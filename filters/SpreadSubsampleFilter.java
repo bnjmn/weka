@@ -49,13 +49,21 @@ import java.util.Hashtable;
  *  10:1 ratio between the classes (default 0)
  *  <p>
  *
+ * -X num <br>
+ *  The maximum count for any class value. <br>
+ *  (default 0 = unlimited)
+ *  <p>
+ *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  **/
 public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
   /** The random number generator seed */
   private int m_RandomSeed = 1;
+
+  /** The maximum count of any class */
+  private int m_MaxCount;
   
   /** True if the first batch has been done */
   private boolean m_FirstBatchDone = false;
@@ -80,6 +88,9 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
               +"\t0 = no maximum spread, 1 = uniform distribution, 10 = allow at most\n"
 	      +"\ta 10:1 ratio between the classes (default 0)",
               "M", 1, "-M <num>"));
+    newVector.addElement(new Option(
+	      "\tThe maximum count for any class value (default 0 = unlimited).\n",
+              "X", 0, "-X <num>"));
 
     return newVector.elements();
   }
@@ -95,6 +106,11 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    *  The maximum class distribution spread. <br>
    *  0 = no maximum spread, 1 = uniform distribution, 10 = allow at most a
    *  10:1 ratio between the classes (default 0)
+   *  <p>
+   *
+   * -X num <br>
+   *  The maximum count for any class value. <br>
+   *  (default 0 = unlimited)
    *  <p>
    *
    *
@@ -117,6 +133,13 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       setDistributionSpread(0);
     }
 
+    String maxCount = Utils.getOption('X', options);
+    if (maxCount.length() != 0) {
+      setMaxCount(Double.valueOf(maxCount).doubleValue());
+    } else {
+      setMaxCount(0);
+    }
+
     if (m_InputFormat != null) {
       inputFormat(m_InputFormat);
     }
@@ -129,11 +152,14 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [4];
+    String [] options = new String [6];
     int current = 0;
 
     options[current++] = "-M"; 
     options[current++] = "" + getDistributionSpread();
+
+    options[current++] = "-X"; 
+    options[current++] = "" + getMaxCount();
 
     options[current++] = "-S"; 
     options[current++] = "" + getRandomSeed();
@@ -163,6 +189,26 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
   public double getDistributionSpread() {
 
     return m_DistributionSpread;
+  }
+  
+  /**
+   * Sets the value for the max count
+   *
+   * @param spread the new max count
+   */
+  public void setMaxCount(double maxcount) {
+
+    m_MaxCount = (int)maxcount;
+  }
+
+  /**
+   * Gets the value for the max count
+   *
+   * @return the max count
+   */    
+  public double getMaxCount() {
+
+    return m_MaxCount;
   }
   
   /**
@@ -278,7 +324,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
     // Sort according to class attribute.
     m_InputFormat.sort(classI);
-      
+
     // Create an index of where each class value starts
     int [] classIndices = new int [m_InputFormat.numClasses() + 1];
     int currentClass = 0;
@@ -309,7 +355,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
     int [] counts = new int [m_InputFormat.numClasses()];
     int [] new_counts = new int [m_InputFormat.numClasses()];
-    int min = 0;
+    int min = -1;
 	
     for (int i = 0; i < m_InputFormat.numInstances(); i++) {
       Instance current = m_InputFormat.instance(i);
@@ -320,13 +366,17 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
     // find the class with the minimum number of instances
     for (int i = 0; i < counts.length; i++) {
-      if (i == 0) {
+      if ( (min < 0) && (counts[i] > 0) ) {
         min = counts[i];
-      } else if (counts[i] < min) {
+      } else if ((counts[i] < min) && (counts[i] > 0)) {
         min = counts[i];
       }
     }
 
+    if (min < 0) { 
+	System.err.println("SpreadSubsampleFilter: *warning* none of the classes have any values in them.");
+	return;
+    }
 
     // determine the new distribution 
     for (int i = 0; i < counts.length; i++) {
@@ -334,6 +384,10 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
                                              min * m_DistributionSpread));
       if (m_DistributionSpread == 0) {
         new_counts[i] = counts[i];
+      }
+
+      if (m_MaxCount > 0) {
+	  new_counts[i] = Math.min(new_counts[i], m_MaxCount);
       }
     }
 
@@ -343,15 +397,15 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       for(int k = 0; k < new_counts[j]; k++) {
         boolean ok = false;
         do{
-          int index = classIndices[j] 
-            + (Math.abs(random.nextInt()) 
-               % (classIndices[j + 1] - classIndices[j])) ;
-          // Have we used this instance before?
+	  int index = classIndices[j] + (Math.abs(random.nextInt()) 
+					   % (classIndices[j + 1] - classIndices[j])) ;
+	  // Have we used this instance before?
           if (t.get("" + index) == null) {
             // if not, add it to the hashtable and use it
             t.put("" + index, "");
             ok = true;
-            push((Instance)m_InputFormat.instance(index).copy());
+	    if(index>=0)
+		push((Instance)m_InputFormat.instance(index).copy());
           }
         } while (!ok);
       }
@@ -374,7 +428,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 	Filter.filterFile(new SpreadSubsampleFilter(), argv);
       }
     } catch (Exception ex) {
-	//	ex.printStackTrace();
+		ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }
