@@ -43,7 +43,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
 
@@ -55,6 +55,22 @@ public class IB1 extends Classifier implements UpdateableClassifier {
 
   /** The maximum values for numeric attributes. */
   private double [] m_MaxArray;
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Nearest-neighbour classifier. Uses normalized Euclidean distance to " 
+      + "find the training instance closest to the given test instance, and predicts "
+      + "the same class as this training instance. If multiple instances have "
+      + "the same (smallest) distance to the test instance, the first one found is "
+      + "used.  For more information, see \n\n"
+      + "Aha, D., and D. Kibler (1991) \"Instance-based learning algorithms\", "
+      + "Machine Learning, vol.6, pp. 37-66.";
+  }
 
   /**
    * Generates the classifier.
