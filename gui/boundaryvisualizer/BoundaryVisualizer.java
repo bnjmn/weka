@@ -52,7 +52,7 @@ import weka.classifiers.DistributionClassifier;
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see JPanel
  */
@@ -510,7 +510,9 @@ public class BoundaryVisualizer extends JPanel {
     m_classAttBox.setModel(new DefaultComboBoxModel(classAttNames));
     m_xAttBox.setModel(new DefaultComboBoxModel(xAttNames));
     m_yAttBox.setModel(new DefaultComboBoxModel(yAttNames));
-    m_yAttBox.setSelectedIndex(1);
+    if (xAttNames.size() > 1) {
+      m_yAttBox.setSelectedIndex(1);
+    }
 
     m_classAttBox.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
