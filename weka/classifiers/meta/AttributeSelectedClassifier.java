@@ -54,7 +54,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AttributeSelectedClassifier extends Classifier 
   implements OptionHandler, Drawable, AdditionalMeasureProducer {
@@ -515,11 +515,11 @@ public class AttributeSelectedClassifier extends Classifier
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareTo("measureNumAttributesSelected") == 0) {
+    if (additionalMeasureName.compareToIgnoreCase("measureNumAttributesSelected") == 0) {
       return measureNumAttributesSelected();
-    } else if (additionalMeasureName.compareTo("measureSelectionTime") == 0) {
+    } else if (additionalMeasureName.compareToIgnoreCase("measureSelectionTime") == 0) {
       return measureSelectionTime();
-    } else if (additionalMeasureName.compareTo("measureTime") == 0) {
+    } else if (additionalMeasureName.compareToIgnoreCase("measureTime") == 0) {
       return measureTime();
     } else if (m_Classifier instanceof AdditionalMeasureProducer) {
       return ((AdditionalMeasureProducer)m_Classifier).
