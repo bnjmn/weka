@@ -26,6 +26,7 @@ import  java.util.*;
 import  weka.core.*;
 import  weka.filters.Filter;
 import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.experiment.Stats;
 
 /**
  * Simple k means clustering class.
@@ -39,7 +40,7 @@ import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -64,6 +65,11 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
    * holds the cluster centroids
    */
   private Instances m_ClusterCentroids;
+
+  /**
+   * Holds the standard deviations of attributes in each cluster
+   */
+  private Instances m_ClusterStdDevs;
 
   /**
    * temporary variable holding cluster assignments while iterating
@@ -128,6 +134,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
     }
     
     m_ClusterCentroids = new Instances(m_instances, m_NumClusters);
+    m_ClusterStdDevs = new Instances(m_instances, m_NumClusters);
     m_ClusterAssignments = new int [m_instances.numInstances()];
 
     Random RandomO = new Random(m_Seed);
@@ -168,10 +175,18 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
       }
       for (int i = 0; i < m_NumClusters; i++) {
 	double [] vals = new double[m_instances.numAttributes()];
+	double [] vals2 = new double[m_instances.numAttributes()];
 	for (int j = 0; j < m_instances.numAttributes(); j++) {
 	  vals[j] = tempI[i].meanOrMode(j);
+	  if (m_instances.attribute(j).isNumeric()) {
+	    Stats ns = tempI[i].attributeStats(j).numericStats;
+	    vals2[j] = ns.stdDev;
+	  } else {
+	    vals2[j] = Instance.missingValue();
+	  }
 	}
 	m_ClusterCentroids.add(new Instance(1.0, vals));
+	m_ClusterStdDevs.add(new Instance(1.0, vals2));
       }
     }
   }
@@ -492,23 +507,51 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
    * @return a description of the clusterer as a string
    */
   public String toString() {
+    int maxWidth = 0;
+    for (int i = 0; i < m_NumClusters; i++) {
+      for (int j = 0 ;j < m_ClusterCentroids.numAttributes(); j++) {
+	if (m_ClusterCentroids.attribute(j).isNumeric()) {
+	  double width = Math.log(Math.abs(m_ClusterCentroids.instance(i).value(j))) /
+	    Math.log(10.0);
+	  width += 1.0;
+	  if ((int)width > maxWidth) {
+	    maxWidth = (int)width;
+	  }
+	}
+      }
+    }
     StringBuffer temp = new StringBuffer();
-
+    String naString = "N/A";
+    for (int i = 0; i < maxWidth+2; i++) {
+      naString += " ";
+    }
     temp.append("\nkMeans\n======\n");
     temp.append("\nNumber of iterations: " + m_Iterations+"\n");
 
     temp.append("\nCluster centroids:\n");
     for (int i = 0; i < m_NumClusters; i++) {
       temp.append("\nCluster "+i+"\n\t");
+      temp.append("Mean/Mode: ");
       for (int j = 0; j < m_ClusterCentroids.numAttributes(); j++) {
 	if (m_ClusterCentroids.attribute(j).isNominal()) {
 	  temp.append(" "+m_ClusterCentroids.attribute(j).
 		      value((int)m_ClusterCentroids.instance(i).value(j)));
 	} else {
-	  temp.append(" "+m_ClusterCentroids.instance(i).value(j));
+	  temp.append(" "+Utils.doubleToString(m_ClusterCentroids.instance(i).value(j),
+					       maxWidth+5, 4));
+	}
+      }
+      temp.append("\n\tStd Devs:  ");
+      for (int j = 0; j < m_ClusterStdDevs.numAttributes(); j++) {
+	if (m_ClusterStdDevs.attribute(j).isNumeric()) {
+	  temp.append(" "+Utils.doubleToString(m_ClusterStdDevs.instance(i).value(j), 
+					       maxWidth+5, 4));
+	} else {
+	  temp.append(" "+naString);
 	}
       }
     }
+    temp.append("\n\n");
     return temp.toString();
   }
 
