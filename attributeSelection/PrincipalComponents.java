@@ -27,7 +27,7 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PrincipalComponents extends AttributeTransformer 
   implements OptionHandler {
@@ -115,6 +115,9 @@ public class PrincipalComponents extends AttributeTransformer
    * Valid options are:<p>
    * -N <classifier>
    * Don't normalize the input data. <p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
    */
   public void setOptions (String[] options)
     throws Exception
