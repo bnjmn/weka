@@ -51,7 +51,7 @@ import weka.classifiers.Classifier;
  * (default 1.0).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class ComplementNaiveBayes extends Classifier
@@ -139,7 +139,8 @@ public class ComplementNaiveBayes extends Classifier
         setNormalizeWordWeights(Utils.getFlag('N', options));
         
         String val = Utils.getOption('S', options);
-        setSmoothingParameter(Double.parseDouble(val));
+        if(val.length()!=0)
+          setSmoothingParameter(Double.parseDouble(val));
     }
     
     /**
