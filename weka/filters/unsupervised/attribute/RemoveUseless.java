@@ -30,7 +30,8 @@ import java.util.Vector;
 /** 
  * This filter removes attributes that do not vary at all or that vary too much.
  * All constant attributes are deleted automatically, along with any that exceed
- * the maximum percentage of variance parameter.<p>
+ * the maximum percentage of variance parameter. The maximum variance test is
+ * only applied to nominal attributes.<p>
  *
  * Valid filter-specific options are: <p>
  *
@@ -38,7 +39,7 @@ import java.util.Vector;
  * The maximum variance allowed before an attribute will be deleted (default 100).<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoveUseless extends Filter implements UnsupervisedFilter,
 						     OptionHandler {
@@ -47,7 +48,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
   protected Remove m_removeFilter = null;
 
   /** The type of attribute to delete */
-  protected double m_maxVariancePercentage = 100;
+  protected double m_maxVariancePercentage = 99.0;
 
   /**
    * Sets the format of the input instances.
@@ -114,8 +115,8 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
 	if (stats.distinctCount < 2) {
 	  // remove constant attributes
 	  attsToDelete[numToDelete++] = i;
-	} else {
-	  // remove attributes that vary too much
+	} else if (toFilter.attribute(i).isNominal()) {
+	  // remove nominal attributes that vary too much
 	  double variancePercent = (double) stats.distinctCount
 	    / (double) stats.totalCount * 100.0;
 	  if (variancePercent > m_maxVariancePercentage) attsToDelete[numToDelete++] = i;
@@ -163,7 +164,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
     Vector newVector = new Vector(1);
 
     newVector.addElement(new Option(
-				    "\tMaximum variance percentage allowed (default 100)",
+				    "\tMaximum variance percentage allowed (default 99)",
 				    "M", 1, "-M <max variance %>"));
 
 
@@ -185,7 +186,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
     if (mString.length() != 0) {
       setMaximumVariancePercentageAllowed((int) Double.valueOf(mString).doubleValue());
     } else {
-      setMaximumVariancePercentageAllowed(100.0);
+      setMaximumVariancePercentageAllowed(99.0);
     }
 
     if (getInputFormat() != null) {
@@ -220,7 +221,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
 
-    return "Removes constant attributes, along with attributes to vary too much.";
+    return "Removes constant attributes, along with nominal attributes that vary too much.";
   }
 
   /**
@@ -231,7 +232,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    */
   public String maximumVariancePercentageAllowedTipText() {
 
-    return "Set the threshold for the highest variance allowed before an attribute will be deleted."
+    return "Set the threshold for the highest variance allowed before a nominal attribute will be deleted."
       + "Specifically, if (number_of_distinct_values / total_number_of_values * 100)"
       + " is greater than this value then the attribute will be removed.";
   }
