@@ -55,7 +55,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -424,6 +424,7 @@ public class PropertySheetPanel extends JPanel
     //ta.setBackground(getBackground());
     ta.setEditable(false);
     ta.setText(m_HelpText.toString());
+    ta.setCaretPosition(0);
     final JFrame jf = new JFrame("Information");
     jf.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
@@ -436,7 +437,7 @@ public class PropertySheetPanel extends JPanel
     jf.getContentPane().setLayout(new BorderLayout());
     jf.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
     jf.pack();
-    jf.setSize(300, 350);
+    jf.setSize(400, 350);
     jf.setLocation(getTopLevelAncestor().getLocationOnScreen().x 
                    + getTopLevelAncestor().getSize().width,
                    getTopLevelAncestor().getLocationOnScreen().y);
