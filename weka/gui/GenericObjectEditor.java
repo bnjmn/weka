@@ -90,7 +90,6 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 
-
 /** 
  * A PropertyEditor for objects that themselves have been defined as
  * editable in the GenericObjectEditor configuration file, which lists
@@ -105,7 +104,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -172,9 +171,72 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   /**
+   * Creates a popup menu containing a tree that is aware
+   * of the screen dimensions.
+   */
+  public class JTreePopupMenu extends JPopupMenu {
+
+    /** The tree */
+    JTree m_tree;
+
+    /** The scroller */
+    JScrollPane m_scroller;
+    
+    /**
+     * Constructs a new popup menu.
+     *
+     * @param tree the tree to put in the menu
+     */
+    public JTreePopupMenu(JTree tree) {
+
+      m_tree = tree;
+      
+      JPanel treeView = new JPanel();
+      treeView.setLayout(new BorderLayout());
+      treeView.add(m_tree, BorderLayout.NORTH);
+      
+      m_scroller = new JScrollPane(treeView);
+      
+      m_scroller.setPreferredSize(new Dimension(300, 400));
+
+      add(m_scroller);
+    }
+
+    /**
+     * Displays the menu, making sure it will fit on the screen.
+     *
+     * @param invoker the component thast invoked the menu
+     * @param x the x location of the popup
+     * @param y the y location of the popup
+     */
+    public void show(Component invoker, int x, int y) {
+
+      super.show(invoker, x, y);
+
+      // calculate available screen area for popup
+      java.awt.Point location = getLocationOnScreen();
+      java.awt.Dimension screenSize = getToolkit().getScreenSize();
+      int maxWidth = (int) (screenSize.getWidth() - location.getX());
+      int maxHeight = (int) (screenSize.getHeight() - location.getY());
+
+      // if the part of the popup goes off the screen then resize it
+      Dimension scrollerSize = m_scroller.getPreferredSize();
+      int height = (int) scrollerSize.getHeight();
+      int width = (int) scrollerSize.getWidth();
+      if (width > maxWidth) width = maxWidth;
+      if (height > maxHeight) height = maxHeight;
+      
+      // commit any size changes
+      m_scroller.setPreferredSize(new Dimension(width, height));
+      revalidate();
+      pack();
+    }
+  }
+
+  /**
    * Handles the GUI side of editing values.
    */
-  public class GOEPanel extends JPanel{
+  public class GOEPanel extends JPanel {
     
     /** The component that performs classifier customization */
     protected PropertySheetPanel m_ChildPropertySheet;
@@ -846,34 +908,19 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
     updateObjectNames();
 
-    final JPopupMenu popup = new JPopupMenu("ChooseClass popup");
-	
+    // create the tree, and find the path to the current class
     m_treeNodeOfCurrentObject = null;
     final JTree tree = createTree(m_ObjectNames);
     if (m_treeNodeOfCurrentObject != null) {
       tree.setSelectionPath(new TreePath(m_treeNodeOfCurrentObject.getPath()));
     }
-    
-    JPanel treeView = new JPanel();
-    treeView.setLayout(new BorderLayout());
-    treeView.add(tree, BorderLayout.NORTH);
-    
-    // dynamically resize as tree is expanded/collapsed
-    tree.addTreeExpansionListener(new TreeExpansionListener() {
-	public void treeExpanded(TreeExpansionEvent e) {
-	  popup.setSize(tree.getPreferredSize());
-	  popup.pack();
-	}
-	public void treeCollapsed(TreeExpansionEvent e) {
-	  popup.setSize(tree.getPreferredSize());
-	  popup.pack();
-	}
-      });
-    
     tree.getSelectionModel().setSelectionMode
       (TreeSelectionModel.SINGLE_TREE_SELECTION);
-	
-    // listen for when the selection changes
+
+    // create the popup
+    final JPopupMenu popup = new JTreePopupMenu(tree);
+
+    // respond when the user chooses a class
     tree.addTreeSelectionListener(new TreeSelectionListener() {
 	public void valueChanged(TreeSelectionEvent e) {
 	  DefaultMutableTreeNode node = (DefaultMutableTreeNode)
@@ -890,7 +937,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    for (int i=0; i<selectedPath.getPathCount(); i++) {
 	      if (i>0) classSelected.append(".");
 	      classSelected.append((String)
-				   ((DefaultMutableTreeNode) selectedPath.getPathComponent(i))
+				   ((DefaultMutableTreeNode)
+				    selectedPath.getPathComponent(i))
 				   .getUserObject());
 	    }
 	    classSelected(classSelected.toString());
@@ -899,8 +947,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	}
       });
     
-    popup.add(treeView);
-
     return popup;
   }
 
@@ -1016,7 +1062,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       java.beans.PropertyEditorManager
 	.registerEditor(java.io.File.class,
 			FileEditor.class);
-      GenericObjectEditor ce = new GenericObjectEditor();
+      GenericObjectEditor ce = new GenericObjectEditor(true);
       ce.setClassType(weka.classifiers.Classifier.class);
       Object initial = new weka.classifiers.rules.ZeroR();
       if (args.length > 0){
