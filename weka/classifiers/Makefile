@@ -12,7 +12,8 @@ SOURCES = Classifier.java DistributionClassifier.java \
 	CostSensitiveClassifier.java MetaCost.java \
 	ClassificationViaRegression.java FilteredClassifier.java \
 	Sourcable.java UserClassifier.java AttributeSelectedClassifier.java \
-	ThresholdSelector.java CostMatrix.java VFI.java AdditiveRegression.java
+	ThresholdSelector.java CostMatrix.java VFI.java AdditiveRegression.java \
+	CheckClassifier.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
@@ -28,6 +29,7 @@ all :   $(CLASSFILES)
 	(cd m5; make all JAVAC=$(JAVAC))
 	(cd kstar; make all JAVAC=$(JAVAC))
 	(cd evaluation; make all JAVAC=$(JAVAC))
+	(cd nn; make all JAVAC=$(JAVAC))
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
@@ -35,6 +37,7 @@ debug : clean
 	(cd m5; make debug JAVAC=$(JAVAC))
 	(cd kstar; make debug JAVAC=$(JAVAC))
 	(cd evaluation; make debug JAVAC=$(JAVAC))
+	(cd nn; make debug JAVAC=$(JAVAC))
 
 optimized : clean
 	$(JAVAC) -O $(SOURCES)
@@ -42,6 +45,7 @@ optimized : clean
 	(cd m5; make optimized JAVAC=$(JAVAC))
 	(cd kstar; make optimized JAVAC=$(JAVAC))
 	(cd evaluation; make optimized JAVAC=$(JAVAC))
+	(cd nn; make optimized JAVAC=$(JAVAC))
 
 clean : 
 	$(RM) *.class *~
@@ -49,4 +53,5 @@ clean :
 	(cd m5; make clean)
 	(cd kstar; make clean)
 	(cd evaluation; make clean)
+	(cd nn; make clean)
 
