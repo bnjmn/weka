@@ -54,14 +54,12 @@ import javax.swing.SwingConstants;
 import java.awt.*;
 import java.awt.image.*;
 
-
-
 /** 
  * The main class for the Weka explorer. Lets the user create,
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class Explorer extends JPanel {
 
@@ -97,29 +95,20 @@ public class Explorer extends JPanel {
    */
   public Explorer() {
     
-    /* try {
-      m_logPanel = new LogPanel(new WekaTaskMonitor());
-    } catch (Exception ex) {
-      System.exit(1);
-      } */
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
     m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg, Mark Hall and Eibe Frank");
-    m_LogPanel.logMessage("(c) 2002 The University of Waikato, Hamilton,"
+    m_LogPanel.logMessage("(c) 2003 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
     m_LogPanel.logMessage("email: wekasupport@cs.waikato.ac.nz");
     m_LogPanel.logMessage("Started on " + date);
     m_LogPanel.statusMessage("Welcome to the Weka Knowledge Explorer");
     m_PreprocessPanel.setLog(m_LogPanel);
-
     m_ClassifierPanel.setLog(m_LogPanel);
-    m_ClassifierPanel.setPreprocess(m_PreprocessPanel);
     m_AssociationPanel.setLog(m_LogPanel);
     m_ClustererPanel.setLog(m_LogPanel);
-    m_ClustererPanel.setPreprocess(m_PreprocessPanel);
     m_AttributeSelectionPanel.setLog(m_LogPanel);
-    //m_VisualizePanel.setLog(m_LogPanel);
     m_TabbedPane.addTab("Preprocess", null, m_PreprocessPanel,
 			"Open/Edit/Save instances");
     m_TabbedPane.addTab("Classify", null, m_ClassifierPanel,
@@ -141,30 +130,15 @@ public class Explorer extends JPanel {
     m_PreprocessPanel.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	m_ClassifierPanel.setInstances(m_PreprocessPanel
-       				       .getWorkingInstances());
-	m_ClassifierPanel.filterUserTestInstances();
-
+       				       .getInstances());
 	m_AssociationPanel.setInstances(m_PreprocessPanel
-				       .getWorkingInstances());
+				       .getInstances());
 	m_ClustererPanel.setInstances(m_PreprocessPanel
-				      .getWorkingInstances());
-	m_ClustererPanel.filterUserTestInstances();
-
+				      .getInstances());
 	m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
-					       .getWorkingInstances());
-	//try {
-	//  PlotData2D tempd = new PlotData2D(m_PreprocessPanel.
-	//				    getWorkingInstances());
-	//  tempd.setPlotName(m_PreprocessPanel.
-	//		    getWorkingInstances().relationName());
-	//  tempd.addInstanceNumberAttribute();
-	//  m_VisualizePanel.setMasterPlot(tempd);
-	//} catch (Exception ex) {
-	//  ex.printStackTrace();
-	//  m_LogPanel.logMessage(ex.toString());
-	//}
+					       .getInstances());
 	m_VisualizePanel.setInstances(m_PreprocessPanel
-					       .getWorkingInstances());
+					       .getInstances());
 
 	m_TabbedPane.setEnabledAt(1, true);
 	m_TabbedPane.setEnabledAt(2, true);
@@ -178,7 +152,6 @@ public class Explorer extends JPanel {
     add(m_TabbedPane, BorderLayout.CENTER);
    
     add(m_LogPanel, BorderLayout.SOUTH);
-    //add(p1, BorderLayout.SOUTH);
   }
 
   /**
@@ -208,7 +181,7 @@ public class Explorer extends JPanel {
 
       if (args.length == 1) {
 	System.err.println("Loading instances from " + args[0]);
-	explorer.m_PreprocessPanel.setBaseInstancesFromFile(new File(args[0]));
+	explorer.m_PreprocessPanel.setInstancesFromFile(new File(args[0]));
       }
 
     } catch (Exception ex) {
