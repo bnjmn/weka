@@ -50,7 +50,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class Instances implements Serializable {
  
@@ -635,12 +635,12 @@ public class Instances implements Serializable {
   public final int numDistinctValues(int attIndex) {
 
     if (attribute(attIndex).isNumeric()) {
-      Instances instCopy = new Instances(this);
-      instCopy.sort(attIndex);
+      double [] attVals = attributeToDoubleArray(attIndex);
+      int [] sorted = Utils.sort(attVals);
       double prev = 0;
       int counter = 0;
-      for (int i = 0; i < instCopy.numInstances(); i++) {
-	Instance current = instCopy.instance(i);
+      for (int i = 0; i < sorted.length; i++) {
+	Instance current = instance(sorted[i]);
 	if (current.isMissing(attIndex)) {
 	  break;
 	}
@@ -1174,23 +1174,23 @@ public class Instances implements Serializable {
    */
   public AttributeStats attributeStats(int index) {
 
-    Instances temp = new Instances(this);
-    Attribute att = temp.attribute(index);
     AttributeStats result = new AttributeStats();
-    if (att.isNominal()) {
-      result.nominalCounts = new int [att.numValues()];
+    if (attribute(index).isNominal()) {
+      result.nominalCounts = new int [attribute(index).numValues()];
     }
-    if (att.isNumeric()) {
+    if (attribute(index).isNumeric()) {
       result.numericStats = new weka.experiment.Stats();
     }
-    result.totalCount = temp.numInstances();
-    temp.sort(index);
+    result.totalCount = numInstances();
+
+    double [] attVals = attributeToDoubleArray(index);
+    int [] sorted = Utils.sort(attVals);
     int currentCount = 0;
     double prev = Instance.missingValue();
-    for (int j = 0; j < temp.numInstances(); j++) {
-      Instance current = temp.instance(j);
+    for (int j = 0; j < numInstances(); j++) {
+      Instance current = instance(sorted[j]);
       if (current.isMissing(index)) {
-	result.missingCount = temp.numInstances() - j;
+	result.missingCount = numInstances() - j;
 	break;
       }
       if (Utils.eq(current.value(index), prev)) {
@@ -1206,6 +1206,24 @@ public class Instances implements Serializable {
     return result;
   }
   
+  /**
+   * Gets the value of all instances in this dataset for a particular
+   * attribute. Useful in conjunction with Utils.sort to allow iterating
+   * through the dataset in sorted order for some attribute.
+   *
+   * @param index the index of the attribute.
+   * @return an array containing the value of the desired attribute for
+   * each instance in the dataset. 
+   */
+  public double [] attributeToDoubleArray(int index) {
+
+    double [] result = new double[numInstances()];
+    for (int i = 0; i < result.length; i++) {
+      result[i] = instance(i).value(index);
+    }
+    return result;
+  }
+
   /**
    * Generates a string summarizing the set of instances. Gives a breakdown
    * for each attribute indicating the number of missing/discrete/unique
