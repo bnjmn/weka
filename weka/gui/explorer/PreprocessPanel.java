@@ -38,6 +38,9 @@ import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -70,7 +73,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -139,6 +142,9 @@ public class PreprocessPanel extends JPanel {
   protected Thread m_IOThread;
 
   protected Logger m_Log = new SysErrLog();
+
+  /** A copy of the most recently applied filters */
+  protected byte [] m_FiltersCopy = null;
   
   static {
     java.beans.PropertyEditorManager
@@ -265,6 +271,14 @@ public class PreprocessPanel extends JPanel {
   }
 
   /**
+   * gets a copy of the most recently applied filters.
+   * @return a serialized array of the most recently applied filters
+   */
+  protected synchronized byte [] getMostRecentFilters() {
+    return m_FiltersCopy;
+  }
+
+  /**
    * Sets the Logger to receive informational messages
    *
    * @param newLog the Logger that will now get info messages
@@ -293,6 +307,9 @@ public class PreprocessPanel extends JPanel {
 			   + " (" + m_BaseInstances.numInstances()
 			   + " instances)");
 	  m_Log.statusMessage("OK");
+
+	  // clear most recently applied filters
+	  m_FiltersCopy = null;
 	  setWorkingInstances(m_BaseInstances);
 	  m_ApplyBut.setEnabled(true);
 	  m_ReplaceBut.setEnabled(false);
@@ -415,6 +432,20 @@ public class PreprocessPanel extends JPanel {
 	filters[i].inputFormat(temp);
 	temp = Filter.useFilter(temp, filters[i]);
       }
+      // try to save a copy of the filters using serialization
+      try {
+	ByteArrayOutputStream bo = new ByteArrayOutputStream();
+	BufferedOutputStream bbo = new BufferedOutputStream(bo);
+	ObjectOutputStream oo = new ObjectOutputStream(bbo);
+	oo.writeObject(filters);
+	oo.close();
+	m_FiltersCopy = bo.toByteArray();
+      } catch (Exception ex) {
+	JOptionPane.showMessageDialog(this,
+				      "Could not create copy of filters",
+				      null,
+				      JOptionPane.ERROR_MESSAGE);
+      }
       return temp;
     } catch (Exception ex) {
       // Pop up an error optionpane
@@ -435,7 +466,6 @@ public class PreprocessPanel extends JPanel {
    * thread, and an error message is popped up if the IO thread is busy.
    */
   public void setWorkingInstancesFromFilters() {
-    
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
 	public void run() {

@@ -19,6 +19,7 @@
 
 package weka.gui.explorer;
 
+import weka.filters.*;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Attribute;
@@ -35,6 +36,7 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
 import weka.gui.CostMatrixEditor;
 import weka.gui.PropertyDialog;
+import weka.gui.InstancesSummaryPanel;
 
 import java.util.Random;
 import java.util.Date;
@@ -61,6 +63,10 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
+import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
+import java.io.ObjectInputStream;
+
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -94,7 +100,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -206,6 +212,9 @@ public class ClassifierPanel extends JPanel {
 
   /** The user-supplied test set (if any) */
   protected Instances m_TestInstances;
+
+  /** The user supplied test set after preprocess filters have been applied */
+  protected Instances m_TestInstancesCopy;
   
   /** A thread that classification runs in */
   protected Thread m_RunThread;
@@ -218,6 +227,13 @@ public class ClassifierPanel extends JPanel {
 
   /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
+
+  /** The preprocess panel through which filters can be applied to
+      user supplied test data sets */
+  protected PreprocessPanel m_Preprocess = null;
+
+  /** The instances summary panel displayed by m_SetTestFrame */
+  protected InstancesSummaryPanel m_Summary = null;
 
   /* Register the property editors we need */
   static {
@@ -614,6 +630,15 @@ public class ClassifierPanel extends JPanel {
   }
 
   /**
+   * Sets the preprocess panel through which user selected
+   * filters can be applied to any supplied test data
+   * @param p the preprocess panel to use
+   */
+  public void setPreprocess(PreprocessPanel p) {
+    m_Preprocess = p;
+  }
+
+  /**
    * Sets the Logger to receive informational messages
    *
    * @param newLog the Logger that will now get info messages
@@ -674,6 +699,55 @@ public class ClassifierPanel extends JPanel {
   }
 
   /**
+   * Attempts to filter the user specified test set through
+   * the most currently used set of filters (if any) from the
+   * pre-process panel.
+   */
+  protected void filterUserTestInstances() {
+
+    if (m_Preprocess != null && m_TestInstances != null) {
+      m_TestInstancesCopy = new Instances(m_TestInstances);
+      byte [] sf = m_Preprocess.getMostRecentFilters();
+      if (sf != null) {
+	Filter [] filters = null;
+	try {
+	  ByteArrayInputStream bi = new ByteArrayInputStream(sf);
+	  BufferedInputStream bbi = new BufferedInputStream(bi);
+	  ObjectInputStream oi = new ObjectInputStream(bbi);
+	  filters = (Filter [])oi.readObject();
+	  oi.close();
+	} catch (Exception ex) {
+	  JOptionPane.showMessageDialog(this,
+					"Could not deserialize filters",
+					null,
+					JOptionPane.ERROR_MESSAGE);
+	}
+	if (filters.length != 0) {
+	  try {
+	    m_Log.statusMessage("Applying preprocess filters to test data...");
+	    m_TestInstancesCopy = new Instances(m_TestInstances);
+	    for (int i = 0; i < filters.length; i++) {
+	      m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
+				  + filters[i].getClass().getName());
+	      filters[i].inputFormat(m_TestInstancesCopy);
+	      m_TestInstancesCopy = Filter.useFilter(m_TestInstancesCopy, 
+						     filters[i]);
+	    }
+	    m_Log.statusMessage("OK");
+	  } catch (Exception ex) {
+	    m_Log.statusMessage("See error log");
+	    m_Log.logMessage("Problem applying filters to test data "
+			     +"(Classifier Panel)");
+	  }
+	  if (m_Summary != null && m_TestInstancesCopy != null) {
+	    m_Summary.setInstances(m_TestInstancesCopy);
+	  }
+	}
+      }
+    }
+  }
+
+  /**
    * Sets the user test set. Information about the current test set
    * is displayed in an InstanceSummaryPanel and the user is given the
    * ability to load another set from a file or url.
@@ -683,12 +757,14 @@ public class ClassifierPanel extends JPanel {
 
     if (m_SetTestFrame == null) {
       final SetInstancesPanel sp = new SetInstancesPanel();
-      if (m_TestInstances != null) {
-	sp.setInstances(m_TestInstances);
+      m_Summary = sp.getSummary();
+      if (m_TestInstancesCopy != null) {
+	sp.setInstances(m_TestInstancesCopy);
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
 	  m_TestInstances = sp.getInstances();
+	  filterUserTestInstances();
 	}
       });
       // Add propertychangelistener to update m_TestInstances whenever
@@ -722,7 +798,7 @@ public class ClassifierPanel extends JPanel {
 	  double [] predictions = null;
 	  Instances predInstances = null;
 	  if (m_TestInstances != null) {
-	    userTest = new Instances(m_TestInstances);
+	    userTest = new Instances(m_TestInstancesCopy);
 	  }
 	  if (m_EvalWRTCostsBut.isSelected()) {
 	    costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor

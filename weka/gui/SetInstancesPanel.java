@@ -48,7 +48,7 @@ import javax.swing.BorderFactory;
  * lets the user open a set of instances from either a file or URL.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SetInstancesPanel extends JPanel {
   
@@ -250,6 +250,15 @@ public class SetInstancesPanel extends JPanel {
   public Instances getInstances() {
     
     return m_Instances;
+  }
+
+  /**
+   * Gets the instances summary panel associated with
+   * this panel
+   * @return the instances summary panel
+   */
+  public InstancesSummaryPanel getSummary() {
+    return m_Summary;
   }
   
   /**
