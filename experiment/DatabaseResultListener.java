@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and submits them to a central database.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DatabaseResultListener extends DatabaseUtils
   implements ResultListener  {
@@ -360,7 +360,7 @@ public class DatabaseResultListener extends DatabaseUtils
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += '"' + key[i].toString() + '"';
+	  query += '\'' + key[i].toString() + '\'';
 	} else {
 	  query += key[i].toString();
 	}
