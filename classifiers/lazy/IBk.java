@@ -49,22 +49,20 @@ import weka.core.*;
  * (default equal weighting) <p>
  *
  * -X <br>
- * Select the number of neighbors to use by cross validation, with
- * an upper limit given by the -K option.
+ * Selects the number of neighbors to use by hold-one-out cross
+ * validation, with an upper limit given by the -K option.
  *
  * -S <br>
  * When k is selected by cross-validation for numeric class attributes,
  * minimize mean-squared error. (default mean absolute error) <p>
  *
  * -B <br>
- * Bayes' weight all models with k=1 .. k=kmax (given by -K) <p>
+ * Bayes' weight all models with <i>k</i>=1 ... <i>k</i>=kmax (given by -K) <p>
  *
- * @version 1.2 - 1 Apr 1998 - Multiple neighbors, windowing. (Len) <br>
- *          1.1 - 6 Aug 1997 - changed main (Eibe) <br>
- *          1.0 - 7 Jul 1997 - Initial version (Stu, Eibe)
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -75,31 +73,31 @@ public class IBk extends DistributionClassifier implements
   // i.e. the minimum length of the list is k
   public class NeighborNode {
 
-    protected double m_distance;
-    protected Instance m_instance;
-    protected NeighborNode m_next;
+    protected double m_Distance;
+    protected Instance m_Instance;
+    protected NeighborNode m_Next;
     
     public NeighborNode(double distance, Instance instance, NeighborNode next){
-      m_distance = distance;
-      m_instance = instance;
-      m_next = next;
+      m_Distance = distance;
+      m_Instance = instance;
+      m_Next = next;
     }
     public NeighborNode(double distance, Instance instance) {
-      m_distance = distance;
-      m_instance = instance;
-      m_next = null;
+      m_Distance = distance;
+      m_Instance = instance;
+      m_Next = null;
     }
   }
 
   class NeighborList {
 
-    NeighborNode m_first, m_last;
-    int m_length;
+    NeighborNode m_First, m_Last;
+    int m_Length;
     
     public NeighborList(int length) {
 
-      m_length = length;
-      m_first = m_last = null;
+      m_Length = length;
+      m_First = m_Last = null;
     }
 
     public NeighborList() {
@@ -109,16 +107,16 @@ public class IBk extends DistributionClassifier implements
 
     public boolean isEmpty() {
 
-      return (m_first == null);
+      return (m_First == null);
     }
 
     public int currentLength() {
 
       int i = 0;
-      NeighborNode current = m_first;
+      NeighborNode current = m_First;
       while (current != null) {
 	i++;
-	current = current.m_next;
+	current = current.m_Next;
       }
       return i;
     }
@@ -126,31 +124,31 @@ public class IBk extends DistributionClassifier implements
     public void insertSorted(double distance, Instance instance) {
 
       if (isEmpty()) {
-	m_first = m_last = new NeighborNode(distance, instance);
+	m_First = m_Last = new NeighborNode(distance, instance);
       } else {
-	NeighborNode current = m_first;
-	if (distance < m_first.m_distance) {// Insert at head
-	  m_first = new NeighborNode(distance, instance, m_first);
+	NeighborNode current = m_First;
+	if (distance < m_First.m_Distance) {// Insert at head
+	  m_First = new NeighborNode(distance, instance, m_First);
 	} else { // Insert further down the list
-	  for( ;(current.m_next != null) && 
-		 (current.m_next.m_distance < distance); 
-	       current = current.m_next);
-	  current.m_next = new NeighborNode(distance, instance,
-					    current.m_next);
-	  if (current.equals(m_last)) {
-	    m_last = current.m_next;
+	  for( ;(current.m_Next != null) && 
+		 (current.m_Next.m_Distance < distance); 
+	       current = current.m_Next);
+	  current.m_Next = new NeighborNode(distance, instance,
+					    current.m_Next);
+	  if (current.equals(m_Last)) {
+	    m_Last = current.m_Next;
 	  }
 	}
 	// Trip down the list until we've got k list elements (or more if the
 	// distance to the last elements is the same).
 	int valcount = 0;
-	for(current = m_first; current.m_next != null; 
-	    current = current.m_next) {
+	for(current = m_First; current.m_Next != null; 
+	    current = current.m_Next) {
 	  valcount++;
-	  if ((valcount >= m_length) && (current.m_distance != 
-					 current.m_next.m_distance)) {
-	    m_last = current;
-	    current.m_next = null;
+	  if ((valcount >= m_Length) && (current.m_Distance != 
+					 current.m_Next.m_Distance)) {
+	    m_Last = current;
+	    current.m_Next = null;
 	    break;
 	  }
 	}
@@ -166,14 +164,14 @@ public class IBk extends DistributionClassifier implements
 	k = 1;
       }
       int currentK = 0;
-      double currentDist = m_first.m_distance;
-      NeighborNode current = m_first;
-      for(; current.m_next != null; current = current.m_next) {
+      double currentDist = m_First.m_Distance;
+      NeighborNode current = m_First;
+      for(; current.m_Next != null; current = current.m_Next) {
 	currentK++;
-	currentDist = current.m_distance;
-	if ((currentK >= k) && (currentDist != current.m_next.m_distance)) {
-	  m_last = current;
-	  current.m_next = null;
+	currentDist = current.m_Distance;
+	if ((currentK >= k) && (currentDist != current.m_Next.m_Distance)) {
+	  m_Last = current;
+	  current.m_Next = null;
 	  break;
 	}
       }
@@ -184,15 +182,15 @@ public class IBk extends DistributionClassifier implements
     public void printList() {
 
       if (isEmpty()) {
-	System.err.println("Empty list");
+	System.out.println("Empty list");
       } else {
-	NeighborNode current = m_first;
+	NeighborNode current = m_First;
 	while (current != null) {
-	  System.err.println("Node: instance " + current.m_instance 
-			     + ", distance " + current.m_distance);
-	  current = current.m_next;
+	  System.out.println("Node: instance " + current.m_Instance 
+			     + ", distance " + current.m_Distance);
+	  current = current.m_Next;
 	}
-	System.err.println();
+	System.out.println();
       }
     }
   }
@@ -252,6 +250,9 @@ public class IBk extends DistributionClassifier implements
    */
   protected boolean m_MeanSquared;
 
+  /** True if debugging output should be printed */
+  boolean m_Debug;
+  
   /* Define possible instance weighting methods */
   public static final int WEIGHT_NONE = 0;
   public static final int WEIGHT_INVERSE = 1;
@@ -294,6 +295,27 @@ public class IBk extends DistributionClassifier implements
   public IBk() {
 
     init();
+  }
+
+  
+  /**
+   * Get the value of Debug.
+   *
+   * @return Value of Debug.
+   */
+  public boolean getDebug() {
+    
+    return m_Debug;
+  }
+  
+  /**
+   * Set the value of Debug.
+   *
+   * @param newDebug Value to assign to Debug.
+   */
+  public void setDebug(boolean newDebug) {
+    
+    m_Debug = newDebug;
   }
   
   /**
@@ -377,8 +399,8 @@ public class IBk extends DistributionClassifier implements
     }
 
     // Calculate the minimum and maximum values
-    m_Min=new double [m_Train.numAttributes()];
-    m_Max=new double [m_Train.numAttributes()];
+    m_Min = new double [m_Train.numAttributes()];
+    m_Max = new double [m_Train.numAttributes()];
     for (int i = 0; i < m_Train.numAttributes(); i++) {
       m_Min[i] = m_Max[i] = Double.NaN;
     }
@@ -387,8 +409,7 @@ public class IBk extends DistributionClassifier implements
       updateMinMax((Instance) enum.nextElement());
     }
 
-    // Invalidate any currently cross-validation selected k
-    m_kNNValid = false;
+    crossValidate();
   }
 
   /**
@@ -408,7 +429,6 @@ public class IBk extends DistributionClassifier implements
     }
     updateMinMax(instance);
     m_Train.add(instance);
-    //    System.err.println("Currently "+m_Train.numInstances()+"\n"+m_Train.toString());
     m_kNNValid = false;
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       while (m_Train.numInstances() > m_WindowSize) {
@@ -446,24 +466,15 @@ public class IBk extends DistributionClassifier implements
       distribution = new double [m_NumClasses];
       for(int j = m_kNNUpper-1; j >= 0; j--) {
 	double [] tempDist = makeDistribution(neighborlist);
-	//	System.err.println("Incorporating "+(j+1)+" neighbor model (weight "
-	//		   +xxx_BayesWeights[j]+")");
 	for(int i = 0; i < m_NumClasses; i++) {
 	  distribution[i] += tempDist[i] * xxx_BayesWeights[j];
-	  //	  System.err.println("P["+i+"]="+distribution[i]
-			     //	     +"   T"+(j+1)+"["+i+"]="+tempDist[i]);
 	}
 	if (j >= 1) {
 	  neighborlist.pruneToK(j);
 	}
       }
-      //      System.err.println("Combined models");
       try {
 	Utils.normalize(distribution);
-	//System.err.println("Final distribution");
-	//for(int i = 0; i < numClasses; i++)
-	//  System.err.println("P["+i+"]="+distribution[i]);
-
       } catch (Exception ex) {
 	throw new Exception("Bayes weighting - couldn't normalize distribution");
       }
@@ -539,15 +550,16 @@ public class IBk extends DistributionClassifier implements
    * (default equal weighting) <p>
    *
    * -X <br>
-   * Select the number of neighbors to use by cross validation, with
-   * an upper limit given by the -K option.
+   * Select the number of neighbors to use by hold-one-out cross
+   * validation, with an upper limit given by the -K option.
    *
    * -S <br>
    * When k is selected by cross-validation for numeric class attributes,
    * minimize mean-squared error. (default mean absolute error) <p>
    *
    * -B <br>
-   * Bayes' weight all models with k=1 .. k=kmax (given by -K) <p>
+   * Bayes' weight all models with <i>k</i>=1 ... <i>k</i>=kmax
+   * (given by -K) <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -667,25 +679,26 @@ public class IBk extends DistributionClassifier implements
    */          
   private double distance(Instance first, Instance second) {  
 
-    double diff,distance = 0;
-
+    double diff, distance = 0;
+    int numAttribsUsed = 0;
     for(int i = 0; i < m_Train.numAttributes(); i++) { 
       if (i == m_Train.classIndex()) {
 	continue;
       }
-      if (m_Train.attribute(i).isNominal()) {
-	
+      switch (m_Train.attribute(i).type()) {
+      case Attribute.NOMINAL:
 	// If attribute is nominal
-
+	numAttribsUsed++;
 	if (first.isMissing(i) || second.isMissing(i) ||
 	    ((int)first.value(i) != (int)second.value(i))) {
 	  diff = 1;
 	} else {
 	  diff = 0;
 	}
-      } else {
+	break;
+      case Attribute.NUMERIC:
 	// If attribute is numeric
-	
+	numAttribsUsed++;	
 	if (first.isMissing(i) || second.isMissing(i)) {
 	  if (first.isMissing(i) && second.isMissing(i)) {
 	    diff = 1;
@@ -700,13 +713,17 @@ public class IBk extends DistributionClassifier implements
 	    }
 	  }
 	} else {
-	  diff = norm(first.value(i),i)-norm(second.value(i),i);
+	  diff = norm(first.value(i),i) - norm(second.value(i),i);
 	}
+	break;
+      default:
+	diff = 0;
+	break;
       }
-      distance += diff*diff;
+      distance += diff * diff;
     }
     
-    return Math.sqrt(distance);
+    return Math.sqrt(distance / numAttribsUsed);
   }
 
   /**
@@ -767,12 +784,9 @@ public class IBk extends DistributionClassifier implements
       Instance trainInstance = (Instance) enum.nextElement();
       if (instance != trainInstance) { // for hold-one-out cross-validation
 	distance = distance(instance, trainInstance);
-	//	System.err.println("dist to train "+i+" "+trainInstance.toString()
-	//		   +" "+distance);
 	if (neighborlist.isEmpty() || (i < m_kNN) || 
-	    (distance <= neighborlist.m_last.m_distance)) {
+	    (distance <= neighborlist.m_Last.m_Distance)) {
 	  neighborlist.insertSorted(distance, trainInstance);
-	  //  neighborlist.printList();
 	}
 	i++;
       }
@@ -793,8 +807,6 @@ public class IBk extends DistributionClassifier implements
     double total = 0, weight;
     double [] distribution = new double [m_NumClasses];
     
-    //neighborlist.printList();
-
     // Set up a correction to the estimator
     if (m_ClassType == Attribute.NOMINAL) {
       for(int i = 0; i < m_NumClasses; i++) {
@@ -805,27 +817,27 @@ public class IBk extends DistributionClassifier implements
 
     if (!neighborlist.isEmpty()) {
       // Collect class counts
-      NeighborNode current = neighborlist.m_first;
+      NeighborNode current = neighborlist.m_First;
       while (current != null) {
 	switch (m_DistanceWeighted) {
 	case WEIGHT_INVERSE:
-	  weight = 1.0 / (current.m_distance + 0.001); // to avoid div by zero
+	  weight = 1.0 / (current.m_Distance + 0.001); // to avoid div by zero
 	  break;
 	case WEIGHT_SIMILARITY:
-	  weight = 1.0 - current.m_distance;           // to avoid div by zero
+	  weight = 1.0 - current.m_Distance;
 	  break;
 	default:                                       // WEIGHT_NONE:
 	  weight = 1.0;
 	  break;
 	}
-	weight *= current.m_instance.weight();
+	weight *= current.m_Instance.weight();
 	try {
 	  switch (m_ClassType) {
 	  case Attribute.NOMINAL:
-	    distribution[(int)current.m_instance.classValue()] += weight;
+	    distribution[(int)current.m_Instance.classValue()] += weight;
 	    break;
 	  case Attribute.NUMERIC:
-	    distribution[0] += current.m_instance.classValue() * weight;
+	    distribution[0] += current.m_Instance.classValue() * weight;
 	    break;
 	  }
 	} catch (Exception ex) {
@@ -834,7 +846,7 @@ public class IBk extends DistributionClassifier implements
 	}
 	total += weight;
 
-	current = current.m_next;
+	current = current.m_Next;
       }
     }
 
@@ -873,14 +885,14 @@ public class IBk extends DistributionClassifier implements
       Instance instance;
       NeighborList neighborlist;
       for(int i = 0; i < m_Train.numInstances(); i++) {
-	if (i % 50 == 0) {
+	if (m_Debug && (i % 50 == 0)) {
 	  System.err.print("Cross validating "
 			   + i + "/" + m_Train.numInstances() + "\r");
 	}
 	instance = m_Train.instance(i);
 	neighborlist = findNeighbors(instance);
 
-	for(int j = m_kNNUpper-1; j >= 0; j--) {
+	for(int j = m_kNNUpper - 1; j >= 0; j--) {
 	  // Update the performance stats
 	  double [] distribution = makeDistribution(neighborlist);
 	  double thisPrediction = Utils.maxIndex(distribution);
@@ -906,29 +918,36 @@ public class IBk extends DistributionClassifier implements
 
       // Display the results of the cross-validation
       for(int i = 0; i < m_kNNUpper; i++) {
-	System.err.print("Hold-one-out performance of " + (i + 1)
-			 + " neighbors " );
+	if (m_Debug) {
+	  System.err.print("Hold-one-out performance of " + (i + 1)
+			   + " neighbors " );
+	}
 	if (m_Train.classAttribute().isNumeric()) {
-	  if (m_MeanSquared) {
-	    System.err.println("(RMSE) = "
-			       + Math.sqrt(performanceStatsSq[i]
-					   / m_Train.numInstances()));
-	  } else {
-	    System.err.println("(MAE) = "
-			       + performanceStats[i] / m_Train.numInstances());
+	  if (m_Debug) {
+	    if (m_MeanSquared) {
+	      System.err.println("(RMSE) = "
+				 + Math.sqrt(performanceStatsSq[i]
+					     / m_Train.numInstances()));
+	    } else {
+	      System.err.println("(MAE) = "
+				 + performanceStats[i]
+				 / m_Train.numInstances());
+	    }
 	  }
 	} else {
 	  Utils.normalize(xxx_BayesWeights);
-	  System.err.print("(Prob) = "
-			   + xxx_BayesWeights[i] + "  ");
-	  System.err.println("(%ERR) = "
-			     + 100.0 * performanceStats[i]
-			     / m_Train.numInstances());
+	  if (m_Debug) {
+	    System.err.print("(Prob) = "
+			     + xxx_BayesWeights[i] + "  ");
+	    System.err.println("(%ERR) = "
+			       + 100.0 * performanceStats[i]
+			       / m_Train.numInstances());
+	  }
 	}
       }
 
 
-      if (xxx_BayesAverage) {
+      if (m_Debug && xxx_BayesAverage) {
 	System.err.println("Will weight the models with kMax="+m_kNN);
       } else {
 	// Check through the performance stats and select the best
@@ -953,7 +972,9 @@ public class IBk extends DistributionClassifier implements
 	  }
 	}
 	m_kNN = bestK;
-	System.err.println("Selected k = "+bestK);
+	if (m_Debug) {
+	  System.err.println("Selected k = " + bestK);
+	}
 
 	// Simulate sensor validation by picking out instances where
 	// a large prediction error was made
@@ -962,11 +983,13 @@ public class IBk extends DistributionClassifier implements
 	  double stdDev = Math.sqrt((performanceStatsSq[bestK - 1]
 				     - mean * mean * m_Train.numInstances())
 				    / m_Train.numInstances());
-	  System.err.println("Error -- mean: " + mean +
-			     "  std dev: " + stdDev);
+	  if (m_Debug) {
+	    System.err.println("Error -- mean: " + mean +
+			       "  std dev: " + stdDev);
+	  }
       
 	  for(int i = 0; i < m_Train.numInstances(); i++) {
-	    if (i % 50 == 0) {
+	    if (m_Debug && (i % 50 == 0)) {
 	      System.err.print("Validating " + i + "/" 
 			       + m_Train.numInstances() + "\r");
 	    }
@@ -1001,8 +1024,7 @@ public class IBk extends DistributionClassifier implements
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv should contain command line options (see setOptions)
    */
   public static void main(String [] argv) {
 
