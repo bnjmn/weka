@@ -17,7 +17,7 @@ import weka.filters.AbstractFilterTest;
  * java weka.filters.RemoveTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoveTest extends AbstractFilterTest {
   
@@ -38,6 +38,7 @@ public class RemoveTest extends AbstractFilterTest {
 
   public void testTypical() {
     m_Filter = getFilter("1,2");
+    ((Remove)m_Filter).setInvertSelection(true);
     Instances result = useFilter();
     assertEquals(2, result.numAttributes());
     assertEquals(m_Instances.attribute(0).name(), result.attribute(0).name());
@@ -46,6 +47,7 @@ public class RemoveTest extends AbstractFilterTest {
 
   public void testTypical2() {
     m_Filter = getFilter("3-4");
+    ((Remove)m_Filter).setInvertSelection(true);
     Instances result = useFilter();
     assertEquals(2, result.numAttributes());
     assertEquals(m_Instances.attribute(2).name(), result.attribute(0).name());
