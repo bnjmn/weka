@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -1195,6 +1195,14 @@ public class DecisionTable
       }
     }
     return s;
+  }
+
+  /**
+   * Returns the number of rules
+   * @return the number of rules
+   */
+  public double measureNumRules() {
+    return m_entries.size();
   }
 
   /**
