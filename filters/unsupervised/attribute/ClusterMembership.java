@@ -23,9 +23,18 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.clusterers.Clusterer;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.FastVector;
+import weka.core.Option;
+import weka.core.Utils;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -43,7 +52,7 @@ import java.util.Vector;
  * the class attribute (if set) is automatically ignored during clustering.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClusterMembership extends Filter implements UnsupervisedFilter, 
 							 OptionHandler {
@@ -53,6 +62,9 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
 
   /** Range of attributes to ignore */
   protected Range m_ignoreAttributesRange = null;
+
+  /** Filter for removing attributes */
+  protected Filter m_removeAttributes = new Remove();
 
   /**
    * Sets the format of the input instances.
@@ -66,6 +78,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
     super.setInputFormat(instanceInfo);
+    m_removeAttributes = null;
 
     return false;
   }
@@ -82,82 +95,129 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
       throw new IllegalStateException("No input instance format defined");
     }
 
-    Instances toFilter = getInputFormat();
-    Instances toFilterIgnoringAttributes = toFilter;
+    if (outputFormatPeek() == null) {
 
-    // filter out attributes if necessary
-    if (m_ignoreAttributesRange != null || toFilter.classIndex() >= 0) {
-      toFilterIgnoringAttributes = new Instances(toFilter);
-      Filter removeAttributes = new Remove();
-      String rangeString = "";
-      if (m_ignoreAttributesRange != null) {
-	rangeString += m_ignoreAttributesRange.getRanges();
-      }
-      if (toFilter.classIndex() >= 0) {
-	if (rangeString.length() > 0) {
-	  rangeString += (","+(toFilter.classIndex()+1));	  
-	} else {
-	  rangeString = ""+(toFilter.classIndex()+1);
+      Instances toFilter = getInputFormat();
+      Instances toFilterIgnoringAttributes = toFilter;
+      
+      // filter out attributes if necessary
+      if (m_ignoreAttributesRange != null || toFilter.classIndex() >= 0) {
+	toFilterIgnoringAttributes = new Instances(toFilter);
+	m_removeAttributes = new Remove();
+	String rangeString = "";
+	if (m_ignoreAttributesRange != null) {
+	  rangeString += m_ignoreAttributesRange.getRanges();
+	}
+	if (toFilter.classIndex() >= 0) {
+	  if (rangeString.length() > 0) {
+	    rangeString += (","+(toFilter.classIndex()+1));	  
+	  } else {
+	    rangeString = ""+(toFilter.classIndex()+1);
+	  }
+	}
+	((Remove)m_removeAttributes).setAttributeIndices(rangeString);
+	((Remove)m_removeAttributes).setInvertSelection(false);
+	m_removeAttributes.setInputFormat(toFilter);
+	for (int i = 0; i < toFilter.numInstances(); i++) {
+	  m_removeAttributes.input(toFilter.instance(i));
+	}
+	m_removeAttributes.batchFinished();
+	toFilterIgnoringAttributes = m_removeAttributes.getOutputFormat();
+	
+	Instance tempInst;
+	while ((tempInst = m_removeAttributes.output()) != null) {
+	  toFilterIgnoringAttributes.add(tempInst);
 	}
       }
-      ((Remove)removeAttributes).setAttributeIndices(rangeString);
-      ((Remove)removeAttributes).setInvertSelection(false);
-      removeAttributes.setInputFormat(toFilter);
-      for (int i = 0; i < toFilter.numInstances(); i++) {
-	removeAttributes.input(toFilter.instance(i));
-      }
-      removeAttributes.batchFinished();
-      toFilterIgnoringAttributes = removeAttributes.getOutputFormat();
       
-      Instance tempInst;
-      while ((tempInst = removeAttributes.output()) != null) {
-	toFilterIgnoringAttributes.add(tempInst);
-      }
-    }
-    
-    // build the clusterer
-    m_clusterer.buildClusterer(toFilterIgnoringAttributes);
-
-    // create output dataset
-    int numAtts = (toFilter.classIndex() >=0)
-      ? m_clusterer.numberOfClusters() + 1
-      : m_clusterer.numberOfClusters();
-
-    FastVector attInfo = new FastVector(numAtts);
-    for (int i = 0; i < m_clusterer.numberOfClusters(); i++) {
-      attInfo.addElement(new Attribute("pCluster"+i));
-    }
-    if (toFilter.classIndex() >= 0) {
-      attInfo.addElement(toFilter.classAttribute().copy());
-    }
-    Instances filtered = new Instances(toFilter.relationName()+"_clusterMembership",
-				      attInfo, 0);
-    setOutputFormat(filtered);
-
-    Instance original, processed;
-    double [] probs;
-    // build new daaset
-    for (int i = 0; i < toFilter.numInstances(); i++) {
-      original = toFilter.instance(i);
+      // build the clusterer
+      m_clusterer.buildClusterer(toFilterIgnoringAttributes);
       
-      probs = m_clusterer.
-	distributionForInstance(toFilterIgnoringAttributes.instance(i));
+      // create output dataset
+      int numAtts = (toFilter.classIndex() >=0)
+	? m_clusterer.numberOfClusters() + 1
+	: m_clusterer.numberOfClusters();
       
-      // set up values
-      double [] instanceVals = new double[filtered.numAttributes()];
-      for (int j = 0; j < probs.length; j++) {
-	instanceVals[j] = probs[j];
+      FastVector attInfo = new FastVector(numAtts);
+      for (int i = 0; i < m_clusterer.numberOfClusters(); i++) {
+	attInfo.addElement(new Attribute("pCluster"+i));
       }
       if (toFilter.classIndex() >= 0) {
-	instanceVals[instanceVals.length - 1] = original.classValue();
+	attInfo.addElement(toFilter.classAttribute().copy());
       }
-      
-      processed = new Instance(original.weight(), instanceVals);
-      processed.setDataset(filtered);
-      push(processed);
+      Instances filtered = new Instances(toFilter.relationName()+"_clusterMembership",
+					 attInfo, 0);
+      if (toFilter.classIndex() >= 0) {
+	filtered.setClassIndex(filtered.numAttributes() - 1);
+      }
+      setOutputFormat(filtered);
+
+      // build new daaset
+      for (int i = 0; i < toFilter.numInstances(); i++) {
+	convertInstance(toFilter.instance(i));
+      }
+    }
+    flushInput();
+
+    m_NewBatch = true;
+    return (numPendingOutput() != 0);
+  }
+
+  /**
+   * Input an instance for filtering. Ordinarily the instance is processed
+   * and made available for output immediately. Some filters require all
+   * instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @exception IllegalStateException if no input format has been defined.
+   */
+  public boolean input(Instance instance) throws Exception {
+
+    if (getInputFormat() == null) {
+      throw new IllegalStateException("No input instance format defined");
+    }
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    
+    if (outputFormatPeek() != null) {
+      convertInstance(instance);
+      return true;
     }
 
-    return (numPendingOutput() != 0);
+    bufferInput(instance);
+    return false;
+  }
+
+  /**
+   * Convert a single instance over. The converted instance is added to 
+   * the end of the output queue.
+   *
+   * @param instance the instance to convert
+   */
+  protected void convertInstance(Instance instance) throws Exception {
+    
+    double [] probs;
+    if (m_removeAttributes != null) {
+      m_removeAttributes.input(instance);
+      probs = m_clusterer.distributionForInstance(m_removeAttributes.output());
+    } else {
+      probs = m_clusterer.distributionForInstance(instance);
+    }
+    
+    // set up values
+    double [] instanceVals = new double[outputFormatPeek().numAttributes()];
+    for (int j = 0; j < probs.length; j++) {
+      instanceVals[j] = probs[j];
+    }
+    if (instance.classIndex() >= 0) {
+      instanceVals[instanceVals.length - 1] = instance.classValue();
+    }
+    
+    push(new Instance(instance.weight(), instanceVals));
   }
 
   /**
