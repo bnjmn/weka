@@ -30,6 +30,9 @@ import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -59,7 +62,7 @@ import java.beans.PropertyChangeEvent;
  * resultgenerator property for an experiment to iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GeneratorPropertyIteratorPanel extends JPanel
   implements ActionListener {
@@ -90,9 +93,19 @@ public class GeneratorPropertyIteratorPanel extends JPanel
     m_ConfigureBut.setEnabled(false);
     m_ConfigureBut.addActionListener(this);
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(1, 2));
-    buttons.add(m_StatusBox);
-    buttons.add(m_ConfigureBut);
+    GridBagLayout gb = new GridBagLayout();
+    GridBagConstraints constraints = new GridBagConstraints();
+    buttons.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    //    buttons.setLayout(new GridLayout(1, 2));
+    buttons.setLayout(gb);
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    buttons.add(m_StatusBox,constraints);
+    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    buttons.add(m_ConfigureBut,constraints);
     buttons.setMaximumSize(new Dimension(buttons.getMaximumSize().width,
 					   buttons.getMinimumSize().height));
     setBorder(BorderFactory.createTitledBorder("Generator properties"));

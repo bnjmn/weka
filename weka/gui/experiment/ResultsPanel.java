@@ -64,9 +64,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.JOptionPane;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.awt.Insets;
 import java.awt.Dimension;
 import javax.swing.SwingUtilities;
 
@@ -75,7 +75,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -270,10 +270,22 @@ public class ResultsPanel extends JPanel {
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createTitledBorder("Source"));
     JPanel p2 = new JPanel();
-    p2.setLayout(new GridLayout(1, 3));
-    p2.add(m_FromFileBut);
-    p2.add(m_FromDBaseBut);
-    p2.add(m_FromExpBut);
+    GridBagLayout gb = new GridBagLayout();
+    GridBagConstraints constraints = new GridBagConstraints();
+    p2.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+    //    p2.setLayout(new GridLayout(1, 3));
+    p2.setLayout(gb);
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    p2.add(m_FromFileBut,constraints);
+    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    p2.add(m_FromDBaseBut,constraints);
+    constraints.gridx=2;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    p2.add(m_FromExpBut,constraints);
     p1.setLayout(new BorderLayout());
     p1.add(m_FromLab, BorderLayout.CENTER);
     p1.add(p2, BorderLayout.EAST);
@@ -287,10 +299,11 @@ public class ResultsPanel extends JPanel {
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = 0;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
-    gbL.setConstraints(lab, gbC);
+    gbL.setConstraints(lab,gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.gridy = 0;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_DatasetCombo, gbC);
     p3.add(m_DatasetCombo);
 
@@ -303,6 +316,7 @@ public class ResultsPanel extends JPanel {
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.gridy = 1;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_RunCombo, gbC);
     p3.add(m_RunCombo);
     
@@ -314,6 +328,7 @@ public class ResultsPanel extends JPanel {
     p3.add(m_ResultKeyLabel);
     gbC = new GridBagConstraints();
     gbC.gridy = 2;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_ResultKeyBut, gbC);
     p3.add(m_ResultKeyBut);
     
@@ -326,6 +341,7 @@ public class ResultsPanel extends JPanel {
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.gridy = 3;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_CompareCombo, gbC);
     p3.add(m_CompareCombo);
     
@@ -350,6 +366,7 @@ public class ResultsPanel extends JPanel {
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.gridy = 5;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_TestsCombo, gbC);
     p3.add(m_TestsCombo);
 
@@ -371,6 +388,7 @@ public class ResultsPanel extends JPanel {
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 1;     gbC.gridx = 0;
+    gbC.insets = new Insets(5,5,5,5);
     gbL.setConstraints(m_PerformBut, gbC);
     mondo.add(m_PerformBut);
     gbC = new GridBagConstraints();
