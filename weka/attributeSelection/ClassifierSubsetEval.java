@@ -50,7 +50,7 @@ import weka.filters.AttributeFilter;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -95,7 +95,7 @@ public class ClassifierSubsetEval
   }
 
   /**
-   * Returns an enumeration describing the available options <p>
+   * Returns an enumeration describing the available options. <p>
    *
    * -B <classifier> <br>
    * Class name of the classifier to use for accuracy estimation.
@@ -110,7 +110,7 @@ public class ClassifierSubsetEval
    * The file containing hold out/test instances to use for accuracy estimation
    * <p>
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);

@@ -47,7 +47,7 @@ import weka.experiment.Stats;
  * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -745,9 +745,9 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions() {
     

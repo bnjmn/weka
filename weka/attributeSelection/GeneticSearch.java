@@ -58,7 +58,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class GeneticSearch extends ASSearch implements 
   StartSetHandler, OptionHandler {
@@ -233,8 +233,8 @@ public class GeneticSearch extends ASSearch implements
   }
 
   /**
-   * Returns an enumeration describing the available options
-   * @return an enumeration of all the available options
+   * Returns an enumeration describing the available options.
+   * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(6);

@@ -40,7 +40,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -60,9 +60,9 @@ public class AttributeFilter extends Filter implements OptionHandler {
   protected int [] m_InputStringIndex;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

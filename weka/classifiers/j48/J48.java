@@ -65,7 +65,7 @@ import weka.classifiers.*;
  *
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -197,7 +197,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
    * Valid options are: <p>
    *
@@ -229,7 +229,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    * -A <br>
    * If set, Laplace smoothing is used for predicted probabilites. <p>
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

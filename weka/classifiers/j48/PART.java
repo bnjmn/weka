@@ -55,7 +55,7 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
@@ -127,7 +127,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
    * Valid options are: <p>
    *
@@ -147,7 +147,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
    * -B <br>
    * Use binary splits for nominal attributes. <p>
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

@@ -31,7 +31,7 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class PrincipalComponents extends AttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -119,12 +119,12 @@ public class PrincipalComponents extends AttributeEvaluator
   }
 
   /**
-   * Returns an enumeration describing the available options <p>
+   * Returns an enumeration describing the available options. <p>
    *
    * -N <classifier>
    * Don't normalize the input data. <p>
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);

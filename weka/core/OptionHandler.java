@@ -29,14 +29,14 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface OptionHandler {
 
   /**
-   * Returns an enumeration of all the available options.
+   * Returns an enumeration of all the available options..
    *
-   * @return an enumeration of all available options
+   * @return an enumeration of all available options.
    */
   Enumeration listOptions();
 

@@ -42,7 +42,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MergeTwoValuesFilter extends Filter implements OptionHandler {
 
@@ -136,9 +136,9 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

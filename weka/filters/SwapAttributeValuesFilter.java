@@ -43,7 +43,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {
@@ -135,9 +135,9 @@ public class SwapAttributeValuesFilter extends Filter
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

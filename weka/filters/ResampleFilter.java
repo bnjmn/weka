@@ -56,7 +56,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -73,9 +73,9 @@ public class ResampleFilter extends Filter implements OptionHandler {
   private boolean m_FirstBatchDone = false;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

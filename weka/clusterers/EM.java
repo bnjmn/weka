@@ -56,7 +56,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class EM
   extends DistributionClusterer
@@ -121,7 +121,7 @@ public class EM
 
 
   /**
-   * Returns an enumeration describing the available options. <p>
+   * Returns an enumeration describing the available options.. <p>
    *
    * Valid options are:<p>
    *
@@ -143,7 +143,7 @@ public class EM
    *  Set the minimum allowable standard deviation for normal density 
    * calculation. <p>
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    *
    **/
   public Enumeration listOptions () {

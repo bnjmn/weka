@@ -55,7 +55,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class AbstractTimeSeriesFilter extends Filter
   implements OptionHandler {
@@ -79,9 +79,9 @@ public abstract class AbstractTimeSeriesFilter extends Filter
   protected Queue m_History;
   
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

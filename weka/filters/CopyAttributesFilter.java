@@ -44,7 +44,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class CopyAttributesFilter extends Filter implements OptionHandler {
 
@@ -64,9 +64,9 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
   protected int [] m_InputStringIndex;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
