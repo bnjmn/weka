@@ -1,5 +1,5 @@
 #
-# $Revision: 1.14 $
+# $Revision: 1.15 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -90,6 +90,7 @@ install : all
 	weka/experiment/*.props \
 	weka/gui/*.class \
 	weka/gui/*.props \
+	weka/gui/*.jpg \
 	weka/gui/experiment/*.class \
 	weka/gui/explorer/*.class \
 	weka/gui/streams/*.class \
