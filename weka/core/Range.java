@@ -39,7 +39,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Range implements Serializable {
 
@@ -396,7 +396,7 @@ public class Range implements Serializable {
     }
     try {
       int index = Integer.parseInt(range);
-      if (index > 0) {
+      if ((index > 0) && (index <= m_Upper + 1)){
 	return true;
       }
       return false;
