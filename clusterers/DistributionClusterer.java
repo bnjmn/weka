@@ -26,13 +26,24 @@ import weka.core.*;
  * (ie. a probability distribution).
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.3 $
+ * @version  $Revision: 1.4 $
  */
 public abstract class DistributionClusterer extends Clusterer {
 
   // ===============
   // Public methods.
   // ===============
+
+  /**
+   * Computes the density for a given instance.
+   * 
+   * @param instance the instance to compute the density for
+   * @return the density.
+   * @exception Exception if the density could not be computed
+   * successfully
+   */
+  public abstract double densityForInstance(Instance instance) 
+    throws Exception;
 
   /**
    * Predicts the cluster memberships for a given instance.
