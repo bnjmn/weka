@@ -50,11 +50,11 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
-public class Ridor extends Classifier implements OptionHandler, AdditionalMeasureProducer,
-						 WeightedInstancesHandler {
+public class Ridor extends Classifier
+  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
 
   /** The number of folds to split data into Grow and Prune for IREP */
   private int m_Folds = 3;
@@ -82,6 +82,9 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 
   /** Statistics of the data */
   private double m_Cover, m_Err;
+
+  /** The minimal number of instance weights within a split*/
+  private double m_MinNo = 2.0;
     
   /** 
    * Private class implementing the single node of Ridor. 
@@ -117,8 +120,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param lvl the level of the parent node
      * @exception Exception if ruleset of this node cannot be built
      */
-    public void findRules(Instances[] dataByClass, int lvl) throws Exception {
-
+    public void findRules(Instances[] dataByClass, int lvl) throws Exception{
       Vector finalRules = null;
       int clas = -1;
       double[] isPure = new double[dataByClass.length];
@@ -239,8 +241,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @exception if the rules cannot be built properly
      */
     private double buildRuleset(Instances insts, double classCount, Vector ruleset) 
-      throws Exception {	    
-
+      throws Exception{	    
       Instances data = new Instances(insts);
       double wAcRt = 0;  // The weighted accuracy rate of this ruleset
       double total = data.sumOfWeights();
@@ -251,7 +252,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 	double bestWorth = -1;           // randomization of the data
 		
 	RidorRule rule = new RidorRule();                                
-	rule.setFolds(m_Folds);
 	rule.setPredictedClass(0);       // Predict the classes other than default
 	if(m_Random == null)
 	  m_Random = new Random(m_Seed);
@@ -320,8 +320,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param data2 the data to be appended to data1
      * @return the merged data
      */
-    private Instances append(Instances data1, Instances data2) {
-
+    private Instances append(Instances data1, Instances data2){
       Instances data = new Instances(data1);
       for(int i=0; i<data2.numInstances(); i++)
 	data.add(data2.instance(i));
@@ -345,7 +344,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param total the total data size fed into the ruleset
      * @return the weighted accuracy rate of this rule
      */
-    private double computeWeightedAcRt(double worthRt, double cover, double total) {
+    private double computeWeightedAcRt(double worthRt, double cover, double total){
 	  
       return (worthRt * (cover/total));	
     }
@@ -361,8 +360,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param dataByClass the array of data to be covered by the rule
      * @return the arrays of data both covered and not covered by the rule
      */
-    private Instances[][] divide(RidorRule rule, Instances[] dataByClass) {
-      
+    private Instances[][] divide(RidorRule rule, Instances[] dataByClass){
       int len = dataByClass.length;
       Instances[][] dataBags = new Instances[2][len];
 	    
@@ -381,7 +379,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return the size of this node
      */
     public int size(){
-      
       int size = 0;
       if(rules != null){
 	for(int i=0; i < rules.length; i++)
@@ -397,7 +394,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return a textual description of one node of Ridor
      */
     public String toString(){
-      
       StringBuffer text =  new StringBuffer();
 	    
       if(level == 1)
@@ -432,10 +428,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
   private class RidorRule implements WeightedInstancesHandler{
 	
     /** The internal representation of the class label to be predicted*/
-    private double m_Class = -1;
-	
-    /** The number of folds to split data into Grow and Prune for REP*/
-    private int m_Folds = 3;
+    private double m_Class = -1;	
 	
     /** The class attribute of the data*/
     private Attribute m_ClassAttribute;
@@ -453,11 +446,9 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
     private double m_CoverP = 0;   
 	
     /** The accurate and covered data of this rule in the growing data */
-    private double m_CoverG = 0, m_AccuG = 0;   
-	
+    private double m_CoverG = 0, m_AccuG = 0;   	
+  
     /** The access functions for parameters */
-    public void setFolds(int folds){  m_Folds = folds; }
-    public int getFolds(){ return m_Folds; }
     public void setPredictedClass(double cl){  m_Class = cl; }
     public double getPredictedClass(){ return m_Class; }
 	
@@ -469,8 +460,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param instances the training data
      * @exception Exception if classifier can't be built successfully
      */
-    public void buildClassifier(Instances instances) throws Exception {
-
+    public void buildClassifier(Instances instances) throws Exception{
       m_ClassAttribute = instances.classAttribute();
       if (!m_ClassAttribute.isNominal()) 
 	throw new Exception(" Only nominal class, please.");
@@ -508,8 +498,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param insts the dataset to be covered by this rule.
      * @return the instances covered and not covered by this rule
      */
-    public Instances[] coveredByRule(Instances insts) {
-
+    public Instances[] coveredByRule(Instances insts){
       Instances[] data = new Instances[2];
       data[0] = new Instances(insts, insts.numInstances());
       data[1] = new Instances(insts, insts.numInstances());
@@ -531,8 +520,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param inst the instance in question
      * @return the boolean value indicating whether the instance is covered by this rule
      */
-    public boolean isCover(Instance datum) {
-
+    public boolean isCover(Instance datum){
       boolean isCover=true;
 	    
       for(int i=0; i<m_Antds.size(); i++){
@@ -551,8 +539,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * 
      * @return the boolean value indicating whether the rule has antecedents
      */
-    public boolean hasAntds() {
-
+    public boolean hasAntds(){
       if (m_Antds == null)
 	return false;
       else
@@ -564,8 +551,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      *
      * @param data the growing data used to build the rule
      */    
-    private void grow(Instances data) {
-
+    private void grow(Instances data){
       Instances growData = new Instances(data);
 	    
       m_AccuG = computeDefAccu(growData);
@@ -607,12 +593,13 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 	       it's stored in the antecedent formed by this attribute.
 	       This procedure returns the data covered by the antecedent*/
 	    Instances coveredData = computeInfoGain(growData, defAcRt, antd);
-	    double infoGain = antd.getMaxInfoGain();
-			
-	    if(Utils.gr(infoGain, maxInfoGain)){
-	      oneAntd=antd;
-	      coverData = coveredData;  
-	      maxInfoGain = infoGain;		    
+	    if(coveredData != null){
+	      double infoGain = antd.getMaxInfoGain();			
+	      if(Utils.gr(infoGain, maxInfoGain)){
+		oneAntd=antd;
+		coverData = coveredData;  
+		maxInfoGain = infoGain;
+	      }		    
 	    }
 	  }
 	}
@@ -644,8 +631,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param antd the specific antecedent
      * @return the data covered by the antecedent
      */
-    private Instances computeInfoGain(Instances instances, double defAcRt, Antd antd) {
-
+    private Instances computeInfoGain(Instances instances, double defAcRt, Antd antd){
       Instances data = new Instances(instances);
 	    
       /* Split the data into bags.
@@ -664,8 +650,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      *
      * @param pruneData the pruning data used to prune the rule
      */    
-    private void prune(Instances pruneData) {
-
+    private void prune(Instances pruneData){
       Instances data=new Instances(pruneData);
 	    
       double total = data.sumOfWeights();
@@ -745,8 +730,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param data the data in question
      * @return the default accuracy number
      */
-    private double computeDefAccu(Instances data) { 
-
+    private double computeDefAccu(Instances data){ 
       double defAccu=0;
       for(int i=0; i<data.numInstances(); i++){
 	Instance inst = data.instance(i);
@@ -771,7 +755,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return a textual description of this rule with the specified class label
      */
     public String toString(String att, String cl) {
-
       StringBuffer text =  new StringBuffer();
       if(m_Antds.size() > 0){
 	for(int j=0; j< (m_Antds.size()-1); j++)
@@ -790,7 +773,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return a textual description of this rule
      */
     public String toString() {
-
       return toString(m_ClassAttribute.name(), m_ClassAttribute.value((int)m_Class));
     }        
   }
@@ -803,7 +785,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    */
     
   private abstract class Antd{
-
     /* The attribute of the antecedent */
     protected Attribute att;
 	
@@ -850,7 +831,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
   /** 
    * The antecedent with numeric attribute
    */
-  private class NumericAntd extends Antd { 
+  private class NumericAntd extends Antd{
 	
     /* The split point for this numeric antecedent */
     private double splitPoint;
@@ -875,8 +856,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param cl the class label to be predicted
      * @return the array of data after split
      */
-    public Instances[] splitData(Instances insts, double defAcRt, double cl) {
-
+    public Instances[] splitData(Instances insts, double defAcRt, double cl){
       Instances data = new Instances(insts);
       data.sort(att);
       int total=data.numInstances();// Total number of instances without 
@@ -887,6 +867,13 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
       int finalSplit=split;         // Final split position
       maxInfoGain = 0;
       value = 0;	
+
+      // Compute minimum number of Instances required in each split
+      double minSplit =  0.1 * (data.sumOfWeights()) / 2.0;
+      if (Utils.smOrEq(minSplit,m_MinNo)) 
+	minSplit = m_MinNo;
+      else if (Utils.gr(minSplit,25)) 
+	minSplit = 25;	    
 	    
       double fstCover=0, sndCover=0, fstAccu=0, sndAccu=0;
 	    
@@ -902,6 +889,10 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 	  sndAccu += inst.weight();
       }
 	    
+      // Enough Instances with known values?
+      if (Utils.sm(sndCover,(2*minSplit)))
+	return null;
+	    
       if(total == 0) return null; // Data all missing for the attribute 	
       splitPoint = data.instance(total-1).value(att);	
 	    
@@ -916,6 +907,11 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 	      fstAccu += inst.weight();  // First bag positive# ++
 	      sndAccu -= inst.weight();  // Second bag positive# --
 	    }	     		   
+	  }
+		    
+	  if(Utils.sm(fstCover, minSplit) || Utils.sm(sndCover, minSplit)){
+	    prev=split;  // Cannot split because either
+	    continue;    // split has not enough data
 	  }
 		    
 	  double fstAccuRate = 0, sndAccuRate = 0;
@@ -981,8 +977,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return the boolean value indicating whether the instance is covered 
      *         by this antecedent
      */
-    public boolean isCover(Instance inst) {
-
+    public boolean isCover(Instance inst){
       boolean isCover=false;
       if(!inst.isMissing(att)){
 	if(Utils.eq(value, 0)){
@@ -1001,7 +996,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return a textual description of this antecedent
      */
     public String toString() {
-
       String symbol = Utils.eq(value, 0.0) ? " <= " : " > ";
       return (att.name() + symbol + Utils.doubleToString(splitPoint, 6));
     }   
@@ -1020,7 +1014,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 	
     /* Constructor*/
     public NominalAntd(Attribute a){ 
-
       super(a);
       int bag = att.numValues();
       accurate = new double[bag];
@@ -1039,8 +1032,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @param cl the class label to be predicted
      * @return the array of data after split
      */
-    public Instances[] splitData(Instances data, double defAcRt, double cl) {
-
+    public Instances[] splitData(Instances data, double defAcRt, double cl){
       int bag = att.numValues();
       Instances[] splitData = new Instances[bag];
 	    
@@ -1060,12 +1052,22 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 	}
       }
 	    
+      // Check if >=2 splits have more than the minimal data
+      int count=0; 
       for(int x=0; x<bag; x++){
-	double p = accurate[x];
 	double t = coverage[x];
-	if(!Utils.eq(t, 0.0))
-	  infoGain[x] = p *((Utils.log2(p/t)) - (Utils.log2(defAcRt)));
+	if(Utils.grOrEq(t, m_MinNo)){
+	  double p = accurate[x];		
+		    
+	  if(!Utils.eq(t, 0.0))
+	    infoGain[x] = p *((Utils.log2(p/t)) - (Utils.log2(defAcRt)));
+	  ++count;
+	}
       }
+	        
+      if(count < 2) // Don't split
+	return null;
+	    
       value = (double)Utils.maxIndex(infoGain);
 	    
       cover = coverage[(int)value];
@@ -1087,8 +1089,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return the boolean value indicating whether the instance is covered 
      *         by this antecedent
      */
-    public boolean isCover(Instance inst) {
-
+    public boolean isCover(Instance inst){
       boolean isCover=false;
       if(!inst.isMissing(att)){
 	if(Utils.eq(inst.value(att), value))
@@ -1103,7 +1104,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
      * @return a textual description of this antecedent
      */
     public String toString() {
-
       return (att.name() + " = " +att.value((int)value));
     } 
   }
@@ -1114,26 +1114,26 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    * @param data the training data
    * @exception Exception if classifier can't be built successfully
    */
-  public void buildClassifier(Instances instances) throws Exception {
+  public void buildClassifier(Instances instances) throws Exception{
 
     Instances data = new Instances(instances);
     if (data.checkForStringAttributes())
       throw new Exception("Can't handle string attributes!");
 	
     if(Utils.eq(data.sumOfWeights(),0))
-      throw new Exception(" No training data.");
+      throw new Exception("No training data.");
 	
     data.deleteWithMissingClass();
 	
     if(Utils.eq(data.sumOfWeights(),0))
-      throw new Exception(" The class labels of all the training data are missing.");	
+      throw new Exception("The class labels of all the training data are missing.");	
 	
     int numCl = data.numClasses();
     m_Root = new Ridor_node();
     m_Class = instances.classAttribute();     // The original class label
 	
     if(!m_Class.isNominal())
-      throw new Exception(" Only nominal class, please.");
+      throw new Exception("Only nominal class, please.");
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();
@@ -1169,8 +1169,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    * @param instance the instance to be classified
    * @return the classification
    */
-  public double classifyInstance(Instance datum) {
-
+  public double classifyInstance(Instance datum){
     return classify(m_Root, datum);
   }
     
@@ -1181,8 +1180,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    * @param instance the instance to be classified
    * @return the classification
    */
-  private double classify(Ridor_node node, Instance datum) {
-
+  private double classify(Ridor_node node, Instance datum){
     double classValue = node.getDefClass();
     RidorRule[] rules = node.getRules();
 
@@ -1220,12 +1218,15 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    * in each step instead of choosing default class based on the error rate
    * (if the flag is not set) <p>  
    * 
+   * -N number <br>
+   * Set the minimal weights of instances within a split.
+   * (Default: 2) <p>
+   *    
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
-
-    Vector newVector = new Vector(4);
-
+    Vector newVector = new Vector(5);
+	
     newVector.addElement(new Option("\tSet number of folds for IREP\n" +
 				    "\tOne fold is used as pruning set.\n" +
 				    "\t(default 3)","F", 1, "-F <number of folds>"));
@@ -1240,6 +1241,9 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
 				    "\tthe default class in each step instead of \n"+
 				    "\tchoosing default class based on the error rate\n"+
 				    "\t(if the flag is not set)","M", 0, "-M"));
+    newVector.addElement(new Option("\tSet the minimal weights of instances\n" +
+				    "\twithin a split.\n" +
+				    "\t(default 2.0)","N", 1, "-N <min. weights>"));		
     return newVector.elements();
   }
     
@@ -1249,7 +1253,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception {
+  public void setOptions(String[] options) throws Exception{
 	
     String numFoldsString = Utils.getOption('F', options);
     if (numFoldsString.length() != 0) 
@@ -1269,6 +1273,12 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
     else 
       m_Seed = 1;
 	
+    String minNoString = Utils.getOption('N', options);
+    if (minNoString.length() != 0) 
+      m_MinNo = Double.parseDouble(minNoString);
+    else 
+      m_MinNo = 2.0;
+	
     m_IsAllErr = Utils.getFlag('A', options);
     m_IsMajority = Utils.getFlag('M', options);
   }
@@ -1280,10 +1290,12 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    */
   public String [] getOptions() {
 	
-    String [] options = new String [6];
+    String [] options = new String [8];
     int current = 0;
     options[current++] = "-F"; options[current++] = "" + m_Folds;
     options[current++] = "-S"; options[current++] = "" + m_Shuffle;
+    options[current++] = "-N"; options[current++] = "" + m_MinNo;
+	
     if(m_IsAllErr)
       options[current++] = "-A";
     if(m_IsMajority)
@@ -1304,7 +1316,9 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
   public boolean getAllErr(){ return m_IsAllErr; }
   public void setMajorityClass(boolean m){ m_IsMajority = m; }
   public boolean getMajorityClass(){ return m_IsMajority; }
-
+  public void setMinNo(double m){  m_MinNo = m; }
+  public double getMinNo(){ return m_MinNo; }
+    
   /**
    * Returns an enumeration of the additional measure names
    * @return an enumeration of the measure names
@@ -1322,7 +1336,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-
     if (additionalMeasureName.compareTo("measureNumRules") == 0) 
       return numRules();
     else 
@@ -1334,8 +1347,7 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    *
    * @return the number of rules
    */  
-  private double numRules() {
-
+  private double numRules(){
     int size = 0;
     if(m_Root != null)
       size = m_Root.size();
@@ -1349,7 +1361,6 @@ public class Ridor extends Classifier implements OptionHandler, AdditionalMeasur
    * @return a textual description of the classifier
    */
   public String toString() {
-
     if (m_Root == null) 
       return "RIpple DOwn Rule Learner(Ridor): No model built yet.";
 	
