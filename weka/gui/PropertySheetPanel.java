@@ -55,7 +55,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -323,17 +323,16 @@ public class PropertySheetPanel extends JPanel
 		  m_TipTexts[i] = tempTip;
 		} else {
 		  m_TipTexts[i] = tempTip.substring(0, ci);
-		  //		  System.out.println(tempTip.substring(0,ci));
-                  if (m_HelpText != null) {
-                    if (firstTip) {
-                      m_HelpText.append("OPTIONS\n");
-                      firstTip = false;
-                    }
-                    m_HelpText.append(name).append(" -- ");
-                    m_HelpText.append(tempTip).append("\n\n");
-                    //jt.setText(m_HelpText.toString());
-                  }
 		}
+                if (m_HelpText != null) {
+                  if (firstTip) {
+                    m_HelpText.append("OPTIONS\n");
+                    firstTip = false;
+                  }
+                  m_HelpText.append(name).append(" -- ");
+                  m_HelpText.append(tempTip).append("\n\n");
+                  //jt.setText(m_HelpText.toString());
+                }
 	      } catch (Exception ex) {
 
 	      }
