@@ -82,7 +82,7 @@ import javax.swing.filechooser.FileFilter;
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SetupPanel extends JPanel {
 
@@ -103,7 +103,7 @@ public class SetupPanel extends JPanel {
     new ExtensionFileFilter(".exp", "Experiment configuration files");
 
   /** The file chooser for selecting experiments */
-  protected JFileChooser m_FileChooser = new JFileChooser();
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
 
   /** The ResultProducer editor */
   protected GenericObjectEditor m_RPEditor = new GenericObjectEditor();

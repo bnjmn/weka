@@ -53,7 +53,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -74,7 +74,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     new ExtensionFileFilter(".arff", "Arff data files");
 
   /** The file chooser component */
-  protected JFileChooser m_FileChooser = new JFileChooser();
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
 
   
   /**

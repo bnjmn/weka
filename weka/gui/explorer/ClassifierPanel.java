@@ -100,7 +100,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1133,7 +1133,7 @@ public class ClassifierPanel extends JPanel {
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();
     if (sb != null) {
-      JFileChooser fileChooser = new JFileChooser();
+      JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       int returnVal = fileChooser.showSaveDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {

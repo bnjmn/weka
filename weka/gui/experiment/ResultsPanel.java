@@ -76,7 +76,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -166,7 +166,7 @@ public class ResultsPanel extends JPanel {
 
   
   /** The file chooser for selecting result files */
-  protected JFileChooser m_FileChooser = new JFileChooser();
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
 
   /** The PairedTTester object */
   protected PairedTTester m_TTester = new PairedTTester();
