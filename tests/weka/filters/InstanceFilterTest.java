@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.InstanceFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class InstanceFilterTest extends AbstractFilterTest {
   
@@ -53,7 +53,7 @@ public class InstanceFilterTest extends AbstractFilterTest {
     }
     result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
-    assert(m_Instances.numInstances() > result.numInstances());
+    assertTrue(m_Instances.numInstances() > result.numInstances());
 
     try {
       ((InstanceFilter)m_Filter).setNominalIndices("3-last");
@@ -62,7 +62,7 @@ public class InstanceFilterTest extends AbstractFilterTest {
     }
     Instances result2 = useFilter();
     assertEquals(m_Instances.numAttributes(), result2.numAttributes());
-    assert(m_Instances.numInstances() > result2.numInstances());
+    assertTrue(m_Instances.numInstances() > result2.numInstances());
     assertEquals(m_Instances.numInstances(), result.numInstances() + result2.numInstances());
 
     ((InstanceFilter)m_Filter).setInvertSelection(true);
@@ -81,13 +81,13 @@ public class InstanceFilterTest extends AbstractFilterTest {
     ((InstanceFilter)m_Filter).setSplitPoint(3);
     result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
-    assert(m_Instances.numInstances() > result.numInstances());
+    assertTrue(m_Instances.numInstances() > result.numInstances());
 
     // Test inversion is working.
     ((InstanceFilter)m_Filter).setInvertSelection(true);
     Instances result2 = useFilter();
     assertEquals(m_Instances.numAttributes(), result2.numAttributes());
-    assert(m_Instances.numInstances() > result2.numInstances());
+    assertTrue(m_Instances.numInstances() > result2.numInstances());
     assertEquals(m_Instances.numInstances(), result.numInstances() + result2.numInstances());
   }
 
@@ -97,9 +97,9 @@ public class InstanceFilterTest extends AbstractFilterTest {
     ((InstanceFilter)m_Filter).setMatchMissingValues(true);
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
-    assert(result.numInstances() > 0);
+    assertTrue(result.numInstances() > 0);
     for (int i = 0; i < result.numInstances(); i++) {
-      assert("Should select only instances with missing values",
+      assertTrue("Should select only instances with missing values",
              result.instance(i).isMissing(4));
     }
   }

@@ -16,7 +16,7 @@ import weka.core.Attribute;
  * java weka.filters.MakeIndicatorFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MakeIndicatorFilterTest extends AbstractFilterTest {
   
@@ -59,7 +59,7 @@ public class MakeIndicatorFilterTest extends AbstractFilterTest {
                  Attribute.NUMERIC, result.attribute(1).type());
     // Check that default indication is correct
     for (int i = 0; i < result.numInstances(); i++) {
-      assert("Checking indicator for instance: " + (i + 1),
+      assertTrue("Checking indicator for instance: " + (i + 1),
              (m_Instances.instance(i).value(1) == 2) ==
              (result.instance(i).value(1) == 1));
     }
@@ -76,7 +76,7 @@ public class MakeIndicatorFilterTest extends AbstractFilterTest {
                  Attribute.NOMINAL, result.attribute(1).type());
     // Check that default indication is correct
     for (int i = 0; i < result.numInstances(); i++) {
-      assert("Checking indicator for instance: " + (i + 1),
+      assertTrue("Checking indicator for instance: " + (i + 1),
              (m_Instances.instance(i).value(1) == 2) ==
              (result.instance(i).value(1) == 1));
     }
@@ -98,7 +98,7 @@ public class MakeIndicatorFilterTest extends AbstractFilterTest {
                  Attribute.NOMINAL, result.attribute(1).type());
     // Check that default indication is correct
     for (int i = 0; i < result.numInstances(); i++) {
-      assert("Checking indicator for instance: " + (i + 1),
+      assertTrue("Checking indicator for instance: " + (i + 1),
              ((m_Instances.instance(i).value(1) == 0) ||
               (m_Instances.instance(i).value(1) == 2)) 
              ==

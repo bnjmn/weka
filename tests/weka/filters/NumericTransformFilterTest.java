@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.NumericTransformFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NumericTransformFilterTest extends AbstractFilterTest {
 
@@ -53,7 +53,7 @@ public class NumericTransformFilterTest extends AbstractFilterTest {
     for (int i = 0; i < result.numInstances(); i++) {
       for (int j = 0; j < result.numAttributes(); j++) {
         if (m_Instances.instance(i).isMissing(j)) {
-          assert(result.instance(i).isMissing(j));
+          assertTrue(result.instance(i).isMissing(j));
         } else if (result.attribute(j).isNumeric()) {
           assertEquals("Value should be same as Math.abs()",
                        Math.abs(m_Instances.instance(i).value(j)),
@@ -78,7 +78,7 @@ public class NumericTransformFilterTest extends AbstractFilterTest {
     for (int i = 0; i < result.numInstances(); i++) {
       for (int j = 0; j < result.numAttributes(); j++) {
         if (m_Instances.instance(i).isMissing(j)) {
-          assert(result.instance(i).isMissing(j));
+          assertTrue(result.instance(i).isMissing(j));
         } else if (result.attribute(j).isNumeric() && (j >=3)) {
           assertEquals("Value should be same as Math.abs()",
                        Math.abs(m_Instances.instance(i).value(j)),
@@ -103,7 +103,7 @@ public class NumericTransformFilterTest extends AbstractFilterTest {
     for (int i = 0; i < result.numInstances(); i++) {
       for (int j = 0; j < result.numAttributes(); j++) {
         if (m_Instances.instance(i).isMissing(j)) {
-          assert(result.instance(i).isMissing(j));
+          assertTrue(result.instance(i).isMissing(j));
         } else if (result.attribute(j).isNumeric()) {
           assertEquals("Value should be same as Math.rint()",
                        Math.rint(m_Instances.instance(i).value(j)),

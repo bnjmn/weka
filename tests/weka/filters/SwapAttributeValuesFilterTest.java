@@ -16,7 +16,7 @@ import weka.core.Attribute;
  * java weka.filters.SwapAttributeValuesFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SwapAttributeValuesFilterTest extends AbstractFilterTest {
   
@@ -57,9 +57,9 @@ public class SwapAttributeValuesFilterTest extends AbstractFilterTest {
     int first = 0, second = 2;
     for (int i = 0; i < result.numInstances(); i++) {
       if (m_Instances.instance(i).value(1) == first) {
-        assert("Value should be swapped", result.instance(i).value(1) == second);
+        assertTrue("Value should be swapped", result.instance(i).value(1) == second);
       } else if (m_Instances.instance(i).value(1) == second) {
-        assert("Value should be swapped", result.instance(i).value(1) == first);
+        assertTrue("Value should be swapped", result.instance(i).value(1) == first);
       }
     }
   }
@@ -74,9 +74,9 @@ public class SwapAttributeValuesFilterTest extends AbstractFilterTest {
     int first = 1, second = 2;
     for (int i = 0; i < result.numInstances(); i++) {
       if (m_Instances.instance(i).value(1) == first) {
-        assert("Value should be swapped", result.instance(i).value(1) == second);
+        assertTrue("Value should be swapped", result.instance(i).value(1) == second);
       } else if (m_Instances.instance(i).value(1) == second) {
-        assert("Value should be swapped", result.instance(i).value(1) == first);
+        assertTrue("Value should be swapped", result.instance(i).value(1) == first);
       }
     }
   }
@@ -91,9 +91,9 @@ public class SwapAttributeValuesFilterTest extends AbstractFilterTest {
     int first = 0, second = 1;
     for (int i = 0; i < result.numInstances(); i++) {
       if (m_Instances.instance(i).value(1) == first) {
-        assert("Value should be swapped", result.instance(i).value(1) == second);
+        assertTrue("Value should be swapped", result.instance(i).value(1) == second);
       } else if (m_Instances.instance(i).value(1) == second) {
-        assert("Value should be swapped", result.instance(i).value(1) == first);
+        assertTrue("Value should be swapped", result.instance(i).value(1) == first);
       }
     }
   }
@@ -110,14 +110,14 @@ public class SwapAttributeValuesFilterTest extends AbstractFilterTest {
     int first = 0, second = 1;
     for (int i = 0; i < result.numInstances(); i++) {
       if (m_Instances.instance(i).isMissing(4)) {
-        assert("Missing in input should give missing in result:" 
+        assertTrue("Missing in input should give missing in result:" 
                + m_Instances.instance(i) + " --> "
                + result.instance(i),
                result.instance(i).isMissing(4));
       } else if (m_Instances.instance(i).value(4) == first) {
-        assert("Value should be swapped", result.instance(i).value(4) == second);
+        assertTrue("Value should be swapped", result.instance(i).value(4) == second);
       } else if (m_Instances.instance(i).value(4) == second) {
-        assert("Value should be swapped", result.instance(i).value(4) == first);
+        assertTrue("Value should be swapped", result.instance(i).value(4) == first);
       }
     }
   }

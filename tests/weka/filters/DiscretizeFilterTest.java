@@ -16,7 +16,7 @@ import weka.core.Attribute;
  * java weka.filters.DiscretizeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DiscretizeFilterTest extends AbstractFilterTest {
   
@@ -124,7 +124,7 @@ public class DiscretizeFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(Attribute.NOMINAL, result.attribute(2).type());
-    assert(5 >= result.attribute(2).numValues());
+    assertTrue(5 >= result.attribute(2).numValues());
   }
 
   public void testMDL() {

@@ -19,7 +19,7 @@ import weka.classifiers.evaluation.NominalPrediction;
  * java weka.classifiers.ThresholdSelectorTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ThresholdSelectorTest extends AbstractClassifierTest {
 
@@ -94,7 +94,7 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
     FastVector result = null;
     m_Instances.setClassIndex(1);
     result = useClassifier();
-    assert(result.size() != 0);
+    assertTrue(result.size() != 0);
     double minp = 0;
     double maxp = 0;
     for (int i = 0; i < result.size(); i++) {
@@ -103,8 +103,8 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
       if ((i == 0) || (prob < minp)) minp = prob;
       if ((i == 0) || (prob > maxp)) maxp = prob;
     }
-    assert("Upper limit shouldn't increase", maxp <= 1.0);
-    assert("Lower limit shouldn'd decrease", minp >= 0.25);
+    assertTrue("Upper limit shouldn't increase", maxp <= 1.0);
+    assertTrue("Lower limit shouldn'd decrease", minp >= 0.25);
   }
 
 
@@ -116,7 +116,7 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
     FastVector result = null;
     m_Instances.setClassIndex(1);
     result = useClassifier();
-    assert(result.size() != 0);
+    assertTrue(result.size() != 0);
     double minp = 0;
     double maxp = 0;
     for (int i = 0; i < result.size(); i++) {
@@ -136,7 +136,7 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
       ((ThresholdSelector)m_Classifier).setDesignatedClass(new SelectedTag(ThresholdSelector.TAGS_OPTIMIZE[i].getID(), ThresholdSelector.TAGS_OPTIMIZE));
       m_Instances.setClassIndex(1);
       FastVector result = useClassifier();
-      assert(result.size() != 0);
+      assertTrue(result.size() != 0);
     }
   }
 
@@ -147,7 +147,7 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
       ((ThresholdSelector)m_Classifier).setEvaluationMode(new SelectedTag(ThresholdSelector.TAGS_EVAL[i].getID(), ThresholdSelector.TAGS_EVAL));
       m_Instances.setClassIndex(1);
       FastVector result = useClassifier();
-      assert(result.size() != 0);
+      assertTrue(result.size() != 0);
     }
   }
 
@@ -165,7 +165,7 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
       ((ThresholdSelector)m_Classifier).setNumXValFolds(i);
       m_Instances.setClassIndex(1);
       FastVector result = useClassifier();
-      assert(result.size() != 0);
+      assertTrue(result.size() != 0);
     }
   }
 

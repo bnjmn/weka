@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.TimeSeriesTranslateFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
 
@@ -53,7 +53,7 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
       for (int j = 0; j < result.numAttributes(); j++) {
         if ((j != 1) && (j != 2)) {
           if (in.isMissing(j)) {
-            assert("Nonselected missing values should pass through",
+            assertTrue("Nonselected missing values should pass through",
                    out.isMissing(j));
           } else if (result.attribute(j).isString()) {
             assertEquals("Nonselected attributes shouldn't change. "
@@ -84,7 +84,7 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
       for (int j = 0; j < result.numAttributes(); j++) {
         if ((j != 1) && (j != 2)) {
           if (in.isMissing(j)) {
-            assert("Nonselected missing values should pass through",
+            assertTrue("Nonselected missing values should pass through",
                    out.isMissing(j));
           } else if (result.attribute(j).isString()) {
             assertEquals("Nonselected attributes shouldn't change. "

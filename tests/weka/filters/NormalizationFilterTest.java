@@ -16,7 +16,7 @@ import weka.core.Instances;
  * java weka.filters.NormalizationFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NormalizationFilterTest extends AbstractFilterTest {
   
@@ -39,7 +39,7 @@ public class NormalizationFilterTest extends AbstractFilterTest {
       if (result.attribute(j).isNumeric()) {
         for (int i = 0; i < result.numInstances(); i++) {
           if (!result.instance(i).isMissing(j)) {
-            assert("Value should be between 0 and 1",
+            assertTrue("Value should be between 0 and 1",
                    (result.instance(i).value(j) >= 0) &&
                    (result.instance(i).value(j) <= 1));
           }

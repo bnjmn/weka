@@ -15,7 +15,7 @@ import weka.core.Attribute;
  * java weka.filters.ObfuscateFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ObfuscateFilterTest extends AbstractFilterTest {
   
@@ -32,18 +32,18 @@ public class ObfuscateFilterTest extends AbstractFilterTest {
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(m_Instances.numInstances(), result.numInstances());
     
-    assert(!m_Instances.relationName().equals(result.relationName()));
+    assertTrue(!m_Instances.relationName().equals(result.relationName()));
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       Attribute inatt = m_Instances.attribute(i);
       Attribute outatt = result.attribute(i);
       if (!inatt.isString()) {
-        assert("Attribute names should be changed",
+        assertTrue("Attribute names should be changed",
                !inatt.name().equals(outatt.name()));
         if (inatt.isNominal()) {
           assertEquals("Number of nominal values shouldn't change",
                        inatt.numValues(), outatt.numValues());
           for (int j = 0; j < inatt.numValues(); j++) {
-            assert("Nominal labels should be changed",
+            assertTrue("Nominal labels should be changed",
                    !inatt.value(j).equals(outatt.value(j)));
           }
         }

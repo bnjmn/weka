@@ -17,7 +17,7 @@ import weka.core.SparseInstance;
  * java weka.filters.SparseToNonSparseFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SparseToNonSparseFilterTest extends AbstractFilterTest {
   
@@ -36,7 +36,7 @@ public class SparseToNonSparseFilterTest extends AbstractFilterTest {
     assertEquals(m_Instances.numInstances(),  result.numInstances());
     // Check conversion is OK
     for (int i = 0; i < result.numInstances(); i++) {
-      assert("Instance should not be an instanceof SparseInstance:" + (i + 1),
+      assertTrue("Instance should not be an instanceof SparseInstance:" + (i + 1),
              !(result.instance(i) instanceof SparseInstance));
     }
   }

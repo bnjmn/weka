@@ -16,7 +16,7 @@ import weka.core.Attribute;
  * java weka.filters.MergeTwoValuesFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MergeTwoValuesFilterTest extends AbstractFilterTest {
   
@@ -122,7 +122,7 @@ public class MergeTwoValuesFilterTest extends AbstractFilterTest {
     int mergedIndex = -1;
     for (int i = 0; i < result.numInstances(); i++) {
       if (m_Instances.instance(i).isMissing(4)) {
-        assert("Missing in input should give missing in result",
+        assertTrue("Missing in input should give missing in result",
                result.instance(i).isMissing(4));
       } else if ((m_Instances.instance(i).value(4) == 0) || 
                  (m_Instances.instance(i).value(4) == 1)) {

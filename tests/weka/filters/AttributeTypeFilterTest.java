@@ -19,7 +19,7 @@ import weka.core.SelectedTag;
  * java weka.filters.AttributeTypeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeTypeFilterTest extends AbstractFilterTest {
   
@@ -48,7 +48,7 @@ public class AttributeTypeFilterTest extends AbstractFilterTest {
     m_Filter = getFilter(Attribute.NOMINAL);
     Instances result = useFilter();
     for (int i = 0; i < result.numAttributes(); i++) {
-      assert(result.attribute(i).type() != Attribute.NOMINAL);
+      assertTrue(result.attribute(i).type() != Attribute.NOMINAL);
     }
   }
 
@@ -56,7 +56,7 @@ public class AttributeTypeFilterTest extends AbstractFilterTest {
     m_Filter = getFilter(Attribute.STRING);
     Instances result = useFilter();
     for (int i = 0; i < result.numAttributes(); i++) {
-      assert(result.attribute(i).type() != Attribute.STRING);
+      assertTrue(result.attribute(i).type() != Attribute.STRING);
     }
   }
 
@@ -64,7 +64,7 @@ public class AttributeTypeFilterTest extends AbstractFilterTest {
     m_Filter = getFilter(Attribute.NUMERIC);
     Instances result = useFilter();
     for (int i = 0; i < result.numAttributes(); i++) {
-      assert(result.attribute(i).type() != Attribute.NUMERIC);
+      assertTrue(result.attribute(i).type() != Attribute.NUMERIC);
     }
   }
 

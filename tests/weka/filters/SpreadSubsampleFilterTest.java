@@ -16,7 +16,7 @@ import weka.core.AttributeStats;
  * java weka.filters.SpreadSubsampleFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SpreadSubsampleFilterTest extends AbstractFilterTest {
 
@@ -83,7 +83,7 @@ public class SpreadSubsampleFilterTest extends AbstractFilterTest {
         max = outs.nominalCounts[i];
       }
     }
-    assert(max / factor <= min);
+    assertTrue(max / factor <= min);
   }
 
   public static Test suite() {

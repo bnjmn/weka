@@ -16,7 +16,7 @@ import weka.core.Attribute;
  * java weka.filters.StringToNominalFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class StringToNominalFilterTest extends AbstractFilterTest {
   
@@ -51,7 +51,7 @@ public class StringToNominalFilterTest extends AbstractFilterTest {
 
     assertEquals(8, result.attribute(3).numValues());
     for (int i = 0; i < result.numInstances(); i++) {
-      assert("Missing values should be preserved",
+      assertTrue("Missing values should be preserved",
              m_Instances.instance(i).isMissing(3) ==
              result.instance(i).isMissing(3));
     }

@@ -16,7 +16,7 @@ import weka.core.AttributeStats;
  * java weka.filters.ResampleFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ResampleFilterTest extends AbstractFilterTest {
   
@@ -56,7 +56,7 @@ public class ResampleFilterTest extends AbstractFilterTest {
     assertEquals(origs.nominalCounts.length, outs.nominalCounts.length);
     for (int i = 0; i < origs.nominalCounts.length; i++) {
       int est = origs.nominalCounts[i] / 2 - 1;
-      assert("Counts for value:" + i 
+      assertTrue("Counts for value:" + i 
              + " orig:" + origs.nominalCounts[i] 
              + " out50%:" + outs.nominalCounts[i], 
              (est <= outs.nominalCounts[i]) &&
@@ -80,7 +80,7 @@ public class ResampleFilterTest extends AbstractFilterTest {
     int est = (origs.totalCount - origs.missingCount) / origs.distinctCount;
     est = est / 2 - 1;
     for (int i = 0; i < origs.nominalCounts.length; i++) {
-      assert("Counts for value:" + i 
+      assertTrue("Counts for value:" + i 
              + " orig:" + origs.nominalCounts[i] 
              + " out50%:" + outs.nominalCounts[i]
              + " ~wanted:" + est,

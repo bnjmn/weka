@@ -16,7 +16,7 @@ import weka.test.Regression;
  * Abstract Test class for Filters.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractFilterTest extends TestCase {
 
@@ -133,7 +133,7 @@ public abstract class AbstractFilterTest extends TestCase {
     // Check the input hasn't been modified
     // We just check the headers are the same and that the instance
     // count is the same.
-    assert(icopy.equalHeaders(m_Instances));
+    assertTrue(icopy.equalHeaders(m_Instances));
     assertEquals(icopy.numInstances(), m_Instances.numInstances());
 
     // Try repeating the filtering and check we get the same results
@@ -155,11 +155,11 @@ public abstract class AbstractFilterTest extends TestCase {
     // Again check the input hasn't been modified
     // We just check the headers are the same and that the instance
     // count is the same.
-    assert(icopy.equalHeaders(m_Instances));
+    assertTrue(icopy.equalHeaders(m_Instances));
     assertEquals(icopy.numInstances(), m_Instances.numInstances());
 
     // Check the same results for both runs
-    assert(result.equalHeaders(result2));
+    assertTrue(result.equalHeaders(result2));
     assertEquals(result.numInstances(), result2.numInstances());
     
   }

@@ -15,7 +15,7 @@ import weka.core.Attribute;
  * java weka.filters.RandomizeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RandomizeFilterTest extends AbstractFilterTest {
   
@@ -39,7 +39,7 @@ public class RandomizeFilterTest extends AbstractFilterTest {
         diff = true;
       }
     }
-    assert("All instances seem to be in the same positions", diff);
+    assertTrue("All instances seem to be in the same positions", diff);
   }
 
   public static Test suite() {

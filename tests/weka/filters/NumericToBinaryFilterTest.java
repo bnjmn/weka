@@ -16,7 +16,7 @@ import weka.core.Instances;
  * java weka.filters.NumericToBinaryFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NumericToBinaryFilterTest extends AbstractFilterTest {
   
@@ -37,16 +37,16 @@ public class NumericToBinaryFilterTest extends AbstractFilterTest {
     // Check conversion is OK
     for (int j = 0; j < result.numAttributes(); j++) {
       if (m_Instances.attribute(j).isNumeric()) {
-        assert("Numeric attribute should now be nominal",
+        assertTrue("Numeric attribute should now be nominal",
                result.attribute(j).isNominal());
         for (int i = 0; i < result.numInstances(); i++) {
           if (m_Instances.instance(i).isMissing(j)) {
-            assert(result.instance(i).isMissing(j));
+            assertTrue(result.instance(i).isMissing(j));
           } else if (m_Instances.instance(i).value(j) == 0) {
-            assert("Output value should be 0", 
+            assertTrue("Output value should be 0", 
                    result.instance(i).value(j) == 0);
           } else {
-            assert("Output value should be 1", 
+            assertTrue("Output value should be 1", 
                    result.instance(i).value(j) == 1);
           }
         }

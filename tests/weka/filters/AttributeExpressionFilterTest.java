@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.AttributeExpressionFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeExpressionFilterTest extends AbstractFilterTest {
   
@@ -74,7 +74,7 @@ public class AttributeExpressionFilterTest extends AbstractFilterTest {
     for (int i = 0; i < result.numInstances(); i++) {
       Instance inst = result.instance(i);
       if (inst.value(1) == 0) {
-        assert("Instance " + (i + 1) + " should have been ?" , 
+        assertTrue("Instance " + (i + 1) + " should have been ?" , 
                inst.isMissing(inst.numAttributes() - 1));
       } else {
         assertEquals("Instance " + (i + 1),
@@ -214,7 +214,7 @@ public class AttributeExpressionFilterTest extends AbstractFilterTest {
       Instance inst = result.instance(i);
       if (inst.isMissing(0) || inst.isMissing(1) ||
           inst.isMissing(2) || inst.isMissing(3)) {
-        assert("Instance " + (i + 1) + " should have been ?" , 
+        assertTrue("Instance " + (i + 1) + " should have been ?" , 
                inst.isMissing(inst.numAttributes() - 1));
       } else {
         assertEquals("Instance " + (i + 1),

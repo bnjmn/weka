@@ -15,7 +15,7 @@ import weka.core.Attribute;
  * java weka.filters.ReplaceMissingValuesFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ReplaceMissingValuesFilterTest extends AbstractFilterTest {
   
@@ -37,7 +37,7 @@ public class ReplaceMissingValuesFilterTest extends AbstractFilterTest {
       for (int i = 0; i < m_Instances.numInstances(); i++) {
         if (m_Instances.attribute(j).isString()) {
           if (m_Instances.instance(i).isMissing(j)) {
-            assert("Missing values in strings cannot be replaced",
+            assertTrue("Missing values in strings cannot be replaced",
                    result.instance(i).isMissing(j));
           } else {
             assertEquals("String values should not have changed",
@@ -45,7 +45,7 @@ public class ReplaceMissingValuesFilterTest extends AbstractFilterTest {
                          outatt.value((int)result.instance(i).value(j)));
           }
         } else {
-          assert("All non-string missing values should have been replaced",
+          assertTrue("All non-string missing values should have been replaced",
                  !result.instance(i).isMissing(j));
         }
       }

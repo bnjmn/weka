@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.CopyAttributesFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CopyAttributesFilterTest extends AbstractFilterTest {
   
@@ -46,8 +46,8 @@ public class CopyAttributesFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     int origNum = m_Instances.numAttributes();
     assertEquals(origNum + 2, result.numAttributes());
-    assert(result.attribute(origNum).name().endsWith(m_Instances.attribute(0).name()));
-    assert(result.attribute(origNum + 1).name().endsWith(m_Instances.attribute(1).name()));
+    assertTrue(result.attribute(origNum).name().endsWith(m_Instances.attribute(0).name()));
+    assertTrue(result.attribute(origNum + 1).name().endsWith(m_Instances.attribute(1).name()));
   }
 
   public void testTypical2() {
@@ -55,8 +55,8 @@ public class CopyAttributesFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     int origNum = m_Instances.numAttributes();
     assertEquals(origNum + 2, result.numAttributes());
-    assert(result.attribute(origNum).name().endsWith(m_Instances.attribute(2).name()));
-    assert(result.attribute(origNum + 1).name().endsWith(m_Instances.attribute(3).name()));
+    assertTrue(result.attribute(origNum).name().endsWith(m_Instances.attribute(2).name()));
+    assertTrue(result.attribute(origNum + 1).name().endsWith(m_Instances.attribute(3).name()));
   }
 
   public void testNonInverted() {
@@ -65,8 +65,8 @@ public class CopyAttributesFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     int origNum = m_Instances.numAttributes();
     assertEquals(origNum + origNum - 2, result.numAttributes());
-    assert(result.attribute(origNum).name().endsWith(m_Instances.attribute(2).name()));
-    assert(result.attribute(origNum + 1).name().endsWith(m_Instances.attribute(3).name()));
+    assertTrue(result.attribute(origNum).name().endsWith(m_Instances.attribute(2).name()));
+    assertTrue(result.attribute(origNum + 1).name().endsWith(m_Instances.attribute(3).name()));
   }
 
   public void testNonInverted2() {
@@ -75,7 +75,7 @@ public class CopyAttributesFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     int origNum = m_Instances.numAttributes();
     assertEquals(origNum + origNum - 3, result.numAttributes());
-    assert(result.attribute(origNum).name().endsWith(m_Instances.attribute(3).name()));
+    assertTrue(result.attribute(origNum).name().endsWith(m_Instances.attribute(3).name()));
   }
 
   public static Test suite() {
