@@ -1,3 +1,21 @@
+/*
+ *    ResultsPanel.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 package weka.gui.experiment;
 
@@ -8,8 +26,16 @@ import weka.experiment.PairedTTester;
 import weka.experiment.InstanceQuery;
 import weka.core.Utils;
 import weka.core.Instances;
+import weka.core.Range;
+import weka.core.Instance;
 
+import java.io.Reader;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.File;
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -23,11 +49,6 @@ import javax.swing.JTextArea;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-import java.io.Reader;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.awt.GridLayout;
-import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.JFileChooser;
 import javax.swing.JComboBox;
@@ -36,34 +57,67 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
-import weka.core.Range;
-import java.awt.Font;
 import javax.swing.JOptionPane;
-import weka.core.Instance;
 
 
+/** 
+ * This panel controls simple analysis of experimental results.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class ResultsPanel extends JPanel {
 
+  /** Message shown when no experimental results have been loaded */
   protected final static String NO_SOURCE = "No source";
 
+  /** Click to load results from a file */
   protected JButton m_FromFileBut = new JButton("File");
+
+  /** Click to load results from a database */
   protected JButton m_FromDBaseBut = new JButton("Database");
+
+  /** Click to get results from the destination given in the experiment */
   protected JButton m_FromExpBut = new JButton("Experiment");
+
+  /** Displays a message about the current result set */
   protected JLabel m_FromLab = new JLabel(NO_SOURCE);
+
+  /** Lets the user select which column contains the datset name */
   protected JComboBox m_DatasetCombo = new JComboBox();
+
+  /** Lets the user select which column contains the run number */
   protected JComboBox m_RunCombo = new JComboBox();
+
+  /** Displays the currently selected column names for the scheme & options */
   protected JLabel m_ResultKeyLabel = new JLabel("Result key fields",
 						 SwingConstants.RIGHT);
+
+  /** Click to edit the columns used to determine the scheme */
   protected JButton m_ResultKeyBut = new JButton("Select keys");
+
+  /** Stores the list of attributes for selecting the scheme columns */
   protected DefaultListModel m_ResultKeyModel = new DefaultListModel();
+
+  /** Displays the list of selected columns determining the scheme */
   protected JList m_ResultKeyList = new JList(m_ResultKeyModel);
+
+  /** Lets the user select which performance measure to analyze */
   protected JComboBox m_CompareCombo = new JComboBox();
+
+  /** Lets the user edit the test significance */
   protected JTextField m_SigTex = new JTextField("0.05");
+
+  /** Lets the user select which scheme to base comparisons against */
   protected JComboBox m_TestsCombo = new JComboBox();
+
+  /** Click to start the test */
   protected JButton m_PerformBut = new JButton("Perform test");
+
+  /** Displays the output of tests */
   protected JTextArea m_OutputTex = new JTextArea();
 
-  
+  /** Filter to ensure only arff files are selected for result files */  
   protected FileFilter m_ArffFilter = new FileFilter() {
     public String getDescription() {
       return "Arff data files";
@@ -79,6 +133,8 @@ public class ResultsPanel extends JPanel {
       return false;
     }
   };
+  
+  /** The file chooser for selecting result files */
   protected JFileChooser m_FileChooser = new JFileChooser();
 
   /** The PairedTTester object */
@@ -96,14 +152,19 @@ public class ResultsPanel extends JPanel {
   /** An experiment (used for identifying a result source) -- optional */
   protected Experiment m_Exp;
 
+  /** An actionlisteners that updates ttest settings */
   protected ActionListener m_ConfigureListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
       setTTester();
     }
   };
   
+  /**
+   * Creates the results panel with no initial experiment.
+   */
   public ResultsPanel() {
 
+    // Create/Configure/Connect components
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_FromExpBut.setEnabled(false);
@@ -145,7 +206,9 @@ public class ResultsPanel extends JPanel {
     m_OutputTex.setFont(new Font("Dialoginput", Font.PLAIN, 10));
     m_OutputTex.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutputTex.setEditable(false);
-    
+
+
+    // Set up the GUI layout
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createTitledBorder("Result source"));
     JPanel p2 = new JPanel();
@@ -200,13 +263,22 @@ public class ResultsPanel extends JPanel {
   }
 
   
+  /**
+   * Tells the panel to use a new experiment.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public void setExperiment(Experiment exp) {
     
     m_Exp = exp;
     setFromExpEnabled();
   }
 
-  public void setFromExpEnabled() {
+  /**
+   * Updates whether the current experiment is of a type that we can
+   * determine the results destination.
+   */
+  protected void setFromExpEnabled() {
 
     if ((m_Exp.getResultListener() instanceof InstancesResultListener)
 	|| (m_Exp.getResultListener() instanceof DatabaseResultListener)) {
@@ -216,6 +288,10 @@ public class ResultsPanel extends JPanel {
     }
   }
 
+  /**
+   * Queries the user enough to make a database query to retrieve experiment
+   * results.
+   */
   protected void setInstancesFromDBaseQuery() {
 
     try {
@@ -272,6 +348,12 @@ public class ResultsPanel extends JPanel {
     }
   }
   
+  /**
+   * Examines the supplied experiment to determine the results destination
+   * and attempts to load the results.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   protected void setInstancesFromExp(Experiment exp) {
 
     if (exp.getResultListener() instanceof InstancesResultListener) {
@@ -304,6 +386,12 @@ public class ResultsPanel extends JPanel {
   }
 
   
+  /**
+   * Queries a database to load results from the specified table name. The
+   * database connection must have already made by m_InstanceQuery.
+   *
+   * @param tableName the name of the table containing results to retrieve.
+   */
   protected void setInstancesFromDatabaseTable(String tableName) {
 
     try {
@@ -314,6 +402,12 @@ public class ResultsPanel extends JPanel {
     }
   }
   
+  /**
+   * Loads results from a set of instances contained in the supplied
+   * file.
+   *
+   * @param f a value of type 'File'
+   */
   protected void setInstancesFromFile(File f) {
       
     try {
@@ -328,6 +422,8 @@ public class ResultsPanel extends JPanel {
   /**
    * Sets up the panel with a new set of instances, attempting
    * to guess the correct settings for various columns.
+   *
+   * @param newInstances the new set of results.
    */
   public void setInstances(Instances newInstances) {
 
@@ -415,8 +511,10 @@ public class ResultsPanel extends JPanel {
     setTTester();
   }
 
-  // Updates the test chooser with possible tests
-  public void setTTester() {
+  /**
+   * Updates the test chooser with possible tests
+   */
+  protected void setTTester() {
     
     m_OutputTex.append("Available resultsets\n"
 		       + m_TTester.resultsetKey() + "\n\n");
@@ -434,7 +532,10 @@ public class ResultsPanel extends JPanel {
   }
 
   
-  public void performTest() {
+  /**
+   * Carries out a t-test using the current configuration.
+   */
+  protected void performTest() {
 
     String sigStr = m_SigTex.getText();
     if (sigStr.length() != 0) {

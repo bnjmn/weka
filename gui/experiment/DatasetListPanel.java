@@ -1,3 +1,21 @@
+/*
+ *    DatasetListPanel.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 package weka.gui.experiment;
 
@@ -6,6 +24,7 @@ import weka.experiment.Experiment;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
@@ -20,19 +39,33 @@ import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JButton;
-import java.awt.event.ActionEvent;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
 
 
+/** 
+ * This panel controls setting a list of datasets for an experiment to
+ * iterate over.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
+  /** The experiment to set the dataset list of */
   protected Experiment m_Exp;
-  
+
+  /** The component displaying the dataset list */
   protected JList m_List;
+
+  /** Click to add a dataset */
   protected JButton m_AddBut = new JButton("Add New");
+
+  /** Click to remove the selected dataset from the list */
   protected JButton m_DeleteBut = new JButton("DeleteSelected");
+
+  /** A filter to ensure only arff files get selected */
   protected FileFilter m_ArffFilter = new FileFilter() {
     public String getDescription() {
       return "Arff data files";
@@ -48,15 +81,25 @@ public class DatasetListPanel extends JPanel implements ActionListener {
       return false;
     }
   };
+
+  /** The file chooser component */
   protected JFileChooser m_FileChooser = new JFileChooser();
 
   
+  /**
+   * Creates the dataset list panel with the given experiment.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public DatasetListPanel(Experiment exp) {
 
     this();
     setExperiment(exp);
   }
 
+  /**
+   * Create the dataset list panel initially disabled.
+   */
   public DatasetListPanel() {
     
     m_List = new JList();
@@ -79,6 +122,11 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     add(new JScrollPane(m_List), BorderLayout.CENTER);
   }
 
+  /**
+   * Tells the panel to act on a new experiment.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public void setExperiment(Experiment exp) {
 
     m_Exp = exp;
@@ -86,9 +134,15 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     m_List.setModel(m_Exp.getDatasets());
   }
   
+  /**
+   * Handle actions when buttons get pressed.
+   *
+   * @param e a value of type 'ActionEvent'
+   */
   public void actionPerformed(ActionEvent e) {
 
     if (e.getSource() == m_AddBut) {
+      // Let the user select an arff file from a file chooser
       int returnVal = m_FileChooser.showOpenDialog(this);
       if(returnVal == JFileChooser.APPROVE_OPTION) {
 	if (m_FileChooser.isMultiSelectionEnabled()) {
@@ -103,12 +157,15 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	}
       }
     } else if (e.getSource() == m_DeleteBut) {
-      // Suss out deleting multiple selections
-      int selected = m_List.getSelectedIndex();
-      if (selected != -1) {
-	m_Exp.getDatasets().removeElementAt(selected);
-	if (m_Exp.getDatasets().size() > selected) {
-	  m_List.setSelectedIndex(selected);
+      // Delete the selected files
+      int [] selected = m_List.getSelectedIndices();
+      if (selected != null) {
+	for (int i = 0; i < selected.length; i++) {
+	  int current = selected[i];
+	  m_Exp.getDatasets().removeElementAt(current);
+	  if (m_Exp.getDatasets().size() > current) {
+	    m_List.setSelectedIndex(current);
+	  }
 	}
       }
       if (m_List.getSelectedIndex() == -1) {
@@ -118,9 +175,9 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   }
   
   /**
-   * Tests out the classifier editor from the command line.
+   * Tests out the dataset list panel from the command line.
    *
-   * @param args may contain the class name of a classifier to edit
+   * @param args ignored
    */
   public static void main(String [] args) {
 

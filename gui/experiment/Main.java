@@ -1,41 +1,77 @@
+/*
+ *    Main.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 package weka.gui.experiment;
 
 import weka.experiment.Experiment;
-
-import java.awt.BorderLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
-import javax.swing.JPanel;
 import weka.core.Utils;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.BufferedOutputStream;
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
-import java.awt.GridLayout;
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
+import javax.swing.JPanel;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
-import java.io.File;
 import javax.swing.JOptionPane;
 
 
+/** 
+ * The main class for the experiment environment. Lets the user create,
+ * load, save, configure, run experiments, and analyse experimental results.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class Main extends JPanel {
 
+  /** The panel for configuring the experiment */
   protected SetupPanel m_SetupPanel;
+
+  /** The panel for running the experiment */
   protected RunPanel m_RunPanel;
+
+  /** The panel for analysing experimental results */
   protected ResultsPanel m_ResultsPanel;
 
+  /** Click to load an experiment */
   protected JButton m_OpenBut = new JButton("Open...");
+
+  /** Click to save an experiment */
   protected JButton m_SaveBut = new JButton("Save...");
+
+  /** Click to create a new experiment with default settings */
   protected JButton m_NewBut = new JButton("New");
-  
+
+  /** A filter to ensure only experiment files get shown in the chooser */
   protected FileFilter m_ExpFilter = new FileFilter() {
     public String getDescription() {
       return "Experiment configuration files";
@@ -51,10 +87,16 @@ public class Main extends JPanel {
       return false;
     }
   };
+
+  /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser = new JFileChooser();
 
+  /** The current experiment */
   protected Experiment m_Exp;
   
+  /**
+   * Creates the experiment environment gui with no initial experiment
+   */
   public Main() {
 
     m_NewBut.addActionListener(new ActionListener() {
@@ -98,12 +140,22 @@ public class Main extends JPanel {
     add(tabbedPane, BorderLayout.CENTER);
   }
 
+  /**
+   * Creates the main GUI with the supplied experiment
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public Main(Experiment exp) {
 
     this();
     setExperiment(exp);
   }
 
+  /**
+   * Sets the experiment being acted on.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public void setExperiment(Experiment exp) {
 
     m_Exp = exp;
@@ -113,6 +165,9 @@ public class Main extends JPanel {
     m_ResultsPanel.setExperiment(exp);
   }
 
+  /**
+   * Prompts the user to select an experiment file and loads it.
+   */
   private void openExperiment() {
     
     int returnVal = m_FileChooser.showOpenDialog(this);
@@ -138,6 +193,10 @@ public class Main extends JPanel {
     }
   }
 
+  /**
+   * Prompts the user for a filename to save the experiment to, then saves
+   * the experiment.
+   */
   private void saveExperiment() {
 
     int returnVal = m_FileChooser.showSaveDialog(this);
@@ -166,9 +225,9 @@ public class Main extends JPanel {
   }
   
   /**
-   * Tests out the classifier editor from the command line.
+   * Tests out the experiment environment.
    *
-   * @param args may contain the class name of a classifier to edit
+   * @param args ignored.
    */
   public static void main(String [] args) {
 

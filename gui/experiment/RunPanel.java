@@ -1,3 +1,21 @@
+/*
+ *    RunPanel.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 package weka.gui.experiment;
 
@@ -18,33 +36,51 @@ import javax.swing.JButton;
 import javax.swing.JTextArea;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
-import javax.swing.SwingConstants;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.io.ObjectOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
+
+/** 
+ * This panel controls the running of an experiment.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class RunPanel extends JPanel implements ActionListener {
 
+  /** The message displayed when no experiment is running */
   protected final static String NOT_RUNNING = "Not running";
-  
+
+  /** Click to start running the experiment */
   protected JButton m_StartBut = new JButton("Start");
+
+  /** Click to signal the running experiment to halt */
   protected JButton m_StopBut = new JButton("Stop");
+
+  /** Shows current status of the run */
   protected JLabel m_StatusLab = new JLabel(NOT_RUNNING,
 					    SwingConstants.CENTER);
+
+  /** Displays error and some status messages */
   protected JTextArea m_ErrorLog = new JTextArea();
 
+  /** The experiment to run */
   protected Experiment m_Exp;
+
+  /** The thread running the experiment */
   protected Thread m_RunThread = null;
 
   /*
-   * A class that handles running the experiment
+   * A class that handles running a copy of the experiment
    * in a separate thread
    */
   class ExperimentRunner extends Thread {
@@ -76,7 +112,7 @@ public class RunPanel extends JPanel implements ActionListener {
     }
     
     /**
-     * Starts running the main method.
+     * Starts running the experiment.
      */
     public void run() {
       
@@ -134,6 +170,9 @@ public class RunPanel extends JPanel implements ActionListener {
   }
 
   
+  /**
+   * Creates the run panel with no initial experiment.
+   */
   public RunPanel() {
 
     m_StartBut.addActionListener(this);
@@ -145,7 +184,9 @@ public class RunPanel extends JPanel implements ActionListener {
 			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     m_ErrorLog.setEditable(false);
     m_ErrorLog.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    
+
+
+    // Set the GUI layout
     JPanel controls = new JPanel();
     controls.setLayout(new GridLayout(1,2));
     controls.add(m_StartBut);
@@ -163,12 +204,22 @@ public class RunPanel extends JPanel implements ActionListener {
     add(output, BorderLayout.CENTER);
   }
     
+  /**
+   * Creates the panel with the supplied initial experiment.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public RunPanel(Experiment exp) {
 
     this();
     setExperiment(exp);
   }
 
+  /**
+   * Sets the experiment the panel operates on.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public void setExperiment(Experiment exp) {
     
     m_Exp = exp;
@@ -177,6 +228,11 @@ public class RunPanel extends JPanel implements ActionListener {
     m_RunThread = null;
   }
   
+  /**
+   * Controls starting and stopping the experiment.
+   *
+   * @param e a value of type 'ActionEvent'
+   */
   public void actionPerformed(ActionEvent e) {
 
     if (e.getSource() == m_StartBut) {
@@ -201,20 +257,26 @@ public class RunPanel extends JPanel implements ActionListener {
    *
    * @return a string containing the date and time.
    */
-  public static String getTimestamp() {
+  protected static String getTimestamp() {
 
     return (new SimpleDateFormat("yyyy.MM.dd hh:mm:ss")).format(new Date());
   }
 
-  public void logMessage(String message) {
+  /**
+   * Sends the supplied message to the log area. The current timestamp will
+   * be prepended.
+   *
+   * @param message a value of type 'String'
+   */
+  protected void logMessage(String message) {
     
     m_ErrorLog.append(RunPanel.getTimestamp() + ' ' + message + '\n');
   }
   
   /**
-   * Tests out the classifier editor from the command line.
+   * Tests out the run panel from the command line.
    *
-   * @param args may contain the class name of a classifier to edit
+   * @param args may contain options specifying an experiment to run.
    */
   public static void main(String [] args) {
 
