@@ -59,7 +59,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -255,9 +255,9 @@ public class Experiment implements Serializable, OptionHandler {
       throw new Exception("No ResultListener set");
     }
 
-    if (m_UsePropertyIterator && (m_PropertyArray != null)) {
-      determineAdditionalResultMeasures();
-    }
+    //    if (m_UsePropertyIterator && (m_PropertyArray != null)) {
+    determineAdditionalResultMeasures();
+      //    }
 
     m_ResultProducer.setResultListener(m_ResultListener);
     m_ResultProducer.setAdditionalMeasures(m_AdditionalMeasures);
@@ -280,24 +280,45 @@ public class Experiment implements Serializable, OptionHandler {
   private void determineAdditionalResultMeasures() throws Exception {
     m_AdditionalMeasures = null;
     FastVector measureNames = new FastVector();
-    
-    for (int i = 0; i < Array.getLength(m_PropertyArray); i++) {
-      Object current = Array.get(m_PropertyArray, i);
 
-      if (current instanceof AdditionalMeasureProducer) {
-	Enumeration am = ((AdditionalMeasureProducer)current).
-	  enumerateMeasures();
-	while (am.hasMoreElements()) {
-	  String mname = (String)am.nextElement();
-	  if (mname.startsWith("measure")) {
-	    if (measureNames.indexOf(mname) == -1) {
-	      measureNames.addElement(mname);
+    // first try the result producer, then property array if applicable
+    if (m_ResultProducer instanceof AdditionalMeasureProducer) {
+      Enumeration am = ((AdditionalMeasureProducer)m_ResultProducer).
+	enumerateMeasures();
+      while (am.hasMoreElements()) {
+	String mname = (String)am.nextElement();
+	if (mname.startsWith("measure")) {
+	  if (measureNames.indexOf(mname) == -1) {
+	    measureNames.addElement(mname);
+	  }
+	} else {
+	  throw new Exception ("Additional measures in "
+			       + m_ResultProducer.getClass().getName()
+			       +" must obey the naming convention"
+			       +" of starting with \"measure\"");
+	}
+      }
+    }
+
+    if (m_UsePropertyIterator && (m_PropertyArray != null)) {
+      for (int i = 0; i < Array.getLength(m_PropertyArray); i++) {
+	Object current = Array.get(m_PropertyArray, i);
+
+	if (current instanceof AdditionalMeasureProducer) {
+	  Enumeration am = ((AdditionalMeasureProducer)current).
+	    enumerateMeasures();
+	  while (am.hasMoreElements()) {
+	    String mname = (String)am.nextElement();
+	    if (mname.startsWith("measure")) {
+	      if (measureNames.indexOf(mname) == -1) {
+		measureNames.addElement(mname);
+	      }
+	    } else {
+	      throw new Exception ("Additional measures in "
+				   + current.getClass().getName()
+				   +" must obey the naming convention"
+				   +" of starting with \"measure\"");
 	    }
-	  } else {
-	    throw new Exception ("Additional measures in "
-				 + current.getClass().getName()
-				 +" must obey the naming convention"
-				 +" of starting with \"measure\"");
 	  }
 	}
       }

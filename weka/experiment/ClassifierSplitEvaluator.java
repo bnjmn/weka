@@ -37,10 +37,10 @@ import weka.classifiers.*;
  * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
-  OptionHandler {
+  OptionHandler, AdditionalMeasureProducer {
   
   /** The classifier used for evaluation */
   protected Classifier m_Classifier = new ZeroR();
@@ -206,7 +206,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 
   /**
    * Set a list of method names for additional measures to look for
-   * in SplitEvaluators.
+   * in Classifiers. This could contain many measures (of which only a
+   * subset may be produceable by the current Classifier) if an experiment
+   * is the type that iterates over a set of properties.
    * @param additionalMeasures a list of method names
    */
   public void setAdditionalMeasures(String [] additionalMeasures) {
@@ -232,6 +234,42 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       }
     } else {
       m_doesProduce = null;
+    }
+  }
+
+  /**
+   * Returns an enumeration of any additional measure names that might be
+   * in the classifier
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
+    if (m_Classifier instanceof AdditionalMeasureProducer) {
+      Enumeration en = ((AdditionalMeasureProducer)m_Classifier).
+	enumerateMeasures();
+      while (en.hasMoreElements()) {
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
+      }
+    }
+    return newVector.elements();
+  }
+  
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (m_Classifier instanceof AdditionalMeasureProducer) {
+      return ((AdditionalMeasureProducer)m_Classifier).
+	getMeasure(additionalMeasureName);
+    } else {
+      throw new Exception("ClassifierSplitEvaluator: "
+			  +"Can't return value for : "+additionalMeasureName
+			  +". "+m_Classifier.getClass().getName()+" "
+			  +"is not an AdditionalMeasureProducer");
     }
   }
 

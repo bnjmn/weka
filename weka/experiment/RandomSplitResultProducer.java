@@ -24,6 +24,7 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.Utils;
+import weka.core.AdditionalMeasureProducer;
 
 import java.util.Enumeration;
 import java.util.Calendar;
@@ -37,11 +38,11 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class RandomSplitResultProducer 
-  implements ResultProducer, OptionHandler {
+  implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
   
   /** The dataset of interest */
   protected Instances m_Instances;
@@ -103,7 +104,9 @@ public class RandomSplitResultProducer
 
   /**
    * Set a list of method names for additional measures to look for
-   * in SplitEvaluators.
+   * in SplitEvaluators. This could contain many measures (of which only a
+   * subset may be produceable by the current SplitEvaluator) if an experiment
+   * is the type that iterates over a set of properties.
    * @param additionalMeasures an array of measure names, null if none
    */
   public void setAdditionalMeasures(String [] additionalMeasures) {
@@ -116,7 +119,43 @@ public class RandomSplitResultProducer
       m_SplitEvaluator.setAdditionalMeasures(m_AdditionalMeasures);
     }
   }
-
+  
+    /**
+     * Returns an enumeration of any additional measure names that might be
+   * in the SplitEvaluator
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
+    if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
+      Enumeration en = ((AdditionalMeasureProducer)m_SplitEvaluator).
+	enumerateMeasures();
+      while (en.hasMoreElements()) {
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
+      }
+    }
+    return newVector.elements();
+  }
+  
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
+      return ((AdditionalMeasureProducer)m_SplitEvaluator).
+	getMeasure(additionalMeasureName);
+    } else {
+      throw new Exception("RandomSplitResultProducer: "
+			  +"Can't return value for : "+additionalMeasureName
+			  +". "+m_SplitEvaluator.getClass().getName()+" "
+			  +"is not an AdditionalMeasureProducer");
+    }
+  }
+  
   /**
    * Sets the object to send results of each run to.
    *
