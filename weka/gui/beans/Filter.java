@@ -53,14 +53,15 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     TrainingSetProducer, TestSetProducer,
-	     DataSource, DataSourceListener, EventConstraints {
+	     DataSource, DataSourceListener, 
+	     InstanceListener, EventConstraints {
 
   protected BeanVisual m_visual = 
     new BeanVisual("Filter",
@@ -93,17 +94,24 @@ public class Filter extends JPanel
   private Vector m_testListeners = new Vector();
 
   /**
-   * Describe variable <code>m_instanceListeners</code> here.
-   *
+   * Objects listening for instance events
    */
   private Vector m_instanceListeners = new Vector();
 
   /**
-   * Objects listening for instance events
+   * Objects listening for data set events
    */
   private Vector m_dataListeners = new Vector();
 
+  /**
+   * The filter to use.
+   */
   private weka.filters.Filter m_Filter = new AllFilter();
+
+  /**
+   * Instance event object for passing on filtered instance streams
+   */
+  private InstanceEvent m_ie = new InstanceEvent(this);
 
   private transient Logger m_log = null;
 
@@ -136,6 +144,14 @@ public class Filter extends JPanel
       }
     }
     m_visual.setText(filterName);
+
+    if (!(m_Filter instanceof StreamableFilter) &&
+	(m_listenees.containsKey("instance"))) {
+      if (m_log != null) {
+	m_log.logMessage("WARNING : "+m_Filter.getClass().getName()
+			 +" is not an incremental filter");
+      }
+    }
   }
 
   public weka.filters.Filter getFilter() {
@@ -149,7 +165,7 @@ public class Filter extends JPanel
    * @exception IllegalArgumentException if an error occurs
    */
   public void setWrappedAlgorithm(Object algorithm) 
-    {
+    throws IllegalArgumentException {
     
     if (!(algorithm instanceof weka.filters.Filter)) { 
       throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
@@ -177,12 +193,68 @@ public class Filter extends JPanel
   }
 
   /**
-   * Accept an instance
+   * Accept an instance for processing by StreamableFilters only
    *
    * @param e an <code>InstanceEvent</code> value
    */
   public void acceptInstance(InstanceEvent e) {
     // to do!
+    if (m_filterThread != null) {
+      String messg = "Filter is currently batch processing!";
+      if (m_log != null) {
+	m_log.logMessage(messg);
+      } else {
+	System.err.println(messg);
+      }
+      return;
+    }
+    if (!(m_Filter instanceof StreamableFilter)) {
+      if (m_log != null) {
+	m_log.logMessage("ERROR : "+m_Filter.getClass().getName()
+			 +"can't process streamed instances; can't continue");
+      }
+      return;
+    }
+    if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+      try {
+	Instances dataset = e.getInstance().dataset();
+	if (m_Filter instanceof SupervisedFilter) {
+	  // defualt to last column if no class is set
+	  if (dataset.classIndex() < 0) {
+	    dataset.setClassIndex(dataset.numAttributes()-1);
+	  }
+	}
+	// initialize filter
+	m_Filter.setInputFormat(dataset);
+      } catch (Exception ex) {
+	ex.printStackTrace();
+      }
+    }
+   
+    // pass instance through the filter
+    try {
+      if (!m_Filter.input(e.getInstance())) {
+	if (m_log != null) {
+	  m_log.logMessage("ERROR : filter not ready to output instance");
+	}
+	return;
+      }
+      
+      // collect output instance.
+      Instance filteredInstance = m_Filter.output();
+      if (filteredInstance == null) {
+	return;
+      }
+
+      m_ie.setInstance(filteredInstance);
+      m_ie.setStatus(e.getStatus());
+      notifyInstanceListeners(m_ie);
+    } catch (Exception ex) {
+      if (m_log != null) {
+	m_log.logMessage(ex.toString());
+      }
+      ex.printStackTrace();
+    }
   }
 
   private void processTrainingOrDataSourceEvents(final EventObject e) {
@@ -461,12 +533,12 @@ public class Filter extends JPanel
   protected void notifyInstanceListeners(InstanceEvent tse) {
     Vector l;
     synchronized (this) {
-      l = (Vector)m_dataListeners.clone();
+      l = (Vector)m_instanceListeners.clone();
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying instance listeners "
-			   +"(Filter)");
+	//	System.err.println("Notifying instance listeners "
+	//			   +"(Filter)");
 	((InstanceListener)l.elementAt(i)).acceptInstance(tse);
       }
     }
@@ -498,13 +570,29 @@ public class Filter extends JPanel
     // data source listener and vis versa
     if (m_listenees.containsKey("dataSet") &&
 	(eventName.compareTo("trainingSet") == 0 ||
-	 eventName.compareTo("testSet") == 0)) {
+	 eventName.compareTo("testSet") == 0 ||
+	eventName.compareTo("instance") == 0)) {
       return false;
     }
 
     if ((m_listenees.containsKey("trainingSet") ||
 	 m_listenees.containsKey("testSet")) &&
-	eventName.compareTo("dataSet") == 0) {
+	(eventName.compareTo("dataSet") == 0 || 
+	eventName.compareTo("instance") == 0)) {
+      return false;
+    }
+
+    if (m_listenees.containsKey("instance") &&
+	(eventName.compareTo("trainingSet") == 0 ||
+	 eventName.compareTo("testSet") == 0 ||
+	 eventName.compareTo("dataSet") == 0)) {
+      return false;
+    }
+
+    // reject an instance event connection if our filter isn't
+    // streamable
+    if (eventName.compareTo("instance") == 0 &&
+	!(m_Filter instanceof StreamableFilter)) {
       return false;
     }
     return true;
@@ -605,7 +693,7 @@ public class Filter extends JPanel
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) {
+  public void performRequest(String request) throws IllegalArgumentException {
     if (request.compareTo("Stop") == 0) {
       stop();
     } else {
@@ -632,6 +720,11 @@ public class Filter extends JPanel
     Object source = m_listenees.get(eventName);
     if (source instanceof EventConstraints) {
       if (!((EventConstraints)source).eventGeneratable(eventName)) {
+	return false;
+      }
+    }
+    if (eventName.compareTo("instance") == 0) {
+      if (!(m_Filter instanceof StreamableFilter)) {
 	return false;
       }
     }
