@@ -35,7 +35,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class BestFirst
   extends ASSearch
@@ -479,8 +479,6 @@ public class BestFirst
 	}
       }
 
-      // evaluate the initial set
-      best_merit = ASEvaluator.evaluateSubset(best_group);
       best_size = m_starting.length;
       m_totalEvals++;
     }
@@ -495,13 +493,13 @@ public class BestFirst
 	}
       }
 
-      // evaluate the initial set
-      best_merit = ASEvaluator.evaluateSubset(best_group);
       best_size = m_numAttribs - 1;
       m_totalEvals++;
     }
     }
 
+    // evaluate the initial subset
+    best_merit = ASEvaluator.evaluateSubset(best_group);
     // add the initial group to the list and the hash table
     bfList.addToList(best_group, best_merit);
     BitSet tt = (BitSet)best_group.clone();
