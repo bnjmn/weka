@@ -52,10 +52,13 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {
+
+  // To maintain the same version number after adding m_ClassAttribute
+  static final long serialVersionUID = -217733168393629381L;
 
   /** Array for storing the generated base classifiers. */
   protected Classifier [][] m_Classifiers;
@@ -68,7 +71,7 @@ public class LogitBoost extends DistributionClassifier
 
   /** The number of classes */
   protected int m_NumClasses;
-  
+
   /** The number of successfully generated base classifiers. */
   protected int m_NumIterations;
 
@@ -86,6 +89,9 @@ public class LogitBoost extends DistributionClassifier
 
   /** Dummy dataset with a numeric class */
   protected Instances m_NumericClassData;
+
+  /** The actual class attribute (for getting class names) */
+  protected Attribute m_ClassAttribute;
 
   /**
    * Select only instances with weights that contribute to 
@@ -389,6 +395,7 @@ public class LogitBoost extends DistributionClassifier
     }
 
     m_NumClasses = data.numClasses();
+    m_ClassAttribute = data.classAttribute();
 
     // Create a copy of the data with the class transformed into numeric
     boostData = new Instances(data);
@@ -429,7 +436,9 @@ public class LogitBoost extends DistributionClassifier
       
       for (int j = 0; j < m_NumClasses; j++) {
 	if (m_Debug) {
-	  System.err.println("\t...for class " + (j + 1));
+	  System.err.println("\t...for class " + (j + 1)
+			     + " (" + m_ClassAttribute.name() 
+			     + "=" + m_ClassAttribute.value(j) + ")");
 	}
 
 	// Set instance pseudoclass and weights
@@ -536,7 +545,9 @@ public class LogitBoost extends DistributionClassifier
       for (int i = 0; i < m_NumIterations; i++) {
 	text.append("\nIteration "+(i+1));
 	for (int j = 0; j < m_NumClasses; j++) {
-	  text.append("\n\tClass " + (j + 1) + "\n\n"
+	  text.append("\n\tClass " + (j + 1) 
+		      + " (" + m_ClassAttribute.name() 
+		      + "=" + m_ClassAttribute.value(j) + ")\n\n"
 		      + m_Classifiers[j][i].toString() + "\n");
 	}
       }
