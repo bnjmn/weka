@@ -26,7 +26,7 @@ import weka.core.*;
  * Abstract unsupervised attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision 1.0 $
+ * @version $Revision: 1.3 $
  */
 public abstract class UnsupervisedSubsetEvaluator extends SubsetEvaluator 
 {
