@@ -29,12 +29,12 @@ import weka.filters.*;
  * Valid options are:<p>
  *
  * -W classname <br>
- * Specify the full class name of a learner as the basis for 
+ * Specify the full class name of a classifier as the basis for 
  * the multi-class classifier (required).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -74,7 +74,8 @@ public class MultiClassClassifier extends DistributionClassifier
       insts = new Instances(insts);
     } else {
 
-      // Use resampling if base classifer can't handle weights and weights not all one
+      // Use resampling if base classifer can't handle weights
+      // and weights not all one
       double[] weights = new double[insts.numInstances()];
       boolean foundOne = false;
       for (int i = 0; i < weights.length; i++) {
@@ -137,6 +138,7 @@ public class MultiClassClassifier extends DistributionClassifier
 
     StringBuffer text = new StringBuffer();
 
+    text.append("MultiClassClassifier\n\n");
     for (int i = 0; i < m_Classifiers.length; i++) {
       text.append(m_Classifiers[i].toString() + "\n");
     }
@@ -160,7 +162,7 @@ public class MultiClassClassifier extends DistributionClassifier
     if (m_Classifier != null) {
       try {
 	vec.addElement(new Option("",
-				  "", 0, "\nOptions specific to weak learner "
+				  "", 0, "\nOptions specific to classifier "
 				  + m_Classifier.getClass().getName() + ":"));
 	Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
 	while (enum.hasMoreElements()) {
@@ -224,7 +226,7 @@ public class MultiClassClassifier extends DistributionClassifier
   }
 
   /**
-   * Set the classifier for boosting. 
+   * Set the base classifier. 
    *
    * @param newClassifier the Classifier to use.
    */
