@@ -100,7 +100,7 @@ import java.awt.Dimension;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -203,6 +203,9 @@ public class AttributeSelectionPanel extends JPanel {
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier [].class,
 		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.DistributionClassifier.class,
+		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);

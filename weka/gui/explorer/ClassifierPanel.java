@@ -108,7 +108,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -265,6 +265,9 @@ public class ClassifierPanel extends JPanel {
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier [].class,
 		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.DistributionClassifier.class,
+		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);
