@@ -55,7 +55,7 @@ import weka.core.*;
  * If set the itemsets found are also output (default = no). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -129,6 +129,7 @@ public class Apriori extends Associator implements OptionHandler {
     double[] confidences, supports;
     int[] indices;
     FastVector[] sortedRuleSet;
+    int necSupport=0;
 
     if (instances.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
@@ -184,9 +185,12 @@ public class Apriori extends Associator implements OptionHandler {
 	m_allTheRules[2].addElement(sortedRuleSet[2].elementAt(indices[i]));
       }
       m_minSupport -= m_delta;
+      necSupport = (int)(m_minSupport * 
+			 (double)instances.numInstances()+0.5);
       m_cycles++;
     } while ((m_allTheRules[0].size() < m_numRules) && 
-	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)));
+	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)) &&
+	     (necSupport >= 1));
     m_minSupport += m_delta;
   }
 
@@ -480,7 +484,8 @@ public class Apriori extends Associator implements OptionHandler {
     m_instances = instances;
     
     // Find large itemsets
-    necSupport = (int)(m_minSupport * (double)instances.numInstances());
+    necSupport = (int)(m_minSupport * (double)instances.numInstances()+0.5);
+   
     kSets = ItemSet.singletons(instances);
     ItemSet.upDateCounters(kSets, instances);
     kSets = ItemSet.deleteItemSets(kSets, necSupport);
