@@ -36,7 +36,7 @@ import weka.core.Option;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler {
@@ -269,6 +269,7 @@ public class DatabaseResultProducer extends DatabaseResultListener
    * Gets the names of each of the columns produced for a single run.
    *
    * @return an array containing the name of each column
+   * @exception Exception if something goes wrong.
    */
   public String [] getKeyNames() throws Exception {
 
@@ -281,6 +282,7 @@ public class DatabaseResultProducer extends DatabaseResultListener
    *
    * @return an array containing objects of the type of each column. The 
    * objects should be Strings, or Doubles.
+   * @exception Exception if something goes wrong.
    */
   public Object [] getKeyTypes() throws Exception {
 
@@ -296,6 +298,7 @@ public class DatabaseResultProducer extends DatabaseResultListener
    * to each result deviation and average field respectively.
    *
    * @return an array containing the name of each column
+   * @exception Exception if something goes wrong.
    */
   public String [] getResultNames() throws Exception {
 
@@ -307,6 +310,7 @@ public class DatabaseResultProducer extends DatabaseResultListener
    *
    * @return an array containing objects of the type of each column. The 
    * objects should be Strings, or Doubles.
+   * @exception Exception if something goes wrong.
    */
   public Object [] getResultTypes() throws Exception {
 

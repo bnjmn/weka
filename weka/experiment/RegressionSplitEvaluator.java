@@ -48,7 +48,7 @@ import java.lang.reflect.InvocationTargetException;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -181,7 +181,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
   /**
    * Set a list of method names for additional measures to look for
    * in SplitEvaluators.
-   * @param
+   * @param additionalMeasures an array of method names.
    */
   public void setAdditionalMeasures(String [] additionalMeasures) {
     m_AdditionalMeasures = additionalMeasures;
