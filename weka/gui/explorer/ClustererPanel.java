@@ -79,7 +79,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -242,14 +242,20 @@ public class ClustererPanel extends JPanel {
     });
     m_VisualizeBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	if (!m_StorePredictionsBut.isSelected()) {
-	  m_VisualizeBut.setEnabled(false);
-	}
 	visualizeClusterer();
       }
     });
+    m_History.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+	if (m_History.getSelectedObject() != null) {
+	  m_VisualizeBut.setEnabled(true);
+	} else {
+	  m_VisualizeBut.setEnabled(false);
+	}
+      }
+    });
 
-    m_StorePredictionsBut.addActionListener(new ActionListener() {
+    /*    m_StorePredictionsBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  if (m_StorePredictionsBut.isSelected()) {
 	    if (m_CurrentVis != null) {
@@ -257,7 +263,7 @@ public class ClustererPanel extends JPanel {
 	    }
 	  }
 	}
-      });
+	}); */
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -430,9 +436,6 @@ public class ClustererPanel extends JPanel {
    */
   public void setInstances(Instances inst) {
     
-    if (!m_StorePredictionsBut.isSelected()) {
-      m_VisualizeBut.setEnabled(false);
-    }
     setXY_VisualizeIndexes(0,0);
 
     m_Instances = inst;
@@ -652,10 +655,12 @@ public class ClustererPanel extends JPanel {
 		});
 
 	      if (saveVis) {
-		m_History.addVis(name, m_CurrentVis);
-	      }  
+		m_History.addObject(name, m_CurrentVis);
+		m_VisualizeBut.setEnabled(true);
+	      } else {
+		m_VisualizeBut.setEnabled(false);
+	      }
 	    }
-	    m_VisualizeBut.setEnabled(true);
 	  }
 	}
       };
@@ -680,11 +685,12 @@ public class ClustererPanel extends JPanel {
 
   protected void visualizeClusterer() {
     final VisualizePanel sp;
-    if (m_StorePredictionsBut.isSelected()) {  
+    sp = (VisualizePanel)m_History.getSelectedObject();
+    /*    if (m_StorePredictionsBut.isSelected()) {  
       sp = m_History.getSelectedVis();
     } else {
       sp = m_CurrentVis;
-    }
+      } */
   
     if (sp != null) {
       String plotName = sp.getName();
