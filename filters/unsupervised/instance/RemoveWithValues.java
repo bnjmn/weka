@@ -67,7 +67,7 @@ import weka.core.SingleIndex;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -305,7 +305,7 @@ public class RemoveWithValues extends Filter
       m_NewBatch = false;
     }
     if (instance.isMissing(m_AttIndex.getIndex())) {
-      if (getMatchMissingValues()) {
+      if (!getMatchMissingValues()) {
         push((Instance)instance.copy());
         return true;
       } else {
