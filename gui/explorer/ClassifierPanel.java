@@ -104,7 +104,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1239,9 +1239,10 @@ public class ClassifierPanel extends JPanel {
 		tempd.setShapeSize(plotSize);
 		tempd.setShapeType(plotShape);
 		tempd.setPlotName(name+" ("+inst.relationName()+")");
+		tempd.addInstanceNumberAttribute();
 		
 		m_CurrentVis.addPlot(tempd);
-		m_CurrentVis.setColourIndex(predInstances.classIndex());
+		m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
 		
 		m_CurrentVis.setXIndex(m_visXIndex); 
 		m_CurrentVis.setYIndex(m_visYIndex);
@@ -1385,6 +1386,7 @@ public class ClassifierPanel extends JPanel {
 		vmc.setLog(m_Log);
 		PlotData2D tempd = new PlotData2D(result);
 		tempd.setPlotName(result.relationName());
+		tempd.addInstanceNumberAttribute();
 		vmc.addPlot(tempd);
 		visualizeClassifierErrors(vmc);
 	      } catch (Exception ex) {
@@ -1410,6 +1412,7 @@ public class ClassifierPanel extends JPanel {
 			      classAtt.value(classValue)+")");
 		  PlotData2D tempd = new PlotData2D(result);
 		  tempd.setPlotName(result.relationName());
+		  tempd.addInstanceNumberAttribute();
 		  vmc.addPlot(tempd);
 		  visualizeClassifierErrors(vmc);
 		} catch (Exception ex) {
