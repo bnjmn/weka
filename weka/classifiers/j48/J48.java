@@ -54,7 +54,7 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, WeightedInstancesHandler {
@@ -228,7 +228,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
     // Pruning options
     m_unpruned = Utils.getFlag('U', options);
     m_subtreeRaising = !Utils.getFlag('S', options);
-    if ((m_unpruned) || (!m_subtreeRaising)) {
+    if ((m_unpruned) && (!m_subtreeRaising)) {
       throw new Exception("Subtree raising doesn't need to be unset for unpruned tree!");
     }
     m_reducedErrorPruning = Utils.getFlag('R', options);
