@@ -46,6 +46,7 @@ all :	$(CLASSFILES)
 	(cd explorer; make all JAVAC=$(JAVAC))
 	(cd streams; make all JAVAC=$(JAVAC))
 	(cd visualize; make all JAVAC=$(JAVAC))
+	(cd boundaryvisualizer; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make all JAVAC=$(JAVAC))
 	(cd beans; make all JAVAC=$(JAVAC))
 
@@ -55,6 +56,7 @@ debug : clean
 	(cd explorer; make debug JAVAC=$(JAVAC))
 	(cd streams; make debug JAVAC=$(JAVAC))
 	(cd visualize; make debug JAVAC=$(JAVAC))	
+	(cd boundaryvisualizer; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make debug JAVAC=$(JAVAC))
 	(cd beans; make debug JAVAC=$(JAVAC))
 
@@ -64,6 +66,7 @@ optimized : clean
 	(cd explorer; make optimized JAVAC=$(JAVAC))
 	(cd streams; make optimized JAVAC=$(JAVAC))
 	(cd visualize; make optimized JAVAC=$(JAVAC))
+	(cd boundaryvisualizer; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make optimized JAVAC=$(JAVAC))
 	(cd beans; make optimized JAVAC=$(JAVAC))
 
@@ -82,6 +85,7 @@ classjar :  all
 	$(PACKAGEDIR)/experiment/*.class \
 	$(PACKAGEDIR)/explorer/*.class \
 	$(PACKAGEDIR)/visualize/*.class \
+	$(PACKAGEDIR)/boundaryvisualizer/*.class \
 	$(PACKAGEDIR)/treevisualizer/*.class \
 	$(PACKAGEDIR)/streams/*.class; \
 	rm -f $(PACKAGE).jar; \
@@ -95,6 +99,7 @@ clean :
 	(cd explorer; make clean)
 	(cd experiment; make clean)
 	(cd visualize; make clean)
+	(cd boundaryvisualizer; make clean)
 	(cd streams; make clean)
 	(cd treevisualizer; make clean)
 	(cd beans; make clean)
