@@ -34,7 +34,7 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.core.Attribute;
-
+import weka.core.Drawable;
 
 /**
  * Class for running an arbitrary classifier on data that has been passed
@@ -53,10 +53,10 @@ import weka.core.Attribute;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class FilteredClassifier extends Classifier
-  implements OptionHandler {
+  implements OptionHandler, Drawable {
 
   /** The classifier */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -88,6 +88,32 @@ public class FilteredClassifier extends Classifier
 
     m_Classifier = classifier;
     m_Filter = filter;
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   */   
+  public int graphType() {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graphType();
+    else 
+      return Drawable.NOT_DRAWABLE;
+  }
+
+  /**
+   * Returns graph describing the classifier (if possible).
+   *
+   * @return the graph of the classifier in dotty format
+   * @exception Exception if the classifier cannot be graphed
+   */
+  public String graph() throws Exception {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graph();
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot be graphed");
   }
 
   /**

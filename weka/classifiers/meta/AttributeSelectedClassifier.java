@@ -54,10 +54,10 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class AttributeSelectedClassifier extends Classifier 
-implements OptionHandler, AdditionalMeasureProducer {
+  implements OptionHandler, Drawable, AdditionalMeasureProducer {
 
   /** The classifier */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -417,6 +417,32 @@ implements OptionHandler, AdditionalMeasureProducer {
     }
 
     return m_Classifier.distributionForInstance(newInstance);
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   */   
+  public int graphType() {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graphType();
+    else 
+      return Drawable.NOT_DRAWABLE;
+  }
+
+  /**
+   * Returns graph describing the classifier (if possible).
+   *
+   * @return the graph of the classifier in dotty format
+   * @exception Exception if the classifier cannot be graphed
+   */
+  public String graph() throws Exception {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graph();
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot be graphed");
   }
 
   /**
