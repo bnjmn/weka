@@ -7,6 +7,7 @@ SOURCES = AdaBoostM1.java AdditiveRegression.java \
 	DistributionMetaClassifier.java FilteredClassifier.java \
 	LogitBoost.java MetaCost.java MultiClassClassifier.java \
 	MultiScheme.java OrdinalClassClassifier.java \
+	RacedIncrementalLogitBoost.java \
 	RegressionByDiscretization.java Stacking.java \
 	ThresholdSelector.java
 
