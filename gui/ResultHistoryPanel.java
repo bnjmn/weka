@@ -53,7 +53,7 @@ import java.awt.Point;
  * single-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -163,7 +163,7 @@ public class ResultHistoryPanel extends JPanel {
   /**
    * Gets the object associated with the currently
    * selected item in the list.
-   * @return the object object or null if there is no
+   * @return the object or null if there is no
    * object corresponding to the current selection in
    * the list
    */
@@ -176,6 +176,22 @@ public class ResultHistoryPanel extends JPanel {
     }
     
     return v;
+  }
+
+  /**
+   * Gets the buffer associated with the currently
+   * selected item in the list.
+   * @return the buffer or null if there are no items in
+   * the list
+   */
+  public StringBuffer getSelectedBuffer() {
+    StringBuffer b = null;
+    int index = m_List.getSelectedIndex();
+    if (index != -1) {
+      String name = (String)(m_Model.elementAt(index));
+      b = (StringBuffer)(m_Results.get(name));
+    }
+    return b;
   }
 
   /**
