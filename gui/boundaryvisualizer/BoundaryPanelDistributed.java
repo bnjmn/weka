@@ -58,7 +58,7 @@ import weka.experiment.TaskStatusInfo;
  * processed row by row using the available remote computers.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see BoundaryPanel
  */
@@ -103,7 +103,9 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
   private weka.core.Queue m_subExpQueue = new weka.core.Queue();
 
   // number of seconds between polling server
-  private int m_minTaskPollTime = 2000;
+  private int m_minTaskPollTime = 1000;
+
+  private int [] m_hostPollingTime;
 
   /**
    * Creates a new <code>BoundaryPanelDistributed</code> instance.
@@ -152,8 +154,10 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
     }
 
     // prime the hosts queue
+    m_hostPollingTime = new int [m_remoteHosts.size()];
     for (int i=0;i<m_remoteHosts.size();i++) {
       m_remoteHostsQueue.push(new Integer(i));
+      m_hostPollingTime[i] = m_minTaskPollTime;
     }
 
     // set up sub taskss (just holds the row numbers to be processed
@@ -218,6 +222,7 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
     int totalHosts = m_remoteHostsQueue.size();
     for (int i = 0; i < totalHosts; i++) {
       availableHost(-1);
+      Thread.sleep(70);
     }
   }
 
@@ -249,8 +254,14 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
       return;
     }
 
+    /*    System.err.println("--------------");
+    System.err.println("exp q :"+m_subExpQueue.size());
+    System.err.println("host list size "+m_remoteHosts.size());
+    System.err.println("actual host list size "+m_remoteHostsQueue.size());
+    System.err.println("removed hosts "+m_removedHosts); */
     if (m_subExpQueue.size() == 0 && 
-	(m_remoteHosts.size() == m_remoteHostsQueue.size())) {
+	(m_remoteHosts.size() == 
+	 (m_remoteHostsQueue.size() + m_removedHosts))) {
       if (m_plotTrainingData) {
 	plotTrainingData();
       }
@@ -392,7 +403,8 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
 	    long startTime = System.currentTimeMillis();
 	    while (!finished) {
 	      try {
-		Thread.sleep(m_minTaskPollTime);
+		Thread.sleep(Math.max(m_minTaskPollTime, 
+				      m_hostPollingTime[ah]));
 		
 		TaskStatusInfo cs = (TaskStatusInfo)comp.
 		  checkStatus(subTaskId);
@@ -404,15 +416,12 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
 		  if (runTime < 1000) {
 		    runTime = 1000;
 		  }
-		  m_minTaskPollTime = (int)runTime;
-		  notifyListeners(false, true, false,  cs.getStatusMessage());
-		  m_remoteHostsStatus[ah] = AVAILABLE;
-		  incrementFinished();
-		  availableHost(ah);
-		  finished = true;
+		  m_hostPollingTime[ah] = (int)runTime;
+
 		  // Extract the row from the result
 		  RemoteResult rr =  (RemoteResult)cs.getTaskResult();
 		  double [][] probs = rr.getProbabilities();
+		  
 		  for (int i = 0; i < m_panelWidth; i++) {
 		    m_probabilityCache[wtask][i] = probs[i];
 		    if (i < m_panelWidth-1) {
@@ -421,6 +430,11 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
 		      plotPoint(i, wtask, probs[i], true);
 		    }
 		  }
+		  notifyListeners(false, true, false,  cs.getStatusMessage());
+		  m_remoteHostsStatus[ah] = AVAILABLE;
+		  incrementFinished();
+		  availableHost(ah);
+		  finished = true;
 		} else if (cs.getExecutionStatus() == 
 			   TaskStatusInfo.FAILED) {
 		  // a non connection related error---possibly host doesn't have
@@ -449,27 +463,62 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
 		    RemoteResult rr = (RemoteResult)cs.getTaskResult();
 		    if (rr != null) {
 		      int percentComplete = rr.getPercentCompleted();
-		      if (percentComplete < 25) {
-			m_minTaskPollTime *= 2;
+		      String timeRemaining = "";
+		      if (percentComplete > 0 && percentComplete < 100) {
+			double timeSoFar = (double)System.currentTimeMillis() -
+			  (double)startTime;
+			double timeToGo = 
+			  ((100.0 - percentComplete) 
+			   / (double)percentComplete) * timeSoFar;
+			String units = "seconds";
+			timeToGo /= 1000.0;
+			if (timeToGo > 60) {
+			  units = "minutes";
+			  timeToGo /= 60.0;
+			}
+			if (timeToGo > 60) {
+			  units = "hours";
+			  timeToGo /= 60.0;
+			}
+			timeRemaining = " (approx. time remaining "
+			  +Utils.doubleToString(timeToGo, 1)+" "+units+")";
+		      }
+		      if (percentComplete < 25 
+			  /*&& minTaskPollTime < 30000*/) {		
+			if (percentComplete > 0) {
+			  m_hostPollingTime[ah] = 
+			    (int)((25.0 / (double)percentComplete) * 
+				  m_hostPollingTime[ah]);
+			} else {
+			  m_hostPollingTime[ah] *= 2;
+			}
+			if (m_hostPollingTime[ah] > 60000) {
+			  m_hostPollingTime[ah] = 60000;
+			}
 		      }
 		      notifyListeners(false, true, false,
 				      "Row "+wtask+" "+percentComplete
-				      +"% complete.");
+				      +"% complete"+timeRemaining+".");
 		    } else {
 		      notifyListeners(false, true, false,
-				      "Row "+wtask+" queued.");
-		      if (m_minTaskPollTime < 30000) {
-			m_minTaskPollTime *= 2;
+				      "Row "+wtask+" queued on "
+				      +((String)m_remoteHosts.
+					elementAt(ah)));
+		      if (m_hostPollingTime[ah] < 60000) {
+			m_hostPollingTime[ah] *= 2;
 		      }
 		    }
 
 		    is = cs;
 		  }
 		}
-	      } catch (InterruptedException ie) {}
+	      } catch (InterruptedException ie) {
+		ie.printStackTrace();
+	      }
 	    }
 	  } catch (Exception ce) {
 	    m_remoteHostsStatus[ah] = CONNECTION_FAILED;
+	    m_removedHosts++;
 	    System.err.println(ce);
 	    ce.printStackTrace();
 	    notifyListeners(false,true,false,"Connection to "
