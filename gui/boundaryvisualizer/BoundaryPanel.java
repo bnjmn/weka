@@ -26,6 +26,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JPanel;
 import java.util.Vector;
+import java.util.Random;
 
 import weka.core.*;
 import weka.classifiers.Classifier;
@@ -118,6 +119,9 @@ public class BoundaryPanel extends JPanel {
   // Stop the plotting thread
   private boolean m_stopPlotting = false;
 
+  // A random number generator 
+  private Random m_random = null;
+
   /**
    * Creates a new <code>BoundaryPanel</code> instance.
    *
@@ -138,6 +142,7 @@ public class BoundaryPanel extends JPanel {
     for (int i = 0; i < 3; i++) {
       m_rgbClassValues[i] = -1;
     }
+    m_random = new Random(1);
   }
 
   /**
@@ -199,10 +204,11 @@ public class BoundaryPanel extends JPanel {
    * @param pix the horizontal pixel number
    * @return a value in attribute space
    */
-  private double getMidX(int pix) {
-    double midX = m_minX + (pix * m_pixWidth);
-    midX += (m_pixWidth / 2.0);
-    return midX;
+  private double getRandomX(int pix) {
+
+    double minPix =  m_minX + (pix * m_pixWidth);
+
+    return minPix + m_random.nextDouble() * m_pixWidth;
   }
 
   /**
@@ -212,10 +218,11 @@ public class BoundaryPanel extends JPanel {
    * @param pix the vertical pixel number
    * @return a value in attribute space
    */
-  private double getMidY(int pix) {
-    double midY = m_minY + (pix * m_pixHeight);
-    midY += (m_pixHeight / 2.0);
-    return midY;
+  private double getRandomY(int pix) {
+
+    double minPix = m_minY + (pix * m_pixHeight);
+
+    return minPix +  m_random.nextDouble() * m_pixHeight;
   }
 
   /**
@@ -283,8 +290,6 @@ public class BoundaryPanel extends JPanel {
 	      Add addF = new Add();
 	      addF.setInputFormat(trainNoClass);
 	      addF.setAttributeIndex(m_classIndex);
-	      double pixelMidX = 0;
-	      double pixelMidY = 0;
 	      double [] dist;
 	      double [] weightingAttsValues = 
 		new double [attsToWeightOn.length];
@@ -292,19 +297,19 @@ public class BoundaryPanel extends JPanel {
 	      Instance predInst = new Instance(1.0, vals);
 	      predInst.setDataset(m_trainingData);
 	      abortPlot: for (int i = 0; i < m_panelHeight; i++) {
-		pixelMidY = getMidY(m_panelHeight-i-1);
 		for (int j = 0; j < m_panelWidth; j++) {
 		  if (m_stopPlotting) {
 		    break abortPlot;
 		  }
-		  pixelMidX = getMidX(j);
 		  double sumOfWeights = 0;
 		  double [] sumOfProbs = 
 		    new double [m_trainingData.classAttribute().numValues()];
 		  for (int z = 0; z < samplesPerPixel; z++) {
 
-		    weightingAttsValues[m_xAttribute] = pixelMidX;
-		    weightingAttsValues[m_yAttribute] = pixelMidY;
+		    weightingAttsValues[m_xAttribute] = 
+		      getRandomX(j);
+		    weightingAttsValues[m_yAttribute] = 
+		      getRandomY(m_panelHeight-i-1);
 
 		    m_dataGenerator.setWeightingValues(weightingAttsValues);
 
