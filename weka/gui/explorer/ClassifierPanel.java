@@ -24,6 +24,7 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Attribute;
 import weka.core.Utils;
+import weka.core.Drawable;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.CostMatrix;
@@ -39,6 +40,8 @@ import weka.gui.CostMatrixEditor;
 import weka.gui.PropertyDialog;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
+
+import weka.gui.explorer.treevisualizer.*;
 
 import java.util.Random;
 import java.util.Date;
@@ -56,6 +59,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Window;
+import java.awt.Dimension;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
@@ -102,7 +107,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -213,6 +218,10 @@ public class ClassifierPanel extends JPanel {
   /** Click to save the output associated with the currently selected result */
   protected JButton m_SaveOutBut = new JButton("Save Output");
 
+  /** Stop the class combo from taking up to much space */
+  private Dimension COMBO_SIZE = new Dimension(150, m_SaveOutBut
+					       .getPreferredSize().height);
+
   /** The cost matrix editor for evaluation costs */
   protected CostMatrixEditor m_CostMatrixEditor = new CostMatrixEditor();
 
@@ -318,6 +327,10 @@ public class ClassifierPanel extends JPanel {
     m_OutputPerClassBut.setSelected(true);
     m_OutputConfusionBut.setSelected(true);
     m_ClassCombo.setEnabled(false);
+    m_ClassCombo.setPreferredSize(COMBO_SIZE);
+    m_ClassCombo.setMaximumSize(COMBO_SIZE);
+    m_ClassCombo.setMinimumSize(COMBO_SIZE);
+
     m_CVBut.setSelected(true);
     updateRadioLinks();
     ButtonGroup bg = new ButtonGroup();
@@ -380,7 +393,7 @@ public class ClassifierPanel extends JPanel {
     });
     m_VisualizeBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  visualizeClassifier();
+	  visualize();
 	}
       });
     m_SaveOutBut.addActionListener(new ActionListener() {
@@ -1087,7 +1100,19 @@ public class ClassifierPanel extends JPanel {
 		    m_CurrentVis.setPredictionsNumeric(false);
 		  }
 	      if (saveVis) {
-		m_History.addObject(name, m_CurrentVis);
+		if (classifier instanceof Drawable) {
+		  String grph = null;
+		  Object [] vv = new Object [2];
+		  try {
+		    grph = ((Drawable)classifier).graph();
+		  } catch (Exception ex) {
+		  }
+		  vv[0] = m_CurrentVis;
+		  vv[1] = grph;
+		  m_History.addObject(name, vv);
+		} else {
+		  m_History.addObject(name, m_CurrentVis);
+		}
 		m_VisualizeBut.setEnabled(true);
 	      } else {
 		m_VisualizeBut.setEnabled(false);
@@ -1111,13 +1136,98 @@ public class ClassifierPanel extends JPanel {
       m_RunThread.start();
     }
   }
-  
+
   /**
-   * Pops up a VisualizePanel for the most recently run classifier.
+   * Handles visualizing classifier errors and trees (when possible)
    */
-  protected void visualizeClassifier() {
+  public void visualize() {
     final VisualizePanel sp;
-    sp = (VisualizePanel)m_History.getSelectedObject();
+    final Object o;
+    final String grph;
+
+    o = m_History.getSelectedObject();
+    if (o instanceof VisualizePanel) {
+      sp = (VisualizePanel)o;
+      grph = null;
+    } else {
+      sp = (VisualizePanel)(((Object [])o)[0]);
+      grph = (String)(((Object [])o)[1]);
+    }
+    
+    if (sp != null && grph != null) {
+      final javax.swing.JFrame jf = 
+	 new javax.swing.JFrame("Visualize options");
+      JPanel pp = new JPanel();
+      JButton err = new JButton("Visualize errors");
+      err.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    visualizeClassifierErrors(sp);
+	    jf.dispose();
+	  }
+	});
+      JButton tree = new JButton("Visualize tree");
+      tree.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    visualizeTree(grph,sp.getName());
+	    jf.dispose();
+	  }
+	});
+      pp.setLayout(new BorderLayout());
+      JPanel buts = new JPanel();
+      buts.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      buts.setLayout(new GridLayout(1, 2, 5, 5));
+      buts.add(err);
+      buts.add(tree);
+      pp.add(buts, BorderLayout.CENTER);
+     
+      jf.setSize(350,80);
+      jf.getContentPane().setLayout(new BorderLayout());
+      
+      jf.getContentPane().add(pp, BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    jf.dispose();
+	  }
+	});
+      
+      jf.setVisible(true);
+    } else if (sp != null) {
+      visualizeClassifierErrors(sp);
+    }
+  }
+
+  /**
+   * Pops up a TreeVisualizer for the classifier from the currently
+   * selected item in the results list
+   * @param dottyString the description of the tree in dotty format
+   * @param treeName the title to assign to the display
+   */
+  protected void visualizeTree(String dottyString, String treeName) {
+    final javax.swing.JFrame jf = 
+      new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+treeName);
+    jf.setSize(500,400);
+    jf.getContentPane().setLayout(new BorderLayout());
+    TreeVisualizer tv = new TreeVisualizer(null,
+					   dottyString,
+					   new PlaceNode2());
+    jf.getContentPane().add(tv, BorderLayout.CENTER);
+    jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	public void windowClosing(java.awt.event.WindowEvent e) {
+	  jf.dispose();
+	}
+      });
+    
+    jf.setVisible(true);
+  }
+
+  /**
+   * Pops up a VisualizePanel for visualizing the data and errors for 
+   * the classifier from the currently selected item in the results list
+   * @param sp the VisualizePanel to pop up.
+   */
+  protected void visualizeClassifierErrors(VisualizePanel sp) {
+   
+    //    sp = (VisualizePanel)m_History.getSelectedObject();
     /*    if (m_StorePredictionsBut.isSelected()) {
       sp = m_History.getSelectedVis();
     } else {
