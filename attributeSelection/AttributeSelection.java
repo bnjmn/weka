@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.32 $
+ * @version  $Revision: 1.33 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -693,8 +693,9 @@ public class AttributeSelection implements Serializable {
        
       // set up the selected attributes array - usable by a filter or
       // whatever
-      if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
+      if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
+	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) || 
+	  m_trainInstances.classIndex() >= 0) 
 	{
 	  // one more for the class
 	  m_selectedAttributeSet = new int[m_numToSelect + 1];
@@ -724,8 +725,9 @@ public class AttributeSelection implements Serializable {
     } else {
       // set up the selected attributes array - usable by a filter or
       // whatever
-      if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
+      if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
+	   && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) || 
+	  m_trainInstances.classIndex() >= 0) 
 	// one more for the class
 	{
 	  m_selectedAttributeSet = new int[attributeSet.length + 1];
