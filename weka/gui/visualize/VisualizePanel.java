@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -2059,11 +2059,13 @@ public class VisualizePanel extends JPanel {
    * @param inst a set of Instances
    */
   public void setInstances(Instances inst) {
-    newColorAttribute(inst.numAttributes()-1, inst);
+    if (inst.numAttributes() > 0 && inst.numInstances() > 0) {
+      newColorAttribute(inst.numAttributes()-1, inst);
+    }
 
     PlotData2D temp = new PlotData2D(inst);
     temp.setPlotName(inst.relationName());
-   
+    
     try {
       setMasterPlot(temp);
     } catch (Exception ex) {
