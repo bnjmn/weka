@@ -26,7 +26,7 @@ import java.util.*;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PruneableClassifierTree extends ClassifierTree{
 
@@ -35,6 +35,9 @@ public class PruneableClassifierTree extends ClassifierTree{
 
   /** How many subsets of equal size? One used for pruning, the rest for training. */
   private int numSets = 3;
+
+  /** Cleanup after the tree has been built. */
+  boolean m_cleanup = true;
 
   /**
    * Constructor for pruneable tree structure. Stores reference
@@ -46,13 +49,14 @@ public class PruneableClassifierTree extends ClassifierTree{
    * @exception Exception if something goes wrong
    */
   public PruneableClassifierTree(ModelSelection toSelectLocModel,
-				 boolean pruneTree, int num)
+				 boolean pruneTree, int num, boolean cleanup)
        throws Exception{
 
     super(toSelectLocModel);
 
     pruneTheTree = pruneTree;
     numSets = num;
+    m_cleanup = cleanup;
   }
 
   /**
@@ -71,9 +75,12 @@ public class PruneableClassifierTree extends ClassifierTree{
    data.stratify(numSets);
    buildTree(data.trainCV(numSets, numSets - 1),
 	     data.testCV(numSets, numSets - 1), false);
-   if (pruneTheTree)
+   if (pruneTheTree) {
      prune();
-   cleanup(new Instances(data, 0));
+   }
+   if (m_cleanup) {
+     cleanup(new Instances(data, 0));
+   }
   }
 
   /**
@@ -111,7 +118,7 @@ public class PruneableClassifierTree extends ClassifierTree{
        throws Exception{
 
     PruneableClassifierTree newTree = 
-      new PruneableClassifierTree(m_toSelectModel,pruneTheTree,numSets);
+      new PruneableClassifierTree(m_toSelectModel, pruneTheTree, numSets, m_cleanup);
     newTree.buildTree(train, test, false);
     return newTree;
   }
