@@ -26,22 +26,22 @@ package weka.classifiers.bayes;
  * Interface for allowing to score a classifier
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface Scoreable {
 
   /**
    * score types
    */
-  public static final int BAYES = 0;
-  public static final int MDL = 1;
-  public static final int ENTROPY = 2;
-  public static final int AIC = 3;
+  int BAYES = 0;
+  int MDL = 1;
+  int ENTROPY = 2;
+  int AIC = 3;
 
   /**
    * Returns log-score
    */
-  public double logScore(int nType);
+  double logScore(int nType);
 }    // interface Scoreable
 
 
