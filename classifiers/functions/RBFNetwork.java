@@ -37,11 +37,13 @@ import weka.clusterers.MakeDensityBasedClusterer;
 
 /**
  * Class that implements a normalized Gaussian radial basis function
- * network.  It uses the K-Means clustering algorithm to provide the
+ * network.  It uses the k-means clustering algorithm to provide the
  * basis functions and learns either a logistic regression (discrete
  * class problems) or linear regression (numeric class problems) on
- * top of that. Standardizes all numeric attributes to zero mean
- * and unit variance. <p>
+ * top of that. Symmetric multivariate Gaussians are fit to the data from
+ * each cluster. If the class is nominal it uses the given number of
+ * clusters per class. It standardizes all numeric attributes to zero
+ * mean and unit variance.
  *
  * Valid options are:<p>
  *
@@ -65,7 +67,7 @@ import weka.clusterers.MakeDensityBasedClusterer;
   *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
@@ -102,13 +104,16 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Class that implements a radial basis function network. "
-      + "It uses the K-Means clustering algorithm to provide the basis "
+    return "Class that implements a normalized Gaussian radial basis" 
+      + "basis function network. "
+      + "It uses the k-means clustering algorithm to provide the basis "
       + "functions and learns either a logistic regression (discrete "
       + "class problems) or linear regression (numeric class problems) "
-      + "on top of that. Standardizes all numeric attributes to zero "
-      + "mean and unit variance. If the class is nominal it uses "
-      + "the given number of clusters per class.";
+      + "on top of that. Symmetric multivariate Gaussians are fit to "
+      + "the data from each cluster. If the class is "
+      + "nominal it uses the given number of clusters per class."
+      + "It standardizes all numeric "
+      + "attributes to zero mean and unit variance." ;
   }
 
   /**
