@@ -35,7 +35,7 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
 
@@ -181,13 +181,16 @@ public class OneR extends Classifier implements OptionHandler {
     // for each attribute ...
     Enumeration enum = instances.enumerateAttributes();
     while (enum.hasMoreElements()) {
-      OneRRule r = newRule((Attribute) enum.nextElement(), data);
+      try {
+	OneRRule r = newRule((Attribute) enum.nextElement(), data);
 
-      // if this attribute is the best so far, replace the rule
-      if (noRule || r.m_correct > m_rule.m_correct) {
-	m_rule = r;
+	// if this attribute is the best so far, replace the rule
+	if (noRule || r.m_correct > m_rule.m_correct) {
+	  m_rule = r;
+	}
+	noRule = false;
+      } catch (Exception ex) {
       }
-      noRule = false;
     }
   }
 
@@ -266,7 +269,6 @@ public class OneR extends Classifier implements OptionHandler {
   public OneRRule newNumericRule(Attribute attr, Instances data,
                              int[] missingValueCounts) throws Exception {
 
-    data.sort(attr);
 
     // ... can't be more than numInstances buckets
     int [] classifications = new int[data.numInstances()];
@@ -278,6 +280,7 @@ public class OneR extends Classifier implements OptionHandler {
     int lastInstance = data.numInstances();
 
     // missing values get sorted to the end of the instances
+    data.sort(attr);
     while (lastInstance > 0 && 
            data.instance(lastInstance-1).isMissing(attr)) {
       lastInstance--;
