@@ -44,7 +44,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SwapValues extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -256,7 +256,7 @@ public class SwapValues extends Filter
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String firstValueTipText() {
+  public String firstValueIndexTipText() {
 
     return "The index of the first value."
       + "(\"first\" and \"last\" are valid values)";
@@ -286,7 +286,7 @@ public class SwapValues extends Filter
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String secondValueTipText() {
+  public String secondValueIndexTipText() {
 
     return "The index of the second value."
       + "(\"first\" and \"last\" are valid values)";
