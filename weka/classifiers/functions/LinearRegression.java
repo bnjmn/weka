@@ -53,7 +53,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -130,6 +130,17 @@ public class LinearRegression extends Classifier implements OptionHandler,
   public void turnChecksOn() {
 
     m_checksTurnedOff = false;
+  }
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class for using linear regression for prediction. Uses the Akaike "
+      +"criterion for model selection, and is able to deal with weighted "
+      +"instances.";
   }
 
   /**
@@ -373,6 +384,15 @@ public class LinearRegression extends Classifier implements OptionHandler,
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String ridgeTipText() {
+    return "The value of the Ridge parameter.";
+  }
+
+  /**
    * Get the value of Ridge.
    *
    * @return Value of Ridge.
@@ -392,6 +412,15 @@ public class LinearRegression extends Classifier implements OptionHandler,
     m_Ridge = newRidge;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String eliminateColinearAttributesTipText() {
+    return "Eliminate colinear attributes.";
+  }
+
   /**
    * Get the value of EliminateColinearAttributes.
    *
@@ -423,6 +452,21 @@ public class LinearRegression extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeSelectionMethodTipText() {
+    return "Set the method used to select attributes for use in the linear "
+      +"regression. Available methods are: no attribute selection, attribute "
+      +"selection using M5's method (step through the attributes removing the one "
+      +"with the smallest standardised coefficient until no improvement is observed "
+      +"in the estimate of the error given by the Akaike "
+      +"information criterion), and a greedy selection using the Akaike information "
+      +"metric.";
+  }
+
+  /**
    * Sets the method used to select attributes for use in the
    * linear regression. 
    *
@@ -444,6 +488,15 @@ public class LinearRegression extends Classifier implements OptionHandler,
   public SelectedTag getAttributeSelectionMethod() {
     
     return new SelectedTag(m_AttributeSelection, TAGS_SELECTION);
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Outputs debug information to the console.";
   }
 
   /**

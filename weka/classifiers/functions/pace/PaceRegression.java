@@ -78,7 +78,7 @@ import weka.core.*;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 public class PaceRegression extends Classifier implements OptionHandler,
 					       WeightedInstancesHandler {
 
@@ -122,6 +122,32 @@ public class PaceRegression extends Classifier implements OptionHandler,
   private int paceEstimator = ebEstimator;  
   private double olscThreshold = 2;  // AIC
   
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class for building pace regression linear models and using them for "
+      +"prediction. \n\n"
+      +"Under regularity conditions, pace regression is provably optimal when "
+      +"the number of coefficients tends to infinity. It consists of a group of "
+      +"estimators that are either overall optimal or optimal under certain "
+      +"conditions.\n\n"
+      +"The current work of the pace regression theory, and therefore also this "
+      +"implementation, do not handle: \n\n"
+      +"- missing values \n"
+      +"- non-binary nominal attributes \n"
+      +"- the case that n - k is small where n is the number of instances and k is "  
+      +"the number of coefficients (the threshold used in this implmentation is 20)\n\n"
+      +"For more information see:\n\n"
+      +"Wang, Y. (2000). A new approach to fitting linear models in high "
+      +"dimensional spaces. PhD Thesis. Department of Computer Science, "
+      +"University of Waikato, New Zealand. \n\n"
+      +"Wang, Y. and Witten, I. H. (2002). Modeling for optimal probability "
+      +"prediction. Proceedings of ICML'2002. Sydney.";
+  }
+
   /**
    * Builds a pace regression model for the given data.
    *
@@ -531,6 +557,15 @@ public class PaceRegression extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Output debug information to the console.";
+  }
+
+  /**
    * Controls whether debugging output will be printed
    *
    * @param debug true if debugging output should be printed
@@ -551,6 +586,26 @@ public class PaceRegression extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String estimatorTipText() {
+    return "The estimator to use.\n\n"
+      +"eb -- Empirical Bayes estimator for noraml mixture (default)\n"
+      +"nested -- Optimal nested model selector for normal mixture\n"
+      +"subset -- Optimal subset selector for normal mixture\n"
+      +"pace2 -- PACE2 for Chi-square mixture\n"
+      +"pace4 -- PACE4 for Chi-square mixture\n"
+      +"pace6 -- PACE6 for Chi-square mixture\n"
+      +"ols -- Ordinary least squares estimator\n"
+      +"aic -- AIC estimator\n"
+      +"bic -- BIC estimator\n"
+      +"ric -- RIC estimator\n"
+      +"olsc -- Ordinary least squares subset selector with a threshold";
+  }
+  
+  /**
    * Gets the estimator
    *
    * @return the estimator
@@ -570,6 +625,15 @@ public class PaceRegression extends Classifier implements OptionHandler,
     if (estimator.getTags() == TAGS_ESTIMATOR) {
       paceEstimator = estimator.getSelectedTag().getID();
     }
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String thresholdTipText() {
+    return "Threshold for the olsc estimator.";
   }
 
   /**

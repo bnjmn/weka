@@ -58,7 +58,7 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class NaiveBayes extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -97,6 +97,27 @@ public class NaiveBayes extends Classifier
    * The discretization filter.
    */
   protected weka.filters.supervised.attribute.Discretize m_Disc = null;
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class for a Naive Bayes classifier using estimator classes. Numeric"
+      +" estimator precision values are chosen based on analysis of the "
+      +" training data. For this reason, the classifier is not an"
+      +" UpdateableClassifier (which in typical usage are initialized with zero"
+      +" training instances) -- if you need the UpdateableClassifier functionality,"
+      +" use the NaiveBayesUpdateable classifier. The NaiveBayesUpdateable"
+      +" classifier will  use a default precision of 0.1 for numeric attributes"
+      +" when buildClassifier is called with zero training instances.\n\n"
+      +"For more information on Naive Bayes classifiers, see\n\n"
+      +"George H. John and Pat Langley (1995). Estimating"
+      + " Continuous Distributions in Bayesian Classifiers. Proceedings"
+      +" of the Eleventh Conference on Uncertainty in Artificial"
+      +" Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.";
+  }
 
   /**
    * Generates the classifier.
@@ -388,6 +409,15 @@ public class NaiveBayes extends Classifier
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useKernelEstimatorTipText() {
+    return "Use a kernel estimator for numeric attributes rather than a "
+      +"normal distribution.";
+  }
+  /**
    * Gets if kernel estimator is being used.
    *
    * @return Value of m_UseKernelEstimatory.
@@ -410,6 +440,16 @@ public class NaiveBayes extends Classifier
     }
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useSupervisedDiscretizationTipText() {
+    return "Use supervised discretization to convert numeric attributes to nominal "
+      +"ones.";
+  }
+
   /**
    * Get whether supervised discretization is to be used.
    *

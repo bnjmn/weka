@@ -41,7 +41,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -84,6 +84,21 @@ public class LeastMedSq extends Classifier implements OptionHandler {
   private Random m_random;
 
   private long m_randomseed = 0;
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Implements a least median sqaured linear regression utilising the "
+      +"existing weka LinearRegression class to form predictions. "
+      +"Least squared regression functions are generated from random subsamples of "
+      +"the data. The least squared regression with the lowest meadian squared error "
+      +"is chosen as the final model.\n\n"
+      +"The basis of the algorithm is \n\nRobust regression and outlier detection "
+      +"Peter J. Rousseeuw, Annick M. Leroy. c1987";
+  }
 
   /**
    * Build lms regression
@@ -176,11 +191,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    */
   private void setRandom(){
 
-    if (m_israndom){
-      m_random = new Random();
-    } else{
-      m_random = new Random(getRandomSeed());
-    }
+    m_random = new Random(getRandomSeed());
   }
 
   /**
@@ -406,6 +417,15 @@ public class LeastMedSq extends Classifier implements OptionHandler {
     return text.toString();
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String sampleSizeTipText() {
+    return "Set the size of the random samples used to generate the least sqaured "
+      +"regression functions.";
+  }
 
   /**
    * sets number of samples
@@ -427,25 +447,13 @@ public class LeastMedSq extends Classifier implements OptionHandler {
     return m_samplesize;
   }
 
-
   /**
-   * Sets whether sample selection is random
-   *
-   * @param israndom true if sample selection is random
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public void setIsRandom(boolean israndom){
-
-    m_israndom = israndom;
-  }
-
-  /**
-   * Returns whether or not samples are selected randomly
-   *
-   * @return true if sample selection is random
-   */
-  public boolean getIsRandom(){
-
-    return m_israndom;
+  public String randomSeedTipText() {
+    return "Set the seed for selecting random subsamples of the training data.";
   }
 
   /**
@@ -499,9 +507,6 @@ public class LeastMedSq extends Classifier implements OptionHandler {
     newVector.addElement(new Option("\tSet sample size\n"
 				    + "\t(default: 4)\n",
 				    "S", 4, "-S <sample size>"));
-    newVector.addElement(new Option("\tUse a random seed to generate samples\n"
-				    + "\t(default use a non-random seed)\n",
-				    "R", 0, "-R"));
     newVector.addElement(new Option("\tSet the seed used to generate samples\n"
 				    + "\t(default: 0)\n",
 				    "G", 0, "-G <seed>"));
@@ -528,17 +533,14 @@ public class LeastMedSq extends Classifier implements OptionHandler {
     } else
       setSampleSize(4);
 
-
-    setIsRandom(Utils.getFlag('R', options));
-
     curropt = Utils.getOption('G', options);
     if ( curropt.length() != 0){
       setRandomSeed(Long.parseLong(curropt));
-    } else
+    } else {
       setRandomSeed(0);
+    }
 
     setDebug(Utils.getFlag('D', options));
-
   }
 
   /**
@@ -553,10 +555,6 @@ public class LeastMedSq extends Classifier implements OptionHandler {
 
     options[current++] = "-S";
     options[current++] = "" + getSampleSize();
-
-    if (getIsRandom()) {
-      options[current++] = "-R";
-    }
 
     options[current++] = "-G";
     options[current++] = "" + getRandomSeed();
