@@ -51,7 +51,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class Filter implements Serializable {
 
@@ -284,7 +284,7 @@ public abstract class Filter implements Serializable {
   
   /**
    * Filters an entire set of instances through a filter and returns
-   * the new set.
+   * the new set. 
    *
    * @param data the data to be filtered
    * @param filter the filter to be used
