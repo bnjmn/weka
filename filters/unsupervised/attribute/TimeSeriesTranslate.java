@@ -56,7 +56,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TimeSeriesTranslate extends AbstractTimeSeries {
 
@@ -109,6 +109,8 @@ public class TimeSeriesTranslate extends AbstractTimeSeries {
       if (m_SelectedCols.isInRange(i)) {
 	if (source != null) {
 	  vals[i] = source.value(i);
+	} else {
+	  vals[i] = Instance.missingValue();
 	}
       } else {
 	vals[i] = dest.value(i);
