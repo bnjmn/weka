@@ -42,7 +42,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -466,6 +466,7 @@ public class ForwardSelection extends ASSearch
 
     if (m_ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
+      m_classIndex = -1;
     }
     else {
       m_hasClass = true;
