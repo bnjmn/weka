@@ -47,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -67,7 +67,7 @@ public class DatabaseUtils implements Serializable {
   public static final String EXP_RESULT_PREFIX = "Results";
   
   /** The max length of a string in a string field */
-  protected static final int STRING_FIELD_LENGTH  = 200;
+  protected static final int STRING_FIELD_LENGTH  = 300;
 
   /** The name of the properties file */
   protected static String PROPERTY_FILE
