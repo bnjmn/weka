@@ -40,8 +40,8 @@ import weka.core.Option;
  *
  * Valid options from the command-line are:<p>
  *
- * -D num <br>
- * The column number containing the dataset name.
+ * -D num,num2... <br>
+ * The column numbers that uniquely specify a dataset.
  * (default last) <p>
  *
  * -R num <br>
@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -71,14 +71,21 @@ public class PairedTTester implements OptionHandler {
   /** The option setting for the run number column (-1 means last) */
   protected int m_RunColumnSet = -1;
 
-  /** The index of the column containing the dataset names */
-  protected int m_DatasetColumn = 0;
-
-  /** The option setting for the dataset name column (-1 means last) */
-  protected int m_DatasetColumnSet = -1;
-
   /** The significance level for comparisons */
   protected double m_SignificanceLevel = 0.05;
+
+  /**
+   * The range of columns that specify a unique "dataset"
+   * (eg: scheme plus configuration)
+   */
+  protected Range m_DatasetKeyColumnsRange = new Range();
+
+  /** An array containing the indexes of just the selected columns */ 
+  protected int [] m_DatasetKeyColumns;
+
+  /** The list of dataset specifiers */
+  protected DatasetSpecifiers m_DatasetSpecifiers = 
+    new DatasetSpecifiers();
 
   /**
    * The range of columns that specify a unique result set
@@ -88,12 +95,6 @@ public class PairedTTester implements OptionHandler {
 
   /** An array containing the indexes of just the selected columns */ 
   protected int [] m_ResultsetKeyColumns;
-  
-  /** Stores the number of datasets we have results for */
-  protected int m_NumDatasets;
-
-  /** Stores the number of unique result sets */
-  protected int m_NumResultsets;
 
   /** Stores a vector for each resultset holding all instances in each set */
   protected FastVector m_Resultsets = new FastVector();
@@ -104,16 +105,135 @@ public class PairedTTester implements OptionHandler {
   /** Indicates whether standard deviations should be displayed */
   protected boolean m_ShowStdDevs = false;
   
+  /* A list of unique "dataset" specifiers that have been observed */
+  private class DatasetSpecifiers {
+
+    FastVector m_Specifiers = new FastVector();
+
+    /**
+     * Removes all specifiers.
+     */
+    protected void removeAllSpecifiers() {
+
+      m_Specifiers.removeAllElements();
+    }
+
+    /** 
+     * Add an instance to the list of specifiers (if necessary)
+     */
+    protected void add(Instance inst) {
+      
+      for (int i = 0; i < m_Specifiers.size(); i++) {
+	Instance specifier = (Instance)m_Specifiers.elementAt(i);
+	boolean found = true;
+	for (int j = 0; j < m_DatasetKeyColumns.length; j++) {
+	  if (inst.value(m_DatasetKeyColumns[j]) !=
+	      specifier.value(m_DatasetKeyColumns[j])) {
+	    found = false;
+	  }
+	}
+	if (found) {
+	  return;
+	}
+      }
+      m_Specifiers.addElement(inst);
+    }
+
+    /**
+     * Get the template at the given position.
+     */
+    protected Instance specifier(int i) {
+
+      return (Instance)m_Specifiers.elementAt(i);
+    }
+
+    /**
+     * Gets the number of specifiers.
+     */
+    protected int numSpecifiers() {
+
+      return m_Specifiers.size();
+    }
+  }
+
+  /* Utility class to store the instances pertaining to a dataset */
+  private class Dataset {
+
+    Instance m_Template;
+    FastVector m_Dataset;
+
+    public Dataset(Instance template) {
+
+      m_Template = template;
+      m_Dataset = new FastVector();
+      add(template);
+    }
+    
+    /**
+     * Returns true if the two instances match on those attributes that have
+     * been designated key columns (eg: scheme name and scheme options)
+     *
+     * @param first the first instance
+     * @param second the second instance
+     * @return true if first and second match on the currently set key columns
+     */
+    protected boolean matchesTemplate(Instance first) {
+      
+      for (int i = 0; i < m_DatasetKeyColumns.length; i++) {
+	if (first.value(m_DatasetKeyColumns[i]) !=
+	    m_Template.value(m_DatasetKeyColumns[i])) {
+	  return false;
+	}
+      }
+      return true;
+    }
+
+    /**
+     * Adds the given instance to the dataset
+     */
+    protected void add(Instance inst) {
+      
+      m_Dataset.addElement(inst);
+    }
+
+    /**
+     * Returns a vector containing the instances in the dataset
+     */
+    protected FastVector contents() {
+
+      return m_Dataset;
+    }
+
+    /**
+     * Sorts the instances in the dataset by the run number.
+     *
+     * @param runColumn a value of type 'int'
+     */
+    public void sort(int runColumn) {
+
+      double [] runNums = new double [m_Dataset.size()];
+      for (int j = 0; j < runNums.length; j++) {
+	runNums[j] = ((Instance) m_Dataset.elementAt(j)).value(runColumn);
+      }
+      int [] index = Utils.sort(runNums);
+      FastVector newDataset = new FastVector(runNums.length);
+      for (int j = 0; j < index.length; j++) {
+	newDataset.addElement(m_Dataset.elementAt(index[j]));
+      }
+      m_Dataset = newDataset;
+    }
+  }
+ 
   /* Utility class to store the instances in a resultset */
   private class Resultset {
 
     Instance m_Template;
-    FastVector [] m_Datasets;
+    FastVector m_Datasets;
 
     public Resultset(Instance template) {
 
       m_Template = template;
-      m_Datasets = new FastVector [m_NumDatasets];
+      m_Datasets = new FastVector();
       add(template);
     }
     
@@ -157,12 +277,17 @@ public class PairedTTester implements OptionHandler {
     /**
      * Returns a vector containing all instances belonging to one dataset.
      *
-     * @param index a value of type 'int'
+     * @param index a template instance
      * @return a value of type 'FastVector'
      */
-    public FastVector dataset(int index) {
+    public FastVector dataset(Instance inst) {
 
-      return m_Datasets[index];
+      for (int i = 0; i < m_Datasets.size(); i++) {
+	if (((Dataset)m_Datasets.elementAt(i)).matchesTemplate(inst)) {
+	  return ((Dataset)m_Datasets.elementAt(i)).contents();
+	} 
+      }
+      return null;
     }
     
     /**
@@ -171,14 +296,15 @@ public class PairedTTester implements OptionHandler {
      * @param newInst a value of type 'Instance'
      */
     public void add(Instance newInst) {
-
-      int newInstDataset = (int) newInst.value(m_DatasetColumn);
-      FastVector dataset = m_Datasets[newInstDataset];
-      if (dataset == null) {
-	dataset = new FastVector();
-	m_Datasets[newInstDataset] = dataset;
+      
+      for (int i = 0; i < m_Datasets.size(); i++) {
+	if (((Dataset)m_Datasets.elementAt(i)).matchesTemplate(newInst)) {
+	  ((Dataset)m_Datasets.elementAt(i)).add(newInst);
+	  return;
+	}
       }
-      dataset.addElement(newInst);
+      Dataset newDataset = new Dataset(newInst);
+      m_Datasets.addElement(newDataset);
     }
 
     /**
@@ -188,24 +314,31 @@ public class PairedTTester implements OptionHandler {
      */
     public void sort(int runColumn) {
 
-      for (int i = 0; i < m_Datasets.length; i++) {
-	FastVector dataset = m_Datasets[i];
-	if (dataset != null) {
-	  double [] runNums = new double [dataset.size()];
-	  for (int j = 0; j < runNums.length; j++) {
-	    runNums[j] = ((Instance) dataset.elementAt(j)).value(runColumn);
-	  }
-	  int [] index = Utils.sort(runNums);
-	  FastVector newDataset = new FastVector(runNums.length);
-	  for (int j = 0; j < index.length; j++) {
-	    newDataset.addElement(dataset.elementAt(index[j]));
-	  }
-	  m_Datasets[i] = newDataset;
-	}
+      for (int i = 0; i < m_Datasets.size(); i++) {
+	((Dataset)m_Datasets.elementAt(i)).sort(runColumn);
       }
     }
   } // Resultset
 
+
+  /**
+   * Returns a string descriptive of the key column values for
+   * the "datasets
+   *
+   * @param template the template
+   * @return a value of type 'String'
+   */
+  private String templateString(Instance template) {
+    
+    String result = "";
+    for (int i = 0; i < m_DatasetKeyColumns.length; i++) {
+      result += template.toString(m_DatasetKeyColumns[i]) + ' ';
+    }
+    if (result.startsWith("weka.classifiers.")) {
+      result = result.substring("weka.classifiers.".length());
+    }
+    return result.trim();
+  }
 
   /**
    * Set whether standard deviations are displayed or not.
@@ -238,43 +371,40 @@ public class PairedTTester implements OptionHandler {
     } else {
       m_RunColumn = m_RunColumnSet;
     }
-    if (m_DatasetColumnSet == -1) {
-      m_DatasetColumn = m_Instances.numAttributes() - 1;
-    } else {
-      m_DatasetColumn = m_DatasetColumnSet;
-    }
 
-    if (m_Instances.attribute(m_DatasetColumn).type() != Attribute.NOMINAL) {
-      throw new Exception("Dataset column " + (m_DatasetColumn + 1)
-			  + " ("
-			  + m_Instances.attribute(m_DatasetColumn).name()
-			  + ") is not nominal");
-    }
     if (m_ResultsetKeyColumnsRange == null) {
       throw new Exception("No result specifier columns have been set");
     }
-
     m_ResultsetKeyColumnsRange.setUpper(m_Instances.numAttributes() - 1);
     m_ResultsetKeyColumns = m_ResultsetKeyColumnsRange.getSelection();
-    m_NumDatasets = m_Instances.attribute(m_DatasetColumn).numValues();
+
+    if (m_DatasetKeyColumnsRange == null) {
+      throw new Exception("No dataset specifier columns have been set");
+    }
+    m_DatasetKeyColumnsRange.setUpper(m_Instances.numAttributes() - 1);
+    m_DatasetKeyColumns = m_DatasetKeyColumnsRange.getSelection();
     
     //  Split the data up into result sets
     m_Resultsets.removeAllElements();  
+    m_DatasetSpecifiers.removeAllSpecifiers();
     for (int i = 0; i < m_Instances.numInstances(); i++) {
       Instance current = m_Instances.instance(i);
-      if (current.isMissing(m_DatasetColumn)) {
-	throw new Exception("Instance has missing value in dataset "
-			    + "column!\n" + current);
-      } else if (current.isMissing(m_RunColumn)) {
+      if (current.isMissing(m_RunColumn)) {
 	throw new Exception("Instance has missing value in run "
 			    + "column!\n" + current);
-      } else {
-	for (int j = 0; j < m_ResultsetKeyColumns.length; j++) {
-	  if (current.isMissing(m_ResultsetKeyColumns[j])) {
-	    throw new Exception("Instance has missing value in resultset key "
-				+ "column " + (m_ResultsetKeyColumns[j] + 1)
-				+ "!\n" + current);
-	  }
+      } 
+      for (int j = 0; j < m_ResultsetKeyColumns.length; j++) {
+	if (current.isMissing(m_ResultsetKeyColumns[j])) {
+	  throw new Exception("Instance has missing value in resultset key "
+			      + "column " + (m_ResultsetKeyColumns[j] + 1)
+			      + "!\n" + current);
+	}
+      }
+      for (int j = 0; j < m_DatasetKeyColumns.length; j++) {
+	if (current.isMissing(m_DatasetKeyColumns[j])) {
+	  throw new Exception("Instance has missing value in dataset key "
+			      + "column " + (m_DatasetKeyColumns[j] + 1)
+			      + "!\n" + current);
 	}
       }
       boolean found = false;
@@ -290,7 +420,10 @@ public class PairedTTester implements OptionHandler {
 	Resultset resultset = new Resultset(current);
 	m_Resultsets.addElement(resultset);
       }
+
+      m_DatasetSpecifiers.add(current);
     }
+
     // Tell each resultset to sort on the run column
     for (int j = 0; j < m_Resultsets.size(); j++) {
       Resultset resultset = (Resultset) m_Resultsets.elementAt(j);
@@ -310,10 +443,11 @@ public class PairedTTester implements OptionHandler {
       try {
 	prepareData();
       } catch (Exception ex) {
+	ex.printStackTrace();
 	return 0;
       }
     }
-    return m_NumDatasets;
+    return m_DatasetSpecifiers.numSpecifiers();
   }
 
   /**
@@ -327,6 +461,7 @@ public class PairedTTester implements OptionHandler {
       try {
 	prepareData();
       } catch (Exception ex) {
+	ex.printStackTrace();
 	return 0;
       }
     }
@@ -345,6 +480,7 @@ public class PairedTTester implements OptionHandler {
       try {
 	prepareData();
       } catch (Exception ex) {
+	ex.printStackTrace();
 	return null;
       }
     }
@@ -355,14 +491,14 @@ public class PairedTTester implements OptionHandler {
    * Computes a paired t-test comparison for a specified dataset between
    * two resultsets.
    *
-   * @param datasetIndex the index of the dataset
+   * @param datasetSpecifier the dataset specifier
    * @param resultset1Index the index of the first resultset
    * @param resultset2Index the index of the second resultset
    * @param comparisonColumn the column containing values to compare
    * @return the results of the paired comparison
    * @exception Exception if an error occurs
    */
-  public PairedStats calculateStatistics(int datasetIndex,
+  public PairedStats calculateStatistics(Instance datasetSpecifier,
 				     int resultset1Index,
 				     int resultset2Index,
 				     int comparisonColumn) throws Exception {
@@ -380,10 +516,9 @@ public class PairedTTester implements OptionHandler {
 
     Resultset resultset1 = (Resultset) m_Resultsets.elementAt(resultset1Index);
     Resultset resultset2 = (Resultset) m_Resultsets.elementAt(resultset2Index);
-    FastVector dataset1 = resultset1.dataset(datasetIndex);
-    FastVector dataset2 = resultset2.dataset(datasetIndex);
-    String datasetName = m_Instances.attribute(m_DatasetColumn)
-      .value(datasetIndex);
+    FastVector dataset1 = resultset1.dataset(datasetSpecifier);
+    FastVector dataset2 = resultset2.dataset(datasetSpecifier);
+    String datasetName = templateString(datasetSpecifier);
     if (dataset1 == null) {
       throw new Exception("No results for dataset=" + datasetName
 			 + " for resultset=" + resultset1.templateString());
@@ -436,6 +571,7 @@ public class PairedTTester implements OptionHandler {
       try {
 	prepareData();
       } catch (Exception ex) {
+	ex.printStackTrace();
 	return ex.getMessage();
       }
     }
@@ -458,6 +594,7 @@ public class PairedTTester implements OptionHandler {
       try {
 	prepareData();
       } catch (Exception ex) {
+	ex.printStackTrace();
 	return ex.getMessage();
       }
     }
@@ -490,14 +627,16 @@ public class PairedTTester implements OptionHandler {
 	System.err.flush();
 	for (int k = 0; k < getNumDatasets(); k++) {
 	  try {
-	    PairedStats pairedStats = calculateStatistics(k, i, j,
-							  comparisonColumn);
+	    PairedStats pairedStats = 
+	      calculateStatistics(m_DatasetSpecifiers.specifier(k), i, j,
+				  comparisonColumn);
 	    if (pairedStats.differencesSignificance < 0) {
 	      win[i][j]++;
 	    } else if (pairedStats.differencesSignificance > 0) {
 	      win[j][i]++;
 	    }
 	  } catch (Exception ex) {
+	    ex.printStackTrace();
 	    System.err.println(ex.getMessage());
 	  }
 	}
@@ -596,27 +735,26 @@ public class PairedTTester implements OptionHandler {
      // determine max field width
     for (int i = 0; i < getNumDatasets(); i++) {
       for (int j = 0; j < getNumResultsets(); j++) {
-	  try {
-	    PairedStats pairedStats = calculateStatistics(i, baseResultset,
-							  j,
-							  comparisonColumn);
-	    double width = ((Math.log(Math.abs(pairedStats.yStats.mean)) / 
-			     Math.log(10))+1);
-	    if (width > maxWidthMean) {
-	      maxWidthMean = (int)width;
-	    }
-	  
-	    if (m_ShowStdDevs) {
-	      width = ((Math.log(Math.abs(pairedStats.yStats.stdDev)) / 
-			Math.log(10))+1);
-	      if (width > maxWidthStdDev) {
-		maxWidthStdDev = (int)width;
-	      }
-	    }
-	  }  catch (Exception ex) {
-	  
+	try {
+	  PairedStats pairedStats = 
+	    calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+				baseResultset, j, comparisonColumn);
+	  double width = ((Math.log(Math.abs(pairedStats.yStats.mean)) / 
+			   Math.log(10))+1);
+	  if (width > maxWidthMean) {
+	    maxWidthMean = (int)width;
 	  }
-       
+	  
+	  if (m_ShowStdDevs) {
+	    width = ((Math.log(Math.abs(pairedStats.yStats.stdDev)) / 
+		      Math.log(10))+1);
+	    if (width > maxWidthStdDev) {
+	      maxWidthStdDev = (int)width;
+	    }
+	  }
+	}  catch (Exception ex) {
+	  ex.printStackTrace();
+	}
       }
     }
 
@@ -667,11 +805,13 @@ public class PairedTTester implements OptionHandler {
     StringBuffer skipped = new StringBuffer("");
     for (int i = 0; i < getNumDatasets(); i++) {
       // Print the name of the dataset
-      String datasetName = m_Instances.attribute(m_DatasetColumn).value(i);
+      String datasetName = 
+	templateString(m_DatasetSpecifiers.specifier(i));
       try {
-	PairedStats pairedStats = calculateStatistics(i, baseResultset,
-						      baseResultset,
-						      comparisonColumn);
+	PairedStats pairedStats = 
+	  calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+			      baseResultset, baseResultset,
+			      comparisonColumn);
 	datasetName = Utils.padRight(datasetName, datasetLength);
 	result.append(datasetName);
 	result.append(Utils.padLeft('('
@@ -695,8 +835,9 @@ public class PairedTTester implements OptionHandler {
 	for (int j = 0; j < getNumResultsets(); j++) {
 	  if (j != baseResultset) {
 	    try {
-	      pairedStats = calculateStatistics(i, baseResultset, j,
-						comparisonColumn);
+	      pairedStats = 
+		calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+				    baseResultset, j, comparisonColumn);
 	      char sigChar = ' ';
 	      if (pairedStats.differencesSignificance < 0) {
 		sigChar = 'v';
@@ -726,12 +867,14 @@ public class PairedTTester implements OptionHandler {
 		result.append(' ').append(sigChar).append(' ');
 	      }
 	    } catch (Exception ex) {
+	      ex.printStackTrace();
 	      result.append(Utils.padLeft("", resultsetLength + 1));
 	    }
 	  }
 	}
 	result.append('\n');
       } catch (Exception ex) {
+	ex.printStackTrace();
 	skipped.append(datasetName).append(' ');
       }
     }
@@ -759,16 +902,18 @@ public class PairedTTester implements OptionHandler {
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
-	      "\tSet the index of the column containing the dataset name",
-              "D", 1, "-D <index>"));
+             "\tSpecify list of columns that specify a unique\n"
+	      + "\tdataset.\n"
+	      + "\tFirst and last are valid indexes. (default none)",
+              "D", 1, "-D <index,index2-index4,...>"));
     newVector.addElement(new Option(
 	      "\tSet the index of the column containing the run number",
               "R", 1, "-R <index>"));
     newVector.addElement(new Option(
-              "\tSpecify list of columns to that specify a unique\n"
+              "\tSpecify list of columns that specify a unique\n"
 	      + "\t'result generator' (eg: classifier name and options).\n"
 	      + "\tFirst and last are valid indexes. (default none)",
               "G", 1, "-G <index1,index2-index4,...>"));
@@ -782,8 +927,8 @@ public class PairedTTester implements OptionHandler {
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -D num <br>
-   * The column number containing the dataset name.
+   * -D num,num2... <br>
+   * The column numbers that uniquely specify a dataset.
    * (default last) <p>
    *
    * -R num <br>
@@ -804,20 +949,14 @@ public class PairedTTester implements OptionHandler {
    */
   public void setOptions(String[] options) throws Exception {
 
-    String indexStr = Utils.getOption('D', options);
-    if (indexStr.length() != 0) {
-      if (indexStr.equals("first")) {
-	setDatasetColumn(0);
-      } else if (indexStr.equals("last")) {
-	setDatasetColumn(-1);
-      } else {
-	setDatasetColumn(Integer.parseInt(indexStr) - 1);
-      }    
-    } else {
-      setDatasetColumn(-1);
+    String datasetList = Utils.getOption('D', options);
+    Range datasetRange = new Range();
+    if (datasetList.length() != 0) {
+      datasetRange.setRanges(datasetList);
     }
+    setDatasetKeyColumns(datasetRange);
 
-    indexStr = Utils.getOption('R', options);
+    String indexStr = Utils.getOption('R', options);
     if (indexStr.length() != 0) {
       if (indexStr.equals("first")) {
 	setRunColumn(0);
@@ -859,8 +998,10 @@ public class PairedTTester implements OptionHandler {
       options[current++] = "-G";
       options[current++] = getResultsetKeyColumns().getRanges();
     }
-    options[current++] = "-D";
-    options[current++] = "" + (getDatasetColumn() + 1);
+    if (!getDatasetKeyColumns().getRanges().equals("")) {
+      options[current++] = "-D";
+      options[current++] = getDatasetKeyColumns().getRanges();
+    }
     options[current++] = "-R";
     options[current++] = "" + (getRunColumn() + 1);
     options[current++] = "-S";
@@ -912,25 +1053,25 @@ public class PairedTTester implements OptionHandler {
     
     m_SignificanceLevel = newSignificanceLevel;
   }
-  
+
   /**
-   * Get the value of DatasetColumn.
+   * Get the value of DatasetKeyColumns.
    *
-   * @return Value of DatasetColumn.
+   * @return Value of DatasetKeyColumns.
    */
-  public int getDatasetColumn() {
+  public Range getDatasetKeyColumns() {
     
-    return m_DatasetColumnSet;
+    return m_DatasetKeyColumnsRange;
   }
   
   /**
-   * Set the value of DatasetColumn.
+   * Set the value of DatasetKeyColumns.
    *
-   * @param newDatasetColumn Value to assign to DatasetColumn.
+   * @param newDatasetKeyColumns Value to assign to DatasetKeyColumns.
    */
-  public void setDatasetColumn(int newDatasetColumn) {
+  public void setDatasetKeyColumns(Range newDatasetKeyColumns) {
     
-    m_DatasetColumnSet = newDatasetColumn;
+    m_DatasetKeyColumnsRange = newDatasetKeyColumns;
     m_ResultsetsValid = false;
   }
   
