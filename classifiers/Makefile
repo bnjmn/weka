@@ -11,7 +11,8 @@ SOURCES = Classifier.java DistributionClassifier.java \
 	RegressionByDiscretization.java \
 	CostSensitiveClassifier.java MetaCost.java \
 	ClassificationViaRegression.java FilteredClassifier.java \
-	Sourcable.java UserClassifier.java AttributeSelectedClassifier.java
+	Sourcable.java UserClassifier.java AttributeSelectedClassifier.java \
+	ThresholdSelector.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
