@@ -94,7 +94,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.6 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -229,7 +229,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    * @since 1.0
    * @see JPanel
    */
@@ -492,7 +492,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     Image pic = null;
     java.net.URL imageURL = ClassLoader.getSystemResource(path);
     if (imageURL == null) {
-      System.err.println("Warning: unable to load "+path);
+      //      System.err.println("Warning: unable to load "+path);
     } else {
       pic = Toolkit.getDefaultToolkit().
 	getImage(imageURL);
