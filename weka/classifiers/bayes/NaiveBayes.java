@@ -56,7 +56,7 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class NaiveBayes extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -95,10 +95,10 @@ public class NaiveBayes extends DistributionClassifier
   public void buildClassifier(Instances instances) throws Exception {
 
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     if (instances.classAttribute().isNumeric()) {
-      throw new Exception("Naive Bayes: Class is numeric!");
+      throw new UnsupportedClassTypeException("Naive Bayes: Class is numeric!");
     }
     m_NumClasses = instances.numClasses();
     if (m_NumClasses < 0) {

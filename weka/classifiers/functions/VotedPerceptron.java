@@ -55,7 +55,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   
@@ -191,13 +191,13 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
   public void buildClassifier(Instances insts) throws Exception {
  
     if (insts.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     if (insts.numClasses() > 2) {
       throw new Exception("Can only handle two-class datasets!");
     }
     if (insts.classAttribute().isNumeric()) {
-      throw new Exception("Can't handle a numeric class!");
+      throw new UnsupportedClassTypeException("Can't handle a numeric class!");
     }
 
     // Filter data

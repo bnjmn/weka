@@ -42,6 +42,7 @@ import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Drawable;
+import weka.core.UnsupportedClassTypeException;
 import weka.filters.Filter;
 
 /**
@@ -78,7 +79,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler, Drawable {
@@ -521,7 +522,7 @@ public class CostSensitiveClassifier extends Classifier
 			  + " minimum expected cost method");
     }
     if (!data.classAttribute().isNominal()) {
-      throw new Exception("Class attribute must be nominal!");
+      throw new UnsupportedClassTypeException("Class attribute must be nominal!");
     }
     if (m_MatrixSource == MATRIX_ON_DEMAND) {
       String costName = data.relationName() + CostMatrix.FILE_EXTENSION;

@@ -34,7 +34,7 @@ import weka.core.*;
  * Class for building and using a very simple kernel density classifier.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class KernelDensity extends DistributionClassifier {
 
@@ -73,10 +73,10 @@ public class KernelDensity extends DistributionClassifier {
   public void buildClassifier(Instances instances) throws Exception {
 
     if (!instances.classAttribute().isNominal()) {
-      throw new Exception("Class attribute has to be nominal!");
+      throw new UnsupportedClassTypeException("Class attribute has to be nominal!");
     }
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     m_Instances = instances;
     m_MinArray = new double [m_Instances.numAttributes()];

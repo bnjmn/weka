@@ -41,7 +41,7 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
 
@@ -172,10 +172,10 @@ public class OneR extends Classifier implements OptionHandler {
     boolean noRule = true;
 
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     if (instances.classAttribute().isNumeric()) {
-      throw new Exception("Can't handle numeric class!");
+      throw new UnsupportedClassTypeException("Can't handle numeric class!");
     }
 
     Instances data = new Instances(instances);

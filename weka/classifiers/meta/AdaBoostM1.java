@@ -66,7 +66,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Sourcable {
@@ -433,7 +433,7 @@ public class AdaBoostM1 extends DistributionClassifier
   public void buildClassifier(Instances data) throws Exception {
 
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     data = new Instances(data);
     data.deleteWithMissingClass();
@@ -441,7 +441,7 @@ public class AdaBoostM1 extends DistributionClassifier
       throw new Exception("No train instances without class missing!");
     }
     if (data.classAttribute().isNumeric()) {
-      throw new Exception("AdaBoostM1 can't handle a numeric class!");
+      throw new UnsupportedClassTypeException("AdaBoostM1 can't handle a numeric class!");
     }
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");

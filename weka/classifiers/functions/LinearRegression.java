@@ -51,7 +51,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -141,13 +141,13 @@ public class LinearRegression extends Classifier implements OptionHandler,
   
     if (!m_checksTurnedOff) {
       if (!data.classAttribute().isNumeric()) {
-	throw new Exception("Class attribute has to be numeric for regression!");
+	throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
       }
       if (data.numInstances() == 0) {
 	throw new Exception("No instances in training file!");
       }
       if (data.checkForStringAttributes()) {
-	throw new Exception("Can't handle string attributes!");
+	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
       }
     }
 

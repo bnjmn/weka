@@ -36,7 +36,7 @@ import weka.filters.*;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -228,7 +228,7 @@ public abstract class M5Base extends Classifier
    */
   public void buildClassifier(Instances data) throws Exception {
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     } 
 
     m_instances = new Instances(data);

@@ -43,7 +43,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
 
@@ -65,7 +65,7 @@ public class IB1 extends Classifier implements UpdateableClassifier {
   public void buildClassifier(Instances instances) throws Exception{
     
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     // Throw away training instances with missing class
     m_Train = new Instances(instances, 0, instances.numInstances());

@@ -65,7 +65,7 @@ import weka.core.*;
  * The ridge parameter (default 1.0e-8) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -382,11 +382,11 @@ public class LWR extends Classifier
       throw new Exception("No class attribute assigned to instances");
     }
     if (instances.classAttribute().type() != Attribute.NUMERIC) {
-      throw new Exception("Class attribute must be numeric");
+      throw new UnsupportedClassTypeException("Class attribute must be numeric");
     }
 
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
 
     // Throw away training instances with missing class

@@ -51,7 +51,7 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 
 public class ConjunctiveRule extends DistributionClassifier implements OptionHandler, WeightedInstancesHandler{
@@ -834,7 +834,7 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    */
   public void buildClassifier(Instances instances) throws Exception{
     if (instances.checkForStringAttributes())
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
 	
     m_ClassAttribute = instances.classAttribute();
 	

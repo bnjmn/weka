@@ -29,6 +29,7 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.core.UnsupportedAttributeTypeException;
 import java.io.*;
 
 /**
@@ -43,7 +44,7 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */ 
 public class HyperPipes extends DistributionClassifier {
 
@@ -93,7 +94,7 @@ public class HyperPipes extends DistributionClassifier {
 	  m_NominalBounds[i] = new boolean [instances.attribute(i).numValues()];
 	  break;
 	default:
-	  throw new Exception("Only numeric and nominal attributes allowed");
+	  throw new UnsupportedAttributeTypeException("Cannot process string attributes!");
 	}
       }
 

@@ -79,7 +79,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class MetaCost extends Classifier
   implements OptionHandler {
@@ -464,7 +464,7 @@ public class MetaCost extends Classifier
       throw new Exception("No base classifier has been set!");
     }
     if (!data.classAttribute().isNominal()) {
-      throw new Exception("Class attribute must be nominal!");
+      throw new UnsupportedClassTypeException("Class attribute must be nominal!");
     }
     if (m_MatrixSource == MATRIX_ON_DEMAND) {
       String costName = data.relationName() + CostMatrix.FILE_EXTENSION;

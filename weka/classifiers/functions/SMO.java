@@ -88,7 +88,7 @@ import weka.filters.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.32 $ 
+ * @version $Revision: 1.33 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -1143,10 +1143,10 @@ public class SMO extends Classifier implements OptionHandler {
 
     if (!m_checksTurnedOff) {
       if (insts.checkForStringAttributes()) {
-	throw new Exception("Can't handle string attributes!");
+	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
       }
       if (insts.classAttribute().isNumeric()) {
-	throw new Exception("SMO can't handle a numeric class!");
+	throw new UnsupportedClassTypeException("SMO can't handle a numeric class!");
       }
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
