@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.12 $
+ * @version  $Revision: 1.13 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -323,10 +323,11 @@ public class AttributeSelection implements Serializable {
 	}
       }
 
-      // now sort them by mean merit
-      int[] s = Utils.sort(m_rankResults[0]);
-      for (int i = s.length - 1; i >= 0; i--) {
-	CvString.append(Utils.doubleToString(m_rankResults[0][s[i]], 6, 3) 
+      // now sort them by mean rank
+      int[] s = Utils.sort(m_rankResults[1]);
+      for (int i=0; i<s.length; i++) {
+	CvString.append(Utils.doubleToString(Math.abs(m_rankResults[0][s[i]]),
+					     6, 3) 
 			+ " +-" 
 			+ Utils.doubleToString(m_rankResults[2][s[i]], 6, 3) 
 			+ "   " 
@@ -547,9 +548,9 @@ public class AttributeSelection implements Serializable {
       int f_p=0;
       int w_p=0;
       for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (m_attributeRanking[i][1] > m_threshold) {
-	  double precision = (m_attributeRanking[i][1] - 
-	      (int)(m_attributeRanking[i][1]));
+	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
+	  double precision = (Math.abs(m_attributeRanking[i][1]) - 
+	      (int)(Math.abs(m_attributeRanking[i][1])));
 
 	  if (precision > 0) {
 	    precision = Math.abs((Math.log(Math.abs(precision)) / 
@@ -567,10 +568,10 @@ public class AttributeSelection implements Serializable {
       }
 
       for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (m_attributeRanking[i][1] > m_threshold) {
+	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
 
 	  m_selectionResults.
-	    append(Utils.doubleToString(m_attributeRanking[i][1],
+	    append(Utils.doubleToString(Math.abs(m_attributeRanking[i][1]),
 					f_p+w_p+1,f_p) 
 		   + Utils.doubleToString((m_attributeRanking[i][0] + 1),
 					  fieldWidth+1,0) 
@@ -584,7 +585,7 @@ public class AttributeSelection implements Serializable {
       int count = 0;
 
       for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (m_attributeRanking[i][1] > m_threshold) {
+	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
 	  count++;
 	}
       }
@@ -605,12 +606,12 @@ public class AttributeSelection implements Serializable {
       m_selectionResults.append("\nSelected attributes: ");
 
       for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (m_attributeRanking[i][1] > m_threshold) {
+	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
 	  m_selectedAttributeSet[i] = (int)m_attributeRanking[i][0];
 	}
 
 	if (i == (m_attributeRanking.length - 1)) {
-	  if (m_attributeRanking[i][1] > m_threshold) {
+	  if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
 	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1) 
 				      + " : " 
 				      + (i + 1) 
@@ -618,10 +619,10 @@ public class AttributeSelection implements Serializable {
 	  }
 	}
 	else {
-	  if (m_attributeRanking[i][1] > m_threshold) {
+	  if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
 	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1));
 
-	    if (m_attributeRanking[i + 1][1] > m_threshold) {
+	    if (Math.abs(m_attributeRanking[i + 1][1]) > m_threshold) {
 	      m_selectionResults.append(",");
 	    }
 	    else {
