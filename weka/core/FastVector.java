@@ -31,7 +31,7 @@ import java.io.*;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ */
+ * @version $Revision: 1.9 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -113,13 +113,13 @@ public class FastVector implements Copyable, Serializable {
   private Object[] m_Objects;
 
   /** The current size; */
-  private int m_Size;
+  private int m_Size = 0;
 
   /** The capacity increment */
-  private int m_CapacityIncrement;
+  private int m_CapacityIncrement = 1;
   
   /** The capacity multiplier. */
-  private double m_CapacityMultiplier;
+  private int m_CapacityMultiplier = 2;
 
   /**
    * Constructs an empty vector with initial
@@ -128,9 +128,6 @@ public class FastVector implements Copyable, Serializable {
   public FastVector() {
   
     m_Objects = new Object[0];
-    m_Size = 0;
-    m_CapacityIncrement = 1;
-    m_CapacityMultiplier = 2;
   }
 
   /**
@@ -141,24 +138,6 @@ public class FastVector implements Copyable, Serializable {
   public FastVector(int capacity) {
 
     m_Objects = new Object[capacity];
-    m_Size = 0;
-    m_CapacityIncrement = 1;
-    m_CapacityMultiplier = 2;
-  }
-
-  /**
-   * Constructs a vector with the given capacity, capacity 
-   * increment and capacity mulitplier.
-   *
-   * @param capacity the vector's initial capacity
-   */
-  public FastVector(int capacity, int capIncrement, 
-		    double capMultiplier) {
-
-    m_Objects = new Object[capacity];
-    m_Size = 0;
-    m_CapacityIncrement = capIncrement;
-    m_CapacityMultiplier = capMultiplier;
   }
 
   /**
@@ -172,7 +151,7 @@ public class FastVector implements Copyable, Serializable {
     Object[] newObjects;
 
     if (m_Size == m_Objects.length) {
-      newObjects = new Object[(int)m_CapacityMultiplier *
+      newObjects = new Object[m_CapacityMultiplier *
 			     (m_Objects.length +
 			      m_CapacityIncrement)];
       System.arraycopy(m_Objects, 0, newObjects, 0, m_Size);
@@ -199,10 +178,11 @@ public class FastVector implements Copyable, Serializable {
    */
   public final Object copy() {
 
-    FastVector copy = new FastVector(m_Objects.length, 
-				     m_CapacityIncrement,
-				     m_CapacityMultiplier);
+    FastVector copy = new FastVector(m_Objects.length);
+
     copy.m_Size = m_Size;
+    copy.m_CapacityIncrement = m_CapacityIncrement;
+    copy.m_CapacityMultiplier = m_CapacityMultiplier;
     System.arraycopy(m_Objects, 0, copy.m_Objects, 0, m_Size);
     return copy;
   }
@@ -215,10 +195,11 @@ public class FastVector implements Copyable, Serializable {
    */
   public final Object copyElements() {
 
-    FastVector copy = new FastVector(m_Objects.length, 
-				     m_CapacityIncrement,
-				     m_CapacityMultiplier);
+    FastVector copy = new FastVector(m_Objects.length);
+
     copy.m_Size = m_Size;
+    copy.m_CapacityIncrement = m_CapacityIncrement;
+    copy.m_CapacityMultiplier = m_CapacityMultiplier;
     for (int i = 0; i < m_Size; i++) {
       copy.m_Objects[i] = ((Copyable)m_Objects[i]).copy();
     }
@@ -316,7 +297,7 @@ public class FastVector implements Copyable, Serializable {
                        m_Size - index);
       m_Objects[index] = element;
     } else {
-      newObjects = new Object[(int)m_CapacityMultiplier *
+      newObjects = new Object[m_CapacityMultiplier *
 			     (m_Objects.length +
 			      m_CapacityIncrement)];
       System.arraycopy(m_Objects, 0, newObjects, 0, index);
