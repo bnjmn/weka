@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
 */
 public class Instances implements Serializable {
  
@@ -1373,49 +1373,48 @@ public class Instances implements Serializable {
 	  realCount += currentCount;
 	}
       }
-      
       result.append(Utils.padLeft("" + (i + 1), 4)).append(' ');
       result.append(Utils.padRight(a.name(), 25)).append(' ');
-      int percent;
+      long percent;
       switch (a.type()) {
       case Attribute.NOMINAL:
 	result.append(Utils.padLeft("Nom", 4)).append(' ');
-	percent = 100 * intCount / total;
+	percent = Math.round(100.0 * intCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = 100 * realCount / total;
+	percent = Math.round(100.0 * realCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       case Attribute.NUMERIC:
 	result.append(Utils.padLeft("Num", 4)).append(' ');
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = 100 * intCount / total;
+	percent = Math.round(100.0 * intCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	percent = 100 * realCount / total;
+	percent = Math.round(100.0 * realCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       case Attribute.STRING:
 	result.append(Utils.padLeft("Str", 4)).append(' ');
-	percent = 100 * intCount / total;
+	percent = Math.round(100.0 * intCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = 100 * realCount / total;
+	percent = Math.round(100.0 * realCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       default:
 	result.append(Utils.padLeft("???", 4)).append(' ');
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = 100 * intCount / total;
+	percent = Math.round(100.0 * intCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	percent = 100 * realCount / total;
+	percent = Math.round(100.0 * realCount / total);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       }
       result.append(Utils.padLeft("" + missingCount, 5)).append(" /");
-      percent = 100 * missingCount / total;
+      percent = Math.round(100.0 * missingCount / total);
       result.append(Utils.padLeft("" + percent, 3)).append("% ");
       result.append(Utils.padLeft("" + uniqueCount, 5)).append(" /");
-      percent = 100 * uniqueCount / total;
+      percent = Math.round(100.0 * uniqueCount / total);
       result.append(Utils.padLeft("" + percent, 3)).append("% ");
       result.append(Utils.padLeft("" + distinctCount, 5)).append(' ');
       result.append('\n');
