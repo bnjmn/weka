@@ -31,6 +31,13 @@ import javax.swing.SwingConstants;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.Point;
 
 /** 
@@ -39,7 +46,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -84,6 +91,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
     setLayout(new BorderLayout());
     add(p1, BorderLayout.CENTER);
     add(m_StatusLab, BorderLayout.SOUTH);
+    addPopup();
   }
 
   /**
@@ -123,6 +131,42 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
     p2.add(m_StatusLab,BorderLayout.CENTER);
     p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
     add(p2, BorderLayout.SOUTH);
+    addPopup();
+  }
+
+  /**
+   * Add a popup menu for displaying the amount of free memory
+   * and running the garbage collector
+   */
+  private void addPopup() {
+    addMouseListener(new MouseAdapter() {
+	public void mouseClicked(MouseEvent e) {
+	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	      == InputEvent.BUTTON1_MASK) {
+	  } else {
+	    JPopupMenu gcMenu = new JPopupMenu();
+	    JMenuItem availMem = new JMenuItem("Available memory");
+	    availMem.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		  Runtime currR = Runtime.getRuntime();
+		  long freeM = currR.freeMemory();
+		  logMessage("Available memory : "+freeM+" bytes");
+		}
+	      });
+	    gcMenu.add(availMem);
+	    JMenuItem runGC = new JMenuItem("Run garabage collector");
+	    runGC.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		  statusMessage("Running garbage collector");
+		  System.gc();
+		  statusMessage("OK");
+		}
+	      });
+	    gcMenu.add(runGC);
+	    gcMenu.show(LogPanel.this, e.getX(), e.getY());
+	  }
+	}
+      });
   }
 
   /**
