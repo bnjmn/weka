@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and submits them to a central database.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DatabaseResultListener extends DatabaseUtils
   implements ResultListener  {
@@ -56,7 +56,17 @@ public class DatabaseResultListener extends DatabaseUtils
 
   /** Stores the cached values */
   protected FastVector m_Cache = new FastVector();
-  
+
+  /**
+   * Returns a string describing this result listener
+   * @return a description of the result listener suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Takes results from a result producer and sends them to a "
+      +"database.";
+  }
+
   /**
    * Sets up the database drivers
    *
@@ -236,6 +246,14 @@ public class DatabaseResultListener extends DatabaseUtils
     m_ResultsTableName = tableName;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String cacheKeyNameTipText() {
+    return "Set the name of the key field by which to cache.";
+  }
   
   /**
    * Get the value of CacheKeyName.
