@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -84,7 +84,7 @@ public class ClassifierSubsetEval
   private Instances m_holdOutInstances = null;
 
   /** evaluate on training data rather than seperate hold out/test set */
-  private boolean m_useTraining = false;
+  private boolean m_useTraining = true;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -408,6 +408,7 @@ public class ClassifierSubsetEval
       errorRate = m_Evaluation.meanAbsoluteError();
     }
 
+    m_Evaluation = null;
     // return the negative of the error rate as search methods  need to
     // maximize something
     return -errorRate;
@@ -478,6 +479,7 @@ public class ClassifierSubsetEval
       errorRate = m_Evaluation.meanAbsoluteError();
     }
 
+    m_Evaluation = null;
     // return the negative of the error as search methods need to
     // maximize something
    return -errorRate;
