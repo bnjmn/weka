@@ -66,7 +66,7 @@ import weka.attributeSelection.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {
@@ -560,7 +560,7 @@ public class SVMAttributeEval extends AttributeEvaluator
 				
 	// SMO seems to get stuck if data not normalised when few attributes remain
 	// smo.setNormalizeData(numAttrLeft < 40);
-	smo.setNormalizeData(true);
+	smo.setStandardizeData(true);
 	smo.setEpsilon(m_smoPParameter);
 	smo.setToleranceParameter(m_smoTParameter);
 	smo.setC(m_smoCParameter);
