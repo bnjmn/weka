@@ -83,7 +83,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable, WeightedInstancesHandler {
@@ -705,8 +705,9 @@ public class LogitBoost extends DistributionClassifier
 	  // Perform iterations
 	  double[][] probs = initialProbs(numInstances);
 	  m_NumIterations = 0;
+	  double sumOfWeights = train.sumOfWeights();
 	  for (int j = 0; j < getMaxIterations(); j++) {
-	    performIteration(trainYs, trainFs, probs, trainN);
+	    performIteration(trainYs, trainFs, probs, trainN, sumOfWeights);
 	    Evaluation eval = new Evaluation(train);
 	    eval.evaluateModel(this, test);
 	    results[j] += eval.correct();
@@ -754,9 +755,10 @@ public class LogitBoost extends DistributionClassifier
     if (m_Debug) {
       System.err.println("Avg. log-likelihood: " + logLikelihood);
     }
+    double sumOfWeights = data.sumOfWeights();
     for (int j = 0; j < bestNumIterations; j++) {
       double previousLoglikelihood = logLikelihood;
-      performIteration(trainYs, trainFs, probs, data);
+      performIteration(trainYs, trainFs, probs, data, sumOfWeights);
       logLikelihood = logLikelihood(trainYs, probs);
       if (m_Debug) {
 	System.err.println("Avg. log-likelihood: " + logLikelihood);
@@ -804,7 +806,8 @@ public class LogitBoost extends DistributionClassifier
   private void performIteration(double[][] trainYs,
 				double[][] trainFs,
 				double[][] probs,
-				Instances data) throws Exception {
+				Instances data,
+				double origSumOfWeights) throws Exception {
 
     if (m_Debug) {
       System.err.println("Training classifier " + (m_NumIterations + 1));
@@ -843,9 +846,17 @@ public class LogitBoost extends DistributionClassifier
 	// Set values for instance
 	Instance current = boostData.instance(i);
 	current.setValue(boostData.classIndex(), z);
-	current.setWeight(/*trainYs.length **/ current.weight() * w);
+	current.setWeight(current.weight() * w);
       }
       
+      // Scale the weights (helps with some base learners)
+      double sumOfWeights = boostData.sumOfWeights();
+      double scalingFactor = (double)origSumOfWeights / sumOfWeights;
+      for (int i = 0; i < probs.length; i++) {
+	Instance current = boostData.instance(i);
+	current.setWeight(current.weight() * scalingFactor);
+      }
+
       // Select instances to train the classifier on
       Instances trainData = boostData;
       if (m_WeightThreshold < 100) {
