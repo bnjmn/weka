@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public final class Utils {
 
@@ -1048,7 +1048,9 @@ public final class Utils {
    * Sorts a given array of doubles in ascending order and returns an 
    * array of integers with the positions of the elements of the original 
    * array in the sorted array. The sort is stable (Equal elements remain
-   * in their original order.)
+   * in their original order.) Occurrences of Double.NaN are treated as 
+   * Double.MAX_VALUE
+   *
    * @param array this array is not changed by the method!
    * @return an array of integers with the positions in the sorted
    * array.
@@ -1060,8 +1062,13 @@ public final class Utils {
     int [] helpIndex;
     int numEqual;
     
-    for (int i = 0; i < index.length; i++)
+    array = (double [])array.clone();
+    for (int i = 0; i < index.length; i++) {
       index[i] = i;
+      if (Double.isNaN(array[i])) {
+        array[i] = Double.MAX_VALUE;
+      }
+    }
     quickSort(array,index,0,array.length-1);
 
     // Make sort stable
