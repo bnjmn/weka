@@ -60,7 +60,7 @@ import java.io.Serializable;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -92,13 +92,15 @@ public class ResultHistoryPanel extends JPanel {
   /**
    * Extension of MouseAdapter that implements Serializable.
    */
-  private class RMouseAdapter extends MouseAdapter implements Serializable {}
+  public static class RMouseAdapter 
+    extends MouseAdapter implements Serializable {}
  
   
   /**
    * Extension of KeyAdapter that implements Serializable.
    */
-  private class RKeyAdapter extends KeyAdapter implements Serializable {}
+  public static class RKeyAdapter 
+    extends KeyAdapter implements Serializable {}
 
   /**
    * Create the result history object
