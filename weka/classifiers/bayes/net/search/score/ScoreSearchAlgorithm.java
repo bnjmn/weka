@@ -41,11 +41,19 @@ import java.util.Enumeration;
  * conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	BayesNet m_BayesNet;
 	Instances m_Instances;
+	
+	public ScoreSearchAlgorithm() {
+	} // c'tor
+	
+	public ScoreSearchAlgorithm(BayesNet bayesNet, Instances instances) {
+		m_BayesNet = bayesNet;
+		m_Instances = instances;
+	} // c'tor
 	
 	/**
 	 * Holds prior on count
