@@ -27,7 +27,7 @@ import weka.core.*;
  * Class for building and using a very simple kernel density classifier.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class KernelDensity extends DistributionClassifier {
 
@@ -101,7 +101,6 @@ public class KernelDensity extends DistributionClassifier {
     double lowerBound = Math.pow(Double.MIN_VALUE, 1.0 / 
 				 (instance.numAttributes() - 1.0)); 
 
-    System.out.println("lowerBound " + lowerBound);
     sum = Math.sqrt(Utils.sum(m_Counts));
     updateMinMax(instance);
     for (int i = 0; i < m_Instances.numInstances(); i++) {
