@@ -8,6 +8,7 @@ SOURCES = \
 	LegendPanel.java \
 	Plot2D.java \
 	Plot2DCompanion.java \
+	PlotData2D.java \
 	VisualizePanel.java \
 	VisualizePanelEvent.java \
 	VisualizePanelListener.java
