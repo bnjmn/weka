@@ -45,7 +45,7 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */ 
 public class HyperPipes extends DistributionClassifier {
 
@@ -232,8 +232,16 @@ public class HyperPipes extends DistributionClassifier {
       dist[j] = m_HyperPipes[j].partialContains(instance);
     }
 
-    Utils.normalize(dist);
-    return dist;
+    double sum = Utils.sum(dist);
+    if (sum <= 0) {
+      for (int j = 0; j < dist.length; j++) {
+	dist[j] = 1.0 / (double)dist.length;
+      }
+      return dist;
+    } else {
+      Utils.normalize(dist, sum);
+      return dist;
+    }
   }
 
 

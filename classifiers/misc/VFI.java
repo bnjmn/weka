@@ -110,7 +110,7 @@ import java.util.Vector;
  * Set exponential bias towards confident intervals. default = 1.0 <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class VFI extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -514,7 +514,15 @@ public class VFI extends DistributionClassifier
 	    }
 	  }	  
 	}
-	Utils.normalize(temp);
+	
+	double sum = Utils.sum(temp);
+	if (sum <= 0) {
+	  for (int j = 0; j < temp.length; j++) {
+	    temp[j] = 1.0 / (double)temp.length;
+	  }
+	} else {
+	  Utils.normalize(temp, sum);
+	}
 
 	if (m_weightByConfidence) {
 	  weight = weka.core.ContingencyTables.entropy(temp);
@@ -530,8 +538,16 @@ public class VFI extends DistributionClassifier
       }
     }
    
-    Utils.normalize(dist);
-    return dist;
+    double sum = Utils.sum(dist);
+    if (sum <= 0) {
+      for (int j = 0; j < dist.length; j++) {
+	dist[j] = 1.0 / (double)dist.length;
+      }
+      return dist;
+    } else {
+      Utils.normalize(dist, sum);
+      return dist;
+    }
   }
 	
   /**
