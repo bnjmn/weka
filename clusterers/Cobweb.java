@@ -19,9 +19,17 @@
 
 /**
  * Implementation of cobweb and classit algorithms for incremental clustering.
+ * <p>
+ * Valid options are:<p>
+ *
+ * -A <0-100> <br>
+ * Acuity. <p>
+ *
+ * -C <0-100> <br>
+ * Cutoff. <p>
  *
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.3 $
  */
 package weka.clusterers;
 
@@ -45,8 +53,7 @@ public class Cobweb extends Clusterer implements OptionHandler{
     public Instance instance = null;
     
 
-    //---- Constructor ---------------------------------------------------------
-
+    //---- Constructor -------------------------------------------------------
     public CTree(Instance i) throws Exception {
       instance = i;
       size = 1;
@@ -61,7 +68,9 @@ public class Cobweb extends Clusterer implements OptionHandler{
 	}
     }
 
-    public CTree copyNode() throws Exception { // just copies stats, not nchildren
+    public CTree copyNode() throws Exception { 
+      // just copies stats, not nchildren
+
       CTree copy = new CTree(instance);
       copy.size = size;
       for (int a = 0; a < instance.numAttributes(); a++)
@@ -91,16 +100,22 @@ public class Cobweb extends Clusterer implements OptionHandler{
 	else for (int v=0; v < 2; v++) totals[a][v] -= node.totals[a][v];
     }
   
-    public double CU() throws Exception { // category utility
+    public double CU() throws Exception { 
+      // category utility
+      
       return TU()/nchildren;
     }
 
-    public double TU() throws Exception { // total utility of children wrt this
+    public double TU() throws Exception { 
+      // total utility of children wrt this
+      
       return(TU(children));
     }
 
     public double TU(CTree node) 
-      throws Exception { // total utility of node + siblings wrt this
+      throws Exception { 
+      // total utility of node + siblings wrt this
+      
       double t = 0;
       for (CTree n = node; n != null; n = n.siblings)
 	t += UIndividual(n);
@@ -108,7 +123,9 @@ public class Cobweb extends Clusterer implements OptionHandler{
     }
 
     public double UIndividual(CTree node) 
-      throws Exception { // utility of one node wrt "this"
+      throws Exception { 
+      // utility of one node wrt "this"
+      
       double s = 0;
       for (int a = 0; a < instance.numAttributes(); a++)
 	if (instance.attribute(a).isNominal())
@@ -129,7 +146,9 @@ public class Cobweb extends Clusterer implements OptionHandler{
     }
 
     public double UMerged(CTree n1, CTree n2) 
-      throws Exception { // utility of n1 merged with n2
+      throws Exception {
+      // utility of n1 merged with n2
+
       n1.updateStats(n2);
       double U = UIndividual(n1);
       n1.downdateStats(n2);
@@ -194,7 +213,6 @@ public class Cobweb extends Clusterer implements OptionHandler{
     }
 
     // Returns a description of the tree
-
     public String toString() {
       try {
 	StringBuffer buf = new StringBuffer("\n");
@@ -221,7 +239,6 @@ public class Cobweb extends Clusterer implements OptionHandler{
     }
 
     // Appends a description of the tree (at given level) to the StringBuffer
-
     private void print(StringBuffer buf, int level) throws Exception {
       if (!cutoff) {
 	if (nchildren != nChildren()) 
@@ -229,7 +246,8 @@ public class Cobweb extends Clusterer implements OptionHandler{
 			     " but there are "+ nChildren() + " children!");
 	if (size != nDescendants()) 
 	  System.out.println("Problem: size = " + size +
-			     " but there are "+ nDescendants() +" descendants!");
+			     " but there are "+ nDescendants() +
+			     " descendants!");
 	for (int j=0; j < level; j++) buf.append("    ");
 	buf.append(size + "  | ");
 	for (int a = 0; a < instance.numAttributes(); a++) {
@@ -258,7 +276,8 @@ public class Cobweb extends Clusterer implements OptionHandler{
 			     " but there are "+ nChildren() + " children!");
 	if (size != nDescendants()) 
 	  System.out.println("Problem: size = " + size +
-			     " but there are "+ nDescendants() +" descendants!");
+			     " but there are "+ nDescendants() +
+			     " descendants!");
 	
 	this.clusterNum = cl_num[0];
 	cl_num[0]++;
@@ -271,14 +290,22 @@ public class Cobweb extends Clusterer implements OptionHandler{
     }
   }
 
-
-  static double acuity = 1.0, cutoff = 0.01 * Cobweb.norm;
+  /** acuity */
+  static double acuity = 1.0;
+  
+  /** cutoff */
+  static double cutoff = 0.01 * Cobweb.norm;
+  
+  /** the cobweb tree */
   private CTree tree = null;
+
+  /** number of clusters */
   private int numClusters = -1;
 
   /**
    * Builds the clusterer.
    *
+   * @param data the training instances.
    * @exception Exception if something goes wrong.
    */
   public void buildClusterer(Instances data) throws Exception
@@ -327,6 +354,7 @@ public class Cobweb extends Clusterer implements OptionHandler{
   /**
    * Clusters an instance.
    *
+   * @param instance the instance to cluster.
    * @exception Exception if something goes wrong.
    */
   public int clusterInstance(Instance instance) throws Exception
@@ -358,10 +386,15 @@ public class Cobweb extends Clusterer implements OptionHandler{
 
     //    System.out.println(host.clusterNum);
     return host.clusterNum;
-    
   }
 
-
+  /**
+   * Adds an example to the tree.
+   *
+   * @param node the node to be added.
+   * @param tree the tree.
+   * @exception Exception if something goes wrong.
+   */
   public void add(CTree node, CTree tree) throws Exception {
     if (tree.children == null) {
       tree.addChild(tree.copyNode());
@@ -390,6 +423,15 @@ public class Cobweb extends Clusterer implements OptionHandler{
     }
   }
 
+  /**
+   * Finds the cluster that an unseen instance belongs to.
+   *
+   * @param tree the tree.
+   * @param node the node to be added.
+   * @param aU ??
+   * @param baseU ??
+   * @exception Exception if something goes wrong.
+   */
   public CTree bestHostCluster(CTree tree, CTree node, double aU, double baseU) 
     throws Exception {
     double oldaU = aU;
@@ -410,10 +452,18 @@ public class Cobweb extends Clusterer implements OptionHandler{
 	  bU = nU;
 	}
       }
-
     return a;
   }
 
+  /**
+   * Finds the best place to add a new node during training.
+   *
+   * @param tree the tree.
+   * @param node the node to be added.
+   * @param aU ??
+   * @param baseU ??
+   * @exception Exception if something goes wrong.
+   */
   public CTree bestHost(CTree tree, CTree node, double aU, double baseU) 
     throws Exception {
     double oldaU = aU;
@@ -474,26 +524,47 @@ public class Cobweb extends Clusterer implements OptionHandler{
     return a;
   }
 
-  public String toString() { return "Number of clusters: "+numClusters+"\n"+tree.toString(); }
-
-   /**
-   * Returns an enumeration describing the available options
-   * @return an enumeration of all the available options
+  /**
+   * Returns a description of the clusterer as a string.
    *
+   * @return a string describing the clusterer.
+   */
+  public String toString() { 
+    if (tree == null)
+      return "Cobweb hasn't been built yet!";
+    else
+      return "Number of clusters: "+numClusters+"\n"+tree.toString(); 
+  }
+
+  /**
+   * Returns an enumeration describing the available options
+   *
+   * @return an enumeration of all the available options
    **/
   public Enumeration listOptions() 
   {
 
     Vector newVector = new Vector(2);
 
-    newVector.addElement(new Option("\tAcuity.", "A", 1,"-A <%>"));
-    newVector.addElement(new Option("\tCutoff.", "C", 1,"-C <%>"));
+    newVector.addElement(new Option("\tAcuity.\n"
+				    +"\t(default=100)", "A", 1,"-A <0-100%>"));
+    newVector.addElement(new Option("\tCutoff.\n"
+				    +"a\t(default=0)", "C", 1,"-C <0-100%>"));
 
     return newVector.elements();
   }
 
   /**
    * Parses a given list of options.
+   *
+   * Valid options are:<p>
+   *
+   * -A <0-100> <br>
+   * Acuity. <p>
+   *
+   * -C <0-100> <br>
+   * Cutoff. <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    *
@@ -536,16 +607,13 @@ public class Cobweb extends Clusterer implements OptionHandler{
   // Main method for testing this class
   public static void main(String [] argv)
   {
-
     try {
-      System.out.println(ClusterEvaluation.evaluateClusterer(new Cobweb(), argv));
+      System.out.println(ClusterEvaluation.evaluateClusterer(new Cobweb(), 
+							     argv));
     }
     catch (Exception e)
     {
       System.out.println(e.getMessage());
     }
   }
- 
 }
-
-

@@ -27,7 +27,7 @@ import weka.core.*;
  * (ie. a probability distribution).
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  1.0 March 1998 (Mark)
+ * @version  $Revision: 1.2 $
  */
 public abstract class DistributionClusterer extends Clusterer {
 
