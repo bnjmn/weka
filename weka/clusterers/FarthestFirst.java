@@ -49,7 +49,7 @@ import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * Specify random number seed. <p>
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -413,7 +413,10 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    *
    * @param n the number of clusters to generate
    */
-  public void setNumClusters(int n) {
+  public void setNumClusters(int n) throws Exception {
+    if (n < 0) {
+      throw new Exception("Number of clusters must be > 0");
+    }
     m_NumClusters = n;
   }
 
