@@ -1,6 +1,7 @@
 JAVAC = javac
 
-SOURCES = DecisionStump.java Id3.java UserClassifier.java
+SOURCES = DecisionStump.java Id3.java UserClassifier.java \
+	DecisionTree.java
 
 
 CLASSFILES = $(SOURCES:.java=.class)
