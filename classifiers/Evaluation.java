@@ -111,7 +111,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.31 $
+ * @version  $Revision: 1.32 $
   */
 public class Evaluation implements Summarizable {
 
@@ -915,6 +915,27 @@ public class Evaluation implements Summarizable {
       pred = classifier.classifyInstance(classMissing);
       updateStatsForPredictor(pred,
 			      instance);
+    }
+    return pred;
+  }
+
+  /**
+   * Evaluates the supplied distribution on a single instance.
+   *
+   * @param dist the supplied distribution
+   * @param instance the test instance to be classified
+   * @exception Exception if model could not be evaluated 
+   * successfully
+   */
+  public double evaluateModelOnce(double [] dist, 
+				  Instance instance) throws Exception {
+    double pred;
+    if (m_ClassIsNominal) {
+      pred = Utils.maxIndex(dist);
+      updateStatsForClassifier(dist, instance);
+    } else {
+      pred = dist[0];
+      updateStatsForPredictor(pred, instance);
     }
     return pred;
   }
