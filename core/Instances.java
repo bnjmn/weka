@@ -55,12 +55,18 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $ 
+ * @version $Revision: 1.41 $ 
  */
 public class Instances implements Serializable {
  
   /** The filename extension that should be used for arff files */
   public static String FILE_EXTENSION = ".arff";
+
+  /** The keyword used to denote the start of an arff header */
+  static String ARFF_RELATION = "@relation";
+
+  /** The keyword used to denote the start of the arff data section */
+  static String ARFF_DATA = "@data";
 
   /** The dataset's name. */
   protected String m_RelationName;         
@@ -1092,11 +1098,11 @@ public class Instances implements Serializable {
     
     StringBuffer text = new StringBuffer();
     
-    text.append("@relation " + Utils.quote(m_RelationName) + "\n\n");
+    text.append(ARFF_RELATION).append(" ").append(Utils.quote(m_RelationName)).append("\n\n");
     for (int i = 0; i < numAttributes(); i++) {
-      text.append(attribute(i) + "\n");
+      text.append(attribute(i)).append("\n");
     }
-    text.append("\n@data\n");
+    text.append("\n").append(ARFF_DATA).append("\n");
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i));
       if (i < numInstances() - 1) {
@@ -1571,12 +1577,12 @@ public class Instances implements Serializable {
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       errms(tokenizer,"premature end of file");
     }
-    if (tokenizer.sval.equalsIgnoreCase("@relation")){
+    if (ARFF_RELATION.equalsIgnoreCase(tokenizer.sval)) {
       getNextToken(tokenizer);
       m_RelationName = tokenizer.sval;
       getLastToken(tokenizer,false);
     } else {
-      errms(tokenizer,"keyword @relation expected");
+      errms(tokenizer,"keyword " + ARFF_RELATION + " expected");
     }
 
     // Create vectors to hold information temporarily.
@@ -1587,7 +1593,8 @@ public class Instances implements Serializable {
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       errms(tokenizer,"premature end of file");
     }
-    while (tokenizer.sval.equalsIgnoreCase("@attribute")) {
+
+    while (Attribute.ARFF_ATTRIBUTE.equalsIgnoreCase(tokenizer.sval)) {
 
       // Get attribute name.
       getNextToken(tokenizer);
@@ -1598,18 +1605,17 @@ public class Instances implements Serializable {
       if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
 
 	// Attribute is real, integer, or string.
-	if (tokenizer.sval.equalsIgnoreCase("real") ||
-	    tokenizer.sval.equalsIgnoreCase("integer") ||
-	    tokenizer.sval.equalsIgnoreCase("numeric")) {
-	  m_Attributes.addElement(new Attribute(attributeName,
-						 numAttributes()));
+	if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_REAL) ||
+	    tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER) ||
+	    tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
+	  m_Attributes.addElement(new Attribute(attributeName, numAttributes()));
 	  readTillEOL(tokenizer);
-	} else if (tokenizer.sval.equalsIgnoreCase("string")) {
+	} else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
 	  m_Attributes.
 	    addElement(new Attribute(attributeName, (FastVector)null,
 				     numAttributes()));
 	  readTillEOL(tokenizer);
-	} else if (tokenizer.sval.equalsIgnoreCase("date")) {
+	} else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
           String format = null;
           if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
             if ((tokenizer.ttype != StreamTokenizer.TT_WORD) &&
@@ -1660,8 +1666,8 @@ public class Instances implements Serializable {
     }
 
     // Check if data part follows. We can't easily check for EOL.
-    if (!tokenizer.sval.equalsIgnoreCase("@data")) {
-      errms(tokenizer,"keyword @data expected");
+    if (!ARFF_DATA.equalsIgnoreCase(tokenizer.sval)) {
+      errms(tokenizer,"keyword " + ARFF_DATA + " expected");
     }
     
     // Check if any attributes have been declared.

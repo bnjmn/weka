@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -98,6 +98,24 @@ public class Attribute implements Copyable, Serializable {
 
   /** Constant set for modulo-ordered attributes. */
   public static final int ORDERING_MODULO   = 2;
+
+  /** The keyword used to denote the start of an arff attribute declaration */
+  static String ARFF_ATTRIBUTE = "@attribute";
+
+  /** A keyword used to denote a numeric attribute */
+  static String ARFF_ATTRIBUTE_INTEGER = "integer";
+
+  /** A keyword used to denote a numeric attribute */
+  static String ARFF_ATTRIBUTE_REAL = "real";
+
+  /** A keyword used to denote a numeric attribute */
+  static String ARFF_ATTRIBUTE_NUMERIC = "numeric";
+
+  /** The keyword used to denote a string attribute */
+  static String ARFF_ATTRIBUTE_STRING = "string";
+
+  /** The keyword used to denote a date attribute */
+  static String ARFF_ATTRIBUTE_DATE = "date";
 
   /** Strings longer than this will be stored compressed. */
   private static final int STRING_COMPRESS_THRESHOLD = 200;
@@ -464,7 +482,7 @@ public class Attribute implements Copyable, Serializable {
     
     StringBuffer text = new StringBuffer();
     
-    text.append("@attribute " + Utils.quote(m_Name) + " ");
+    text.append(ARFF_ATTRIBUTE).append(" ").append(Utils.quote(m_Name)).append(" ");
     switch (m_Type) {
     case NOMINAL:
       text.append('{');
@@ -477,13 +495,13 @@ public class Attribute implements Copyable, Serializable {
       text.append('}');
       break;
     case NUMERIC:
-      text.append("numeric");
+      text.append(ARFF_ATTRIBUTE_NUMERIC);
       break;
     case STRING:
-      text.append("string");
+      text.append(ARFF_ATTRIBUTE_STRING);
       break;
     case DATE:
-      text.append("date ").append(Utils.quote(m_DateFormat.toPattern()));
+      text.append(ARFF_ATTRIBUTE_DATE).append(" ").append(Utils.quote(m_DateFormat.toPattern()));
       break;
     default:
       text.append("UNKNOWN");
