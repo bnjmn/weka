@@ -136,7 +136,7 @@ import java.io.*;
  * <p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public abstract class Optimization{
     
@@ -185,7 +185,7 @@ public abstract class Optimization{
      * @param x the variable values
      * @return the objective function value
      */
-    protected abstract double objectiveFunction(double[] x);
+    protected abstract double objectiveFunction(double[] x) throws Exception;
 
     /* 
      * Subclass should implement this procedure to evaluate gradient
@@ -194,7 +194,7 @@ public abstract class Optimization{
      * @param x the variable values
      * @return the gradient vector
      */
-    protected abstract double[] evaluateGradient(double[] x);
+    protected abstract double[] evaluateGradient(double[] x) throws Exception;
 
     /* 
      * Subclass is recommended to override this procedure to evaluate second-order
@@ -205,7 +205,7 @@ public abstract class Optimization{
      * @param index the row index in the Hessian matrix
      * @return one row (the row #index) of the Hessian matrix, null as default
      */
-    protected double[] evaluateHessian(double[] x, int index){
+    protected double[] evaluateHessian(double[] x, int index) throws Exception{
 	return null;
     }
 
@@ -324,7 +324,7 @@ public abstract class Optimization{
 		    System.err.println(h+": isFixed="+isFixed[h]+", x="+
 				       x[h]+", grad="+gradient[h]+", direct="+
 				       direct[h]);
-	    throw new Exception("g'*p positive! -- Try to debug from here: line 263.");
+	    throw new Exception("g'*p positive! -- Try to debug from here: line 327.");
 	}
 	
 	// Compute LAMBDAmin and upper bound of lambda--alpha
@@ -414,7 +414,7 @@ public abstract class Optimization{
 	kloop:
 	for (k=0;;k++) {
 	    if(m_Debug)
-		System.err.println("\nIteration: " + k);
+		System.err.println("\nLine search iteration: " + k);
 	    
 	    for (i=0;i<len;i++){
 		if(!isFixed[i]){
@@ -429,7 +429,9 @@ public abstract class Optimization{
 	    }
 	    
 	    m_f = objectiveFunction(x);    // Compute fnew
-	    
+	    if(Double.isNaN(m_f))
+		throw new Exception("Objective function value is NaN!");
+	
 	    while(Double.isInfinite(m_f)){ // Avoid infinity
 		if(m_Debug)
 		    System.err.println("Too large m_f.  Shrink step by half.");
@@ -445,14 +447,17 @@ public abstract class Optimization{
 			x[i] = xold[i]+alam*direct[i]; 
 		
 		m_f = objectiveFunction(x); 
+		if(Double.isNaN(m_f))
+		    throw new Exception("Objective function value is NaN!");
+	
 		initF = Double.POSITIVE_INFINITY;
 	    }
 	    
 	    if(m_Debug) {
 		System.err.println("obj. function: " + 
-				 Utils.doubleToString(m_f, 10, 7));
+				   Utils.doubleToString(m_f, 10, 7));
 		System.err.println("threshold: " + 
-				 Utils.doubleToString(fold+m_ALF*alam*m_Slope,10,7));
+				   Utils.doubleToString(fold+m_ALF*alam*m_Slope,10,7));
 	    }
 	    
 	    if(m_f<=fold+m_ALF*alam*m_Slope){// Alpha condition: sufficient function decrease
@@ -495,22 +500,26 @@ public abstract class Optimization{
 			lo = alam;
 			flo = m_f;
 			alam *= 2.0;
-			if(alam>=upper)
+			if(alam>=upper)  // Avoid rounding errors
 			    alam=upper;
 
 			for (i=0;i<len;i++)
 			    if(!isFixed[i])
 				x[i] = xold[i]+alam*direct[i];
 			m_f = objectiveFunction(x);
+			if(Double.isNaN(m_f))
+			    throw new Exception("Objective function value is NaN!");
+			
 			newGrad = evaluateGradient(x);
 			for(newSlope=0.0,i=0; i<len; i++)
 			    if(!isFixed[i])
 				newSlope += newGrad[i]*direct[i];
-
+			
 			if(newSlope >= m_BETA*m_Slope){
 			    if (m_Debug)		
-				System.err.println("Increasing derivatives (beta condition): ");
-
+				System.err.println("Increasing derivatives (beta condition): \n"+
+						   "newSlope = "+Utils.doubleToString(newSlope,10,7));
+			    
 			    if((fixedOne!=-1) && (alam>=alpha)){ // Has bounds and over
 				if(direct[fixedOne] > 0){
 				    x[fixedOne] = nwsBounds[1][fixedOne]; // Avoid rounding error
@@ -597,10 +606,16 @@ public abstract class Optimization{
 		    else {
 			disc=b*b-3.0*a*m_Slope;
 			if (disc < 0.0) disc = 0.0;
-			tmplam=(-b+Math.sqrt(disc))/(3.0*a);
+			double numerator = -b+Math.sqrt(disc);
+			if(numerator >= Double.MAX_VALUE){
+			    numerator = Double.MAX_VALUE;
+			    if (m_Debug)
+				System.err.print("-b+sqrt(disc) too large! Set it to MAX_VALUE.");
+			}
+			tmplam=numerator/(3.0*a);
 		    }
 		    if (m_Debug)
-			System.err.print("newstuff: \n" + 
+			System.err.print("Cubic interpolation: \n" + 
 					 "a:   " + Utils.doubleToString(a,10,7)+ "\n" +
 					 "b:   " + Utils.doubleToString(b,10,7)+ "\n" +
 					 "disc:   " + Utils.doubleToString(disc,10,7)+ "\n" +
@@ -630,17 +645,32 @@ public abstract class Optimization{
 	if(m_Debug)
 	    System.err.println("Last stage of searching for beta condition (alam between "
 			       +Utils.doubleToString(lo,10,7)+" and "
-			       +Utils.doubleToString(hi,10,7)+")...");
+			       +Utils.doubleToString(hi,10,7)+")...\n"+
+			       "Quadratic Interpolation(QI):\n"+
+			       "Last newSlope = "+Utils.doubleToString(newSlope, 10, 7));
+	
 	while((newSlope<m_BETA*m_Slope) && (ldiff>=alamin)){
 	    lincr = -0.5*newSlope*ldiff*ldiff/(fhi-flo-newSlope*ldiff);
+
+	    if(m_Debug)
+		System.err.println("fhi = "+fhi+"\n"+
+				   "flo = "+flo+"\n"+
+				   "ldiff = "+ldiff+"\n"+
+				   "lincr (using QI) = "+lincr+"\n");
+	    
 	    if(lincr<0.2*ldiff) lincr=0.2*ldiff;
 	    alam = lo+lincr;
-
+	    if(alam >= hi){ // We cannot go beyond the bounds, so the best we can try is hi
+	    	alam=hi;
+		lincr=ldiff;
+	    }
 	    for (i=0;i<len;i++)
 		if(!isFixed[i])
 		    x[i] = xold[i]+alam*direct[i];
 	    m_f = objectiveFunction(x);
-
+	    if(Double.isNaN(m_f))
+		throw new Exception("Objective function value is NaN!");
+	
 	    if(m_f>fold+m_ALF*alam*m_Slope){ 
 		// Alpha condition fails, shrink lambda_upper
 		ldiff = lincr;
@@ -720,6 +750,9 @@ public abstract class Optimization{
 
 	// Initial value of obj. function, gradient and inverse of the Hessian
 	m_f = objectiveFunction(initX);
+	if(Double.isNaN(m_f))
+	    throw new Exception("Objective function value is NaN!");
+	
 	double sum=0;
 	double[] grad=evaluateGradient(initX), oldGrad, oldX,
 	    deltaGrad=new double[l], deltaX=new double[l],
@@ -880,6 +913,8 @@ public abstract class Optimization{
 			if (m_Debug)
 			    System.err.println("Minimum found.");
 			m_f = objectiveFunction(x);
+			if(Double.isNaN(m_f))
+			    throw new Exception("Objective function value is NaN!");	
 			return x;
 		    }
 		    
