@@ -287,6 +287,9 @@ public class ClassValuePicker extends JPanel
    * time
    */
   public boolean eventGeneratable(String eventName) {
+    if (eventName.compareTo("dataSet") != 0) {
+      return false;
+    }
 
     if (eventName.compareTo("dataSet") == 0) { 
       if (m_dataProvider == null) {

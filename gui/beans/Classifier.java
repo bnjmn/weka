@@ -54,9 +54,9 @@ import weka.gui.Logger;
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
 <<<<<<< Classifier.java
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
 =======
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
 >>>>>>> 1.14
  * @since 1.0
  * @see JPanel
@@ -624,6 +624,7 @@ public class Classifier extends JPanel
 	    }
 	  }
 	  if (m_trainingSet.equalHeaders(m_testingSet)) {
+
 	    BatchClassifierEvent ce = 
 	      new BatchClassifierEvent(this, m_Classifier, 
 				       new DataSetEvent(this, e.getTestSet()),

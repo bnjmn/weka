@@ -48,7 +48,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -117,12 +117,11 @@ public class ClassifierPerformanceEvaluator
 		  m_classifier = ce.getClassifier();
 		  m_predInstances = 
 		    weka.gui.explorer.ClassifierPanel.
-		    setUpVisualizableInstances(ce.getTestSet().getDataSet());
+		    setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
 		  m_preds = new FastVector();
 		  m_plotShape = new FastVector();
 		  m_plotSize = new FastVector();
 		}
-		
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
 		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
