@@ -23,7 +23,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PlotData2D {
 
@@ -37,6 +37,9 @@ public class PlotData2D {
   public boolean m_useCustomColour = false;
   public Color m_customColour = null;
 
+  /** Display all points (ie. those that map to the same display coords) */
+  public boolean m_displayAllPoints = false;
+
   /** Panel coordinate cache for data points */
   protected double [][] m_pointLookup;
 
@@ -48,6 +51,14 @@ public class PlotData2D {
       data. Default is to allow automatic assigning of point shape on the
       basis of plot number */
   protected int [] m_shapeType;
+
+  /**
+   * Additional optional information to control the drawing of lines
+   * between consecutive points. Setting an entry in the array to true
+   * indicates that the associated point should have a line connecting
+   * it to the previous point.
+   */
+  protected boolean [] m_connectPoints;
 
   /** These are used to determine bounds */
 
@@ -79,6 +90,7 @@ public class PlotData2D {
     m_pointLookup = new double [m_plotInstances.numInstances()][4];
     m_shapeSize = new int [m_plotInstances.numInstances()];
     m_shapeType = new int [m_plotInstances.numInstances()];
+    m_connectPoints = new boolean [m_plotInstances.numInstances()];
     for (int i = 0; i < m_plotInstances.numInstances(); i++) {
       m_shapeSize[i] = Plot2D.DEFAULT_SHAPE_SIZE; //default shape size
       m_shapeType[i] = Plot2D.CONST_AUTOMATIC_SHAPE; // default (automatic shape assignment)
@@ -189,11 +201,43 @@ public class PlotData2D {
       throw new Exception("PlotData2D: Shape size vector must have the same "
 			  +"number of entries as number of data points!");
     }
-    System.err.println("Setting shape sizes ");
+    System.err.println("Setting connect points ");
     m_shapeSize = new int [ss.size()];
     for (int i = 0; i < ss.size(); i++) {
       m_shapeSize[i] = ((Integer)ss.elementAt(i)).intValue();
     }
+  }
+
+  /**
+   * Set whether consecutive points should be connected by lines
+   * @param cp an array of boolean specifying which points should be
+   * connected to their preceeding neighbour.
+   */
+  public void setConnectPoints(boolean [] cp) throws Exception {
+    m_connectPoints = cp;
+    if (m_connectPoints.length != m_plotInstances.numInstances()) {
+      throw new Exception("PlotData2D: connect points array must have the "
+			  +"same number of entries as number of data points!");
+    }
+    m_connectPoints[0] = false;
+  }
+  
+  /**
+   * Set whether consecutive points should be connected by lines
+   * @param cp a FastVector of boolean specifying which points should be
+   * connected to their preceeding neighbour.
+   */
+  public void setConnectPoints(FastVector cp) throws Exception {
+    if (cp.size() != m_plotInstances.numInstances()) {
+      throw new Exception("PlotData2D: connect points array must have the "
+			  +"same number of entries as number of data points!");
+    }
+    System.err.println("Setting connect points ");
+    m_shapeSize = new int [cp.size()];
+    for (int i = 0; i < cp.size(); i++) {
+      m_connectPoints[i] = ((Boolean)cp.elementAt(i)).booleanValue();
+    }
+    m_connectPoints[0] = false;
   }
 
   /**

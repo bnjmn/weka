@@ -31,6 +31,11 @@ weka.gui.visualize.VisualizePanel.ThresholdCurve.XDimension=Recall
 weka.gui.visualize.VisualizePanel.ThresholdCurve.YDimension=Precision
 weka.gui.visualize.VisualizePanel.ThresholdCurve.ColourDimension=Threshold
 
+#Defaults for cost curve plots
+weka.gui.visualize.VisualizePanel.CostCurve.XDimension=Probability\ Cost\ Function
+weka.gui.visualize.VisualizePanel.CostCurve.YDimension=Normalized\ Expected\ Cost
+weka.gui.visualize.VisualizePanel.CostCurve.ColourDimension=Threshold
+
 # Defaults for margin curve plots
 weka.gui.visualize.VisualizePanel.MarginCurve.XDimension=Margin
 weka.gui.visualize.VisualizePanel.MarginCurve.YDimension=Cumulative
