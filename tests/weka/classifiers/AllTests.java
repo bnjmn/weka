@@ -24,7 +24,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AllTests extends TestSuite {
 
@@ -84,6 +84,7 @@ public class AllTests extends TestSuite {
     suite.addTest(M5PTest.suite());
     suite.addTest(ThresholdSelectorTest.suite());
     suite.addTest(ZeroRTest.suite());
+    suite.addTest(NeuralNetworkTest.suite());
 //      suite.addTest(weka.classifiers.evaluation.AllTests.suite());
 //      suite.addTest(weka.classifiers.j48.AllTests.suite());
 //      suite.addTest(weka.classifiers.kstar.AllTests.suite());
