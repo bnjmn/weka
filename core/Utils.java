@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public final class Utils {
 
@@ -461,7 +461,7 @@ public final class Utils {
 	try {
 	  Double dummy = Double.valueOf(options[i]);
 	} catch (NumberFormatException e) {
-	  if (options[i].length() > 2) {
+	  if (options[i].length() != 2) {
 	    throw new Exception("Illegal option: " + options[i]);
 	  }
 	  if (options[i].charAt(1) == flag) {
