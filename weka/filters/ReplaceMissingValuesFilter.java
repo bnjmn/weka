@@ -28,7 +28,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
@@ -110,11 +110,13 @@ public class ReplaceMissingValuesFilter extends Filter {
       }
 
       // Convert pending input instances
-
       for(int i = 0; i < m_InputFormat.numInstances(); i++) {
 	current = m_InputFormat.instance(i);
 	convertInstance(current);
       }
+
+      // Free memory
+      m_InputFormat = new Instances(m_InputFormat, 0);
     } 
 
     m_NewBatch = true;

@@ -24,7 +24,7 @@ import java.io.*;
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Queue extends Object implements Serializable {
 
@@ -132,6 +132,9 @@ public class Queue extends Object implements Serializable {
     Object retval = m_Head.contents();
     m_Size--;
     m_Head = m_Head.next();
+    if (m_Head == null) {
+      m_Tail = null;
+    }
     return retval;
   }
 

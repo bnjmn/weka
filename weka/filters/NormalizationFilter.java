@@ -29,7 +29,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NormalizationFilter extends Filter {
 
@@ -135,6 +135,9 @@ public class NormalizationFilter extends Filter {
 	current = m_InputFormat.instance(i);
 	convertInstance(current);
       }
+
+      // Free memory
+      m_InputFormat = new Instances(m_InputFormat, 0);
     } 
 
     m_NewBatch = true;
