@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.79.2.1 $
+ * @version $Revision: 1.79.2.2 $
  */
 public class ClassifierPanel extends JPanel {
 

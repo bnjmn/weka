@@ -39,7 +39,7 @@ import javax.swing.event.TableModelEvent;
  *
  * version 1.4 12/17/97
  * @author Philip Milne 
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.1.2.1 $ 
  */
 
 public class TableMap extends AbstractTableModel

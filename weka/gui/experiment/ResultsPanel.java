@@ -87,7 +87,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28.2.1 $
+ * @version $Revision: 1.28.2.2 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -123,6 +123,9 @@ public class ResultsPanel extends JPanel {
   
   /** The model embedded in m_TestsList */
   protected DefaultListModel m_TestsModel = new DefaultListModel();
+  
+  /** The model embedded in m_DisplayedList */
+  protected DefaultListModel m_DisplayedModel = new DefaultListModel();
 
   /** Displays the currently selected column names for the scheme & options */
   protected JLabel m_DatasetKeyLabel = new JLabel("Row",
@@ -153,8 +156,14 @@ public class ResultsPanel extends JPanel {
   /** Lets the user select which scheme to base comparisons against */
   protected JButton m_TestsButton = new JButton("Select base...");
 
+  /** Lets the user select which schemes are compared to base */
+  protected JButton m_DisplayedButton = new JButton("Select");
+
   /** Holds the list of schemes to base the test against */
   protected JList m_TestsList = new JList(m_TestsModel);
+
+  /** Holds the list of schemes to display */
+  protected JList m_DisplayedList = new JList(m_DisplayedModel);
 
   /** Lets the user select which performance measure to analyze */
   protected JComboBox m_CompareCombo = new JComboBox(m_CompareModel);
@@ -166,6 +175,9 @@ public class ResultsPanel extends JPanel {
       or not */
   protected JCheckBox m_ShowStdDevs = 
     new JCheckBox("");
+  
+  /** lets the user choose the format for the output */
+  protected JButton m_OutputFormatButton = new JButton("Select");
 
   /** Click to start the test */
   protected JButton m_PerformBut = new JButton("Perform test");
@@ -211,6 +223,19 @@ public class ResultsPanel extends JPanel {
   
   private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut
 					       .getPreferredSize().height);
+
+  /** Produce tables in latex format */
+  protected boolean m_latexOutput = false;
+  
+  /** Produce tables in csv format */
+  protected boolean m_csvOutput = false;
+  
+  /** the number of digits after the period (= precision) for printing the mean */
+  protected int m_MeanPrec = 2;
+  
+  /** the number of digits after the period (= precision) for printing the std. deviation */
+  protected int m_StdDevPrec = 2;
+
   /**
    * Creates the results panel with no initial experiment.
    */
@@ -295,6 +320,21 @@ public class ResultsPanel extends JPanel {
 	}
       });
 
+    m_DisplayedButton.setEnabled(false);
+    m_DisplayedButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setDisplayedFromDialog();
+      }
+      });
+
+    m_ShowStdDevs.setEnabled(false);
+    m_OutputFormatButton.setEnabled(false);
+    m_OutputFormatButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setOutputFormatFromDialog();
+      }
+      });
+    
     m_PerformBut.setEnabled(false);
     m_PerformBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -409,8 +449,7 @@ public class ResultsPanel extends JPanel {
     gbL.setConstraints(m_TestsButton, gbC);
     p3.add(m_TestsButton);
 
-
-    lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
+    lab = new JLabel("Displayed Columns", SwingConstants.RIGHT);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = 6;     gbC.gridx = 0;
@@ -418,12 +457,41 @@ public class ResultsPanel extends JPanel {
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.WEST;
+    gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 6;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
+    gbL.setConstraints(m_DisplayedButton, gbC);
+    p3.add(m_DisplayedButton);
+
+
+    lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 7;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 7;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_ShowStdDevs, gbC);
     p3.add(m_ShowStdDevs);
 
+    lab = new JLabel("Output Format", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 8;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 8;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
+    gbL.setConstraints(m_OutputFormatButton, gbC);
+    p3.add(m_OutputFormatButton);
+    
     JPanel output = new JPanel();
     output.setLayout(new BorderLayout());
     output.setBorder(BorderFactory.createTitledBorder("Test output"));
@@ -569,6 +637,7 @@ public class ResultsPanel extends JPanel {
 	lm.addElement(index.instance(i).toString());
       }
       JList jl = new JList(lm);
+      jl.setSelectedIndex(0);
       ListSelectorDialog jd = new ListSelectorDialog(null, jl);
       int result = jd.showDialog();
       if (result != ListSelectorDialog.APPROVE_OPTION) {
@@ -582,7 +651,10 @@ public class ResultsPanel extends JPanel {
       setInstancesFromDatabaseTable(table);
       
     } catch (Exception ex) {
-      m_FromLab.setText("Problem reading database");
+       // 1. print complete stacktrace
+       ex.printStackTrace();
+       // 2. print message in panel
+       m_FromLab.setText("Problem reading database: '" + ex.getMessage() + "'");
     }
   }
   
@@ -777,6 +849,9 @@ public class ResultsPanel extends JPanel {
    */
   protected void setTTester() {
     
+    // default is to display all columns
+    m_TTester.setDisplayedResultsets(null);       
+
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date())
       + "Available resultsets";
@@ -794,11 +869,21 @@ public class ResultsPanel extends JPanel {
 	} */
       m_TestsModel.addElement(tname);
     }
+    
+    m_DisplayedModel.removeAllElements();
+    for (int i = 0; i < m_TestsModel.size(); i++)
+      m_DisplayedModel.addElement(m_TestsModel.elementAt(i));
+    
     m_TestsModel.addElement("Summary");
     m_TestsModel.addElement("Ranking");
-    m_TestsList.setSelectedIndex(0);
-    m_TestsButton.setEnabled(true);
 
+    m_TestsList.setSelectedIndex(0);
+    m_DisplayedList.setSelectionInterval(0, m_DisplayedModel.size() - 1);
+    
+    m_TestsButton.setEnabled(true);
+    m_DisplayedButton.setEnabled(true);
+    m_ShowStdDevs.setEnabled(true);
+    m_OutputFormatButton.setEnabled(true);
     m_PerformBut.setEnabled(true);
     
   }
@@ -830,6 +915,11 @@ public class ResultsPanel extends JPanel {
     outBuff.append("\n");
     m_History.addResult(name, outBuff);
     m_History.setSingle(name);
+    m_TTester.setDisplayedResultsets(m_DisplayedList.getSelectedIndices());
+    m_TTester.setMeanPrec(m_MeanPrec);
+    m_TTester.setStdDevPrec(m_StdDevPrec);
+    m_TTester.setProduceLatex(m_latexOutput);
+    m_TTester.setProduceCSV(m_csvOutput);
     try {
       if (tType < m_TTester.getNumResultsets()) {
 	outBuff.append(m_TTester.multiResultsetFull(tType, compareCol));
@@ -907,6 +997,33 @@ public class ResultsPanel extends JPanel {
 
     // Open the dialog
     jd.showDialog();
+  }
+
+  public void setDisplayedFromDialog() {
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_DisplayedList);
+
+    // Open the dialog
+    jd.showDialog();
+  }
+  
+  /**
+   * displays the Dialog for the output format and sets the chosen settings, 
+   * if the user approves
+   */
+  public void setOutputFormatFromDialog() {
+    OutputFormatDialog dialog = new OutputFormatDialog(null);
+    
+    dialog.setProduceLatex(m_latexOutput);
+    dialog.setProduceCSV(m_csvOutput);
+    dialog.setMeanPrec(m_MeanPrec);
+    dialog.setStdDevPrec(m_StdDevPrec);
+    
+    if (dialog.showDialog() == OutputFormatDialog.APPROVE_OPTION) {
+      m_latexOutput = dialog.getProduceLatex();
+      m_csvOutput   = dialog.getProduceCSV();
+      m_MeanPrec    = dialog.getMeanPrec();
+      m_StdDevPrec  = dialog.getStdDevPrec();
+    }
   }
 
   /**

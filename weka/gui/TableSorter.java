@@ -54,7 +54,7 @@ import javax.swing.table.TableColumnModel;
  *
  * version 1.5 12/17/97
  * @author Philip Milne
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.1.2.1 $ 
  */
 
 public class TableSorter extends TableMap {

@@ -64,9 +64,9 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.20.2.1 $
  */
-public class Plot2D extends JPanel {
+public class Plot2D extends PrintablePanel {
 
   /* constants for shape types */
   public static final int MAX_SHAPES = 5;
@@ -181,6 +181,7 @@ public class Plot2D extends JPanel {
 
   /** Constructor */
   public Plot2D() {
+    super();
     setProperties();
     this.setBackground(m_backgroundColour);
     m_InstanceInfoText.setFont(new Font("Monospaced", Font.PLAIN,12));

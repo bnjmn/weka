@@ -50,7 +50,7 @@ import java.text.*;
  * @see #m_PSFontReplacement
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 
 public class PostscriptGraphics extends Graphics2D {

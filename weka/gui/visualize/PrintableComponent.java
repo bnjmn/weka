@@ -45,7 +45,7 @@ import weka.gui.ExtensionFileFilter;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class PrintableComponent implements PrintableHandler {
   /** the parent component of this print dialog */

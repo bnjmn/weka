@@ -28,6 +28,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.*;
 import weka.core.Instances;
+import weka.gui.visualize.PrintablePanel;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.VisualizePanelListener;
 import weka.gui.visualize.VisualizePanelEvent;
@@ -59,9 +60,9 @@ import weka.gui.visualize.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
-public class TreeVisualizer extends JPanel implements MouseMotionListener,
+public class TreeVisualizer extends PrintablePanel implements MouseMotionListener,
 			       MouseListener,ActionListener,ItemListener {
 
 
@@ -236,7 +237,8 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
    * @param p the algorithm to be used to position the nodes.
    */
   public TreeVisualizer(TreeDisplayListener tdl, String dot, NodePlace p) {
-
+    super();
+    
     //generate the node structure in here
     setBorder(BorderFactory.createTitledBorder("Tree View")); 
     m_listener = tdl;
@@ -461,6 +463,8 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
    * @param p the algorithm to be used to position the nodes.
    */  
   public TreeVisualizer(TreeDisplayListener tdl, Node n, NodePlace p) {
+    super();
+    
     //if the size needs to be automatically alocated I will do it here
     setBorder(BorderFactory.createTitledBorder("Tree View")); 
     m_listener = tdl;
@@ -1033,11 +1037,11 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
       //then the left mouse button has been pressed
       //check for modifiers
       
-      if ((e.getModifiers() & e.CTRL_MASK) != 0) {
+      if (((e.getModifiers() & e.CTRL_MASK) != 0) && ((e.getModifiers() & e.SHIFT_MASK) == 0)) {
 	//then is in zoom out mode
 	m_mouseState = 2;
       }
-      else if ((e.getModifiers() & e.SHIFT_MASK) != 0) {
+      else if (((e.getModifiers() & e.SHIFT_MASK) != 0) && ((e.getModifiers() & e.CTRL_MASK) == 0)) {
 	//then is in zoom mode
 	//note if both are pressed default action is to zoom out
 	m_oldMousePos.width = e.getX();

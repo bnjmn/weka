@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.45.2.1 $
+ * @version $Revision: 1.45.2.2 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -842,10 +842,11 @@ public class ClustererPanel extends JPanel {
 
 	    // remove the class attribute (if set) and build the clusterer
 	    clusterer.buildClusterer(removeClass(trainInst));
-
+	    
 	    if (testMode == 2) {
 	      outBuff.append("\n=== Clustering model (full training set) ===\n\n");
-	    outBuff.append(clusterer.toString() + '\n');
+	    
+	      outBuff.append(clusterer.toString() + '\n');
 	    }
 	    m_History.updateResult(name);
 	    if (clusterer instanceof Drawable) {

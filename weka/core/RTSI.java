@@ -55,7 +55,7 @@ import java.util.Vector;
  *
  * @author <a href="mailto:daniel@satlive.org">Daniel Le Berre</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class RTSI {
   /** whether to output some debug information */

@@ -65,8 +65,14 @@ import weka.core.Option;
  * scheme name plus options).
  * (default last) <p>
  *
+ * -L <br>
+ * Produce comparison tables in Latex table format <p>
+ *
+ * -csv <br>
+ * Produce comparison tables in csv format <p>
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.22.2.1 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -107,6 +113,9 @@ public class PairedTTester implements OptionHandler {
   /** An array containing the indexes of just the selected columns */ 
   protected int [] m_ResultsetKeyColumns;
 
+  /** An array containing the indexes of the datasets to display */
+  protected int[] m_DisplayedResultsets = null;
+
   /** Stores a vector for each resultset holding all instances in each set */
   protected FastVector m_Resultsets = new FastVector();
 
@@ -118,6 +127,15 @@ public class PairedTTester implements OptionHandler {
 
   /** Produce tables in latex format */
   protected boolean m_latexOutput = false;
+  
+  /** Produce tables in csv format */
+  protected boolean m_csvOutput = false;
+  
+  /** the number of digits after the period (= precision) for printing the mean */
+  protected int m_MeanPrec = 2;
+  
+  /** the number of digits after the period (= precision) for printing the std. deviation */
+  protected int m_StdDevPrec = 2;
   
   /* A list of unique "dataset" specifiers that have been observed */
   protected class DatasetSpecifiers {
@@ -359,11 +377,45 @@ public class PairedTTester implements OptionHandler {
   }
 
   /**
+   * Sets the precision of the mean output
+   * @param precision the number of digits used in printing the mean
+   */
+  public void setMeanPrec(int precision) {
+    m_MeanPrec = precision;
+  }
+
+  /**
+   * Gets the precision used for printing the mean
+   * @return the number of digits used in printing the mean
+   */
+  public int getMeanPrec() {
+    return m_MeanPrec;
+  }
+
+  /**
+   * Sets the precision of the std. deviation output
+   * @param precision the number of digits used in printing the std. deviation
+   */
+  public void setStdDevPrec(int precision) {
+    m_StdDevPrec = precision;
+  }
+
+  /**
+   * Gets the precision used for printing the std. deviation
+   * @return the number of digits used in printing the std. deviation
+   */
+  public int getStdDevPrec() {
+    return m_StdDevPrec;
+  }
+
+  /**
    * Set whether latex is output
    * @param l true if tables are to be produced in Latex format
    */
   public void setProduceLatex(boolean l) {
     m_latexOutput = l;
+    if (m_latexOutput)
+      setProduceCSV(false);
   }
 
   /**
@@ -372,6 +424,24 @@ public class PairedTTester implements OptionHandler {
    */
   public boolean getProduceLatex() {
     return m_latexOutput;
+  }
+  
+  /**
+   * Set whether csv is output
+   * @param c true if tables are to be produced in csv format
+   */
+  public void setProduceCSV(boolean c) {
+    m_csvOutput = c;
+    if (m_csvOutput)
+      setProduceLatex(false);
+  }
+  
+  /**
+   * Get whether csv is output
+   * @return true if csv is to be output
+   */
+  public boolean getProduceCSV() {
+    return m_csvOutput;
   }
 
   /**
@@ -497,13 +567,37 @@ public class PairedTTester implements OptionHandler {
 
     if (!m_ResultsetsValid) {
       try {
-	prepareData();
+  prepareData();
       } catch (Exception ex) {
-	ex.printStackTrace();
-	return 0;
+  ex.printStackTrace();
+  return 0;
       }
     }
     return m_Resultsets.size();
+  }
+
+  /**
+   * Gets the number of displayed resultsets in the data.
+   *
+   * @return the number of displayed resultsets in the data
+   */
+  public int getNumDisplayedResultsets() {
+
+    if (!m_ResultsetsValid) {
+      try {
+        prepareData();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        return 0;
+      }
+    }
+    
+    int result = 0;
+    for (int i = 0; i < getNumResultsets(); i++) {
+      if (displayResultset(i))
+        result++;
+    }
+    return result;
   }
 
   /**
@@ -523,6 +617,31 @@ public class PairedTTester implements OptionHandler {
       }
     }
     return ((Resultset) m_Resultsets.elementAt(index)).templateString();
+  }
+  
+  /**
+   * Checks whether the resultset with the given index shall be displayed.
+   * 
+   * @param index the index of the resultset to check whether it shall be displayed 
+   * @return whether the specified resultset is displayed 
+   */
+  public boolean displayResultset(int index) {
+    boolean       result;
+    int           i;
+    
+    result = true;
+
+    if (m_DisplayedResultsets != null) {
+      result = false;
+      for (i = 0; i < m_DisplayedResultsets.length; i++) {
+        if (m_DisplayedResultsets[i] == index) {
+          result = true;
+          break;
+        }
+      }
+    }
+      
+    return result;
   }
   
   /**
@@ -660,11 +779,12 @@ public class PairedTTester implements OptionHandler {
    * j performed significantly better than resultset i.
    * @exception Exception if an error occurs
    */
-  public int [][] multiResultsetWins(int comparisonColumn)
+  public int [][] multiResultsetWins(int comparisonColumn, int [][] nonSigWin)
     throws Exception {
 
     int numResultsets = getNumResultsets();
     int [][] win = new int [numResultsets][numResultsets];
+    //    int [][] nonSigWin = new int [numResultsets][numResultsets];
     for (int i = 0; i < numResultsets; i++) {
       for (int j = i + 1; j < numResultsets; j++) {
 	System.err.print("Comparing (" + (i + 1) + ") with ("
@@ -679,6 +799,12 @@ public class PairedTTester implements OptionHandler {
 	      win[i][j]++;
 	    } else if (pairedStats.differencesSignificance > 0) {
 	      win[j][i]++;
+	    }
+
+	    if (pairedStats.differencesStats.mean < 0) {
+	      nonSigWin[i][j]++;
+	    } else if (pairedStats.differencesStats.mean > 0) {
+	      nonSigWin[j][i]++;
 	    }
 	  } catch (Exception ex) {
 	    ex.printStackTrace();
@@ -702,8 +828,10 @@ public class PairedTTester implements OptionHandler {
   public String multiResultsetSummary(int comparisonColumn)
     throws Exception {
     
-    int [][] win = multiResultsetWins(comparisonColumn);
     int numResultsets = getNumResultsets();
+    int [][] nonSigWin = new int [numResultsets][numResultsets];
+
+    int [][] win = multiResultsetWins(comparisonColumn, nonSigWin);
     int resultsetLength = 1 + Math.max((int)(Math.log(numResultsets)
 					     / Math.log(10)),
 				       (int)(Math.log(getNumDatasets()) / 
@@ -712,28 +840,35 @@ public class PairedTTester implements OptionHandler {
     String titles = "";
 
     if (m_latexOutput) {
+      result += "{\\centering\n";
       result += "\\begin{table}[thb]\n\\caption{\\label{labelname}"
 		  +"Table Caption}\n";
       result += "\\footnotesize\n";
-      result += "{\\centering \\begin{tabular}{l";
+      result += "\\begin{tabular}{l";
     }
 
     for (int i = 0; i < numResultsets; i++) {
+      if (!displayResultset(i))
+        continue;
       if (m_latexOutput) {
 	titles += " &";
 	result += "c";
       }
       titles += ' ' + Utils.padLeft("" + (char)((int)'a' + i % 26),
-				    resultsetLength);
+				    resultsetLength * 2 + 3);
     }
     if (m_latexOutput) {
-      result += "}}\\\\\n\\hline\n";
+      result += "}\\\\\n\\hline\n";
       result += titles + " \\\\\n\\hline\n";
     } else {
       result += titles + "  (No. of datasets where [col] >> [row])\n";
     }
     for (int i = 0; i < numResultsets; i++) {
+      if (!displayResultset(i))
+        continue;
       for (int j = 0; j < numResultsets; j++) {
+        if (!displayResultset(j))
+          continue;
 	if (m_latexOutput && j == 0) {
 	  result +=  (char)((int)'a' + i % 26);
 	}
@@ -741,13 +876,14 @@ public class PairedTTester implements OptionHandler {
 	  if (m_latexOutput) {
 	    result += " & - ";
 	  } else {
-	    result += ' ' + Utils.padLeft("-", resultsetLength);
+	    result += ' ' + Utils.padLeft("-", resultsetLength * 2 + 3);
 	  }
 	} else {
 	  if (m_latexOutput) {
-	    result += "& " + win[i][j] + ' ';
+	    result += "& " + nonSigWin[i][j] + " (" + win[i][j] + ") ";
 	  } else {
-	    result += ' ' + Utils.padLeft("" + win[i][j], resultsetLength);
+	    result += ' ' + Utils.padLeft("" + nonSigWin[i][j] +  " (" + win[i][j] + ")"
+					  , resultsetLength * 2 + 3);
 	  }
 	}
       }
@@ -760,16 +896,19 @@ public class PairedTTester implements OptionHandler {
     }
 
     if (m_latexOutput) {
-      result += "\\hline\n\\end{tabular} \\footnotesize \\par}\n\\end{table}";
+      result += "\\hline\n\\end{tabular} \\footnotesize \\par\n\\end{table}}";
     }
     return result;
   }
 
   public String multiResultsetRanking(int comparisonColumn)
     throws Exception {
-
-    int [][] win = multiResultsetWins(comparisonColumn);
+    
     int numResultsets = getNumResultsets();
+    int [][] nonSigWin = new int [numResultsets][numResultsets];
+
+    int [][] win = multiResultsetWins(comparisonColumn, nonSigWin);
+
     int [] wins = new int [numResultsets];
     int [] losses = new int [numResultsets];
     int [] diff = new int [numResultsets];
@@ -799,6 +938,8 @@ public class PairedTTester implements OptionHandler {
     int [] ranking = Utils.sort(diff);
     for (int i = numResultsets - 1; i >= 0; i--) {
       int curr = ranking[i];
+      if (!displayResultset(curr))
+        continue;
       if (m_latexOutput) {
 	result += "(" + (curr+1) + ") & " 
 	  + Utils.padLeft("" + diff[curr], width) 
@@ -834,9 +975,10 @@ public class PairedTTester implements OptionHandler {
 					 int maxWidthStdDev) {
 
     StringBuffer result = new StringBuffer(1000);
-    int numcols = getNumResultsets() * 2;
+    String tmpStr = "";
+    int numcols = getNumDisplayedResultsets() * 2;
     if (m_ShowStdDevs) {
-      numcols += getNumResultsets();
+      numcols += getNumDisplayedResultsets();
     }
 
     result.append("\\begin{table}[thb]\n\\caption{\\label{labelname}"
@@ -857,6 +999,8 @@ public class PairedTTester implements OptionHandler {
     }
 
     for (int j = 0; j < getNumResultsets(); j++) {
+      if (!displayResultset(j))
+        continue;
       if (j != baseResultset) {
 	if (!m_ShowStdDevs) {
 	  result.append("l@{\\hspace{0.1cm}}l");
@@ -874,6 +1018,8 @@ public class PairedTTester implements OptionHandler {
 
     // now do the column names (numbers)
     for (int j = 0; j < getNumResultsets(); j++) {
+      if (!displayResultset(j))
+        continue;
       if (j != baseResultset) {
 	if (!m_ShowStdDevs) {
 	  result.append("& (" + (j + 1) + ") & ");
@@ -885,9 +1031,9 @@ public class PairedTTester implements OptionHandler {
     result.append("\\\\\n\\hline\n");
     
     int datasetLength = 25;
-    int resultsetLength = maxWidthMean + 7;
+    int resultsetLength = maxWidthMean + 5 + m_MeanPrec;
     if (m_ShowStdDevs) {
-      resultsetLength += (maxWidthStdDev + 5);
+      resultsetLength += (maxWidthStdDev + 8 + m_StdDevPrec);
     }
 
     for (int i = 0; i < getNumDatasets(); i++) {
@@ -904,50 +1050,50 @@ public class PairedTTester implements OptionHandler {
 
 	
 	if (!m_ShowStdDevs) {
-	  result.append("& "+padIt(pairedStats.xStats.mean,
-				   resultsetLength - 2, 2));
+	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
 	} else {
-	  result.append("& "+padIt(pairedStats.xStats.mean,
-				   (maxWidthMean+5), 2)+"$\\pm$");
+	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec) + "$\\pm$";
 	  if (Double.isNaN(pairedStats.xStats.stdDev)) {
-	    result.append("&"+Utils.doubleToString(0.0,
-						  (maxWidthStdDev+3),2)+" ");
+	    tmpStr += "&" + Utils.doubleToString(0.0, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 	  } else {
-	    result.append("&"+padIt(pairedStats.xStats.stdDev,
-				    (maxWidthStdDev+3),2)+" ");
+	    tmpStr += "&" + padIt(pairedStats.xStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 	  }
 	}
+	if (tmpStr.length() < resultsetLength - 2)
+	  tmpStr = Utils.padLeft(tmpStr, resultsetLength - 2);
+	result.append("& ")
+	      .append(tmpStr);
 	// Iterate over the resultsets
 	for (int j = 0; j < getNumResultsets(); j++) {
+          if (!displayResultset(j))
+            continue;
 	  if (j != baseResultset) {
 	    try {
 	      pairedStats = 
 		calculateStatistics(m_DatasetSpecifiers.specifier(i), 
 				    baseResultset, j, comparisonColumn);
-	      String sigString = "";
+	      String sigString = "         ";
 	      if (pairedStats.differencesSignificance < 0) {
-		sigString = "$\\circ$";
+		sigString = "$\\circ$  ";
 	      } else if (pairedStats.differencesSignificance > 0) {
 		sigString = "$\\bullet$";
 	      } 
 	      if (!m_ShowStdDevs) {
-		result.append(" & "+padIt(pairedStats.yStats.mean,
-					  resultsetLength - 2,
-					  2)).append(" & "+sigString);
+		tmpStr = padIt(pairedStats.yStats.mean, maxWidthMean + 5, m_MeanPrec);
 	      } else {
-		result.append(" & "
-			      +padIt(pairedStats.yStats.mean,
-				     (maxWidthMean+5),
-				     2)+"$\\pm$");
+		tmpStr = padIt(pairedStats.yStats.mean, maxWidthMean + 5, m_MeanPrec) + "$\\pm$";
 		if (Double.isNaN(pairedStats.yStats.stdDev)) {
-		  result.append("&"+Utils.doubleToString(0.0, 
-				(maxWidthStdDev+3),2)+" ");
+		  tmpStr += "&" + Utils.doubleToString(0.0, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 		} else {
-		  result.append("&"+padIt(pairedStats.
-					  yStats.stdDev, (maxWidthStdDev+3),2)+" ");
+		  tmpStr += "&" + padIt(pairedStats.yStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 		}
-		result.append(" & ").append(sigString);
 	      }
+	      if (tmpStr.length() < resultsetLength - 2)
+	        tmpStr = Utils.padLeft(tmpStr, resultsetLength - 2);
+	      result.append(" & ")
+	            .append(tmpStr)
+	            .append(" & ")
+	            .append(sigString);
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	      result.append(Utils.padLeft("", resultsetLength + 1));
@@ -971,26 +1117,42 @@ public class PairedTTester implements OptionHandler {
     
     result.append("\\par}\n\\end{table}"
 		  +"\n");
-    System.out.println(result.toString()+"\n\n");
     return result.toString();
   }
 
+  /**
+   * pads the given double on the left side with blanks and returns the string
+   * 
+   * @param value the value to print as string
+   * @param a the width of the double
+   * @param b the precision of the double (digits after period)
+   * @return the double as left-padded string
+   */
   private String padIt(double value, int a, int b) {
     String res = Utils.doubleToString(value,
 				      a, b);
+    int precision = 0;  
     int width = res.length();
+
     res = res.trim();
+    
+    // how many "0" to add? -> determine current precision digits
     if (res.indexOf(".") == -1) {
-      res += ".00";
-    } else if (res.indexOf(".") == res.length()-2) {
-      res += "0";
+      res += ".";
+      precision = 0;
     }
+    else {
+      precision = res.substring(res.indexOf(".") + 1).length();
+    }
+    for (int i = precision; i < b; i++)
+      res += "0";
+
     while (res.length() < width) {
       res = " " + res;
     }
     return res;
   }
-
+  
   /**
    * Generates a comparison table in latex table format
    *
@@ -1006,12 +1168,13 @@ public class PairedTTester implements OptionHandler {
                                              int maxWidthStdDev) {
 
     StringBuffer result = new StringBuffer(1000);
+    String tmpStr = "";
     int datasetLength = 25;
     //    int resultsetLength = 9;
     //    int resultsetLength = 16;
-    int resultsetLength = maxWidthMean + 7;
+    int resultsetLength = maxWidthMean + 5 + m_MeanPrec;
     if (m_ShowStdDevs) {
-      resultsetLength += (maxWidthStdDev + 5);
+      resultsetLength += (maxWidthStdDev + 3 + m_StdDevPrec);
     }
 
     // Set up the titles
@@ -1033,6 +1196,8 @@ public class PairedTTester implements OptionHandler {
     separator.append("---");
     titles.append(" | ");
     for (int j = 0; j < getNumResultsets(); j++) {
+      if (!displayResultset(j))
+        continue;
       if (j != baseResultset) {
         label = new StringBuffer(Utils.padLeft("(" + (j + 1) + ") "
                                                + getResultsetName(j), resultsetLength));
@@ -1061,29 +1226,23 @@ public class PairedTTester implements OptionHandler {
                               comparisonColumn);
         datasetName = Utils.padRight(datasetName, datasetLength);
         result.append(datasetName);
-        result.append(Utils.padLeft('('
-                                    + Utils.doubleToString(pairedStats.count,
-                                                           0)
-                                    + ')', 5)).append(' ');
+        result.append(Utils.padLeft('(' + Utils.doubleToString(pairedStats.count, 0) + ')', 5))
+              .append(' ');
         if (!m_ShowStdDevs) {
-
-	  result.append(padIt(pairedStats.xStats.mean,
-			      resultsetLength - 2, 2)).
-	    append(" | ");
+	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
         } else {
-          result.append(padIt(pairedStats.xStats.mean,
-			      (maxWidthMean+5), 2));
+          tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
           if (Double.isInfinite(pairedStats.xStats.stdDev)) {
-            result.append('(' + Utils.padRight("Inf", maxWidthStdDev + 3)
-                          +')').append(" | ");
+            tmpStr += '(' + Utils.padRight("Inf", maxWidthStdDev + 3) +')';
           } else {
-            result.append('('+padIt(pairedStats.xStats.stdDev,
-				    (maxWidthStdDev+3),2)
-                          +')').append(" | ");
+            tmpStr += '(' + padIt(pairedStats.xStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + ')';
           }
         }
+        result.append(Utils.padLeft(tmpStr, resultsetLength - 2)).append(" | ");
         // Iterate over the resultsets
         for (int j = 0; j < getNumResultsets(); j++) {
+          if (!displayResultset(j))
+            continue;
           if (j != baseResultset) {
             try {
               pairedStats = 
@@ -1100,26 +1259,19 @@ public class PairedTTester implements OptionHandler {
                 tie[j]++;
               }
               if (!m_ShowStdDevs) {
-                result.append(padIt(pairedStats.yStats.mean,
-				    resultsetLength - 2,
-				    2)).append(' ')
-                  .append(sigChar).append(' ');
+                tmpStr = padIt(pairedStats.yStats.mean, resultsetLength - 2, m_MeanPrec);
               } else {
-                result.append(padIt(pairedStats.yStats.mean,
-				    (maxWidthMean+5),
-				    2));
+                tmpStr = padIt(pairedStats.yStats.mean, maxWidthMean + 5, m_MeanPrec);
                 if (Double.isInfinite(pairedStats.yStats.stdDev)) {
-                  result.append('(' 
-                                + Utils.padRight("Inf", maxWidthStdDev + 3)
-                                +')');
+                  tmpStr += '(' + Utils.padRight("Inf", maxWidthStdDev + 3) + ')';
                 } else {
-                  result.append('('+padIt(pairedStats.
-					  yStats.stdDev, 
-					  (maxWidthStdDev+3),
-					  2)+')');
+                  tmpStr += '(' + padIt(pairedStats.yStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + ')';
                 }
-                result.append(' ').append(sigChar).append(' ');
               }
+              result.append(Utils.padLeft(tmpStr, resultsetLength - 2))
+                    .append(' ')
+                    .append(sigChar)
+                    .append(' ');
             } catch (Exception ex) {
               ex.printStackTrace();
               result.append(Utils.padLeft("", resultsetLength + 1));
@@ -1136,10 +1288,168 @@ public class PairedTTester implements OptionHandler {
     result.append(Utils.padLeft("(v/ /*)", datasetLength + 4 +
                                 resultsetLength)).append(" | ");
     for (int j = 0; j < getNumResultsets(); j++) {
+      if (!displayResultset(j))
+        continue;
       if (j != baseResultset) {
         result.append(Utils.padLeft("(" + win[j] + '/' + tie[j]
                                     + '/' + loss[j] + ')',
                                     resultsetLength)).append(' ');
+      }
+    }
+    result.append('\n');
+    if (!skipped.equals("")) {
+      result.append("Skipped: ").append(skipped).append('\n');
+    }
+    return result.toString();
+  }
+  
+  /**
+   * Generates a comparison table in CSV table format
+   *
+   * @param baseResultset the index of the base resultset
+   * @param comparisonColumn the index of the column to compare over
+   * @param maxWidthMean width for the mean
+   * @param maxWidthStdDev width for the standard deviation
+   * @return the comparison table string
+   */
+  private String multiResultsetFullCSV(int baseResultset,
+                                       int comparisonColumn,
+                                       int maxWidthMean,
+                                       int maxWidthStdDev) {
+    StringBuffer result = new StringBuffer(1000);
+    
+    int resultsetLength = maxWidthMean + 7;
+    if (m_ShowStdDevs) {
+      resultsetLength += (maxWidthStdDev + 5);
+    }
+    
+    // Set up the titles
+    StringBuffer titles = new StringBuffer("Dataset");
+    titles.append(",");
+    StringBuffer label  = new StringBuffer(Utils.quote("(" + (baseResultset + 1)
+                                           + ") "
+                                           + getResultsetName(baseResultset)));
+    
+    titles.append(label);
+    if (m_ShowStdDevs)
+      titles.append(",")
+            .append("StdDev");
+    for (int j = 0; j < getNumResultsets(); j++) {
+      if (!displayResultset(j))
+        continue;
+      if (j != baseResultset) {
+        label = new StringBuffer(Utils.quote("(" + (j + 1) + ") " + getResultsetName(j)));
+        titles.append(",")
+              .append(label)
+              .append(",");
+        if (m_ShowStdDevs)
+          titles.append("StdDev")
+                .append(",");
+      }
+    }
+    result.append(titles).append('\n');
+    
+    // Iterate over datasets
+    int [] win = new int [getNumResultsets()];
+    int [] loss = new int [getNumResultsets()];
+    int [] tie = new int [getNumResultsets()];
+    StringBuffer skipped = new StringBuffer("");
+    for (int i = 0; i < getNumDatasets(); i++) {
+      // Print the name of the dataset
+      String datasetName = 
+        templateString(m_DatasetSpecifiers.specifier(i));
+      try {
+        PairedStats pairedStats = 
+          calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+              baseResultset, baseResultset,
+              comparisonColumn);
+        result.append(Utils.quote(datasetName + Utils.doubleToString(pairedStats.count, 0)));
+        if (!m_ShowStdDevs) {
+          result.append(',')
+                .append(padIt(pairedStats.xStats.mean, resultsetLength - 2, m_MeanPrec).trim());
+        } 
+        else {
+          result.append(',')
+                .append(padIt(pairedStats.xStats.mean, (maxWidthMean+5), m_MeanPrec).trim());
+          if (Double.isInfinite(pairedStats.xStats.stdDev)) {
+            result.append(',')
+                  .append("Inf");
+          } 
+          else {
+            result.append(',')
+                  .append(padIt(pairedStats.xStats.stdDev, (maxWidthStdDev+3), m_StdDevPrec));
+          }
+        }
+        // Iterate over the resultsets
+        for (int j = 0; j < getNumResultsets(); j++) {
+          if (!displayResultset(j))
+            continue;
+          if (j != baseResultset) {
+            try {
+              pairedStats = 
+                calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+                    baseResultset, j, comparisonColumn);
+              char sigChar = ' ';
+              if (pairedStats.differencesSignificance < 0) {
+                sigChar = 'v';
+                win[j]++;
+              } 
+              else 
+                if (pairedStats.differencesSignificance > 0) {
+                  sigChar = '*';
+                  loss[j]++;
+                } 
+                else {
+                  tie[j]++;
+                }
+              if (!m_ShowStdDevs) {
+                result.append(',')
+                      .append(padIt(pairedStats.yStats.mean, resultsetLength - 2, m_MeanPrec).trim())
+                      .append(',')
+                      .append(sigChar);
+              } 
+              else {
+                result.append(',')
+                      .append(padIt(pairedStats.yStats.mean, (maxWidthMean+5), m_MeanPrec).trim());
+                if (Double.isInfinite(pairedStats.yStats.stdDev)) {
+                  result.append(',')
+                        .append("Inf");
+                } 
+                else {
+                  result.append(',')
+                        .append(padIt(pairedStats.yStats.stdDev, (maxWidthStdDev+3), m_StdDevPrec).trim());
+                }
+                result.append(',')
+                      .append(sigChar);
+              }
+            } catch (Exception ex) {
+              ex.printStackTrace();
+            }
+          }
+        }
+        result.append('\n');
+      } 
+      catch (Exception ex) {
+        ex.printStackTrace();
+        if (skipped.length() > 0)
+          skipped.append(',');
+        skipped.append(datasetName);
+      }
+    }
+    result.append(',')
+          .append(Utils.quote("(v/ /*)"));
+    if (m_ShowStdDevs)
+      result.append(',');
+    for (int j = 0; j < getNumResultsets(); j++) {
+      if (!displayResultset(j))
+        continue;
+      if (j != baseResultset) {
+        result.append(',');
+        if (m_ShowStdDevs)
+          result.append(',');
+        result.append(',')
+              .append(Utils.quote("(" + win[j] + '/' + tie[j]
+                                      + '/' + loss[j] + ')'));
       }
     }
     result.append('\n');
@@ -1166,6 +1476,8 @@ public class PairedTTester implements OptionHandler {
      // determine max field width
     for (int i = 0; i < getNumDatasets(); i++) {
       for (int j = 0; j < getNumResultsets(); j++) {
+        if (!displayResultset(j))
+          continue;
 	try {
 	  PairedStats pairedStats = 
 	    calculateStatistics(m_DatasetSpecifiers.specifier(i), 
@@ -1202,7 +1514,13 @@ public class PairedTTester implements OptionHandler {
 							maxWidthMean,
 							maxWidthStdDev));
 
-    } else {
+    } else if (m_csvOutput) {
+      result = new StringBuffer(multiResultsetFullCSV(baseResultset, 
+                     comparisonColumn, 
+                     maxWidthMean,
+                     maxWidthStdDev));
+        
+     } else {
       result = new StringBuffer(multiResultsetFullPlainText(baseResultset, 
                                                             comparisonColumn, 
                                                             maxWidthMean,
@@ -1212,6 +1530,8 @@ public class PairedTTester implements OptionHandler {
     // scheme+option names
     result.append("\nKey:\n\n");
     for (int j = 0; j < getNumResultsets(); j++) {
+      if (!displayResultset(j))
+        continue;
       result.append("("+(j+1)+") ");
       result.append(getResultsetName(j)+"\n");
     }
@@ -1225,7 +1545,7 @@ public class PairedTTester implements OptionHandler {
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(6);
 
     newVector.addElement(new Option(
              "\tSpecify list of columns that specify a unique\n"
@@ -1252,6 +1572,9 @@ public class PairedTTester implements OptionHandler {
     newVector.addElement(new Option(
 	      "\tProduce table comparisons in Latex table format",
               "L", 0, "-L"));
+    newVector.addElement(new Option(
+         "\tProduce table comparisons in CSV table format",
+         "csv", 0, "-csv"));
 
     return newVector.elements();
   }
@@ -1286,6 +1609,9 @@ public class PairedTTester implements OptionHandler {
    * -L <br>
    * Produce comparison tables in Latex table format <p>
    *
+   * -csv <br>
+   * Produce comparison tables in csv format <p>
+   *
    * @param options an array containing options to set.
    * @exception Exception if invalid options are given
    */
@@ -1293,6 +1619,7 @@ public class PairedTTester implements OptionHandler {
 
     setShowStdDevs(Utils.getFlag('V', options));
     setProduceLatex(Utils.getFlag('L', options));
+    setProduceCSV(Utils.getFlag("csv", options));
 
     String datasetList = Utils.getOption('D', options);
     Range datasetRange = new Range();
@@ -1367,6 +1694,10 @@ public class PairedTTester implements OptionHandler {
       options[current++] = "-L";
     }
 
+    if (getProduceCSV()) {
+      options[current++] = "-csv";
+    }
+   
     while (current < options.length) {
       options[current++] = "";
     }
@@ -1392,6 +1723,26 @@ public class PairedTTester implements OptionHandler {
     
     m_ResultsetKeyColumnsRange = newResultsetKeyColumns;
     m_ResultsetsValid = false;
+  }
+  
+  /**
+   * Gets the indices of the the datasets that are displayed (if <code>null</code>
+   * then all are displayed). The base is always displayed.
+   * 
+   * @return the indices of the datasets to display
+   */
+  public int[] getDisplayedResultsets() {
+    return m_DisplayedResultsets;
+  }
+  
+  /**
+   * Sets the indicies of the datasets to display (<code>null</code> means all).
+   * The base is always displayed.
+   * 
+   * @param cols the indices of the datasets to display
+   */
+  public void setDisplayedResultsets(int[] cols) {
+    m_DisplayedResultsets = cols;
   }
   
   /**
@@ -1555,6 +1906,8 @@ public class PairedTTester implements OptionHandler {
 	System.out.println(tt.resultsetKey());
 	if (baseColStr.length() == 0) {
 	  for (int i = 0; i < tt.getNumResultsets(); i++) {
+            if (!tt.displayResultset(i))
+              continue;
 	    System.out.println(tt.multiResultsetFull(i, compareCol));
 	  }
 	} else {
