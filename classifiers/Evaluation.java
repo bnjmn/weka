@@ -124,7 +124,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.56 $
+ * @version  $Revision: 1.57 $
  */
 public class Evaluation implements Summarizable {
 
@@ -305,7 +305,10 @@ public class Evaluation implements Summarizable {
 
   /**
    * Performs a (stratified if class is nominal) cross-validation 
-   * for a classifier on a set of instances.
+   * for a classifier on a set of instances. Now performs
+   * a deep copy of the classifier before each call to 
+   * buildClassifier() (just in case the classifier is not
+   * initialized properly).
    *
    * @param classifier the classifier with any options set.
    * @param data the data on which the cross-validation is to be 
@@ -329,9 +332,10 @@ public class Evaluation implements Summarizable {
     for (int i = 0; i < numFolds; i++) {
       Instances train = data.trainCV(numFolds, i, random);
       setPriors(train);
-      classifier.buildClassifier(train);
+      Classifier copiedClassifier = Classifier.makeCopy(classifier);
+      copiedClassifier.buildClassifier(train);
       Instances test = data.testCV(numFolds, i);
-      evaluateModel(classifier, test);
+      evaluateModel(copiedClassifier, test);
     }
     m_NumFolds = numFolds;
   }

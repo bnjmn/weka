@@ -65,7 +65,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class BVDecompose implements OptionHandler {
 
@@ -495,11 +495,12 @@ public class BVDecompose implements OptionHandler {
       trainPool.randomize(random);
       Instances train = new Instances(trainPool, 0, m_TrainPoolSize / 2);
 
-      m_Classifier.buildClassifier(train);
+      Classifier current = Classifier.makeCopy(m_Classifier);
+      current.buildClassifier(train);
 
       //// Evaluate the classifier on test, updating BVD stats
       for (int j = 0; j < numTest; j++) {
-	int pred = (int)m_Classifier.classifyInstance(test.instance(j));
+	int pred = (int)current.classifyInstance(test.instance(j));
 	if (pred != test.instance(j).classValue()) {
 	  m_Error++;
 	}
