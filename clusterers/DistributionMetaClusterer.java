@@ -15,7 +15,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 
 /**
  * Class that wraps up a Clusterer and presents it as a DistributionClusterer
@@ -30,10 +29,10 @@ import weka.core.WeightedInstancesHandler;
  * Specify the full class name of a sub-clusterer (required).<p>
  *
  * @author Richard Littin (richard@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DistributionMetaClusterer extends DistributionClusterer
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler {
 
   /** The clusterer. */
   private Clusterer m_Clusterer = new weka.clusterers.EM();
@@ -45,19 +44,10 @@ public class DistributionMetaClusterer extends DistributionClusterer
    * @exception Exception if a clusterer can't be built
    */
   public void buildClusterer(Instances insts) throws Exception {
-    //System.err.println("DistributionMetaClusterer.buildClusterer");
+
     if (m_Clusterer == null) {
       throw new Exception("No base clusterer has been set!");
     }
-
-    if (m_Clusterer instanceof WeightedInstancesHandler) {
-      // Base clusterer can handle weights
-      insts = new Instances(insts);
-    } else {
-      // ?????
-      insts = insts.resampleWithWeights(new Random(42));
-    }     
-        
     m_Clusterer.buildClusterer(insts);
   }
 
@@ -71,7 +61,6 @@ public class DistributionMetaClusterer extends DistributionClusterer
     double[] result = new double[m_Clusterer.numberOfClusters()];
     int predictedCluster = m_Clusterer.clusterInstance(inst);
     result[predictedCluster] = 1.0;
-
     return result;
   }
 
@@ -91,9 +80,7 @@ public class DistributionMetaClusterer extends DistributionClusterer
    * @exception Exception if number of clusters could not be returned
    * successfully
    */
-  public int numberOfClusters ()
-    throws Exception
-  {
+  public int numberOfClusters() throws Exception {
     return  m_Clusterer.numberOfClusters();
   }
 
@@ -101,7 +88,6 @@ public class DistributionMetaClusterer extends DistributionClusterer
    * Prints the clusterers.
    */
   public String toString() {
-
     return "DistributionMetaClusterer: " + m_Clusterer.toString() + "\n";
   }
 
@@ -110,11 +96,9 @@ public class DistributionMetaClusterer extends DistributionClusterer
    *
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions()  {
+  public Enumeration listOptions() {
 
     Vector vec = new Vector(1);
-    Object c;
-    
     vec.addElement(new Option("\tSets the base clusterer.",
 			      "W", 1, "-W <base clusterer>"));
     
@@ -204,7 +188,6 @@ public class DistributionMetaClusterer extends DistributionClusterer
     return m_Clusterer;
   }
 
-
   /**
    * Main method for testing this class.
    *
@@ -212,10 +195,8 @@ public class DistributionMetaClusterer extends DistributionClusterer
    */
   public static void main(String [] argv) {
 
-    DistributionClusterer scheme;
-
     try {
-      scheme = new DistributionMetaClusterer();
+      DistributionClusterer scheme = new DistributionMetaClusterer();
       System.out.println(ClusterEvaluation.evaluateClusterer(scheme, argv));
     } catch (Exception e) {
       System.err.println(e.getMessage());
