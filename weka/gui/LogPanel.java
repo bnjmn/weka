@@ -55,7 +55,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -75,17 +75,35 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
   protected WekaTaskMonitor m_TaskMonitor=null;
   
   /**
-   * Creates the log panel
+   * Creates the log panel with no task monitor and
+   * the log always visible.
    */
   public LogPanel() {
 
-    this(null);
+    this(null, false);
   }
 
   /**
-   * Creates the log panel
+   * Creates the log panel with a task monitor,
+   * where the log is hidden.
+   *
+   * @param tm the task monitor, or null for none
    */
   public LogPanel(WekaTaskMonitor tm) {
+
+    this(tm, true);
+  }
+
+  /**
+   * Creates the log panel, possibly with task monitor,
+   * where the log is optionally hidden.
+   *
+   * @param tm the task monitor, or null for none
+   * @param logHidden true if the log should be hidden and
+   *                  acessible via a button, or false if the
+   *                  log should always be visible.
+   */
+  public LogPanel(WekaTaskMonitor tm, boolean logHidden) {
 
     m_TaskMonitor = tm;
     m_LogText.setEditable(false);
@@ -109,44 +127,66 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
       }
     });
 
-    // create log window
-    final JFrame jf = new JFrame("Log");
-    jf.addWindowListener(new WindowAdapter() {
-	public void windowClosing(WindowEvent e) {
-	  jf.setVisible(false);
-	}
-      });
-    jf.getContentPane().setLayout(new BorderLayout());
-    jf.getContentPane().add(js, BorderLayout.CENTER);
-    jf.pack();
-    jf.setSize(450, 350);
+    if (logHidden) {
 
-    // display log window on request
-    m_logButton.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  jf.setVisible(true);
-	}
-      });
-
-    // do layout
-    setLayout(new BorderLayout());
-    JPanel logButPanel = new JPanel();
-    logButPanel.setLayout(new BorderLayout());
-    logButPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-    logButPanel.add(m_logButton, BorderLayout.CENTER);
-    JPanel p1 = new JPanel();
-    p1.setLayout(new BorderLayout());
-    p1.add(m_StatusLab, BorderLayout.CENTER);
-    p1.add(logButPanel, BorderLayout.EAST);
-
-    if (tm == null) {
-      add(p1, BorderLayout.SOUTH);
+      // create log window
+      final JFrame jf = new JFrame("Log");
+      jf.addWindowListener(new WindowAdapter() {
+	  public void windowClosing(WindowEvent e) {
+	    jf.setVisible(false);
+	  }
+	});
+      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().add(js, BorderLayout.CENTER);
+      jf.pack();
+      jf.setSize(450, 350);
+      
+      // display log window on request
+      m_logButton.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    jf.setVisible(true);
+	  }
+	});
+      
+      // do layout
+      setLayout(new BorderLayout());
+      JPanel logButPanel = new JPanel();
+      logButPanel.setLayout(new BorderLayout());
+      logButPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+      logButPanel.add(m_logButton, BorderLayout.CENTER);
+      JPanel p1 = new JPanel();
+      p1.setLayout(new BorderLayout());
+      p1.add(m_StatusLab, BorderLayout.CENTER);
+      p1.add(logButPanel, BorderLayout.EAST);
+      
+      if (tm == null) {
+	add(p1, BorderLayout.SOUTH);
+      } else {
+	JPanel p2 = new JPanel();
+	p2.setLayout(new BorderLayout());
+	p2.add(p1, BorderLayout.CENTER);
+	p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
+	add(p2, BorderLayout.SOUTH);
+      }
     } else {
-      JPanel p2 = new JPanel();
-      p2.setLayout(new BorderLayout());
-      p2.add(p1, BorderLayout.CENTER);
-      p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
-      add(p2, BorderLayout.SOUTH);
+      // log always visible
+      
+      JPanel p1 = new JPanel();
+      p1.setBorder(BorderFactory.createTitledBorder("Log"));
+      p1.setLayout(new BorderLayout());
+      p1.add(js, BorderLayout.CENTER);
+      setLayout(new BorderLayout());
+      add(p1, BorderLayout.CENTER);
+
+      if (tm == null) {
+	add(m_StatusLab, BorderLayout.SOUTH);
+      } else {
+	JPanel p2 = new JPanel();
+	p2.setLayout(new BorderLayout());
+	p2.add(m_StatusLab,BorderLayout.CENTER);
+	p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
+	add(p2, BorderLayout.SOUTH);
+      }
     }
     addPopup();
   }
