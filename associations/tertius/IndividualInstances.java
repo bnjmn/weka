@@ -35,7 +35,7 @@ import java.io.IOException;
 public class IndividualInstances extends Instances {
     
   public IndividualInstances(Instances individuals, Instances parts) 
-    throws IOException, Exception {
+    throws Exception {
 	
     super(individuals, individuals.numInstances());
 

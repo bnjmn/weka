@@ -35,7 +35,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public final class Utils {
 
@@ -948,7 +948,7 @@ public final class Utils {
    * @param a an array holding the natural logarithms of the probabilities
    * @return the converted array 
    */
-  static public double[] logs2probs(double[] a) {
+  public static double[] logs2probs(double[] a) {
 
     double max = a[maxIndex(a)];
     double sum = 0.0;

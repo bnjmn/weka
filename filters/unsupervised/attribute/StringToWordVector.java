@@ -61,7 +61,7 @@ import weka.filters.UnsupervisedFilter;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -1466,7 +1466,7 @@ public class StringToWordVector extends Filter
               return false;
       }
       
-      public Object nextElement() throws NoSuchElementException {
+      public Object nextElement() {
           int beginpos, endpos;
           beginpos = currentPos;
           
