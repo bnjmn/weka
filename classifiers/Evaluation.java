@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.8 $
+ * @version  $Revision: 1.9 $
   */
 public class Evaluation implements Summarizable {
 
@@ -320,22 +320,34 @@ public class Evaluation implements Summarizable {
    * Performs a (stratified if class is nominal) cross-validation 
    * for a classifier on a set of instances.
    *
-   * @param classifier the classifier. The method will generate a new
-   * object of the type of this classifier for each fold.
+   * @param classifier the classifier with any options set.
    * @param data the data on which the cross-validation is to be 
    * performed 
    * @param numFolds the number of folds for the cross-validation
-   * @param options the options to the classifier
    * @exception Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
   public void crossValidateModel(Classifier classifier,
-				 Instances data, int numFolds,
-				 String[] options) 
-       throws Exception {
+				 Instances data, int numFolds) 
+    throws Exception {
     
-    crossValidateModel(classifier.getClass().getName(), data, 
-		       numFolds, options);
+    // Make a copy of the data we can reorder
+    data = new Instances(data);
+    if (data.classAttribute().isNominal()) {
+      data.stratify(numFolds);
+    }
+    // Do the folds
+    for (int i = 0; i < numFolds; i++) {
+      Instances train = data.trainCV(numFolds, i);
+      if (m_CostMatrix != null) {
+	train = train.applyCostMatrix(m_CostMatrix, m_Random);
+      }
+      setPriors(train);
+      classifier.buildClassifier(train);
+      Instances test = data.testCV(numFolds, i);
+      evaluateModel(classifier, test);
+    }
+    m_NumFolds = numFolds;
   }
 
   /**
@@ -346,7 +358,8 @@ public class Evaluation implements Summarizable {
    * @param data the data on which the cross-validation is to be 
    * performed 
    * @param numFolds the number of folds for the cross-validation
-   * @param options the options to the classifier
+   * @param options the options to the classifier. Any options
+   * accepted by the classifier will be removed from this array.
    * @exception Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
@@ -355,57 +368,8 @@ public class Evaluation implements Summarizable {
 				 String[] options) 
        throws Exception {
     
-    Classifier classifier;	 
-    Instances train, test;
-    String[] savedOptions = null;
-
-    if (options != null) {
-      savedOptions = new String[options.length];
-    }
-    data = new Instances(data);
-    if (data.classAttribute().isNominal()) {
-      data.stratify(numFolds);
-    }
-    for (int i = 0; i < numFolds; i++) {
-
-      // Create classifier
-      try {
-	classifier = 
-	  (Classifier)Class.forName(classifierString).
-	    newInstance();
-      } catch (Exception e) {
-	throw new Exception("Can't find class with name " + 
-			    classifierString + '.');
-      }
-
-      // Save options
-      if (options != null) {
-	System.arraycopy(options, 0, savedOptions, 0, 
-			 options.length);
-      }
-
-      // Parse options
-      if (classifier instanceof OptionHandler) {
-	try {
-	  ((OptionHandler)classifier).setOptions(savedOptions);
-	  Utils.checkForRemainingOptions(savedOptions);
-	} catch (Exception e) {
-	  throw new Exception("Can't parse given options in " + 
-			      "cross-validation!");
-	}
-      }
-
-      // Build and test classifier 
-      train = data.trainCV(numFolds, i);
-      if (m_CostMatrix != null) {
-	train = train.applyCostMatrix(m_CostMatrix, m_Random);
-      }
-      setPriors(train);
-      classifier.buildClassifier(train);
-      test = data.testCV(numFolds, i);
-      evaluateModel(classifier, test);
-    }
-    m_NumFolds = numFolds;
+    crossValidateModel(Classifier.forName(classifierString, options),
+		       data, numFolds);
   }
 
   /**
@@ -580,7 +544,6 @@ public class Evaluation implements Summarizable {
       printGraph = false;
     Evaluation trainingEvaluation, testingEvaluation;
     StringBuffer text = new StringBuffer();
-    String[] savedOptions = null;
     BufferedReader trainReader = null, testReader = null;
     Reader costReader;
     ObjectInputStream objectInputStream = null;
@@ -694,12 +657,6 @@ public class Evaluation implements Summarizable {
       printMargins = Utils.getFlag('r', options);
       printGraph = Utils.getFlag('g', options);
       
-      // Save options
-      if (options != null) {
-	savedOptions = new String[options.length];
-	System.arraycopy(options, 0, savedOptions, 0, options.length);
-      }
-
       // If a model file is given, we can't process 
       // scheme-specific options
       if (objectInputFileName.length() != 0)
@@ -927,9 +884,7 @@ public class Evaluation implements Summarizable {
       random.setSeed(seed);
       trainWithoutStrings.randomize(random);
       testingEvaluation.
-      crossValidateModel(classifier.getClass().getName(),
-			 trainWithoutStrings, folds, 
-			 savedOptions);
+      crossValidateModel(classifier, trainWithoutStrings, folds);
       if (train.classAttribute().isNumeric()) {
 	text.append("\n\n" + testingEvaluation.
 		    toSummaryString("=== Cross-validation ===\n",
