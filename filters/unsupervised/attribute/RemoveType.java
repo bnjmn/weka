@@ -42,13 +42,13 @@ import java.util.Vector;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RemoveType extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
   /** The attribute filter used to do the filtering */
-  protected Remove m_attributeFilter = new AttributeFilter();
+  protected Remove m_attributeFilter = new Remove();
 
   /** The type of attribute to delete */
   protected int m_attTypeToDelete = Attribute.STRING;
