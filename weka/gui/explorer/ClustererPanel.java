@@ -95,7 +95,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -719,14 +719,6 @@ public class ClustererPanel extends JPanel {
 	    m_Log.statusMessage("See error log");
 	    ex.printStackTrace();
 	  } finally {
-	    if (isInterrupted()) {
-	      m_Log.logMessage("Interrupted " + cname);
-	      m_Log.statusMessage("See error log");
-	    }
-	    m_SaveOutBut.setEnabled(true);
-	    m_RunThread = null;
-	    m_StartBut.setEnabled(true);
-	    m_StopBut.setEnabled(false);
 	    if (predInstances != null) {
 	      m_CurrentVis = new VisualizePanel();
 	      m_CurrentVis.setPredictions(predictions);
@@ -757,6 +749,14 @@ public class ClustererPanel extends JPanel {
 		m_VisualizeBut.setEnabled(false);
 	      }
 	    }
+	    if (isInterrupted()) {
+	      m_Log.logMessage("Interrupted " + cname);
+	      m_Log.statusMessage("See error log");
+	    }
+	    m_SaveOutBut.setEnabled(true);
+	    m_RunThread = null;
+	    m_StartBut.setEnabled(true);
+	    m_StopBut.setEnabled(false);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskFinished();
 	    }

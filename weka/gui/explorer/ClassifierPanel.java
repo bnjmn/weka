@@ -101,7 +101,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1053,14 +1053,6 @@ public class ClassifierPanel extends JPanel {
 	    m_Log.logMessage(ex.getMessage());
 	    m_Log.statusMessage("See error log");
 	  } finally {
-	    if (isInterrupted()) {
-	      m_Log.logMessage("Interrupted " + cname);
-	      m_Log.statusMessage("See error log");
-	    }
-	    m_SaveOutBut.setEnabled(true);
-	    m_RunThread = null;
-	    m_StartBut.setEnabled(true);
-	    m_StopBut.setEnabled(false);
 	    if (predInstances != null) {
 	      m_CurrentVis = new VisualizePanel();
 	      m_CurrentVis.setInstances(predInstances);
@@ -1096,11 +1088,19 @@ public class ClassifierPanel extends JPanel {
 	      } else {
 		m_VisualizeBut.setEnabled(false);
 	      }
-	      if (m_Log instanceof TaskLogger) {
-		((TaskLogger)m_Log).taskFinished();
-	      }
 	    }
-	  }
+	    if (isInterrupted()) {
+	      m_Log.logMessage("Interrupted " + cname);
+	      m_Log.statusMessage("See error log");
+	    }
+	    m_SaveOutBut.setEnabled(true);
+	    m_RunThread = null;
+	    m_StartBut.setEnabled(true);
+	    m_StopBut.setEnabled(false);
+            if (m_Log instanceof TaskLogger) {
+              ((TaskLogger)m_Log).taskFinished();
+            }
+          }
 	}
       };
       m_RunThread.setPriority(Thread.MIN_PRIORITY);
