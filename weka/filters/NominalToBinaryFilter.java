@@ -24,7 +24,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -382,29 +382,29 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   private void convertInstanceNominal(Instance instance) throws Exception {
   
+    double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
-    double [] newVals = new double [outputFormatPeek().numAttributes()];
 
     for(int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if ((!att.isNominal()) || (j == getInputFormat().classIndex())) {
-	newVals[attSoFar] = instance.value(j);
+	vals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
 	if (att.numValues() <= 2) {
-	  newVals[attSoFar] = instance.value(j);
+	  vals[attSoFar] = instance.value(j);
 	  attSoFar++;
 	} else {
 	  if (instance.isMissing(j)) {
 	    for (int k = 0; k < att.numValues(); k++) {
-              newVals[attSoFar + k] = instance.value(j);
+              vals[attSoFar + k] = instance.value(j);
 	    }
 	  } else {
 	    for (int k = 0; k < att.numValues(); k++) {
 	      if (k == (int)instance.value(j)) {
-                newVals[attSoFar + k] = 1;
+                vals[attSoFar + k] = 1;
 	      } else {
-                newVals[attSoFar + k] = 0;
+                vals[attSoFar + k] = 0;
 	      }
 	    }
 	  }
@@ -412,12 +412,16 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	}
       }
     }
-    
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), newVals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), newVals));
+      inst = new Instance(instance.weight(), vals);
     }
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    push(inst);
   }
 
   /**
@@ -428,38 +432,43 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   private void convertInstanceNumeric(Instance instance) throws Exception {
   
-    double [] newVals = new double [outputFormatPeek().numAttributes()];
+    double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
 
     for(int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if ((!att.isNominal()) || (j == getInputFormat().classIndex())) {
-	newVals[attSoFar] = instance.value(j);
+	vals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
 	if (instance.isMissing(j)) {
 	  for (int k = 0; k < att.numValues() - 1; k++) {
-            newVals[attSoFar + k] = instance.value(j);
+            vals[attSoFar + k] = instance.value(j);
 	  }
 	} else {
 	  int k = 0;
 	  while ((int)instance.value(j) != m_Indices[j][k]) {
-            newVals[attSoFar + k] = 1;
+            vals[attSoFar + k] = 1;
 	    k++;
 	  }
 	  while (k < att.numValues() - 1) {
-            newVals[attSoFar + k] = 0;
+            vals[attSoFar + k] = 0;
 	    k++;
 	  }
 	}
 	attSoFar += att.numValues() - 1;
       }
     }
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), newVals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), newVals));
+      inst = new Instance(instance.weight(), vals);
     }
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    push(inst);
   }
 
   /**

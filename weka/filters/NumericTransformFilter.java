@@ -26,13 +26,15 @@ import weka.core.*;
  * Invert matching sense.<p>
  *
  * -C string <br>
- * Name of the class containing the method used for transformation.<p>
+ * Name of the class containing the method used for transformation. 
+ * (default java.lang.Math) <p>
  *
  * -M string <br>
- * Name of the method used for the transformation.<p>
+ * Name of the method used for the transformation.
+ * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -100,10 +102,6 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    double oldVal;
-    Double[] params = new Double[1];
-    Double newVal;
-
     if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
@@ -112,15 +110,16 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
 
-    double[] vals = new double[instance.numAttributes()];
+    double []vals = new double[instance.numAttributes()];
+    Double []params = new Double[1];
+    Double newVal;
     for(int i = 0; i < instance.numAttributes(); i++) {
       if (instance.isMissing(i)) {
 	vals[i] = Instance.missingValue();
       } else {
-	oldVal = instance.value(i);
 	if (m_Cols.isInRange(i) &&
 	    instance.attribute(i).isNumeric()) {
-	  params[0] = new Double(oldVal);
+	  params[0] = new Double(instance.value(i));
 	  newVal = (Double) m_Method.invoke(null, params);
 	  if (newVal.isNaN() || newVal.isInfinite()) {
 	    vals[i] = Instance.missingValue();
@@ -128,16 +127,18 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
 	    vals[i] = newVal.doubleValue(); 
 	  }
 	} else {
-	  vals[i] = oldVal;
+	  vals[i] = instance.value(i);
 	}
       }
     }
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), vals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), vals));
+      inst = new Instance(instance.weight(), vals);
     }
-   
+    inst.setDataset(instance.dataset());
+    push(inst);
     return true;
   }
 
@@ -161,11 +162,12 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
               "V", 0, "-V"));
 
     newVector.addElement(new Option(
-              "\tSets the class containing transformation method.",
+              "\tSets the class containing transformation method.\n"+
+              "\t(default java.lang.Math)",
               "C", 1, "-C <string>"));
 
     newVector.addElement(new Option(
-              "\tSets the method.",
+              "\tSets the method. (default abs)",
               "M", 1, "-M <string>"));
 
     return newVector.elements();
@@ -183,10 +185,12 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    * Invert matching sense.<p>
    *
    * -C string <br>
-   * Name of the class containing the method used for transformation.<p>
+   * Name of the class containing the method used for transformation.
+   * (default java.lang.Math) <p>
    *
    * -M string <br>
-   * Name of the method used for the transformation.<p>
+   * Name of the method used for the transformation.
+   * (default abs) <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported

@@ -17,7 +17,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NormalizationFilter extends Filter {
 
@@ -88,17 +88,17 @@ public class NormalizationFilter extends Filter {
       throw new Exception("No input instance format defined");
     }
     if (m_MinArray == null) {
-   
+      Instances input = getInputFormat();
       // Compute minimums and maximums
-      m_MinArray = new double[getInputFormat().numAttributes()];
-      m_MaxArray = new double[getInputFormat().numAttributes()];
-      for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      m_MinArray = new double[input.numAttributes()];
+      m_MaxArray = new double[input.numAttributes()];
+      for (int i = 0; i < input.numAttributes(); i++) {
 	m_MinArray[i] = Double.NaN;
       }
-      for (int j = 0; j < getInputFormat().numInstances(); j++) {
-	double[] value = getInputFormat().instance(j).toDoubleArray();
-	for (int i = 0; i < getInputFormat().numAttributes(); i++) {
-	  if (getInputFormat().attribute(i).isNumeric()) {
+      for (int j = 0; j < input.numInstances(); j++) {
+	double[] value = input.instance(j).toDoubleArray();
+	for (int i = 0; i < input.numAttributes(); i++) {
+	  if (input.attribute(i).isNumeric()) {
 	    if (!Instance.isMissingValue(value[i])) {
 	      if (Double.isNaN(m_MinArray[i])) {
 		m_MinArray[i] = m_MaxArray[i] = value[i];
@@ -116,8 +116,8 @@ public class NormalizationFilter extends Filter {
       }
 
       // Convert pending input instances
-      for(int i = 0; i < getInputFormat().numInstances(); i++) {
-	convertInstance(getInputFormat().instance(i));
+      for(int i = 0; i < input.numInstances(); i++) {
+	convertInstance(input.instance(i));
       }
     } 
     // Free memory
@@ -135,22 +135,8 @@ public class NormalizationFilter extends Filter {
    */
   private void convertInstance(Instance instance) throws Exception {
   
-    if (!(instance instanceof SparseInstance)) {
-      double[] vals = instance.toDoubleArray();
-      for (int j = 0; j < getInputFormat().numAttributes(); j++) {
-	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j]))) {
-	  if (Double.isNaN(m_MinArray[j]) ||
-	      (m_MaxArray[j] == m_MinArray[j])) {
-	    vals[j] = 0;
-	  } else {
-	    vals[j] = (vals[j] - m_MinArray[j]) / 
-	      (m_MaxArray[j] - m_MinArray[j]);
-	  }
-	}
-      }	
-      push(new Instance(instance.weight(), vals));
-    } else {
+    Instance inst = null;
+    if (instance instanceof SparseInstance) {
       double[] newVals = new double[instance.numAttributes()];
       int[] newIndices = new int[instance.numAttributes()];
       double[] vals = instance.toDoubleArray();
@@ -184,9 +170,26 @@ public class NormalizationFilter extends Filter {
       int[] tempInd = new int[ind];
       System.arraycopy(newVals, 0, tempVals, 0, ind);
       System.arraycopy(newIndices, 0, tempInd, 0, ind);
-      push(new SparseInstance(instance.weight(), tempVals, tempInd,
-			      instance.numAttributes()));
+      inst = new SparseInstance(instance.weight(), tempVals, tempInd,
+                                instance.numAttributes());
+    } else {
+      double[] vals = instance.toDoubleArray();
+      for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+	if (instance.attribute(j).isNumeric() &&
+	    (!Instance.isMissingValue(vals[j]))) {
+	  if (Double.isNaN(m_MinArray[j]) ||
+	      (m_MaxArray[j] == m_MinArray[j])) {
+	    vals[j] = 0;
+	  } else {
+	    vals[j] = (vals[j] - m_MinArray[j]) / 
+	      (m_MaxArray[j] - m_MinArray[j]);
+	  }
+	}
+      }	
+      inst = new Instance(instance.weight(), vals);
     }
+    inst.setDataset(instance.dataset());
+    push(inst);
   }
 
   /**
