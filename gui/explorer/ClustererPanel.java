@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -909,9 +909,14 @@ public class ClustererPanel extends JPanel {
 	    m_Log.logMessage("Finished " + cname);
 	    m_Log.statusMessage("OK");
 	  } catch (Exception ex) {
-	    m_Log.logMessage(ex.getMessage());
-	    m_Log.statusMessage("See error log");
 	    ex.printStackTrace();
+	    m_Log.logMessage(ex.getMessage());
+	    JOptionPane.showMessageDialog(ClustererPanel.this,
+					  "Problem evaluating clusterer:\n"
+					  + ex.getMessage(),
+					  "Evaluate clusterer",
+					  JOptionPane.ERROR_MESSAGE);
+	    m_Log.statusMessage("Problem evaluating clusterer");
 	  } finally {
 	    if (predData != null) {
 	      m_CurrentVis = new VisualizePanel();
@@ -1476,9 +1481,15 @@ public class ClustererPanel extends JPanel {
       m_Log.logMessage("Finished re-evaluation");
       m_Log.statusMessage("OK");
     } catch (Exception ex) {
-      m_Log.logMessage(ex.getMessage());
-      m_Log.statusMessage("See error log");
       ex.printStackTrace();
+      m_Log.logMessage(ex.getMessage());
+      JOptionPane.showMessageDialog(this,
+				    "Problem evaluating clusterer:\n"
+				    + ex.getMessage(),
+				    "Evaluate clusterer",
+				    JOptionPane.ERROR_MESSAGE);
+      m_Log.statusMessage("Problem evaluating clusterer");
+
     } finally {
       if (predData != null) {
 	m_CurrentVis = new VisualizePanel();
