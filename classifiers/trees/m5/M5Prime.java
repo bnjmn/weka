@@ -52,7 +52,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler,
  AdditionalMeasureProducer {
@@ -422,7 +422,8 @@ public final class  M5Prime extends Classifier implements OptionHandler,
    */
   public void setUseUnsmoothed(boolean v) {
     
-    m_UseUnsmoothed = v;
+    if (m_Model != Node.MODEL_TREE) m_UseUnsmoothed = true;
+    else m_UseUnsmoothed = v;
   }
   
   /**
@@ -464,6 +465,7 @@ public final class  M5Prime extends Classifier implements OptionHandler,
     
     if (newMethod.getTags() == TAGS_MODEL_TYPES) {
       m_Model = newMethod.getSelectedTag().getID();
+      if (m_Model != Node.MODEL_TREE) setUseUnsmoothed(true);
     }
   }
   
@@ -501,10 +503,3 @@ public final class  M5Prime extends Classifier implements OptionHandler,
     }
   }
 }
-
-     
-
-
-
-
-
