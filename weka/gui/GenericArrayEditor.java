@@ -69,7 +69,7 @@ import java.io.ObjectInputStream;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -230,14 +230,14 @@ public class GenericArrayEditor extends JPanel
 
 	  public void paintComponent(Graphics g) {
 
-	    Insets i = getInsets();
+	    Insets i = this.getInsets();
 	    Rectangle box = new Rectangle(i.left, i.top,
-					  getWidth() - i.right,
-					  getHeight() - i.bottom );
+					  this.getWidth() - i.right,
+					  this.getHeight() - i.bottom );
 	    g.setColor(isSelected
 		       ? list.getSelectionBackground()
 		       : list.getBackground());
-	    g.fillRect(0, 0, getWidth(), getHeight());
+	    g.fillRect(0, 0, this.getWidth(), this.getHeight());
 	    g.setColor(isSelected
 		       ? list.getSelectionForeground()
 		       : list.getForeground());
@@ -246,8 +246,8 @@ public class GenericArrayEditor extends JPanel
 	  
 	  public Dimension getPreferredSize() {
 
-	    Font f = getFont();
-	    FontMetrics fm = getFontMetrics(f);
+	    Font f = this.getFont();
+	    FontMetrics fm = this.getFontMetrics(f);
 	    return new Dimension(0, fm.getHeight());
 	  }
 	};
