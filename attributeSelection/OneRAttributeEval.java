@@ -137,7 +137,7 @@ public class OneRAttributeEval
     int [] featArray = new int [2]; // feat + class
     double errorRate;
     Evaluation o_Evaluation;
-    DeleteFilter delTransform = new DeleteFilter();
+    AttributeFilter delTransform = new AttributeFilter();
     delTransform.setInvertSelection(true);
 
     // copy the instances

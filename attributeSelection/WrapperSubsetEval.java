@@ -299,7 +299,7 @@ public class WrapperSubsetEval
     int i,j;
     Random Rnd = new Random(seed);
 
-    DeleteFilter delTransform = new DeleteFilter();
+    AttributeFilter delTransform = new AttributeFilter();
     delTransform.setInvertSelection(true);
 
     // copy the instances
