@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $ 
+ * @version $Revision: 1.37 $ 
  */
 public class Instances implements Serializable {
  
@@ -1833,15 +1833,13 @@ public class Instances implements Serializable {
   private void quickSort(int attIndex, int lo0, int hi0) {
     
     int lo = lo0, hi = hi0;
-    double mid, midPlus, midMinus;
+    double mid;
     
     if (hi0 > lo0) {
       
       // Arbitrarily establishing partition element as the 
       // midpoint of the array.
       mid = instance((lo0 + hi0) / 2).value(attIndex);
-      midPlus = mid + 1e-6;
-      midMinus = mid - 1e-6;
 
       // loop through the array until indices cross
       while(lo <= hi) {
@@ -1849,14 +1847,14 @@ public class Instances implements Serializable {
 	// find the first element that is greater than or equal to 
 	// the partition element starting from the left Index.
 	while ((instance(lo).value(attIndex) < 
-		midMinus) && (lo < hi0)) {
+		mid) && (lo < hi0)) {
 	  ++lo;
 	}
 	
 	// find an element that is smaller than or equal to
 	// the partition element starting from the right Index.
 	while ((instance(hi).value(attIndex)  > 
-		midPlus) && (hi > lo0)) {
+		mid) && (hi > lo0)) {
 	  --hi;
 	}
 	
