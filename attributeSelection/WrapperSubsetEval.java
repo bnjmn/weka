@@ -48,7 +48,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -77,6 +77,17 @@ public class WrapperSubsetEval
    */
   private double m_threshold;
 
+  /**
+   * Returns a string describing this attribute evaluator
+   * @return a description of the evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "WrapperSubsetEval:\n\n"
+      +"Evaluates attribute sets by using a learning scheme. Cross\n"
+      +"validation is used to estimate the accuracy of the learning\n"
+      +"scheme for a set of attributes.\n";
+  }
 
   /**
    * Constructor. Calls restOptions to set default options
@@ -188,7 +199,15 @@ public class WrapperSubsetEval
       setThreshold(temp.doubleValue());
     }
   }
-
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String thresholdTipText() {
+    return "Repeat xval if stdev of mean exceeds this value";
+  }
 
   /**
    * Set the value of the threshold for repeating cross validation
@@ -209,6 +228,14 @@ public class WrapperSubsetEval
     return  m_threshold;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String foldsTipText() {
+    return "Number of xval folds to use when estimating subset accuracy";
+  }
 
   /**
    * Set the number of folds to use for accuracy estimation
@@ -230,6 +257,15 @@ public class WrapperSubsetEval
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Seed to use for randomly generating xval splits";
+  }
+
+  /**
    * Set the seed to use for cross validation
    *
    * @param s the seed
@@ -248,6 +284,14 @@ public class WrapperSubsetEval
     return  m_seed;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifierTipText() {
+    return "Classifier to use for estimating the accuracy of subsets";
+  }
 
   /**
    * Set the classifier to use for accuracy estimation
