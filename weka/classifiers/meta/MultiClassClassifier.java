@@ -62,10 +62,13 @@ import weka.filters.InstanceFilter;
  * Specify the full class name of a classifier as the basis for 
  * the multi-class classifier (required).<p>
  *
+ * -Q seed <br>
+ * Random number seed (default 1).<p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -87,6 +90,9 @@ public class MultiClassClassifier extends DistributionClassifier
   
   /** A transformed dataset header used by the  1-against-1 method */
   private Instances m_TwoClassDataset;
+
+  /** Random number seed */
+  protected int m_Seed = 1;
 
   /** 
    * The multiplier when generating random codes. Will generate
@@ -167,7 +173,7 @@ public class MultiClassClassifier extends DistributionClassifier
 
   /** Constructs a random code assignment */
   private class RandomCode extends Code {
-    Random r = new Random();
+    Random r = new Random(m_Seed);
     public RandomCode(int numClasses, int numCodes) {
       numCodes = Math.max(numClasses, numCodes);
       m_Codebits = new boolean[numCodes][numClasses];
@@ -262,11 +268,15 @@ public class MultiClassClassifier extends DistributionClassifier
     m_ZeroR = new ZeroR();
     m_ZeroR.buildClassifier(insts);
 
+    m_TwoClassDataset = null;
+
     int numClassifiers = insts.numClasses();
     if (numClassifiers <= 2) {
 
       m_Classifiers = Classifier.makeCopies(m_Classifier, 1);
       m_Classifiers[0].buildClassifier(insts);
+
+      m_ClassFilters = null;
 
     } else if (m_Method == METHOD_1_AGAINST_1) {
  
@@ -351,6 +361,43 @@ public class MultiClassClassifier extends DistributionClassifier
       }
     }
     m_ClassAttribute = insts.classAttribute();
+  }
+
+  /**
+   * Returns the individual predictions of the base classifiers
+   * for an instance. Used by StackedMultiClassClassifier.
+   * Returns the probability for the second "class" predicted
+   * by each base classifier.
+   *
+   * @exception Exception if the predictions can't be computed successfully
+   */
+  public double[] individualPredictions(Instance inst) throws Exception {
+    
+    double[] result = null;
+
+    if (m_Classifiers.length == 1) {
+      result = new double[1];
+      result[0] = ((DistributionClassifier)m_Classifiers[0])
+        .distributionForInstance(inst)[1];
+    } else {
+      result = new double[m_ClassFilters.length];
+      for(int i = 0; i < m_ClassFilters.length; i++) {
+	if (m_Classifiers[i] != null) {
+	  if (m_Method == METHOD_1_AGAINST_1) {    
+	    Instance tempInst = new Instance(inst); 
+	    tempInst.setDataset(m_TwoClassDataset);
+	    result[i] = ((DistributionClassifier)m_Classifiers[i])
+	      .distributionForInstance(tempInst)[1];  
+	  } else {
+	    m_ClassFilters[i].input(inst);
+	    m_ClassFilters[i].batchFinished();
+	    result[i] = ((DistributionClassifier)m_Classifiers[i])
+	      .distributionForInstance(m_ClassFilters[i].output())[1];
+	  }
+	}
+      }
+    }
+    return result;
   }
 
   /**
@@ -464,7 +511,10 @@ public class MultiClassClassifier extends DistributionClassifier
     vec.addElement(new Option(
        "\tSets the base classifier.",
        "W", 1, "-W <base classifier>"));
-    
+    vec.addElement(new Option(
+       "\tSets the random number seed for random codes.",
+       "Q", 1, "-Q <random number seed>"));
+
     if (m_Classifier != null) {
       try {
 	vec.addElement(new Option("",
@@ -494,6 +544,9 @@ public class MultiClassClassifier extends DistributionClassifier
    * Specify the full class name of a learner as the basis for 
    * the multiclassclassifier (required).<p>
    *
+   * -Q seed <br>
+   * Random number seed (default 1).<p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -512,6 +565,12 @@ public class MultiClassClassifier extends DistributionClassifier
       setRandomWidthFactor((new Double(rfactorString)).doubleValue());
     } else {
       setRandomWidthFactor(2.0);
+    }
+    String randomString = Utils.getOption('Q', options);
+    if (randomString.length() != 0) {
+      setSeed(Integer.parseInt(randomString));
+    } else {
+      setSeed(1);
     }
 
     String classifierName = Utils.getOption('W', options);
@@ -536,7 +595,7 @@ public class MultiClassClassifier extends DistributionClassifier
 	(m_Classifier instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
-    String [] options = new String [classifierOptions.length + 7];
+    String [] options = new String [classifierOptions.length + 9];
     int current = 0;
 
     options[current++] = "-M";
@@ -544,6 +603,8 @@ public class MultiClassClassifier extends DistributionClassifier
     
     options[current++] = "-R";
     options[current++] = "" + m_RandomWidthFactor;
+
+    options[current++] = "-Q"; options[current++] = "" + getSeed();
     
     if (getDistributionClassifier() != null) {
       options[current++] = "-W";
@@ -666,6 +727,26 @@ public class MultiClassClassifier extends DistributionClassifier
     return m_Classifier;
   }
 
+
+  /**
+   * Sets the seed for random number generation.
+   *
+   * @param seed the random number seed
+   */
+  public void setSeed(int seed) {
+    
+    m_Seed = seed;;
+  }
+
+  /**
+   * Gets the random number seed.
+   * 
+   * @return the random number seed
+   */
+  public int getSeed() {
+
+    return m_Seed;
+  }
 
   /**
    * Main method for testing this class.
