@@ -81,7 +81,7 @@ import weka.filters.unsupervised.attribute.*;
  * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ */
+ * @version $Revision: 1.26 $ */
 public class Logistic extends DistributionClassifier 
     implements OptionHandler, WeightedInstancesHandler {
   
@@ -353,15 +353,15 @@ public class Logistic extends DistributionClassifier
      */
     public void buildClassifier(Instances train) throws Exception {
 	if (train.classAttribute().type() != Attribute.NOMINAL) {
-	    throw new Exception("Class attribute must be nominal.");
+	    throw new UnsupportedClassTypeException("Class attribute must be nominal.");
 	}
 	if (train.checkForStringAttributes()) {
-	    throw new Exception("Can't handle string attributes!");
+	    throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
 	}
 	train = new Instances(train);
 	train.deleteWithMissingClass();
 	if (train.numInstances() == 0) {
-	    throw new Exception("No train instances without missing class value!");
+	    throw new IllegalArgumentException("No train instances without missing class value!");
 	}
 
 	// Replace missing values	
