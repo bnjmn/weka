@@ -8,7 +8,8 @@ SOURCES = Classifier.java DistributionClassifier.java \
 	DecisionTable.java VotedPerceptron.java \
 	Bagging.java LogitBoost.java AdaBoostM1.java Stacking.java \
 	MultiClassClassifier.java MultiScheme.java CVParameterSelection.java \
-	BVDecompose.java RegressionByDiscretization.java ClassificationViaRegression.java
+	BVDecompose.java RegressionByDiscretization.java \
+	ClassificationViaRegression.java FilteredClassifier.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
