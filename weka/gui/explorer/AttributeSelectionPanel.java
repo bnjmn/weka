@@ -108,7 +108,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -629,7 +629,8 @@ public class AttributeSelectionPanel extends JPanel {
 
 	      case 1: // CV mode
 	      m_Log.statusMessage("Randomizing instances...");
-	      inst.randomize(new Random(seed));
+	      Random random = new Random(seed);
+	      inst.randomize(random);
 	      if (inst.attribute(classIndex).isNominal()) {
 		m_Log.statusMessage("Stratifying instances...");
 		inst.stratify(numFolds);
@@ -637,7 +638,7 @@ public class AttributeSelectionPanel extends JPanel {
 	      for (int fold = 0; fold < numFolds;fold++) {
 		m_Log.statusMessage("Creating splits for fold "
 				    + (fold + 1) + "...");
-		Instances train = inst.trainCV(numFolds, fold);
+		Instances train = inst.trainCV(numFolds, fold, random);
 		m_Log.statusMessage("Selecting attributes using all but fold "
 				    + (fold + 1) + "...");
 		

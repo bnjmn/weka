@@ -113,7 +113,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.3 $ */
 public class SMO extends Classifier implements OptionHandler, 
   WeightedInstancesHandler {
 
@@ -218,7 +218,7 @@ public class SMO extends Classifier implements OptionHandler,
 	insts.randomize(random);
 	insts.stratify(numFolds);
 	for (int i = 0; i < numFolds; i++) {
-	  Instances train = insts.trainCV(numFolds, i);
+	  Instances train = insts.trainCV(numFolds, i, random);
 	  SerializedObject so = new SerializedObject(this);
 	  BinarySMO smo = (BinarySMO)so.getObject();
 	  smo.buildClassifier(train, cl1, cl2, false, -1, -1);

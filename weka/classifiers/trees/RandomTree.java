@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -66,9 +66,6 @@ public class RandomTree extends Classifier
   
   /** The number of attributes considered for a split. */
   protected int m_KValue = 1;
-
-  /** Random number generator. */
-  protected Random m_random;
 
   /** The random seed to use. */
   protected int m_randomSeed = 1;
@@ -322,7 +319,7 @@ public class RandomTree extends Classifier
     // Build tree
     buildTree(sortedIndices, weights, train, classProbs,
 	      new Instances(train, 0), m_MinNum, m_Debug,
-	      attIndicesWindow);
+	      attIndicesWindow, data.getRandomNumberGenerator(m_randomSeed));
   }
   
   /**
@@ -511,11 +508,8 @@ public class RandomTree extends Classifier
   protected void buildTree(int[][] sortedIndices, double[][] weights,
 			 Instances data, double[] classProbs, 
 			 Instances header, double minNum, boolean debug,
-			 int[] attIndicesWindow) 
+			 int[] attIndicesWindow, Random random) 
     throws Exception {
-
-    // create the random generator
-    m_random = new Random(m_randomSeed);
 
     // Store structure of dataset, set minimum number of instances
     m_Info = header;
@@ -560,7 +554,7 @@ public class RandomTree extends Classifier
     boolean gainFound = false;
     while ((windowSize > 0) && (k-- > 0 || !gainFound)) {
 
-      int chosenIndex = m_random.nextInt(windowSize);
+      int chosenIndex = random.nextInt(windowSize);
       attIndex = attIndicesWindow[chosenIndex];
       
       // shift chosen attIndex out of window
@@ -595,11 +589,10 @@ public class RandomTree extends Classifier
       m_Successors = new RandomTree[m_Distribution.length];
       for (int i = 0; i < m_Distribution.length; i++) {
 	m_Successors[i] = new RandomTree();
-	m_Successors[i].setSeed(m_random.nextInt());
 	m_Successors[i].setKValue(m_KValue);
 	m_Successors[i].buildTree(subsetIndices[i], subsetWeights[i], data, 
 				  m_Distribution[i], header, m_MinNum, m_Debug,
-				  attIndicesWindow);
+				  attIndicesWindow, random);
       }
     } else {
       

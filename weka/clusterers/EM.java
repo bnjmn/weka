@@ -69,7 +69,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class EM
   extends DistributionClusterer
@@ -798,7 +798,7 @@ public class EM
       templl = 0.0;
 
       for (i = 0; i < numFolds; i++) {
-	Instances cvTrain = trainCopy.trainCV(numFolds, i);
+	Instances cvTrain = trainCopy.trainCV(numFolds, i, cvr);
 	Instances cvTest = trainCopy.testCV(numFolds, i);
 	EM_Init(cvTrain, num_cl);
 	iterate(cvTrain, num_cl, false);

@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.20 $
+ * @version  $Revision: 1.21 $
  */
 public class ClusterEvaluation {
 
@@ -675,7 +675,7 @@ public class ClusterEvaluation {
       random.setSeed(seed);
       train.randomize(random);
       text.append(crossValidateModel(clusterer.getClass().getName()
-				     , train, folds, savedOptions));
+				     , train, folds, savedOptions, random));
     }
 
     // Save the clusterer if an object output file is provided
@@ -698,13 +698,15 @@ public class ClusterEvaluation {
    * performed 
    * @param numFolds the number of folds for the cross-validation
    * @param options the options to the clusterer
+   * @param random a random number generator
    * @return a string containing the cross validated log likelihood
    * @exception Exception if a clusterer could not be generated 
    */
   public static String crossValidateModel (String clustererString, 
 					   Instances data, 
 					   int numFolds, 
-					   String[] options)
+					   String[] options,
+					   Random random)
     throws Exception {
     Clusterer clusterer = null;
     Instances train, test;
@@ -754,7 +756,7 @@ public class ClusterEvaluation {
       }
 
       // Build and test classifier 
-      train = data.trainCV(numFolds, i);
+      train = data.trainCV(numFolds, i, random);
       clusterer.buildClusterer(train);
       test = data.testCV(numFolds, i);
       foldAv = 0.0;

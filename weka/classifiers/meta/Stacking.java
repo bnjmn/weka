@@ -53,7 +53,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class Stacking extends Classifier implements OptionHandler {
 
@@ -330,7 +330,8 @@ public class Stacking extends Classifier implements OptionHandler {
     if (newData.numInstances() == 0) {
       throw new Exception("No training instances without missing class!");
     }
-    newData.randomize(new Random(m_Seed));
+    Random random = new Random(m_Seed);
+    newData.randomize(random);
     if (newData.classAttribute().isNominal())
       newData.stratify(m_NumFolds);
     int numClassifiers = m_BaseClassifiers.length;
@@ -338,7 +339,7 @@ public class Stacking extends Classifier implements OptionHandler {
     Instances metaData = metaFormat(newData);
     m_MetaFormat = new Instances(metaData, 0);
     for (int j = 0; j < m_NumFolds; j++) {
-      Instances train = newData.trainCV(m_NumFolds, j);
+      Instances train = newData.trainCV(m_NumFolds, j, random);
 
       // Build base classifiers
       for (int i = 0; i < m_BaseClassifiers.length; i++) {

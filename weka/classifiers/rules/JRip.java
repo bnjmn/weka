@@ -134,7 +134,7 @@ import weka.classifiers.Classifier;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class JRip extends Classifier 
   implements OptionHandler, 
@@ -1050,27 +1050,23 @@ public class JRip extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
      
-      if(instances.numInstances() == 0)
-	  throw new Exception(" No instances with a class value!");
-      
-      if (instances.checkForStringAttributes()) 
-	  throw new UnsupportedAttributeTypeException(" Cannot handle string attributes!");
-      
-      if (!instances.classAttribute().isNominal()) 
-	  throw new UnsupportedClassTypeException(" Only nominal class, please.");
-      
-      m_Random = new Random(m_Seed); 
-      m_Total = RuleStats.numAllConditions(instances);
-      if(m_Debug)
-	  System.err.println("Number of all possible conditions = "+m_Total);
-      
-      Instances data = null;
-      m_Filter = new ClassOrder();
-      
-      // Sth. to make the class order different each time in cross-validations
-    Instance inst = 
-      instances.instance((int)(m_Random.nextDouble()*(double)instances.numInstances()));
-    ((ClassOrder)m_Filter).setSeed((long)inst.toString().hashCode());	
+    if(instances.numInstances() == 0)
+      throw new Exception(" No instances with a class value!");
+    
+    if (instances.checkForStringAttributes()) 
+      throw new UnsupportedAttributeTypeException(" Cannot handle string attributes!");
+    
+    if (!instances.classAttribute().isNominal()) 
+      throw new UnsupportedClassTypeException(" Only nominal class, please.");
+    
+    m_Random = instances.getRandomNumberGenerator(m_Seed); 
+    m_Total = RuleStats.numAllConditions(instances);
+    if(m_Debug)
+      System.err.println("Number of all possible conditions = "+m_Total);
+    
+    Instances data = null;
+    m_Filter = new ClassOrder();
+    ((ClassOrder)m_Filter).setSeed(m_Random.nextInt());	
     ((ClassOrder)m_Filter).setClassOrder(ClassOrder.FREQ_ASCEND);
     m_Filter.setInputFormat(instances);
     data = Filter.useFilter(instances, m_Filter);

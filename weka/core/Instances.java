@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.47 $ 
+ * @version $Revision: 1.48 $ 
  */
 public class Instances implements Serializable {
  
@@ -522,6 +522,22 @@ public class Instances implements Serializable {
   public final Instance firstInstance() {
     
     return (Instance)m_Instances.firstElement();
+  }
+
+  /**
+   * Returns a random number generator. The initial seed of the random
+   * number generator depends on the given seed and the hash code of
+   * a string representation of a instances chosen based on the given
+   * seed. 
+   *
+   * @param seed the given seed
+   * @return the random number generator
+   */
+  public Random getRandomNumberGenerator(long seed) {
+
+    Random r = new Random(seed);
+    r.setSeed(instance(r.nextInt(numInstances())).toString().hashCode() + seed);
+    return r;
   }
  
   /**
@@ -1109,13 +1125,13 @@ public class Instances implements Serializable {
 
   /**
    * Creates the training set for one fold of a cross-validation 
-   * on the dataset.
+   * on the dataset. The data is subsequently randomized based
+   * on the given random number generator.
    *
    * @param numFolds the number of folds in the cross-validation. Must
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
-   * @return the training set as a set of weighted 
-   * instances
+   * @return the training set 
    * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
@@ -1142,6 +1158,26 @@ public class Instances implements Serializable {
     copyInstances(first + numInstForFold, train,
 		  numInstances() - first - numInstForFold);
 
+    return train;
+  }
+
+  /**
+   * Creates the training set for one fold of a cross-validation 
+   * on the dataset. The data is subsequently randomized based
+   * on the given random number generator.
+   *
+   * @param numFolds the number of folds in the cross-validation. Must
+   * be greater than 1.
+   * @param numFold 0 for the first fold, 1 for the second, ...
+   * @param random the random number generator
+   * @return the training set 
+   * @exception IllegalArgumentException if the number of folds is less than 2
+   * or greater than the number of instances.
+   */
+  public Instances trainCV(int numFolds, int numFold, Random random) {
+
+    Instances train = trainCV(numFold, numFold);
+    train.randomize(random);
     return train;
   }
 
@@ -2134,7 +2170,7 @@ public class Instances implements Serializable {
 	instances.stratify(3);
       }
       for (j = 0; j < 3; j++) {
-        train = instances.trainCV(3,j);
+        train = instances.trainCV(3,j, new Random(1));
 	test = instances.testCV(3,j);
                       
 	// Print all instances and their weights (and the sum of weights).

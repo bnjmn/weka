@@ -32,7 +32,7 @@ import weka.classifiers.*;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class MakeDecList implements Serializable {
 
@@ -56,6 +56,9 @@ public class MakeDecList implements Serializable {
 
   /** Generated unpruned list? */
   private boolean unpruned = false;
+
+  /** The seed for random number generation. */
+  private int m_seed = 1;
 
   /**
    * Constructor for unpruned dec list.
@@ -86,13 +89,14 @@ public class MakeDecList implements Serializable {
    * Constructor for dec list pruned using hold-out pruning.
    */
   public MakeDecList(ModelSelection toSelectLocModel, int num,
-		     int minNum){
+		     int minNum, int seed){
 
     toSelectModeL = toSelectLocModel;
     numSetS = num;
     reducedErrorPruning = true;
     unpruned = false;
     minNumObj = minNum;
+    m_seed = seed;
   }
 
   /**
@@ -120,8 +124,10 @@ public class MakeDecList implements Serializable {
     if (data.numInstances() == 0)
       throw new Exception("No training instances/Only instances with missing class!");
     if ((reducedErrorPruning) && !(unpruned)){ 
+      Random random = new Random(m_seed);
+      data.randomize(random);
       data.stratify(numSetS);
-      oldGrowData = data.trainCV(numSetS, numSetS - 1);
+      oldGrowData = data.trainCV(numSetS, numSetS - 1, random);
       oldPruneData = data.testCV(numSetS, numSetS - 1);
     } else {
       oldGrowData = data;

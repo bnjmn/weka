@@ -33,7 +33,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class EvaluationUtils {
 
@@ -69,7 +69,7 @@ public class EvaluationUtils {
     }
     int inst = 0;
     for (int fold = 0; fold < numFolds; fold++) {
-      Instances train = runInstances.trainCV(numFolds, fold);
+      Instances train = runInstances.trainCV(numFolds, fold, random);
       Instances test = runInstances.testCV(numFolds, fold);
       FastVector foldPred = getTrainTestPredictions(classifier, train, test);
       predictions.appendElements(foldPred);

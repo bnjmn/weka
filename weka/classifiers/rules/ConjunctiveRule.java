@@ -51,7 +51,7 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 
 public class ConjunctiveRule extends Classifier 
@@ -80,9 +80,6 @@ public class ConjunctiveRule extends Classifier
     
   /** The Random object used for randomization */
   private Random m_Random = null;
-
-  /** Whether randomize the data */
-  private boolean m_IsRandomized = true;
     
   /** The predicted classes recorded for each antecedent in the growing data */
   private FastVector m_Targets;
@@ -788,7 +785,6 @@ public class ConjunctiveRule extends Classifier
     else 
       m_NumAntds = -1;
 	
-    m_IsRandomized = (!Utils.getFlag('R', options));
     m_IsExclude = Utils.getFlag('E', options);	
   }
     
@@ -799,15 +795,13 @@ public class ConjunctiveRule extends Classifier
    */
   public String [] getOptions() {
 	
-    String [] options = new String [10];
+    String [] options = new String [9];
     int current = 0;
     options[current++] = "-N"; options[current++] = "" + m_Folds;
     options[current++] = "-M"; options[current++] = "" + m_MinNo;
     options[current++] = "-P"; options[current++] = "" + m_NumAntds;
     options[current++] = "-S"; options[current++] = "" + m_Seed;
 
-    if(!m_IsRandomized)
-      options[current++] = "-R";
     if(m_IsExclude)
       options[current++] = "-E";
 	
@@ -821,8 +815,6 @@ public class ConjunctiveRule extends Classifier
   public int getFolds(){ return m_Folds; }
   public void setSeed(long s){ m_Seed = s; }
   public long getSeed(){ return m_Seed; }
-  public boolean getRandomized(){ return m_IsRandomized;}
-  public void setRandomized(boolean r){ m_IsRandomized = r;}
   public boolean getExclusive(){ return m_IsExclude;}
   public void setExclusive(boolean e){ m_IsExclude = e;}
   public void setMinNo(double m){  m_MinNo = m; }
@@ -868,18 +860,17 @@ public class ConjunctiveRule extends Classifier
     m_Targets = new FastVector();	    
     m_Random = new Random(m_Seed);
     
-    if(m_IsRandomized){  // Randomize the data	
-	data.randomize(m_Random);
-    }
-    
     if(m_NumAntds != -1){
       grow(data);
     }
     else{
+
+      data.randomize(m_Random);
+
       // Split data into Grow and Prune	   
       data.stratify(m_Folds);
 	
-      Instances growData=data.trainCV(m_Folds, m_Folds-1);
+      Instances growData=data.trainCV(m_Folds, m_Folds-1, m_Random);
       Instances pruneData=data.testCV(m_Folds, m_Folds-1);
 
       grow(growData);      // Build this rule  

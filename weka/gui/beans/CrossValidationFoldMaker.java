@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -101,7 +101,8 @@ public class CrossValidationFoldMaker
       m_foldThread = new Thread() {
 	  public void run() {
 	    try {
-	      dataSet.randomize(new Random(getSeed()));
+	      Random random = new Random(getSeed());
+	      dataSet.randomize(random);
 	      if (dataSet.classIndex() >= 0 && 
 		  dataSet.attribute(dataSet.classIndex()).isNominal()) {
 		dataSet.stratify(getFolds());
@@ -120,7 +121,7 @@ public class CrossValidationFoldMaker
 		  // exit gracefully
 		  break;
 		}
-		Instances train = dataSet.trainCV(getFolds(), i);
+		Instances train = dataSet.trainCV(getFolds(), i, random);
 		Instances test  = dataSet.testCV(getFolds(), i);
 		
 		// inform all training set listeners

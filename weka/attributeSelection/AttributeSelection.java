@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.30 $
+ * @version  $Revision: 1.31 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -529,7 +529,8 @@ public class AttributeSelection implements Serializable {
     double[] subsetResults;
     double[][] attributeRanking = null;
 
-    cvData.randomize(new Random(m_seed));
+    Random random = new Random(m_seed);
+    cvData.randomize(random);
 
     if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
 	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
@@ -541,7 +542,7 @@ public class AttributeSelection implements Serializable {
 
     for (int i = 0; i < m_numFolds; i++) {
       // Perform attribute selection
-      train = cvData.trainCV(m_numFolds, i);
+      train = cvData.trainCV(m_numFolds, i, random);
       selectAttributesCVSplit(train);
     }
 

@@ -158,8 +158,8 @@ implements OptionHandler {
       } else {
 	probs[i] = distributions[i - 1][1] - distributions[i][1];
 	if (!(probs[i] > 0)) {
-	  //System.err.println("Warning: estimated probability " + probs[i] +
-	  //		     ". Rounding to 0.");
+	  System.err.println("Warning: estimated probability " + probs[i] +
+	  		     ". Rounding to 0.");
 	  probs[i] = 0;
 	}
       }

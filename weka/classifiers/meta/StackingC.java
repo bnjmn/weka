@@ -62,7 +62,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class StackingC extends Classifier implements OptionHandler {
 
@@ -353,7 +353,8 @@ public class StackingC extends Classifier implements OptionHandler {
     if (newData.numInstances() == 0) {
       throw new Exception("No training instances without missing class!");
     }
-    newData.randomize(new Random(m_Seed));
+    Random random = new Random(m_Seed);
+    newData.randomize(random);
     if (newData.classAttribute().isNominal())
       newData.stratify(m_NumFolds);
     int numClassifiers = m_BaseClassifiers.length;
@@ -361,7 +362,7 @@ public class StackingC extends Classifier implements OptionHandler {
     Instances metaData = metaFormat(newData);
     m_MetaFormat = new Instances(metaData, 0);
     for (int j = 0; j < m_NumFolds; j++) {
-      Instances train = newData.trainCV(m_NumFolds, j);
+      Instances train = newData.trainCV(m_NumFolds, j, random);
 
       // Build base classifiers
       for (int i = 0; i < m_BaseClassifiers.length; i++) {

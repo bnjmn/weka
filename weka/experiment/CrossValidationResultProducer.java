@@ -44,7 +44,7 @@ import weka.core.AdditionalMeasureProducer;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
@@ -282,7 +282,8 @@ public class CrossValidationResultProducer
     }
     // Randomize on a copy of the original dataset
     Instances runInstances = new Instances(m_Instances);
-    runInstances.randomize(new Random(run));
+    Random random = new Random(run);
+    runInstances.randomize(random);
     if (runInstances.classAttribute().isNominal()) {
       runInstances.stratify(m_NumFolds);
     }
@@ -295,7 +296,7 @@ public class CrossValidationResultProducer
       key[2] = "" + (fold + 1);
       System.arraycopy(seKey, 0, key, 3, seKey.length);
       if (m_ResultListener.isResultRequired(this, key)) {
-	Instances train = runInstances.trainCV(m_NumFolds, fold);
+	Instances train = runInstances.trainCV(m_NumFolds, fold, random);
 	Instances test = runInstances.testCV(m_NumFolds, fold);
 	try {
 	  Object [] seResults = m_SplitEvaluator.getResult(train, test);
