@@ -83,7 +83,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -1016,8 +1016,7 @@ public class PreprocessPanel extends JPanel {
 	  String fileType = f.getName();
 	  try {
 	    m_Log.statusMessage("Reading from file...");
-	    if (f.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)
-		|| f.getName().toLowerCase().endsWith(".tmp")) {	    
+	    if (f.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {	    
 	      fileType = "arff";
 	      Reader r = new BufferedReader(new FileReader(f));
 	      setInstances(new Instances(r));
@@ -1035,7 +1034,8 @@ public class PreprocessPanel extends JPanel {
 	      Instances inst = cnv.getDataSet();
 	      setInstances(inst);
 	    } else if (f.getName().toLowerCase().
-		       endsWith(Instances.SERIALIZED_OBJ_FILE_EXTENSION)) {
+		       endsWith(Instances.SERIALIZED_OBJ_FILE_EXTENSION)
+		       || f.getName().toLowerCase().endsWith(".tmp")) {
 	      ObjectInputStream ois = 
 		new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 	      setInstances((Instances)ois.readObject());
@@ -1171,16 +1171,14 @@ public class PreprocessPanel extends JPanel {
     File tempFile = File.createTempFile("weka", null);
     tempFile.deleteOnExit();
 
-    // write current dataset to file
-    Writer w = new BufferedWriter(new FileWriter(tempFile));
-    Instances h = new Instances(m_Instances, 0);
-    w.write(h.toString());
-    w.write("\n");
-    for (int i = 0; i < m_Instances.numInstances(); i++) {
-      w.write(m_Instances.instance(i).toString());
-      w.write("\n");
-    }
-    w.close();
+    ObjectOutputStream oos = 
+      new ObjectOutputStream(
+      new BufferedOutputStream(
+      new FileOutputStream(tempFile)));
+    
+    oos.writeObject(m_Instances);
+    oos.flush();
+    oos.close();
 
     // update undo file list
     if (m_tempUndoFiles[m_tempUndoIndex] != null) {
