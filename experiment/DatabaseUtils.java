@@ -53,7 +53,7 @@ import java.sql.PreparedStatement;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -77,10 +77,10 @@ public class DatabaseUtils implements Serializable {
     = "weka/experiment/DatabaseUtils.props";
 
   /** Holds the jdbc drivers to be used (only to stop them being gc'ed) */
-  protected static Vector DRIVERS = new Vector();
+  protected Vector DRIVERS = new Vector();
 
   /** Properties associated with the database connection */
-  protected static Properties PROPERTIES;
+  protected Properties PROPERTIES;
 
 
 
@@ -95,39 +95,6 @@ public class DatabaseUtils implements Serializable {
   public static final int FLOAT = 7;
   public static final int DATE = 8; 
  
-
-  /* Load the database drivers -- the properties files only get consulted
-   * when the class is initially loaded, not for every object instantiated
-   */
-  static {
-
-    try {
-      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-   
-      // Register the drivers in jdbc DriverManager
-      String drivers = PROPERTIES.getProperty("jdbcDriver",
-					    "jdbc.idbDriver");
-
-      if (drivers == null) {
-	throw new Exception("No jdbc drivers specified");
-      }
-      // The call to newInstance() is necessary on some platforms
-      // (with some java VM implementations)
-      StringTokenizer st = new StringTokenizer(drivers, ", ");
-      while (st.hasMoreTokens()) {
-	String driver = st.nextToken();
-	try {
-	  DRIVERS.addElement(Class.forName(driver).newInstance());
-	  System.err.println("Loaded driver: " + driver);
-	} catch (Exception ex) {
-	  // Drop through
-	}
-      }
-    } catch (Exception ex) {
-      System.err.println("Problem reading properties. Fix before continuing.");
-      System.err.println(ex);
-    }
-  }
   
   /** Database URL */
   protected String m_DatabaseURL;
@@ -214,8 +181,6 @@ public class DatabaseUtils implements Serializable {
 
   /** True if debugging output should be printed */
   protected boolean m_Debug = true;
-
- 
   
   /** Database username */
   protected String m_userName="";
@@ -240,11 +205,34 @@ public class DatabaseUtils implements Serializable {
 
 
   /**
-   * Sets up the database drivers
+   * Reads properties and sets up the database drivers
    *
    * @exception Exception if an error occurs
    */
   public DatabaseUtils() throws Exception {
+
+    try {
+      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+   
+      // Register the drivers in jdbc DriverManager
+      String drivers = PROPERTIES.getProperty("jdbcDriver",
+					    "jdbc.idbDriver");
+
+      if (drivers == null) {
+	throw new Exception("No jdbc drivers specified");
+      }
+      // The call to newInstance() is necessary on some platforms
+      // (with some java VM implementations)
+      StringTokenizer st = new StringTokenizer(drivers, ", ");
+      while (st.hasMoreTokens()) {
+	String driver = st.nextToken();
+	DRIVERS.addElement(driver);
+	System.err.println("Added driver: " + driver);
+      }
+    } catch (Exception ex) {
+      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(ex);
+    }
 
     m_DatabaseURL = PROPERTIES.getProperty("jdbcURL",
 					   "jdbc:idb=experiments.prp");
@@ -392,9 +380,37 @@ public class DatabaseUtils implements Serializable {
     }
     if (m_Connection == null) {
       if (m_userName.equals("")) {
-	m_Connection = DriverManager.getConnection(m_DatabaseURL);
+	try {
+	  m_Connection = DriverManager.getConnection(m_DatabaseURL);
+	} catch (java.sql.SQLException e) {
+	  
+	  // Try loading the drivers
+	  for (int i = 0; i < DRIVERS.size(); i++) {
+	    try {
+	      Class.forName((String)DRIVERS.elementAt(i));
+	    } catch (Exception ex) {
+	      // Drop through
+	    }
+	  }
+	  m_Connection = DriverManager.getConnection(m_DatabaseURL);
+	}
       } else {
-	m_Connection = DriverManager.getConnection(m_DatabaseURL,m_userName,m_password);
+	try {
+	  m_Connection = DriverManager.getConnection(m_DatabaseURL, m_userName,
+						     m_password);
+	} catch (java.sql.SQLException e) {
+	  
+	  // Try loading the drivers
+	  for (int i = 0; i < DRIVERS.size(); i++) {
+	    try {
+	      Class.forName((String)DRIVERS.elementAt(i));
+	    } catch (Exception ex) {
+	      // Drop through
+	    }
+	  }
+	  m_Connection = DriverManager.getConnection(m_DatabaseURL, m_userName,
+						     m_password);
+	}
       }
     }
     if (m_setAutoCommit){

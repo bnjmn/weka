@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.19 $
+   $Revision: 1.20 $
   ===========================================================================
 -->
 
@@ -214,15 +214,13 @@
      <copy todir="${path_modifier}${dist}" >
        <fileset dir="${path_modifier}weka/experiment">
           <include name="remote.policy"/>
-	  <include name="DatabaseUtils.props"/>
        </fileset>
     </copy>
     <jar jarfile="${path_modifier}${dist}/remoteExperimentServer.jar"
      basedir="${path_modifier}${dist}"
-     includes="remoteEngine.jar,remote.policy,DatabaseUtils.props"/>
+     includes="remoteEngine.jar,remote.policy"/>
      <delete file="${path_modifier}${dist}/remoteEngine.jar"/>
      <delete file="${path_modifier}${dist}/remote.policy"/>
-     <delete file="${path_modifier}${dist}/DatabaseUtils.props"/>
    </target>
 
    <target name="changelog"
