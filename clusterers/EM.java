@@ -69,7 +69,8 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.23 $
  */
 public class EM
   extends DistributionClusterer
@@ -122,9 +123,6 @@ public class EM
   /** random numbers and seed */
   private Random m_rr;
   private int m_rseed;
-
-  /** Constant for normal distribution. */
-  private static double m_normConst = Math.sqrt(2*Math.PI);
 
   /** Verbose? */
   private boolean m_verbose;
@@ -409,17 +407,16 @@ public class EM
    * Initialise estimators and storage.
    *
    * @param inst the instances
-   * @param num_cl the number of clusters
    **/
-  private void EM_Init (Instances inst, int num_cl)
+  private void EM_Init (Instances inst)
     throws Exception {
     int i, j, k;
-    m_weights = new double[inst.numInstances()][num_cl];
-    m_model = new DiscreteEstimator[num_cl][m_num_attribs];
-    m_modelNormal = new double[num_cl][m_num_attribs][3];
-    m_priors = new double[num_cl];
+    m_weights = new double[inst.numInstances()][m_num_clusters];
+    m_model = new DiscreteEstimator[m_num_clusters][m_num_attribs];
+    m_modelNormal = new double[m_num_clusters][m_num_attribs][3];
+    m_priors = new double[m_num_clusters];
 
-    for (i = 0; i < num_cl; i++) {
+    for (i = 0; i < m_num_clusters; i++) {
       for (j = 0; j < m_num_attribs; j++) {
 	if (inst.attribute(j).isNominal()) {
 	  m_model[i][j] = new DiscreteEstimator(m_theInstances.
@@ -432,14 +429,14 @@ public class EM
 	else {
 	  double delta_init = m_maxValues[j]-m_minValues[j];
 	  m_modelNormal[i][j][0] = m_minValues[j]+delta_init*m_rr.nextDouble();
-	  m_modelNormal[i][j][1] = delta_init/(2*num_cl);
+	  m_modelNormal[i][j][1] = delta_init/(2*m_num_clusters);
 	  m_modelNormal[i][j][2] = 1.0;
 	}
       }
     }
     
     // initially equal priors
-    for (j = 0; j < num_cl; j++) {
+    for (j = 0; j < m_num_clusters; j++) {
       m_priors[j] += 1.0;
     }
     Utils.normalize(m_priors);
@@ -450,17 +447,16 @@ public class EM
    * calculate prior probabilites for the clusters
    *
    * @param inst the instances
-   * @param num_cl the number of clusters
    * @exception Exception if priors can't be calculated
    **/
-  private void estimate_priors (Instances inst, int num_cl)
+  private void estimate_priors (Instances inst)
     throws Exception {
-    for (int i = 0; i < num_cl; i++) {
+    for (int i = 0; i < m_num_clusters; i++) {
       m_priors[i] = 0.0;
     }
 
     for (int i = 0; i < inst.numInstances(); i++) {
-      for (int j = 0; j < num_cl; j++) {
+      for (int j = 0; j < m_num_clusters; j++) {
         m_priors[j] += m_weights[i][j];
       }
     }
@@ -469,26 +465,29 @@ public class EM
   }
 
 
+  /** Constant for normal distribution. */
+  private static double m_normConst = Math.log(Math.sqrt(2*Math.PI));
+
   /**
    * Density function of normal distribution.
    * @param x input value
    * @param mean mean of distribution
    * @param stdDev standard deviation of distribution
    */
-  private double normalDens (double x, double mean, double stdDev) {
-    double diff = x - mean;
-   
-    return  (1/(m_normConst*stdDev))*Math.exp(-(diff*diff/(2*stdDev*stdDev)));
-  }
+  private double logNormalDens (double x, double mean, double stdDev) {
 
+    double diff = x - mean;
+    
+    return - (diff * diff / (2 * stdDev * stdDev))  - m_normConst - Math.log(stdDev);
+  }
 
   /**
    * New probability estimators for an iteration
    *
    * @param num_cl the numbe of clusters
    */
-  private void new_estimators (int num_cl) {
-    for (int i = 0; i < num_cl; i++) {
+  private void new_estimators () {
+    for (int i = 0; i < m_num_clusters; i++) {
       for (int j = 0; j < m_num_attribs; j++) {
         if (m_theInstances.attribute(j).isNominal()) {
           m_model[i][j] = new DiscreteEstimator(m_theInstances.
@@ -507,14 +506,13 @@ public class EM
   /**
    * The M step of the EM algorithm.
    * @param inst the training instances
-   * @param num_cl the number of clusters
    */
-  private void M (Instances inst, int num_cl)
+  private void M (Instances inst)
     throws Exception {
     int i, j, l;
-    new_estimators(num_cl);
+    new_estimators();
 
-    for (i = 0; i < num_cl; i++) {
+    for (i = 0; i < m_num_clusters; i++) {
       for (j = 0; j < m_num_attribs; j++) {
         for (l = 0; l < inst.numInstances(); l++) {
           if (!inst.instance(l).isMissing(j)) {
@@ -537,7 +535,7 @@ public class EM
     // calcualte mean and std deviation for numeric attributes
     for (j = 0; j < m_num_attribs; j++) {
       if (!inst.attribute(j).isNominal()) {
-        for (i = 0; i < num_cl; i++) {
+        for (i = 0; i < m_num_clusters; i++) {
           if (m_modelNormal[i][j][2] < 0) {
             m_modelNormal[i][j][1] = 0;
           } else {
@@ -574,78 +572,36 @@ public class EM
    * probabilities.
    *
    * @param inst the training instances
-   * @param num_cl the number of clusters
    * @return the average log likelihood
    */
-  private double E (Instances inst, int num_cl)
+  private double E (Instances inst, boolean change_weights)
     throws Exception {
-    int i, j, l;
-    double prob;
+
     double loglk = 0.0;
 
-    for (l = 0; l < inst.numInstances(); l++) {
-      for (i = 0; i < num_cl; i++) {
-	m_weights[l][i] = m_priors[i];
+    for (int l = 0; l < inst.numInstances(); l++) {
+
+      double[] logWeights = logOfWeightsForInstance(inst.instance(l));
+
+      if (change_weights) {
+	m_weights[l] = Utils.logs2probs(logWeights);
       }
-      for (j = 0; j < m_num_attribs; j++) {
-	double max = 0;
-	for (i = 0; i < num_cl; i++) {
-	  
-          if (!inst.instance(l).isMissing(j)) {
-            if (inst.attribute(j).isNominal()) {
-              m_weights[l][i] *= 
-		m_model[i][j].getProbability(inst.instance(l).value(j));
-	      
-            }
-            else {
-              // numeric attribute
-              m_weights[l][i] *= normalDens(inst.instance(l).value(j), 
-					    m_modelNormal[i][j][0], 
-					    m_modelNormal[i][j][1]);
-	      if (Double.isInfinite(m_weights[l][i])) {
-		throw new Exception("Joint density has overflowed. Try "
-				    +"increasing the minimum allowable "
-				    +"standard deviation for normal "
-				    +"density calculation.");
-	      }
-            }
-	    if (m_weights[l][i] > max) {
-	      max = m_weights[l][i];
-	    }
-          }
-        }
-	if (max > 0 && max < 1e-75) { // check for underflow
-	  for (int zz = 0; zz < num_cl; zz++) {
-	    // rescale
-	    m_weights[l][zz] *= 1e75;
-	  }
-	}
+
+      double max = logWeights[Utils.maxIndex(logWeights)];
+      double sum = 0.0;
+
+      for(int i = 0; i < logWeights.length; i++) {
+	sum += Math.exp(logWeights[i] - max);
       }
-      
-      double temp1 = 0;
-      
-      for (i = 0; i < num_cl; i++) {
-        temp1 += m_weights[l][i];
-      }
-      
-      if (temp1 > 0) {
-        loglk += Math.log(temp1);
-      }
-      
-      // normalise the weights for this instance
-      try {
-	Utils.normalize(m_weights[l]);
-      } catch (Exception e) {
-	throw new Exception("An instance has zero cluster memberships. Try "
-			    +"increasing the minimum allowable "
-			    +"standard deviation for normal "
-			    +"density calculation.");
-      }
+
+      loglk += max + Math.log(sum);
     }
     
     // reestimate priors
-    estimate_priors(inst, num_cl);
-    return  loglk/inst.numInstances();
+    if (change_weights) {
+      estimate_priors(inst);
+    }
+    return  loglk / inst.numInstances();
   }
   
   
@@ -774,14 +730,13 @@ public class EM
    * estimate the number of clusters by cross validation on the training
    * data.
    *
-   * @return the number of clusters selected
    */
-  private int CVClusters ()
+  private void CVClusters ()
     throws Exception {
     double CVLogLikely = -Double.MAX_VALUE;
     double templl, tll;
     boolean CVincreased = true;
-    int num_cl = 1;
+    m_num_clusters = 1;
     int i;
     Random cvr;
     Instances trainCopy;
@@ -800,12 +755,12 @@ public class EM
       for (i = 0; i < numFolds; i++) {
 	Instances cvTrain = trainCopy.trainCV(numFolds, i, cvr);
 	Instances cvTest = trainCopy.testCV(numFolds, i);
-	EM_Init(cvTrain, num_cl);
-	iterate(cvTrain, num_cl, false);
-	tll = E(cvTest, num_cl);
+	EM_Init(cvTrain);
+	iterate(cvTrain, false);
+	tll = E(cvTest, false);
 
 	if (m_verbose) {
-	  System.out.println("# clust: " + num_cl + " Fold: " + i 
+	  System.out.println("# clust: " + m_num_clusters + " Fold: " + i 
 			     + " Loglikely: " + tll);
 	}
 
@@ -817,7 +772,7 @@ public class EM
       if (m_verbose) {
 	System.out.println("===================================" 
 			   + "==============\n# clust: " 
-			   + num_cl 
+			   + m_num_clusters 
 			   + " Mean Loglikely: " 
 			   + templl 
 			   + "\n================================" 
@@ -827,15 +782,15 @@ public class EM
       if (templl > CVLogLikely) {
 	CVLogLikely = templl;
 	CVincreased = true;
-	num_cl++;
+	m_num_clusters++;
       }
     }
 
     if (m_verbose) {
-      System.out.println("Number of clusters: " + (num_cl - 1));
+      System.out.println("Number of clusters: " + (m_num_clusters - 1));
     }
 
-    return  num_cl - 1;
+    m_num_clusters--;
   }
 
 
@@ -912,35 +867,37 @@ public class EM
     // save memory
     m_theInstances = new Instances(m_theInstances,0);
   }
-
+  
   /**
    * Computes the density for a given instance.
    * 
-   * @param inst the instance to compute the density for
+   * @param instance the instance to compute the density for
    * @return the density.
-   * @exception Exception if the density could not be computed
-   * successfully
+   * @exception Exception if the density could not be computed successfully
    */
-  public double densityForInstance(Instance inst) throws Exception {
-    return Utils.sum(weightsForInstance(inst));
+  public double logDensityForInstance(Instance instance) throws Exception {
+
+    double[] a = logOfWeightsForInstance(instance);
+    double max = a[Utils.maxIndex(a)];
+    double sum = 0.0;
+
+    for(int i = 0; i < a.length; i++) {
+      sum += Math.exp(a[i] - max);
+    }
+
+    return max + Math.log(sum);
   }
 
   /**
-   * Predicts the cluster memberships for a given instance.
+   * Returns the cluster probability distribution for an instance. Will simply have a
+   * probability of 1 for the chosen cluster and 0 for the others.
    *
-   * @param data set of test instances
-   * @param instance the instance to be assigned a cluster.
-   * @return an array containing the estimated membership 
-   * probabilities of the test instance in each cluster (this 
-   * should sum to at most 1)
-   * @exception Exception if distribution could not be 
-   * computed successfully
-   */
-  public double[] distributionForInstance (Instance inst)
-    throws Exception {
-    double [] distrib = weightsForInstance(inst);
-    Utils.normalize(distrib);
-    return distrib;
+   * @param instance the instance to be clustered
+   * @return the probability distribution
+   */  
+  public double[] distributionForInstance(Instance instance) throws Exception {
+    
+    return Utils.logs2probs(logOfWeightsForInstance(instance));
   }
 
   /**
@@ -950,30 +907,30 @@ public class EM
    * @return an array of weights
    * @exception Exception if weights could not be computed
    */
-  protected double[] weightsForInstance(Instance inst)
+  protected double[] logOfWeightsForInstance(Instance inst)
     throws Exception {
 
     int i, j;
-    double prob;
+    double logprob;
     double[] wghts = new double[m_num_clusters];
 
     for (i = 0; i < m_num_clusters; i++) {
-      prob = 1.0;
+      logprob = 0.0;
 
       for (j = 0; j < m_num_attribs; j++) {
 	if (!inst.isMissing(j)) {
 	  if (inst.attribute(j).isNominal()) {
-	    prob *= m_model[i][j].getProbability(inst.value(j));
+	    logprob += Math.log(m_model[i][j].getProbability(inst.value(j)));
 	  }
 	  else { // numeric attribute
-	    prob *= normalDens(inst.value(j), 
-			       m_modelNormal[i][j][0], 
-			       m_modelNormal[i][j][1]);
+	    logprob += logNormalDens(inst.value(j), 
+				     m_modelNormal[i][j][0], 
+				     m_modelNormal[i][j][1]);
 	  }
 	}
       }
 
-      wghts[i] = (prob*m_priors[i]);
+      wghts[i] = (logprob + Math.log(m_priors[i]));
     }
 
     return  wghts;
@@ -1010,15 +967,15 @@ public class EM
     // cross validate to determine number of clusters?
     if (m_initialNumClusters == -1) {
       if (m_theInstances.numInstances() > 9) {
-	m_num_clusters = CVClusters();
+	CVClusters();
       } else {
 	m_num_clusters = 1;
       }
     }
 
     // fit full training set
-    EM_Init(m_theInstances, m_num_clusters);
-    m_loglikely = iterate(m_theInstances, m_num_clusters, m_verbose);
+    EM_Init(m_theInstances);
+    m_loglikely = iterate(m_theInstances, m_verbose);
   }
 
 
@@ -1031,7 +988,7 @@ public class EM
    * @param report be verbose.
    * @return the log likelihood of the data
    */
-  private double iterate (Instances inst, int num_cl, boolean report)
+  private double iterate (Instances inst, boolean report)
     throws Exception {
     int i;
     double llkold = 0.0;
@@ -1043,7 +1000,7 @@ public class EM
 
     for (i = 0; i < m_max_iterations; i++) {
       llkold = llk;
-      llk = E(inst, num_cl);
+      llk = E(inst, true);
 
       if (report) {
 	System.out.println("Loglikely: " + llk);
@@ -1054,7 +1011,7 @@ public class EM
 	  break;
 	}
       }
-      M(inst, num_cl);
+      M(inst);
     }
 
     if (report) {

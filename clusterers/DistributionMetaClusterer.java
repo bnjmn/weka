@@ -34,9 +34,9 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class DistributionMetaClusterer extends Clusterer 
+public class DistributionMetaClusterer extends DistributionClusterer 
   implements OptionHandler {
 
   /** holds training instances header information */
@@ -151,9 +151,17 @@ public class DistributionMetaClusterer extends Clusterer
    * @return the density.
    * @exception Exception if the density could not be computed successfully
    */
-  public double densityForInstance(Instance instance) throws Exception {
+  public double logDensityForInstance(Instance instance) throws Exception {
 
-    return Utils.sum(weightsForInstance(instance));
+    double[] a = logOfWeightsForInstance(instance);
+    double max = a[Utils.maxIndex(a)];
+    double sum = 0.0;
+
+    for(int i = 0; i < a.length; i++) {
+      sum += Math.exp(a[i] - max);
+    }
+
+    return max + Math.log(sum);
   }
 
   /**
@@ -165,9 +173,7 @@ public class DistributionMetaClusterer extends Clusterer
    */  
   public double[] distributionForInstance(Instance instance) throws Exception {
     
-    double[] distribution = weightsForInstance(instance);
-    Utils.normalize(distribution);
-    return distribution;
+    return Utils.logs2probs(logOfWeightsForInstance(instance));
   }
 
   /**
@@ -177,31 +183,32 @@ public class DistributionMetaClusterer extends Clusterer
    * @return an array of weights
    * @exception Exception if weights could not be computed
    */
-  protected double[] weightsForInstance(Instance inst)
+  protected double[] logOfWeightsForInstance(Instance inst)
     throws Exception {
 
     int i, j;
-    double prob;
+    double logprob;
     double[] wghts = new double[m_wrappedClusterer.numberOfClusters()];
 
     for (i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
       if (m_priors[i] > 0) {
-	prob = 1.0;
+	logprob = 0;
 	
 	for (j = 0; j < inst.numAttributes(); j++) {
 	  if (!inst.isMissing(j)) {
 	    if (inst.attribute(j).isNominal()) {
-	    prob *= m_model[i][j].getProbability(inst.value(j));
-	    }
-	    else { // numeric attribute
-	      prob *= normalDens(inst.value(j), 
-				 m_modelNormal[i][j][0], 
-				 m_modelNormal[i][j][1]);
+	      logprob += Math.log(m_model[i][j].getProbability(inst.value(j)));
+	    } else { // numeric attribute
+	      logprob += logNormalDens(inst.value(j), 
+				       m_modelNormal[i][j][0], 
+				       m_modelNormal[i][j][1]);
 	    }
 	  }
 	}
 
-	wghts[i] = (prob * m_priors[i]);
+	wghts[i] = (logprob + Math.log(m_priors[i]));
+      } else {
+	throw new IllegalArgumentException("Cluster empty!");
       }
     }
 
@@ -209,7 +216,7 @@ public class DistributionMetaClusterer extends Clusterer
   }
 
   /** Constant for normal distribution. */
-  private static double m_normConst = Math.sqrt(2*Math.PI);
+  private static double m_normConst = Math.log(Math.sqrt(2*Math.PI));
 
   /**
    * Density function of normal distribution.
@@ -217,10 +224,11 @@ public class DistributionMetaClusterer extends Clusterer
    * @param mean mean of distribution
    * @param stdDev standard deviation of distribution
    */
-  private double normalDens (double x, double mean, double stdDev) {
+  private double logNormalDens (double x, double mean, double stdDev) {
+
     double diff = x - mean;
     
-    return  (1/(m_normConst*stdDev))*Math.exp(-(diff*diff/(2*stdDev*stdDev)));
+    return - (diff * diff / (2 * stdDev * stdDev))  - m_normConst - Math.log(stdDev);
   }
   
   /**
