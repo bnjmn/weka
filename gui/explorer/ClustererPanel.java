@@ -37,10 +37,12 @@ import weka.gui.SetInstancesPanel;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
 import weka.filters.Filter;
+import weka.filters.AttributeFilter;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
 import weka.gui.treevisualizer.*;
+import weka.gui.ListSelectorDialog;
 
 import java.util.Random;
 import java.util.Date;
@@ -96,6 +98,8 @@ import java.awt.Point;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 
 /** 
  * This panel allows the user to select and configure a clusterer, and evaluate
@@ -105,7 +109,7 @@ import javax.swing.JMenuItem;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -149,6 +153,15 @@ public class ClustererPanel extends JPanel {
 
   /** The frame used to show the test set selection panel */
   protected JFrame m_SetTestFrame;
+
+  /** The button used to popup a list for choosing attributes to ignore while
+      clustering */
+  protected JButton m_ignoreBut = new JButton("Ignore attributes");
+
+  protected DefaultListModel m_ignoreKeyModel = new DefaultListModel();
+  protected JList m_ignoreKeyList = new JList(m_ignoreKeyModel);
+
+  //  protected AttributeFilter m_ignoreFilter = null;
   
   /**
    * Alters the enabled/disabled status of elements associated with each
@@ -245,6 +258,7 @@ public class ClustererPanel extends JPanel {
     m_StorePredictionsBut.
       setToolTipText("Store predictions in the result list for later "
 		     +"visualization");
+    m_ignoreBut.setToolTipText("Ignore attributes during clustering");
 
     m_TrainBut.setSelected(true);
     m_StorePredictionsBut.setSelected(true);
@@ -264,6 +278,7 @@ public class ClustererPanel extends JPanel {
 
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
+    m_ignoreBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startClusterer();
@@ -274,6 +289,12 @@ public class ClustererPanel extends JPanel {
 	stopClusterer();
       }
     });
+
+    m_ignoreBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  setIgnoreColumns();
+	}
+      });
    
     m_History.setHandleRightClicks(false);
     // see if we can popup a menu for the selected result
@@ -356,12 +377,17 @@ public class ClustererPanel extends JPanel {
     p2.add(m_StorePredictionsBut);
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(1,2));
+    buttons.setLayout(new GridLayout(2, 1));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
+    JPanel ib = new JPanel();
+    ib.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    ib.setLayout(new GridLayout(1, 1, 5, 5));
+    ib.add(m_ignoreBut);
+    buttons.add(ib);
     buttons.add(ssButs);
     
     JPanel p3 = new JPanel();
@@ -471,6 +497,15 @@ public class ClustererPanel extends JPanel {
     m_Instances = inst;
     m_StartBut.setEnabled(m_RunThread == null);
     m_StopBut.setEnabled(m_RunThread != null);
+
+    m_ignoreKeyModel.removeAllElements();
+    
+    for (int i = 0; i < m_Instances.numAttributes(); i++) {
+      String name = m_Instances.attribute(i).name();
+      m_ignoreKeyModel.addElement(name);
+    }
+
+    m_ignoreBut.setEnabled(true);
   }
 
   /**
@@ -604,6 +639,7 @@ public class ClustererPanel extends JPanel {
     if (m_RunThread == null) {
       m_StartBut.setEnabled(false);
       m_StopBut.setEnabled(true);
+      m_ignoreBut.setEnabled(false);
       m_RunThread = new Thread() {
 	public void run() {
 	  // Copy the current state of things
@@ -652,6 +688,10 @@ public class ClustererPanel extends JPanel {
 	      throw new Exception("Unknown test mode");
 	    }
 
+	    Instances trainInst = new Instances(inst);
+	    if (!m_ignoreKeyList.isSelectionEmpty()) {
+	      trainInst = removeIgnoreCols(trainInst);
+	    }
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
 	    if (m_Log instanceof TaskLogger) {
@@ -668,9 +708,30 @@ public class ClustererPanel extends JPanel {
 	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
 	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
 	    if (inst.numAttributes() < 100) {
+	      boolean [] selected = new boolean [inst.numAttributes()];
 	      for (int i = 0; i < inst.numAttributes(); i++) {
-		outBuff.append("              " + inst.attribute(i).name()
-			       + '\n');
+		selected[i] = true;
+	      }
+	      if (!m_ignoreKeyList.isSelectionEmpty()) {
+		int [] indices = m_ignoreKeyList.getSelectedIndices();
+		for (int i = 0; i < indices.length; i++) {
+		  selected[indices[i]] = false;
+		}
+	      }
+	      for (int i = 0; i < inst.numAttributes(); i++) {
+		if (selected[i]) {
+		  outBuff.append("              " + inst.attribute(i).name()
+				 + '\n');
+		}
+	      }
+	      if (!m_ignoreKeyList.isSelectionEmpty()) {
+		outBuff.append("Ingored:\n");
+		for (int i = 0; i < inst.numAttributes(); i++) {
+		  if (!selected[i]) {
+		    outBuff.append("              " + inst.attribute(i).name()
+				   + '\n');
+		  }
+		}
 	      }
 	    } else {
 	      outBuff.append("              [list of attributes omitted]\n");
@@ -696,7 +757,8 @@ public class ClustererPanel extends JPanel {
 	    
 	    // Build the model and output it.
 	    m_Log.statusMessage("Building model on training data...");
-	    clusterer.buildClusterer(inst);
+	   
+	    clusterer.buildClusterer(trainInst);
 	    outBuff.append("=== Clustering model (full training set) ===\n\n");
 	    outBuff.append(clusterer.toString() + '\n');
 	    m_History.updateResult(name);
@@ -707,9 +769,9 @@ public class ClustererPanel extends JPanel {
 	    switch (testMode) {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Clustering training data...");
-	      eval.evaluateClusterer(inst);
+	      eval.evaluateClusterer(trainInst);
 	      numClusters = eval.getNumClusters();
-	      predictions = eval.getClusterAssignments();
+	      predictions = eval.getClusterAssignments();     
 	      predInstances = setUpVisualizableInstances(inst, numClusters,
 							 predictions);
 	      outBuff.append("=== Evaluation on training set ===\n");
@@ -718,24 +780,31 @@ public class ClustererPanel extends JPanel {
 	      case 2: // Percent split
 	      m_Log.statusMessage("Randomizing instances...");
 	      inst.randomize(new Random(42));
-	      int trainSize = inst.numInstances() * percent / 100;
-	      int testSize = inst.numInstances() - trainSize;
-	      Instances train = new Instances(inst, 0, trainSize);
-	      Instances test = new Instances(inst, trainSize, testSize);
+	      trainInst.randomize(new Random(42));
+	      int trainSize = trainInst.numInstances() * percent / 100;
+	      int testSize = trainInst.numInstances() - trainSize;
+	      Instances train = new Instances(trainInst, 0, trainSize);
+	      Instances test = new Instances(trainInst, trainSize, testSize);
+	      Instances testVis = new Instances(inst, trainSize, testSize);
 	      m_Log.statusMessage("Building model on training split...");
 	      clusterer.buildClusterer(train);
 	      m_Log.statusMessage("Evaluating on test split...");
 	      eval.evaluateClusterer(test);
 	      numClusters = eval.getNumClusters();
 	      predictions = eval.getClusterAssignments();
-	      predInstances = setUpVisualizableInstances(test, numClusters,
+	      predInstances = setUpVisualizableInstances(testVis, numClusters,
 							  predictions);
 	      outBuff.append("=== Evaluation on test split ===\n");
 	      break;
 		
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
-	      eval.evaluateClusterer(userTest);
+	      Instances userTestT = new Instances(userTest);
+	      if (!m_ignoreKeyList.isSelectionEmpty()) {
+		userTestT = removeIgnoreCols(userTestT);
+		//	      System.out.print(trainInst);
+	      }
+	      eval.evaluateClusterer(userTestT);
 	      numClusters = eval.getNumClusters();
 	      predictions = eval.getClusterAssignments();
 	      predInstances = setUpVisualizableInstances(userTest, numClusters,
@@ -793,6 +862,7 @@ public class ClustererPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
+	    m_ignoreBut.setEnabled(true);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskFinished();
 	    }
@@ -803,7 +873,24 @@ public class ClustererPanel extends JPanel {
       m_RunThread.start();
     }
   }
-  
+
+  private Instances removeIgnoreCols(Instances inst) {
+    int [] selected = m_ignoreKeyList.getSelectedIndices();
+    AttributeFilter af = new AttributeFilter();
+    Instances retI = null;
+
+    try {
+      af.setAttributeIndicesArray(selected);
+      af.setInvertSelection(false);
+      af.inputFormat(inst);
+      retI = Filter.useFilter(inst, af);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    return retI;
+  }
+
   /**
    * Stops the currently running clusterer (if any).
    */
@@ -953,7 +1040,19 @@ public class ClustererPanel extends JPanel {
       }
     }
   }
-  
+
+  private void setIgnoreColumns() {
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_ignoreKeyList);
+
+    // Open the dialog
+    int result = jd.showDialog();
+    
+    if (result != ListSelectorDialog.APPROVE_OPTION) {
+      // clear selected indices
+      m_ignoreKeyList.clearSelection();
+    }
+  }
+
   /**
    * Tests out the clusterer panel from the command line.
    *
