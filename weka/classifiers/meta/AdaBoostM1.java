@@ -65,40 +65,25 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
-public class AdaBoostM1 extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, Sourcable {
+public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
+  implements WeightedInstancesHandler, Sourcable {
 
   /** Max num iterations tried to find classifier with non-zero error. */ 
   private static int MAX_NUM_RESAMPLING_ITERATIONS = 10;
-
-  /** The model base classifier to use */
-  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
-  
-  /** Array for storing the generated base classifiers. */
-  protected Classifier [] m_Classifiers;
   
   /** Array for storing the weights for the votes. */
   protected double [] m_Betas;
 
-  /** The maximum number of boost iterations */
-  protected int m_MaxIterations = 10;
-
   /** The number of successfully generated base classifiers. */
-  protected int m_NumIterations;
+  protected int m_NumIterationsPerformed;
 
   /** Weight Threshold. The percentage of weight mass used in training */
   protected int m_WeightThreshold = 100;
 
-  /** Debugging mode, gives extra output if true */
-  protected boolean m_Debug;
-
   /** Use boosting with reweighting? */
   protected boolean m_UseResampling;
-
-  /** Seed for boosting with resampling. */
-  protected int m_Seed = 1;
 
   /** The number of classes */
   protected int m_NumClasses;
@@ -152,41 +137,20 @@ public class AdaBoostM1 extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(2);
 
-    newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
-    newVector.addElement(new Option(
-	      "\tMaximum number of boost iterations.\n"
-	      +"\t(default 10)",
-	      "I", 1, "-I <num>"));
     newVector.addElement(new Option(
 	      "\tPercentage of weight mass to base training on.\n"
 	      +"\t(default 100, reduce to around 90 speed up)",
 	      "P", 1, "-P <num>"));
     newVector.addElement(new Option(
-	      "\tFull name of classifier to boost.\n"
-	      +"\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W <class name>"));
-    newVector.addElement(new Option(
 	      "\tUse resampling for boosting.",
 	      "Q", 0, "-Q"));
-    newVector.addElement(new Option(
-	      "\tSeed for resampling. (Default 1)",
-	      "S", 1, "-S <num>"));
-    
 
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option(
-	     "",
-	     "", 0, "\nOptions specific to classifier "
-	     + m_Classifier.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
-      }
+
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
     }
     return newVector.elements();
   }
@@ -221,15 +185,6 @@ public class AdaBoostM1 extends Classifier
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
-    setDebug(Utils.getFlag('D', options));
-    
-    String boostIterations = Utils.getOption('I', options);
-    if (boostIterations.length() != 0) {
-      setMaxIterations(Integer.parseInt(boostIterations));
-    } else {
-      setMaxIterations(10);
-    }
 
     String thresholdString = Utils.getOption('P', options);
     if (thresholdString.length() != 0) {
@@ -243,21 +198,7 @@ public class AdaBoostM1 extends Classifier
       throw new Exception("Weight pruning with resampling"+
 			  "not allowed.");
     }
-
-    String seedString = Utils.getOption('S', options);
-    if (seedString.length() != 0) {
-      setSeed(Integer.parseInt(seedString));
-    } else {
-      setSeed(1);
-    }
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
+    super.setOptions(options);
   }
 
   /**
@@ -267,78 +208,20 @@ public class AdaBoostM1 extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
 
-    String [] options = new String [classifierOptions.length + 10];
     int current = 0;
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
     if (getUseResampling()) {
       options[current++] = "-Q";
     } else {
       options[current++] = "-P"; 
       options[current++] = "" + getWeightThreshold();
     }
-    options[current++] = "-I"; options[current++] = "" + getMaxIterations();
-    options[current++] = "-S"; options[current++] = "" + getSeed();
 
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
-
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
     return options;
-  }
-
-  /**
-   * Set the classifier for boosting. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
-
-  /**
-   * Set the maximum number of boost iterations
-   */
-  public void setMaxIterations(int maxIterations) {
-
-    m_MaxIterations = maxIterations;
-  }
-
-  /**
-   * Get the maximum number of boost iterations
-   *
-   * @return the maximum number of boost iterations
-   */
-  public int getMaxIterations() {
-
-    return m_MaxIterations;
   }
 
   /**
@@ -359,46 +242,6 @@ public class AdaBoostM1 extends Classifier
   public int getWeightThreshold() {
 
     return m_WeightThreshold;
-  }
-
-  /**
-   * Set seed for resampling.
-   *
-   * @param seed the seed for resampling
-   */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Get seed for resampling.
-   *
-   * @return the seed for resampling
-   */
-  public int getSeed() {
-
-    return m_Seed;
-  }
-
-  /**
-   * Set debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-
-    m_Debug = debug;
-  }
-
-  /**
-   * Get whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
   }
 
   /**
@@ -431,6 +274,8 @@ public class AdaBoostM1 extends Classifier
 
   public void buildClassifier(Instances data) throws Exception {
 
+    super.buildClassifier(data);
+
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
@@ -442,11 +287,7 @@ public class AdaBoostM1 extends Classifier
     if (data.classAttribute().isNumeric()) {
       throw new UnsupportedClassTypeException("AdaBoostM1 can't handle a numeric class!");
     }
-    if (m_Classifier == null) {
-      throw new Exception("A base classifier has not been specified!");
-    }
     m_NumClasses = data.numClasses();
-    m_Classifiers = Classifier.makeCopies(m_Classifier, getMaxIterations());
     if ((!m_UseResampling) && 
 	(m_Classifier instanceof WeightedInstancesHandler)) {
       buildClassifierWithWeights(data);
@@ -476,7 +317,7 @@ public class AdaBoostM1 extends Classifier
 
     // Initialize data
     m_Betas = new double [m_Classifiers.length];
-    m_NumIterations = 0;
+    m_NumIterationsPerformed = 0;
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
     training = new Instances(data, 0, numInstances);
@@ -487,10 +328,10 @@ public class AdaBoostM1 extends Classifier
     }
     
     // Do boostrap iterations
-    for (m_NumIterations = 0; m_NumIterations < m_Classifiers.length; 
-	 m_NumIterations++) {
+    for (m_NumIterationsPerformed = 0; m_NumIterationsPerformed < m_Classifiers.length; 
+	 m_NumIterationsPerformed++) {
       if (m_Debug) {
-	System.err.println("Training classifier " + (m_NumIterations + 1));
+	System.err.println("Training classifier " + (m_NumIterationsPerformed + 1));
       }
 
       // Select instances to train the classifier on
@@ -511,9 +352,9 @@ public class AdaBoostM1 extends Classifier
 	sample = trainData.resampleWithWeights(randomInstance, weights);
 
 	// Build and evaluate classifier
-	m_Classifiers[m_NumIterations].buildClassifier(sample);
+	m_Classifiers[m_NumIterationsPerformed].buildClassifier(sample);
 	evaluation = new Evaluation(data);
-	evaluation.evaluateModel(m_Classifiers[m_NumIterations], 
+	evaluation.evaluateModel(m_Classifiers[m_NumIterationsPerformed], 
 				 training);
 	epsilon = evaluation.errorRate();
 	resamplingIterations++;
@@ -522,18 +363,18 @@ public class AdaBoostM1 extends Classifier
       	
       // Stop if error too big or 0
       if (Utils.grOrEq(epsilon, 0.5) || Utils.eq(epsilon, 0)) {
-	if (m_NumIterations == 0) {
-	  m_NumIterations = 1; // If we're the first we have to to use it
+	if (m_NumIterationsPerformed == 0) {
+	  m_NumIterationsPerformed = 1; // If we're the first we have to to use it
 	}
 	break;
       }
       
       // Determine the weight to assign to this model
-      m_Betas[m_NumIterations] = beta = Math.log((1 - epsilon) / epsilon);
+      m_Betas[m_NumIterationsPerformed] = beta = Math.log((1 - epsilon) / epsilon);
       reweight = (1 - epsilon) / epsilon;
       if (m_Debug) {
 	System.err.println("\terror rate = " + epsilon
-			   +"  beta = " + m_Betas[m_NumIterations]);
+			   +"  beta = " + m_Betas[m_NumIterationsPerformed]);
       }
  
       // Update instance weights
@@ -553,7 +394,7 @@ public class AdaBoostM1 extends Classifier
     Enumeration enum = training.enumerateInstances();
     while (enum.hasMoreElements()) {
       Instance instance = (Instance) enum.nextElement();
-      if (!Utils.eq(m_Classifiers[m_NumIterations].classifyInstance(instance), 
+      if (!Utils.eq(m_Classifiers[m_NumIterationsPerformed].classifyInstance(instance), 
 		    instance.classValue()))
 	instance.setWeight(instance.weight() * reweight);
     }
@@ -587,17 +428,17 @@ public class AdaBoostM1 extends Classifier
 
     // Initialize data
     m_Betas = new double [m_Classifiers.length];
-    m_NumIterations = 0;
+    m_NumIterationsPerformed = 0;
 
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
     training = new Instances(data, 0, numInstances);
     
     // Do boostrap iterations
-    for (m_NumIterations = 0; m_NumIterations < m_Classifiers.length; 
-	 m_NumIterations++) {
+    for (m_NumIterationsPerformed = 0; m_NumIterationsPerformed < m_Classifiers.length; 
+	 m_NumIterationsPerformed++) {
       if (m_Debug) {
-	System.err.println("Training classifier " + (m_NumIterations + 1));
+	System.err.println("Training classifier " + (m_NumIterationsPerformed + 1));
       }
       // Select instances to train the classifier on
       if (m_WeightThreshold < 100) {
@@ -608,26 +449,26 @@ public class AdaBoostM1 extends Classifier
       }
 
       // Build the classifier
-      m_Classifiers[m_NumIterations].buildClassifier(trainData);
+      m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
 
       // Evaluate the classifier
       evaluation = new Evaluation(data);
-      evaluation.evaluateModel(m_Classifiers[m_NumIterations], training);
+      evaluation.evaluateModel(m_Classifiers[m_NumIterationsPerformed], training);
       epsilon = evaluation.errorRate();
 
       // Stop if error too small or error too big and ignore this model
       if (Utils.grOrEq(epsilon, 0.5) || Utils.eq(epsilon, 0)) {
-	if (m_NumIterations == 0) {
-	  m_NumIterations = 1; // If we're the first we have to to use it
+	if (m_NumIterationsPerformed == 0) {
+	  m_NumIterationsPerformed = 1; // If we're the first we have to to use it
 	}
 	break;
       }
       // Determine the weight to assign to this model
-      m_Betas[m_NumIterations] = beta = Math.log((1 - epsilon) / epsilon);
+      m_Betas[m_NumIterationsPerformed] = beta = Math.log((1 - epsilon) / epsilon);
       reweight = (1 - epsilon) / epsilon;
       if (m_Debug) {
 	System.err.println("\terror rate = " + epsilon
-			   +"  beta = " + m_Betas[m_NumIterations]);
+			   +"  beta = " + m_Betas[m_NumIterationsPerformed]);
       }
  
       // Update instance weights
@@ -646,15 +487,15 @@ public class AdaBoostM1 extends Classifier
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
       
-    if (m_NumIterations == 0) {
+    if (m_NumIterationsPerformed == 0) {
       throw new Exception("No model built");
     }
     double [] sums = new double [instance.numClasses()]; 
     
-    if (m_NumIterations == 1) {
+    if (m_NumIterationsPerformed == 1) {
       return m_Classifiers[0].distributionForInstance(instance);
     } else {
-      for (int i = 0; i < m_NumIterations; i++) {
+      for (int i = 0; i < m_NumIterationsPerformed; i++) {
 	sums[(int)m_Classifiers[i].classifyInstance(instance)] += m_Betas[i];
       }
       return Utils.logs2probs(sums);
@@ -669,7 +510,7 @@ public class AdaBoostM1 extends Classifier
    */
   public String toSource(String className) throws Exception {
 
-    if (m_NumIterations == 0) {
+    if (m_NumIterationsPerformed == 0) {
       throw new Exception("No model built yet");
     }
     if (!(m_Classifiers[0] instanceof Sourcable)) {
@@ -682,11 +523,11 @@ public class AdaBoostM1 extends Classifier
 
     text.append("  public static double classify(Object [] i) {\n");
 
-    if (m_NumIterations == 1) {
+    if (m_NumIterationsPerformed == 1) {
       text.append("    return " + className + "_0.classify(i);\n");
     } else {
       text.append("    double [] sums = new double [" + m_NumClasses + "];\n");
-      for (int i = 0; i < m_NumIterations; i++) {
+      for (int i = 0; i < m_NumIterationsPerformed; i++) {
 	text.append("    sums[(int) " + className + '_' + i 
 		    + ".classify(i)] += " + m_Betas[i] + ";\n");
       }
@@ -714,19 +555,19 @@ public class AdaBoostM1 extends Classifier
     
     StringBuffer text = new StringBuffer();
     
-    if (m_NumIterations == 0) {
+    if (m_NumIterationsPerformed == 0) {
       text.append("AdaBoostM1: No model built yet.\n");
-    } else if (m_NumIterations == 1) {
+    } else if (m_NumIterationsPerformed == 1) {
       text.append("AdaBoostM1: No boosting possible, one classifier used!\n");
       text.append(m_Classifiers[0].toString() + "\n");
     } else {
       text.append("AdaBoostM1: Base classifiers and their weights: \n\n");
-      for (int i = 0; i < m_NumIterations ; i++) {
+      for (int i = 0; i < m_NumIterationsPerformed ; i++) {
 	text.append(m_Classifiers[i].toString() + "\n\n");
 	text.append("Weight: " + Utils.roundDouble(m_Betas[i], 2) + "\n\n");
       }
       text.append("Number of performed Iterations: " 
-		  + m_NumIterations + "\n");
+		  + m_NumIterationsPerformed + "\n");
     }
     
     return text.toString();

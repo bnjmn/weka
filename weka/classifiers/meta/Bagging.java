@@ -68,23 +68,10 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
-public class Bagging extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, Randomizable,
-	     AdditionalMeasureProducer {
-
-  /** The model base classifier to use */
-  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
-  
-  /** Array for storing the generated base classifiers. */
-  protected Classifier[] m_Classifiers;
-  
-  /** The number of iterations. */
-  protected int m_NumIterations = 10;
-
-  /** The seed for random number generation. */
-  protected int m_Seed = 1;
+public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
+  implements WeightedInstancesHandler, AdditionalMeasureProducer {
 
   /** The size of each bag sample, as a percentage of the training size */
   protected int m_BagSizePercent = 100;
@@ -102,20 +89,8 @@ public class Bagging extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(2);
 
-    newVector.addElement(new Option(
-	      "\tNumber of bagging iterations.\n"
-	      + "\t(default 10)",
-	      "I", 1, "-I <num>"));
-    newVector.addElement(new Option(
-	      "\tFull name of classifier to bag.\n"
-	      + "\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W"));
-    newVector.addElement(new Option(
-              "\tSeed for random number generator.\n"
-              + "\t(default 1)",
-              "S", 1, "-S"));
     newVector.addElement(new Option(
               "\tSize of each bag, as a percentage of the\n" 
               + "\ttraining set size. (default 100)",
@@ -124,16 +99,9 @@ public class Bagging extends Classifier
               "\tCalculate the out of bag error.",
               "O", 0, "-O"));
 
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option(
-	     "",
-	     "", 0, "\nOptions specific to classifier "
-	     + m_Classifier.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
-      }
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
     }
     return newVector.elements();
   }
@@ -164,20 +132,6 @@ public class Bagging extends Classifier
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
-    String bagIterations = Utils.getOption('I', options);
-    if (bagIterations.length() != 0) {
-      setNumIterations(Integer.parseInt(bagIterations));
-    } else {
-      setNumIterations(10);
-    }
-
-    String seed = Utils.getOption('S', options);
-    if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
-    } else {
-      setSeed(1);
-    }
 
     String bagSize = Utils.getOption('P', options);
     if (bagSize.length() != 0) {
@@ -186,16 +140,9 @@ public class Bagging extends Classifier
       setBagSizePercent(100);
     }
 
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-
     setCalcOutOfBag(Utils.getFlag('O', options));
 
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
+    super.setOptions(options);
   }
 
   /**
@@ -205,28 +152,22 @@ public class Bagging extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
-    String [] options = new String [classifierOptions.length + 10];
+
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 3];
+
     int current = 0;
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-    options[current++] = "-I"; options[current++] = "" + getNumIterations();
-    options[current++] = "-P"; options[current++] = "" + getBagSizePercent();
+    options[current++] = "-P"; 
+    options[current++] = "" + getBagSizePercent();
 
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
+    if (getCalcOutOfBag()) { 
+      options[current++] = "-O";
     }
 
-    if (getCalcOutOfBag()) options[current++] = "-O";
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    options[current++] = "--";
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
+    current += superOptions.length;
     while (current < options.length) {
       options[current++] = "";
     }
@@ -234,25 +175,13 @@ public class Bagging extends Classifier
   }
 
   /**
-   * Set the classifier for bagging. 
-   *
-   * @param newClassifier the Classifier to use.
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
+  public String bagSizePercentTipText() {
+    return "Size of each bag, as a percentage of the training set size.";
   }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
 
   /**
    * Gets the size of each bag, as a percentage of the training set size.
@@ -273,43 +202,14 @@ public class Bagging extends Classifier
 
     m_BagSizePercent = newBagSizePercent;
   }
-  
-  /**
-   * Sets the number of bagging iterations
-   */
-  public void setNumIterations(int numIterations) {
-
-    m_NumIterations = numIterations;
-  }
 
   /**
-   * Gets the number of bagging iterations
-   *
-   * @return the maximum number of bagging iterations
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public int getNumIterations() {
-    
-    return m_NumIterations;
-  }
-
-  /**
-   * Set the seed for random number generation.
-   *
-   * @param seed the seed 
-   */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Gets the seed for the random number generations
-   *
-   * @return the seed for the random number generation
-   */
-  public int getSeed() {
-    
-    return m_Seed;
+  public String calcOutOfBagTipText() {
+    return "Whether the out-of-bag error is calculated.";
   }
 
   /**
@@ -333,9 +233,10 @@ public class Bagging extends Classifier
   }
 
   /**
-   * Gets the out of bag error that was calculated as the classifier was built.
+   * Gets the out of bag error that was calculated as the classifier
+   * was built.
    *
-   * @return the out of bag error
+   * @return the out of bag error 
    */
   public double measureOutOfBagError() {
     
@@ -436,9 +337,8 @@ public class Bagging extends Classifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (m_Classifier == null) {
-      throw new Exception("A base classifier has not been specified!");
-    }
+    super.buildClassifier(data);
+
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
@@ -448,8 +348,6 @@ public class Bagging extends Classifier
     }
     double outOfBagCount = 0.0;
     double errorSum = 0.0;
-
-    m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
 
     int bagSize = data.numInstances() * m_BagSizePercent / 100;
     Random random = new Random(m_Seed);
@@ -497,11 +395,12 @@ public class Bagging extends Classifier
   }
 
   /**
-   * Calculates the class membership probabilities for the given test instance.
+   * Calculates the class membership probabilities for the given test
+   * instance.
    *
    * @param instance the instance to be classified
    * @return preedicted class probability distribution
-   * @exception Exception if distribution can't be computed successfully
+   * @exception Exception if distribution can't be computed successfully 
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 

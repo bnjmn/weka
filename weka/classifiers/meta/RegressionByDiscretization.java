@@ -56,10 +56,9 @@ import weka.filters.unsupervised.attribute.PotentialClassIgnorer;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
-public class RegressionByDiscretization extends Classifier 
-  implements OptionHandler {
+public class RegressionByDiscretization extends Classifier {
 
   /** The subclassifier. */
   protected Classifier m_Classifier = new ZeroR();
@@ -191,13 +190,16 @@ public class RegressionByDiscretization extends Classifier
   public Enumeration listOptions() {
 
     Vector newVector = new Vector(3);
-    newVector.addElement(new Option("\tProduce debugging output.",
-				    "D", 0,"-D"));
+
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
+    }
 
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use, followed\n"
 	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
+	      + "\tdefault: \"weka.classifiers.rules.ZeroR -D\"",
 	      "W", 1, "-W <classifier specification>"));
     newVector.addElement(new Option(
 	      "\tFull name of filter (should be a discretizer), followed\n"
@@ -216,8 +218,8 @@ public class RegressionByDiscretization extends Classifier
    *
    * -W classifierstring <br>
    * Classifierstring should contain the full class name of a classifier
-   * followed by options to the classifier.
-   * (required).<p>
+   * followed by options to the classifier
+   * (default: weka.classifiers.rules.ZeroR).<p>
    *
    * -F discretizerstring <br>
    * Full name of filter (should be a discretizer), followed by options.<p>
@@ -227,20 +229,18 @@ public class RegressionByDiscretization extends Classifier
    */
   public void setOptions(String[] options) throws Exception {
 
-    setDebug(Utils.getFlag('D', options));
+    super.setOptions(options);
 
     String classifierString = Utils.getOption('W', options);
-    if (classifierString.length() == 0) {
-      throw new Exception("A classifier must be specified"
-			  + " with the -W option.");
+    if (classifierString.length() != 0) {
+      String [] classifierSpec = Utils.splitOptions(classifierString);
+      if (classifierSpec.length == 0) {
+	throw new Exception("Invalid classifier specification string");
+      }
+      String classifierName = classifierSpec[0];
+      classifierSpec[0] = "";
+      setClassifier(Classifier.forName(classifierName, classifierSpec));
     }
-    String [] classifierSpec = Utils.splitOptions(classifierString);
-    if (classifierSpec.length == 0) {
-      throw new Exception("Invalid classifier specification string");
-    }
-    String classifierName = classifierSpec[0];
-    classifierSpec[0] = "";
-    setClassifier(Classifier.forName(classifierName, classifierSpec));
     
     // Same for discretizer
     String discretizerString = Utils.getOption('F', options);
@@ -263,11 +263,9 @@ public class RegressionByDiscretization extends Classifier
    */
   public String [] getOptions() {
 
-    String [] options = new String [5];
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 4];
     int current = 0;
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
 
     options[current++] = "-W";
     options[current++] = "" + getClassifierSpec();
@@ -276,9 +274,9 @@ public class RegressionByDiscretization extends Classifier
     options[current++] = "-F";
     options[current++] = "" + getDiscretizerSpec();
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
     return options;
   }
 
@@ -373,33 +371,6 @@ public class RegressionByDiscretization extends Classifier
 	+ Utils.joinOptions(((OptionHandler)c).getOptions());
     }
     return c.getClass().getName();
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String debugTipText() {
-    return "Whether debug information is output to console.";
-  }
-
-  /**
-   * Get the Debug value.
-   * @return the Debug value.
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
-  }
-
-  /**
-   * Set the Debug value.
-   * @param newDebug The new Debug value.
-   */
-  public void setDebug(boolean newDebug) {
-    
-    m_Debug = newDebug;
   }
 
   /**
