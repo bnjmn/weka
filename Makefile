@@ -1,5 +1,5 @@
 #
-# $Revision: 1.32 $
+# $Revision: 1.33 $
 #
 
 # Java Compiler to use
@@ -85,7 +85,8 @@ doc :
 	weka.gui.treevisualizer \
 	weka.gui.streams ; \
 	touch doc/index.html; for page in `ls doc/*.html`; \
-	do cat $$page | sed "s/Index<\/A><\/PRE>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
+	do cat $$page | sed "s/Index<\/A>  <A HREF=\"help.html\"/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a>  <A HREF=\"help.html\"/g" > $$page.temp; mv $$page.temp $$page; \
+	cat $$page | sed "s/Index<\/A><\/PRE/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/PRE/g" > $$page.temp; mv $$page.temp $$page; done; \
 	sed 's/help.html/..\/Tutorial.pdf/g' \
 	< doc/packages.html > packages_temp.html; \
 	mv packages_temp.html doc/packages.html)
@@ -193,7 +194,8 @@ install : all
 	weka.gui.treevisualizer \
 	weka.gui.streams; \
 	for page in `ls $(WEKAHOME)/doc/*.html`; \
-	do cat $$page | sed "s/Index<\/A><\/PRE>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
+	do cat $$page | sed "s/Index<\/A>  <A HREF=\"help.html\"/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a>  <A HREF=\"help.html\"/g" > $$page.temp; mv $$page.temp $$page; \
+	cat $$page | sed "s/Index<\/A><\/PRE/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/PRE/g" > $$page.temp; mv $$page.temp $$page; done; \
 	sed 's/help.html/..\/Tutorial.pdf/g' \
 	< $(WEKAHOME)/doc/packages.html > $(WEKAHOME)/packages_temp.html; \
 	mv $(WEKAHOME)/packages_temp.html $(WEKAHOME)/doc/packages.html \
