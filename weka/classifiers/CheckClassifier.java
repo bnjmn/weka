@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -32,7 +31,7 @@ import weka.core.*;
  * common ones. <p>
  * 
  * Typical usage: <p>
- * <code>java CheckClassifier -W classifier_name 
+ * <code>java weka.classifiers.CheckClassifier -W classifier_name 
  * classifier_options </code><p>
  * 
  * CheckClassifier reports on the following:
@@ -84,13 +83,9 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 1 Dec 1998 - Initial version (Len)
+ * @version $Revision: 1.4 $
  */
 public class CheckClassifier implements OptionHandler {
-
-  // =================
-  // Protected Members
-  // =================
 
   /*** The classifier to be examined */
   protected Classifier m_Classifier;
@@ -103,11 +98,6 @@ public class CheckClassifier implements OptionHandler {
 
   /** Debugging mode, gives extra output if true */
   protected boolean b_Debug;
-
-
-  // ==============
-  // Public Methods
-  // ==============
 
   /**
    * Returns an enumeration describing the available options
@@ -216,7 +206,6 @@ public class CheckClassifier implements OptionHandler {
     System.out.println("\n=== Check on Classifier: "+getLearner()+" ===\n");
 
     // Start tests
-
     canTakeOptions();
     boolean updateableClassifier = updateableClassifier();
     boolean distributionClassifier = distributionClassifier();
@@ -242,6 +231,7 @@ public class CheckClassifier implements OptionHandler {
    * @return true if debugging output is on
    */
   public boolean getDebug() {
+
     return b_Debug;
   }
 
@@ -275,7 +265,6 @@ public class CheckClassifier implements OptionHandler {
     return m_Classifier.getClass().getName();
   }
 
-
   /**
    * Test method for this class
    */
@@ -302,11 +291,6 @@ public class CheckClassifier implements OptionHandler {
       System.err.println(ex.getMessage());
     }
   }
-
-
-  // =================
-  // Protected Methods
-  // =================
 
   /**
    * Run a battery of tests for a given class attribute type
@@ -528,6 +512,7 @@ public class CheckClassifier implements OptionHandler {
     boolean built = false;
     int stage = 0;
     try {
+
       // Make two sets of train/test splits with different 
       // numbers of attributes
       train1 = makeTestDataset(42, numTrain, 
@@ -822,10 +807,6 @@ public class CheckClassifier implements OptionHandler {
 	return false;
       }
       System.out.println("yes");
-      /*
-      if (b_Debug)
-	System.out.println(evaluation.toSummaryString("\n=== Full report ===")+"\n\n");
-	*/
       return true;
     } catch (Exception ex) {
       System.out.print("Problem during");
@@ -904,6 +885,7 @@ public class CheckClassifier implements OptionHandler {
       System.exit(0);
     }
     try {
+
       // Now modify instance weights and re-built/test
       for (int i = 0; i < train.numInstances(); i++) {
 	train.instance(i).setWeight(0);
@@ -1050,7 +1032,9 @@ public class CheckClassifier implements OptionHandler {
     return false;
   }
 
-
+  /**
+   * Runs a text on the datasets with the given characteristics.
+   */
   protected boolean runBasicTest(boolean nominalPredictor,
 				 boolean numericPredictor, 
 				 boolean numericClass,
@@ -1101,10 +1085,6 @@ public class CheckClassifier implements OptionHandler {
 	throw new Exception("Scheme performs worse than ZeroR");
       }
       System.out.println("yes");
-      /*
-      if (b_Debug)
-	System.out.println(evaluation.toSummaryString("\n=== Full report ===")+"\n\n");
-	*/
       return true;
     } catch (Exception ex) {
       boolean acceptable = false;
@@ -1146,7 +1126,6 @@ public class CheckClassifier implements OptionHandler {
     return false;
   }
 
-
   /**
    * Determine whether the scheme performs worse than ZeroR during testing
    *
@@ -1164,6 +1143,7 @@ public class CheckClassifier implements OptionHandler {
 	 
     evaluation.evaluateModel(classifier, test);
     try {
+
       // Tested OK, compare with ZeroR
       Classifier zeroR = new weka.classifiers.ZeroR();
       zeroR.buildClassifier(train);
@@ -1186,8 +1166,8 @@ public class CheckClassifier implements OptionHandler {
    * @exception Exception if the datasets differ
    */
   protected void compareDatasets(Instances data1, Instances data2)
-       throws Exception
-  {
+       throws Exception {
+
     if (!data2.equalHeaders(data1)) {
       throw new Exception("header has been modified");
     }
@@ -1272,8 +1252,8 @@ public class CheckClassifier implements OptionHandler {
   protected Instances makeTestDataset(int seed, int numInstances, 
 				      int numNominal, int numNumeric, 
 				      int numClasses, boolean numericClass)
-       throws Exception
-  {
+       throws Exception {
+
     int numAttributes = numNominal + numNumeric + 1;
     Random random = new Random(seed);
     FastVector attributes = new FastVector(numAttributes);
@@ -1306,6 +1286,7 @@ public class CheckClassifier implements OptionHandler {
 
     Instances data = new Instances("CheckSet", attributes, numInstances);
     data.setClassIndex(data.numAttributes() - 1);
+
     // Generate the instances
     for (int i = 0; i < numInstances; i++) {
       Instance current = new Instance(numAttributes);
@@ -1367,7 +1348,6 @@ public class CheckClassifier implements OptionHandler {
     }
     System.out.print(" predictors)");
   }
-
 }
 
 
