@@ -35,7 +35,7 @@ import weka.core.Option;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler {
@@ -100,16 +100,19 @@ public class AveragingResultProducer
     }
     return m_KeyIndex;
   }
-  
+
+
   /**
-   * Gets the keys for a specified run number. Different run
-   * numbers correspond to different randomizations of the data. Keys
-   * produced should be sent to the current ResultListener
+   * Simulates a run to collect the keys the sub-resultproducer could
+   * generate. Does some checking on the keys and determines the 
+   * template key.
    *
-   * @param run the run number to get keys for.
-   * @exception Exception if a problem occurs while getting the keys
+   * @param run the run number
+   * @return a template key (null for the field being averaged)
+   * @exception Exception if an error occurs
    */
-  public void doRunKeys(int run) throws Exception {
+  protected Object [] determineTemplate(int run) throws Exception {
+
     if (m_Instances == null) {
       throw new Exception("No Instances set");
     }
@@ -120,11 +123,6 @@ public class AveragingResultProducer
     m_Results.removeAllElements();
     
     m_ResultProducer.doRunKeys(run);
-
-    // Average the results collected
-    //System.err.println("Number of results collected: " + m_Keys.size());
-
-    // Check that the keys only differ on the selected key field
     checkForMultipleDifferences();
 
     Object [] template = (Object [])((Object [])m_Keys.elementAt(0)).clone();
@@ -132,13 +130,26 @@ public class AveragingResultProducer
     // Check for duplicate keys
     checkForDuplicateKeys(template);
 
-    // Generate the
+    return template;
+  }
+
+  /**
+   * Gets the keys for a specified run number. Different run
+   * numbers correspond to different randomizations of the data. Keys
+   * produced should be sent to the current ResultListener
+   *
+   * @param run the run number to get keys for.
+   * @exception Exception if a problem occurs while getting the keys
+   */
+  public void doRunKeys(int run) throws Exception {
+
+    // Generate the template
+    Object [] template = determineTemplate(run);
     String [] newKey = new String [template.length - 1];
     System.arraycopy(template, 0, newKey, 0, m_KeyIndex);
     System.arraycopy(template, m_KeyIndex + 1,
 		     newKey, m_KeyIndex,
 		     template.length - m_KeyIndex - 1);
-
     m_ResultListener.acceptResult(this, newKey, null);      
   }
 
@@ -151,24 +162,9 @@ public class AveragingResultProducer
    * @exception Exception if a problem occurs while getting the results
    */
   public void doRun(int run) throws Exception {
-    
-    if (m_Instances == null) {
-      throw new Exception("No Instances set");
-    }
-    m_ResultProducer.setInstances(m_Instances);
 
-    // Clear the collected results
-    m_Keys.removeAllElements();
-    m_Results.removeAllElements();
-    
-    m_ResultProducer.doRunKeys(run);
-    checkForMultipleDifferences();
-
-    Object [] template = (Object [])((Object [])m_Keys.elementAt(0)).clone();
-    template[m_KeyIndex] = null;
-    // Check for duplicate keys
-    checkForDuplicateKeys(template);
     // Generate the key and ask whether the result is required
+    Object [] template = determineTemplate(run);
     String [] newKey = new String [template.length - 1];
     System.arraycopy(template, 0, newKey, 0, m_KeyIndex);
     System.arraycopy(template, m_KeyIndex + 1,
