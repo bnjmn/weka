@@ -52,7 +52,7 @@ import java.util.*;
  * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class SimpleLogistic extends DistributionClassifier implements OptionHandler, 
@@ -114,6 +114,7 @@ public class SimpleLogistic extends DistributionClassifier implements OptionHand
      * @exception Exception if something goes wrong 
      */
     public void buildClassifier(Instances data) throws Exception {
+
 	if (data.classAttribute().type() != Attribute.NOMINAL) {
 	    throw new UnsupportedClassTypeException("Class attribute must be nominal.");
 	}
@@ -123,6 +124,10 @@ public class SimpleLogistic extends DistributionClassifier implements OptionHand
 
 	data = new Instances(data);
 	data.deleteWithMissingClass();
+
+	if (data.numInstances() == 0) {
+	  throw new Exception("No instances without missing class values in training file!");
+	}
 
 	//replace missing values
 	m_ReplaceMissingValues = new ReplaceMissingValues();
