@@ -3,7 +3,10 @@ JAVADOC = javadoc
 SOURCES = \
 	ClassifierPanel.java \
 	Explorer.java \
-	PreprocessPanel.java
+	PreprocessPanel.java \
+	AttributeSelectionPanel.java \
+	AssociationsPanel.java \
+	ClustererPanel.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../../..
