@@ -42,7 +42,7 @@ import weka.core.*;
  * Learnerstring for the meta learner. Same format as for base learners.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0 - 10 Mar 1999 - Initial version (Eibe)
+ * @version $Revision: 1.3 $
  */
 public class Stacking extends Classifier implements OptionHandler {
 
@@ -295,7 +295,8 @@ public class Stacking extends Classifier implements OptionHandler {
       return "";
     }
     if ((m_BaseClassifierOptions == null) 
-	|| (m_BaseClassifierOptions.size() < index)) {
+	|| (m_BaseClassifierOptions.size() < index)
+	|| ((String)m_BaseClassifierOptions.elementAt(index)).equals("")) {
       return (String)m_BaseClassifierNames.elementAt(index);
     }
     return (String)m_BaseClassifierNames.elementAt(index) 
@@ -351,7 +352,8 @@ public class Stacking extends Classifier implements OptionHandler {
     if (m_MetaClassifierName == null) {
       return "";
     }
-    if (m_MetaClassifierOptions == null) {
+    if ((m_MetaClassifierOptions == null) 
+	|| ((String)m_MetaClassifierOptions).equals("")) {
       return m_MetaClassifierName;
     }
     return m_MetaClassifierName + " " + m_MetaClassifierOptions;
