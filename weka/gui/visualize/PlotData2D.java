@@ -23,7 +23,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PlotData2D {
 
@@ -107,7 +107,7 @@ public class PlotData2D {
       AddFilter addF = new AddFilter();
       addF.setAttributeName("Instance_number");
       addF.setAttributeIndex(0);
-      addF.inputFormat(m_plotInstances);
+      addF.setInputFormat(m_plotInstances);
       m_plotInstances = Filter.useFilter(m_plotInstances, addF);
       m_plotInstances.setClassIndex(m_plotInstances.numAttributes()-1);
       for (int i = 0; i < m_plotInstances.numInstances(); i++) {

@@ -15,7 +15,7 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class PrincipalComponents extends AttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -300,18 +300,18 @@ public class PrincipalComponents extends AttributeEvaluator
     m_trainCopy = new Instances(m_trainInstances);
     
     m_replaceMissingFilter = new ReplaceMissingValuesFilter();
-    m_replaceMissingFilter.inputFormat(m_trainInstances);
+    m_replaceMissingFilter.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, 
 					m_replaceMissingFilter);
 
     if (m_normalize) {
       m_normalizeFilter = new NormalizationFilter();
-      m_normalizeFilter.inputFormat(m_trainInstances);
+      m_normalizeFilter.setInputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_normalizeFilter);
     }
 
     m_nominalToBinFilter = new NominalToBinaryFilter();
-    m_nominalToBinFilter.inputFormat(m_trainInstances);
+    m_nominalToBinFilter.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, 
 					m_nominalToBinFilter);
     
@@ -339,7 +339,7 @@ public class PrincipalComponents extends AttributeEvaluator
       }
       m_attributeFilter.setAttributeIndicesArray(todelete);
       m_attributeFilter.setInvertSelection(false);
-      m_attributeFilter.inputFormat(m_trainInstances);
+      m_attributeFilter.setInputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_attributeFilter);
     }
 

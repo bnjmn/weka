@@ -38,7 +38,7 @@ import java.util.*;
  * If set, data is not being stratified even if class index is set. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -148,7 +148,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
       setSeed(0);
     }
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -330,13 +330,13 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * @return true because outputFormat can be collected immediately
    * @exception Exception if the input format can't be set successfully
    */  
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     if ((m_NumFolds > 0) && (m_NumFolds < m_Fold)) {
       throw new IllegalArgumentException("Fold has to be smaller or equal to "+
                                          "number of folds.");
     }
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     return true;
   }

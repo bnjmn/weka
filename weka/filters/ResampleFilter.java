@@ -40,7 +40,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -123,7 +123,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
     }
 
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -225,10 +225,10 @@ public class ResampleFilter extends Filter implements OptionHandler {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     m_FirstBatchDone = false;
     return true;

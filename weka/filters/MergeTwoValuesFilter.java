@@ -26,7 +26,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class MergeTwoValuesFilter extends Filter implements OptionHandler {
 
@@ -58,10 +58,10 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     m_AttIndex = m_AttIndexSet;
     if (m_AttIndex < 0) {
       m_AttIndex = instanceInfo.numAttributes() - 1;
@@ -201,7 +201,7 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
     }
    
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 

@@ -31,7 +31,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -63,10 +63,10 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    * @exception UnsupportedAttributeTypeException the selecte attribute is not nominal
    * @exception UnsupportedAttributeTypeException the selecte attribute has fewer than two values.
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     m_AttIndex = m_AttIndexSet;
     if (m_AttIndex < 0) {
       m_AttIndex = instanceInfo.numAttributes() - 1;
@@ -179,7 +179,7 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     setNumeric(!Utils.getFlag('N', options));
 
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 

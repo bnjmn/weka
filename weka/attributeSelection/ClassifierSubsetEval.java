@@ -34,7 +34,7 @@ import weka.filters.AttributeFilter;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -371,7 +371,7 @@ public class ClassifierSubsetEval
     
     featArray[j] = m_classIndex;
     delTransform.setAttributeIndicesArray(featArray);
-    delTransform.inputFormat(trainCopy);
+    delTransform.setInputFormat(trainCopy);
     trainCopy = Filter.useFilter(trainCopy, delTransform);
     if (!m_useTraining) {
       testCopy = Filter.useFilter(testCopy, delTransform);
@@ -447,7 +447,7 @@ public class ClassifierSubsetEval
     
     featArray[j] = m_classIndex;
     delTransform.setAttributeIndicesArray(featArray);
-    delTransform.inputFormat(trainCopy);
+    delTransform.setInputFormat(trainCopy);
     trainCopy = Filter.useFilter(trainCopy, delTransform);
     testCopy = Filter.useFilter(testCopy, delTransform);
 
@@ -518,7 +518,7 @@ public class ClassifierSubsetEval
     }
     featArray[j] = m_classIndex;
     delTransform.setAttributeIndicesArray(featArray);
-    delTransform.inputFormat(trainCopy);
+    delTransform.setInputFormat(trainCopy);
 
     if (retrain) {
       trainCopy = Filter.useFilter(trainCopy, delTransform);

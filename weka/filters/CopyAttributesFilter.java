@@ -28,7 +28,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class CopyAttributesFilter extends Filter implements OptionHandler {
 
@@ -90,7 +90,7 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
     setInvertSelection(Utils.getFlag('V', options));
     
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -126,9 +126,9 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
    * @return true if the outputFormat may be collected immediately
    * @exception Exception if a problem occurs setting the input format
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     
     m_CopyCols.setUpper(instanceInfo.numAttributes() - 1);
 

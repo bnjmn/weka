@@ -30,7 +30,7 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@intelligenesis.net)
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  **/
 public class StringToWordVectorFilter extends Filter {
 
@@ -86,10 +86,10 @@ public class StringToWordVectorFilter extends Filter {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     m_FirstBatchDone = false;
     return false;
   }

@@ -29,7 +29,7 @@ import weka.filters.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
 
@@ -257,10 +257,10 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
       throw new Exception("No train instances without missing class value!");
     }
     m_ReplaceMissingValues = new ReplaceMissingValuesFilter();
-    m_ReplaceMissingValues.inputFormat(train);
+    m_ReplaceMissingValues.setInputFormat(train);
     train = Filter.useFilter(train, m_ReplaceMissingValues);
     m_NominalToBinary = new NominalToBinaryFilter();
-    m_NominalToBinary.inputFormat(train);
+    m_NominalToBinary.setInputFormat(train);
     train = Filter.useFilter(train, m_NominalToBinary);
     m_ClassIndex = train.classIndex();
 

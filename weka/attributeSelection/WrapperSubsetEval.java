@@ -36,7 +36,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -412,7 +412,7 @@ public class WrapperSubsetEval
 
     featArray[j] = m_classIndex;
     delTransform.setAttributeIndicesArray(featArray);
-    delTransform.inputFormat(trainCopy);
+    delTransform.setInputFormat(trainCopy);
     trainCopy = Filter.useFilter(trainCopy, delTransform);
 
     // max of 5 repititions ofcross validation

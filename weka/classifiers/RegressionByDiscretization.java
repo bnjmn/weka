@@ -40,7 +40,7 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -83,7 +83,7 @@ public class RegressionByDiscretization extends Classifier
     }
     m_Discretizer.setUseMDL(false);
     m_Discretizer.setAttributeIndices(""+ (instances.classIndex() + 1));
-    m_Discretizer.inputFormat(instances);
+    m_Discretizer.setInputFormat(instances);
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
     int numClasses = newTrain.numClasses();
 

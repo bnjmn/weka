@@ -49,7 +49,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class InstanceFilter extends Filter implements OptionHandler {
 
@@ -187,7 +187,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
     // Re-initialize output format according to new options
     
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -228,9 +228,9 @@ public class InstanceFilter extends Filter implements OptionHandler {
    * @exception UnsupportedAttributeTypeException if the specified attribute
    * is neither numeric or nominal.
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     if (m_AttributeSet == -1) {
       m_Attribute = instanceInfo.numAttributes() - 1;
     } else {

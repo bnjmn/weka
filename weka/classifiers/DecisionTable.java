@@ -38,7 +38,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -1076,7 +1076,7 @@ public class DecisionTable
       m_classIsNominal = true;
     }
 
-    m_disTransform.inputFormat(m_theInstances);
+    m_disTransform.setInputFormat(m_theInstances);
     m_theInstances = Filter.useFilter(m_theInstances, m_disTransform);
     
     m_numAttributes = m_theInstances.numAttributes();
@@ -1091,7 +1091,7 @@ public class DecisionTable
     
     // set features to keep
     m_delTransform.setAttributeIndicesArray(m_decisionFeatures); 
-    m_delTransform.inputFormat(m_theInstances);
+    m_delTransform.setInputFormat(m_theInstances);
     m_theInstances = Filter.useFilter(m_theInstances, m_delTransform);
     
     // reset the number of attributes

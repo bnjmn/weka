@@ -49,7 +49,7 @@ import weka.core.UnsupportedClassTypeException;
  *  <p>
  *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  **/
 public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
@@ -175,7 +175,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
     setAdjustWeights(Utils.getFlag('W', options));
 
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -280,10 +280,10 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    * @exception UnsupportedClassTypeException if the class attribute
    * is not nominal. 
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     if (instanceInfo.classAttribute().isNominal() == false) {
       throw new UnsupportedClassTypeException("The class attribute must be nominal.");
     }

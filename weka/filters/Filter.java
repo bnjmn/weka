@@ -52,7 +52,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public abstract class Filter implements Serializable {
 
@@ -320,12 +320,7 @@ public abstract class Filter implements Serializable {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = instanceInfo.stringFreeStructure();
-    m_InputStringAtts = getStringIndices(instanceInfo);
-    m_OutputFormat = null;
-    m_OutputQueue = new Queue();
-    m_NewBatch = true;
-    return false;
+    return setInputFormat(instanceInfo);
   }
 
   /**
@@ -343,7 +338,12 @@ public abstract class Filter implements Serializable {
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    return inputFormat(instanceInfo);
+    m_InputFormat = instanceInfo.stringFreeStructure();
+    m_InputStringAtts = getStringIndices(instanceInfo);
+    m_OutputFormat = null;
+    m_OutputQueue = new Queue();
+    m_NewBatch = true;
+    return false;
   }
 
   /**
@@ -351,10 +351,7 @@ public abstract class Filter implements Serializable {
    */
   public final Instances outputFormat() {
 
-    if (m_OutputFormat == null) {
-      throw new NullPointerException("No output format defined.");
-    }
-    return new Instances(m_OutputFormat, 0);
+    return getOutputFormat();
   }
 
   /**
@@ -370,7 +367,10 @@ public abstract class Filter implements Serializable {
    */
   public final Instances getOutputFormat() {
 
-    return outputFormat();
+    if (m_OutputFormat == null) {
+      throw new NullPointerException("No output format defined.");
+    }
+    return new Instances(m_OutputFormat, 0);
   }
 
   /**
@@ -544,6 +544,7 @@ public abstract class Filter implements Serializable {
     while ((processed = filter.output()) != null) {
       newData.add(processed);
     }
+
     /*
     System.err.println(filter.getClass().getName() 
                        + " out:" + newData.numInstances());

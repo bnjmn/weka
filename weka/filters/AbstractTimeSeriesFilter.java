@@ -39,7 +39,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractTimeSeriesFilter extends Filter
   implements OptionHandler {
@@ -137,7 +137,7 @@ public abstract class AbstractTimeSeriesFilter extends Filter
     }
 
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -177,9 +177,9 @@ public abstract class AbstractTimeSeriesFilter extends Filter
    * @return true if the outputFormat may be collected immediately
    * @exception Exception if the format couldn't be set successfully
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     resetHistory();
     m_SelectedCols.setUpper(instanceInfo.numAttributes() - 1);
     return false;

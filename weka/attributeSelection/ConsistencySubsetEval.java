@@ -20,7 +20,7 @@ import  weka.filters.*;
  * Machine Learning (ICML'96), July 1996, pp. 319-327. Bari, Italy. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ConsistencySubsetEval extends SubsetEvaluator {
   
@@ -268,7 +268,7 @@ public class ConsistencySubsetEval extends SubsetEvaluator {
 
     m_disTransform = new DiscretizeFilter();
     m_disTransform.setUseBetterEncoding(true);
-    m_disTransform.inputFormat(m_trainInstances);
+    m_disTransform.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, m_disTransform);
   }
 

@@ -40,7 +40,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
 
@@ -54,9 +54,9 @@ public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
    * @exception UnsupportedAttributeTypeException if selected
    * attributes are not numeric.  
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
     for(int i = 0; i < instanceInfo.numAttributes(); i++) {

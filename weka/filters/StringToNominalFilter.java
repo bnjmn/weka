@@ -31,7 +31,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * Index of the attribute to be changed. (default last)<p>
  *
  * @author Len Trigg (len@intelligenesis.net) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class StringToNominalFilter extends Filter 
   implements OptionHandler {
@@ -54,10 +54,10 @@ public class StringToNominalFilter extends Filter
    * @exception Exception if the input format can't be set 
    * successfully.
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     m_AttIndex = m_AttIndexSet;
     if (m_AttIndex < 0) {
       m_AttIndex = instanceInfo.numAttributes() - 1;
@@ -169,7 +169,7 @@ public class StringToNominalFilter extends Filter
     }
        
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 

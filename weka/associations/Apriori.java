@@ -57,7 +57,7 @@ import weka.filters.AttributeFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ */
+ * @version $Revision: 1.10 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -203,7 +203,7 @@ public class Apriori extends Associator implements OptionHandler {
       AttributeFilter af = new AttributeFilter();
       af.setAttributeIndices(deleteString.toString());
       af.setInvertSelection(false);
-      af.inputFormat(instances);
+      af.setInputFormat(instances);
       Instances newInst = Filter.useFilter(instances, af);
 
       return newInst;

@@ -27,7 +27,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -92,10 +92,10 @@ public class LinearRegression extends Classifier implements OptionHandler,
     // Preprocess instances
     m_TransformedData = data;
     m_TransformFilter = new NominalToBinaryFilter();
-    m_TransformFilter.inputFormat(m_TransformedData);
+    m_TransformFilter.setInputFormat(m_TransformedData);
     m_TransformedData = Filter.useFilter(m_TransformedData, m_TransformFilter);
     m_MissingFilter = new ReplaceMissingValuesFilter();
-    m_MissingFilter.inputFormat(m_TransformedData);
+    m_MissingFilter.setInputFormat(m_TransformedData);
     m_TransformedData = Filter.useFilter(m_TransformedData, m_MissingFilter);
     m_TransformedData.deleteWithMissingClass();
     m_ClassIndex = m_TransformedData.classIndex();
