@@ -247,14 +247,18 @@ public class SparseInstance extends Instance {
    * given index.
    *
    * @return the internal index of the attribute index. Returns
-   * -1 if no index with this property couldn't be found
+   * -1 if no index with this property could be found
    */
   public int locateIndex(int index) {
 
     int min = 0, max = m_Indices.length - 1;
 
+    if (max == -1) {
+      return -1;
+    }
+
     // Binary search
-    while (max >= min) {
+    while ((m_Indices[min] <= index) && (m_Indices[max] >= index)) {
       int current = (max + min) / 2;
       if (m_Indices[current] > index) {
 	max = current - 1;
@@ -264,7 +268,11 @@ public class SparseInstance extends Instance {
 	return current;
       }
     }
-    return -1;
+    if (m_Indices[max] < index) {
+      return max;
+    } else {
+      return min - 1;
+    }
   }
 
   /**
