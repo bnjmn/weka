@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -49,7 +49,7 @@ public class CrossValidationFoldMaker
 	     UserRequestAcceptor, EventConstraints, Serializable {
 
   private int m_numFolds = 10;
-  private int m_randomSeed = 42;
+  private int m_randomSeed = 1;
 
   private Thread m_foldThread = null;
 
