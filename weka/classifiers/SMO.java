@@ -74,7 +74,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
@@ -869,6 +869,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 	key = id1 * m_alpha.length + id2;
       } else {
 	key = id2 * m_alpha.length + id1;
+      }
+      if (key < 0) {
+        key = -key;
       }
       location = key % m_keys.length;
       if (m_keys[location] == (key + 1)) {
