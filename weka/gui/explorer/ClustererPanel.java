@@ -125,9 +125,12 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class ClustererPanel extends JPanel {
+
+  /** The filename extension that should be used for model files */
+  public static String MODEL_FILE_EXTENSION = ".model";
 
   /** Lets the user configure the clusterer */
   protected GenericObjectEditor m_ClustererEditor =
@@ -238,7 +241,7 @@ public class ClustererPanel extends JPanel {
 
   /** Filter to ensure only model files are selected */  
   protected FileFilter m_ModelFilter =
-    new ExtensionFileFilter("model", "Model object files");
+    new ExtensionFileFilter(MODEL_FILE_EXTENSION, "Model object files");
 
   /** The file chooser for selecting model files */
   protected JFileChooser m_FileChooser 
@@ -709,6 +712,7 @@ public class ClustererPanel extends JPanel {
 	  int testMode = 0;
 	  int percent = 66;
 	  Clusterer clusterer = (Clusterer) m_ClustererEditor.getValue();
+	  Clusterer fullClusterer = null;
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
 	  .format(new Date());
@@ -859,6 +863,9 @@ public class ClustererPanel extends JPanel {
 	      } catch (Exception ex) {
 	      }
 	    }
+	    // copy full model for output
+	    SerializedObject so = new SerializedObject(clusterer);
+	    fullClusterer = (Clusterer) so.getObject();
 	    
 	    ClusterEvaluation eval = new ClusterEvaluation();
 	    eval.setClusterer(clusterer);
@@ -941,7 +948,7 @@ public class ClustererPanel extends JPanel {
 		});
 
 	      FastVector vv = new FastVector();
-	      vv.addElement(clusterer);
+	      vv.addElement(fullClusterer);
 	      Instances trainHeader = new Instances(m_Instances, 0);
 	      vv.addElement(trainHeader);
 	      if (ignoredAtts != null) vv.addElement(ignoredAtts);
@@ -1283,7 +1290,10 @@ public class ClustererPanel extends JPanel {
     int returnVal = m_FileChooser.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       sFile = m_FileChooser.getSelectedFile();
-      
+      if (!sFile.getName().toLowerCase().endsWith(MODEL_FILE_EXTENSION)) {
+	sFile = new File(sFile.getParent(), sFile.getName() 
+			 + MODEL_FILE_EXTENSION);
+      }
       m_Log.statusMessage("Saving model to file...");
       
       try {
