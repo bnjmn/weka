@@ -41,9 +41,13 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class InstanceQuery extends DatabaseUtils {
+
+  /** Determines whether sparse data is created */
+  // (currently always false)
+  boolean m_CreateSparseData = false;
 
   /**
    * Sets up the database drivers
@@ -161,7 +165,7 @@ public class InstanceQuery extends DatabaseUtils {
 	System.err.print("read " + rowCount + " instances \r");
 	System.err.flush();
       }
-      Instance newInst = new Instance(numAttributes);
+      double[] vals = new double[numAttributes];
       for(int i = 1; i <= numAttributes; i++) {
 	switch (md.getColumnType(i)) {
 	case Types.CHAR:
@@ -170,7 +174,7 @@ public class InstanceQuery extends DatabaseUtils {
 	  String str = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
 	    Double index = (Double)nominalIndexes[i - 1].get(str);
 	    if (index == null) {
@@ -178,15 +182,15 @@ public class InstanceQuery extends DatabaseUtils {
 	      nominalIndexes[i - 1].put(str, index);
 	      nominalStrings[i - 1].addElement(str);
 	    }
-	    newInst.setValue(i - 1, index.doubleValue());
+	    vals[i - 1] = index.doubleValue();
 	  }
 	  break;
 	case Types.BIT:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
-	    newInst.setValue(i - 1, (boo ? 1.0 : 0.0));
+	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
 	  break;
 	case Types.NUMERIC:
@@ -195,59 +199,59 @@ public class InstanceQuery extends DatabaseUtils {
 	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
 	    //	    newInst.setValue(i - 1, bd.doubleValue());
-	    newInst.setValue(i - 1, dd);
+	    vals[i - 1] =  dd;
 	  }
 	  break;
 	case Types.TINYINT:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
-	    newInst.setValue(i - 1, (double)by);
+	    vals[i - 1] = (double)by;
 	  }
 	  break;
 	case Types.SMALLINT:
 	  short sh = rs.getByte(i);
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
-	    newInst.setValue(i - 1, (double)sh);
+	    vals[i - 1] = (double)sh;
 	  }
 	  break;
 	case Types.INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
-	    newInst.setValue(i - 1, (double)in);
+	    vals[i - 1] = (double)in;
 	  }
 	  break;
 	case Types.BIGINT:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
-	    newInst.setValue(i - 1, (double)lo);
+	    vals[i - 1] = (double)lo;
 	  }
 	  break;
 	case Types.REAL:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
-	    newInst.setValue(i - 1, (double)fl);
+	    vals[i - 1] = (double)fl;
 	  }
 	  break;
 	case Types.FLOAT:
 	case Types.DOUBLE:
 	  double dou = rs.getDouble(i);
 	  if (rs.wasNull()) {
-	    newInst.setValue(i - 1, Instance.missingValue());
+	    vals[i - 1] = Instance.missingValue();
 	  } else {
-	    newInst.setValue(i - 1, (double)dou);
+	    vals[i - 1] = (double)dou;
 	  }
 	  break;
 	case Types.BINARY:
@@ -257,8 +261,14 @@ public class InstanceQuery extends DatabaseUtils {
 	case Types.TIME:
 	case Types.TIMESTAMP:
 	default:
-	  newInst.setValue(i - 1, Instance.missingValue());
+	  vals[i - 1] = Instance.missingValue();
 	}
+      }
+      Instance newInst;
+      if (m_CreateSparseData) {
+	newInst = new SparseInstance(1.0, vals);
+      } else {
+	newInst = new Instance(1.0, vals);
       }
       instances.addElement(newInst);
     }

@@ -29,7 +29,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NormalizationFilter extends Filter {
 
@@ -110,19 +110,19 @@ public class NormalizationFilter extends Filter {
       for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
 	m_MinArray[i] = Double.NaN;
       }
-     for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-	if (m_InputFormat.attribute(i).isNumeric()) {
-	  for (int j = 0; j < m_InputFormat.numInstances(); j++) {
-	    if (!m_InputFormat.instance(j).isMissing(i)) {
-	      double value = m_InputFormat.instance(j).value(i);
+      for (int j = 0; j < m_InputFormat.numInstances(); j++) {
+	double[] value = m_InputFormat.instance(j).toDoubleArray();
+	for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
+	  if (m_InputFormat.attribute(i).isNumeric()) {
+	    if (!Instance.isMissingValue(value[i])) {
 	      if (Double.isNaN(m_MinArray[i])) {
-		m_MinArray[i] = m_MaxArray[i] = value;
+		m_MinArray[i] = m_MaxArray[i] = value[i];
 	      } else {
-		if (value < m_MinArray[i]) {
-		  m_MinArray[i] = value;
+		if (value[i] < m_MinArray[i]) {
+		  m_MinArray[i] = value[i];
 		}
-		if (value > m_MaxArray[i]) {
-		  m_MaxArray[i] = value;
+		if (value[i] > m_MaxArray[i]) {
+		  m_MaxArray[i] = value[i];
 		}
 	      }
 	    }
@@ -152,20 +152,58 @@ public class NormalizationFilter extends Filter {
    */
   private void convertInstance(Instance instance) throws Exception {
   
-    double [] newVals = instance.toDoubleArray();
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      if (instance.attribute(j).isNumeric() &&
-	  (!instance.isMissing(j))) {
-	if (Double.isNaN(m_MinArray[j]) ||
-	    (m_MaxArray[j] == m_MinArray[j])) {
-	  newVals[j] = 0;
-	} else {
-	  newVals[j] = (instance.value(j) - m_MinArray[j]) / 
-            (m_MaxArray[j] - m_MinArray[j]);
+    if (!(instance instanceof SparseInstance)) {
+      double[] vals = instance.toDoubleArray();
+      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
+	if (instance.attribute(j).isNumeric() &&
+	    (!Instance.isMissingValue(vals[j]))) {
+	  if (Double.isNaN(m_MinArray[j]) ||
+	      (m_MaxArray[j] == m_MinArray[j])) {
+	    vals[j] = 0;
+	  } else {
+	    vals[j] = (vals[j] - m_MinArray[j]) / 
+	      (m_MaxArray[j] - m_MinArray[j]);
+	  }
 	}
-      }
-    }	
-    push(new Instance(instance.weight(), newVals));
+      }	
+      push(new Instance(instance.weight(), vals));
+    } else {
+      double[] newVals = new double[instance.numAttributes()];
+      int[] newIndices = new int[instance.numAttributes()];
+      double[] vals = instance.toDoubleArray();
+      int ind = 0;
+      for (int j = 0; j < instance.numAttributes(); j++) {
+	double value;
+	if (instance.attribute(j).isNumeric() &&
+	    (!Instance.isMissingValue(vals[j]))) {
+	  if (Double.isNaN(m_MinArray[j]) ||
+	      (m_MaxArray[j] == m_MinArray[j])) {
+	    value = 0;
+	  } else {
+	    value = (vals[j] - m_MinArray[j]) / 
+	      (m_MaxArray[j] - m_MinArray[j]);
+	  }
+	  if (value != 0.0) {
+	    newVals[ind] = value;
+	    newIndices[ind] = j;
+	    ind++;
+	  }
+	} else {
+	  value = vals[j];
+	  if (value != 0.0) {
+	    newVals[ind] = value;
+	    newIndices[ind] = j;
+	    ind++;
+	  }
+	}
+      }	
+      double[] tempVals = new double[ind];
+      int[] tempInd = new int[ind];
+      System.arraycopy(newVals, 0, tempVals, 0, ind);
+      System.arraycopy(newIndices, 0, tempInd, 0, ind);
+      push(new SparseInstance(instance.weight(), tempVals, tempInd,
+			      instance.numAttributes()));
+    }
   }
 
   /**

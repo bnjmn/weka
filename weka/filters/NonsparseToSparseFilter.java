@@ -1,6 +1,6 @@
 /*
- *    ObfuscateFilter.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    AllFilter.java
+ *    Copyright (C) 1999 Len Trigg
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -24,14 +24,12 @@ import java.util.*;
 import weka.core.*;
 
 /** 
- * A simple instance filter that renames the relation, all attribute names
- * and all nominal (and string) attribute values. For exchanging sensitive
- * datasets. Currently doesn't like string attributes.
+ * A filter that converts all incoming instances into sparse format.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.1 $
  */
-public class ObfuscateFilter extends Filter {
+public class NonsparseToSparseFilter extends Filter {
 
   /**
    * Returns a string describing this filter
@@ -40,7 +38,8 @@ public class ObfuscateFilter extends Filter {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "An instance filter that obfuscates all strings in the data";
+    return "An instance filter that converts all incoming instances"
+      + " into sparse format.";
   }
 
   /**
@@ -54,33 +53,7 @@ public class ObfuscateFilter extends Filter {
   public boolean inputFormat(Instances instanceInfo) {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    
-    // Make the obfuscated header
-    FastVector v = new FastVector();
-    for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-      Attribute oldAtt = instanceInfo.attribute(i);
-      Attribute newAtt = null;
-      switch (oldAtt.type()) {
-      case Attribute.NUMERIC:
-        newAtt = new Attribute("A" + (i + 1));
-        break;
-      case Attribute.NOMINAL:
-        FastVector vals = new FastVector();
-        for (int j = 0; j < oldAtt.numValues(); j++) {
-          vals.addElement("V" + (j + 1));
-        }
-        newAtt = new Attribute("A" + (i + 1), vals);
-        break;
-      case Attribute.STRING:
-      default:
-        newAtt = (Attribute) oldAtt.copy();
-        System.err.println("Not converting attribute: " + oldAtt.name());
-        break;
-      }
-      v.addElement(newAtt);
-    }
-    Instances newHeader = new Instances("R", v, 10);
-    setOutputFormat(newHeader);
+    setOutputFormat(m_InputFormat);
     m_NewBatch = true;
     return true;
   }
@@ -106,7 +79,7 @@ public class ObfuscateFilter extends Filter {
       resetQueue();
       m_NewBatch = false;
     }
-    push((Instance)instance.copy());
+    push(new SparseInstance(instance));
     return true;
   }
 
@@ -119,9 +92,9 @@ public class ObfuscateFilter extends Filter {
     
     try {
       if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new ObfuscateFilter(), argv);
+	Filter.batchFilterFile(new NonsparseToSparseFilter(), argv);
       } else {
-	Filter.filterFile(new ObfuscateFilter(), argv);
+	Filter.filterFile(new NonsparseToSparseFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

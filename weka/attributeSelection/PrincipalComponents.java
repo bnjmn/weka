@@ -27,7 +27,7 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PrincipalComponents extends AttributeTransformer 
   implements OptionHandler {
@@ -424,8 +424,8 @@ public class PrincipalComponents extends AttributeTransformer
 
     //    System.out.println("Original: "+instance);
 
-    Instance newInstance = new Instance(m_outputNumAtts);
-    Instance tempInst = new Instance(instance);
+    double[] newVals = new double[m_outputNumAtts];
+    Instance tempInst = (Instance)instance.copy();
 
     m_replaceMissingFilter.input(tempInst);
     tempInst = m_replaceMissingFilter.output();
@@ -444,21 +444,24 @@ public class PrincipalComponents extends AttributeTransformer
     }
 
     if (m_hasClass) {
-       newInstance.setValue(m_outputNumAtts-1,
-			   instance.value(instance.classIndex()));
+       newVals[m_outputNumAtts - 1] = instance.value(instance.classIndex());
     }
     //    System.out.println("normalized etc: "+tempInst);
 
-    for (int i=m_numAttribs;i>=1;i--) {
+    for (int i = m_numAttribs; i >= 1; i--) {
       double tempval = 0.0;
-      for (int j=1;j<=m_numAttribs;j++) {
+      for (int j = 1; j <= m_numAttribs; j++) {
 	tempval += (m_eigenvectors[j][m_sortedEigens[i]] * 
-		    tempInst.value(j-1));
-       }
-      newInstance.setValue(m_numAttribs-i,tempval);
+		    tempInst.value(j - 1));
+      }
+      newVals[m_numAttribs - i] = tempval;
     }
     
-    return newInstance;
+    if (instance instanceof SparseInstance) {
+      return new SparseInstance(instance.weight(), newVals);
+    } else {
+      return new Instance(instance.weight(), newVals);
+    }      
   }
 
   /**

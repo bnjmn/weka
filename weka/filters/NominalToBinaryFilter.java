@@ -36,7 +36,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -433,7 +433,11 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
       }
     }
     
-    push(new Instance(instance.weight(), newVals));
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), newVals));
+    } else {
+      push(new Instance(instance.weight(), newVals));
+    }
   }
 
   /**
@@ -471,7 +475,11 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	attSoFar += att.numValues() - 1;
       }
     }
-    push(new Instance(instance.weight(), newVals));
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), newVals));
+    } else {
+      push(new Instance(instance.weight(), newVals));
+    }
   }
 
   /**

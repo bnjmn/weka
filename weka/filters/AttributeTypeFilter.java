@@ -21,6 +21,7 @@ package weka.filters;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.SparseInstance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import java.util.Enumeration;
@@ -42,7 +43,7 @@ import weka.core.FastVector;
  * and "string". (default "string")<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
@@ -215,16 +216,18 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
 
-    Instances outputFormat = outputFormatPeek();
-    Instance newInstance = new Instance(outputFormat.
-					numAttributes());
-    for (int i = 0, j = 0; i < m_InputFormat.numAttributes(); i++) {
+    double[] vals = new double[outputFormatPeek().numAttributes()];
+    int j = 0;
+    for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
       if (m_InputFormat.attribute(i).type() != m_DeleteType) {
-        newInstance.setValue(j++, instance.value(i));
+	vals[j++] = instance.value(i);
       }
     }
-    newInstance.setWeight(instance.weight());
-    push(newInstance);
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), vals));
+    } else {
+      push(new Instance(instance.weight(), vals));
+    }
     return true;
   }
 
@@ -243,6 +246,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
 	Filter.filterFile(new AttributeTypeFilter(), argv);
       }
     } catch (Exception ex) {
+      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }

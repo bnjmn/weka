@@ -46,7 +46,7 @@ import weka.core.*;
  * (default 0 = Linear) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -392,7 +392,7 @@ public class LWR extends Classifier
       if (weight < 1e-20) {
 	break;
       }
-      Instance newInst = new Instance(m_Train.instance(sortKey[i]));
+      Instance newInst = (Instance) m_Train.instance(sortKey[i]).copy();
       newInst.setWeight(newInst.weight() * weight);
       weightedTrain.add(newInst);
     }

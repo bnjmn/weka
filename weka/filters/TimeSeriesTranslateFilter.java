@@ -51,7 +51,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class TimeSeriesTranslateFilter extends Filter
   implements OptionHandler {
@@ -445,19 +445,21 @@ public class TimeSeriesTranslateFilter extends Filter
     throws Exception {
 
     Instances outputFormat = outputFormatPeek();
-    Instance newInstance = new Instance(outputFormat.
-					numAttributes());
-    for(int i = 0; i < newInstance.numAttributes(); i++) {
+    double[] vals = new double[outputFormat.numAttributes()];
+    for(int i = 0; i < vals.length; i++) {
       if (m_SelectedCols.isInRange(i)) {
 	if (source != null) {
-	  newInstance.setValue(i, source.value(i));
+	  vals[i] = source.value(i);
 	}
       } else {
-	newInstance.setValue(i, dest.value(i));
+	vals[i] = dest.value(i);
       }
     }
-    newInstance.setWeight(dest.weight());
-    return newInstance;
+     if (dest instanceof SparseInstance) {
+      return new SparseInstance(dest.weight(), vals);
+    } else {
+      return new Instance(dest.weight(), vals);
+    }
   }
   
   /**

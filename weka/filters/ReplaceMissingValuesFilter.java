@@ -28,7 +28,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
@@ -101,12 +101,37 @@ public class ReplaceMissingValuesFilter extends Filter {
     if (m_ModesAndMeans == null) {
    
       // Compute modes and means
+      double[][] counts = new double[m_InputFormat.numAttributes()][];
+      for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
+	if (m_InputFormat.attribute(i).isNominal()) {
+	  counts[i] = new double[m_InputFormat.attribute(i).numValues()];
+	}
+      }
+      double[] sums = new double[m_InputFormat.numAttributes()];
+      double[] results = new double[m_InputFormat.numAttributes()];
+      for (int j = 0; j < m_InputFormat.numInstances(); j++) {
+	Instance inst = m_InputFormat.instance(j);
+	double[] values = inst.toDoubleArray();
+	for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
+	  if (!Instance.isMissingValue(values[i])) {
+	    if (m_InputFormat.attribute(i).isNominal()) {
+	      counts[i][(int)values[i]] += inst.weight();
+	    } else if (m_InputFormat.attribute(i).isNumeric()) {
+	      sums[i] += inst.weight();
+	      results[i] += inst.weight() * values[i];
+	    }
+	  }
+	}
+      }
       m_ModesAndMeans = new double[m_InputFormat.numAttributes()];
       for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-	if (m_InputFormat.attribute(i).isNominal() ||
-            m_InputFormat.attribute(i).isNumeric()) {
-          m_ModesAndMeans[i] = m_InputFormat.meanOrMode(i);
-        } 
+	if (m_InputFormat.attribute(i).isNominal()) {
+	  m_ModesAndMeans[i] = (double)Utils.maxIndex(counts[i]);
+	} else if (m_InputFormat.attribute(i).isNumeric()) {
+	  if (Utils.gr(sums[i], 0)) {
+	    m_ModesAndMeans[i] = results[i] / sums[i];
+	  }
+	}
       }
 
       // Convert pending input instances
@@ -131,16 +156,49 @@ public class ReplaceMissingValuesFilter extends Filter {
    */
   private void convertInstance(Instance instance) throws Exception {
   
-    double [] newVals = new double[m_InputFormat.numAttributes()];
-    for(int j = 0; j < m_InputFormat.numAttributes(); j++) 
-      if (instance.isMissing(j) &&
-          (m_InputFormat.attribute(j).isNominal() ||
-           m_InputFormat.attribute(j).isNumeric())) {
-        newVals[j] = m_ModesAndMeans[j]; 
+    if (!(instance instanceof SparseInstance)) {
+      double[] newVals = new double[m_InputFormat.numAttributes()];
+      for(int j = 0; j < instance.numAttributes(); j++) {
+	if (instance.isMissing(j) &&
+	    (m_InputFormat.attribute(j).isNominal() ||
+	     m_InputFormat.attribute(j).isNumeric())) {
+	  newVals[j] = m_ModesAndMeans[j]; 
+	} else {
+	  newVals[j] = instance.value(j);
+	}
+      } 
+      push(new Instance(instance.weight(), newVals));
+    } else {
+      double[] newVals = new double[instance.numValues()];
+      int[] newIndices = new int[instance.numValues()];
+      int num = 0;
+      for(int j = 0; j < instance.numValues(); j++) {
+	if (instance.isMissingSparse(j) &&
+	    (instance.attributeSparse(j).isNominal() ||
+	     instance.attributeSparse(j).isNumeric())) {
+	  if (m_ModesAndMeans[instance.index(j)] != 0.0) {
+	    newVals[num] = m_ModesAndMeans[instance.index(j)];
+	    newIndices[num] = instance.index(j);
+	    num++;
+	  } 
+	} else {
+	  newVals[num] = instance.valueSparse(j);
+	  newIndices[num] = instance.index(j);
+	  num++;
+	}
+      } 
+      if (num == instance.numValues()) {
+	push(new SparseInstance(instance.weight(), newVals, newIndices,
+			      instance.numAttributes()));
       } else {
-        newVals[j] = instance.value(j);
+	double[] tempVals = new double[num];
+	int[] tempInd = new int[num];
+	System.arraycopy(newVals, 0, tempVals, 0, num);
+	System.arraycopy(newIndices, 0, tempInd, 0, num);
+	push(new SparseInstance(instance.weight(), tempVals, tempInd,
+				instance.numAttributes()));
       }
-    push(new Instance(instance.weight(), newVals));
+    }
   }
 
   /**
