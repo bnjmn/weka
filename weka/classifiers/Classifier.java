@@ -40,7 +40,7 @@ import weka.core.Option;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public abstract class Classifier 
   implements Cloneable, Serializable, OptionHandler {
@@ -119,7 +119,12 @@ public abstract class Classifier
     double[] dist = new double[instance.numClasses()];
     switch (instance.classAttribute().type()) {
     case Attribute.NOMINAL:
-      dist[(int)classifyInstance(instance)] = 1.0;
+      double classification = classifyInstance(instance);
+      if (Instance.isMissingValue(classification)) {
+	return dist;
+      } else {
+	dist[(int)classification] = 1.0;
+      }
       return dist;
     case Attribute.NUMERIC:
       dist[0] = classifyInstance(instance);
