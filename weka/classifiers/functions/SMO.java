@@ -52,9 +52,6 @@ import weka.filters.*;
  * -E num <br>
  * The exponent for the polynomial kernel. (default 1)<p>
  *
- * -S num <br>
- * The seed for the random number generator. (default 1)<p>
- *
  * -N <br>
  * Don't normalize the training instances. <p>
  *
@@ -77,7 +74,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
@@ -206,9 +203,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   /** The complexity parameter. */
   private double m_C = 1.0;
 
-  /** The seed for the random number generation. */
-  private int m_seed = 1;
-
   /** Epsilon for rounding. */
   private double m_eps = 1.0e-12;
   
@@ -264,9 +258,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
   /** The size of the cache (a prime number) */
   private int m_cacheSize = 1000003;
-
-  /** A random number generator */
-  private Random m_random;
 
   /** True if we don't want to normalize */
   private boolean m_dontNormalize = false;
@@ -330,10 +321,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       m_NominalToBinary.inputFormat(m_data);
       m_data = Filter.useFilter(m_data, m_NominalToBinary);
     }
-    
-    // Randomize the data set
-    m_random = new Random(m_seed);
-    m_data.randomize(m_random);
 
     // If machine is linear, reserve space for weights
     if (m_exponent == 1.0) {
@@ -401,7 +388,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
 	// This code implements Modification 1 from Keerthi et al.'s paper
 	for (int i = 0; i < m_alpha.length; i++) {
-	  if ((m_alpha[i] > 0) && (m_alpha[i] < m_C)) {
+	  if ((m_alpha[i] > 0) &&  (m_alpha[i] < m_C)) {
 	    if (examineExample(i)) {
 	      numChanged++;
 	    }
@@ -414,8 +401,8 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 	  }
 	}
 	
-	/* This is the code for Modification 2 from Keerthi et al.'s paper
-	boolean innerLoopSuccess = true; 
+	//This is the code for Modification 2 from Keerthi et al.'s paper
+	/*boolean innerLoopSuccess = true; 
 	numChanged = 0;
 	while ((m_bUp < m_bLow - 2 * m_tol) && (innerLoopSuccess == true)) {
 	  innerLoopSuccess = takeStep(m_iUp, m_iLow, m_errors[m_iLow]);
@@ -513,17 +500,13 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(9);
+    Vector newVector = new Vector(8);
 
     newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
 				    "C", 1, "-C <double>"));
     newVector.addElement(new Option("\tThe exponent for the "
 				    + "polynomial kernel. (default 1)",
 				    "E", 1, "-E <double>"));
-    newVector.addElement(new Option("\tThe seed for the random "
-				    + "number generation. "+
-				    "(default 1)",
-				    "S", 1, "-S <int>"));
     newVector.addElement(new Option("\tDon't normalize the data.",
 				    "N", 0, "-N"));
     newVector.addElement(new Option("\tRescale the kernel.",
@@ -552,9 +535,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    *
    * -E num <br>
    * The exponent for the polynomial kernel <p>
-   *
-   * -S num <br>
-   * The seed for the random number generator. (default 1)<p>
    *
    * -N <br>
    * Don't normalize the training instances. <p>
@@ -590,12 +570,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       m_exponent = (new Double(exponentsString)).doubleValue();
     } else {
       m_exponent = 1.0;
-    }
-    String seedString = Utils.getOption('S', options);
-    if (seedString.length() != 0) {
-      m_seed = Integer.parseInt(seedString);
-    } else {
-      m_seed = 1;
     }
     String cacheString = Utils.getOption('A', options);
     if (cacheString.length() != 0) {
@@ -633,12 +607,11 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [15];
+    String [] options = new String [13];
     int current = 0;
 
     options[current++] = "-C"; options[current++] = "" + m_C;
     options[current++] = "-E"; options[current++] = "" + m_exponent;
-    options[current++] = "-S"; options[current++] = "" + m_seed;
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
     options[current++] = "-T"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
@@ -757,26 +730,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   public void setC(double v) {
     
     m_C = v;
-  }
-  
-  /**
-   * Get the value of seed.
-   *
-   * @return Value of seed.
-   */
-  public int getSeed() {
-    
-    return m_seed;
-  }
-  
-  /**
-   * Set the value of seed.
-   *
-   * @param v  Value to assign to seed.
-   */
-  public void setSeed(int v) {
-    
-    m_seed = v;
   }
   
   /**
@@ -1137,62 +1090,62 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
 
     // Update sets
-    if (a1 > m_eps) {
+    if (a1 > 0) {
       m_supportVectors.insert(i1);
     } else {
       m_supportVectors.delete(i1);
     }
-    if ((a1 > m_eps) && (a1 < m_C - m_eps)) {
+    if ((a1 > 0) && (a1 < m_C)) {
       m_I0.insert(i1);
     } else {
       m_I0.delete(i1);
     }
-    if ((y1 == 1) && (!(a1 > m_eps))) {
+    if ((y1 == 1) && (!(a1 > 0))) {
       m_I1.insert(i1);
     } else {
       m_I1.delete(i1);
     }
-    if ((y1 == -1) && (!(a1 < m_C - m_eps))) {
+    if ((y1 == -1) && (!(a1 < m_C))) {
       m_I2.insert(i1);
     } else {
       m_I2.delete(i1);
     }
-    if ((y1 == 1) && (!(a1 < m_C - m_eps))) {
+    if ((y1 == 1) && (!(a1 < m_C))) {
       m_I3.insert(i1);
     } else {
       m_I3.delete(i1);
     }
-    if ((y1 == -1) && (!(a1 > m_eps))) {
+    if ((y1 == -1) && (!(a1 > 0))) {
       m_I4.insert(i1);
     } else {
       m_I4.delete(i1);
     }
-    if (a2 > m_eps) {
+    if (a2 > 0) {
       m_supportVectors.insert(i2);
     } else {
       m_supportVectors.delete(i2);
     }
-    if ((a2 > m_eps) && (a2 < m_C - m_eps)) {
+    if ((a2 > 0) && (a2 < m_C)) {
       m_I0.insert(i2);
     } else {
       m_I0.delete(i2);
     }
-    if ((y2 == 1) && (!(a2 > m_eps))) {
+    if ((y2 == 1) && (!(a2 > 0))) {
       m_I1.insert(i2);
     } else {
       m_I1.delete(i2);
     }
-    if ((y2 == -1) && (!(a2 < m_C - m_eps))) {
+    if ((y2 == -1) && (!(a2 < m_C))) {
       m_I2.insert(i2);
     } else {
       m_I2.delete(i2);
     }
-    if ((y2 == 1) && (!(a2 < m_C - m_eps))) {
+    if ((y2 == 1) && (!(a2 < m_C))) {
       m_I3.insert(i2);
     } else {
       m_I3.delete(i2);
     }
-    if ((y2 == -1) && (!(a2 > m_eps))) {
+    if ((y2 == -1) && (!(a2 > 0))) {
       m_I4.insert(i2);
     } else {
       m_I4.delete(i2);
@@ -1217,17 +1170,27 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 	m_bLow = m_errors[j]; m_iLow = j;
       }
     }
-    if (m_errors[i1] < m_bUp) {
-      m_bUp = m_errors[i1]; m_iUp = i1;
+    if (!m_I0.contains(i1)) {
+      if (m_I3.contains(i1) || m_I4.contains(i1)) {
+	if (m_errors[i1] > m_bLow) {
+	  m_bLow = m_errors[i1]; m_iLow = i1;
+	} 
+      } else {
+	if (m_errors[i1] < m_bUp) {
+	  m_bUp = m_errors[i1]; m_iUp = i1;
+	}
+      }
     }
-    if (m_errors[i1] > m_bLow) {
-      m_bLow = m_errors[i1]; m_iLow = i1;
-    }
-    if (m_errors[i2] < m_bUp) {
-      m_bUp = m_errors[i2]; m_iUp = i2;
-    }
-    if (m_errors[i2] > m_bLow) {
-      m_bLow = m_errors[i2]; m_iLow = i2;
+    if (!m_I0.contains(i2)) {
+      if (m_I3.contains(i2) || m_I4.contains(i2)) {
+	if (m_errors[i2] > m_bLow) {
+	  m_bLow = m_errors[i2]; m_iLow = i2;
+	}
+      } else {
+	if (m_errors[i2] < m_bUp) {
+	  m_bUp = m_errors[i2]; m_iUp = i2;
+	}
+      }
     }
     if ((m_iLow == -1) || (m_iUp == -1)) {
       throw new Exception("This should never happen!");
