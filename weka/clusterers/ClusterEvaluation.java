@@ -49,7 +49,7 @@ import  weka.core.*;
  * be performed if the test file is missing.
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.4 $
+ * @version  $Revision: 1.5 $
  */
 public class ClusterEvaluation {
 
@@ -142,7 +142,6 @@ public class ClusterEvaluation {
     double[] dist;
     double temp;
     int cc = m_Clusterer.numberOfClusters();
-    int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
     int numInstFieldWidth = (int)((Math.log(test.numInstances())/
 				   Math.log(10))+1);
     double[] instanceStats = new double[cc];
@@ -174,10 +173,29 @@ public class ClusterEvaluation {
       instanceStats[cnum]++;
     }
 
+    // count the actual number of used clusters
+    int count = 0;
+    for (i = 0; i < cc; i++) {
+      if (instanceStats[i] > 0) {
+	count++;
+      }
+    }
+    if (count > 0) {
+      double [] tempStats = new double [count];
+      count=0;
+      for (i=0;i<cc;i++) {
+	if (instanceStats[i] > 0) {
+	  tempStats[count++] = instanceStats[i];
+	}
+      }
+      instanceStats = tempStats;
+      cc = instanceStats.length;
+    }
+
     double sum = Utils.sum(instanceStats);
     loglk /= sum;
     m_clusteringResults.append("Cluster Instances\n");
-    
+    int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
     for (i = 0; i < cc; i++) {
       m_clusteringResults.append(Utils.doubleToString((double)i, 
 						      clustFieldWidth, 0) 
@@ -512,6 +530,25 @@ public class ClusterEvaluation {
 	instanceStats[cnum]++;
 	inst.delete(0);
 	i++;
+      }
+
+      // count the actual number of used clusters
+      int count = 0;
+      for (i = 0; i < cc; i++) {
+	if (instanceStats[i] > 0) {
+	  count++;
+	}
+      }
+      if (count > 0) {
+	double [] tempStats = new double [count];
+	count=0;
+	for (i=0;i<cc;i++) {
+	  if (instanceStats[i] > 0) {
+	    tempStats[count++] = instanceStats[i];
+	}
+	}
+	instanceStats = tempStats;
+	cc = instanceStats.length;
       }
 
       int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
