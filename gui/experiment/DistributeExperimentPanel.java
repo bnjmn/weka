@@ -30,17 +30,24 @@ import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
 /** 
  * This panel enables an experiment to be distributed to multiple hosts;
  * it also allows remote host names to be specified.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class DistributeExperimentPanel extends JPanel {
-  
+
+  /**
+   * The experiment to configure.
+   */
+  RemoteExperiment m_Exp = null;
+
   /** Distribute the current experiment to remote hosts */
   protected JCheckBox m_enableDistributedExperiment = 
     new JCheckBox();
@@ -51,6 +58,23 @@ public class DistributeExperimentPanel extends JPanel {
   /** The host list panel */
   protected HostListPanel m_hostList = new HostListPanel();
 
+  /**
+   * Split experiment up by data set.
+   */
+  protected JRadioButton m_splitByDataSet = new JRadioButton("By data set");
+
+  /**
+   * Split experiment up by run number.
+   */
+  protected JRadioButton m_splitByRun = new JRadioButton("By run");
+
+  /** Handle radio buttons */
+  ActionListener m_radioListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	updateRadioLinks();
+      }
+    };
+  
   /**
    * Constructor
    */
@@ -66,6 +90,11 @@ public class DistributeExperimentPanel extends JPanel {
 	public void actionPerformed(ActionEvent e) {
 	  m_configureHostNames.setEnabled(m_enableDistributedExperiment.
 					  isSelected());
+	  m_splitByDataSet.setEnabled(m_enableDistributedExperiment.
+					  isSelected());
+	  m_splitByRun.setEnabled(m_enableDistributedExperiment.
+					  isSelected());
+	  
 	}
       });
 
@@ -74,11 +103,29 @@ public class DistributeExperimentPanel extends JPanel {
 	  popupHostPanel();
 	}
       });
-    
+
+    m_splitByDataSet.setToolTipText("Distribute experiment by data set");
+    m_splitByRun.setToolTipText("Distribute experiment by run number");
+    m_splitByDataSet.setSelected(true);
+    m_splitByDataSet.setEnabled(false);
+    m_splitByRun.setEnabled(false);
+    m_splitByDataSet.addActionListener(m_radioListener);
+    m_splitByRun.addActionListener(m_radioListener);
+
+    ButtonGroup bg = new ButtonGroup();
+    bg.add(m_splitByDataSet);
+    bg.add(m_splitByRun);
+
+    JPanel rbuts = new JPanel();
+    rbuts.setLayout(new GridLayout(1, 2));
+    rbuts.add(m_splitByDataSet);
+    rbuts.add(m_splitByRun);
+
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createTitledBorder("Distribute experiment"));
     add(m_enableDistributedExperiment, BorderLayout.WEST);
     add(m_configureHostNames, BorderLayout.CENTER);
+    add(rbuts, BorderLayout.SOUTH);
   }
 
   /**
@@ -99,10 +146,16 @@ public class DistributeExperimentPanel extends JPanel {
   public void setExperiment(Experiment exp) {
     
     m_enableDistributedExperiment.setEnabled(true);
+    m_Exp = null;
     if (exp instanceof RemoteExperiment) {
+      m_Exp = (RemoteExperiment)exp;
       m_enableDistributedExperiment.setSelected(true);
       m_configureHostNames.setEnabled(true);
-      m_hostList.setExperiment((RemoteExperiment)exp);
+      m_hostList.setExperiment(m_Exp);
+      m_splitByDataSet.setEnabled(true);
+      m_splitByRun.setEnabled(true);
+      m_splitByDataSet.setSelected(m_Exp.getSplitByDataSet());
+      m_splitByRun.setSelected(!m_Exp.getSplitByDataSet());
     }
   }
 
@@ -143,6 +196,15 @@ public class DistributeExperimentPanel extends JPanel {
    */
   public void addCheckBoxActionListener(ActionListener al) {
     m_enableDistributedExperiment.addActionListener(al);
+  }
+
+  /**
+   * Updates the remote experiment when a radio button is clicked
+   */
+  private void updateRadioLinks() {
+    if (m_Exp != null) {
+      m_Exp.setSplitByDataSet(m_splitByDataSet.isSelected());
+    }
   }
 
   /**

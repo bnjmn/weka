@@ -73,7 +73,8 @@ import javax.swing.ButtonGroup;
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 1.16 $
  */
 public class SetupPanel extends JPanel {
 
@@ -132,13 +133,13 @@ public class SetupPanel extends JPanel {
    */
   protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
-  /** Click to set primary iteration over runs */
+  /** Click to advacne data set before custom generator */
   protected JRadioButton m_advanceDataSetFirst = 
     new JRadioButton("Data sets first");
 
-  /** Click to set primary iteration over data sets */
+  /** Click to advance custom generator before data set */
   protected JRadioButton m_advanceIteratorFirst = 
-    new JRadioButton("Custom iterator first");
+    new JRadioButton("Custom generator first");
 
   /** Handle radio buttons */
   ActionListener m_RadioListener = new ActionListener() {
@@ -327,9 +328,9 @@ public class SetupPanel extends JPanel {
     m_advanceDataSetFirst.setEnabled(false);
     m_advanceIteratorFirst.setEnabled(false);
     m_advanceDataSetFirst.
-      setToolTipText("Advance data set before custom iterator");
+      setToolTipText("Advance data set before custom generator");
     m_advanceIteratorFirst.
-      setToolTipText("Advance custom iterator before data set");
+      setToolTipText("Advance custom generator before data set");
     m_advanceDataSetFirst.setSelected(true);
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_advanceDataSetFirst);
@@ -346,15 +347,35 @@ public class SetupPanel extends JPanel {
 
     JPanel simpleIterators = new JPanel();
     simpleIterators.setLayout(new BorderLayout());
+    
     JPanel tmp = new JPanel();
-    tmp.setLayout(new GridLayout(1, 2));
-    tmp.add(m_RunNumberPanel);
-    tmp.add(m_DistributeExperimentPanel);
+    tmp.setLayout(new GridBagLayout());
+    //    tmp.setLayout(new GridLayout(1, 2));
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    tmp.add(m_RunNumberPanel,constraints);
+    
+    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=2;
+    tmp.add(m_DistributeExperimentPanel, constraints);
 
     JPanel tmp2 = new JPanel();
-    tmp2.setLayout(new GridLayout(2, 1));
-    tmp2.add(tmp);
-    tmp2.add(radioButs);
+    //    tmp2.setLayout(new GridLayout(2, 1));
+    tmp2.setLayout(new GridBagLayout());
+
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    tmp2.add(tmp,constraints);
+
+    constraints.gridx=0;constraints.gridy=1;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    tmp2.add(radioButs,constraints);
 		   
 
     simpleIterators.add(tmp2, BorderLayout.NORTH);
