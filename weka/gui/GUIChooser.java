@@ -25,6 +25,7 @@ package weka.gui;
 
 import weka.gui.explorer.Explorer;
 import weka.gui.experiment.Experimenter;
+import weka.gui.beans.KnowledgeFlow;
 
 import java.awt.Panel;
 import java.awt.Button;
@@ -52,7 +53,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class GUIChooser extends Frame {
 
@@ -65,6 +66,9 @@ public class GUIChooser extends Frame {
   /** Click to open the Explorer */
   protected Button m_ExperimenterBut = new Button("Experimenter");
 
+  /** Click to open the KnowledgeFlow */
+  protected Button m_KnowledgeFlowBut = new Button("KnowledgeFlow");
+
   /** The SimpleCLI */
   protected SimpleCLI m_SimpleCLI;
 
@@ -73,6 +77,9 @@ public class GUIChooser extends Frame {
 
   /** The frame containing the experiment interface */
   protected JFrame m_ExperimenterFrame;
+
+  /** The frame containing the knowledge flow interface */
+  protected JFrame m_KnowledgeFlowFrame;
 
   /** The weka image */
   Image m_weka = Toolkit.getDefaultToolkit().
@@ -104,10 +111,11 @@ public class GUIChooser extends Frame {
       setLayout(new BorderLayout());
       JPanel wbuts = new JPanel();
       wbuts.setBorder(BorderFactory.createTitledBorder("GUI"));
-      wbuts.setLayout(new GridLayout(1, 3));
+      wbuts.setLayout(new GridLayout(2, 2));
       wbuts.add(m_SimpleBut);
       wbuts.add(m_ExplorerBut);
       wbuts.add(m_ExperimenterBut);
+      wbuts.add(m_KnowledgeFlowBut);
       add(wbuts, BorderLayout.SOUTH);
 
       JPanel wekaPan = new JPanel();
@@ -125,7 +133,7 @@ public class GUIChooser extends Frame {
       titlePan.add(new JLabel("Knowledge Analysis", 
 			      SwingConstants.CENTER));
       titlePan.add(new JLabel(""));
-      titlePan.add(new JLabel("(c) 1999 - 2002", 
+      titlePan.add(new JLabel("(c) 1999 - 2003", 
 			      SwingConstants.CENTER));
       titlePan.add(new JLabel("University of Waikato", 
 			      SwingConstants.CENTER));
@@ -202,6 +210,29 @@ public class GUIChooser extends Frame {
       }
     });
 
+    m_KnowledgeFlowBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	if (m_KnowledgeFlowFrame == null) {
+	  m_KnowledgeFlowBut.setEnabled(false);
+	  m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
+	  m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
+	  m_KnowledgeFlowFrame.getContentPane()
+	    .add(new KnowledgeFlow(), BorderLayout.CENTER);
+	  m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
+	    public void windowClosing(WindowEvent w) {
+	      m_KnowledgeFlowFrame.dispose();
+	      m_KnowledgeFlowFrame = null;
+	      m_KnowledgeFlowBut.setEnabled(true);
+	      checkExit();
+	    }
+	  });
+	  m_KnowledgeFlowFrame.pack();
+	  m_KnowledgeFlowFrame.setSize(800, 600);
+	  m_KnowledgeFlowFrame.setVisible(true);
+	}
+      }
+    });
+
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent w) {
 	dispose();
@@ -219,7 +250,8 @@ public class GUIChooser extends Frame {
     if (!isVisible()
 	&& (m_SimpleCLI == null)
 	&& (m_ExplorerFrame == null)
-	&& (m_ExperimenterFrame == null)) {
+	&& (m_ExperimenterFrame == null)
+	&& (m_KnowledgeFlowFrame == null)) {
       System.exit(0);
     }
   }
