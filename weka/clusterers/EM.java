@@ -56,7 +56,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class EM
   extends DistributionClusterer
@@ -558,44 +558,53 @@ public class EM
 
     for (l = 0; l < inst.numInstances(); l++) {
       for (i = 0; i < num_cl; i++) {
-        prob = 1.0;
-
-        for (j = 0; j < m_num_attribs; j++) {
+	m_weights[l][i] = m_priors[i];
+      }
+      for (j = 0; j < m_num_attribs; j++) {
+	double max = 0;
+	for (i = 0; i < num_cl; i++) {
+	  
           if (!inst.instance(l).isMissing(j)) {
             if (inst.attribute(j).isNominal()) {
-              prob *= m_model[i][j].getProbability(inst.instance(l).value(j));
+              m_weights[l][i] *= 
+		m_model[i][j].getProbability(inst.instance(l).value(j));
+	      
             }
             else {
               // numeric attribute
-              prob *= normalDens(inst.instance(l).value(j), 
-				 m_modelNormal[i][j][0], 
-				 m_modelNormal[i][j][1]);
-	      if (Double.isInfinite(prob)) {
+              m_weights[l][i] *= normalDens(inst.instance(l).value(j), 
+					    m_modelNormal[i][j][0], 
+					    m_modelNormal[i][j][1]);
+	      if (Double.isInfinite(m_weights[l][i])) {
 		throw new Exception("Joint density has overflowed. Try "
 				    +"increasing the minimum allowable "
 				    +"standard deviation for normal "
 				    +"density calculation.");
 	      }
             }
+	    if (m_weights[l][i] > max) {
+	      max = m_weights[l][i];
+	    }
           }
         }
-
-        m_weights[l][i] = (prob*m_priors[i]);
-	if (m_weights[l][i] < 0) {
-	  m_weights[l][i] = 0;
+	if (max > 0 && max < 1e-75) { // check for underflow
+	  for (int zz = 0; zz < num_cl; zz++) {
+	    // rescale
+	    m_weights[l][zz] *= 1e75;
+	  }
 	}
       }
-
+      
       double temp1 = 0;
-
+      
       for (i = 0; i < num_cl; i++) {
         temp1 += m_weights[l][i];
       }
-
+      
       if (temp1 > 0) {
         loglk += Math.log(temp1);
       }
-
+      
       // normalise the weights for this instance
       try {
 	Utils.normalize(m_weights[l]);
@@ -606,13 +615,13 @@ public class EM
 			    +"density calculation.");
       }
     }
-
+    
     // reestimate priors
     estimate_priors(inst, num_cl);
     return  loglk/inst.numInstances();
   }
-
-
+  
+  
   /**
    * Constructor.
    *
