@@ -25,7 +25,7 @@ import weka.core.*;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class Clusterer implements Cloneable, Serializable {
 
@@ -85,13 +85,14 @@ public abstract class Clusterer implements Cloneable, Serializable {
   }
 
   /**
-   * Creates copies of the current clusterer.
+   * Creates copies of the current clusterer. Note that this is not
+   * designed to copy any currently built <i>model</i>, just the
+   * parameter settings.
    *
    * @param model an example clusterer to copy
    * @param num the number of clusterer copies to create.
    * @return an array of clusterers.
-   * @exception Exception if an error occurs
-   */
+   * @exception Exception if an error occurs */
   public static Clusterer [] makeCopies(Clusterer model,
 					int num) throws Exception {
      if (model == null) {
