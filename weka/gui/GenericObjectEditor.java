@@ -64,7 +64,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -164,14 +164,13 @@ public class GenericObjectEditor implements PropertyEditor {
 	public void actionPerformed(ActionEvent e) {
 	  Object object = openObject();
           if (object != null) {
-            System.err.println("Loaded object");
-            setObject(object);
-            updateClassType();
-            updateChooser();
-            updateChildPropertySheet();
+            // setValue takes care of: Making sure obj is of right type,
+            // and firing property change.
+            setValue(object);
+            // Need a second setValue to get property values filled in OK.
+            // Not sure why.
+            setValue(object);
           }
-          // Make sure obj is of right type. 
-          // Fire prop change.
 	}
       });
 
@@ -218,7 +217,10 @@ public class GenericObjectEditor implements PropertyEditor {
       
       setLayout(new BorderLayout());
       add(m_ObjectChooser, BorderLayout.NORTH);
-      add(new JScrollPane(m_ChildPropertySheet), BorderLayout.CENTER);
+      add(m_ChildPropertySheet, BorderLayout.CENTER);
+      // Since we resize to the size of the property sheet, a scrollpane isn't
+      // typically needed
+      // add(new JScrollPane(m_ChildPropertySheet), BorderLayout.CENTER);
 
       JPanel okcButs = new JPanel();
       okcButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
