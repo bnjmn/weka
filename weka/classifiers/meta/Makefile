@@ -9,7 +9,7 @@ SOURCES = AdaBoostM1.java AdditiveRegression.java \
 	MultiBoostAB.java MultiScheme.java OrdinalClassClassifier.java \
 	RacedIncrementalLogitBoost.java \
 	RegressionByDiscretization.java Stacking.java \
-	ThresholdSelector.java
+	ThresholdSelector.java StackingC.java Grading.java Vote.java
 
 
 
