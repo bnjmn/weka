@@ -51,7 +51,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class Filter implements Serializable {
 
@@ -312,6 +312,7 @@ public abstract class Filter implements Serializable {
    * @param argv should contain the following arguments: <br>
    * -i input_file <br>
    * -o output_file <br>
+   * -c class_index <br>
    * or -h for help on options
    * @exception Exception if something goes wrong or the user requests help on
    * command options
@@ -333,7 +334,8 @@ public abstract class Filter implements Serializable {
       }
       String infileName = Utils.getOption('i', options);
       String outfileName = Utils.getOption('o', options); 
-
+      String classIndex = Utils.getOption('c', options);
+      
       if (filter instanceof OptionHandler) {
 	((OptionHandler)filter).setOptions(options);
       }
@@ -354,7 +356,15 @@ public abstract class Filter implements Serializable {
       }
 
       data = new Instances(input, 1);
-      data.setClassIndex(data.numAttributes() - 1);
+      if (classIndex.length() != 0) {
+	if (classIndex.equals("first")) {
+	  data.setClassIndex(0);
+	} else if (classIndex.equals("last")) {
+	  data.setClassIndex(data.numAttributes() - 1);
+	} else {
+	  data.setClassIndex(Integer.parseInt(classIndex) - 1);
+	}
+      }
     } catch (Exception ex) {
       String filterOptions = "";
       // Output the error and also the valid options
@@ -374,12 +384,14 @@ public abstract class Filter implements Serializable {
 	+ "(use -b -h for help on batch mode.)\n"
 	+ "-i <file>\n"
 	+ "\tThe name of the file containing input instances. "
-	+ "If not supplied\n"
-	+ "\tthen input instances will be read from stdin.\n"
+	+ "\tIf not supplied then instances will be read from stdin.\n"
 	+ "-o <file>\n"
 	+ "\tThe name of the file output instances will be written to.\n"
-	+ "\tIf not supplied then output instances will be "
-	+ "written to stdout.\n";
+	+ "\tIf not supplied then instances will be written to stdout.\n"
+	+ "-c <class index>\n"
+	+ "\tThe number of the attribute to use as the class.\n"
+	+ "\t\"first\" and \"last\" are also valid entries.\n"
+	+ "\tIf not supplied then no class is assigned.\n";
 
       throw new Exception('\n' + ex.getMessage()
 			  + filterOptions+genericOptions);
@@ -458,8 +470,9 @@ public abstract class Filter implements Serializable {
    * @param argv should contain the following arguments:<br>
    * -i (first) input file <br>
    * -o (first) output file <br>
-   * -I (second) input file <br>
-   * -O (second) output file <br>
+   * -r (second) input file <br>
+   * -s (second) output file <br>
+   * -c class_index <br>
    * or -h for help on options
    * @exception Exception if something goes wrong or the user requests help on
    * command options
@@ -504,6 +517,8 @@ public abstract class Filter implements Serializable {
       } else {
 	throw new Exception("No second output file given.\n");
       }
+      String classIndex = Utils.getOption('c', options);
+
       if (filter instanceof OptionHandler) {
 	((OptionHandler)filter).setOptions(options);
       }
@@ -513,11 +528,21 @@ public abstract class Filter implements Serializable {
 	throw new Exception("Help requested.\n");
       }
       firstData = new Instances(firstInput, 1);
-      firstData.setClassIndex(firstData.numAttributes() - 1);
       secondData = new Instances(secondInput, 1);
-      secondData.setClassIndex(secondData.numAttributes() - 1);
       if (!secondData.equalHeaders(firstData)) {
 	throw new Exception("Input file formats differ.\n");
+      }
+      if (classIndex.length() != 0) {
+	if (classIndex.equals("first")) {
+	  firstData.setClassIndex(0);
+	  secondData.setClassIndex(0);
+	} else if (classIndex.equals("last")) {
+	  firstData.setClassIndex(firstData.numAttributes() - 1);
+	  secondData.setClassIndex(secondData.numAttributes() - 1);
+	} else {
+	  firstData.setClassIndex(Integer.parseInt(classIndex) - 1);
+	  secondData.setClassIndex(Integer.parseInt(classIndex) - 1);
+	}
       }
     } catch (Exception ex) {
       String filterOptions = "";
@@ -533,16 +558,20 @@ public abstract class Filter implements Serializable {
       }
 
       String genericOptions = "\nGeneral options:\n\n"
-	+"-h\n"
-	+"\tGet help on available options.\n"
-	+"-i <file>\n"
-	+"\tThe name of the file containing first input instances.\n"
-	+"-o <file>\n"
-	+"\tThe name of the file first output instances will be written to.\n"
-	+"-r <file>\n"
-	+"\tThe name of the file containing second input instances.\n"
-	+"-s <file>\n"
-	+"\tThe name of the file second output instances will be written to.\n";
+	+ "-h\n"
+	+ "\tGet help on available options.\n"
+	+ "-i <filename>\n"
+	+ "\tThe file containing first input instances.\n"
+	+ "-o <filename>\n"
+	+ "\tThe file first output instances will be written to.\n"
+	+ "-r <filename>\n"
+	+ "\tThe file containing second input instances.\n"
+	+ "-s <filename>\n"
+	+ "\tThe file second output instances will be written to.\n"
+	+ "-c <class index>\n"
+	+ "\tThe number of the attribute to use as the class.\n"
+	+ "\t\"first\" and \"last\" are also valid entries.\n"
+	+ "\tIf not supplied then no class is assigned.\n";
 
       throw new Exception('\n' + ex.getMessage()
 			  + filterOptions+genericOptions);

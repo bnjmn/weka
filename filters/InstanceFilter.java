@@ -1,5 +1,5 @@
 /*
- *    SelectFilter.java
+ *    InstanceFilter.java
  *    Copyright (C) 1999 Eibe Frank
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -43,9 +43,9 @@ import weka.core.*;
  * Invert matching sense.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class SelectFilter extends Filter implements OptionHandler {
+public class InstanceFilter extends Filter implements OptionHandler {
 
   /** Stores the attribute setting */
   protected int m_AttributeSet = -1;
@@ -389,9 +389,9 @@ public class SelectFilter extends Filter implements OptionHandler {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new SelectFilter(), argv);
+ 	Filter.batchFilterFile(new InstanceFilter(), argv);
       } else {
-	Filter.filterFile(new SelectFilter(), argv);
+	Filter.filterFile(new InstanceFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

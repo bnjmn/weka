@@ -1,5 +1,5 @@
 /*
- *    DeleteFilter.java
+ *    AttributeFilter.java
  *    Copyright (C) 1999 Len Trigg
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -36,13 +36,19 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class DeleteFilter extends Filter implements OptionHandler {
+public class AttributeFilter extends Filter implements OptionHandler {
 
-  /** Stores which columns to delete */
-  protected Range m_DeleteCols = new Range();
+  /** Stores which columns to select as a funky range */
+  protected Range m_SelectCols = new Range();
 
+  /**
+   * Stores the indexes of the selected attributes in order, once the
+   * dataset is seen
+   */
+  protected int [] m_SelectedAttributes;
+  
   /**
    * Returns an enumeration describing the available options
    *
@@ -126,20 +132,23 @@ public class DeleteFilter extends Filter implements OptionHandler {
     m_InputFormat = new Instances(instanceInfo, 0);
     m_NewBatch = true;
     
-    m_DeleteCols.setUpper(m_InputFormat.numAttributes() - 1);
-    // Create the output buffer
-    Instances outputFormat = new Instances(instanceInfo, 0); 
+    m_SelectCols.setUpper(m_InputFormat.numAttributes() - 1);
 
     try {
-      for(int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
-	if (m_DeleteCols.isInRange(i)) {
-	  // If they want the class column deleted, re-assign it
-	  if (i == outputFormat.classIndex()) {
-	    outputFormat.setClassIndex(-1);
-	  }
-	  outputFormat.deleteAttributeAt(i);
+      // Create the output buffer
+      FastVector attributes = new FastVector();
+      int outputClass = -1;
+      m_SelectedAttributes = m_SelectCols.getSelection();
+      for (int i = 0; i < m_SelectedAttributes.length; i++) {
+	int current = m_SelectedAttributes[i];
+	if (m_InputFormat.classIndex() == current) {
+	  outputClass = attributes.size();
 	}
+	attributes.addElement(m_InputFormat.attribute(current));
       }
+      Instances outputFormat = new Instances(m_InputFormat.relationName(),
+					     attributes, 0); 
+      outputFormat.setClassIndex(outputClass);
       setOutputFormat(outputFormat);
     } catch (Exception ex) {
       System.err.println("Exception: " + ex.getMessage());
@@ -173,12 +182,9 @@ public class DeleteFilter extends Filter implements OptionHandler {
     Instances outputFormat = outputFormatPeek();
     Instance newInstance = new Instance(outputFormat.
 					numAttributes());
-    int i, j;
-    for(i = 0, j = 0; j < outputFormat.numAttributes(); i++, j++) {
-      while (m_DeleteCols.isInRange(i)) {
-	i++;
-      }
-      newInstance.setValue(j, instance.value(i));
+    for (int i = 0; i < m_SelectedAttributes.length; i++) {
+      int current = m_SelectedAttributes[i];
+      newInstance.setValue(i, instance.value(current));
     }
     newInstance.setWeight(instance.weight());
     push(newInstance);
@@ -192,7 +198,7 @@ public class DeleteFilter extends Filter implements OptionHandler {
    */
   public boolean getInvertSelection() {
 
-    return m_DeleteCols.getInvert();
+    return !m_SelectCols.getInvert();
   }
 
   /**
@@ -204,17 +210,17 @@ public class DeleteFilter extends Filter implements OptionHandler {
    */
   public void setInvertSelection(boolean invert) {
 
-    m_DeleteCols.setInvert(invert);
+    m_SelectCols.setInvert(!invert);
   }
 
   /**
-   * Get the current range selection
+   * Get the current range selection.
    *
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
 
-    return m_DeleteCols.getRanges();
+    return m_SelectCols.getRanges();
   }
 
   /**
@@ -228,7 +234,7 @@ public class DeleteFilter extends Filter implements OptionHandler {
    */
   public void setAttributeIndices(String rangeList) throws Exception {
 
-    m_DeleteCols.setRanges(rangeList);
+    m_SelectCols.setRanges(rangeList);
   }
 
   /**
@@ -261,9 +267,9 @@ public class DeleteFilter extends Filter implements OptionHandler {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new DeleteFilter(), argv); 
+ 	Filter.batchFilterFile(new AttributeFilter(), argv); 
       } else {
-	Filter.filterFile(new DeleteFilter(), argv);
+	Filter.filterFile(new AttributeFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());
