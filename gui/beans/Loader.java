@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -372,8 +372,18 @@ public class Loader extends AbstractDataSource
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
+    boolean ok = true;
     if (m_ioThread == null) {
-      newVector.addElement("Start loading");
+      if (m_Loader instanceof FileSourcedLoader) {
+	if (! ((FileSourcedLoader) m_Loader).getFile().isFile()) {
+	  ok = false;
+	}
+      }
+      String entry = "Start loading";
+      if (!ok) {
+	entry = "$"+entry;
+      }
+      newVector.addElement(entry);
     }
     return newVector.elements();
   }
