@@ -41,7 +41,7 @@ import  weka.filters.*;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -931,6 +931,7 @@ public class CfsSubsetEval
     int j = 0;
 
     if (!m_locallyPredictive) {
+      //      m_trainInstances = new Instances(m_trainInstances,0);
       return  attributeSet;
     }
 
@@ -958,6 +959,7 @@ public class CfsSubsetEval
       }
     }
 
+    //    m_trainInstances = new Instances(m_trainInstances,0);
     return  newSet;
   }
 
