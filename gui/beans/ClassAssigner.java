@@ -56,7 +56,7 @@ public class ClassAssigner extends JPanel
   private Vector m_dataListeners = new Vector();
   private Vector m_instanceListeners = new Vector();
 
-  protected weka.gui.Logger m_logger = null;
+  protected transient weka.gui.Logger m_logger = null;
 
   protected BeanVisual m_visual = 
     new BeanVisual("ClassAssigner", 

@@ -38,7 +38,7 @@ import java.beans.EventSetDescriptor;
  * visual representation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see TrainingSetProducer
  * @see DataSetListener
@@ -63,7 +63,7 @@ public abstract class AbstractTrainingSetProducer extends JPanel
    */
   protected Object m_listenee = null;
 
-  private weka.gui.Logger m_logger = null;
+  private transient weka.gui.Logger m_logger = null;
 
   /**
    * Creates a new <code>AbstractTrainingSetProducer</code> instance.

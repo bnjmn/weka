@@ -50,7 +50,7 @@ import weka.core.Queue;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class StripChart 
   extends JPanel 
@@ -168,7 +168,7 @@ public class StripChart
 		   BeanVisual.ICON_PATH+"StripChart_animated.gif");
 
   private Object m_listenee = null;
-  private weka.gui.Logger m_log = null;
+  private transient weka.gui.Logger m_log = null;
 
   /**
    * Print x axis labels every m_xValFreq points
