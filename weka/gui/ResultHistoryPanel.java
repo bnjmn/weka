@@ -50,6 +50,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.BorderFactory;
+import java.io.Serializable;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
@@ -59,7 +60,7 @@ import javax.swing.BorderFactory;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -88,6 +89,16 @@ public class ResultHistoryPanel extends JPanel {
       manner---ie, pop up a window displaying the buffer */
   protected boolean m_HandleRightClicks = true;
 
+  /**
+   * Extension of MouseAdapter that implements Serializable.
+   */
+  private class RMouseAdapter extends MouseAdapter implements Serializable {}
+ 
+  
+  /**
+   * Extension of KeyAdapter that implements Serializable.
+   */
+  private class RKeyAdapter extends KeyAdapter implements Serializable {}
 
   /**
    * Create the result history object
@@ -97,7 +108,7 @@ public class ResultHistoryPanel extends JPanel {
   public ResultHistoryPanel(JTextComponent text) {
     
     m_SingleText = text;
-    m_List.addMouseListener(new MouseAdapter() {
+    m_List.addMouseListener(new RMouseAdapter() {
       public void mouseClicked(MouseEvent e) {
 	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	    == InputEvent.BUTTON1_MASK) {
@@ -119,7 +130,7 @@ public class ResultHistoryPanel extends JPanel {
       }
     });
 
-    m_List.addKeyListener(new KeyAdapter() {
+    m_List.addKeyListener(new RKeyAdapter() {
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
           int selected = m_List.getSelectedIndex();
