@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -271,8 +271,9 @@ public class DecisionTable
      * Convert a hash entry to a string
      *
      * @param t the set of instances
+     * @param maxColWidth width to make the fields
      */
-    public String toString(Instances t) {
+    public String toString(Instances t, int maxColWidth) {
 
       int i;
       int cindex = t.classIndex();
@@ -280,23 +281,19 @@ public class DecisionTable
       
       for (i=0;i<attributes.length;i++) {
 	if (i != cindex) {
-	  int l = t.attribute(i).name().length();
 	  if (missing[i]) {
-	    text.append("?  ");
-	    for (int j=0;j<(l-1);j++) {
+	    text.append("?");
+	    for (int j=0;j<maxColWidth;j++) {
 	      text.append(" ");
 	    }
 	  } else {
 	    String ss = t.attribute(i).value((int)attributes[i]);
 	    StringBuffer sb = new StringBuffer(ss);
-	    if (l < ss.length()) {
-	      sb.setLength(l);
-	    } else {
-	      for (int j=0;j < (l-ss.length()); j++) {
+	    
+	    for (int j=0;j < (maxColWidth-ss.length()+1); j++) {
 		sb.append(" ");
-	      }
 	    }
-	    text.append(sb.toString()+"  ");
+	    text.append(sb);
 	  }
 	}
       }
@@ -1234,11 +1231,34 @@ public class DecisionTable
       text.append("\nFeature set: "+printFeatures());
       
       if (m_displayRules) {
+
+	// find out the max column width
+	int maxColWidth = 0;
+	for (int i=0;i<m_theInstances.numAttributes();i++) {
+	  if (m_theInstances.attribute(i).name().length() > maxColWidth) {
+	    maxColWidth = m_theInstances.attribute(i).name().length();
+	  }
+
+	  if (m_classIsNominal || (i != m_theInstances.classIndex())) {
+	    Enumeration e = m_theInstances.attribute(i).enumerateValues();
+	    while (e.hasMoreElements()) {
+	      String ss = (String)e.nextElement();
+	      if (ss.length() > maxColWidth) {
+		maxColWidth = ss.length();
+	      }
+	    }
+	  }
+	}
+
 	text.append("\n\nRules:\n");
 	StringBuffer tm = new StringBuffer();
 	for (int i=0;i<m_theInstances.numAttributes();i++) {
 	  if (m_theInstances.classIndex() != i) {
-	    tm.append(m_theInstances.attribute(i).name()+"  ");	
+	    int d = maxColWidth - m_theInstances.attribute(i).name().length();
+	    tm.append(m_theInstances.attribute(i).name());
+	    for (int j=0;j<d+1;j++) {
+	      tm.append(" ");
+	    }
 	  }
 	}
 	tm.append(m_theInstances.attribute(m_theInstances.classIndex()).name()+"  ");
@@ -1257,7 +1277,7 @@ public class DecisionTable
 	Enumeration e = m_entries.keys();
 	while (e.hasMoreElements()) {
 	  hashKey tt = (hashKey)e.nextElement();
-	  text.append(tt.toString(m_theInstances));
+	  text.append(tt.toString(m_theInstances,maxColWidth));
 	  double [] ClassDist = (double []) m_entries.get(tt);
 
 	  if (m_classIsNominal) {
