@@ -55,7 +55,7 @@ import javax.swing.BorderFactory;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -80,6 +80,10 @@ public class ResultHistoryPanel extends JPanel {
   /** A hashtable mapping names to arbitrary objects */
   protected Hashtable m_Objs = new Hashtable();
 
+  /** Let the result history list handle right clicks in the default
+      manner---ie, pop up a window displaying the buffer */
+  protected boolean m_HandleRightClicks = true;
+
 
   /**
    * Create the result history object
@@ -100,16 +104,17 @@ public class ResultHistoryPanel extends JPanel {
 	} else {
 	  // if there are stored objects then assume that the storer
 	  // will handle popping up the text in a seperate frame
-	  int index = m_List.locationToIndex(e.getPoint());
-	  if (index != -1) {
-	    String name = (String)m_Model.elementAt(index);
-	    if (m_Objs.get(name) == null) {
-	      openFrame((String)m_Model.elementAt(index));
+	  if (m_HandleRightClicks) {
+	    int index = m_List.locationToIndex(e.getPoint());
+	    if (index != -1) {
+	      String name = (String)m_Model.elementAt(index);
+	      openFrame(name);
 	    }
 	  }
 	}
       }
     });
+
     m_List.addKeyListener(new KeyAdapter() {
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
@@ -195,6 +200,18 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
+   * Get the named object from the list
+   * @param index the index of the item to retrieve the stored object
+   * for
+   * @return the object or null if there is no object at this index
+   */
+  public Object getNamedObject(String name) {
+    Object v = null;
+    v = m_Objs.get(name);
+    return v;
+  }
+
+  /**
    * Gets the object associated with the currently
    * selected item in the list.
    * @return the object or null if there is no
@@ -235,6 +252,17 @@ public class ResultHistoryPanel extends JPanel {
    */
   public String getSelectedName() {
     int index = m_List.getSelectedIndex();
+    if (index != -1) {
+      return (String)(m_Model.elementAt(index));
+    }
+    return null;
+  }
+
+  /**
+   * Gets the name of theitem in the list at the specified index
+   * @return the name of item or null if there is no item at that index
+   */
+  public String getNameAtIndex(int index) {
     if (index != -1) {
       return (String)(m_Model.elementAt(index));
     }
@@ -326,6 +354,16 @@ public class ResultHistoryPanel extends JPanel {
   public JList getList() {
     return m_List;
   }
+
+  /**
+   * Set whether the result history list should handle right clicks
+   * or whether the parent object will handle them.
+   * @param tf false if parent object will handle right clicks
+   */
+  public void setHandleRightClicks(boolean tf) {
+    m_HandleRightClicks = tf;
+  }
+
 
   /**
    * Tests out the result history from the command line.
