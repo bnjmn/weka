@@ -19,6 +19,7 @@
 
 package weka.gui.experiment;
 
+import weka.core.Instances;
 import weka.experiment.Experiment;
 
 import weka.gui.ExtensionFileFilter;
@@ -53,7 +54,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -71,7 +72,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 
   /** A filter to ensure only arff files get selected */
   protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(".arff", "Arff data files");
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
   /** The file chooser component */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));

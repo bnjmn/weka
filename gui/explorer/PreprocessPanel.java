@@ -73,7 +73,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -115,7 +115,7 @@ public class PreprocessPanel extends JPanel {
   
   /** Filter to ensure only arff files are selected */  
   protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(".arff", "Arff data files");
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
   /** The file chooser for selecting arff files */
   protected JFileChooser m_FileChooser 
@@ -504,8 +504,9 @@ public class PreprocessPanel extends JPanel {
       int returnVal = m_FileChooser.showSaveDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
 	File sFile = m_FileChooser.getSelectedFile();
-	if (!sFile.getName().toLowerCase().endsWith(".arff")) {
-	  sFile = new File(sFile.getParent(), sFile.getName() + ".arff");
+	if (!sFile.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {
+	  sFile = new File(sFile.getParent(), sFile.getName() 
+                           + Instances.FILE_EXTENSION);
 	}
 	File selected = sFile;
 	saveInstancesToFile(selected, m_WorkingInstances);
