@@ -46,7 +46,6 @@ import weka.gui.CostMatrixEditor;
 import weka.gui.PropertyDialog;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
-//import weka.gui.VisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
@@ -120,7 +119,8 @@ import javax.swing.JMenuItem;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 1.34 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -563,7 +563,7 @@ public class ClassifierPanel extends JPanel {
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 4;     gbC.gridx = 0;  gbC.weightx = 100;
     gbC.gridwidth = 3;
-    //gbC.ipadx = 20;
+
     gbC.insets = new Insets(3, 0, 1, 0);
     gbL.setConstraints(m_MoreOptions, gbC);
     p2.add(m_MoreOptions);
@@ -581,11 +581,6 @@ public class ClassifierPanel extends JPanel {
     ssButs.add(m_StopBut);
 
     buttons.add(ssButs);
-    /*JPanel vPl = new JPanel();
-    vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    vPl.setLayout(new GridLayout(1,1,5,5));
-    vPl.add(m_SaveOutBut);
-    buttons.add(vPl); */
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Classifier output"));
@@ -1297,6 +1292,8 @@ public class ClassifierPanel extends JPanel {
 
   /**
    * Handles constructing a popup menu with visualization options.
+   * @param name the name of the result history list entry clicked on by
+   * the user
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
