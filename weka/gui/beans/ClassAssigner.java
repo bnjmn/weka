@@ -65,9 +65,28 @@ public class ClassAssigner extends JPanel
 		   BeanVisual.ICON_PATH+"ClassAssigner.gif",
 		   BeanVisual.ICON_PATH+"ClassAssigner_animated.gif");
 
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Designate which column is to be considered the class column "
+      +"in incoming data.";
+  }
+
   public ClassAssigner() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);    
+  }
+
+  /**
+   * Tool tip text for this property
+   *
+   * @return a <code>String</code> value
+   */
+  public String classColumnTipText() {
+    return "Specify the number of the column that contains the class attribute";
   }
 
   public void setClassColumn(String col) {

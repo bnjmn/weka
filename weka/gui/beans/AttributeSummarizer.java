@@ -47,7 +47,7 @@ import java.beans.beancontext.*;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeSummarizer extends DataVisualizer {
 
@@ -218,7 +218,7 @@ public class AttributeSummarizer extends DataVisualizer {
       hp.add(temp);
     }
     
-    Dimension d = new Dimension(800, gridHeight * 100);
+    Dimension d = new Dimension(830, gridHeight * 100);
     hp.setMinimumSize(d);
     hp.setMaximumSize(d);
     hp.setPreferredSize(d);
@@ -321,7 +321,7 @@ public class AttributeSummarizer extends DataVisualizer {
           System.exit(0);
         }
       });
-      jf.setSize(800,600);
+      jf.setSize(830,600);
       jf.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();
