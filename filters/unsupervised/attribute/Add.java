@@ -46,7 +46,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Add extends Filter implements UnsupervisedFilter,
 					   StreamableFilter, OptionHandler {
@@ -58,7 +58,7 @@ public class Add extends Filter implements UnsupervisedFilter,
   protected String m_Name = "unnamed";
 
   /** The location to insert the new attribute */
-  protected int m_Insert = -1;
+  private SingleIndex m_Insert = new SingleIndex("last"); 
 
   /** The list of labels for nominal attribute */
   protected FastVector m_Labels = new FastVector(5);
@@ -120,17 +120,7 @@ public class Add extends Filter implements UnsupervisedFilter,
    */
   public void setOptions(String[] options) throws Exception {
     
-    String insertString = Utils.getOption('C', options);
-    if (insertString.length() != 0) {
-      if (insertString.toLowerCase().equals("last")) {
-	setAttributeIndex(-1);
-      } else if (insertString.toLowerCase().equals("first")) {
-	setAttributeIndex(0);
-      } else {
-	setAttributeIndex(Integer.parseInt(insertString) - 1); 
-      }
-    }
-
+    setAttributeIndex(Utils.getOption('C', options));
     setNominalLabels(Utils.getOption('L', options));
     setAttributeName(Utils.getOption('N', options));
 
@@ -154,7 +144,7 @@ public class Add extends Filter implements UnsupervisedFilter,
       options[current++] = "-L"; options[current++] = getNominalLabels();
     }
     options[current++] = "-C";
-    options[current++] = "" + (getAttributeIndex() + 1);
+    options[current++] = "" + getAttributeIndex();
 
     while (current < options.length) {
       options[current++] = "";
@@ -175,6 +165,7 @@ public class Add extends Filter implements UnsupervisedFilter,
 
     super.setInputFormat(instanceInfo);
 
+    m_Insert.setUpper(instanceInfo.numAttributes());
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute = null;
     switch (m_AttributeType) {
@@ -185,13 +176,14 @@ public class Add extends Filter implements UnsupervisedFilter,
       newAttribute = new Attribute(m_Name, m_Labels);
       break;
     default:
-      throw new Error("Unknown attribute type in Add");
+      throw new IllegalArgumentException("Unknown attribute type in Add");
     }
 
-    if ((m_Insert < 0) || (m_Insert > getInputFormat().numAttributes())) {
-      m_Insert = getInputFormat().numAttributes();
+    if ((m_Insert.getIndex() < 0) || 
+	(m_Insert.getIndex() > getInputFormat().numAttributes())) {
+      throw new IllegalArgumentException("Index out of range");
     }
-    outputFormat.insertAttributeAt(newAttribute, m_Insert);
+    outputFormat.insertAttributeAt(newAttribute, m_Insert.getIndex());
     setOutputFormat(outputFormat);
     return true;
   }
@@ -225,7 +217,7 @@ public class Add extends Filter implements UnsupervisedFilter,
 
     // Insert the new attribute and reassign to output
     inst.setDataset(null);
-    inst.insertAttributeAt(m_Insert);
+    inst.insertAttributeAt(m_Insert.getIndex());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;
@@ -281,28 +273,28 @@ public class Add extends Filter implements UnsupervisedFilter,
    */
   public String attributeIndexTipText() {
 
-    return "The position (from 0) where the attribute will be inserted."
-      + " Use -1 to indicate the last attribute.";
+    return "The position (starting from 1) where the attribute will be inserted "
+      + "(first and last are valid indices).";
   }
 
   /**
-   * Get the index where the attribute will be inserted
+   * Get the index of the attribute used.
    *
-   * @return the attribute insertion index
+   * @return the index of the attribute
    */
-  public int getAttributeIndex() {
+  public String getAttributeIndex() {
 
-    return m_Insert;
+    return m_Insert.getSingleIndex();
   }
 
   /**
-   * Set the index where the attribute will be inserted
+   * Sets index of the attribute used.
    *
-   * @param attributeIndex the insertion index (-1 means last)
+   * @param index the index of the attribute
    */
-  public void setAttributeIndex(int attributeIndex) {
-
-    m_Insert = attributeIndex;
+  public void setAttributeIndex(String attIndex) {
+    
+    m_Insert.setSingleIndex(attIndex);
   }
 
   /**
