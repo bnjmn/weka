@@ -59,11 +59,11 @@ import weka.gui.visualize.ClassPanel;
  * the pixel. For more information, see<p>
  * 
  * Eibe Frank and Mark Hall (2003). Visualizing Class Probability
- * Estimators. Working Paper 03/03, Department of Computer Science,
+ * Estimators. Working Paper 02/03, Department of Computer Science,
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 1.0
  * @see JPanel 
  */
