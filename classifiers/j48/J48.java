@@ -54,10 +54,10 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
-  Drawable, Matchable, WeightedInstancesHandler {
+  Drawable, Matchable, WeightedInstancesHandler, Summarizable {
 
   /** The decision tree */
   private ClassifierTree m_root;
@@ -308,11 +308,20 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   public String toString() {
     
     if (m_unpruned)
-      return "J48 unpruned tree\n------------------\n"+m_root.toString();
+      return "J48 unpruned tree\n------------------\n" + m_root.toString();
     else
-      return "J48 pruned tree\n------------------\n"+m_root.toString();
+      return "J48 pruned tree\n------------------\n" + m_root.toString();
   }
-   
+
+  /**
+   * Returns a superconcise version of the model
+   */
+  public String toSummaryString() {
+
+    return "Number of leaves: " + m_root.numLeaves() + "\n"
+         + "Size of the tree: " + m_root.numNodes() + "\n";
+  }
+  
   /**
    * Get the value of unpruned.
    *
