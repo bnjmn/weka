@@ -33,7 +33,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PlotData2D {
 
@@ -258,7 +258,9 @@ public class PlotData2D {
   private void determineBounds() {
      double value,min,max;
     
-    if (m_plotInstances != null) {
+    if (m_plotInstances != null && 
+	m_plotInstances.numAttributes() > 0 &&
+	m_plotInstances.numInstances() > 0) {
       // x bounds
       min=Double.POSITIVE_INFINITY;
       max=Double.NEGATIVE_INFINITY;

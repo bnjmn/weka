@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Plot2D extends JPanel {
 
@@ -262,15 +262,18 @@ public class Plot2D extends JPanel {
    * @param j the level of jitter
    */
   public void setJitter(int j) {
-    if (j >= 0) {
-      m_JitterVal = j;
-      m_JRand = new Random(m_JitterVal);
-      //      if (m_pointLookup != null) {
-      m_drawnPoints = new int[m_XaxisEnd - m_XaxisStart + 1]
-	[m_YaxisEnd - m_YaxisStart + 1];
-      updatePturb();
+    if (m_plotInstances.numAttributes() > 0 
+	&& m_plotInstances.numInstances() > 0) {
+      if (j >= 0) {
+	m_JitterVal = j;
+	m_JRand = new Random(m_JitterVal);
+	//      if (m_pointLookup != null) {
+	m_drawnPoints = new int[m_XaxisEnd - m_XaxisStart + 1]
+	  [m_YaxisEnd - m_YaxisStart + 1];
+	updatePturb();
 	//      }
-      this.repaint();
+	this.repaint();
+      }
     }
   }
 
@@ -927,18 +930,21 @@ public class Plot2D extends JPanel {
     for (int j=0;j<m_plots.size();j++) {
       PlotData2D temp_plot = (PlotData2D)(m_plots.elementAt(j));
 
-      for (int i=0;i<temp_plot.m_plotInstances.numInstances();i++) {
-	if (temp_plot.m_plotInstances.instance(i).isMissing(m_xIndex) ||
-	    temp_plot.m_plotInstances.instance(i).isMissing(m_yIndex)) {
-	  temp_plot.m_pointLookup[i][0] = Double.NEGATIVE_INFINITY;
-	  temp_plot.m_pointLookup[i][1] = Double.NEGATIVE_INFINITY;
-	} else {
-	  double x = convertToPanelX(temp_plot.m_plotInstances.
-				     instance(i).value(m_xIndex));
-	  double y = convertToPanelY(temp_plot.m_plotInstances.
-				     instance(i).value(m_yIndex));
-	  temp_plot.m_pointLookup[i][0] = x;
-	  temp_plot.m_pointLookup[i][1] = y;
+      if (temp_plot.m_plotInstances.numInstances() > 0 &&
+	  temp_plot.m_plotInstances.numAttributes() > 0) {
+	for (int i=0;i<temp_plot.m_plotInstances.numInstances();i++) {
+	  if (temp_plot.m_plotInstances.instance(i).isMissing(m_xIndex) ||
+	      temp_plot.m_plotInstances.instance(i).isMissing(m_yIndex)) {
+	    temp_plot.m_pointLookup[i][0] = Double.NEGATIVE_INFINITY;
+	    temp_plot.m_pointLookup[i][1] = Double.NEGATIVE_INFINITY;
+	  } else {
+	    double x = convertToPanelX(temp_plot.m_plotInstances.
+				       instance(i).value(m_xIndex));
+	    double y = convertToPanelY(temp_plot.m_plotInstances.
+				       instance(i).value(m_yIndex));
+	    temp_plot.m_pointLookup[i][0] = x;
+	    temp_plot.m_pointLookup[i][1] = y;
+	  }
 	}
       }
     }
@@ -1429,7 +1435,9 @@ public class Plot2D extends JPanel {
    */
   public void paintComponent(Graphics gx) {
     super.paintComponent(gx);
-    if (m_plotInstances != null) {
+    if (m_plotInstances != null 
+	&& m_plotInstances.numInstances() > 0
+	&& m_plotInstances.numAttributes() > 0) {
       if (m_plotCompanion != null) {
 	m_plotCompanion.prePlot(gx);
       }

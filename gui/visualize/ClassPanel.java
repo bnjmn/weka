@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassPanel extends JPanel {
     
@@ -218,14 +218,16 @@ public class ClassPanel extends JPanel {
    * @param cIndex the index of the attribute to display coloured labels for
    */
   protected void setCindex(int cIndex) {
-    m_cIndex = cIndex;
-    if (m_Instances.attribute(m_cIndex).isNumeric()) {
-      setNumeric();
-    } else {
-      if (m_Instances.attribute(m_cIndex).numValues() > m_colorList.size()) {
-	extendColourMap();
+    if (m_Instances.numAttributes() > 0) {
+      m_cIndex = cIndex;
+      if (m_Instances.attribute(m_cIndex).isNumeric()) {
+	setNumeric();
+      } else {
+	if (m_Instances.attribute(m_cIndex).numValues() > m_colorList.size()) {
+	  extendColourMap();
+	}
+	setNominal();
       }
-      setNominal();
     }
   }
 
@@ -349,6 +351,8 @@ public class ClassPanel extends JPanel {
    */
   protected void paintNominal(Graphics gx) {
     setFonts(gx);
+
+
 
     int numClasses;
 
@@ -491,6 +495,7 @@ public class ClassPanel extends JPanel {
 	x += ((w - (m_HorizontalPad*2)) / (numClasses-numToDo));
       }	  
     }
+
   }
 
   /**
@@ -622,7 +627,9 @@ public class ClassPanel extends JPanel {
 	this.removeAll();
 	paintNumeric(gx);
       } else {
-	if (m_Instances != null) {
+	if (m_Instances != null && 
+	    m_Instances.numInstances() > 0 && 
+	    m_Instances.numAttributes() > 0) {
 	  if (m_oldWidth != this.getWidth()) {
 	    this.removeAll();
 	    m_oldWidth = this.getWidth();

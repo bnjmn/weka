@@ -53,7 +53,7 @@ import java.awt.Graphics;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AttributePanel extends JScrollPane {
   /** The instances to be plotted */
@@ -222,7 +222,10 @@ public class AttributePanel extends JScrollPane {
       super.paintComponent(gx);
       int xp, yp, h;
       h = this.getWidth();
-      if (m_plotInstances != null) {
+      if (m_plotInstances != null 
+	  && m_plotInstances.numAttributes() > 0
+	  && m_plotInstances.numInstances() > 0) {
+
 	if (m_oldWidth != h) {
 	  m_pointDrawn = new boolean[h][20];
 	  for (int noa = 0; noa < m_plotInstances.numInstances(); noa++) {
@@ -355,10 +358,12 @@ public class AttributePanel extends JScrollPane {
     m_maxC = h;
     m_minC = l;
     
-    if (m_plotInstances.attribute(m_cIndex).isNominal()) {
-      if (m_plotInstances.attribute(m_cIndex).numValues() > 
-	  m_colorList.size()) {
-	extendColourMap();
+    if (m_plotInstances.numAttributes() > 0) {
+      if (m_plotInstances.attribute(m_cIndex).isNominal()) {
+	if (m_plotInstances.attribute(m_cIndex).numValues() > 
+	    m_colorList.size()) {
+	  extendColourMap();
+	}
       }
     }
     this.repaint();
@@ -452,62 +457,64 @@ public class AttributePanel extends JScrollPane {
 	};
     }
 
-    JPanel padder = new JPanel();
-    JPanel padd2 = new JPanel();
-    
-    m_plotInstances = ins;
-      
-    /*    if (m_splitListener != null) {
-      m_plotInstances.randomize(new Random());
-      } */
-
-    m_heights = new int[ins.numInstances()];
-
-    m_cIndex = ins.numAttributes() - 1;
-    for (int noa = 0; noa < ins.numInstances(); noa++) {
-      m_heights[noa] = (int)(Math.random() * 19);
-    }
-    m_span.setPreferredSize(new Dimension(m_span.getPreferredSize().width, 
-					  (m_cIndex + 1) * 20));
-    m_span.setMaximumSize(new Dimension(m_span.getMaximumSize().width, 
-					(m_cIndex + 1) * 20));
-    AttributeSpacing tmp;
-      
-    GridBagLayout gb = new GridBagLayout();
-    GridBagLayout gb2 = new GridBagLayout();
-    GridBagConstraints constraints = new GridBagConstraints();
-      
     m_span.removeAll();
+    m_plotInstances = ins;
+    if (ins.numInstances() > 0 && ins.numAttributes() > 0) {
+      JPanel padder = new JPanel();
+      JPanel padd2 = new JPanel();
+      
+      /*    if (m_splitListener != null) {
+	    m_plotInstances.randomize(new Random());
+	    } */
 
-    padder.setLayout(gb);
-    m_span.setLayout(gb2);
-    constraints.anchor = GridBagConstraints.CENTER;
-    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    constraints.insets = new Insets(0, 0, 0, 0);
-    padder.add(m_span, constraints);
-    constraints.gridx=0;constraints.gridy=1;constraints.weightx=5;
-    constraints.fill = GridBagConstraints.BOTH;
-    constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
-    constraints.insets = new Insets(0, 0, 0, 0);
-    padder.add(padd2, constraints);
-    constraints.weighty=0;
-    setViewportView(padder);
-    //getViewport().setLayout(null);
-    //m_span.setMinimumSize(new Dimension(100, (m_cIndex + 1) * 24));
-    //m_span.setSize(100, (m_cIndex + 1) * 24);
-    constraints.anchor = GridBagConstraints.CENTER;
-    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
-    constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
-    constraints.insets = new Insets(2,20,2,4);
+      m_heights = new int[ins.numInstances()];
 
-    for (int noa = 0; noa < ins.numAttributes(); noa++) {
-      tmp = new AttributeSpacing(ins.attribute(noa), noa);
+      m_cIndex = ins.numAttributes() - 1;
+      for (int noa = 0; noa < ins.numInstances(); noa++) {
+	m_heights[noa] = (int)(Math.random() * 19);
+      }
+      m_span.setPreferredSize(new Dimension(m_span.getPreferredSize().width, 
+					    (m_cIndex + 1) * 20));
+      m_span.setMaximumSize(new Dimension(m_span.getMaximumSize().width, 
+					  (m_cIndex + 1) * 20));
+      AttributeSpacing tmp;
+      
+      GridBagLayout gb = new GridBagLayout();
+      GridBagLayout gb2 = new GridBagLayout();
+      GridBagConstraints constraints = new GridBagConstraints();
+      
+
+
+      padder.setLayout(gb);
+      m_span.setLayout(gb2);
+      constraints.anchor = GridBagConstraints.CENTER;
+      constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.gridwidth=1;constraints.gridheight=1;
+      constraints.insets = new Insets(0, 0, 0, 0);
+      padder.add(m_span, constraints);
+      constraints.gridx=0;constraints.gridy=1;constraints.weightx=5;
+      constraints.fill = GridBagConstraints.BOTH;
+      constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
+      constraints.insets = new Insets(0, 0, 0, 0);
+      padder.add(padd2, constraints);
+      constraints.weighty=0;
+      setViewportView(padder);
+      //getViewport().setLayout(null);
+      //m_span.setMinimumSize(new Dimension(100, (m_cIndex + 1) * 24));
+      //m_span.setSize(100, (m_cIndex + 1) * 24);
+      constraints.anchor = GridBagConstraints.CENTER;
+      constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
+      constraints.insets = new Insets(2,20,2,4);
+
+      for (int noa = 0; noa < ins.numAttributes(); noa++) {
+	tmp = new AttributeSpacing(ins.attribute(noa), noa);
 	 
-      constraints.gridy = noa;
-      m_span.add(tmp, constraints);
+	constraints.gridy = noa;
+	m_span.add(tmp, constraints);
+      }
     }
   }
     
