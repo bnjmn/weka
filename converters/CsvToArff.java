@@ -31,7 +31,7 @@ import weka.core.Attribute;
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Converter
  * @see Serializable
  */
@@ -55,11 +55,6 @@ public class CsvToArff implements Converter, Serializable {
    * Describe variable <code>m_tokenizer</code> here.
    */
   //  private StreamTokenizer m_tokenizer = null;
-
-  /**
-   * The reader for the source file.
-   */
-  private Reader m_sourceReader = null;
 
   /**
    * A list of hash tables for accumulating nominal values during parsing.
@@ -282,7 +277,7 @@ public class CsvToArff implements Converter, Serializable {
     FastVector current = new FastVector();
 
     // Check if end of file reached.
-    getFirstToken(tokenizer);
+    ConverterUtils.getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       return null;
     }
@@ -294,7 +289,7 @@ public class CsvToArff implements Converter, Serializable {
       
       // Get next token
       if (!first) {
-	getToken(tokenizer);
+	ConverterUtils.getToken(tokenizer);
       }
 
       if (tokenizer.ttype == ',' || tokenizer.ttype == '\t' || 
@@ -319,15 +314,16 @@ public class CsvToArff implements Converter, Serializable {
       }
       
       if (!wasSep) {
-	getToken(tokenizer);
+	ConverterUtils.getToken(tokenizer);
       }
       first = false;
     }
     
     // check number of values read
     if (current.size() != m_structure.numAttributes()) {
-      errms(tokenizer, "wrong number of values. Read "+current.size()
-	    +", expected "+m_structure.numAttributes());
+      ConverterUtils.errms(tokenizer, 
+			   "wrong number of values. Read "+current.size()
+			   +", expected "+m_structure.numAttributes());
     }
 
     // check for structure update
@@ -429,70 +425,17 @@ public class CsvToArff implements Converter, Serializable {
   private void readHeader(StreamTokenizer tokenizer) throws IOException {
    
     FastVector attribNames = new FastVector();
-    getFirstToken(tokenizer);
+    ConverterUtils.getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      errms(tokenizer,"premature end of file");
+      ConverterUtils.errms(tokenizer,"premature end of file");
     }
 
     while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
       attribNames.addElement(new Attribute(tokenizer.sval));
-      getToken(tokenizer);
+      ConverterUtils.getToken(tokenizer);
     }
     
     m_structure = new Instances(m_sourceFile.getName(), attribNames, 0);
-  }
-
-  /**
-   * Throws error message with line number and last token read.
-   *
-   * @param theMsg the error message to be thrown
-   * @param tokenizer the stream tokenizer
-   * @exception IOExcpetion containing the error message
-   */
-  private void errms(StreamTokenizer tokenizer, String theMsg) 
-    throws IOException {
-    
-    throw new IOException(theMsg + ", read " + tokenizer.toString());
-  }
-
-  /**
-   * Gets token, skipping empty lines.
-   *
-   * @param tokenizer the stream tokenizer
-   * @exception IOException if reading the next token fails
-   */
-  private void getFirstToken(StreamTokenizer tokenizer) throws IOException {
-    
-    while (tokenizer.nextToken() == StreamTokenizer.TT_EOL){};
-    if ((tokenizer.ttype == '\'') ||
-	(tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))) {
-      tokenizer.ttype = '?';
-    }
-  }
-
-  /**
-   * Gets token.
-   *
-   * @param tokenizer the stream tokenizer
-   * @exception IOException if reading the next token fails
-   */
-  private void getToken(StreamTokenizer tokenizer) throws IOException {
-    
-    tokenizer.nextToken();
-    if (tokenizer.ttype== StreamTokenizer.TT_EOL) {
-      return;
-    }
-
-    if ((tokenizer.ttype == '\'') ||
-	(tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))) {
-      tokenizer.ttype = '?';
-    }
   }
 
   /**
