@@ -77,7 +77,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.20 $
+ * @version  $Revision: 1.21 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -398,38 +398,44 @@ public class AttributeSelection implements Serializable {
       // now sort them by mean rank
       int[] s = Utils.sort(m_rankResults[1]);
       for (int i=0; i<s.length; i++) {
-	CvString.append(Utils.doubleToString(Math.abs(m_rankResults[0][s[i]]),
-					     6, 3) 
-			+ " +-" 
-			+ Utils.doubleToString(m_rankResults[2][s[i]], 6, 3) 
-			+ "   " 
-			+ Utils.doubleToString(m_rankResults[1][s[i]],
-					       fieldWidth+2, 1) 
-			+ " +-" 
-			+ Utils.doubleToString(m_rankResults[3][s[i]], 5, 2) 
+	if (m_rankResults[1][s[i]] > 0) {
+	  CvString.append(Utils.doubleToString(Math.
+					       abs(m_rankResults[0][s[i]]),
+					       6, 3) 
+			  + " +-" 
+			  + Utils.doubleToString(m_rankResults[2][s[i]], 6, 3) 
+			  + "   " 
+			  + Utils.doubleToString(m_rankResults[1][s[i]],
+						 fieldWidth+2, 1) 
+			  + " +-" 
+			  + Utils.doubleToString(m_rankResults[3][s[i]], 5, 2) 
 			+"  "
-			+ Utils.doubleToString(((double)(s[i] + 1)), 
-					       fieldWidth, 0)
-			+ " " 
-			+ m_trainInstances.attribute(s[i]).name() 
-			+ "\n");
+			  + Utils.doubleToString(((double)(s[i] + 1)), 
+						 fieldWidth, 0)
+			  + " " 
+			  + m_trainInstances.attribute(s[i]).name() 
+			  + "\n");
+	}
       }
     }
     else {
       CvString.append("number of folds (%)  attribute\n");
 
       for (int i = 0; i < m_subsetResults.length; i++) {
-	CvString.append(Utils.doubleToString(m_subsetResults[i], 12, 0) 
-			+ "(" 
-			+ Utils.doubleToString((m_subsetResults[i] / 
-						m_numFolds * 100.0)
-					       , 3, 0) 
-			+ " %)  " 
-			+ Utils.doubleToString(((double)(i + 1)),
-					       fieldWidth, 0)
-			+ " " 
-			+ m_trainInstances.attribute(i).name() 
-			+ "\n");
+	if ((m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) ||
+	    (i != m_trainInstances.classIndex())) {
+	  CvString.append(Utils.doubleToString(m_subsetResults[i], 12, 0) 
+			  + "(" 
+			  + Utils.doubleToString((m_subsetResults[i] / 
+						  m_numFolds * 100.0)
+						 , 3, 0) 
+			  + " %)  " 
+			  + Utils.doubleToString(((double)(i + 1)),
+						 fieldWidth, 0)
+			  + " " 
+			  + m_trainInstances.attribute(i).name() 
+			  + "\n");
+	}
       }
     }
 
@@ -461,21 +467,8 @@ public class AttributeSelection implements Serializable {
 
     // create space to hold statistics
     if (m_rankResults == null && m_subsetResults == null) {
-      if (m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
-	m_subsetResults = new double[split.numAttributes()];
-      }
-      else {
-	m_subsetResults = new double[split.numAttributes() - 1];
-      }
-      
-      if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
-	  !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
-
-	m_rankResults = new double[4][split.numAttributes() - 1];
-      }
-      else {
-	m_rankResults = new double[4][split.numAttributes()];
-      }
+      m_subsetResults = new double[split.numAttributes()];
+      m_rankResults = new double[4][split.numAttributes()];
     }
 
     m_ASEvaluator.buildEvaluator(split);
