@@ -59,7 +59,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -653,12 +653,13 @@ public class Experiment implements Serializable, OptionHandler {
    * The full class name of a ResultProducer (required).
    * eg: weka.experiment.RandomSplitResultProducer <p>
    *
-   * -D class_name <br>
-   * The full class name of a ResultListener (required).
-   * eg: weka.experiment.CSVResultListener <p>
+   * -D "class_name" <br>
+   * The full class name of a ResultListener followed by any options.
+   * If options are supplied then full string must be enclosed in quotes.
+   * (required).
+   * eg: "weka.experiment.CSVResultListener -O outfile.csv" <p>
    *
-   * All option after -- will be passed to the result producer
-   * (there is currently no way to pass options to the result listener). <p>
+   * All option after -- will be passed to the result producer. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -702,8 +703,19 @@ public class Experiment implements Serializable, OptionHandler {
     if (rlName.length() == 0) {
       throw new Exception("Required: -D <ResultListener class name>");
     }
+    rlName = rlName.trim();
+    // split off any options
+    int breakLoc = rlName.indexOf(' ');
+    String clName = rlName;
+    String rlOptionsString = "";
+    String [] rlOptions = null;
+    if (breakLoc != -1) {
+      clName = rlName.substring(0, breakLoc);
+      rlOptionsString = rlName.substring(breakLoc).trim();
+      rlOptions = Utils.splitOptions(rlOptionsString);
+    }
     setResultListener((ResultListener)Utils.forName(ResultListener.class,
-						    rlName, null));
+						    clName, rlOptions));
 
     String rpName = Utils.getOption('P', options);
     if (rpName.length() == 0) {
