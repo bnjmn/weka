@@ -33,9 +33,9 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Normalize extends Filter implements UnsupervisedFilter {
+public class Normalize extends PotentialClassIgnorer implements UnsupervisedFilter {
 
   /** The minimum values for numeric attributes. */
   private double [] m_MinArray;

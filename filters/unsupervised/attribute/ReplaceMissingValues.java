@@ -33,9 +33,9 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class ReplaceMissingValues extends Filter
+public class ReplaceMissingValues extends PotentialClassIgnorer
   implements UnsupervisedFilter {
 
   /** The modes and means */

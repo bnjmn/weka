@@ -68,7 +68,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public abstract class Filter implements Serializable {
 
@@ -139,6 +139,17 @@ public abstract class Filter implements Serializable {
    * @return the input Instances.
    */
   protected Instances getInputFormat() {
+
+    return m_InputFormat;
+  }
+
+  /**
+   * Returns a reference to the current input format without
+   * copying it.
+   *
+   * @return a reference to the current input format
+   */
+  protected Instances inputFormatPeek() {
 
     return m_InputFormat;
   }
@@ -365,7 +376,7 @@ public abstract class Filter implements Serializable {
   /**
    * @deprecated use <code>getOutputFormat()</code> instead.
    */
-  public final Instances outputFormat() {
+  public Instances outputFormat() {
 
     return getOutputFormat();
   }
@@ -381,7 +392,7 @@ public abstract class Filter implements Serializable {
    * @exception NullPointerException if no input structure has been
    * defined (or the output format hasn't been determined yet) 
    */
-  public final Instances getOutputFormat() {
+  public Instances getOutputFormat() {
 
     if (m_OutputFormat == null) {
       throw new NullPointerException("No output format defined.");
