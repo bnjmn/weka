@@ -41,11 +41,13 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Loader
  */
 public class C45Loader extends AbstractLoader 
   implements BatchLoader, IncrementalLoader {
+
+  public static String FILE_EXTENSION = ".names";
 
   /**
    * Holds the determined structure (header) of the data set.
