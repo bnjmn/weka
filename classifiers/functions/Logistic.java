@@ -81,7 +81,7 @@ import weka.filters.unsupervised.attribute.*;
  * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ */
+ * @version $Revision: 1.31 $ */
 public class Logistic extends Classifier 
     implements OptionHandler, WeightedInstancesHandler {
   
@@ -522,6 +522,9 @@ public class Logistic extends Classifier
 	}
 	
 	m_LL = -opt.getMinFunction(); // Log-likelihood
+
+	// Don't need data matrix anymore
+	m_Data = null;
 	    
 	// Convert coefficients back to non-normalized attribute units
 	for(int i=0; i < nK; i++){
