@@ -55,7 +55,7 @@ import javax.swing.BorderFactory;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -98,9 +98,14 @@ public class ResultHistoryPanel extends JPanel {
 	    setSingle((String)m_Model.elementAt(index));
 	  }
 	} else {
+	  // if there are stored objects then assume that the storer
+	  // will handle popping up the text in a seperate frame
 	  int index = m_List.locationToIndex(e.getPoint());
 	  if (index != -1) {
-	    openFrame((String)m_Model.elementAt(index));
+	    String name = (String)m_Model.elementAt(index);
+	    if (m_Objs.get(name) == null) {
+	      openFrame((String)m_Model.elementAt(index));
+	    }
 	  }
 	}
       }
@@ -224,6 +229,19 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
+   * Get the name of the currently selected item in the list
+   * @return the name of the currently selected item or null if no
+   * item selected
+   */
+  public String getSelectedName() {
+    int index = m_List.getSelectedIndex();
+    if (index != -1) {
+      return (String)(m_Model.elementAt(index));
+    }
+    return null;
+  }
+
+  /**
    * Sets the single-click display to view the named result.
    *
    * @param name the name of the result to display.
@@ -299,6 +317,14 @@ public class ResultHistoryPanel extends JPanel {
   public ListSelectionModel getSelectionModel() {
     
     return m_List.getSelectionModel();
+  }
+
+  /**
+   * Gets the JList used by the results list
+   * @return the JList
+   */
+  public JList getList() {
+    return m_List;
   }
 
   /**
