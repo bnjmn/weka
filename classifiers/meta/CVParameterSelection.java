@@ -22,8 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
@@ -64,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {

@@ -22,9 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
-import weka.classifiers.CostMatrix;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
@@ -79,7 +77,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class MetaCost extends RandomizableSingleClassifierEnhancer {
 

@@ -25,8 +25,7 @@ package weka.classifiers.meta;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 
 /**
@@ -43,7 +42,7 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class Vote extends MultipleClassifiersCombiner {

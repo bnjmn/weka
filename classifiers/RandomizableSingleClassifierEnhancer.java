@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.meta;
+package weka.classifiers;
 
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;

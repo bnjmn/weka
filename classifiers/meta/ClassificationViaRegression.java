@@ -22,8 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import java.util.*;
 import weka.core.*;
@@ -46,7 +45,7 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
 */
 public class ClassificationViaRegression extends SingleClassifierEnhancer {
 

@@ -22,9 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
-import weka.classifiers.rules.ZeroR;
+import weka.classifiers.*;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -54,7 +52,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 

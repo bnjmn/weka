@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.meta;
+package weka.classifiers;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 

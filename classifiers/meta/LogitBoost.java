@@ -22,9 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
-import weka.classifiers.Sourcable;
+import weka.classifiers.*;
 import weka.classifiers.trees.DecisionStump;
 import java.io.*;
 import java.util.*;
@@ -82,7 +80,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.31 $ 
  */
 public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements Sourcable, WeightedInstancesHandler {
