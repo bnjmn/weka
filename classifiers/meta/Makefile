@@ -10,7 +10,7 @@ SOURCES = AdaBoostM1.java AdditiveRegression.java \
 	RacedIncrementalLogitBoost.java \
 	RegressionByDiscretization.java Stacking.java \
 	ThresholdSelector.java StackingC.java Grading.java Vote.java \
-	RandomCommittee.java
+	RandomCommittee.java RSW.java SeqCVParameterSelection.java
 
 
 
