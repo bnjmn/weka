@@ -96,7 +96,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -692,6 +692,7 @@ public class ClustererPanel extends JPanel {
     if (pointShapes != null) {
       plotData.setShapeType(pointShapes);
     }
+    plotData.addInstanceNumberAttribute();
     return plotData;
   }
   
