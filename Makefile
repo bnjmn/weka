@@ -1,5 +1,5 @@
 #
-# $Revision: 1.2 $
+# $Revision: 1.3 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -53,9 +53,15 @@ doc :
 	weka.clusterers \
 	weka.attributeSelection)
 
+# Assumes any auxiliary classfiles are in the parent directory
+# One of these must be SimpleCLI.class
 install : all
 	(cd ..; \
-	jar cvf $$JAWSHOME/weka.jar \
+	echo "" > manifest.tmp ; \
+	echo "Main-Class: SimpleCLI.class" >> manifest.tmp ;\
+	echo "" >> manifest.tmp ; \
+	jar cvfm $$JAWSHOME/weka.jar manifest.tmp \
+	*.class \
 	weka/core/*.class \
 	weka/classifiers/*.class \
 	weka/classifiers/j48/*.class \
@@ -74,7 +80,8 @@ install : all
         weka/estimators/*java \
         weka/associations/*.java \
 	weka/clusterers/*.java \
-	weka/attributeSelection/*.java)
+	weka/attributeSelection/*.java ;\
+	rm manifest.tmp )
 	javadoc -public -author -version -d $$JAWSHOME/doc \
 	weka.core \
 	weka.classifiers \
