@@ -60,6 +60,7 @@ import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.converters.Loader;
 import weka.core.converters.CSVLoader;
+import weka.core.converters.C45Loader;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
@@ -86,7 +87,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -129,12 +130,6 @@ public class PreprocessPanel extends JPanel {
 
   /** Click to apply filters and save the results */
   protected JButton m_ApplyFilterBut = new JButton("Apply");
-
-  /** Filter to ensure only arff files are selected */  
-  protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(new String [] {Instances.FILE_EXTENSION, 
-					   CSVLoader.FILE_EXTENSION}, 
-			    "Arff or CSV data files");
 
   /** The file chooser for selecting arff files */
   protected JFileChooser m_FileChooser 
@@ -218,7 +213,17 @@ public class PreprocessPanel extends JPanel {
     m_UndoBut.setToolTipText("Undo the last change to the dataset");
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
-    m_FileChooser.setFileFilter(m_ArffFilter);
+
+    m_FileChooser.
+      addChoosableFileFilter(new ExtensionFileFilter(C45Loader.FILE_EXTENSION,
+						     "C45 names files"));
+    m_FileChooser.
+      addChoosableFileFilter(new ExtensionFileFilter(CSVLoader.FILE_EXTENSION,
+						     "CSV data files"));
+    m_FileChooser.
+      addChoosableFileFilter(new ExtensionFileFilter(Instances.FILE_EXTENSION,
+						     "Arff data files"));
+
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -749,17 +754,35 @@ public class PreprocessPanel extends JPanel {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
 	public void run() {
+	  String fileType = "";
 	  try {
 	    m_Log.statusMessage("Reading from file...");
-	    Reader r = new BufferedReader(new FileReader(f));
-	    setInstances(new Instances(r));
-	    r.close();
+	    if (f.getName().toLowerCase().endsWith(".arff")) {	    
+	      fileType = "arff";
+	      Reader r = new BufferedReader(new FileReader(f));
+	      setInstances(new Instances(r));
+	      r.close();
+	    } else if (f.getName().toLowerCase().endsWith(".csv")) {
+	      fileType = "csv";
+	      CSVLoader cnv = new CSVLoader();
+	      cnv.setSource(f);
+	      Instances inst = cnv.getDataSet();
+	      setInstances(inst);
+	    } else if (f.getName().toLowerCase().endsWith(".names")) {
+	      fileType = "C45 names";
+	      C45Loader cnv = new C45Loader();
+	      cnv.setSource(f);
+	      Instances inst = cnv.getDataSet();
+	      setInstances(inst);
+	    }
 	  } catch (Exception ex) {
-	    m_Log.statusMessage("File '" + f.getName() + "' not recognised as an arff file.");
+	    m_Log.statusMessage("File '" + f.getName() + "' not recognised as an "
+				+fileType+" file.");
 	    m_IOThread = null;
 	    if (JOptionPane.showOptionDialog(PreprocessPanel.this,
 					     "File '" + f.getName()
-					     + "' not recognised as an arff file.\n"
+					     + "' not recognised as an "
+					     +fileType+" file.\n"
 					     + "Reason:\n" + ex.getMessage(),
 					     "Load Instances",
 					     0,
