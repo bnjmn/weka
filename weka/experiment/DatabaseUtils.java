@@ -48,7 +48,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -588,7 +588,7 @@ public class DatabaseUtils implements Serializable {
     if (m_Connection.getMetaData().getDriverName().
 	equals("Mark Matthews' MySQL Driver")
 	|| (m_Connection.getMetaData().getDriverName().
-	equals("InstantDB JDBC Driver"))) {
+	indexOf("InstantDB JDBC Driver") != -1)) {
       query = "CREATE TABLE " + EXP_INDEX_TABLE 
 	+ " ( " + EXP_TYPE_COL + " TEXT,"
 	+ "  " + EXP_SETUP_COL + " TEXT,"
@@ -769,7 +769,7 @@ public class DatabaseUtils implements Serializable {
 	if (m_Connection.getMetaData().getDriverName().
 	    equals("Mark Matthews' MySQL Driver")
 	    || (m_Connection.getMetaData().getDriverName().
-		equals("InstantDB JDBC Driver"))) {
+		indexOf("InstantDB JDBC Driver")) != -1) {
 	  query += "TEXT ";
 	} else {
 	  query += "LONGVARBINARY ";

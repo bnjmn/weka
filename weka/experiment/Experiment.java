@@ -59,7 +59,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -476,6 +476,14 @@ public class Experiment implements Serializable, OptionHandler {
   public DefaultListModel getDatasets() {
 
     return m_Datasets;
+  }
+
+  /**
+   * Set the datasets to use in the experiment
+   * @param ds the list of datasets to use
+   */
+  public void setDatasets(DefaultListModel ds) {
+    m_Datasets = ds;
   }
 
   /**

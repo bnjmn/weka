@@ -21,15 +21,16 @@ SOURCES = \
 	ResultListener.java \
 	ResultProducer.java \
 	SplitEvaluator.java \
-	Stats.java
+	Stats.java \
 #	LearningRateResultProducer.java \
 #	TreeMatchingEvaluator.java \
-#	RemoteEngine.java \
-#	Compute.java \
-#	Task.java \
-#	RemoteExperiment.java \
-#	RemoteExperimentListener.java \
-#	RemoteExperimentEvent.java
+	RemoteEngine.java \
+	Compute.java \
+	Task.java \
+	RemoteExperiment.java \
+	RemoteExperimentListener.java \
+	RemoteExperimentEvent.java \
+	RemoteExperimentSubTask.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..

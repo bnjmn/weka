@@ -85,69 +85,15 @@ import java.io.ByteArrayInputStream;
  * </pre>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RemoteExperiment extends Experiment {
-
-  // Inner class for encapsulating sub experiments
-  protected class ExperimentSubTask implements Task {
-
-    /* The (sub) experiment to execute */
-    private Experiment m_experiment;
-
-    /**
-     * Set the experiment for this sub task
-     * @param task the experiment
-     */
-    public void setExperiment(Experiment task) {
-      m_experiment = task;
-    }
-
-    /**
-     * Get the experiment for this sub task
-     * @return this sub task's experiment
-     */
-    public Experiment getExperiment() {
-      return m_experiment;
-    }
-    
-    /**
-     * Run the experiment
-     */
-    public Object execute() {
-      FastVector result = new FastVector();
-      String goodResult = "(sub)experiment completed successfully";
-      try {
-	System.err.println("Initializing (exp run # "+m_experiment.getRunLower()
-			   +")...");
-	m_experiment.initialize();
-	System.err.println("Iterating (exp run # "+m_experiment.getRunLower()
-			   +")...");
-	m_experiment.runExperiment();
-	System.err.println("Postprocessing (exp run # "
-			   +m_experiment.getRunLower()
-			   +")...");
-	m_experiment.postProcess();
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	String badResult =  "(sub)experiment (run # "
-	  +m_experiment.getRunLower()
-	  +") : "+ex.toString();
-	result.addElement(new Integer(FAILED));
-	result.addElement(badResult);
-	return result;
-      }            
-      result.addElement(new Integer(FINISHED));
-      result.addElement(goodResult);
-      return result;
-    }
-  }
 
   /** The list of objects listening for remote experiment events */
   private FastVector m_listeners = new FastVector();
 
   /** Holds the names of machines with remoteEngine servers running */
-  private FastVector m_remoteHosts = new FastVector();
+  protected DefaultListModel m_remoteHosts = new DefaultListModel();
   
   /** The queue of available hosts */
   private Queue m_remoteHostsQueue = new Queue();
@@ -190,12 +136,29 @@ public class RemoteExperiment extends Experiment {
   protected int [] m_subExpComplete;
 
   /**
+   * Construct a new RemoteExperiment using a base Experiment
+   * @param base the base experiment to use
+   * @exeception Exception if the base experiment is null
+   */
+  public RemoteExperiment(Experiment base) throws Exception {
+    setBaseExperiment(base);
+  }
+
+  /**
    * Add an object to the list of those interested in recieving update
    * information from the RemoteExperiment
    * @param r a listener
    */
   public void addRemoteExperimentListener(RemoteExperimentListener r) {
     m_listeners.addElement(r);
+  }
+
+  /**
+   * Get the base experiment used by this remote experiment
+   * @return the base experiment
+   */
+  public Experiment getBaseExperiment() {
+    return m_baseExperiment;
   }
 
   /**
@@ -211,7 +174,115 @@ public class RemoteExperiment extends Experiment {
     m_baseExperiment = base;
     setRunLower(m_baseExperiment.getRunLower());
     setRunUpper(m_baseExperiment.getRunUpper());
+    setResultListener(m_baseExperiment.getResultListener());
+    setResultProducer(m_baseExperiment.getResultProducer());
+    setDatasets(m_baseExperiment.getDatasets());
+    setUsePropertyIterator(m_baseExperiment.getUsePropertyIterator());
+    setPropertyPath(m_baseExperiment.getPropertyPath());
+    setPropertyArray(m_baseExperiment.getPropertyArray());
+    setNotes(m_baseExperiment.getNotes());
+    m_ClassFirst = m_baseExperiment.m_ClassFirst;
   }
+  
+  /**
+   * Set the user notes.
+   *
+   * @param newNotes New user notes.
+   */
+  public void setNotes(String newNotes) {
+    
+    super.setNotes(newNotes);
+    m_baseExperiment.setNotes(newNotes);
+  }
+
+  /**
+   * Set the lower run number for the experiment.
+   *
+   * @param newRunLower the lower run number for the experiment.
+   */
+  public void setRunLower(int newRunLower) {
+    
+    super.setRunLower(newRunLower);
+    m_baseExperiment.setRunLower(newRunLower);
+  }
+
+  /**
+   * Set the upper run number for the experiment.
+   *
+   * @param newRunUpper the upper run number for the experiment.
+   */
+  public void setRunUpper(int newRunUpper) {
+    
+    super.setRunUpper(newRunUpper);
+    m_baseExperiment.setRunUpper(newRunUpper);
+  }
+
+  /**
+   * Sets the result listener where results will be sent.
+   *
+   * @param newResultListener the result listener where results will be sent.
+   */
+  public void setResultListener(ResultListener newResultListener) {
+    
+    super.setResultListener(newResultListener);
+    m_baseExperiment.setResultListener(newResultListener);
+  }
+
+  /**
+   * Set the result producer used for the current experiment.
+   *
+   * @param newResultProducer result producer to use for the current 
+   * experiment.
+   */
+  public void setResultProducer(ResultProducer newResultProducer) {
+    
+    super.setResultProducer(newResultProducer);
+    m_baseExperiment.setResultProducer(newResultProducer);
+  }
+
+  /**
+   * Set the datasets to use in the experiment
+   * @param ds the list of datasets to use
+   */
+  public void setDatasets(DefaultListModel ds) {
+    super.setDatasets(ds);
+    m_baseExperiment.setDatasets(ds);
+  }
+
+  /**
+   * Sets whether the custom property iterator should be used.
+   *
+   * @param newUsePropertyIterator true if so
+   */
+  public void setUsePropertyIterator(boolean newUsePropertyIterator) {
+    
+    super.setUsePropertyIterator(newUsePropertyIterator);
+    m_baseExperiment.setUsePropertyIterator(newUsePropertyIterator);
+  }
+
+  /**
+   * Sets the path of properties taken to get to the custom property
+   * to iterate over.
+   *
+   * @newPropertyPath an array of PropertyNodes
+   */
+  public void setPropertyPath(PropertyNode [] newPropertyPath) {
+    
+    super.setPropertyPath(newPropertyPath);
+    m_baseExperiment.setPropertyPath(newPropertyPath);
+  }
+
+  /**
+   * Sets the array of values to set the custom property to.
+   *
+   * @param newPropArray a value of type Object which should be an
+   * array of the appropriate values.
+   */
+  public void setPropertyArray(Object newPropArray) {
+    super.setPropertyArray(newPropArray);
+    m_baseExperiment.setPropertyArray(newPropArray);
+  }
+
     
   /**
    * Prepares a remote experiment for running, creates sub experiments
@@ -278,8 +349,10 @@ public class RemoteExperiment extends Experiment {
    * @param finished true if the remote experiment has finished
    * @param message the message.
    */
-  private void notifyListeners(boolean status, boolean log, boolean finished,
-			  String message) {
+  private synchronized void notifyListeners(boolean status, 
+					    boolean log, 
+					    boolean finished,
+					    String message) {
     if (m_listeners.size() > 0) {
       for (int i=0;i<m_listeners.size();i++) {
 	RemoteExperimentListener r = 
@@ -348,7 +421,7 @@ public class RemoteExperiment extends Experiment {
    */
   private String postExperimentInfo() {
     StringBuffer text = new StringBuffer();
-    text.append(m_finishedCount+" runs completed successfully.\n"
+    text.append(m_finishedCount+" runs completed successfully. "
 		+m_failedCount+" failures during running.\n");
     System.err.print(text.toString());
     return text.toString();
@@ -375,7 +448,8 @@ public class RemoteExperiment extends Experiment {
     }
 
     if ((getRunUpper() - getRunLower() + 1) == m_finishedCount) {
-      notifyListeners(false,true,true,"Experiment completed successfully.");
+      notifyListeners(false,true,false,"Experiment completed successfully.");
+      notifyListeners(false,true,true,postExperimentInfo());
       return;
     }
     
@@ -409,7 +483,7 @@ public class RemoteExperiment extends Experiment {
 	public void run() {	      
 	  m_remoteHostsStatus[ah] = IN_USE;
 	  m_subExpComplete[wexp] = PROCESSING;
-	  ExperimentSubTask expSubTsk = new ExperimentSubTask();
+	  RemoteExperimentSubTask expSubTsk = new RemoteExperimentSubTask();
 	  expSubTsk.setExperiment(m_subExperiments[wexp]);
 	  try {
 	    String name = "//"
@@ -454,13 +528,14 @@ public class RemoteExperiment extends Experiment {
 			      +" completed successfully.");
 	      // push host back onto queue and try launching any waiting 
 	      // sub-experiments
-	      availableHost(ah);
 	      incrementFinished();
+	      availableHost(ah);
 	    }
 	  } catch (Exception ce) {
 	    m_remoteHostsStatus[ah] = CONNECTION_FAILED;
 	    m_subExpComplete[wexp] = TO_BE_RUN;
 	    System.err.println(ce);
+	    ce.printStackTrace();
 	    notifyListeners(false,true,false,"Connection to "
 			    +((String)m_remoteHosts.elementAt(ah))
 			    +" failed. Scheduling run "
@@ -507,6 +582,14 @@ public class RemoteExperiment extends Experiment {
    */
   public void addRemoteHost(String hostname) {
     m_remoteHosts.addElement(hostname);
+  }
+
+  /**
+   * Get the list of remote host names
+   * @return the list of remote host names
+   */
+  public DefaultListModel getRemoteHosts() {
+    return m_remoteHosts;
   }
 
   /**
@@ -594,8 +677,7 @@ public class RemoteExperiment extends Experiment {
 	oi.close();
       }
       if (base != null) {
-	exp = new RemoteExperiment();
-	exp.setBaseExperiment(base);
+	exp = new RemoteExperiment(base);
       }
       for (int i=0;i<remoteHosts.size();i++) {
 	exp.addRemoteHost((String)remoteHosts.elementAt(i));
