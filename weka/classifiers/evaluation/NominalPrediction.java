@@ -13,7 +13,7 @@ import java.io.Serializable;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NominalPrediction implements Prediction, Serializable {
 
@@ -58,6 +58,9 @@ public class NominalPrediction implements Prediction, Serializable {
   public NominalPrediction(double actual, double [] distribution, 
                            double weight) {
 
+    if (distribution == null) {
+      throw new NullPointerException("Null distribution in NominalPrediction.");
+    }
     m_Actual = actual;
     m_Distribution = distribution;
     m_Weight = weight;
@@ -190,6 +193,23 @@ public class NominalPrediction implements Prediction, Serializable {
     } else {
       m_Predicted = MISSING_VALUE;
     }
+  }
+
+  /**
+   * Gets a human readable representation of this prediction.
+   *
+   * @return a human readable representation of this prediction.
+   */
+  public String toString() {
+
+    StringBuffer sb = new StringBuffer();
+    sb.append("NOM: ").append(actual()).append(" ").append(predicted());
+    sb.append(' ').append(weight());
+    double [] dist = distribution();
+    for (int i = 0; i < dist.length; i++) {
+      sb.append(' ').append(dist[i]);
+    }
+    return sb.toString();
   }
 }
 
