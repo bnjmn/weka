@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -455,7 +455,7 @@ public class ClassifierPanel extends JPanel {
 	      String name = m_History.getNameAtIndex(index);
 	      visualize(name, e.getX(), e.getY());
 	    } else {
-	      loadPopup(e.getX(), e.getY());
+	      visualize(null, e.getX(), e.getY());
 	    }
 	  }
 	}
@@ -1396,28 +1396,41 @@ public class ClassifierPanel extends JPanel {
     JPopupMenu resultListMenu = new JPopupMenu();
     
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
-    visMainBuffer.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.setSingle(selectedName);
-	}
-      });
+    if (selectedName != null) {
+      visMainBuffer.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    m_History.setSingle(selectedName);
+	  }
+	});
+    } else {
+      visMainBuffer.setEnabled(false);
+    }
     resultListMenu.add(visMainBuffer);
     
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
-    visSepBuffer.addActionListener(new ActionListener() {
+    if (selectedName != null) {
+      visSepBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  m_History.openFrame(selectedName);
 	}
       });
+    } else {
+      visSepBuffer.setEnabled(false);
+    }
     resultListMenu.add(visSepBuffer);
     
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
-    saveOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveBuffer(selectedName);
-	}
-      });
+    if (selectedName != null) {
+      saveOutput.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    saveBuffer(selectedName);
+	  }
+	});
+    } else {
+      saveOutput.setEnabled(false);
+    }
     resultListMenu.add(saveOutput);
+    
     resultListMenu.addSeparator();
     
     JMenuItem loadModel = new JMenuItem("Load model");
@@ -1428,16 +1441,19 @@ public class ClassifierPanel extends JPanel {
       });
     resultListMenu.add(loadModel);
 
-    FastVector o = (FastVector)m_History.getNamedObject(selectedName);
-    
-    if (o != null) {
-      VisualizePanel temp_vp = null;
-      String temp_grph = null;
-      FastVector temp_preds = null;
-      Attribute temp_classAtt = null;
-      Classifier temp_classifier = null;
-      Instances temp_trainHeader = null;
+    FastVector o = null;
+    if (selectedName != null) {
+      o = (FastVector)m_History.getNamedObject(selectedName);
+    }
+
+    VisualizePanel temp_vp = null;
+    String temp_grph = null;
+    FastVector temp_preds = null;
+    Attribute temp_classAtt = null;
+    Classifier temp_classifier = null;
+    Instances temp_trainHeader = null;
       
+    if (o != null) { 
       for (int i = 0; i < o.size(); i++) {
 	Object temp = o.elementAt(i);
 	if (temp instanceof Classifier) {
@@ -1454,68 +1470,108 @@ public class ClassifierPanel extends JPanel {
 	  temp_classAtt = (Attribute)temp;
 	}
       }
+    }
 
-      final VisualizePanel vp = temp_vp;
-      final String grph = temp_grph;
-      final FastVector preds = temp_preds;
-      final Attribute classAtt = temp_classAtt;
-      final Classifier classifier = temp_classifier;
-      final Instances trainHeader = temp_trainHeader;
+    final VisualizePanel vp = temp_vp;
+    final String grph = temp_grph;
+    final FastVector preds = temp_preds;
+    final Attribute classAtt = temp_classAtt;
+    final Classifier classifier = temp_classifier;
+    final Instances trainHeader = temp_trainHeader;
+    
+    JMenuItem saveModel = new JMenuItem("Save model");
+    if (classifier != null) {
+      saveModel.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    saveClassifier(selectedName, classifier, trainHeader);
+	  }
+	});
+    } else {
+      saveModel.setEnabled(false);
+    }
+    resultListMenu.add(saveModel);
 
-      JMenuItem saveModel = new JMenuItem("Save model");
-      JMenuItem reEvaluate =
-	new JMenuItem("Re-evaluate model on current test set");
+    JMenuItem reEvaluate =
+      new JMenuItem("Re-evaluate model on current test set");
+    if (classifier != null && m_TestInstances != null) {
+      reEvaluate.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    reevaluateModel(selectedName, classifier, trainHeader);
+	  }
+	});
+    } else {
+      reEvaluate.setEnabled(false);
+    }
+    resultListMenu.add(reEvaluate);
+    
+    resultListMenu.addSeparator();
+    
+    JMenuItem visErrors = new JMenuItem("Visualize classifer errors");
+    if (vp != null) {
+      visErrors.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    visualizeClassifierErrors(vp);
+	  }
+	});
+    } else {
+      visErrors.setEnabled(false);
+    }
+    resultListMenu.add(visErrors);
 
-      if (classifier != null) {
+    JMenuItem visTree = new JMenuItem("Visualize tree");
+    if (grph != null) {
+      visTree.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    String title;
+	    if (vp != null) title = vp.getName();
+	    else title = selectedName;
+	    visualizeTree(grph, title);
+	  }
+	});
+    } else {
+      visTree.setEnabled(false);
+    }
+    resultListMenu.add(visTree);
 
-	saveModel.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      saveClassifier(selectedName, classifier, trainHeader);
+    JMenuItem visMargin = new JMenuItem("Visualize margin curve");
+    if (preds != null) {
+      visMargin.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    try {
+	      MarginCurve tc = new MarginCurve();
+	      Instances result = tc.getCurve(preds);
+	      VisualizePanel vmc = new VisualizePanel();
+	      vmc.setName(result.relationName());
+	      vmc.setLog(m_Log);
+	      PlotData2D tempd = new PlotData2D(result);
+	      tempd.setPlotName(result.relationName());
+	      tempd.addInstanceNumberAttribute();
+	      vmc.addPlot(tempd);
+	      visualizeClassifierErrors(vmc);
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
 	    }
-	  });
-	resultListMenu.add(saveModel);
+	  }
+	});
+    } else {
+      visMargin.setEnabled(false);
+    }
+    resultListMenu.add(visMargin);
 
-	reEvaluate.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      reevaluateModel(selectedName, classifier, trainHeader);
-	    }
-	  });
-	resultListMenu.add(reEvaluate);
-      }
-
-      resultListMenu.addSeparator();
-
-      JMenuItem visErrors = new JMenuItem("Visualize classifer errors");
-      if (vp != null) {
-	visErrors.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      visualizeClassifierErrors(vp);
-	    }
-	  });
-	resultListMenu.add(visErrors);
-      }
-      JMenuItem visTree = new JMenuItem("Visualize tree");
-      if (grph != null) {
-	visTree.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      String title;
-	      if (vp != null) title = vp.getName();
-	      else title = selectedName;
-	      visualizeTree(grph, title);
-	    }
-	  });
-	resultListMenu.add(visTree);
-      }
-      JMenuItem visMargin = new JMenuItem("Visualize margin curve");
-      if (preds != null) {
-	visMargin.addActionListener(new ActionListener() {
+    JMenu visThreshold = new JMenu("Visualize threshold curve");
+    if (preds != null && classAtt != null) {
+      for (int i = 0; i < classAtt.numValues(); i++) {
+	JMenuItem clv = new JMenuItem(classAtt.value(i));
+	final int classValue = i;
+	clv.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
 	      try {
-		MarginCurve tc = new MarginCurve();
-		Instances result = tc.getCurve(preds);
+		ThresholdCurve tc = new ThresholdCurve();
+		Instances result = tc.getCurve(preds, classValue);
 		VisualizePanel vmc = new VisualizePanel();
-		vmc.setName(result.relationName());
 		vmc.setLog(m_Log);
+		vmc.setName(result.relationName()+". Class value "+
+			    classAtt.value(classValue)+")");
 		PlotData2D tempd = new PlotData2D(result);
 		tempd.setPlotName(result.relationName());
 		tempd.addInstanceNumberAttribute();
@@ -1524,93 +1580,53 @@ public class ClassifierPanel extends JPanel {
 	      } catch (Exception ex) {
 		ex.printStackTrace();
 	      }
+	      }
+	  });
+	  visThreshold.add(clv);
+      }
+    } else {
+      visThreshold.setEnabled(false);
+    }
+    resultListMenu.add(visThreshold);
+
+    JMenu visCost = new JMenu("Visualize cost curve");
+    if (preds != null && classAtt != null) {
+      for (int i = 0; i < classAtt.numValues(); i++) {
+	JMenuItem clv = new JMenuItem(classAtt.value(i));
+	final int classValue = i;
+	clv.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      try {
+		CostCurve cc = new CostCurve();
+		Instances result = cc.getCurve(preds, classValue);
+		VisualizePanel vmc = new VisualizePanel();
+		vmc.setLog(m_Log);
+		vmc.setName(result.relationName()+". Class value "+
+			    classAtt.value(classValue)+")");
+		PlotData2D tempd = new PlotData2D(result);
+		tempd.m_displayAllPoints = true;
+		tempd.setPlotName(result.relationName());
+		boolean [] connectPoints = 
+		  new boolean [result.numInstances()];
+		for (int jj = 1; jj < connectPoints.length; jj+=2) {
+		  connectPoints[jj] = true;
+		}
+		tempd.setConnectPoints(connectPoints);
+		//		  tempd.addInstanceNumberAttribute();
+		vmc.addPlot(tempd);
+		visualizeClassifierErrors(vmc);
+	      } catch (Exception ex) {
+		ex.printStackTrace();
+	      }
 	    }
 	  });
-	resultListMenu.add(visMargin);
+	visCost.add(clv);
       }
-      JMenu visThreshold = new JMenu("Visualize threshold curve");
-      if (preds != null && classAtt != null) {
-	for (int i = 0; i < classAtt.numValues(); i++) {
-	  JMenuItem clv = new JMenuItem(classAtt.value(i));
-	  final int classValue = i;
-	  clv.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
-		try {
-		  ThresholdCurve tc = new ThresholdCurve();
-		  Instances result = tc.getCurve(preds, classValue);
-		  VisualizePanel vmc = new VisualizePanel();
-		  vmc.setLog(m_Log);
-		  vmc.setName(result.relationName()+". Class value "+
-			      classAtt.value(classValue)+")");
-		  PlotData2D tempd = new PlotData2D(result);
-		  tempd.setPlotName(result.relationName());
-		  tempd.addInstanceNumberAttribute();
-		  vmc.addPlot(tempd);
-		  visualizeClassifierErrors(vmc);
-		} catch (Exception ex) {
-		  ex.printStackTrace();
-		}
-	      }
-	    });
-	  visThreshold.add(clv);
-	}
-	resultListMenu.add(visThreshold);
-      }
-      JMenu visCost = new JMenu("Visualize cost curve");
-      if (preds != null && classAtt != null) {
-	for (int i = 0; i < classAtt.numValues(); i++) {
-	  JMenuItem clv = new JMenuItem(classAtt.value(i));
-	  final int classValue = i;
-	  clv.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
-		try {
-		  CostCurve cc = new CostCurve();
-		  Instances result = cc.getCurve(preds, classValue);
-		  VisualizePanel vmc = new VisualizePanel();
-		  vmc.setLog(m_Log);
-		  vmc.setName(result.relationName()+". Class value "+
-			      classAtt.value(classValue)+")");
-		  PlotData2D tempd = new PlotData2D(result);
-		  tempd.m_displayAllPoints = true;
-		  tempd.setPlotName(result.relationName());
-		  boolean [] connectPoints = 
-		    new boolean [result.numInstances()];
-		  for (int jj = 1; jj < connectPoints.length; jj+=2) {
-		    connectPoints[jj] = true;
-		  }
-		  tempd.setConnectPoints(connectPoints);
-		  //		  tempd.addInstanceNumberAttribute();
-		  vmc.addPlot(tempd);
-		  visualizeClassifierErrors(vmc);
-		} catch (Exception ex) {
-		  ex.printStackTrace();
-		}
-	      }
-	    });
-	  visCost.add(clv);
-	}
-	resultListMenu.add(visCost);
-      }
+    } else {
+      visCost.setEnabled(false);
     }
-    resultListMenu.show(m_History.getList(), x, y);
-  }
+    resultListMenu.add(visCost);
 
-  /**
-   * Handles constructing a popup menu with load option.
-   * @param x the x coordinate for popping up the menu
-   * @param y the y coordinate for popping up the menu
-   */
-  protected void loadPopup(int x, int y) {
-
-    JPopupMenu resultListMenu = new JPopupMenu();
-    
-    JMenuItem loadModel = new JMenuItem("Load model");
-    loadModel.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  loadClassifier();
-	}
-      });
-    resultListMenu.add(loadModel);
     resultListMenu.show(m_History.getList(), x, y);
   }
 
