@@ -66,7 +66,7 @@ import java.util.Vector;
  * (default 200)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class Logistic extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -190,9 +190,7 @@ public class Logistic extends DistributionClassifier
     }
     data = new Instances(data);
     data.deleteWithMissingClass();
-    if (data.numInstances() == 0) {
-      throw new Exception("No train instances without missing class value!");
-    }
+
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(data);
     data = Filter.useFilter(data, m_ReplaceMissingValues);
