@@ -47,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -609,8 +609,12 @@ public class DatabaseUtils implements Serializable {
     String query;
 
     // Workaround for MySQL (doesn't support LONGVARBINARY)
+    // Also for InstantDB which attempts to interpret numbers when storing
+    // in LONGVARBINARY
     if (m_Connection.getMetaData().getDriverName().
-	equals("Mark Matthews' MySQL Driver")) {
+	equals("Mark Matthews' MySQL Driver")
+	|| (m_Connection.getMetaData().getDriverName().
+	equals("InstantDB JDBC Driver"))) {
       query = "CREATE TABLE " + EXP_INDEX_TABLE 
 	+ " ( " + EXP_TYPE_COL + " TEXT,"
 	+ "  " + EXP_SETUP_COL + " TEXT,"
@@ -786,8 +790,12 @@ public class DatabaseUtils implements Serializable {
       } else if (types[i] instanceof String) {
 
 	// Workaround for MySQL (doesn't support LONGVARCHAR)
+	// Also for InstantDB which attempts to interpret numbers when storing
+	// in LONGVARBINARY
 	if (m_Connection.getMetaData().getDriverName().
-	    equals("Mark Matthews' MySQL Driver")) {
+	    equals("Mark Matthews' MySQL Driver")
+	    || (m_Connection.getMetaData().getDriverName().
+		equals("InstantDB JDBC Driver"))) {
 	  query += "TEXT ";
 	} else {
 	  query += "LONGVARBINARY ";
@@ -810,8 +818,12 @@ public class DatabaseUtils implements Serializable {
       } else if (types[i] instanceof String) {
 	
 	// Workaround for MySQL (doesn't support LONGVARCHAR)
+	// Also for InstantDB which attempts to interpret numbers when storing
+	// in LONGVARBINARY
 	if (m_Connection.getMetaData().getDriverName().
-	    equals("Mark Matthews' MySQL Driver")) {
+	    equals("Mark Matthews' MySQL Driver")
+	    || (m_Connection.getMetaData().getDriverName().
+		equals("InstantDB JDBC Driver"))) {
 	  query += "TEXT ";
 	} else {
 	  query += "LONGVARBINARY ";
