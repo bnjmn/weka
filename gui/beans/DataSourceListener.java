@@ -28,10 +28,10 @@ import java.util.EventListener;
  * Interface to something that can accept DataSetEvents
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see EventListener
  */
 public interface DataSourceListener extends EventListener {
-  public void acceptDataSet(DataSetEvent e);
+  void acceptDataSet(DataSetEvent e);
 }

@@ -29,7 +29,7 @@ import weka.core.Instances;
  * Interface to something that can produce a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface TrainingSetProducer {
 
@@ -38,13 +38,13 @@ public interface TrainingSetProducer {
    *
    * @param tsl a <code>TrainingSetListener</code> value
    */
-  public void addTrainingSetListener(TrainingSetListener tsl);
+  void addTrainingSetListener(TrainingSetListener tsl);
 
   /**
    * Remove a training set listener
    *
    * @param tsl a <code>TrainingSetListener</code> value
    */
-  public void removeTrainingSetListener(TrainingSetListener tsl);
+  void removeTrainingSetListener(TrainingSetListener tsl);
 
 }

@@ -372,7 +372,7 @@ public class  DoubleVector implements Cloneable {
   public double sum2( DoubleVector v ) 
   {
     return minus( v ).sum2();
-  };
+  }
   
   /** Returns a subvector.
    *  @param i0   the index of the first element
