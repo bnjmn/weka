@@ -77,7 +77,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -688,14 +688,16 @@ public class ResultsPanel extends JPanel {
       m_ResultKeyModel.addElement(name);
       m_CompareModel.addElement(name);
 
-      if (name.toLowerCase().startsWith("key_dataset")) {
+      if (name.toLowerCase().equals("key_dataset")) {
 	m_DatasetKeyList.addSelectionInterval(i, i);
 	selectedListDataset += "," + (i + 1);
       } else if ((runCol == -1)
-	  && (name.toLowerCase().indexOf("run") != -1)) {
+		 && (name.toLowerCase().equals("key_run"))) {
 	m_RunCombo.setSelectedIndex(i);
 	runCol = i;
-      } else if (name.toLowerCase().startsWith("key_")) {
+      } else if (name.toLowerCase().equals("key_scheme") ||
+		 name.toLowerCase().equals("key_scheme_options") ||
+		 name.toLowerCase().equals("key_scheme_version_id")) {
 	m_ResultKeyList.addSelectionInterval(i, i);
 	selectedList += "," + (i + 1);
       } else if (name.toLowerCase().indexOf("percent_correct") != -1) {
@@ -791,6 +793,7 @@ public class ResultsPanel extends JPanel {
     m_TTester.setShowStdDevs(m_ShowStdDevs.isSelected());
     int compareCol = m_CompareCombo.getSelectedIndex();
     int tType = m_TestsCombo.getSelectedIndex();
+
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date())
       + (String) m_CompareCombo.getSelectedItem() + " - "
