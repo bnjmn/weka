@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.51 $
+ * @version $Revision: 1.52 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1003,8 +1003,10 @@ public class ClassifierPanel extends JPanel {
   protected void startClassifier() {
 
     if (m_RunThread == null) {
-      m_StartBut.setEnabled(false);
-      m_StopBut.setEnabled(true);
+      synchronized (this) {
+	m_StartBut.setEnabled(false);
+	m_StopBut.setEnabled(true);
+      }
       m_RunThread = new Thread() {
 	public void run() {
 	  // Copy the current state of things
@@ -1370,10 +1372,12 @@ public class ClassifierPanel extends JPanel {
 	      m_Log.statusMessage("See error log");
 	    }
 
-	    m_RunThread = null;
-	    m_StartBut.setEnabled(true);
-	    m_StopBut.setEnabled(false);
-            if (m_Log instanceof TaskLogger) {
+	    synchronized (this) {
+	      m_StartBut.setEnabled(true);
+	      m_StopBut.setEnabled(false);
+	      m_RunThread = null;
+	    }
+	    if (m_Log instanceof TaskLogger) {
               ((TaskLogger)m_Log).taskFinished();
             }
           }
@@ -1687,7 +1691,7 @@ public class ClassifierPanel extends JPanel {
     StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
-	m_Log.logMessage("Save succesful.");
+	m_Log.logMessage("Save successful.");
       }
     }
   }
@@ -1702,8 +1706,7 @@ public class ClassifierPanel extends JPanel {
       m_RunThread.interrupt();
       
       // This is deprecated (and theoretically the interrupt should do).
-      m_RunThread.stop();
-      
+      //m_RunThread.stop();
     }
   }
 
