@@ -73,6 +73,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees.DecisionStump,\
  weka.classifiers.trees.Id3,\
  weka.classifiers.trees.j48.J48,\
+ weka.classifiers.trees.lmt.LMT,\
  weka.classifiers.trees.m5.M5P,\
  weka.classifiers.trees.RandomForest,\
  weka.classifiers.trees.RandomTree,\
