@@ -37,7 +37,7 @@ import weka.attributeSelection.*;
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
@@ -321,7 +321,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
     int i;
     if (m_ASEvaluator instanceof AttributeTransformer) {
-      informat = ((AttributeTransformer)m_ASEvaluator).getTransformedData();
+      informat = ((AttributeTransformer)m_ASEvaluator).transformedData();
     } else {
       informat = m_InputFormat;
     }
