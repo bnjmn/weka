@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import java.util.*;
 import weka.core.*;
@@ -29,7 +29,7 @@ import weka.core.*;
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class BinC45Split extends ClassifierSplitModel{

@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import weka.core.*;
 import java.util.*;
@@ -30,7 +30,7 @@ import java.util.*;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PruneableClassifierTree extends ClassifierTree{
 

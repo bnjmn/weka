@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.m5;
+package weka.classifiers.trees.m5;
 
 import java.io.*;
 import java.util.*;
@@ -30,7 +30,7 @@ import weka.core.*;
 /**
  * Class for handling a matrix
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public final class Matrix {

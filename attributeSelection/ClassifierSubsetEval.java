@@ -26,6 +26,7 @@ import java.io.*;
 import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
+import weka.classifiers.rules.ZeroR;
 import weka.classifiers.Evaluation;
 import weka.filters.Filter;
 import weka.filters.AttributeFilter;
@@ -39,7 +40,7 @@ import weka.filters.AttributeFilter;
  * -B <classifier> <br>
  * Class name of the classifier to use for accuracy estimation.
  * Place any classifier options last on the command line following a
- * "--". Eg  -B weka.classifiers.NaiveBayes ... -- -K <p>
+ * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
  *
  * -T <br>
  * Use the training data for accuracy estimation rather than a hold out/
@@ -50,7 +51,7 @@ import weka.filters.AttributeFilter;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -100,7 +101,7 @@ public class ClassifierSubsetEval
    * -B <classifier> <br>
    * Class name of the classifier to use for accuracy estimation.
    * Place any classifier options last on the command line following a
-   * "--". Eg  -B weka.classifiers.NaiveBayes ... -- -K <p>
+   * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
    *
    * -T <br>
    * Use the training data for accuracy estimation rather than a hold out/
@@ -118,7 +119,7 @@ public class ClassifierSubsetEval
 				    + "\n\taccuracy estimation. Place any" 
 				    + "\n\tclassifier options LAST on the" 
 				    + "\n\tcommand line following a \"--\"." 
-				    + "\n\teg. -C weka.classifiers.NaiveBayes ... " 
+				    + "\n\teg. -C weka.classifiers.bayes.NaiveBayes ... " 
 				    + "-- -K", "B", 1, "-B <classifier>"));
     
     newVector.addElement(new Option("\tUse the training data to estimate"
@@ -153,7 +154,7 @@ public class ClassifierSubsetEval
    * -C <classifier> <br>
    * Class name of classifier to use for accuracy estimation.
    * Place any classifier options last on the command line following a
-   * "--". Eg  -B weka.classifiers.NaiveBayes ... -- -K <p>
+   * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
    *
    * -T <br>
    * Use training data instead of a hold out/test set for accuracy estimation.

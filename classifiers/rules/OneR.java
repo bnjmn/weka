@@ -20,8 +20,10 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.rules;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -39,7 +41,7 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
 

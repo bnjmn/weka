@@ -20,8 +20,13 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Sourcable;
+import weka.classifiers.trees.DecisionStump;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -62,7 +67,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
@@ -74,7 +79,7 @@ public class LogitBoost extends DistributionClassifier
   protected Classifier [][] m_Classifiers;
 
   /** An instantiated base classifier used for getting and testing options */
-  protected Classifier m_Classifier = new weka.classifiers.DecisionStump();
+  protected Classifier m_Classifier = new weka.classifiers.trees.DecisionStump();
 
   /** The maximum number of boost iterations */
   protected int m_MaxIterations = 10;
@@ -200,7 +205,7 @@ public class LogitBoost extends DistributionClassifier
 	      "P", 1, "-P <percent>"));
     newVector.addElement(new Option(
 	      "\tFull name of 'weak' learner to boost.\n"
-	      +"\teg: weka.classifiers.DecisionStump",
+	      +"\teg: weka.classifiers.trees.DecisionStump",
 	      "W", 1, "-W <learner class name>"));
 
     if ((m_Classifier != null) &&

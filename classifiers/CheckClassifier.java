@@ -22,6 +22,8 @@
 
 package weka.classifiers;
 
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -87,12 +89,12 @@ import weka.core.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class CheckClassifier implements OptionHandler {
 
   /*** The classifier to be examined */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** The options to be passed to the base classifier. */
   protected String [] m_ClassifierOptions;
@@ -117,7 +119,7 @@ public class CheckClassifier implements OptionHandler {
 	      "D", 0, "-D"));
     newVector.addElement(new Option(
 	      "\tFull name of the classifier analysed.\n"
-	      +"\teg: weka.classifiers.NaiveBayes",
+	      +"\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W"));
 
     if ((m_Classifier != null) 
@@ -1255,7 +1257,7 @@ public class CheckClassifier implements OptionHandler {
     try {
 
       // Tested OK, compare with ZeroR
-      Classifier zeroR = new weka.classifiers.ZeroR();
+      Classifier zeroR = new weka.classifiers.rules.ZeroR();
       zeroR.buildClassifier(train);
       Evaluation zeroREval = new Evaluation(train);
       zeroREval.evaluateModel(zeroR, test);

@@ -20,8 +20,11 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -49,7 +52,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -58,7 +61,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
  
   /** The list of classifiers */
   protected Classifier [] m_Classifiers = {
-     new weka.classifiers.ZeroR()
+     new weka.classifiers.rules.ZeroR()
   };
 
   /** The index into the vector for the selected scheme */
@@ -92,7 +95,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
 	      "\tFull class name of classifier to include, followed\n"
 	      + "\tby scheme options. May be specified multiple times,\n"
 	      + "\trequired at least twice.\n"
-	      + "\teg: \"weka.classifiers.NaiveBayes -D\"",
+	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
 	      "B", 1, "-B <classifier specification>"));
     newVector.addElement(new Option(
 	      "\tSets the random number seed (default 1).",

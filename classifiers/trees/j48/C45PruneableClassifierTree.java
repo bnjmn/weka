@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import weka.core.*;
 
@@ -29,7 +29,7 @@ import weka.core.*;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class C45PruneableClassifierTree extends ClassifierTree{

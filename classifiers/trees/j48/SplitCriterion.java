@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import java.io.*;
 
@@ -29,7 +29,7 @@ import java.io.*;
  * with respect to distributions of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class SplitCriterion implements Serializable {
 

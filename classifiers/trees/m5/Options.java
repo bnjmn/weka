@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.m5;
+package weka.classifiers.trees.m5;
 
 import java.lang.*;
 import java.io.*;
@@ -29,7 +29,7 @@ import weka.core.*;
 /**
  * Class for handing options 
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public final class Options implements Serializable {

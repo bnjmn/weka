@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -50,16 +54,16 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class Stacking extends Classifier implements OptionHandler {
 
   /** The meta classifier. */
-  protected Classifier m_MetaClassifier = new weka.classifiers.ZeroR();
+  protected Classifier m_MetaClassifier = new weka.classifiers.rules.ZeroR();
 
   /** The base classifiers. */
   protected Classifier [] m_BaseClassifiers = {
-     new weka.classifiers.ZeroR()
+     new weka.classifiers.rules.ZeroR()
   };
  
   /** Format for meta data */
@@ -86,7 +90,7 @@ public class Stacking extends Classifier implements OptionHandler {
 	      "\tFull class name of base classifiers to include, followed "
 	      + "by scheme options\n"
 	      + "\t(may be specified multiple times).\n"
-	      + "\teg: \"weka.classifiers.NaiveBayes -K\"",
+	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -K\"",
 	      "B", 1, "-B <scheme specification>"));
     newVector.addElement(new Option(
 	      "\tFull name of meta classifier, followed by options.",

@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import java.util.*;
 import weka.core.*;
@@ -65,7 +65,7 @@ import weka.classifiers.*;
  *
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,

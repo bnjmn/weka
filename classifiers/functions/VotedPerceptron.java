@@ -21,8 +21,11 @@
  */
 
 
-package weka.classifiers;
+package weka.classifiers.functions;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
 import weka.filters.*;
 import weka.core.*;
 import java.util.*;
@@ -52,7 +55,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   

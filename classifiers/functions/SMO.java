@@ -20,8 +20,11 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.functions;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
 import java.util.*;
 import java.io.*;
 import weka.core.*;
@@ -80,7 +83,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class SMO extends DistributionClassifier implements OptionHandler {
 

@@ -20,8 +20,13 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.Sourcable;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -61,7 +66,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Sourcable {
@@ -70,7 +75,7 @@ public class AdaBoostM1 extends DistributionClassifier
   private static int MAX_NUM_RESAMPLING_ITERATIONS = 10;
 
   /** The model base classifier to use */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
   
   /** Array for storing the generated base classifiers. */
   protected Classifier [] m_Classifiers;
@@ -163,7 +168,7 @@ public class AdaBoostM1 extends DistributionClassifier
 	      "P", 1, "-P <num>"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to boost.\n"
-	      +"\teg: weka.classifiers.NaiveBayes",
+	      +"\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W <class name>"));
     newVector.addElement(new Option(
 	      "\tUse resampling for boosting.",

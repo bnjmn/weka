@@ -21,7 +21,7 @@
  *
  */
 
-package weka.classifiers.kstar;
+package weka.classifiers.lazy.kstar;
 
 /*
  * @author Len Trigg (len@intelligenesis.net)

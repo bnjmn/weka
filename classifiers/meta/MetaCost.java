@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -75,7 +79,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class MetaCost extends Classifier
   implements OptionHandler {
@@ -101,7 +105,7 @@ public class MetaCost extends Classifier
   protected String m_CostFile;
 
   /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** The cost matrix */
   protected CostMatrix m_CostMatrix = new CostMatrix(1);
@@ -130,7 +134,7 @@ public class MetaCost extends Classifier
 	      "I", 1, "-I <num>"));
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use. (required)\n"
-	      + "\teg: weka.classifiers.NaiveBayes",
+	      + "\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W <class name>"));
     newVector.addElement(new Option(
 	      "\tFile name of a cost matrix to use. If this is not supplied,\n"

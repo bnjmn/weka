@@ -2,7 +2,7 @@ JAVAC = javac
 
 SOURCES = BayesNet.java BayesNetB.java BayesNetB2.java \
 	DiscreteEstimatorBayes.java ParentSet.java \
-	Scoreable.java
+	Scoreable.java NaiveBayes.java NaiveBayesSimple.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 

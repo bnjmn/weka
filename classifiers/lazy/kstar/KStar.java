@@ -22,8 +22,9 @@
  */
 
 
-package weka.classifiers.kstar;
+package weka.classifiers.lazy.kstar;
 
+import weka.classifiers.lazy.IB1;
 import java.io.*;
 import java.util.*;
 import weka.core.*;

@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import weka.core.*;
 
@@ -28,7 +28,7 @@ import weka.core.*;
  * Class for computing the gain ratio for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public final class GainRatioSplitCrit extends EntropyBasedSplitCrit{
 

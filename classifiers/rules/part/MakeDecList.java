@@ -20,8 +20,9 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.rules.part;
 
+import weka.classifiers.trees.j48.ModelSelection;
 import java.util.*;
 import java.io.*;
 import weka.core.*;
@@ -31,7 +32,7 @@ import weka.classifiers.*;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class MakeDecList implements Serializable {
 

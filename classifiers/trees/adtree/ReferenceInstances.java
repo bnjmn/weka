@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.adtree;
+package weka.classifiers.trees.adtree;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -31,7 +31,7 @@ import weka.core.Instances;
  * make reweighting of instances easy to manage.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ReferenceInstances extends Instances {
 

@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.adtree;
+package weka.classifiers.trees.adtree;
 
 import weka.classifiers.*;
 import weka.core.*;
@@ -54,7 +54,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ADTree
   extends DistributionClassifier implements OptionHandler, Drawable,

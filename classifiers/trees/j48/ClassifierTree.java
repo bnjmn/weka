@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import weka.core.*;
 import weka.classifiers.*;
@@ -31,7 +31,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 

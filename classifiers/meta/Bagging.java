@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Random;
@@ -57,13 +61,13 @@ import weka.core.Utils;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
 
   /** The model base classifier to use */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
   
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers;
@@ -92,7 +96,7 @@ public class Bagging extends DistributionClassifier
 	      "I", 1, "-I <num>"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to bag.\n"
-	      + "\teg: weka.classifiers.NaiveBayes",
+	      + "\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W"));
     newVector.addElement(new Option(
               "\tSeed for random number generator.\n"

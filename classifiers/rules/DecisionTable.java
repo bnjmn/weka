@@ -20,14 +20,17 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.rules;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.lazy.IBk;
+import weka.classifiers.lazy.IB1;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
 import weka.filters.*;
-import weka.classifiers.*;
-import weka.classifiers.j48.*;
 
 /**
  * Class for building and using a simple decision table majority classifier.
@@ -54,7 +57,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 

@@ -28,6 +28,8 @@ import java.util.*;
 
 import weka.core.*;
 import weka.classifiers.*;
+import weka.classifiers.rules.ZeroR;
+
 
 /**
  * A SplitEvaluator that produces results for a classification scheme
@@ -41,7 +43,7 @@ import weka.classifiers.*;
  * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -112,7 +114,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 
     newVector.addElement(new Option(
 	     "\tThe full class name of the classifier.\n"
-	      +"\teg: weka.classifiers.NaiveBayes", 
+	      +"\teg: weka.classifiers.bayes.NaiveBayes", 
 	     "W", 1, 
 	     "-W <class name>"));
     newVector.addElement(new Option(

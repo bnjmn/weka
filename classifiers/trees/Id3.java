@@ -20,8 +20,11 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.trees;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
 import weka.core.*;
 import java.io.*;
 import java.util.*;
@@ -34,7 +37,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class Id3 extends DistributionClassifier {
 

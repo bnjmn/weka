@@ -20,8 +20,11 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -61,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -167,7 +170,7 @@ public class CVParameterSelection extends Classifier
   }
 
   /** The generated base classifier */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /**
    * The base classifier options (not including those being set
@@ -317,7 +320,7 @@ public class CVParameterSelection extends Classifier
 	      "D", 0, "-D"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to perform parameter selection on.\n"
-	      + "\teg: weka.classifiers.NaiveBayes",
+	      + "\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W <classifier class name>"));
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation (default 10).",

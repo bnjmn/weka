@@ -22,6 +22,8 @@
 
 package weka.classifiers;
 
+import weka.classifiers.meta.MetaCost;
+import weka.classifiers.meta.CostSensitiveClassifier;
 import java.util.*;
 import java.io.*;
 import weka.core.*;
@@ -117,7 +119,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.42 $
+ * @version  $Revision: 1.43 $
   */
 public class Evaluation implements Summarizable {
 
@@ -881,8 +883,8 @@ public class Evaluation implements Summarizable {
            +" and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
            +" only. For cost-sensitive *prediction*, use one of the"
            +" cost-sensitive metaschemes such as"
-           +" weka.classifiers.CostSensitiveClassifier or"
-           +" weka.classifiers.MetaCost");
+           +" weka.classifiers.meta.CostSensitiveClassifier or"
+           +" weka.classifiers.meta.MetaCost");
 
       Reader costReader = null;
       try {

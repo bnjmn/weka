@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.rules.ZeroR;
 import java.util.*;
 import weka.core.*;
 import weka.filters.*;
@@ -42,7 +46,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -54,7 +58,7 @@ public class ClassificationViaRegression extends DistributionClassifier
   private MakeIndicatorFilter[] m_ClassFilters;
 
   /** The class name of the base classifier. */
-  private Classifier m_Classifier = new weka.classifiers.ZeroR();
+  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /**
    * Builds the classifiers.

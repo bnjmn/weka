@@ -20,10 +20,9 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import java.io.*;
-
 import java.util.*;
 import weka.core.*;
 
@@ -32,7 +31,7 @@ import weka.core.*;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class ClassifierSplitModel implements Cloneable, Serializable {
 
