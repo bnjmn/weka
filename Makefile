@@ -1,5 +1,5 @@
 #
-# $Revision: 1.33 $
+# $Revision: 1.34 $
 #
 
 # Java Compiler to use
@@ -22,6 +22,7 @@ all :
 	(cd associations; make all JAVAC=$(JAVAC))
 	(cd clusterers; make all JAVAC=$(JAVAC))
 	(cd attributeSelection; make all JAVAC=$(JAVAC))
+	(cd datagenerators; make all JAVAC=$(JAVAC))
 	(cd experiment; make all JAVAC=$(JAVAC))
 	(cd gui; make all JAVAC=$(JAVAC))
 
@@ -33,6 +34,7 @@ optimized :
 	(cd associations; make optimized JAVAC=$(JAVAC))
 	(cd clusterers; make optimized JAVAC=$(JAVAC))
 	(cd attributeSelection; make optimized JAVAC=$(JAVAC))
+	(cd datagenerators; make optimized JAVAC=$(JAVAC))
 	(cd experiment; make optimized JAVAC=$(JAVAC))
 	(cd gui; make optimized JAVAC=$(JAVAC))
 
@@ -44,6 +46,7 @@ debug :
 	(cd associations; make debug JAVAC=$(JAVAC))
 	(cd clusterers; make debug JAVAC=$(JAVAC))
 	(cd attributeSelection; make debug JAVAC=$(JAVAC))
+	(cd datagenerators; make debug JAVAC=$(JAVAC))
 	(cd experiment; make debug JAVAC=$(JAVAC))
 	(cd gui; make debug JAVAC=$(JAVAC))
 
@@ -55,6 +58,7 @@ clean :
 	(cd associations; make clean)
 	(cd clusterers; make clean)
 	(cd attributeSelection; make clean)
+	(cd datagenerators; make clean)
 	(cd experiment; make clean)
 	(cd gui; make clean)
 
@@ -77,6 +81,7 @@ doc :
 	weka.associations \
 	weka.clusterers \
 	weka.attributeSelection \
+	weka.datagenerators \
 	weka.experiment \
 	weka.gui \
 	weka.gui.experiment \
@@ -110,6 +115,7 @@ install : all
 	weka/associations/*.class \
 	weka/clusterers/*.class \
 	weka/attributeSelection/*.class \
+	weka/datagenerators/*.class \
 	weka/experiment/*.class \
 	weka/experiment/*.props \
 	weka/experiment/*.policy \
@@ -139,6 +145,7 @@ install : all
 	weka/associations/*.java \
 	weka/clusterers/*.java \
 	weka/attributeSelection/*.java \
+	weka/datagenerators/*.java \
 	weka/experiment/*.java \
 	weka/experiment/*.props \
 	weka/experiment/*.policy \
@@ -186,6 +193,7 @@ install : all
 	weka.associations \
 	weka.clusterers \
 	weka.attributeSelection \
+	weka.datagenerators \
 	weka.experiment \
 	weka.gui \
 	weka.gui.experiment \
