@@ -14,7 +14,7 @@ import weka.core.*;
  * given a starting set of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision 1.1 $
+ * @version $Revision: 1.4 $
  */
 public interface StartSetHandler {
 
