@@ -30,7 +30,7 @@ import java.util.*;
  * Class representing a prediction node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public final class PredictionNode implements Serializable, Cloneable {
 
@@ -108,7 +108,7 @@ public final class PredictionNode implements Serializable, Cloneable {
     }
     if (oldEqual == null) { // didn't find one so just add
       Splitter addChild = (Splitter) newChild.clone();
-      addChild.orderAdded = addingTo.nextSplitAddedOrder();
+      setOrderAddedSubtree(addChild, addingTo);
       children.addElement(addChild);
     }
     else { // found one, so do a merge
@@ -146,6 +146,23 @@ public final class PredictionNode implements Serializable, Cloneable {
     value += merger.value;
     for (Enumeration e = merger.children(); e.hasMoreElements(); ) {
       addChild((Splitter)e.nextElement(), mergingTo);
+    }
+  }
+
+  /**
+   * Sets the order added values of the subtree rooted at this splitter node.
+   *
+   * @param addChild the root of the subtree
+   * @param addingTo the tree that this node will belong to
+   */
+  private final void setOrderAddedSubtree(Splitter addChild, ADTree addingTo) {
+
+    addChild.orderAdded = addingTo.nextSplitAddedOrder();
+    for (int i=0; i<addChild.getNumOfBranches(); i++) {
+      PredictionNode node = addChild.getChildForBranch(i);
+      if (node != null)
+	for (Enumeration e = node.children(); e.hasMoreElements(); )
+	  setOrderAddedSubtree((Splitter) e.nextElement(), addingTo);
     }
   }
 }
