@@ -48,7 +48,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -91,7 +91,7 @@ public class WrapperSubsetEval
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(4);
     newVector.addElement(new Option("\tclass name of base learner to use for" 
 				    + "\n\taccuracy estimation. Place any" 
 				    + "\n\tclassifier options LAST on the" 
@@ -101,7 +101,9 @@ public class WrapperSubsetEval
     newVector.addElement(new Option("\tnumber of cross validation folds to " 
 				    + "use\n\tfor estimating accuracy." 
 				    + "\n\t(default=5)", "F", 1, "-F <num>"));
-    //    newVector.addElement(new Option("\tseed", "S", 1,"-S <num>"));
+    newVector.addElement(new Option("\tSeed for cross validation accuracy "
+				    +"\n\testimation."
+				    +"\n\t(default = 1)", "S", 1,"-S <seed>"));
     newVector.addElement(new Option("\tthreshold by which to execute " 
 				    + "another cross validation" 
 				    + "\n\t(standard deviation---" 
@@ -168,6 +170,11 @@ public class WrapperSubsetEval
       setFolds(Integer.parseInt(optionString));
     }
 
+    optionString = Utils.getOption('S', options);
+    if (optionString.length() != 0) {
+      setSeed(Integer.parseInt(optionString));
+    }
+
     //       optionString = Utils.getOption('S',options);
     //       if (optionString.length() != 0)
     //         {
@@ -222,6 +229,25 @@ public class WrapperSubsetEval
     return  m_folds;
   }
 
+  /**
+   * Set the seed to use for cross validation
+   *
+   * @param s the seed
+   */
+  public void setSeed (int s) {
+    m_seed = s;
+  }
+
+
+  /**
+   * Get the random number seed used for cross validation
+   *
+   * @return the seed
+   */
+  public int getSeed () {
+    return  m_seed;
+  }
+
 
   /**
    * Set the classifier to use for accuracy estimation
@@ -256,7 +282,7 @@ public class WrapperSubsetEval
       classifierOptions = ((OptionHandler)m_BaseClassifier).getOptions();
     }
 
-    String[] options = new String[7 + classifierOptions.length];
+    String[] options = new String[9 + classifierOptions.length];
     int current = 0;
 
     if (getClassifier() != null) {
@@ -268,6 +294,8 @@ public class WrapperSubsetEval
     options[current++] = "" + getFolds();
     options[current++] = "-T";
     options[current++] = "" + getThreshold();
+    options[current++] = "-S";
+    options[current++] = "" + getSeed();
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
 		     classifierOptions.length);
@@ -284,7 +312,7 @@ public class WrapperSubsetEval
   protected void resetOptions () {
     m_trainInstances = null;
     m_Evaluation = null;
-    m_BaseClassifier = null;
+    m_BaseClassifier = new ZeroR();
     m_folds = 5;
     m_seed = 1;
     m_threshold = 0.01;
