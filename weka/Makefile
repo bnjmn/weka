@@ -1,8 +1,16 @@
 #
-# $Revision: 1.24 $
+# $Revision: 1.25 $
 #
 
+# Java Compiler to use
+# E.g: make all JAVAC=jikes
 JAVAC = javac
+
+# Location to place install jarfiles and doc
+# If relative, it's w.r.t this Makefile 
+# (default is parent directory of this Makefile)
+# E.g: make install WEKAHOME=/home/ml/java
+WEKAHOME = .
 
 .PHONY: all optimized debug clean install archive doc
 
@@ -50,8 +58,10 @@ clean :
 	(cd experiment; make clean)
 	(cd gui; make clean)
 
+# Creates Javadoc documentation in directory ../doc
 doc :
 	(cd ..; \
+	(mkdir doc 2>&1 ) >/dev/null ; \
 	javadoc -J-mx100m -public -author -version -d doc \
 	weka.core \
 	weka.classifiers \
@@ -76,12 +86,11 @@ doc :
 	< doc/packages.html > packages_temp.html; \
 	mv packages_temp.html doc/packages.html)
 
-# Assumes any auxiliary classfiles are in the parent directory
-# One of these must be SimpleCLI.class
+# Makes source and binary jarfiles and docs into WEKAHOME
 install : all
 	(cd ..; \
 	echo "Main-Class: weka.gui.GUIChooser" > manifest.tmp ;\
-	jar cvfm $$JAWSHOME/weka.jar manifest.tmp \
+	jar cvfm $(WEKAHOME)/weka.jar manifest.tmp \
 	weka/core/*.class \
 	weka/classifiers/*.class \
 	weka/classifiers/j48/*.class \
@@ -104,7 +113,7 @@ install : all
 	weka/gui/treevisualizer/*.class \
 	weka/gui/streams/*.class \
 	; \
-	jar cvf $$JAWSHOME/weka-src.jar \
+	jar cvf $(WEKAHOME)/weka-src.jar \
 	weka/core/*.java \
 	weka/classifiers/*.java \
 	weka/classifiers/j48/*.java \
@@ -117,14 +126,19 @@ install : all
 	weka/clusterers/*.java \
 	weka/attributeSelection/*.java \
 	weka/experiment/*.java \
+	weka/experiment/*.props \
 	weka/gui/*.java \
+	weka/gui/*.props \
+	weka/gui/*.jpg \
+	weka/gui/*.gif \
 	weka/gui/experiment/*.java \
 	weka/gui/explorer/*.java \
 	weka/gui/treevisualizer/*.java \
 	weka/gui/streams/*.java \
 	;\
-	rm manifest.tmp )
-	javadoc -J-mx100m -public -author -version -d $$JAWSHOME/doc \
+	rm manifest.tmp ;\
+	(mkdir $(WEKAHOME)/doc 2>&1 ) >/dev/null ; \
+	javadoc -J-mx100m -public -author -version -d $(WEKAHOME)/doc \
 	weka.core \
 	weka.classifiers \
 	weka.classifiers.j48 \
@@ -142,17 +156,14 @@ install : all
 	weka.gui.explorer \
 	weka.gui.treevisualizer \
 	weka.gui.streams; \
-	for page in `ls $$JAWSHOME/doc/*.html`; \
+	for page in `ls $(WEKAHOME)/doc/*.html`; \
 	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
 	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
-	< $$JAWSHOME/doc/packages.html > $$JAWSHOME/packages_temp.html; \
-	mv $$JAWSHOME/packages_temp.html $$JAWSHOME/doc/packages.html
+	< $(WEKAHOME)/doc/packages.html > $(WEKAHOME)/packages_temp.html; \
+	mv $(WEKAHOME)/packages_temp.html $(WEKAHOME)/doc/packages.html \
+	)
 
+# Creates a snapshot of the entire directory structure
 archive :
 	(cd ..; \
 	tar czf archive/weka`date +%d%b%Y`.tar.gz  weka)
-
-
-
-
-
