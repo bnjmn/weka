@@ -25,59 +25,67 @@ package weka.classifiers.j48;
 import weka.core.*;
 
 /**
- * Class implementing a statistical routine needed by J48.
- * This code is adapted from Ross Quinlan's implementation of C4.5.
+ * Class implementing a statistical routine needed by J48 to
+ * compute its error estimate.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Stats {
 
-  /** Some constants for the interpolation. */
-  private static final double Val[] = 
-  {  0, 0.000000001, 0.00000001, 0.0000001, 0.000001, 0.00001, 0.00005, 0.0001, 
-     0.0005, 0.001, 0.005, 0.01, 0.05, 0.10, 0.20, 0.40, 1.00};
-  private static final double Dev[] = 
-  {100,         6.0,       5.61,       5.2,     4.75,    4.26,    3.89,   3.72,   
-       3.29,  3.09,  2.58, 2.33, 1.65, 1.28, 0.84, 0.25, 0.00};
-
   /**
    * Computes estimated extra error for given total number of instances
-   * and errors.
+   * and error using normal approximation to binomial distribution
+   * (and continuity correction).
    *
    * @param N number of instances
    * @param e observed error
    * @param CF confidence value
    */
   public static double addErrs(double N, double e, float CF){
-    
-    double Val0, Pr, Coeff = 0;
-    int i;
-    
-    i = 0;
-    while (CF > Val[i]) {
-      i++;
+
+    // Ignore stupid values for CF
+    if (CF > 0.5) {
+      System.err.println("WARNING: confidence value for pruning " +
+			 " too high. Error estimate not modified.");
+      return 0;
     }
-    Coeff = Dev[i-1] +
-      (Dev[i] - Dev[i-1]) * (CF-Val[i-1]) / (Val[i] - Val[i-1]);
-    Coeff = Coeff * Coeff;
-    if (e == 0) {
-      return N * (1 - Math.exp(Math.log(CF) / N));
-    } else {
-      if (e < 0.9999) {
-        Val0 = N * (1 - Math.exp(Math.log(CF) / N));
-        return Val0 + e * (addErrs(N, 1.0, CF) - Val0);
-      } else {
-	if (e + 0.5 >= N) {
-	  return 0.67 * (N - e);
-        } else {
-	  Pr = (e + 0.5 + Coeff / 
-		2 + Math.sqrt(Coeff * ((e + 0.5) * (1 - (e + 0.5) / N) + Coeff / 4))) / 
-	    (N + Coeff);
-	  return (N * Pr - e);
-	}
+
+    // Check for extreme cases at the low end because the
+    // normal approximation won't work
+    if (e < 1) {
+
+      // Base case (i.e. e == 0) from documenta Geigy Scientific
+      // Tables, 6th edition, page 185
+      double base = N * (1 - Math.pow(CF, 1 / N)); 
+      if (e == 0) {
+	return base; 
       }
+    
+      // Use linear interpolation between 0 and 1 like C4.5 does
+      return base + e * (addErrs(N, 1, CF) - base);
     }
+    
+    // Use linear interpolation at the high end (i.e. between N - 0.5
+    // and N) because of the continuity correction
+    if (e + 0.5 >= N) {
+
+      // Make sure that we never return anything smaller than zero
+      return Math.max(N - e, 0);
+    }
+
+    // Get z-score corresponding to CF
+    double z = Statistics.normalInverse(1 - CF);
+
+    // Compute upper limit of confidence interval
+    double  f = (e + 0.5) / N;
+    double r = (f + (z * z) / (2 * N) +
+		z * Math.sqrt((f / N) - 
+			      (f * f / N) + 
+			      (z * z / (4 * N * N)))) /
+      (1 + (z * z) / N);
+
+    return (r * N) - e;
   }
 }
 
