@@ -23,7 +23,12 @@ import weka.core.*;
 import weka.filters.*;
 
 /**
- * Class for doing classification using regression methods.
+ * Class for doing classification using regression methods. For more
+ * information, see <p>
+ * 
+ * E. Frank, Y. Wang, S. Inglis, G. Holmes, and I.H. Witten (1998)
+ * "Using model trees for classification", <i>Machine Learning</i>,
+ * Vol.32, No.1, pp. 63-76.<p>
  *
  * Valid options are:<p>
  *
@@ -33,8 +38,8 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
- */
+ * @version $Revision: 1.4 $ 
+*/
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
 
