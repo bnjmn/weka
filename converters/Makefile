@@ -1,7 +1,6 @@
 JAVAC = javac
 
-SOURCES = Converter.java ArffToArff.java CsvToArff.java
-# C5ToArff.java
+SOURCES = Converter.java ArffToArff.java CsvToArff.java C45ToArff.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
