@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.clusterers;
 
 import weka.core.*;
@@ -27,7 +26,7 @@ import weka.core.*;
  * (ie. a probability distribution).
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.2 $
+ * @version  $Revision: 1.3 $
  */
 public abstract class DistributionClusterer extends Clusterer {
 
@@ -55,11 +54,10 @@ public abstract class DistributionClusterer extends Clusterer {
    * @return the predicted most likely cluster for the instance. 
    * @exception Exception if an error occurred during the prediction
    */
-  public int clusterInstance(Instance instance) throws Exception 
-  {
+  public int clusterInstance(Instance instance) throws Exception {
     double [] dist = distributionForInstance(instance);
-    if (dist == null) 
-    {
+
+    if (dist == null) {
       throw new Exception("Null distribution predicted");
     }
    

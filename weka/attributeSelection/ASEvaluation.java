@@ -25,11 +25,11 @@ import weka.core.*;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
-public abstract class ASEvaluation implements Serializable 
-{
+public abstract class ASEvaluation implements Serializable {
+
   // ===============
   // Public methods.
   // ===============
@@ -52,8 +52,31 @@ public abstract class ASEvaluation implements Serializable
    * @return a possibly ranked list of postprocessed attributes
    * @exception Exception if postprocessing fails for some reason
    */
-  public int [] postProcess(int [] attributeSet) throws Exception
+  public int [] postProcess(int [] attributeSet) 
+    throws Exception
   {
     return attributeSet;
+  }
+
+  /**
+   * Creates a new instance of an attribute/subset evaluator 
+   * given it's class name and
+   * (optional) arguments to pass to it's setOptions method. If the
+   * evaluator implements OptionHandler and the options parameter is
+   * non-null, the evaluator will have it's options set.
+   *
+   * @param evaluatorName the fully qualified class name of the evaluator
+   * @param options an array of options suitable for passing to setOptions. May
+   * be null.
+   * @return the newly created evaluator, ready for use.
+   * @exception Exception if the evaluator name is invalid, or the options
+   * supplied are not acceptable to the evaluator
+   */
+  public static ASEvaluation forName(String evaluatorName,
+				     String [] options) throws Exception
+  {
+    return (ASEvaluation)Utils.forName(ASEvaluation.class,
+				       evaluatorName,
+				       options);
   }
 }
