@@ -19,8 +19,6 @@
 
 package weka.gui;
 
-import javax.swing.JFrame;
-import javax.swing.JButton;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -28,13 +26,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyEditor;
+import javax.swing.JFrame;
+import javax.swing.JButton;
 
 /** 
  * Support for PropertyEditors with custom editors: puts the editor into
  * a separate frame.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PropertyDialog extends JFrame {
 

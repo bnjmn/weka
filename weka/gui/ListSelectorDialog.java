@@ -21,18 +21,13 @@ package weka.gui;
 
 import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.Frame;
-import java.awt.FlowLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 import javax.swing.JFrame;
-import javax.swing.SwingConstants;
 import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
@@ -40,14 +35,13 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 
 /** 
  * A dialog to present the user with a list of items, that the user can
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ListSelectorDialog extends JDialog {
   

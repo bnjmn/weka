@@ -28,10 +28,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
+import java.util.Vector;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.io.FileInputStream;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.FontMetrics;
+import java.awt.Window;
 import java.awt.event.ItemListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,13 +47,9 @@ import javax.swing.JPanel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.DefaultComboBoxModel;
-import java.util.Properties;
-import java.io.FileInputStream;
-import java.util.StringTokenizer;
 import javax.swing.JOptionPane;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import java.awt.Window;
 
 
 /** 
@@ -62,7 +63,7 @@ import java.awt.Window;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -151,37 +152,12 @@ public class GenericObjectEditor implements PropertyEditor {
       }
       m_ObjectChooser.addItemListener(this);
     }
-    
+        
     /** Called when the class of object being edited changes. */
     protected void updateClassType() {
       
-      //System.err.println("GOE::updateClassType()");
-      String className = m_ClassType.getName();
-      String typeOptions = EDITOR_PROPERTIES.getProperty(className);
-      if (typeOptions == null) {
-	System.err.println("No configuration property found in\n"
-			   + ".weka.experiment.GenericObjectEditor\n"
-			   + "for " + className);
-      } else {
-	StringTokenizer st = new StringTokenizer(typeOptions, ", ");
-	DefaultComboBoxModel newModel = new DefaultComboBoxModel();
-	while (st.hasMoreTokens()) {
-	  String current = st.nextToken().trim();
-	  if (false) {
-	    // Verify that class names are OK. Slow -- with Java2 we could
-	    // try Class.forName(current, false, getClass().getClassLoader());
-	    try {
-	      Class c = Class.forName(current);
-	      newModel.addElement(current);
-	    } catch (Exception ex) {
-	      System.err.println("Couldn't find class with name" + current);
-	    }
-	  } else {
-	    newModel.addElement(current);
-	  }
-	}
-	m_ObjectChooser.setModel(newModel);
-      }
+      Vector classes = getClassesFromProperties();
+      m_ObjectChooser.setModel(new DefaultComboBoxModel(classes));
     }
 
     /** Called to update the list of values to be selected from */
@@ -249,6 +225,37 @@ public class GenericObjectEditor implements PropertyEditor {
     }
   }
 
+  /** Called when the class of object being edited changes. */
+  protected Vector getClassesFromProperties() {
+    
+    Vector classes = new Vector();
+    String className = m_ClassType.getName();
+    String typeOptions = EDITOR_PROPERTIES.getProperty(className);
+    if (typeOptions == null) {
+      System.err.println("No configuration property found in\n"
+			 + ".weka.experiment.GenericObjectEditor\n"
+			 + "for " + className);
+    } else {
+      StringTokenizer st = new StringTokenizer(typeOptions, ", ");
+      while (st.hasMoreTokens()) {
+	String current = st.nextToken().trim();
+	if (false) {
+	  // Verify that class names are OK. Slow -- with Java2 we could
+	  // try Class.forName(current, false, getClass().getClassLoader());
+	  try {
+	    Class c = Class.forName(current);
+	    classes.addElement(current);
+	  } catch (Exception ex) {
+	    System.err.println("Couldn't find class with name" + current);
+	  }
+	} else {
+	  classes.addElement(current);
+	}
+      }
+    }
+    return classes;
+  }
+
   /**
    * Sets whether the editor is "enabled", meaning that the current
    * values will be painted.
@@ -280,6 +287,25 @@ public class GenericObjectEditor implements PropertyEditor {
 
     if (m_EditorComponent != null) {
       m_EditorComponent.updateClassType();
+    }
+  }
+
+  /**
+   * Sets the current object to be the default, taken as the first item in
+   * the chooser
+   */
+  public void setDefaultValue() {
+
+    if (m_ClassType == null) {
+      System.err.println("No ClassType set up for GenericObjectEditor!!");
+      return;
+    }
+    Vector v = getClassesFromProperties();
+    try {
+      if (v.size() > 0) {
+	setObject((Object)Class.forName((String)v.elementAt(0)).newInstance());
+      }
+    } catch (Exception ex) {
     }
   }
   
@@ -488,8 +514,8 @@ public class GenericObjectEditor implements PropertyEditor {
 	.registerEditor(java.io.File.class,
 			FileEditor.class);
       GenericObjectEditor ce = new GenericObjectEditor();
-      ce.setClassType(weka.classifiers.Classifier.class);
-      Object initial = new weka.classifiers.IBk();
+      ce.setClassType(weka.filters.Filter.class);
+      Object initial = new weka.filters.AttributeFilter();
       if (args.length > 0) {
 	initial = (Object)Class.forName(args[0]).newInstance();
       }
