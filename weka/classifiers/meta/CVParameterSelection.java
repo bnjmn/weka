@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
@@ -282,7 +282,10 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
       }
       ((OptionHandler)m_Classifier).setOptions(options);
       for (int j = 0; j < m_NumFolds; j++) {
-	Instances train = trainData.trainCV(m_NumFolds, j, random);
+
+        // We want to randomize the data the same way for every 
+        // learning scheme.
+	Instances train = trainData.trainCV(m_NumFolds, j, new Random(1));
 	Instances test = trainData.testCV(m_NumFolds, j);
 	m_Classifier.buildClassifier(train);
 	evaluation.setPriors(train);
@@ -462,7 +465,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
     m_NumAttributes = trainData.numAttributes();
     Random random = new Random(m_Seed);
     trainData.randomize(random);
-    m_TrainFoldSize = trainData.trainCV(m_NumFolds, 0, random).numInstances();
+    m_TrainFoldSize = trainData.trainCV(m_NumFolds, 0).numInstances();
 
     // Check whether there are any parameters to optimize
     if (m_CVParams.size() == 0) {
