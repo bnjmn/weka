@@ -48,7 +48,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler {
   
@@ -331,12 +331,38 @@ public final class  M5Prime extends Classifier implements OptionHandler {
 	//       print the linear regression model
       }
       
-      text.append("Number of Leaves : "+m_root[1].numberOfLinearModels());
+      text.append("Number of Rules : "+m_root[1].numberOfLinearModels());
 
       return text.toString();
     } catch (Exception e) {
       return "can't print m5' tree";
     }
+  }
+
+  /**
+   * return the number of linear models
+   * @return the number of linear models
+   */
+  public double measureNumLinearModels() {
+    return m_root[1].numberOfLinearModels();
+  }
+
+  /**
+   * return the number of leaves in the tree
+   * @return the number leaves in the tree (same as # linear models &
+   * # rules)
+   */
+  public double measureNumLeaves() {
+    return measureNumLinearModels();
+  }
+
+  /**
+   * return the number of rules
+   * @return the number of rules (same as # linear models &
+   * # leaves in the tree)
+   */
+  public double measureNumRules() {
+    return measureNumLinearModels();
   }
   
   /**
