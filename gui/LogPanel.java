@@ -50,7 +50,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -159,7 +159,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 		}
 	      });
 	    gcMenu.add(availMem);
-	    JMenuItem runGC = new JMenuItem("Run garabage collector");
+	    JMenuItem runGC = new JMenuItem("Run garbage collector");
 	    runGC.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent ee) {
 		  statusMessage("Running garbage collector");
