@@ -53,8 +53,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.1 - 10 Dec 1998 - Handles multi-class problems (Len) <br>
- *          1.0 - 5 Dec 1998 - Initial two-class version (Len)
+ * @version $Revision: 1.4 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {
@@ -88,13 +87,13 @@ public class LogitBoost extends DistributionClassifier
   protected int m_WeightThreshold = 100;
 
   /** Debugging mode, gives extra output if true */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
   /** A very small number, below which weights cannot fall */
-  protected static final double k_Small = 2 * Double.MIN_VALUE;
+  protected static final double VERY_SMALL = 2 * Double.MIN_VALUE;
 
   /** A threshold for responses (Friedman suggests between 2 and 4) */
-  protected static final double k_ZMax = 4;
+  protected static final double Z_MAX = 4;
 
   /**
    * Select only instances with weights that contribute to 
@@ -118,36 +117,32 @@ public class LogitBoost extends DistributionClassifier
     }
     double weightMassToSelect = sumOfWeights * quantile;
     int [] sortedIndices = Utils.sort(weights);
-    /*
-    if (b_Debug)
-      System.err.println("quantile:"+quantile
-			 +" sumOfWeights:"+sumOfWeights
-			 +" weightMassToSelect:"+weightMassToSelect);
-			 */
     // Select the instances
     sumOfWeights = 0;
     for (int i = numInstances-1; i >= 0; i--) {
       Instance instance = (Instance)data.instance(sortedIndices[i]).copy();
       trainData.add(instance);
       sumOfWeights += weights[sortedIndices[i]];
-      /*
-      if (b_Debug)
-	System.err.println("Kept instance "+sortedIndices[i]
-			   +" with weight "+weights[sortedIndices[i]]);
-			   */
       if ((sumOfWeights > weightMassToSelect) && 
 	  (i > 0) && 
 	  (weights[sortedIndices[i]] != weights[sortedIndices[i-1]])) {
 	break;
       }
     }
-    if (b_Debug) {
+    if (m_Debug) {
       System.err.println("Selected " + trainData.numInstances()
 			 + " out of " + numInstances);
     }
     return trainData;
   }
 
+  /**
+   * Convert from function responses to probabilities
+   *
+   * @param R an array containing the responses from each function
+   * @param j the class value of interest
+   * @return the probability prediction for j
+   */
   protected double RtoP(double []R, int j) {
 
     double Rcenter = 0;
@@ -159,7 +154,7 @@ public class LogitBoost extends DistributionClassifier
     for (int i = 0; i < R.length; i++) {
       Rsum += Math.exp(R[i] - Rcenter);
     }
-    return Math.exp(R[j]) / Rsum;
+   return Math.exp(R[j]) / Rsum;
   }
 
   // ===============
@@ -181,15 +176,15 @@ public class LogitBoost extends DistributionClassifier
     newVector.addElement(new Option(
 	      "\tMaximum number of boost iterations.\n"
 	      +"\t(default 10)",
-	      "I", 1, "-I"));
+	      "I", 1, "-I <num>"));
     newVector.addElement(new Option(
 	      "\tPercentage of weight mass to base training on.\n"
 	      +"\t(default 100, reduce to around 90 speed up)",
-	      "P", 1, "-P"));
+	      "P", 1, "-P <percent>"));
     newVector.addElement(new Option(
 	      "\tFull name of 'weak' learner to boost.\n"
-	      +"\teg: weka.classifiers.NaiveBayes",
-	      "W", 1, "-W"));
+	      +"\teg: weka.classifiers.DecisionStump",
+	      "W", 1, "-W <learner class name>"));
 
     if ((m_ClassifierExample != null) &&
 	(m_ClassifierExample instanceof OptionHandler)) {
@@ -301,7 +296,8 @@ public class LogitBoost extends DistributionClassifier
 
 
   /**
-   * Set the 'weak' learner for boosting. 
+   * Set the 'weak' learner for boosting. The learner should be able to
+   * handle numeric class attributes.
    *
    * @param learnerName the full class name of the learner to boost
    * @exception Exception if learnerName is not a valid class name
@@ -339,6 +335,8 @@ public class LogitBoost extends DistributionClassifier
 
   /**
    * Set the maximum number of boost iterations
+   *
+   * @param maxIterations the maximum number of boost iterations
    */
   public void setMaxIterations(int maxIterations) {
 
@@ -383,7 +381,7 @@ public class LogitBoost extends DistributionClassifier
    */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
 
   /**
@@ -393,7 +391,7 @@ public class LogitBoost extends DistributionClassifier
    */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
 
@@ -419,7 +417,7 @@ public class LogitBoost extends DistributionClassifier
     if (data.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
-    if (b_Debug) {
+    if (m_Debug) {
       System.err.println("Creating copy of the training data");
     }
 
@@ -431,7 +429,7 @@ public class LogitBoost extends DistributionClassifier
     // Temporarily unset the class index
     boostData.setClassIndex(-1);
     boostData.deleteAttributeAt(classIndex);
-    boostData.insertAttributeAt(new Attribute("pseudo class"), classIndex);
+    boostData.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
     boostData.setClassIndex(classIndex);
     double [][] trainFs = new double [numInstances][m_NumClasses];
     double [][] trainYs = new double [numInstances][m_NumClasses];
@@ -441,7 +439,7 @@ public class LogitBoost extends DistributionClassifier
 	trainYs[i][j] = (data.instance(k).classValue() == j) ? 1 : 0;
       }
     }
-    if (b_Debug) {
+    if (m_Debug) {
       System.err.println("Creating base classifiers");
     }
     // Create the base classifiers
@@ -454,7 +452,7 @@ public class LogitBoost extends DistributionClassifier
     }
     // Set the options for the classifiers
     if (m_ClassifierExample instanceof OptionHandler) {
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("Setting classifier options");
       }
       for (int j = 0; j < m_NumClasses; j++) {
@@ -470,12 +468,12 @@ public class LogitBoost extends DistributionClassifier
     // Do boostrap iterations
     for (m_NumIterations = 0; m_NumIterations < getMaxIterations(); 
 	 m_NumIterations++) {
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("Training classifier " + (m_NumIterations + 1));
       }
       
       for (int j = 0; j < m_NumClasses; j++) {
-	if (b_Debug) {
+	if (m_Debug) {
 	  System.err.println("\t...for class " + (j + 1));
 	}
 	// Set instance pseudoclass and weights
@@ -485,18 +483,18 @@ public class LogitBoost extends DistributionClassifier
 	  double z, actual = trainYs[i][j];
 	  if (actual == 1) {
 	    z = 1.0 / p;
-	    if (z > k_ZMax) { // threshold
-	      z = k_ZMax;
+	    if (z > Z_MAX) { // threshold
+	      z = Z_MAX;
 	    }
 	  } else if (actual == 0) {
 	    z = -1.0 / (1.0 - p);
-	    if (z < -k_ZMax) { // threshold
-	      z = -k_ZMax;
+	    if (z < -Z_MAX) { // threshold
+	      z = -Z_MAX;
 	    }
 	  } else {
 	    z = (actual - p) / (p * (1 - p));
 	  }
-	  double w = Math.max(p * (1 - p), k_Small);
+	  double w = Math.max(p * (1 - p), VERY_SMALL);
 	  current.setValue(classIndex, z);
 	  current.setWeight(numInstances * w);
 	}
@@ -537,7 +535,6 @@ public class LogitBoost extends DistributionClassifier
    * @exception Exception if instance could not be classified
    * successfully
    */
-
   public double classifyInstance(Instance instance) throws Exception {
 
     return (double)Utils.maxIndex(distributionForInstance(instance));
@@ -596,7 +593,7 @@ public class LogitBoost extends DistributionClassifier
 		      + m_Classifiers[j][i].toString() + "\n");
 	}
       }
-      text.append("Number of performed Iterations: " +
+      text.append("Number of performed iterations: " +
 		    m_NumIterations + "\n");
     }
     
