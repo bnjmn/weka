@@ -50,7 +50,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
 */
 public class Instances implements Serializable {
  
@@ -205,7 +205,7 @@ public class Instances implements Serializable {
    */
   public final void add(Instance instance) {
 
-    Instance newInstance = new Instance(instance);
+    Instance newInstance = (Instance)instance.copy();
 
     newInstance.setDataset(this);
     m_Instances.addElement(newInstance);
@@ -1260,27 +1260,144 @@ public class Instances implements Serializable {
   protected boolean getInstance(StreamTokenizer tokenizer, 
 				boolean flag) 
        throws IOException {
-
-    double[] instance;
-    int index;
     
     // Check if any attributes have been declared.
     if (m_Attributes.size() == 0) {
       errms(tokenizer,"no header information available");
     }
+
+    // Check if end of file reached.
+    getFirstToken(tokenizer);
+    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
+      return false;
+    }
     
-    // Reserve space for new instance.
-    instance = new double [numAttributes()];
+    // Parse instance
+    if (tokenizer.ttype == '{') {
+      return getInstanceSparse(tokenizer, flag);
+    } else {
+      return getInstanceFull(tokenizer, flag);
+    }
+  }
+
+  /**
+   * Reads a single instance using the tokenizer and appends it
+   * to the dataset. Automatically expands the dataset if it
+   * is not large enough to hold the instance.
+   *
+   * @param tokenizer the tokenizer to be used
+   * @param flag if method should test for carriage return after 
+   * each instance
+   * @return false if end of file has been reached
+   * @exception IOException if the information is not read 
+   * successfully
+   */ 
+  protected boolean getInstanceSparse(StreamTokenizer tokenizer, 
+				      boolean flag) 
+       throws IOException {
+
+    double[] values = new double[numAttributes()];
+    int[] indices = new int[numAttributes()];
+    int valIndex, numValues = 0, maxIndex = -1;
+    
+    // Get values
+    do {
+      
+      // Get index
+      getIndex(tokenizer);
+      if (tokenizer.ttype == '}') {
+	break;
+      }
+       
+      // Is index valid?
+      try{
+	indices[numValues] = Integer.valueOf(tokenizer.sval).intValue();
+      } catch (NumberFormatException e) {
+	errms(tokenizer,"index number expected");
+      }
+      if (indices[numValues] <= maxIndex) {
+	errms(tokenizer,"indeces have to be ordered");
+      }
+      if ((indices[numValues] < 0) || 
+	  (indices[numValues] >= numAttributes())) {
+	errms(tokenizer,"index out of bounds");
+      }
+      maxIndex = indices[numValues];
+
+      // Get value;
+      getNextToken(tokenizer);
+
+      // Check if value is missing.
+      if  (tokenizer.ttype == '?') {
+	values[numValues] = Instance.missingValue();
+      } else {
+
+	// Check if token is valid.
+	if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
+	  errms(tokenizer,"not a valid value");
+	}
+	if (attribute(indices[numValues]).isNominal()) {
+	  
+	  // Check if value appears in header.
+	  valIndex = 
+	    attribute(indices[numValues]).indexOfValue(tokenizer.sval);
+	  if (valIndex == -1) {
+	    errms(tokenizer,"nominal value not declared in header");
+	  }
+	  values[numValues] = (double)valIndex;
+	} else if (attribute(indices[numValues]).isNumeric()) {
+	  
+	  // Check if value is really a number.
+	  try{
+	    values[numValues] = Double.valueOf(tokenizer.sval).
+	      doubleValue();
+	  } catch (NumberFormatException e) {
+	    errms(tokenizer,"number expected");
+	  }
+	} else { 
+	  values[numValues] = 
+	    attribute(indices[numValues]).addStringValue(tokenizer.sval);
+	}
+      }
+      numValues++;
+    } while (true);
+    if (flag) {
+      getLastToken(tokenizer,true);
+    }
+      
+    // Add instance to dataset
+    double[] tempValues = new double[numValues];
+    int[] tempIndices = new int[numValues];
+    System.arraycopy(values, 0, tempValues, 0, numValues);
+    System.arraycopy(indices, 0, tempIndices, 0, numValues);
+    add(new SparseInstance(1, tempValues, tempIndices, numAttributes()));
+    return true;
+  }
+
+  /**
+   * Reads a single instance using the tokenizer and appends it
+   * to the dataset. Automatically expands the dataset if it
+   * is not large enough to hold the instance.
+   *
+   * @param tokenizer the tokenizer to be used
+   * @param flag if method should test for carriage return after 
+   * each instance
+   * @return false if end of file has been reached
+   * @exception IOException if the information is not read 
+   * successfully
+   */ 
+  protected boolean getInstanceFull(StreamTokenizer tokenizer, 
+				    boolean flag) 
+       throws IOException {
+
+    double[] instance = new double[numAttributes()];
+    int index;
     
     // Get values for all attributes.
     for (int i = 0; i < numAttributes(); i++){
       
-      // Check if end of file reached.
-      if (i == 0) {
-	getFirstToken(tokenizer);
-	if (tokenizer.ttype == StreamTokenizer.TT_EOF)
-	  return false;
-      } else {
+      // Get next token
+      if (i > 0) {
 	getNextToken(tokenizer);
       }
             
@@ -1480,6 +1597,22 @@ public class Instances implements Serializable {
     } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
 	       (tokenizer.sval.equals("?"))){
       tokenizer.ttype = '?';
+    }
+  }
+
+  /**
+   * Gets index, checking for a premature and of line.
+   *
+   * @param tokenizer the stream tokenizer
+   * @exception IOException if it finds a premature end of line
+   */
+  private void getIndex(StreamTokenizer tokenizer) throws IOException{
+    
+    if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
+      errms(tokenizer,"premature end of line");
+    }
+    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
+      errms(tokenizer,"premature end of file");
     }
   }
   
@@ -1696,18 +1829,7 @@ public class Instances implements Serializable {
 				     first.numInstances());
     // Merge each instance
     for (int i = 0; i < first.numInstances(); i++) {
-      Instance mergedInst = new Instance(merged.numAttributes());
-      Instance firstInst = first.instance(i);
-      Instance secondInst = second.instance(i);
-      
-      int m = 0;
-      for (int j = 0; j < first.numAttributes(); j++, m++) {
-	mergedInst.setValue(m, firstInst.value(j));
-      }
-      for (int j = 0; j < second.numAttributes(); j++, m++) {
-	mergedInst.setValue(m, secondInst.value(j));
-      }
-      merged.add(mergedInst);
+      merged.add(first.instance(i).mergeInstance(second.instance(i)));
     }
     return merged;
   }

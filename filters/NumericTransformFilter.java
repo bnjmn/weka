@@ -44,7 +44,7 @@ import weka.core.*;
  * Name of the method used for the transformation.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -130,7 +130,11 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
 	}
       }
     }
-    push(new Instance(instance.weight(), vals));
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), vals));
+    } else {
+      push(new Instance(instance.weight(), vals));
+    }
    
     return true;
   }

@@ -6,7 +6,8 @@ SOURCES = Attribute.java Instance.java Instances.java Utils.java \
 	Tag.java SelectedTag.java \
 	FastVector.java Copyable.java Queue.java Range.java \
 	WeightedInstancesHandler.java CheckOptionHandler.java \
-	Drawable.java Matchable.java Summarizable.java AttributeStats.java
+	Drawable.java Matchable.java Summarizable.java AttributeStats.java \
+	SparseInstance.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 

@@ -46,7 +46,7 @@ import weka.core.*;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -191,8 +191,7 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     }
 
     Instances outputFormat = outputFormatPeek();
-    Instance newInstance = new Instance(outputFormat.
-					numAttributes());
+    double[] vals = new double[outputFormat.numAttributes()];
     boolean inRange = false;
     double lastVal = Instance.missingValue();
     int i, j;
@@ -200,20 +199,23 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
       if (m_DeltaCols.isInRange(i)) {
 	if (inRange) {
 	  if (Instance.isMissingValue(lastVal) || instance.isMissing(i)) {
-	    newInstance.setMissing(j++);
+	    vals[j++] = Instance.missingValue();
 	  } else {
-	    newInstance.setValue(j++, instance.value(i) - lastVal);
+	    vals[j++] = instance.value(i) - lastVal;
 	  }
 	} else {
 	  inRange = true;
 	}
 	lastVal = instance.value(i);
       } else {
-	newInstance.setValue(j++, instance.value(i));
+	vals[j++] = instance.value(i);
       }
-     }
-    newInstance.setWeight(instance.weight());
-    push(newInstance);
+    }
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), vals));
+    } else {
+      push(new Instance(instance.weight(), vals));
+    }
     return true;
   }
 

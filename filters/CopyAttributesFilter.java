@@ -40,7 +40,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CopyAttributesFilter extends Filter implements OptionHandler {
 
@@ -177,19 +177,20 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
 
-    Instances outputFormat = outputFormatPeek();
-    Instance newInstance = new Instance(outputFormat.
-					numAttributes());
+    double[] vals = new double[outputFormatPeek().numAttributes()];
     for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
-      newInstance.setValue(i, instance.value(i));
+      vals[i] = instance.value(i);
     }
     int j = m_InputFormat.numAttributes();
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
-      newInstance.setValue(i + j, instance.value(current));
+      vals[i + j] = instance.value(current);
     }
-    newInstance.setWeight(instance.weight());
-    push(newInstance);
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), vals));
+    } else {
+      push(new Instance(instance.weight(), vals));
+    }
     return true;
   }
 

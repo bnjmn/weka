@@ -58,25 +58,25 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 */
 public class Instance implements Copyable, Serializable {
   
   /** Constant representing a missing value. */
-  private final static double MISSING_VALUE = Double.NaN;
+  protected final static double MISSING_VALUE = Double.NaN;
 
   /** 
    * The dataset the instance has access to.  Null if the instance
    * doesn't have access to any dataset.  Only if an instance has
    * access to a dataset, it knows about the actual attribute types.  
    */
-  private Instances m_Dataset;
+  protected Instances m_Dataset;
 
   /** The instance's attribute values. */
-  private double[] m_AttValues;
+  protected double[] m_AttValues;
 
   /** The instance's weight. */
-  private double m_Weight;
+  protected double m_Weight;
 
   /**
    * Constructor that copies the attribute values and the weight from
@@ -140,6 +140,23 @@ public class Instance implements Copyable, Serializable {
       throw new Exception("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.attribute(index);
+  }
+
+  /**
+   * Returns the attribute with the given index. Does the same
+   * thing as attribute().
+   *
+   * @param indexOfIndex the index of the attribute's index 
+   * @return the attribute at the given position
+   * @exception Exception if instance doesn't have access to a
+   * dataset
+   */ 
+  public Attribute attributeSparse(int indexOfIndex) throws Exception {
+   
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
+    return m_Dataset.attribute(indexOfIndex);
   }
 
   /**
@@ -210,7 +227,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the shallow copy
    */
-  public final Object copy() {
+  public Object copy() {
 
     return new Instance(this);
   }
@@ -280,6 +297,18 @@ public class Instance implements Copyable, Serializable {
   }
 
   /**
+   * Returns the index of the attribute stored at the given position.
+   * Just returns the given value.
+   *
+   * @param position the position 
+   * @return the index of the attribute stored at the given position
+   */
+  public int index(int position) {
+
+    return position;
+  }
+
+  /**
    * Inserts an attribute at the given position (0 to 
    * numAttributes()). Only succeeds if the instance does not
    * have access to any dataset because otherwise inconsistencies
@@ -308,9 +337,23 @@ public class Instance implements Copyable, Serializable {
    *
    * @param attIndex the attribute's index
    */
-  public final boolean isMissing(int attIndex) {
+  public boolean isMissing(int attIndex) {
 
     if (Double.isNaN(m_AttValues[attIndex])) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Tests if a specific value is "missing". Does
+   * the same thing as isMissing() if applied to an Instance.
+   *
+   * @param indexOfIndex the index of the attribute's index 
+   */
+  public final boolean isMissingSparse(int indexOfIndex) {
+
+    if (Double.isNaN(m_AttValues[indexOfIndex])) {
       return true;
     }
     return false;
@@ -339,6 +382,27 @@ public class Instance implements Copyable, Serializable {
   }
 
   /**
+   * Merges this instance with the given instance and returns
+   * the result. Dataset is set to null.
+   *
+   * @param inst the instance to be merged with this one
+   * @return the merged instances
+   */
+  public Instance mergeInstance(Instance inst) {
+
+    Instance newInstance = new Instance(numAttributes() + 
+					inst.numAttributes());
+    int m = 0;
+    for (int j = 0; j < numAttributes(); j++, m++) {
+      newInstance.setValue(m, value(j));
+    }
+    for (int j = 0; j < inst.numAttributes(); j++, m++) {
+      newInstance.setValue(m, inst.value(j));
+    }
+    return newInstance;
+  }
+
+  /**
    * Returns the double that codes "missing".
    *
    * @return the double that codes "missing"
@@ -353,7 +417,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the number of attributes as an integer
    */
-  public final int numAttributes() {
+  public int numAttributes() {
 
     return m_AttValues.length;
   }
@@ -374,16 +438,26 @@ public class Instance implements Copyable, Serializable {
     return m_Dataset.numClasses();
   }
 
+  /**
+   * Returns the number of present. Always the same as numAttributes().
+   *
+   * @return the number of values
+   */
+  public int numValues() {
+
+    return m_AttValues.length;
+  }
+
   /** 
-   * Replaces all missing values in the instance with the modes 
-   * and means contained in the given array. A deep copy of
+   * Replaces all missing values in the instance with the
+   * values contained in the given array. A deep copy of
    * the vector of attribute values is performed before the
    * values are replaced.
    *
    * @param array containing the means and modes
    * @exception Exception if numbers of attributes are unequal
    */
-  public final void replaceMissingValues(double[] array) 
+  public void replaceMissingValues(double[] array) 
        throws Exception {
 	 
     if ((array == null) || 
@@ -411,7 +485,6 @@ public class Instance implements Copyable, Serializable {
     if (classIndex() < 0) {
       throw new Exception("Class is not set!");
     }
-    freshAttributeVector();
     setMissing(classIndex());
   }
 
@@ -431,8 +504,7 @@ public class Instance implements Copyable, Serializable {
     if (classIndex() < 0) {
       throw new Exception("Class is not set!");
     }
-    freshAttributeVector();
-    m_AttValues[classIndex()] = value;
+    setValue(classIndex(), value);
   }
 
   /**
@@ -477,8 +549,7 @@ public class Instance implements Copyable, Serializable {
    */
   public final void setMissing(int attIndex) {
 
-    freshAttributeVector();
-    m_AttValues[attIndex] = MISSING_VALUE;
+    setValue(attIndex, MISSING_VALUE);
   }
 
   /**
@@ -503,10 +574,27 @@ public class Instance implements Copyable, Serializable {
    * attribute is nominal (or a string) then this is the new value's
    * index as a double).  
    */
-  public final void setValue(int attIndex, double value) {
+  public void setValue(int attIndex, double value) {
     
     freshAttributeVector();
     m_AttValues[attIndex] = value;
+  }
+
+  /**
+   * Sets a specific value in the instance to the given value 
+   * (internal floating-point format). Performs a deep copy
+   * of the vector of attribute values before the value is set.
+   * Does exactly the same thing as setValue().
+   *
+   * @param indexOfIndex the index of the attribute's index 
+   * @param value the new attribute value (If the corresponding
+   * attribute is nominal (or a string) then this is the new value's
+   * index as a double).  
+   */
+  public void setValueSparse(int indexOfIndex, double value) {
+    
+    freshAttributeVector();
+    m_AttValues[indexOfIndex] = value;
   }
 
   /**
@@ -542,8 +630,7 @@ public class Instance implements Copyable, Serializable {
 	valIndex = attribute(attIndex).indexOfValue(value);
       }
     }
-    freshAttributeVector();
-    m_AttValues[attIndex] = (double)valIndex;
+    setValue(attIndex, (double)valIndex); 
   }
 
   /**
@@ -561,8 +648,7 @@ public class Instance implements Copyable, Serializable {
    */
   public final void setValue(Attribute att, double value) {
 
-    freshAttributeVector();
-    m_AttValues[att.index()] = (double)value;
+    setValue(att.index(), value);
   }
 
   /**
@@ -594,8 +680,7 @@ public class Instance implements Copyable, Serializable {
 	valIndex = att.indexOfValue(value);
       }
     }
-    freshAttributeVector();
-    m_AttValues[att.index()] = (double)valIndex;
+    setValue(att.index(), (double)valIndex);
   }
 
   /**
@@ -628,7 +713,7 @@ public class Instance implements Copyable, Serializable {
       throw new Exception("Attribute neither nominal nor string!");
     }
     return m_Dataset.attribute(attIndex).
-      value((int) m_AttValues[attIndex]);
+      value((int) value(attIndex));
   }
 
   /** 
@@ -647,6 +732,19 @@ public class Instance implements Copyable, Serializable {
   }
 
   /**
+   * Returns the values of each attribute as an array of doubles.
+   *
+   * @return an array containing all the instance attribute values
+   */
+  public double[] toDoubleArray() {
+
+    double[] newValues = new double[m_AttValues.length];
+    System.arraycopy(m_AttValues, 0, newValues, 0, 
+		     m_AttValues.length);
+    return newValues;
+  }
+
+  /**
    * Returns the description of one instance. If the instance
    * doesn't have access to a dataset, it returns the internal
    * floating-point values. Quotes string
@@ -654,7 +752,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the instance's description as a string
    */
-  public final String toString() {
+  public String toString() {
 
     StringBuffer text = new StringBuffer();
     
@@ -694,7 +792,7 @@ public class Instance implements Copyable, Serializable {
 	   throw new Error("This should never happen!");
 	 }
        } else {
-	 text.append(Utils.doubleToString(m_AttValues[attIndex],6));
+	 text.append(Utils.doubleToString(value(attIndex),6));
        }
      }
    }
@@ -725,10 +823,24 @@ public class Instance implements Copyable, Serializable {
    * attribute is nominal (or a string) then it returns the value's index as a 
    * double).
    */
-  public final double value(int attIndex) {
+  public double value(int attIndex) {
 
     return m_AttValues[attIndex];
   }
+
+  /**
+   * Returns an instance's attribute value in internal format.
+   * Does exactly the same thing as value() if applied to an Instance.
+   *
+   * @param indexOfIndex the index of the attribute's index
+   * @return the specified value as a double (If the corresponding
+   * attribute is nominal (or a string) then it returns the value's index as a 
+   * double).
+   */
+  public final double valueSparse(int indexOfIndex) {
+
+    return m_AttValues[indexOfIndex];
+  }  
 
   /**
    * Returns an instance's attribute value in internal format.
@@ -741,7 +853,7 @@ public class Instance implements Copyable, Serializable {
    */
   public final double value(Attribute att) {
 
-    return m_AttValues[att.index()];
+    return value(att.index());
   }
 
   /**
@@ -749,7 +861,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the instance's weight as a double
    */
-  public final double weight(){
+  public final double weight() {
 
     return m_Weight;
   }
@@ -761,7 +873,7 @@ public class Instance implements Copyable, Serializable {
    * @param pos the attribute's position
    */
 
-  final void forceDeleteAttributeAt(int position) {
+  void forceDeleteAttributeAt(int position) {
 
     double[] newValues = new double[m_AttValues.length - 1];
 
@@ -776,11 +888,11 @@ public class Instance implements Copyable, Serializable {
 
   /**
    * Inserts an attribute at the given position
-   *
    * (0 to numAttributes()) and sets its value to be missing. 
+   *
    * @param pos the attribute's position
    */
-  final void forceInsertAttributeAt(int position)  {
+  void forceInsertAttributeAt(int position)  {
 
     double[] newValues = new double[m_AttValues.length + 1];
 
@@ -792,25 +904,18 @@ public class Instance implements Copyable, Serializable {
   }
 
   /**
+   * Private constructor for subclasses. Does nothing.
+   */
+  protected Instance() {
+  }
+
+  /**
    * Clones the attribute vector of the instance and
    * overwrites it with the clone.
    */
   private void freshAttributeVector() {
 
     m_AttValues = toDoubleArray();
-  }
-
-  /**
-   * Returns the values of each attribute as an array of doubles.
-   *
-   * @return an array containing all the instance attribute values
-   */
-  public final double []toDoubleArray() {
-
-    double[] newValues = new double[m_AttValues.length];
-    System.arraycopy(m_AttValues, 0, newValues, 0, 
-		     m_AttValues.length);
-    return newValues;
   }
 
   /**

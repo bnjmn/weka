@@ -77,7 +77,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
@@ -227,10 +227,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   /** The training data. */
   private Instances m_data;
 
-  /** Compressed instances for fast dot products. */
-  private int m_compressIndex[][];
-  private double m_compressValue[][];
-
   /** Weight vector for linear machine. */
   private double[] m_weights;
 
@@ -259,6 +255,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
   /** The filter used to normalize all values. */
   private NormalizationFilter m_Normalization;
+
+  /** The filter used to get rid of missing values. */
+  private ReplaceMissingValuesFilter m_Missing;
 
   /** Counts the number of kernel evaluations. */
   private int m_kernelEvals;
@@ -316,11 +315,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       }
     }
 
-    if (!m_onlyNumeric) {
-      m_NominalToBinary = new NominalToBinaryFilter();
-      m_NominalToBinary.inputFormat(m_data);
-      m_data = Filter.useFilter(m_data, m_NominalToBinary);
-    }
+    m_Missing = new ReplaceMissingValuesFilter();
+    m_Missing.inputFormat(m_data);
+    m_data = Filter.useFilter(m_data, m_Missing); 
 
     if (!m_dontNormalize) {
       m_Normalization = new NormalizationFilter();
@@ -328,11 +325,10 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       m_data = Filter.useFilter(m_data, m_Normalization); 
     }
 
-    m_ModesAndMeans = new double[m_data.numAttributes()];
-    for (int i = 0; i < m_data.numAttributes(); i++) {
-      if (i != m_data.classIndex()) {
-	m_ModesAndMeans[i] = m_data.meanOrMode(i);
-      }
+    if (!m_onlyNumeric) {
+      m_NominalToBinary = new NominalToBinaryFilter();
+      m_NominalToBinary.inputFormat(m_data);
+      m_data = Filter.useFilter(m_data, m_NominalToBinary);
     }
     
     // Randomize the data set
@@ -343,37 +339,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     if (m_exponent == 1.0) {
       m_weights = new double[m_data.numAttributes()];
     }
-
-    // Build compressed representations of the instance
-    // vectors for fast dot products
-    m_compressIndex = new int[m_data.numInstances()+1][];
-    m_compressValue = new double[m_data.numInstances()+1][];
-    
-    for (int i = 0; i < m_data.numInstances(); i++) {
-      int[] tempCompressIndex = new int[m_data.numAttributes()];
-      double[] tempCompressValue = new double[m_data.numAttributes()];
-      int k = 0;
-      
-      for (int j = 0; j < m_data.numAttributes(); j++) {
-	if (j != m_data.classIndex()) {
-	  if (m_data.instance(i).isMissing(j)) {
-	    tempCompressIndex[k] = j;
-	    tempCompressValue[k] = m_ModesAndMeans[j];
-	    k++;
-	  } else if (m_data.instance(i).value(j) != 0.0) {
-	    tempCompressIndex[k] = j;
-	    tempCompressValue[k] = m_data.instance(i).value(j);
-	    k++;
-	  }
-	}
-      }
-      
-      m_compressIndex[i] = new int[k];
-      m_compressValue[i] = new double[k];
-      
-      System.arraycopy(tempCompressIndex, 0, m_compressIndex[i], 0, k);
-      System.arraycopy(tempCompressValue, 0, m_compressValue[i], 0, k);
-    }	
 
     // Set class values
     m_class = new double[m_data.numInstances()];
@@ -407,9 +372,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     m_I2 = new SMOset(m_data.numInstances());
     m_I3 = new SMOset(m_data.numInstances());
     m_I4 = new SMOset(m_data.numInstances());
-
-    // Save memory
-    m_data = new Instances(m_data, 0);
 
     // The kernel calculations are cached
     m_storage = new double[m_cacheSize];
@@ -476,8 +438,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
     // If machine is linear, delete training data
     if (m_exponent == 1.0) {
-      m_compressIndex = new int[1][];
-      m_compressValue = new double[1][];
+      m_data = new Instances(m_data, 0);
     }
   }
   
@@ -485,22 +446,25 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    * Computes SVM output for given instance.
    *
    * @param index the instance for which output is to be computed
+   * @param inst the instance 
    * @return the output of the SVM for the given instance
    */
-  private double SVMOutput(int index) throws Exception {
+  private double SVMOutput(int index, Instance inst) throws Exception {
 
     double result = 0;
 
     // Is the machine linear?
     if (m_exponent == 1.0) {
-      for (int p = 0; p < m_compressIndex[index].length; p++) {
-	result += m_weights[m_compressIndex[index][p]] * 
-	  m_compressValue[index][p];
+      int n1 = inst.numValues(); int classIndex = m_data.classIndex();
+      for (int p = 0; p < n1; p++) {
+	if (inst.index(p) != classIndex) {
+	  result += m_weights[inst.index(p)] * inst.valueSparse(p);
+	}
       }
     } else {
       for (int i = m_supportVectors.getNext(-1); i != -1; 
 	   i = m_supportVectors.getNext(i)) {
-	result += m_class[i] * m_alpha[i] * kernel(index, i);
+	result += m_class[i] * m_alpha[i] * kernel(index, i, inst);
       }
     }
     result -= m_b;
@@ -520,50 +484,21 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   public double[] distributionForInstance(Instance inst) throws Exception {
 
     // Filter instance
-    if (!m_onlyNumeric) {
-      m_NominalToBinary.input(inst);
-      inst = m_NominalToBinary.output();
-    }
+    m_Missing.input(inst);
+    inst = m_Missing.output();
     
     if (!m_dontNormalize) {
       m_Normalization.input(inst);
       inst = m_Normalization.output();
     }
 
-    // Put the compressed test instance at the end of the training data 
-    // for speed
-    int[] tempCompressIndex = new int[m_data.numAttributes()];
-    double[] tempCompressValue = new double[m_data.numAttributes()];
-    
-    int k = 0;
-    for (int j = 0; j < inst.numAttributes(); j++) {
-      if (j != inst.classIndex()) {
-	if (inst.isMissing(j)) {
-	  tempCompressIndex[k] = j;
-	  tempCompressValue[k] = m_ModesAndMeans[j];
-	  k++;
-	} else if (inst.value(j) != 0.0) {
-	  tempCompressIndex[k] = j;
-	  tempCompressValue[k] = inst.value(j);
-	  k++;
-	}
-      }
+    if (!m_onlyNumeric) {
+      m_NominalToBinary.input(inst);
+      inst = m_NominalToBinary.output();
     }
-      
-    int index;
-    if (m_exponent == 1.0) {
-      index = 0;
-    } else {
-      index = m_alpha.length;
-    }
-    m_compressIndex[index] = new int[k];
-    m_compressValue[index] = new double[k];
-    
-    System.arraycopy(tempCompressIndex, 0, m_compressIndex[index], 0, k);
-    System.arraycopy(tempCompressValue, 0, m_compressValue[index], 0, k);
 
     // Get probabilities
-    double output = SVMOutput(index);
+    double output = SVMOutput(-1, inst);
     double[] result = new double[2];
     result[1] = 1.0 / (1.0 + Math.exp(-output));
     result[0] = 1.0 - result[1];
@@ -967,38 +902,40 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    *
    * @param id1 the index of the first instance
    * @param id2 the index of the second instance
+   * @param inst the instance corresponding to id1
    * @return the result of the kernel function
    */
-  private double kernel(int id1, int id2 ) throws Exception {
+  private double kernel(int id1, int id2, Instance inst1) throws Exception {
 
     double result = 0;
     int key = -1, location = -1;
 
-    // we can't cache if we don't know the indexes
-    if (id1 < m_alpha.length && id2 < m_alpha.length ) {
-      
+    // we can only cache if we know the indexes
+    if (id1 >= 0) {
       if (id1 > id2) {
 	key = id1 * m_alpha.length + id2;
       } else {
 	key = id2 * m_alpha.length + id1;
       }
       location = key % m_keys.length;
-       if (m_keys[location] == (key + 1)) {
+      if (m_keys[location] == (key + 1)) {
 	return m_storage[location];
       }
     }
 	
     // we can do a fast dot product
-    int length1 = m_compressIndex[id1].length;
-    int length2 = m_compressIndex[id2].length;
-    
-    for (int p1 = 0, p2 = 0; p1 < length1 && p2 < length2;) {
-      if (m_compressIndex[id1][p1] == m_compressIndex[id2][p2]) {
-	result += m_compressValue[id1][p1] * 
-	  m_compressValue[id2][p2];
-	p1++;
-	p2++;
-      } else if (m_compressIndex[id1][p1] > m_compressIndex[id2][p2]) {
+    Instance inst2 = m_data.instance(id2);
+    int n1 = inst1.numValues(); int n2 = inst2.numValues();
+    int classIndex = m_data.classIndex();
+    for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
+      int ind1 = inst1.index(p1); 
+      int ind2 = inst2.index(p2);
+      if (ind1 == ind2) {
+	if (ind1 != classIndex) {
+	  result += inst1.valueSparse(p1) * inst2.valueSparse(p2);
+	}
+	p1++; p2++;
+      } else if (ind1 > ind2) {
 	p2++;
       } else { 
 	p1++;
@@ -1045,7 +982,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     if (m_I0.contains(i2)) {
       F2 = m_errors[i2];
     } else {
-      F2 = SVMOutput(i2) + m_b - y2;
+      F2 = SVMOutput(i2, m_data.instance(i2)) + m_b - y2;
       m_errors[i2] = F2;
       
       // Update thresholds
@@ -1126,9 +1063,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
 
     // Compute second derivative of objective function
-    k11 = kernel(i1, i1);
-    k12 = kernel(i1, i2);
-    k22 = kernel(i2, i2);
+    k11 = kernel(i1, i1, m_data.instance(i1));
+    k12 = kernel(i1, i2, m_data.instance(i1));
+    k22 = kernel(i2, i2, m_data.instance(i2));
     eta = 2 * k12 - k11 - k22;
 
     // Check if second derivative is negative
@@ -1146,8 +1083,8 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     } else {
 
       // Look at endpoints of diagonal
-      f1 = SVMOutput(i1);
-      f2 = SVMOutput(i2);
+      f1 = SVMOutput(i1, m_data.instance(i1));
+      f2 = SVMOutput(i2, m_data.instance(i2));
       v1 = f1 + m_b - y1 * alph1 * k11 - y2 * alph2 * k12; 
       v2 = f2 + m_b - y1 * alph1 * k12 - y2 * alph2 * k22; 
       double gamma = alph1 + s * alph2;
@@ -1174,13 +1111,19 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     
     // Update weight vector to reflect change a1 and a2, if linear SVM
     if (m_exponent == 1.0) {
-      for (int p1 = 0; p1 < m_compressIndex[i1].length; p1++) {
-	  m_weights[m_compressIndex[i1][p1]] += 
-	    y1 * (a1 - alph1) * m_compressValue[i1][p1];
+      Instance inst1 = m_data.instance(i1);
+      for (int p1 = 0; p1 < inst1.numValues(); p1++) {
+	if (inst1.index(p1) != m_data.classIndex()) {
+	  m_weights[inst1.index(p1)] += 
+	    y1 * (a1 - alph1) * inst1.valueSparse(p1);
+	}
       }
-      for (int p2 = 0; p2 < m_compressIndex[i2].length; p2++) {
-	  m_weights[m_compressIndex[i2][p2]] += 
-	    y2 * (a2 - alph2) * m_compressValue[i2][p2];
+      Instance inst2 = m_data.instance(i2);
+      for (int p2 = 0; p2 < inst2.numValues(); p2++) {
+	if (inst2.index(p2) != m_data.classIndex()) {
+	  m_weights[inst2.index(p2)] += 
+	    y2 * (a2 - alph2) * inst2.valueSparse(p2);
+	}
       }
     }
 
@@ -1188,8 +1131,8 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
       if ((j != i1) && (j != i2)) {
 	m_errors[j] += 
-	  y1 * (a1 - alph1) * kernel(i1, j) + 
-	  y2 * (a2 - alph2) * kernel(i2, j);
+	  y1 * (a1 - alph1) * kernel(i1, j, m_data.instance(i1)) + 
+	  y2 * (a2 - alph2) * kernel(i2, j, m_data.instance(i2));
       }
     }
 
@@ -1308,7 +1251,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     System.err.println("Sum of y(i) * alpha(i): " + sum);
 
     for (int i = 0; i < m_alpha.length; i++) {
-      double output = SVMOutput(i);
+      double output = SVMOutput(i, m_data.instance(i));
       if (Utils.eq(m_alpha[i], 0)) {
 	if (Utils.sm(m_class[i] * output, 1)) {
 	  System.err.println("KKT condition 1 violated: " + m_class[i] * output);

@@ -111,7 +111,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.27 $
+ * @version  $Revision: 1.28 $
   */
 public class Evaluation implements Summarizable {
 
@@ -897,9 +897,9 @@ public class Evaluation implements Summarizable {
    * successfully or the data contains string attributes
    */
   public double evaluateModelOnce(Classifier classifier,
-				Instance instance) throws Exception {
+				  Instance instance) throws Exception {
   
-    Instance classMissing = new Instance(instance);				  
+    Instance classMissing = (Instance)instance.copy();
     double pred=0;
     classMissing.setDataset(instance.dataset());
     classMissing.setClassMissing();
@@ -1873,7 +1873,7 @@ public class Evaluation implements Summarizable {
       int i = 0;
       while (test.readInstance(testReader)) {
 	Instance instance = test.instance(0);    
-	Instance withMissing = new Instance(instance);
+	Instance withMissing = (Instance)instance.copy();
 	withMissing.setDataset(test);
 	double predValue = 
 	  ((Classifier)classifier).classifyInstance(withMissing);

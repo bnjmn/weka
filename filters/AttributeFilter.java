@@ -36,7 +36,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -180,7 +180,11 @@ public class AttributeFilter extends Filter implements OptionHandler {
       int current = m_SelectedAttributes[i];
       newVals[i] = instance.value(current);
     }
-    push(new Instance(instance.weight(), newVals));
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), newVals));
+    } else {
+      push(new Instance(instance.weight(), newVals));
+    }
     return true;
   }
 

@@ -41,7 +41,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -212,16 +212,9 @@ public class AddFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
 
-    double [] newVals = new double[outputFormatPeek().numAttributes()];
-    // Copy the existing values over
-    int i, j;
-    for(i = 0, j = 0; i < m_InputFormat.numAttributes(); i++, j++) {
-      if (i == m_Insert) {
-	j++;
-      }
-      newVals[j] = instance.value(i);
-    }
-    push(new Instance(instance.weight(), newVals));
+    Instance inst = (Instance)instance.copy();
+    inst.insertAttributeAt(m_Insert);
+    push(inst);
     return true;
   }
 
@@ -295,6 +288,7 @@ public class AddFilter extends Filter implements OptionHandler {
    * @param attributeIndex the insertion index (-1 means last)
    */
   public void setAttributeIndex(int attributeIndex) {
+
     m_Insert = attributeIndex;
   }
 

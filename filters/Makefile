@@ -10,7 +10,8 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	TimeSeriesTranslateFilter.java RandomizeFilter.java \
 	AttributeSelectionFilter.java NormalizationFilter.java \
 	ResampleFilter.java AttributeTypeFilter.java \
-	StringToNominalFilter.java ObfuscateFilter.java
+	StringToNominalFilter.java ObfuscateFilter.java \
+	NonsparseToSparseFilter.java
 
 # Filters To Do:
 # TimeSeriesSmoothFilter.java    -- replace attribute values with values

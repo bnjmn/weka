@@ -58,7 +58,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
@@ -597,7 +597,7 @@ public class LogitBoost extends DistributionClassifier
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
 
-    instance = new Instance(instance);
+    instance = (Instance)instance.copy();
     instance.setDataset(m_NumericClassData);
     double [] Fs = new double [m_NumClasses]; 
     for (int i = 0; i < m_NumIterations; i++) {

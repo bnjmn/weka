@@ -56,7 +56,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -1159,7 +1159,11 @@ public class DiscretizeFilter extends Filter
       }
     }
     
-    push(new Instance(instance.weight(), newVals));
+    if (instance instanceof SparseInstance) {
+      push(new SparseInstance(instance.weight(), newVals));
+    } else {
+      push(new Instance(instance.weight(), newVals));
+    }
   }
 
   /**

@@ -52,7 +52,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -318,7 +318,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
       // Convert pending input instances
       for(int i = 0; i < sampleSize; i++) {
         int index = (int) (random.nextDouble() * origSize);
-        push(new Instance(m_InputFormat.instance(index)));
+        push((Instance)m_InputFormat.instance(index).copy());
       }
     } else {
 
@@ -381,7 +381,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
         } else {
           index = (int) (random.nextDouble() * origSize);
         }
-        push(new Instance(m_InputFormat.instance(index)));
+        push((Instance)m_InputFormat.instance(index).copy());
       }
     }
   }
