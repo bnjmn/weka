@@ -24,15 +24,17 @@ import  weka.core.*;
 
 /** 
  * Class for evaluating a attribute ranking (given by a specified
- * attribute evaluator) using a specified subset evaluator. <p>
+ * evaluator) using a specified subset evaluator. <p>
  *
  * Valid options are: <p>
  *
- * -A <attribute evaluator> <br>
- * Specify the attribute evaluator to be used for generating the ranking.<p>
+ * -A <attribute/subset evaluator> <br>
+ * Specify the attribute/subset evaluator to be used for generating the 
+ * ranking. If a subset evaluator is specified then a forward selection
+ * search is used to produce a ranked list of attributes.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RankSearch extends ASSearch implements OptionHandler {
 
@@ -70,11 +72,14 @@ public class RankSearch extends ASSearch implements OptionHandler {
    */
   public String globalInfo() {
     return "RankSearch : \n\n"
-      +"Uses an attribute ranker to rank all attributes. From the ranked\n"
-      +"list of attributes, subsets of increasing size are evaluated, ie.\n"
-      +"The best attribute, the best attribute plus the next best attribute,\n"
-      +"etc.... The best attribute set is reported. RankSearch is linear in\n"
-      +"the number of attributes.\n";
+      +"Uses an attribute/subset evaluator to rank all attributes. "
+      +"If a subset evaluator is specified, then a forward selection "
+      +"search is used to generate a ranked list. From the ranked "
+      +"list of attributes, subsets of increasing size are evaluated, ie. "
+      +"The best attribute, the best attribute plus the next best attribute, "
+      +"etc.... The best attribute set is reported. RankSearch is linear in "
+      +"the number of attributes if a simple attribute evaluator is used "
+      +"such as GainRatioAttributeEval.\n";
   }
 
   public RankSearch () {
@@ -87,7 +92,7 @@ public class RankSearch extends ASSearch implements OptionHandler {
    * displaying in the explorer/experimenter gui
    */
   public String attributeEvaluatorTipText() {
-    return "Attribute evaluator to use for generating a ranking";    
+    return "Attribute evaluator to use for generating a ranking.";    
   }
 
   /**
@@ -231,7 +236,8 @@ public class RankSearch extends ASSearch implements OptionHandler {
     m_Instances = data;
     m_numAttribs = m_Instances.numAttributes();
 
-    if (m_ASEval instanceof UnsupervisedAttributeEvaluator) {
+    if (m_ASEval instanceof UnsupervisedAttributeEvaluator || 
+	m_ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
       if (!(m_SubsetEval instanceof UnsupervisedSubsetEvaluator)) {
 	throw new Exception("Must use an unsupervised subset evaluator.");
@@ -242,10 +248,23 @@ public class RankSearch extends ASSearch implements OptionHandler {
       m_classIndex = m_Instances.classIndex();
     }
 
-    // generate the attribute ranking first
-    Ranker ranker = new Ranker();
-    ((AttributeEvaluator)m_ASEval).buildEvaluator(m_Instances);
-    m_Ranking = ranker.search((AttributeEvaluator)m_ASEval, m_Instances);
+    if (m_ASEval instanceof AttributeEvaluator) {
+      // generate the attribute ranking first
+      Ranker ranker = new Ranker();
+      ((AttributeEvaluator)m_ASEval).buildEvaluator(m_Instances);
+      m_Ranking = ranker.search((AttributeEvaluator)m_ASEval, m_Instances);
+    } else {
+      ForwardSelection fs = new ForwardSelection();
+      double [][]rankres; 
+      fs.setGenerateRanking(true);
+      ((SubsetEvaluator)m_ASEval).buildEvaluator(m_Instances);
+      fs.search(m_ASEval, m_Instances);
+      rankres = fs.rankedAttributes();
+      m_Ranking = new int[rankres.length];
+      for (int i=0;i<rankres.length;i++) {
+	m_Ranking[i] = (int)rankres[i][0];
+      }
+    }
 
     // now evaluate the attribute ranking
     for (int i=0;i<m_Ranking.length;i++) {
