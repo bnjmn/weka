@@ -81,12 +81,12 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ResultsPanel extends JPanel {
 
   /** Message shown when no experimental results have been loaded */
-  protected final static String NO_SOURCE = "No source";
+  protected static final String NO_SOURCE = "No source";
 
   /** Click to load results from a file */
   protected JButton m_FromFileBut = new JButton("File...");
@@ -105,7 +105,7 @@ public class ResultsPanel extends JPanel {
    * is using Swing 1.1.1 or higher just remove this variable and use the
    * no-arg constructor to DefaultComboBoxModel
    */
-  static private String [] FOR_JFC_1_1_DCBM_BUG = {""};
+  private static String [] FOR_JFC_1_1_DCBM_BUG = {""};
 
   /** The model embedded in m_DatasetCombo */
   protected DefaultComboBoxModel m_DatasetModel =

@@ -44,7 +44,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -206,7 +206,7 @@ public class ClassifierPerformanceEvaluator
    * @param request the request to perform
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) throws IllegalArgumentException {
+  public void performRequest(String request) {
     if (request.compareTo("Stop") == 0) {
       stop();
     } else {

@@ -26,12 +26,12 @@ package weka.classifiers.evaluation;
  * Encapsulates performance functions for two-class problems.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class TwoClassStats {
 
   /** The names used when converting this object to a confusion matrix */
-  private final static String [] CATEGORY_NAMES = {"negative", "positive"};
+  private static final String [] CATEGORY_NAMES = {"negative", "positive"};
 
   /** Pos predicted as pos */
   private double m_TruePos;

@@ -133,7 +133,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class JRip extends DistributionClassifier 
   implements OptionHandler, 
@@ -252,7 +252,7 @@ public class JRip extends DistributionClassifier
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
     String numFoldsString = Utils.getOption('F', options);
     if (numFoldsString.length() != 0) 
       m_Folds = Integer.parseInt(numFoldsString);
@@ -807,7 +807,7 @@ public class JRip extends DistributionClassifier
      * @param data the growing data used to build the rule
      * @exception if the consequent is not set yet
      */    
-      public void grow(Instances data) throws Exception{
+      public void grow(Instances data) throws Exception {
       if(m_Consequent == -1)
 	throw new Exception(" Consequent not set yet.");
 	    
@@ -1048,7 +1048,7 @@ public class JRip extends DistributionClassifier
    * @param instances the training data
    * @exception Exception if classifier can't be built successfully
    */
-  public void buildClassifier(Instances instances) throws Exception{
+  public void buildClassifier(Instances instances) throws Exception {
      
       if(instances.numInstances() == 0)
 	  throw new Exception(" No instances with a class value!");
@@ -1205,7 +1205,7 @@ public class JRip extends DistributionClassifier
 					 Instances data, 
 					 double classIndex,
 					 double defDL)
-    throws Exception{
+    throws Exception {
 	
     Instances newData = data, growData, pruneData;  	
     boolean stop = false;

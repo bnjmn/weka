@@ -65,7 +65,7 @@ import weka.classifiers.*;
  *
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -111,7 +111,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) 
-       throws Exception{
+       throws Exception {
 
     ModelSelection modSelection;	 
 
@@ -276,7 +276,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
     
     // Other options
     String minNumString = Utils.getOption('M', options);

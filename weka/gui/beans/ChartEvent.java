@@ -29,7 +29,7 @@ import java.util.Vector;
  * Event encapsulating info for plotting a data point on the StripChart
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ChartEvent extends EventObject {
   private Vector m_legendText;

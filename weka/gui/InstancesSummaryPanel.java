@@ -48,12 +48,12 @@ import javax.swing.SwingConstants;
  * attributes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class InstancesSummaryPanel extends JPanel {
 
   /** Message shown when no instances have been loaded */
-  protected final static String NO_SOURCE = "None";
+  protected static final String NO_SOURCE = "None";
 
   /** Displays the name of the relation */
   protected JLabel m_RelationNameLab = new JLabel(NO_SOURCE);

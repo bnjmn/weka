@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.19 $
+ * @version  $Revision: 1.20 $
  */
 public class ClusterEvaluation {
 
@@ -482,8 +482,7 @@ public class ClusterEvaluation {
    */
   public static String evaluateClusterer (Clusterer clusterer, 
 					  String[] options)
-    throws Exception
-  {
+    throws Exception {
     int seed = 1, folds = 10;
     boolean doXval = false;
     Instances train = null;
@@ -706,8 +705,7 @@ public class ClusterEvaluation {
 					   Instances data, 
 					   int numFolds, 
 					   String[] options)
-    throws Exception
-  {
+    throws Exception {
     Clusterer clusterer = null;
     Instances train, test;
     String[] savedOptions = null;
@@ -800,8 +798,7 @@ public class ClusterEvaluation {
    */
   private static String printClusterStats (Clusterer clusterer, 
 					   String fileName)
-    throws Exception
-  {
+    throws Exception {
     StringBuffer text = new StringBuffer();
     int i = 0;
     int cnum;
@@ -909,8 +906,7 @@ public class ClusterEvaluation {
    */
   private static String printClusterings (Clusterer clusterer, Instances train,
 					  String testFileName, Range attributesToOutput)
-    throws Exception
-  {
+    throws Exception {
     StringBuffer text = new StringBuffer();
     int i = 0;
     int cnum;

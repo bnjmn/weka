@@ -27,11 +27,11 @@ import java.text.FieldPosition;
 
 public class ExponentialFormat extends DecimalFormat {
     
-  protected  DecimalFormat nf ;
-  protected  boolean sign;
-  protected  int digits;
-  protected  int exp;
-  protected  boolean trailing = true;
+  protected DecimalFormat nf ;
+  protected boolean sign;
+  protected int digits;
+  protected int exp;
+  protected boolean trailing = true;
 
   public ExponentialFormat () {
     this( 5 );

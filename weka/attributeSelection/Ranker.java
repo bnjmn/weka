@@ -40,7 +40,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -277,8 +277,7 @@ public class Ranker extends ASSearch
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
 
@@ -376,8 +375,7 @@ public class Ranker extends ASSearch
    * @exception Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
-    throws Exception
-  {
+    throws Exception {
     int i, j;
 
     if (!(ASEval instanceof AttributeEvaluator)) {
@@ -465,8 +463,7 @@ public class Ranker extends ASSearch
    * @exception Exception of sorting can't be done.
    */
   public double[][] rankedAttributes ()
-    throws Exception
-  {
+    throws Exception {
     int i, j;
 
     if (m_attributeList == null || m_attributeMerit == null) {

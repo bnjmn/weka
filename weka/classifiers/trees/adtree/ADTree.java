@@ -54,7 +54,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ADTree
   extends DistributionClassifier implements OptionHandler, Drawable,
@@ -64,10 +64,10 @@ public class ADTree
 {
 
   /** The search modes */
-  public final static int SEARCHPATH_ALL = 0;
-  public final static int SEARCHPATH_HEAVIEST = 1;
-  public final static int SEARCHPATH_ZPURE = 2;
-  public final static int SEARCHPATH_RANDOM = 3;
+  public static final int SEARCHPATH_ALL = 0;
+  public static final int SEARCHPATH_HEAVIEST = 1;
+  public static final int SEARCHPATH_ZPURE = 2;
+  public static final int SEARCHPATH_RANDOM = 3;
   public static final Tag [] TAGS_SEARCHPATH = {
     new Tag(SEARCHPATH_ALL, "Expand all paths"),
     new Tag(SEARCHPATH_HEAVIEST, "Expand the heaviest path"),
@@ -305,8 +305,7 @@ public class ADTree
    */
   private void searchForBestTestSingle(PredictionNode currentNode,
 				       Instances posInstances, Instances negInstances)
-    throws Exception
-  {
+    throws Exception {
 
     // don't investigate pure or empty nodes any further
     if (posInstances.numInstances() == 0 || negInstances.numInstances() == 0) return;
@@ -367,8 +366,7 @@ public class ADTree
    */
   private void goDownAllPathsSingle(PredictionNode currentNode,
 				    Instances posInstances, Instances negInstances)
-    throws Exception
-  {
+    throws Exception {
 
     for (Enumeration e = currentNode.children(); e.hasMoreElements(); ) {
       Splitter split = (Splitter) e.nextElement();
@@ -390,8 +388,7 @@ public class ADTree
    */
   private void goDownHeaviestPathSingle(PredictionNode currentNode,
 					Instances posInstances, Instances negInstances)
-    throws Exception
-  {
+    throws Exception {
 
     Splitter heaviestSplit = null;
     int heaviestBranch = 0;
@@ -428,8 +425,7 @@ public class ADTree
    */
   private void goDownZpurePathSingle(PredictionNode currentNode,
 				     Instances posInstances, Instances negInstances)
-    throws Exception
-  {
+    throws Exception {
 
     double lowestZpure = m_search_smallestZ; // do z-pure cutoff
     PredictionNode bestPath = null;
@@ -514,8 +510,7 @@ public class ADTree
   private void evaluateNumericSplitSingle(int attIndex, PredictionNode currentNode,
 					  Instances posInstances, Instances negInstances,
 					  Instances allInstances)
-    throws Exception
-  {
+    throws Exception {
     
     double[] splitAndZ = findLowestZNumericSplit(allInstances, attIndex);
 
@@ -657,8 +652,7 @@ public class ADTree
    * Z-value of the split
    */
   private double[] findLowestZNumericSplit(Instances instances, int attIndex)
-    throws Exception
-  {
+    throws Exception {
     
     double splitPoint = 0.0;
     double bestVal = Double.MAX_VALUE, currVal, currCutPoint;
@@ -833,8 +827,7 @@ public class ADTree
    */       
   protected void graphTraverse(PredictionNode currentNode, StringBuffer text,
 			       int splitOrder, int predOrder, Instances instances)
-    throws Exception
-  {
+    throws Exception {
     
     text.append("S" + splitOrder + "P" + predOrder + " [label=\"");
     text.append(Utils.doubleToString(currentNode.getValue(),3));

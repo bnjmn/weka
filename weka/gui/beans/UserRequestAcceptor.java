@@ -29,7 +29,7 @@ import java.util.Enumeration;
  * some action
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public interface UserRequestAcceptor {
@@ -47,5 +47,5 @@ public interface UserRequestAcceptor {
    * @param requestName a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  void performRequest(String requestName) throws IllegalArgumentException;
+  void performRequest(String requestName);
 }

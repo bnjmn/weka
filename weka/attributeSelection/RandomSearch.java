@@ -41,7 +41,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RandomSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -162,8 +162,7 @@ public class RandomSearch extends ASSearch
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
     

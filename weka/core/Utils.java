@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public final class Utils {
 
@@ -64,7 +64,7 @@ public final class Utils {
    * an error occurs reading the properties files.  
    */
   public static Properties readProperties(String resourceName)
-    throws Exception{
+    throws Exception {
 
     Properties defaultProps = new Properties();
     try {
@@ -120,7 +120,7 @@ public final class Utils {
    * @param n the length of two double vectors
    * @return the correlation coefficient
    */
-  public final static double correlation(double y1[],double y2[],int n) {
+  public static final double correlation(double y1[],double y2[],int n) {
 
     int i;
     double av1 = 0.0, av2 = 0.0, y11 = 0.0, y22 = 0.0, y12 = 0.0, c;

@@ -87,23 +87,23 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
 
   /* Type of correction applied to threshold range */ 
-  public final static int RANGE_NONE = 0;
-  public final static int RANGE_BOUNDS = 1;
+  public static final int RANGE_NONE = 0;
+  public static final int RANGE_BOUNDS = 1;
   public static final Tag [] TAGS_RANGE = {
     new Tag(RANGE_NONE, "No range correction"),
     new Tag(RANGE_BOUNDS, "Correct based on min/max observed")
   };
 
   /* The evaluation modes */
-  public final static int EVAL_TRAINING_SET = 2;
-  public final static int EVAL_TUNED_SPLIT = 1;
-  public final static int EVAL_CROSS_VALIDATION = 0;
+  public static final int EVAL_TRAINING_SET = 2;
+  public static final int EVAL_TUNED_SPLIT = 1;
+  public static final int EVAL_CROSS_VALIDATION = 0;
   public static final Tag [] TAGS_EVAL = {
     new Tag(EVAL_TRAINING_SET, "Entire training set"),
     new Tag(EVAL_TUNED_SPLIT, "Single tuned fold"),
@@ -111,11 +111,11 @@ public class ThresholdSelector extends DistributionClassifier
   };
 
   /* How to determine which class value to optimize for */
-  public final static int OPTIMIZE_0     = 0;
-  public final static int OPTIMIZE_1     = 1;
-  public final static int OPTIMIZE_LFREQ = 2;
-  public final static int OPTIMIZE_MFREQ = 3;
-  public final static int OPTIMIZE_POS_NAME = 4;
+  public static final int OPTIMIZE_0     = 0;
+  public static final int OPTIMIZE_1     = 1;
+  public static final int OPTIMIZE_LFREQ = 2;
+  public static final int OPTIMIZE_MFREQ = 3;
+  public static final int OPTIMIZE_POS_NAME = 4;
   public static final Tag [] TAGS_OPTIMIZE = {
     new Tag(OPTIMIZE_0, "First class value"),
     new Tag(OPTIMIZE_1, "Second class value"),
@@ -160,7 +160,7 @@ public class ThresholdSelector extends DistributionClassifier
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
-  protected final static double MIN_VALUE = 0.05;
+  protected static final double MIN_VALUE = 0.05;
 
   /**
    * Collects the classifier predictions using the specified evaluation method.

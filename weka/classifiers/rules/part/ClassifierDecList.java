@@ -33,7 +33,7 @@ import java.io.*;
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ClassifierDecList implements Serializable {
 
@@ -74,7 +74,7 @@ public class ClassifierDecList implements Serializable {
    *
    * @exception Exception if something goes wrong
    */
-  public void buildDecList(Instances data, boolean leaf) throws Exception{
+  public void buildDecList(Instances data, boolean leaf) throws Exception {
     
     Instances [] localInstances,localPruneInstances;
     int index,ind;
@@ -143,7 +143,7 @@ public class ClassifierDecList implements Serializable {
    * @exception Exception if something goes wrong
    */
   public void buildDecList(Instances train, Instances test, 
-			   boolean leaf) throws Exception{
+			   boolean leaf) throws Exception {
     
     Instances [] localTrain,localTest;
     int index,ind;
@@ -314,7 +314,7 @@ public class ClassifierDecList implements Serializable {
    * @exception Exception if something goes wrong
    */
   protected ClassifierDecList getNewDecList(Instances train, boolean leaf) 
-    throws Exception{
+    throws Exception {
 	 
     ClassifierDecList newDecList = new ClassifierDecList(m_toSelectModel);
     newDecList.buildDecList(train,leaf);
@@ -329,7 +329,7 @@ public class ClassifierDecList implements Serializable {
    */
   protected ClassifierDecList getNewDecList(Instances train, Instances test,
 				  boolean leaf) 
-       throws Exception{
+       throws Exception {
 	 
     ClassifierDecList newDecList = new ClassifierDecList(m_toSelectModel);
     newDecList.buildDecList(train, test ,leaf);

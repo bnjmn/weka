@@ -64,12 +64,12 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
   /** The message displayed when no experiment is running */
-  protected final static String NOT_RUNNING = "Not running";
+  protected static final String NOT_RUNNING = "Not running";
 
   /** Click to start running the experiment */
   protected JButton m_StartBut = new JButton("Start");

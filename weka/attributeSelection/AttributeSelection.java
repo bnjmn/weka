@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.29 $
+ * @version  $Revision: 1.30 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -311,8 +311,7 @@ public class AttributeSelection implements Serializable {
    */
   public static String SelectAttributes (ASEvaluation ASEvaluator, 
 					 String[] options)
-    throws Exception
-  {
+    throws Exception {
     String trainFileName, searchName;
     Instances train = null;
     ASSearch searchMethod = null;
@@ -796,8 +795,7 @@ public class AttributeSelection implements Serializable {
   public static String SelectAttributes (ASEvaluation ASEvaluator, 
 					 String[] options, 
 					 Instances train)
-    throws Exception
-  {
+    throws Exception {
     int seed = 1, folds = 10;
     String cutString, foldsString, seedString, searchName;
     String classString;
@@ -1010,8 +1008,7 @@ public class AttributeSelection implements Serializable {
    */
   private static String makeOptionString (ASEvaluation ASEvaluator, 
 					  ASSearch searchMethod)
-    throws Exception
-  {
+    throws Exception {
     StringBuffer optionsText = new StringBuffer("");
     // General options
     optionsText.append("\n\nGeneral options:\n\n");

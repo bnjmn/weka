@@ -42,7 +42,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -104,8 +104,7 @@ public class BestFirst extends ASSearch
      * @param index the index of the element to be removed.
      **/
     public void removeLinkAt (int index)
-      throws Exception
-    {
+      throws Exception {
       if ((index >= 0) && (index < size())) {
         removeElementAt(index);
       }
@@ -120,8 +119,7 @@ public class BestFirst extends ASSearch
      * @param index the index of the element to be returned.
      **/
     public Link2 getLinkAt (int index)
-      throws Exception
-    {
+      throws Exception {
       if (size() == 0) {
         throw  new Exception("List is empty (getLinkAt)");
       }
@@ -141,8 +139,7 @@ public class BestFirst extends ASSearch
      * @param mer the "merit" of this attribute set
      **/
     public void addToList (BitSet gr, double mer)
-      throws Exception
-    {
+      throws Exception {
       Link2 newL = new Link2(gr, mer);
 
       if (size() == 0) {
@@ -302,8 +299,7 @@ public class BestFirst extends ASSearch
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
 
@@ -378,8 +374,7 @@ public class BestFirst extends ASSearch
    * @exception Exception if t is less than 1
    */
   public void setSearchTermination (int t)
-    throws Exception
-  {
+    throws Exception {
     if (t < 1) {
       throw  new Exception("Value of -N must be > 0.");
     }
@@ -552,8 +547,7 @@ public class BestFirst extends ASSearch
    * @exception Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
-    throws Exception
-  {
+    throws Exception {
     m_totalEvals = 0;
     if (!(ASEval instanceof SubsetEvaluator)) {
       throw  new Exception(ASEval.getClass().getName() 

@@ -38,7 +38,7 @@ import java.io.*;
  * load cost matrices from files.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CostMatrixEditor implements PropertyEditor {
 
@@ -421,7 +421,7 @@ public class CostMatrixEditor implements PropertyEditor {
    * @exception always throws an IllegalArgumentException
    */   
   public void setAsText(String text)
-    throws IllegalArgumentException {
+    {
 
     throw new IllegalArgumentException("CostMatrixEditor: "
 				       + "CostMatrix properties cannot be "

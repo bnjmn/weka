@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $ 
+ * @version $Revision: 1.39 $ 
  */
 public class Instances implements Serializable {
  
@@ -1569,7 +1569,7 @@ public class Instances implements Serializable {
    * successfully
    */ 
   protected void readHeader(StreamTokenizer tokenizer) 
-     throws IOException{
+     throws IOException {
     
     String attributeName;
     FastVector attributeValues;
@@ -1728,7 +1728,7 @@ public class Instances implements Serializable {
    * @exception IOException if reading the next token fails
    */
   private void getFirstToken(StreamTokenizer tokenizer) 
-    throws IOException{
+    throws IOException {
     
     while (tokenizer.nextToken() == StreamTokenizer.TT_EOL){};
     if ((tokenizer.ttype == '\'') ||
@@ -1746,7 +1746,7 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    * @exception IOException if it finds a premature end of line
    */
-  private void getIndex(StreamTokenizer tokenizer) throws IOException{
+  private void getIndex(StreamTokenizer tokenizer) throws IOException {
     
     if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
       errms(tokenizer,"premature end of line");
@@ -1763,7 +1763,7 @@ public class Instances implements Serializable {
    * @exception IOException if it doesn't find an end of line
    */
   private void getLastToken(StreamTokenizer tokenizer, boolean endOfFileOk) 
-       throws IOException{
+       throws IOException {
 
     if ((tokenizer.nextToken() != StreamTokenizer.TT_EOL) &&
 	((tokenizer.ttype != StreamTokenizer.TT_EOF) || !endOfFileOk)) {
@@ -1778,7 +1778,7 @@ public class Instances implements Serializable {
    * @exception IOException if it finds a premature end of line
    */
   private void getNextToken(StreamTokenizer tokenizer) 
-       throws IOException{
+       throws IOException {
     
     if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
       errms(tokenizer,"premature end of line");
@@ -1897,7 +1897,7 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    */
   private void readTillEOL(StreamTokenizer tokenizer) 
-       throws IOException{
+       throws IOException {
     
     while (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {};
     tokenizer.pushBack();

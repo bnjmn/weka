@@ -48,7 +48,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class Matrix implements Cloneable, Serializable {
 
@@ -556,7 +556,7 @@ public class Matrix implements Cloneable, Serializable {
    * @return the indices of the row permutation
    * @exception Exception if the matrix is singular 
    */
-  public int [] LUDecomposition() throws Exception{
+  public int [] LUDecomposition() throws Exception {
     
     int nr = m_Elements.length;    // num of rows
     int nc = m_Elements[0].length; // num of columns
@@ -649,7 +649,7 @@ public class Matrix implements Cloneable, Serializable {
    * @param bb first vektor B in above equation then X in same equation.
    * @exception matrix is singulaer
    */
-  public void solve(double [] bb) throws Exception{
+  public void solve(double [] bb) throws Exception {
 
     int nr = m_Elements.length;
     int nc = m_Elements[0].length;
@@ -750,8 +750,7 @@ public class Matrix implements Cloneable, Serializable {
    * @param n size of matrix
    * @exception if reduction doesn't work
    */
-  private void tred2 (double [][] V, double [] d, double [] e, int n) throws Exception
-  {
+  private void tred2 (double [][] V, double [] d, double [] e, int n) throws Exception {
     //  This is derived from the Algol procedures tred2 by
     //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
     //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding

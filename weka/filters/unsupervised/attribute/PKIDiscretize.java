@@ -70,7 +70,7 @@ import weka.core.*;
  *
  * @author Deakin University http://www.cm.deakin.edu.au/webb (webb@deakin.edu.au)
  * @author Richard Kirkby
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PKIDiscretize extends Filter 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {

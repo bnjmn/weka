@@ -103,7 +103,7 @@ import java.util.Vector;
  * Random number seed for random function used (default 1). <p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  **/
 public class BIRCHCluster extends ClusterGenerator
   implements OptionHandler,
@@ -123,11 +123,11 @@ public class BIRCHCluster extends ClusterGenerator
   private double m_MaxRadius = Math.sqrt(2.0);
   
   /**@serial  Constant set for choice of pattern. (option G)*/
-  public final static int GRID = 0;
+  public static final int GRID = 0;
   /**@serial  Constant set for choice of pattern. (option I)*/
-  public final static int SINE = 1;
+  public static final int SINE = 1;
   /**@serial  Constant set for choice of pattern. (default)*/
-  public final static int RANDOM = 2;
+  public static final int RANDOM = 2;
   
   /**@serial pattern (changed with options G or S)*/ 
   private int m_Pattern = RANDOM;
@@ -139,9 +139,9 @@ public class BIRCHCluster extends ClusterGenerator
   private int m_NumCycles = 4;
 
   /**@serial  Constant set for input order (option O)*/
-  public final static int ORDERED = 0;
+  public static final int ORDERED = 0;
   /**@serial  Constant set for input order (default)*/
-  public final static int RANDOMIZED = 1;
+  public static final int RANDOMIZED = 1;
 
   /**@serial input order (changed with option O)*/ 
   private int m_InputOrder = RANDOMIZED;

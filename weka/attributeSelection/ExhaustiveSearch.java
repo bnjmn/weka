@@ -38,7 +38,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ExhaustiveSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -138,8 +138,7 @@ public class ExhaustiveSearch extends ASSearch
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
 

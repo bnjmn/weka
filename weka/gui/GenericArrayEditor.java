@@ -68,7 +68,7 @@ import javax.swing.JOptionPane;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -417,7 +417,7 @@ public class GenericArrayEditor extends JPanel
    * @exception IllegalArgumentException as we don't support
    * getting/setting values as text.
    */
-  public void setAsText(String text) throws IllegalArgumentException {
+  public void setAsText(String text) {
     throw new IllegalArgumentException(text);
   }
 

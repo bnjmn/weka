@@ -31,7 +31,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -97,7 +97,7 @@ public class ClassifierTree implements Drawable, Serializable {
    *
    * @exception Exception if something goes wrong
    */
-  public void buildClassifier(Instances data) throws Exception{
+  public void buildClassifier(Instances data) throws Exception {
 
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
@@ -115,7 +115,7 @@ public class ClassifierTree implements Drawable, Serializable {
    * @param keepData is training data to be kept?
    * @exception Exception if something goes wrong
    */
-  public void buildTree(Instances data, boolean keepData) throws Exception{
+  public void buildTree(Instances data, boolean keepData) throws Exception {
     
     Instances [] localInstances;
 
@@ -153,7 +153,7 @@ public class ClassifierTree implements Drawable, Serializable {
    * @exception Exception if something goes wrong
    */
   public void buildTree(Instances train, Instances test, boolean keepData)
-       throws Exception{
+       throws Exception {
     
     Instances [] localTrain, localTest;
     int i;
@@ -439,7 +439,7 @@ public class ClassifierTree implements Drawable, Serializable {
    * @param data the training data
    * @exception Exception if something goes wrong
    */
-  protected ClassifierTree getNewTree(Instances data) throws Exception{
+  protected ClassifierTree getNewTree(Instances data) throws Exception {
 	 
     ClassifierTree newTree = new ClassifierTree(m_toSelectModel);
     newTree.buildTree(data, false);
@@ -455,7 +455,7 @@ public class ClassifierTree implements Drawable, Serializable {
    * @exception Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances train, Instances test) 
-       throws Exception{
+       throws Exception {
 	 
     ClassifierTree newTree = new ClassifierTree(m_toSelectModel);
     newTree.buildTree(train, test, false);

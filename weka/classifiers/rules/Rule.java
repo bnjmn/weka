@@ -30,7 +30,7 @@ import weka.core.Copyable;
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public abstract class Rule 
@@ -50,7 +50,7 @@ public abstract class Rule
      * @return the boolean value indicating whether the instance 
      *         is covered by this rule
      */
-    abstract public boolean covers(Instance datum);
+    public abstract boolean covers(Instance datum);
 
     /**
      * Build this rule
@@ -58,21 +58,21 @@ public abstract class Rule
      * @param data the data used to build the rule
      * @exception if rule cannot be built
      */    
-    abstract public void grow(Instances data) throws Exception;    
+    public abstract void grow(Instances data) throws Exception;    
 
     /**
      * Whether this rule has antecedents, i.e. whether it is a default rule
      * 
      * @return the boolean value indicating whether the rule has antecedents
      */
-    abstract public boolean hasAntds();   
+    public abstract boolean hasAntds();   
 
     /** 
      * Get the consequent of this rule, i.e. the predicted class 
      * 
      * @return the consequent
      */
-    abstract public double getConsequent(); 
+    public abstract double getConsequent(); 
 
     /** 
      * The size of the rule.  Could be number of antecedents in the case
@@ -80,5 +80,5 @@ public abstract class Rule
      *
      * @return the size of the rule
      */
-    abstract public double size(); 
+    public abstract double size(); 
 }

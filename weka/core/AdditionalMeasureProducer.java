@@ -29,7 +29,7 @@ import java.util.*;
  * calculated by evaluation modules. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public interface AdditionalMeasureProducer {
 
@@ -47,5 +47,5 @@ public interface AdditionalMeasureProducer {
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
    */
-  double getMeasure(String measureName) throws IllegalArgumentException;
+  double getMeasure(String measureName);
 }

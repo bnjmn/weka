@@ -46,7 +46,7 @@ import  weka.filters.Filter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -171,8 +171,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * @exception Exception if an option is not supported
    */
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     resetOptions();
     String optionString;
 

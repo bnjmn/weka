@@ -40,7 +40,7 @@ import javax.swing.JLabel;
  * weka.core.SelectedTag object.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SelectedTagEditor extends PropertyEditorSupport {
 
@@ -86,7 +86,7 @@ public class SelectedTagEditor extends PropertyEditorSupport {
    * @exception java.lang.IllegalArgumentException if an error occurs
    */
   public void setAsText(String text)
-    throws java.lang.IllegalArgumentException {
+    {
 
     SelectedTag s = (SelectedTag)getValue();
     Tag [] tags = s.getTags();

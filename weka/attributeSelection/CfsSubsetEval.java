@@ -46,7 +46,7 @@ import  weka.filters.Filter;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -128,8 +128,7 @@ public class CfsSubsetEval
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
     setMissingSeperate(Utils.getFlag('M', options));
@@ -235,8 +234,7 @@ public class CfsSubsetEval
    * generated successfully
    */
   public void buildEvaluator (Instances data)
-    throws Exception
-  {
+    throws Exception {
     if (data.checkForStringAttributes()) {
       throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
@@ -280,8 +278,7 @@ public class CfsSubsetEval
    * @exception Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset)
-    throws Exception
-  {
+    throws Exception {
     double num = 0.0;
     double denom = 0.0;
     double corr;
@@ -968,8 +965,7 @@ public class CfsSubsetEval
    * @exception Exception if postprocessing fails for some reason
    */
   public int[] postProcess (int[] attributeSet)
-    throws Exception
-  {
+    throws Exception {
     int j = 0;
 
     if (!m_locallyPredictive) {

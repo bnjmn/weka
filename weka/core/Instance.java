@@ -62,12 +62,12 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class Instance implements Copyable, Serializable {
   
   /** Constant representing a missing value. */
-  protected final static double MISSING_VALUE = Double.NaN;
+  protected static final double MISSING_VALUE = Double.NaN;
 
   /** 
    * The dataset the instance has access to.  Null if the instance

@@ -18,7 +18,7 @@ import weka.filters.unsupervised.attribute.TimeSeriesTranslateTest;
  * java weka.filters.TimeSeriesTranslateFilterTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
 
@@ -28,7 +28,7 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
   public AbstractTimeSeriesFilterTest(String name) { super(name);  }
 
   /** Creates a default TimeSeriesTranslateFilter */
-  abstract public Filter getFilter();
+  public abstract Filter getFilter();
 
   public void testDefault() {
     testInstanceRange_X(((TimeSeriesTranslate)m_Filter).getInstanceRange());

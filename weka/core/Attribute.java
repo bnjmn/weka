@@ -74,33 +74,33 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class Attribute implements Copyable, Serializable {
 
   /** Constant set for numeric attributes. */
-  public final static int NUMERIC = 0;
+  public static final int NUMERIC = 0;
 
   /** Constant set for nominal attributes. */
-  public final static int NOMINAL = 1;
+  public static final int NOMINAL = 1;
 
   /** Constant set for attributes with string values. */
-  public final static int STRING = 2;
+  public static final int STRING = 2;
 
   /** Constant set for attributes with date values. */
-  public final static int DATE = 3;
+  public static final int DATE = 3;
 
   /** Constant set for symbolic attributes. */
-  public final static int ORDERING_SYMBOLIC = 0;
+  public static final int ORDERING_SYMBOLIC = 0;
 
   /** Constant set for ordered attributes. */
-  public final static int ORDERING_ORDERED  = 1;
+  public static final int ORDERING_ORDERED  = 1;
 
   /** Constant set for modulo-ordered attributes. */
-  public final static int ORDERING_MODULO   = 2;
+  public static final int ORDERING_MODULO   = 2;
 
   /** Strings longer than this will be stored compressed. */
-  private final static int STRING_COMPRESS_THRESHOLD = 200;
+  private static final int STRING_COMPRESS_THRESHOLD = 200;
 
   /** The attribute's name. */
   private String m_Name;

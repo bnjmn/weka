@@ -29,7 +29,7 @@ import weka.core.*;
  * Abstract attribute selection search class.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class ASSearch implements Serializable {
 
@@ -62,8 +62,7 @@ public abstract class ASSearch implements Serializable {
    * supplied are not acceptable to the search class.
    */
   public static ASSearch forName(String searchName,
-				 String [] options) throws Exception
-  {
+				 String [] options) throws Exception {
     return (ASSearch)Utils.forName(ASSearch.class,
 				   searchName,
 				   options);

@@ -36,7 +36,7 @@ import  weka.filters.Filter;
  * No options. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator
@@ -82,8 +82,7 @@ public class OneRAttributeEval
    * generated successfully
    */
   public void buildEvaluator (Instances data)
-    throws Exception
-  {
+    throws Exception {
     m_trainInstances = data;
 
     if (m_trainInstances.checkForStringAttributes()) {
@@ -116,8 +115,7 @@ public class OneRAttributeEval
    * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
-    throws Exception
-  {
+    throws Exception {
     int[] featArray = new int[2]; // feat + class
     double errorRate;
     Evaluation o_Evaluation;

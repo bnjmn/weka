@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ */
+ * @version $Revision: 1.14 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -444,7 +444,7 @@ public class Apriori extends Associator implements OptionHandler {
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported 
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
     
     resetOptions();
     String numRulesString = Utils.getOption('N', options),

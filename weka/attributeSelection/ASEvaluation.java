@@ -33,7 +33,7 @@ import weka.core.Utils;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public abstract class ASEvaluation implements Serializable {
@@ -61,8 +61,7 @@ public abstract class ASEvaluation implements Serializable {
    * @exception Exception if postprocessing fails for some reason
    */
   public int [] postProcess(int [] attributeSet) 
-    throws Exception
-  {
+    throws Exception {
     return attributeSet;
   }
 
@@ -81,8 +80,7 @@ public abstract class ASEvaluation implements Serializable {
    * supplied are not acceptable to the evaluator
    */
   public static ASEvaluation forName(String evaluatorName,
-				     String [] options) throws Exception
-  {
+				     String [] options) throws Exception {
     return (ASEvaluation)Utils.forName(ASEvaluation.class,
 				       evaluatorName,
 				       options);

@@ -31,7 +31,7 @@ import weka.core.*;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class ClassifierSplitModel implements Cloneable, Serializable {
 
@@ -60,7 +60,7 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
    *
    * @exception Exception if something goes wrong
    */
-  abstract public void buildClassifier(Instances instances) throws Exception;
+  public abstract void buildClassifier(Instances instances) throws Exception;
   
   /**
    * Checks if generated model is valid.
@@ -159,12 +159,12 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
    *
    * @param data the data.
    */
-  abstract public String leftSide(Instances data);
+  public abstract String leftSide(Instances data);
 
   /**
    * Prints left side of condition satisfied by instances in subset index.
    */
-  abstract public String rightSide(int index,Instances data);
+  public abstract String rightSide(int index,Instances data);
 
   /**
    * Prints label for subset index of instances (eg class).
@@ -269,7 +269,7 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
    * Returns weights if instance is assigned to more than one subset.
    * Returns null if instance is only assigned to one subset.
    */
-  abstract public double [] weights(Instance instance);
+  public abstract double [] weights(Instance instance);
   
   /**
    * Returns index of subset instance is assigned to.
@@ -277,7 +277,7 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
    *
    * @exception Exception if something goes wrong
    */
-  abstract public int whichSubset(Instance instance) throws Exception;
+  public abstract int whichSubset(Instance instance) throws Exception;
 }
 
 

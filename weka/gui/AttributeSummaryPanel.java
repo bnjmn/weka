@@ -57,12 +57,12 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AttributeSummaryPanel extends JPanel {
 
   /** Message shown when no instances have been loaded and no attribute set */
-  protected final static String NO_SOURCE = "None";
+  protected static final String NO_SOURCE = "None";
 
   /** Displays the name of the relation */
   protected JLabel m_AttributeNameLab = new JLabel(NO_SOURCE);

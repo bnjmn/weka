@@ -38,18 +38,18 @@ import weka.classifiers.DistributionClassifier;
  * "positive".
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class CostCurve {
 
   /** The name of the relation used in cost curve datasets */
-  public final static String RELATION_NAME = "CostCurve";
+  public static final String RELATION_NAME = "CostCurve";
 
-  public final static String PROB_COST_FUNC_NAME = "Probability Cost Function";
-  public final static String NORM_EXPECTED_COST_NAME = 
+  public static final String PROB_COST_FUNC_NAME = "Probability Cost Function";
+  public static final String NORM_EXPECTED_COST_NAME = 
     "Normalized Expected Cost";
-  public final static String THRESHOLD_NAME = "Threshold";
+  public static final String THRESHOLD_NAME = "Threshold";
 
   /**
    * Calculates the performance stats for the default class and return 

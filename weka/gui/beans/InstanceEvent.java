@@ -29,13 +29,13 @@ import weka.core.Instance;
  * Event that encapsulates a single instance
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see EventObject
  */
 public class InstanceEvent extends EventObject {
-  public final static int FORMAT_AVAILABLE = 0;
-  public final static int INSTANCE_AVAILABLE = 1;
-  public final static int BATCH_FINISHED = 2;
+  public static final int FORMAT_AVAILABLE = 0;
+  public static final int INSTANCE_AVAILABLE = 1;
+  public static final int BATCH_FINISHED = 2;
   
   private Instance m_instance;
   private int m_status;

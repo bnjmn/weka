@@ -38,7 +38,7 @@ import  weka.core.*;
  * search is used to produce a ranked list of attributes.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RankSearch extends ASSearch implements OptionHandler {
 
@@ -158,8 +158,7 @@ public class RankSearch extends ASSearch implements OptionHandler {
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
     optionString = Utils.getOption('A', options);

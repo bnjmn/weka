@@ -30,7 +30,7 @@ import java.util.*;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PruneableClassifierTree extends ClassifierTree{
 
@@ -54,7 +54,7 @@ public class PruneableClassifierTree extends ClassifierTree{
    */
   public PruneableClassifierTree(ModelSelection toSelectLocModel,
 				 boolean pruneTree, int num, boolean cleanup)
-       throws Exception{
+       throws Exception {
 
     super(toSelectLocModel);
 
@@ -69,7 +69,7 @@ public class PruneableClassifierTree extends ClassifierTree{
    * @exception Exception if tree can't be built successfully
    */
   public void buildClassifier(Instances data) 
-       throws Exception{
+       throws Exception {
 
    if (data.classAttribute().isNumeric())
       throw new Exception("Class is numeric!");
@@ -119,7 +119,7 @@ public class PruneableClassifierTree extends ClassifierTree{
    * @param data and selection method for local models.
    */
   protected ClassifierTree getNewTree(Instances train, Instances test) 
-       throws Exception{
+       throws Exception {
 
     PruneableClassifierTree newTree = 
       new PruneableClassifierTree(m_toSelectModel, pruneTheTree, numSets, m_cleanup);

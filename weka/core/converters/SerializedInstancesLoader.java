@@ -36,7 +36,7 @@ import weka.core.Instances;
  * Reads a source that contains serialized Instances.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Loader
  */
 public class SerializedInstancesLoader extends AbstractLoader 

@@ -54,7 +54,7 @@ import  weka.filters.Filter;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -168,8 +168,7 @@ public class WrapperSubsetEval
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
     optionString = Utils.getOption('B', options);
@@ -378,8 +377,7 @@ public class WrapperSubsetEval
    * generated successfully
    */
   public void buildEvaluator (Instances data)
-    throws Exception
-  {
+    throws Exception {
     if (data.checkForStringAttributes()) {
       throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
@@ -399,8 +397,7 @@ public class WrapperSubsetEval
    * @exception Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset)
-    throws Exception
-  {
+    throws Exception {
     double errorRate = 0;
     double[] repError = new double[5];
     boolean ok = true;

@@ -35,7 +35,7 @@ import java.io.*;
  * the data models of the two instances exactly the same), is low. 
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class EuclideanDistance extends DistanceFunction
                                implements 
@@ -184,7 +184,7 @@ public class EuclideanDistance extends DistanceFunction
    * @return the distance between the two given attribute values
    */
   private double difference(int index, double val1, double val2) 
-    throws Exception{
+    throws Exception {
     
     // If attribute is numeric
     if (Instance.isMissingValue(val1) || 
