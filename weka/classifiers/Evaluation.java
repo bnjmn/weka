@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.40 $
+ * @version  $Revision: 1.41 $
   */
 public class Evaluation implements Summarizable {
 
@@ -525,6 +525,8 @@ public class Evaluation implements Summarizable {
     CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
     Range attributesToOutput = null;
+    long trainTimeStart = 0, trainTimeElapsed = 0,
+      testTimeStart = 0, testTimeElapsed = 0;
     
     try {
 
@@ -686,6 +688,7 @@ public class Evaluation implements Summarizable {
       // Build classifier incrementally
       trainingEvaluation.setPriors(train);
       testingEvaluation.setPriors(train);
+      trainTimeStart = System.currentTimeMillis();
       if (objectInputFileName.length() == 0) {
 	classifier.buildClassifier(train);
       }
@@ -697,6 +700,7 @@ public class Evaluation implements Summarizable {
 	  updateClassifier(train.instance(0));
 	train.delete(0);
       }
+      trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
       trainReader.close();
     } else if (objectInputFileName.length() == 0) {
       
@@ -704,7 +708,9 @@ public class Evaluation implements Summarizable {
       tempTrain = new Instances(train);
       trainingEvaluation.setPriors(tempTrain);
       testingEvaluation.setPriors(tempTrain);
+      trainTimeStart = System.currentTimeMillis();
       classifier.buildClassifier(tempTrain);
+      trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
     } 
 
     // Save the classifier if an object output file is provided
@@ -772,6 +778,7 @@ public class Evaluation implements Summarizable {
 	} else {
 	  train.setClassIndex(train.numAttributes() - 1);
 	}
+	testTimeStart = System.currentTimeMillis();
 	while (train.readInstance(trainReader)) {
 
 	  trainingEvaluation.
@@ -779,16 +786,25 @@ public class Evaluation implements Summarizable {
 			    train.instance(0));
 	  train.delete(0);
 	}
+	testTimeElapsed = System.currentTimeMillis() - testTimeStart;
 	trainReader.close();
       } else {
+	testTimeStart = System.currentTimeMillis();
 	trainingEvaluation.evaluateModel(classifier, 
 					 train);
+	testTimeElapsed = System.currentTimeMillis() - testTimeStart;
       }
 
       // Print the results of the training evaluation
       if (printMargins) {
 	return trainingEvaluation.toCumulativeMarginDistributionString();
       } else {
+	text.append("\nTime taken to build model: " +
+		    Utils.doubleToString(trainTimeElapsed / 1000.0,2) +
+		    " seconds");
+	text.append("\nTime taken to test model on training data: " +
+		    Utils.doubleToString(testTimeElapsed / 1000.0,2) +
+		    " seconds");
 	text.append(trainingEvaluation.
 		    toSummaryString("\n\n=== Error on training" + 
 				    " data ===\n", printComplexityStatistics));
@@ -798,6 +814,7 @@ public class Evaluation implements Summarizable {
 	  }
 	  text.append("\n\n" + trainingEvaluation.toMatrixString());
 	}
+	
       }
     }
 
@@ -812,6 +829,7 @@ public class Evaluation implements Summarizable {
 	test.delete(0);
       }
       testReader.close();
+
       text.append("\n\n" + testingEvaluation.
 		  toSummaryString("=== Error on test data ===\n",
 				  printComplexityStatistics));
@@ -822,7 +840,7 @@ public class Evaluation implements Summarizable {
       random.setSeed(seed);
       train.randomize(random);
       testingEvaluation.
-      crossValidateModel(classifier, train, folds);
+	crossValidateModel(classifier, train, folds);
       if (template.classAttribute().isNumeric()) {
 	text.append("\n\n\n" + testingEvaluation.
 		    toSummaryString("=== Cross-validation ===\n",
