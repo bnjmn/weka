@@ -34,6 +34,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.WeightedInstancesHandler;
+import weka.core.AdditionalMeasureProducer;
 import weka.core.Option;
 import weka.core.Utils;
 import weka.core.Randomizable;
@@ -60,14 +61,19 @@ import weka.core.UnsupportedAttributeTypeException;
  * -P num <br>
  * Size of each bag, as a percentage of the training size (default 100). <p>
  *
+ * -O <br>
+ * Compute out of bag error. <p>
+ *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.22 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.23 $
  */
 public class Bagging extends DistributionClassifier 
-  implements OptionHandler, WeightedInstancesHandler, Randomizable {
+  implements OptionHandler, WeightedInstancesHandler, Randomizable,
+	     AdditionalMeasureProducer {
 
   /** The model base classifier to use */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -83,6 +89,12 @@ public class Bagging extends DistributionClassifier
 
   /** The size of each bag sample, as a percentage of the training size */
   protected int m_BagSizePercent = 100;
+
+  /** Whether to calculate the out of bag error */
+  protected boolean m_CalcOutOfBag = false;
+
+  /** The out of bag error that has been calculated */
+  protected double m_OutOfBagError;  
 
   /**
    * Returns an enumeration describing the available options.
@@ -109,6 +121,9 @@ public class Bagging extends DistributionClassifier
               "\tSize of each bag, as a percentage of the\n" 
               + "\ttraining set size. (default 100)",
               "P", 1, "-P"));
+    newVector.addElement(new Option(
+              "\tCalculate the out of bag error.",
+              "O", 0, "-O"));
 
     if ((m_Classifier != null) &&
 	(m_Classifier instanceof OptionHandler)) {
@@ -140,6 +155,9 @@ public class Bagging extends DistributionClassifier
    *
    * -P num <br>
    * Size of each bag, as a percentage of the training size (default 100). <p>
+   *
+   * -O <br>
+   * Compute out of bag error. <p>
    *
    * Options after -- are passed to the designated classifier.<p>
    *
@@ -174,6 +192,9 @@ public class Bagging extends DistributionClassifier
       throw new Exception("A classifier must be specified with"
 			  + " the -W option.");
     }
+
+    setCalcOutOfBag(Utils.getFlag('O', options));
+
     setClassifier(Classifier.forName(classifierName,
 				     Utils.partitionOptions(options)));
   }
@@ -190,7 +211,7 @@ public class Bagging extends DistributionClassifier
 	(m_Classifier instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
-    String [] options = new String [classifierOptions.length + 9];
+    String [] options = new String [classifierOptions.length + 10];
     int current = 0;
     options[current++] = "-S"; options[current++] = "" + getSeed();
     options[current++] = "-I"; options[current++] = "" + getNumIterations();
@@ -200,6 +221,9 @@ public class Bagging extends DistributionClassifier
       options[current++] = "-W";
       options[current++] = getClassifier().getClass().getName();
     }
+
+    if (getCalcOutOfBag()) options[current++] = "-O";
+
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
 		     classifierOptions.length);
@@ -290,6 +314,65 @@ public class Bagging extends DistributionClassifier
   }
 
   /**
+   * Set whether the out of bag error is calculated.
+   *
+   * @param calcOutOfBag whether to calculate the out of bag error
+   */
+  public void setCalcOutOfBag(boolean calcOutOfBag) {
+
+    m_CalcOutOfBag = calcOutOfBag;
+  }
+
+  /**
+   * Get whether the out of bag error is calculated.
+   *
+   * @return whether the out of bag error is calculated
+   */
+  public boolean getCalcOutOfBag() {
+
+    return m_CalcOutOfBag;
+  }
+
+  /**
+   * Gets the out of bag error that was calculated as the classifier was built.
+   *
+   * @return the out of bag error
+   */
+  public double measureOutOfBagError() {
+    
+    return m_OutOfBagError;
+  }
+  
+  /**
+   * Returns an enumeration of the additional measure names.
+   *
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    
+    Vector newVector = new Vector(1);
+    newVector.addElement("measureOutOfBagError");
+    return newVector.elements();
+  }
+  
+  /**
+   * Returns the value of the named measure.
+   *
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception IllegalArgumentException if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) {
+    
+    if (additionalMeasureName.equals("measureOutOfBagError")) {
+      return measureOutOfBagError();
+    }
+    else {throw new IllegalArgumentException(additionalMeasureName 
+					     + " not supported (Bagging)");
+    }
+  }
+
+  /**
    * Bagging method.
    *
    * @param data the training data to be used for generating the
@@ -304,22 +387,59 @@ public class Bagging extends DistributionClassifier
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
+    double outOfBagCount = 0.0;
+    double errorSum = 0.0;
+
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
 
     int bagSize = data.numInstances() * m_BagSizePercent / 100;
     Random random = new Random(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {
-      Instances bagData = data.resampleWithWeights(random);
-      if (bagSize < data.numInstances()) {
-	bagData.randomize(random);
-	Instances newBagData = new Instances(bagData, 0, bagSize);
-	bagData = newBagData;
+      Instances bagData = null;
+      boolean[] inBag = null;
+      // create the in-bag dataset
+      if (m_CalcOutOfBag) {
+	inBag = new boolean[data.numInstances()];
+	bagData = new Instances(data, bagSize);
+	while (bagData.numInstances() < bagSize) {
+	  int i = random.nextInt(data.numInstances());
+	  bagData.add(data.instance(i));
+	  inBag[i] = true;
+	}
+      } else {
+	bagData = data.resampleWithWeights(random);
+	if (bagSize < data.numInstances()) {
+	  bagData.randomize(random);
+	  Instances newBagData = new Instances(bagData, 0, bagSize);
+	  bagData = newBagData;
+	}
       }
       if (m_Classifier instanceof Randomizable) {
 	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
       }
+      // build the classifier
       m_Classifiers[j].buildClassifier(bagData);
+      if (m_CalcOutOfBag) {
+	// calculate out of bag error
+	for (int i=0; i<inBag.length; i++) {  
+	  if (!inBag[i]) {
+	    Instance outOfBagInst = data.instance(i);
+	    outOfBagCount++;
+	    if (data.classAttribute().isNumeric()) {
+	      errorSum +=
+		Math.abs(m_Classifiers[j].classifyInstance(outOfBagInst)
+			 - outOfBagInst.classValue());
+	    } else {
+	      if (m_Classifiers[j].classifyInstance(outOfBagInst)
+		  != outOfBagInst.classValue()) {
+		errorSum++;
+	      }
+	    }
+	  }
+	}
+      }
     }
+    m_OutOfBagError = errorSum / outOfBagCount;
   }
 
   /**
@@ -371,6 +491,12 @@ public class Bagging extends DistributionClassifier
     for (int i = 0; i < m_Classifiers.length; i++)
       text.append(m_Classifiers[i].toString() + "\n\n");
     
+    if (m_CalcOutOfBag) {
+      text.append("Out of bag error: "
+		  + Utils.doubleToString(m_OutOfBagError, 4)
+		  + "\n\n");
+    }
+
     return text.toString();
   }
 
