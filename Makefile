@@ -1,5 +1,5 @@
 #
-# $Revision: 1.8 $
+# $Revision: 1.9 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -63,6 +63,7 @@ doc :
 	weka.experiment \
 	weka.gui \
 	weka.gui.experiment \
+	weka.gui.explorer \
 	weka.gui.streams; \
 	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
 	< doc/packages.html > packages_temp.html; \
@@ -118,6 +119,7 @@ install : all
 	weka.experiment \
 	weka.gui \
 	weka.gui.experiment \
+	weka.gui.explorer \
 	weka.gui.streams;
 	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
 	< $$JAWSHOME/doc/packages.html > $$JAWSHOME/packages_temp.html; \
