@@ -65,7 +65,7 @@ import weka.core.*;
  * The ridge parameter (default 1.0e-8) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -467,7 +467,9 @@ public class LWR extends Classifier
 	  break;
 	}
       }
-      throw new Exception("All training instances coincide with test instance!");
+      if (bandwidth <= 0) {
+	throw new Exception("All training instances coincide with test instance!");
+      }
     }
 
     // Rescale the distances by the bandwidth

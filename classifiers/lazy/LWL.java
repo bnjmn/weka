@@ -61,7 +61,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LWL extends DistributionClassifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -195,7 +195,7 @@ public class LWL extends DistributionClassifier
 	(m_classifier instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_classifier).getOptions();
     }
-    String [] options = new String [classifierOptions.length + 6];
+    String [] options = new String [classifierOptions.length + 8];
     int current = 0;
 
     if (getClassifier() != null) {
@@ -445,7 +445,9 @@ public class LWL extends DistributionClassifier
 	  break;
 	}
       }
-      throw new Exception("All training instances coincide with test instance!");
+      if (bandwidth <= 0) {
+	throw new Exception("All training instances coincide with test instance!");
+      }
     }
 
     // Rescale the distances by the bandwidth
