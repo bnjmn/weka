@@ -16,295 +16,653 @@
 
 /*
  *    Cobweb.java
- *    Copyright (C) 1999 Ian H. Witten
+ *    Copyright (C) 2001 Mark Hall
  *
  */
 
-
-/**
- * Implementation of cobweb and classit algorithms for incremental clustering.
- * <p>
- * Valid options are:<p>
- *
- * -A <0-100> <br>
- * Acuity. <p>
- *
- * -C <0-100> <br>
- * Cutoff. <p>
- *
- * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
- */
 package weka.clusterers;
 
 import java.io.*;
 import java.util.*; 
 import weka.core.*; 
+import weka.filters.Filter;
+import weka.filters.AddFilter;
+import weka.experiment.Stats;
 
-public class Cobweb extends Clusterer implements OptionHandler{
+/**
+ * Class implementing the Cobweb and Classit clustering algorithms.<p><p>
+ *
+ * Note: the application of node operators (merging, splitting etc.) in
+ * terms of ordering and priority differs (and is somewhat ambiguous)
+ * between the original Cobweb and Classit papers. This algorithm always
+ * compares the best host, adding a new leaf, merging the two best hosts, and
+ * splitting the best host when considering where to place a new instance.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -A <acuity> <br>
+ * Acuity. <p>
+ *
+ * -C <cutoff> <br>
+ * Cutoff. <p>
+ *
+ * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
+ * @version $Revision: 1.11 $
+ * @see Clusterer
+ * @see OptionHandler
+ * @see Drawable
+ */
+public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 
-  static final double norm = 1/Math.sqrt(2*Math.PI);
-
-  // Inner Class
-  class CTree implements Serializable {
-    public CTree siblings = null, children = null;
-    public int size; // number of leaves under this node
-    public int nchildren; // number of direct children of this node
-    public int [][] counts; // these are used for nominal attributes
-    public int clusterNum;
-    public double [][] totals; // these are used for numeric attributes
-    public boolean cutoff = false; // true if this node is cut off
-    public Instance instance = null;
+  /**
+   * Inner class handling node operations for Cobweb.
+   *
+   * @see Serializable
+   */
+  private class CNode implements Serializable {
     
+    /**
+     * Within cluster attribute statistics
+     */
+    private AttributeStats [] m_attStats;
 
-    //---- Constructor -------------------------------------------------------
-    public CTree(Instance i) throws Exception {
-      instance = i;
-      size = 1;
-      nchildren = 0;
-      counts = makeCounts(); totals = makeTotals();
-      for (int a = 0; a < instance.numAttributes(); a++)
-	if (instance.attribute(a).isNominal())
-	  counts[a][(int) instance.value(a)]++;
-	else {
-	  totals[a][0] = instance.value(a);
-	  totals[a][1] = instance.value(a)*instance.value(a);
-	}
+    /**
+     * Number of attributes
+     */
+    private int m_numAttributes;
+    
+    /**
+     * Instances at this node
+     */
+    protected Instances m_clusterInstances = null;
+
+    /**
+     * Children of this node
+     */
+    private FastVector m_children = null;
+
+    /**
+     * Total instances at this node
+     */
+    private double m_totalInstances = 0.0;
+
+    /**
+     * Cluster number of this node
+     */
+    private int m_clusterNum = -1;
+
+    /**
+     * Creates an empty <code>CNode</code> instance.
+     *
+     * @param numAttributes the number of attributes in the data
+     */
+    public CNode(int numAttributes) {      
+      m_numAttributes = numAttributes;
     }
 
-    public CTree copyNode() throws Exception { 
-      // just copies stats, not nchildren
-
-      CTree copy = new CTree(instance);
-      copy.size = size;
-      for (int a = 0; a < instance.numAttributes(); a++)
-	if (instance.attribute(a).isNominal())
-	  for (int v=0; v < instance.attribute(a).numValues(); v++)
-	    copy.counts[a][v] = counts[a][v];
-	else for (int v=0; v < 2; v++) copy.totals[a][v] = totals[a][v];
-      return copy;
-    }
-
-    public void updateStats(CTree node) 
-      throws Exception { // just updates stats, not nchildren
-      size += node.size;
-      for (int a = 0; a < instance.numAttributes(); a++)
-	if (instance.attribute(a).isNominal())
-	  for (int v=0; v < instance.attribute(a).numValues(); v++)
-	    counts[a][v] += node.counts[a][v];
-	else for (int v=0; v < 2; v++) totals[a][v] += node.totals[a][v];
-    }
-  
-    public void downdateStats(CTree node) throws Exception {
-      size -= node.size;
-      for (int a = 0; a < instance.numAttributes(); a++)
-	if (instance.attribute(a).isNominal())
-	  for (int v=0; v < instance.attribute(a).numValues(); v++)
-	    counts[a][v] -= node.counts[a][v];
-	else for (int v=0; v < 2; v++) totals[a][v] -= node.totals[a][v];
-    }
-  
-    public double CU() throws Exception { 
-      // category utility
-      
-      return TU()/nchildren;
-    }
-
-    public double TU() throws Exception { 
-      // total utility of children wrt this
-      
-      return(TU(children));
-    }
-
-    public double TU(CTree node) 
-      throws Exception { 
-      // total utility of node + siblings wrt this
-      
-      double t = 0;
-      for (CTree n = node; n != null; n = n.siblings)
-	t += UIndividual(n);
-      return t;
-    }
-
-    public double UIndividual(CTree node) 
-      throws Exception { 
-      // utility of one node wrt "this"
-      
-      double s = 0;
-      for (int a = 0; a < instance.numAttributes(); a++)
-	if (instance.attribute(a).isNominal())
-	  for (int v=0; v < instance.attribute(a).numValues(); v++) {
-	    double x = (double) node.counts[a][v]/node.size;
-	    double y = (double) counts[a][v]/size;
-	    s += x*x - y*y;
-	  }
-	else
-	  s += Cobweb.norm/node.sigma(a) - Cobweb.norm/sigma(a);
-      return(((double) node.size/size) * s);
-    }
-
-    public double sigma(int a) {
-      double x = totals[a][1] - totals[a][0]*totals[a][0]/size;
-      if (x <= 0) x = 0; else x = Math.sqrt(x/size);
-      return Math.max(Cobweb.acuity, x);
-    }
-
-    public double UMerged(CTree n1, CTree n2) 
-      throws Exception {
-      // utility of n1 merged with n2
-
-      n1.updateStats(n2);
-      double U = UIndividual(n1);
-      n1.downdateStats(n2);
-      return U;
-    }
-
-    public void addChildren(CTree node) {
-      if (node == null); // do nothing
-      else {
-	CTree n;
-	nchildren++;
-	for (n = node; n.siblings != null; n = n.siblings) nchildren++;
-	n.siblings = children;
-	children = node;
+    /**
+     * Creates a new leaf <code>CNode</code> instance.
+     *
+     * @param numAttributes the number of attributes in the data
+     * @param leafInstance the instance to store at this leaf
+     */
+    public CNode(int numAttributes, Instance leafInstance) {
+      this(numAttributes);
+      if (m_clusterInstances == null) {
+	m_clusterInstances = new Instances(leafInstance.dataset(), 1);
       }
+      m_clusterInstances.add(leafInstance);
+      updateStats(leafInstance, false);
     }
+    
+    /**
+     * Adds an instance to this cluster.
+     *
+     * @param newInstance the instance to add
+     * @exception Exception if an error occurs
+     */
+    protected void addInstance(Instance newInstance) throws Exception {
+      // Add the instance to this cluster
 
-    public void addChild(CTree node) {
-      nchildren++;
-      if (children == null) children = node;
-      else children.addSibling(node);
-    }
+      if (m_clusterInstances == null) {
+	m_clusterInstances = new Instances(newInstance.dataset(), 1);
+	m_clusterInstances.add(newInstance);
+	updateStats(newInstance, false);
+	return;
+      } else if (m_children == null) {
+	/* we are a leaf, so make our existing instance(s) into a child
+	 and then add the new instance as a child */
+	m_children = new FastVector();
+	CNode tempSubCluster = new CNode(m_numAttributes, 
+					 m_clusterInstances.instance(0)); 
 
-    public void removeChild(CTree node) {
-      if (children == null) return;
-      if (children == node) {
-	children = children.siblings;
-	node.siblings = null;
-	nchildren--;
+	//	System.out.println("Dumping "+m_clusterInstances.numInstances());
+	for (int i = 1; i < m_clusterInstances.numInstances(); i++) {
+	  tempSubCluster.m_clusterInstances.
+	    add(m_clusterInstances.instance(i));
+	  tempSubCluster.updateStats(m_clusterInstances.instance(i), false);
+	}
+	m_children = new FastVector();
+	m_children.addElement(tempSubCluster);
+	m_children.addElement(new CNode(m_numAttributes, newInstance));
+	
+	m_clusterInstances.add(newInstance);
+	updateStats(newInstance, false);
+
+	// here is where we check against cutoff (also check cutoff
+	// in findHost)
+	if (categoryUtility() < m_cutoff) {
+	  //	  System.out.println("Cutting (leaf add) ");
+	  m_children = null;
+	}
 	return;
       }
-      for (CTree n = children; n.siblings != null; n = n.siblings) 
-	if (n.siblings == node) {
-	  n.siblings = node.siblings;
-	  node.siblings = null;
-	  nchildren--;
-	  return;
-	}
-    }
-
-    public void addSibling(CTree node) {
-      node.siblings = siblings;
-      siblings = node;
-    }
-
-    private int[][] makeCounts() throws Exception {
-      int [][] counts = new int[instance.numAttributes()][];
-      for (int a = 0; a < instance.numAttributes(); a++)
-	if (instance.attribute(a).isNominal())
-	  counts[a] = new int[instance.attribute(a).numValues()];
-	else counts[a] = null;
-      return counts;
-    }
-  
-    private double[][] makeTotals() throws Exception {
-      double [][] totals = new double[instance.numAttributes()][];
-      for (int a = 0; a < instance.numAttributes(); a++)
-	if (instance.attribute(a).isNumeric())
-	  totals[a] = new double[2];
-	else totals[a] = null;
-      return totals;
-    }
-
-    // Returns a description of the tree
-    public String toString() {
-      try {
-	StringBuffer buf = new StringBuffer("\n");
-	print(buf, 0);
-	return buf.toString();
-      } catch (Exception e) {
-	e.printStackTrace();
-	return "Can't print clusterer.";
+      
+      // otherwise, find the best host for this instance
+      CNode bestHost = findHost(newInstance, false);
+      if (bestHost != null) {	
+	// now add to the best host
+	bestHost.addInstance(newInstance);
       }
     }
 
-    private int nChildren() {
-      int number = 0;
-      for (CTree n = children; n != null; n = n.siblings) number++;
-      return number;
-    }
+    /**
+     * Finds a host for the new instance in this nodes children. Also
+     * considers merging the two best hosts and splitting the best host.
+     *
+     * @param newInstance the instance to find a host for
+     * @param structureFrozen true if the instance is not to be added to
+     * the tree and instead the best potential host is to be returned
+     * @return the best host
+     * @exception Exception if an error occurs
+     */
+    private CNode findHost(Instance newInstance, 
+			  boolean structureFrozen) throws Exception {
 
-    private int nDescendants() {
-      int number = 0;
-      if (children == null) number = 1;
-      else for (CTree n = children; n != null; n = n.siblings)
-	number += n.nDescendants();
-      return number;
-    }
-
-    // Appends a description of the tree (at given level) to the StringBuffer
-    private void print(StringBuffer buf, int level) throws Exception {
-      if (!cutoff) {
-	if (nchildren != nChildren()) 
-	  System.out.println("Problem: nchildren = " + nchildren +
-			     " but there are "+ nChildren() + " children!");
-	if (size != nDescendants()) 
-	  System.out.println("Problem: size = " + size +
-			     " but there are "+ nDescendants() +
-			     " descendants!");
-	for (int j=0; j < level; j++) buf.append("    ");
-	buf.append(size + "  | ");
-	for (int a = 0; a < instance.numAttributes(); a++) {
-	  if (instance.attribute(a).isNominal())
-	    for (int v=0; v < instance.attribute(a).numValues(); v++)
-	      buf.append(((double) counts[a][v]) + " ");
-	  else
-	    buf.append(totals[a][0]/size + // " (" + totals[a][1]/size + ")" +
-		       " " + sigma(a));
-	  buf.append("| ");
-	}
-	if (this.nchildren > 0) buf.append(" (" + this.CU() + ")");
-
-	buf.append(" ["+clusterNum+"]");
-	buf.append("\n");
-
-	if (children != null) children.print(buf, level+1);
-      } // cut off nodes can't have children, but they often have siblings
-      if (siblings != null) siblings.print(buf, level);
-    }
-
-    private void assignClusterNums(int [] cl_num) throws Exception {
-      if (!cutoff) {
-	if (nchildren != nChildren()) 
-	  System.out.println("Problem: nchildren = " + nchildren +
-			     " but there are "+ nChildren() + " children!");
-	if (size != nDescendants()) 
-	  System.out.println("Problem: size = " + size +
-			     " but there are "+ nDescendants() +
-			     " descendants!");
-	
-	this.clusterNum = cl_num[0];
-	cl_num[0]++;
-	if (children != null) 
-	  children.assignClusterNums(cl_num);
+      if (!structureFrozen) {
+	updateStats(newInstance, false);
       }
       
-      if (siblings != null)
-	siblings.assignClusterNums(cl_num);
+      // look for a host in existing children and also consider as a new leaf
+      double [] categoryUtils = new double [m_children.size()];
+
+      // look for a home for this instance in the existing children
+      for (int i = 0; i < m_children.size(); i++) {
+	CNode temp = (CNode) m_children.elementAt(i);
+	// tentitively add the new instance to this child
+	temp.updateStats(newInstance, false);
+	categoryUtils[i] = categoryUtility();
+	
+	// remove the new instance from this child
+	temp.updateStats(newInstance, true);
+      }
+      
+      // make a temporary new leaf for this instance and get CU
+      CNode newLeaf = new CNode(m_numAttributes, newInstance);
+      m_children.addElement(newLeaf);
+      double bestHostCU = categoryUtility();
+      CNode finalBestHost = newLeaf;
+      
+      // remove new leaf when seaching for best and second best nodes to
+      // consider for merging and splitting
+      m_children.removeElementAt(m_children.size()-1);
+
+      // now determine the best host (and the second best)
+      int best = 0;
+      int secondBest = 0;
+      for (int i = 0; i < categoryUtils.length; i++) {
+	if (categoryUtils[i] > categoryUtils[secondBest]) {
+	  if (categoryUtils[i] > categoryUtils[best]) {
+	    secondBest = best;
+	    best = i;
+	  } else {
+	    secondBest = i;
+	  }
+	} 
+      }
+      
+      CNode a = (CNode) m_children.elementAt(best);
+      CNode b = (CNode) m_children.elementAt(secondBest);
+      if (categoryUtils[best] > bestHostCU) {
+	bestHostCU = categoryUtils[best];
+	finalBestHost = a;
+	//	System.out.println("Node is best");
+      }
+
+      if (structureFrozen) {
+	if (finalBestHost == newLeaf) {
+	  return null; // *this* node is the best host
+	} else {
+	  return finalBestHost;
+	}
+      }
+
+      double mergedCU = -Double.MAX_VALUE;
+      CNode merged = new CNode(m_numAttributes);
+      if (a != b) {
+	// consider merging the best and second
+	// best. If thats no good then consider splitting the best
+	merged.m_clusterInstances = new Instances(m_clusterInstances, 1);
+	
+	merged.addChildNode(a);
+	merged.addChildNode(b);
+	merged.updateStats(newInstance, false); // add new instance to stats
+	// remove the best and second best nodes
+	m_children.removeElementAt(m_children.indexOf(a));
+	m_children.removeElementAt(m_children.indexOf(b));	
+	m_children.addElement(merged);
+	mergedCU = categoryUtility();
+	// restore the status quo
+	m_children.removeElementAt(m_children.indexOf(merged));
+	m_children.addElement(a);
+	m_children.addElement(b);
+	if (mergedCU > bestHostCU) {
+	  merged.updateStats(newInstance, true);
+	  bestHostCU = mergedCU;
+	  finalBestHost = merged;
+	}
+      }
+	
+      double splitCU = -Double.MAX_VALUE;
+      if (a.m_children != null) {
+	FastVector tempChildren = new FastVector();
+
+	for (int i = 0; i < m_children.size(); i++) {
+	  CNode existingChild = (CNode)m_children.elementAt(i);
+	  if (existingChild != a) {
+	    tempChildren.addElement(existingChild);
+	  }
+	}
+	for (int i = 0; i < a.m_children.size(); i++) {
+	  CNode promotedChild = (CNode)a.m_children.elementAt(i);
+	  tempChildren.addElement(promotedChild);
+	}
+
+	// also add the new leaf
+	tempChildren.addElement(newLeaf);
+
+	FastVector saveStatusQuo = m_children;
+	m_children = tempChildren;
+	splitCU = categoryUtility();
+
+	if (splitCU > bestHostCU) {
+	  bestHostCU = splitCU;
+	  finalBestHost = this;
+	  // pull the new leaf back out as we will probably be recursively
+	  // calling on this node again
+	  tempChildren.removeElementAt(tempChildren.size()-1);
+	} else {
+	  // restore the status quo
+	  m_children = saveStatusQuo;
+	}
+      }
+
+      if (finalBestHost != this) {
+	// can commit the instance to the set of instances at this node
+	m_clusterInstances.add(newInstance);
+      } else {
+	m_numberSplits++;
+      }
+
+      if (finalBestHost == merged) {
+	m_numberMerges++;
+	m_children.removeElementAt(m_children.indexOf(a));
+	m_children.removeElementAt(m_children.indexOf(b));	
+	m_children.addElement(merged);
+      }
+
+      if (finalBestHost == newLeaf) {
+	finalBestHost = new CNode(m_numAttributes);
+	m_children.addElement(finalBestHost);
+      }
+
+      if (bestHostCU < m_cutoff) {
+	if (finalBestHost == this) {
+	  // splitting was the best, but since we are cutting all children
+	  // recursion is aborted and we still need to add the instance
+	  // to the set of instances at this node
+	  m_clusterInstances.add(newInstance);
+	}
+	m_children = null;
+	finalBestHost = null;
+      }
+
+      if (finalBestHost == this) {
+	// splitting is still the best, so downdate the stats as 
+	// we'll be recursively calling on this node
+	updateStats(newInstance, true);
+      }
+
+      return finalBestHost;
+    }
+    
+    /**
+     * Adds the supplied node as a child of this node. All of the child's
+     * instances are added to this nodes instances
+     *
+     * @param child the child to add
+     */
+    protected void addChildNode(CNode child) {
+      for (int i = 0; i < child.m_clusterInstances.numInstances(); i++) {
+	Instance temp = child.m_clusterInstances.instance(i);
+	m_clusterInstances.add(temp);
+	updateStats(temp, false);
+      }
+
+      if (m_children == null) {
+	m_children = new FastVector();
+      }
+      m_children.addElement(child);
+    }
+
+    /**
+     * Computes the utility of all children with respect to this node
+     *
+     * @return the category utility of the children with respect to this node.
+     */
+    protected double categoryUtility() throws Exception {
+      
+      if (m_children == null) {
+	throw new Exception("categoryUtility: No children!");
+      }
+
+      double totalCU = 0;
+     
+      for (int i = 0; i < m_children.size(); i++) {
+	CNode child = (CNode) m_children.elementAt(i);
+	totalCU += categoryUtilityChild(child);
+      }
+
+      totalCU /= (double)m_children.size();
+      return totalCU;
+    }
+
+    /**
+     * Computes the utility of a single child with respect to this node
+     *
+     * @param child the child for which to compute the utility
+     * @return the utility of the child with respect to this node
+     * @exception Exception if something goes wrong
+     */
+    protected double categoryUtilityChild(CNode child) throws Exception {
+      
+      double sum = 0;
+      for (int i = 0; i < m_numAttributes; i++) {
+	if (m_clusterInstances.attribute(i).isNominal()) {
+	  for (int j = 0; 
+	       j < m_clusterInstances.attribute(i).numValues(); j++) {
+	    double x = child.getProbability(i, j);
+	    double y = getProbability(i, j);
+	    sum += (x * x) - (y * y);
+	  }
+	} else {
+	  // numeric attribute
+	  sum += ((m_normal / child.getStandardDev(i)) - 
+		  (m_normal / getStandardDev(i)));
+	  
+	}
+      }
+      return (child.m_totalInstances / m_totalInstances) * sum;
+    }
+
+    /**
+     * Returns the probability of a value of a nominal attribute in this node
+     *
+     * @param attIndex the index of the attribute
+     * @param valueIndex the index of the value of the attribute
+     * @return the probability
+     * @exception Exception if the requested attribute is not nominal
+     */
+    protected double getProbability(int attIndex, int valueIndex) 
+      throws Exception {
+      
+      if (!m_clusterInstances.attribute(attIndex).isNominal()) {
+	throw new Exception("getProbability: attribute is not nominal");
+      }
+
+      if (m_attStats[attIndex].totalCount <= 0) {
+	return 0;
+      }
+
+      return (double) m_attStats[attIndex].nominalCounts[valueIndex] / 
+	(double) m_attStats[attIndex].totalCount;
+    }
+
+    /**
+     * Returns the standard deviation of a numeric attribute
+     *
+     * @param attIndex the index of the attribute
+     * @return the standard deviation
+     * @exception Exception if an error occurs
+     */
+    protected double getStandardDev(int attIndex) throws Exception {
+      if (!m_clusterInstances.attribute(attIndex).isNumeric()) {
+	throw new Exception("getStandardDev: attribute is not numeric");
+      }
+
+      m_attStats[attIndex].numericStats.calculateDerived();
+      double stdDev = m_attStats[attIndex].numericStats.stdDev;
+      if (Double.isNaN(stdDev) || Double.isInfinite(stdDev)) {
+	return m_acuity;
+      }
+
+      return Math.max(m_acuity, stdDev);
+    }
+
+    /**
+     * Update attribute stats using the supplied instance. 
+     *
+     * @param updateInstance the instance for updating
+     * @param delete true if the values of the supplied instance are
+     * to be removed from the statistics
+     */
+    protected void updateStats(Instance updateInstance, 
+			       boolean delete) {
+
+      if (m_attStats == null) {
+	m_attStats = new AttributeStats[m_numAttributes];
+	for (int i = 0; i < m_numAttributes; i++) {
+	  m_attStats[i] = new AttributeStats();
+	  if (m_clusterInstances.attribute(i).isNominal()) {
+	    m_attStats[i].nominalCounts = 
+	      new int [m_clusterInstances.attribute(i).numValues()];
+	  } else {
+	    m_attStats[i].numericStats = new Stats();
+	  }
+	}
+      }
+      for (int i = 0; i < m_numAttributes; i++) {
+	if (!updateInstance.isMissing(i)) {
+	  double value = updateInstance.value(i);
+	  if (m_clusterInstances.attribute(i).isNominal()) {
+	    m_attStats[i].nominalCounts[(int)value] += (delete) ? 
+	      (-1.0 * updateInstance.weight()) : 
+	      updateInstance.weight();
+	    m_attStats[i].totalCount += (delete) ?
+	      (-1.0 * updateInstance.weight()) :
+	      updateInstance.weight();
+	  } else {
+	    if (delete) {
+	      m_attStats[i].numericStats.subtract(value, 
+						  updateInstance.weight());
+	    } else {
+	      m_attStats[i].numericStats.add(value, updateInstance.weight());
+	    }
+	  }
+	}
+      }
+      m_totalInstances += (delete) 
+	? (-1.0 * updateInstance.weight()) 
+	: (updateInstance.weight());
+    }
+
+    /**
+     * Recursively assigns numbers to the nodes in the tree.
+     *
+     * @param cl_num an <code>int[]</code> value
+     * @exception Exception if an error occurs
+     */
+    private void assignClusterNums(int [] cl_num) throws Exception {
+      if (m_children != null && m_children.size() < 2) {
+	throw new Exception("assignClusterNums: tree not built correctly!");
+      }
+      
+      m_clusterNum = cl_num[0];
+      cl_num[0]++;
+      if (m_children != null) {
+	for (int i = 0; i < m_children.size(); i++) {
+	  CNode child = (CNode) m_children.elementAt(i);
+	  child.assignClusterNums(cl_num);
+	}
+      }
+    }
+
+    /**
+     * Recursively build a string representation of the Cobweb tree
+     *
+     * @param depth depth of this node in the tree
+     * @param text holds the string representation
+     */
+    protected void dumpTree(int depth, StringBuffer text) {
+
+      if (m_children == null) {
+	text.append("\n");
+	for (int j = 0; j < depth; j++) {
+	  text.append("|   ");
+	}
+	text.append("leaf "+m_clusterNum+" ["
+		    +m_clusterInstances.numInstances()+"]");
+      } else {
+	for (int i = 0; i < m_children.size(); i++) {
+	  text.append("\n");
+	  for (int j = 0; j < depth; j++) {
+	    text.append("|   ");
+	  }
+	  text.append("node "+m_clusterNum+" ["
+		      +m_clusterInstances.numInstances()
+		      +"]");
+	  ((CNode) m_children.elementAt(i)).dumpTree(depth+1, text);
+	}
+      }
+    }
+
+    /**
+     * Returns the instances at this node as a string. Appends the cluster
+     * number of the child that each instance belongs to.
+     *
+     * @return a <code>String</code> value
+     * @exception Exception if an error occurs
+     */
+    protected String dumpData() throws Exception {
+      if (m_children == null) {
+	return m_clusterInstances.toString();
+      }
+
+      // construct instances string with cluster numbers attached
+      CNode tempNode = new CNode(m_numAttributes);
+      tempNode.m_clusterInstances = new Instances(m_clusterInstances, 1);
+      for (int i = 0; i < m_children.size(); i++) {
+	tempNode.addChildNode((CNode)m_children.elementAt(i));
+      }
+      Instances tempInst = tempNode.m_clusterInstances;
+      tempNode = null;
+
+      StringBuffer instBuff = new StringBuffer();
+      AddFilter af = new AddFilter();
+      af.setAttributeName("Cluster");
+      String labels = "";
+      for (int i = 0; i < m_children.size(); i++) {
+	CNode temp = (CNode)m_children.elementAt(i);
+	labels += ("C"+temp.m_clusterNum);
+	if (i < m_children.size()-1) {
+	  labels+=",";
+	}
+      }
+      af.setNominalLabels(labels);
+      af.setInputFormat(tempInst);
+      tempInst = Filter.useFilter(tempInst, af);
+      tempInst.setRelationName("Cluster "+m_clusterNum);
+      
+      int z = 0;
+      for (int i = 0; i < m_children.size(); i++) {
+	CNode temp = (CNode)m_children.elementAt(i);
+	for (int j = 0; j < temp.m_clusterInstances.numInstances(); j++) {
+	  tempInst.instance(z).setValue(m_numAttributes, (double)i);
+	  z++;
+	}
+      }
+      return tempInst.toString();
+    }
+
+    /**
+     * Recursively generate the graph string for the Cobweb tree.
+     *
+     * @param text holds the graph string
+     */
+    protected void graphTree(StringBuffer text) throws Exception {
+      
+      text.append("N"+m_clusterNum
+		  + " [label=\""+((m_children == null) 
+				 ? "leaf " : "node ")
+		  +m_clusterNum+" "
+		  +" ("+m_clusterInstances.numInstances()
+		  +")\" "
+		  +((m_children == null) 
+				 ? "shape=box style=filled " : "")
+		  +(m_saveInstances 
+		    ? "data =\n"+dumpData() +"\n,\n"
+		    : "")
+		  + "]\n");
+      if (m_children != null) {
+	for (int i = 0; i < m_children.size(); i++) {
+	  CNode temp = (CNode)m_children.elementAt(i);
+	  text.append("N"+m_clusterNum
+		      +"->"
+		      +"N" + temp.m_clusterNum
+		      + "\n");
+	}
+
+	for (int i = 0; i < m_children.size(); i++) {
+	  CNode temp = (CNode)m_children.elementAt(i);
+	  temp.graphTree(text);
+	}
+      }
     }
   }
 
-  /** acuity */
-  static double acuity = 1.0;
-  
-  /** cutoff */
-  static double cutoff = 0.01 * Cobweb.norm;
-  
-  /** the cobweb tree */
-  private CTree tree = null;
+  /**
+   * Normal constant.
+   */
+  protected static final double m_normal = 1.0/(2 * Math.sqrt(Math.PI));
 
-  /** number of clusters */
-  private int numClusters = -1;
+  /**
+   * Acuity (minimum standard deviation).
+   */
+  protected double m_acuity = 1.0;
+
+  /**
+   * Cutoff (minimum category utility).
+   */
+  protected double m_cutoff = 0.01 * Cobweb.m_normal;
+
+  /**
+   * Holds the root of the Cobweb tree.
+   */
+  protected CNode m_cobwebTree = null;
+
+  /**
+   * Number of clusters (nodes in the tree).
+   */
+  protected int m_numberOfClusters = -1;
+  
+  protected int m_numberSplits;
+  protected int m_numberMerges;
+
+  /**
+   * Output instances in graph representation of Cobweb tree (Allows
+   * instances at nodes in the tree to be visualized in the Explorer).
+   */
+  protected boolean m_saveInstances = false;
 
   /**
    * Builds the clusterer.
@@ -313,235 +671,77 @@ public class Cobweb extends Clusterer implements OptionHandler{
    * @exception Exception if something goes wrong.
    */
   public void buildClusterer(Instances data) throws Exception {
+    m_numberOfClusters = -1;
+    m_cobwebTree = null;
+    m_numberSplits = 0;
+    m_numberMerges = 0;
 
     if (data.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
 
-    tree = null;
-    numClusters = -1;
-    makeweb(data);
-  }
-
-  private void makeweb(Instances data) throws Exception {
-    Enumeration e = data.enumerateInstances();
-    while (e.hasMoreElements()) {
-      Instance i = (Instance) e.nextElement();
-      CTree node = new CTree(i);
-      if (tree == null) {
-	tree = new CTree(i);
-	tree.addChild(node);
-      }
-      else add(node, tree);
+    for (int i = 0; i < data.numInstances(); i++) {
+      addInstance(data.instance(i));
     }
-
-    if (numClusters == -1)
-      {
-	int [] cl_num = new int [1];
-	cl_num[0] = 0;
-	tree.assignClusterNums(cl_num);
-	numClusters = cl_num[0];
-      }
     
-    // System.out.println(tree);
+    int [] numClusts = new int [1];
+    numClusts[0] = 0;
+    m_cobwebTree.assignClusterNums(numClusts);
+    m_numberOfClusters = numClusts[0];
   }
-  
+
+  /**
+   * Classifies a given instance.
+   *
+   * @param instance the instance to be assigned to a cluster
+   * @return the number of the assigned cluster as an interger
+   * if the class is enumerated, otherwise the predicted value
+   * @exception Exception if instance could not be classified
+   * successfully
+   */
+  public int clusterInstance(Instance instance) throws Exception {
+    CNode host = m_cobwebTree;
+    CNode temp = null;
+    
+    do {
+      if (host.m_children == null) {
+	temp = null;
+	break;
+      }
+
+      host.updateStats(instance, false);
+      temp = host.findHost(instance, true);
+      host.updateStats(instance, true);
+      
+      if (temp != null) {
+	host = temp;
+      }
+    } while (temp != null);
+    
+    return host.m_clusterNum;
+  }
+
   /**
    * Returns the number of clusters.
    *
    * @exception Exception if something goes wrong.
    */
   public int numberOfClusters() throws Exception {
-    return numClusters;
+    return m_numberOfClusters;
   }
 
   /**
-   * Clusters an instance.
+   * Adds an instance to the Cobweb tree.
    *
-   * @param instance the instance to cluster.
-   * @exception Exception if something goes wrong.
+   * @param newInstance the instance to be added
+   * @exception Exception if something goes wrong
    */
-  public int clusterInstance(Instance instance) throws Exception {
-    CTree node = new CTree(instance);
- 
-    double T;
-    int n;
-    double baseU; // base CU over child nodes
-    double U;
-    CTree host = tree;
-    CTree temp = null;
-    do {
-      if (host.children == null) {
-	temp = null;
-      }
-      else {
-	T = host.TU();
-	n = host.nchildren;
-	baseU = T/n; // base CU over child nodes
-	host.updateStats(node);
-	U = (host.UIndividual(node) + host.TU())/(n+1);
-	temp = bestHostCluster(host, node, U, baseU);
-	host.downdateStats(node);
-      }
-      if (temp != null) {
-	host = temp;
-      }
-    } while (temp != null);
-
-    //    System.out.println(host.clusterNum);
-    return host.clusterNum;
-  }
-
-  /**
-   * Adds an example to the tree.
-   *
-   * @param node the node to be added.
-   * @param tree the tree.
-   * @exception Exception if something goes wrong.
-   */
-  public void add(CTree node, CTree tree) throws Exception {
-    if (tree.children == null) {
-      tree.addChild(tree.copyNode());
-      tree.addChild(node);
-      tree.updateStats(node);
+  public void addInstance(Instance newInstance) throws Exception {
+    if (m_cobwebTree == null) {
+      m_cobwebTree = new CNode(newInstance.numAttributes(), newInstance);
+    } else {
+      m_cobwebTree.addInstance(newInstance);
     }
-    else {
-      double T = tree.TU();
-      int n = tree.nchildren;
-      double baseU = T/n; // base CU over child nodes
-      
-      tree.updateStats(node);
-      double U = (tree.UIndividual(node) + tree.TU())/(n+1);
-      CTree host = bestHost(tree, node, U, baseU);
-      if (host == null) tree.addChild(node);
-      else if (host.children == null) {
-	host.addChild(host.copyNode());
-	host.addChild(node);
-	host.updateStats(node);
-	if (host.CU() < cutoff) {
-	  for (CTree n1 = host.children; n1 != null; n1 = n1.siblings)
-	    n1.cutoff = true; // mark them cut off
-	  return;
-	}
-      }
-      else add(node, host);
-    }
-  }
-
-  /**
-   * Finds the cluster that an unseen instance belongs to.
-   *
-   * @param tree the tree.
-   * @param node the node to be added.
-   * @param aU ??
-   * @param baseU ??
-   * @exception Exception if something goes wrong.
-   */
-  public CTree bestHostCluster(CTree tree, CTree node, double aU, double baseU) 
-    throws Exception {
-    double oldaU = aU;
-    CTree a = null; // a is the best node so far
-    CTree b = null; double bU = 0; // b is the second-best
-    for (CTree n = tree.children; n != null; n = n.siblings)
-      if (!n.cutoff) {
-	n.updateStats(node);
-      double nU = tree.CU();
-      n.downdateStats(node);
-      if (nU > bU)
-	if (nU > aU) { // n becomes best, a becomes second-best
-	  b = a; a = n;
-	  bU = aU; aU = nU;
-	}
-	else { // n becomes second-best
-	  b = n;
-	  bU = nU;
-	}
-      }
-    return a;
-  }
-
-  /**
-   * Finds the best place to add a new node during training.
-   *
-   * @param tree the tree.
-   * @param node the node to be added.
-   * @param aU ??
-   * @param baseU ??
-   * @exception Exception if something goes wrong.
-   */
-  public CTree bestHost(CTree tree, CTree node, double aU, double baseU) 
-    throws Exception {
-    double oldaU = aU;
-    CTree a = null; // a is the best node so far
-    CTree b = null; double bU = 0; // b is the second-best
-    for (CTree n = tree.children; n != null; n = n.siblings)
-      if (!n.cutoff) {
-      n.updateStats(node);
-      double nU = tree.CU();
-      n.downdateStats(node);
-      if (nU > bU)
-	if (nU > aU) { // n becomes best, a becomes second-best
-	  b = a; a = n;
-	  bU = aU; aU = nU;
-	}
-	else { // n becomes second-best
-	  b = n;
-	  bU = nU;
-	}
-      }
-    if (a == null) return null;
-      // consider merging best and second-best nodes
-      // current CU is baseU = (a + b + rest)/n
-      // new CU would be (c + rest)/(n-1)  [c is merged node]
-      // merge if (c + rest)/(n-1) > U, ie c - (a+b) + baseU > 0
-    if (b != null &&
-	tree.UMerged(a, b) - (tree.UIndividual(a)+tree.UIndividual(b)) + baseU
-	  > 0) {
-      CTree c = a.copyNode();
-      c.updateStats(b);
-      tree.addChild(c);
-      tree.removeChild(a); tree.removeChild(b);
-      c.addChild(a); c.addChild(b);
-      return(c);
-    }
-    // change notation: now c will be the node we split
-    CTree c = a; // call c's children a, b, ...
-    // current CU is baseU = (c + rest)/n
-    // new CU would be (a + b + ... + rest)/(n - 1 + nchildren)
-    // split if (a + b + ... + rest)/(n - 1 + nchildren) > baseU
-    // ie if (a + b + ...) - c > (nchildren - 1)*baseU
-    if (a.children != null &&
-      c.TU() - tree.UIndividual(c) > (c.nchildren - 1)*baseU) {
-      tree.removeChild(c);
-      tree.addChildren(c.children);
-      // Now find the best host again
-      a = null; aU = 0; // a is the best node so far
-      for (CTree n = tree.children; n != null; n = n.siblings) {
-	n.updateStats(node);
-	double nU = tree.CU();
-	n.downdateStats(node);
-	if (nU > aU) {
-	  a = n;
-	  aU = nU;
-	}
-      }
-    }
-    return a;
-  }
-
-  /**
-   * Returns a description of the clusterer as a string.
-   *
-   * @return a string describing the clusterer.
-   */
-  public String toString() { 
-    if (tree == null) {
-      return "Cobweb hasn't been built yet!";
-    }
-    else {
-      return "Number of clusters: "+numClusters+"\n"+tree.toString(); 
-    }
-    
   }
 
   /**
@@ -554,9 +754,9 @@ public class Cobweb extends Clusterer implements OptionHandler{
     Vector newVector = new Vector(2);
     
     newVector.addElement(new Option("\tAcuity.\n"
-				    +"\t(default=100)", "A", 1,"-A <0-100%>"));
+				    +"\t(default=1.0)", "A", 1,"-A <acuity>"));
     newVector.addElement(new Option("\tCutoff.\n"
-				    +"a\t(default=0)", "C", 1,"-C <0-100%>"));
+				    +"a\t(default=0.002)", "C", 1,"-C <cutoff>"));
     
     return newVector.elements();
   }
@@ -566,10 +766,10 @@ public class Cobweb extends Clusterer implements OptionHandler{
    *
    * Valid options are:<p>
    *
-   * -A <0-100> <br>
+   * -A <acuity> <br>
    * Acuity. <p>
    *
-   * -C <0-100> <br>
+   * -C <cutoff> <br>
    * Cutoff. <p>
    *
    * @param options the list of options as an array of strings
@@ -581,51 +781,101 @@ public class Cobweb extends Clusterer implements OptionHandler{
 
     optionString = Utils.getOption('A', options); 
     if (optionString.length() != 0) {
-	setAcuity(Integer.parseInt(optionString));
+      Double temp = new Double(optionString);
+      setAcuity(temp.doubleValue());
     }
     else {
-      acuity = 1.0;
+      m_acuity = 1.0;
     }
     optionString = Utils.getOption('C', options); 
     if (optionString.length() != 0) {
-      setCutoff(Integer.parseInt(optionString));
+      Double temp = new Double(optionString);
+      setCutoff(temp.doubleValue());
     }
     else {
-      cutoff = 0.01 * Cobweb.norm;
+      m_cutoff = 0.01 * Cobweb.m_normal;
     }
   }
 
   /**
-   * set the accuity.
-   * @param a the accuity between 0 and 100
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public void setAcuity(int a) {
-    acuity = (double) a / 100.0;
+  public String acuityTipText() {
+    return "set the minimum standard deviation for numeric attributes";
   }
 
   /**
-   * get the accuity value
-   * @return the accuity as a value between 0 and 100
+   * set the acuity.
+   * @param a the acuity value
    */
-  public int getAcuity() {
-    return (int) (acuity * 100.0);
+  public void setAcuity(double a) {
+    m_acuity = a;
+  }
+
+  /**
+   * get the acuity value
+   * @return the acuity
+   */
+  public double getAcuity() {
+    return m_acuity;
+  }
+
+   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String cutoffTipText() {
+    return "set the category utility threshold by which to prune nodes";
   }
 
   /**
    * set the cutoff
-   * @param c the cutoff between 0 and 100
+   * @param c the cutof
    */
-  public void setCutoff(int c) {
-    cutoff = (double) c / 100.0;;
+  public void setCutoff(double c) {
+    m_cutoff = c;
   }
 
   /**
    * get the cutoff
-   * @return the cutoff as a value between 1 and 100\
+   * @return the cutoff
    */
-  public int getCutoff() {
-    return (int) (cutoff * 100.0);
+  public double getCutoff() {
+    return m_cutoff;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String saveInstanceDataTipText() {
+    return "save instance information for visualization purposes";
+  }
+
+  /**
+   * Get the value of saveInstances.
+   *
+   * @return Value of saveInstances.
+   */
+  public boolean getSaveInstanceData() {
+    
+    return m_saveInstances;
+  }
+  
+  /**
+   * Set the value of saveInstances.
+   *
+   * @param newsaveInstances Value to assign to saveInstances.
+   */
+  public void setSaveInstanceData(boolean newsaveInstances) {
+    
+    m_saveInstances = newsaveInstances;
+  }
+  
 
   /**
    * Gets the current settings of Cobweb.
@@ -637,13 +887,48 @@ public class Cobweb extends Clusterer implements OptionHandler{
     String [] options = new String [4];
     int current = 0;
     options[current++] = "-A"; 
-    options[current++] = "" + ((int)(acuity * 100.0));
+    options[current++] = "" + m_acuity;
     options[current++] = "-C"; 
-    options[current++] = "" + ((int)(cutoff * 100.0));
+    options[current++] = "" + m_cutoff;
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Returns a description of the clusterer as a string.
+   *
+   * @return a string describing the clusterer.
+   */
+  public String toString() { 
+    StringBuffer text = new StringBuffer();
+    if (m_cobwebTree == null) {
+      return "Cobweb hasn't been built yet!";
+    }
+    else {
+      m_cobwebTree.dumpTree(0, text); 
+      return "Number of merges: "
+	+ m_numberMerges+"\nNumber of splits: "
+	+ m_numberSplits+"\nNumber of clusters: "
+	+ m_numberOfClusters+"\n"+text.toString()+"\n\n";
+     
+    }
+  }
+
+  /**
+   * Generates the graph string of the Cobweb tree
+   *
+   * @return a <code>String</code> value
+   * @exception Exception if an error occurs
+   */
+  public String graph() throws Exception {
+    StringBuffer text = new StringBuffer();
+    
+    text.append("digraph CobwebTree {\n");
+    m_cobwebTree.graphTree(text);
+    text.append("}\n");
+    return text.toString();
   }
 
   // Main method for testing this class
@@ -656,6 +941,7 @@ public class Cobweb extends Clusterer implements OptionHandler{
     catch (Exception e)
     {
       System.out.println(e.getMessage());
+      e.printStackTrace();
     }
   }
 }
