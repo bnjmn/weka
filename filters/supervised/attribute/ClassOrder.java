@@ -33,6 +33,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.FastVector;
 
 /** 
  * A filter that sorts the order of classes so that the class values are 
@@ -48,7 +49,8 @@ import weka.core.Utils;
  * using <code>originalValue(double value)</code> procedure.<p>  
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class ClassOrder extends Filter implements SupervisedFilter,
 						  OptionHandler {
@@ -63,7 +65,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * The 1-1 converting table from the original class values
    * to the new values
    */
-  private double[] m_Converter = null;
+  private int[] m_Converter = null;
     
   /** Class attribute of the data */
   private Attribute m_ClassAttribute = null;
@@ -141,8 +143,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
 	
     m_Random = null;
   }
-    
-    
+        
   /**
    * Gets the current settings of the filter.
    *
@@ -229,15 +230,23 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * structure is required).
    * @return true if the outputFormat may be collected immediately
    */
-    public boolean setInputFormat(Instances instanceInfo) throws Exception {     
-	super.setInputFormat(new Instances(instanceInfo, 0));	
-	m_ClassAttribute = instanceInfo.classAttribute();	
-	m_Random = new Random(m_Seed);
-	
-	int numClasses = instanceInfo.numClasses();
-	m_ClassCounts = new double[numClasses];	
-	return false;
-    }    
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {     
+
+    super.setInputFormat(new Instances(instanceInfo, 0));	
+    if (instanceInfo.classIndex() < 0) {
+      throw new IllegalArgumentException("ClassOrder: No class index set.");
+    }
+    if (!instanceInfo.classAttribute().isNominal()) {
+      throw new IllegalArgumentException("ClassOrder: Class must be nominal.");
+    }
+    m_ClassAttribute = instanceInfo.classAttribute();	
+    m_Random = new Random(m_Seed);
+    m_Converter = null;
+    
+    int numClasses = instanceInfo.numClasses();
+    m_ClassCounts = new double[numClasses];	
+    return false;
+  }    
     
   /**
    * Input an instance for filtering. Ordinarily the instance is processed
@@ -262,26 +271,22 @@ public class ClassOrder extends Filter implements SupervisedFilter,
     // In case some one use this routine in testing, 
     // although he/she should not do so
     if(m_Converter != null){
-	Instance datum = new Instance(instance);
-	if((m_ClassAttribute.isNominal())
-	   && (!datum.isMissing(m_ClassAttribute))){
-	    datum.setClassValue(m_Converter[(int)datum.classValue()]);
-	    // Add back the String attributes
-	    copyStringValues(datum, false, getInputFormat(), getOutputFormat());
-	    datum.setDataset(getOutputFormat());
-	}
-	push(datum);
-	return true;
+      Instance datum = (Instance)instance.copy();
+      if (!datum.isMissing(m_ClassAttribute)){
+	datum.setClassValue((double)m_Converter[(int)datum.classValue()]);
+      }
+      push(datum);
+      return true;
+    }
+    
+    if (!instance.isMissing(m_ClassAttribute)) {
+      m_ClassCounts[(int)instance.classValue()] += instance.weight();
     }
 
-    if((!instance.isMissing(m_ClassAttribute)) 
-       && m_ClassAttribute.isNominal())
-      m_ClassCounts[(int)instance.classValue()] += instance.weight();
-	
     bufferInput(instance);
     return false;
   }
-
+  
   /**
    * Signify that this batch of input to the filter is finished. If
    * the filter requires all instances prior to filtering, output()
@@ -296,107 +301,95 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * @exception Exception if there was a problem finishing the batch.
    */
   public boolean batchFinished() throws Exception {
-	
-      Instances data = getInputFormat();
-      if ( data == null) 
-	  throw new NullPointerException("No input instance format defined");
-    
-      data.deleteWithMissingClass();
-      if(data.numInstances() == 0)
-	  throw new Exception(" No instances with a class value!");      
-      
-      Instances newInsts = new Instances(data, 0);
-      m_Converter = new double[data.numClasses()];
-      if(m_ClassAttribute.isNominal()){
-	  switch(m_ClassOrder){
-	  case FREQ_ASCEND:
-	  case FREQ_DESCEND:
-	      // Sort it and put into a double array
-	      int[] tmp = Utils.sort(m_ClassCounts);
-	      double[] classOrder = new double[tmp.length];
-	      for(int t=0; t < tmp.length; t++)
-		  classOrder[t] = (double)tmp[t];
-	      
-	      int lo=-1, hi=-1, max=m_Converter.length-1;
-	      for(int y=0; y<=max; y++){ // y is the new class label
-		  double next = (y==max) ? -1.0 : m_ClassCounts[(int)classOrder[y+1]];
-		  if(Utils.eq(m_ClassCounts[(int)classOrder[y]], next)){
-		      if(lo == -1)
-			  lo = y;
-		  }
-		  else if(lo != -1){ // Randomize the order of classes with same size
-		      hi = y;
-		      randomize(classOrder, lo, hi);			
-		      for(int yy=lo; yy<=hi; yy++){
-			  if(m_ClassOrder == FREQ_ASCEND)
-			      m_Converter[(int)classOrder[yy]] = (double)yy;
-			  else
-			      m_Converter[(int)classOrder[yy]] = (double)(max-yy);
-			  
-		      }			
-		      lo = hi = -1;
-		  }
-		  else{ // Record in the converting table
-		      if(m_ClassOrder == FREQ_ASCEND)
-			  m_Converter[(int)classOrder[y]] = (double)y;
-		      else
-			  m_Converter[(int)classOrder[y]] = (double)(max-y);
-		  }
-	      }
-	      break;
-	  case RANDOM:
-	      for(int x=0; x < m_Converter.length; x++)		    
-		  m_Converter[x] = (double)x;
-	      
-	      randomize(m_Converter, 0, m_Converter.length-1);       
-	      break;
-	  default:
-	      throw new Exception("Class order not defined!"); 
-	  }
-	  
-	  // Reset the class values
-	  int classIndex = newInsts.classIndex();
-	  double[] cls = new double[m_ClassCounts.length];
-	  for(int z=0; z<m_Converter.length; z++){
-	      newInsts.renameAttributeValue(classIndex, (int)m_Converter[z], m_ClassAttribute.value(z));
-	      cls[(int)m_Converter[z]] = m_ClassCounts[z];
-	  }
-	  m_ClassCounts = cls;
+
+    Instances data = getInputFormat();
+    if (data == null)
+      throw new IllegalStateException("No input instance format defined");
+
+    if (m_Converter == null) {
+
+      // Get randomized indices and class counts 
+      int[] randomIndices = new int[m_ClassCounts.length];
+      for (int i = 0; i < randomIndices.length; i++) {
+	randomIndices[i] = i;
+      }
+      for (int j = randomIndices.length - 1; j > 0; j--) {
+	int toSwap = m_Random.nextInt(j + 1);
+	int tmpIndex = randomIndices[j];
+	randomIndices[j] = randomIndices[toSwap];
+	randomIndices[toSwap] = tmpIndex;
       }
       
+      double[] randomizedCounts = new double[m_ClassCounts.length];
+      for (int i = 0; i < randomizedCounts.length; i++) {
+	randomizedCounts[i] = m_ClassCounts[randomIndices[i]];
+      } 
+
+      // Create new order. For the moment m_Converter converts new indices
+      // into old ones.
+      if (m_ClassOrder == RANDOM) {
+	m_Converter = randomIndices;
+	m_ClassCounts = randomizedCounts;
+      } else {
+	int[] sorted = Utils.sort(randomizedCounts);
+	m_Converter = new int[sorted.length];
+	if (m_ClassOrder == FREQ_ASCEND) {
+	  for (int i = 0; i < sorted.length; i++) {
+	    m_Converter[i] = randomIndices[sorted[i]];
+	  }
+	} else if (m_ClassOrder == FREQ_DESCEND) {
+	  for (int i = 0; i < sorted.length; i++) {
+	    m_Converter[i] = randomIndices[sorted[sorted.length - i - 1]];
+	  }
+	} else {
+	  throw new IllegalArgumentException("Class order not defined!");
+	}
+	
+	// Change class counts
+	double[] tmp2 = new double[m_ClassCounts.length];
+	for (int i = 0; i < m_Converter.length; i++) {
+	  tmp2[i] = m_ClassCounts[m_Converter[i]];
+	}
+	m_ClassCounts = tmp2;
+      }
+      
+      // Change the class values
+      FastVector values = new FastVector(data.classAttribute().numValues());
+      for (int i = 0; i < data.numClasses(); i++) {
+	values.addElement(data.classAttribute().value(m_Converter[i]));
+      }
+      FastVector newVec = new FastVector(data.numAttributes());
+      for (int i = 0; i < data.numAttributes(); i++) {
+	if (i == data.classIndex()) {
+	  newVec.addElement(new Attribute(data.classAttribute().name(), values, 
+					  data.classAttribute().getMetadata()));
+	} else {
+	  newVec.addElement(data.attribute(i));
+	}
+      }
+      Instances newInsts = new Instances(data.relationName(), newVec, 0);
+      newInsts.setClassIndex(data.classIndex());
       setOutputFormat(newInsts);
+
+      // From now on we need m_Converter to convert old indices into new ones
+      int[] temp = new int[m_Converter.length];
+      for (int i = 0; i < temp.length; i++) {
+	temp[m_Converter[i]] = i;
+      }
+      m_Converter = temp;
 
       // Process all instances
       for(int xyz=0; xyz<data.numInstances(); xyz++){
-	  Instance datum = data.instance(xyz);
-	  if(m_ClassAttribute.isNominal())
-	      datum.setClassValue(m_Converter[(int)datum.classValue()]);
-	  // Add back the String attributes
-	  copyStringValues(datum, false, data, getOutputFormat());
-	  datum.setDataset(getOutputFormat());
-	  push(datum);
-      }	
-	
-    flushInput();
-    m_NewBatch = true;	
-    return (numPendingOutput() != 0);
-  }
-
-  /**
-   * Helper function to randomize the given double array from the
-   * the given low index to the given high index
-   *
-   * @param array the given double array
-   * @param low low index
-   * @param high high index
-   */
-  private void randomize(double[] array, int low, int high){
-    for(int y=low; y <= high; y++){
-      int swapPos = m_Random.nextInt(high-y+1) + y;
-      double temp = array[y];
-      array[y] = array[swapPos];
-      array[swapPos] = temp;
+	Instance datum = data.instance(xyz);
+	if (!datum.isMissing(datum.classIndex())) {
+	  datum.setClassValue((double)m_Converter[(int)datum.classValue()]);
+	}
+	push(datum);
+      }
     }
+    flushInput();
+    m_NewBatch = true;
+    return (numPendingOutput() != 0);
   }
     
   /**
@@ -406,26 +399,28 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * @return the class counts
    */
   public double[] getClassCounts(){ 
+
     if(m_ClassAttribute.isNominal())
       return m_ClassCounts; 
     else
       return null;
   }
 
-    /**
-     * Convert the given class distribution back to the distributions
-     * with the original internal class index
-     * 
-     * @param before the given class distribution
-     * @return the distribution converted back
-     */
-    public double[] distributionsByOriginalIndex (double[] before){
-	double[] after = new double[m_Converter.length];
-	for(int i=0; i < m_Converter.length; i++) 
-	    after[i] = before[(int)m_Converter[i]];
-	
-	return after;
-    }
+  /**
+   * Convert the given class distribution back to the distributions
+   * with the original internal class index
+   * 
+   * @param before the given class distribution
+   * @return the distribution converted back
+   */
+  public double[] distributionsByOriginalIndex (double[] before){
+
+    double[] after = new double[m_Converter.length];
+    for(int i=0; i < m_Converter.length; i++) 
+      after[i] = before[m_Converter[i]];
+    
+    return after;
+  }
 
   /**
    * Return the original internal class value given the randomized 
@@ -439,11 +434,12 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * @exception if the coverter table is not set yet
    */
   public double originalValue(double value)throws Exception{
+
     if(m_Converter == null)
       throw new IllegalStateException("Coverter table not defined yet!");
 	
     for(int i=0; i < m_Converter.length; i++)
-      if((int)value == (int)m_Converter[i])
+      if((int)value == m_Converter[i])
 	return (double)i;
 
     return -1;
