@@ -54,7 +54,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ 
+ * @version $Revision: 1.33 $ 
  */
 public class Instances implements Serializable {
  
@@ -817,7 +817,9 @@ public class Instances implements Serializable {
   public final void renameAttributeValue(Attribute att, String val, 
                                          String name) {
 
-    renameAttributeValue(att.index(), att.indexOfValue(val), name);
+    int v = att.indexOfValue(val);
+    if (v == -1) throw new IllegalArgumentException(val + " not found");
+    renameAttributeValue(att.index(), v, name);
   }
 
   /**
