@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public final class Utils {
 
@@ -364,37 +364,80 @@ public final class Utils {
   }
 
   /**
-   * Quotes a string if it contains whitespace characters, or a comma,
-   * or is a question mark (to distinguish it from the missing value which
-   * is represented as an unquoted question mark in arff files).
+   * Quotes a string if it contains special characters.
+   * 
+   * The following rules are applied:
+   *
+   * A character is backquoted version of it is one 
+   * of <tt>" ' % \ \n \r \t</tt>.
+   *
+   * A string is enclosed within single quotes if a character has been
+   * backquoted using the previous rule above or contains 
+   * <tt>{ }</tt> or is exactly equal to the strings 
+   * <tt>, ? space or ""</tt> (empty string).
+   *
+   * A quoted question mark distinguishes it from the missing value which
+   * is represented as an unquoted question mark in arff files.
    *
    * @param string the string to be quoted
-   * @return the string (quoted if it contains whitespace characters)
+   * @return the string (possibly quoted)
    */
   public static String quote(String string) {
+      boolean quote=false;
 
-    if ((string.indexOf('\n') != -1) ||
-	(string.indexOf('\r') != -1)) {
-      string = ("'".concat(replaceNewLines(string))).concat("'");
-    } else if ((string.indexOf(' ') != -1) ||
-	       (string.indexOf('\t') != -1) ||
-	       (string.indexOf(',') != -1) ||
-	       (string.equals("?")) ||
-	       (string.equals(""))) {
-      string = ("'".concat(string)).concat("'");
-    }
-    return string;
+      // backquote the following characters 
+      if ((string.indexOf('\n') != -1) || (string.indexOf('\r') != -1) || 
+	  (string.indexOf('\'') != -1) || (string.indexOf('"') != -1) || 
+	  (string.indexOf('\\') != -1) || 
+	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1)) {
+	  string = backQuoteChars(string);
+	  quote=true;
+      }
+
+      // Enclose the string in 's if the string contains a recently added
+      // backquote or contains one of the following characters.
+      if((quote == true) || 
+	 (string.indexOf('{') != -1) || (string.indexOf('}') != -1) ||
+	 (string.indexOf(',') != -1) || (string.equals("?")) ||
+	 (string.indexOf(' ') != -1) || (string.equals(""))) {
+	  string = ("'".concat(string)).concat("'");
+      }
+
+      return string;
   }
 
   /**
    * Converts carriage returns and new lines in a string into \r and \n.
+   * Backquotes the following characters: ` " \ \t and %
    * @param string the string
    * @return the converted string
    */
-  public static String replaceNewLines(String string) {
+  public static String backQuoteChars(String string) {
 
     int index;
     StringBuffer newStringBuffer;
+
+    // replace each of the following characters with the backquoted version
+    char   CharsFind[]=   {'\\',   '\'',  '\t',  '"',    '%'};
+    String CharsReplace[]={"\\\\", "\\'", "\\t", "\\\"", "\\%"};
+    for(int i=0;i<CharsFind.length;i++){
+	if(string.indexOf(CharsFind[i]) != -1 ) {
+	    newStringBuffer = new StringBuffer();
+	    while ((index = string.indexOf(CharsFind[i])) != -1) {
+		if (index > 0) {
+		    newStringBuffer.append(string.substring(0, index));
+		}
+		newStringBuffer.append(CharsReplace[i]);
+		if ((index + 1) < string.length()) {
+		    string = string.substring(index + 1);
+		} else {
+		    string = "";
+		}
+	    }
+	    newStringBuffer.append(string);
+	    string = newStringBuffer.toString();
+	}
+    }
 
     // Replace with \n
     newStringBuffer = new StringBuffer();
@@ -429,7 +472,7 @@ public final class Utils {
     }
     newStringBuffer.append(string);
     string = newStringBuffer.toString();
-   
+
     return string;
   }
 
