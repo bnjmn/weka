@@ -58,7 +58,8 @@ import weka.core.converters.CSVLoader;
 import weka.core.converters.C45Loader;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
-import weka.gui.AttributeListPanel;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.AttributeSelectionPanel;
 import weka.gui.AttributeSummaryPanel;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.FileEditor;
@@ -81,7 +82,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -109,7 +110,10 @@ public class PreprocessPanel extends JPanel {
   protected JButton m_SaveBut = new JButton("Save...");
   
   /** Panel to let the user toggle attributes */
-  protected AttributeListPanel m_AttPanel = new AttributeListPanel();
+  protected AttributeSelectionPanel m_AttPanel = new AttributeSelectionPanel();
+
+  /** Button for removing attributes */
+  JButton m_RemoveButton = new JButton("Remove");
 
   /** Displays summary stats on the selected attribute */
   protected AttributeSummaryPanel m_AttSummaryPanel =
@@ -263,13 +267,13 @@ public class PreprocessPanel extends JPanel {
     });
     m_ApplyFilterBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  applyFilter();
+	  applyFilter((Filter) m_FilterEditor.getValue());
 	}
       });
     m_AttPanel.getSelectionModel()
       .addListSelectionListener(new ListSelectionListener() {
 	public void valueChanged(ListSelectionEvent e) {
-	  if (!e.getValueIsAdjusting()) {
+	  if (!e.getValueIsAdjusting()) {	  
 	    ListSelectionModel lm = (ListSelectionModel) e.getSource();
 	    for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
 	      if (lm.isSelectedIndex(i)) {
@@ -285,8 +289,55 @@ public class PreprocessPanel extends JPanel {
 
     m_InstSummaryPanel.setBorder(BorderFactory
 				 .createTitledBorder("Current relation"));
-    m_AttPanel.setBorder(BorderFactory
-		    .createTitledBorder("Attributes"));
+    JPanel attStuffHolderPanel = new JPanel();
+    attStuffHolderPanel.setBorder(BorderFactory
+				  .createTitledBorder("Attributes"));
+    attStuffHolderPanel.setLayout(new BorderLayout());
+    attStuffHolderPanel.add(m_AttPanel, BorderLayout.CENTER);
+    m_RemoveButton.setEnabled(false);
+    m_RemoveButton.setToolTipText("Remove selected attributes.");
+    m_RemoveButton.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  try {
+	    Remove r = new Remove();
+	    int [] selected = m_AttPanel.getSelectedAttributes();
+	    if (selected.length == 0) {
+	      return;
+	    }
+	    if (selected.length == m_Instances.numAttributes()) {
+	      // Pop up an error optionpane
+	      JOptionPane.showMessageDialog(PreprocessPanel.this,
+					    "Can't remove all attributes from data!\n",
+					    "Remove Attributes",
+					    JOptionPane.ERROR_MESSAGE);
+	      m_Log.logMessage("Can't remove all attributes from data!");
+	      m_Log.statusMessage("Problem removing attributes");
+	      return;
+	    }
+	    r.setAttributeIndicesArray(selected);
+	    r.setInputFormat(new Instances(m_Instances));
+	    applyFilter(r);
+	  } catch (Exception ex) {
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskFinished();
+	    }
+	    // Pop up an error optionpane
+	    JOptionPane.showMessageDialog(PreprocessPanel.this,
+					  "Problem filtering instances:\n"
+					  + ex.getMessage(),
+					  "Remove Attributes",
+					  JOptionPane.ERROR_MESSAGE);
+	    m_Log.logMessage("Problem removing attributes: " + ex.getMessage());
+	    m_Log.statusMessage("Problem removing attributes");
+	  }
+	}
+      });
+
+    JPanel p1 = new JPanel();
+    p1.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    p1.setLayout(new BorderLayout());
+    p1.add(m_RemoveButton, BorderLayout.CENTER);
+    attStuffHolderPanel.add(p1, BorderLayout.SOUTH);
     m_AttSummaryPanel.setBorder(BorderFactory
 		    .createTitledBorder("Selected attribute"));
     m_UndoBut.setEnabled(false);
@@ -305,7 +356,7 @@ public class PreprocessPanel extends JPanel {
     JPanel attInfo = new JPanel();
 
     attInfo.setLayout(new BorderLayout());
-    attInfo.add(m_AttPanel, BorderLayout.CENTER);
+    attInfo.add(attStuffHolderPanel, BorderLayout.CENTER);
 
     JPanel filter = new JPanel();
     filter.setBorder(BorderFactory
@@ -407,6 +458,7 @@ public class PreprocessPanel extends JPanel {
 	public void run() {
 	  m_InstSummaryPanel.setInstances(m_Instances);
 	  m_AttPanel.setInstances(m_Instances);
+	  m_RemoveButton.setEnabled(true);
 	  m_AttSummaryPanel.setInstances(m_Instances);
 	  m_AttVisualizePanel.setInstances(m_Instances);
 
@@ -473,14 +525,13 @@ public class PreprocessPanel extends JPanel {
   /**
    * Passes the dataset through the filter that has been configured for use.
    */
-  protected void applyFilter() {
+  protected void applyFilter(final Filter filter) {
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
 	public void run() {
 	  try {
 
-	    Filter filter = (Filter) m_FilterEditor.getValue();
 	    if (filter != null) {
 	    
 	      if (m_Log instanceof TaskLogger) {
