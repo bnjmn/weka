@@ -1,3 +1,22 @@
+/*
+ *    SetupPanel.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 
 package weka.gui.experiment;
 
@@ -23,6 +42,10 @@ import java.awt.GridLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -36,6 +59,8 @@ import javax.swing.JTextField;
 import javax.swing.Box;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -45,30 +70,45 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 
+
+/** 
+ * This panel controls the configuration of an experiment.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class SetupPanel extends JPanel {
 
+  /** The experiment being configured */
   protected Experiment m_Exp;
-  
+
+  /** The ResultProducer editor */
   protected GenericObjectEditor m_RPEditor = new GenericObjectEditor();
+
+  /** The panel to contain the ResultProducer editor */
   protected PropertyPanel m_RPEditorPanel = new PropertyPanel(m_RPEditor);
 
+  /** The ResultListener editor */
   protected GenericObjectEditor m_RLEditor = new GenericObjectEditor();
+
+  /** The panel to contain the ResultListener editor */
   protected PropertyPanel m_RLEditorPanel = new PropertyPanel(m_RLEditor);
 
+  /** The panel that configures iteration on custom resultproducer property */
   protected GeneratorPropertyIteratorPanel m_GeneratorPropertyPanel
     = new GeneratorPropertyIteratorPanel();
+
+  /** The panel for configuring run numbers */
   protected RunNumberPanel m_RunNumberPanel = new RunNumberPanel();
+
+  /** The panel for configuring selected datasets */
   protected DatasetListPanel m_DatasetListPanel = new DatasetListPanel();
 
+  /** Area for user notes */
   protected JTextArea m_NotesText = new JTextArea();
-  
+
+  // Registers the appropriate property editors
   static {
     System.err.println("---Registering Weka Editors---");
     java.beans.PropertyEditorManager
@@ -94,12 +134,20 @@ public class SetupPanel extends JPanel {
 		      SelectedTagEditor.class);
   }
   
+  /**
+   * Creates the setup panel with the supplied initial experiment.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public SetupPanel(Experiment exp) {
 
     this();
     setExperiment(exp);
   }
   
+  /**
+   * Creates the setup panel with no initial experiment.
+   */
   public SetupPanel() {
 
     m_RPEditor.setClassType(ResultProducer.class);
@@ -138,7 +186,8 @@ public class SetupPanel extends JPanel {
 	m_Exp.setNotes(m_NotesText.getText());
       }
     });
-    
+
+    // Set up the GUI layout
     JPanel src = new JPanel();
     src.setLayout(new BorderLayout());
     src.setBorder(BorderFactory.createCompoundBorder(
@@ -184,6 +233,11 @@ public class SetupPanel extends JPanel {
     add(p2, BorderLayout.CENTER);
   }
   
+  /**
+   * Sets the experiment to configure.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public void setExperiment(Experiment exp) {
 
     m_Exp = exp;

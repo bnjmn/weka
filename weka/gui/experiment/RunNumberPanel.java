@@ -1,3 +1,21 @@
+/*
+ *    RunNumberPanel.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 package weka.gui.experiment;
 
@@ -5,9 +23,15 @@ import weka.experiment.Experiment;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -18,22 +42,32 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
-import java.awt.FlowLayout;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 
 
+
+/** 
+ * This panel controls configuration of lower and upper run numbers
+ * in an experiment.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class RunNumberPanel extends JPanel {
 
+  /** Configures the lower run number */
   protected JTextField m_LowerText = new JTextField("1");
+
+  /** Configures the upper run number */
   protected JTextField m_UpperText = new JTextField("10");
+
+  /** The experiment being configured */
   protected Experiment m_Exp;
   
+  /**
+   * Creates the panel with no initial experiment.
+   */
   public RunNumberPanel() {
     
     // Updates occur to the values in exp whenever enter is pressed
@@ -58,9 +92,10 @@ public class RunNumberPanel extends JPanel {
 	m_Exp.setRunUpper(getUpper());
       }
     });
-
     m_LowerText.setEnabled(false);
     m_UpperText.setEnabled(false);
+
+    // Set the GUI layout
     setLayout(new GridLayout(1,2));
     setBorder(BorderFactory.createTitledBorder("Runs"));
     Box b1 = new Box(BoxLayout.X_AXIS);
@@ -77,12 +112,22 @@ public class RunNumberPanel extends JPanel {
     add(b2);
   }
 
+  /**
+   * Creates the panel with the supplied initial experiment.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public RunNumberPanel(Experiment exp) {
 
     this();
     setExperiment(exp);
   }
 
+  /**
+   * Sets the experiment to be configured.
+   *
+   * @param exp a value of type 'Experiment'
+   */
   public void setExperiment(Experiment exp) {
     
     m_Exp = exp;
@@ -92,6 +137,11 @@ public class RunNumberPanel extends JPanel {
     m_UpperText.setEnabled(true);
   }
   
+  /**
+   * Gets the current lower run number.
+   *
+   * @return the lower run number.
+   */
   public int getLower() {
 
     int result = 1;
@@ -101,6 +151,12 @@ public class RunNumberPanel extends JPanel {
     }
     return Math.max(1, result);
   }
+  
+  /**
+   * Gets the current upper run number.
+   *
+   * @return the upper run number.
+   */
   public int getUpper() {
 
     int result = 1;
@@ -112,9 +168,9 @@ public class RunNumberPanel extends JPanel {
   }
   
   /**
-   * Tests out the classifier editor from the command line.
+   * Tests out the panel from the command line.
    *
-   * @param args may contain the class name of a classifier to edit
+   * @param args ignored.
    */
   public static void main(String [] args) {
 
