@@ -25,7 +25,7 @@ import weka.core.*;
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class C45Split extends ClassifierSplitModel{
 
@@ -328,6 +328,37 @@ public class C45Split extends ClassifierSplitModel{
     return text.toString();
   }
   
+  /**
+   * Returns a string containing java source code equivalent to the test
+   * made at this node. The instance being tested is called "i".
+   *
+   * @param index index of the nominal value tested
+   * @param data the data containing instance structure info
+   * @return a value of type 'String'
+   */
+  public final String sourceExpression(int index, Instances data) {
+
+    StringBuffer expr = null;
+    if (index < 0) {
+      return "i[" + m_attIndex + "] == null";
+    }
+    if (data.attribute(m_attIndex).isNominal()) {
+      expr = new StringBuffer("i[");
+      expr.append(m_attIndex).append("]");
+      expr.append(".equals(\"").append(data.attribute(m_attIndex)
+				     .value(index)).append("\")");
+    } else {
+      expr = new StringBuffer("((Double) i[");
+      expr.append(m_attIndex).append("])");
+      if (index == 0) {
+	expr.append(".doubleValue() <= ").append(m_splitPoint);
+      } else {
+	expr.append(".doubleValue() > ").append(m_splitPoint);
+      }
+    }
+    return expr.toString();
+  }  
+
   /**
    * Sets split point to greatest value in given data smaller or equal to
    * old split point.

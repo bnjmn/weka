@@ -54,10 +54,10 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
-  Drawable, Matchable, WeightedInstancesHandler, Summarizable {
+  Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable {
 
   /** The decision tree */
   private ClassifierTree m_root;
@@ -149,6 +149,47 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   public String prefix() throws Exception {
     
     return m_root.prefix();
+  }
+
+
+  /**
+   * Returns tree as an if-then statement.
+   *
+   * @return the tree as a Java if-then type statement
+   * @exception Exception if something goes wrong
+   */
+  public String toSource() throws Exception {
+
+    StringBuffer [] source = m_root.toSource("    ");
+    return 
+     "package weka.classifiers;\n"
+    +"import weka.core.Attribute;\n"
+    +"import weka.core.Instance;\n"
+    +"import weka.core.Instances;\n"
+    +"import weka.classifiers.Classifier;\n\n"
+    +"public class J48InducedClassifier extends Classifier {\n\n"
+    +"  public void buildClassifier(Instances i) throws Exception {\n"
+    +"  }\n\n"
+    +"  public double classifyInstance(Instance i) throws Exception {\n\n"
+    +"    Object [] s = new Object [i.numAttributes()];\n"
+    +"    for (int j = 0; j < s.length; j++) {\n"
+    +"      if (!i.isMissing(j)) {\n"
+    +"        if (i.attribute(j).type() == Attribute.NOMINAL) {\n"
+    +"          s[j] = i.attribute(j).value((int) i.value(j));\n"
+    +"        } else if (i.attribute(j).type() == Attribute.NUMERIC) {\n"
+    +"          s[j] = new Double(i.value(j));\n"
+    +"        }\n"
+    +"      }\n"
+    +"    }\n"
+    +"    return simpleClassify(s);\n"
+    +"  }\n\n"
+    +"  public double simpleClassify(Object [] i) throws Exception {\n\n"
+    +"    double p = Double.NaN;\n"
+    + source[0]  // Assignment code
+    +"    return p;\n"
+    +"  }\n"
+    + source[1]  // Support code
+    +"}\n";
   }
 
   /**
