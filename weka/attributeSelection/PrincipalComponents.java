@@ -32,9 +32,9 @@ import  weka.filters.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
-public class PrincipalComponents extends AttributeEvaluator 
+public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
   
   /** The data to transform analyse/transform */
