@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.35 $ 
  */
 public class Instances implements Serializable {
  
@@ -1172,8 +1172,15 @@ public class Instances implements Serializable {
     if (Utils.smOrEq(sumOfWeights, 1)) {
       return 0;
     }
-    return (sumSquared - (sum * sum / sumOfWeights)) / 
+    double result = (sumSquared - (sum * sum / sumOfWeights)) / 
       (sumOfWeights - 1);
+
+    // We don't like negative variance
+    if (result < 0) {
+      return 0;
+    } else {
+      return result;
+    }
   }
 
   /**
