@@ -1,6 +1,6 @@
 /*
  *    Logistic.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 Len Trigg, Eibe Frank
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,13 @@ import weka.core.*;
 import weka.filters.*;
 
 /**
- * Class for building and using a two-class logistic regression model.
+ * Class for building and using a two-class logistic regression model
+ * with a ridge estimator.  <p>
+ * 
+ * Reference: le Cessie, S. and van Houwelingen, J.C. (1997). <i>
+ * Ridge Estimators in Logistic Regression.</i> Applied Statistics,
+ * Vol. 41, No. 1, pp. 191-201. <p>
+ *
  * Missing values are replaced using a ReplaceMissingValuesFilter, and
  * nominal attributes are transformed into numeric attributes using a
  * NominalToBinaryFilter.<p>
@@ -34,7 +40,8 @@ import weka.filters.*;
  * Turn on debugging output.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.6 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
 
@@ -52,6 +59,9 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 
   /** The index of the class attribute */
   protected int m_ClassIndex;
+
+  /** The ridge parameter. */
+  protected double m_Ridge = 1e-8;
 
   /** The filter used to make attributes numeric. */
   private NominalToBinaryFilter m_NominalToBinary;
@@ -133,6 +143,16 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 	  Arr[j][k] += xij * X[i][k] * w;
 	}
       }
+    }
+
+    // Add ridge adjustment to first derivative
+    for (int j = 0; j < m_Par.length; j++) {
+      deltas[j] -= 2 * m_Ridge * m_Par[j];
+    }
+
+    // Add ridge adjustment to second derivative
+    for (int j = 0; j < Arr.length; j++) {
+      Arr[j][j] += 2 * m_Ridge;
     }
 
     // Fill out the rest of the array
@@ -243,7 +263,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     if (train.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
-    m_ClassIndex = train.classIndex();
     train = new Instances(train);
     train.deleteWithMissingClass();
     if (train.numInstances() == 0) {
@@ -255,6 +274,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     m_NominalToBinary = new NominalToBinaryFilter();
     m_NominalToBinary.inputFormat(train);
     train = Filter.useFilter(train, m_NominalToBinary);
+    m_ClassIndex = train.classIndex();
 
     int nR = m_NumPredictors = train.numAttributes() - 1;
     int nC = train.numInstances();
@@ -276,9 +296,9 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
       for (int k = 0; k <= nR; k++) {
 	if (k != m_ClassIndex) {
 	  double x = current.value(k);
-	  if ((i == j) && (i <= nR)) {
+	  /*if ((i == j) && (i <= nR)) {
 	    x += 1e-8;
-	  }
+	    }*/
 	  X[i][j] = x;
 	  xMean[j] = xMean[j] + x;
 	  xSD[j] = xSD[j] + x*x;
