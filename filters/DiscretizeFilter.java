@@ -35,16 +35,20 @@ import weka.core.*;
  * Valid filter-specific options are: <p>
  *
  * -B num <br>
- * Specify the (maximum) number of bins to divide numeric attributes into.
- * (default class-based discretisation).<p>
+ * Specifies the (maximum) number of bins to divide numeric attributes into.
+ * (default: class-based discretisation).<p>
+ *
+ * -F <br>
+ * Use equal-frequency instead of equal-width discretization if 
+ * class-based discretisation is turned off.<p>
  *
  * -O <br>
- * Optimizes the number of bins using a leave-one-out estimate of the 
- * entropy.<p>
+ * Optimize the number of bins using a leave-one-out estimate of the 
+ * entropy (for equal-width binning).<p>
  *
  * -R col1,col2-col4,... <br>
- * Specify list of columns to Discretize. First
- * and last are valid indexes. (default none) <p>
+ * Specifies list of columns to Discretize. First
+ * and last are valid indexes. (default: none) <p>
  *
  * -V <br>
  * Invert matching sense.<p>
@@ -59,8 +63,8 @@ import weka.core.*;
  * Use Kononeko's MDL criterion. <p>
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.15 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.16 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -89,6 +93,9 @@ public class DiscretizeFilter extends Filter
   /** Find the number of bins using cross-validated entropy. */
   protected boolean m_FindNumBins = false;
 
+  /** Use equal-frequency binning if unsupervised discretization turned on */
+  protected boolean m_UseEqualFrequency = false;
+
   /** Constructor - initialises the filter */
   public DiscretizeFilter() {
 
@@ -106,14 +113,19 @@ public class DiscretizeFilter extends Filter
     Vector newVector = new Vector(7);
 
     newVector.addElement(new Option(
-              "\tSpecify the (maximum) number of bins to divide numeric"
+              "\tSpecifies the (maximum) number of bins to divide numeric"
 	      + " attributes into.\n"
 	      + "\t(default class-based discretization)",
               "B", 1, "-B <num>"));
 
     newVector.addElement(new Option(
+              "\tUse equal-frequency instead of equal-width with\n"+
+	      "\tunsupervised discretization.",
+              "F", 0, "-F"));
+
+    newVector.addElement(new Option(
               "\tOptimize number of bins using leave-one-out estimate\n"+
-	      "\t of estimated entropy.",
+	      "\tof estimated entropy (for equal-width discretization).",
               "O", 0, "-O"));
 
     /* If we decide to implement loading and saving cutfiles like 
@@ -127,7 +139,7 @@ public class DiscretizeFilter extends Filter
     */
 
     newVector.addElement(new Option(
-              "\tSpecify list of columns to Discretize. First"
+              "\tSpecifies list of columns to Discretize. First"
 	      + " and last are valid indexes.\n"
 	      + "\t(default none)",
               "R", 1, "-R <col1,col2-col4,...>"));
@@ -156,15 +168,19 @@ public class DiscretizeFilter extends Filter
    * Parses the options for this object. Valid options are: <p>
    *
    * -B num <br>
-   * Specify the (maximum) number of equal-width bins to divide
-   * numeric attributes into. (default class-based discretization).<p>
+   * Specifies the (maximum) number of bins to divide numeric attributes into.
+   * (default class-based discretisation).<p>
    *
-   * -O
-   * Optimizes the number of bins using a leave-one-out estimate of the 
-   * entropy.
+   * -F <br>
+   * Use equal-frequency instead of equal-width discretization if 
+   * class-based discretisation is turned off.<p>
+   *
+   * -O <br>
+   * Optimize the number of bins using a leave-one-out estimate of the 
+   * entropy (for equal-width binning).<p>
    *
    * -R col1,col2-col4,... <br>
-   * Specify list of columns to discretize. First
+   * Specifies list of columns to Discretize. First
    * and last are valid indexes. (default none) <p>
    *
    * -V <br>
@@ -185,6 +201,7 @@ public class DiscretizeFilter extends Filter
   public void setOptions(String[] options) throws Exception {
 
     setMakeBinary(Utils.getFlag('D', options));
+    setUseEqualFrequency(Utils.getFlag('F', options));
     setUseBetterEncoding(Utils.getFlag('E', options));
     setUseKononenko(Utils.getFlag('K', options));
     setFindNumBins(Utils.getFlag('O', options));
@@ -217,11 +234,14 @@ public class DiscretizeFilter extends Filter
    */
   public String [] getOptions() {
 
-    String [] options = new String [11];
+    String [] options = new String [12];
     int current = 0;
 
     if (getMakeBinary()) {
       options[current++] = "-D";
+    }
+    if (getUseEqualFrequency()) {
+      options[current++] = "-F";
     }
     if (getUseBetterEncoding()) {
       options[current++] = "-E";
@@ -271,6 +291,11 @@ public class DiscretizeFilter extends Filter
       if (!instanceInfo.classAttribute().isNominal()) {
 	throw new UnsupportedClassTypeException("Supervised discretization not possible:"
                                                 + " class is not nominal!");
+      }
+    } else {
+      if (getFindNumBins() && getUseEqualFrequency()) {
+	throw new IllegalArgumentException("Bin number optimization in conjunction "+
+					   "with equal-frequency binning not implemented.");
       }
     }
 
@@ -364,7 +389,7 @@ public class DiscretizeFilter extends Filter
    */
   public String findNumBinsTipText() {
 
-    return "Optimize bins using leave-one-out.";
+    return "Optimize number of equal-width bins using leave-one-out.";
   }
 
   /**
@@ -384,7 +409,6 @@ public class DiscretizeFilter extends Filter
    */
   public void setFindNumBins(boolean newFindNumBins) {
     
-    m_UseMDL = false;
     m_FindNumBins = newFindNumBins;
   }
   
@@ -464,7 +488,27 @@ public class DiscretizeFilter extends Filter
     return "Use Kononenko's MDL criterion. If set to false"
       + " uses the Fayyad & Irani criterion.";
   }
-
+  
+  /**
+   * Get the value of UseEqualFrequency.
+   *
+   * @return Value of UseEqualFrequency.
+   */
+  public boolean getUseEqualFrequency() {
+    
+    return m_UseEqualFrequency;
+  }
+  
+  /**
+   * Set the value of UseEqualFrequency.
+   *
+   * @param newUseEqualFrequency Value to assign to UseEqualFrequency.
+   */
+  public void setUseEqualFrequency(boolean newUseEqualFrequency) {
+    
+    m_UseEqualFrequency = newUseEqualFrequency;
+  }
+  
   /**
    * Gets whether Kononenko's MDL criterion is to be used.
    *
@@ -482,7 +526,6 @@ public class DiscretizeFilter extends Filter
    */
   public void setUseKononenko(boolean useKon) {
 
-    m_UseMDL = true;
     m_UseKononenko = useKon;
   }
 
@@ -494,8 +537,7 @@ public class DiscretizeFilter extends Filter
    */
   public String useBetterEncodingTipText() {
 
-    return "Uses a different split point encoding. Who says it's better?"
-      + " (Eibe fix this).";
+    return "Uses a more efficient split point encoding.";
   }
 
   /**
@@ -515,7 +557,6 @@ public class DiscretizeFilter extends Filter
    */
   public void setUseBetterEncoding(boolean useBetterEncoding) {
 
-    m_UseMDL = true;
     m_UseBetterEncoding = useBetterEncoding;
   }
 
@@ -548,7 +589,6 @@ public class DiscretizeFilter extends Filter
    */
   public void setBins(int numBins) {
 
-    m_UseMDL = false;
     m_NumBins = numBins;
   }
 
@@ -674,8 +714,10 @@ public class DiscretizeFilter extends Filter
 	} else {
 	  if (m_FindNumBins) {
 	    findNumBins(i);
+	  } else if (!m_UseEqualFrequency) {
+	    calculateCutPointsByEqualWidthBinning(i);
 	  } else {
-	    calculateCutPointsByBinning(i);
+	    calculateCutPointsByEqualFrequencyBinning(i);
 	  }
 	}
       }
@@ -918,7 +960,7 @@ public class DiscretizeFilter extends Filter
    *
    * @param index the index of the attribute to set cutpoints for
    */
-  protected void calculateCutPointsByBinning(int index) {
+  protected void calculateCutPointsByEqualWidthBinning(int index) {
 
     // Scan for max and min values
     double max = 0, min = 1, currentVal;
@@ -947,6 +989,66 @@ public class DiscretizeFilter extends Filter
       }
     }
     m_CutPoints[index] = cutPoints;
+  }
+ 
+  /**
+   * Set cutpoints for a single attribute.
+   *
+   * @param index the index of the attribute to set cutpoints for
+   */
+  protected void calculateCutPointsByEqualFrequencyBinning(int index) {
+
+    // Copy data so that it can be sorted
+    Instances data = new Instances(getInputFormat());
+
+    // Sort input data
+    data.sort(index);
+
+    // Compute weight of instances without missing values
+    double sumOfWeights = 0;
+    for (int i = 0; i < data.numInstances(); i++) {
+      if (data.instance(i).isMissing(index)) {
+	break;
+      } else {
+	sumOfWeights += data.instance(i).weight();
+      }
+    }
+    double freq = sumOfWeights / m_NumBins;
+
+    // Compute break points
+    double[] cutPoints = new double[m_NumBins - 1];
+    double counter = 0;
+    int cpindex = 0;
+    for (int i = 0; i < data.numInstances() - 1; i++) {
+
+      // Stop if value missing
+      if (data.instance(i).isMissing(index)) {
+	break;
+      }
+      counter += data.instance(i).weight();
+
+      // Do we have a potential breakpoint?
+      if (data.instance(i).value(index) < 
+	  data.instance(i + 1).value(index)) {
+	if (counter >= freq) {
+	  cutPoints[cpindex] = (data.instance(i).value(index) +
+				data.instance(i + 1).value(index)) / 2;
+	  cpindex++;
+	  counter = counter - freq;
+	}
+      }
+    }
+
+    // Did we find any cutpoints?
+    if (cpindex == 0) {
+      m_CutPoints[index] = null;
+    } else {
+      double[] cp = new double[cpindex];
+      for (int i = 0; i < cpindex; i++) {
+	cp[i] = cutPoints[i];
+      }
+      m_CutPoints[index] = cp;
+    }
   }
 
   /**
@@ -1022,7 +1124,7 @@ public class DiscretizeFilter extends Filter
       }
     }
     m_CutPoints[index] = cutPoints;
-  }
+   }
 
   /**
    * Set the output format. Takes the currently defined cutpoints and 
