@@ -26,11 +26,16 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.Font;
 import java.beans.Customizer;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
+import java.beans.MethodDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
@@ -49,13 +54,18 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+
 
 /** 
  * Displays a property sheet where (supported) properties of the target
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -66,6 +76,9 @@ public class PropertySheetPanel extends JPanel
   /** Holds properties of the target */
   private PropertyDescriptor m_Properties[];
 
+  /** Holds the methods of the target */
+  private MethodDescriptor m_Methods[];
+
   /** Holds property editors of the object */
   private PropertyEditor m_Editors[];
 
@@ -73,10 +86,13 @@ public class PropertySheetPanel extends JPanel
   private Object m_Values[];
 
   /** Stores GUI components containing each editing component */
-  private Component m_Views[];
+  private JComponent m_Views[];
 
   /** The labels for each property */
   private JLabel m_Labels[];
+
+  /** The tool tip text for each property */
+  private String m_TipTexts[];
 
   /** A count of the number of properties we have an editor for */
   private int m_NumEditable = 0;
@@ -128,10 +144,16 @@ public class PropertySheetPanel extends JPanel
    * @param targ a value of type 'Object'
    */
   public synchronized void setTarget(Object targ) {
-	
+
+    // used to offset the components for the properties of targ
+    // if there happens to be globalInfo available in targ
+    int componentOffset = 0;
+
     // Close any child windows at this point
     removeAll();
+    
     GridBagLayout gbLayout = new GridBagLayout();
+
     setLayout(gbLayout);
     setVisible(false);
     m_NumEditable = 0;
@@ -139,15 +161,67 @@ public class PropertySheetPanel extends JPanel
     try {
       BeanInfo bi = Introspector.getBeanInfo(m_Target.getClass());
       m_Properties = bi.getPropertyDescriptors();
+      m_Methods = bi.getMethodDescriptors();
     } catch (IntrospectionException ex) {
       System.err.println("PropertySheet: Couldn't introspect");
       return;
     }
 
+    // Look for a globalInfo method that returns a string
+    // describing the target
+    for (int i = 0;i < m_Methods.length; i++) {
+      String name = m_Methods[i].getDisplayName();
+      Method meth = m_Methods[i].getMethod();
+      if (name.equals("globalInfo")) {
+	if (meth.getReturnType().equals(String.class)) {
+	  try {
+	    Object args[] = { };
+	    final String globalInfo = (String)(meth.invoke(m_Target, args));
+	    final String className = targ.getClass().getName();
+	    /*	    m_globalAboutBut = new JButton("About");
+	    m_globalAboutBut.setToolTipText("Click for information about "
+			       +className);
+	    
+	    m_globalAboutBut.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent a) {
+		  popupGlobalInfo(className, globalInfo);
+		  m_globalAboutBut.setEnabled(false);
+		}
+	      });
+	    */
+	    JTextArea jt = new JTextArea();
+	    jt.setFont(new Font("SansSerif", Font.PLAIN,12));
+	    jt.setEditable(false);
+	    jt.setText(globalInfo);
+	    JPanel jp = new JPanel();
+	    jp.setBorder(BorderFactory.createCompoundBorder(
+			 BorderFactory.createTitledBorder("About"),
+			 BorderFactory.createEmptyBorder(0, 5, 5, 5)
+		 ));
+	    jp.setLayout(new BorderLayout());
+	    jp.add(jt);
+	    GridBagConstraints gbConstraints = new GridBagConstraints();
+	    //	    gbConstraints.anchor = GridBagConstraints.EAST;
+	    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+	    gbConstraints.gridy = 0;     gbConstraints.gridx = 0;
+	    gbConstraints.gridwidth = 2;
+	    gbConstraints.insets = new Insets(0,5,0,5);
+	    gbLayout.setConstraints(jp, gbConstraints);
+	    add(jp);
+	    componentOffset = 1;
+	    break;
+	  } catch (Exception ex) {
+	    
+	  }
+	}
+      }
+    }
+
     m_Editors = new PropertyEditor[m_Properties.length];
     m_Values = new Object[m_Properties.length];
-    m_Views = new Component[m_Properties.length];
+    m_Views = new JComponent[m_Properties.length];
     m_Labels = new JLabel[m_Properties.length];
+    m_TipTexts = new String[m_Properties.length];
     for (int i = 0; i < m_Properties.length; i++) {
 
       // Don't display hidden or expert properties.
@@ -165,7 +239,7 @@ public class PropertySheetPanel extends JPanel
 	continue;
       }
 	
-      Component view = null;
+      JComponent view = null;
 
       try {
 	Object args[] = { };
@@ -216,6 +290,22 @@ public class PropertySheetPanel extends JPanel
 
 	editor.setValue(value);
 
+	// now look for a TipText method for this property
+	for (int j = 0;j < m_Methods.length; j++) {
+	  String mname = m_Methods[j].getDisplayName();
+	  Method meth = m_Methods[j].getMethod();
+	  if (mname.startsWith(name)) {
+	    if (meth.getReturnType().equals(String.class)) {
+	      try {
+		m_TipTexts[i] = (String)(meth.invoke(m_Target, args));
+	      } catch (Exception ex) {
+
+	      }
+	      break;
+	    }
+	  }
+	}	  
+
 	// Now figure out how to display it...
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
@@ -251,17 +341,20 @@ public class PropertySheetPanel extends JPanel
       GridBagConstraints gbConstraints = new GridBagConstraints();
       gbConstraints.anchor = GridBagConstraints.EAST;
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-      gbConstraints.gridy = i;     gbConstraints.gridx = 0;
+      gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(m_Labels[i], gbConstraints);
       add(m_Labels[i]);
       JPanel newPanel = new JPanel();
+      if (m_TipTexts[i] != null) {
+	m_Views[i].setToolTipText(m_TipTexts[i]);
+      }
       newPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
       newPanel.setLayout(new BorderLayout());
       newPanel.add(m_Views[i], BorderLayout.CENTER);
       gbConstraints = new GridBagConstraints();
       gbConstraints.anchor = GridBagConstraints.WEST;
       gbConstraints.fill = GridBagConstraints.BOTH;
-      gbConstraints.gridy = i;     gbConstraints.gridx = 1;
+      gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 1;
       gbConstraints.weightx = 100;
       gbLayout.setConstraints(newPanel, gbConstraints);
       add(newPanel);
@@ -272,6 +365,7 @@ public class PropertySheetPanel extends JPanel
       empty.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
       add(empty);
     }
+
     validate();
     setVisible(true);	
   }
