@@ -22,7 +22,7 @@
 
 package weka.classifiers.evaluation;
 
-import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.VotedPerceptron;
 import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -38,7 +38,7 @@ import weka.classifiers.DistributionClassifier;
  * "positive".
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class CostCurve {
@@ -140,7 +140,7 @@ public class CostCurve {
       inst.setClassIndex(inst.numAttributes() - 1);
       CostCurve cc = new CostCurve();
       EvaluationUtils eu = new EvaluationUtils();
-      DistributionClassifier classifier = new weka.classifiers.functions.SMO();
+      DistributionClassifier classifier = new weka.classifiers.functions.VotedPerceptron();
       FastVector predictions = new FastVector();
       for (int i = 0; i < 2; i++) { // Do two runs.
 	eu.setSeed(i);
