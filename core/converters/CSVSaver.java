@@ -31,9 +31,11 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Enumeration;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
 
 /**
  * Writes to a destination in csv format.
@@ -41,22 +43,27 @@ import weka.core.Instances;
  * Valid options:
  *
  * -i input arff file <br>
- * The input filw in arff format. <p>
+ * The input filw in ARFF format. <p>
  *
  * -o the output file <br>
  * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
  * 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class CSVSaver extends AbstractSaver implements BatchConverter, IncrementalConverter, FileSourcedConverter {
+public class CSVSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, FileSourcedConverter {
 
+    /** Constructor */  
+  public CSVSaver(){
+  
+      resetOptions();
+  }
    
   /**
-   * Returns a string describing this Loader
-   * @return a description of the Loader suitable for
+   * Returns a string describing this Saver
+   * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
@@ -117,7 +124,7 @@ public class CSVSaver extends AbstractSaver implements BatchConverter, Increment
       if(writeMode == STRUCTURE_READY){
           setWriteMode(WRITE);
           //write header
-          if(getFile() == null || outW == null){
+          if(retrieveFile() == null || outW == null){
               // print out attribute names as first row
               for (int i = 0; i < structure.numAttributes(); i++) {
                 System.out.print(structure.attribute(i).name());
@@ -146,10 +153,17 @@ public class CSVSaver extends AbstractSaver implements BatchConverter, Increment
               throw new IOException("No instances information available.");
           if(inst != null){
           //write instance 
-              if(getFile() == null || outW == null)
+              if(retrieveFile() == null || outW == null)
                 System.out.println(inst);
-              else
+              else{
                 outW.println(inst);
+                //flushes every 100 instances
+                m_incrementalCounter++;
+                if(m_incrementalCounter > 100){
+                    m_incrementalCounter = 0;
+                    outW.flush();
+                }
+              }
           }
           else{
           //close
@@ -157,8 +171,8 @@ public class CSVSaver extends AbstractSaver implements BatchConverter, Increment
                 outW.flush();
                 outW.close();
               }
-              setWriteMode(WAIT);
-              setStructure(null);
+              m_incrementalCounter = 0;
+              resetStructure();
           }
       }
   }  
@@ -174,7 +188,7 @@ public class CSVSaver extends AbstractSaver implements BatchConverter, Increment
           throw new IOException("Batch and incremental saving cannot be mixed.");
       setRetrieval(BATCH);
       setWriteMode(WRITE);
-      if(getFile() == null || getWriter() == null){
+      if(retrieveFile() == null || getWriter() == null){
           // print out attribute names as first row
           for (int i = 0; i < getInstances().numAttributes(); i++) {
             System.out.print(getInstances().attribute(i).name());
@@ -187,6 +201,7 @@ public class CSVSaver extends AbstractSaver implements BatchConverter, Increment
         for (int i = 0; i < getInstances().numInstances(); i++) {
             System.out.println(getInstances().instance(i));
         }
+        setWriteMode(WAIT);
         return;
       }
       PrintWriter outW = new PrintWriter(getWriter());
@@ -205,6 +220,7 @@ public class CSVSaver extends AbstractSaver implements BatchConverter, Increment
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
+      
   }
 
   /**
@@ -213,21 +229,32 @@ public class CSVSaver extends AbstractSaver implements BatchConverter, Increment
    * @param options should contain the options of a Saver.
    */
   public static void main(String [] options) {
+      
+      StringBuffer text = new StringBuffer();
       try {
 	CSVSaver csv = new CSVSaver();
+        text.append("\n\nCSVSaver options:\n\n");
+        Enumeration enumi = csv.listOptions();
+        while (enumi.hasMoreElements()) {
+            Option option = (Option)enumi.nextElement();
+            text.append(option.synopsis()+'\n');
+            text.append(option.description()+'\n');
+        }
         try {
           csv.setOptions(options);  
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println("\n"+text);
+            System.exit(1);
 	}
-        //incre,ental
+        //incremental
         /*
         csv.setRetrieval(INCREMENTAL);
         Instances instances = csv.getInstances();
         csv.setStructure(instances);
-        for(int i = 0; i <= instances.numInstances(); i++){ //last instance is null and finishes incremental saving
+        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
             csv.writeIncremental(instances.instance(i));
         }
+        csv.writeIncremental(null);
         */
         
         //batch

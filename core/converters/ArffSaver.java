@@ -31,9 +31,11 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Enumeration;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
 
 /**
  * Writes to a destination in arff text format.
@@ -41,22 +43,29 @@ import weka.core.Instances;
  * Valid options:
  *
  * -i input arff file <br>
- * The input filw in arff format. <p>
+ * The input filw in ARFF format. <p>
  *
  * -o the output file <br>
  * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class ArffSaver extends AbstractSaver implements BatchConverter, IncrementalConverter {
+public class ArffSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
 
+    
+  /** Constructor */  
+  public ArffSaver(){
+  
+      resetOptions();
+  }
+   
    
   /**
-   * Returns a string describing this Loader
-   * @return a description of the Loader suitable for
+   * Returns a string describing this Saver
+   * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
@@ -120,7 +129,7 @@ public class ArffSaver extends AbstractSaver implements BatchConverter, Incremen
           setWriteMode(WRITE);
           //write header
           Instances header = new Instances(structure,0);
-          if(getFile() == null || outW == null)
+          if(retrieveFile() == null || outW == null)
               System.out.println(header.toString());
           else{
               outW.print(header.toString());
@@ -134,13 +143,16 @@ public class ArffSaver extends AbstractSaver implements BatchConverter, Incremen
               throw new IOException("No instances information available.");
           if(inst != null){
           //write instance 
-              if(getFile() == null || outW == null)
+              if(retrieveFile() == null || outW == null)
                 System.out.println(inst);
               else{
-                //PrintWriter outW = new PrintWriter(getWriter());
                 outW.println(inst);
-                //outW.flush();
-                //outW.close(); 
+                m_incrementalCounter++;
+                //flush every 100 instances
+                if(m_incrementalCounter > 100){
+                    m_incrementalCounter = 0;
+                    outW.flush();
+                }
               }
           }
           else{
@@ -149,8 +161,8 @@ public class ArffSaver extends AbstractSaver implements BatchConverter, Incremen
                 outW.flush();
                 outW.close();
               }
-              setWriteMode(WAIT);
-              setStructure(null);
+              m_incrementalCounter = 0;
+              resetStructure();
           }
       }
   }
@@ -166,8 +178,9 @@ public class ArffSaver extends AbstractSaver implements BatchConverter, Incremen
           throw new IOException("Batch and incremental saving cannot be mixed.");
       setRetrieval(BATCH);
       setWriteMode(WRITE);
-      if(getFile() == null || getWriter() == null){
+      if(retrieveFile() == null || getWriter() == null){
           System.out.println((getInstances()).toString());
+          setWriteMode(WAIT);
           return;
       }
       PrintWriter outW = new PrintWriter(getWriter());
@@ -183,22 +196,31 @@ public class ArffSaver extends AbstractSaver implements BatchConverter, Incremen
    * @param options should contain the options of a Saver.
    */
   public static void main(String [] options) {
-      try {
-	ArffSaver asv = new ArffSaver();
+      
+      StringBuffer text = new StringBuffer();
+      try{
+        ArffSaver asv = new ArffSaver();
+        text.append("\n\nArffSaver options:\n\n");
+        Enumeration enumi = asv.listOptions();
+        while (enumi.hasMoreElements()) {
+            Option option = (Option)enumi.nextElement();
+            text.append(option.synopsis()+'\n');
+            text.append(option.description()+'\n');
+        }
         try {
           asv.setOptions(options);  
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println("\n"+text);
+            System.exit(1);
 	}
-        //incre,ental
-        /*
-        asv.setRetrieval(INCREMENTAL);
+        //incremental
+        /*asv.setRetrieval(INCREMENTAL);
         Instances instances = asv.getInstances();
         asv.setStructure(instances);
-        for(int i = 0; i <= instances.numInstances(); i++){ //last instance is null and finishes incremental saving
+        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
             asv.writeIncremental(instances.instance(i));
         }
-        */
+        asv.writeIncremental(null);*/
         
         //batch
         asv.writeBatch();

@@ -38,7 +38,7 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
@@ -120,13 +120,14 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       throw new IOException("File not found");
     }
   }
+  
 
   /**
    * get the File specified as the source
    *
    * @return the source file
    */
-  public File getFile() {
+  public File retrieveFile() {
     return new File(m_File);
   }
 
@@ -204,7 +205,15 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
     // is moved out of Instances and into this Loader.
     while (m_structure.readInstance(m_sourceReader));
     
-    return m_structure;
+    Instances readIn = new Instances(m_structure);
+    /*if (m_File != null) {
+	File temp = new File(m_File);
+	if (temp.exists()) {
+	  setSource(temp);
+	}
+    }*/
+    
+    return readIn;
   }
 
   /**
@@ -230,12 +239,12 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
     if (!m_structure.readInstance(m_sourceReader)) {
       // try to reset the loader if the source is a file
-      if (m_File != null) {
+      /*if (m_File != null) {
 	File temp = new File(m_File);
 	if (temp.exists()) {
 	  setSource(temp);
 	}
-      }
+      }*/
       return null;
     }
    

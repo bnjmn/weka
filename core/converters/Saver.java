@@ -16,7 +16,7 @@
 
 /*
  *    Saver.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 Mark Hall, Stefan Mutter
  *
  */
 
@@ -34,9 +34,16 @@ import weka.core.Instance;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
  */
 public interface Saver extends Serializable {
+    
+    /** The retrieval modes */
+  static final int NONE = 0;
+  static final int BATCH = 1;
+  static final int INCREMENTAL = 2;
+  
 
 
   /*@ public model instance boolean model_structureDetermined
@@ -71,17 +78,88 @@ public interface Saver extends Serializable {
    */
   void setDestination(File file) throws IOException;
 
-  /**
-   * Resets the Saver object and sets the destination to be 
+  /** Resets the Saver object and sets the destination to be
    * the supplied InputStream.
-   *
-   * @param input the source InputStream
+   * @param output the output stream
    * @exception IOException if this Loader doesn't
    * support loading from a File.
    */
   void setDestination(OutputStream output) throws IOException;
-
   
+  /** Sets the retrieval mode
+   * @param mode an integer representing a retrieval mode
+   */  
+  void setRetrieval(int mode);
+  
+  /** Gets the file extension
+   * @return a string conatining the file extension (including the '.')
+   * @throws Exception exception if a Saver not implementing FileSourcedConverter is used.
+   */  
+  String getFileExtension() throws Exception;
+  
+  /** Sets the output file
+   * @param file the output file
+   * @throws IOException exception if new output file cannot be set
+   */  
+  void setFile(File file)throws IOException;
+  
+  /** Sets the file prefix.
+   * This method is used in the KnowledgeFlow GUI.
+   * @param prefix the prefix of the file name
+   * @throws Exception exception if a Saver not implementing FileSourcedConverter is used.
+   */  
+  void setFilePrefix(String prefix) throws Exception;
+  
+  /** Gets the file prefix
+   * This method is used in the KnowledgeFlow GUI.
+   * @return the prefix of the file name
+   * @throws Exception exception if a Saver not implementing FileSourcedConverter is used.
+   */  
+  String filePrefix() throws Exception;
+  
+  /** Sets the directory of the output file.
+   * This method is used in the KnowledgeFlow GUI.
+   * @param dir a string containing the path and name of the directory
+   * @throws IOException exception if a Saver not implementing FileSourcedConverter is used.
+   */  
+  void setDir(String dir) throws IOException;
+  
+  /** Sets the file prefix and the directory.
+   * This method is used in the KnowledgeFlow GUI.
+   * @param relationName the name of the realtion to be saved
+   * @param add additional String for the file name
+   * @throws IOException exception if a Saver not implementing FileSourcedConverter is used.
+   */  
+  public void setDirAndPrefix(String relationName, String add) throws IOException; 
+  
+  /** Gets the driectory of the output file
+   * This method is used in the KnowledgeFlow GUI.
+   * @return the directory as a string
+   * @throws IOException exception if a Saver not implementing FileSourcedConverter is used.
+   */  
+  String retrieveDir() throws IOException;
+  
+  /** Sets the instances to be saved
+   * @param instances the instances
+   */  
+  void setInstances(Instances instances);
+
+  /** Writes to a destination in batch mode
+   * @throws IOException throws exection if writting in batch mode is not possible
+   */  
+  void writeBatch() throws IOException;
+  
+  /** Writes to a destination in incremental mode.
+   * If the instance is null, the outputfile will be closed.
+   * @param inst the instance to write, if null the output file is closed
+   * @throws IOException throws exception if incremental writting is not possible
+   */  
+  void writeIncremental(Instance inst) throws IOException;
+  
+  /** Gets the write mode
+   * @return an integer representing the write mode
+   */  
+  public int getWriteMode();
   
 }
 
