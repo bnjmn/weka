@@ -62,7 +62,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -74,10 +74,10 @@ public class Instance implements Copyable, Serializable {
    * doesn't have access to any dataset.  Only if an instance has
    * access to a dataset, it knows about the actual attribute types.  
    */
-  protected Instances m_Dataset;
+  protected /*@spec_public@*/ Instances m_Dataset;
 
   /** The instance's attribute values. */
-  protected double[] m_AttValues;
+  protected /*@spec_public non_null@*/ double[] m_AttValues;
 
   /** The instance's weight. */
   protected double m_Weight;
@@ -91,7 +91,8 @@ public class Instance implements Copyable, Serializable {
    * @param instance the instance from which the attribute
    * values and the weight are to be copied 
    */
-  public Instance(Instance instance) {
+  //@ ensures m_Dataset == null;
+  public Instance(/*@non_null@*/ Instance instance) {
     
     m_AttValues = instance.m_AttValues;
     m_Weight = instance.m_Weight;
@@ -106,7 +107,8 @@ public class Instance implements Copyable, Serializable {
    * @param weight the instance's weight
    * @param attValues a vector of attribute values 
    */
-  public Instance(double weight, double[] attValues){
+  //@ ensures m_Dataset == null;
+  public Instance(double weight,  /*@non_null@*/ double[]attValues){
     
     m_AttValues = attValues;
     m_Weight = weight;
@@ -120,6 +122,8 @@ public class Instance implements Copyable, Serializable {
    *
    * @param numAttributes the size of the instance 
    */
+  //@ requires numAttributes > 0;    // Or maybe == 0 is okay too?
+  //@ ensures m_Dataset == null;
   public Instance(int numAttributes) {
     
     m_AttValues = new double[numAttributes];
@@ -138,7 +142,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
-  public Attribute attribute(int index) {
+  //@ requires m_Dataset != null;
+  public /*@pure@*/ Attribute attribute(int index) {
    
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -155,7 +160,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
-  public Attribute attributeSparse(int indexOfIndex) {
+  //@ requires m_Dataset != null;
+  public /*@pure@*/ Attribute attributeSparse(int indexOfIndex) {
    
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -170,7 +176,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if the class is not set or the
    * instance doesn't have access to a dataset
    */
-  public Attribute classAttribute() {
+  //@ requires m_Dataset != null;
+  public /*@pure@*/ Attribute classAttribute() {
 
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -184,7 +191,9 @@ public class Instance implements Copyable, Serializable {
    * @return the class index as an integer 
    * @exception UnassignedDatasetException if instance doesn't have access to a dataset 
    */
-  public int classIndex() {
+  //@ requires m_Dataset != null;
+  //@ ensures  \result == m_Dataset.classIndex();
+  public /*@pure@*/ int classIndex() {
     
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -199,7 +208,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset
    */
-  public boolean classIsMissing() {
+  //@ requires classIndex() >= 0;
+  public /*@pure@*/ boolean classIsMissing() {
 
     if (classIndex() < 0) {
       throw new UnassignedClassException("Class is not set!");
@@ -217,7 +227,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset 
    */
-  public double classValue() {
+  //@ requires classIndex() >= 0;
+  public /*@pure@*/ double classValue() {
     
     if (classIndex() < 0) {
       throw new UnassignedClassException("Class is not set!");
@@ -233,7 +244,10 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the shallow copy
    */
-  public Object copy() {
+  //@ also ensures \result != null;
+  //@ also ensures \result instanceof Instance;
+  //@ also ensures ((Instance)\result).m_Dataset == m_Dataset;
+  public /*@pure@*/ Object copy() {
 
     Instance result = new Instance(this);
     result.m_Dataset = m_Dataset;
@@ -247,7 +261,8 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the dataset the instance has accesss to
    */
-  public Instances dataset() {
+  //@ ensures \result == m_Dataset;
+  public /*@pure@*/ Instances dataset() {
 
     return m_Dataset;
   }
@@ -262,6 +277,7 @@ public class Instance implements Copyable, Serializable {
    * @exception RuntimeException if the instance has access to a
    * dataset 
    */
+  //@ requires m_Dataset != null;
   public void deleteAttributeAt(int position) {
 
     if (m_Dataset != null) {
@@ -277,7 +293,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
-  public Enumeration enumerateAttributes() {
+  //@ requires m_Dataset != null;
+  public /*@pure@*/ Enumeration enumerateAttributes() {
 
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -294,7 +311,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
-  public boolean equalHeaders(Instance inst) {
+  //@ requires m_Dataset != null;
+  public /*@pure@*/ boolean equalHeaders(Instance inst) {
 
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -309,7 +327,7 @@ public class Instance implements Copyable, Serializable {
    * @param position the position 
    * @return the index of the attribute stored at the given position
    */
-  public int index(int position) {
+  public /*@pure@*/ int index(int position) {
 
     return position;
   }
@@ -325,6 +343,7 @@ public class Instance implements Copyable, Serializable {
    * dataset
    * @exception IllegalArgumentException if the position is out of range
    */
+  //@ requires m_Dataset != null;
   public void insertAttributeAt(int position) {
 
     if (m_Dataset != null) {
@@ -343,7 +362,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @param attIndex the attribute's index
    */
-  public boolean isMissing(int attIndex) {
+  public /*@pure@*/ boolean isMissing(int attIndex) {
 
     if (Double.isNaN(m_AttValues[attIndex])) {
       return true;
@@ -357,7 +376,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @param indexOfIndex the index of the attribute's index 
    */
-  public boolean isMissingSparse(int indexOfIndex) {
+  public /*@pure@*/ boolean isMissingSparse(int indexOfIndex) {
 
     if (Double.isNaN(m_AttValues[indexOfIndex])) {
       return true;
@@ -371,7 +390,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @param att the attribute
    */
-  public boolean isMissing(Attribute att) {
+  public /*@pure@*/ boolean isMissing(Attribute att) {
 
     return isMissing(att.index());
   }
@@ -382,7 +401,7 @@ public class Instance implements Copyable, Serializable {
    * @param val the value to be tested
    * @return true if val codes "missing"
    */
-  public static boolean isMissingValue(double val) {
+  public static /*@pure@*/ boolean isMissingValue(double val) {
 
     return Double.isNaN(val);
   }
@@ -412,7 +431,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the double that codes "missing"
    */
-  public static double missingValue() {
+  public /*@pure@*/ static double missingValue() {
 
     return MISSING_VALUE;
   }
@@ -422,7 +441,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the number of attributes as an integer
    */
-  public int numAttributes() {
+  public /*@pure@*/ int numAttributes() {
 
     return m_AttValues.length;
   }
@@ -435,7 +454,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
-  public int numClasses() {
+  //@ requires m_Dataset != null;
+  public /*@pure@*/ int numClasses() {
     
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -448,7 +468,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the number of values
    */
-  public int numValues() {
+  public /*@pure@*/ int numValues() {
 
     return m_AttValues.length;
   }
@@ -485,6 +505,7 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if the instance doesn't
    * have access to a dataset
    */
+  //@ requires classIndex() >= 0;
   public void setClassMissing() {
 
     if (classIndex() < 0) {
@@ -505,6 +526,7 @@ public class Instance implements Copyable, Serializable {
    * @exception UnaddignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
+  //@ requires classIndex() >= 0;
   public void setClassValue(double value) {
 
     if (classIndex() < 0) {
@@ -527,6 +549,7 @@ public class Instance implements Copyable, Serializable {
    * nominal or a string, or the value couldn't be found for a nominal
    * attribute 
    */
+  //@ requires classIndex() >= 0;
   public final void setClassValue(String value) {
 
     if (classIndex() < 0) {
@@ -619,6 +642,7 @@ public class Instance implements Copyable, Serializable {
    * attribute is not nominal or a string, or the supplied value couldn't 
    * be found for a nominal attribute 
    */
+  //@ requires m_Dataset != null;
   public final void setValue(int attIndex, String value) {
     
     int valIndex;
@@ -714,7 +738,8 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
-  public final String stringValue(int attIndex) {
+  //@ requires m_Dataset != null;
+  public final /*@pure@*/ String stringValue(int attIndex) {
 
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
@@ -733,7 +758,7 @@ public class Instance implements Copyable, Serializable {
    * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
-  public final String stringValue(Attribute att) {
+  public final /*@pure@*/ String stringValue(Attribute att) {
 
     int attIndex = att.index();
     switch (att.type()) {
@@ -790,7 +815,7 @@ public class Instance implements Copyable, Serializable {
    * @param attIndex the attribute's index
    * @return the value's description as a string
    */
-  public final String toString(int attIndex) {
+  public final /*@pure@*/ String toString(int attIndex) {
 
    StringBuffer text = new StringBuffer();
    
@@ -841,7 +866,7 @@ public class Instance implements Copyable, Serializable {
    * attribute is nominal (or a string) then it returns the value's index as a 
    * double).
    */
-  public double value(int attIndex) {
+  public /*@pure@*/ double value(int attIndex) {
 
     return m_AttValues[attIndex];
   }
@@ -855,7 +880,7 @@ public class Instance implements Copyable, Serializable {
    * attribute is nominal (or a string) then it returns the value's index as a 
    * double).
    */
-  public double valueSparse(int indexOfIndex) {
+  public /*@pure@*/ double valueSparse(int indexOfIndex) {
 
     return m_AttValues[indexOfIndex];
   }  
@@ -869,7 +894,7 @@ public class Instance implements Copyable, Serializable {
    * attribute is nominal (or a string) then it returns the value's index as a
    * double).
    */
-  public double value(Attribute att) {
+  public /*@pure@*/ double value(Attribute att) {
 
     return value(att.index());
   }
@@ -879,7 +904,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the instance's weight as a double
    */
-  public final double weight() {
+  public final /*@pure@*/ double weight() {
 
     return m_Weight;
   }
@@ -939,6 +964,7 @@ public class Instance implements Copyable, Serializable {
   /**
    * Main method for testing this class.
    */
+  //@ requires options != null;
   public static void main(String[] options) {
 
     try {

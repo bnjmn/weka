@@ -31,7 +31,7 @@ import java.io.*;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ */
+ * @version $Revision: 1.10 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -41,9 +41,12 @@ public class FastVector implements Copyable, Serializable {
 
     /** The counter. */
     private int m_Counter;
+    // These JML commands say how m_Counter implements Enumeration
+    //@ in moreElements;
+    //@ private represents moreElements = m_Counter < m_Vector.size();
 
     /** The vector. */
-    private FastVector m_Vector;
+    private /*@non_null@*/ FastVector m_Vector;
 
     /** Special element. Skipped during enumeration. */
     private int m_SpecialElement;
@@ -53,7 +56,7 @@ public class FastVector implements Copyable, Serializable {
      *
      * @param vector the vector which is to be enumerated
      */
-    public FastVectorEnumeration(FastVector vector) {
+    public FastVectorEnumeration(/*@non_null@*/FastVector vector) {
 
       m_Counter = 0;
       m_Vector = vector;
@@ -67,7 +70,7 @@ public class FastVector implements Copyable, Serializable {
      * @param vector the vector which is to be enumerated
      * @param special the index of the special element
      */
-    public FastVectorEnumeration(FastVector vector, int special) {
+    public FastVectorEnumeration(/*@non_null@*/FastVector vector, int special){
 
       m_Vector = vector;
       m_SpecialElement = special;
@@ -84,7 +87,7 @@ public class FastVector implements Copyable, Serializable {
      *
      * @return true if there are some elements left
      */
-    public final boolean hasMoreElements() {
+    public final /*@pure@*/ boolean hasMoreElements() {
 
       if (m_Counter < m_Vector.size()) {
 	return true;
@@ -110,16 +113,25 @@ public class FastVector implements Copyable, Serializable {
   }
 
   /** The array of objects. */
-  private Object[] m_Objects;
+  private /*@spec_public@*/ Object[] m_Objects;
+  //@ invariant m_Objects != null;
+  //@ invariant m_Objects.length >= 0;
 
   /** The current size; */
-  private int m_Size = 0;
+  private /*@spec_public@*/ int m_Size = 0;
+  //@ invariant 0 <= m_Size;
+  //@ invariant m_Size <= m_Objects.length;
 
   /** The capacity increment */
-  private int m_CapacityIncrement = 1;
+  private /*@spec_public@*/ int m_CapacityIncrement = 1;
+  //@ invariant 1 <= m_CapacityIncrement;
   
   /** The capacity multiplier. */
-  private int m_CapacityMultiplier = 2;
+  private /*@spec_public@*/ int m_CapacityMultiplier = 2;
+  //@ invariant 1 <= m_CapacityMultiplier;
+
+  // Make sure the size will increase...
+  //@ invariant 3 <= m_CapacityMultiplier + m_CapacityIncrement;
 
   /**
    * Constructs an empty vector with initial
@@ -135,6 +147,7 @@ public class FastVector implements Copyable, Serializable {
    *
    * @param capacity the vector's initial capacity
    */
+  //@ requires capacity >= 0;
   public FastVector(int capacity) {
 
     m_Objects = new Object[capacity];
@@ -166,7 +179,8 @@ public class FastVector implements Copyable, Serializable {
    *
    * @return the capacity of the vector
    */
-  public final int capacity() {
+  //@ ensures \result == m_Objects.length;
+  public final /*@pure@*/ int capacity() {
   
     return m_Objects.length;
   }
@@ -212,7 +226,9 @@ public class FastVector implements Copyable, Serializable {
    * @param index the element's index
    * @return the element with the given index
    */
-  public final Object elementAt(int index) {
+  //@ requires 0 <= index;
+  //@ requires index < m_Objects.length;
+  public final /*@pure@*/ Object elementAt(int index) {
 
     return m_Objects[index];
   }
@@ -222,7 +238,7 @@ public class FastVector implements Copyable, Serializable {
    *
    * @return an enumeration of this vector
    */
-  public final Enumeration elements() {
+  public final /*@pure@*/ Enumeration elements() {
   
     return new FastVectorEnumeration(this);
   }
@@ -234,7 +250,7 @@ public class FastVector implements Copyable, Serializable {
    * @param index the element to skip
    * @return an enumeration of this vector
    */
-  public final Enumeration elements(int index) {
+  public final /*@pure@*/ Enumeration elements(int index) {
   
     return new FastVectorEnumeration(this, index);
   }
@@ -242,7 +258,7 @@ public class FastVector implements Copyable, Serializable {
     /**
      * added by akibriya
      */
-  public boolean contains(Object o) {
+  public /*@pure@*/ boolean contains(Object o) {
       if(o==null)
 	  return false;
 
@@ -259,7 +275,8 @@ public class FastVector implements Copyable, Serializable {
    *
    * @return the first element of the vector
    */
-  public final Object firstElement() {
+  //@ requires m_Size > 0;
+  public final /*@pure@*/ Object firstElement() {
 
     return m_Objects[0];
   }
@@ -272,7 +289,7 @@ public class FastVector implements Copyable, Serializable {
    * @return the index of the first occurrence of the argument 
    * in this vector; returns -1 if the object is not found
    */
-  public final int indexOf(Object element) {
+  public final /*@pure@*/ int indexOf(Object element) {
 
     for (int i = 0; i < m_Size; i++) {
       if (element.equals(m_Objects[i])) {
@@ -314,7 +331,8 @@ public class FastVector implements Copyable, Serializable {
    *
    * @return the last element of the vector
    */
-  public final Object lastElement() {
+  //@ requires m_Size > 0;
+  public final /*@pure@*/ Object lastElement() {
 
     return m_Objects[m_Size - 1];
   }
@@ -396,7 +414,8 @@ public class FastVector implements Copyable, Serializable {
    *
    * @return the vector's current size
    */
-  public final int size() {
+  //@ ensures \result == m_Size;
+  public final /*@pure@*/ int size() {
 
     return m_Size;
   }
