@@ -11,7 +11,8 @@ weka.gui.beans.KnowledgeFlow.Evaluation=weka.gui.beans.TrainingSetMaker,\
  weka.gui.beans.TrainTestSplitMaker,\
  weka.gui.beans.ClassAssigner,\
  weka.gui.beans.ClassifierPerformanceEvaluator,\
- weka.gui.beans.IncrementalClassifierEvaluator
+ weka.gui.beans.IncrementalClassifierEvaluator,\
+ weka.gui.beans.PredictionAppender
 weka.gui.beans.KnowledgeFlow.Visualization=weka.gui.beans.DataVisualizer,\
  weka.gui.beans.ScatterPlotMatrix,\
  weka.gui.beans.AttributeSummarizer,\
