@@ -29,7 +29,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -200,7 +200,9 @@ public class AddFilter extends Filter implements OptionHandler {
     }
 
     Instance inst = (Instance)instance.copy();
+    inst.setDataset(null);
     inst.insertAttributeAt(m_Insert);
+    inst.setDataset(outputFormat());
     push(inst);
     return true;
   }
