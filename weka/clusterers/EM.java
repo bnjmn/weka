@@ -48,7 +48,7 @@ import  weka.estimators.*;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class EM
   extends DistributionClusterer
@@ -684,13 +684,12 @@ public class EM
    * successfully
    */
   public double densityForInstance(Instance inst) throws Exception {
-    return Utils.sum(distributionForInstance(inst));
+    return Utils.sum(weightsForInstance(inst));
   }
 
   /**
    * Predicts the cluster memberships for a given instance.
    *
-   * @param data set of test instances
    * @param instance the instance to be assigned a cluster.
    * @return an array containing the estimated membership 
    * probabilities of the test instance in each cluster (this 
@@ -698,7 +697,21 @@ public class EM
    * @exception Exception if distribution could not be 
    * computed successfully
    */
-  public double[] distributionForInstance (Instance inst)
+  public double[] distributionForInstance(Instance inst) 
+    throws Exception {
+    double [] distrib = weightsForInstance(inst);
+    Utils.normalize(distrib);
+    return distrib;
+  }
+
+  /**
+   * Returns the weights (indicating cluster membership) for a given instance
+   * 
+   * @param inst the instance to be assigned a cluster
+   * @return an array of weights
+   * @exception Exception if weights could not be computed
+   */
+  protected double[] weightsForInstance(Instance inst)
     throws Exception {
     int i, j;
     double prob;
@@ -748,6 +761,7 @@ public class EM
       } else {
 	m_num_clusters = 1;
       }
+      m_rr = new Random(m_rseed);
     }
 
     // fit full training set
