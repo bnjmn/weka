@@ -29,11 +29,19 @@ import java.beans.PropertyChangeSupport;
 
 
 /**
- * Class for generating an user defined decision tree.
+ * Class for generating an user defined decision tree. For more info see <p>
  *
+ * Ware M., Frank E., Holmes G., Hall M. and Witten I.H. (2000).
+ * <i>interactive machine learning - letting users build classifiers</i>,
+ * Working Paper 00/4, Department of Computer Science, 
+ * University of Waikato; March. Also available online at
+ * <a href="http://www.cs.waikato.ac.nz/~ml/publications/2000/
+ * 00MW-etal-Interactive-ML.ps">
+ * http://www.cs.waikato.ac.nz/~ml/publications/2000/
+ * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
