@@ -28,7 +28,7 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Rule {
 
@@ -371,7 +371,10 @@ public class Rule {
       return "Tree/Rule has not been built yet!";
     } 
 
-    text.append("Pruned training "
+    text.append("M5 "
+		+ ((m_useUnpruned)
+		   ? "unpruned "
+		   : "pruned ")
 		+ ((m_regressionTree) 
 		   ? "regression "
 		   : "model ")

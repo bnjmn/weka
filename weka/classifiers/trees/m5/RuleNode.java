@@ -30,7 +30,7 @@ import weka.filters.Filter;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RuleNode extends Classifier {
 
@@ -689,6 +689,11 @@ public class RuleNode extends Classifier {
     nodeModelEval = new Evaluation(m_reducedI);
     nodeModelEval.evaluateModel(m_nodeModel, m_reducedI);
     m_rootMeanSquaredError = nodeModelEval.rootMeanSquaredError();
+    // save space
+    if (!m_saveInstances) {
+      m_instances = new Instances(m_instances, 0);
+    }
+    m_reducedI = new Instances(m_reducedI, 0);
   }
 
   /**
