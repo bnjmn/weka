@@ -30,7 +30,7 @@ import weka.core.*;
 /**
  * Class for handling a matrix
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public final class Matrix {
@@ -102,20 +102,27 @@ public final class Matrix {
   public final Matrix  multiply(Matrix b,int l,int m,int n)
   {
     int i,j,k;
+    int iMax=l-1,jMax=n-1,kMax=m-1;
+    
     Matrix c;
     
     c = new Matrix(l,n);
-    for(i=0;i<=l-1;i++){
-      for(j=0;j<=n-1;j++){
-	for(k=0;k<=m-1;k++){
-	  c.elements[i][j] += elements[i][k] * b.elements[k][j];
-	}
+    double[][] bElements = b.elements;
+    for(i=0;i<=iMax;i++){
+      double[] cElements = c.elements[i];
+      double[] myElements = elements[i];
+      for(j=0;j<=jMax;j++){
+        double sum = 0.0;
+        for(k=0;k<kMax;k++){
+          sum += myElements[k] * bElements[k][j];
+        }
+        cElements[j] += sum;
       }
     }
-
+    
     return c;
   }
-
+  
   /**
    * Linear regression 
    * @param y the dependent variable vector
