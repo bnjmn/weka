@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.49 $
+ * @version  $Revision: 1.50 $
   */
 public class Evaluation implements Summarizable {
 
@@ -598,6 +598,9 @@ public class Evaluation implements Summarizable {
 	} else {
 	  train.setClassIndex(train.numAttributes() - 1);
 	}
+	if ((testFileName.length() != 0) && !test.equalHeaders(train)) {
+	  throw new IllegalArgumentException("Train and test file not compatible!");
+	}
 	if (classIndex > train.numAttributes()) {
 	  throw new Exception("Index of class attribute too large.");
 	}
@@ -919,12 +922,15 @@ public class Evaluation implements Summarizable {
   }
 
   /**
-   * Evaluates the classifier on a given set of instances.
+   * Evaluates the classifier on a given set of instances. Note that
+   * the data must have exactly the same format (e.g. order of
+   * attributes) as the data used to train the classifier! Otherwise
+   * the results will generally be meaningless.
    *
    * @param classifier machine learning classifier
    * @param data set of test instances for evaluation
    * @exception Exception if model could not be evaluated 
-   * successfully
+   * successfully 
    */
   public void evaluateModel(Classifier classifier,
 			    Instances data) throws Exception {
