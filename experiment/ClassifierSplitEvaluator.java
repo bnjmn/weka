@@ -43,7 +43,7 @@ import weka.classifiers.rules.ZeroR;
  * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -232,7 +232,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 	while (en.hasMoreElements()) {
 	  String mname = (String)en.nextElement();
 	  for (int j=0;j<m_AdditionalMeasures.length;j++) {
-	    if (mname.compareTo(m_AdditionalMeasures[j]) == 0) {
+	    if (mname.compareToIgnoreCase(m_AdditionalMeasures[j]) == 0) {
 	      m_doesProduce[j] = true;
 	    }
 	  }
