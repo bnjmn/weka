@@ -83,7 +83,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.48 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -1167,32 +1167,34 @@ public class PreprocessPanel extends JPanel {
    * Backs up the current state of the dataset, so the changes can be undone.
    */
   public void addUndoPoint() throws Exception {
-
-    // create temporary file
-    File tempFile = File.createTempFile("weka", null);
-    tempFile.deleteOnExit();
-
-    ObjectOutputStream oos = 
-      new ObjectOutputStream(
-      new BufferedOutputStream(
-      new FileOutputStream(tempFile)));
     
-    oos.writeObject(m_Instances);
-    oos.flush();
-    oos.close();
+    if (m_Instances != null) {
+      // create temporary file
+      File tempFile = File.createTempFile("weka", null);
+      tempFile.deleteOnExit();
 
-    // update undo file list
-    if (m_tempUndoFiles[m_tempUndoIndex] != null) {
-      // remove undo points that are too old
-      m_tempUndoFiles[m_tempUndoIndex].delete();
-    }
-    m_tempUndoFiles[m_tempUndoIndex] = tempFile;
-    if (++m_tempUndoIndex >= m_tempUndoFiles.length) {
-      // wrap pointer around
-      m_tempUndoIndex = 0;
-    }
+      ObjectOutputStream oos = 
+	new ObjectOutputStream(
+	new BufferedOutputStream(
+	new FileOutputStream(tempFile)));
+    
+      oos.writeObject(m_Instances);
+      oos.flush();
+      oos.close();
 
-    m_UndoBut.setEnabled(true);
+      // update undo file list
+      if (m_tempUndoFiles[m_tempUndoIndex] != null) {
+	// remove undo points that are too old
+	m_tempUndoFiles[m_tempUndoIndex].delete();
+      }
+      m_tempUndoFiles[m_tempUndoIndex] = tempFile;
+      if (++m_tempUndoIndex >= m_tempUndoFiles.length) {
+	// wrap pointer around
+	m_tempUndoIndex = 0;
+      }
+
+      m_UndoBut.setEnabled(true);
+    }
   }
 
   /**
