@@ -25,9 +25,9 @@ import weka.core.*;
  * Abstract attribute transformer. Transforms the dataset.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public abstract class AttributeTransformer extends AttributeEvaluator {
+public interface AttributeTransformer {
     // ===============
     // Public methods.
     // ===============
