@@ -28,7 +28,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
@@ -101,24 +101,35 @@ public class ReplaceMissingValuesFilter extends Filter {
     if (m_ModesAndMeans == null) {
    
       // Compute modes and means
+      double sumOfWeights =  m_InputFormat.sumOfWeights();
       double[][] counts = new double[m_InputFormat.numAttributes()][];
       for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
 	if (m_InputFormat.attribute(i).isNominal()) {
 	  counts[i] = new double[m_InputFormat.attribute(i).numValues()];
+	  counts[i][0] = sumOfWeights;
 	}
       }
       double[] sums = new double[m_InputFormat.numAttributes()];
+      for (int i = 0; i < sums.length; i++) {
+	sums[i] = sumOfWeights;
+      }
       double[] results = new double[m_InputFormat.numAttributes()];
       for (int j = 0; j < m_InputFormat.numInstances(); j++) {
 	Instance inst = m_InputFormat.instance(j);
-	double[] values = inst.toDoubleArray();
-	for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-	  if (!Instance.isMissingValue(values[i])) {
-	    if (m_InputFormat.attribute(i).isNominal()) {
-	      counts[i][(int)values[i]] += inst.weight();
-	    } else if (m_InputFormat.attribute(i).isNumeric()) {
-	      sums[i] += inst.weight();
-	      results[i] += inst.weight() * values[i];
+	for (int i = 0; i < inst.numValues(); i++) {
+	  if (!inst.isMissingSparse(i)) {
+	    double value = inst.valueSparse(i);
+	    if (inst.attributeSparse(i).isNominal()) {
+	      counts[inst.index(i)][(int)value] += inst.weight();
+	      counts[inst.index(i)][0] -= inst.weight();
+	    } else if (inst.attributeSparse(i).isNumeric()) {
+	      results[inst.index(i)] += inst.weight() * inst.valueSparse(i);
+	    }
+	  } else {
+	    if (inst.attributeSparse(i).isNominal()) {
+	      counts[inst.index(i)][0] -= inst.weight();
+	    } else if (inst.attributeSparse(i).isNumeric()) {
+	      sums[inst.index(i)] -= inst.weight();
 	    }
 	  }
 	}
