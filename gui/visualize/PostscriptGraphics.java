@@ -50,7 +50,7 @@ import java.text.*;
  * @see #m_PSFontReplacement
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class PostscriptGraphics extends Graphics2D {
@@ -73,6 +73,10 @@ public class PostscriptGraphics extends Graphics2D {
     protected int m_xOffset;
     protected int m_yOffset;
     
+    /** the scale factors */
+    protected double m_xScale;
+    protected double m_yScale;
+    
     /**
      * Create a new GraphicsState with default values.
      */
@@ -82,6 +86,8 @@ public class PostscriptGraphics extends Graphics2D {
       m_currentStroke = new BasicStroke();
       m_xOffset       = 0;
       m_yOffset       = 0;
+      m_xScale        = 1.0;
+      m_yScale        = 1.0;
     }
     
     /**
@@ -95,6 +101,8 @@ public class PostscriptGraphics extends Graphics2D {
       m_currentStroke = copy.m_currentStroke;
       m_xOffset       = copy.m_xOffset;
       m_yOffset       = copy.m_yOffset;
+      m_xScale        = copy.m_xScale;
+      m_yScale        = copy.m_yScale;
     }
     
     /* Stroke Methods */
@@ -140,6 +148,22 @@ public class PostscriptGraphics extends Graphics2D {
     protected int getYOffset(){
       return m_yOffset;
     }
+    
+    protected void setXScale(double x){
+      m_xScale = x;
+    }
+    
+    protected void setYScale(double y){
+      m_yScale = y;
+    }
+    
+    protected double getXScale(){
+      return m_xScale;
+    }
+    
+    protected double getYScale(){
+      return m_yScale;
+    }
   }
   
   /** The bounding box of the output */
@@ -153,10 +177,6 @@ public class PostscriptGraphics extends Graphics2D {
   
   /** The current local graphics state for this PostscriptGraphics object */
   protected GraphicsState m_localGraphicsState;
-  
-  /** the scale factors */
-  protected double m_xScale;
-  protected double m_yScale;
   
   /** whether to print some debug information */
   protected final static boolean DEBUG = false;
@@ -173,6 +193,8 @@ public class PostscriptGraphics extends Graphics2D {
     m_PSFontReplacement = new Hashtable();
     m_PSFontReplacement.put("SansSerif.plain", "Helvetica.plain");   // SansSerif.plain is displayed as Courier in GV???
     m_PSFontReplacement.put("Dialog.plain", "Helvetica.plain");  // dialog is a Sans Serif font, but GV displays it as Courier???
+    m_PSFontReplacement.put("Microsoft Sans Serif", "Helvetica.plain");  // MS Sans Serif is a Sans Serif font (hence the name!), but GV displays it as Courier???
+    m_PSFontReplacement.put("MicrosoftSansSerif", "Helvetica.plain");  // MS Sans Serif is a Sans Serif font (hence the name!), but GV displays it as Courier???
   }
   
   /** 
@@ -190,8 +212,6 @@ public class PostscriptGraphics extends Graphics2D {
     m_printstream        = new PrintStream(os);
     m_localGraphicsState = new GraphicsState();
     m_psGraphicsState    = new GraphicsState();
-    m_xScale             = 1.0;
-    m_yScale             = 1.0;
     
     Header();
   }
@@ -207,7 +227,6 @@ public class PostscriptGraphics extends Graphics2D {
     m_printstream        = copy.m_printstream;
     m_localGraphicsState = new GraphicsState(copy.m_localGraphicsState); // create a local copy of the current state
     m_psGraphicsState    = copy.m_psGraphicsState; // link to global state of eps file
-    scale(copy.m_xScale, copy.m_yScale);
   }
   
   /**
@@ -292,14 +311,14 @@ public class PostscriptGraphics extends Graphics2D {
    * scales the given x value with current x scale factor
    */
   private int xScale(int x) {
-    return doScale(x, m_xScale);
+    return doScale(x, m_localGraphicsState.getXScale());
   }
   
   /**
    * scales the given y value with current y scale factor
    */
   private int yScale(int y) {
-    return doScale(y, m_yScale);
+    return doScale(y, m_localGraphicsState.getYScale());
   }
   
   /** Set the current eps graphics state to that of the local one
@@ -309,6 +328,21 @@ public class PostscriptGraphics extends Graphics2D {
     setFont(this.getFont());
     setStroke(this.getStroke());
   }
+  
+  /**
+   * returns a two hexadecimal representation of i, if shorter than 2 chars
+   * then an additional "0" is put in front   
+   */
+  private String toHex(int i) {
+    String      result;
+    
+    result = Integer.toHexString(i);
+    if (result.length() < 2)
+      result = "0" + result;
+    
+    return result;
+  }
+
   /***** overridden Graphics methods *****/  
   
   /**
@@ -323,7 +357,7 @@ public class PostscriptGraphics extends Graphics2D {
     setStateToLocal();
     Color saveColor = getColor();
     setColor(Color.white); // background color for page
-    m_printstream.println(xScale(xTransform(x)) + " " + yScale(yTransform(y)) + " " + xScale(width) + " " + yScale(height) + " true Rect");
+    m_printstream.println(xTransform(xScale(x)) + " " + yTransform(yScale(y)) + " " + xScale(width) + " " + yScale(height) + " true Rect");
     setColor(saveColor);
   }
   
@@ -390,45 +424,92 @@ public class PostscriptGraphics extends Graphics2D {
   }
   
   /**
-   * Not implemented
+   * calls drawImage(Image,int,int,int,int,Color,ImageObserver)
+   * 
+   * @see #drawImage(Image,int,int,int,int,Color,ImageObserver)
    */
   public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer){
-    return(false);
+    return drawImage(img, x, y, img.getWidth(observer), img.getHeight(observer), bgcolor, observer);
   }
   
   /**
-   * Not implemented
+   * calls drawImage(Image,int,int,Color,ImageObserver) with Color.WHITE as 
+   * background color
+   * 
+   * @see #drawImage(Image,int,int,Color,ImageObserver)
+   * @see Color#WHITE
    */
   public boolean drawImage(Image img, int x, int y, ImageObserver observer){
-    return(false);
+    return drawImage(img, x, y, Color.WHITE, observer);
   }
   
   /**
-   * Not implemented
+   * PS see http://astronomy.swin.edu.au/~pbourke/geomformats/postscript/
+   * Java http://show.docjava.com:8086/book/cgij/doc/ip/graphics/SimpleImageFrame.java.html
    */
   public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer){
-    return(false);
+    try {
+      // get data from image
+      int[] pixels = new int[width * height];
+      PixelGrabber grabber = new PixelGrabber(img, 0, 0, width, height, pixels, 0, width);
+      grabber.grabPixels();
+      ColorModel model = ColorModel.getRGBdefault();
+      
+      // print data to ps
+      m_printstream.println("gsave");
+      m_printstream.println(xTransform(xScale(x)) + " " + (yTransform(yScale(y)) - yScale(height)) + " translate");
+      m_printstream.println(xScale(width) + " " + yScale(height) + " scale");
+      m_printstream.println(width + " " + height + " " + "8" + " [" + width + " 0 0 " + (-height) + " 0 " + height + "]");
+      m_printstream.println("{<");
+
+      int index;
+      for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+          index = i * width + j;
+          m_printstream.print(toHex(model.getRed(pixels[index])));
+          m_printstream.print(toHex(model.getGreen(pixels[index])));
+          m_printstream.print(toHex(model.getBlue(pixels[index])));
+        }
+        m_printstream.println();
+      }
+      
+      m_printstream.println(">}");
+      m_printstream.println("false 3 colorimage");
+      m_printstream.println("grestore");
+      return true;
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
   }
   
   /**
-   * Not implemented
+   * calls drawImage(Image,int,int,int,int,Color,ImageObserver) with the color 
+   * WHITE as background
+   * 
+   * @see #drawImage(Image,int,int,int,int,Color,ImageObserver)
+   * @see Color#WHITE
    */
   public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer){
-    return(false);
+    return drawImage(img, x, y, width, height, Color.WHITE, observer);
   }
   
   /**
    * Not implemented
    */
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver  observer){
-    return(false);
+    return false;
   }
   
   /**
-   * Not implemented
+   * calls drawImage(Image,int,int,int,int,int,int,int,int,Color,ImageObserver)
+   * with Color.WHITE as background color
+   * 
+   * @see #drawImage(Image,int,int,int,int,int,int,int,int,Color,ImageObserver)
    */
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer){
-    return(false);
+    return drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, Color.WHITE, observer);
   }
   
   
@@ -556,7 +637,7 @@ public class PostscriptGraphics extends Graphics2D {
   
   public void fillRect(int x, int y, int width, int height){
     if (width == m_extent.width && height == m_extent.height) {
-      clearRect(x,y,width,height); // if we're painting the entire background, just make it white
+      clearRect(x, y, width, height); // if we're painting the entire background, just make it white
     } else {
       if (DEBUG)
         m_printstream.println("% fillRect");
@@ -587,13 +668,17 @@ public class PostscriptGraphics extends Graphics2D {
    * @return full drawing area
    */
   public Rectangle getClipBounds(){
-    return(new Rectangle(0,0,m_extent.width,m_extent.height));
+    return(new Rectangle(0, 0, m_extent.width, m_extent.height));
   }
   
   /**
-   * Not implemented
+   * This returns the full current drawing area
+   * @return full drawing area
    */
-  public Rectangle getClipBounds(Rectangle r){return(null);}
+  public Rectangle getClipBounds(Rectangle r) {
+    r.setBounds(0, 0, m_extent.width, m_extent.height);
+    return r;
+  }
   
   /**
    * Not implemented
@@ -728,10 +813,10 @@ public class PostscriptGraphics extends Graphics2D {
   public void translate(int x, int y){
     if (DEBUG)
       System.out.println("translate with x = " + x + " and y = " + y);
-    m_localGraphicsState.setXOffset(m_localGraphicsState.getXOffset() + x);
-    m_localGraphicsState.setYOffset(m_localGraphicsState.getYOffset() + y);
-    m_psGraphicsState.setXOffset(m_psGraphicsState.getXOffset() + x);
-    m_psGraphicsState.setYOffset(m_psGraphicsState.getYOffset() + y);
+    m_localGraphicsState.setXOffset(m_localGraphicsState.getXOffset() + xScale(x));
+    m_localGraphicsState.setYOffset(m_localGraphicsState.getYOffset() + yScale(y));
+    m_psGraphicsState.setXOffset(m_psGraphicsState.getXOffset() + xScale(x));
+    m_psGraphicsState.setYOffset(m_psGraphicsState.getYOffset() + yScale(y));
   }
   /***** END overridden Graphics methods *****/
   
@@ -758,27 +843,18 @@ public class PostscriptGraphics extends Graphics2D {
   public AffineTransform getTransform(){
     return(new AffineTransform());
   }
-  public void setTransform(AffineTransform at) {
-    if (DEBUG)
-      System.err.println("setTransform=" + at);
-  }
-  public void transform(AffineTransform at) {
-    if (DEBUG)
-      System.err.println("transform=" + at);
-  }
+  public void setTransform(AffineTransform at) {}
+  public void transform(AffineTransform at) {}
   public void shear(double d1, double d2){}
   public void scale(double d1, double d2) {
-    m_xScale = d1;
-    m_yScale = d2;
+    m_localGraphicsState.setXScale(d1);
+    m_localGraphicsState.setYScale(d2);
     if (DEBUG)
       System.err.println("d1 = " + d1 + ", d2 = " + d2);
   }
   public void rotate(double d1, double d2, double d3){}
   public void rotate(double d1){}
-  public void translate(double d1, double d2) {
-    if (DEBUG)
-      System.err.println("translate(double,double)");
-  }
+  public void translate(double d1, double d2) {}
   public RenderingHints getRenderingHints(){
     return(new RenderingHints(null));
   }
