@@ -46,7 +46,7 @@ import  weka.filters.Filter;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -70,7 +70,8 @@ public class CfsSubsetEval
   /** Include locally predicitive attributes */
   private boolean m_locallyPredictive;
   /** Holds the matrix of attribute correlations */
-  private Matrix m_corr_matrix;
+  //  private Matrix m_corr_matrix;
+  private float [][] m_corr_matrix;
   /** Standard deviations of attributes (when using pearsons correlation) */
   private double[] m_std_devs;
   /** Threshold for admitting locally predictive features */
@@ -254,17 +255,19 @@ public class CfsSubsetEval
     }
 
     m_std_devs = new double[m_numAttribs];
-    m_corr_matrix = new Matrix(m_numAttribs, m_numAttribs);
+    m_corr_matrix = new float [m_numAttribs][];
+    for (int i = 0; i < m_numAttribs; i++) {
+      m_corr_matrix[i] = new float [i+1];
+    }
 
-    for (int i = 0; i < m_corr_matrix.numRows(); i++) {
-      m_corr_matrix.setElement(i, i, 1.0);
+    for (int i = 0; i < m_corr_matrix.length; i++) {
+      m_corr_matrix[i][i] = 1.0f;
       m_std_devs[i] = 1.0;
     }
 
     for (int i = 0; i < m_numAttribs; i++) {
-      for (int j = i + 1; j < m_numAttribs; j++) {
-        m_corr_matrix.setElement(i, j, -999);
-        m_corr_matrix.setElement(j, i, -999);
+      for (int j = 0; j < m_corr_matrix[i].length - 1; j++) {
+	m_corr_matrix[i][j] = -999;
       }
     }
   }
@@ -281,20 +284,26 @@ public class CfsSubsetEval
     throws Exception {
     double num = 0.0;
     double denom = 0.0;
-    double corr;
-
+    float corr;
+    int larger, smaller;
     // do numerator
     for (int i = 0; i < m_numAttribs; i++) {
       if (i != m_classIndex) {
         if (subset.get(i)) {
-          if (m_corr_matrix.getElement(i, m_classIndex) == -999) {
+	  if (i > m_classIndex) {
+	    larger = i; smaller = m_classIndex;
+	  } else {
+	    smaller = i; larger = m_classIndex;
+	  }
+	  /*	  int larger = (i > m_classIndex ? i : m_classIndex);
+		  int smaller = (i > m_classIndex ? m_classIndex : i); */
+          if (m_corr_matrix[larger][smaller] == -999) {
             corr = correlate(i, m_classIndex);
-            m_corr_matrix.setElement(i, m_classIndex, corr);
-            m_corr_matrix.setElement(m_classIndex, i, corr);
+	    m_corr_matrix[larger][smaller] = corr;
             num += (m_std_devs[i] * corr);
           }
-          else {num += (m_std_devs[i] * 
-			m_corr_matrix.getElement(i, m_classIndex));
+          else {
+	    num += (m_std_devs[i] * m_corr_matrix[larger][smaller]);
 	  }
 	}
       }
@@ -306,17 +315,17 @@ public class CfsSubsetEval
 	if (subset.get(i)) {
 	  denom += (1.0 * m_std_devs[i] * m_std_devs[i]);
 
-	  for (int j = i + 1; j < m_numAttribs; j++) {if (subset.get(j)) {
-	    if (m_corr_matrix.getElement(i, j) == -999) {
-	      corr = correlate(i, j);
-	      m_corr_matrix.setElement(i, j, corr);
-	      m_corr_matrix.setElement(j, i, corr);
-	      denom += (2.0 * m_std_devs[i] * m_std_devs[j] * corr);
+	  for (int j = 0; j < m_corr_matrix[i].length - 1; j++) {
+	    if (subset.get(j)) {
+	      if (m_corr_matrix[i][j] == -999) {
+		corr = correlate(i, j);
+		m_corr_matrix[i][j] = corr;
+		denom += (2.0 * m_std_devs[i] * m_std_devs[j] * corr);
+	      }
+	      else {
+		denom += (2.0 * m_std_devs[i] * m_std_devs[j] * m_corr_matrix[i][j]);
+	      }
 	    }
-	    else {denom += (2.0 * m_std_devs[i] * m_std_devs[j] * 
-			    m_corr_matrix.getElement(i, j));
-	    }
-	  }
 	  }
 	}
       }
@@ -340,27 +349,27 @@ public class CfsSubsetEval
   }
 
 
-  private double correlate (int att1, int att2) {
+  private float correlate (int att1, int att2) {
     if (!m_isNumeric) {
-      return  symmUncertCorr(att1, att2);
+      return  (float) symmUncertCorr(att1, att2);
     }
 
     boolean att1_is_num = (m_trainInstances.attribute(att1).isNumeric());
     boolean att2_is_num = (m_trainInstances.attribute(att2).isNumeric());
 
     if (att1_is_num && att2_is_num) {
-      return  num_num(att1, att2);
+      return  (float) num_num(att1, att2);
     }
     else {if (att2_is_num) {
-      return  num_nom2(att1, att2);
+      return  (float) num_nom2(att1, att2);
     }
     else {if (att1_is_num) {
-      return  num_nom2(att2, att1);
+      return  (float) num_nom2(att2, att1);
     }
     }
     }
 
-    return  nom_nom(att1, att2);
+    return (float) nom_nom(att1, att2);
   }
 
 
@@ -502,10 +511,8 @@ public class CfsSubsetEval
       }
     }
 
-    // corr_measure = Correlate.symm_uncert(counts,sumi,sumj,sum,ni,nj,flag);
     corr_measure = ContingencyTables.symmetricalUncertainty(counts);
 
-    // corr_measure = ContingencyTables.gainRatio(counts);
     if (Utils.eq(corr_measure, 0.0)) {
       if (flag == true) {
 	return  (0.0);
@@ -900,24 +907,31 @@ public class CfsSubsetEval
     boolean done = false;
     boolean ok = true;
     double temp_best = -1.0;
-    double corr;
+    float corr;
     j = 0;
     BitSet temp_group = (BitSet)best_group.clone();
+    int larger, smaller;
 
     while (!done) {
       temp_best = -1.0;
 
       // find best not already in group
       for (i = 0; i < m_numAttribs; i++) {
+	if (i > m_classIndex) {
+	  larger = i; smaller = m_classIndex;
+	} else {
+	  smaller = i; larger = m_classIndex;
+	}
+	/*	int larger = (i > m_classIndex ? i : m_classIndex);
+		int smaller = (i > m_classIndex ? m_classIndex : i); */
 	if ((!temp_group.get(i)) && (i != m_classIndex)) {
-	  if (m_corr_matrix.getElement(i, m_classIndex) == -999) {
+	  if (m_corr_matrix[larger][smaller] == -999) {
 	    corr = correlate(i, m_classIndex);
-	    m_corr_matrix.setElement(i, m_classIndex, corr);
-	    m_corr_matrix.setElement(m_classIndex, i, corr);
+	    m_corr_matrix[larger][smaller] = corr;
 	  }
 
-	  if (m_corr_matrix.getElement(i, m_classIndex) > temp_best) {
-	    temp_best = m_corr_matrix.getElement(i, m_classIndex);
+	  if (m_corr_matrix[larger][smaller]  > temp_best) {
+	    temp_best = m_corr_matrix[larger][smaller];
 	    j = i;
 	  }
 	}
@@ -933,14 +947,20 @@ public class CfsSubsetEval
 	// check the best against correlations with others already
 	// in group 
 	for (i = 0; i < m_numAttribs; i++) {
+	  if (i > j) {
+	    larger = i; smaller = j;
+	  } else {
+	    larger = j; smaller = i;
+	  }
+	  /*  int larger = (i > j ? i : j);
+	      int smaller = (i > j ? j : i); */
 	  if (best_group.get(i)) {
-	    if (m_corr_matrix.getElement(i, j) == -999) {
+	    if (m_corr_matrix[larger][smaller] == -999) {
 	      corr = correlate(i, j);
-	      m_corr_matrix.setElement(i, j, corr);
-	      m_corr_matrix.setElement(j, i, corr);
+	      m_corr_matrix[larger][smaller] = corr;
 	    }
 
-	    if (m_corr_matrix.getElement(i, j) > temp_best - m_c_Threshold) {
+	    if (m_corr_matrix[larger][smaller] > temp_best - m_c_Threshold) {
 	      ok = false;
 	      break;
 	    }
@@ -1025,6 +1045,5 @@ public class CfsSubsetEval
       System.out.println(e.getMessage());
     }
   }
-
 }
 
