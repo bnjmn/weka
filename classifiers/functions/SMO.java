@@ -25,10 +25,9 @@ import weka.filters.*;
 
 /**
  * Implements John C. Platt's sequential minimal optimization
- * algorithm for training a support vector classifier using scaled
- * polynomial kernels. Transforms output of SVM into probabilities
- * by applying a standard sigmoid function that is not fitted to the
- * data.
+ * algorithm for training a support vector classifier using polynomial
+ * kernels. Transforms output of SVM into probabilities by applying a
+ * standard sigmoid function that is not fitted to the data.
  *
  * This implementation globally replaces all missing values,
  * transforms nominal attributes into binary ones, and normalizes all
@@ -59,8 +58,15 @@ import weka.filters.*;
  * -N <br>
  * Don't normalize the training instances. <p>
  *
+ * -L <br>
+ * Rescale kernel. <p>
+ *
+ * -O <br>
+ * Use lower-order terms. <p>
+ *
  * -A num <br>
- * Sets the size of the kernel cache. Should be a prime number. (default 1000003) <p>
+ * Sets the size of the kernel cache. Should be a prime number. 
+ * (default 1000003) <p>
  *
  * -T num <br>
  * Sets the tolerance parameter. (default 1.0e-3)<p>
@@ -71,8 +77,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.7 $ 
-*/
+ * @version $Revision: 1.8 $ */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
   /**
@@ -260,7 +265,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   /** Counts the number of kernel evaluations. */
   private int m_kernelEvals;
 
-  /** The size of the cache (a prime number*/
+  /** The size of the cache (a prime number) */
   private int m_cacheSize = 1000003;
 
   /** A random number generator */
@@ -268,6 +273,12 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
   /** True if we don't want to normalize */
   private boolean m_dontNormalize = false;
+
+  /** Rescale? */
+  private boolean m_rescale = false;
+  
+  /** Use lower-order terms? */
+  private boolean m_lowerOrder = false;
 
   /** Only numeric attributes in the dataset? */
   private boolean m_onlyNumeric = true;
@@ -310,7 +321,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       m_NominalToBinary.inputFormat(insts);
       insts = Filter.useFilter(insts, m_NominalToBinary);
     }
-    
+
     if (!m_dontNormalize) {
       m_Normalization = new NormalizationFilter();
       m_Normalization.inputFormat(insts);
@@ -464,7 +475,8 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 	  m_compressValue[index][p];
       }
     } else {
-      for (int i = m_supportVectors.getNext(-1); i != -1; i = m_supportVectors.getNext(i)) {
+      for (int i = m_supportVectors.getNext(-1); i != -1; 
+	   i = m_supportVectors.getNext(i)) {
 	result += m_class[i] * m_alpha[i] * kernel(index, i);
       }
     }
@@ -533,7 +545,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(7);
+    Vector newVector = new Vector(9);
 
     newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
 				    "C", 1, "-C <double>"));
@@ -545,16 +557,20 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 				    "(default 1)",
 				    "S", 1, "-S <int>"));
     newVector.addElement(new Option("\tDon't normalize the data.",
-				    "N", 0, "-N <int>"));
+				    "N", 0, "-N"));
+    newVector.addElement(new Option("\tRescale the kernel.",
+				    "L", 0, "-L"));
+    newVector.addElement(new Option("\tUse lower-order terms.",
+				    "O", 0, "-O"));
     newVector.addElement(new Option("\tThe size of the kernel cache. " +
 				    "(default 1000003)",
 				    "A", 1, "-A <int>"));
     newVector.addElement(new Option("\tThe tolerance parameter. " +
 				    "(default 1.0e-3)",
-				    "T", 1, "-T <int>"));
+				    "T", 1, "-T <double>"));
     newVector.addElement(new Option("\tThe epsilon for round-off error. " +
 				    "(default 1.0e-15)",
-				    "P", 1, "-P <int>"));
+				    "P", 1, "-P <double>"));
     
 
     return newVector.elements();
@@ -574,6 +590,12 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    *
    * -N <br>
    * Don't normalize the training instances. <p>
+   *
+   * -L <br>
+   * Rescale kernel. <p>
+   *
+   * -O <br>
+   * Use lower-order terms. <p>
    *
    * -A num <br>
    * Sets the size of the kernel cache. Should be a prime number. (default 1000003) <p>
@@ -626,6 +648,14 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       m_eps = 1.0e-15;
     }
     m_dontNormalize = Utils.getFlag('N', options);
+    m_rescale = Utils.getFlag('L', options);
+    if ((m_exponent == 1.0) && (m_rescale)) {
+      throw new Exception("Can't use rescaling with linear machine.");
+    }
+    m_lowerOrder = Utils.getFlag('O', options);
+    if ((m_exponent == 1.0) && (m_lowerOrder)) {
+      throw new Exception("Can't use lower-order terms with linear machine.");
+    }
   }
 
   /**
@@ -635,7 +665,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [13];
+    String [] options = new String [15];
     int current = 0;
 
     options[current++] = "-C"; options[current++] = "" + m_C;
@@ -646,6 +676,12 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     options[current++] = "-P"; options[current++] = "" + m_eps;
     if (m_dontNormalize) {
       options[current++] = "-N";
+    }
+    if (m_rescale) {
+      options[current++] = "-L";
+    }
+    if (m_lowerOrder) {
+      options[current++] = "-O";
     }
 
     while (current < options.length) {
@@ -669,16 +705,34 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
     try {
       text.append("SMO\n\n");
-      for (int i = 0; i < m_alpha.length; i++) {
-	if (m_supportVectors.contains(i)) {
-	  printed++;
-	  if (printed > 0) {
-	    text.append(" + ");
-	  } else {
-	    text.append("   ");
+
+      // If machine linear, print weight vector
+      if (m_exponent == 1.0) {
+	text.append("Machine linear: showing attribute weights, ");
+	text.append("not support vectors.\n\n");
+	for (int i = 0; i < m_weights.length; i++) {
+	  if (i != (int)m_data.classIndex()) {
+	    if (printed > 0) {
+	      text.append(" + ");
+	    } else {
+	      text.append("   ");
+	    }
+	    text.append(m_weights[i] + " * x" + (i + 1) + "\n");
+	    printed++;
 	  }
-	  text.append(((int)m_class[i]) + " * " +
-		      m_alpha[i] + " * K[X(" + i + ") * X]\n");
+	}
+      } else {
+	for (int i = 0; i < m_alpha.length; i++) {
+	  if (m_supportVectors.contains(i)) {
+	    if (printed > 0) {
+	      text.append(" + ");
+	    } else {
+	      text.append("   ");
+	    }
+	    text.append(((int)m_class[i]) + " * " +
+			m_alpha[i] + " * K[X(" + i + ") * X]\n");
+	    printed++;
+	  }
 	}
       }
       text.append(" - " + m_b);
@@ -692,7 +746,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   }
   
   /**
-   * Get the value of exponent.
+   * Get the value of exponent. 
    *
    * @return Value of exponent.
    */
@@ -702,12 +756,18 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   }
   
   /**
-   * Set the value of exponent.
+   * Set the value of exponent. If linear kernel
+   * is used, rescaling and lower-order terms are
+   * turned off.
    *
    * @param v  Value to assign to exponent.
    */
   public void setExponent(double v) {
     
+    if (v == 1.0) {
+      m_rescale = false;
+      m_lowerOrder = false;
+    }
     m_exponent = v;
   }
   
@@ -749,6 +809,124 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   public void setSeed(int v) {
     
     m_seed = v;
+  }
+  
+  /**
+   * Get the value of tolerance parameter.
+   * @return Value of tolerance parameter.
+   */
+  public double getToleranceParameter() {
+    
+    return m_tol;
+  }
+  
+  /**
+   * Set the value of tolerance parameter.
+   * @param v  Value to assign to tolerance parameter.
+   */
+  public void setToleranceParameter(double v) {
+    
+    m_tol = v;
+  }
+  
+  /**
+   * Get the value of epsilon.
+   * @return Value of epsilon.
+   */
+  public double getEpsilon() {
+    
+    return m_eps;
+  }
+  
+  /**
+   * Set the value of epsilon.
+   * @param v  Value to assign to epsilon.
+   */
+  public void setEpsilon(double v) {
+    
+    m_eps = v;
+  }
+  
+  /**
+   * Get the size of the kernel cache
+   * @return Size of kernel cache.
+   */
+  public int getCacheSize() {
+    
+    return m_cacheSize;
+  }
+  
+  /**
+   * Set the value of the kernel cache.
+   * @param v  Size of kernel cache.
+   */
+  public void setCacheSize(int v) {
+    
+    m_cacheSize = v;
+  }
+  
+  /**
+   * Check whether data is to be normalized.
+   * @return Value of dontNormalize.
+   */
+  public boolean getDontNormalizeData() {
+    
+    return m_dontNormalize;
+  }
+  
+  /**
+   * Set whether data is to be normalized.
+   * @param v  Value to assign to dontNormalize.
+   */
+  public void setDontNormalizeData(boolean v) {
+    
+    m_dontNormalize = v;
+  }
+  
+  /**
+   * Check whether kernel is being rescaled.
+   * @return Value of rescale.
+   */
+  public boolean getRescaleKernel() throws Exception {
+
+    return m_rescale;
+  }
+  
+  /**
+   * Set whether kernel is to be rescaled. Defaults
+   * to false if a linear machine is built.
+   * @param v  Value to assign to rescale.
+   */
+  public void setRescaleKernel(boolean v) throws Exception {
+    
+    if (m_exponent == 1.0) {
+      m_rescale = false;
+    } else {
+      m_rescale = v;
+    }
+  }
+  
+  /**
+   * Check whether lower-order terms are being used.
+   * @return Value of lowerOrder.
+   */
+  public boolean getLowerOrderTerms() {
+    
+    return m_lowerOrder;
+  }
+  
+  /**
+   * Set whether lower-order terms are to be used. Defaults
+   * to false if a linear machine is built.
+   * @param v  Value to assign to lowerOrder.
+   */
+  public void setLowerOrderTerms(boolean v) {
+    
+    if (m_exponent == 1.0) {
+      m_lowerOrder = false;
+    } else {
+      m_lowerOrder = v;
+    }
   }
 
   /**
@@ -794,10 +972,15 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       }
     }
     
-    //result += 1;        // as kernel form is (x.y + 1)^d
-    
-    // Rescale kernel
-    //result /= (double)m_data.numAttributes() - 1;
+    // Use lower order terms?
+    if (m_lowerOrder) {
+      result += 1.0;
+    }
+
+    // Rescale kernel?
+    if (m_rescale) {
+      result /= (double)m_data.numAttributes() - 1;
+    }      
     
     if (m_exponent != 1.0) {
       result = Math.pow(result, m_exponent);
@@ -1008,7 +1191,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     } else {
       m_I4.delete(i1);
     }
-    if (a2 > 0) {
+    if (a2 > 0 + m_eps) {
       m_supportVectors.insert(i2);
     } else {
       m_supportVectors.delete(i2);
@@ -1122,7 +1305,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       scheme = new SMO();
       System.out.println(Evaluation.evaluateModel(scheme, argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
