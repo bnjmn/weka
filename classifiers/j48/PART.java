@@ -52,7 +52,7 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -73,7 +73,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
   private int m_numFolds = 3;
 
   /** Binary splits on nominal attributes? */
-  private boolean binarySplits = false;
+  private boolean m_binarySplits = false;
   
   /**
    * Generates the classifier.
@@ -85,7 +85,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
 
     ModelSelection modSelection;	 
 
-    if (binarySplits)
+    if (m_binarySplits)
       modSelection = new BinC45ModelSelection(m_minNumObj, instances);
     else
       modSelection = new C45ModelSelection(m_minNumObj, instances);
@@ -178,7 +178,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
 
     // Pruning options
     m_reducedErrorPruning = Utils.getFlag('R', options);
-    binarySplits = Utils.getFlag('B', options);
+    m_binarySplits = Utils.getFlag('B', options);
     String confidenceString = Utils.getOption('C', options);
     if (confidenceString.length() != 0) {
       if (m_reducedErrorPruning) {
@@ -231,7 +231,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
     } else {
       options[current++] = "-C"; options[current++] = "" + m_CF;
     }
-    if (binarySplits) {
+    if (m_binarySplits) {
       options[current++] = "-B";
     }
     options[current++] = "-M"; options[current++] = "" + m_minNumObj;
@@ -248,6 +248,106 @@ public class PART extends DistributionClassifier implements OptionHandler,
   public String toString() {
     
     return "PART decision list\n------------------\n\n" + m_root.toString();
+  }
+  
+  /**
+   * Get the value of CF.
+   *
+   * @return Value of CF.
+   */
+  public float getCF() {
+    
+    return m_CF;
+  }
+  
+  /**
+   * Set the value of CF.
+   *
+   * @param v  Value to assign to CF.
+   */
+  public void setCF(float v) {
+    
+    m_CF = v;
+  }
+  
+  /**
+   * Get the value of minNumObj.
+   *
+   * @return Value of minNumObj.
+   */
+  public int getMinNumObj() {
+    
+    return m_minNumObj;
+  }
+  
+  /**
+   * Set the value of minNumObj.
+   *
+   * @param v  Value to assign to minNumObj.
+   */
+  public void setMinNumObj(int v) {
+    
+    m_minNumObj = v;
+  }
+  
+  /**
+   * Get the value of reducedErrorPruning.
+   *
+   * @return Value of reducedErrorPruning.
+   */
+  public boolean getReducedErrorPruning() {
+    
+    return m_reducedErrorPruning;
+  }
+  
+  /**
+   * Set the value of reducedErrorPruning.
+   *
+   * @param v  Value to assign to reducedErrorPruning.
+   */
+  public void setReducedErrorPruning(boolean v) {
+    
+    m_reducedErrorPruning = v;
+  }
+  
+  /**
+   * Get the value of numFolds.
+   *
+   * @return Value of numFolds.
+   */
+  public int getNumFolds() {
+    
+    return m_numFolds;
+  }
+  
+  /**
+   * Set the value of numFolds.
+   *
+   * @param v  Value to assign to numFolds.
+   */
+  public void setNumFolds(int v) {
+    
+    m_numFolds = v;
+  }
+  
+  /**
+   * Get the value of binarySplits.
+   *
+   * @return Value of binarySplits.
+   */
+  public boolean getBinarySplits() {
+    
+    return m_binarySplits;
+  }
+  
+  /**
+   * Set the value of binarySplits.
+   *
+   * @param v  Value to assign to binarySplits.
+   */
+  public void setBinarySplits(boolean v) {
+    
+    m_binarySplits = v;
   }
   
   /**

@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -40,16 +39,10 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.1 - 21 Dec 1998 - Added Akaike attribute selection and 
- * instance weights (Len) <br>
- *          1.0 - ?? ??? 1998 - Initial version (Eibe)
+ * @version $Revision: 1.3 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
-
-  // =================
-  // Private variables
-  // =================
 
   /** Array for storing coefficients of linear regression. */
   private double[] m_Coefficients;
@@ -63,9 +56,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
   /** The filter for removing missing values. */
   private ReplaceMissingValuesFilter m_MissingFilter;
 
-  /**
-   * The filter storing the transformation from
-   * nominal to numeric attributes.
+  /** The filter storing the transformation from nominal to binary attributes.
    */
   private NominalToBinaryFilter m_TransformFilter;
 
@@ -85,11 +76,6 @@ public class LinearRegression extends Classifier implements OptionHandler,
   private static final int M5METHOD = 0;
   private static final int NONE     = 1;
   private static final int GREEDY   = 2;
-
-
-  // ==============
-  // Public methods
-  // ==============
 
   /**
    * Builds a regression model for the given data.
@@ -294,10 +280,6 @@ public class LinearRegression extends Classifier implements OptionHandler,
     return b_Debug;
   }
 
-  // ===============
-  // Private methods
-  // ===============
-
   /**
    * Calculates the standard deviations of each attribute. The
    * results are stored in m_StdDev.
@@ -387,6 +369,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
     switch (m_AttributeSelection) {
 
     case GREEDY:
+
       // Greedy attribute removal
       do {
 	boolean [] currentSelected = (boolean []) selectedAttributes.clone();
@@ -406,6 +389,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
 	    if (b_Debug) {
 	      System.out.println("(akaike: " + currentAkaike);
 	    }
+
 	    // If it is better than the current best
 	    if (currentAkaike < akaike) {
 	      if (b_Debug) {
@@ -426,6 +410,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
       break;
 
     case M5METHOD:
+
       // Step through the attributes removing the one with the smallest 
       // standardised coefficient until no improvement in Akaike
       do {
@@ -459,6 +444,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
 	  if (b_Debug) {
 	    System.out.println("(akaike: " + currentAkaike);
 	  }
+
 	  // If it is better than the current best
 	  if (currentAkaike < akaike) {
 	    if (b_Debug) {
@@ -598,8 +584,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
   /**
    * Generates a linear regression function predictor.
    *
-   * @param String with options: -c <index of class>, 
-   * -t <name of file with training data>, -T <name of file with test data>, 
+   * @param String the options
    */
   public static void main(String argv[]) {
     

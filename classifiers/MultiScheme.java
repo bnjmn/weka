@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -46,13 +45,9 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
-
-  // ===================
-  // Protected variables
-  // ===================
 
   /** The classifier that had the best performance on training data. */
   protected Classifier m_Classifier;
@@ -77,10 +72,6 @@ public class MultiScheme extends Classifier implements OptionHandler {
 
   /** Random number seed */
   protected int m_Seed = 1;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -226,6 +217,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
       String [] options = Utils.splitOptions(learnerOptions);
       ((OptionHandler)tempClassifier).setOptions(options);
     }
+
     // Everything good, so add the learner to the set.
     if (m_ClassifierNames == null) {
       m_ClassifierNames = new FastVector();
@@ -346,6 +338,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     double bestPerformance = Double.NaN;
     int numClassifiers = m_ClassifierNames.size();
     for (int i = 0; i < numClassifiers; i++) {
+
       // Instantiate the classifier
       String learnerName = (String)m_ClassifierNames.elementAt(i);
       Classifier currentClassifier = (Classifier)Class.forName(learnerName)

@@ -16,32 +16,43 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /**
  * Class for building and using a PRISM classifier
+ *
+ * Reference: J. Cendrowska (1987). <i>PRISM: An algorithm for
+ * inducing modular rules</i>. International Journal of Man-Machine
+ * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version 1.0
- */
+ * @version $Revision: 1.5 $ 
+*/
 public class Prism extends Classifier {
 
   /**
    * Class for storing a PRISM ruleset, i.e. a list of rules
    */
   private class PrismRule {
-    private int classification;
-    private Instances instances;
-    private Test test; // first test of this rule
-    private int errors; // number of errors made by this rule (will end up 0)
-    private PrismRule next;
+    
+    /** The classification */
+    private int m_classification;
+
+    /** The instances */
+    private Instances m_instances;
+
+    /** First test of this rule */
+    private Test m_test; 
+
+    /** Number of errors made by this rule (will end up 0) */
+    private int m_errors; 
+
+    /** The next rule in the list */
+    private PrismRule m_next;
 
     /**
      * Constructor that takes instances and the classification.
@@ -52,15 +63,15 @@ public class Prism extends Classifier {
      */
     public PrismRule(Instances data, int cl) throws Exception {
 
-      instances = data;
-      classification = cl;
-      test = null;
-      next = null;
-      errors = 0;
+      m_instances = data;
+      m_classification = cl;
+      m_test = null;
+      m_next = null;
+      m_errors = 0;
       Enumeration enum = data.enumerateInstances();
       while (enum.hasMoreElements()) {
         if ((int) ((Instance) enum.nextElement()).classValue() != cl) {
-	  errors++;
+	  m_errors++;
 	}
       }
     }  
@@ -73,8 +84,8 @@ public class Prism extends Classifier {
      */
     public int resultRule(Instance inst) {
 
-      if (test == null || test.satisfies(inst)) {
-	return classification;
+      if (m_test == null || m_test.satisfies(inst)) {
+	return m_classification;
       } else {
 	return -1;
       }
@@ -89,9 +100,9 @@ public class Prism extends Classifier {
     public int resultRules(Instance inst) {
 
       if (resultRule(inst) != -1) {
-	return classification;
-      } else if (next != null) {
-	return next.resultRules(inst);
+	return m_classification;
+      } else if (m_next != null) {
+	return m_next.resultRules(inst);
       } else {
 	return -1;
       }
@@ -146,24 +157,24 @@ public class Prism extends Classifier {
 
       try {
 	StringBuffer text = new StringBuffer();
-	if (test != null) {
+	if (m_test != null) {
 	  text.append("If ");
-	  for (Test t = test; t != null; t = t.next) {
-	    if (t.attr == -1) {
+	  for (Test t = m_test; t != null; t = t.m_next) {
+	    if (t.m_attr == -1) {
 	      text.append("?");
 	    } else {
-	      text.append(instances.attribute(t.attr).name() + " = " +
-			  instances.attribute(t.attr).value(t.val));
+	      text.append(m_instances.attribute(t.m_attr).name() + " = " +
+			  m_instances.attribute(t.m_attr).value(t.m_val));
 	    }
-	    if (t.next != null) {
+	    if (t.m_next != null) {
 	      text.append("\n   and ");
 	    }
 	  }
 	  text.append(" then ");
 	}
-	text.append(instances.classAttribute().value(classification) + "\n");
-	if (next != null) {
-	  text.append(next.toString());
+	text.append(m_instances.classAttribute().value(m_classification) + "\n");
+	if (m_next != null) {
+	  text.append(m_next.toString());
 	}
 	return text.toString();
       } catch (Exception e) {
@@ -177,9 +188,14 @@ public class Prism extends Classifier {
    */
   private class Test { 
 
-    private int attr = -1; // attribute to test
-    private int val; // value of that attribute
-    private Test next = null; // next test
+    /** Attribute to test */
+    private int m_attr = -1; 
+
+    /** The attribute's value */
+    private int m_val; 
+
+    /** The next test in the rule */
+    private Test m_next = null; 
 
     /**
      * Returns whether a given instance satisfies this test.
@@ -189,18 +205,19 @@ public class Prism extends Classifier {
      */
     private boolean satisfies(Instance inst) {
 
-      if ((int) inst.value(attr) == val) {
-        if (next == null) {
+      if ((int) inst.value(m_attr) == m_val) {
+        if (m_next == null) {
 	  return true;
 	} else {
-	  return next.satisfies(inst);
+	  return m_next.satisfies(inst);
 	}
       }
       return false;    
     }
   }
 
-  private PrismRule rules;
+  /** The first rule in the list of rules */
+  private PrismRule m_rules;
 
   /**
    * Classifies a given instance.
@@ -210,7 +227,7 @@ public class Prism extends Classifier {
    */
   public double classifyInstance(Instance inst) {
 
-    int result = rules.resultRules(inst);
+    int result = m_rules.resultRules(inst);
     if (result == -1) {
       return Instance.missingValue();
     } else {
@@ -262,14 +279,15 @@ public class Prism extends Classifier {
       while (contains(E, cl)) { // while E contains examples in class cl
         rule = addRule(rule, new PrismRule(E, cl)); // make a new rule
         ruleE = E; // examples covered by this rule
-        while (rule.errors != 0) { // until the rule is perfect
+        while (rule.m_errors != 0) { // until the rule is perfect
           test = new Test(); // make a new test
           bestCorrect = bestCovers = attUsed = 0;
+
           // for every attribute not mentioned in the rule
           enumAtt = ruleE.enumerateAttributes();
           while (enumAtt.hasMoreElements()) {
             Attribute attr = (Attribute) enumAtt.nextElement();
-            if (isMentionedIn(attr, rule.test)) {
+            if (isMentionedIn(attr, rule.m_test)) {
 	      attUsed++; 
 	      continue;
 	    }
@@ -293,19 +311,21 @@ public class Prism extends Classifier {
             // ... for each value of this attribute, see if this test is better
             for (int val = 0; val < M; val ++) {
               int diff = correct[val] * bestCovers - bestCorrect * covers[val];
+
               // this is a ratio test, correct/covers vs best correct/covers
-              if (test.attr == -1
+              if (test.m_attr == -1
                   || diff > 0 || (diff == 0 && correct[val] > bestCorrect)) {
+
                 // update the rule to use this test
                 bestCorrect = correct[val];
                 bestCovers = covers[val];
-                test.attr = attr.index();
-                test.val = val;
-                rule.errors = bestCovers - bestCorrect;
+                test.m_attr = attr.index();
+                test.m_val = val;
+                rule.m_errors = bestCovers - bestCorrect;
               }
             }
           }
-	  if (test.attr == -1) { // Couldn't find any sensible test
+	  if (test.m_attr == -1) { // Couldn't find any sensible test
 	    break;
 	  }
 	  oldTest = addTest(rule, oldTest, test);
@@ -329,9 +349,9 @@ public class Prism extends Classifier {
   private PrismRule addRule(PrismRule lastRule, PrismRule newRule) {
 
     if (lastRule == null) {
-      rules = newRule;
+      m_rules = newRule;
     } else {
-      lastRule.next = newRule;
+      lastRule.m_next = newRule;
     }
     return newRule;
   }
@@ -346,10 +366,10 @@ public class Prism extends Classifier {
    */
   private Test addTest(PrismRule rule, Test lastTest, Test newTest) {
 
-    if (rule.test == null) {
-      rule.test = newTest;
+    if (rule.m_test == null) {
+      rule.m_test = newTest;
     } else {
-      lastTest.next = newTest;
+      lastTest.m_next = newTest;
     }
     return newTest;
   }
@@ -383,10 +403,10 @@ public class Prism extends Classifier {
     if (t == null) { 
       return false;
     }
-    if (t.attr == attr.index()) {
+    if (t.m_attr == attr.index()) {
       return true;
     }
-    return isMentionedIn(attr, t.next);
+    return isMentionedIn(attr, t.m_next);
   }    
 
   /**
@@ -396,7 +416,7 @@ public class Prism extends Classifier {
    */
   public String toString() {
 
-    return "Prism rules\n----------\n" + rules.toString();
+    return "Prism rules\n----------\n" + m_rules.toString();
   }
 
   /**
@@ -411,6 +431,7 @@ public class Prism extends Classifier {
     }
   }
 }
+
 
 
 

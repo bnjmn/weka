@@ -23,11 +23,11 @@ import weka.core.*;
 import weka.classifiers.*;
 
 /**
- * Class for generating an unpruned or a pruned C4.5 decision tree.
+ * Class for generating an unpruned or a pruned C4.5 decision tree. <p>
  *
  * Reference:
  * Ross Quinlan (1993). <i>C4.5: Programs for Machine Learning</i>, 
- * Morgan Kaufmann Publishers, San Mateo, CA.
+ * Morgan Kaufmann Publishers, San Mateo, CA. </p>
  *
  * Valid options are: <p>
  *
@@ -54,14 +54,14 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, WeightedInstancesHandler {
 
   /** The decision tree */
   private ClassifierTree m_root;
-
+  
   /** Unpruned tree? */
   private boolean m_unpruned = false;
 
@@ -312,7 +312,146 @@ public class J48 extends DistributionClassifier implements OptionHandler,
     else
       return "J48 pruned tree\n------------------\n"+m_root.toString();
   }
+   
+  /**
+   * Get the value of unpruned.
+   *
+   * @return Value of unpruned.
+   */
+  public boolean getUnpruned() {
+    
+    return m_unpruned;
+  }
   
+  /**
+   * Set the value of unpruned.
+   * @param v  Value to assign to unpruned.
+   */
+  public void setUnpruned(boolean v) {
+    
+    m_unpruned = v;
+  }
+  
+  /**
+   * Get the value of CF.
+   *
+   * @return Value of CF.
+   */
+  public float getCF() {
+    
+    return m_CF;
+  }
+  
+  /**
+   * Set the value of CF.
+   *
+   * @param v  Value to assign to CF.
+   */
+  public void setCF(float v) {
+    
+    m_CF = v;
+  }
+  
+  /**
+   * Get the value of minNumObj.
+   *
+   * @return Value of minNumObj.
+   */
+  public int getMinNumObj() {
+    
+    return m_minNumObj;
+  }
+  
+  /**
+   * Set the value of minNumObj.
+   *
+   * @param v  Value to assign to minNumObj.
+   */
+  public void setMinNumObj(int v) {
+    
+    m_minNumObj = v;
+  }
+  
+  /**
+   * Get the value of reducedErrorPruning.
+   *
+   * @return Value of reducedErrorPruning.
+   */
+  public boolean getReducedErrorPruning() {
+    
+    return m_reducedErrorPruning;
+  }
+  
+  /**
+   * Set the value of reducedErrorPruning.
+   *
+   * @param v  Value to assign to reducedErrorPruning.
+   */
+  public void setReducedErrorPruning(boolean v) {
+    
+    m_reducedErrorPruning = v;
+  }
+  
+  /**
+   * Get the value of numFolds.
+   *
+   * @return Value of numFolds.
+   */
+  public int getNumFolds() {
+    
+    return m_numFolds;
+  }
+  
+  /**
+   * Set the value of numFolds.
+   *
+   * @param v  Value to assign to numFolds.
+   */
+  public void setNumFolds(int v) {
+    
+    m_numFolds = v;
+  }
+  
+  /**
+   * Get the value of binarySplits.
+   *
+   * @return Value of binarySplits.
+   */
+  public boolean getBinarySplits() {
+    
+    return m_binarySplits;
+  }
+  
+  /**
+   * Set the value of binarySplits.
+   *
+   * @param v  Value to assign to binarySplits.
+   */
+  public void setBinarySplits(boolean v) {
+    
+    m_binarySplits = v;
+  }
+  
+  /**
+   * Get the value of subtreeRaising.
+   *
+   * @return Value of subtreeRaising.
+   */
+  public boolean getSubtreeRaising() {
+    
+    return m_subtreeRaising;
+  }
+  
+  /**
+   * Set the value of subtreeRaising.
+   *
+   * @param v  Value to assign to subtreeRaising.
+   */
+  public void setSubtreeRaising(boolean v) {
+    
+    m_subtreeRaising = v;
+  }
+ 
   /**
    * Main method for testing this class
    *

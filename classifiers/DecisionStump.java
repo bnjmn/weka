@@ -23,10 +23,15 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for building and using a decision stump.
+ * Class for building and using a decision stump. Usually used in conjunction
+ * with a boosting algorithm.
  *
+ * Typical usage: <p>
+ * <code>java weka.classifiers.LogitBoost -I 100 -W weka.classifiers.DecisionStump 
+ * -t training_data </code><p>
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler {

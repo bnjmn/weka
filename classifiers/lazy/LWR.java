@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -41,15 +40,11 @@ import weka.core.*;
  * (default 0 = Linear) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 21 Dec 1998
+ * @version $Revision: 1.3 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
   WeightedInstancesHandler {
-  
-  // ===================
-  // Protected variables
-  // ===================
   
   /** The training instances used for classification. */
   protected Instances m_Train;
@@ -76,12 +71,6 @@ public class LWR extends Classifier
   protected static final int LINEAR  = 0;
   protected static final int INVERSE = 1;
   protected static final int GAUSS   = 2;
-
-
-  // ==============
-  // Public methods
-  // ==============
-
 
   /**
    * Returns an enumeration describing the available options
@@ -433,10 +422,6 @@ public class LWR extends Classifier
     return result;
   }
 
-  // ===============
-  // Private methods
-  // ===============
-
   /**
    * Calculates the distance between two instances
    *
@@ -453,8 +438,8 @@ public class LWR extends Classifier
 	continue;
       }
       if (m_Train.attribute(i).isNominal()) {
-	// If attribute is nominal
 
+	// If attribute is nominal
 	if (first.isMissing(i) || second.isMissing(i) ||
 	    ((int)first.value(i) != (int)second.value(i))) {
 	  diff = 1;
@@ -462,8 +447,8 @@ public class LWR extends Classifier
 	  diff = 0;
 	}
       } else {
-	// If attribute is numeric
 
+	// If attribute is numeric
 	if (first.isMissing(i) || second.isMissing(i)) {
 	  if (first.isMissing(i) && second.isMissing(i)) {
 	    diff = 1;
@@ -523,17 +508,11 @@ public class LWR extends Classifier
       }
     }
   }
-    
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

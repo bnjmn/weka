@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import weka.core.*;
@@ -24,11 +23,14 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Class implementing an Id3 decision tree classifier.
+ * Class implementing an Id3 decision tree classifier.<p>
+ *
+ * Reference: R. Quinlan (1986). <i>Induction of decision
+ * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
- */
+ * @version $Revision: 1.2 $ 
+*/
 public class Id3 extends DistributionClassifier {
 
   /** The node's successors. */ 

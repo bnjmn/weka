@@ -24,7 +24,14 @@ import weka.core.*;
 import java.util.*;
 
 /**
- * Implements the voted perceptron algorithm by Freund and Schapire.
+ * Implements the voted perceptron algorithm by Freund and
+ * Schapire. Globally replaces all missing values, and transforms
+ * nominal attributes into binary ones. <p>
+ *
+ * Reference: Y. Freund and R. E. Schapire (1998). <i> Large margin
+ * classification using the perceptron algorithm<\i>.  Proc. 11th
+ * Annu. Conf. on Comput. Learning Theory, pp. 209-217, ACM Press, New
+ * York, NY.
  *
  * Valid options are:<p>
  *
@@ -41,10 +48,10 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
- */
+ * @version $Revision: 1.3 $ 
+*/
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
-
+  
   /** The maximum number of alterations to the perceptron */
   private int m_MaxK = 10000;
 
@@ -171,6 +178,8 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
 
   /**
    * Builds the ensemble of perceptrons.
+   *
+   * @exception Exception if something goes wrong during building
    */
   public void buildClassifier(Instances insts) throws Exception {
  
@@ -276,6 +285,86 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
     text.append("Number of perceptrons: " + m_K);
     return text.toString();
   }
+  
+  /**
+   * Get the value of maxK.
+   *
+   * @return Value of maxK.
+   */
+  public int getMaxK() {
+    
+    return m_MaxK;
+  }
+  
+  /**
+   * Set the value of maxK.
+   *
+   * @param v  Value to assign to maxK.
+   */
+  public void setMaxK(int v) {
+    
+    m_MaxK = v;
+  }
+  
+  /**
+   * Get the value of NumIterations.
+   *
+   * @return Value of NumIterations.
+   */
+  public int getNumIterations() {
+    
+    return m_NumIterations;
+  }
+  
+  /**
+   * Set the value of NumIterations.
+   *
+   * @param v  Value to assign to NumIterations.
+   */
+  public void setNumIterations(int v) {
+    
+    m_NumIterations = v;
+  }
+  
+  /**
+   * Get the value of exponent.
+   *
+   * @return Value of exponent.
+   */
+  public double getExponent() {
+    
+    return m_Exponent;
+  }
+  
+  /**
+   * Set the value of exponent.
+   *
+   * @param v  Value to assign to exponent.
+   */
+  public void setExponent(double v) {
+    
+    m_Exponent = v;
+  }
+  
+  /**
+   * Get the value of Seed.
+   *
+   * @return Value of Seed.
+   */
+  public int getSeed() {
+    
+    return m_Seed;
+  }
+  
+  /**
+   * Set the value of Seed.
+   *
+   * @param v  Value to assign to Seed.
+   */
+  public void setSeed(int v) {
+    
+    m_Seed = v;
+  }
 
   /** 
    * Computes the inner product of two instances
@@ -287,8 +376,14 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
       if (j != i1.classIndex()) {
 	result += (i1.value(j) * i2.value(j));
       }
+    }    
+    result += 1.0;
+    
+    if (m_Exponent != 1) {
+      return Math.pow(result, m_Exponent);
+    } else {
+      return result;
     }
-    return Math.pow(result, m_Exponent);
   }
 
   /** 

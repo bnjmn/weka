@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -26,6 +25,10 @@ import weka.core.*;
 /**
  * Class for performing parameter selection by cross-validation for any
  * classifier.<p>
+ *
+ * Reference: R. Kohavi (1995). <i>Wrappers for Performance
+ * Enhancement and Oblivious Decision Graphs</i>. PhD
+ * Thesis. Department of Computer Science, Stanford University. <p>
  *
  * Valid options are:<p>
  *
@@ -37,10 +40,10 @@ import weka.core.*;
  * selection on.<p>
  *
  * -X num <br>
- * Number of folds used for cross validation. (default 10) <p>
+ * Number of folds used for cross validation (default 10). <p>
  *
  * -S seed <br>
- * Random number seed.<p>
+ * Random number seed (default 1).<p>
  *
  * -P "N 1 5 10" <br>
  * Sets an optimisation parameter for the learner with name -N,
@@ -54,11 +57,8 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.1 - 16 Mar 1999 - Changed format of optimisation parameter
- * specification: now provide number of steps rather than increment size <br>
- *          1.0 - 5 Jan 1999 - Initial version (Len)
- */
-
+ * @version $Revision: 1.3 $ 
+*/
 public class CVParameterSelection extends Classifier 
   implements OptionHandler {
 
@@ -67,15 +67,31 @@ public class CVParameterSelection extends Classifier
    * cross-validation search parameter
    */
   protected class CVParameter {
-    char m_ParamChar;    // Char used to identify the option of interest
-    double m_Lower;      // Lower bound for the CV search
-    double m_Upper;      // Upper bound for the CV search
-    double m_Steps;      // Increment during the search
-    double m_ParamValue; // The parameter value with the best performance
-    boolean b_AddAtEnd;  // True if the parameter should be added at the end
-                         // of the argument list
-    boolean b_RoundParam;// True if the parameter should be rounded to an 
-                         // integer
+
+    /**  Char used to identify the option of interest */
+    private char m_ParamChar;    
+
+    /**  Lower bound for the CV search */
+    private double m_Lower;      
+
+    /**  Upper bound for the CV search */
+    private double m_Upper;      
+
+    /**  Increment during the search */
+    private double m_Steps;      
+
+    /**  The parameter value with the best performance */
+    private double m_ParamValue; 
+
+    /**  True if the parameter should be added at the end of the argument list */
+    private boolean b_AddAtEnd;  
+
+    /**  True if the parameter should be rounded to an integer */
+    private boolean b_RoundParam;
+
+    /**
+     * Constructs a CVParameter.
+     */
     public CVParameter(String param) throws Exception {
      
       // Tokenize the string into it's parts
@@ -121,6 +137,9 @@ public class CVParameterSelection extends Classifier
       }
     }
 
+    /**
+     * Returns a CVParameter as a string.
+     */
     public String toString() {
 
       String result = m_ParamChar + " " + m_Lower + " ";
@@ -143,17 +162,10 @@ public class CVParameterSelection extends Classifier
     }
   }
 
-  // ===================
-  // Protected variables
-  // ===================
-
   /** The generated base classifier */
   protected Classifier m_Classifier;
 
-  /**
-   * The base classifier options (not including those being set
-   * by cross-validation)
-   */
+  /** The base classifier options (not including those being set by cross-validation) */
   protected String [] m_ClassifierOptions;
 
   /** The set of all classifier options as determined by cross-validation */
@@ -177,16 +189,10 @@ public class CVParameterSelection extends Classifier
   /** Debugging mode, gives extra output if true */
   protected boolean b_Debug;
 
-
-
-  // =================
-  // Protected methods
-  // =================
-
   /**
    * Create the options array to pass to the classifier. The parameter
    * values and positions are taken from m_ClassifierOptions and
-   * m_CVParams
+   * m_CVParams.
    *
    * @return the options array
    */
@@ -221,6 +227,9 @@ public class CVParameterSelection extends Classifier
     return options;
   }
 
+  /**
+   * Finds the best parameter.
+   */
   protected void findParamsByCrossValidation(int depth) throws Exception {
 
     if (depth < m_CVParams.size()) {
@@ -247,6 +256,7 @@ public class CVParameterSelection extends Classifier
     } else {
       
       Evaluation evaluation = new Evaluation(m_Train);
+
       // Set the classifier options
       String [] options = createOptions();
       if (b_Debug) {
@@ -278,10 +288,6 @@ public class CVParameterSelection extends Classifier
     }
   }
 
-  // ===============
-  // Public methods.
-  // ===============
-
   /**
    * Returns an enumeration describing the available options
    *
@@ -289,7 +295,7 @@ public class CVParameterSelection extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
 	      "\tTurn on debugging output.",
@@ -299,8 +305,7 @@ public class CVParameterSelection extends Classifier
 	      + "\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W"));
     newVector.addElement(new Option(
-	      "\tNumber of folds used for cross validation.\n"
-	      + "\t(default 10)",
+	      "\tNumber of folds used for cross validation (default 10).",
 	      "X", 1, "-X"));
     newVector.addElement(new Option(
 	      "\tLearner parameter options.\n"
@@ -309,10 +314,11 @@ public class CVParameterSelection extends Classifier
 	      + "\tand 10 optimisation steps. The upper bound may be the\n"
 	      + "\tcharacter 'A' or 'I' to substitute the number of\n"
 	      + "\tattributes or instances in the training data,\n"
-	      + "\trespectively.",
+	      + "\trespectively. This parameter may be supplied more than once to\n"
+	      + "\toptimise over several learner options simultaneously.",
 	      "P", 1, "-P"));
     newVector.addElement(new Option(
-	      "\tSets the random number seed.",
+	      "\tSets the random number seed (default 1).",
 	      "S", 1, "-S"));
 
     if ((m_Classifier != null) &&
@@ -342,10 +348,10 @@ public class CVParameterSelection extends Classifier
    * selection on.<p>
    *
    * -X num <br>
-   * Number of folds used for cross validation. (default 10) <p>
+   * Number of folds used for cross validation (default 10). <p>
    *
    * -S seed <br>
-   * Random number seed.<p>
+   * Random number seed (default 1).<p>
    *
    * -P "N 1 5 10" <br>
    * Sets an optimisation parameter for the learner with name -N,
@@ -426,7 +432,7 @@ public class CVParameterSelection extends Classifier
     }
 
     int current = 0;
-    String [] options = new String [classifierOptions.length + 6];
+    String [] options = new String [classifierOptions.length + 8];
     if (m_CVParams != null) {
       options = new String [m_CVParams.size() * 2 + options.length];
       for (int i = 0; i < m_CVParams.size(); i++) {
@@ -532,6 +538,9 @@ public class CVParameterSelection extends Classifier
     m_CVParams.addElement(newCV);
   }
 
+  /**
+   * Gets the scheme paramter with the given index.
+   */
   public String getCVParameter(int index) {
 
     if (m_CVParams.size() <= index) {
@@ -655,8 +664,7 @@ public class CVParameterSelection extends Classifier
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

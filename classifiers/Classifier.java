@@ -16,27 +16,25 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
 import weka.core.*;
 
 /** 
- * Abstract classifier.
+ * Abstract classifier. All schemes for numeric or nominal prediction in
+ * Weka extend this class.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.1 September 1998 (Eibe)
+ * @version $Revision: 1.2 $
  */
 public abstract class Classifier implements Cloneable, Serializable {
-
-  // ===============
-  // Public methods.
-  // ===============
  
   /**
-   * Generates a classifier. Has to initialize all fields of the classifier
-   * that are not being set via options.
+   * Generates a classifier. Must initialize all fields of the classifier
+   * that are not being set via options (ie. multiple calls of buildClassifier
+   * must always lead to the same result). Must not change the dataset
+   * in any way.
    *
    * @param data set of instances serving as training data 
    * @exception Exception if the classifier has not been 
@@ -47,10 +45,9 @@ public abstract class Classifier implements Cloneable, Serializable {
   /**
    * Classifies a given instance.
    *
-   * @param data set of instances 
    * @param instance the instance to be classified
    * @return index of the predicted class as a double
-   * if the class is enumerated, otherwise the predicted value
+   * if the class is nominal, otherwise the predicted value
    * @exception Exception if instance could not be classified
    * successfully
    */

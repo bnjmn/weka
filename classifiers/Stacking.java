@@ -23,32 +23,31 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Implements Stacking<p>
+ * Implements stacking.<p>
+ *
+ * Reference: David H. Wolpert (1992). <i>Stacked
+ * generalization</i>. Neural Networks, 5:241-259, Pergamon Press. <p>
  *
  * Valid options are:<p>
  *
  * -X num_folds <br>
- * The number of folds for the cross-validation.<p>
+ * The number of folds for the cross-validation (default 10).<p>
  *
  * -S seed <br>
- * Random number seed.<p>
+ * Random number seed (default 1).<p>
  *
  * -B learnerstring <br>
- * Learnerstring should contain the full class name of a scheme
- * included for selection followed by options to the learner
+ * Learnerstring should contain the full class name of a base scheme
+ * followed by options to the learner.
  * (required, option should be used once for each learner).<p>
  *
- * -M learnerstring  <br>
+ * -M learnerstring <br>
  * Learnerstring for the meta learner. Same format as for base learners.
+ * (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
- */
+ * @version $Revision: 1.4 $ */
 public class Stacking extends Classifier implements OptionHandler {
-
-  // ===================
-  // Protected variables
-  // ===================
 
   /** The meta classifier. */
   protected Classifier m_MetaClassifier = null;
@@ -79,10 +78,6 @@ public class Stacking extends Classifier implements OptionHandler {
 
   /** Random number seed */
   protected int m_Seed = 1;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -115,18 +110,19 @@ public class Stacking extends Classifier implements OptionHandler {
    * Parses a given list of options. Valid options are:<p>
    *
    * -X num_folds <br>
-   * The number of folds for the cross-validation.<p>
+   * The number of folds for the cross-validation (default 10).<p>
    *
    * -S seed <br>
-   * Random number seed.<p>
+   * Random number seed (default 1).<p>
    *
    * -B learnerstring <br>
    * Learnerstring should contain the full class name of a base scheme
-   * followed by options to the learner
+   * followed by options to the learner.
    * (required, option should be used once for each learner).<p>
    *
    * -M learnerstring <br>
    * Learnerstring for the meta learner. Same format as for base learners.
+   * (required) <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -175,14 +171,16 @@ public class Stacking extends Classifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [4];
+    String [] options;
     int current = 0;
 
     if (m_BaseClassifierNames != null) {
-      options = new String [m_BaseClassifierNames.size() * 2 + 4];
+      options = new String [m_BaseClassifierNames.size() * 2 + 6];
       for (int i = 0; i < m_BaseClassifierNames.size(); i++) {
 	options[current++] = "-B"; options[current++] = "" + getLearner(i);
       }
+    } else {
+      options = new String[6];
     }
     options[current++] = "-X"; options[current++] = "" + getNumFolds();
     options[current++] = "-S"; options[current++] = "" + getSeed();
@@ -271,6 +269,7 @@ public class Stacking extends Classifier implements OptionHandler {
       String [] options = Utils.splitOptions(learnerOptions);
       ((OptionHandler)tempClassifier).setOptions(options);
     }
+
     // Everything good, so add the learner to the set.
     if (m_BaseClassifierNames == null) {
       m_BaseClassifierNames = new FastVector();
@@ -489,10 +488,6 @@ public class Stacking extends Classifier implements OptionHandler {
     }
   }
 
-  // =================
-  // Protected Methods
-  // =================
-
   /**
    * Makes the format for the level-1 data.
    *
@@ -567,3 +562,5 @@ public class Stacking extends Classifier implements OptionHandler {
     return metaInstance;
   }
 }
+
+

@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -55,26 +54,19 @@ import weka.core.*;
  * Set the number of train iterations (default 50). <p>
  *
  * -s num <br>
- * Set the seed for the dataset randomisation (default 42). <p>
+ * Set the seed for the dataset randomisation (default 1). <p>
  *
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 15 Nov 1998
+ * @version $Revision: 1.3 $
  */
 public class BVDecompose implements OptionHandler {
-  
-  // =================
-  // Protected Members
-  // =================
 
   /** Debugging mode, gives extra output if true */
   protected boolean b_Debug;
 
-  /**
-   * An instantiated base classifier used for getting and testing 
-   * validity of options
-   */
+  /** An instantiated base classifier used for getting and testing options. */
   protected Classifier m_Classifier;
 
   /** The options to be passed to the base classifier. */
@@ -90,7 +82,7 @@ public class BVDecompose implements OptionHandler {
   protected int m_ClassIndex = -1;
 
   /** The random number seed */
-  protected int m_Seed = 42;
+  protected int m_Seed = 1;
 
   /** The calculated bias (squared) */
   protected double m_Bias;
@@ -107,11 +99,6 @@ public class BVDecompose implements OptionHandler {
   /** The number of instances used in the training pool */
   protected int m_TrainPoolSize = 100;
 
-
-  // ==============
-  // Public Methods
-  // ==============
-
   /**
    * Returns an enumeration describing the available options
    *
@@ -119,7 +106,7 @@ public class BVDecompose implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(7);
 
     newVector.addElement(new Option(
 	      "\tThe index of the class attribute.\n"+
@@ -185,7 +172,7 @@ public class BVDecompose implements OptionHandler {
    * Set the number of train iterations (default 50). <p>
    *
    * -s num <br>
-   * Set the seed for the dataset randomisation (default 42). <p>
+   * Set the seed for the dataset randomisation (default 1). <p>
    *
    * Options after -- are passed to the designated sub-learner. <p>
    *
@@ -233,7 +220,7 @@ public class BVDecompose implements OptionHandler {
     if (seedString.length() != 0) {
       setSeed(Integer.parseInt(seedString));
     } else {
-      setSeed(42);
+      setSeed(1);
     }
 
     String dataFile = Utils.getOption('t', options);

@@ -1,6 +1,6 @@
 /*
  *    DistributionClassifier.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 Eibe Frank, Len Trigg
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import weka.core.*;
@@ -26,21 +25,19 @@ import weka.core.*;
  * an estimate of the membership in each class 
  * (ie. a probability distribution).
  *
+ * @author   Eibe Frank (trigg@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  1.1 September 1998 (Eibe)
+ * @version $Revision: 1.2 $
  */
 public abstract class DistributionClassifier extends Classifier {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Predicts the class memberships for a given instance. If
    * an instance is unclassified, the returned array elements
-   * must be all zero.
+   * must be all zero. If the class is numeric, the array
+   * must consist of only one element, which contains the
+   * predicted value.
    *
-   * @param data set of test instances
    * @param instance the instance to be classified
    * @return an array containing the estimated membership 
    * probabilities of the test instance in each class (this 

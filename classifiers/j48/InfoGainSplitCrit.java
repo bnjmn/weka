@@ -24,7 +24,7 @@ import weka.core.*;
  * Class for computing the information gain for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
 
@@ -51,7 +51,7 @@ public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
    * This method computes the information gain in the same way 
    * C4.5 does.
    *
-   * @param distribution 
+   * @param distribution the distribution
    * @param totalNoInst weight of ALL instances (including the
    * ones with missing values).
    */
@@ -78,7 +78,7 @@ public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
    * This method computes the information gain in the same way 
    * C4.5 does.
    *
-   * @param distribution 
+   * @param distribution the distribution
    * @param totalNoInst weight of ALL instances 
    * @param oldEnt entropy with respect to "no-split"-model.
    */

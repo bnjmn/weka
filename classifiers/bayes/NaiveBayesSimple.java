@@ -16,46 +16,40 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /**
- * Class for building and using a Naive Bayes classifier.
+ * Class for building and using a Naive Bayes classifier. <p>
+ *
+ * Reference: Richard Duda and Peter Hart (1973).<i>Pattern
+ * Classification and Scene Analysis</i>. Wiley, New York.
+
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0 - ?? ??? 1998 - Initial version (Eibe)
- */
+ * @version $Revision: 1.3 $ 
+*/
 public class NaiveBayesSimple extends DistributionClassifier {
 
-  // =================
-  // Private variables
-  // =================
-
   /** All the counts for nominal attributes. */
-  private double [][][] theCounts;
+  private double [][][] m_Counts;
   
   /** The means for numeric attributes. */
-  private double [][] theMeans;
+  private double [][] m_Means;
 
   /** The standard deviations for numeric attributes. */
-  private double [][] theDevs;
+  private double [][] m_Devs;
 
   /** The prior probabilities of the classes. */
-  private double [] thePriors;
+  private double [] m_Priors;
 
   /** The instances used for training. */
-  private Instances theInstances;
+  private Instances m_Instances;
 
   /** Constant for normal distribution. */
-  private static double normConst = Math.sqrt(2 * Math.PI);
-
-  // ===============
-  // Public methods.
-  // ===============
+  private static double NORM_CONST = Math.sqrt(2 * Math.PI);
 
   /**
    * Generates the classifier.
@@ -75,34 +69,32 @@ public class NaiveBayesSimple extends DistributionClassifier {
       throw new Exception("Naive Bayes: Class is numeric!");
     }
     
-    theInstances = new Instances(instances, 0, 0);
+    m_Instances = new Instances(instances, 0, 0);
     
     // Reserve space
-    
-    theCounts = new double[instances.numClasses()]
+    m_Counts = new double[instances.numClasses()]
       [instances.numAttributes() - 1][0];
-    theMeans = new double[instances.numClasses()]
+    m_Means = new double[instances.numClasses()]
       [instances.numAttributes() - 1];
-    theDevs = new double[instances.numClasses()]
+    m_Devs = new double[instances.numClasses()]
       [instances.numAttributes() - 1];
-    thePriors = new double[instances.numClasses()];
+    m_Priors = new double[instances.numClasses()];
     Enumeration enum = instances.enumerateAttributes();
     while (enum.hasMoreElements()) {
       Attribute attribute = (Attribute) enum.nextElement();
       if (attribute.isNominal()) {
 	for (int j = 0; j < instances.numClasses(); j++) {
-	  theCounts[j][attIndex] = new double[attribute.numValues()];
+	  m_Counts[j][attIndex] = new double[attribute.numValues()];
 	}
       } else {
 	for (int j = 0; j < instances.numClasses(); j++) {
-	  theCounts[j][attIndex] = new double[1];
+	  m_Counts[j][attIndex] = new double[1];
 	}
       }
       attIndex++;
     }
     
     // Compute counts and sums
-    
     Enumeration enumInsts = instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) {
       Instance instance = (Instance) enumInsts.nextElement();
@@ -113,41 +105,39 @@ public class NaiveBayesSimple extends DistributionClassifier {
 	  Attribute attribute = (Attribute) enumAtts.nextElement();
 	  if (!instance.isMissing(attribute)) {
 	    if (attribute.isNominal()) {
-	      theCounts[(int)instance.classValue()][attIndex]
+	      m_Counts[(int)instance.classValue()][attIndex]
 		[(int)instance.value(attribute)]++;
 	    } else {
-	      theMeans[(int)instance.classValue()][attIndex] +=
+	      m_Means[(int)instance.classValue()][attIndex] +=
 		instance.value(attribute);
-	      theCounts[(int)instance.classValue()][attIndex][0]++;
+	      m_Counts[(int)instance.classValue()][attIndex][0]++;
 	    }
 	  }
 	  attIndex++;
 	}
-	thePriors[(int)instance.classValue()]++;
+	m_Priors[(int)instance.classValue()]++;
       }
     }
     
     // Compute means
-    
     Enumeration enumAtts = instances.enumerateAttributes();
     attIndex = 0;
     while (enumAtts.hasMoreElements()) {
       Attribute attribute = (Attribute) enumAtts.nextElement();
       if (attribute.isNumeric()) {
 	for (int j = 0; j < instances.numClasses(); j++) {
-	  if (theCounts[j][attIndex][0] < 2) {
+	  if (m_Counts[j][attIndex][0] < 2) {
 	    throw new Exception("attribute " + attribute.name() +
 				": less than two values for class " +
 				instances.classAttribute().value(j));
 	  }
-	  theMeans[j][attIndex] /= theCounts[j][attIndex][0];
+	  m_Means[j][attIndex] /= m_Counts[j][attIndex][0];
 	}
       }
       attIndex++;
     }    
     
     // Compute standard deviations
-    
     enumInsts = instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) {
       Instance instance = 
@@ -159,10 +149,10 @@ public class NaiveBayesSimple extends DistributionClassifier {
 	  Attribute attribute = (Attribute) enumAtts.nextElement();
 	  if (!instance.isMissing(attribute)) {
 	    if (attribute.isNumeric()) {
-	      theDevs[(int)instance.classValue()][attIndex] +=
-		(theMeans[(int)instance.classValue()][attIndex]-
+	      m_Devs[(int)instance.classValue()][attIndex] +=
+		(m_Means[(int)instance.classValue()][attIndex]-
 		 instance.value(attribute))*
-		(theMeans[(int)instance.classValue()][attIndex]-
+		(m_Means[(int)instance.classValue()][attIndex]-
 		 instance.value(attribute));
 	    }
 	  }
@@ -176,14 +166,14 @@ public class NaiveBayesSimple extends DistributionClassifier {
       Attribute attribute = (Attribute) enumAtts.nextElement();
       if (attribute.isNumeric()) {
 	for (int j = 0; j < instances.numClasses(); j++) {
-	  if (theDevs[j][attIndex] <= 0) {
+	  if (m_Devs[j][attIndex] <= 0) {
 	    throw new Exception("attribute " + attribute.name() +
 				": standard deviation is 0 for class " +
 				instances.classAttribute().value(j));
 	  }
 	  else {
-	    theDevs[j][attIndex] /= theCounts[j][attIndex][0] - 1;
-	    theDevs[j][attIndex] = Math.sqrt(theDevs[j][attIndex]);
+	    m_Devs[j][attIndex] /= m_Counts[j][attIndex][0] - 1;
+	    m_Devs[j][attIndex] = Math.sqrt(m_Devs[j][attIndex]);
 	  }
 	}
       }
@@ -191,17 +181,16 @@ public class NaiveBayesSimple extends DistributionClassifier {
     } 
     
     // Normalize counts
-    
     enumAtts = instances.enumerateAttributes();
     attIndex = 0;
     while (enumAtts.hasMoreElements()) {
       Attribute attribute = (Attribute) enumAtts.nextElement();
       if (attribute.isNominal()) {
 	for (int j = 0; j < instances.numClasses(); j++) {
-	  sum = Utils.sum(theCounts[j][attIndex]);
+	  sum = Utils.sum(m_Counts[j][attIndex]);
 	  for (int i = 0; i < attribute.numValues(); i++) {
-	    theCounts[j][attIndex][i] =
-	      (theCounts[j][attIndex][i] + 1) 
+	    m_Counts[j][attIndex][i] =
+	      (m_Counts[j][attIndex][i] + 1) 
 	      / (sum + (double)attribute.numValues());
 	  }
 	}
@@ -210,22 +199,10 @@ public class NaiveBayesSimple extends DistributionClassifier {
     }
     
     // Normalize priors
-    sum = Utils.sum(thePriors);
+    sum = Utils.sum(m_Priors);
     for (int j = 0; j < instances.numClasses(); j++)
-      thePriors[j] = (thePriors[j] + 1) 
+      m_Priors[j] = (m_Priors[j] + 1) 
 	/ (sum + (double)instances.numClasses());
-  }
-
-  /**
-   * Classifies a given instance.
-   *
-   * @param instance the instance to be classified
-   * @return index of the predicted class
-   * @exception Exception if the instance can't be classified
-   */
-  public double classifyInstance(Instance instance) throws Exception {
-
-    return Utils.maxIndex(distributionForInstance(instance));
   }
 
   /**
@@ -248,15 +225,15 @@ public class NaiveBayesSimple extends DistributionClassifier {
 	Attribute attribute = (Attribute) enumAtts.nextElement();
 	if (!instance.isMissing(attribute)) {
 	  if (attribute.isNominal()) {
-	    probs[j] *= theCounts[j][attIndex][(int)instance.value(attribute)];
+	    probs[j] *= m_Counts[j][attIndex][(int)instance.value(attribute)];
 	  } else {
 	    probs[j] *= normalDens(instance.value(attribute),
-				   theMeans[j][attIndex],
-				   theDevs[j][attIndex]);}
+				   m_Means[j][attIndex],
+				   m_Devs[j][attIndex]);}
 	}
 	attIndex++;
       }
-      probs[j] *= thePriors[j];
+      probs[j] *= m_Priors[j];
     }
     
     // Normalize probabilities
@@ -278,12 +255,12 @@ public class NaiveBayesSimple extends DistributionClassifier {
       
       text.append("Naive Bayes");
       
-      for (int i = 0; i < theInstances.numClasses(); i++) {
-	text.append("\n\nClass " + theInstances.classAttribute().value(i) 
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
+	text.append("\n\nClass " + m_Instances.classAttribute().value(i) 
 		    + ": P(C) = " 
-		    + Utils.doubleToString(thePriors[i], 10, 8)
+		    + Utils.doubleToString(m_Priors[i], 10, 8)
 		    + "\n\n");
-	Enumeration enumAtts = theInstances.enumerateAttributes();
+	Enumeration enumAtts = m_Instances.enumerateAttributes();
 	attIndex = 0;
 	while (enumAtts.hasMoreElements()) {
 	  Attribute attribute = (Attribute) enumAtts.nextElement();
@@ -295,13 +272,13 @@ public class NaiveBayesSimple extends DistributionClassifier {
 	    text.append("\n");
 	    for (int j = 0; j < attribute.numValues(); j++)
 	      text.append(Utils.
-			  doubleToString(theCounts[i][attIndex][j], 10, 8)
+			  doubleToString(m_Counts[i][attIndex][j], 10, 8)
 			  + "\t");
 	  } else {
 	    text.append("Mean: " + Utils.
-			doubleToString(theMeans[i][attIndex], 10, 8) + "\t");
+			doubleToString(m_Means[i][attIndex], 10, 8) + "\t");
 	    text.append("Standard Deviation: " 
-			+ Utils.doubleToString(theDevs[i][attIndex], 10, 8));
+			+ Utils.doubleToString(m_Devs[i][attIndex], 10, 8));
 	  }
 	  text.append("\n\n");
 	  attIndex++;
@@ -313,10 +290,6 @@ public class NaiveBayesSimple extends DistributionClassifier {
       return "Can't print Naive Bayes classifier!";
     }
   }
- 
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Density function of normal distribution.
@@ -325,19 +298,14 @@ public class NaiveBayesSimple extends DistributionClassifier {
     
     double diff = x - mean;
     
-    return (1 / (normConst * stdDev)) 
+    return (1 / (NORM_CONST * stdDev)) 
       * Math.exp(-(diff * diff / (2 * stdDev * stdDev)));
   }
-  
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

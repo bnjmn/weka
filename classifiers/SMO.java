@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.util.*;
@@ -28,6 +27,11 @@ import weka.filters.*;
  * training a support vector classifier. Does not implement speed-up
  * for linear feature space and sparse input data. Globally replaces all 
  * missing values, and transforms nominal attributes into binary ones. <p>
+ *
+ * Reference: J. Platt (1998). <i>Fast Training of Support Vector
+ * Machines using Sequential Minimal Optimization. Advances in Kernel
+ * Methods - Support Vector Learning<\i>, B. Schölkopf, C. Burges, and
+ * A. Smola, eds., MIT Press.
  *
  * Valid options are:<p>
  *
@@ -41,10 +45,10 @@ import weka.filters.*;
  * The seed for the random number generator. (default 1)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
- */
+ * @version $Revision: 1.3 $ 
+*/
 public class SMO extends DistributionClassifier implements OptionHandler {
-
+  
   /** The exponent for the polnomial kernel. */
   private double m_exponent = 1.0;
 
@@ -324,6 +328,66 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     
     return text.toString();
   }
+  
+  /**
+   * Get the value of exponent.
+   *
+   * @return Value of exponent.
+   */
+  public double getExponent() {
+    
+    return m_exponent;
+  }
+  
+  /**
+   * Set the value of exponent.
+   *
+   * @param v  Value to assign to exponent.
+   */
+  public void setExponent(double v) {
+    
+    m_exponent = v;
+  }
+  
+  /**
+   * Get the value of C.
+   *
+   * @return Value of C.
+   */
+  public double getC() {
+    
+    return m_C;
+  }
+  
+  /**
+   * Set the value of C.
+   *
+   * @param v  Value to assign to C.
+   */
+  public void setC(double v) {
+    
+    m_C = v;
+  }
+  
+  /**
+   * Get the value of seed.
+   *
+   * @return Value of seed.
+   */
+  public int getSeed() {
+    
+    return m_seed;
+  }
+  
+  /**
+   * Set the value of seed.
+   *
+   * @param v  Value to assign to seed.
+   */
+  public void setSeed(int v) {
+    
+    m_seed = v;
+  }
 
   /**
    * Computes the result of the kernel function for two instances.
@@ -393,7 +457,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 	((r2 > m_tol) && (alph2 > 0))) {
       
       // Are there at least two non-zero and non-C alphas?
-      
       foundOne = false; foundTwo = false;
       for (int i = m_nextUnbound[0]; i != -1; i = m_nextUnbound[i + 1]) {
 	if (m_alpha[i] < m_C) {
@@ -408,7 +471,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       if (foundTwo) {
 	
 	// Use second choice heuristic
-	
 	for (int i = m_nextUnbound[0]; i != -1; i = m_nextUnbound[i + 1]) {
 	  if (m_alpha[i] < m_C) {
 	    E1 = m_errors[i];
@@ -424,11 +486,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       }
       
       // Permute indices
-      
       permute(m_indices);
 
       // Loop over all non-zero and non-C alpha
-
       for (int i = 0; i < m_alpha.length; i++) {
 	if ((m_alpha[m_indices[i]] > 0) && (m_alpha[m_indices[i]] < m_C) &&
 	    takeStep(m_indices[i], i2, E2)) {
@@ -437,11 +497,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       }
       
       // Permute indices
-
       permute(m_indices);
 	  
       // Loop over all instances
-	
       for (int i = 0; i < m_alpha.length; i++) {
 	if (takeStep(m_indices[i], i2, E2)) {
 	  return true;
@@ -467,13 +525,11 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       a1, a2, f1, f2, v1, v2, Lobj, Hobj, b1, b2, bOld;
     
     // Don't do anything if the two instances are the same
-
     if (i1 == i2) {
       return false;
     }
 
     // Initialize variables
-    
     inst1 = m_data.instance(i1); inst2 = m_data.instance(i2);
     alph1 = m_alpha[i1]; alph2 = m_alpha[i2];
     y1 = m_class[i1]; y2 = m_class[i2];
@@ -485,7 +541,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     s = y1 * y2;
 
     // Find the constraints on a2
-
     if (y1 != y2) {
       L = Math.max(0, alph2 - alph1); 
       H = Math.min(m_C, m_C + alph2 - alph1);
@@ -498,22 +553,18 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
 
     // Compute second derivative of objective function
-
     k11 = kernel(inst1, inst1);
     k12 = kernel(inst1, inst2);
     k22 = kernel(inst2, inst2);
     eta = 2 * k12 - k11 - k22;
 
     // Check if second derivative is negative
-
     if (eta < 0) {
 
       // Compute unconstrained maximum
-
       a2 = alph2 - y2 * (E1 - E2) / eta;
 
       // Compute constrained maximum
-
       if (a2 < L) {
 	a2 = L;
       } else if (a2 > H) {
@@ -522,7 +573,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     } else {
 
       // Look at endpoints of diagonal
-
       f1 = SVMOutput(inst1);
       f2 = SVMOutput(inst2);
       v1 = f1 + m_b - y1 * alph1 * k11 - y2 * alph2 * k12; 
@@ -546,11 +596,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
 
     // Compute new value of a1
-    
     a1 = alph1 + s * (alph2 - a2);
 
     // Update threshold to reflect change in Lagrange multipliers
-
     bOld = m_b;
     b1 = E1 + y1 * (a1 - alph1) * k11 + y2 * (a2 - alph2) * k12 + m_b;
     b2 = E2 + y1 * (a1 - alph1) * k12 + y2 * (a2 - alph2) * k22 + m_b;
@@ -568,7 +616,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     // (not implemented)
 
     // Update array with Lagrange multipliers
-
     if ((a1 > 0) && (m_alpha[i1] == 0)) {
       for (int i = i1; 
 	   (i >= 0) && (m_nextUnbound[i] == m_nextUnbound[i1 + 1]); i--) {
@@ -599,7 +646,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     m_alpha[i2] = a2;
 
     // Update error cache using new Lagrange multipliers
-
     for (int j = m_nextUnbound[0]; j != -1; j = m_nextUnbound[j + 1]) {
       if (m_alpha[j] < m_C) {
 	if ((j == i1) || (j == i2)) {
@@ -613,7 +659,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
 
     // Made some progress.
-
     return true;
   }
   

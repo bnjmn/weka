@@ -16,44 +16,60 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /**
- * Class for building and using a 1R classifier.
+ * Class for building and using a 1R classifier.<p>
+ *
+ * Reference: R.C. Holte (1993). <i>Very simple classification rules
+ * perform well on most commonly used datasets</i>. Machine Learning,
+ * Vol. 11, pp. 63-91.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -B num <br>
+ * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version 1.0
- */
+ * @version $Revision: 1.3 $ */
 public class OneR extends Classifier implements OptionHandler {
 
   /**
    * Class for storing store a 1R rule.
    */
   private class OneRRule {
-  
-    private Instances instances;
-    private Attribute attr; // attribute to test
-    private int correct; // training set examples this rule gets right
-    private int[] classifications; // predicted class for each value of attr
-    private int missingValueClass = -1; // predicted class for missing values
-    private double[] breakpoints; // breakpoints (numeric attributes only)
+
+    /** A set of instances. */
+    private Instances m_instances;
+
+    /** Attribute to test */
+    private Attribute m_attr; 
+
+    /** Training set examples this rule gets right */
+    private int m_correct; 
+
+    /** Predicted class for each value of attr */
+    private int[] m_classifications; 
+
+    /** Predicted class for missing values */
+    private int m_missingValueClass = -1; 
+
+    /** Breakpoints (numeric attributes only) */
+    private double[] m_breakpoints; 
   
     /**
      * Constructor for nominal attribute.
      */
     public OneRRule(Instances data, Attribute attribute) {
 
-      instances = data;
-      attr = attribute;
-      correct = 0;
-      classifications = new int[attr.numValues()];
+      m_instances = data;
+      m_attr = attribute;
+      m_correct = 0;
+      m_classifications = new int[m_attr.numValues()];
     }
 
     /**
@@ -61,11 +77,11 @@ public class OneR extends Classifier implements OptionHandler {
      */
     public OneRRule(Instances data, Attribute attribute, int nBreaks) {
 
-      instances = data;
-      attr = attribute;
-      correct = 0;
-      classifications = new int[nBreaks];
-      breakpoints = new double[nBreaks - 1]; // last breakpoint is infinity
+      m_instances = data;
+      m_attr = attribute;
+      m_correct = 0;
+      m_classifications = new int[nBreaks];
+      m_breakpoints = new double[nBreaks - 1]; // last breakpoint is infinity
     }
     
     /**
@@ -75,26 +91,26 @@ public class OneR extends Classifier implements OptionHandler {
 
       try {
 	StringBuffer text = new StringBuffer();
-	text.append(attr.name() + ":\n");
-	for (int v = 0; v < classifications.length; v++) {
+	text.append(m_attr.name() + ":\n");
+	for (int v = 0; v < m_classifications.length; v++) {
 	  text.append("\t");
-	  if (attr.isNominal()) {
-	    text.append(attr.value(v));
-	  } else if (v < breakpoints.length) {
-	    text.append("< " + breakpoints[v]);
+	  if (m_attr.isNominal()) {
+	    text.append(m_attr.value(v));
+	  } else if (v < m_breakpoints.length) {
+	    text.append("< " + m_breakpoints[v]);
 	  } else {
-	    text.append(">= " + breakpoints[v - 1]);
+	    text.append(">= " + m_breakpoints[v - 1]);
 	  }
 	  text.append("\t-> " + 
-		      instances.classAttribute().value(classifications[v]) 
+		      m_instances.classAttribute().value(m_classifications[v]) 
 		      + "\n");
 	}
-	if (missingValueClass != -1) {
+	if (m_missingValueClass != -1) {
 	  text.append("\t?\t-> " + 
-		      instances.classAttribute().value(missingValueClass) 
+		      m_instances.classAttribute().value(m_missingValueClass) 
 		      + "\n");
 	}
-	text.append("(" + correct + "/" + instances.numInstances() +
+	text.append("(" + m_correct + "/" + m_instances.numInstances() +
 		    " instances correct)\n");
 	return text.toString();
       } catch (Exception e) {
@@ -103,8 +119,11 @@ public class OneR extends Classifier implements OptionHandler {
     }
   }
   
-  private OneRRule rule;
-  private int minBucketSize = 6;
+  /** A 1-R rule */
+  private OneRRule m_rule;
+
+  /** The minimum bucket size */
+  private int m_minBucketSize = 6;
 
   /**
    * Classifies a given instance.
@@ -114,22 +133,22 @@ public class OneR extends Classifier implements OptionHandler {
   public double classifyInstance(Instance inst) {
 
     int v = 0;
-    if (inst.isMissing(rule.attr)) {
-      if (rule.missingValueClass != -1) {
-	return rule.missingValueClass;
+    if (inst.isMissing(m_rule.m_attr)) {
+      if (m_rule.m_missingValueClass != -1) {
+	return m_rule.m_missingValueClass;
       } else {
 	return 0;  // missing values occur in test but not training set    
       }
     }
-    if (rule.attr.isNominal()) {
-      v = (int) inst.value(rule.attr);
+    if (m_rule.m_attr.isNominal()) {
+      v = (int) inst.value(m_rule.m_attr);
     } else {
-      while (v < rule.breakpoints.length &&
-	     inst.value(rule.attr) >= rule.breakpoints[v]) {
+      while (v < m_rule.m_breakpoints.length &&
+	     inst.value(m_rule.m_attr) >= m_rule.m_breakpoints[v]) {
 	v++;
       }
     }
-    return rule.classifications[v];
+    return m_rule.m_classifications[v];
   }
 
   /**
@@ -151,6 +170,7 @@ public class OneR extends Classifier implements OptionHandler {
     }
 
     Instances data = new Instances(instances);
+
     // new dataset without missing class values
     data.deleteWithMissingClass();
     if (data.numInstances() == 0) {
@@ -163,8 +183,8 @@ public class OneR extends Classifier implements OptionHandler {
       OneRRule r = newRule((Attribute) enum.nextElement(), data);
 
       // if this attribute is the best so far, replace the rule
-      if (noRule || r.correct > rule.correct) {
-	rule = r;
+      if (noRule || r.m_correct > m_rule.m_correct) {
+	m_rule = r;
       }
       noRule = false;
     }
@@ -190,11 +210,11 @@ public class OneR extends Classifier implements OptionHandler {
     } else {
       r = newNumericRule(attr, data, missingValueCounts);
     }
-    r.missingValueClass = Utils.maxIndex(missingValueCounts);
-    if (missingValueCounts[r.missingValueClass] == 0) {
-      r.missingValueClass = -1; // signal for no missing value class
+    r.m_missingValueClass = Utils.maxIndex(missingValueCounts);
+    if (missingValueCounts[r.m_missingValueClass] == 0) {
+      r.m_missingValueClass = -1; // signal for no missing value class
     } else {
-      r.correct += missingValueCounts[r.missingValueClass];
+      r.m_correct += missingValueCounts[r.m_missingValueClass];
     }
     return r;
   }
@@ -228,8 +248,8 @@ public class OneR extends Classifier implements OptionHandler {
     OneRRule r = new OneRRule(data, attr); // create a new rule
     for (int value = 0; value < attr.numValues(); value++) {
       int best = Utils.maxIndex(counts[value]);
-      r.classifications[value] = best;
-      r.correct += counts[value][best];
+      r.m_classifications[value] = best;
+      r.m_correct += counts[value][best];
     }
     return r;
   }
@@ -246,6 +266,7 @@ public class OneR extends Classifier implements OptionHandler {
                              int[] missingValueCounts) throws Exception {
 
     data.sort(attr);
+
     // ... can't be more than numInstances buckets
     int [] classifications = new int[data.numInstances()];
     double [] breakpoints = new double[data.numInstances()];
@@ -254,6 +275,7 @@ public class OneR extends Classifier implements OptionHandler {
     int [] counts = new int[data.classAttribute().numValues()];
     int correct = 0;
     int lastInstance = data.numInstances();
+
     // missing values get sorted to the end of the instances
     while (lastInstance > 0 && 
            data.instance(lastInstance-1).isMissing(attr)) {
@@ -269,7 +291,8 @@ public class OneR extends Classifier implements OptionHandler {
       do { // fill it until it has enough of the majority class
         it = (int) data.instance(i++).classValue();
         counts[it]++;
-      } while (counts[it] < minBucketSize && i < lastInstance);
+      } while (counts[it] < m_minBucketSize && i < lastInstance);
+
       // while class remains the same, keep on filling
       while (i < lastInstance && 
              (int) data.instance(i).classValue() == it) { 
@@ -306,11 +329,11 @@ public class OneR extends Classifier implements OptionHandler {
       throw new Exception("Only missing values in the training data!");
     }
     OneRRule r = new OneRRule(data, attr, cl); // new rule with cl branches
-    r.correct = correct;
+    r.m_correct = correct;
     for (int v = 0; v < cl; v++) {
-      r.classifications[v] = classifications[v];
+      r.m_classifications[v] = classifications[v];
       if (v < cl-1) {
-	r.breakpoints[v] = breakpoints[v];
+	r.m_breakpoints[v] = breakpoints[v];
       }
     }
 
@@ -324,7 +347,7 @@ public class OneR extends Classifier implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    String string = "\tThe minimum number of objects in a bucket.";
+    String string = "\tThe minimum number of objects in a bucket (default: 6).";
 
     Vector newVector = new Vector(1);
 
@@ -338,7 +361,7 @@ public class OneR extends Classifier implements OptionHandler {
    * Parses a given list of options. Valid options are:<p>
    *
    * -B num <br>
-   * Specify the minumum number of objects in a bucket <p>
+   * Specify the minimum number of objects in a bucket (default: 6). <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -347,9 +370,9 @@ public class OneR extends Classifier implements OptionHandler {
     
     String bucketSizeString = Utils.getOption('B', options);
     if (bucketSizeString.length() != 0) {
-      minBucketSize = Integer.parseInt(bucketSizeString);
+      m_minBucketSize = Integer.parseInt(bucketSizeString);
     } else {
-      minBucketSize = 6;
+      m_minBucketSize = 6;
     }
   }
 
@@ -363,7 +386,7 @@ public class OneR extends Classifier implements OptionHandler {
     String [] options = new String [2];
     int current = 0;
 
-    options[current++] = "-B"; options[current++] = "" + minBucketSize;
+    options[current++] = "-B"; options[current++] = "" + m_minBucketSize;
 
     while (current < options.length) {
       options[current++] = "";
@@ -376,9 +399,27 @@ public class OneR extends Classifier implements OptionHandler {
    */
   public String toString() {
 
-    return rule.toString();
+    return m_rule.toString();
   }
-
+  
+  /**
+   * Get the value of minBucketSize.
+   * @return Value of minBucketSize.
+   */
+  public int getMinBucketSize() {
+    
+    return m_minBucketSize;
+  }
+  
+  /**
+   * Set the value of minBucketSize.
+   * @param v  Value to assign to minBucketSize.
+   */
+  public void setMinBucketSize(int v) {
+    
+    m_minBucketSize = v;
+  }
+  
   /**
    * Main method for testing this class
    */
