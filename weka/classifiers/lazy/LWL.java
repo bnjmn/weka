@@ -61,11 +61,14 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LWL extends DistributionClassifier 
   implements OptionHandler, UpdateableClassifier, 
   WeightedInstancesHandler {
+
+  // To maintain the same version number after fixing bug
+  static final long serialVersionUID = 7858523588073370243L;
   
   /** The training instances used for classification. */
   protected Instances m_Train;
@@ -479,12 +482,15 @@ public class LWL extends DistributionClassifier
 
     // Set the weights on a copy of the training data
     Instances weightedTrain = new Instances(m_Train, 0);
+    double sumOfWeights = 0, newSumOfWeights = 0;
     for (int i = 0; i < distance.length; i++) {
       double weight = distance[sortKey[i]];
       if (weight < 1e-20) {
 	break;
       }
       Instance newInst = (Instance) m_Train.instance(sortKey[i]).copy();
+      sumOfWeights += newInst.weight();
+      newSumOfWeights += newInst.weight() * weight;
       newInst.setWeight(newInst.weight() * weight);
       weightedTrain.add(newInst);
     }
@@ -493,6 +499,12 @@ public class LWL extends DistributionClassifier
 			 + m_Train.numInstances() + " instances");
     }
     
+    // Rescale weights
+    for (int i = 0; i < weightedTrain.numInstances(); i++) {
+      Instance newInst = weightedTrain.instance(i);
+      newInst.setWeight(newInst.weight() * sumOfWeights / newSumOfWeights);
+    }
+
     // Create a weighted classifier
     m_classifier.buildClassifier(weightedTrain);
 
