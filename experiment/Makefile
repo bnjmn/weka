@@ -1,7 +1,5 @@
 JAVA = javac
 JAVADOC = javadoc
-DOCDIR = /home/trigg/java/doc
-
 SOURCES = InstanceQuery.java \
 	ResultListener.java \
 	ResultProducer.java \
@@ -23,6 +21,7 @@ SOURCES = InstanceQuery.java \
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
+DOCDIR = $(TOPDIR)/doc
 PACKAGEDIR = weka/experiment
 PACKAGE = weka.experiment
 
@@ -53,6 +52,7 @@ classjar : all
 	(cd $(TOPDIR) ;\
 	jar cvf archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar \
 	$(PACKAGEDIR)/*.class; \
+	$(PACKAGEDIR)/*.props; \
 	rm -f $(PACKAGE).jar; \
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
 

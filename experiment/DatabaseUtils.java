@@ -38,7 +38,7 @@ import java.sql.ResultSetMetaData;
  * database. The jdbc
  * driver and database to be used default to "jdbc.idbDriver" and
  * "jdbc:idb=experiments.prp". These may be changed by creating
- * a java properties file called .weka.experiment.DatabaseUtils in user.home or
+ * a java properties file called DatabaseUtils.props in user.home or
  * the current directory. eg:<p>
  *
  * <code><pre>
@@ -47,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </code></pre><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -70,8 +70,8 @@ public class DatabaseUtils implements Serializable {
   protected static final int STRING_FIELD_LENGTH  = 200;
 
   /** The name of the properties file */
-  protected static String USER_PROPERTY_FILE
-    = ".weka.experiment.DatabaseUtils";
+  protected static String PROPERTY_FILE
+    = "DatabaseUtils.props";
 
   /** Holds the jdbc drivers to be used (only to stop them being gc'ed) */
   protected static Vector DRIVERS = new Vector();
@@ -87,11 +87,23 @@ public class DatabaseUtils implements Serializable {
     // Look in the Users home directory for the database connection
     // properties file
     Properties systemProps = System.getProperties();
-    String propFile = systemProps.getProperty("user.home")
-      + systemProps.getProperty("file.separator")
-      + USER_PROPERTY_FILE;
-    Properties userProps = new Properties();
+
+    Properties defaultProps = new Properties();
     try {
+      // Apparently hardcoded slashes are OK here
+      // jdk1.1/docs/guide/misc/resources.html
+      defaultProps.load(ClassLoader.getSystemResourceAsStream(
+		  "weka/experiment/" + PROPERTY_FILE));
+    } catch (Exception ex) {
+      System.err.println("Couldn't load default properties: "
+			 + ex.getMessage());
+    }
+
+    Properties userProps = new Properties(defaultProps);
+    try {
+      String propFile = systemProps.getProperty("user.home")
+	+ systemProps.getProperty("file.separator")
+	+ PROPERTY_FILE;
       userProps.load(new FileInputStream(propFile));
     } catch (Exception ex) {
     }
@@ -101,15 +113,11 @@ public class DatabaseUtils implements Serializable {
     // they want to put into their own directory
     Properties localProps = new Properties(userProps);
     try {
-      localProps.load(new FileInputStream(USER_PROPERTY_FILE));
+      localProps.load(new FileInputStream(PROPERTY_FILE));
     } catch (Exception ex) {
     }
     PROPERTIES = localProps;
     
-    System.err.println("Properties from " + propFile + " " + userProps);
-    System.err.println("Properties from " + USER_PROPERTY_FILE
-		       + " " + localProps);
-
     // Register the drivers in jdbc DriverManager
     String drivers = localProps.getProperty("jdbcDriver",
 					    "jdbc.idbDriver");

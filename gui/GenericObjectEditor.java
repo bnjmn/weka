@@ -56,14 +56,15 @@ import javax.swing.JScrollPane;
  * A PropertyEditor for objects that themselves have been defined as
  * editable in the GenericObjectEditor configuration file, which lists
  * possible values that can be selected from, and themselves configured.
- * The configuration file is called ".weka.gui.GenericObjectEditor" and
+ * The configuration file is called "GenericObjectEditor.props" and
  * may live in either the location given by "user.home" or the current
- * directory (this last will take precedence). For speed, the properties
+ * directory (this last will take precedence), and a default properties
+ * file is read from the weka distribution. For speed, the properties
  * file is read only once when the class is first loaded -- this may need
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -83,7 +84,7 @@ public class GenericObjectEditor implements PropertyEditor {
   private boolean m_Enabled = true;
   
   /** The name of the properties file */
-  protected static String PROPERTY_FILE = ".weka.gui.GenericObjectEditor";
+  protected static String PROPERTY_FILE = "GenericObjectEditor.props";
 
   /** Contains the editor properties */
   private static Properties EDITOR_PROPERTIES;
@@ -91,21 +92,36 @@ public class GenericObjectEditor implements PropertyEditor {
   /** Loads the configuration property file */
   static {
 
+    boolean noDefaultProps = false;
     boolean noUserProps = false;
     boolean noLocalProps = false;
     
-    // Global properties
+    // Properties for user info
     Properties systemProps = System.getProperties();
 
+    // Get default properties from the weka distribution
+    Properties defaultProps = new Properties();
+    try {
+      // Apparently hardcoded slashes are OK here
+      // jdk1.1/docs/guide/misc/resources.html
+      defaultProps.load(ClassLoader.getSystemResourceAsStream("weka/gui/" +
+							      PROPERTY_FILE));
+    } catch (Exception ex) {
+      noDefaultProps = true;
+      System.err.println("Couldn't load default properties: "
+			 + ex.getMessage());
+    }
+    
     // Allow a properties file in the users home directory to override
-    Properties userProps = new Properties();
+    Properties userProps = new Properties(defaultProps);
     try {
       userProps.load(new FileInputStream(systemProps.getProperty("user.home")
 			 + systemProps.getProperty("file.separator")
 			 + PROPERTY_FILE));
     } catch (Exception ex) {
       noUserProps = true;
-      System.err.println(ex.getMessage());
+      System.err.println("Couldn't load user properties: "
+			 + ex.getMessage());
     }
 
     // Allow a properties file in the current directory to override
@@ -114,10 +130,11 @@ public class GenericObjectEditor implements PropertyEditor {
       EDITOR_PROPERTIES.load(new FileInputStream(PROPERTY_FILE));
     } catch (Exception ex) {
       noLocalProps = true;
-      System.err.println(ex.getMessage());
+      System.err.println("Couldn't load localdir properties: "
+			 + ex.getMessage());
     }
 
-    if (noUserProps && noLocalProps) {
+    if (noDefaultProps && noUserProps && noLocalProps) {
       JOptionPane.showMessageDialog(null,
 	  "Could not read a configuration file for the generic object\n"
          +"editor. An example file is included with the Weka distribution.\n"
@@ -538,7 +555,7 @@ public class GenericObjectEditor implements PropertyEditor {
 			FileEditor.class);
       GenericObjectEditor ce = new GenericObjectEditor();
       ce.setClassType(weka.filters.Filter.class);
-      Object initial = new weka.filters.AttributeFilter();
+      Object initial = new weka.filters.AddFilter();
       if (args.length > 0) {
 	initial = (Object)Class.forName(args[0]).newInstance();
       }
