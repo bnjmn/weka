@@ -32,7 +32,7 @@ import weka.core.Instances;
  * Works with nominal variables only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SearchAlgorithmB2 extends SearchAlgorithmB {
 

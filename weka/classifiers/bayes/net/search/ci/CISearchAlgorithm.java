@@ -32,7 +32,7 @@ import weka.core.Instances;
  * score based of cross validation based search algorithms).
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CISearchAlgorithm extends ScoreSearchAlgorithm {
 	BayesNet  m_BayesNet;

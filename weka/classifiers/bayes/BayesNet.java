@@ -40,7 +40,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable {
 

@@ -30,7 +30,7 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ParentSet implements Serializable {
 

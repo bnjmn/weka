@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/

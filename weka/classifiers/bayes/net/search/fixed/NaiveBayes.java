@@ -29,7 +29,7 @@ import weka.core.Instances;
  * with arrows from the class variable to each of the attribute variables.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NaiveBayes extends SearchAlgorithm {
 	

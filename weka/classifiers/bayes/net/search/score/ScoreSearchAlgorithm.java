@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	BayesNet m_BayesNet;
@@ -114,6 +114,7 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
 		m_BayesNet = bayesNet;
 		m_Instances = instances;
+		super.buildStructure(bayesNet, instances);
 	} // buildStructure
 
 

@@ -37,7 +37,7 @@ import weka.core.Option;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SearchAlgorithmB extends CVSearchAlgorithm {
 
@@ -161,6 +161,10 @@ public class SearchAlgorithmB extends CVSearchAlgorithm {
 
         newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
 
+		Enumeration enum = super.listOptions();
+		while (enum.hasMoreElements()) {
+			newVector.addElement(enum.nextElement());
+		}
         return newVector.elements();
     }
 

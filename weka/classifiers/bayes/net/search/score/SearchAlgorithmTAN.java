@@ -34,7 +34,7 @@ import weka.core.Instances;
  *      Machine Learning, 29: 131--163, 1997
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
@@ -85,6 +85,7 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 		int [] link1 = new int [nNrOfAtts - 1];
 		int [] link2 = new int [nNrOfAtts - 1];
 		boolean [] linked = new boolean [nNrOfAtts];
+
 		// 1. find strongest link
 		int    nBestLinkNode1 = -1;
 		int    nBestLinkNode2 = -1;
@@ -137,11 +138,6 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 			linked[nBestLinkNode2] = true;
 		}
 		
-		
-		System.out.println();	
-	for (int i = 0; i < 3; i++) {
-		System.out.println(link1[i] + " " + link2[i]);
-	}
 		// 3. assign direction to links
 		boolean [] hasParent = new boolean [nNrOfAtts];
 		for (int iLink = 0; iLink < nNrOfAtts - 2; iLink++) {

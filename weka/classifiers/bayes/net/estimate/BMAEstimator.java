@@ -34,7 +34,7 @@ import weka.estimators.Estimator;
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class BMAEstimator extends SimpleEstimator {

@@ -36,7 +36,7 @@ import weka.core.OptionHandler;
  * and should not be used by itself.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
@@ -127,13 +127,13 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
     } // AddArcMakesCycle
 
     /**
-     * ReverseArcMakesCycle checks whether the arc from iAttributeTail to
+     * reverseArcMakesSense checks whether the arc from iAttributeTail to
      * iAttributeHead exists and reversing does not introduce a cycle
      * 
      * @param index of the attribute that is head of the arrow
      * @param index of the attribute that is tail of the arrow
      */
-    protected boolean reverseArcMakesCycle(
+    protected boolean reverseArcMakesSense(
         BayesNet bayesNet,
         Instances instances,
         int iAttributeHead,
@@ -156,7 +156,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
 
         // check for cycles
-        bayesNet.getParentSet(iAttributeTail).addParent(iAttributeHead, instances);
+		bayesNet.getParentSet(iAttributeTail).addParent(iAttributeHead, instances);
 
         for (int iNode = 0; iNode < nNodes; iNode++) {
 
@@ -165,14 +165,13 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
 
             for (int iNode2 = 0; !bFound && iNode2 < nNodes; iNode2++) {
                 if (!bDone[iNode2]) {
+                	ParentSet parentSet = bayesNet.getParentSet(iNode2);
                     boolean bHasNoParents = true;
-
-                    for (int iParent = 0; iParent < bayesNet.getParentSet(iNode2).getNrOfParents(); iParent++) {
-                        if (!bDone[bayesNet.getParentSet(iNode2).getParent(iParent)]) {
-
+                    for (int iParent = 0; iParent < parentSet.getNrOfParents(); iParent++) {
+                        if (!bDone[parentSet.getParent(iParent)]) {
+                        	
                             // this one has a parent which is not 'done' UNLESS it is the arc to be reversed
-                            if (iNode2 != iAttributeHead
-                                || bayesNet.getParentSet(iNode2).getParent(iParent) != iAttributeTail) {
+                            if (!(iNode2 == iAttributeHead && parentSet.getParent(iParent) == iAttributeTail)) {
                                 bHasNoParents = false;
                             }
                         }
@@ -187,13 +186,11 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
 
             if (!bFound) {
                 bayesNet.getParentSet(iAttributeTail).deleteLastParent(instances);
-
                 return false;
             }
         }
 
         bayesNet.getParentSet(iAttributeTail).deleteLastParent(instances);
-
         return true;
     } // ReverseArcMakesCycle
 

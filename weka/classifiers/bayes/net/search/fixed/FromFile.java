@@ -32,7 +32,7 @@ import java.util.*;
  * in BIFF format.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FromFile extends SearchAlgorithm {
 	/** name of file to read structure from **/
