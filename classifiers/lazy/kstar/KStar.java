@@ -53,7 +53,7 @@ import weka.classifiers.*;
  */
 
 public class KStar extends DistributionClassifier
-  implements KStarConstants, OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
+  implements KStarConstants, OptionHandler, UpdateableClassifier {
 
   /** The training instances used for classification. */
   protected Instances m_Train; 
@@ -486,6 +486,7 @@ public class KStar extends DistributionClassifier
       m_NumClasses = m_Train.numClasses();
       m_NumAttributes = m_Train.numAttributes();
       m_ClassType = m_Train.classAttribute().type();
+      m_InitFlag = ON;
     } catch(Exception e) {
       e.printStackTrace();
     }
