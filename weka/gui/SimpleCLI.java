@@ -56,7 +56,7 @@ import java.util.Vector;
  * through previous commmands. This gui uses only AWT (i.e. no Swing).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SimpleCLI extends Frame implements ActionListener {
   
@@ -106,7 +106,7 @@ public class SimpleCLI extends Frame implements ActionListener {
      * @param output the TextArea to send output to
      */
     public ReaderToTextArea(Reader input, TextArea output) {
-
+      setDaemon(true);
       m_Input = new LineNumberReader(input);
       m_Output = output;
     }
@@ -151,7 +151,7 @@ public class SimpleCLI extends Frame implements ActionListener {
      */
     public ClassRunner(Class theClass, String [] commandArgs)
       throws Exception {
-      
+      setDaemon(true);
       Class [] argTemplate = { String[].class };
       m_CommandArgs = commandArgs;
       m_MainMethod = theClass.getMethod("main", argTemplate);
@@ -428,7 +428,6 @@ public class SimpleCLI extends Frame implements ActionListener {
 	public void windowClosing(WindowEvent param1) {
 	  System.err.println("window closed");
 	  frame.dispose();
-	  System.exit(0);
 	}
       });
       frame.setVisible(true);
