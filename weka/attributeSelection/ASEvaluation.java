@@ -25,7 +25,7 @@ import weka.core.*;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public abstract class ASEvaluation implements Serializable {
@@ -78,5 +78,35 @@ public abstract class ASEvaluation implements Serializable {
     return (ASEvaluation)Utils.forName(ASEvaluation.class,
 				       evaluatorName,
 				       options);
+  }
+
+  /**
+   * Creates copies of the current evaluator.
+   *
+   * @param model an example evaluator to copy
+   * @param num the number of evaluator copies to create.
+   * @return an array of evaluators.
+   * @exception Exception if an error occurs
+   */
+  public static ASEvaluation [] makeCopies(ASEvaluation model,
+					 int num) throws Exception {
+
+    if (model == null) {
+      throw new Exception("No model evaluator set");
+    }
+    ASEvaluation [] evaluators = new ASEvaluation [num];
+    String [] options = null;
+    if (model instanceof OptionHandler) {
+      options = ((OptionHandler)model).getOptions();
+    }
+    for(int i = 0; i < evaluators.length; i++) {
+      evaluators[i] = (ASEvaluation) model.getClass().newInstance();
+      if (options != null) {
+	String [] tempOptions = (String [])options.clone();
+	((OptionHandler)evaluators[i]).setOptions(tempOptions);
+	Utils.checkForRemainingOptions(tempOptions);
+      }
+    }
+    return evaluators;
   }
 }
