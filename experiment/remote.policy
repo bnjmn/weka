@@ -1,6 +1,39 @@
-/* grants all privaleges to classes in the classpath */
+/* Necessary permissions for remote engines */
+/* To start: cd to /path to dir containing remoteEngine.jar */
+/* java -classpath remoteEngine.jar:/path to any data base drivers/ \ */
+/* -Djava.security.policy=remote.policy \ */
+/* -Djava.rmi.server.codebase=file:/path to dir containing remoteEngine.jar/remoteEngine.jar \ */
+/* weka.experiment.RemoteEngine */
 
 grant {
-  permission java.security.AllPermission;
+
+/* file permission for data sets */
+  permission java.io.FilePermission
+	     "/path to data sets/-", "read";
+
+/* file permission to load server classes from remoteEngine.jar */
+  permission java.io.FilePermission
+	     "/path to dir containing remoteEngine.jar/-", "read";
+
+/* file permissions for the properties files */
+  permission java.io.FilePermission
+	     "/home dir/DatabaseUtils.props", "read";
+  permission java.io.FilePermission
+	     "/path to dir containing remoteEngine.jar/DatabaseUtils.props", "read";
+
+/* file permissions for downloading classes from client file url's */
+  permission java.io.FilePermission
+	     "/joe user's path to weka classes/-", "read";
+  permission java.io.FilePermission
+	     "/jill user's path to weka classes/-", "read";
+
+/* read write for properties */
+  permission java.util.PropertyPermission "*", "read,write";
+
+/* connect to or accept connections from unprivaleged ports and the http port */
+  permission java.net.SocketPermission "*:1024-65535",
+	     "connect,accept";
+  permission java.net.SocketPermission "*:80", "connect";
 };
+
 
