@@ -93,6 +93,11 @@ implements OptionHandler {
   public void buildClassifier(Instances insts) throws Exception {
 
     Instances newInsts;
+
+    if (!insts.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("OrdinalClassClassifier: class should " +
+					      "be declared nominal!");
+    }
     
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
@@ -156,8 +161,8 @@ implements OptionHandler {
       } else {
 	probs[i] = distributions[i - 1][1] - distributions[i][1];
 	if (!(probs[i] > 0)) {
-	  System.err.println("Warning: estimated probability " + probs[i] +
-			     ". Rounding to 0.");
+	  //System.err.println("Warning: estimated probability " + probs[i] +
+	  //		     ". Rounding to 0.");
 	  probs[i] = 0;
 	}
       }

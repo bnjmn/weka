@@ -39,7 +39,7 @@ import weka.attributeSelection.*;
  *
  * Valid options from the command line are:<p>
  *
- * -B classifierstring <br>
+ * -W classifierstring <br>
  * Classifierstring should contain the full class name of a classifier
  * followed by options to the classifier.
  * (required).<p>
@@ -55,7 +55,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AttributeSelectedClassifier extends DistributionClassifier 
 implements OptionHandler, AdditionalMeasureProducer {
@@ -110,7 +110,7 @@ implements OptionHandler, AdditionalMeasureProducer {
 	      "\tFull class name of classifier to use, followed\n"
 	      + "\tby scheme options. (required)\n"
 	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
-	      "B", 1, "-B <classifier specification>"));
+	      "W", 1, "-W <classifier specification>"));
     
     newVector.addElement(new Option(
 	      "\tFull class name of attribute evaluator, followed\n"
@@ -129,7 +129,7 @@ implements OptionHandler, AdditionalMeasureProducer {
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -B classifierstring <br>
+   * -W classifierstring <br>
    * Classifierstring should contain the full class name of a classifier
    * followed by options to the classifier.
    * (required).<p>
@@ -149,10 +149,10 @@ implements OptionHandler, AdditionalMeasureProducer {
    */
   public void setOptions(String[] options) throws Exception {
 
-    String classifierString = Utils.getOption('B', options);
+    String classifierString = Utils.getOption('W', options);
     if (classifierString.length() == 0) {
       throw new Exception("A classifier must be specified"
-			  + " with the -B option.");
+			  + " with the -W option.");
     }
     String [] classifierSpec = Utils.splitOptions(classifierString);
     if (classifierSpec.length == 0) {
@@ -201,7 +201,7 @@ implements OptionHandler, AdditionalMeasureProducer {
     String [] options = new String [6];
     int current = 0;
 
-    options[current++] = "-B";
+    options[current++] = "-W";
     options[current++] = "" + getClassifierSpec();
 
     // same attribute evaluator

@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
+import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
@@ -52,12 +53,12 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class MultiScheme extends Classifier implements OptionHandler {
+public class MultiScheme extends DistributionClassifier implements OptionHandler {
 
   /** The classifier that had the best performance on training data. */
-  protected Classifier m_Classifier;
+  protected DistributionClassifier m_Classifier;
  
   /** The list of classifiers */
   protected Classifier [] m_Classifiers = {
@@ -378,22 +379,27 @@ public class MultiScheme extends Classifier implements OptionHandler {
       }
     }
     m_ClassifierIndex = bestIndex;
-    m_Classifier = bestClassifier;
     if (m_NumXValFolds > 1) {
-      m_Classifier.buildClassifier(newData);
+      bestClassifier.buildClassifier(newData);
+    }
+    if (!(bestClassifier instanceof DistributionClassifier)) {
+      m_Classifier = new DistributionMetaClassifier();
+      ((DistributionMetaClassifier)m_Classifier).setClassifier(bestClassifier);
+    } else {
+      m_Classifier = (DistributionClassifier)bestClassifier;
     }
   }
 
   /**
-   * Classifies a given instance using the selected classifier.
+   * Returns class probabilities.
    *
    * @param instance the instance to be classified
    * @exception Exception if instance could not be classified
    * successfully
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
-    return m_Classifier.classifyInstance(instance);
+    return m_Classifier.distributionForInstance(instance);
   }
 
   /**

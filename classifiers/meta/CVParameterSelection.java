@@ -64,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -73,7 +73,7 @@ public class CVParameterSelection extends Classifier
    * A data structure to hold values associated with a single
    * cross-validation search parameter
    */
-  protected class CVParameter {
+  protected class CVParameter implements Serializable {
 
     /**  Char used to identify the option of interest */
     private char m_ParamChar;    

@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -439,7 +439,11 @@ public class REPTree extends DistributionClassifier
       m_HoldOutDist = new double[data.numClasses()];
 	
       // Make leaf if there are no training instances
-      if (sortedIndices[0].length == 0) {
+      int helpIndex = 0;
+      if (data.classIndex() == 0) {
+	helpIndex = 1;
+      }
+      if (sortedIndices[helpIndex].length == 0) {
 	if (data.classAttribute().isNumeric()) {
 	  m_Distribution = new double[2];
 	} else {
@@ -454,12 +458,12 @@ public class REPTree extends DistributionClassifier
 
 	// Compute prior variance
 	double totalSum = 0, totalSumSquared = 0, totalSumOfWeights = 0; 
-	for (int i = 0; i < sortedIndices[0].length; i++) {
-	  Instance inst = data.instance(sortedIndices[0][i]);
-	  totalSum += inst.classValue() * weights[0][i];
+	for (int i = 0; i < sortedIndices[helpIndex].length; i++) {
+	  Instance inst = data.instance(sortedIndices[helpIndex][i]);
+	  totalSum += inst.classValue() * weights[helpIndex][i];
 	  totalSumSquared += 
-	    inst.classValue() * inst.classValue() * weights[0][i];
-	  totalSumOfWeights += weights[0][i];
+	    inst.classValue() * inst.classValue() * weights[helpIndex][i];
+	  totalSumOfWeights += weights[helpIndex][i];
 	}
 	priorVar = singleVariance(totalSum, totalSumSquared, 
 				  totalSumOfWeights);
@@ -1070,7 +1074,7 @@ public class REPTree extends DistributionClassifier
 	m_HoldOutError += diff * diff * weight;
       }	
 
-      // Th process is recursive
+      // The process is recursive
       if (m_Attribute != -1) {
       
 	// If node is not a leaf
@@ -1391,7 +1395,7 @@ public class REPTree extends DistributionClassifier
 
     // Check for non-nominal classes
     if (!data.classAttribute().isNominal() && !data.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("REPTree: nominal or numeric class, please.");
+      throw new UnsupportedClassTypeException("REPTree: nominal or numeric class!");
     }
 
     // Delete instances with missing class
@@ -1400,8 +1404,13 @@ public class REPTree extends DistributionClassifier
 
     // Check for empty datasets
     if (data.numInstances() == 0) {
-      throw new Exception("REPTree: zero training instances or all instances " +
-			  "have missing class!");
+      throw new IllegalArgumentException("REPTree: zero training instances or all " +
+					 "instances have missing class!");
+    }
+
+    if (data.numAttributes() == 1) {
+      throw new IllegalArgumentException("REPTree: Attribute missing. Need at least " +
+					 "one attribute other than class attribute!");
     }
 
     // Randomize and stratify
@@ -1450,7 +1459,7 @@ public class REPTree extends DistributionClassifier
 	    }
 	  }
 	} else {
-	  
+
 	  // Sorted indices are computed for numeric attributes
 	  for (int i = 0; i < train.numInstances(); i++) {
 	    Instance inst = train.instance(i);

@@ -47,7 +47,7 @@ import weka.classifiers.meta.*;
  *
  *
  * Dataset                   (1) m5.M5Prim | (2) AdditiveRegression -S 0.7 \
- *                                         |    -B weka.classifiers.meta.m5.M5Prime 
+ *                                         |    -W weka.classifiers.meta.m5.M5Prime 
  *                          ----------------------------
  * auto93.names              (10)    54.4  |    49.41 * 
  * autoHorse.names           (10)    32.76 |    26.34 * 
@@ -97,7 +97,7 @@ import weka.classifiers.meta.*;
  *
  * Valid options from the command line are: <p>
  * 
- * -B classifierstring <br>
+ * -W classifierstring <br>
  * Classifierstring should contain the full class name of a classifier
  * followed by options to the classifier.
  * (required).<p>
@@ -117,7 +117,7 @@ import weka.classifiers.meta.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -204,7 +204,7 @@ public class AdditiveRegression extends Classifier
 	      "\tFull class name of classifier to use, followed\n"
 	      + "\tby scheme options. (required)\n"
 	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
-	      "B", 1, "-B <classifier specification>"));
+	      "W", 1, "-W <classifier specification>"));
 
     newVector.addElement(new Option(
 	      "\tSpecify shrinkage rate. "
@@ -227,7 +227,7 @@ public class AdditiveRegression extends Classifier
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -B classifierstring <br>
+   * -W classifierstring <br>
    * Classifierstring should contain the full class name of a classifier
    * followed by options to the classifier.
    * (required).<p>
@@ -253,10 +253,10 @@ public class AdditiveRegression extends Classifier
 
     setDebug(Utils.getFlag('D', options));
 
-    String classifierString = Utils.getOption('B', options);
+    String classifierString = Utils.getOption('W', options);
     if (classifierString.length() == 0) {
       throw new Exception("A classifier must be specified"
-			  + " with the -B option.");
+			  + " with the -w option.");
     }
     String [] classifierSpec = Utils.splitOptions(classifierString);
     if (classifierSpec.length == 0) {
@@ -294,7 +294,7 @@ public class AdditiveRegression extends Classifier
       options[current++] = "-D";
     }
 
-    options[current++] = "-B";
+    options[current++] = "-W";
     options[current++] = "" + getClassifierSpec();
 
     options[current++] = "-S"; options[current++] = ""+getShrinkage();

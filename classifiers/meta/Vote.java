@@ -47,7 +47,7 @@ import weka.classifiers.rules.ZeroR;
  * (required, option should be used once for each classifier).<p>
  *
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class Vote extends DistributionClassifier implements OptionHandler {
@@ -281,6 +281,12 @@ public class Vote extends DistributionClassifier implements OptionHandler {
     if (m_Classifiers.length == 0) {
       throw new Exception("No base classifiers have been set!");
     }
+
+    // Check for non-nominal classes
+    if (!data.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("Vote: Nominal class, please.");
+    }
+
     Instances newData = new Instances(data);
     m_NumClasses=data.numClasses();
     newData.deleteWithMissingClass();
@@ -317,9 +323,10 @@ public class Vote extends DistributionClassifier implements OptionHandler {
         double[] dist = ((DistributionClassifier)currentClassifier).
           distributionForInstance(instance);
         for (int j=0; j < dist.length; j++)
-          probs[j]+=((double)dist[j])/((double)numClassifiers);
+          probs[j] += ((double)dist[j])/((double)numClassifiers);
       } else {
-        probs[(int)currentClassifier.classifyInstance(instance)]+=1/((double)numClassifiers);
+        probs[(int)currentClassifier.classifyInstance(instance)] += 
+	  1 / ((double)numClassifiers);
       }
     }
 

@@ -54,11 +54,11 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
-public class Stacking extends Classifier implements OptionHandler {
+public class Stacking extends DistributionClassifier implements OptionHandler {
 
-  /** The meta classifier. */
+  /** The meta classifier (really a DistributionClassifier -- ugly). */
   protected Classifier m_MetaClassifier = new weka.classifiers.rules.ZeroR();
 
   /** The base classifiers. */
@@ -360,18 +360,24 @@ public class Stacking extends Classifier implements OptionHandler {
    
     // Build meta classifier
     m_MetaClassifier.buildClassifier(metaData);
+    if (!(m_MetaClassifier instanceof DistributionClassifier)) {
+      Classifier temp = m_MetaClassifier;
+      m_MetaClassifier = new DistributionMetaClassifier();
+      ((DistributionMetaClassifier)m_MetaClassifier).setClassifier(temp);
+    }
   }
 
   /**
-   * Classifies a given instance using the stacked classifier.
+   * Returns class probabilities.
    *
    * @param instance the instance to be classified
    * @exception Exception if instance could not be classified
    * successfully
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
-    return m_MetaClassifier.classifyInstance(metaInstance(instance));
+    return ((DistributionClassifier)m_MetaClassifier).
+      distributionForInstance(metaInstance(instance));
   }
 
   /**
@@ -519,5 +525,12 @@ public class Stacking extends Classifier implements OptionHandler {
     return metaInstance;
   }
 }
+
+
+
+
+
+
+
 
 
