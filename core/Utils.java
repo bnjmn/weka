@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public final class Utils {
 
@@ -449,7 +449,7 @@ public final class Utils {
    * @return the indicated option or an empty string
    * @exception Exception if the option indicated by the flag can't be found
    */
-  public static String getOption(char flag, String [] options) 
+  public static /*@non_null@*/ String getOption(char flag, String [] options) 
     throws Exception {
 
     String newString;
