@@ -54,7 +54,7 @@ import weka.filters.UnsupervisedFilter;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -73,6 +73,9 @@ public class StringToWordVector extends Filter
 
   /** True if output instances should contain word frequency rather than boolean 0 or 1. */
   private boolean m_OutputCounts = false;
+
+  /** A String prefix for the attribute names */
+  private String m_Prefix = "";
 
   /**
    * The default number of words (per class if there is a class attribute
@@ -101,6 +104,10 @@ public class StringToWordVector extends Filter
 				    + "\t(default: select all string attributes)",
 				    "R", 1, "-R <index1,index2-index4,...>"));
     newVector.addElement(new Option(
+				    "\tSpecify a prefix for the created attribute names.\n"
+				    + "\t(default: \"\")",
+				    "P", 1, "-P <attribute name prefix>"));
+    newVector.addElement(new Option(
 				    "\tSpecify approximate number of word fields to create.\n"
 				    + "\tSurplus words will be discarded..\n"
 				    + "\t(default: 1000)",
@@ -124,6 +131,10 @@ public class StringToWordVector extends Filter
    * Specify list of string attributes to convert to words.
    * (default: all string attributes)<p>
    *
+   * -P attribute_name_prefix <br>
+   * Specify a prefix for the created attribute names.
+   * (default: "")<p>
+   *
    * -W number_of_words_to_keep <br>
    * Specify number of word fields to create.
    * Other, less useful words will be discarded.
@@ -144,6 +155,11 @@ public class StringToWordVector extends Filter
       setSelectedRange(value);
     }
 
+    value = Utils.getOption('P', options);
+    if (value.length() != 0) {
+      setAttributeNamePrefix(value);
+    }
+
     value = Utils.getOption('W', options);
     if (value.length() != 0) {
       setWordsToKeep(Integer.valueOf(value).intValue());
@@ -159,7 +175,7 @@ public class StringToWordVector extends Filter
    */
   public String [] getOptions() {
 
-    String [] options = new String [11];
+    String [] options = new String [13];
     int current = 0;
 
     options[current++] = "-D"; 
@@ -169,6 +185,11 @@ public class StringToWordVector extends Filter
       options[current++] = "-R"; 
       m_SelectedRange.setUpper(getInputFormat().numAttributes() - 1);
       options[current++] = getSelectedRange().getRanges();
+    }
+
+    if (!"".equals(getAttributeNamePrefix())) {
+      options[current++] = "-P"; 
+      options[current++] = getAttributeNamePrefix();
     }
 
     options[current++] = "-W"; 
@@ -342,6 +363,25 @@ public class StringToWordVector extends Filter
   }
 
   /**
+   * Get the attribute name prefix.
+   *
+   * @return The current attribute name prefix.
+   */
+  public String getAttributeNamePrefix() {
+    return m_Prefix;
+  }
+    
+  /**
+   * Set the attribute name prefix.
+   *
+   * @param newPrefix String to use as the attribute name prefix.
+   */
+  public void setAttributeNamePrefix(String newPrefix) {
+    m_Prefix = newPrefix;
+  }
+
+
+  /**
    * Gets the number of words (per class if there is a class attribute
    * assigned) to attempt to keep.
    *
@@ -349,7 +389,6 @@ public class StringToWordVector extends Filter
    * assigned).
    */
   public int getWordsToKeep() {
-
     return m_WordsToKeep;
   }
   
@@ -361,7 +400,6 @@ public class StringToWordVector extends Filter
    * vector (per class if assigned).
    */
   public void setWordsToKeep(int newWordsToKeep) {
-
     m_WordsToKeep = newWordsToKeep;
   }
   
@@ -538,7 +576,7 @@ public class StringToWordVector extends Filter
 	      System.err.println(word);
             */
             newDictionary.put(word, new Integer(index++));
-            attributes.addElement(new Attribute(word));
+            attributes.addElement(new Attribute(m_Prefix + word));
           }
         }
       }
