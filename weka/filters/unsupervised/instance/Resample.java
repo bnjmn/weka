@@ -35,10 +35,10 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * Produces a random subsample of a dataset. The original dataset must
- * fit entirely in memory. The number of instances in the generated
- * dataset may be specified. When used in batch mode, subsequent batches
- * are <b>not</b> resampled.
+ * Produces a random subsample of a dataset using sampling with
+ * replacement. The original dataset must fit entirely in memory. The
+ * number of instances in the generated dataset may be specified. When
+ * used in batch mode, subsequent batches are <b>not</b> resampled.
  *
  * Valid options are:<p>
  *
@@ -50,8 +50,9 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.3 $ 
- **/
+ * @version $Revision: 1.4 $ 
+ *
+ */
 public class Resample extends Filter implements UnsupervisedFilter,
 						OptionHandler {
 
@@ -70,7 +71,8 @@ public class Resample extends Filter implements UnsupervisedFilter,
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Produces a random subsample of a dataset. The original dataset must "
+    return "Produces a random subsample of a dataset using sampling with"
+      + "replacement. The original dataset must "
       +"fit entirely in memory. The number of instances in the generated "
       +"dataset may be specified.";
   }
@@ -293,7 +295,7 @@ public class Resample extends Filter implements UnsupervisedFilter,
     Random random = new Random(m_RandomSeed);
     // Convert pending input instances
     for(int i = 0; i < sampleSize; i++) {
-      int index = (int) (random.nextDouble() * origSize);
+      int index = random.nextInt(origSize);
       push((Instance)getInputFormat().instance(index).copy());
     }
   }
