@@ -117,7 +117,7 @@ import weka.classifiers.meta.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -502,7 +502,11 @@ public class AdditiveRegression extends Classifier
 
     for (int i = 0; i < m_additiveModels.size(); i++) {
       Classifier current = (Classifier)m_additiveModels.elementAt(i);
-      prediction += (current.classifyInstance(inst) * getShrinkage());
+      double toAdd = current.classifyInstance(inst);
+      if (i < m_additiveModels.size() - 1) {
+	toAdd *= getShrinkage();
+      }
+      prediction += toAdd;
     }
 
     return prediction;
