@@ -56,11 +56,11 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
-	     AdditionalMeasureProducer {
+	     AdditionalMeasureProducer, Sourcable {
 
   /** An inner class for building and storing the tree structure */
   protected class Tree implements Serializable {
@@ -73,7 +73,7 @@ public class REPTree extends DistributionClassifier
     
     /** The attribute to split on. */
     protected int m_Attribute = -1;
-    
+
     /** The split point. */
     protected double m_SplitPoint = Double.NaN;
     
@@ -150,7 +150,139 @@ public class REPTree extends DistributionClassifier
 	return returnedDist;
       }
     }
-  
+
+   /**
+    * Returns a string containing java source code equivalent to the test
+    * made at this node. The instance being tested is called "i". This
+    * routine assumes to be called in the order of branching, enabling us to
+    * set the >= condition test (the last one) of a numeric splitpoint 
+    * to just "true" (because being there in the flow implies that the 
+    * previous less-than test failed).
+    *
+    * @param index index of the value tested
+    * @return a value of type 'String'
+    */
+    public final String sourceExpression(int index) {
+      
+      StringBuffer expr = null;
+      if (index < 0) {
+        return "i[" + m_Attribute + "] == null";
+      }
+      if (m_Info.attribute(m_Attribute).isNominal()) {
+        expr = new StringBuffer("i[");
+	expr.append(m_Attribute).append("]");
+	expr.append(".equals(\"").append(m_Info.attribute(m_Attribute)
+		.value(index)).append("\")");
+      } else {
+        expr = new StringBuffer("");
+	if (index == 0) {
+	  expr.append("((Double)i[")
+	    .append(m_Attribute).append("]).doubleValue() < ")
+	    .append(m_SplitPoint);
+	} else {
+	  expr.append("true");
+	}
+      }
+      return expr.toString();
+    }
+
+   /**
+    * Returns source code for the tree as if-then statements. The 
+    * class is assigned to variable "p", and assumes the tested 
+    * instance is named "i". The results are returned as two stringbuffers: 
+    * a section of code for assignment of the class, and a section of
+    * code containing support code (eg: other support methods).
+    *
+    * TODO: If the outputted source code encounters a missing value
+    * for the evaluated attribute, it stops branching and uses the 
+    * class distribution of the current node to decide the return value. 
+    * This is unlike the behaviour of distributionForInstance(). 
+    *
+    * @param className the classname that this static classifier has
+    * @param parent parent node of the current node 
+    * @return an array containing two stringbuffers, the first string containing
+    * assignment code, and the second containing source for support code.
+    * @exception Exception if something goes wrong
+    */
+    public StringBuffer [] toSource(String className, Tree parent) 
+      throws Exception {
+    
+      StringBuffer [] result = new StringBuffer[2];
+      double[] currentProbs;
+
+      if(m_ClassProbs == null)
+        currentProbs = parent.m_ClassProbs;
+      else
+        currentProbs = m_ClassProbs;
+
+      long printID = nextID();
+
+      // Is this a leaf?
+      if (m_Attribute == -1) {
+        result[0] = new StringBuffer("	p = ");
+ 	if(m_Info.classAttribute().isNumeric())
+	  result[0].append(currentProbs[0]);
+	else {
+	  result[0].append(Utils.maxIndex(currentProbs));
+	}
+	result[0].append(";\n");
+	result[1] = new StringBuffer("");
+      } else {
+	StringBuffer text = new StringBuffer("");
+	String nextIndent = "      ";
+	StringBuffer atEnd = new StringBuffer("");
+
+	text.append("  static double N")
+	  .append(Integer.toHexString(this.hashCode()) + printID)
+	  .append("(Object []i) {\n")
+	  .append("    double p = Double.NaN;\n");
+
+        text.append("    /* " + m_Info.attribute(m_Attribute).name() + " */\n");
+	// Missing attribute?
+	text.append("    if (" + this.sourceExpression(-1) + ") {\n")
+	  .append("      p = ");
+	if(m_Info.classAttribute().isNumeric())
+	  text.append(currentProbs[0] + ";\n");
+	else
+	  text.append(Utils.maxIndex(currentProbs) + ";\n");
+	text.append("    } ");
+	
+	// Branching of the tree
+	for (int i=0;i<m_Successors.length; i++) {
+          text.append("else if (" + this.sourceExpression(i) + ") {\n");
+	  // Is the successor a leaf?
+	  if(m_Successors[i].m_Attribute == -1) {
+	    double[] successorProbs = m_Successors[i].m_ClassProbs;
+	    if(successorProbs == null)
+	      successorProbs = m_ClassProbs;
+	    text.append("      p = ");
+	    if(m_Info.classAttribute().isNumeric()) {
+	      text.append(successorProbs[0] + ";\n");
+	    } else {
+	      text.append(Utils.maxIndex(successorProbs) + ";\n");
+	    }
+	  } else {
+	    StringBuffer [] sub = m_Successors[i].toSource(className, this);
+	    text.append("" + sub[0]);
+            atEnd.append("" + sub[1]);
+	  }
+	  text.append("    } ");
+	  if (i == m_Successors.length - 1) {
+	    text.append("\n");
+	  }
+        }
+
+        text.append("    return p;\n  }\n");
+
+        result[0] = new StringBuffer("    p = " + className + ".N");
+        result[0].append(Integer.toHexString(this.hashCode()) + printID)
+          .append("(i);\n");
+        result[1] = text.append("" + atEnd);
+      }
+      return result;
+    }
+
+	
     /**
      * Outputs one node for graph.
      */
@@ -305,7 +437,7 @@ public class REPTree extends DistributionClassifier
       // and make space for potential info from pruning data
       m_Info = header;
       m_HoldOutDist = new double[data.numClasses()];
-      
+	
       // Make leaf if there are no training instances
       if (sortedIndices[0].length == 0) {
 	if (data.classAttribute().isNumeric()) {
@@ -1373,6 +1505,49 @@ public class REPTree extends DistributionClassifier
     throws Exception {
   
     return m_Tree.distributionForInstance(instance);
+  }
+
+
+  /** 
+   * For getting a unique ID when outputting the tree source
+   * (hashcode isn't guaranteed unique) 
+   */
+  private static long PRINTED_NODES = 0;
+
+  /**
+   * Gets the next unique node ID.
+   *
+   * @return the next unique node ID.
+   */
+  protected static long nextID() {
+
+    return PRINTED_NODES ++;
+  }
+
+  protected static void resetID() {
+    PRINTED_NODES = 0;
+  }
+
+  /**
+   * Returns the tree as if-then statements.
+   *
+   * @return the tree as a Java if-then type statement
+   * @exception Exception if something goes wrong
+   */
+  public String toSource(String className) 
+    throws Exception {
+     
+    StringBuffer [] source = m_Tree.toSource(className, m_Tree);
+    return
+    "class " + className + " {\n\n"
+    +"  public static double classify(Object [] i)\n"
+    +"    throws Exception {\n\n"
+    +"    double p = Double.NaN;\n"
+    + source[0]  // Assignment code
+    +"    return p;\n"
+    +"  }\n"
+    + source[1]  // Support code
+    +"}\n";
   }
 
   /**
