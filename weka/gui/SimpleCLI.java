@@ -52,7 +52,7 @@ import java.util.Vector;
  * through previous commmands. This gui uses only AWT (i.e. no Swing).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SimpleCLI extends Frame implements ActionListener {
   
@@ -222,6 +222,12 @@ public class SimpleCLI extends Frame implements ActionListener {
     // Finish setting up the frame and show it
     pack();
     setSize(600,500);
+
+    System.out.println("\nWelcome to the WEKA SimpleCLI\n\n"
+                       +"Enter commands in the textfield at the bottom of \n"
+                       +"the window. Use the up and down arrows to move \n"
+                       +"through previous commands.\n\n");
+    runCommand("help");
   }
 
   /**
