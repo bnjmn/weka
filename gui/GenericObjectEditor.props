@@ -107,6 +107,7 @@ weka.filters.Filter = \
  weka.filters.unsupervised.attribute.AddCluster, \
  weka.filters.unsupervised.attribute.AddExpression, \
  weka.filters.unsupervised.attribute.AddNoise, \
+ weka.filters.unsupervised.attribute.ClusterMembership, \
  weka.filters.unsupervised.attribute.Copy, \
  weka.filters.unsupervised.attribute.Discretize, \
  weka.filters.unsupervised.attribute.FirstOrder, \
@@ -145,6 +146,7 @@ weka.filters.UnsupervisedFilter = \
  weka.filters.unsupervised.attribute.AddCluster, \
  weka.filters.unsupervised.attribute.AddExpression, \
  weka.filters.unsupervised.attribute.AddNoise, \
+ weka.filters.unsupervised.attribute.ClusterMembership, \
  weka.filters.unsupervised.attribute.Copy, \
  weka.filters.unsupervised.attribute.Discretize, \
  weka.filters.unsupervised.attribute.FirstOrder, \
@@ -213,7 +215,8 @@ weka.clusterers.Clusterer=\
  weka.clusterers.EM, \
  weka.clusterers.SimpleKMeans, \
  weka.clusterers.Cobweb, \
- weka.clusterers.FarthestFirst
+ weka.clusterers.FarthestFirst, \
+ weka.clusterers.DistributionMetaClusterer
 
 # Lists the Loaders I want to choose from
 weka.core.converters.Loader =\
