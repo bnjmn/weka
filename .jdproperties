@@ -1,0 +1,14 @@
+#jd startup properties (you may erase this file if you wish)
+#Wed Sep 09 04:43:19 GMT 1998
+Frame.width=921
+Locals.visible=true
+Callers.visible=true
+Threads.visible=true
+Source.visible=true
+Frame.height=731
+Console.visible=true
+Frame.y=24
+Frame.x=106
+version=1.11 (01 May 1998)
+Classes.visible=true
+Inspector.visible=true
