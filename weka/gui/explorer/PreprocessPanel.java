@@ -28,6 +28,7 @@ import weka.gui.GenericArrayEditor;
 import weka.gui.Logger;
 import weka.gui.SysErrLog;
 import weka.gui.InstancesSummaryPanel;
+import weka.experiment.InstanceQuery;
 
 import java.io.Reader;
 import java.io.FileReader;
@@ -69,7 +70,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -86,6 +87,9 @@ public class PreprocessPanel extends JPanel {
 
   /** Click to load base instances from a URL */
   protected JButton m_OpenURLBut = new JButton("Open URL...");
+
+  /** Click to load base instances from a Database */
+  protected JButton m_OpenDBBut = new JButton("Open DB...");
 
   /** Click to apply filters and replace the working dataset */
   protected JButton m_ApplyBut = new JButton("Apply");
@@ -115,6 +119,9 @@ public class PreprocessPanel extends JPanel {
 
   /** Stores the last URL that instances were loaded from */
   protected String m_LastURL = "http://";
+  
+  /** Stores the last sql query executed */
+  protected String m_SQLQ = new String("SELECT * FROM ?");
   
   /** The unadulterated instances */
   protected Instances m_BaseInstances;
@@ -156,6 +163,7 @@ public class PreprocessPanel extends JPanel {
     // Create/Configure/Connect components
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
+    m_OpenDBBut.setToolTipText("Open a set of instances from a database");
     m_ReplaceBut
       .setToolTipText("Replace the base relation with the working relation");
     m_ApplyBut.setToolTipText("Update working relation with current filters");
@@ -166,6 +174,11 @@ public class PreprocessPanel extends JPanel {
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setBaseInstancesFromURLQ();
+      }
+    });
+    m_OpenDBBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	setBaseInstancesFromDBQ();
       }
     });
     m_OpenFileBut.addActionListener(new ActionListener() {
@@ -223,9 +236,10 @@ public class PreprocessPanel extends JPanel {
 
     JPanel buttons = new JPanel();
     buttons.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-    buttons.setLayout(new GridLayout(1, 5, 5, 5));
+    buttons.setLayout(new GridLayout(1, 6, 5, 5));
     buttons.add(m_OpenFileBut);
     buttons.add(m_OpenURLBut);
+    buttons.add(m_OpenDBBut);
     buttons.add(m_ApplyBut);
     buttons.add(m_ReplaceBut);
     buttons.add(m_SaveBut);
@@ -494,6 +508,57 @@ public class PreprocessPanel extends JPanel {
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
+
+  /**
+   * Queries the user for a URL to a database to load instances from, 
+   * then loads the instances in a background process. This is done in the IO
+   * thread, and an error message is popped up if the IO thread is busy.
+   */
+  public void setBaseInstancesFromDBQ() {
+    if (m_IOThread == null) {
+      try {
+	InstanceQuery InstQ = new InstanceQuery();
+	String dbaseURL = InstQ.getDatabaseURL();
+	dbaseURL = (String) JOptionPane.showInputDialog(this,
+					     "Enter the database URL",
+					     "Query Database",
+					     JOptionPane.QUESTION_MESSAGE,
+					     null,
+					     null,
+					     dbaseURL);
+	if (dbaseURL == null) {
+	  return;
+	}
+	InstQ.setDatabaseURL(dbaseURL);
+	InstQ.connectToDatabase();      
+	m_SQLQ = (String) JOptionPane.showInputDialog(this,
+					       "Enter an SQL query",
+					       "Query Database",
+					       JOptionPane.QUESTION_MESSAGE,
+					       null,
+					       null,
+					       m_SQLQ);
+	if (m_SQLQ == null) {
+	  m_SQLQ = new String("SELECT * FROM ?");
+	} else {
+	  setBaseInstancesFromDB(InstQ);
+	}
+      } catch (Exception ex) {
+	JOptionPane.showMessageDialog(this,
+				      "Problem with database URL:\n"
+				      + ex.getMessage(),
+				      "Load Instances",
+				      JOptionPane.ERROR_MESSAGE);
+      }
+      
+    } else {
+      JOptionPane.showMessageDialog(this,
+				     "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
+				    JOptionPane.WARNING_MESSAGE);
+    }
+  }
     
   /**
    * Queries the user for a URL to load instances from, then loads the
@@ -606,6 +671,51 @@ public class PreprocessPanel extends JPanel {
       m_IOThread.start();
     } else {
       JOptionPane.showMessageDialog(this,
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
+				    JOptionPane.WARNING_MESSAGE);
+    }
+  }
+  
+  /**
+   * Loads instances from a database
+   *
+   * @param iq the InstanceQuery object to load from (this is assumed
+   * to have been already connected to a valid database).
+   */
+  public void setBaseInstancesFromDB(final InstanceQuery iq) {
+    if (m_IOThread == null) {
+      m_IOThread = new Thread() {
+	public void run() {
+	  
+	  try {
+	    m_Log.statusMessage("Reading from database...");
+	    final Instances i = iq.getInstances(m_SQLQ);
+	    SwingUtilities.invokeAndWait(new Runnable() {
+	      public void run() {
+		setBaseInstances(new Instances(i));
+	      }
+	    });
+	    iq.disconnectFromDatabase();
+	  } catch (Exception ex) {
+	    m_Log.statusMessage("Probelm executing DB query "+m_SQLQ);
+	    JOptionPane.showMessageDialog(PreprocessPanel.this,
+					  "Couldn't read from database:\n"
+					  + m_SQLQ + "\n"
+					  + ex.getMessage(),
+					  "Load Instances",
+					  JOptionPane.ERROR_MESSAGE);
+	  }
+
+	   m_IOThread = null;
+	}
+      };
+
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    } else {
+       JOptionPane.showMessageDialog(this,
 				    "Can't load at this time,\n"
 				    + "currently busy with other IO",
 				    "Load Instances",
