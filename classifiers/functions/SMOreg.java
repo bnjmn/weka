@@ -65,34 +65,34 @@ public class SMOreg extends Classifier implements OptionHandler,
     
 
   /** Feature-space normalization? */
-  private boolean m_featureSpaceNormalization = false;
+  protected boolean m_featureSpaceNormalization = false;
   
   /** Use RBF kernel? (default: poly) */
-  private boolean m_useRBF = false;
+  protected boolean m_useRBF = false;
     
   /** The size of the cache (a prime number) */
-  private int m_cacheSize = 1000003;
+  protected int m_cacheSize = 1000003;
     
   /** Kernel to use **/
-  private Kernel m_kernel;
+  protected Kernel m_kernel;
 
   /** Use lower-order terms? */
-  private boolean m_lowerOrder = false;
+  protected boolean m_lowerOrder = false;
 
   /** The exponent for the polynomial kernel. */
-  private double m_exponent = 1.0;
+  protected double m_exponent = 1.0;
     
   /** Gamma for the RBF kernel. */
-  private double m_gamma = 0.01;
+  protected double m_gamma = 0.01;
 
   /** The class index from the training data */
-  private int m_classIndex = -1;
+  protected int m_classIndex = -1;
 
   /** Only numeric attributes in the dataset? */
-  private boolean m_onlyNumeric;
+  protected boolean m_onlyNumeric;
 
   /** The filter used to make attributes numeric. */
-  private NominalToBinary m_NominalToBinary;
+  protected NominalToBinary m_NominalToBinary;
     
   /** The filter to apply to the training data */
   public static final int FILTER_NORMALIZE = 0;
@@ -105,70 +105,70 @@ public class SMOreg extends Classifier implements OptionHandler,
   };
     
   /** The filter used to standardize/normalize all values. */
-  private Filter m_Filter = null;
+  protected Filter m_Filter = null;
     
   /** Whether to normalize/standardize/neither */
-  private int m_filterType = FILTER_NORMALIZE;
+  protected int m_filterType = FILTER_NORMALIZE;
 
   /** The filter used to get rid of missing values. */
-  private ReplaceMissingValues m_Missing;
+  protected ReplaceMissingValues m_Missing;
     
   /** Turn off all checks and conversions? Turning them off assumes
       that data is purely numeric, doesn't contain any missing values,
       and has a numeric class. Turning them off also means that
       no header information will be stored if the machine is linear. 
       Finally, it also assumes that no instance has a weight equal to 0.*/
-  private boolean m_checksTurnedOff = false;
+  protected boolean m_checksTurnedOff = false;
     
   /** The training data. */
-  private Instances m_data;
+  protected Instances m_data;
     
   /** The complexity parameter */
-  private double m_C = 1.0;
+  protected double m_C = 1.0;
 
   /** The Lagrange multipliers */
-  private double[] m_alpha;
-  private double[] m_alpha_;
+  protected double[] m_alpha;
+  protected double[] m_alpha_;
 
   /** The thresholds. */
-  private double m_b, m_bLow, m_bUp;
+  protected double m_b, m_bLow, m_bUp;
 
   /** The indices for m_bLow and m_bUp */
-  private int m_iLow, m_iUp;
+  protected int m_iLow, m_iUp;
 
   /** Weight vector for linear machine. */
-  private double[] m_weights;
+  protected double[] m_weights;
 
   /** The current set of errors for all non-bound examples. */
-  private double[] m_fcache;
+  protected double[] m_fcache;
 
   /** The five different sets used by the algorithm. */
-  private SMOset m_I0; // {i: 0 < m_alpha[i] < C || 0 < m_alpha_[i] < C}
-  private SMOset m_I1; // {i: m_class[i] = 0, m_alpha_[i] = 0}
-  private SMOset m_I2; // {i: m_class[i] = 0, m_alpha_[i] = C}
-  private SMOset m_I3; // {i: m_class[i] = C, m_alpha_[i] = 0}
+  protected SMOset m_I0; // {i: 0 < m_alpha[i] < C || 0 < m_alpha_[i] < C}
+  protected SMOset m_I1; // {i: m_class[i] = 0, m_alpha_[i] = 0}
+  protected SMOset m_I2; // {i: m_class[i] = 0, m_alpha_[i] = C}
+  protected SMOset m_I3; // {i: m_class[i] = C, m_alpha_[i] = 0}
 
   /** The parameter epsilon */
-  private double m_epsilon = 1e-3;
+  protected double m_epsilon = 1e-3;
 
   /** The parameter tol */
-  private double m_tol = 1.0e-3;
+  protected double m_tol = 1.0e-3;
 
   /** The parameter eps */
-  private double m_eps = 1.0e-12;
+  protected double m_eps = 1.0e-12;
 
   /** Precision constant for updating sets */
-  private static double m_Del = 1e-10;
+  protected static double m_Del = 1e-10;
     
   /** The parameters of the linear transforamtion realized 
    * by the filter on the class attribute */
-  private double m_Alin;
-  private double m_Blin;
+  protected double m_Alin;
+  protected double m_Blin;
 
   /** Variables to hold weight vector in sparse form.
       (To reduce storage requirements.) */
-  private double[] m_sparseWeights;
-  private int[] m_sparseIndices;
+  protected double[] m_sparseWeights;
+  protected int[] m_sparseIndices;
 
   /**
    * Returns a string describing classifier
@@ -438,7 +438,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * @return true if examination was successfull
    * @exception Exception if something goes wrong
    */    
-  private int examineExample(int i2) throws Exception{
+  protected int examineExample(int i2) throws Exception{
 
     // Lagrange multipliers for i2
     double alpha2 = m_alpha[i2];
@@ -577,7 +577,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * @return true if multipliers could be found
    * @exception Exception if something goes wrong
    */
-  private boolean takeStep(int i1, int i2) throws Exception{
+  protected boolean takeStep(int i1, int i2) throws Exception{
 
     if(i1 == i2){
       return false;
@@ -1669,7 +1669,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Debuggage function.
    * Compute the value of the objective function.
    */
-  private double objFun() throws Exception {
+  protected double objFun() throws Exception {
 	
     double res = 0;
     double t = 0, t2 = 0;
@@ -1688,7 +1688,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Debuggage function.
    * Compute the value of the objective function.
    */
-  private double objFun(int i1, int i2, 
+  protected double objFun(int i1, int i2, 
 			double alpha1, double alpha1_, 
 			double alpha2, double alpha2_) throws Exception {
 	
@@ -1729,7 +1729,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Check that the set I0, I1, I2 and I3 cover the whole set of index 
    * and that no attribute appears in two different sets. 
    */
-  private void checkSets() throws Exception{
+  protected void checkSets() throws Exception{
 	
     boolean[] test = new boolean[m_data.numInstances()];
     for (int i = m_I0.getNext(-1); i != -1; i = m_I0.getNext(i)) {
@@ -1787,7 +1787,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    *      alpha*alpha_=0 
    *      sum(alpha[i] - alpha_[i]) = 0 
    */
-  private void checkAlphas() throws Exception{
+  protected void checkAlphas() throws Exception{
 
     double sum = 0;
     for(int i = 0; i < m_alpha.length; i++){
@@ -1809,7 +1809,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * @param i1 the first current indice
    * @param i2 the second current indice
    */
-  private void displayStat(int i1, int i2) throws Exception {
+  protected void displayStat(int i1, int i2) throws Exception {
 	
     System.err.println("\n-------- Status : ---------");
     System.err.println("\n i, alpha, alpha'\n");
@@ -1838,7 +1838,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Debuggage function
    * Compute and display bLow, lUp and so on...
    */
-  private void displayB() throws Exception {
+  protected void displayB() throws Exception {
 
     //double bUp =  Double.NEGATIVE_INFINITY;
     //double bLow = Double.POSITIVE_INFINITY;
@@ -1884,7 +1884,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * (Refers to "Improvements to SMO Algorithm for SVM Regression".)
    * Prints warnings for each equation which doesn't hold.
    */
-  private void checkOptimality() throws Exception {
+  protected void checkOptimality() throws Exception {
 
     double bUp =  Double.POSITIVE_INFINITY;
     double bLow = Double.NEGATIVE_INFINITY;

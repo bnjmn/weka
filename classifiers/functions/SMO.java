@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.51 $ */
+ * @version $Revision: 1.52 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -152,52 +152,52 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
   /**
    * Class for building a binary support vector machine.
    */
-  private class BinarySMO implements Serializable {
+  protected class BinarySMO implements Serializable {
     
     /** The Lagrange multipliers. */
-    private double[] m_alpha;
+    protected double[] m_alpha;
 
     /** The thresholds. */
-    private double m_b, m_bLow, m_bUp;
+    protected double m_b, m_bLow, m_bUp;
 
     /** The indices for m_bLow and m_bUp */
-    private int m_iLow, m_iUp;
+    protected int m_iLow, m_iUp;
 
     /** The training data. */
-    private Instances m_data;
+    protected Instances m_data;
 
     /** Weight vector for linear machine. */
-    private double[] m_weights;
+    protected double[] m_weights;
 
     /** Variables to hold weight vector in sparse form.
 	(To reduce storage requirements.) */
-    private double[] m_sparseWeights;
-    private int[] m_sparseIndices;
+    protected double[] m_sparseWeights;
+    protected int[] m_sparseIndices;
 
     /** Kernel to use **/
-    private Kernel m_kernel;
+    protected Kernel m_kernel;
 
     /** The transformed class values. */
-    private double[] m_class;
+    protected double[] m_class;
 
     /** The current set of errors for all non-bound examples. */
-    private double[] m_errors;
+    protected double[] m_errors;
 
     /** The five different sets used by the algorithm. */
-    private SMOset m_I0; // {i: 0 < m_alpha[i] < C}
-    private SMOset m_I1; // {i: m_class[i] = 1, m_alpha[i] = 0}
-    private SMOset m_I2; // {i: m_class[i] = -1, m_alpha[i] =C}
-    private SMOset m_I3; // {i: m_class[i] = 1, m_alpha[i] = C}
-    private SMOset m_I4; // {i: m_class[i] = -1, m_alpha[i] = 0}
+    protected SMOset m_I0; // {i: 0 < m_alpha[i] < C}
+    protected SMOset m_I1; // {i: m_class[i] = 1, m_alpha[i] = 0}
+    protected SMOset m_I2; // {i: m_class[i] = -1, m_alpha[i] =C}
+    protected SMOset m_I3; // {i: m_class[i] = 1, m_alpha[i] = C}
+    protected SMOset m_I4; // {i: m_class[i] = -1, m_alpha[i] = 0}
 
     /** The set of support vectors */
-    private SMOset m_supportVectors; // {i: 0 < m_alpha[i]}
+    protected SMOset m_supportVectors; // {i: 0 < m_alpha[i]}
 
     /** Stores logistic regression model for probability estimate */
-    private Logistic m_logistic = null;
+    protected Logistic m_logistic = null;
 
     /** Stores the weight of the training instances */
-    private double m_sumOfWeights = 0;
+    protected double m_sumOfWeights = 0;
 
     /**
      * Fits logistic regression model to SVM outputs analogue
@@ -208,7 +208,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
      * @param cl2 the second class' index
      * @exception Exception if the sigmoid can't be fit successfully
      */
-    private void fitLogistic(Instances insts, int cl1, int cl2,
+    protected void fitLogistic(Instances insts, int cl1, int cl2,
 			     int numFolds, Random random) 
       throws Exception {
 
@@ -282,7 +282,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
      * @param random random number generator for cross-validation
      * @exception Exception if the classifier can't be built successfully
      */
-    private void buildClassifier(Instances insts, int cl1, int cl2,
+    protected void buildClassifier(Instances insts, int cl1, int cl2,
 				 boolean fitLogistic, int numFolds,
 				 int randomSeed) throws Exception {
       
@@ -492,7 +492,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
      * @param inst the instance 
      * @return the output of the SVM for the given instance
      */
-    private double SVMOutput(int index, Instance inst) throws Exception {
+    protected double SVMOutput(int index, Instance inst) throws Exception {
       
       double result = 0;
       
@@ -640,7 +640,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
      * @return true if examination was successfull
      * @exception Exception if something goes wrong
      */
-    private boolean examineExample(int i2) throws Exception {
+    protected boolean examineExample(int i2) throws Exception {
     
       double y2, alph2, F2;
       int i1 = -1;
@@ -702,7 +702,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
      * @return true if multipliers could be found
      * @exception Exception if something goes wrong
      */
-    private boolean takeStep(int i1, int i2, double F2) throws Exception {
+    protected boolean takeStep(int i1, int i2, double F2) throws Exception {
 
       double alph1, alph2, y1, y2, F1, s, L, H, k11, k12, k22, eta,
 	a1, a2, f1, f2, v1, v2, Lobj, Hobj, b1, b2, bOld;
@@ -934,7 +934,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
     /**
      * Quick and dirty check whether the quadratic programming problem is solved.
      */
-    private void checkClassifier() throws Exception {
+    protected void checkClassifier() throws Exception {
 
       double sum = 0;
       for (int i = 0; i < m_alpha.length; i++) {
@@ -977,74 +977,74 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
   };
 
   /** The binary classifier(s) */
-  private BinarySMO[][] m_classifiers = null;
+  protected BinarySMO[][] m_classifiers = null;
 
   /** The exponent for the polynomial kernel. */
-  private double m_exponent = 1.0;
+  protected double m_exponent = 1.0;
  
   /** Use lower-order terms? */
-  private boolean m_lowerOrder = false;
+  protected boolean m_lowerOrder = false;
   
   /** Gamma for the RBF kernel. */
-  private double m_gamma = 0.01;
+  protected double m_gamma = 0.01;
   
   /** The complexity parameter. */
-  private double m_C = 1.0;
+  protected double m_C = 1.0;
   
   /** Epsilon for rounding. */
-  private double m_eps = 1.0e-12;
+  protected double m_eps = 1.0e-12;
   
   /** Tolerance for accuracy of result. */
-  private double m_tol = 1.0e-3;
+  protected double m_tol = 1.0e-3;
 
   /** Whether to normalize/standardize/neither */
-  private int m_filterType = FILTER_NORMALIZE;
+  protected int m_filterType = FILTER_NORMALIZE;
   
   /** Feature-space normalization? */
-  private boolean m_featureSpaceNormalization = false;
+  protected boolean m_featureSpaceNormalization = false;
   
   /** Use RBF kernel? (default: poly) */
-  private boolean m_useRBF = false;
+  protected boolean m_useRBF = false;
   
   /** The size of the cache (a prime number) */
-  private int m_cacheSize = 1000003;
+  protected int m_cacheSize = 1000003;
 
   /** The filter used to make attributes numeric. */
-  private NominalToBinary m_NominalToBinary;
+  protected NominalToBinary m_NominalToBinary;
 
   /** The filter used to standardize/normalize all values. */
-  private Filter m_Filter = null;
+  protected Filter m_Filter = null;
 
   /** The filter used to get rid of missing values. */
-  private ReplaceMissingValues m_Missing;
+  protected ReplaceMissingValues m_Missing;
 
   /** Only numeric attributes in the dataset? */
-  private boolean m_onlyNumeric;
+  protected boolean m_onlyNumeric;
 
   /** The class index from the training data */
-  private int m_classIndex = -1;
+  protected int m_classIndex = -1;
 
   /** The class attribute */
-  private Attribute m_classAttribute;
+  protected Attribute m_classAttribute;
 
   /** Turn off all checks and conversions? Turning them off assumes
       that data is purely numeric, doesn't contain any missing values,
       and has a nominal class. Turning them off also means that
       no header information will be stored if the machine is linear. 
       Finally, it also assumes that no instance has a weight equal to 0.*/
-  private boolean m_checksTurnedOff;
+  protected boolean m_checksTurnedOff;
 
   /** Precision constant for updating sets */
-  private static double m_Del = 1000 * Double.MIN_VALUE;
+  protected static double m_Del = 1000 * Double.MIN_VALUE;
 
   /** Whether logistic models are to be fit */
-  private boolean m_fitLogisticModels = false;
+  protected boolean m_fitLogisticModels = false;
 
   /** The number of folds for the internal cross-validation */
-  private int m_numFolds = -1;
+  protected int m_numFolds = -1;
 
   /** The random number seed  */
-  private int m_randomSeed = 1;
+  protected int m_randomSeed = 1;
 
   /**
    * Turns off checks for missing values, etc. Use with caution.
