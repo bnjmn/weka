@@ -64,7 +64,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
@@ -250,7 +250,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   private int m_cacheSize = 1000003;
 
   /** True if we don't want to normalize */
-  private boolean m_dontNormalize = false;
+  private boolean m_Normalize = true;
 
   /** Rescale? */
   private boolean m_rescale = false;
@@ -297,7 +297,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     m_Missing.inputFormat(m_data);
     m_data = Filter.useFilter(m_data, m_Missing); 
 
-    if (!m_dontNormalize) {
+    if (m_Normalize) {
       m_Normalization = new NormalizationFilter();
       m_Normalization.inputFormat(m_data);
       m_data = Filter.useFilter(m_data, m_Normalization); 
@@ -476,7 +476,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     m_Missing.batchFinished();
     inst = m_Missing.output();
     
-    if (!m_dontNormalize) {
+    if (m_Normalize) {
       m_Normalization.input(inst);
       m_Normalization.batchFinished();
       inst = m_Normalization.output();
@@ -593,7 +593,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     } else {
       m_eps = 1.0e-12;
     }
-    m_dontNormalize = Utils.getFlag('N', options);
+    m_Normalize = !Utils.getFlag('N', options);
     m_rescale = Utils.getFlag('L', options);
     if ((m_exponent == 1.0) && (m_rescale)) {
       throw new Exception("Can't use rescaling with linear machine.");
@@ -619,7 +619,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
     options[current++] = "-T"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
-    if (m_dontNormalize) {
+    if (!m_Normalize) {
       options[current++] = "-N";
     }
     if (m_rescale) {
@@ -796,7 +796,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    */
   public boolean getNormalizeData() {
     
-    return !m_dontNormalize;
+    return m_Normalize;
   }
   
   /**
@@ -805,7 +805,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    */
   public void setNormalizeData(boolean v) {
     
-    m_dontNormalize = !v;
+    m_Normalize = v;
   }
   
   /**
