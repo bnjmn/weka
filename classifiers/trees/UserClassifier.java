@@ -47,8 +47,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 
 
-
-
 /**
  * Class for generating an user defined decision tree. For more info see <p>
  *
@@ -62,7 +60,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class UserClassifier extends Classifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -81,21 +79,21 @@ TreeDisplayListener, VisualizePanelListener {
   
 
   /** The tree display panel. */
-  private TreeVisualizer m_tView = null;
+  private transient TreeVisualizer m_tView = null;
   /** The instances display. */
-  private VisualizePanel m_iView = null;
+  private transient VisualizePanel m_iView = null;
   /** Two references to the structure of the decision tree. */
   private TreeClass m_top, m_focus;
   /** The next number that can be used as a unique id for a node. */
   private int m_nextId;
   /** These two frames aren't used anymore. */
-  private JFrame m_treeFrame;
-  private JFrame m_visFrame;
+  private transient JFrame m_treeFrame;
+  private transient JFrame m_visFrame;
   
   /** The tabbed window for the tree and instances view. */
-  private JTabbedPane m_reps;
+  private transient JTabbedPane m_reps;
   /** The window. */
-  private JFrame m_mainWin;
+  private transient JFrame m_mainWin;
   /** The status of whether there is a decision tree ready or not. */
   private boolean m_built=false;
   /** A list of other m_classifiers. */
@@ -315,7 +313,6 @@ TreeDisplayListener, VisualizePanelListener {
     }
   }
   
-
 
   /**
    * This receives shapes from the data view. 
