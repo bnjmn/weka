@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.54 $
+ * @version $Revision: 1.55 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -860,10 +860,13 @@ public class ClassifierPanel extends JPanel {
       double pred;
       // classifier is a distribution classifer and class is nominal
       if (predictions != null) {
+	Instance classMissing = (Instance)toPredict.copy();
+	classMissing.setDataset(toPredict.dataset());
+	classMissing.setClassMissing();
 	DistributionClassifier dc = 
 	  (DistributionClassifier)classifier;
 	double [] dist = 
-	  dc.distributionForInstance(toPredict);
+	  dc.distributionForInstance(classMissing);
 	pred = eval.evaluateModelOnce(dist, toPredict);
 	int actual = (int)toPredict.classValue();
 	predictions.addElement(new 
