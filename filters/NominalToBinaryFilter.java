@@ -36,7 +36,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -276,117 +276,113 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     }
   }
 
-  /** Set the output format if the class is nominal. */
-  private void setOutputFormatNominal() {
+  /**
+   * Set the output format if the class is nominal.
+   *
+   * @exception Exception if a problem occurs when setting the output format
+   */
+  private void setOutputFormatNominal() throws Exception {
 
-    try {
+    FastVector newAtts;
+    int newClassIndex;
+    StringBuffer attributeName;
+    Instances outputFormat;
+    FastVector vals;
 
-      FastVector newAtts;
-      int newClassIndex;
-      StringBuffer attributeName;
-      Instances outputFormat;
-      FastVector vals;
+    // Compute new attributes
 
-      // Compute new attributes
-
-      newClassIndex = m_InputFormat.classIndex();
-      newAtts = new FastVector();
-      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-	Attribute att = m_InputFormat.attribute(j);
-	if ((!att.isNominal()) || 
-	    (j == m_InputFormat.classIndex())) {
-	  newAtts.addElement(att.copy());
-	} else {
-	  if (j < m_InputFormat.classIndex()) {
-	    newClassIndex += att.numValues() - 1;
-	  }
-	  // Compute values for new attributes
+    newClassIndex = m_InputFormat.classIndex();
+    newAtts = new FastVector();
+    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
+      Attribute att = m_InputFormat.attribute(j);
+      if ((!att.isNominal()) || 
+	  (j == m_InputFormat.classIndex())) {
+	newAtts.addElement(att.copy());
+      } else {
+	if (j < m_InputFormat.classIndex()) {
+	  newClassIndex += att.numValues() - 1;
+	}
+	// Compute values for new attributes
 	  
-	  for (int k = 0; k < att.numValues(); k++) {
-	    attributeName = 
-	      new StringBuffer(att.name() + "=");
-	    attributeName.append(att.value(k));
-	    if (m_Numeric) {
-	      newAtts.
+	for (int k = 0; k < att.numValues(); k++) {
+	  attributeName = 
+	    new StringBuffer(att.name() + "=");
+	  attributeName.append(att.value(k));
+	  if (m_Numeric) {
+	    newAtts.
 	      addElement(new Attribute(attributeName.toString()));
-	    } else {
-	      vals = new FastVector(2);
-	      vals.addElement("f"); vals.addElement("t");
-	      newAtts.
+	  } else {
+	    vals = new FastVector(2);
+	    vals.addElement("f"); vals.addElement("t");
+	    newAtts.
 	      addElement(new Attribute(attributeName.toString(), vals));
-	    }
 	  }
 	}
       }
-      outputFormat = new Instances(m_InputFormat.relationName(),
-				   newAtts, 0);
-      outputFormat.setClassIndex(newClassIndex);
-      setOutputFormat(outputFormat);
-    } catch (Exception ex) {
-      System.err.println("Problem setting new output format");
-      System.exit(0);
     }
+    outputFormat = new Instances(m_InputFormat.relationName(),
+				 newAtts, 0);
+    outputFormat.setClassIndex(newClassIndex);
+    setOutputFormat(outputFormat);
   }
 
-  /** Set the output format if the class is numeric. */
-  private void setOutputFormatNumeric() {
+  /**
+   * Set the output format if the class is numeric.
+   *
+   * @exception Exception if a problem occurs when setting the output format
+   */
+  private void setOutputFormatNumeric() throws Exception {
 
     if (m_AvgClassValues == null) {
       setOutputFormat(null);
       return;
     }
-    try {
+    FastVector newAtts;
+    int newClassIndex;
+    StringBuffer attributeName;
+    Instances outputFormat;
+    FastVector vals;
 
-      FastVector newAtts;
-      int newClassIndex;
-      StringBuffer attributeName;
-      Instances outputFormat;
-      FastVector vals;
+    // Compute new attributes
 
-      // Compute new attributes
-
-      newClassIndex = m_InputFormat.classIndex();
-      newAtts = new FastVector();
-      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-	Attribute att = m_InputFormat.attribute(j);
-	if ((!att.isNominal()) || 
-	    (j == m_InputFormat.classIndex())) {
-	  newAtts.addElement(att.copy());
-	} else {
-	  if (j < m_InputFormat.classIndex())
-	    newClassIndex += att.numValues() - 2;
+    newClassIndex = m_InputFormat.classIndex();
+    newAtts = new FastVector();
+    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
+      Attribute att = m_InputFormat.attribute(j);
+      if ((!att.isNominal()) || 
+	  (j == m_InputFormat.classIndex())) {
+	newAtts.addElement(att.copy());
+      } else {
+	if (j < m_InputFormat.classIndex())
+	  newClassIndex += att.numValues() - 2;
 	  
-	  // Compute values for new attributes
+	// Compute values for new attributes
 	  
-	  for (int k = 1; k < att.numValues(); k++) {
-	    attributeName = 
-	      new StringBuffer(att.name() + "=");
-	    for (int l = k; l < att.numValues(); l++) {
-	      if (l > k) {
-		attributeName.append(',');
-	      }
-	      attributeName.append(att.value(m_Indices[j][l]));
+	for (int k = 1; k < att.numValues(); k++) {
+	  attributeName = 
+	    new StringBuffer(att.name() + "=");
+	  for (int l = k; l < att.numValues(); l++) {
+	    if (l > k) {
+	      attributeName.append(',');
 	    }
-	    if (m_Numeric) {
-	      newAtts.
+	    attributeName.append(att.value(m_Indices[j][l]));
+	  }
+	  if (m_Numeric) {
+	    newAtts.
 	      addElement(new Attribute(attributeName.toString()));
-	    } else {
-	      vals = new FastVector(2);
-	      vals.addElement("f"); vals.addElement("t");
-	      newAtts.
+	  } else {
+	    vals = new FastVector(2);
+	    vals.addElement("f"); vals.addElement("t");
+	    newAtts.
 	      addElement(new Attribute(attributeName.toString(), vals));
-	    }
 	  }
 	}
       }
-      outputFormat = new Instances(m_InputFormat.relationName(),
-				   newAtts, 0);
-      outputFormat.setClassIndex(newClassIndex);
-      setOutputFormat(outputFormat);
-    } catch (Exception ex) {
-      System.err.println("Problem setting new output format");
-      System.exit(0);
     }
+    outputFormat = new Instances(m_InputFormat.relationName(),
+				 newAtts, 0);
+    outputFormat.setClassIndex(newClassIndex);
+    setOutputFormat(outputFormat);
   }
 
   /**

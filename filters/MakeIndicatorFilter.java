@@ -42,7 +42,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -284,42 +284,40 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     return m_Numeric;
   }
 
-  /** Set the output format.  */
-  private void setOutputFormat() {
+  /**
+   * Set the output format.
+   *
+   * @exception Exception if a problem occurs setting the output format
+   */
+  private void setOutputFormat() throws Exception {
     
-    try {
+    Instances newData;
+    FastVector newAtts, newVals;
       
-      Instances newData;
-      FastVector newAtts, newVals;
-      
-      // Compute new attributes
-      
-      newAtts = new FastVector(m_InputFormat.numAttributes());
-      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-	Attribute att = m_InputFormat.attribute(j);
-	if (j != m_AttIndex) {
-	  newAtts.addElement(att.copy());
+    // Compute new attributes
+    
+    newAtts = new FastVector(m_InputFormat.numAttributes());
+    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
+      Attribute att = m_InputFormat.attribute(j);
+      if (j != m_AttIndex) {
+	newAtts.addElement(att.copy());
+      } else {
+	if (m_Numeric) {
+	  newAtts.addElement(new Attribute(att.name()));
 	} else {
-	  if (m_Numeric) {
-	    newAtts.addElement(new Attribute(att.name()));
-	  } else {
-	    newVals = new FastVector(2);
-	    newVals.addElement("not_" + att.value(m_ValIndex));
-	    newVals.addElement(att.value(m_ValIndex));
-	    newAtts.addElement(new Attribute(att.name(), newVals));
-	  }
+	  newVals = new FastVector(2);
+	  newVals.addElement("not_" + att.value(m_ValIndex));
+	  newVals.addElement(att.value(m_ValIndex));
+	  newAtts.addElement(new Attribute(att.name(), newVals));
 	}
       }
-      
-      // Construct new header
-      
-      newData = new Instances(m_InputFormat.relationName(), newAtts, 0);
-      newData.setClassIndex(m_InputFormat.classIndex());
-      setOutputFormat(newData);
-    } catch (Exception ex) {
-      System.err.println("Problem setting new output format");
-      System.exit(0);
     }
+    
+    // Construct new header
+    
+    newData = new Instances(m_InputFormat.relationName(), newAtts, 0);
+    newData.setClassIndex(m_InputFormat.classIndex());
+    setOutputFormat(newData);
   }
  
   /**

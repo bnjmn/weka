@@ -41,7 +41,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -151,8 +151,9 @@ public class AddFilter extends Filter implements OptionHandler {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @exception Exception if the format couldn't be set successfully
    */
-  public boolean inputFormat(Instances instanceInfo) {
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
     m_NewBatch = true;
@@ -167,21 +168,14 @@ public class AddFilter extends Filter implements OptionHandler {
       newAttribute = new Attribute(m_Name, m_Labels);
       break;
     default:
-      System.err.println("Unknown attribute type in AddFilter");
-      System.exit(0);
+      throw new Error("Unknown attribute type in AddFilter");
     }
 
     if ((m_Insert < 0) || (m_Insert > m_InputFormat.numAttributes())) {
       m_Insert = m_InputFormat.numAttributes();
     }
-    try {
-      outputFormat.insertAttributeAt(newAttribute, m_Insert);
-      setOutputFormat(outputFormat);
-    } catch (Exception ex) {
-      System.err.println("Error in inputFormat() - this should never "+
-			 "be reached!!");
-      System.exit(0);
-    }
+    outputFormat.insertAttributeAt(newAttribute, m_Insert);
+    setOutputFormat(outputFormat);
     return true;
   }
 

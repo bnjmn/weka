@@ -36,7 +36,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -126,34 +126,30 @@ public class AttributeFilter extends Filter implements OptionHandler {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @exception Exception if the format couldn't be set successfully
    */
-  public boolean inputFormat(Instances instanceInfo) {
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
     m_NewBatch = true;
     
     m_SelectCols.setUpper(m_InputFormat.numAttributes() - 1);
 
-    try {
-      // Create the output buffer
-      FastVector attributes = new FastVector();
-      int outputClass = -1;
-      m_SelectedAttributes = m_SelectCols.getSelection();
-      for (int i = 0; i < m_SelectedAttributes.length; i++) {
-	int current = m_SelectedAttributes[i];
-	if (m_InputFormat.classIndex() == current) {
-	  outputClass = attributes.size();
-	}
-	attributes.addElement(m_InputFormat.attribute(current));
+    // Create the output buffer
+    FastVector attributes = new FastVector();
+    int outputClass = -1;
+    m_SelectedAttributes = m_SelectCols.getSelection();
+    for (int i = 0; i < m_SelectedAttributes.length; i++) {
+      int current = m_SelectedAttributes[i];
+      if (m_InputFormat.classIndex() == current) {
+	outputClass = attributes.size();
       }
-      Instances outputFormat = new Instances(m_InputFormat.relationName(),
-					     attributes, 0); 
-      outputFormat.setClassIndex(outputClass);
-      setOutputFormat(outputFormat);
-    } catch (Exception ex) {
-      System.err.println("Exception: " + ex.getMessage());
-      System.exit(0);
+      attributes.addElement(m_InputFormat.attribute(current));
     }
+    Instances outputFormat = new Instances(m_InputFormat.relationName(),
+					   attributes, 0); 
+    outputFormat.setClassIndex(outputClass);
+    setOutputFormat(outputFormat);
     return true;
   }
   

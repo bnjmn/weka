@@ -46,7 +46,7 @@ import weka.core.*;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -145,31 +145,26 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
 
-    try {
-      boolean inRange = false;
-      for (int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
-	if (m_DeltaCols.isInRange(i)) {
-	  // If they want the class column modified, unassign it
-	  if (i == outputFormat.classIndex()) {
-	    outputFormat.setClassIndex(-1);
-	  }
-
-	  String foName = outputFormat.attribute(i).name();
-	  foName = "'FO " + foName.replace('\'', ' ').trim() + '\'';
-	  outputFormat.deleteAttributeAt(i);
-	  // Create the new attribute
-	  if (inRange) {
-	    Attribute newAttrib = new Attribute(foName);
-	    outputFormat.insertAttributeAt(newAttrib, i);
-	  }
-	  inRange = true;
+    boolean inRange = false;
+    for (int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
+      if (m_DeltaCols.isInRange(i)) {
+	// If they want the class column modified, unassign it
+	if (i == outputFormat.classIndex()) {
+	  outputFormat.setClassIndex(-1);
 	}
+	
+	String foName = outputFormat.attribute(i).name();
+	foName = "'FO " + foName.replace('\'', ' ').trim() + '\'';
+	outputFormat.deleteAttributeAt(i);
+	// Create the new attribute
+	if (inRange) {
+	  Attribute newAttrib = new Attribute(foName);
+	  outputFormat.insertAttributeAt(newAttrib, i);
+	}
+	inRange = true;
       }
-      setOutputFormat(outputFormat);
-    } catch (Exception ex) {
-      System.err.println("Exception: " + ex.getMessage());
-      System.exit(0);
     }
+    setOutputFormat(outputFormat);
     return true;
   }
   
