@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ */
+ * @version $Revision: 1.16 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -701,8 +701,9 @@ public class Apriori extends Associator implements OptionHandler {
       +"premise and consequence were independent of each other. The total "
       +"number of examples that this represents is presented in brackets "
       +"following the leverage. Conviction is "
-      +"another measure of departure from independence. Conviction is given "
-      +"by ";
+      +"another measure of departure from independence and furthermore takes into "
+      +"account implicaton. Conviction is given "
+      +"by P(premise)P(!consequence) / P(premise, !consequence).";
   }
 
   /**
