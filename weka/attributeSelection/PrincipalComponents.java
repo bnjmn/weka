@@ -46,7 +46,7 @@ import  weka.filters.Filter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -113,6 +113,9 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   /** transform the data through the pc space and back to the original
       space ? */
   private boolean m_transBackToOriginal = false;
+  
+  /** maximum number of attributes in the transformed attribute name */
+  private int m_maxAttrsInName = 5;
 
   /** holds the transposed eigenvectors for converting back to the
       original space */
@@ -151,6 +154,10 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     newVector.addElement(new Option("\tTransform through the PC space and "
 				    +"\n\tback to the original space."
 				    , "O", 0, "-O"));
+				    
+    newVector.addElement(new Option("\tMaximum number of attributes to include in "
+                                    + "\ntransformed attribute names. (-1 = include all)"
+				    , "A", 1, "-A"));
     return  newVector.elements();
   }
 
@@ -167,6 +174,10 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * -T <br>
    * Transform through the PC space and back to the original space. <p>
    *
+   * -A <max>
+   * The maximum number of attributes to include in transformed attribute names.
+   * (-1 = include all attributes)
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -180,6 +191,10 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
       Double temp;
       temp = Double.valueOf(optionString);
       setVarianceCovered(temp.doubleValue());
+    }
+    optionString = Utils.getOption('A', options);
+    if (optionString.length() != 0) {
+      setMaximumAttributeNames(Integer.parseInt(optionString));
     }
     setNormalize(!Utils.getFlag('D', options));
 
@@ -247,6 +262,24 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    */
   public double getVarianceCovered() {
     return m_coverVariance;
+  }
+
+  /**
+   * Sets maximum number of attributes to include in
+   * transformed attribute names.
+   * @param m the maximum number of attributes
+   */
+  public void setMaximumAttributeNames(int m) {
+    m_maxAttrsInName = m;
+  }
+
+  /**
+   * Gets maximum number of attributes to include in
+   * transformed attribute names.
+   * @return the maximum number of attributes
+   */
+  public int getMaximumAttributeNames() {
+    return m_maxAttrsInName;
   }
 
   /**
@@ -779,17 +812,33 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     FastVector attributes = new FastVector();
      for (int i = m_numAttribs - 1; i >= 0; i--) {
        StringBuffer attName = new StringBuffer();
-       for (int j = 0; j < m_numAttribs; j++) {
-	 attName.append(Utils.
-			doubleToString(m_eigenvectors[j][m_sortedEigens[i]],
-				       5,3)
-			+m_trainInstances.attribute(j).name());
-	 if (j != m_numAttribs - 1) {
-	   if (m_eigenvectors[j+1][m_sortedEigens[i]] >= 0) {
-	     attName.append("+");
-	   }
-	 }
+       // build array of coefficients
+       double[] coeff_mags = new double[m_numAttribs];
+       for (int j = 0; j < m_numAttribs; j++)
+         coeff_mags[j] = -Math.abs(m_eigenvectors[j][m_sortedEigens[i]]);
+       int num_attrs = (m_maxAttrsInName > 0) ? Math.min(m_numAttribs, m_maxAttrsInName) : m_numAttribs;
+       // this array contains the sorted indices of the coefficients
+       int[] coeff_inds;
+       if (m_numAttribs > 0) {
+          // if m_maxAttrsInName > 0, sort coefficients by decreasing magnitude
+          coeff_inds = Utils.sort(coeff_mags);
+       } else {
+          // if  m_maxAttrsInName <= 0, use all coeffs in original order
+          coeff_inds = new int[m_numAttribs];
+          for (int j=0; j<m_numAttribs; j++)
+            coeff_inds[j] = j;
        }
+       // build final attName string
+       for (int j = 0; j < num_attrs; j++) {
+         double coeff_value = m_eigenvectors[coeff_inds[j]][m_sortedEigens[i]];
+         if (j > 0 && coeff_value >= 0)
+           attName.append("+");
+	 attName.append(Utils.doubleToString(coeff_value,5,3)
+			+m_trainInstances.attribute(coeff_inds[j]).name());
+       }
+       if (num_attrs < m_numAttribs)
+         attName.append("...");
+         
        attributes.addElement(new Attribute(attName.toString()));
        cumulative+=m_eigenvalues[m_sortedEigens[i]];
 

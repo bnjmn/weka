@@ -58,12 +58,7 @@ import weka.core.*;
  *
  *
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @version 1.01 $$ 
- *
- * Changes:
- *
- * 2005-01-15: precompute and cache full kernel matrix for -A 0 or negative
  *
  */
 public class SMOreg extends Classifier implements OptionHandler, 
@@ -77,10 +72,7 @@ public class SMOreg extends Classifier implements OptionHandler,
   protected boolean m_useRBF = false;
     
   /** The size of the cache (a prime number) */
-  protected int m_cacheSize = 1000003;
-
-  /** The full kernel matrix */
-  protected double[][] m_kernelMatrix;
+  protected int m_cacheSize = 250007;
     
   /** Kernel to use **/
   protected Kernel m_kernel;
@@ -307,12 +299,6 @@ public class SMOreg extends Classifier implements OptionHandler,
       m_Blin = 0.0;
     }
 
-    int originalCacheSize = m_cacheSize;
-    if (m_cacheSize < 1) {
-	m_kernelMatrix = new double[m_data.numInstances()][];
-	m_cacheSize = 1; // cannot use 0, would break local kernel caches
-    }
-
     // Initialize kernel
     if(m_useRBF) {
       m_kernel = new RBFKernel(m_data, m_cacheSize, m_gamma);
@@ -322,11 +308,6 @@ public class SMOreg extends Classifier implements OptionHandler,
       } else {
 	m_kernel = new PolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
       }
-    }
-
-    if (m_kernelMatrix != null) {
-	m_cacheSize = originalCacheSize;
-	precomputeKernelMatrix(m_kernelMatrix,m_data);
     }
 	
     // If machine is linear, reserve space for weights
@@ -399,7 +380,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     m_b = (m_bLow + m_bUp) / 2.0;
 	
     // Save memory
-    m_kernel.clean(); m_fcache = null; m_kernelMatrix = null;
+    m_kernel.clean(); m_fcache = null; 
     m_I0 = m_I1 = m_I2 = m_I3 = null;
 	
     // If machine is linear, delete training data
@@ -450,27 +431,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     }
   }
 
-    public void precomputeKernelMatrix(double[][] k, Instances data) 
-      throws Exception {
-	for(int i = 0; i < data.numInstances(); i++) {
-	    k[i] = new double[i+1];
-	    for(int j = 0; j <= i; j++) {
-		k[i][j] = (double) m_kernel.eval(i,j,data.instance(i));
-	    }
-	}
-    }
-
-
-    public double kernelEval(int id1, int id2, Instance instance) throws Exception {
-	if ((id1 >= 0) && (m_kernelMatrix != null)) {
-	    return (id1 > id2) ? m_kernelMatrix[id1][id2] : m_kernelMatrix[id2][id1];
-	}
-	return m_kernel.eval(id1,id2,instance);
-    }
-
-
-
-
   /**
    * Examines instance. (As defined in Shevade's paper.)
    *
@@ -491,7 +451,7 @@ public class SMOreg extends Classifier implements OptionHandler,
       // compute F2 = F_i2 and set f-cache[i2] = F2
       F2 = m_data.instance(i2).classValue();
       for(int j = 0; j < m_alpha.length; j++){
-	F2 -= (m_alpha[j] - m_alpha_[j]) * kernelEval(i2, j, m_data.instance(i2));
+	F2 -= (m_alpha[j] - m_alpha_[j]) * m_kernel.eval(i2, j, m_data.instance(i2));
       }
       m_fcache[i2] = F2;
 
@@ -631,9 +591,9 @@ public class SMOreg extends Classifier implements OptionHandler,
     double F1 = m_fcache[i1];
     double F2 = m_fcache[i2];
 
-    double k11 = kernelEval(i1, i1, m_data.instance(i1));
-    double k12 = kernelEval(i1, i2, m_data.instance(i1));
-    double k22 = kernelEval(i2, i2, m_data.instance(i2));	
+    double k11 = m_kernel.eval(i1, i1, m_data.instance(i1));
+    double k12 = m_kernel.eval(i1, i2, m_data.instance(i1));
+    double k22 = m_kernel.eval(i2, i2, m_data.instance(i2));	
     double eta = -2*k12+k11+k22;
     double gamma = alpha1 - alpha1_ + alpha2 - alpha2_;
 
@@ -802,8 +762,8 @@ public class SMOreg extends Classifier implements OptionHandler,
       for (int i = m_I0.getNext(-1); i != -1; i = m_I0.getNext(i)) {
 	if (i != i1 && i != i2){
 	  m_fcache[i] += 
-	    ((m_alpha[i1] - m_alpha_[i1]) - (alpha1 - alpha1_)) * kernelEval(i1, i, m_data.instance(i1)) +
-	    ((m_alpha[i2] - m_alpha_[i2]) - (alpha2 - alpha2_)) * kernelEval(i2, i, m_data.instance(i2));
+	    ((m_alpha[i1] - m_alpha_[i1]) - (alpha1 - alpha1_)) * m_kernel.eval(i1, i, m_data.instance(i1)) +
+	    ((m_alpha[i2] - m_alpha_[i2]) - (alpha2 - alpha2_)) * m_kernel.eval(i2, i, m_data.instance(i2));
 	}
       }
 	    
@@ -1019,7 +979,7 @@ public class SMOreg extends Classifier implements OptionHandler,
       }
     } else {
       for (int i = 0; i < m_alpha.length; i++) { 
-	result += (m_alpha[i] - m_alpha_[i]) * kernelEval(-1, i, inst);
+	result += (m_alpha[i] - m_alpha_[i]) * m_kernel.eval(-1, i, inst);
       }
     }
 
@@ -1062,7 +1022,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 				    "(default poly)",
 				    "R", 0, "-R"));
     newVector.addElement(new Option("\tThe size of the kernel cache. " +
-				    "(default 1000003, use 0 for full cache)",
+				    "(default 250007, use 0 for full cache)",
 				    "A", 1, "-A <int>"));
     newVector.addElement(new Option("\tThe tolerance parameter. " +
 				    "(default 1.0e-3)",
@@ -1103,7 +1063,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Use RBF kernel (default poly). <p>
    * 
    * -A num <br>
-   * Sets the size of the kernel cache. Should be a prime number. (default 1000003, use 0 for full cache) <p>
+   * Sets the size of the kernel cache. Should be a prime number. (default 250007, use 0 for full cache) <p>
    *
    * -T num <br>
    * Sets the tolerance parameter. (default 1.0e-3)<p>
@@ -1144,7 +1104,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     if (cacheString.length() != 0) {
       m_cacheSize = Integer.parseInt(cacheString);
     } else {
-      m_cacheSize = 1000003;
+      m_cacheSize = 250007;
     }
     String toleranceString = Utils.getOption('T', options);
     if (toleranceString.length() != 0) {
@@ -1679,7 +1639,19 @@ public class SMOreg extends Classifier implements OptionHandler,
       if (m_useRBF || m_exponent != 1.0) {
 	text.append("\n\nNumber of support vectors: " + printed);
       }
-      text.append("\n\nNumber of kernel evaluations: " + m_kernel.numEvals()+ "\n");
+      int numEval = 0;
+      int numCacheHits = -1;
+      if(m_kernel != null)
+	{
+	  numEval = m_kernel.numEvals();
+	  numCacheHits = m_kernel.numCacheHits();
+	}
+      text.append("\n\nNumber of kernel evaluations: " + numEval);
+      if (numCacheHits >= 0 && numEval > 0)
+	{
+	  double hitRatio = 1 - numEval/(numCacheHits+numEval);
+	  text.append(" (" + Utils.doubleToString(hitRatio*100, 7, 3) + "% cached)");
+	}
     } catch (Exception e) {
       return "Can't print the classifier.";
     }
@@ -1715,7 +1687,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     double t = 0, t2 = 0;
     for(int i = 0; i < m_alpha.length; i++){
       for(int j = 0; j < m_alpha.length; j++){
-	t += (m_alpha[i] - m_alpha_[i]) * (m_alpha[j] - m_alpha_[j]) * kernelEval(i,j,m_data.instance(i));
+	t += (m_alpha[i] - m_alpha_[i]) * (m_alpha[j] - m_alpha_[j]) * m_kernel.eval(i,j,m_data.instance(i));
       }
       t2 += m_data.instance(i).classValue() * (m_alpha[i] - m_alpha_[i]) - m_epsilon * (m_alpha[i] + m_alpha_[i]);
     }	
@@ -1754,7 +1726,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 	} else {
 	  alphaj = m_alpha[j]; alphaj_ = m_alpha_[j];		
 	}
-	t += (alphai - alphai_) * (alphaj - alphaj_) * kernelEval(i,j,m_data.instance(i));
+	t += (alphai - alphai_) * (alphaj - alphaj_) * m_kernel.eval(i,j,m_data.instance(i));
       }
       t2 += m_data.instance(i).classValue() * (alphai - alphai_) - m_epsilon * (alphai + alphai_);
     }	
@@ -1856,7 +1828,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     for(int i = 0; i < m_alpha.length; i++){
       double result = (m_bLow + m_bUp)/2.0; 
       for (int j = 0; j < m_alpha.length; j++) { 
-	result += (m_alpha[j] - m_alpha_[j]) * kernelEval(i, j, m_data.instance(i));
+	result += (m_alpha[j] - m_alpha_[j]) * m_kernel.eval(i, j, m_data.instance(i));
       }
       System.err.print(" " + i + ":  (" + m_alpha[i] + ", " + m_alpha_[i] + 
 		       "),       " + (m_data.instance(i).classValue() - m_epsilon) + " <= " + 
@@ -1886,7 +1858,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     for(int i = 0; i < m_data.numInstances(); i++){
       double Fi = m_data.instance(i).classValue();
       for(int j = 0; j < m_alpha.length; j++){
-	Fi -= (m_alpha[j] - m_alpha_[j]) * kernelEval(i, j, m_data.instance(i));
+	Fi -= (m_alpha[j] - m_alpha_[j]) * m_kernel.eval(i, j, m_data.instance(i));
       }
       System.err.print("(" + m_alpha[i] + ", " + m_alpha_[i] + ") : ");
       System.err.print((Fi - m_epsilon) + ",  " + (Fi + m_epsilon));
@@ -1934,7 +1906,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 
       double Fi = m_data.instance(i).classValue();
       for(int j = 0; j < m_alpha.length; j++){
-	Fi -= (m_alpha[j] - m_alpha_[j]) * kernelEval(i, j, m_data.instance(i));
+	Fi -= (m_alpha[j] - m_alpha_[j]) * m_kernel.eval(i, j, m_data.instance(i));
       }
 	    
       double fitilde = 0, fibarre = 0;
@@ -1975,7 +1947,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     for(int i = 0; i < m_data.numInstances(); i++){
       double Fi = m_data.instance(i).classValue();
       for(int j = 0; j < m_alpha.length; j++){
-	Fi -= (m_alpha[j] - m_alpha_[j]) * kernelEval(i, j, m_data.instance(i));
+	Fi -= (m_alpha[j] - m_alpha_[j]) * m_kernel.eval(i, j, m_data.instance(i));
       }
       double Ei = Fi - ((m_bUp + m_bLow) / 2.0);
       if((m_alpha[i] > 0) && !(Ei >= m_epsilon - m_tol)){
