@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public final class Utils {
 
@@ -384,7 +384,7 @@ public final class Utils {
    * @return the string (possibly quoted)
    */
   public static String quote(String string) {
-      boolean quote=false;
+      boolean quote = false;
 
       // backquote the following characters 
       if ((string.indexOf('\n') != -1) || (string.indexOf('\r') != -1) || 
@@ -392,7 +392,7 @@ public final class Utils {
 	  (string.indexOf('\\') != -1) || 
 	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1)) {
 	  string = backQuoteChars(string);
-	  quote=true;
+	  quote = true;
       }
 
       // Enclose the string in 's if the string contains a recently added
@@ -419,16 +419,16 @@ public final class Utils {
     StringBuffer newStringBuffer;
 
     // replace each of the following characters with the backquoted version
-    char   CharsFind[]=   {'\\',   '\'',  '\t',  '"',    '%'};
-    String CharsReplace[]={"\\\\", "\\'", "\\t", "\\\"", "\\%"};
-    for(int i=0;i<CharsFind.length;i++){
-	if(string.indexOf(CharsFind[i]) != -1 ) {
+    char   charsFind[] =    {'\\',   '\'',  '\t',  '"',    '%'};
+    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\\"", "\\%"};
+    for(int i = 0; i < charsFind.length; i++) {
+	if (string.indexOf(charsFind[i]) != -1 ) {
 	    newStringBuffer = new StringBuffer();
-	    while ((index = string.indexOf(CharsFind[i])) != -1) {
+	    while ((index = string.indexOf(charsFind[i])) != -1) {
 		if (index > 0) {
 		    newStringBuffer.append(string.substring(0, index));
 		}
-		newStringBuffer.append(CharsReplace[i]);
+		newStringBuffer.append(charsReplace[i]);
 		if ((index + 1) < string.length()) {
 		    string = string.substring(index + 1);
 		} else {
