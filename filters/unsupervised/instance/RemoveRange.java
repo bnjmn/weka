@@ -40,16 +40,16 @@ import java.util.*;
  * Specifies if inverse of selection is to be output.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
 */
 public class RemoveRange extends Filter
   implements UnsupervisedFilter, OptionHandler {
 
-  /** Range of instances provided by user. */
+  /** Range of instances requested by the user. */
   private Range m_Range = new Range("first-last");
 
   /**
-   * Gets an enumeration describing the available options..
+   * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
@@ -79,8 +79,8 @@ public class RemoveRange extends Filter
    * -V <br>
    * Specifies if inverse of selection is to be output.<p>
    *
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @param options the list of options as an array of string.s
+   * @exception Exception if an option is not supported.
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -100,7 +100,7 @@ public class RemoveRange extends Filter
   /**
    * Gets the current settings of the filter.
    *
-   * @return an array of strings suitable for passing to setOptions
+   * @return an array of strings suitable for passing to setOptions.
    */
   public String [] getOptions() {
 
@@ -121,7 +121,7 @@ public class RemoveRange extends Filter
    * Returns a string describing this filter
    *
    * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * displaying in the GUI.
    */
   public String globalInfo() {
 
