@@ -1,22 +1,27 @@
 JAVAC = javac
 JAVACDOC = javadoc
-SOURCES = InstanceQuery.java \
-	ResultListener.java \
-	ResultProducer.java \
-	PropertyNode.java \
-	Experiment.java \
-	SplitEvaluator.java \
-	ClassifierSplitEvaluator.java \
-	RegressionSplitEvaluator.java \
-	RandomSplitResultProducer.java \
-	CrossValidationResultProducer.java \
+SOURCES = \
 	AveragingResultProducer.java \
 	CSVResultListener.java \
-	DatabaseUtils.java \
+	ClassifierSplitEvaluator.java \
+	CostSensitiveClassifierSplitEvaluator.java \
+	CrossValidationResultProducer.java \
 	DatabaseResultListener.java \
 	DatabaseResultProducer.java \
+	DatabaseUtils.java \
+	Experiment.java \
+	InstanceQuery.java \
+	InstancesResultListener.java \
+	OutputZipper.java \
+	PairedStats.java \
 	PairedTTester.java \
-	CostSensitiveClassifierSplitEvaluator.java
+	PropertyNode.java \
+	RandomSplitResultProducer.java \
+	RegressionSplitEvaluator.java \
+	ResultListener.java \
+	ResultProducer.java \
+	SplitEvaluator.java \
+	Stats.java
 #	LearningRateResultProducer.java \
 #	TreeMatchingEvaluator.java
 
