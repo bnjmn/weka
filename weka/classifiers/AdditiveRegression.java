@@ -99,8 +99,11 @@ import weka.classifiers.*;
  * (but increase learning time).
  * (default = 1.0, ie no shrinkage). <p>
  *
+ * -D <br>
+ * Debugging output. <p>
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -126,6 +129,11 @@ public class AdditiveRegression extends Classifier
    * The list of iteratively generated models.
    */
   private FastVector m_additiveModels = new FastVector();
+
+  /**
+   * Produce debugging output.
+   */
+  private boolean m_debug = false;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -177,12 +185,16 @@ public class AdditiveRegression extends Classifier
 	      + "\teg: \"weka.classifiers.NaiveBayes -D\"",
 	      "B", 1, "-B <classifier specification>"));
 
-     newVector.addElement(new Option(
+    newVector.addElement(new Option(
 	      "\tSpecify shrinkage rate. "
 	      +"(default=1.0, ie. no shrinkage)\n", 
 	      "S", 1, "-S"));
+
+    newVector.addElement(new Option(
+	      "\tTurn on debugging output.",
+	      "D", 0, "-D"));
      
-     return newVector.elements();
+    return newVector.elements();
   }
 
   /**
@@ -198,10 +210,15 @@ public class AdditiveRegression extends Classifier
    * (but increase learning time).
    * (default = 1.0, ie. no shrinkage). <p>
    *
+   * -D <br>
+   * Debugging output. <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+
+    setDebug(Utils.getFlag('D', options));
 
     String classifierString = Utils.getOption('B', options);
     if (classifierString.length() == 0) {
@@ -231,9 +248,13 @@ public class AdditiveRegression extends Classifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-
-    String [] options = new String [4];
+    
+    String [] options = new String [5];
     int current = 0;
+
+    if (getDebug()) {
+      options[current++] = "-D";
+    }
 
     options[current++] = "-B";
     options[current++] = "" + getClassifierSpec();
@@ -244,6 +265,33 @@ public class AdditiveRegression extends Classifier
       options[current++] = "";
     }
     return options;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Turn on debugging output";
+  }
+
+  /**
+   * Set whether debugging output is produced.
+   *
+   * @param d true if debugging output is to be produced
+   */
+  public void setDebug(boolean d) {
+    m_debug = d;
+  }
+
+  /**
+   * Gets whether debugging has been turned on
+   *
+   * @return true if debugging has been turned on
+   */
+  public boolean getDebug() {
+    return m_debug;
   }
 
   /**
@@ -347,7 +395,10 @@ public class AdditiveRegression extends Classifier
     m_additiveModels.addElement(zr);
     newData = residualReplace(newData, zr);
     sum = newData.attributeStats(m_classIndex).numericStats.sumSq;
-    System.err.println("New sum of residuals squared : "+sum);
+    if (m_debug) {
+      System.err.println("Sum of squared residuals "
+			 +"(predicting the mean) : "+sum);
+    }
 
     do {
       temp_sum = sum;
@@ -356,7 +407,9 @@ public class AdditiveRegression extends Classifier
       m_additiveModels.addElement(nextC);
       newData = residualReplace(newData, nextC);
       sum = newData.attributeStats(m_classIndex).numericStats.sumSq;
-      System.err.println("sum of residuals squared : "+sum);
+      if (m_debug) {
+	System.err.println("Sum of squared residuals : "+sum);
+      }
     } while ((temp_sum - 
 		   (sum = newData.attributeStats(m_classIndex).
 		    numericStats.sumSq)) > Utils.SMALL);
