@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  * @see JPanel
  */
@@ -348,139 +348,175 @@ public class BoundaryPanel extends JPanel {
     computeMinMaxAtts();
     
     if (m_plotThread == null) {
-      m_plotThread = new Thread() {
-	  public void run() {
-	    m_stopPlotting = false;
-	    try {
-	      initialize();
-	      repaint();
-	      
-	      // train the classifier
-	      m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
-	      m_classifier.buildClassifier(m_trainingData);
-	      
-	      // build DataGenerator
-	      boolean [] attsToWeightOn = 
-		new boolean[m_trainingData.numAttributes()];
-	      attsToWeightOn[m_xAttribute] = true;
-	      attsToWeightOn[m_yAttribute] = true;
-	      
-	      m_dataGenerator.setWeightingDimensions(attsToWeightOn);
-	      
-	      m_dataGenerator.buildGenerator(m_trainingData);
-	      
-	      // generate samples
-	      double [] dist;
-	      double [] weightingAttsValues = 
-		new double [attsToWeightOn.length];
-	      double [] vals = new double[m_trainingData.numAttributes()];
-	      Instance predInst = new Instance(1.0, vals);
-	      predInst.setDataset(m_trainingData);
-	    abortPlot: for (int i = 0; i < m_panelHeight; i++) {
-	      for (int j = 0; j < m_panelWidth; j++) {
-		
-		if (m_stopPlotting) {
-		  break abortPlot;
-		}
-		
-		double [] sumOfProbsForRegion = 
-		  new double [m_trainingData.classAttribute().numValues()];
-		
-		for (int u = 0; u < m_numOfSamplesPerRegion; u++) {
-		  
-		  double [] sumOfProbsForLocation = 
-		    new double [m_trainingData.classAttribute().numValues()];
-		  
-		  weightingAttsValues[m_xAttribute] = 
-		    getRandomX(j);
-		  weightingAttsValues[m_yAttribute] = 
-		    getRandomY(m_panelHeight-i-1);
-		  
-		  m_dataGenerator.setWeightingValues(weightingAttsValues);
-		  
-		  double [] weights = m_dataGenerator.getWeights();
-		  double sumOfWeights = Utils.sum(weights);
-		  int [] indices = Utils.sort(weights);
-		  
-		  // Prune 1% of weight mass
-		  int [] newIndices = new int[indices.length];
-		  double sumSoFar = 0; 
-		  double criticalMass = 0.99 * sumOfWeights;
-		  int index = weights.length - 1; int counter = 0;
-		  for (int z = weights.length - 1; z >= 0; z--) {
-		    newIndices[index--] = indices[z];
-		    sumSoFar += weights[indices[z]];
-		    counter++;
-		    if (sumSoFar > criticalMass) {
-		      break;
-		    }
-		  }
-		  indices = new int[counter];
-		  System.arraycopy(newIndices, index + 1, indices, 0, counter);
-		  
-		  for (int z = 0; z < m_numOfSamplesPerGenerator; z++) {
-		    
-		    m_dataGenerator.setWeightingValues(weightingAttsValues);
-		    double [][] values = 
-		      m_dataGenerator.generateInstances(indices);
-
-		    for (int q = 0; q < values.length; q++) {
-		      if (values[q] != null) {
-			System.arraycopy(values[q], 0, vals, 0, vals.length);
-			vals[m_xAttribute] = weightingAttsValues[m_xAttribute];
-			vals[m_yAttribute] = weightingAttsValues[m_yAttribute];
-			
-			// classify the instance
-			dist = m_classifier.distributionForInstance(predInst);
-			for (int k = 0; 
-			     k < sumOfProbsForLocation.length; k++) {
-			  sumOfProbsForLocation[k] += (dist[k] * weights[q]); 
-			}
-		      }
-		    }
-		  }
-		  
-		  for (int k = 0; k < sumOfProbsForRegion.length; k++) {
-		    sumOfProbsForRegion[k] += 
-		      (sumOfProbsForLocation[k] * sumOfWeights); 
-		  }
-		}
-		
-		// average
-		Utils.normalize(sumOfProbsForRegion);
-		// cache
-		m_probabilityCache[i][j] = 
-		  new double[sumOfProbsForRegion.length];
-		System.arraycopy(sumOfProbsForRegion, 0, 
-				 m_probabilityCache[i][j], 0, 
-				 sumOfProbsForRegion.length);
-		
-		plotPoint(j, i, sumOfProbsForRegion);
-	      }
-	    }
-	      if (m_plotTrainingData) {
-		plotTrainingData();
-	      }
-	      
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	    } finally {
-	      m_plotThread = null;
-	      // notify any listeners that we are finished
-	      Vector l;
-	      ActionEvent e = new ActionEvent(this, 0, "");
-	      synchronized(this) {
-		l = (Vector)m_listeners.clone();
-	      }
-	      for (int i = 0; i < l.size(); i++) {
-		ActionListener al = (ActionListener)l.elementAt(i);
-		al.actionPerformed(e);
-	      }
-	    }
-	  }
-	};
+      m_plotThread = new PlotThread();
       m_plotThread.setPriority(Thread.MIN_PRIORITY);
       m_plotThread.start();
+    }
+  }
+  
+  protected class PlotThread extends Thread {
+    double [] m_weightingAttsValues;
+    boolean [] m_attsToWeightOn;
+    double [] m_vals;
+    double [] m_dist;
+    Instance m_predInst;
+    public void run() {
+      m_stopPlotting = false;
+      try {
+        initialize();
+        repaint();
+        
+        // train the classifier
+        m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
+        m_classifier.buildClassifier(m_trainingData);
+        
+        // build DataGenerator
+        m_attsToWeightOn = new boolean[m_trainingData.numAttributes()];
+        m_attsToWeightOn[m_xAttribute] = true;
+        m_attsToWeightOn[m_yAttribute] = true;
+	      
+        m_dataGenerator.setWeightingDimensions(m_attsToWeightOn);
+	      
+        m_dataGenerator.buildGenerator(m_trainingData);
+
+        // generate samples
+        m_weightingAttsValues = new double [m_attsToWeightOn.length];
+        m_vals = new double[m_trainingData.numAttributes()];
+        m_predInst = new Instance(1.0, m_vals);
+        m_predInst.setDataset(m_trainingData);
+
+        int size = 1 << 4;  // Current sample region size
+
+        // Display the initial coarse image tiling.
+        for (int i = 0; i <= m_panelHeight; i += size) {   
+          for (int j = 0; j <= m_panelWidth; j += size) {   
+            plotPoint(j, i, size, size, calculateRegionProbs(j, i), true);
+          }
+        }
+        
+        // Sampling and gridding loop
+        int size2 = size / 2;
+        abortPlot: 
+        while (size > 1) { // Subdivide down to the pixel level
+          for (int i = 0; i <= m_panelHeight; i += size) {
+            for (int j = 0; j <= m_panelWidth; j += size) {
+              if (m_stopPlotting) {
+                break abortPlot;
+              }
+              boolean update = (j == 0);
+              // Draw the three new subpixel regions
+              plotPoint(j, i + size2, size2, size2, calculateRegionProbs(j, i + size2), update);
+              plotPoint(j + size2, i + size2, size2, size2, calculateRegionProbs(j + size2, i + size2), update);
+              plotPoint(j + size2, i, size2, size2, calculateRegionProbs(j + size2, i), update);
+            }
+          }
+          // The new region edge length is half the old edge length
+          size = size2;
+          size2 = size2 / 2;
+        }
+
+
+        /* 
+        // Old method without sampling.
+        abortPlot: 
+        for (int i = 0; i < m_panelHeight; i++) {
+          for (int j = 0; j < m_panelWidth; j++) {
+            if (m_stopPlotting) {
+              break abortPlot;
+            }
+            plotPoint(j, i, calculateRegionProbs(j, i), (j == 0));
+          }
+        }
+        */
+
+
+        if (m_plotTrainingData) {
+          plotTrainingData();
+        }
+	      
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      } finally {
+        m_plotThread = null;
+        // notify any listeners that we are finished
+        Vector l;
+        ActionEvent e = new ActionEvent(this, 0, "");
+        synchronized(this) {
+          l = (Vector)m_listeners.clone();
+        }
+        for (int i = 0; i < l.size(); i++) {
+          ActionListener al = (ActionListener)l.elementAt(i);
+          al.actionPerformed(e);
+        }
+      }
+    }
+    
+    private double [] calculateRegionProbs(int j, int i) throws Exception {
+      double [] sumOfProbsForRegion = new double [m_trainingData.classAttribute().numValues()];		
+      for (int u = 0; u < m_numOfSamplesPerRegion; u++) {
+      
+        double [] sumOfProbsForLocation = new double [m_trainingData.classAttribute().numValues()];
+      
+        m_weightingAttsValues[m_xAttribute] = getRandomX(j);
+        m_weightingAttsValues[m_yAttribute] = getRandomY(m_panelHeight-i-1);
+      
+        m_dataGenerator.setWeightingValues(m_weightingAttsValues);
+      
+        double [] weights = m_dataGenerator.getWeights();
+        double sumOfWeights = Utils.sum(weights);
+        int [] indices = Utils.sort(weights);
+      
+        // Prune 1% of weight mass
+        int [] newIndices = new int[indices.length];
+        double sumSoFar = 0; 
+        double criticalMass = 0.99 * sumOfWeights;
+        int index = weights.length - 1; int counter = 0;
+        for (int z = weights.length - 1; z >= 0; z--) {
+          newIndices[index--] = indices[z];
+          sumSoFar += weights[indices[z]];
+          counter++;
+          if (sumSoFar > criticalMass) {
+            break;
+          }
+        }
+        indices = new int[counter];
+        System.arraycopy(newIndices, index + 1, indices, 0, counter);
+      
+        for (int z = 0; z < m_numOfSamplesPerGenerator; z++) {
+        
+          m_dataGenerator.setWeightingValues(m_weightingAttsValues);
+          double [][] values = m_dataGenerator.generateInstances(indices);
+        
+          for (int q = 0; q < values.length; q++) {
+            if (values[q] != null) {
+              System.arraycopy(values[q], 0, m_vals, 0, m_vals.length);
+              m_vals[m_xAttribute] = m_weightingAttsValues[m_xAttribute];
+              m_vals[m_yAttribute] = m_weightingAttsValues[m_yAttribute];
+            
+              // classify the instance
+              m_dist = m_classifier.distributionForInstance(m_predInst);
+              for (int k = 0; k < sumOfProbsForLocation.length; k++) {
+                sumOfProbsForLocation[k] += (m_dist[k] * weights[q]); 
+              }
+            }
+          }
+        }
+      
+        for (int k = 0; k < sumOfProbsForRegion.length; k++) {
+          sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] * sumOfWeights); 
+        }
+      }
+    
+      // average
+      Utils.normalize(sumOfProbsForRegion);
+
+      // cache
+      if ((i < m_panelHeight) && (j < m_panelWidth)) {
+        m_probabilityCache[i][j] = new double[sumOfProbsForRegion.length];
+        System.arraycopy(sumOfProbsForRegion, 0, m_probabilityCache[i][j], 0, sumOfProbsForRegion.length);
+      }
+		
+      return sumOfProbsForRegion;
     }
   }
 
@@ -491,29 +527,29 @@ public class BoundaryPanel extends JPanel {
     //    						    0.5f);
     //    osg.setComposite(ac);
     osg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-			 RenderingHints.VALUE_ANTIALIAS_ON);
+                         RenderingHints.VALUE_ANTIALIAS_ON);
     double xval = 0; double yval = 0;
     for (int i = 0; i < m_trainingData.numInstances(); i++) {
       if (!m_trainingData.instance(i).isMissing(m_xAttribute) &&
-	  !m_trainingData.instance(i).isMissing(m_yAttribute)) {
+          !m_trainingData.instance(i).isMissing(m_yAttribute)) {
 
-	xval = m_trainingData.instance(i).value(m_xAttribute);
-	yval = m_trainingData.instance(i).value(m_yAttribute);
+        xval = m_trainingData.instance(i).value(m_xAttribute);
+        yval = m_trainingData.instance(i).value(m_yAttribute);
        
-	int panelX = convertToPanelX(xval);
-	int panelY = convertToPanelY(yval);
-	Color ColorToPlotWith = 
-	  ((Color)m_Colors.elementAt((int)m_trainingData.instance(i).
-				     value(m_classIndex)));
+        int panelX = convertToPanelX(xval);
+        int panelY = convertToPanelY(yval);
+        Color ColorToPlotWith = 
+          ((Color)m_Colors.elementAt((int)m_trainingData.instance(i).
+                                     value(m_classIndex)));
 
-	if (ColorToPlotWith.equals(Color.white)) {
-	  osg.setColor(Color.black);
-	} else {
-	  osg.setColor(Color.white);
-	}
-	osg.fillOval(panelX-3, panelY-3, 7, 7);
-       	osg.setColor(ColorToPlotWith);
-	osg.fillOval(panelX-2, panelY-2, 5, 5);
+        if (ColorToPlotWith.equals(Color.white)) {
+          osg.setColor(Color.black);
+        } else {
+          osg.setColor(Color.white);
+        }
+        osg.fillOval(panelX-3, panelY-3, 7, 7);
+        osg.setColor(ColorToPlotWith);
+        osg.fillOval(panelX-2, panelY-2, 5, 5);
       }
     }
     g.drawImage(m_osi,0,0,m_plotPanel);
@@ -530,13 +566,13 @@ public class BoundaryPanel extends JPanel {
     double temp = (yval - m_minY) / m_rangeY;
     temp = temp * (double) m_panelHeight;
     temp = m_panelHeight - temp;
-
+    
     return (int)temp;
   }
-
+  
   private double convertFromPanelX(double pX) {
     pX /= (double) m_panelWidth;
-
+    
     pX *= m_rangeX;
     return pX + m_minX;
   }
@@ -545,11 +581,16 @@ public class BoundaryPanel extends JPanel {
     pY  = m_panelHeight - pY;
     pY /= (double) m_panelHeight;
     pY *= m_rangeY;
-
+    
     return pY + m_minY;
   }
 
-  private void plotPoint(int x, int y, double [] probs) {
+
+  private void plotPoint(int x, int y, double [] probs, boolean update) {
+    plotPoint(x, y, 1, 1, probs, update);
+  }
+  
+  private void plotPoint(int x, int y, int width, int height, double [] probs, boolean update) {
     // plot the point
     Graphics osg = m_osi.getGraphics();
     Graphics g = m_plotPanel.getGraphics();
@@ -561,16 +602,17 @@ public class BoundaryPanel extends JPanel {
 
       curr.getRGBColorComponents(tempCols);
       for (int z = 0 ; z < 3; z++) {
-	colVal[z] += probs[k] * tempCols[z];
+        colVal[z] += probs[k] * tempCols[z];
       }
     }
     
     osg.setColor(new Color(colVal[0], 
-			   colVal[1], 
-			   colVal[2]));
-    osg.drawLine(x,y,x,y);
-    if (x == 0) {
-      g.drawImage(m_osi,0,0,m_plotPanel);
+                           colVal[1], 
+                           colVal[2]));
+    osg.fillRect(x, y, width, height);
+
+    if (update) {
+      g.drawImage(m_osi, 0, 0, m_plotPanel);
     }
   }
 
@@ -597,7 +639,7 @@ public class BoundaryPanel extends JPanel {
   public void addActionListener(ActionListener newListener) {
     m_listeners.add(newListener);
   }
-
+  
   /**
    * Remove a listener
    *
@@ -606,7 +648,7 @@ public class BoundaryPanel extends JPanel {
   public void removeActionListener(ActionListener removeListener) {
     m_listeners.removeElement(removeListener);
   }
-
+  
   /**
    * Set the classifier to use.
    *
@@ -615,7 +657,7 @@ public class BoundaryPanel extends JPanel {
   public void setClassifier(DistributionClassifier classifier) {
     m_classifier = classifier;
   }
-
+  
   /**
    * Set the data generator to use for generating new instances
    *
@@ -624,7 +666,7 @@ public class BoundaryPanel extends JPanel {
   public void setDataGenerator(DataGenerator dataGenerator) {
     m_dataGenerator = dataGenerator;
   }
-    
+  
   /**
    * Set the x attribute index
    *
@@ -636,16 +678,16 @@ public class BoundaryPanel extends JPanel {
       throw new Exception("No training data set (BoundaryPanel)");
     }
     if (xatt < 0 || 
-	xatt > m_trainingData.numAttributes()) {
+        xatt > m_trainingData.numAttributes()) {
       throw new Exception("X attribute out of range (BoundaryPanel)");
     }
     if (m_trainingData.attribute(xatt).isNominal()) {
       throw new Exception("Visualization dimensions must be numeric "
-			  +"(BoundaryPanel)");
+                          +"(BoundaryPanel)");
     }
     if (m_trainingData.numDistinctValues(xatt) < 2) {
       throw new Exception("Too few distinct values for X attribute "
-			  +"(BoundaryPanel)");
+                          +"(BoundaryPanel)");
     }
     m_xAttribute = xatt;
   }
@@ -661,16 +703,16 @@ public class BoundaryPanel extends JPanel {
       throw new Exception("No training data set (BoundaryPanel)");
     }
     if (yatt < 0 || 
-	yatt > m_trainingData.numAttributes()) {
+        yatt > m_trainingData.numAttributes()) {
       throw new Exception("X attribute out of range (BoundaryPanel)");
     }
     if (m_trainingData.attribute(yatt).isNominal()) {
       throw new Exception("Visualization dimensions must be numeric "
-			  +"(BoundaryPanel)");
+                          +"(BoundaryPanel)");
     }
     if (m_trainingData.numDistinctValues(yatt) < 2) {
       throw new Exception("Too few distinct values for Y attribute "
-			  +"(BoundaryPanel)");
+                          +"(BoundaryPanel)");
     }
     m_yAttribute = yatt;
   }
@@ -705,7 +747,7 @@ public class BoundaryPanel extends JPanel {
   public boolean getPlotTrainingData() {
     return m_plotTrainingData;
   }
-
+  
   /**
    * Get the current vector of Color objects used for the classes
    *
@@ -714,7 +756,7 @@ public class BoundaryPanel extends JPanel {
   public FastVector getColors() {
     return m_Colors;
   }
-
+  
   /**
    * Quickly replot the display using cached probability estimates
    */
@@ -729,20 +771,20 @@ public class BoundaryPanel extends JPanel {
     } catch (Exception ex) {}
 
     final Thread replotThread = new Thread() {
-	public void run() {
-	  m_stopReplotting = false;
-	finishedReplot: for (int i = 0; i < m_panelHeight; i++) {
-	  for (int j = 0; j < m_panelWidth; j++) {
-	    if (m_probabilityCache[i][j] == null || m_stopReplotting) {
-	      break finishedReplot;
-	    }
-	    plotPoint(j, i, m_probabilityCache[i][j]);
-	  }
-	}
-	  if (m_plotTrainingData) {
-	    plotTrainingData();
-	  }
-	}
+        public void run() {
+          m_stopReplotting = false;
+          finishedReplot: for (int i = 0; i < m_panelHeight; i++) {
+            for (int j = 0; j < m_panelWidth; j++) {
+              if (m_probabilityCache[i][j] == null || m_stopReplotting) {
+                break finishedReplot;
+              }
+              plotPoint(j, i, m_probabilityCache[i][j], i == 0);
+            }
+          }
+          if (m_plotTrainingData) {
+            plotTrainingData();
+          }
+        }
       };
     
     replotThread.start();      
@@ -751,12 +793,12 @@ public class BoundaryPanel extends JPanel {
   protected void saveImage(String fileName) {
     try {
       BufferedOutputStream out = 
-	new BufferedOutputStream(new FileOutputStream(fileName));
+        new BufferedOutputStream(new FileOutputStream(fileName));
       
       JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
 
       BufferedImage bi = new BufferedImage(m_panelWidth, m_panelHeight,
-					   BufferedImage.TYPE_INT_RGB);
+                                           BufferedImage.TYPE_INT_RGB);
       Graphics2D gr2 = bi.createGraphics();
       gr2.drawImage(m_osi, 0, 0, m_panelWidth, m_panelHeight, null);
 
@@ -779,19 +821,19 @@ public class BoundaryPanel extends JPanel {
   public static void main (String [] args) {
     try {
       if (args.length < 7) {
-	System.err.println("Usage : BoundaryPanel <dataset> "
-			   +"<class col> <xAtt> <yAtt> <display width> "
-			   +"<display height> <classifier "
-			   +"[classifier options]>");
-	System.exit(1);
+        System.err.println("Usage : BoundaryPanel <dataset> "
+                           +"<class col> <xAtt> <yAtt> <display width> "
+                           +"<display height> <classifier "
+                           +"[classifier options]>");
+        System.exit(1);
       }
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka classification boundary visualizer");
+        new javax.swing.JFrame("Weka classification boundary visualizer");
       jf.getContentPane().setLayout(new BorderLayout());
 
       System.err.println("Loading instances from : "+args[0]);
       java.io.Reader r = new java.io.BufferedReader(
-			 new java.io.FileReader(args[0]));
+                                                    new java.io.FileReader(args[0]));
       final Instances i = new Instances(r);
       i.setClassIndex(Integer.parseInt(args[1]));
 
@@ -804,14 +846,14 @@ public class BoundaryPanel extends JPanel {
       final String classifierName = args[6];
       final BoundaryPanel bv = new BoundaryPanel(panelWidth,panelHeight);
       bv.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    String classifierNameNew = 
-	      classifierName.substring(classifierName.lastIndexOf('.')+1, 
-				       classifierName.length());
-	    bv.saveImage(classifierNameNew+"_"+i.relationName()
-			 +"_X"+xatt+"_Y"+yatt+".jpg");
-	  }
-	});
+          public void actionPerformed(ActionEvent e) {
+            String classifierNameNew = 
+              classifierName.substring(classifierName.lastIndexOf('.')+1, 
+                                       classifierName.length());
+            bv.saveImage(classifierNameNew+"_"+i.relationName()
+                         +"_X"+xatt+"_Y"+yatt+".jpg");
+          }
+        });
 
       bv.setDataGenerator(new KDDataGenerator());
       bv.setTrainingData(i);
@@ -822,11 +864,11 @@ public class BoundaryPanel extends JPanel {
       jf.setSize(bv.getMinimumSize());
       //      jf.setSize(200,200);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	  public void windowClosing(java.awt.event.WindowEvent e) {
-	    jf.dispose();
-	    System.exit(0);
-	  }
-	});
+          public void windowClosing(java.awt.event.WindowEvent e) {
+            jf.dispose();
+            System.exit(0);
+          }
+        });
 
       jf.pack();
       jf.setVisible(true);
@@ -836,10 +878,10 @@ public class BoundaryPanel extends JPanel {
 
       String [] argsR = null;
       if (args.length > 7) {
-	argsR = new String [args.length-7];
-	for (int j = 7; j < args.length; j++) {
-	  argsR[j-7] = args[j];
-	}
+        argsR = new String [args.length-7];
+        for (int j = 7; j < args.length; j++) {
+          argsR[j-7] = args[j];
+        }
       }
       Classifier c = Classifier.forName(args[6], argsR);
       bv.setClassifier((DistributionClassifier)c);
