@@ -28,6 +28,7 @@ import weka.core.Utils;
 import weka.core.SpecialFunctions;
 import java.util.Random;
 import java.util.Hashtable;
+import java.io.Serializable;
 
 /**
  * Class implementing the prior estimattion of the predictive apriori algorithm 
@@ -39,9 +40,9 @@ import java.util.Hashtable;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 
- public class PriorEstimation {
+ public class PriorEstimation implements Serializable {
     
     /** The number of rnadom rules. */
     protected int m_numRandRules;
