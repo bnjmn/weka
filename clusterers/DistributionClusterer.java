@@ -26,7 +26,7 @@ import weka.core.*;
  * (ie. a probability distribution).
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.4 $
+ * @version  $Revision: 1.5 $
  */
 public abstract class DistributionClusterer extends Clusterer {
 
@@ -71,8 +71,10 @@ public abstract class DistributionClusterer extends Clusterer {
     if (dist == null) {
       throw new Exception("Null distribution predicted");
     }
-   
-    Utils.normalize(dist);
+
+    if (Utils.sum(dist) <= 0) {
+      throw new Exception("Unable to cluster instance");
+    }
     return Utils.maxIndex(dist);
   }
 }

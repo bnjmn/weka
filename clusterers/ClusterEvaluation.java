@@ -55,7 +55,7 @@ import  weka.filters.AttributeFilter;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.12 $
+ * @version  $Revision: 1.13 $
  */
 public class ClusterEvaluation {
 
@@ -190,6 +190,7 @@ public class ClusterEvaluation {
     m_clusterAssignments = new double [test.numInstances()];
     Instances testCopy = test;
     boolean hasClass = (testCopy.classIndex() >= 0);
+    int unclusteredInstances = 0;
 
     // If class is set then do class based evaluation as well
     if (hasClass) {
@@ -204,15 +205,16 @@ public class ClusterEvaluation {
     }
 
     for (i=0;i<testCopy.numInstances();i++) {
+      cnum = -1;
       try {
 	if (m_Clusterer instanceof DistributionClusterer) {
 	  temp = ((DistributionClusterer)m_Clusterer).
 	    densityForInstance(testCopy.instance(i));
 	  //	  temp = Utils.sum(dist);
-	  
 	  if (temp > 0) {
 	    loglk += Math.log(temp);
 	  }
+	  
 	  //	  Utils.normalize(dist);
 	  cnum = m_Clusterer.clusterInstance(testCopy.instance(i)); 
 	  // Utils.maxIndex(dist);
@@ -223,11 +225,12 @@ public class ClusterEvaluation {
 	}
       }
       catch (Exception e) {
-	throw  new Exception('\n' + "Unable to cluster instance\n" 
-			       + e.getMessage());
+	unclusteredInstances++;
       }
       
-      instanceStats[cnum]++;
+      if (cnum != -1) {
+	instanceStats[cnum]++;
+      }
     }
 
     /* // count the actual number of used clusters
@@ -257,7 +260,9 @@ public class ClusterEvaluation {
 
     double sum = Utils.sum(instanceStats);
     loglk /= sum;
-    m_clusteringResults.append("Cluster Instances\n\n");
+    
+    m_clusteringResults.append(m_Clusterer.toString());
+    m_clusteringResults.append("Clustered Instances\n\n");
     int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
     for (i = 0; i < cc; i++) {
       if (instanceStats[i] > 0) {
@@ -273,8 +278,13 @@ public class ClusterEvaluation {
       }
     }
     
+    if (unclusteredInstances > 0) {
+      m_clusteringResults.append("\nUnclustered instances : "
+				 +unclusteredInstances);
+    }
+
     if (m_Clusterer instanceof DistributionClusterer) {
-      m_clusteringResults.append("\nLog likelihood: " 
+      m_clusteringResults.append("\n\nLog likelihood: " 
 				 + Utils.doubleToString(loglk, 1, 5) 
 				 + "\n");
     }
@@ -614,7 +624,9 @@ public class ClusterEvaluation {
 	ClusterEvaluation ce = new ClusterEvaluation();
 	ce.setClusterer(clusterer);
 	ce.evaluateClusterer(train);
-	return ce.clusterResultsToString();
+	
+	return "\n\n=== Clustering stats for training data ===\n\n" +
+	  ce.clusterResultsToString();
       }
     }
 
@@ -728,11 +740,16 @@ public class ClusterEvaluation {
       foldAv = 0.0;
 
       for (int j = 0; j < test.numInstances(); j++) {
-	double temp = ((DistributionClusterer)clusterer).densityForInstance(test.instance(j));
-	//	double temp = Utils.sum(tempDist);
+	try {
+	  double temp = ((DistributionClusterer)clusterer).
+	    densityForInstance(test.instance(j));
+	  //	double temp = Utils.sum(tempDist);
 
-	if (temp > 0) {
-	  foldAv += Math.log(temp);
+	  if (temp > 0) {
+	    foldAv += Math.log(temp);
+	  }
+	} catch (Exception ex) {
+	  // unclustered instances
 	}
       }
 
@@ -771,6 +788,7 @@ public class ClusterEvaluation {
     double temp;
     int cc = clusterer.numberOfClusters();
     double[] instanceStats = new double[cc];
+    int unclusteredInstances = 0;
 
     if (fileName.length() != 0) {
       FileReader inStream = null;
@@ -797,17 +815,16 @@ public class ClusterEvaluation {
 	      loglk += Math.log(temp);
 	    }
 	  }
+	  instanceStats[cnum]++;
 	}
 	catch (Exception e) {
-	  throw  new Exception('\n' + "Unable to cluster instance\n" 
-			       + e.getMessage());
+	  unclusteredInstances++;
 	}
-
-	instanceStats[cnum]++;
 	inst.delete(0);
 	i++;
       }
 
+      /*
       // count the actual number of used clusters
       int count = 0;
       for (i = 0; i < cc; i++) {
@@ -825,27 +842,32 @@ public class ClusterEvaluation {
 	}
 	instanceStats = tempStats;
 	cc = instanceStats.length;
-      }
+	} */
 
       int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
       int numInstFieldWidth = (int)((Math.log(i)/Math.log(10))+1);
       double sum = Utils.sum(instanceStats);
       loglk /= sum;
-      text.append("Cluster Instances\n");
+      text.append("Clustered Instances\n");
 
       for (i = 0; i < cc; i++) {
-	text.append(Utils.doubleToString((double)i, 
-					 clustFieldWidth, 0) 
-		    + "      " 
-		    + Utils.doubleToString(instanceStats[i], 
-					   numInstFieldWidth, 0) 
-		    + " (" 
+	if (instanceStats[i] > 0) {
+	  text.append(Utils.doubleToString((double)i, 
+					   clustFieldWidth, 0) 
+		      + "      " 
+		      + Utils.doubleToString(instanceStats[i], 
+					     numInstFieldWidth, 0) 
+		      + " (" 
 		    + Utils.doubleToString((instanceStats[i]/sum*100.0)
 					   , 3, 0) + "%)\n");
+	}
+      }
+      if (unclusteredInstances > 0) {
+	text.append("\nUnclustered Instances : "+unclusteredInstances);
       }
 
       if (clusterer instanceof DistributionClusterer) {
-	text.append("\nLog likelihood: " 
+	text.append("\n\nLog likelihood: " 
 		    + Utils.doubleToString(loglk, 1, 5) 
 		    + "\n");
       }
@@ -885,13 +907,15 @@ public class ClusterEvaluation {
       while (test.readInstance(testStream)) {
 	try {
 	  cnum = clusterer.clusterInstance(test.instance(0));
+	
+
+	  text.append(i + " " + cnum + "\n");
 	}
 	catch (Exception e) {
-	  throw  new Exception('\n' + "Unable to cluster instance\n" 
-			       + e.getMessage());
+	  /*	  throw  new Exception('\n' + "Unable to cluster instance\n" 
+		  + e.getMessage()); */
+	  text.append(i + " Unclustered\n");
 	}
-
-	text.append(i + " " + cnum + "\n");
 	test.delete(0);
 	i++;
       }
@@ -901,14 +925,15 @@ public class ClusterEvaluation {
 	for (i = 0; i < train.numInstances(); i++) {
 	  try {
 	    cnum = clusterer.clusterInstance(train.instance(i));
+	 
+	    text.append(i + " " + cnum + "\n");
 	  }
 	  catch (Exception e) {
-	    throw  new Exception('\n' 
+	    /*  throw  new Exception('\n' 
 				 + "Unable to cluster instance\n" 
-				 + e.getMessage());
+				 + e.getMessage()); */
+	    text.append(i + " Unclustered\n");
 	  }
-
-	  text.append(i + " " + cnum + "\n");
 	}
       }
 
