@@ -37,29 +37,21 @@ import java.util.*;
  * OptionHandler <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CheckOptionHandler {
   
   /**
-   * Prints the given options to stdout.
+   * Prints the given options to a string.
    *
-   * @param options the options to be printed
+   * @param options the options to be joined
    */
   public static String printOptions(String [] options) {
     
     if (options == null) {
       return("<null>");
     } else {
-      String result = "";
-      for (int i = 0; i < options.length; i++) {
-	if (options[i].indexOf(' ') != -1) {
-	  result += " \"" + options[i] + '"';
-	} else {
-	  result += " " + options[i];
-	}
-      }
-      return result;
+      return Utils.joinOptions(options);
     }
   }
 
