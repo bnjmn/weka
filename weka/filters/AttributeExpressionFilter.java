@@ -41,7 +41,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeExpressionFilter extends Filter 
   implements OptionHandler {
@@ -584,7 +584,7 @@ public class AttributeExpressionFilter extends Filter
    * displaying in the explorer/experimenter gui
    */
   public String nameTipText() {
-    return "set the name of the new attribute";
+    return "Set the name of the new attribute.";
   }
 
   /**
@@ -612,7 +612,7 @@ public class AttributeExpressionFilter extends Filter
    * displaying in the explorer/experimenter gui
    */
   public String debugTipText() {
-    return "set debug mode. If true then the new attribute will be named with "
+    return "Set debug mode. If true then the new attribute will be named with "
       +"the postfix parse of the supplied expression.";
   }
   
@@ -640,7 +640,7 @@ public class AttributeExpressionFilter extends Filter
    * displaying in the explorer/experimenter gui
    */
   public String expressionTipText() {
-    return "set the math expression to apply. Eg. a1^2*a5/log(a7*4.0)";
+    return "Set the math expression to apply. Eg. a1^2*a5/log(a7*4.0)";
   }
 
   /**
