@@ -40,6 +40,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.m5.M5Prime,\
  weka.classifiers.NaiveBayesSimple,\
  weka.classifiers.NaiveBayes,\
+ weka.classifiers.bayes.BayesNet,\
  weka.classifiers.OneR,\
  weka.classifiers.Prism,\
  weka.classifiers.SMO,\
@@ -83,6 +84,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.Logistic,\
  weka.classifiers.NaiveBayesSimple,\
  weka.classifiers.NaiveBayes,\
+ weka.classifiers.bayes.BayesNet,\
  weka.classifiers.SMO,\
  weka.classifiers.VotedPerceptron,\
  weka.classifiers.VFI,\
