@@ -37,7 +37,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RandomSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -100,7 +100,7 @@ public class RandomSearch extends ASSearch
       +"that are as good or better than the start point with the same or "
       +"or fewer attributes. Using RandomSearch in conjunction with a start "
       +"set containing all attributes equates to the LVF algorithm of Liu "
-      +"and Setiono (ICML-96).\n"
+      +"and Setiono (ICML-96).\n";
   }
 
   /**
