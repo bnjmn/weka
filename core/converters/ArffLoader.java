@@ -38,7 +38,7 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
@@ -52,7 +52,7 @@ implements BatchLoader, IncrementalLoader {
   protected transient Instances m_structure = null;
 
   protected String m_File = 
-    (new File(System.getProperty("user.dir"))).getName();
+    (new File(System.getProperty("user.dir"))).getAbsolutePath();
 
   /**
    * The reader for the source file.
@@ -107,7 +107,7 @@ implements BatchLoader, IncrementalLoader {
    * @exception IOException if an error occurs
    */
   public void setFile(File file) throws IOException {
-    m_File = file.getName();
+    m_File = file.getAbsolutePath();
     setSource(file);
   }
 
