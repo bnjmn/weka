@@ -32,7 +32,7 @@ import weka.filters.*;
 /**
  * Implements John C. Platt's sequential minimal optimization
  * algorithm for training a support vector classifier using polynomial
- * kernels. 
+ * or RBF kernels. 
  *
  * This implementation globally replaces all missing values and
  * transforms nominal attributes into binary ones. For more
@@ -59,14 +59,20 @@ import weka.filters.*;
  * -E num <br>
  * The exponent for the polynomial kernel. (default 1)<p>
  *
+ * -G num <br>
+ * Gamma for the RBF kernel. (default 0.01)<p>
+ *
  * -N <br>
  * Don't normalize the training instances. <p>
  *
  * -L <br>
- * Rescale kernel. <p>
+ * Rescale kernel (only for non-linear polynomial kernels). <p>
  *
  * -O <br>
- * Use lower-order terms. <p>
+ * Use lower-order terms (only for non-linear polynomial kernels). <p>
+ *
+ * -R <br>
+ * Use the RBF kernel. (default poly)<p>
  *
  * -A num <br>
  * Sets the size of the kernel cache. Should be a prime number. 
@@ -81,7 +87,8 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.31 $ 
+ * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
+ * @version $Revision: 1.32 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -89,6 +96,172 @@ public class SMO extends Classifier implements OptionHandler {
    * Class for building a binary support vector machine.
    */
   private class BinarySMO implements Serializable {
+
+    /**
+     * Calculates a dot product between two instances
+     *
+     */
+    private double dotProd(Instance inst1, Instance inst2) throws Exception {
+      double result=0;
+    
+      // we can do a fast dot product
+      int n1 = inst1.numValues(); int n2 = inst2.numValues();
+      int classIndex = m_data.classIndex();
+      for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
+        int ind1 = inst1.index(p1); 
+        int ind2 = inst2.index(p2);
+        if (ind1 == ind2) {
+	  if (ind1 != classIndex) {
+	    result += inst1.valueSparse(p1) * inst2.valueSparse(p2);
+	  }
+	  p1++; p2++;
+	} else if (ind1 > ind2) {
+	  p2++;
+        } else {
+          p1++;
+	}
+      }
+      return(result);
+    }
+
+    /**
+     * Abstract kernel. 
+     *
+     */
+    private abstract class Kernel {
+    
+      /**
+       * Computes the result of the kernel function for two instances.
+       *
+       * @param id1 the index of the first instance
+       * @param id2 the index of the second instance
+       * @param inst the instance corresponding to id1
+       * @return the result of the kernel function
+       */
+      public abstract double eval(int id1, int id2, Instance inst1) throws Exception;
+    }
+ 
+    /**
+     * The polynomial kernel.
+     *
+     */
+    private class PolyKernel extends Kernel {
+
+      public double eval(int id1, int id2, Instance inst1) throws Exception {
+      
+	double result = 0;
+	long key = -1;
+	int location = -1;
+
+	// we can only cache if we know the indexes
+	if (id1 >= 0) {
+	  if (id1 > id2) {
+	    key = (long)id1 * m_alpha.length + id2;
+	  } else {
+	    key = (long)id2 * m_alpha.length + id1;
+	  }
+	  if (key < 0) {
+	    throw new Exception("Cache overflow detected!");
+	  }
+	  location = (int)(key % m_keys.length);
+	  if (m_keys[location] == (key + 1)) {
+	    return m_storage[location];
+	  }
+        }
+	
+        result=dotProd(inst1, m_data.instance(id2));
+    
+        // Use lower order terms?
+        if (m_lowerOrder) {
+ 	  result += 1.0;
+        }
+
+        // Rescale kernel?
+        if (m_rescale) {
+	  result /= (double)m_data.numAttributes() - 1;
+        }      
+    
+        if (m_exponent != 1.0) {
+	  result = Math.pow(result, m_exponent);
+        }
+        m_kernelEvals++;
+    
+        // store result in cache 	
+        if (key != -1){
+	  m_storage[location] = result;
+	  m_keys[location] = (key + 1);
+        }
+        return result;
+	//
+      }
+    }
+    
+    /**
+     * The RBF kernel.
+     *
+     */
+    private class RBFKernel extends Kernel {
+    
+      /** The precalculated dotproducts of <inst_i,inst_i> */
+      private double m_kernelPrecalc[];
+
+      /**
+       * Constructor. Initializes m_kernelPrecalc[].
+       *
+       */
+      public RBFKernel(Instances data) throws Exception {
+        
+	m_kernelPrecalc=new double[data.numInstances()];
+
+	for(int i=0;i<data.numInstances();i++)
+	  m_kernelPrecalc[i]=dotProd(data.instance(i),data.instance(i));
+      
+      }
+
+      public double eval(int id1, int id2, Instance inst1) throws Exception {
+  
+	double result = 0;
+	long key = -1;
+	int location = -1;
+      
+	// we can only cache if we know the indexes
+	if (id1 >= 0) {
+	  if (id1 > id2) {
+  	    key = (long)id1 * m_alpha.length + id2;
+	  } else {
+	    key = (long)id2 * m_alpha.length + id1;
+	  }
+	  if (key < 0) {
+	    throw new Exception("Cache overflow detected!");
+	  }
+	  location = (int)(key % m_keys.length);
+	  if (m_keys[location] == (key + 1)) {
+	    return m_storage[location];
+	  }
+        }
+	
+	Instance inst2 = m_data.instance(id2);
+
+	double precalc1;
+
+	if(id1==-1)
+	  precalc1=dotProd(inst1,inst1);
+	else
+          precalc1=m_kernelPrecalc[id1];
+	
+        result=Math.exp(m_gamma*(2.*dotProd(inst1, inst2)-precalc1-m_kernelPrecalc[id2]));
+  
+        m_kernelEvals++;
+    
+        // store result in cache 	
+        if (key != -1){
+          m_storage[location] = result;
+          m_keys[location] = (key + 1);
+        }
+
+        return result;
+      }
+    }
     
     /**
      * Stores a set of a given size.
@@ -229,6 +402,9 @@ public class SMO extends Classifier implements OptionHandler {
     private double[] m_sparseWeights;
     private int[] m_sparseIndices;
 
+    /** Kernel to use **/
+    private Kernel m_kernel;
+
     /** Kernel function cache */
     private double[] m_storage;
     private long[] m_keys;
@@ -286,7 +462,7 @@ public class SMO extends Classifier implements OptionHandler {
 	} else {
 	  m_b = -1;
 	}
-	if (m_exponent == 1.0) {
+	if (!m_useRBF && m_exponent == 1.0) {
 	  m_sparseWeights = new double[0];
 	  m_sparseIndices = new int[0];
 	}
@@ -298,7 +474,7 @@ public class SMO extends Classifier implements OptionHandler {
       m_data = insts;
 
       // If machine is linear, reserve space for weights
-      if (m_exponent == 1.0) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	m_weights = new double[m_data.numAttributes()];
       } else {
 	m_weights = null;
@@ -322,7 +498,13 @@ public class SMO extends Classifier implements OptionHandler {
       // Initialize error cache
       m_errors = new double[m_data.numInstances()];
       m_errors[m_iLow] = 1; m_errors[m_iUp] = -1;
-      
+     
+      // Initialize kernel
+      if(m_useRBF)
+      	m_kernel=new RBFKernel(m_data);
+      else
+        m_kernel=new PolyKernel();
+     
       // The kernel calculations are cached
       m_storage = new double[m_cacheSize];
       m_keys = new long[m_cacheSize];
@@ -388,7 +570,7 @@ public class SMO extends Classifier implements OptionHandler {
       
       // If machine is linear, delete training data
       // and store weight vector in sparse format
-      if (m_exponent == 1.0) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	
 	// We don't need to store the set of support vectors
 	m_supportVectors = null;
@@ -439,7 +621,7 @@ public class SMO extends Classifier implements OptionHandler {
       double result = 0;
       
       // Is the machine linear?
-      if (m_exponent == 1.0) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	
 	// Is weight vector stored in sparse format?
 	if (m_sparseWeights == null) {
@@ -469,7 +651,7 @@ public class SMO extends Classifier implements OptionHandler {
       } else {
 	for (int i = m_supportVectors.getNext(-1); i != -1; 
 	     i = m_supportVectors.getNext(i)) {
-	  result += m_class[i] * m_alpha[i] * kernel(index, i, inst);
+	  result += m_class[i] * m_alpha[i] * m_kernel.eval(index, i, inst);
 	}
       }
       result -= m_b;
@@ -494,7 +676,7 @@ public class SMO extends Classifier implements OptionHandler {
 	text.append("BinarySMO\n\n");
 
 	// If machine linear, print weight vector
-	if (m_exponent == 1.0) {
+	if (!m_useRBF && m_exponent == 1.0) {
 	  text.append("Machine linear: showing attribute weights, ");
 	  text.append("not support vectors.\n\n");
 
@@ -533,7 +715,7 @@ public class SMO extends Classifier implements OptionHandler {
 	}
 	text.append(" - " + m_b);
 
-	if (m_exponent != 1.0) {
+	if (m_useRBF || m_exponent != 1.0) {
 	  text.append("\n\nNumber of support vectors: " + m_supportVectors.numElements());
 	}
 	text.append("\n\nNumber of kernel evaluations: " + m_kernelEvals);
@@ -542,77 +724,6 @@ public class SMO extends Classifier implements OptionHandler {
       }
     
       return text.toString();
-    }
-
-    /**
-     * Computes the result of the kernel function for two instances.
-     *
-     * @param id1 the index of the first instance
-     * @param id2 the index of the second instance
-     * @param inst the instance corresponding to id1
-     * @return the result of the kernel function
-     */
-    private double kernel(int id1, int id2, Instance inst1) throws Exception {
-
-      double result = 0;
-      long key = -1;
-      int location = -1;
-
-      // we can only cache if we know the indexes
-      if (id1 >= 0) {
-	if (id1 > id2) {
-	  key = (long)id1 * m_alpha.length + id2;
-	} else {
-	  key = (long)id2 * m_alpha.length + id1;
-	}
-	if (key < 0) {
-	  throw new Exception("Cache overflow detected!");
-	}
-	location = (int)(key % m_keys.length);
-	if (m_keys[location] == (key + 1)) {
-	  return m_storage[location];
-	}
-      }
-	
-      // we can do a fast dot product
-      Instance inst2 = m_data.instance(id2);
-      int n1 = inst1.numValues(); int n2 = inst2.numValues();
-      for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
-	int ind1 = inst1.index(p1); 
-	int ind2 = inst2.index(p2);
-	if (ind1 == ind2) {
-	  if (ind1 != m_classIndex) {
-	    result += inst1.valueSparse(p1) * inst2.valueSparse(p2);
-	  }
-	  p1++; p2++;
-	} else if (ind1 > ind2) {
-	  p2++;
-	} else { 
-	  p1++;
-	}
-      }
-    
-      // Use lower order terms?
-      if (m_lowerOrder) {
-	result += 1.0;
-      }
-
-      // Rescale kernel?
-      if (m_rescale) {
-	result /= (double)m_data.numAttributes() - 1;
-      }      
-    
-      if (m_exponent != 1.0) {
-	result = Math.pow(result, m_exponent);
-      }
-      m_kernelEvals++;
-    
-      // store result in cache 	
-      if (key != -1){
-	m_storage[location] = result;
-	m_keys[location] = (key + 1);
-      }
-      return result;
     }
 
     /**
@@ -713,9 +824,9 @@ public class SMO extends Classifier implements OptionHandler {
       }
 
       // Compute second derivative of objective function
-      k11 = kernel(i1, i1, m_data.instance(i1));
-      k12 = kernel(i1, i2, m_data.instance(i1));
-      k22 = kernel(i2, i2, m_data.instance(i2));
+      k11 = m_kernel.eval(i1, i1, m_data.instance(i1));
+      k12 = m_kernel.eval(i1, i2, m_data.instance(i1));
+      k22 = m_kernel.eval(i2, i2, m_data.instance(i2));
       eta = 2 * k12 - k11 - k22;
 
       // Check if second derivative is negative
@@ -836,7 +947,7 @@ public class SMO extends Classifier implements OptionHandler {
       }
       
       // Update weight vector to reflect change a1 and a2, if linear SVM
-      if (m_exponent == 1.0) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	Instance inst1 = m_data.instance(i1);
 	for (int p1 = 0; p1 < inst1.numValues(); p1++) {
 	  if (inst1.index(p1) != m_data.classIndex()) {
@@ -857,8 +968,8 @@ public class SMO extends Classifier implements OptionHandler {
       for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
 	if ((j != i1) && (j != i2)) {
 	  m_errors[j] += 
-	    y1 * (a1 - alph1) * kernel(i1, j, m_data.instance(i1)) + 
-	    y2 * (a2 - alph2) * kernel(i2, j, m_data.instance(i2));
+	    y1 * (a1 - alph1) * m_kernel.eval(i1, j, m_data.instance(i1)) + 
+	    y2 * (a2 - alph2) * m_kernel.eval(i2, j, m_data.instance(i2));
 	}
       }
       
@@ -948,8 +1059,11 @@ public class SMO extends Classifier implements OptionHandler {
   /** The binary classifier(s) */
   private BinarySMO[][] m_classifiers = null;
 
-  /** The exponent for the polnomial kernel. */
+  /** The exponent for the polynomial kernel. */
   private double m_exponent = 1.0;
+ 
+  /** Gamma for the RBF kernel. */
+  private double m_gamma = 0.01;
   
   /** The complexity parameter. */
   private double m_C = 1.0;
@@ -969,6 +1083,9 @@ public class SMO extends Classifier implements OptionHandler {
   /** Use lower-order terms? */
   private boolean m_lowerOrder = false;
 
+  /** Use RBF kernel? (default: poly) */
+  private boolean m_useRBF = false;
+  
   /** The size of the cache (a prime number) */
   private int m_cacheSize = 1000003;
 
@@ -1188,19 +1305,25 @@ public class SMO extends Classifier implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(8);
+    Vector newVector = new Vector(10);
 
     newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
 				    "C", 1, "-C <double>"));
     newVector.addElement(new Option("\tThe exponent for the "
 				    + "polynomial kernel. (default 1)",
 				    "E", 1, "-E <double>"));
+    newVector.addElement(new Option("\tGamma for the "
+				    + "RBF kernel. (default 0.01)",
+				    "G", 1, "-G <double>"));
     newVector.addElement(new Option("\tDon't normalize the data.",
 				    "N", 0, "-N"));
-    newVector.addElement(new Option("\tRescale the kernel.",
+    newVector.addElement(new Option("\tRescale the kernel (only for non-linear polynomial kernels).",
 				    "L", 0, "-L"));
-    newVector.addElement(new Option("\tUse lower-order terms.",
+    newVector.addElement(new Option("\tUse lower-order terms (only for non-linear polynomial kernels).",
 				    "O", 0, "-O"));
+    newVector.addElement(new Option("\tUse RBF kernel. " +
+    				    "(default poly)",
+				    "R", 0, "-R"));
     newVector.addElement(new Option("\tThe size of the kernel cache. " +
 				    "(default 1000003)",
 				    "A", 1, "-A <int>"));
@@ -1224,15 +1347,21 @@ public class SMO extends Classifier implements OptionHandler {
    * -E num <br>
    * The exponent for the polynomial kernel. (default 1) <p>
    *
+   * -G num <br>
+   * Gamma for the RBF kernel. (default 0.01) <p>
+   *
    * -N <br>
    * Don't normalize the training instances. <p>
    *
    * -L <br>
-   * Rescale kernel. <p>
+   * Rescale kernel (only for non-linear polynomial kernels). <p>
    *
    * -O <br>
-   * Use lower-order terms. <p>
+   * Use lower-order terms (only for non-linear polynomial kernels). <p>
    *
+   * -R <br>
+   * Use RBF kernel (default poly). <p>
+   * 
    * -A num <br>
    * Sets the size of the kernel cache. Should be a prime number. (default 1000003) <p>
    *
@@ -1259,6 +1388,12 @@ public class SMO extends Classifier implements OptionHandler {
     } else {
       m_exponent = 1.0;
     }
+    String gammaString = Utils.getOption('G', options);
+    if (gammaString.length() != 0) {
+      m_gamma = (new Double(gammaString)).doubleValue();
+    } else {
+      m_gamma = 0.01;
+    }
     String cacheString = Utils.getOption('A', options);
     if (cacheString.length() != 0) {
       m_cacheSize = Integer.parseInt(cacheString);
@@ -1277,12 +1412,19 @@ public class SMO extends Classifier implements OptionHandler {
     } else {
       m_eps = 1.0e-12;
     }
+    m_useRBF = Utils.getFlag('R', options);
     m_Normalize = !Utils.getFlag('N', options);
     m_rescale = Utils.getFlag('L', options);
+    if ((m_useRBF) && (m_rescale)) {
+      throw new Exception("Can't use rescaling with RBF machine.");
+    }
     if ((m_exponent == 1.0) && (m_rescale)) {
       throw new Exception("Can't use rescaling with linear machine.");
     }
     m_lowerOrder = Utils.getFlag('O', options);
+    if ((m_useRBF) && (m_lowerOrder)) {
+      throw new Exception("Can't use lower-order terms with RBF machine.");
+    }
     if ((m_exponent == 1.0) && (m_lowerOrder)) {
       throw new Exception("Can't use lower-order terms with linear machine.");
     }
@@ -1295,11 +1437,12 @@ public class SMO extends Classifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [13];
+    String [] options = new String [16];
     int current = 0;
 
     options[current++] = "-C"; options[current++] = "" + m_C;
     options[current++] = "-E"; options[current++] = "" + m_exponent;
+    options[current++] = "-G"; options[current++] = "" + m_gamma;
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
     options[current++] = "-T"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
@@ -1311,6 +1454,9 @@ public class SMO extends Classifier implements OptionHandler {
     }
     if (m_lowerOrder) {
       options[current++] = "-O";
+    }
+    if (m_useRBF) {
+      options[current++] = "-R";
     }
 
     while (current < options.length) {
@@ -1343,6 +1489,26 @@ public class SMO extends Classifier implements OptionHandler {
       m_lowerOrder = false;
     }
     m_exponent = v;
+  }
+  
+  /**
+   * Get the value of gamma. 
+   *
+   * @return Value of gamma.
+   */
+  public double getGamma() {
+    
+    return m_gamma;
+  }
+  
+  /**
+   * Set the value of gamma. 
+   *
+   * @param v  Value to assign to gamma.
+   */
+  public void setGamma(double v) {
+    
+    m_gamma = v;
   }
   
   /**
@@ -1438,6 +1604,28 @@ public class SMO extends Classifier implements OptionHandler {
   }
   
   /**
+   * Check if the RBF kernel is to be used.
+   * @return true if RBF
+   */
+  public boolean getUseRBF() {
+    
+    return m_useRBF;
+  }
+  
+  /**
+   * Set if the RBF kernel is to be used.
+   * @param v  true if RBF
+   */
+  public void setUseRBF(boolean v) {
+
+    if (v) {
+      m_rescale = false;
+      m_lowerOrder = false;
+    }
+    m_useRBF = v;
+  }
+  
+  /**
    * Check whether kernel is being rescaled.
    * @return Value of rescale.
    */
@@ -1453,7 +1641,7 @@ public class SMO extends Classifier implements OptionHandler {
    */
   public void setRescaleKernel(boolean v) throws Exception {
     
-    if (m_exponent == 1.0) {
+    if (m_exponent == 1.0 || m_useRBF) {
       m_rescale = false;
     } else {
       m_rescale = v;
@@ -1476,7 +1664,7 @@ public class SMO extends Classifier implements OptionHandler {
    */
   public void setLowerOrderTerms(boolean v) {
     
-    if (m_exponent == 1.0) {
+    if (m_exponent == 1.0 || m_useRBF) {
       m_lowerOrder = false;
     } else {
       m_lowerOrder = v;
@@ -1524,7 +1712,6 @@ public class SMO extends Classifier implements OptionHandler {
       scheme = new SMO();
       System.out.println(Evaluation.evaluateModel(scheme, argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
