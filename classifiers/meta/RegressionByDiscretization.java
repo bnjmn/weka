@@ -61,7 +61,7 @@ import weka.filters.Filter;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -132,6 +132,8 @@ public class RegressionByDiscretization extends Classifier
 	  System.out.println("              " + m_ClassMeans[i]);
 	  System.out.println("" + cutPoints[i]);
 	}
+      } else {
+	System.out.println("The class has been discretized into one interval.");
       }
       System.out.println("              " 
 			 + m_ClassMeans[m_ClassMeans.length - 1]);

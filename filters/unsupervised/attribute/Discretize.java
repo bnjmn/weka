@@ -30,7 +30,8 @@ import weka.core.*;
 
 /** 
  * An instance filter that discretizes a range of numeric attributes in 
- * the dataset into nominal attributes. Discretization is by simple binning.<p>
+ * the dataset into nominal attributes. Discretization is by simple binning.
+ * Skips the class attribute if set.<p>
  *
  * Valid filter-specific options are: <p>
  *
@@ -58,7 +59,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Discretize extends Filter 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
@@ -183,6 +184,7 @@ public class Discretize extends Filter
       setInputFormat(getInputFormat());
     }
   }
+
   /**
    * Gets the current settings of the filter.
    *
@@ -215,7 +217,6 @@ public class Discretize extends Filter
     return options;
   }
 
-
   /**
    * Sets the format of the input instances.
    *
@@ -241,8 +242,6 @@ public class Discretize extends Filter
     //them here and set the output format
     return false;
   }
-
-  
 
   /**
    * Input an instance for filtering. Ordinarily the instance is processed
@@ -272,7 +271,6 @@ public class Discretize extends Filter
     bufferInput(instance);
     return false;
   }
-
 
   /**
    * Signifies that this batch of input to the filter is finished. If the 
@@ -315,7 +313,8 @@ public class Discretize extends Filter
 
     return "An instance filter that discretizes a range of numeric"
       + " attributes in the dataset into nominal attributes."
-      + " Discretization is by simple binning.";
+      + " Discretization is by simple binning. Skips the class"
+      + " attribute if set.";
   }
   
   /**
@@ -524,7 +523,7 @@ public class Discretize extends Filter
    *
    * @param the index (from 0) of the attribute to get the cut points of
    * @return an array containing the cutpoints (or null if the
-   * attribute requested isn't being Discretized
+   * attribute requested has been discretized into only one interval.)
    */
   public double [] getCutPoints(int attributeIndex) {
 
@@ -542,7 +541,8 @@ public class Discretize extends Filter
     m_CutPoints = new double [getInputFormat().numAttributes()] [];
     for(int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
       if ((m_DiscretizeCols.isInRange(i)) && 
-	  (getInputFormat().attribute(i).isNumeric())) {
+	  (getInputFormat().attribute(i).isNumeric()) &&
+	  (getInputFormat().classIndex() != i)) {
 	if (m_FindNumBins) {
 	  findNumBins(i);
 	} else if (!m_UseEqualFrequency) {
@@ -739,7 +739,8 @@ public class Discretize extends Filter
     int classIndex = getInputFormat().classIndex();
     for(int i = 0; i < getInputFormat().numAttributes(); i++) {
       if ((m_DiscretizeCols.isInRange(i)) 
-	  && (getInputFormat().attribute(i).isNumeric())) {
+	  && (getInputFormat().attribute(i).isNumeric())
+	  && (getInputFormat().classIndex() != i)) {
 	if (!m_MakeBinary) {
 	  FastVector attribValues = new FastVector(1);
 	  if (m_CutPoints[i] == null) {
@@ -809,7 +810,8 @@ public class Discretize extends Filter
     // Copy and convert the values
     for(int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (m_DiscretizeCols.isInRange(i) && 
-	  getInputFormat().attribute(i).isNumeric()) {
+	  getInputFormat().attribute(i).isNumeric() &&
+	  (getInputFormat().classIndex() != i)) {
 	int j;
 	double currentVal = instance.value(i);
 	if (m_CutPoints[i] == null) {
