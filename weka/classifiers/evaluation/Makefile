@@ -1,6 +1,7 @@
 JAVAC = javac
 
-SOURCES = ThresholdCurve.java
+SOURCES = NominalPrediction.java TwoClassStats.java EvaluationUtils.java \
+	ThresholdCurve.java MarginCurve.java
 
 
 CLASSFILES = $(SOURCES:.java=.class)

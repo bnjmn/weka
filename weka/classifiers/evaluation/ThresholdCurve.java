@@ -1,144 +1,42 @@
+/*
+ *    ThresholdCurve.java
+ *    Copyright (C) 2000 Intelligenesis Corp.
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 package weka.classifiers.evaluation;
 
 import weka.core.Utils;
-import weka.core.FastVector;
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.classifiers.DistributionClassifier;
-import java.util.Random;
 
-
+/**
+ * Generates points illustrating prediction tradeoffs that can be obtained
+ * by varying the threshold value between classes. For example, the typical 
+ * threshold value of 0.5 means the predicted probability of "positive" must be
+ * higher than 0.5 for the instance to be predicted as "positive". The 
+ * resulting dataset can be used to visualize precision/recall tradeoff, or 
+ * for ROC curve analysis (true positive rate vs false positive rate).
+ *
+ * @author Len Trigg (len@intelligenesis.net)
+ * @version $Revision: 1.2 $
+ */
 public class ThresholdCurve {
-
-  /** Number of runs to average over */
-  private int m_Runs = 10;
-
-  /** The classifiert to analyze */
-  private DistributionClassifier m_Classifier;
-
-  /** The full predictions for each run */
-  private double [][][] m_Predictions;
-
-  /** The class values */
-  private int [][] m_Classes;
-
-  public class TwoClassStats {
-
-    double m_TruePos;
-    double m_FalsePos;
-    double m_TrueNeg;
-    double m_FalseNeg;
-
-    public TwoClassStats(double tp, double fp, double tn, double fn) {
-      
-      m_TruePos = tp; 
-      m_FalsePos = fp;
-      m_TrueNeg = tn; 
-      m_FalseNeg = fn;
-    }
-    public void setTruePos(double tp) { m_TruePos = tp; }
-    public void setFalsePos(double fp) { m_FalsePos = fp; }
-    public void setTrueNeg(double tn) { m_TrueNeg = tn; }
-    public void setFalseNeg(double fn) { m_FalseNeg = fn; }
-    public double getTruePos() { return m_TruePos; }
-    public double getFalsePos() { return m_FalsePos; }
-    public double getTrueNeg() { return m_TrueNeg; }
-    public double getFalseNeg() { return m_FalseNeg; }
-    public double getTruePosRate() { 
-      if (0 == (m_TruePos + m_FalseNeg)) {
-        return 0;
-      } else {
-        return m_TruePos / (m_TruePos + m_FalseNeg); 
-      }
-    }
-    public double getFalsePosRate() { 
-      if (0 == (m_FalsePos + m_TrueNeg)) {
-        return 0;
-      } else {
-        return m_FalsePos / (m_FalsePos + m_TrueNeg); 
-      }
-    }
-    public double getPrecision() { 
-      if (0 == (m_TruePos + m_FalsePos)) {
-        return 0;
-      } else {
-        return m_TruePos / (m_TruePos + m_FalsePos); 
-      }
-    }
-    public double getRecall() { return getTruePosRate(); }
-
-    public String toString() {
-      StringBuffer res = new StringBuffer();
-      res.append(getTruePos()).append(' ');
-      res.append(getFalseNeg()).append(' ');
-      res.append(getTrueNeg()).append(' ');
-      res.append(getFalsePos()).append(' ');
-      res.append(getFalsePosRate()).append(' ');
-      res.append(getTruePosRate()).append(' ');
-      res.append(getPrecision()).append(' ');
-      res.append(getRecall()).append(' ');
-      return res.toString();
-    }
-  }
-
-
-  /**
-   * Gets the Classifier.
-   *
-   * @return the classifier.
-   */
-  public DistributionClassifier getClassifier() {
-
-    return m_Classifier;
-  }
-  
-  /**
-   * Sets the Classifier (must have all options set).
-   *
-   * @param newClassifier the classifier to use during analysis.
-   */
-  public void setClassifier(DistributionClassifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-  
-  /**
-   * Generate all the predictions ready for processing by performing a
-   * cross-validation on the suuplied dataset.
-   *
-   * @param data the dataset
-   * @param numFolds the number of folds in the cross-validation.
-   * @exception Exception if an error occurs
-   */
-  public void process(Instances data, int numFolds) throws Exception {
-
-    if (!data.classAttribute().isNominal()) {
-      throw new Exception("Class must be nominal.");
-    }
-
-    Instances runInstances = new Instances(data);
-    Random random = new Random(1);
-    m_Predictions = new double [m_Runs][data.numInstances()][data.numClasses()];
-    m_Classes = new int [m_Runs][data.numInstances()];
-    for (int run = 0; run < m_Runs; run++) {
-      runInstances.randomize(random);
-      runInstances.stratify(numFolds);
-      int inst = 0;
-      for (int fold = 0; fold < numFolds; fold++) {
-	Instances train = runInstances.trainCV(numFolds, fold);
-	Instances test = runInstances.testCV(numFolds, fold);
-        
-        m_Classifier.buildClassifier(train);
-        for (int i = 0; i < test.numInstances(); i++) {
-          Instance curr = test.instance(i);
-          m_Predictions[run][inst] = m_Classifier.distributionForInstance(curr);
-          m_Classes[run][inst++] = (int) curr.classValue();
-        }
-      } 
-    }
-  }
-
 
   /**
    * Calculates the performance stats for the default class and return 
@@ -148,14 +46,14 @@ public class ThresholdCurve {
    * @return datapoints as a set of instances, null if no predictions
    * have been made.
    */
-  public Instances getCurve() {
+  public Instances getCurve(FastVector predictions) {
 
-    if ((m_Predictions == null) ||
-        (m_Predictions[0] == null) ||
-        (m_Predictions[0][0] == null)) {
+    if (predictions.size() == 0) {
       return null;
     }
-    return getCurve(m_Predictions[0][0].length - 1);
+    return getCurve(predictions, 
+                    ((NominalPrediction)predictions.elementAt(0))
+                    .distribution().length - 1);
   }
 
   /**
@@ -165,14 +63,61 @@ public class ThresholdCurve {
    * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances.
    */
-  public Instances getCurve(int classIndex) {
+  public Instances getCurve(FastVector predictions, int classIndex) {
 
-    if ((m_Predictions == null) ||
-        (m_Predictions[0] == null) ||
-        (m_Predictions[0][0] == null) ||
-        (m_Predictions[0][0].length <= classIndex)) {
+    if ((predictions.size() == 0) ||
+        (((NominalPrediction)predictions.elementAt(0))
+         .distribution().length <= classIndex)) {
       return null;
     }
+
+    Instances insts = makeHeader();
+    int totPos = 0, totNeg = 0;
+    double [] probs = getProbabilities(predictions, classIndex);
+    int [] sorted = Utils.sort(probs);
+
+    // Get distribution of positive/negatives
+    for (int i = 0; i < probs.length; i++) {
+      NominalPrediction pred = (NominalPrediction)predictions.elementAt(i);
+      if (pred.actual() == classIndex) {
+        totPos += pred.weight();
+      } else {
+        totNeg += pred.weight();
+      }
+    }
+
+    TwoClassStats tc = new TwoClassStats(totPos, totNeg, 0, 0);
+    for (int i = 0; i < sorted.length; i++) {
+      NominalPrediction pred = (NominalPrediction)predictions.elementAt(sorted[i]);
+      if (pred.actual() == classIndex) {
+        tc.setTruePositive(tc.getTruePositive() - pred.weight());
+        tc.setFalseNegative(tc.getFalseNegative() + pred.weight());
+      } else {
+        tc.setFalsePositive(tc.getFalsePositive() - pred.weight());
+        tc.setTrueNegative(tc.getTrueNegative() + pred.weight());
+      }
+      System.out.println(tc + " " + probs[sorted[i]] 
+                         + " " + (pred.actual() == classIndex));
+      if ((i == 0) || (i == (sorted.length - 1)) || 
+          (probs[sorted[i]] != probs[sorted[i - 1]])) {
+        insts.add(makeInstance(tc, probs[sorted[i]]));
+      }
+    }
+    return insts;
+  }
+
+  private double [] getProbabilities(FastVector predictions, int classIndex) {
+
+    // sort by predicted probability of the desired class.
+    double [] probs = new double [predictions.size()];
+    for (int i = 0; i < probs.length; i++) {
+      NominalPrediction pred = (NominalPrediction)predictions.elementAt(i);
+      probs[i] = pred.distribution()[classIndex];
+    }
+    return probs;
+  }
+
+  private Instances makeHeader() {
 
     FastVector fv = new FastVector();
     fv.addElement(new Attribute("True Positives"));
@@ -184,58 +129,31 @@ public class ThresholdCurve {
     fv.addElement(new Attribute("Precision"));
     fv.addElement(new Attribute("Recall"));
     fv.addElement(new Attribute("Threshold"));
-    Instances insts = new Instances("Threshold Curve", fv, 100);
-
-    int totPos = 0, totNeg = 0;
-    for (int run = 0; run < m_Runs; run++) {
-
-      // sort by predicted probability of the desired class.
-      double [] probs = new double [m_Predictions[run].length];
-      for (int i = 0; i < probs.length; i++) {
-        probs[i] = m_Predictions[run][i][classIndex];
-      }
-      int [] sorted = Utils.sort(probs);
-
-      if (run == 0) {   // Get class distribution
-        for (int i = 0; i < probs.length; i++) {
-          if (m_Classes[run][i] == classIndex) {
-            totPos++;
-          } else {
-            totNeg++;
-          }
-        }
-      }
-
-      TwoClassStats tc = new TwoClassStats(totPos, totNeg, 0, 0);
-      for (int i = 0; i < sorted.length; i++) {
-        if (m_Classes[run][sorted[i]] == classIndex) {
-          tc.setTruePos(tc.getTruePos() - 1);
-          tc.setFalseNeg(tc.getFalseNeg() + 1);
-        } else {
-          tc.setFalsePos(tc.getFalsePos() - 1);
-          tc.setTrueNeg(tc.getTrueNeg() + 1);
-        }
-        if ((i == 0) || (i == (sorted.length - 1)) || 
-            (probs[sorted[i]] != probs[sorted[i - 1]])) {
-          //System.out.println(tc + " " + probs[sorted[i]]);
-          int count = 0;
-          double [] vals = new double[9];
-          vals[count++] = tc.getTruePos();
-          vals[count++] = tc.getFalseNeg();
-          vals[count++] = tc.getFalsePos();
-          vals[count++] = tc.getTrueNeg();
-          vals[count++] = tc.getFalsePosRate();
-          vals[count++] = tc.getTruePosRate();
-          vals[count++] = tc.getPrecision();
-          vals[count++] = tc.getRecall();
-          vals[count++] = probs[sorted[i]];
-          insts.add(new Instance(1.0, vals));
-        }
-      }
-    }
-    return insts;
+    return new Instances("Threshold Curve", fv, 100);
   }
+  
+  private Instance makeInstance(TwoClassStats tc, double prob) {
 
+    int count = 0;
+    double [] vals = new double[9];
+    vals[count++] = tc.getTruePositive();
+    vals[count++] = tc.getFalseNegative();
+    vals[count++] = tc.getFalsePositive();
+    vals[count++] = tc.getTrueNegative();
+    vals[count++] = tc.getFalsePositiveRate();
+    vals[count++] = tc.getTruePositiveRate();
+    vals[count++] = tc.getPrecision();
+    vals[count++] = tc.getRecall();
+    vals[count++] = prob;
+    return new Instance(1.0, vals);
+  }
+  
+  /**
+   * Tests the ThresholdCurve generation from the command line.
+   * The classifier is currently hardcoded. Pipe in an arff file.
+   *
+   * @param args currently ignored
+   */
   public static void main(String [] args) {
 
     try {
@@ -243,10 +161,16 @@ public class ThresholdCurve {
       Instances inst = new Instances(new java.io.InputStreamReader(System.in));
       inst.setClassIndex(inst.numAttributes() - 1);
       ThresholdCurve tc = new ThresholdCurve();
-      tc.setClassifier(new weka.classifiers.SMO());
-      tc.process(inst, 10);
-      Instances result = tc.getCurve();
-      System.out.println(result);
+      EvaluationUtils eu = new EvaluationUtils();
+      DistributionClassifier classifier = new weka.classifiers.SMO();
+      FastVector predictions = new FastVector();
+      for (int i = 0; i < 2; i++) {
+        eu.setSeed(i);
+        predictions.appendElements(eu.getCVPredictions(classifier, inst, 10));
+        Instances result = tc.getCurve(predictions);
+        System.out.println("\n\n\n");
+        //System.out.println(result);
+      }
     } catch (Exception ex) {
       ex.printStackTrace();
     }
