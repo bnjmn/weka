@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -144,40 +144,30 @@ public class SimpleKMeans extends Clusterer
     for (int i = 0; i < instances.numInstances(); i++) {
       updateMinMax(instances.instance(i));
     }
-
-    Instances tempInst = new Instances(instances);
+    
     Random RandomO = new Random(m_Seed);
     int instIndex;
     HashMap initC = new HashMap();
     DecisionTable.hashKey hk = null;
-    boolean centroidSearchBailOut = false;
-    int i;
-    int centroidCount = 0;
-    for (i = 0; i < m_NumClusters; i++) {
-      do {
-	instIndex = RandomO.nextInt(tempInst.numInstances());
-	hk = new DecisionTable.hashKey(tempInst.instance(instIndex), 
-				       tempInst.numAttributes());
-	if (initC.containsKey(hk)) {
-	  centroidCount++;
-	}
-      } while (initC.containsKey(hk) && 
-	       centroidCount < instances.numInstances());
 
-      if (centroidCount >= instances.numInstances()) {
-	// bail out and set the number of requested clusters to i
-	centroidSearchBailOut = true;
+    for (int j = instances.numInstances() - 1; j > 0; j--) {
+      instIndex = RandomO.nextInt(j+1);
+      hk = new DecisionTable.hashKey(instances.instance(instIndex), 
+				     instances.numAttributes());
+      if (!initC.containsKey(hk)) {
+	m_ClusterCentroids.add(instances.instance(instIndex));
+	initC.put(hk, null);
+      }
+      instances.swap(j, instIndex);
+      
+      if (m_ClusterCentroids.numInstances() == m_NumClusters) {
 	break;
       }
-      m_ClusterCentroids.add(tempInst.instance(instIndex));
-      initC.put(hk, null);
-      centroidCount++;
     }
-    if (centroidSearchBailOut) {
-      m_NumClusters = i;
-    }
-    tempInst = null;
 
+    m_NumClusters = m_ClusterCentroids.numInstances();
+    
+    int i;
     boolean converged = false;
     int emptyClusterCount;
     Instances [] tempI = new Instances[m_NumClusters];
