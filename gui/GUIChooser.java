@@ -48,7 +48,7 @@ import javax.swing.BorderFactory;;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class GUIChooser extends Frame {
 
@@ -94,6 +94,9 @@ public class GUIChooser extends Frame {
       add(m_SimpleBut);
       add(new Label("Swing is not installed"));
     } else {
+      Image icon = Toolkit.getDefaultToolkit().
+	getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
+      setIconImage(icon);
       setLayout(new BorderLayout());
       JPanel wbuts = new JPanel();
       wbuts.setBorder(BorderFactory.createTitledBorder("GUI"));
