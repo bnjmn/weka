@@ -45,7 +45,7 @@ import weka.filters.AttributeFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SVMAttributeEval 
   extends AttributeEvaluator 
@@ -127,7 +127,7 @@ public class SVMAttributeEval
     
     optionString = Utils.getOption('P', options);
     if (optionString.length() != 0) {
-      setSVMComplexityParameter((new Double(optionString)).doubleValue());
+      setComplexityParameter((new Double(optionString)).doubleValue());
     }
 
     Utils.checkForRemainingOptions(options);
@@ -146,7 +146,7 @@ public class SVMAttributeEval
     options[current++] = ""+getAttsToEliminatePerIteration();
     
     options[current++] = "-P"; 
-    options[current++] = ""+getSVMComplexityParameter();
+    options[current++] = ""+getComplexityParameter();
 
     while (current < options.length) {
       options[current++] = "";
@@ -161,7 +161,7 @@ public class SVMAttributeEval
    *
    * @return tip text string describing this property
    */
-  public String svmComplexityParameterTipText() {
+  public String complexityParameterTipText() {
     return "C complexity parameter to pass to the SVM";
   }
 
@@ -170,7 +170,7 @@ public class SVMAttributeEval
    *
    * @param svmC the value of C
    */
-  public void setSVMComplexityParameter(double svmC) {
+  public void setComplexityParameter(double svmC) {
     m_smoCParameter = svmC;
   }
 
@@ -179,7 +179,7 @@ public class SVMAttributeEval
    *
    * @return the value of C
    */
-  public double getSVMComplexityParameter() {
+  public double getComplexityParameter() {
     return m_smoCParameter;
   }
 
