@@ -88,7 +88,7 @@ import weka.core.WeightedInstancesHandler;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -1095,7 +1095,7 @@ public class IBk extends DistributionClassifier implements
    * @param instance the instance to search for neighbours of
    * @return a list of neighbours
    */
-  private NeighbourList findNeighbours(Instance instance) {
+  private NeighbourList findNeighbours(Instance instance) throws Exception {
 
     double distance;
     NeighbourList neighbourlist = new NeighbourList(m_kNN);
