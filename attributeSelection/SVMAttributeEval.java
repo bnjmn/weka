@@ -66,7 +66,7 @@ import weka.attributeSelection.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {
@@ -622,9 +622,8 @@ public class SVMAttributeEval extends AttributeEvaluator
 	smo.buildClassifier(trainCopy);
 				
 	// Find the attribute with maximum weight^2
-	FastVector weightsAndIndices = smo.weights();
-	double[] weightsSparse = (double[]) weightsAndIndices.elementAt(0);
-	int[] indicesSparse = (int[]) weightsAndIndices.elementAt(1);
+	double[] weightsSparse = smo.sparseWeights()[0][1];
+	int[] indicesSparse = smo.sparseIndices()[0][1];
 	double[] weights = new double[trainCopy.numAttributes()];
 	for (int j = 0; j < weightsSparse.length; j++) {
 	  weights[indicesSparse[j]] = weightsSparse[j] * weightsSparse[j];

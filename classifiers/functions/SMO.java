@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.47 $ */
+ * @version $Revision: 1.48 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -1682,27 +1682,6 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       }
     }
     return attributeNames;
-  }
-  
-  /**
-   * Returns the coefficients in sparse format.  Throws an exception
-   * if there is more than one machine or if the machine is not
-   * linear.  
-   */
-  public FastVector weights() throws Exception {
-    
-    if (m_classifiers.length > 2) {
-      throw new Exception("More than one machine has been built.");
-    }
-    if (m_classifiers[0][1].m_sparseWeights == null) {
-      throw new Exception("No weight vector available.");
-    }
-    
-    FastVector vec = new FastVector(2);
-    vec.addElement(m_classifiers[0][1].m_sparseWeights);
-    vec.addElement(m_classifiers[0][1].m_sparseIndices);
-    
-    return vec;
   }
   
   /**
