@@ -64,7 +64,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
@@ -474,15 +474,18 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     // Filter instance
     m_Missing.input(inst);
     inst = m_Missing.output();
+    m_Missing.batchFinished();
     
     if (!m_dontNormalize) {
       m_Normalization.input(inst);
       inst = m_Normalization.output();
+      m_Normalization.batchFinished();
     }
 
     if (!m_onlyNumeric) {
       m_NominalToBinary.input(inst);
       inst = m_NominalToBinary.output();
+      m_NominalToBinary.batchFinished();
     }
 
     // Get probabilities

@@ -57,7 +57,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -157,6 +157,8 @@ public class ThresholdSelector extends DistributionClassifier
   protected void findThreshold(FastVector predictions) throws Exception {
 
     Instances curve = (new ThresholdCurve()).getCurve(predictions, m_DesignatedClass);
+
+    //System.err.println(curve);
     
     m_BestThreshold = 0.5;
     m_BestValue = MIN_VALUE;
@@ -173,6 +175,7 @@ public class ThresholdSelector extends DistributionClassifier
       if (maxFM.value(indexFM) > MIN_VALUE) {
         m_BestThreshold = maxFM.value(indexThreshold);
         m_BestValue = maxFM.value(indexFM);
+        //System.err.println("maxFM: " + maxFM);
       }
     }
   }
@@ -400,6 +403,14 @@ public class ThresholdSelector extends DistributionClassifier
     default:
       throw new Exception("Unrecognized class value selection mode");
     }
+
+    /*
+    System.err.println("ThresholdSelector: Using mode=" 
+                       + TAGS_OPTIMIZE[m_ClassMode].getReadable());
+    System.err.println("ThresholdSelector: Optimizing using class "
+                       + m_DesignatedClass + "/" 
+                       + instances.classAttribute().value(m_DesignatedClass));
+    */
 
     // If data contains only one instance of positive data
     // optimize on training data
