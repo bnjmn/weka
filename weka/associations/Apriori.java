@@ -55,8 +55,8 @@ import weka.core.*;
  * If set the itemsets found are also output (default = no). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
-public class Apriori implements OptionHandler {
+ * @version $Revision: 1.4 $ */
+public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
   private double m_minSupport;
