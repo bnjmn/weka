@@ -52,7 +52,7 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -89,17 +89,7 @@ public class RegressionByDiscretization extends Classifier
     if (m_Classifier instanceof WeightedInstancesHandler) {
       instances = new Instances(instances);
     } else {
-      double[] weights = new double[instances.numInstances()];
-      boolean foundOne = false;
-      for (int i = 0; i < weights.length; i++) {
-	weights[i] = instances.instance(i).weight();
-	if (!Utils.eq(weights[i], weights[0])) {
-	  foundOne = true;
-	}
-      }
-      if (foundOne) {
-	instances = instances.resampleWithWeights(new Random(42), weights);
-      }
+      instances = instances.resampleWithWeights(new Random(42));
     }
     instances.deleteWithMissingClass();
 
