@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -353,6 +353,25 @@ public class Attribute implements Copyable, Serializable {
 
     freshAttributeValues();
     m_Values.addElement(value);
+  }
+
+  /**
+   * Produces a shallow copy of this attribute with a new name.
+   *
+   * @param newName the name of the new attribute
+   * @return a copy of this attribute with the same index
+   */
+  final Attribute copy(String newName) {
+
+    Attribute copy = new Attribute(newName);
+
+    copy.m_Index = m_Index;
+    if (!isNominal() && !isString())
+      return copy;
+    copy.m_Type = m_Type;
+    copy.m_Values = m_Values;
+ 
+    return copy;
   }
 
   /**
