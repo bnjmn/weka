@@ -31,15 +31,17 @@ import weka.classifiers.functions.Logistic;
 import weka.classifiers.functions.LinearRegression;
 import weka.filters.unsupervised.attribute.ClusterMembership;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Standardize;
 import weka.clusterers.SimpleKMeans;
 import weka.clusterers.MakeDensityBasedClusterer;
 
 /**
- * Class that implements a radial basis function network. 
- * It uses the K-Means clustering algorithm to provide the basis
- * functions and learns either a logistic regression (discrete
- * class problems) or linear regression (numeric class problems)
- * on top of that. <p>
+ * Class that implements a normalized Gaussian radial basis function
+ * network.  It uses the K-Means clustering algorithm to provide the
+ * basis functions and learns either a logistic regression (discrete
+ * class problems) or linear regression (numeric class problems) on
+ * top of that. Standardizes all numeric attributes to zero mean
+ * and unit variance. <p>
  *
  * Valid options are:<p>
  *
@@ -57,8 +59,13 @@ import weka.clusterers.MakeDensityBasedClusterer;
  * Set the random seed used by K-means when generating clusters. 
  * (default 1). <p>
  *
+ * -W num <br>
+ * Set the minimum standard deviation for the clusters.
+ * (default 0.1). <p>
+  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @author Eibe Frank
+ * @version $Revision: 1.3 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
@@ -70,6 +77,9 @@ public class RBFNetwork extends Classifier implements OptionHandler {
 
   /** The filter for producing the meta data */
   private ClusterMembership m_basisFilter;
+
+  /** Filter used for normalizing the data */
+  private Standardize m_standardize;
 
   /** The number of clusters (basis functions to generate) */
   private int m_numClusters = 2;
@@ -83,6 +93,9 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   /** The seed to pass on to K-means */
   private int m_clusteringSeed = 1;
 
+  /** The minimum standard deviation */
+  private double m_minStdDev = 0.1;
+
   /**
    * Returns a string describing this classifier
    * @return a description of the classifier suitable for
@@ -90,10 +103,12 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    */
   public String globalInfo() {
     return "Class that implements a radial basis function network. "
-      +"It uses the K-Means clustering algorithm to provide the basis "
-      +"functions and learns either a logistic regression (discrete "
-      +"class problems) or linear regression (numeric class problems) "
-      +"on top of that.";
+      + "It uses the K-Means clustering algorithm to provide the basis "
+      + "functions and learns either a logistic regression (discrete "
+      + "class problems) or linear regression (numeric class problems) "
+      + "on top of that. Standardizes all numeric attributes to zero "
+      + "mean and unit variance. If the class is nominal it uses "
+      + "the given number of clusters per class.";
   }
 
   /**
@@ -110,11 +125,16 @@ public class RBFNetwork extends Classifier implements OptionHandler {
       throw new Exception("No training instances without a missing class!");
     }
     
+    m_standardize = new Standardize();
+    m_standardize.setInputFormat(instances);
+    instances = Filter.useFilter(instances, m_standardize);
+
     SimpleKMeans sk = new SimpleKMeans();
     sk.setNumClusters(m_numClusters);
     sk.setSeed(m_clusteringSeed);
     MakeDensityBasedClusterer dc = new MakeDensityBasedClusterer();
     dc.setClusterer(sk);
+    dc.setMinStdDev(m_minStdDev);
     m_basisFilter = new ClusterMembership();
     m_basisFilter.setDensityBasedClusterer(dc);
     m_basisFilter.setInputFormat(instances);
@@ -129,6 +149,8 @@ public class RBFNetwork extends Classifier implements OptionHandler {
     } else {
       m_logistic = null;
       m_linear = new LinearRegression();
+      m_linear.setAttributeSelectionMethod(new SelectedTag(LinearRegression.SELECTION_NONE,
+							   LinearRegression.TAGS_SELECTION));
       m_linear.setRidge(m_ridge);
       m_linear.buildClassifier(transformed);
     }
@@ -143,7 +165,9 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    */
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
-    m_basisFilter.input(instance);
+
+    m_standardize.input(instance);
+    m_basisFilter.input(m_standardize.output());
     Instance transformed = m_basisFilter.output();
     
     return ((instance.classAttribute().isNominal()
@@ -288,6 +312,32 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minStdDevTipText() {
+    return "Sets the minimum standard deviation for the clusters.";
+  }
+
+  /**
+   * Get the MinStdDev value.
+   * @return the MinStdDev value.
+   */
+  public double getMinStdDev() {
+    return m_minStdDev;
+  }
+
+  /**
+   * Set the MinStdDev value.
+   * @param newMinStdDev The new MinStdDev value.
+   */
+  public void setMinStdDev(double newMinStdDev) {
+    m_minStdDev = newMinStdDev;
+  }
+
+  
+  /**
    * Returns an enumeration describing the available options
    *
    * @return an enumeration of all the available options
@@ -308,6 +358,10 @@ public class RBFNetwork extends Classifier implements OptionHandler {
 				    +"for the logistic regression."
 				    + " (default -1, until convergence).",
 				    "M", 1, "-M <number>"));
+    newVector.addElement(new Option("\tSet the minimum standard "
+				    +"deviation for the clusters."
+				    + " (default 0.1).",
+				    "W", 1, "-W <number>"));
     return newVector.elements();
   }
 
@@ -327,6 +381,10 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    * -S seed <br>
    * Set the random seed used by K-means when generating clusters. 
    * (default 1). <p>
+   *
+   * -W num <br>
+   * Set the minimum standard deviation for the clusters.
+   * (default 0.1). <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -357,6 +415,10 @@ public class RBFNetwork extends Classifier implements OptionHandler {
     if (seedString.length() != 0) {
       setClusteringSeed(Integer.parseInt(seedString));
     }
+    String stdString = Utils.getOption('W', options);
+    if (stdString.length() != 0) {
+      setMinStdDev(Double.parseDouble(stdString));
+    }
     Utils.checkForRemainingOptions(options);
   }
 
@@ -367,7 +429,7 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    */
   public String [] getOptions() {
 	
-    String [] options = new String [8];
+    String [] options = new String [10];
     int current = 0;
     
     options[current++] = "-B";
@@ -378,6 +440,8 @@ public class RBFNetwork extends Classifier implements OptionHandler {
     options[current++] = ""+m_ridge;	
     options[current++] = "-M";
     options[current++] = ""+m_maxIts;
+    options[current++] = "-W";
+    options[current++] = ""+m_minStdDev;
 
     while (current < options.length) 
       options[current++] = "";
