@@ -63,6 +63,14 @@ weka.core.converters.Loader=\
 weka.core.converters.Saver=\
  weka.core.converters
 
+# Lists the search algorithms for nearest neighbour search
+weka.core.NearestNeighbourSearch =\
+ weka.core
+
+# Lists the distance functions for use nearest neighbour search
+weka.core.DistanceFunction =\
+ weka.core 
+
 # Lists the Search algorithm for Bayes net structure learning-Packages I want to choose from
 weka.classifiers.bayes.net.search.SearchAlgorithm=\
  weka.classifiers.bayes.net.search.local, \
