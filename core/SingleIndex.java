@@ -39,7 +39,7 @@ import java.util.*;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SingleIndex implements Serializable {
 
@@ -58,7 +58,6 @@ public class SingleIndex implements Serializable {
    *
    */
   //@ assignable m_IndexString, m_SelectedIndex, m_Upper;
-  //@ ensures m_IndexString.equals("");
   //@ ensures m_SelectedIndex == -1;
   //@ ensures m_Upper == -1;
   public SingleIndex() {
@@ -84,7 +83,6 @@ public class SingleIndex implements Serializable {
    *
    * @param newUpper the value of "last"
    */
-  //@ requires ! m_IndexString.equals("");
   //@ assignable m_Upper, m_IndexString, m_SelectedIndex;
   //@ ensures newUpper < 0 ==> m_Upper == \old(m_Upper);
   //@ ensures newUpper >= 0 ==> m_Upper == newUpper;
@@ -148,7 +146,6 @@ public class SingleIndex implements Serializable {
    * @return the selected index
    * @exception RuntimeException if the upper limit of the index hasn't been defined
    */
-  //@ requires ! m_IndexString.equals("");
   //@ requires m_Upper >= 0;
   public /*@pure@*/ int getIndex() {
 
@@ -180,7 +177,6 @@ public class SingleIndex implements Serializable {
    * @param single the string representing the selection (eg: 1 first last)
    * @return the number corresponding to the selected value
    */
-  //@ requires ! m_IndexString.equals("");
   //@ assignable m_SelectedIndex, m_IndexString;
   protected void setValue() {
 
