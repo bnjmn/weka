@@ -50,7 +50,7 @@ import weka.core.*;
  * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NumericTransform extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -84,7 +84,7 @@ public class NumericTransform extends Filter
    */
   public NumericTransform() {
 
-    m_Class = "Math";
+    m_Class = "java.lang.Math";
     m_Method = "abs";
   }
 
@@ -225,8 +225,14 @@ public class NumericTransform extends Filter
     
     setAttributeIndices(Utils.getOption('R', options));
     setInvertSelection(Utils.getFlag('V', options));
-    setClassName(Utils.getOption('C', options));
-    setMethodName(Utils.getOption('M', options));
+    String classString = Utils.getOption('C', options);
+    if (classString.length() != 0) {
+      setClassName(classString);
+    }
+    String methodString = Utils.getOption('M', options);
+    if (methodString.length() != 0) {
+      setMethodName(methodString);
+    }
 
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
