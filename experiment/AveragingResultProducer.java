@@ -35,7 +35,7 @@ import weka.core.Option;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler {
@@ -102,6 +102,47 @@ public class AveragingResultProducer
   }
   
   /**
+   * Gets the keys for a specified run number. Different run
+   * numbers correspond to different randomizations of the data. Keys
+   * produced should be sent to the current ResultListener
+   *
+   * @param run the run number to get keys for.
+   * @exception Exception if a problem occurs while getting the keys
+   */
+  public void doRunKeys(int run) throws Exception {
+    if (m_Instances == null) {
+      throw new Exception("No Instances set");
+    }
+    m_ResultProducer.setInstances(m_Instances);
+
+    // Clear the collected results
+    m_Keys.removeAllElements();
+    m_Results.removeAllElements();
+    
+    m_ResultProducer.doRunKeys(run);
+
+    // Average the results collected
+    //System.err.println("Number of results collected: " + m_Keys.size());
+
+    // Check that the keys only differ on the selected key field
+    checkForMultipleDifferences();
+
+    Object [] template = (Object [])((Object [])m_Keys.elementAt(0)).clone();
+    template[m_KeyIndex] = null;
+    // Check for duplicate keys
+    checkForDuplicateKeys(template);
+
+    // Generate the
+    String [] newKey = new String [template.length - 1];
+    System.arraycopy(template, 0, newKey, 0, m_KeyIndex);
+    System.arraycopy(template, m_KeyIndex + 1,
+		     newKey, m_KeyIndex,
+		     template.length - m_KeyIndex - 1);
+
+    m_ResultListener.acceptResult(this, newKey, null);      
+  }
+
+  /**
    * Gets the results for a specified run number. Different run
    * numbers correspond to different randomizations of the data. Results
    * produced should be sent to the current ResultListener
@@ -120,25 +161,40 @@ public class AveragingResultProducer
     m_Keys.removeAllElements();
     m_Results.removeAllElements();
     
-    //    System.err.println("Starting run " + run);
-    // Collect all the results
-    // Should be smarter -- first doing a run collecting only the keys
-    // from isResultRequired(), then determining if the average is required,
-    // then getting the actual results.
-    m_ResultProducer.doRun(run);
-
-    // Average the results collected
-    //System.err.println("Number of results collected: " + m_Keys.size());
-
-    // Check that the keys only differ on the selected key field
+    m_ResultProducer.doRunKeys(run);
     checkForMultipleDifferences();
 
     Object [] template = (Object [])((Object [])m_Keys.elementAt(0)).clone();
     template[m_KeyIndex] = null;
     // Check for duplicate keys
     checkForDuplicateKeys(template);
-    // Calculate the average and submit it if necessary
-    doAverageResult(template);
+    // Generate the key and ask whether the result is required
+    String [] newKey = new String [template.length - 1];
+    System.arraycopy(template, 0, newKey, 0, m_KeyIndex);
+    System.arraycopy(template, m_KeyIndex + 1,
+		     newKey, m_KeyIndex,
+		     template.length - m_KeyIndex - 1);
+
+    if (m_ResultListener.isResultRequired(this, newKey)) {
+      // Clear the collected keys
+      m_Keys.removeAllElements();
+      m_Results.removeAllElements();
+      
+      m_ResultProducer.doRun(run);
+      
+      // Average the results collected
+      //System.err.println("Number of results collected: " + m_Keys.size());
+      
+      // Check that the keys only differ on the selected key field
+      checkForMultipleDifferences();
+      
+      template = (Object [])((Object [])m_Keys.elementAt(0)).clone();
+      template[m_KeyIndex] = null;
+      // Check for duplicate keys
+      checkForDuplicateKeys(template);
+      // Calculate the average and submit it if necessary
+      doAverageResult(template);
+    }
   }
 
   

@@ -35,7 +35,7 @@ import java.io.Serializable;
 * </ul>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public interface ResultProducer extends Serializable {
@@ -83,6 +83,16 @@ public interface ResultProducer extends Serializable {
    * @exception Exception if a problem occurs while getting the results
    */
   public void doRun(int run) throws Exception;
+  
+  /**
+   * Gets the keys for a specified run number. Different run
+   * numbers correspond to different randomizations of the data. Keys
+   * produced should be sent to the current ResultListener
+   *
+   * @param run the run number to get keys for.
+   * @exception Exception if a problem occurs while getting the keys
+   */
+  public void doRunKeys(int run) throws Exception;
 
   /**
    * Gets the names of each of the key columns produced for a single run.

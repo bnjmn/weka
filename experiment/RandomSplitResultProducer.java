@@ -36,7 +36,7 @@ import java.util.Vector;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class RandomSplitResultProducer 
@@ -127,7 +127,35 @@ public class RandomSplitResultProducer
 
     m_ResultListener.postProcess(this);
   }
-  
+
+  /**
+   * Gets the keys for a specified run number. Different run
+   * numbers correspond to different randomizations of the data. Keys
+   * produced should be sent to the current ResultListener
+   *
+   * @param run the run number to get keys for.
+   * @exception Exception if a problem occurs while getting the keys
+   */
+  public void doRunKeys(int run) throws Exception {
+    if (m_Instances == null) {
+      throw new Exception("No Instances set");
+    }
+    // Add in some fields to the key like run number, dataset name
+    Object [] seKey = m_SplitEvaluator.getKey();
+    Object [] key = new Object [seKey.length + 2];
+    key[0] = m_Instances.relationName();
+    key[1] = "" + run;
+    System.arraycopy(seKey, 0, key, 2, seKey.length);
+    if (m_ResultListener.isResultRequired(this, key)) {
+      try {
+	m_ResultListener.acceptResult(this, key, null);
+      } catch (Exception ex) {
+	// Save the train and test datasets for debugging purposes?
+	throw ex;
+      }
+    }
+  }
+
   /**
    * Gets the results for a specified run number. Different run
    * numbers correspond to different randomizations of the data. Results
