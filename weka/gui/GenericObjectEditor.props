@@ -117,7 +117,8 @@ weka.filters.Filter = \
  weka.filters.TimeSeriesDeltaFilter, \
  weka.filters.TimeSeriesTranslateFilter, \
  weka.filters.NonSparseToSparseFilter, \
- weka.filters.NumericToBinaryFilter
+ weka.filters.NumericToBinaryFilter, \
+ weka.filters.AttributeExpressionFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
