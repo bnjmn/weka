@@ -57,7 +57,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   
@@ -381,12 +381,25 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
    */
   private double innerProduct(Instance i1, Instance i2) throws Exception {
 
+    // we can do a fast dot product
     double result = 0;
-    for (int j = 0; j < i1.numAttributes(); j++) {
-      if (j != i1.classIndex()) {
-	result += (i1.value(j) * i2.value(j));
-      }
-    }    
+    int n1 = i1.numValues(); int n2 = i2.numValues();
+    int classIndex = m_Train.classIndex();
+    for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
+        int ind1 = i1.index(p1);
+        int ind2 = i2.index(p2);
+        if (ind1 == ind2) {
+            if (ind1 != classIndex) {
+                result += i1.valueSparse(p1) *
+                          i2.valueSparse(p2);
+            }
+            p1++; p2++;
+        } else if (ind1 > ind2) {
+            p2++;
+        } else {
+            p1++;
+        }
+    }
     result += 1.0;
     
     if (m_Exponent != 1) {
