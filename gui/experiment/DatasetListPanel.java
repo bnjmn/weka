@@ -54,7 +54,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -134,6 +134,9 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     m_Exp = exp;
     m_AddBut.setEnabled(true);
     m_List.setModel(m_Exp.getDatasets());
+    if (m_Exp.getDatasets().size() > 0) {
+      m_DeleteBut.setEnabled(true);
+    }
   }
   
   /**
@@ -162,11 +165,13 @@ public class DatasetListPanel extends JPanel implements ActionListener {
       // Delete the selected files
       int [] selected = m_List.getSelectedIndices();
       if (selected != null) {
-	for (int i = 0; i < selected.length; i++) {
+	for (int i = selected.length - 1; i >= 0; i--) {
 	  int current = selected[i];
 	  m_Exp.getDatasets().removeElementAt(current);
 	  if (m_Exp.getDatasets().size() > current) {
 	    m_List.setSelectedIndex(current);
+	  } else {
+	    m_List.setSelectedIndex(current - 1);
 	  }
 	}
       }
