@@ -9,21 +9,21 @@
 humpty ,g , 1.0 ,the   ,a ,-2.3
 dumpty ,b , 2.0 ,quick ,b ,-3.3
 sat    ,r , 3.0 ,brown ,c ,-2.4
-on     ,g , 4.0 ,fox   ,d ,-5.3
+on     ,r , 4.0 ,fox   ,d ,-5.3
 a      ,b , 5.0 ,jumped,a ,-2.6
 wall   ,r , 6.0 ,over  ,b ,-7.3
-humpty ,g , 7.0 ,the   ,c ,-2.8
-dumpty ,b , 8.0 ,lazy  ,d ,-9.3
-had    ,r , 9.0 ,dog   ,? ,-2.0
+humpty ,r , 7.0 ,the   ,c ,-2.8
+dumpty ,g , 8.0 ,lazy  ,d ,-9.3
+had    ,b , 9.0 ,dog   ,? ,-2.0
 a      ,r , 9.4 ,?     ,? ,-9.0
-great  ,g , 1.4 ,the   ,a ,-8.3
+great  ,r , 1.4 ,the   ,a ,-8.3
 fall   ,b , 2.3 ,quick ,b ,-7.3
 all    ,r , 3.3 ,brown ,c ,?
-the    ,g , 4.3 ,fox   ,d ,-5.3
-kings  ,b , 5.3 ,jumped,? ,-5.6
-horses ,r , 6.5 ,over  ,b ,-4.3
-and    ,g , 7.5 ,the   ,c ,-3.8
-all    ,b , 8.5 ,lazy  ,d ,-2.3
+the    ,r , 4.3 ,fox   ,d ,-5.3
+kings  ,g , 5.3 ,jumped,? ,-5.6
+horses ,b , 6.5 ,over  ,b ,-4.3
+and    ,r , 7.5 ,the   ,c ,-3.8
+all    ,r , 8.5 ,lazy  ,d ,-2.3
 the    ,r , 9.4 ,?     ,a ,-1.0
 {0 wall, 2 4.3, 4 d}
 {1 b, 3 lazy, 5 3.4}
