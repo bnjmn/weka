@@ -52,10 +52,10 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class LogitBoost extends DistributionClassifier 
-  implements OptionHandler {
+  implements OptionHandler, Sourcable {
 
   // To maintain the same version number after adding m_ClassAttribute
   static final long serialVersionUID = -217733168393629381L;
@@ -142,7 +142,7 @@ public class LogitBoost extends DistributionClassifier
    * @param j the class value of interest
    * @return the probability prediction for j
    */
-  protected double RtoP(double []R, int j) {
+  protected static double RtoP(double []R, int j) {
 
     double Rcenter = 0;
     for (int i = 0; i < R.length; i++) {
@@ -526,6 +526,70 @@ public class LogitBoost extends DistributionClassifier
     }
     Utils.normalize(distribution);
     return distribution;
+  }
+
+  /**
+   * Returns the boosted model as Java source code.
+   *
+   * @return the tree as Java source code
+   * @exception Exception if something goes wrong
+   */
+  public String toSource(String className) throws Exception {
+
+    if (m_NumIterations == 0) {
+      throw new Exception("No model built yet");
+    }
+    if (!(m_Classifiers[0][0] instanceof Sourcable)) {
+      throw new Exception("Base learner " + m_Classifier.getClass().getName()
+			  + " is not Sourcable");
+    }
+
+    StringBuffer text = new StringBuffer("class ");
+    text.append(className).append(" {\n\n");
+    text.append("  private static double RtoP(double []R, int j) {\n"+
+		"    double Rcenter = 0;\n"+
+		"    for (int i = 0; i < R.length; i++) {\n"+
+		"      Rcenter += R[i];\n"+
+		"    }\n"+
+		"    Rcenter /= R.length;\n"+
+		"    double Rsum = 0;\n"+
+		"    for (int i = 0; i < R.length; i++) {\n"+
+		"      Rsum += Math.exp(R[i] - Rcenter);\n"+
+		"    }\n"+
+		"    return Math.exp(R[j]) / Rsum;\n"+
+		"  }\n\n");
+
+    text.append("  public static double classify(Object [] i) {\n");
+    text.append("    double [] Fs = new double [" + m_NumClasses + "];\n");
+    text.append("    double [] Fi = new double [" + m_NumClasses + "];\n");
+    text.append("    double Fsum;\n");
+    for (int i = 0; i < m_NumIterations; i++) {
+      text.append("    Fsum = 0;\n");
+      for (int j = 0; j < m_NumClasses; j++) {
+	text.append("    Fi[" + j + "] = " + className + '_' +j + '_' + i 
+		    + ".classify(i); Fsum += Fi[" + j + "];\n");
+      }
+      text.append("    Fsum /= " + m_NumClasses + ";\n");
+      text.append("    for (int j = 0; j < " + m_NumClasses + "; j++) {");
+      text.append(" Fs[j] += (Fi[j] - Fsum) * "
+		  + (m_NumClasses - 1) + " / " + m_NumClasses + "; }\n");
+    }
+    
+    text.append("    double maxV = RtoP(Fs, 0);\n" +
+		"    int maxI = 0;\n"+
+		"    for (int j = 1; j < " + m_NumClasses + "; j++) {\n"+
+		"      double c = RtoP(Fs, j);\n"+
+		"      if (c > maxV) { maxV = c; maxI = j; }\n"+
+		"    }\n    return (double) maxI;\n");
+    text.append("  }\n}\n");
+
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      for (int j = 0; j < m_Classifiers[i].length; j++) {
+	text.append(((Sourcable)m_Classifiers[i][j])
+		    .toSource(className + '_' + i + '_' + j));
+      }
+    }
+    return text.toString();
   }
 
   /**

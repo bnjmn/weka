@@ -54,7 +54,7 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable {
@@ -158,32 +158,13 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    * @return the tree as a Java if-then type statement
    * @exception Exception if something goes wrong
    */
-  public String toSource() throws Exception {
+  public String toSource(String className) throws Exception {
 
-    StringBuffer [] source = m_root.toSource("    ");
+    StringBuffer [] source = m_root.toSource(className);
     return 
-     "package weka.classifiers;\n"
-    +"import weka.core.Attribute;\n"
-    +"import weka.core.Instance;\n"
-    +"import weka.core.Instances;\n"
-    +"import weka.classifiers.Classifier;\n\n"
-    +"public class J48InducedClassifier extends Classifier {\n\n"
-    +"  public void buildClassifier(Instances i) throws Exception {\n"
-    +"  }\n\n"
-    +"  public double classifyInstance(Instance i) throws Exception {\n\n"
-    +"    Object [] s = new Object [i.numAttributes()];\n"
-    +"    for (int j = 0; j < s.length; j++) {\n"
-    +"      if (!i.isMissing(j)) {\n"
-    +"        if (i.attribute(j).type() == Attribute.NOMINAL) {\n"
-    +"          s[j] = i.attribute(j).value((int) i.value(j));\n"
-    +"        } else if (i.attribute(j).type() == Attribute.NUMERIC) {\n"
-    +"          s[j] = new Double(i.value(j));\n"
-    +"        }\n"
-    +"      }\n"
-    +"    }\n"
-    +"    return simpleClassify(s);\n"
-    +"  }\n\n"
-    +"  public double simpleClassify(Object [] i) throws Exception {\n\n"
+    "class " + className + " {\n\n"
+    +"  public static double classify(Object [] i)\n"
+    +"    throws Exception {\n\n"
     +"    double p = Double.NaN;\n"
     + source[0]  // Assignment code
     +"    return p;\n"

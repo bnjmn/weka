@@ -27,7 +27,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -259,57 +259,56 @@ public class ClassifierTree implements Drawable, Serializable {
    * a section of code for assignment of the class, and a section of
    * code containing support code (eg: other support methods).
    *
-   * @param indent the current source indentation string
+   * @param className the classname that this static classifier has
    * @return an array containing two stringbuffers, the first string containing
    * assignment code, and the second containing source for support code.
    * @exception Exception if something goes wrong
    */
-  public StringBuffer [] toSource(String indent) throws Exception {
+  public StringBuffer [] toSource(String className) throws Exception {
     
     StringBuffer [] result = new StringBuffer [2];
     if (m_isLeaf) {
-      result[0] = new StringBuffer(indent + "p = " 
+      result[0] = new StringBuffer("    p = " 
 	+ m_localModel.distribution().maxClass(0) + ";\n");
       result[1] = new StringBuffer("");
     } else {
       StringBuffer text = new StringBuffer();
-      String nextIndent = indent + "  ";
+      String nextIndent = "      ";
       StringBuffer atEnd = new StringBuffer();
 
-      text.append("  double N") 
+      text.append("  static double N") 
 	.append(Integer.toHexString(m_localModel.hashCode()))
 	.append("(Object []i) {\n")
-	.append(indent).append("double p = Double.NaN;\n");
+	.append("    double p = Double.NaN;\n");
 
-      text.append(indent).append("if (")
+      text.append("    if (")
 	.append(m_localModel.sourceExpression(-1, m_train))
 	.append(") {\n");
-      text.append(nextIndent).append("p = ")
+      text.append("      p = ")
 	.append(m_localModel.distribution().maxClass(0))
 	.append(";\n");
-      text.append(indent).append("} ");
+      text.append("    } ");
       for (int i = 0; i < m_sons.length; i++) {
 	text.append("else if (" + m_localModel.sourceExpression(i, m_train) 
 		    + ") {\n");
 	if (m_sons[i].m_isLeaf) {
-	  text.append(nextIndent + "p = " 
+	  text.append("      p = " 
 		      + m_localModel.distribution().maxClass(i) + ";\n");
 	} else {
-	  StringBuffer [] sub = m_sons[i].toSource(indent);
+	  StringBuffer [] sub = m_sons[i].toSource(className);
 	  text.append(sub[0]);
 	  atEnd.append(sub[1]);
 	}
-	text.append(indent + "} ");
+	text.append("    } ");
 	if (i == m_sons.length - 1) {
 	  text.append('\n');
 	}
       }
 
-      text.append(indent).append("return p;\n  }\n");
+      text.append("    return p;\n  }\n");
 
-      result[0] = new StringBuffer(nextIndent);
-      result[0].append("p = N")
-	.append(Integer.toHexString(m_localModel.hashCode()))
+      result[0] = new StringBuffer("    p = " + className + ".N");
+      result[0].append(Integer.toHexString(m_localModel.hashCode()))
 	.append("(i);\n");
       result[1] = text.append(atEnd);
     }
