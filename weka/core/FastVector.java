@@ -27,7 +27,7 @@ import java.io.*;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -293,9 +293,8 @@ public class FastVector implements Copyable, Serializable {
     Object[] newObjects;
 
     if (m_Size < m_Objects.length) {
-      for (int i = m_Size - 1; i >= index; i--) {
-	m_Objects[i + 1] = m_Objects[i];
-      }
+      System.arraycopy(m_Objects, index, m_Objects, index + 1, 
+                       m_Size - index);
       m_Objects[index] = element;
     } else {
       newObjects = new Object[(int)m_CapacityMultiplier *
@@ -327,12 +326,8 @@ public class FastVector implements Copyable, Serializable {
    */
   public final void removeElementAt(int index) {
 
-    Object[] newObjects = new Object[m_Objects.length];
-
-    System.arraycopy(m_Objects, 0, newObjects, 0, index);
-    System.arraycopy(m_Objects, index + 1, newObjects,
-		     index, m_Objects.length - (index + 1));
-    m_Objects = newObjects;
+    System.arraycopy(m_Objects, index + 1, m_Objects, index, 
+                     m_Size - index - 1);
     m_Size--;
   }
 
