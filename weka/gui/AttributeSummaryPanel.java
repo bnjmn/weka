@@ -57,7 +57,7 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AttributeSummaryPanel extends JPanel {
 
@@ -293,6 +293,9 @@ public class AttributeSummaryPanel extends JPanel {
       break;
     case Attribute.STRING:
       m_AttributeTypeLab.setText("String");
+      break;
+    case Attribute.DATE:
+      m_AttributeTypeLab.setText("Date");
       break;
     default:
       m_AttributeTypeLab.setText("Unknown");
