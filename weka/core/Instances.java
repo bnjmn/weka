@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
  */
 public class Instances implements Serializable {
  
@@ -922,8 +922,8 @@ public class Instances implements Serializable {
    */
   public final void setClassIndex(int classIndex) {
 
-    if (classIndex >= numAttributes() || (classIndex < 0)) {
-      throw new IllegalArgumentException("Class index to large!");
+    if (classIndex >= numAttributes()) {
+      throw new IllegalArgumentException("Invalid class index: " + classIndex);
     }
     m_ClassIndex = classIndex;
   }
