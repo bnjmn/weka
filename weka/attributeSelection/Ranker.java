@@ -40,7 +40,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -392,7 +392,7 @@ public class Ranker extends ASSearch
 
     m_numAttribs = data.numAttributes();
 
-    if (ASEval instanceof UnsupervisedSubsetEvaluator) {
+    if (ASEval instanceof UnsupervisedAttributeEvaluator) {
       m_hasClass = false;
     }
     else {
