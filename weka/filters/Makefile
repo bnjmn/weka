@@ -16,7 +16,7 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	UselessAttributeFilter.java SpreadSubsampleFilter.java \
 	StringToWordVectorFilter.java \
 	AttributeExpressionFilter.java AddNoiseFilter.java \
-	ClassOrderFilter.java
+	ClassOrderFilter.java MisclassificationFilter.java
 
 # Filters To Do:
 # TimeSeriesSmoothFilter.java    -- replace attribute values with values
