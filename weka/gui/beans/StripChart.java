@@ -46,17 +46,19 @@ import java.util.Enumeration;
 import java.io.Serializable;
 
 import weka.core.Queue;
+import weka.core.Instances;
+import weka.core.Instance;
 
 /**
  * Bean that can display a horizontally scrolling strip chart. Can
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class StripChart 
   extends JPanel 
-  implements ChartListener, Visible, 
+  implements ChartListener, InstanceListener, Visible, 
 	     BeanCommon, UserRequestAcceptor, 
 	     Serializable {
   
@@ -528,6 +530,40 @@ public class StripChart
     return numString;
   }
 
+  ChartEvent m_ce = new ChartEvent(this);
+  double [] m_dataPoint = null;
+  public void acceptInstance(InstanceEvent e) {
+    if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+      Instances structure = e.getStructure();
+      m_legendText = new Vector();
+      m_max = 1.0;
+      m_min = 0;
+      int i = 0;
+      for (i =0; i < structure.numAttributes(); i++) {
+	if (i > 10) {
+	  i--;
+	  break;
+	}
+	m_legendText.addElement(structure.attribute(i).name());
+	m_legendPanel.repaint();
+	m_scalePanel.repaint();
+      }
+      m_dataPoint = new double[i];
+      m_xCount = 0;
+      return;
+    }
+
+    // process data point
+    Instance inst = e.getInstance();
+    for (int i = 0; i < m_dataPoint.length; i++) {
+      if (!inst.isMissing(i)) {
+	m_dataPoint[i] = inst.value(i);
+      }
+    }
+    acceptDataPoint(m_dataPoint);
+    m_xCount++;
+  }
+  
   /**
    * Accept a data point (encapsulated in a chart event) to plot
    *
@@ -586,6 +622,10 @@ public class StripChart
 	  m_oldMax = m_max; m_max = dataPoint[i];
 	  m_yScaleUpdate = true;
 	}
+      }
+      if (m_yScaleUpdate) {
+	m_scalePanel.repaint();
+	m_yScaleUpdate = false;
       }
       synchronized(m_dataList) {
 	m_dataList.add(m_dataList.size(), dp);
