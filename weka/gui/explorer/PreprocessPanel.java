@@ -29,6 +29,7 @@ import weka.gui.Logger;
 import weka.gui.SysErrLog;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.TaskLogger;
+import weka.gui.FileEditor;
 import weka.experiment.InstanceQuery;
 
 import java.io.Reader;
@@ -74,7 +75,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -149,6 +150,9 @@ public class PreprocessPanel extends JPanel {
   protected byte [] m_FiltersCopy = null;
   
   static {
+    java.beans.PropertyEditorManager
+      .registerEditor(java.io.File.class,
+                      FileEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.core.SelectedTag.class,
 		      weka.gui.SelectedTagEditor.class);
