@@ -22,8 +22,12 @@
 
 package weka.core;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /** 
  * Class for handling an attribute. Once an attribute has been created,
@@ -66,7 +70,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -78,6 +82,9 @@ public class Attribute implements Copyable, Serializable {
 
   /** Constant set for attributes with string values. */
   public final static int STRING = 2;
+
+  /** Constant set for attributes with date values. */
+  public final static int DATE = 3;
 
   /** Strings longer than this will be stored compressed. */
   private final static int STRING_COMPRESS_THRESHOLD = 200;
@@ -94,6 +101,9 @@ public class Attribute implements Copyable, Serializable {
   /** Mapping of values to indices (if nominal or string). */
   private Hashtable m_Hashtable;
 
+  /** Date format specification for date attributes */
+  private SimpleDateFormat m_DateFormat;
+
   /** The attribute's index. */
   private int m_Index;
 
@@ -109,6 +119,28 @@ public class Attribute implements Copyable, Serializable {
     m_Values = null;
     m_Hashtable = null;
     m_Type = NUMERIC;
+  }
+
+  /**
+   * Constructor for a date attribute.
+   *
+   * @param attributeName the name for the attribute
+   * @param dateFormat a string suitable for use with
+   * SimpleDateFormatter for parsing dates.
+   */
+  public Attribute(String attributeName, String dateFormat) {
+
+    m_Name = attributeName;
+    m_Index = -1;
+    m_Values = null;
+    m_Hashtable = null;
+    m_Type = DATE;
+    if (dateFormat != null) {
+      m_DateFormat = new SimpleDateFormat(dateFormat);
+    } else {
+      m_DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    }
+    m_DateFormat.setLenient(false);
   }
 
   /**
@@ -159,8 +191,10 @@ public class Attribute implements Copyable, Serializable {
     Attribute copy = new Attribute(m_Name);
 
     copy.m_Index = m_Index;
+    /*
     if (!isNominal() && !isString())
       return copy;
+    */
     copy.m_Type = m_Type;
     copy.m_Values = m_Values;
     copy.m_Hashtable = m_Hashtable;
@@ -210,21 +244,19 @@ public class Attribute implements Copyable, Serializable {
     if (!m_Name.equals(att.m_Name)) {
       return false;
     }
-    if (isNumeric() && att.isNumeric()) {
-      return true;
-    }
-    if (isNumeric() || att.isNumeric()) {
-      return false;
-    }
-    if (m_Values.size() != att.m_Values.size()) {
-      return false;
-    }
-    for (int i = 0; i < m_Values.size(); i++) {
-      if (!m_Values.elementAt(i).equals(att.m_Values.elementAt(i))) {
-	return false;
+    if (isNominal() && att.isNominal()) {
+      if (m_Values.size() != att.m_Values.size()) {
+        return false;
       }
+      for (int i = 0; i < m_Values.size(); i++) {
+        if (!m_Values.elementAt(i).equals(att.m_Values.elementAt(i))) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return (type() == att.type());
     }
-    return true;
   }
 
   /**
@@ -281,7 +313,7 @@ public class Attribute implements Copyable, Serializable {
    */
   public final boolean isNumeric() {
 
-    return (m_Type == NUMERIC);
+    return ((m_Type == NUMERIC) || (m_Type == DATE));
   }
 
   /**
@@ -330,7 +362,8 @@ public class Attribute implements Copyable, Serializable {
     StringBuffer text = new StringBuffer();
     
     text.append("@attribute " + Utils.quote(m_Name) + " ");
-    if (isNominal()) {
+    switch (m_Type) {
+    case NOMINAL:
       text.append('{');
       Enumeration enum = enumerateValues();
       while (enum.hasMoreElements()) {
@@ -339,12 +372,19 @@ public class Attribute implements Copyable, Serializable {
 	  text.append(',');
       }
       text.append('}');
-    } else {
-      if (isNumeric()) {
-	text.append("numeric");
-      } else {
-	text.append("string");
-      }
+      break;
+    case NUMERIC:
+      text.append("numeric");
+      break;
+    case STRING:
+      text.append("string");
+      break;
+    case DATE:
+      text.append("date ").append(Utils.quote(m_DateFormat.toPattern()));
+      break;
+    default:
+      text.append("UNKNOWN");
+      break;
     }
     return text.toString();
   }
@@ -391,7 +431,22 @@ public class Attribute implements Copyable, Serializable {
   Attribute(String attributeName, int index) {
 
     this(attributeName);
+    m_Index = index;
+  }
 
+  /**
+   * Constructor for date attributes with a particular index.
+   *
+   * @param attributeName the name for the attribute
+   * @param dateFormat a string suitable for use with
+   * SimpleDateFormatter for parsing dates.  Null for a default format
+   * string.
+   * @param index the attribute's index
+   */
+  Attribute(String attributeName, String dateFormat, 
+	    int index) {
+
+    this(attributeName, dateFormat);
     m_Index = index;
   }
 
@@ -410,7 +465,6 @@ public class Attribute implements Copyable, Serializable {
 	    int index) {
 
     this(attributeName, attributeValues);
-
     m_Index = index;
   }
 
@@ -499,8 +553,7 @@ public class Attribute implements Copyable, Serializable {
     Attribute copy = new Attribute(newName);
 
     copy.m_Index = m_Index;
-    if (!isNominal() && !isString())
-      return copy;
+    copy.m_DateFormat = m_DateFormat;
     copy.m_Type = m_Type;
     copy.m_Values = m_Values;
     copy.m_Hashtable = m_Hashtable;
@@ -579,11 +632,10 @@ public class Attribute implements Copyable, Serializable {
    * string.
    */
   final void setValue(int index, String string) {
-
-    if (!isNominal() && !isString()) {
-      throw new IllegalArgumentException("Can only set value of nominal"+
-                                         "or string attribute!");
-    } else {
+    
+    switch (m_Type) {
+    case NOMINAL:
+    case STRING:
       m_Values = (FastVector)m_Values.copy();
       m_Hashtable = (Hashtable)m_Hashtable.clone();
       Object store = string;
@@ -598,6 +650,32 @@ public class Attribute implements Copyable, Serializable {
       m_Hashtable.remove(m_Values.elementAt(index));
       m_Values.setElementAt(store, index);
       m_Hashtable.put(store, new Integer(index));
+      break;
+    default:
+      throw new IllegalArgumentException("Can only set values for nominal"
+                                         + " or string attributes!");
+    }
+  }
+
+  public String formatDate(double date) {
+    switch (m_Type) {
+    case DATE:
+      return m_DateFormat.format(new Date((long)date));
+    default:
+      throw new IllegalArgumentException("Can only format date values for date"
+                                         + " attributes!");
+    }
+  }
+
+  public double parseDate(String string) throws ParseException {
+    switch (m_Type) {
+    case DATE:
+      long time = m_DateFormat.parse(string).getTime();
+      // TODO put in a safety check here if we can't store the value in a double.
+      return (double)time;
+    default:
+      throw new IllegalArgumentException("Can only parse date values for date"
+                                         + " attributes!");
     }
   }
 
@@ -611,6 +689,18 @@ public class Attribute implements Copyable, Serializable {
       // Create numeric attributes "length" and "weight"
       Attribute length = new Attribute("length");
       Attribute weight = new Attribute("weight");
+
+      // Create date attribute "date"
+      Attribute date = new Attribute("date", "yyyy-MM-dd HH:mm:ss");
+
+      System.out.println(date);
+      double dd = date.parseDate("2001-04-04 14:13:55");
+      System.out.println("Test date = " + dd);
+      System.out.println(date.formatDate(dd));
+
+      dd = new Date().getTime();
+      System.out.println("Date now = " + dd);
+      System.out.println(date.formatDate(dd));
       
       // Create vector to hold nominal values "first", "second", "third" 
       FastVector my_nominal_values = new FastVector(3); 
@@ -674,6 +764,9 @@ public class Attribute implements Copyable, Serializable {
 	break;
       case Attribute.STRING:
 	System.out.println("\"position\" is string");
+	break;
+      case Attribute.DATE:
+	System.out.println("\"position\" is date");
 	break;
       default:
 	System.out.println("\"position\" has unknown type");

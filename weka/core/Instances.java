@@ -23,6 +23,7 @@
 package weka.core;
 
 import java.io.*;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -54,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $ 
+ * @version $Revision: 1.34 $ 
  */
 public class Instances implements Serializable {
  
@@ -216,7 +217,7 @@ public class Instances implements Serializable {
     for (int i = 0 ; i < atts.size(); i++) {
       Attribute att = (Attribute)atts.elementAt(i);
       if (att.type() == Attribute.STRING) {
-        atts.setElementAt(new Attribute(att.name(), null), i);
+        atts.setElementAt(new Attribute(att.name(), (FastVector)null), i);
       }
     }
     Instances result = new Instances(relationName(), atts, 0);
@@ -1290,6 +1291,14 @@ public class Instances implements Serializable {
 	percent = Math.round(100.0 * as.realCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
+      case Attribute.DATE:
+	result.append(Utils.padLeft("Dat", 4)).append(' ');
+	result.append(Utils.padLeft("" + 0, 3)).append("% ");
+	percent = Math.round(100.0 * as.intCount / as.totalCount);
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	percent = Math.round(100.0 * as.realCount / as.totalCount);
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	break;
       case Attribute.STRING:
 	result.append(Utils.padLeft("Str", 4)).append(' ');
 	percent = Math.round(100.0 * as.intCount / as.totalCount);
@@ -1408,17 +1417,17 @@ public class Instances implements Serializable {
 	if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
 	  errms(tokenizer,"not a valid value");
 	}
-	if (attribute(m_IndicesBuffer[numValues]).isNominal()) {
-	  
-	  // Check if value appears in header.
-	  valIndex = 
-	    attribute(m_IndicesBuffer[numValues]).indexOfValue(tokenizer.sval);
-	  if (valIndex == -1) {
-	    errms(tokenizer,"nominal value not declared in header");
-	  }
-	  m_ValueBuffer[numValues] = (double)valIndex;
-	} else if (attribute(m_IndicesBuffer[numValues]).isNumeric()) {
-	  
+        switch (attribute(m_IndicesBuffer[numValues]).type()) {
+          case Attribute.NOMINAL:
+            // Check if value appears in header.
+            valIndex = 
+              attribute(m_IndicesBuffer[numValues]).indexOfValue(tokenizer.sval);
+            if (valIndex == -1) {
+              errms(tokenizer,"nominal value not declared in header");
+            }
+            m_ValueBuffer[numValues] = (double)valIndex;
+            break;
+	case Attribute.NUMERIC:
 	  // Check if value is really a number.
 	  try{
 	    m_ValueBuffer[numValues] = Double.valueOf(tokenizer.sval).
@@ -1426,9 +1435,21 @@ public class Instances implements Serializable {
 	  } catch (NumberFormatException e) {
 	    errms(tokenizer,"number expected");
 	  }
-	} else { 
+          break;
+	case Attribute.STRING:
 	  m_ValueBuffer[numValues] = 
 	    attribute(m_IndicesBuffer[numValues]).addStringValue(tokenizer.sval);
+          break;
+        case Attribute.DATE:
+          try {
+            m_ValueBuffer[numValues] = 
+              attribute(m_IndicesBuffer[numValues]).parseDate(tokenizer.sval);
+          } catch (ParseException e) {
+            errms(tokenizer,"unparseable date: " + tokenizer.sval);
+          }
+          break;
+        default:
+          errms(tokenizer,"unknown attribute type in column " + m_IndicesBuffer[numValues]);
 	}
       }
       numValues++;
@@ -1482,16 +1503,16 @@ public class Instances implements Serializable {
 	if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
 	  errms(tokenizer,"not a valid value");
 	}
-	if (attribute(i).isNominal()) {
-	  
+        switch (attribute(i).type()) {
+        case Attribute.NOMINAL:
 	  // Check if value appears in header.
 	  index = attribute(i).indexOfValue(tokenizer.sval);
 	  if (index == -1) {
 	    errms(tokenizer,"nominal value not declared in header");
 	  }
 	  instance[i] = (double)index;
-	} else if (attribute(i).isNumeric()) {
-	  
+          break;
+	case Attribute.NUMERIC:
 	  // Check if value is really a number.
 	  try{
 	    instance[i] = Double.valueOf(tokenizer.sval).
@@ -1499,8 +1520,19 @@ public class Instances implements Serializable {
 	  } catch (NumberFormatException e) {
 	    errms(tokenizer,"number expected");
 	  }
-	} else { 
+          break;
+	case Attribute.STRING:
 	  instance[i] = attribute(i).addStringValue(tokenizer.sval);
+          break;
+        case Attribute.DATE:
+          try {
+            instance[i] = attribute(i).parseDate(tokenizer.sval);
+          } catch (ParseException e) {
+            errms(tokenizer,"unparseable date: " + tokenizer.sval);
+          }
+          break;
+        default:
+          errms(tokenizer,"unknown attribute type in column " + i);
 	}
       }
     }
@@ -1567,9 +1599,25 @@ public class Instances implements Serializable {
 	  readTillEOL(tokenizer);
 	} else if (tokenizer.sval.equalsIgnoreCase("string")) {
 	  m_Attributes.
-	    addElement(new Attribute(attributeName, null,
+	    addElement(new Attribute(attributeName, (FastVector)null,
 				     numAttributes()));
 	  readTillEOL(tokenizer);
+	} else if (tokenizer.sval.equalsIgnoreCase("date")) {
+          String format = null;
+          if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
+            if ((tokenizer.ttype != StreamTokenizer.TT_WORD) &&
+                (tokenizer.ttype != '\'') &&
+                (tokenizer.ttype != '\"')) {
+              errms(tokenizer,"not a valid date format");
+            }
+            format = tokenizer.sval;
+            readTillEOL(tokenizer);
+          } else {
+            tokenizer.pushBack();
+          }
+	  m_Attributes.addElement(new Attribute(attributeName, format,
+                                                numAttributes()));
+
 	} else {
 	  errms(tokenizer,"no valid attribute type or invalid "+
 		"enumeration");
@@ -1702,7 +1750,7 @@ public class Instances implements Serializable {
        throws IOException{
 
     if ((tokenizer.nextToken() != StreamTokenizer.TT_EOL) &&
-	((tokenizer.nextToken() != StreamTokenizer.TT_EOF) || !endOfFileOk)) {
+	((tokenizer.ttype != StreamTokenizer.TT_EOF) || !endOfFileOk)) {
       errms(tokenizer,"end of line expected");
     }
   }
@@ -2143,6 +2191,7 @@ public class Instances implements Serializable {
       Instances i = new Instances(r);
       System.out.println(i.toSummaryString());
     } catch (Exception ex) {
+      ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
   }
