@@ -111,7 +111,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.28 $
+ * @version  $Revision: 1.29 $
   */
 public class Evaluation implements Summarizable {
 
@@ -875,12 +875,6 @@ public class Evaluation implements Summarizable {
     
     double [] predicted;
 
-    for (int j = 0; j < data.numAttributes(); j++) {
-      if (data.attribute(j).isString()) {
-	throw new Exception("Can't evaluate on data with " + 
-			    "string attributes!");
-      }
-    }
     for (int i = 0; i < data.numInstances(); i++) {
       evaluateModelOnce((Classifier)classifier, 
 			data.instance(i));
@@ -903,10 +897,6 @@ public class Evaluation implements Summarizable {
     double pred=0;
     classMissing.setDataset(instance.dataset());
     classMissing.setClassMissing();
-    for (int i = 0; i < classMissing.numAttributes(); i++)
-      if (classMissing.attribute(i).isString())
-	throw new Exception("Can't evaluate on data with string " + 
-			    "attributes!");
     if (m_ClassIsNominal) {
       if (classifier instanceof DistributionClassifier) {
 	double [] dist = ((DistributionClassifier)classifier).
