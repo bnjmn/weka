@@ -23,18 +23,18 @@ CLASSFILES = $(SOURCES:.java=.class)
 #--------------------------------------------------------------------
 
 all :   $(CLASSFILES) 
-	(cd j48; make all)
-	(cd m5; make all)
+	(cd j48; make all JAVA=$(JAVA))
+	(cd m5; make all JAVA=$(JAVA))
 
 debug : clean
 	$(JAVA) -g $(SOURCES)
-	(cd j48; make debug)
-	(cd m5; make debug)
+	(cd j48; make debug JAVA=$(JAVA))
+	(cd m5; make debug JAVA=$(JAVA))
 
 optimized : clean
 	$(JAVA) -O $(SOURCES)
-	(cd j48; make optimized)
-	(cd m5; make optimized)
+	(cd j48; make optimized JAVA=$(JAVA))
+	(cd m5; make optimized JAVA=$(JAVA))
 
 clean : 
 	$(RM) *.class *~

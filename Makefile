@@ -1,41 +1,43 @@
 #
-# $Revision: 1.15 $
+# $Revision: 1.16 $
 #
+
+JAVA = javac
 
 .PHONY: all optimized debug clean install archive doc
 
 all : 
-	(cd core; make all)
-	(cd classifiers; make all)
-	(cd filters; make all)
-	(cd estimators; make all)
-	(cd associations; make all)
-	(cd clusterers; make all)
-	(cd attributeSelection; make all)
-	(cd experiment; make all)
-	(cd gui; make all)
+	(cd core; make all JAVA=$(JAVA))
+	(cd classifiers; make all JAVA=$(JAVA))
+	(cd filters; make all JAVA=$(JAVA))
+	(cd estimators; make all JAVA=$(JAVA))
+	(cd associations; make all JAVA=$(JAVA))
+	(cd clusterers; make all JAVA=$(JAVA))
+	(cd attributeSelection; make all JAVA=$(JAVA))
+	(cd experiment; make all JAVA=$(JAVA))
+	(cd gui; make all JAVA=$(JAVA))
 
 optimized : 
-	(cd core; make optimized)
-	(cd classifiers; make optimized)
-	(cd filters; make optimized)
-	(cd estimators; make optimized)
-	(cd associations; make optimized)
-	(cd clusterers; make optimized)
-	(cd attributeSelection; make optimized)
-	(cd experiment; make optimized)
-	(cd gui; make optimized)
+	(cd core; make optimized JAVA=$(JAVA))
+	(cd classifiers; make optimized JAVA=$(JAVA))
+	(cd filters; make optimized JAVA=$(JAVA))
+	(cd estimators; make optimized JAVA=$(JAVA))
+	(cd associations; make optimized JAVA=$(JAVA))
+	(cd clusterers; make optimized JAVA=$(JAVA))
+	(cd attributeSelection; make optimized JAVA=$(JAVA))
+	(cd experiment; make optimized JAVA=$(JAVA))
+	(cd gui; make optimized JAVA=$(JAVA))
 
 debug :
-	(cd core; make debug)
-	(cd classifiers; make debug)
-	(cd filters; make debug)
-	(cd estimators; make debug)
-	(cd associations; make debug)
-	(cd clusterers; make debug)
-	(cd attributeSelection; make debug)
-	(cd experiment; make debug)
-	(cd gui; make debug)
+	(cd core; make debug JAVA=$(JAVA))
+	(cd classifiers; make debug JAVA=$(JAVA))
+	(cd filters; make debug JAVA=$(JAVA))
+	(cd estimators; make debug JAVA=$(JAVA))
+	(cd associations; make debug JAVA=$(JAVA))
+	(cd clusterers; make debug JAVA=$(JAVA))
+	(cd attributeSelection; make debug JAVA=$(JAVA))
+	(cd experiment; make debug JAVA=$(JAVA))
+	(cd gui; make debug JAVA=$(JAVA))
 
 clean : 
 	(cd core; make clean)
@@ -96,13 +98,13 @@ install : all
 	weka/gui/streams/*.class \
 	; \
 	jar cvf $$JAWSHOME/weka-src.jar \
-        weka/core/*.java \
-        weka/classifiers/*.java \
-        weka/classifiers/j48/*.java \
-        weka/classifiers/m5/*.java \
-        weka/filters/*.java \
-        weka/estimators/*java \
-        weka/associations/*.java \
+	weka/core/*.java \
+	weka/classifiers/*.java \
+	weka/classifiers/j48/*.java \
+	weka/classifiers/m5/*.java \
+	weka/filters/*.java \
+	weka/estimators/*java \
+	weka/associations/*.java \
 	weka/clusterers/*.java \
 	weka/attributeSelection/*.java \
 	weka/experiment/*.java \
