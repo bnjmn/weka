@@ -55,7 +55,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AttributeSelectedClassifier extends DistributionClassifier 
 implements OptionHandler, AdditionalMeasureProducer {
@@ -445,7 +445,8 @@ implements OptionHandler, AdditionalMeasureProducer {
    */
   public String toString() {
     if (m_AttributeSelection == null) {
-      return "AttributeSelectedClassifier: No model built yet.";
+      return "AttributeSelectedClassifier: No attribute selection possible.\n\n"
+	+m_Classifier.toString();
     }
 
     StringBuffer result = new StringBuffer();
