@@ -94,7 +94,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.2 $
+ * @version  $Revision: 1.3 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -215,7 +215,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    * @since 1.0
    * @see JPanel
    */
@@ -1020,6 +1020,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	Vector beans = (Vector) ois.readObject();
 	Vector connections = (Vector) ois.readObject();
 	ois.close();
+	java.awt.Color bckC = getBackground();
 
 	// register this panel as a property change listener with each
 	// bean
@@ -1028,6 +1029,12 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  if (tempB.getBean() instanceof Visible) {
 	    ((Visible)(tempB.getBean())).getVisual().
 	      addPropertyChangeListener(this);
+
+	    // A workaround to account for JPanel's with their default
+	    // background colour not being serializable in Apple's JRE
+	    ((Visible)(tempB.getBean())).getVisual().
+	      setBackground(bckC);
+	    ((JComponent)(tempB.getBean())).setBackground(bckC);
 	  }
 	  if (tempB.getBean() instanceof BeanCommon) {
 	    ((BeanCommon)(tempB.getBean())).setLog(m_logPanel);
@@ -1053,6 +1060,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     m_loadB.setEnabled(false);
     m_saveB.setEnabled(false);
     int returnVal = m_FileChooser.showSaveDialog(this);
+    java.awt.Color bckC = getBackground();
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       // temporarily remove this panel as a property changle listener from
       // each bean
@@ -1062,6 +1070,15 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	if (tempB.getBean() instanceof Visible) {
 	  ((Visible)(tempB.getBean())).getVisual().
 	    removePropertyChangeListener(this);
+
+	  // A workaround to account for JPanel's with their default
+	  // background colour not being serializable in Apple's JRE.
+	  // JComponents are rendered with a funky stripy background
+	  // under OS X using java.awt.TexturePaint - unfortunately
+	  // TexturePaint doesn't implement Serializable.
+	  ((Visible)(tempB.getBean())).getVisual().
+	    setBackground(java.awt.Color.white);
+	  ((JComponent)(tempB.getBean())).setBackground(java.awt.Color.white);
 	}
       }
       // now serialize components vector and connections vector
@@ -1082,6 +1099,11 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  if (tempB.getBean() instanceof Visible) {
 	    ((Visible)(tempB.getBean())).getVisual().
 	      addPropertyChangeListener(this);
+
+	    // Restore the default background colour
+	    ((Visible)(tempB.getBean())).getVisual().
+	      setBackground(bckC);
+	    ((JComponent)(tempB.getBean())).setBackground(bckC);
 	  }
 	}
       }

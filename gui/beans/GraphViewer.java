@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class GraphViewer 
   extends JPanel
@@ -64,9 +64,19 @@ public class GraphViewer
 
   private transient JFrame m_resultsFrame = null;
 
-  protected ResultHistoryPanel m_history = new ResultHistoryPanel(null);
+  protected transient ResultHistoryPanel m_history = 
+    new ResultHistoryPanel(null);
 
   public GraphViewer() {
+    setUpResultHistory();
+    setLayout(new BorderLayout());
+    add(m_visual, BorderLayout.CENTER);
+  }
+
+  private void setUpResultHistory() {
+    if (m_history == null) {
+      m_history = new ResultHistoryPanel(null);
+    }
     m_history.setBorder(BorderFactory.createTitledBorder("Graph list"));
     m_history.setHandleRightClicks(false);
     m_history.getList().
@@ -79,9 +89,6 @@ public class GraphViewer
 	    }
 	  }
 	});
-
-    setLayout(new BorderLayout());
-    add(m_visual, BorderLayout.CENTER);
   }
 
   /**
@@ -90,6 +97,9 @@ public class GraphViewer
    * @param e a <code>GraphEvent</code> value
    */
   public synchronized void acceptGraph(GraphEvent e) {
+    if (m_history == null) {
+      setUpResultHistory();
+    }
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date());
 
@@ -130,6 +140,9 @@ public class GraphViewer
    */
   public void showResults() {
     if (m_resultsFrame == null) {
+      if (m_history == null) {
+	setUpResultHistory();
+      }
       m_resultsFrame = new JFrame("Graph Viewer");
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(m_history, BorderLayout.CENTER);
