@@ -23,11 +23,11 @@ import weka.core.*;
 
 
 /** 
- * Abstract attribute selection search class capable of producing a
+ * Interface for search methods capable of producing a
  * ranked list of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.1 $
  */
 public interface RankedOutputSearch {
 
@@ -61,5 +61,21 @@ public interface RankedOutputSearch {
    * @return a threshold by which to discard attributes
    */
   public abstract double getThreshold();
+
+  /**
+   * Sets whether or not ranking is to be performed.
+   * When a search method is capable of producing a ranked list
+   * of attributes, the user has the choice of seeing the results of a
+   * normal search or seeing a ranked list.
+   * @param doRanking true if ranked list is to be produced
+   */
+  public abstract void setGenerateRanking(boolean doRanking);
+
+  /**
+   * Gets whether the user has opted to see a ranked list of
+   * attributes rather than the normal result of the search
+   * @return true if a ranked list has been requested.
+   */
+  public abstract boolean getGenerateRanking();
 
 }
