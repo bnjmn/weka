@@ -36,7 +36,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -402,30 +402,29 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   private void convertInstanceNominal(Instance instance) throws Exception {
   
-    Instance newInstance = 
-      new Instance(outputFormatPeek().numAttributes());
     int attSoFar = 0;
+    double [] newVals = new double [outputFormatPeek().numAttributes()];
 
     for(int j = 0; j < m_InputFormat.numAttributes(); j++) {
       Attribute att = m_InputFormat.attribute(j);
       if ((!att.isNominal()) || (j == m_InputFormat.classIndex())) {
-	newInstance.setValue(attSoFar, instance.value(j));
+	newVals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
 	if (att.numValues() <= 2) {
-	  newInstance.setValue(attSoFar, instance.value(j));
+	  newVals[attSoFar] = instance.value(j);
 	  attSoFar++;
 	} else {
 	  if (instance.isMissing(j)) {
 	    for (int k = 0; k < att.numValues(); k++) {
-	      newInstance.setValue(attSoFar + k, instance.value(j));
+              newVals[attSoFar + k] = instance.value(j);
 	    }
 	  } else {
 	    for (int k = 0; k < att.numValues(); k++) {
 	      if (k == (int)instance.value(j)) {
-		newInstance.setValue(attSoFar + k, 1);
+                newVals[attSoFar + k] = 1;
 	      } else {
-		newInstance.setValue(attSoFar + k, 0);
+                newVals[attSoFar + k] = 0;
 	      }
 	    }
 	  }
@@ -433,8 +432,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	}
       }
     }
-    newInstance.setWeight(instance.weight());
-    push(newInstance);
+    
+    push(new Instance(instance.weight(), newVals));
   }
 
   /**
@@ -445,36 +444,34 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   private void convertInstanceNumeric(Instance instance) throws Exception {
   
-    Instance newInstance = 
-      new Instance(outputFormatPeek().numAttributes());
+    double [] newVals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
 
     for(int j = 0; j < m_InputFormat.numAttributes(); j++) {
       Attribute att = m_InputFormat.attribute(j);
       if ((!att.isNominal()) || (j == m_InputFormat.classIndex())) {
-	newInstance.setValue(attSoFar, instance.value(j));
+	newVals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
 	if (instance.isMissing(j)) {
 	  for (int k = 0; k < att.numValues() - 1; k++) {
-	    newInstance.setValue(attSoFar + k, instance.value(j));
+            newVals[attSoFar + k] = instance.value(j);
 	  }
 	} else {
 	  int k = 0;
 	  while ((int)instance.value(j) != m_Indices[j][k]) {
-	    newInstance.setValue(attSoFar + k, 1);
+            newVals[attSoFar + k] = 1;
 	    k++;
 	  }
 	  while (k < att.numValues() - 1) {
-	    newInstance.setValue(attSoFar + k, 0);
+            newVals[attSoFar + k] = 0;
 	    k++;
 	  }
 	}
 	attSoFar += att.numValues() - 1;
       }
     }
-    newInstance.setWeight(instance.weight());
-    push(newInstance);
+    push(new Instance(instance.weight(), newVals));
   }
 
   /**
