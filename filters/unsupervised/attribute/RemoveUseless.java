@@ -39,7 +39,7 @@ import java.util.Vector;
  * The maximum variance allowed before an attribute will be deleted (default 100).<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RemoveUseless extends Filter implements UnsupervisedFilter,
 						     OptionHandler {
@@ -111,6 +111,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
       int[] attsToDelete = new int[toFilter.numAttributes()];
       int numToDelete = 0;
       for(int i = 0; i < toFilter.numAttributes(); i++) {
+	if (i==toFilter.classIndex()) continue; // skip class
 	AttributeStats stats = toFilter.attributeStats(i);
 	if (stats.distinctCount < 2) {
 	  // remove constant attributes
