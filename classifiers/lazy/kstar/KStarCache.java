@@ -24,6 +24,7 @@
 
 package weka.classifiers.lazy.kstar;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -35,7 +36,7 @@ import java.util.*;
  * @version $Revision 1.0 $
  */
 
-public class KStarCache {
+public class KStarCache implements Serializable {
   
   /**
    * cache table
