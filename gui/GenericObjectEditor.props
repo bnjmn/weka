@@ -51,6 +51,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.ClassificationViaRegression,\
  weka.classifiers.CostSensitiveClassifier,\
  weka.classifiers.CVParameterSelection,\
+ weka.classifiers.DistributionMetaClassifier,\
  weka.classifiers.FilteredClassifier,\
  weka.classifiers.LogitBoost,\
  weka.classifiers.MetaCost,\
@@ -78,13 +79,15 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.NaiveBayes,\
  weka.classifiers.SMO,\
  weka.classifiers.VotedPerceptron,\
- weka.classifiers.VFI,\	
+ weka.classifiers.VFI,\
  weka.classifiers.AdaBoostM1,\
  weka.classifiers.Bagging, \
  weka.classifiers.ClassificationViaRegression,\
+ weka.classifiers.DistributionMetaClassifier,\
  weka.classifiers.FilteredClassifier,\
  weka.classifiers.LogitBoost,\
  weka.classifiers.MultiClassClassifier,\
+ weka.classifiers.ThresholdSelector,\
  weka.classifiers.UserClassifier,\
  weka.classifiers.AttributeSelectedClassifier
 
