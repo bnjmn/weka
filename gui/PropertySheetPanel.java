@@ -71,7 +71,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -503,8 +503,9 @@ public class PropertySheetPanel extends JPanel
 	      System.err.println("WARNING: Vetoed; reason is: " 
 				 + ex.getTargetException().getMessage());
 	    } else {
-	      System.err.println("InvocationTargetException while updating " 
-				 + property.getName());
+	      System.err.println(ex.getTargetException().getClass().getName() + 
+				 " while updating " + property.getName() + ": " +
+				 ex.getTargetException().getMessage());
 	    }
 	  } catch (Exception ex) {
 	    System.err.println("Unexpected exception while updating " 
