@@ -65,7 +65,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Discretize extends PotentialClassIgnorer 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
@@ -91,12 +91,22 @@ public class Discretize extends PotentialClassIgnorer
   /** Use equal-frequency binning if unsupervised discretization turned on */
   protected boolean m_UseEqualFrequency = false;
 
+  /** The default columns to discretize */
+  protected String m_DefaultCols;
+
   /** Constructor - initialises the filter */
   public Discretize() {
 
+    m_DefaultCols = "first-last";
     setAttributeIndices("first-last");
   }
 
+  /** Another constructor */
+  public Discretize(String cols) {
+
+    m_DefaultCols = cols;
+    setAttributeIndices(cols);
+  }
 
   /**
    * Gets an enumeration describing the available options.
@@ -207,7 +217,7 @@ public class Discretize extends PotentialClassIgnorer
     if (convertList.length() != 0) {
       setAttributeIndices(convertList);
     } else {
-      setAttributeIndices("first-last");
+      setAttributeIndices(m_DefaultCols);
     }
 
     if (getInputFormat() != null) {
