@@ -42,9 +42,12 @@ import weka.core.*;
  *
  * -N <br>
  * If binary attributes are to be coded as nominal ones.<p>
+ * 
+ * -A <br>
+ * For each nominal value a new attribute is created, not only if there are more than 2 values.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class NominalToBinary extends Filter implements SupervisedFilter,
 						       OptionHandler {
@@ -54,6 +57,9 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
 
   /** Are the new attributes going to be nominal or numeric ones? */
   private boolean m_Numeric = true;
+
+  /** Are all values transformed into new attributes? */
+  private boolean m_TransformAll = false;
 
   /**
    * Returns a string describing this filter
@@ -66,7 +72,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     return "Converts all nominal attributes into binary numeric attributes. An "
       + "attribute with k values is transformed into k binary attributes if "
       + "the class is nominal (using the one-attribute-per-value approach). "
-      + "Binary attributes are left binary."
+      + "Binary attributes are left binary, if option '-A' is not given."
       + "If the class is numeric, k - 1 new binary attributes are generated "
       + "in the manner described in \"Classification and Regression "
       + "Trees\" by Breiman et al. (i.e. taking the average class value associated "
@@ -168,6 +174,9 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     newVector.addElement(new Option(
 	      "\tSets if binary attributes are to be coded as nominal ones.",
 	      "N", 0, "-N"));
+    newVector.addElement(new Option(
+	      "\tFor each nominal value a new attribute is created, \nnot only if there are more than 2 values.",
+	      "A", 0, "-A"));
 
     return newVector.elements();
   }
@@ -179,12 +188,17 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    * -N <br>
    * If binary attributes are to be coded as nominal ones.<p>
    *
+   * -A <br>
+   * Whether all nominal values are turned into new attributes.<p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
+
     setBinaryAttributesNominal(Utils.getFlag('N', options));
+
+    setTransformAllValues(Utils.getFlag('A', options));
 
     if (getInputFormat() != null)
       setInputFormat(getInputFormat());
@@ -204,12 +218,16 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
       options[current++] = "-N";
     }
 
+    if (getTransformAllValues()) {
+      options[current++] = "-A";
+    }
+
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
   }
-    
+
   /**
    * Returns the tip text for this property
    *
@@ -240,9 +258,41 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     m_Numeric = !bool;
   }
 
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String transformAllValuesTipText() {
+    return "Whether all nominal values are turned into new attributes, not only if there are more than 2.";
+  }
+
+  /**
+   * Gets if all nominal values are turned into new attributes, not only if
+   * there are more than 2.
+   *
+   * @return true all nominal values are transformed into new attributes
+   */
+  public boolean getTransformAllValues() {
+
+    return m_TransformAll;
+  }
+
+  /**
+   * Sets whether all nominal values are transformed into new attributes, not
+   * just if there are more than 2.
+   *
+   * @param bool true if all nominal value are transformed into new attributes
+   */
+  public void setTransformAllValues(boolean bool) {
+
+    m_TransformAll = bool;
+  }
+
   /** Computes average class values for each attribute and value */
   private void computeAverageClassValues() {
-    
+
     double totalCounts, sum;
     Instance instance;
     double [] counts;
@@ -325,7 +375,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
 	  (j == getInputFormat().classIndex())) {
 	newAtts.addElement(att.copy());
       } else {
-	if (att.numValues() <= 2) {
+	if ( (att.numValues() <= 2) && (!m_TransformAll) ) {
 	  if (m_Numeric) {
 	    newAtts.addElement(new Attribute(att.name()));
 	  } else {
@@ -425,7 +475,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    * @param instance the instance to convert
    */
   private void convertInstanceNominal(Instance instance) {
-  
+
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
 
@@ -435,7 +485,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
 	vals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
-	if (att.numValues() <= 2) {
+	if ( (att.numValues() <= 2) && (!m_TransformAll) ) {
 	  vals[attSoFar] = instance.value(j);
 	  attSoFar++;
 	} else {
@@ -475,7 +525,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    * @param instance the instance to convert
    */
   private void convertInstanceNumeric(Instance instance) {
-  
+
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
 
@@ -534,11 +584,3 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     }
   }
 }
-
-
-
-
-
-
-
-
