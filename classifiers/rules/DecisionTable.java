@@ -57,7 +57,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
@@ -1286,7 +1286,7 @@ public class DecisionTable extends Classifier
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
       return measureNumRules();
     } else {
       throw new IllegalArgumentException(additionalMeasureName 

@@ -65,7 +65,7 @@ import weka.classifiers.meta.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -503,7 +503,7 @@ public class AdditiveRegression extends Classifier
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareTo("measureNumIterations") == 0) {
+    if (additionalMeasureName.compareToIgnoreCase("measureNumIterations") == 0) {
       return measureNumIterations();
     } else {
       throw new IllegalArgumentException(additionalMeasureName 

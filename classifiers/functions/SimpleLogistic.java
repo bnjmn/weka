@@ -52,7 +52,7 @@ import java.util.*;
  * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class SimpleLogistic extends Classifier 
@@ -367,9 +367,9 @@ public class SimpleLogistic extends Classifier
      * @exception IllegalArgumentException if the named measure is not supported
      */
     public double getMeasure(String additionalMeasureName) {
-	if (additionalMeasureName.compareTo("measureAttributesUsed") == 0) {
+	if (additionalMeasureName.compareToIgnoreCase("measureAttributesUsed") == 0) {
 	    return measureAttributesUsed();
-      	} else if(additionalMeasureName.compareTo("measureNumIterations") == 0){
+      	} else if(additionalMeasureName.compareToIgnoreCase("measureNumIterations") == 0){
 	    return getNumRegressions();
 	} else {
 	    throw new IllegalArgumentException(additionalMeasureName 

@@ -67,7 +67,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -292,7 +292,7 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
    */
   public double getMeasure(String additionalMeasureName) {
     
-    if (additionalMeasureName.equals("measureOutOfBagError")) {
+    if (additionalMeasureName.equalsIgnoreCase("measureOutOfBagError")) {
       return measureOutOfBagError();
     }
     else {throw new IllegalArgumentException(additionalMeasureName 

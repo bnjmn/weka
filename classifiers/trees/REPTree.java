@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1520,7 +1520,7 @@ public class REPTree extends Classifier
    */
   public double getMeasure(String additionalMeasureName) {
     
-    if (additionalMeasureName.equals("measureTreeSize")) {
+    if (additionalMeasureName.equalsIgnoreCase("measureTreeSize")) {
       return (double) numNodes();
     }
     else {throw new IllegalArgumentException(additionalMeasureName 

@@ -47,7 +47,7 @@ import java.util.*;
  * Random number seed (default 1). <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RandomForest extends Classifier 
   implements OptionHandler, Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -200,7 +200,7 @@ public class RandomForest extends Classifier
    */
   public double getMeasure(String additionalMeasureName) {
     
-    if (additionalMeasureName.equals("measureOutOfBagError")) {
+    if (additionalMeasureName.equalsIgnoreCase("measureOutOfBagError")) {
       return measureOutOfBagError();
     }
     else {throw new IllegalArgumentException(additionalMeasureName 

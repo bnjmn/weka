@@ -68,7 +68,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class J48 extends Classifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -538,11 +538,11 @@ public class J48 extends Classifier implements OptionHandler,
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
       return measureNumRules();
-    } else if (additionalMeasureName.compareTo("measureTreeSize") == 0) {
+    } else if (additionalMeasureName.compareToIgnoreCase("measureTreeSize") == 0) {
       return measureTreeSize();
-    } else if (additionalMeasureName.compareTo("measureNumLeaves") == 0) {
+    } else if (additionalMeasureName.compareToIgnoreCase("measureNumLeaves") == 0) {
       return measureNumLeaves();
     } else {
       throw new IllegalArgumentException(additionalMeasureName 

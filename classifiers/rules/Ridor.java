@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 
 public class Ridor extends Classifier
@@ -1414,7 +1414,7 @@ public class Ridor extends Classifier
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareTo("measureNumRules") == 0) 
+    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) 
       return numRules();
     else 
       throw new IllegalArgumentException(additionalMeasureName+" not supported (Ripple down rule learner)");

@@ -38,7 +38,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -482,7 +482,7 @@ public abstract class M5Base extends Classifier
    */
   public double getMeasure(String additionalMeasureName) 
     {
-    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
       return measureNumRules();
     } else {
       throw new IllegalArgumentException(additionalMeasureName 
