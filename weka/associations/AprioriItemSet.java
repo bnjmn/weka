@@ -36,7 +36,7 @@ import weka.core.*;
  * association rules.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class AprioriItemSet extends ItemSet implements Serializable {
 
@@ -123,7 +123,7 @@ public class AprioriItemSet extends ItemSet implements Serializable {
 				   int premiseCount,
 				   int consequenceCount) {
     double num = 
-      (double)premiseCount * (double)(m_totalTransactions - consequenceCount) *
+      (double)premiseCount * (double)(m_totalTransactions - consequenceCount) /
        (double)m_totalTransactions;
     double denom = 
       ((premiseCount - consequence.m_counter)+1);
