@@ -24,10 +24,10 @@ package weka.classifiers.bayes;
 import java.util.*;
 import weka.core.*;
 import weka.estimators.*;
+import weka.filters.supervised.attribute.Discretize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.classifiers.*;
 import weka.classifiers.bayes.net.*;
-import weka.classifiers.bayes.net.ParentSet;
-import weka.classifiers.bayes.net.ADNode;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.classifiers.bayes.net.search.*;
 import weka.classifiers.bayes.net.search.score.*;
@@ -39,10 +39,14 @@ import weka.classifiers.bayes.net.estimate.*;
  * learning algorithms like K2 and B.
  * Works with nominal variables and no missing values only.
  * 
+ * For further documentation, see 
+ * <a href='http://www.cs.waikato.ac.nz/~remco/weka.pdf>Bayesian networks in Weka</a>
+ * user documentation.
+ * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
-public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable {
+public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
     static {
         try {
@@ -67,6 +71,14 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      */
     public Estimator[][] m_Distributions;
 
+
+   	/** filter used to quantize continuous variables, if any **/
+    Discretize m_DiscretizeFilter = null;
+    int m_nNonDiscreteAttribute = -1;
+
+	/** filter used to fill in missing values, if any **/
+	ReplaceMissingValues m_MissingValuesFilter = null;	
+	
     /**
      * The number of classes
      */
@@ -118,23 +130,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
             throw new UnsupportedClassTypeException("BayesNet: nominal class, please.");
         }
 
-        // check that all variables are nominal and that there
-        // are no missing values
-        Enumeration enum = instances.enumerateAttributes();
-
-        while (enum.hasMoreElements()) {
-            Attribute attribute = (Attribute) enum.nextElement();
-
-            if (attribute.type() != Attribute.NOMINAL) {
-                throw new UnsupportedAttributeTypeException("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
-            }
-            Enumeration enum2 = instances.enumerateInstances();
-            while (enum2.hasMoreElements()) {
-                if (((Instance) enum2.nextElement()).isMissing(attribute)) {
-                    throw new NoSupportForMissingValuesException("BayesNet: no missing values, please.");
-                }
-            }
-        }
+		// ensure we have a data set with discrete variables only and with no missing values
+		instances = normalizeDataSet(instances);
 
         // Copy the instances
         m_Instances = new Instances(instances);
@@ -162,7 +159,85 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
         m_ADTree = null;
     } // buildClassifier
 
-    /**stop
+	/** ensure that all variables are nominal and that there are no missing values
+	 * @param instances: data set to check and quantize and/or fill in missing values
+	 * @return filtered instances
+	 * @throws Exception
+	 */
+	Instances normalizeDataSet(Instances instances) throws Exception {
+		m_DiscretizeFilter = null;
+		m_MissingValuesFilter = null;
+
+		boolean bHasNonNominal = false;
+		boolean bHasMissingValues = false;
+
+		Enumeration enum = instances.enumerateAttributes();		
+		while (enum.hasMoreElements()) {
+			Attribute attribute = (Attribute) enum.nextElement();
+		
+			if (attribute.type() != Attribute.NOMINAL) {
+				m_nNonDiscreteAttribute = attribute.index();
+				bHasNonNominal = true;
+				//throw new UnsupportedAttributeTypeException("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
+			}
+			Enumeration enum2 = instances.enumerateInstances();
+			while (enum2.hasMoreElements()) {
+				if (((Instance) enum2.nextElement()).isMissing(attribute)) {
+					bHasMissingValues = true;
+					// throw new NoSupportForMissingValuesException("BayesNet: no missing values, please.");
+				}
+			}
+		}
+		        
+		if (bHasNonNominal) {
+			System.err.println("Warning: discretizing data set");
+			m_DiscretizeFilter = new Discretize();
+			m_DiscretizeFilter.setInputFormat(instances);
+			instances = m_DiscretizeFilter.useFilter(instances, m_DiscretizeFilter);
+		}
+
+		if (bHasMissingValues) {
+			System.err.println("Warning: filling in missing values in data set");
+			m_MissingValuesFilter = new ReplaceMissingValues();
+			m_MissingValuesFilter.setInputFormat(instances);
+			instances = m_MissingValuesFilter.useFilter(instances, m_MissingValuesFilter);
+		}
+		return instances;
+	} // normalizeDataSet
+
+	/** ensure that all variables are nominal and that there are no missing values
+	 * @param instance: instance to check and quantize and/or fill in missing values
+	 * @return filtered instance
+	 * @throws Exception
+	 */
+	Instance normalizeInstance(Instance instance) throws Exception {
+		if ((m_DiscretizeFilter != null) &&
+			(instance.attribute(m_nNonDiscreteAttribute).type() != Attribute.NOMINAL)) {
+			m_DiscretizeFilter.input(instance);
+			instance = m_DiscretizeFilter.output();
+		}
+		if (m_MissingValuesFilter != null) {
+			m_MissingValuesFilter.input(instance);
+			instance = m_MissingValuesFilter.output();
+		} else {
+			// is there a missing value in this instance?
+			// this can happen when there is no missing value in the training set
+			for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+				if (iAttribute != instance.classIndex() && instance.isMissing(iAttribute)) {
+					System.err.println("Warning: Found missing value in test set, filling in values.");
+					m_MissingValuesFilter = new ReplaceMissingValues();
+					m_MissingValuesFilter.setInputFormat(m_Instances);
+					m_MissingValuesFilter.useFilter(m_Instances, m_MissingValuesFilter);
+					m_MissingValuesFilter.input(instance);
+					instance = m_MissingValuesFilter.output();
+					iAttribute = m_Instances.numAttributes();
+				}
+			}
+		}
+		return instance;
+	} // normalizeInstance
+
+    /**
      * Init structure initializes the structure to an empty graph or a Naive Bayes
      * graph (depending on the -N flag).
      */
@@ -188,7 +263,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
         for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
             m_ParentSets[iAttribute] = new ParentSet(m_Instances.numAttributes());
         }
-    }
+    } // initStructure
 
     /**
      * buildStructure determines the network structure/graph of the network.
@@ -221,7 +296,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * the model.
      */
     public void updateClassifier(Instance instance) throws Exception {
-        m_BayesNetEstimator.updateClassifier(this, instance);
+		instance = normalizeInstance(instance);
+    	m_BayesNetEstimator.updateClassifier(this, instance);
     } // updateClassifier
 
     /**
@@ -233,9 +309,10 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * @exception Exception if there is a problem generating the prediction
      */
     public double[] distributionForInstance(Instance instance) throws Exception {
-        return m_BayesNetEstimator.distributionForInstance(this, instance);
-    } // distributionForInstance
-
+    	instance = normalizeInstance(instance);
+		return m_BayesNetEstimator.distributionForInstance(this, instance);
+	} // distributionForInstance
+   	
     /**
      * Calculates the counts for Dirichlet distribution for the 
      * class membership probabilities for the given test instance.
@@ -507,7 +584,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
             text.append(": No model built yet.");
         } else {
 
-            // TODO: flatten BayesNet down to text
+            // flatten BayesNet down to text
             text.append("\n#attributes=");
             text.append(m_Instances.numAttributes());
             text.append(" #classindex=");
@@ -534,12 +611,11 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
                 // text.append("\n");
             }
 
-//            text.append("LogScore Bayes: " + logScore(Scoreable.BAYES) + "\n");
-//            text.append("LogScore MDL: " + logScore(Scoreable.MDL) + "\n");
-//            text.append("LogScore ENTROPY: " + logScore(Scoreable.ENTROPY) + "\n");
-//            text.append("LogScore AIC: " + logScore(Scoreable.AIC) + "\n");
-//            text.append("LogScore CROSS_CLASSIC: " + logScore(Scoreable.CROSS_CLASSIC) + "\n");
-//            text.append("LogScore CROSS_BAYES: " + logScore(Scoreable.CROSS_BAYES) + "\n");
+			text.append("LogScore Bayes: " + measureBayesScore() + "\n");
+			text.append("LogScore BDeu: " + measureBDeuScore() + "\n");
+            text.append("LogScore MDL: " + measureMDLScore() + "\n");
+            text.append("LogScore ENTROPY: " + measureEntropyScore() + "\n");
+            text.append("LogScore AIC: " + measureAICScore() + "\n");
 
             if (m_otherBayesNet != null) {
                 text.append(
@@ -552,12 +628,6 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
                         + "\n");
                 text.append("Divergence: " + m_otherBayesNet.divergence(this) + "\n");
             }
-
-//            String[] options = getOptions();
-//
-//            for (int iOption = 0; iOption < 1; iOption++) {
-//                text.append(options[iOption]);
-//            }
         }
 
         return text.toString();
@@ -813,5 +883,116 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 	 * @return ADTree strucrture
 	 */
 	public ADNode getADTree() { return m_ADTree;}
+
+	// implementation of AdditionalMeasureProducer interface
+	  /**
+	   * Returns an enumeration of the measure names. Additional measures
+	   * must follow the naming convention of starting with "measure", eg.
+	   * double measureBlah()
+	   * @return an enumeration of the measure names
+	   */
+	  public Enumeration enumerateMeasures() {
+	    Vector newVector = new Vector(4);
+	    newVector.addElement("measureExtraArcs");
+	    newVector.addElement("measureMissingArcs");
+	    newVector.addElement("measureReversedArcs");
+	    newVector.addElement("measureDivergence");
+	    newVector.addElement("measureBayesScore");
+	    newVector.addElement("measureBDeuScore");
+	    newVector.addElement("measureMDLScore");
+	    newVector.addElement("measureAICScore");
+	    newVector.addElement("measureEntropyScore");
+	    return newVector.elements();
+	  } // enumerateMeasures
+
+	  public double measureExtraArcs() {
+	  	if (m_otherBayesNet != null) {
+	  		return m_otherBayesNet.extraArcs(this); 
+	  	}
+	  	return 0;
+	  } // measureExtraArcs
+
+	  public double measureMissingArcs() {
+	  	if (m_otherBayesNet != null) {
+	  		return m_otherBayesNet.missingArcs(this); 
+	  	}
+	  	return 0;
+	  } // measureMissingArcs
+
+  	  public double measureReversedArcs() {
+	  	if (m_otherBayesNet != null) {
+	  		return m_otherBayesNet.reversedArcs(this); 
+	  	}
+	  	return 0;
+	  } // measureReversedArcs
+	  	  
+  	  public double measureDivergence() {
+	  	if (m_otherBayesNet != null) {
+	  		return m_otherBayesNet.divergence(this); 
+	  	}
+	  	return 0;
+	  } // measureDivergence
+
+  	  public double measureBayesScore() {
+  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	return s.logScore(Scoreable.BAYES);
+  	  } // measureBayesScore
+
+  	  public double measureBDeuScore() {
+  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	return s.logScore(Scoreable.BDeu);
+  	  } // measureBDeuScore
+
+  	  public double measureMDLScore() {
+  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	return s.logScore(Scoreable.MDL);
+  	  } // measureMDLScore
+
+  	  public double measureAICScore() {
+  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	return s.logScore(Scoreable.AIC);
+  	  } // measureAICScore
+
+  	  public double measureEntropyScore() {
+  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	return s.logScore(Scoreable.ENTROPY);
+  	  } // measureEntropyScore
+  	  
+  	  /**
+	   * Returns the value of the named measure
+	   * @param measureName the name of the measure to query for its value
+	   * @return the value of the named measure
+	   * @exception IllegalArgumentException if the named measure is not supported
+	   */
+	  public double getMeasure(String measureName) {
+	  	if (measureName.equals("measureExtraArcs")) {
+	  		return measureExtraArcs();
+	  	}
+	  	if (measureName.equals("measureMissingArcs")) {
+	  		return measureMissingArcs();
+	  	}
+	  	if (measureName.equals("measureReversedArcs")) {
+	  		return measureReversedArcs();
+	  	}
+	  	if (measureName.equals("measureDivergence")) {
+	  		return measureDivergence();
+	  	}
+	  	if (measureName.equals("measureBayesScore")) {
+	  		return measureBayesScore();
+	  	}
+	  	if (measureName.equals("measureBDeuScore")) {
+	  		return measureBDeuScore();
+	  	}
+	  	if (measureName.equals("measureMDLScore")) {
+	  		return measureMDLScore();
+	  	}
+	  	if (measureName.equals("measureAICScore")) {
+	  		return measureAICScore();
+	  	}
+	  	if (measureName.equals("measureEntropyScore")) {
+	  		return measureEntropyScore();
+	  	}
+	  	return 0;
+	  } // getMeasure
 
 } // class BayesNet
