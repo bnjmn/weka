@@ -35,7 +35,7 @@ import weka.core.*;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -131,7 +131,6 @@ public class PairedCorrectedTTester extends PairedTTester {
       pairedStats.add(value1, value2);
     }
     pairedStats.calculateDerived();
-    System.err.println("Differences stats:\n" + pairedStats.differencesStats);
     return pairedStats;
   }  
 }
