@@ -50,7 +50,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -73,8 +73,11 @@ public class Attribute implements Copyable, Serializable {
   /** The attribute's type. */
   private int m_Type;
 
-  /** The attribute's values (if nominal). */
+  /** The attribute's values (if nominal or string). */
   private FastVector m_Values;
+
+  /** Mapping of values to indices (if nominal or string). */
+  private Hashtable m_Hashtable;
 
   /** The attribute's index. */
   private int m_Index;
@@ -89,6 +92,7 @@ public class Attribute implements Copyable, Serializable {
     m_Name = attributeName;
     m_Index = -1;
     m_Values = null;
+    m_Hashtable = null;
     m_Type = NUMERIC;
   }
 
@@ -108,9 +112,14 @@ public class Attribute implements Copyable, Serializable {
     m_Index = -1;
     if (attributeValues == null) {
       m_Values = new FastVector();
+      m_Hashtable = new Hashtable();
       m_Type = STRING;
     } else {
       m_Values = (FastVector) attributeValues.copy();
+      m_Hashtable = new Hashtable(m_Values.size());
+      for (int i = 0; i < m_Values.size(); i++) {
+	m_Hashtable.put(m_Values.elementAt(i), new Integer(i));
+      }
       m_Type = NOMINAL;
     }
   }
@@ -129,6 +138,7 @@ public class Attribute implements Copyable, Serializable {
       return copy;
     copy.m_Type = m_Type;
     copy.m_Values = m_Values;
+    copy.m_Hashtable = m_Hashtable;
  
     return copy;
   }
@@ -224,7 +234,7 @@ public class Attribute implements Copyable, Serializable {
                            + " searching uncompressed.");
       }
     }
-    return m_Values.indexOf(store);
+    return ((Integer)m_Hashtable.get(store)).intValue();
   }
 
   /**
@@ -380,8 +390,7 @@ public class Attribute implements Copyable, Serializable {
 
   /**
    * Adds a string value to the list of valid strings for attributes
-   * of type STRING and returns the index of the string. No check is
-   * done to see whether the string value is already present.
+   * of type STRING and returns the index of the string.
    *
    * @param value The string value to add
    * @return the index assigned to the string, or -1 if the attribute is not
@@ -402,15 +411,20 @@ public class Attribute implements Copyable, Serializable {
                            + " storing uncompressed.");
       }
     }
-    int existing = m_Values.size();
-    m_Values.addElement(store);
-    return existing;
+    Integer index = (Integer)m_Hashtable.get(store);
+    if (index != null) {
+      return index.intValue();
+    } else {
+      int intIndex = m_Values.size();
+      m_Values.addElement(store);
+      m_Hashtable.put(store, new Integer(intIndex));
+      return intIndex;
+    }
   }
 
   /**
    * Adds a string value to the list of valid strings for attributes
-   * of type STRING and returns the index of the string. No check is
-   * done to see whether the string value is already present. This method is
+   * of type STRING and returns the index of the string. This method is
    * more efficient than addStringValue(String) for long strings.
    *
    * @param src The Attribute containing the string value to add.
@@ -424,9 +438,15 @@ public class Attribute implements Copyable, Serializable {
       return -1;
     }
     Object store = src.m_Values.elementAt(index);
-    int existing = m_Values.size();
-    m_Values.addElement(store);
-    return existing;
+    Integer oldIndex = (Integer)m_Hashtable.get(store);
+    if (oldIndex != null) {
+      return oldIndex.intValue();
+    } else {
+      int intIndex = m_Values.size();
+      m_Values.addElement(store);
+      m_Hashtable.put(store, new Integer(intIndex));
+      return intIndex;
+    }
   }
 
   /**
@@ -437,7 +457,8 @@ public class Attribute implements Copyable, Serializable {
    */
   final void addValue(String value) {
 
-    freshAttributeValues();
+    m_Values = (FastVector)m_Values.copy();
+    m_Hashtable = (Hashtable)m_Hashtable.clone();
     forceAddValue(value);
   }
 
@@ -456,6 +477,7 @@ public class Attribute implements Copyable, Serializable {
       return copy;
     copy.m_Type = m_Type;
     copy.m_Values = m_Values;
+    copy.m_Hashtable = m_Hashtable;
  
     return copy;
   }
@@ -473,8 +495,21 @@ public class Attribute implements Copyable, Serializable {
       throw new Exception("Can only remove value of"+
 			  "nominal or string attribute!");
     else {
-      freshAttributeValues();
+      m_Values = (FastVector)m_Values.copy();
       m_Values.removeElementAt(index);
+      Hashtable hash = new Hashtable(m_Hashtable.size());
+      Enumeration enum = hash.keys();
+      while (enum.hasMoreElements()) {
+	String string = (String)enum.nextElement();
+	Integer valIndexObject = (Integer)m_Hashtable.get(string);
+	int valIndex = valIndexObject.intValue();
+	if (valIndex > index) {
+	  hash.put(string, new Integer(valIndex - 1));
+	} else if (valIndex < index) {
+	  hash.put(string, valIndexObject);
+	}
+      }
+      m_Hashtable = hash;
     }
   }
 
@@ -495,6 +530,7 @@ public class Attribute implements Copyable, Serializable {
       }
     }
     m_Values.addElement(store);
+    m_Hashtable.put(store, new Integer(m_Values.size() - 1));
   }
 
   /**
@@ -522,7 +558,8 @@ public class Attribute implements Copyable, Serializable {
       throw new Exception("Can only set value of nominal"+
 			  "or string attribute!");
     } else {
-      freshAttributeValues();
+      m_Values = (FastVector)m_Values.copy();
+      m_Hashtable = (Hashtable)m_Hashtable.clone();
       Object store = string;
       if (string.length() > STRING_COMPRESS_THRESHOLD) {
         try {
@@ -532,16 +569,10 @@ public class Attribute implements Copyable, Serializable {
                              + " storing uncompressed.");
         }
       }
+      m_Hashtable.remove(m_Values.elementAt(index));
       m_Values.setElementAt(store, index);
+      m_Hashtable.put(store, new Integer(index));
     }
-  }
-
-  /**
-   * Produces a fresh vector of attribute values.
-   */
-  private void freshAttributeValues() {
-
-    m_Values = (FastVector)m_Values.copy();
   }
 
   /**
