@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.3 $
+   $Revision: 1.4 $
   ===========================================================================
 -->
 
@@ -212,7 +212,7 @@
    description="Make a release (needs more work) in ${release}. Run with -Drelease=&lt;path to release directory&gt;.">
     <!-- copy the docs to dist/docs -->
 
-    <copy todir="${release}/docs" >
+    <copy todir="${release}/doc" >
        <fileset dir="${path_modifier}${doc}"/>
     </copy>
     <copy todir="${release}">
