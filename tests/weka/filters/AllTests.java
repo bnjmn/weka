@@ -10,7 +10,7 @@ import junit.framework.TestSuite;
  * java weka.filters.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AllTests extends TestSuite {
 
@@ -24,7 +24,7 @@ public class AllTests extends TestSuite {
     suite.addTest(AttributeTypeFilterTest.suite());
     suite.addTest(CopyAttributesFilterTest.suite());
     suite.addTest(DiscretizeFilterTest.suite());
-    suite.addTest(EmptyAttributeFilterTest.suite());
+    suite.addTest(UselessAttributeFilterTest.suite());
     suite.addTest(FirstOrderFilterTest.suite());
     suite.addTest(InstanceFilterTest.suite());
     suite.addTest(MakeIndicatorFilterTest.suite());
