@@ -56,7 +56,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class GUIChooser extends JFrame {
 
@@ -214,6 +214,8 @@ public class GUIChooser extends JFrame {
 	    public void windowClosing(WindowEvent w) {
 	      m_KnowledgeFlowFrame.dispose();
 	      m_KnowledgeFlowFrame = null;
+              weka.gui.beans.BeanConnection.reset();
+              weka.gui.beans.BeanInstance.reset(null);
 	      m_KnowledgeFlowBut.setEnabled(true);
 	      checkExit();
 	    }
