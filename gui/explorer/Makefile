@@ -6,7 +6,8 @@ SOURCES = \
 	PreprocessPanel.java \
 	AttributeSelectionPanel.java \
 	AssociationsPanel.java \
-	ClustererPanel.java
+	ClustererPanel.java \
+	VisualizePanel.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../../..
