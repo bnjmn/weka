@@ -29,20 +29,38 @@ import javax.swing.SwingConstants;
 import java.util.Vector;
 import java.awt.*;
 import java.io.Serializable;
+import java.beans.beancontext.*;
+import java.beans.*;
 
 
 /**
  * Abstract class for objects that can provide instances from some source
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see DataSource
  * @see Serializable
  */
 public abstract class AbstractDataSource extends JPanel
-  implements DataSource, Visible, Serializable {
+  implements DataSource, Visible, Serializable, BeanContextChild {
+
+  /**
+   * True if this bean's appearance is the design mode appearance
+   */
+  protected boolean m_design;
+  
+  /**
+   * BeanContex that this bean might be contained within
+   */
+  protected transient BeanContext m_beanContext = null;
+
+  /**
+   * BeanContextChild support
+   */
+  protected BeanContextChildSupport m_bcSupport = 
+    new BeanContextChildSupport(this);
 
   /**
    * Default visual for data sources
@@ -129,4 +147,74 @@ public abstract class AbstractDataSource extends JPanel
     m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataSource.gif",
 		       BeanVisual.ICON_PATH+"DefaultDataSource_animated.gif");
   }
+
+  /**
+   * Set a bean context for this bean
+   *
+   * @param bc a <code>BeanContext</code> value
+   */
+  public void setBeanContext(BeanContext bc) {
+    m_beanContext = bc;
+    m_design = m_beanContext.isDesignTime();
+  }
+
+  /**
+   * Return the bean context (if any) that this bean is embedded in
+   *
+   * @return a <code>BeanContext</code> value
+   */
+  public BeanContext getBeanContext() {
+    return m_beanContext;
+  }
+
+  /**
+   * Add a property change listener to this bean
+   *
+   * @param name the name of the property of interest
+   * @param pcl a <code>PropertyChangeListener</code> value
+   */
+  public void addPropertyChangeListener(String name,
+					PropertyChangeListener pcl) {
+    m_bcSupport.addPropertyChangeListener(name, pcl);
+  }
+
+  /**
+   * Remove a property change listener from this bean
+   *
+   * @param name the name of the property of interest
+   * @param pcl a <code>PropertyChangeListener</code> value
+   */
+  public void removePropertyChangeListener(String name,
+					   PropertyChangeListener pcl) {
+    m_bcSupport.removePropertyChangeListener(name, pcl);
+  }
+
+  /**
+   * Add a vetoable change listener to this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void addVetoableChangeListener(String name,
+				       VetoableChangeListener vcl) {
+    m_bcSupport.addVetoableChangeListener(name, vcl);
+  }
+  
+  /**
+   * Remove a vetoable change listener from this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void removeVetoableChangeListener(String name,
+					   VetoableChangeListener vcl) {
+    m_bcSupport.removeVetoableChangeListener(name, vcl);
+  }
 }
+
+
+
+
+
+
+
