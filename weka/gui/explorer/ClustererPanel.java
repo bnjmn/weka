@@ -108,7 +108,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -916,6 +916,7 @@ public class ClustererPanel extends JPanel {
 	    if (predData != null) {
 	      m_CurrentVis = new VisualizePanel();
 	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
+	      m_CurrentVis.setLog(m_Log);
 	      predData.setPlotName(name+" ("+inst.relationName()+")");
 	      
 	      try {
