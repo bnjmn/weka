@@ -66,7 +66,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -660,11 +660,12 @@ public class PairedTTester implements OptionHandler {
    * j performed significantly better than resultset i.
    * @exception Exception if an error occurs
    */
-  public int [][] multiResultsetWins(int comparisonColumn)
+  public int [][] multiResultsetWins(int comparisonColumn, int [][] nonSigWin)
     throws Exception {
 
     int numResultsets = getNumResultsets();
     int [][] win = new int [numResultsets][numResultsets];
+    //    int [][] nonSigWin = new int [numResultsets][numResultsets];
     for (int i = 0; i < numResultsets; i++) {
       for (int j = i + 1; j < numResultsets; j++) {
 	System.err.print("Comparing (" + (i + 1) + ") with ("
@@ -679,6 +680,12 @@ public class PairedTTester implements OptionHandler {
 	      win[i][j]++;
 	    } else if (pairedStats.differencesSignificance > 0) {
 	      win[j][i]++;
+	    }
+
+	    if (pairedStats.differencesStats.mean < 0) {
+	      nonSigWin[i][j]++;
+	    } else if (pairedStats.differencesStats.mean > 0) {
+	      nonSigWin[j][i]++;
 	    }
 	  } catch (Exception ex) {
 	    ex.printStackTrace();
@@ -702,8 +709,10 @@ public class PairedTTester implements OptionHandler {
   public String multiResultsetSummary(int comparisonColumn)
     throws Exception {
     
-    int [][] win = multiResultsetWins(comparisonColumn);
     int numResultsets = getNumResultsets();
+    int [][] nonSigWin = new int [numResultsets][numResultsets];
+
+    int [][] win = multiResultsetWins(comparisonColumn, nonSigWin);
     int resultsetLength = 1 + Math.max((int)(Math.log(numResultsets)
 					     / Math.log(10)),
 				       (int)(Math.log(getNumDatasets()) / 
@@ -712,10 +721,11 @@ public class PairedTTester implements OptionHandler {
     String titles = "";
 
     if (m_latexOutput) {
+      result += "{\\centering\n";
       result += "\\begin{table}[thb]\n\\caption{\\label{labelname}"
 		  +"Table Caption}\n";
       result += "\\footnotesize\n";
-      result += "{\\centering \\begin{tabular}{l";
+      result += "\\begin{tabular}{l";
     }
 
     for (int i = 0; i < numResultsets; i++) {
@@ -724,10 +734,10 @@ public class PairedTTester implements OptionHandler {
 	result += "c";
       }
       titles += ' ' + Utils.padLeft("" + (char)((int)'a' + i % 26),
-				    resultsetLength);
+				    resultsetLength * 2 + 3);
     }
     if (m_latexOutput) {
-      result += "}}\\\\\n\\hline\n";
+      result += "}\\\\\n\\hline\n";
       result += titles + " \\\\\n\\hline\n";
     } else {
       result += titles + "  (No. of datasets where [col] >> [row])\n";
@@ -741,13 +751,14 @@ public class PairedTTester implements OptionHandler {
 	  if (m_latexOutput) {
 	    result += " & - ";
 	  } else {
-	    result += ' ' + Utils.padLeft("-", resultsetLength);
+	    result += ' ' + Utils.padLeft("-", resultsetLength * 2 + 3);
 	  }
 	} else {
 	  if (m_latexOutput) {
-	    result += "& " + win[i][j] + ' ';
+	    result += "& " + nonSigWin[i][j] + " (" + win[i][j] + ") ";
 	  } else {
-	    result += ' ' + Utils.padLeft("" + win[i][j], resultsetLength);
+	    result += ' ' + Utils.padLeft("" + nonSigWin[i][j] +  " (" + win[i][j] + ")"
+					  , resultsetLength * 2 + 3);
 	  }
 	}
       }
@@ -760,16 +771,19 @@ public class PairedTTester implements OptionHandler {
     }
 
     if (m_latexOutput) {
-      result += "\\hline\n\\end{tabular} \\footnotesize \\par}\n\\end{table}";
+      result += "\\hline\n\\end{tabular} \\footnotesize \\par\n\\end{table}}";
     }
     return result;
   }
 
   public String multiResultsetRanking(int comparisonColumn)
     throws Exception {
-
-    int [][] win = multiResultsetWins(comparisonColumn);
+    
     int numResultsets = getNumResultsets();
+    int [][] nonSigWin = new int [numResultsets][numResultsets];
+
+    int [][] win = multiResultsetWins(comparisonColumn, nonSigWin);
+
     int [] wins = new int [numResultsets];
     int [] losses = new int [numResultsets];
     int [] diff = new int [numResultsets];
