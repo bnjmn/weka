@@ -22,7 +22,8 @@ import java.io.*;
 import java.util.*;
 
 /** 
- * Class for handling an attribute.<p>
+ * Class for handling an attribute. Once an attribute has been created,
+ * it can't be changed. <p>
  *
  * Three attribute types are supported:
  * <ul>
@@ -61,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Attribute implements Copyable, Serializable {
 
