@@ -15,7 +15,7 @@ SOURCES = Classifier.java DistributionClassifier.java \
 	ThresholdSelector.java CostMatrix.java VFI.java AdditiveRegression.java \
 	CheckClassifier.java DistributionMetaClassifier.java \
 	IterativeClassifier.java Cleanser.java LeastMedSq.java \
-	OrdinalClassClassifier.java
+	OrdinalClassClassifier.java BVDecompose.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
