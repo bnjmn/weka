@@ -70,7 +70,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.StackingC,\
  weka.classifiers.meta.ThresholdSelector,\
  weka.classifiers.meta.Vote,\
- weka.classifiers.misc.FLR,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.VFI,\
  weka.classifiers.trees.ADTree,\

@@ -27,8 +27,6 @@ package weka.gui.experiment;
 import weka.core.Tag;
 import weka.core.SelectedTag;
 import weka.core.Utils;
-import weka.core.xml.KOML;
-import weka.experiment.xml.XMLExperiment;
 
 import weka.gui.ExtensionFileFilter;
 import weka.gui.SelectedTagEditor;
@@ -84,15 +82,10 @@ import javax.swing.ButtonGroup;
 
 /** 
  * This panel controls the configuration of an experiment.
- * <p>
- * If <a href="http://koala.ilog.fr/XML/serialization/" target="_blank">KOML</a>
- * is in the classpath the experiments can also be saved to XML instead of a
- * binary format.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.23.2.1 $
  */
 public class SetupPanel extends JPanel {
 
@@ -111,17 +104,7 @@ public class SetupPanel extends JPanel {
   /** A filter to ensure only experiment files get shown in the chooser */
   protected FileFilter m_ExpFilter = 
     new ExtensionFileFilter(Experiment.FILE_EXTENSION, 
-                            "Experiment configuration files (*" + Experiment.FILE_EXTENSION + ")");
-
-  /** A filter to ensure only experiment (in KOML format) files get shown in the chooser */
-  protected FileFilter m_KOMLFilter = 
-    new ExtensionFileFilter(KOML.FILE_EXTENSION, 
-                            "Experiment configuration files (*" + KOML.FILE_EXTENSION + ")");
-
-  /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
-  protected FileFilter m_XMLFilter = 
-    new ExtensionFileFilter(".xml", 
-                            "Experiment configuration files (*.xml)");
+                            "Experiment configuration files");
 
   /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
@@ -278,10 +261,6 @@ public class SetupPanel extends JPanel {
 	openExperiment();
       }
     });
-    m_FileChooser.addChoosableFileFilter(m_ExpFilter);
-    if (KOML.isPresent())
-       m_FileChooser.addChoosableFileFilter(m_KOMLFilter);
-    m_FileChooser.addChoosableFileFilter(m_XMLFilter);
     m_FileChooser.setFileFilter(m_ExpFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     
@@ -506,34 +485,16 @@ public class SetupPanel extends JPanel {
       return;
     }
     File expFile = m_FileChooser.getSelectedFile();
-    if ( !(    (expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION))
-          || (KOML.isPresent() && expFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
-          || (expFile.getName().toLowerCase().endsWith(".xml")) ) )
-    {
-       expFile = new File(expFile.getParent(), expFile.getName()
-                          + Experiment.FILE_EXTENSION);
+    if (!expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION)) {
+      expFile = new File(expFile.getParent(), expFile.getName()
+                         + Experiment.FILE_EXTENSION);
     }
     try {
-      Experiment exp; 
-      
-      // KOML?
-      if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-         exp = (Experiment) KOML.read(expFile.getAbsolutePath());
-      }
-      else
-      // XML?
-      if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
-         XMLExperiment xml = new XMLExperiment(); 
-         exp = (Experiment) xml.read(expFile);
-      }
-      // binary
-      else {
-         FileInputStream fi = new FileInputStream(expFile);
-         ObjectInputStream oi = new ObjectInputStream(
-                                new BufferedInputStream(fi));
-         exp = (Experiment)oi.readObject();
-         oi.close();
-      }
+      FileInputStream fi = new FileInputStream(expFile);
+      ObjectInputStream oi = new ObjectInputStream(
+			     new BufferedInputStream(fi));
+      Experiment exp = (Experiment)oi.readObject();
+      oi.close();
       setExperiment(exp);
       System.err.println("Opened experiment:\n" + m_Exp);
     } catch (Exception ex) {
@@ -558,32 +519,16 @@ public class SetupPanel extends JPanel {
       return;
     }
     File expFile = m_FileChooser.getSelectedFile();
-    if ( !(    (expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION))
-          || (KOML.isPresent() && expFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
-          || (expFile.getName().toLowerCase().endsWith(".xml")) ) )
-    {
-       expFile = new File(expFile.getParent(), expFile.getName()
-                          + Experiment.FILE_EXTENSION);
+    if (!expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION)) {
+      expFile = new File(expFile.getParent(), expFile.getName() 
+                         + Experiment.FILE_EXTENSION);
     }
     try {
-      // KOML?
-      if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-         KOML.write(expFile.getAbsolutePath(), m_Exp);
-      }
-      else
-      // XML?
-      if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
-         XMLExperiment xml = new XMLExperiment(); 
-         xml.write(expFile, m_Exp);
-      }
-      // binary
-      else {
-         FileOutputStream fo = new FileOutputStream(expFile);
-         ObjectOutputStream oo = new ObjectOutputStream(
-                                 new BufferedOutputStream(fo));
-         oo.writeObject(m_Exp);
-         oo.close();
-      }
+      FileOutputStream fo = new FileOutputStream(expFile);
+      ObjectOutputStream oo = new ObjectOutputStream(
+			      new BufferedOutputStream(fo));
+      oo.writeObject(m_Exp);
+      oo.close();
       System.err.println("Saved experiment:\n" + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();

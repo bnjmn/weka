@@ -29,10 +29,6 @@ import weka.core.Utils;
 import weka.core.Option;
 import weka.core.FastVector;
 import weka.core.Queue;
-import weka.core.xml.KOML;
-import weka.core.xml.XMLOptions;
-import weka.experiment.xml.XMLExperiment;
-
 import java.rmi.*;
 
 import java.io.Serializable;
@@ -105,7 +101,7 @@ import java.io.BufferedOutputStream;
  * file. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.13.2.1 $
  */
 public class RemoteExperiment extends Experiment {
 
@@ -194,16 +190,7 @@ public class RemoteExperiment extends Experiment {
   public void setSplitByDataSet(boolean sd) {
     m_splitByDataSet = sd;
   }
-  
-  /**
-   * Construct a new RemoteExperiment using an empty Experiment as base 
-   * Experiment
-   * @exception Exception if the base experiment is null
-   */
-  public RemoteExperiment() throws Exception {
-     this(new Experiment());
-  }
-  
+    
   /**
    * Construct a new RemoteExperiment using a base Experiment
    * @param base the base experiment to use
@@ -718,14 +705,6 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Set the list of remote host names
-   * @param list the list of remote host names
-   */
-  public void setRemoteHosts(DefaultListModel list) {
-    m_remoteHosts = list;
-  }
-
-  /**
    * Overides toString in Experiment
    * @return a description of this remote experiment
    */
@@ -759,12 +738,6 @@ public class RemoteExperiment extends Experiment {
 
     try {
       RemoteExperiment exp = null;
-
-      // get options from XML?
-      String xmlOption = Utils.getOption("xml", args);
-      if (!xmlOption.equals(""))
-         args = new XMLOptions(xmlOption).toArray();
-      
       Experiment base = null;
       String expFile = Utils.getOption('l', args);
       String saveFile = Utils.getOption('s', args);
@@ -791,47 +764,29 @@ public class RemoteExperiment extends Experiment {
 	    + "\tSave experiment to file after setting other options\n"
 	    + "\t(default don't save)\n"
 	    + "-h <remote host name>\n"
-	    + "\tHost to run experiment on (may be specified more than once\n"
-	    + "\tfor multiple remote hosts)\n"
+	    +"\tHost to run experiment on (may be specified more than once\n"
+	    +"\tfor multiple remote hosts)\n"
 	    + "-r \n"
-	    + "\tRun experiment on (default don't run)\n"
-       + "-xml <filename | xml-string>\n"
-       + "\tget options from XML-Data instead from parameters\n"
-       + "\n";
-	  Enumeration enm = ((OptionHandler)base).listOptions();
-	  while (enm.hasMoreElements()) {
-	    Option option = (Option) enm.nextElement();
+	    + "\tRun experiment on (default don't run)\n\n";
+	  Enumeration enu = ((OptionHandler)base).listOptions();
+	  while (enu.hasMoreElements()) {
+	    Option option = (Option) enu.nextElement();
 	    result += option.synopsis() + "\n";
 	    result += option.description() + "\n";
 	  }
 	  throw new Exception(result + "\n" + ex.getMessage());
 	}
       } else {
-         Object tmp;
-         
-         // KOML?
-         if ( (KOML.isPresent()) && (expFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-            tmp = KOML.read(expFile);
-         }
-         else
-         // XML?
-         if (expFile.toLowerCase().endsWith(".xml")) {
-            XMLExperiment xml = new XMLExperiment(); 
-            tmp = xml.read(expFile);
-         }
-         // binary
-         else {
-            FileInputStream fi = new FileInputStream(expFile);
-            ObjectInputStream oi = new ObjectInputStream(
-                                   new BufferedInputStream(fi));
-            tmp = oi.readObject();
-            oi.close();
-         }
+	FileInputStream fi = new FileInputStream(expFile);
+	ObjectInputStream oi = new ObjectInputStream(
+			       new BufferedInputStream(fi));
+	Object tmp = oi.readObject();
 	if (tmp instanceof RemoteExperiment) {
 	  exp = (RemoteExperiment)tmp;
 	} else {
 	  base = (Experiment)tmp;
 	}
+	oi.close();
       }
       if (base != null) {
 	exp = new RemoteExperiment(base);
@@ -842,24 +797,11 @@ public class RemoteExperiment extends Experiment {
       System.err.println("Experiment:\n" + exp.toString());
 
       if (saveFile.length() != 0) {
-         // KOML?
-         if ( (KOML.isPresent()) && (saveFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-            KOML.write(saveFile, exp);
-         }
-         else
-         // XML?
-         if (saveFile.toLowerCase().endsWith(".xml")) {
-            XMLExperiment xml = new XMLExperiment(); 
-            xml.write(saveFile, exp);
-         }
-         // binary
-         else {
-            FileOutputStream fo = new FileOutputStream(saveFile);
-            ObjectOutputStream oo = new ObjectOutputStream(
-                                    new BufferedOutputStream(fo));
-            oo.writeObject(exp);
-            oo.close();
-         }
+	FileOutputStream fo = new FileOutputStream(saveFile);
+	ObjectOutputStream oo = new ObjectOutputStream(
+				new BufferedOutputStream(fo));
+	oo.writeObject(exp);
+	oo.close();
       }
       
       if (runExp) {
