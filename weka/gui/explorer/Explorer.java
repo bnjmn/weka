@@ -61,7 +61,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class Explorer extends JPanel {
 
@@ -105,7 +105,7 @@ public class Explorer extends JPanel {
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
     m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg, Mark Hall and Eibe Frank");
-    m_LogPanel.logMessage("(c) 2001 The University of Waikato, Hamilton,"
+    m_LogPanel.logMessage("(c) 2002 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
     m_LogPanel.logMessage("email: wekasupport@cs.waikato.ac.nz");
