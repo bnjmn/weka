@@ -36,7 +36,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -454,7 +454,7 @@ public class Ranker extends ASSearch
 			   + "attribute list can be obtained");
     }
 
-    int[] ranked = Utils.sortUnsafe(m_attributeMerit);
+    int[] ranked = Utils.sort(m_attributeMerit);
     // reverse the order of the ranked indexes
     double[][] bestToWorst = new double[ranked.length][2];
 

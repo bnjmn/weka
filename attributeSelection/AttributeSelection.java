@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.17 $
+ * @version  $Revision: 1.18 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -327,7 +327,7 @@ public class AttributeSelection implements Serializable {
       }
 
       // now sort them by mean rank
-      int[] s = Utils.sortUnsafe(m_rankResults[1]);
+      int[] s = Utils.sort(m_rankResults[1]);
       for (int i=0; i<s.length; i++) {
 	CvString.append(Utils.doubleToString(Math.abs(m_rankResults[0][s[i]]),
 					     6, 3) 
@@ -667,6 +667,8 @@ public class AttributeSelection implements Serializable {
     if (m_doXval == true) {
       m_selectionResults.append(CrossValidateAttributes()); 
     }
+
+    m_trainInstances = null;
   }
 
   /**

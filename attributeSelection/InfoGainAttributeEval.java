@@ -36,7 +36,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator
@@ -200,8 +200,7 @@ public class InfoGainAttributeEval
    */
   public void buildEvaluator (Instances data)
     throws Exception {
-
-    try {
+    
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
     }
@@ -346,9 +345,6 @@ public class InfoGainAttributeEval
 	  (ContingencyTables.entropyOverColumns(counts[i]) 
 	   - ContingencyTables.entropyConditionedOnRows(counts[i]));
       }
-    }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
