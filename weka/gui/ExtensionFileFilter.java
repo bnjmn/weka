@@ -33,15 +33,15 @@ import javax.swing.filechooser.FileFilter;
  * javax.swing.filechooser.FileFilter (why there are two I have no idea).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
 
   /** The text description of the types of files accepted */
   protected String m_Description;
 
-  /** The filename extension of accepted files */
-  protected String m_Extension;
+  /** The filename extensions of accepted files */
+  protected String [] m_Extension;
 
   /**
    * Creates the ExtensionFileFilter
@@ -50,8 +50,20 @@ public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
    * @param description a text description of accepted files.
    */
   public ExtensionFileFilter(String extension, String description) {
+    m_Extension = new String [1];
+    m_Extension[0] = extension;
+    m_Description = description;
+  }
 
-    m_Extension = extension;
+  /**
+   * Creates an ExtensionFileFilter that accepts files that have any of
+   * the extensions contained in the supplied array.
+   *
+   * @param extensions an array of acceptable file extensions (as Strings).
+   * @param description a text description of accepted files.
+   */
+  public ExtensionFileFilter(String [] extensions, String description) {
+    m_Extension = extensions;
     m_Description = description;
   }
   
@@ -78,8 +90,10 @@ public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
     if (file.isDirectory()) {
       return true;
     }
-    if (name.endsWith(m_Extension)) {
-      return true;
+    for (int i = 0; i < m_Extension.length; i++) {
+      if (name.endsWith(m_Extension[i])) {
+	return true;
+      }
     }
     return false;
   }
