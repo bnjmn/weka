@@ -43,6 +43,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -69,7 +70,7 @@ import javax.swing.JFrame;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
-import java.awt.Point;
+import javax.swing.JCheckBox;
 
 /** 
  * This panel allows the user to select and configure a classifier, set the
@@ -80,7 +81,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -115,6 +116,17 @@ public class ClassifierPanel extends JPanel {
   /** Click to set test mode to a user-specified test set */
   protected JRadioButton m_TestSplitBut =
     new JRadioButton("Supplied test set");
+
+  /** Check to output the model built from the training data */
+  protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
+
+  /** Check to output true/false positives for each class */
+  protected JCheckBox m_OutputTFPosBut =
+    new JCheckBox("Output true/false positives");
+
+  /** Check to output a confusion matrix */
+  protected JCheckBox m_OutputConfusionBut =
+    new JCheckBox("Output confusion matrix");
 
   /** Label by where the cv folds are entered */
   protected JLabel m_CVLab = new JLabel("Folds", SwingConstants.RIGHT);
@@ -213,6 +225,15 @@ public class ClassifierPanel extends JPanel {
     m_TestSplitBut.setToolTipText("Test on a user-specified dataset");
     m_StartBut.setToolTipText("Starts the classification");
     m_StopBut.setToolTipText("Stops a running classification");
+    m_OutputModelBut
+      .setToolTipText("Output the model obtained from the full training set");
+    m_OutputTFPosBut.setToolTipText("Output the true positives and false"
+				    + " positives for each class");
+    m_OutputConfusionBut
+      .setToolTipText("Output the matrix displaying class confusions");
+    m_OutputModelBut.setSelected(true);
+    m_OutputTFPosBut.setSelected(true);
+    m_OutputConfusionBut.setSelected(true);
     m_ClassCombo.setEnabled(false);
     m_CVBut.setSelected(true);
     updateRadioLinks();
@@ -241,6 +262,14 @@ public class ClassifierPanel extends JPanel {
     m_StopBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	stopClassifier();
+      }
+    });
+    m_ClassCombo.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	int selected = m_ClassCombo.getSelectedIndex();
+	boolean isNominal = m_Instances.attribute(selected).isNominal();
+	m_OutputTFPosBut.setEnabled(isNominal);
+	m_OutputConfusionBut.setEnabled(isNominal);	
       }
     });
 
@@ -323,6 +352,24 @@ public class ClassifierPanel extends JPanel {
     gbC.ipadx = 20;
     gbL.setConstraints(m_PercentText, gbC);
     p2.add(m_PercentText);
+
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 4;     gbC.gridx = 0;  gbC.gridwidth = 2;
+    gbL.setConstraints(m_OutputModelBut, gbC);
+    p2.add(m_OutputModelBut);
+
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 5;     gbC.gridx = 0;  gbC.gridwidth = 2;
+    gbL.setConstraints(m_OutputTFPosBut, gbC);
+    p2.add(m_OutputTFPosBut);
+
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 6;     gbC.gridx = 0;  gbC.gridwidth = 2;
+    gbL.setConstraints(m_OutputConfusionBut, gbC);
+    p2.add(m_OutputConfusionBut);
 
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(2, 1));
@@ -494,6 +541,12 @@ public class ClassifierPanel extends JPanel {
 	  if (m_TestInstances != null) {
 	    userTest = new Instances(m_TestInstances);
 	  }
+
+	  boolean outputModel = m_OutputModelBut.isSelected();
+	  boolean outputConfusion = m_OutputConfusionBut.isSelected();
+	  boolean outputTFPos = m_OutputTFPosBut.isSelected();
+	  boolean outputSummary = true;
+
 	  int testMode = 0;
 	  int numFolds = 10, percent = 66;
 	  int classIndex = m_ClassCombo.getSelectedIndex();
@@ -537,6 +590,7 @@ public class ClassifierPanel extends JPanel {
 	    }
 	    inst.setClassIndex(classIndex);
 
+
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
 	    outBuff.append("=== Run information ===\n\n");
@@ -549,10 +603,15 @@ public class ClassifierPanel extends JPanel {
 	    outBuff.append("Relation:     " + inst.relationName() + '\n');
 	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
 	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
-	    for (int i = 0; i < inst.numAttributes(); i++) {
-	      outBuff.append("              " + inst.attribute(i).name()
+	    if (inst.numAttributes() < 100) {
+	      for (int i = 0; i < inst.numAttributes(); i++) {
+		outBuff.append("              " + inst.attribute(i).name()
 			       + '\n');
+	      }
+	    } else {
+	      outBuff.append("              [list of attributes omitted]\n");
 	    }
+
 	    outBuff.append("Test mode:    ");
 	    switch (testMode) {
 	      case 3: // Test on training
@@ -575,11 +634,16 @@ public class ClassifierPanel extends JPanel {
 	    m_History.setSingle(name);
 	    
 	    // Build the model and output it.
-	    m_Log.statusMessage("Building model on training data...");
-	    classifier.buildClassifier(inst);
-	    outBuff.append("=== Classifier model (full training set) ===\n\n");
-	    outBuff.append(classifier.toString() + '\n');
-	    m_History.updateResult(name);
+	    if (outputModel || (testMode == 3) || (testMode == 4)) {
+	      m_Log.statusMessage("Building model on training data...");
+	      classifier.buildClassifier(inst);
+	    }
+
+	    if (outputModel) {
+	      outBuff.append("=== Classifier model (full training set) ===\n\n");
+	      outBuff.append(classifier.toString() + "\n\n");
+	      m_History.updateResult(name);
+	    }
 	    
 	    Evaluation eval = null;
 	    switch (testMode) {
@@ -643,14 +707,23 @@ public class ClassifierPanel extends JPanel {
 	      default:
 	      throw new Exception("Test mode not implemented");
 	    }
-	    outBuff.append(eval.toSummaryString());
-	    if (inst.attribute(classIndex).isNominal()) {
-	      outBuff.append("\n\n");
-	      outBuff.append(eval.toClassDetailsString());
-	      outBuff.append("\n\n");
-	      outBuff.append(eval.toMatrixString());
+
+	    if (outputSummary) {
+	      outBuff.append(eval.toSummaryString() + "\n");
 	    }
-	    outBuff.append("\n");
+
+
+	    if (inst.attribute(classIndex).isNominal()) {
+
+	      if (outputTFPos) {
+		outBuff.append(eval.toClassDetailsString() + "\n");
+	      }
+
+	      if (outputConfusion) {
+		outBuff.append(eval.toMatrixString() + "\n");
+	      }
+	    }
+
 	    m_History.updateResult(name);
 	    m_Log.logMessage("Finished " + cname);
 	    m_Log.statusMessage("OK");
@@ -710,6 +783,7 @@ public class ClassifierPanel extends JPanel {
 	}
       });
       jf.pack();
+      jf.setSize(800, 600);
       jf.setVisible(true);
       if (args.length == 1) {
 	System.err.println("Loading instances from " + args[0]);

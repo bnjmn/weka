@@ -75,7 +75,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -308,9 +308,13 @@ public class AssociationsPanel extends JPanel {
 	    outBuff.append("Relation:     " + inst.relationName() + '\n');
 	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
 	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
-	    for (int i = 0; i < inst.numAttributes(); i++) {
-	      outBuff.append("              " + inst.attribute(i).name()
+	    if (inst.numAttributes() < 100) {
+	      for (int i = 0; i < inst.numAttributes(); i++) {
+		outBuff.append("              " + inst.attribute(i).name()
 			       + '\n');
+	      }
+	    } else {
+	      outBuff.append("              [list of attributes omitted]\n");
 	    }
 	    m_History.addResult(name, outBuff);
 	    m_History.setSingle(name);

@@ -78,7 +78,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -462,10 +462,15 @@ public class ClustererPanel extends JPanel {
 	    outBuff.append("Relation:     " + inst.relationName() + '\n');
 	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
 	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
-	    for (int i = 0; i < inst.numAttributes(); i++) {
-	      outBuff.append("              " + inst.attribute(i).name()
+	    if (inst.numAttributes() < 100) {
+	      for (int i = 0; i < inst.numAttributes(); i++) {
+		outBuff.append("              " + inst.attribute(i).name()
 			       + '\n');
+	      }
+	    } else {
+	      outBuff.append("              [list of attributes omitted]\n");
 	    }
+
 	    outBuff.append("Test mode:    ");
 	    switch (testMode) {
 	      case 3: // Test on training

@@ -84,7 +84,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -506,9 +506,13 @@ public class AttributeSelectionPanel extends JPanel {
 	    outBuff.append("Relation:     " + inst.relationName() + '\n');
 	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
 	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
-	    for (int i = 0; i < inst.numAttributes(); i++) {
-	      outBuff.append("              " + inst.attribute(i).name()
+	    if (inst.numAttributes() < 100) {
+	      for (int i = 0; i < inst.numAttributes(); i++) {
+		outBuff.append("              " + inst.attribute(i).name()
 			       + '\n');
+	      }
+	    } else {
+	      outBuff.append("              [list of attributes omitted]\n");
 	    }
 	    outBuff.append("Evaluation mode:    ");
 	    switch (testMode) {
