@@ -117,117 +117,117 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.45 $
+ * @version  $Revision: 1.46 $
   */
 public class Evaluation implements Summarizable {
 
   /** The number of classes. */
-  private int m_NumClasses;
+  protected int m_NumClasses;
 
   /** The number of folds for a cross-validation. */
-  private int m_NumFolds;
+  protected int m_NumFolds;
  
   /** The weight of all incorrectly classified instances. */
-  private double m_Incorrect;
+  protected double m_Incorrect;
 
   /** The weight of all correctly classified instances. */
-  private double m_Correct;
+  protected double m_Correct;
 
   /** The weight of all unclassified instances. */
-  private double m_Unclassified;
+  protected double m_Unclassified;
 
   /*** The weight of all instances that had no class assigned to them. */
-  private double m_MissingClass;
+  protected double m_MissingClass;
 
   /** The weight of all instances that had a class assigned to them. */
-  private double m_WithClass;
+  protected double m_WithClass;
 
   /** Array for storing the confusion matrix. */
-  private double [][] m_ConfusionMatrix;
+  protected double [][] m_ConfusionMatrix;
 
   /** The names of the classes. */
-  private String [] m_ClassNames;
+  protected String [] m_ClassNames;
 
   /** Is the class nominal or numeric? */
-  private boolean m_ClassIsNominal;
+  protected boolean m_ClassIsNominal;
   
   /** The prior probabilities of the classes */
-  private double [] m_ClassPriors;
+  protected double [] m_ClassPriors;
 
   /** The sum of counts for priors */
-  private double m_ClassPriorsSum;
+  protected double m_ClassPriorsSum;
 
   /** The cost matrix (if given). */
-  private CostMatrix m_CostMatrix;
+  protected CostMatrix m_CostMatrix;
 
   /** The total cost of predictions (includes instance weights) */
-  private double m_TotalCost;
+  protected double m_TotalCost;
 
   /** Sum of errors. */
-  private double m_SumErr;
+  protected double m_SumErr;
   
   /** Sum of absolute errors. */
-  private double m_SumAbsErr;
+  protected double m_SumAbsErr;
 
   /** Sum of squared errors. */
-  private double m_SumSqrErr;
+  protected double m_SumSqrErr;
 
   /** Sum of class values. */
-  private double m_SumClass;
+  protected double m_SumClass;
   
   /** Sum of squared class values. */
-  private double m_SumSqrClass;
+  protected double m_SumSqrClass;
 
   /*** Sum of predicted values. */
-  private double m_SumPredicted;
+  protected double m_SumPredicted;
 
   /** Sum of squared predicted values. */
-  private double m_SumSqrPredicted;
+  protected double m_SumSqrPredicted;
 
   /** Sum of predicted * class values. */
-  private double m_SumClassPredicted;
+  protected double m_SumClassPredicted;
 
   /** Sum of absolute errors of the prior */
-  private double m_SumPriorAbsErr;
+  protected double m_SumPriorAbsErr;
 
   /** Sum of absolute errors of the prior */
-  private double m_SumPriorSqrErr;
+  protected double m_SumPriorSqrErr;
 
   /** Total Kononenko & Bratko Information */
-  private double m_SumKBInfo;
+  protected double m_SumKBInfo;
 
   /*** Resolution of the margin histogram */
-  private static int k_MarginResolution = 500;
+  protected static int k_MarginResolution = 500;
 
   /** Cumulative margin distribution */
-  private double m_MarginCounts [];
+  protected double m_MarginCounts [];
 
   /** Number of non-missing class training instances seen */
-  private int m_NumTrainClassVals;
+  protected int m_NumTrainClassVals;
 
   /** Array containing all numeric training class values seen */
-  private double [] m_TrainClassVals;
+  protected double [] m_TrainClassVals;
 
   /** Array containing all numeric training class weights */
-  private double [] m_TrainClassWeights;
+  protected double [] m_TrainClassWeights;
 
   /** Numeric class error estimator for prior */
-  private Estimator m_PriorErrorEstimator;
+  protected Estimator m_PriorErrorEstimator;
 
   /** Numeric class error estimator for scheme */
-  private Estimator m_ErrorEstimator;
+  protected Estimator m_ErrorEstimator;
 
   /**
    * The minimum probablility accepted from an estimator to avoid
    * taking log(0) in Sf calculations.
    */
-  private static final double MIN_SF_PROB = Double.MIN_VALUE;
+  protected static final double MIN_SF_PROB = Double.MIN_VALUE;
 
   /** Total entropy of prior predictions */
-  private double m_SumPriorEntropy;
+  protected double m_SumPriorEntropy;
   
   /** Total entropy of scheme predictions */
-  private double m_SumSchemeEntropy;
+  protected double m_SumSchemeEntropy;
   
   /**
    * Initializes all the counters for the evaluation.
@@ -871,7 +871,7 @@ public class Evaluation implements Summarizable {
    * @return a <code>CostMatrix</code> value, or null if costFileName is empty
    * @exception Exception if an error occurs.
    */
-  private static CostMatrix handleCostOption(String costFileName, 
+  protected static CostMatrix handleCostOption(String costFileName, 
                                              int numClasses) 
     throws Exception {
 
@@ -2114,7 +2114,7 @@ public class Evaluation implements Summarizable {
   /**
    * Prints the predictions for the given dataset into a String variable.
    */
-  private static String printClassifications(Classifier classifier, 
+  protected static String printClassifications(Classifier classifier, 
 					     Instances train,
 					     String testFileName,
 					     int classIndex,
@@ -2188,7 +2188,7 @@ public class Evaluation implements Summarizable {
    * @param attributes the range of the attributes to list
    * @return a string listing values of the attributes in the range
    */
-  private static String attributeValuesString(Instance instance, Range attRange) {
+  protected static String attributeValuesString(Instance instance, Range attRange) {
     StringBuffer text = new StringBuffer();
     if (attRange != null) {
       boolean firstOutput = true;
@@ -2211,7 +2211,7 @@ public class Evaluation implements Summarizable {
    * @param classifier the classifier to include options for
    * @return a string detailing the valid command line options
    */
-  private static String makeOptionString(Classifier classifier) {
+  protected static String makeOptionString(Classifier classifier) {
 
     StringBuffer optionsText = new StringBuffer("");
 
@@ -2282,7 +2282,7 @@ public class Evaluation implements Summarizable {
    * @param num integer to format
    * @return the formatted integer as a string
    */
-  private String num2ShortID(int num,char [] IDChars,int IDWidth) {
+  protected String num2ShortID(int num,char [] IDChars,int IDWidth) {
     
     char ID [] = new char [IDWidth];
     int i;
@@ -2310,7 +2310,7 @@ public class Evaluation implements Summarizable {
    * @param predictedClass the index of the predicted class
    * @return the probability distribution
    */
-  private double [] makeDistribution(double predictedClass) {
+  protected double [] makeDistribution(double predictedClass) {
 
     double [] result = new double [m_NumClasses];
     if (Instance.isMissingValue(predictedClass)) {
@@ -2334,7 +2334,7 @@ public class Evaluation implements Summarizable {
    * @exception Exception if the class of the instance is not
    * set
    */
-  private void updateStatsForClassifier(double [] predictedDistribution,
+  protected void updateStatsForClassifier(double [] predictedDistribution,
 					Instance instance)
        throws Exception {
 
@@ -2422,7 +2422,7 @@ public class Evaluation implements Summarizable {
    * @exception Exception if the class of the instance is not
    * set
    */
-  private void updateStatsForPredictor(double predictedValue,
+  protected void updateStatsForPredictor(double predictedValue,
 				       Instance instance) 
        throws Exception {
 
@@ -2474,7 +2474,7 @@ public class Evaluation implements Summarizable {
    * @param actualClass the index of the actual instance class
    * @param weight the weight assigned to the instance
    */
-  private void updateMargins(double [] predictedDistribution, 
+  protected void updateMargins(double [] predictedDistribution, 
 			     int actualClass, double weight) {
 
     double probActual = predictedDistribution[actualClass];
@@ -2500,7 +2500,7 @@ public class Evaluation implements Summarizable {
    * @param actual the actual value
    * @param weight the weight associated with this prediction
    */
-  private void updateNumericScores(double [] predicted, 
+  protected void updateNumericScores(double [] predicted, 
 				   double [] actual, double weight) {
 
     double diff;
@@ -2529,7 +2529,7 @@ public class Evaluation implements Summarizable {
    * @param classValue the class value
    * @param weight the instance weight
    */
-  private void addNumericTrainClass(double classValue, double weight) {
+  protected void addNumericTrainClass(double classValue, double weight) {
 
     if (m_TrainClassVals == null) {
       m_TrainClassVals = new double [100];
@@ -2555,7 +2555,7 @@ public class Evaluation implements Summarizable {
    * Sets up the priors for numeric class attributes from the 
    * training class values that have been seen so far.
    */
-  private void setNumericPriorsFromBuffer() {
+  protected void setNumericPriorsFromBuffer() {
     
     double numPrecision = 0.01; // Default value
     if (m_NumTrainClassVals > 1) {
