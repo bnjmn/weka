@@ -23,6 +23,11 @@ import java.util.*;
 
 import weka.core.*;
 
+/**
+ * Stores split information.
+ * @author Yong Wang (yongwang@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public final class SplitInfo implements Serializable {
 
   int  number;         // number of total instances
