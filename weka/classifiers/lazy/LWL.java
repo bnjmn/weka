@@ -56,17 +56,17 @@ import weka.core.*;
  * Set the number of neighbours used for setting kernel bandwidth.
  * (default all) <p>
  *
- * -W num <br>
+ * -U num <br>
  * Set the weighting kernel shape to use. 1 = Inverse, 2 = Gaussian.
  * (default 0 = Linear) <p>
  *
- * -B classname <br>
+ * -W classname <br>
  * Specify the full class name of a base classifier (which needs
  * to be a WeightedInstancesHandler).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ */
+ * @version $Revision: 1.10 $ */
 public class LWL extends SingleClassifierEnhancer 
   implements UpdateableClassifier, WeightedInstancesHandler {
   
@@ -141,7 +141,7 @@ public class LWL extends SingleClassifierEnhancer
     newVector.addElement(new Option("\tSet the weighting kernel shape to use."
 				    + " 1 = Inverse, 2 = Gaussian.\n"
 				    + "\t(default 0 = Linear)",
-				    "W", 1,"-W <number of weighting method>"));
+				    "U", 1,"-U <number of weighting method>"));
 
     Enumeration enum = super.listOptions();
     while (enum.hasMoreElements()) {
@@ -161,11 +161,11 @@ public class LWL extends SingleClassifierEnhancer
    * Set the number of neighbours used for setting kernel bandwidth.
    * (default all) <p>
    *
-   * -W num <br>
+   * -U num <br>
    * Set the weighting kernel shape to use. 1 = Inverse, 2 = Gaussian.
    * (default 0 = Linear) <p>
    *
-   * -B classname <br>
+   * -W classname <br>
    * Specify the full class name of a base classifier (which needs
    * to be a WeightedInstancesHandler).<p>
    *
@@ -181,7 +181,7 @@ public class LWL extends SingleClassifierEnhancer
       setKNN(0);
     }
 
-    String weightString = Utils.getOption('W', options);
+    String weightString = Utils.getOption('U', options);
     if (weightString.length() != 0) {
       setWeightingKernel(Integer.parseInt(weightString));
     } else {
@@ -202,7 +202,7 @@ public class LWL extends SingleClassifierEnhancer
 
     int current = 0;
 
-    options[current++] = "-W"; options[current++] = "" + getWeightingKernel();
+    options[current++] = "-U"; options[current++] = "" + getWeightingKernel();
     options[current++] = "-K"; options[current++] = "" + getKNN();
     
     System.arraycopy(superOptions, 0, options, current, 
@@ -516,7 +516,7 @@ public class LWL extends SingleClassifierEnhancer
    * @param train the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
-  private double distance(Instance first, Instance second) {  
+  protected double distance(Instance first, Instance second) {  
 
     double distance = 0;
     int firstI, secondI;
