@@ -62,7 +62,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -113,7 +113,7 @@ public class PairedTTester implements OptionHandler {
   protected boolean m_latexOutput = false;
   
   /* A list of unique "dataset" specifiers that have been observed */
-  private class DatasetSpecifiers {
+  protected class DatasetSpecifiers {
 
     FastVector m_Specifiers = new FastVector();
 
@@ -164,7 +164,7 @@ public class PairedTTester implements OptionHandler {
   }
 
   /* Utility class to store the instances pertaining to a dataset */
-  private class Dataset {
+  protected class Dataset {
 
     Instance m_Template;
     FastVector m_Dataset;
@@ -232,7 +232,7 @@ public class PairedTTester implements OptionHandler {
   }
  
   /* Utility class to store the instances in a resultset */
-  private class Resultset {
+  protected class Resultset {
 
     Instance m_Template;
     FastVector m_Datasets;
@@ -339,7 +339,7 @@ public class PairedTTester implements OptionHandler {
    * @param template the template
    * @return a value of type 'String'
    */
-  private String templateString(Instance template) {
+  protected String templateString(Instance template) {
     
     String result = "";
     for (int i = 0; i < m_DatasetKeyColumns.length; i++) {
@@ -560,34 +560,8 @@ public class PairedTTester implements OptionHandler {
 			  + resultset2.templateString()
 			  );
     }
-
     
-    //PairedStats pairedStats = new PairedStats(m_SignificanceLevel);
-
-    // calculate the test/train ratio
-    double testTrainRatio = 0.0;
-    int trainSizeIndex = -1;
-    int testSizeIndex = -1;
-    // find the columns with the train/test sizes
-    for (int i=0; i<m_Instances.numAttributes(); i++) {
-      if (m_Instances.attribute(i).name().equals("Number_of_training_instances")) {
-	trainSizeIndex = i;
-      } else if (m_Instances.attribute(i).name().equals("Number_of_testing_instances")) {
-	testSizeIndex = i;
-      }
-    }
-    if (trainSizeIndex >= 0 && testSizeIndex >= 0) {
-      double totalTrainSize = 0.0;
-      double totalTestSize = 0.0;
-      for (int k = 0; k < dataset1.size(); k ++) {
-	Instance current = (Instance) dataset1.elementAt(k);
-	totalTrainSize += current.value(trainSizeIndex);
-	totalTestSize += current.value(testSizeIndex);
-      }
-      testTrainRatio = totalTestSize / totalTrainSize;
-      //System.err.println("testTrainRatio calculated as " + testTrainRatio);
-    }
-    PairedStats pairedStats = new PairedStatsCorrected(m_SignificanceLevel, testTrainRatio);
+    PairedStats pairedStats = new PairedStats(m_SignificanceLevel);
 
     for (int k = 0; k < dataset1.size(); k ++) {
       Instance current1 = (Instance) dataset1.elementAt(k);
@@ -609,6 +583,7 @@ public class PairedTTester implements OptionHandler {
       pairedStats.add(value1, value2);
     }
     pairedStats.calculateDerived();
+    System.err.println("Differences stats:\n" + pairedStats.differencesStats);
     return pairedStats;
 
   }
