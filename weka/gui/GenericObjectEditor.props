@@ -4,6 +4,7 @@
 # Lists the ResultProducers I want to choose from
 weka.experiment.ResultProducer=\
  weka.experiment.CrossValidationResultProducer,\
+ weka.experiment.LearningRateResultProducer,\
  weka.experiment.RandomSplitResultProducer,\
  weka.experiment.AveragingResultProducer,\
  weka.experiment.DatabaseResultProducer
