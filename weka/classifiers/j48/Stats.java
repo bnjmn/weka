@@ -25,7 +25,7 @@ import weka.core.*;
  * This code is adapted from Ross Quinlan's implementation of C4.5.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Stats {
 
@@ -36,7 +36,6 @@ public class Stats {
   private static final double Dev[] = 
   {100,         6.0,       5.61,       5.2,     4.75,    4.26,    3.89,   3.72,   
        3.29,  3.09,  2.58, 2.33, 1.65, 1.28, 0.84, 0.25, 0.00};
-  private static double Coeff = 0;
 
   /**
    * Computes estimated extra error for given total number of instances
@@ -48,18 +47,16 @@ public class Stats {
    */
   public static double addErrs(double N, double e, float CF){
     
-    double Val0, Pr;
+    double Val0, Pr, Coeff = 0;
     int i;
     
-    if (Coeff == 0) {
-      i = 0;
-      while (CF > Val[i]) {
-	i++;
-      }
-      Coeff = Dev[i-1] +
-	(Dev[i] - Dev[i-1]) * (CF-Val[i-1]) / (Val[i] - Val[i-1]);
-      Coeff = Coeff * Coeff;
+    i = 0;
+    while (CF > Val[i]) {
+      i++;
     }
+    Coeff = Dev[i-1] +
+      (Dev[i] - Dev[i-1]) * (CF-Val[i-1]) / (Val[i] - Val[i-1]);
+    Coeff = Coeff * Coeff;
     if (e == 0) {
       return N * (1 - Math.exp(Math.log(CF) / N));
     } else {
