@@ -55,7 +55,7 @@ import weka.gui.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TreeVisualizer extends JPanel implements MouseMotionListener,
 			       MouseListener,ActionListener,ItemListener {
@@ -431,10 +431,10 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
       m_classifyChild.addActionListener(this);
       m_nodeMenu.add(m_classifyChild);
       
-      m_sendInstances = new JMenuItem("Add Instances To Viewer");
+      /*m_sendInstances = new JMenuItem("Add Instances To Viewer");
       m_sendInstances.setActionCommand("send_instances");
       m_sendInstances.addActionListener(this);
-      m_nodeMenu.add(m_sendInstances);
+      m_nodeMenu.add(m_sendInstances); */
       
     }
     
