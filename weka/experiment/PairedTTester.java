@@ -66,7 +66,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -904,17 +904,17 @@ public class PairedTTester implements OptionHandler {
 
 	
 	if (!m_ShowStdDevs) {
-	  result.append("& "+Utils.doubleToString(pairedStats.xStats.mean,
-			       resultsetLength - 2, 2));
+	  result.append("& "+padIt(pairedStats.xStats.mean,
+				   resultsetLength - 2, 2));
 	} else {
-	  result.append("& "+Utils.doubleToString(pairedStats.xStats.mean,
-					     (maxWidthMean+5), 2)+"$\\pm$");
+	  result.append("& "+padIt(pairedStats.xStats.mean,
+				   (maxWidthMean+5), 2)+"$\\pm$");
 	  if (Double.isNaN(pairedStats.xStats.stdDev)) {
 	    result.append("&"+Utils.doubleToString(0.0,
 						  (maxWidthStdDev+3),2)+" ");
 	  } else {
-	    result.append("&"+Utils.doubleToString(pairedStats.xStats.stdDev,
-						   (maxWidthStdDev+3),2)+" ");
+	    result.append("&"+padIt(pairedStats.xStats.stdDev,
+				    (maxWidthStdDev+3),2)+" ");
 	  }
 	}
 	// Iterate over the resultsets
@@ -931,20 +931,20 @@ public class PairedTTester implements OptionHandler {
 		sigString = "$\\bullet$";
 	      } 
 	      if (!m_ShowStdDevs) {
-		result.append(" & "+Utils.doubleToString(pairedStats.yStats.mean,
-						   resultsetLength - 2,
-						   2)).append(" & "+sigString);
+		result.append(" & "+padIt(pairedStats.yStats.mean,
+					  resultsetLength - 2,
+					  2)).append(" & "+sigString);
 	      } else {
 		result.append(" & "
-			      +Utils.doubleToString(pairedStats.yStats.mean,
-						   (maxWidthMean+5),
-						   2)+"$\\pm$");
+			      +padIt(pairedStats.yStats.mean,
+				     (maxWidthMean+5),
+				     2)+"$\\pm$");
 		if (Double.isNaN(pairedStats.yStats.stdDev)) {
 		  result.append("&"+Utils.doubleToString(0.0, 
 				(maxWidthStdDev+3),2)+" ");
 		} else {
-		  result.append("&"+Utils.doubleToString(pairedStats.
-				  yStats.stdDev, (maxWidthStdDev+3),2)+" ");
+		  result.append("&"+padIt(pairedStats.
+					  yStats.stdDev, (maxWidthStdDev+3),2)+" ");
 		}
 		result.append(" & ").append(sigString);
 	      }
@@ -975,6 +975,21 @@ public class PairedTTester implements OptionHandler {
     return result.toString();
   }
 
+  private String padIt(double value, int a, int b) {
+    String res = Utils.doubleToString(value,
+				      a, b);
+    int width = res.length();
+    res = res.trim();
+    if (res.indexOf(".") == -1) {
+      res += ".00";
+    } else if (res.indexOf(".") == res.length()-2) {
+      res += "0";
+    }
+    while (res.length() < width) {
+      res += " ";
+    }
+    return res;
+  }
 
   /**
    * Generates a comparison table in latex table format
@@ -1051,18 +1066,19 @@ public class PairedTTester implements OptionHandler {
                                                            0)
                                     + ')', 5)).append(' ');
         if (!m_ShowStdDevs) {
-          result.append(Utils.doubleToString(pairedStats.xStats.mean,
-                                             resultsetLength - 2, 2)).
-            append(" | ");
+
+	  result.append(padIt(pairedStats.xStats.mean,
+			      resultsetLength - 2, 2)).
+	    append(" | ");
         } else {
-          result.append(Utils.doubleToString(pairedStats.xStats.mean,
-                                             (maxWidthMean+5), 2));
+          result.append(padIt(pairedStats.xStats.mean,
+			      (maxWidthMean+5), 2));
           if (Double.isInfinite(pairedStats.xStats.stdDev)) {
             result.append('(' + Utils.padRight("Inf", maxWidthStdDev + 3)
                           +')').append(" | ");
           } else {
-            result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
-                                                   (maxWidthStdDev+3),2)
+            result.append('('+padIt(pairedStats.xStats.stdDev,
+				    (maxWidthStdDev+3),2)
                           +')').append(" | ");
           }
         }
@@ -1084,23 +1100,23 @@ public class PairedTTester implements OptionHandler {
                 tie[j]++;
               }
               if (!m_ShowStdDevs) {
-                result.append(Utils.doubleToString(pairedStats.yStats.mean,
-                                                   resultsetLength - 2,
-                                                   2)).append(' ')
+                result.append(padIt(pairedStats.yStats.mean,
+				    resultsetLength - 2,
+				    2)).append(' ')
                   .append(sigChar).append(' ');
               } else {
-                result.append(Utils.doubleToString(pairedStats.yStats.mean,
-                                                   (maxWidthMean+5),
-                                                   2));
+                result.append(padIt(pairedStats.yStats.mean,
+				    (maxWidthMean+5),
+				    2));
                 if (Double.isInfinite(pairedStats.yStats.stdDev)) {
                   result.append('(' 
                                 + Utils.padRight("Inf", maxWidthStdDev + 3)
                                 +')');
                 } else {
-                  result.append('('+Utils.doubleToString(pairedStats.
-                                                         yStats.stdDev, 
-                                                         (maxWidthStdDev+3),
-                                                         2)+')');
+                  result.append('('+padIt(pairedStats.
+					  yStats.stdDev, 
+					  (maxWidthStdDev+3),
+					  2)+')');
                 }
                 result.append(' ').append(sigChar).append(' ');
               }
