@@ -30,7 +30,8 @@ SOURCES = \
 	RemoteExperiment.java \
 	RemoteExperimentListener.java \
 	RemoteExperimentEvent.java \
-	RemoteExperimentSubTask.java
+	RemoteExperimentSubTask.java \
+	TaskStatusInfo.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
