@@ -36,7 +36,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */ 
 public class HyperPipes extends Classifier {
 
