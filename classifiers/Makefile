@@ -29,7 +29,7 @@ all :   $(CLASSFILES)
 	(cd m5; make all JAVAC=$(JAVAC))
 	(cd kstar; make all JAVAC=$(JAVAC))
 	(cd evaluation; make all JAVAC=$(JAVAC))
-	(cd nn; make all JAVAC=$(JAVAC))
+	(cd neural; make all JAVAC=$(JAVAC))
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
