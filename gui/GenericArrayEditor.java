@@ -69,7 +69,7 @@ import java.io.ObjectInputStream;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -105,11 +105,14 @@ public class GenericArrayEditor extends JPanel
     public void actionPerformed(ActionEvent e) {
 
       if (e.getSource() == m_DeleteBut) {
-	int selected = m_ElementList.getSelectedIndex();
-	if (selected != -1) {
-	  m_ListModel.removeElementAt(selected);
-	  if (m_ListModel.size() > selected) {
-	    m_ElementList.setSelectedIndex(selected);
+	int [] selected = m_ElementList.getSelectedIndices();
+	if (selected != null) {
+	  for (int i = 0; i < selected.length; i++) {
+	    int current = selected[i];
+	    m_ListModel.removeElementAt(current);
+	    if (m_ListModel.size() > current) {
+	      m_ElementList.setSelectedIndex(current);
+	    }
 	  }
 	  m_Support.firePropertyChange("", null, null);
 	}
@@ -306,9 +309,13 @@ public class GenericArrayEditor extends JPanel
 	  if (m_ListModel.getSize() > 0) {
 	    m_ElementEditor.setValue(m_ListModel.getElementAt(0));
 	  } else {
-	    m_ElementEditor.setValue(m_ElementClass.newInstance());
+	    if (m_ElementEditor instanceof GenericObjectEditor) {
+	      ((GenericObjectEditor)m_ElementEditor).setDefaultValue();
+	    } else {
+	      m_ElementEditor.setValue(m_ElementClass.newInstance());
+	    }
 	  }
-	  	  
+	  
 	  JPanel panel = new JPanel();
 	  panel.setLayout(new BorderLayout());
 	  panel.add(view, BorderLayout.CENTER);
@@ -323,6 +330,8 @@ public class GenericArrayEditor extends JPanel
 	    }
 	  });
 	} catch (Exception ex) {
+	  System.err.println(ex.getMessage());
+	  m_ElementEditor = null;
 	}
       }
     }
@@ -474,19 +483,25 @@ public class GenericArrayEditor extends JPanel
 
     try {
       System.err.println("---Registering Weka Editors---");
-      java.beans.PropertyEditorManager.registerEditor(Classifier.class,
-					GenericObjectEditor.class);
-      java.beans.PropertyEditorManager.registerEditor(SelectedTag.class,
-					SelectedTagEditor.class);
-      java.beans.PropertyEditorManager.registerEditor(String [].class,
-					GenericArrayEditor.class);
+      java.beans.PropertyEditorManager
+	.registerEditor(Classifier.class,
+			GenericObjectEditor.class);
+      java.beans.PropertyEditorManager
+	.registerEditor(SelectedTag.class,
+			SelectedTagEditor.class);
+      java.beans.PropertyEditorManager
+	.registerEditor(weka.filters.Filter.class,
+			GenericObjectEditor.class);
+      java.beans.PropertyEditorManager
+	.registerEditor(String [].class,
+			GenericArrayEditor.class);
       final GenericArrayEditor ce = new GenericArrayEditor();
 
-      final Classifier [] initial = {
-	new weka.classifiers.ZeroR(),
-	new weka.classifiers.OneR(),
-	new weka.classifiers.ZeroR()
-	};
+      final weka.filters.Filter [] initial = new weka.filters.Filter [0];
+	/*
+      {
+	new weka.filters.AddFilter()
+	};*/
       /*
       final String [] initial = {
 	"Hello",

@@ -32,10 +32,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 /** 
- * A PropertyEditor that uses tags.
+ * A PropertyEditor that uses tags, where the tags are obtained from a
+ * weka.core.SelectedTag object.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SelectedTagEditor extends PropertyEditorSupport {
 

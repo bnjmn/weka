@@ -27,10 +27,10 @@ import java.awt.event.ItemEvent;
 import java.beans.PropertyEditor;
 
 /** 
- * Support for a PropertyEditor that uses tags.
+ * Support for any PropertyEditor that uses tags.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class PropertyValueSelector extends JComboBox {
 
