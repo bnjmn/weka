@@ -24,6 +24,7 @@ package weka.gui.boundaryvisualizer;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import javax.swing.JPanel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
@@ -57,7 +58,7 @@ import weka.gui.visualize.ClassPanel;
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  * @see JPanel
  */
@@ -249,16 +250,27 @@ public class BoundaryVisualizer extends JPanel {
   private int m_xIndex;
   private int m_yIndex;
 
+  // Kernel density estimator/generator
+  private KDDataGenerator m_dataGenerator;
+
   // number of samples per pixel (fixed dimensions only)
   private int m_numberOfSamplesFromEachRegion;
 
+  // base for sampling in the non-fixed dimensions
   private int m_generatorSamplesBase;
+
+  // Set the kernel bandwidth to cover this many nearest neighbours
+  private int m_kernelBandwidth;
   
   private JTextField m_regionSamplesText = 
     new JTextField(""+0);
 
   private JTextField m_generatorSamplesText = 
     new JTextField(""+0);
+
+  private JTextField m_kernelBandwidthText = 
+    new JTextField(""+3+"  ");
+
 
   /**
    * Creates a new <code>BoundaryVisualizer</code> instance.
@@ -311,17 +323,29 @@ public class BoundaryVisualizer extends JPanel {
     colOne.add(cHolder, BorderLayout.NORTH);
     colOne.add(vAttHolder, BorderLayout.CENTER);
 
-    m_regionSamplesText.setBorder(BorderFactory.
-			    createTitledBorder("Num. locations per pixel"));
-    m_regionSamplesText.setBackground(colOne.getBackground());
-    m_generatorSamplesText.setBorder(BorderFactory.
-				     createTitledBorder("Base for sampling in "
-				     +"non-fixed dimensions"));
-    m_generatorSamplesText.setBackground(colOne.getBackground());
+    JPanel tempPanel = new JPanel();
+    tempPanel.setBorder(BorderFactory.
+			createTitledBorder("Sampling control"));
+    tempPanel.setLayout(new GridLayout(3,1));
 
     JPanel colTwo = new JPanel();
     colTwo.setLayout(new BorderLayout());
-    colTwo.add(m_generatorSamplesText, BorderLayout.NORTH);
+    JPanel gsP = new JPanel(); gsP.setLayout(new BorderLayout());
+    gsP.add(new JLabel(" Base for sampling (r)"), BorderLayout.CENTER);
+    gsP.add(m_generatorSamplesText, BorderLayout.WEST);
+    tempPanel.add(gsP);
+
+    JPanel rsP = new JPanel(); rsP.setLayout(new BorderLayout());
+    rsP.add(new JLabel(" Num. locations per pixel"), BorderLayout.CENTER);
+    rsP.add(m_regionSamplesText, BorderLayout.WEST);
+    tempPanel.add(rsP);
+
+    JPanel ksP = new JPanel(); ksP.setLayout(new BorderLayout());
+    ksP.add(new JLabel(" Kernel bandwidth (k)"), BorderLayout.CENTER);
+    ksP.add(m_kernelBandwidthText, BorderLayout.WEST);
+    tempPanel.add(ksP);
+    
+    colTwo.add(tempPanel, BorderLayout.NORTH);
 
     JPanel startPanel = new JPanel();
     startPanel.setBorder(BorderFactory.
@@ -329,11 +353,8 @@ public class BoundaryVisualizer extends JPanel {
     startPanel.setLayout(new BorderLayout());
     startPanel.add(m_startBut, BorderLayout.CENTER);
     startPanel.add(m_plotTrainingData, BorderLayout.WEST);
-    JPanel tempPanel = new JPanel();
-    tempPanel.setLayout(new BorderLayout());
-    tempPanel.add(m_regionSamplesText, BorderLayout.NORTH);
-    tempPanel.add(startPanel, BorderLayout.SOUTH);
-    colTwo.add(tempPanel, BorderLayout.SOUTH);
+
+    colTwo.add(startPanel, BorderLayout.SOUTH);
 
     m_controlPanel.add(colOne, BorderLayout.WEST);
     m_controlPanel.add(colTwo, BorderLayout.CENTER);
@@ -346,10 +367,14 @@ public class BoundaryVisualizer extends JPanel {
 
     m_boundaryPanel = new BoundaryPanel(m_plotAreaWidth, m_plotAreaHeight);
     m_numberOfSamplesFromEachRegion = m_boundaryPanel.getNumSamplesPerRegion();
-    m_regionSamplesText.setText(""+m_numberOfSamplesFromEachRegion);
+    m_regionSamplesText.setText(""+m_numberOfSamplesFromEachRegion+"  ");
     m_generatorSamplesBase = (int)m_boundaryPanel.getGeneratorSamplesBase();
-    m_generatorSamplesText.setText(""+m_generatorSamplesBase);
-    m_boundaryPanel.setDataGenerator(new KDDataGenerator());
+    m_generatorSamplesText.setText(""+m_generatorSamplesBase+"  ");
+
+    m_dataGenerator = new KDDataGenerator();
+    m_kernelBandwidth = m_dataGenerator.getKernelBandwidth();
+    m_kernelBandwidthText.setText(""+m_kernelBandwidth+"  ");
+    m_boundaryPanel.setDataGenerator(m_dataGenerator);
     add(m_boundaryPanel, BorderLayout.CENTER);
 
     m_xAxisPanel = new AxisPanel(false);
@@ -384,6 +409,16 @@ public class BoundaryVisualizer extends JPanel {
 		m_generatorSamplesBase = tempSamples;
 		m_boundaryPanel.setGeneratorSamplesBase((double)tempSamples);
 
+		tempSamples = m_kernelBandwidth;
+		try {
+		  tempSamples = 
+		    Integer.parseInt(m_kernelBandwidthText.getText().trim());
+		} catch (Exception ex) {
+		  m_kernelBandwidthText.setText(""+tempSamples);
+		}
+		m_kernelBandwidth = tempSamples;
+		m_dataGenerator.setKernelBandwidth(tempSamples);
+
 		m_trainingInstances.
 		  setClassIndex(m_classAttBox.getSelectedIndex());
 		m_boundaryPanel.setClassifier(m_classifier);
@@ -416,6 +451,17 @@ public class BoundaryVisualizer extends JPanel {
 
     m_classPanel.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
+
+	  try {
+	    // save color vector to a file
+	    FastVector colors = m_boundaryPanel.getColors();
+	    FileOutputStream fos = new FileOutputStream("colors.ser");
+	    ObjectOutputStream oos = new ObjectOutputStream(fos);
+	    oos.writeObject(colors);
+	    oos.flush();
+	    oos.close();
+	  } catch (Exception ex) {}
+
 	  m_boundaryPanel.replot();
 	}
       });
@@ -432,6 +478,7 @@ public class BoundaryVisualizer extends JPanel {
     m_yAttBox.setEnabled(status);
     m_regionSamplesText.setEnabled(status);
     m_generatorSamplesText.setEnabled(status);
+    m_kernelBandwidthText.setEnabled(status);
     m_plotTrainingData.setEnabled(status);
   }
 
