@@ -36,7 +36,7 @@ import weka.classifiers.Classifier;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 
 /**
@@ -284,7 +284,7 @@ public class NaiveBayesMultinomial extends Classifier
       {
 	result.append(headerInfo.attribute(w).name()).append("\t");
 	for(int c = 0; c<numClasses; c++)
-	  result.append(Double.toString(Math.pow(10.0, probOfWordGivenClass[c][w]))).append("\t");
+	  result.append(Double.toString(Math.exp(probOfWordGivenClass[c][w]))).append("\t");
 	result.append("\n");
       }
 
