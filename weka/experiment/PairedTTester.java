@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -270,35 +270,11 @@ public class PairedTTester implements OptionHandler {
 	tempResult = m_Template.toString(m_ResultsetKeyColumns[i]) + ' ';
 
 	// compact the string
-	while (tempResult.indexOf("weka.classifiers.") != -1) {
-	  int ind = tempResult.indexOf("weka.classifiers.");
-	  String tt = tempResult.substring(0, ind);
-	  tempResult = tt + tempResult.
-	    substring(ind + ("weka.classifiers.".length()), 
-		      tempResult.length());
-	}
-
-	while (tempResult.indexOf("weka.filters.") != -1) {
-	  int ind = tempResult.indexOf("weka.filters.");
-	  String tt = tempResult.substring(0, ind);
-	  tempResult = tt + tempResult.
-	    substring(ind + ("weka.filters.".length()), 
-		      tempResult.length());
-	}
-
-	while (tempResult.indexOf("weka.attributeSelection.") != -1) {
-	  int ind = tempResult.indexOf("weka.attributeSelection.");
-	  String tt = tempResult.substring(0, ind);
-	  tempResult = tt + tempResult.
-	    substring(ind + ("weka.attributeSelection.".length()), 
-		      tempResult.length());
-	}
-	
+        tempResult = Utils.removeSubstring(tempResult, "weka.classifiers.");
+        tempResult = Utils.removeSubstring(tempResult, "weka.filters.");
+        tempResult = Utils.removeSubstring(tempResult, "weka.attributeSelection.");
 	result += tempResult;
       }
-      /* if (result.startsWith("weka.classifiers.")) {
-	result = result.substring("weka.classifiers.".length());
-	} */
       return result.trim();
     }
     
