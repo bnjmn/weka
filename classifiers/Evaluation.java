@@ -99,7 +99,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.37 $
+ * @version  $Revision: 1.38 $
   */
 public class Evaluation implements Summarizable {
 
@@ -2275,6 +2275,11 @@ public class Evaluation implements Summarizable {
       // Determine misclassification cost
       if (m_CostMatrix != null) {
         if (predictedClass < 0) {
+          // For missing predictions, we assume the worst possible cost.
+          // This is pretty harsh.
+          // Perhaps we could take the negative of the cost of a correct
+          // prediction (-m_CostMatrix.getElement(actualClass,actualClass)),
+          // although often this will be zero
           m_TotalCost += instance.weight()
             * m_CostMatrix.getMaxCost(actualClass);
         } else {
