@@ -22,8 +22,11 @@
 
 package weka.gui.beans;
 
+import weka.core.FastVector;
+import weka.core.Drawable;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.treevisualizer.*;
+import weka.gui.graphvisualizer.*;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -49,7 +52,7 @@ import java.awt.event.MouseEvent;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class GraphViewer 
   extends JPanel
@@ -79,7 +82,7 @@ public class GraphViewer
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Graphically visualize trees produced by classifiers/clusterers.";
+    return "Graphically visualize trees or graphs produced by classifiers/clusterers.";
   }
 
   private void setUpResultHistory() {
@@ -106,6 +109,9 @@ public class GraphViewer
    * @param e a <code>GraphEvent</code> value
    */
   public synchronized void acceptGraph(GraphEvent e) {
+
+    FastVector graphInfo = new FastVector();
+
     if (m_history == null) {
       setUpResultHistory();
     }
@@ -113,8 +119,10 @@ public class GraphViewer
       .format(new Date());
 
     name += e.getGraphTitle();
+    graphInfo.addElement(new Integer(e.getGraphType()));
+    graphInfo.addElement(e.getGraphString());
     m_history.addResult(name, new StringBuffer());
-    m_history.addObject(name, e.getGraphString());
+    m_history.addObject(name, graphInfo);
   }
 
   /**
@@ -133,7 +141,7 @@ public class GraphViewer
   public BeanVisual getVisual() {
     return m_visual;
   }
-  
+
   /**
    * Use the default visual appearance
    *
@@ -169,24 +177,56 @@ public class GraphViewer
   }
 
   private void doPopup(String name) {
-    String grphString = (String)m_history.getNamedObject(name);
 
-    final javax.swing.JFrame jf = 
-      new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+name);
-    jf.setSize(500,400);
-    jf.getContentPane().setLayout(new BorderLayout());
-    TreeVisualizer tv = 
-      new TreeVisualizer(null,
+    FastVector graph;  
+    String grphString;
+    int grphType;
+
+    graph = (FastVector)m_history.getNamedObject(name);
+    grphType = ((Integer)graph.firstElement()).intValue();
+    grphString = (String)graph.lastElement();
+
+    if(grphType == Drawable.TREE){
+        final javax.swing.JFrame jf = 
+            new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+name);
+        jf.setSize(500,400);
+        jf.getContentPane().setLayout(new BorderLayout());
+        TreeVisualizer tv = 
+            new TreeVisualizer(null,
 			 grphString,
 			 new PlaceNode2());
-    jf.getContentPane().add(tv, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  jf.dispose();
-	}
-      });
-    
-    jf.setVisible(true);
+        jf.getContentPane().add(tv, BorderLayout.CENTER);
+        jf.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+            jf.dispose();
+            }
+        });
+
+        jf.setVisible(true);
+    }
+    if(grphType == Drawable.BayesNet) {
+      final javax.swing.JFrame jf = 
+	new javax.swing.JFrame("Weka Classifier Graph Visualizer: "+name);
+      jf.setSize(500,400);
+      jf.getContentPane().setLayout(new BorderLayout());
+      GraphVisualizer gv = 
+	new GraphVisualizer();
+      try { 
+	gv.readBIF(grphString);
+      }
+      catch (BIFFormatException be) { 
+	System.err.println("unable to visualize BayesNet"); be.printStackTrace(); 
+      }
+      gv.layoutGraph();
+      jf.getContentPane().add(gv, BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+            jf.dispose();
+	  }
+        });
+      
+      jf.setVisible(true);
+    }
   }
 
   /**

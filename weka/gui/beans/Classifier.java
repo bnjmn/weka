@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -150,7 +150,7 @@ public class Classifier extends JPanel
   public String globalInfo() {
     return m_globalInfo;
   }
-  
+
   /**
    * Creates a new <code>Classifier</code> instance.
    */
@@ -249,7 +249,7 @@ public class Classifier extends JPanel
    */
   public void setWrappedAlgorithm(Object algorithm) 
     {
-    
+
     if (!(algorithm instanceof weka.classifiers.Classifier)) { 
       throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
 					 +"type of algorithm (Classifier)");
@@ -371,7 +371,7 @@ public class Classifier extends JPanel
       System.err.println("NOTIFYING NEW BATCH");
       m_ie.setStructure(dataset); 
       m_ie.setClassifier(m_Classifier);
-      
+
       notifyIncrementalClassifierListeners(m_ie);
       return;
     } else {
@@ -383,7 +383,7 @@ public class Classifier extends JPanel
 	return;
       }
     }
-    
+
     try {
       // test on this instance
       int status = IncrementalClassifierEvent.WITHIN_BATCH;
@@ -393,12 +393,12 @@ public class Classifier extends JPanel
 		       InstanceEvent.BATCH_FINISHED) {
 	status = IncrementalClassifierEvent.BATCH_FINISHED;
       }
-      
+
       m_ie.setStatus(status); m_ie.setClassifier(m_Classifier);
       m_ie.setCurrentInstance(m_incrementalEvent.getInstance());
-      
+
       notifyIncrementalClassifierListeners(m_ie);
-      
+
       // now update on this instance (if class is not missing and classifier
       // is updateable and user has specified that classifier is to be
       // updated)
@@ -486,7 +486,7 @@ public class Classifier extends JPanel
 	new BatchClassifierEvent(this, m_Classifier, 
 				 new DataSetEvent(this, e.getTrainingSet()),
 				 e.getSetNumber(), e.getMaxSetNumber());
-      
+
       notifyBatchClassifierListeners(ce);
       return;
     }
@@ -521,6 +521,7 @@ public class Classifier extends JPanel
 			m_graphListeners.size() > 0) {
 		      String grphString = 
 			((weka.core.Drawable)m_Classifier).graph();
+                      int grphType = ((weka.core.Drawable)m_Classifier).graphType();
 		      String grphTitle = m_Classifier.getClass().getName();
 		      grphTitle = grphTitle.substring(grphTitle.
 						      lastIndexOf('.')+1, 
@@ -531,7 +532,8 @@ public class Classifier extends JPanel
 		      
 		      GraphEvent ge = new GraphEvent(Classifier.this, 
 						     grphString, 
-						     grphTitle);
+						     grphTitle,
+                                                     grphType);
 		      notifyGraphListeners(ge);
 		    }
 
@@ -782,7 +784,7 @@ public class Classifier extends JPanel
     removeIncrementalClassifierListener(IncrementalClassifierListener cl) {
     m_incrementalClassifierListeners.remove(cl);
   }
-  
+
   /**
    * Notify all incremental classifier listeners of an incremental classifier
    * event
@@ -902,7 +904,7 @@ public class Classifier extends JPanel
 	((BeanCommon)tempO).stop();
       }
     }
-    
+
     // stop the build thread
     if (m_buildThread != null) {
       m_buildThread.interrupt();
@@ -1038,4 +1040,3 @@ public class Classifier extends JPanel
     return true;
   }
 }
-
