@@ -29,7 +29,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EvaluationUtils {
 
@@ -86,17 +86,47 @@ public class EvaluationUtils {
    */
   public FastVector getTrainTestPredictions(DistributionClassifier classifier, 
                                             Instances train, Instances test) 
-  throws Exception {
-
-    FastVector predictions = new FastVector();
+    throws Exception {
+    
     classifier.buildClassifier(train);
+    return getTestPredictions(classifier, test);
+  }
+
+  /**
+   * Generate a bunch of predictions ready for processing, by performing a
+   * evaluation on a test set assuming the classifier is already trained.
+   *
+   * @param classifier the pre-trained DistributionClassifier to evaluate
+   * @param test the test dataset
+   * @exception Exception if an error occurs
+   */
+  public FastVector getTestPredictions(DistributionClassifier classifier, 
+                                       Instances test) 
+    throws Exception {
+    
+    FastVector predictions = new FastVector();
     for (int i = 0; i < test.numInstances(); i++) {
-      Instance curr = test.instance(i);
-      int actual = (int) curr.classValue();
-      double [] dist = classifier.distributionForInstance(curr);
-      predictions.addElement(new NominalPrediction(actual, dist, 
-                                                   curr.weight()));
+      predictions.addElement(getPrediction(classifier, test.instance(i)));
     }
     return predictions;
   }
+
+  
+  /**
+   * Generate a single prediction for a test instance given the pre-trained
+   * classifier.
+   *
+   * @param classifier the pre-trained DistributionClassifier to evaluate
+   * @param test the test instance
+   * @exception Exception if an error occurs
+   */
+  public NominalPrediction getPrediction(DistributionClassifier classifier,
+                                         Instance test)
+    throws Exception {
+   
+    int actual = (int) test.classValue();
+    double [] dist = classifier.distributionForInstance(test);
+    return new NominalPrediction(actual, dist, test.weight());
+  }
 }
+
