@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -235,6 +235,7 @@ public class Filter extends JPanel
     }
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
       try {
+        //notifyInstanceListeners(e);
 	//	Instances dataset = e.getInstance().dataset();
 	Instances dataset = e.getStructure();
 	if (m_Filter instanceof SupervisedFilter) {
@@ -301,14 +302,20 @@ public class Filter extends JPanel
     boolean structureOnly = false;
     if (e instanceof DataSetEvent) {
       structureOnly = ((DataSetEvent)e).isStructureOnly();
+      if(structureOnly){
+       notifyDataOrTrainingListeners(e);  
+      }
     }
     if (e instanceof TrainingSetEvent) {
       structureOnly = ((TrainingSetEvent)e).isStructureOnly();
+      if(structureOnly){
+       notifyDataOrTrainingListeners(e);  
+      }
     }
     if (structureOnly && !(m_Filter instanceof StreamableFilter)) {
       return; // nothing can be done
     }
-      
+    
     if (m_filterThread == null) {
       try {
 	if (m_state == IDLE) {
@@ -385,7 +392,9 @@ public class Filter extends JPanel
    * @param e a <code>TestSetEvent</code> value
    */
   public void acceptTestSet(final TestSetEvent e) {
-    if (m_trainingSet != null && 
+      if(e.isStructureOnly())
+            notifyTestListeners(e);
+      if (m_trainingSet != null && 
 	m_trainingSet.equalHeaders(e.getTestSet()) && 
 	m_filterThread == null) {
       try {

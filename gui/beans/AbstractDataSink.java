@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Abstract class for objects that store instances to some destination.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -43,7 +43,7 @@ import java.io.Serializable;
 public abstract class AbstractDataSink extends JPanel
   implements DataSink, BeanCommon, Visible, 
 	     DataSourceListener, TrainingSetListener,
-	     TestSetListener, Serializable {
+	     TestSetListener, InstanceListener, Serializable {
 
   /**
    * Default visual for data sources
@@ -74,20 +74,14 @@ public abstract class AbstractDataSink extends JPanel
    *
    * @param e a <code>TrainingSetEvent</code> value
    */
-  public synchronized void acceptTrainingSet(TrainingSetEvent e) {
-    DataSetEvent de = new DataSetEvent(e.getSource(), e.getTrainingSet());
-    acceptDataSet(de);
-  }
+  public abstract void acceptTrainingSet(TrainingSetEvent e);
 
   /**
    * Accept a test set
    *
    * @param e a <code>TestSetEvent</code> value
    */
-  public synchronized void acceptTestSet(TestSetEvent e) {
-    DataSetEvent de = new DataSetEvent(e.getSource(), e.getTestSet());
-    acceptDataSet(de);
-  }
+  public abstract void acceptTestSet(TestSetEvent e);
 
   /**
    * Accept a data set
@@ -95,6 +89,14 @@ public abstract class AbstractDataSink extends JPanel
    * @param e a <code>DataSetEvent</code> value
    */
   public abstract void acceptDataSet(DataSetEvent e);
+  
+  
+  /**
+   * Accept an instance
+   *
+   * @param e an <code>InstanceEvent</code> value
+   */
+  public abstract void acceptInstance(InstanceEvent e);
 
   /**
    * Set the visual for this data source
