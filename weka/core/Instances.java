@@ -50,7 +50,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
 */
 public class Instances implements Serializable {
  
@@ -68,6 +68,12 @@ public class Instances implements Serializable {
 
   /** The class attribute's index */
   private int m_ClassIndex;
+
+  /** Buffer of values for sparse instance */
+  private double[] m_ValueBuffer;
+
+  /** Buffer of indices for sparse instance */
+  private int[] m_IndicesBuffer;
 
   /**
    * Reads an ARFF file from a reader, and assigns a weight of
@@ -1296,8 +1302,6 @@ public class Instances implements Serializable {
 				      boolean flag) 
        throws IOException {
 
-    double[] values = new double[numAttributes()];
-    int[] indices = new int[numAttributes()];
     int valIndex, numValues = 0, maxIndex = -1;
     
     // Get values
@@ -1311,52 +1315,52 @@ public class Instances implements Serializable {
        
       // Is index valid?
       try{
-	indices[numValues] = Integer.valueOf(tokenizer.sval).intValue();
+	m_IndicesBuffer[numValues] = Integer.valueOf(tokenizer.sval).intValue();
       } catch (NumberFormatException e) {
 	errms(tokenizer,"index number expected");
       }
-      if (indices[numValues] <= maxIndex) {
+      if (m_IndicesBuffer[numValues] <= maxIndex) {
 	errms(tokenizer,"indeces have to be ordered");
       }
-      if ((indices[numValues] < 0) || 
-	  (indices[numValues] >= numAttributes())) {
+      if ((m_IndicesBuffer[numValues] < 0) || 
+	  (m_IndicesBuffer[numValues] >= numAttributes())) {
 	errms(tokenizer,"index out of bounds");
       }
-      maxIndex = indices[numValues];
+      maxIndex = m_IndicesBuffer[numValues];
 
       // Get value;
       getNextToken(tokenizer);
 
       // Check if value is missing.
       if  (tokenizer.ttype == '?') {
-	values[numValues] = Instance.missingValue();
+	m_ValueBuffer[numValues] = Instance.missingValue();
       } else {
 
 	// Check if token is valid.
 	if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
 	  errms(tokenizer,"not a valid value");
 	}
-	if (attribute(indices[numValues]).isNominal()) {
+	if (attribute(m_IndicesBuffer[numValues]).isNominal()) {
 	  
 	  // Check if value appears in header.
 	  valIndex = 
-	    attribute(indices[numValues]).indexOfValue(tokenizer.sval);
+	    attribute(m_IndicesBuffer[numValues]).indexOfValue(tokenizer.sval);
 	  if (valIndex == -1) {
 	    errms(tokenizer,"nominal value not declared in header");
 	  }
-	  values[numValues] = (double)valIndex;
-	} else if (attribute(indices[numValues]).isNumeric()) {
+	  m_ValueBuffer[numValues] = (double)valIndex;
+	} else if (attribute(m_IndicesBuffer[numValues]).isNumeric()) {
 	  
 	  // Check if value is really a number.
 	  try{
-	    values[numValues] = Double.valueOf(tokenizer.sval).
+	    m_ValueBuffer[numValues] = Double.valueOf(tokenizer.sval).
 	      doubleValue();
 	  } catch (NumberFormatException e) {
 	    errms(tokenizer,"number expected");
 	  }
 	} else { 
-	  values[numValues] = 
-	    attribute(indices[numValues]).addStringValue(tokenizer.sval);
+	  m_ValueBuffer[numValues] = 
+	    attribute(m_IndicesBuffer[numValues]).addStringValue(tokenizer.sval);
 	}
       }
       numValues++;
@@ -1368,8 +1372,8 @@ public class Instances implements Serializable {
     // Add instance to dataset
     double[] tempValues = new double[numValues];
     int[] tempIndices = new int[numValues];
-    System.arraycopy(values, 0, tempValues, 0, numValues);
-    System.arraycopy(indices, 0, tempIndices, 0, numValues);
+    System.arraycopy(m_ValueBuffer, 0, tempValues, 0, numValues);
+    System.arraycopy(m_IndicesBuffer, 0, tempIndices, 0, numValues);
     add(new SparseInstance(1, tempValues, tempIndices, numAttributes()));
     return true;
   }
@@ -1541,6 +1545,10 @@ public class Instances implements Serializable {
     if (m_Attributes.size() == 0) {
       errms(tokenizer,"no attributes declared");
     }
+
+    // Allocate buffers in case sparse instances have to be read
+    m_ValueBuffer = new double[numAttributes()];
+    m_IndicesBuffer = new int[numAttributes()];
   }
 
   /**
