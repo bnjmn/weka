@@ -25,6 +25,7 @@ import java.util.*;
 import weka.core.*;
 import weka.estimators.*;
 import weka.classifiers.*;
+import weka.classifiers.bayes.net.*;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.classifiers.bayes.net.ADNode;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
@@ -39,7 +40,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable {
 
@@ -86,8 +87,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     /**
      * Bayes network to compare the structure with.
      */
-    BIFReader m_otherBayesNet = null;
-
+    protected BIFReader m_otherBayesNet = null;
 
     /**
      * Use the experimental ADTree datastructure for calculating contingency tables
@@ -162,7 +162,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
         m_ADTree = null;
     } // buildClassifier
 
-    /**
+    /**stop
      * Init structure initializes the structure to an empty graph or a Naive Bayes
      * graph (depending on the -N flag).
      */
@@ -287,12 +287,12 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * @return an enumeration of all the available options
      */
     public Enumeration listOptions() {
-        Vector newVector = new Vector(5);
+        Vector newVector = new Vector(4);
 
         newVector.addElement(new Option("\tUse ADTree data structure\n", "D", 0, "-D"));
+        newVector.addElement(new Option("\tBIF file to compare with\n", "B", 1, "-B <BIF file>"));
         newVector.addElement(new Option("\tSearch algorithm\n", "Q", 1, "-Q weka.classifiers.bayes.net.search.SearchAlgorithm"));
         newVector.addElement(new Option("\tEstimator algorithm\n", "E", 1, "-E weka.classifiers.bayes.net.estimate.SimpleEstimator"));
-        newVector.addElement(new Option("\tBIF file to compare with\n", "B", 1, "-B <BIF file>"));
 
         return newVector.elements();
     } // listOptions
@@ -321,7 +321,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
             (SearchAlgorithm) Utils.forName(
                 SearchAlgorithm.class,
                 searchAlgorithmName,
-                Utils.partitionOptions(options)));
+                partitionOptions(options)));
 
 
         String estimatorName = Utils.getOption('E', options);
@@ -337,12 +337,54 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     } // setOptions
 
     /**
+     * Returns the secondary set of options (if any) contained in
+     * the supplied options array. The secondary set is defined to
+     * be any options after the first "--" but before the "-E". These 
+     * options are removed from the original options array.
+     *
+     * @param options the input array of options
+     * @return the array of secondary options
+     */
+    public static String [] partitionOptions(String [] options) {
+
+      for (int i = 0; i < options.length; i++) {
+        if (options[i].equals("--")) {
+        	// ensure it follows by a -E option
+        	int j = i;
+			while ((j < options.length) && !(options[j].equals("-E"))) {
+			  j++;
+			}
+			if (j >= options.length) {
+				return new String[0];
+			}
+  	options[i++] = "";
+  	String [] result = new String [options.length - i];
+	j = i;
+  	while ((j < options.length) && !(options[j].equals("-E"))) {
+  	  result[j - i] = options[j];
+  	  options[j] = "";
+	  j++;
+  	}
+	while(j < options.length) {
+  	  result[j - i] = "";
+	  j++;
+  	}		 
+  	return result;
+        }
+      }
+      return new String [0];
+    }
+
+    
+    /**
      * Gets the current settings of the classifier.
      * 
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-        String[] options = new String[9];
+		String[] searchOptions = m_SearchAlgorithm.getOptions();
+		String[] estimatorOptions = m_BayesNetEstimator.getOptions();
+        String[] options = new String[11 + searchOptions.length + estimatorOptions.length];
         int current = 0;
 
         options[current++] = "-S";
@@ -351,16 +393,24 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
             options[current++] = "-D";
         }
 
+        options[current++] = "-B";
         if (m_otherBayesNet != null) {
-            options[current++] = "-B";
             options[current++] = ((BIFReader) m_otherBayesNet).getFileName();
         }
 
         options[current++] = "-Q";
         options[current++] = "" + getSearchAlgorithm().getClass().getName();
+		options[current++] = "--";
+		for (int iOption = 0; iOption < searchOptions.length; iOption++) {
+			options[current++] = searchOptions[iOption];
+		}
 
         options[current++] = "-E";
         options[current++] = "" + getEstimator().getClass().getName();
+		options[current++] = "--";
+		for (int iOption = 0; iOption < estimatorOptions.length; iOption++) {
+			options[current++] = estimatorOptions[iOption];
+		}
 
         // Fill up rest with empty strings, not nulls!
         while (current < options.length) {
@@ -438,7 +488,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
         if (m_otherBayesNet != null) {
         	return m_otherBayesNet.getFileName();
         }
-        return null;
+        return "";
     }
 
 
@@ -503,11 +553,11 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
                 text.append("Divergence: " + m_otherBayesNet.divergence(this) + "\n");
             }
 
-            String[] options = getOptions();
-
-            for (int iOption = 0; iOption < 1; iOption++) {
-                text.append(options[iOption]);
-            }
+//            String[] options = getOptions();
+//
+//            for (int iOption = 0; iOption < 1; iOption++) {
+//                text.append(options[iOption]);
+//            }
         }
 
         return text.toString();
@@ -717,6 +767,20 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     public int getParent(int iNode, int iParent) {
         return m_ParentSets[iNode].GetParent(iParent);
     }
+
+	/** Get full set of parent sets.
+	 * @return parent sets;
+	 */
+	public ParentSet[] getParentSets() { 
+		return m_ParentSets;
+	}
+
+	/** Get full set of estimators.
+	 * @return estimators;
+	 */
+	public Estimator[][] getDistributions() {
+		return m_Distributions;
+	}
 
     /** get number of values the collection of parents of a node can take
      * @param iNode: index of the node
