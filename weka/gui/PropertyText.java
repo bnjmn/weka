@@ -39,7 +39,7 @@ import javax.swing.JTextField;
  * somewhere other than this field simultaneously
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 class PropertyText extends JTextField {
 
@@ -52,8 +52,9 @@ class PropertyText extends JTextField {
    * @param pe the PropertyEditor
    */
   PropertyText(PropertyEditor pe) {
-
-    super(pe.getAsText());
+ 
+    //super(pe.getAsText());
+    super((pe.getAsText().equals("null"))?"":pe.getAsText());
     m_Editor = pe;
     
     /*    m_Editor.addPropertyChangeListener(new PropertyChangeListener() {
