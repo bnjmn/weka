@@ -57,7 +57,7 @@ import weka.gui.visualize.ClassPanel;
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  * @see JPanel
  */
@@ -312,7 +312,7 @@ public class BoundaryVisualizer extends JPanel {
     colOne.add(vAttHolder, BorderLayout.CENTER);
 
     m_regionSamplesText.setBorder(BorderFactory.
-			    createTitledBorder("Num. samples per region"));
+			    createTitledBorder("Num. locations per pixel"));
     m_regionSamplesText.setBackground(colOne.getBackground());
     m_generatorSamplesText.setBorder(BorderFactory.
 				     createTitledBorder("Base for sampling in "
