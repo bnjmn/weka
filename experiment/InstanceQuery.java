@@ -41,13 +41,15 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class InstanceQuery extends DatabaseUtils {
+public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
   /** Determines whether sparse data is created */
-  // (currently always false)
   boolean m_CreateSparseData = false;
+  
+  /** Query to execute */
+  String m_Query = "SELECT * from ?";
 
   /**
    * Sets up the database drivers
@@ -60,13 +62,136 @@ public class InstanceQuery extends DatabaseUtils {
   }
 
   /**
+   * Returns an enumeration describing the available options <p>
+   *
+   */
+   public Enumeration listOptions () {
+     Vector newVector = new Vector(2);
+
+     newVector.addElement(new Option("\tSQL query to execute.",
+				     "Q",1,"-Q <query>"));
+     newVector.addElement(new Option("\tReturn sparse rather than normal "
+				    +"instances." 
+				    , "S", 0, "-S"));
+     return  newVector.elements();
+   }
+
+  /**
+   * Parses a given list of options.
+   *
+   * Valid options are:<p>
+   * 
+   * -S <br>
+   * Return a set of sparse instances rather than normal instances.<p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions (String[] options)
+    throws Exception
+  {
+    setSparseData(Utils.getFlag('S',options));
+
+    String optionString;
+    
+    optionString = Utils.getOption('Q',options);
+    if (optionString.length() != 0) {
+      setQuery(optionString);
+    } 
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String queryTipText() {
+    return "The SQL query to execute against the database.";
+  }
+  
+  /**
+   * Set the query to execute against the database
+   * @param q the query to execute
+   */
+  public void setQuery(String q) {
+    m_Query = q;
+  }
+
+  /**
+   * Get the query to execute against the database
+   * @return the query
+   */
+  public String getQuery() {
+    return m_Query;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String sparseDataTipText() {
+    return "Encode data as sparse instances.";
+  }
+
+  /**
+   * Sets whether data should be encoded as sparse instances
+   * @param s true if data should be encoded as a set of sparse instances
+   */
+  public void setSparseData(boolean s) {
+    m_CreateSparseData = s;
+  }
+
+  /**
+   * Gets whether data is to be returned as a set of sparse instances
+   * @return true if data is to be encoded as sparse instances
+   */
+  public boolean getSparseData() {
+    return m_CreateSparseData;
+  }
+
+  /**
+   * Gets the current settings of InstanceQuery
+   *
+   * @return an array of strings suitable for passing to setOptions()
+   */
+  public String[] getOptions () {
+
+    String[] options = new String[3];
+    int current = 0;
+
+    options[current] = "-Q"; options[current++] = getQuery();
+ 
+    if (getSparseData()) {
+      options[current++] = "-S";
+    }
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    
+    return  options;
+  }
+
+  /**
+   * Makes a database query using the query set through the -Q option 
+   * to convert a table into a set of instances
+   *
+   * @return the instances contained in the result of the query
+   * @exception Exception if an error occurs
+   */
+  public Instances retrieveInstances() throws Exception {
+    return retrieveInstances(m_Query);
+  }
+
+  /**
    * Makes a database query to convert a table into a set of instances
    *
    * @param query the query to convert to instances
    * @return the instances contained in the result of the query
    * @exception Exception if an error occurs
    */
-  public Instances getInstances(String query) throws Exception {
+  public Instances retrieveInstances(String query) throws Exception {
 
     System.err.println("Executing query: " + query);
     connectToDatabase();
@@ -311,13 +436,27 @@ public class InstanceQuery extends DatabaseUtils {
   public static void main(String args[]) {
 
     try {
+      InstanceQuery iq = new InstanceQuery();
       String query = Utils.getOption('Q', args);
       if (query.length() == 0) {
-	query = "select * from Experiment_index";
+	iq.setQuery("select * from Experiment_index");
+      } else {
+	iq.setQuery(query);
       }
-      InstanceQuery iq = new InstanceQuery();
-      Utils.checkForRemainingOptions(args);
-      Instances aha = iq.getInstances(query);
+      iq.setOptions(args);
+      try {
+	Utils.checkForRemainingOptions(args);
+      } catch (Exception e) {
+	System.err.println("Options for weka.experiment.InstanceQuery:\n");
+	Enumeration en = iq.listOptions();
+	while (en.hasMoreElements()) {
+	  Option o = (Option)en.nextElement();
+	  System.err.println(o.synopsis()+"\n"+o.description());
+	}
+	System.exit(1);
+      }
+     
+      Instances aha = iq.retrieveInstances();
       iq.disconnectFromDatabase();
       // The dataset may be large, so to make things easier we'll
       // output an instance at a time (rather than having to convert
