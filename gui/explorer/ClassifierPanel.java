@@ -100,7 +100,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -929,6 +929,10 @@ public class ClassifierPanel extends JPanel {
 		predictions[jj] = 
 		  eval.evaluateModelOnce(classifier, inst.instance(jj));
 		predInstances.add(inst.instance(jj));
+		if ((jj % 100) == 0) {
+		  m_Log.statusMessage("Evaluating on training data. Processed "
+				      +jj+" instances...");
+		}
 	      }
 	      outBuff.append("=== Evaluation on training set ===\n");
 	      break;
@@ -986,6 +990,10 @@ public class ClassifierPanel extends JPanel {
 		predictions[jj] = 
 		  eval.evaluateModelOnce(classifier, test.instance(jj));
 		predInstances.add(test.instance(jj));
+		if ((jj % 100) == 0) {
+		  m_Log.statusMessage("Evaluating on test split. Processed "
+				      +jj+" instances...");
+		}
 	      }
 	      //	      eval.evaluateModel(classifier, test);
 	      outBuff.append("=== Evaluation on test split ===\n");
@@ -1001,6 +1009,10 @@ public class ClassifierPanel extends JPanel {
 		predictions[jj] = 
 		  eval.evaluateModelOnce(classifier, userTest.instance(jj));
 		predInstances.add(userTest.instance(jj));
+		if ((jj % 100) == 0) {
+		  m_Log.statusMessage("Evaluating on test data. Processed "
+				      +jj+" instances...");
+		}
 	      }
 	      //	      eval.evaluateModel(classifier, userTest);
 	      outBuff.append("=== Evaluation on test set ===\n");
