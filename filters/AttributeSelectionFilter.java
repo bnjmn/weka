@@ -37,7 +37,7 @@ import weka.attributeSelection.*;
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
@@ -291,7 +291,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       if (m_SelectedAttributes == null) {
 	throw new Exception("No selected attributes\n");
       }
-
+     
       setOutputFormat();
       
       // Convert pending input instances
@@ -310,7 +310,8 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * m_InputFormat and calls setOutputFormat(Instances) appropriately.
    */
   protected void setOutputFormat() throws Exception {
-    
+    Instances informat;
+
     if (m_SelectedAttributes == null) {
       setOutputFormat(null);
       return;
@@ -319,9 +320,15 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
     FastVector attributes = new FastVector(m_SelectedAttributes.length);
 
     int i;
+    if (m_ASEvaluator instanceof AttributeTransformer) {
+      informat = ((AttributeTransformer)m_ASEvaluator).getTransformedData();
+    } else {
+      informat = m_InputFormat;
+    }
+
     for (i=0;i < m_SelectedAttributes.length;i++) {
       attributes.
-	addElement(m_InputFormat.attribute(m_SelectedAttributes[i]).copy());
+	addElement(informat.attribute(m_SelectedAttributes[i]).copy());
     }
 
     Instances outputFormat = 
@@ -345,11 +352,28 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    */
   protected void convertInstance(Instance instance) throws Exception {
     int index = 0;
-    Instance newInstance = new Instance(outputFormatPeek().numAttributes());
+    Instance newInstance;
+
+    if (m_ASEvaluator instanceof AttributeTransformer) {
+      Instance tempInstance;
+      tempInstance = ((AttributeTransformer)m_ASEvaluator).
+	convertInstance(instance);
+
+      newInstance = new Instance(outputFormatPeek().numAttributes());
     
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      newInstance.setValue(index, instance.value(m_SelectedAttributes[i]));
-      index++;
+      for (int i = 0; i < m_SelectedAttributes.length; i++) {
+	newInstance.setValue(index, tempInstance.
+			     value(m_SelectedAttributes[i]));
+	index++;
+      }
+      
+    } else {
+      newInstance = new Instance(outputFormatPeek().numAttributes());
+    
+      for (int i = 0; i < m_SelectedAttributes.length; i++) {
+	newInstance.setValue(index, instance.value(m_SelectedAttributes[i]));
+	index++;
+      }
     }
 
     // set the weight
