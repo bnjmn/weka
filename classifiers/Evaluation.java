@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.24 $
+ * @version  $Revision: 1.25 $
   */
 public class Evaluation implements Summarizable {
 
@@ -504,8 +504,9 @@ public class Evaluation implements Summarizable {
     int seed = 1, folds = 10, classIndex = -1;
     double predValue;
     double[] results;
-    String trainFileName, testFileName, costFileName, classIndexString,
-      seedString, foldsString, objectInputFileName, objectOutputFileName;
+    String trainFileName, testFileName, costFileName, sourceClass, 
+      classIndexString, seedString, foldsString, objectInputFileName, 
+      objectOutputFileName;
     boolean IRstatistics = false, noOutput = false,
       printClassifications = false, trainStatistics = true,
       printMargins = false, printComplexityStatistics = false,
@@ -651,7 +652,8 @@ public class Evaluation implements Summarizable {
       printMargins = Utils.getFlag('r', options);
       printGraph = Utils.getFlag('g', options);
       ROCStatistics = Utils.getFlag('y', options);
-      printSource = Utils.getFlag('z', options);
+      sourceClass = Utils.getOption('z', options);
+      printSource = (sourceClass.length() != 0);
       
       // If a model file is given, we can't process 
       // scheme-specific options
@@ -737,7 +739,7 @@ public class Evaluation implements Summarizable {
     // Output the classifier as equivalent source
     if ((classifier instanceof Sourcable)
 	&& (printSource)){
-      return wekaStaticWrapper((Sourcable) classifier);
+      return wekaStaticWrapper((Sourcable) classifier, sourceClass);
     }
 
     // Output test instance predictions only
@@ -947,13 +949,15 @@ public class Evaluation implements Summarizable {
    * class libraries.
    *
    * @param classifier a Sourcable Classifier
+   * @param className the name to give to the source code class
    * @return the source for a static classifier that can be tested with
    * weka libraries.
    */
-  protected static String wekaStaticWrapper(Sourcable classifier) 
+  protected static String wekaStaticWrapper(Sourcable classifier, 
+                                            String className) 
     throws Exception {
     
-    String className = "StaticClassifier";
+    //String className = "StaticClassifier";
     String staticClassifier = classifier.toSource(className);
     return "package weka.classifiers;\n"
     +"import weka.core.Attribute;\n"
@@ -1938,9 +1942,10 @@ public class Evaluation implements Summarizable {
     optionsText.append("\tOutputs detailed class breakdown.\n");
     optionsText.append("\tyy? y not?\n");
     if (classifier instanceof Sourcable) {
-      optionsText.append("-z\n");
+      optionsText.append("-z <class name>\n");
       optionsText.append("\tOnly outputs the source representation"
-			 + " of the classifier.\n");
+			 + " of the classifier, giving it the supplied"
+			 + " name.\n");
     }
     if (classifier instanceof Drawable) {
       optionsText.append("-g\n");
