@@ -53,7 +53,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ClassPanel extends JPanel {
     
@@ -304,6 +304,9 @@ public class ClassPanel extends JPanel {
       }
     }
      
+    // handle case where all values are missing
+    if (min == Double.POSITIVE_INFINITY) min = max = 0.0;
+
     m_minC = min; m_maxC = max;
 
     int whole = (int)Math.abs(m_maxC);
