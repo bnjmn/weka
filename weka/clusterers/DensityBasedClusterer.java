@@ -31,7 +31,7 @@ import weka.core.*;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.2 $
+ * @version  $Revision: 1.3 $
  */
 public abstract class DensityBasedClusterer extends Clusterer {
 
@@ -113,5 +113,29 @@ public abstract class DensityBasedClusterer extends Clusterer {
       }
     }
     return weights;
+  }
+
+  /**
+   * Creates copies of the current clusterer. Note that this method
+   * now uses Serialization to perform a deep copy, so the Clusterer
+   * object must be fully Serializable. Any currently built model will
+   * now be copied as well.
+   *
+   * @param model an example clusterer to copy
+   * @param num the number of clusterer copies to create.
+   * @return an array of clusterers.
+   * @exception Exception if an error occurs 
+   */
+  public static DensityBasedClusterer [] makeCopies(DensityBasedClusterer model,
+						    int num) throws Exception {
+     if (model == null) {
+      throw new Exception("No model clusterer set");
+    }
+    DensityBasedClusterer [] clusterers = new DensityBasedClusterer [num];
+    SerializedObject so = new SerializedObject(model);
+    for(int i = 0; i < clusterers.length; i++) {
+      clusterers[i] = (DensityBasedClusterer) so.getObject();
+    }
+    return clusterers;
   }
 }
