@@ -61,6 +61,9 @@ public class LoaderCustomizer extends JPanel
       .registerEditor(weka.classifiers.Classifier [].class,
 		      weka.gui.GenericArrayEditor.class);
     java.beans.PropertyEditorManager
+      .registerEditor(Object [].class,
+		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
