@@ -21,6 +21,7 @@ package weka.gui.explorer;
 
 import weka.core.Instances;
 import weka.core.SerializedObject;
+import weka.converters.*;
 import weka.filters.Filter;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.AttributeSelectionPanel;
@@ -75,7 +76,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -170,6 +171,9 @@ public class PreprocessPanel extends JPanel {
 		      weka.gui.GenericObjectEditor.class);
      java.beans.PropertyEditorManager
       .registerEditor(weka.experiment.InstanceQuery.class,
+		      weka.gui.GenericObjectEditor.class);
+     java.beans.PropertyEditorManager
+       .registerEditor(weka.converters.Converter.class,
 		      weka.gui.GenericObjectEditor.class);
   }
   
@@ -691,6 +695,58 @@ public class PreprocessPanel extends JPanel {
   }
 
   /**
+   * Pops up generic object editor with list of conversion filters
+   *
+   * @param f the File
+   */
+  private void converterQuery(final File f) {
+    final GenericObjectEditor convEd = new GenericObjectEditor();
+
+    try {
+      convEd.setClassType(weka.converters.Converter.class);
+      convEd.setValue(new CsvToArff());
+      ((GenericObjectEditor.GOEPanel)convEd.getCustomEditor())
+	.addOkListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      tryConverter((Converter)convEd.getValue(), f);
+	    }
+	  });
+    } catch (Exception ex) {
+    }
+
+    PropertyDialog pd = new PropertyDialog(convEd, 100, 100);
+  }
+
+  /**
+   * Applies the selected converter
+   *
+   * @param cnv the converter to apply to the input file
+   * @param f the input file
+   */
+  private void tryConverter(final Converter cnv, final File f) {
+
+    if (m_IOThread == null) {
+      m_IOThread = new Thread() {
+	  public void run() {
+	    try {
+	      cnv.setSource(f);
+	      Instances inst = cnv.getDataSet();
+	      setBaseInstances(inst);
+	    } catch (Exception ex) {
+	      m_Log.statusMessage(cnv.getClass().getName()+" failed to load "
+				 +f.getName());
+	      m_IOThread = null;
+	      converterQuery(f);
+	    }
+	    m_IOThread = null;
+	  }
+	};
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    }
+  }
+
+  /**
    * Loads results from a set of instances contained in the supplied
    * file. This is started in the IO thread, and a dialog is popped up
    * if there's a problem.
@@ -708,13 +764,17 @@ public class PreprocessPanel extends JPanel {
 	    setBaseInstances(new Instances(r));
 	    r.close();
 	  } catch (Exception ex) {
-	    m_Log.statusMessage("Problem reading " + f.getName());
+	    m_Log.statusMessage("Problem reading " + f.getName() 
+				+ " as an arff file.");
+	    m_IOThread = null;
+	    converterQuery(f);
+	    /* m_Log.statusMessage("Problem reading " + f.getName());
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
 					  "Couldn't read from file:\n"
 					  + f.getName() + "\n"
 					  + ex.getMessage(),
 					  "Load Instances",
-					  JOptionPane.ERROR_MESSAGE);
+					  JOptionPane.ERROR_MESSAGE); */
 	  }
 	  m_IOThread = null;
 	}
