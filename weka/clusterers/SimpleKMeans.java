@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -153,8 +153,8 @@ public class SimpleKMeans extends Clusterer
     //    String hk = null;
     boolean centroidSearchBailOut = false;
     int i;
+    int centroidCount = 0;
     for (i = 0; i < m_NumClusters; i++) {
-      int centroidCount = 0;
       do {
 	instIndex = RandomO.nextInt(instances.numInstances());
 		hk = new DecisionTable.hashKey(instances.instance(instIndex), 
