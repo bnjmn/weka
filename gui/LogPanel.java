@@ -26,7 +26,10 @@ package weka.gui;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.awt.BorderLayout;
+
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
@@ -42,6 +45,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.Point;
 
 /** 
@@ -50,7 +55,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -59,6 +64,9 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
   
   /** Displays the log messages */
   protected JTextArea m_LogText = new JTextArea(4, 20);
+
+  /** The button for viewing the log */
+  protected JButton m_logButton = new JButton("Log");
 
   /** An indicator for whether text has been output yet */
   protected boolean m_First = true;
@@ -70,52 +78,24 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
    * Creates the log panel
    */
   public LogPanel() {
-    m_LogText.setEditable(false);
-    m_LogText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    m_StatusLab.setBorder(BorderFactory.createCompoundBorder(
-			  BorderFactory.createTitledBorder("Status"),
-			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));    
-    JPanel p1 = new JPanel();
-    p1.setBorder(BorderFactory.createTitledBorder("Log"));
-    p1.setLayout(new BorderLayout());
-    final JScrollPane js = new JScrollPane(m_LogText);
-    p1.add(js, BorderLayout.CENTER);
-    js.getViewport().addChangeListener(new ChangeListener() {
-      private int lastHeight;
-      public void stateChanged(ChangeEvent e) {
-	JViewport vp = (JViewport)e.getSource();
-	int h = vp.getViewSize().height; 
-	if (h != lastHeight) { // i.e. an addition not just a user scrolling
-	  lastHeight = h;
-	  int x = h - vp.getExtentSize().height;
-	  vp.setViewPosition(new Point(0, x));
-	}
-      }
-    });
-    setLayout(new BorderLayout());
-    add(p1, BorderLayout.CENTER);
-    add(m_StatusLab, BorderLayout.SOUTH);
-    addPopup();
+
+    this(null);
   }
 
   /**
    * Creates the log panel
    */
   public LogPanel(WekaTaskMonitor tm) {
-    /*    if (!(tm instanceof java.awt.Component)) {
-      throw new Exception("TaskLogger must be a graphical component");
-      } */
+
     m_TaskMonitor = tm;
     m_LogText.setEditable(false);
     m_LogText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_StatusLab.setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createTitledBorder("Status"),
-			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));    
-    JPanel p1 = new JPanel();
-    p1.setBorder(BorderFactory.createTitledBorder("Log"));
-    p1.setLayout(new BorderLayout());
+			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+
+    // create scrolling log
     final JScrollPane js = new JScrollPane(m_LogText);
-    p1.add(js, BorderLayout.CENTER);
     js.getViewport().addChangeListener(new ChangeListener() {
       private int lastHeight;
       public void stateChanged(ChangeEvent e) {
@@ -128,13 +108,46 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 	}
       }
     });
+
+    // create log window
+    final JFrame jf = new JFrame("Log");
+    jf.addWindowListener(new WindowAdapter() {
+	public void windowClosing(WindowEvent e) {
+	  jf.setVisible(false);
+	}
+      });
+    jf.getContentPane().setLayout(new BorderLayout());
+    jf.getContentPane().add(js, BorderLayout.CENTER);
+    jf.pack();
+    jf.setSize(450, 350);
+
+    // display log window on request
+    m_logButton.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  jf.setVisible(true);
+	}
+      });
+
+    // do layout
     setLayout(new BorderLayout());
-    add(p1, BorderLayout.CENTER);
-    JPanel p2 = new JPanel();
-    p2.setLayout(new BorderLayout());
-    p2.add(m_StatusLab,BorderLayout.CENTER);
-    p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
-    add(p2, BorderLayout.SOUTH);
+    JPanel logButPanel = new JPanel();
+    logButPanel.setLayout(new BorderLayout());
+    logButPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    logButPanel.add(m_logButton, BorderLayout.CENTER);
+    JPanel p1 = new JPanel();
+    p1.setLayout(new BorderLayout());
+    p1.add(m_StatusLab, BorderLayout.CENTER);
+    p1.add(logButPanel, BorderLayout.EAST);
+
+    if (tm == null) {
+      add(p1, BorderLayout.SOUTH);
+    } else {
+      JPanel p2 = new JPanel();
+      p2.setLayout(new BorderLayout());
+      p2.add(p1, BorderLayout.CENTER);
+      p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
+      add(p2, BorderLayout.SOUTH);
+    }
     addPopup();
   }
 
@@ -156,6 +169,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 		  Runtime currR = Runtime.getRuntime();
 		  long freeM = currR.freeMemory();
 		  logMessage("Available memory : "+freeM+" bytes");
+		  statusMessage(freeM + " bytes free");
 		}
 	      });
 	    gcMenu.add(availMem);
