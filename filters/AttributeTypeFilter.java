@@ -14,53 +14,147 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    AttributeTypeFilter.java
- *    Copyright (C) 1999 Intelligenesis Corp.
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
-
 
 package weka.filters;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.SparseInstance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
+import weka.core.*;
 import java.util.Enumeration;
-import weka.core.SelectedTag;
-import weka.core.Tag;
 import java.util.Vector;
-import weka.core.Option;
-import weka.core.Utils;
-import weka.core.FastVector;
 
 /** 
- * An instance filter that deletes all attributes of a specified type
- * from the dataset.<p>
+ * A filter that removes attributes of a given type.<p>
  *
- * Valid filter-specific options are:<p>
+ * Valid filter-specific options are: <p>
  *
  * -T type <br>
- * Specify the attribute type to delete. Valid values are "nominal", "numeric",
- * and "string". (default "string")<p>
+ * Attribute type to delete.
+ * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.11 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.12 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
-  /** Stores which type of attribute to delete */
-  protected int m_DeleteType = Attribute.STRING;
+  /** The AttributeFilter used to do the filtering */
+  protected AttributeFilter m_attributeFilter = new AttributeFilter();
 
-  /* Define possible attribute types to delete */
-  public static final Tag [] TAGS_ATTRIBUTES = {
-    new Tag(Attribute.STRING, "Delete string attributes"),
+  /** The type of attribute to delete */
+  protected int m_attTypeToDelete = Attribute.STRING;
+  
+  /** Tag allowing selection of attribute type to delete */
+  public static final Tag [] TAGS_ATTRIBUTETYPE = {
     new Tag(Attribute.NOMINAL, "Delete nominal attributes"),
     new Tag(Attribute.NUMERIC, "Delete numeric attributes"),
+    new Tag(Attribute.STRING, "Delete string attributes"),
     new Tag(Attribute.DATE, "Delete date attributes")
-  };
+      };
+
+  /**
+   * Sets the format of the input instances.
+   *
+   * @param instanceInfo an Instances object containing the input instance
+   * structure (any instances contained in the object are ignored - only the
+   * structure is required).
+   * @return true if the outputFormat may be collected immediately
+   * @exception Exception if the inputFormat can't be set successfully 
+   */ 
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
+    
+    super.setInputFormat(instanceInfo);
+
+    int[] attsToDelete = new int[instanceInfo.numAttributes()];
+    int numToDelete = 0;
+    for (int i=0; i<instanceInfo.numAttributes(); i++) {
+      if (instanceInfo.attribute(i).type() == m_attTypeToDelete)
+	attsToDelete[numToDelete++] = i;
+    }
+
+    int[] finalAttsToDelete = new int[numToDelete];
+    System.arraycopy(attsToDelete, 0, finalAttsToDelete, 0, numToDelete);
+    
+    m_attributeFilter.setAttributeIndicesArray(finalAttsToDelete);
+    m_attributeFilter.setInvertSelection(false);
+    
+    boolean result = m_attributeFilter.setInputFormat(instanceInfo);
+    Instances afOutputFormat = m_attributeFilter.getOutputFormat();
+    
+    // restore old relation name to hide attribute filter stamp
+    afOutputFormat.setRelationName(instanceInfo.relationName());
+
+    setOutputFormat(afOutputFormat);
+    return result;
+  }
+
+  /**
+   * Input an instance for filtering.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   */
+  public boolean input(Instance instance) {
+    
+    return m_attributeFilter.input(instance);
+  }
+
+  /**
+   * Signify that this batch of input to the filter is finished.
+   *
+   * @return true if there are instances pending output
+   */  
+  public boolean batchFinished() throws Exception {
+
+    return m_attributeFilter.batchFinished();
+  }
+
+  /**
+   * Output an instance after filtering and remove from the output queue.
+   *
+   * @return the instance that has most recently been filtered (or null if
+   * the queue is empty).
+   */
+  public Instance output() {
+
+    return m_attributeFilter.output();
+  }
+
+  /**
+   * Output an instance after filtering but do not remove from the
+   * output queue.
+   *
+   * @return the instance that has most recently been filtered (or null if
+   * the queue is empty).
+   */
+  public Instance outputPeek() {
+
+    return m_attributeFilter.outputPeek();
+  }
+
+  /**
+   * Returns the number of instances pending output
+   *
+   * @return the number of instances  pending output
+   */  
+  public int numPendingOutput() {
+  
+    return m_attributeFilter.numPendingOutput();
+  }
+  
+  /**
+   * Returns whether the output format is ready to be collected
+   *
+   * @return true if the output format is set
+   */  
+  public boolean isOutputFormatDefined() {
+
+    return m_attributeFilter.isOutputFormatDefined();
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -69,46 +163,32 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
-              "\tSpecify the attribute type to delete. Valid values are:\n"
-	      + "\t\"nominal\", \"numeric\", \"date\", and \"string\". \n"
-              + "(default \"string\")",
-              "T", 1, "-T <type>"));
+				    "\tAttribute type to delete. Valid options are \"nominal\", "
+				    + "\"numeric\", \"string\" and \"date\". (default \"string\")",
+				    "T", 1, "-T <nominal|numeric|string|date>"));
+
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options controlling the behaviour of this object.
-   * Valid options are:<p>
+   * Parses the options for this object. Valid options are: <p>
    *
    * -T type <br>
-   * Specify the attribute type to delete. Valid values are "nominal", 
-   * "numeric", "date", and "string". (default "string")<p>
+   * Attribute type to delete.
+   * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    String attributeType = Utils.getOption('T', options);
-    if (attributeType.length() != 0) {
-      attributeType = attributeType.toLowerCase();
-      if (attributeType.equals("nominal")) {
-        setAttributeType(new SelectedTag(Attribute.NOMINAL, TAGS_ATTRIBUTES));
-      } else if (attributeType.equals("numeric")) {
-        setAttributeType(new SelectedTag(Attribute.NUMERIC, TAGS_ATTRIBUTES));
-      } else if (attributeType.equals("date")) {
-        setAttributeType(new SelectedTag(Attribute.DATE, TAGS_ATTRIBUTES));
-      } else {
-        setAttributeType(new SelectedTag(Attribute.STRING, TAGS_ATTRIBUTES));
-      }
-    } else {
-      setAttributeType(new SelectedTag(Attribute.STRING, TAGS_ATTRIBUTES));
-    }
     
+    String tString = Utils.getOption('T', options);
+    if (tString.length() != 0) setAttributeTypeString(tString);
+
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
@@ -125,122 +205,85 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
     int current = 0;
 
     options[current++] = "-T";
-    if (m_DeleteType == Attribute.NOMINAL) {
-      options[current++] = "nominal";
-    } else if (m_DeleteType == Attribute.NUMERIC) {
-      options[current++] = "numeric";
-    } else if (m_DeleteType == Attribute.DATE) {
-      options[current++] = "date";
-    } else {
-      options[current++] = "string";
-    }
-
+    options[current++] = getAttributeTypeString();
+    
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
   }
 
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Removes attributes of a given type.";
+  }
 
   /**
-   * Gets the type of attribute that will be deleted. The ID will be one of
-   * Attribute.STRING, Attribute.NOMINAL, or Attribute.NUMERIC.
+   * Returns the tip text for this property
    *
-   * @return the selected attribute type.
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeTypeTipText() {
+
+    return "The type of attribute to remove.";
+  }
+
+  /**
+   * Sets the attribute type to be deleted by the filter.
+   *
+   * @param type a TAGS_ATTRIBUTETYPE of the new type the filter should delete
+   */
+  public void setAttributeType(SelectedTag type) {
+    
+    if (type.getTags() == TAGS_ATTRIBUTETYPE) {
+      m_attTypeToDelete = type.getSelectedTag().getID();
+    }
+  }
+
+  /**
+   * Gets the attribute type to be deleted by the filter.
+   *
+   * @return the attribute type as a selected tag TAGS_ATTRIBUTETYPE
    */
   public SelectedTag getAttributeType() {
 
-    return new SelectedTag(m_DeleteType, TAGS_ATTRIBUTES);
+    return new SelectedTag(m_attTypeToDelete, TAGS_ATTRIBUTETYPE);
   }
 
   /**
-   * Sets the type of attribute to delete. Values other than
-   * Attribute.STRING, Attribute.NOMINAL, or Attribute.NUMERIC will be ignored.
+   * Gets the attribute type to be deleted by the filter as a string.
    *
-   * @param newAttributeType the type of attribute to delete.
+   * @return the attribute type as a String
    */
-  public void setAttributeType(SelectedTag newType) {
-    
-    if (newType.getTags() == TAGS_ATTRIBUTES) {
-      m_DeleteType = newType.getSelectedTag().getID();
-    }
-  }
+  protected String getAttributeTypeString() {
 
+    if (m_attTypeToDelete == Attribute.NOMINAL) return "nominal";
+    else if (m_attTypeToDelete == Attribute.NUMERIC) return "numeric";
+    else if (m_attTypeToDelete == Attribute.STRING) return "string";
+    else if (m_attTypeToDelete == Attribute.DATE) return "date";
+    else return "unknown";
+  }
 
   /**
-   * Sets the format of the input instances.
+   * Sets the attribute type to be deleted by the filter.
    *
-   * @param instanceInfo an Instances object containing the input instance
-   * structure (any instances contained in the object are ignored - only the
-   * structure is required).
-   * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the format couldn't be set successfully
+   * @param type a String representing the new type the filter should delete
    */
-  public boolean setInputFormat(Instances instanceInfo) throws Exception {
+  protected void setAttributeTypeString(String typeString) {
 
-    super.setInputFormat(instanceInfo);
-    
-    // Create the output buffer
-    FastVector attributes = new FastVector();
-    int outputClass = -1;
-    for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-      if (instanceInfo.attribute(i).type() != m_DeleteType) {
-        if (instanceInfo.classIndex() == i) {
-          outputClass = attributes.size();
-        }
-        attributes.addElement(instanceInfo.attribute(i).copy());
-      }
-    }
-    Instances outputFormat = new Instances(instanceInfo.relationName(),
-					   attributes, 0); 
-    outputFormat.setClassIndex(outputClass);
-    setOutputFormat(outputFormat);
-    return true;
+    typeString = typeString.toLowerCase();
+    if (typeString.equals("nominal")) m_attTypeToDelete = Attribute.NOMINAL;
+    else if (typeString.equals("numeric")) m_attTypeToDelete = Attribute.NUMERIC;
+    else if (typeString.equals("string")) m_attTypeToDelete = Attribute.STRING;
+    else if (typeString.equals("date")) m_attTypeToDelete = Attribute.DATE;
   }
-  
-
-  /**
-   * Input an instance for filtering. Ordinarily the instance is processed
-   * and made available for output immediately. Some filters require all
-   * instances be read before producing output.
-   *
-   * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
-   */
-  public boolean input(Instance instance) {
-
-    if (getInputFormat() == null) {
-      throw new IllegalStateException("No input instance format defined");
-    }
-    if (m_NewBatch) {
-      resetQueue();
-      m_NewBatch = false;
-    }
-
-    double[] vals = new double[outputFormatPeek().numAttributes()];
-    int j = 0;
-    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if (getInputFormat().attribute(i).type() != m_DeleteType) {
-	vals[j++] = instance.value(i);
-      }
-    }
-    Instance inst = null;
-    if (instance instanceof SparseInstance) {
-      inst = new SparseInstance(instance.weight(), vals);
-    } else {
-      inst = new Instance(instance.weight(), vals);
-    }
-    if (m_DeleteType != Attribute.STRING) {
-      copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
-                       getOutputFormat(), getOutputStringIndex());
-    }
-    inst.setDataset(getOutputFormat());
-    push(inst);
-    return true;
-  }
-
 
   /**
    * Main method for testing this class.
@@ -256,16 +299,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
 	Filter.filterFile(new AttributeTypeFilter(), argv);
       }
     } catch (Exception ex) {
-      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }
 }
-
-
-
-
-
-
-
-
