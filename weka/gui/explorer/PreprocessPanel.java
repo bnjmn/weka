@@ -82,7 +82,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -526,7 +526,9 @@ public class PreprocessPanel extends JPanel {
 	  (InstanceQuery)m_DatabaseQueryEditor.getValue();
 	
 	InstQ.connectToDatabase();      
-	addUndoPoint();
+	try {
+	  addUndoPoint();
+	} catch (Exception ignored) {}
 	setInstancesFromDB(InstQ);
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
@@ -564,10 +566,13 @@ public class PreprocessPanel extends JPanel {
 	if (urlName != null) {
 	  m_LastURL = urlName;
 	  URL url = new URL(urlName);
-	  addUndoPoint();
+	  try {
+	    addUndoPoint();
+	  } catch (Exception ignored) {}
 	  setInstancesFromURL(url);
 	}
       } catch (Exception ex) {
+	ex.printStackTrace();
 	JOptionPane.showMessageDialog(this,
 				      "Problem with URL:\n"
 				      + ex.getMessage(),
@@ -792,6 +797,7 @@ public class PreprocessPanel extends JPanel {
 	    setInstances(new Instances(r));
 	    r.close();
 	  } catch (Exception ex) {
+	    ex.printStackTrace();
 	    m_Log.statusMessage("Problem reading " + u);
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
 					  "Couldn't read from URL:\n"
