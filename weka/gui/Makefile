@@ -24,7 +24,8 @@ SOURCES = \
 	SysErrLog.java \
 	TaskLogger.java \
 	WekaTaskMonitor.java \
-	SaveBuffer.java
+	SaveBuffer.java \
+	CostMatrixEditor.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
