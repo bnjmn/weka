@@ -46,7 +46,7 @@ import javax.swing.BorderFactory;
  * classification).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -82,7 +82,6 @@ public class AttributeSelectionPanel extends JPanel {
 
       m_Instances = instances;
       m_Selected = new boolean [m_Instances.numAttributes()];
-      includeAll();
     }
     
     /**
