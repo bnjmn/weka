@@ -93,8 +93,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules.Prism,\
  weka.classifiers.rules.Ridor,\
  weka.classifiers.rules.JRip,\
- weka.classifiers.rules.car.JCBA,\
- weka.classifiers.rules.car.WeightedClassifier,\
  weka.classifiers.rules.ZeroR
 
 # Lists the Filters I want to choose from
@@ -214,14 +212,8 @@ weka.attributeSelection.ASSearch = \
 weka.associations.Associator=\
  weka.associations.Apriori, \
  weka.associations.PredictiveApriori, \
- weka.associations.classification.CarApriori, \
- weka.associations.classification.CarPredictiveApriori, \
  weka.associations.Tertius
 
-# Lists the CARuleMiners I want to choose from
-weka.associations.classification.CARuleMiner=\
- weka.associations.classification.CarApriori, \
- weka.associations.classification.CarPredictiveApriori
 
 # Lists the Clusterers I want to choose from
 weka.clusterers.Clusterer=\

@@ -85,7 +85,7 @@ import javax.swing.ButtonGroup;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class SetupPanel extends JPanel {
 
@@ -193,7 +193,13 @@ public class SetupPanel extends JPanel {
       .registerEditor(weka.attributeSelection.ASSearch.class,
 		      GenericObjectEditor.class);
     java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.UnsupervisedSubsetEvaluator.class,
+		      GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
       .registerEditor(weka.clusterers.Clusterer.class,
+		      GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.clusterers.DensityBasedClusterer.class,
 		      GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(SelectedTag.class,

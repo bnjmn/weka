@@ -69,7 +69,7 @@ import java.beans.PropertyEditor;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -136,7 +136,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
-      .registerEditor(weka.associations.classification.CARuleMiner.class,
+      .registerEditor(weka.associations.CARuleMiner.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.CostMatrix.class,

@@ -1,4 +1,4 @@
-/*
+ /*
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -83,7 +83,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.49 $
+ * @version $Revision: 1.50 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -203,6 +203,9 @@ public class PreprocessPanel extends JPanel {
 		      weka.gui.GenericObjectEditor.class);
      java.beans.PropertyEditorManager
        .registerEditor(weka.core.converters.Loader.class,
+		      weka.gui.GenericObjectEditor.class);
+     java.beans.PropertyEditorManager
+       .registerEditor(weka.core.converters.Saver.class,
 		      weka.gui.GenericObjectEditor.class);
   }
   

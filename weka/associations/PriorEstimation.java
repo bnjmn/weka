@@ -40,9 +40,9 @@ import java.io.Serializable;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.3 $ */
 
- public class PriorEstimation implements Serializable {
+ public class PriorEstimation implements Serializable{
     
     /** The number of rnadom rules. */
     protected int m_numRandRules;

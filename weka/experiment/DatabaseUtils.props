@@ -73,3 +73,7 @@ CREATE_DOUBLE=DOUBLE
 checkUpperCaseNames=false
 setAutoCommit=true
 createIndex=false
+
+#flags for loading and saving instances using DatabaseLoader/Saver
+nominalToStringLimit=50
+idColumn=auto_generated_id
