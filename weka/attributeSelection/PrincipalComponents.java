@@ -27,16 +27,22 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class PrincipalComponents extends AttributeTransformer 
-  implements OptionHandler {
+public class PrincipalComponents extends AttributeEvaluator 
+  implements AttributeTransformer, OptionHandler {
   
   /** The data to transform analyse/transform */
   private Instances m_trainInstances;
 
   /** Keep a copy for the class attribute (if set) */
   private Instances m_trainCopy;
+
+  /** The header for the transformed data format */
+  private Instances m_transformedFormat;
+
+  /** The header for data transformed back to the original space */
+  private Instances m_originalSpaceFormat;
 
   /** Data has a class set */
   private boolean m_hasClass;
@@ -75,9 +81,9 @@ public class PrincipalComponents extends AttributeTransformer
   /** used to remove the class column if a class column is set */
   private AttributeFilter m_attribFilter;
 
-  /** The number of attributes in the transformed data */
+  /** The number of attributes in the pc transformed data */
   private int m_outputNumAtts = -1;
-
+  
   /** normalize the input data? */
   private boolean m_normalize = true;
 
@@ -88,6 +94,10 @@ public class PrincipalComponents extends AttributeTransformer
   /** transform the data through the pc space and back to the original
       space ? */
   private boolean m_transBackToOriginal = false;
+
+  /** holds the transposed eigenvectors for converting back to the
+      original space */
+  private double [][] m_eTranspose;
 
   /**
    * Returns a string describing this attribute transformer
@@ -190,19 +200,39 @@ public class PrincipalComponents extends AttributeTransformer
     return m_normalize;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String varianceCoveredTipText() {
     return "Retain enough PC attributes to account for this proportion of "
       +"variance.";
   }
 
+  /**
+   * Sets the amount of variance to account for when retaining
+   * principal components
+   * @param vc the proportion of total variance to account for
+   */
   public void setVarianceCovered(double vc) {
     m_coverVariance = vc;
   }
 
+  /**
+   * Gets the proportion of total variance to account for when
+   * retaining principal components
+   * @return the proportion of variance to account for
+   */
   public double getVarianceCovered() {
     return m_coverVariance;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String transformBackToOriginalTipText() {
     return "Transform through the PC space and back to the original space. "
       +"If only the best n PCs are retained (by setting varianceCovered < 1) "
@@ -210,16 +240,27 @@ public class PrincipalComponents extends AttributeTransformer
       +"less attribute noise.";
   }
 
+  /**
+   * Sets whether the data should be transformed back to the original
+   * space
+   * @param b true if the data should be transformed back to the
+   * original space
+   */
   public void setTransformBackToOriginal(boolean b) {
     m_transBackToOriginal = b;
   }
-
+  
+  /**
+   * Gets whether the data is to be transformed back to the original
+   * space.
+   * @return true if the data is to be transformed back to the original space
+   */
   public boolean getTransformBackToOriginal() {
     return m_transBackToOriginal;
   }
 
   /**
-   * Gets the current settings of ClassifierSubsetEval
+   * Gets the current settings of PrincipalComponents
    *
    * @return an array of strings suitable for passing to setOptions()
    */
@@ -291,7 +332,6 @@ public class PrincipalComponents extends AttributeTransformer
     for (int i=0;i<m_trainInstances.numAttributes();i++) {
       if (m_trainInstances.numDistinctValues(i) <=1) {
 	deleteCols.addElement(new Integer(i));
-	//      System.err.println("att : "+(i+1)+ " num vals : "+m_trainInstances.numDistinctValues(i));
       }
     }
 
@@ -327,9 +367,6 @@ public class PrincipalComponents extends AttributeTransformer
     m_eigenvectors = (double [][])v.clone();
     
     m_eigenvalues = (double [])d.clone();
-    /*    for (int i=0;i<m_eigenvalues.length;i++) {
-      System.err.println("eig val : "+i+" "+m_eigenvalues[i]);
-      } */
 
     // any eigenvalues less than 0 are not worth anything --- change to 0
     for (int i=0;i<m_eigenvalues.length;i++) {
@@ -339,6 +376,38 @@ public class PrincipalComponents extends AttributeTransformer
     }
     m_sortedEigens = Utils.sort(m_eigenvalues);
     m_sumOfEigenValues = Utils.sum(m_eigenvalues);
+
+    m_transformedFormat = setOutputFormat();
+    if (m_transBackToOriginal) {
+      m_originalSpaceFormat = setOutputFormatOriginal();
+      
+      // new ordered eigenvector matrix
+      int numVectors = (m_transformedFormat.classIndex() < 0) 
+	? m_transformedFormat.numAttributes()
+	: m_transformedFormat.numAttributes()-1;
+
+      double [][] orderedVectors = 
+	new double [m_eigenvectors.length][numVectors+1];
+      
+      // try converting back to the original space
+      for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
+	for (int j=1;j<=m_numAttribs;j++) {
+	  orderedVectors[j][m_numAttribs-i+1] = 
+	    m_eigenvectors[j][m_sortedEigens[i]];
+	}
+      }
+      
+      // transpose the matrix
+      int nr = orderedVectors.length;
+      int nc = orderedVectors[0].length;
+      m_eTranspose = 
+	new double [nc][nr];
+      for (int i=0;i<nc;i++) {
+	for (int j=0;j<nr;j++) {
+	  m_eTranspose[i][j] = orderedVectors[j][i];
+	}
+      }
+    }
   }
 
   /**
@@ -354,13 +423,11 @@ public class PrincipalComponents extends AttributeTransformer
     if (m_eigenvalues == null) {
       throw new Exception("Principal components hasn't been built yet");
     }
-    Instances output;
     if (m_transBackToOriginal) {
-      output = setOutputFormatOriginal();
+      return m_originalSpaceFormat;
     } else {
-      output = setOutputFormat();
+      return m_transformedFormat;
     }
-    return output;
   }
 
   /**
@@ -373,67 +440,26 @@ public class PrincipalComponents extends AttributeTransformer
       throw new Exception("Principal components hasn't been built yet");
     }
 
-    Instances output = setOutputFormat();
+    Instances output;
+
+    if (m_transBackToOriginal) {
+      output = new Instances(m_originalSpaceFormat);
+    } else {
+      output = new Instances(m_transformedFormat);
+    }
     for (int i=0;i<m_trainCopy.numInstances();i++) {
       Instance converted = convertInstance(m_trainCopy.instance(i));
       output.add(converted);
-    }
-
-
-    if (m_transBackToOriginal) {
-      // new ordered eigenvector matrix
-      int numVectors = (output.classIndex() < 0) 
-	? output.numAttributes()
-	: output.numAttributes()-1;
-
-      double [][] orderedVectors = 
-	new double [m_eigenvectors.length][numVectors+1];
-            
-      // try converting back to the original space
-      for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
-	for (int j=1;j<=m_numAttribs;j++) {
-	  orderedVectors[j][m_numAttribs-i+1] = 
-	    m_eigenvectors[j][m_sortedEigens[i]];
-	}
-      }
-      
-      // transpose the matrix
-      int nr = orderedVectors.length;
-      int nc = orderedVectors[0].length;
-      double [][] transpose = 
-	new double [nc][nr];
-      for (int i=0;i<nc;i++) {
-	for (int j=0;j<nr;j++) {
-	  transpose[i][j] = orderedVectors[j][i];
-	}
-      }
-      
-      return mapToOriginal(output, transpose);
     }
 
     return output;
   }
 
   /**
-   * Map the PC transformed data back to the original space
-   */
-  private Instances mapToOriginal(Instances transformed, 
-			     double [][]e_valuesTransposed) 
-    throws Exception {
-
-    Instances originalSpace = setOutputFormatOriginal();
-    for (int i=0;i<transformed.numInstances();i++) {
-      
-      Instance converted = convertInstanceToOriginal(transformed.instance(i),
-					   e_valuesTransposed);
-      originalSpace.add(converted);
-    }
-    return originalSpace;
-  }
-
-  /**
    * Evaluates the merit of a transformed attribute. This is defined
-   * to be 1 minus the cumulative variance explained.
+   * to be 1 minus the cumulative variance explained. Merit can't
+   * be meaningfully evaluated if the data is to be transformed back
+   * to the original space.
    * @param att the attribute to be evaluated
    * @return the merit of a transformed attribute
    * @exception Exception if attribute can't be evaluated
@@ -573,20 +599,25 @@ public class PrincipalComponents extends AttributeTransformer
   /**
    * Convert a pc transformed instance back to the original space
    */
-  private Instance convertInstanceToOriginal(Instance inst,
-				   double [][] e_transposed) 
+  private Instance convertInstanceToOriginal(Instance inst)
     throws Exception {
-    double[] newVals = new double[m_outputNumAtts];
-    //    Instance newInstance = new Instance(numAtts);
+    double[] newVals;
 
     if (m_hasClass) {
-      newVals[m_outputNumAtts - 1] = inst.value(inst.classIndex());
+      newVals = new double[m_numAttribs+1];
+    } else {
+      newVals = new double[m_numAttribs];
     }
 
-    for (int i=1;i<e_transposed[0].length;i++) {
+    if (m_hasClass) {
+      // class is always appended as the last attribute
+      newVals[m_numAttribs] = inst.value(inst.numAttributes()-1);
+    }
+
+    for (int i=1;i<m_eTranspose[0].length;i++) {
       double tempval = 0.0;
-      for (int j=1;j<e_transposed.length;j++) {
-	tempval += (e_transposed[j][i] * 
+      for (int j=1;j<m_eTranspose.length;j++) {
+	tempval += (m_eTranspose[j][i] * 
 		    inst.value(j - 1));
        }
       newVals[i - 1] = tempval;
@@ -600,7 +631,8 @@ public class PrincipalComponents extends AttributeTransformer
   }
 
   /**
-   * Transform an instance in original (unormalized) format.
+   * Transform an instance in original (unormalized) format. Convert back
+   * to the original space if requested.
    * @param instance an instance in the original (unormalized) format
    * @return a transformed instance
    * @exception Exception if instance cant be transformed
@@ -611,8 +643,6 @@ public class PrincipalComponents extends AttributeTransformer
       throw new Exception("convertInstance: Principal components not "
 			  +"built yet");
     }
-
-    //    System.out.println("Original: "+instance);
 
     double[] newVals = new double[m_outputNumAtts];
     Instance tempInst = (Instance)instance.copy();
@@ -636,7 +666,7 @@ public class PrincipalComponents extends AttributeTransformer
     if (m_hasClass) {
        newVals[m_outputNumAtts - 1] = instance.value(instance.classIndex());
     }
-    //    System.out.println("normalized etc: "+tempInst);
+
     double cumulative = 0;
     for (int i = m_numAttribs; i >= 1; i--) {
       double tempval = 0.0;
@@ -649,14 +679,23 @@ public class PrincipalComponents extends AttributeTransformer
       if ((cumulative / m_sumOfEigenValues) >= m_coverVariance) {
 	break;
       }
-      //      newInstance.setValue(m_numAttribs-i,tempval);
     }
-
-    if (instance instanceof SparseInstance) {
+    
+    if (!m_transBackToOriginal) {
+      if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
+      } else {
+	return new Instance(instance.weight(), newVals);
+      }      
     } else {
-      return new Instance(instance.weight(), newVals);
-    }      
+      if (instance instanceof SparseInstance) {
+	return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
+							    newVals));
+      } else {
+	return convertInstanceToOriginal(new Instance(instance.weight(),
+						      newVals));
+      }
+    }
   }
 
   /**
@@ -683,7 +722,6 @@ public class PrincipalComponents extends AttributeTransformer
       outputFormat.setClassIndex(outputFormat.numAttributes()-1);
     }
 
-    m_outputNumAtts = outputFormat.numAttributes();
     return outputFormat;
   }
 
