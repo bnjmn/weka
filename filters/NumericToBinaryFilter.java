@@ -20,7 +20,7 @@ import weka.core.*;
  * attribute will be one. The new attributes will nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class NumericToBinaryFilter extends Filter {
 
@@ -36,8 +36,7 @@ public class NumericToBinaryFilter extends Filter {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
     setOutputFormat();
     return true;
   }
@@ -53,7 +52,7 @@ public class NumericToBinaryFilter extends Filter {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -62,23 +61,6 @@ public class NumericToBinaryFilter extends Filter {
     }
     convertInstance(instance);
     return true;
-  }
-
-  /**
-   * Signify that this batch of input to the filter is finished. 
-   *
-   * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
-   */
-  public boolean batchFinished() throws Exception {
-
-    Instance current;
-
-    if (m_InputFormat == null) {
-      throw new Exception("No input instance format defined");
-    }
-    m_NewBatch = true;
-    return (numPendingOutput() != 0);
   }
 
   /** 
@@ -93,10 +75,10 @@ public class NumericToBinaryFilter extends Filter {
     FastVector vals;
 
     // Compute new attributes
-    newClassIndex = m_InputFormat.classIndex();
+    newClassIndex = getInputFormat().classIndex();
     newAtts = new FastVector();
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
+    for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
       if ((j == newClassIndex) || (!att.isNumeric())) {
 	newAtts.addElement(att.copy());
       } else {
@@ -106,7 +88,7 @@ public class NumericToBinaryFilter extends Filter {
 	newAtts.addElement(new Attribute(attributeName.toString(), vals));
       }
     }
-    outputFormat = new Instances(m_InputFormat.relationName(), newAtts, 0);
+    outputFormat = new Instances(getInputFormat().relationName(), newAtts, 0);
     outputFormat.setClassIndex(newClassIndex);
     setOutputFormat(outputFormat);
   }
@@ -121,9 +103,9 @@ public class NumericToBinaryFilter extends Filter {
   
     if (!(inst instanceof SparseInstance)) {
       double[] newVals = new double[outputFormatPeek().numAttributes()];
-      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-	Attribute att = m_InputFormat.attribute(j);
-	if ((!att.isNumeric()) || (j == m_InputFormat.classIndex())) {
+      for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+	Attribute att = getInputFormat().attribute(j);
+	if ((!att.isNumeric()) || (j == getInputFormat().classIndex())) {
 	  newVals[j] = inst.value(j);
 	} else {
 	  if (inst.isMissing(j) || (inst.value(j) == 0)) {
@@ -138,8 +120,8 @@ public class NumericToBinaryFilter extends Filter {
       double[] newVals = new double[inst.numValues()];
       int[] newIndices = new int[inst.numValues()];
       for (int j = 0; j < inst.numValues(); j++) {
-	Attribute att = m_InputFormat.attribute(inst.index(j));
-	if ((!att.isNumeric()) || (inst.index(j) == m_InputFormat.classIndex())) {
+	Attribute att = getInputFormat().attribute(inst.index(j));
+	if ((!att.isNumeric()) || (inst.index(j) == getInputFormat().classIndex())) {
 	  newVals[j] = inst.valueSparse(j);
 	} else {
 	  if (inst.isMissingSparse(j)) {

@@ -27,7 +27,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {
@@ -63,27 +63,25 @@ public class SwapAttributeValuesFilter extends Filter
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
+    super.inputFormat(instanceInfo);
     m_AttIndex = m_AttIndexSet;
     if (m_AttIndex < 0) {
-      m_AttIndex = m_InputFormat.numAttributes() - 1;
+      m_AttIndex = instanceInfo.numAttributes() - 1;
     }
     m_FirstIndex = m_FirstIndexSet;
     if (m_FirstIndex < 0) {
-      m_FirstIndex = m_InputFormat.attribute(m_AttIndex).numValues() - 1;
+      m_FirstIndex = instanceInfo.attribute(m_AttIndex).numValues() - 1;
     }
     m_SecondIndex = m_SecondIndexSet;
     if (m_SecondIndex < 0) {
-      m_SecondIndex = m_InputFormat.attribute(m_AttIndex).numValues() - 1;
+      m_SecondIndex = instanceInfo.attribute(m_AttIndex).numValues() - 1;
     }
-    if (!m_InputFormat.attribute(m_AttIndex).isNominal()) {
+    if (!instanceInfo.attribute(m_AttIndex).isNominal()) {
       throw new Exception("Chosen attribute not nominal.");
     }
-    if (m_InputFormat.attribute(m_AttIndex).numValues() < 2) {
+    if (instanceInfo.attribute(m_AttIndex).numValues() < 2) {
       throw new Exception("Chosen attribute has less than two values.");
     }
-    m_NewBatch = true;
-    setOutputFormat();
     return true;
   }
 
@@ -99,7 +97,7 @@ public class SwapAttributeValuesFilter extends Filter
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -197,8 +195,8 @@ public class SwapAttributeValuesFilter extends Filter
       setSecondValueIndex(-1);
     }
    
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -298,9 +296,9 @@ public class SwapAttributeValuesFilter extends Filter
       
     // Compute new attributes
       
-    newAtts = new FastVector(m_InputFormat.numAttributes());
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
+    newAtts = new FastVector(getInputFormat().numAttributes());
+    for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
       if (j != m_AttIndex) {
 	newAtts.addElement(att.copy()); 
       } else {
@@ -323,9 +321,9 @@ public class SwapAttributeValuesFilter extends Filter
       
     // Construct new header
       
-    newData = new Instances(m_InputFormat.relationName(), newAtts,
+    newData = new Instances(getInputFormat().relationName(), newAtts,
 			    0);
-    newData.setClassIndex(m_InputFormat.classIndex());
+    newData.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(newData);
   }
   

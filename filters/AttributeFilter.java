@@ -24,7 +24,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -79,8 +79,8 @@ public class AttributeFilter extends Filter implements OptionHandler {
     }
     setInvertSelection(Utils.getFlag('V', options));
     
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -118,10 +118,9 @@ public class AttributeFilter extends Filter implements OptionHandler {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
     
-    m_SelectCols.setUpper(m_InputFormat.numAttributes() - 1);
+    m_SelectCols.setUpper(instanceInfo.numAttributes() - 1);
 
     // Create the output buffer
     FastVector attributes = new FastVector();
@@ -129,12 +128,12 @@ public class AttributeFilter extends Filter implements OptionHandler {
     m_SelectedAttributes = m_SelectCols.getSelection();
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
-      if (m_InputFormat.classIndex() == current) {
+      if (instanceInfo.classIndex() == current) {
 	outputClass = attributes.size();
       }
-      attributes.addElement(m_InputFormat.attribute(current).copy());
+      attributes.addElement(instanceInfo.attribute(current).copy());
     }
-    Instances outputFormat = new Instances(m_InputFormat.relationName(),
+    Instances outputFormat = new Instances(instanceInfo.relationName(),
 					   attributes, 0); 
     outputFormat.setClassIndex(outputClass);
     setOutputFormat(outputFormat);
@@ -155,7 +154,7 @@ public class AttributeFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {

@@ -16,7 +16,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
@@ -36,9 +36,8 @@ public class ReplaceMissingValuesFilter extends Filter {
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
+    setOutputFormat(instanceInfo);
     m_ModesAndMeans = null;
     return true;
   }
@@ -55,7 +54,7 @@ public class ReplaceMissingValuesFilter extends Filter {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -63,7 +62,7 @@ public class ReplaceMissingValuesFilter extends Filter {
       m_NewBatch = false;
     }
     if (m_ModesAndMeans == null) {
-      m_InputFormat.add(instance);
+      bufferInput(instance);
       return false;
     } else {
       convertInstance(instance);
@@ -81,29 +80,27 @@ public class ReplaceMissingValuesFilter extends Filter {
    */
   public boolean batchFinished() throws Exception {
 
-    Instance current;
-
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
+
     if (m_ModesAndMeans == null) {
-   
       // Compute modes and means
-      double sumOfWeights =  m_InputFormat.sumOfWeights();
-      double[][] counts = new double[m_InputFormat.numAttributes()][];
-      for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-	if (m_InputFormat.attribute(i).isNominal()) {
-	  counts[i] = new double[m_InputFormat.attribute(i).numValues()];
+      double sumOfWeights =  getInputFormat().sumOfWeights();
+      double[][] counts = new double[getInputFormat().numAttributes()][];
+      for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+	if (getInputFormat().attribute(i).isNominal()) {
+	  counts[i] = new double[getInputFormat().attribute(i).numValues()];
 	  counts[i][0] = sumOfWeights;
 	}
       }
-      double[] sums = new double[m_InputFormat.numAttributes()];
+      double[] sums = new double[getInputFormat().numAttributes()];
       for (int i = 0; i < sums.length; i++) {
 	sums[i] = sumOfWeights;
       }
-      double[] results = new double[m_InputFormat.numAttributes()];
-      for (int j = 0; j < m_InputFormat.numInstances(); j++) {
-	Instance inst = m_InputFormat.instance(j);
+      double[] results = new double[getInputFormat().numAttributes()];
+      for (int j = 0; j < getInputFormat().numInstances(); j++) {
+	Instance inst = getInputFormat().instance(j);
 	for (int i = 0; i < inst.numValues(); i++) {
 	  if (!inst.isMissingSparse(i)) {
 	    double value = inst.valueSparse(i);
@@ -122,11 +119,11 @@ public class ReplaceMissingValuesFilter extends Filter {
 	  }
 	}
       }
-      m_ModesAndMeans = new double[m_InputFormat.numAttributes()];
-      for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-	if (m_InputFormat.attribute(i).isNominal()) {
+      m_ModesAndMeans = new double[getInputFormat().numAttributes()];
+      for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+	if (getInputFormat().attribute(i).isNominal()) {
 	  m_ModesAndMeans[i] = (double)Utils.maxIndex(counts[i]);
-	} else if (m_InputFormat.attribute(i).isNumeric()) {
+	} else if (getInputFormat().attribute(i).isNumeric()) {
 	  if (Utils.gr(sums[i], 0)) {
 	    m_ModesAndMeans[i] = results[i] / sums[i];
 	  }
@@ -134,14 +131,12 @@ public class ReplaceMissingValuesFilter extends Filter {
       }
 
       // Convert pending input instances
-      for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-	current = m_InputFormat.instance(i);
-	convertInstance(current);
+      for(int i = 0; i < getInputFormat().numInstances(); i++) {
+	convertInstance(getInputFormat().instance(i));
       }
-
-      // Free memory
-      m_InputFormat = new Instances(m_InputFormat, 0);
     } 
+    // Free memory
+    flushInput();
 
     m_NewBatch = true;
     return (numPendingOutput() != 0);
@@ -156,11 +151,11 @@ public class ReplaceMissingValuesFilter extends Filter {
   private void convertInstance(Instance instance) throws Exception {
   
     if (!(instance instanceof SparseInstance)) {
-      double[] newVals = new double[m_InputFormat.numAttributes()];
+      double[] newVals = new double[getInputFormat().numAttributes()];
       for(int j = 0; j < instance.numAttributes(); j++) {
 	if (instance.isMissing(j) &&
-	    (m_InputFormat.attribute(j).isNominal() ||
-	     m_InputFormat.attribute(j).isNumeric())) {
+	    (getInputFormat().attribute(j).isNominal() ||
+	     getInputFormat().attribute(j).isNumeric())) {
 	  newVals[j] = m_ModesAndMeans[j]; 
 	} else {
 	  newVals[j] = instance.value(j);

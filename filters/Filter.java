@@ -1,3 +1,4 @@
+
 /*
  *    Filter.java
  *    Copyright (C) 1999 Len Trigg
@@ -15,6 +16,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.Enumeration;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -50,7 +52,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public abstract class Filter implements Serializable {
 
@@ -63,8 +65,11 @@ public abstract class Filter implements Serializable {
   /** The output instance queue */
   private Queue m_OutputQueue = null;
 
+  /** Indices of string attributes in the output format */
+  private int [] m_OutputStringAtts;
+
   /** The input format for instances */
-  protected Instances m_InputFormat = null;
+  private Instances m_InputFormat = null;
 
   /** Record whether the filter is at the start of a batch */
   protected boolean m_NewBatch = true;
@@ -79,11 +84,44 @@ public abstract class Filter implements Serializable {
   protected void setOutputFormat(Instances outputFormat) {
 
     if (outputFormat != null) {
-      m_OutputFormat = new Instances(outputFormat);
+      m_OutputFormat = outputFormat.stringFreeStructure();
+
+      // Scan through getting the indices of String attributes
+      int [] index = new int [m_OutputFormat.numAttributes()];
+      int indexSize = 0;
+      for (int i = 0; i < m_OutputFormat.numAttributes(); i++) {
+        if (m_OutputFormat.attribute(i).type() == Attribute.STRING) {
+          index[indexSize++] = i;
+        }
+      }
+      m_OutputStringAtts = new int [indexSize];
+      System.arraycopy(index, 0, m_OutputStringAtts, 0, indexSize);
+
+      // Rename the attribute
+      String relationName = outputFormat.relationName() 
+        + "-" + this.getClass().getName();
+      if (this instanceof OptionHandler) {
+        String [] options = ((OptionHandler)this).getOptions();
+        for (int i = 0; i < options.length; i++) {
+          relationName += options[i].trim();
+        }
+      }
+      m_OutputFormat.setRelationName(relationName);
     } else {
       m_OutputFormat = null;
     }
     m_OutputQueue = new Queue();
+  }
+
+  /**
+   * Gets the currently set inputformat instances. This dataset may contain
+   * buffered instances.
+   *
+   * @return the input Instances.
+   */
+  protected Instances getInputFormat() {
+
+    return m_InputFormat;
   }
 
   /**
@@ -106,6 +144,18 @@ public abstract class Filter implements Serializable {
   protected void push(Instance instance) {
 
     if (instance != null) {
+      // Copy any string values across
+      Instances origDataset = instance.dataset();
+      for (int i = 0; i < m_OutputStringAtts.length; i++) {
+        int attIndex = m_OutputStringAtts[i];
+        Attribute dest = m_OutputFormat.attribute(attIndex);
+        Attribute src = origDataset.attribute(attIndex);
+        int valIndex = dest.addStringValue(src, (int)instance.value(attIndex));
+        instance.setValue(attIndex, (double)valIndex);
+      }
+      // Point the instance at the outputformat dataset
+      instance.setDataset(m_OutputFormat);
+      // Queue up for later retrieval
       m_OutputQueue.push(instance);
     }
   }
@@ -121,8 +171,9 @@ public abstract class Filter implements Serializable {
   /**
    * Sets the format of the input instances. If the filter is able to
    * determine the output format before seeing any input instances, it
-   * does so here. This default implementation assumes the output
-   * format is determined when batchFinished() is called.
+   * does so here. This default implementation clears the output format
+   * and output queue, and the new batch flag is set. Overriders should
+   * call super.inputFormat()
    *
    * @param instanceInfo an Instances object containing the input instance
    * structure (any instances contained in the object are ignored - only the
@@ -131,6 +182,21 @@ public abstract class Filter implements Serializable {
    * @exception Exception if the inputFormat can't be set successfully 
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
+
+    // TODO. Make m_InputFormat safe for string attributes 
+
+    // The current implementation will break if we had a filter that
+    // couldn't process instances in non-first batches incrementally,
+    // because of the reassignment of dataset that happens when
+    // buffering the data.  For the first batch this is OK, since
+    // strings aren't removed when we copy the inputformat structure.
+
+    // inputFormat() would use stringFreeStructure
+    // inputFormat() would create an index of string atts
+    // all overriders of inputFormat must call super.inputFormat() or
+    // otherwise ensure inputFormat was created stringFree
+    // all buffering should be done by bufferInput()
+    // bufferInput() would copy string values between the headers
 
     m_InputFormat = new Instances(instanceInfo, 0);
     m_OutputFormat = null;
@@ -155,17 +221,7 @@ public abstract class Filter implements Serializable {
     if (m_OutputFormat == null) {
       throw new Exception("No output format defined.");
     }
-    Instances result = new Instances(m_OutputFormat, 0);
-    String relationName = result.relationName() 
-      + "-" + this.getClass().getName();
-    if (this instanceof OptionHandler) {
-      String [] options = ((OptionHandler)this).getOptions();
-      for (int i = 0; i < options.length; i++) {
-	relationName += options[i].trim();
-      }
-    }
-    result.setRelationName(relationName);
-    return result;
+    return m_OutputFormat;
   }
   
   /**
@@ -192,10 +248,31 @@ public abstract class Filter implements Serializable {
       m_OutputQueue = new Queue();
       m_NewBatch = false;
     }
-    m_InputFormat.add(instance);
+    bufferInput(instance);
     return false;
   }
 
+  /**
+   * Adds the supplied input to the inputformat dataset for later processing.
+   * Use this method rather than getInputFormat().add(instance). Or else.
+   *
+   * @param instance the <code>Instance</code> to buffer.
+   */
+  protected void bufferInput(Instance instance) {
+
+    // This will most likely change to do special string attribute 
+    // manipulation stuff. See the comments in inputFormat()
+    m_InputFormat.add(instance);
+  }
+
+  /**
+   * This will remove all buffered instances from the inputformat dataset.
+   * Use this method rather than getInputFormat().delete();
+   */
+  protected void flushInput() {
+
+    m_InputFormat = m_InputFormat.stringFreeStructure();
+  }
 
   /**
    * Signify that this batch of input to the filter is finished. If
@@ -215,6 +292,7 @@ public abstract class Filter implements Serializable {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
+    flushInput();
     m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
@@ -236,7 +314,9 @@ public abstract class Filter implements Serializable {
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    result.setDataset(m_OutputFormat);
+    if (m_OutputQueue.empty() && m_NewBatch) {
+      //m_OutputFormat = m_OutputFormat.stringFreeStructure();
+    }
     return result;
   }
   
@@ -257,7 +337,6 @@ public abstract class Filter implements Serializable {
       return null;
     }
     Instance result = (Instance)m_OutputQueue.peek();
-    result.setDataset(m_OutputFormat);
     return result;
   }
 
@@ -297,6 +376,8 @@ public abstract class Filter implements Serializable {
   public static Instances useFilter(Instances data,
 				    Filter filter) throws Exception {
 
+    System.err.println(filter.getClass().getName() 
+                       + " in:" + data.numInstances());
     for (int i = 0; i < data.numInstances(); i++) {
       filter.input(data.instance(i));
     }
@@ -306,6 +387,8 @@ public abstract class Filter implements Serializable {
     while ((processed = filter.output()) != null) {
       newData.add(processed);
     }
+    System.err.println(filter.getClass().getName() 
+                       + " out:" + newData.numInstances());
     return newData;
   }
 
@@ -510,14 +593,14 @@ public abstract class Filter implements Serializable {
       if (fileName.length() != 0) {
 	firstOutput = new PrintWriter(new FileOutputStream(fileName));
       } else {
-	throw new Exception("No first output file given.\n");
+	firstOutput = new PrintWriter(System.out);
       }
       
       fileName = Utils.getOption('s', options); 
       if (fileName.length() != 0) {
 	secondOutput = new PrintWriter(new FileOutputStream(fileName));
       } else {
-	throw new Exception("No second output file given.\n");
+	secondOutput = new PrintWriter(System.out);
       }
       String classIndex = Utils.getOption('c', options);
 
@@ -637,6 +720,31 @@ public abstract class Filter implements Serializable {
     }
     if (secondOutput != null) {
       secondOutput.close();
+    }
+  }
+
+  /**
+   * Main method for testing this class.
+   *
+   * @param argv should contain arguments to the filter: use -h for help
+   */
+  public static void main(String [] args) {
+    
+    try {
+      if (args.length == 0) {
+        throw new Exception("First argument must be the class name of a Filter");
+      }
+      String fname = args[0];
+      Filter f = (Filter)Class.forName(fname).newInstance();
+      args[0] = "";
+      if (Utils.getFlag('b', args)) {
+	Filter.batchFilterFile(f, args);
+      } else {
+	Filter.filterFile(f, args);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.out.println(ex.getMessage());
     }
   }
 }

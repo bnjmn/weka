@@ -16,7 +16,7 @@ import weka.core.*;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AllFilter extends Filter {
 
@@ -39,11 +39,10 @@ public class AllFilter extends Filter {
    * structure is required).
    * @return true if the outputFormat may be collected immediately
    */
-  public boolean inputFormat(Instances instanceInfo) {
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
+    setOutputFormat(instanceInfo);
     return true;
   }
 
@@ -61,7 +60,7 @@ public class AllFilter extends Filter {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -90,11 +89,3 @@ public class AllFilter extends Filter {
     }
   }
 }
-
-
-
-
-
-
-
-

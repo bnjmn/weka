@@ -40,7 +40,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -122,8 +122,8 @@ public class ResampleFilter extends Filter implements OptionHandler {
       setSampleSizePercent(100);
     }
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -228,9 +228,8 @@ public class ResampleFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
+    setOutputFormat(instanceInfo);
     m_FirstBatchDone = false;
     return true;
   }
@@ -247,7 +246,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -258,7 +257,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
       push(instance);
       return true;
     } else {
-      m_InputFormat.add(instance);
+      bufferInput(instance);
       return false;
     }
   }
@@ -273,15 +272,15 @@ public class ResampleFilter extends Filter implements OptionHandler {
    */
   public boolean batchFinished() throws Exception {
 
-    Instance current;
-
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
 
-    // Do the subsample, and clear the input instances.
-    createSubsample();
-    m_InputFormat = new Instances(m_InputFormat, 0);
+    if (!m_FirstBatchDone) {
+      // Do the subsample, and clear the input instances.
+      createSubsample();
+    }
+    flushInput();
 
     m_NewBatch = true;
     m_FirstBatchDone = true;
@@ -295,10 +294,10 @@ public class ResampleFilter extends Filter implements OptionHandler {
    */
   private void createSubsample() throws Exception {
 
-    int origSize = m_InputFormat.numInstances();
+    int origSize = getInputFormat().numInstances();
     int sampleSize = (int) (origSize * m_SampleSizePercent / 100);
-    if ((m_InputFormat.classIndex() == -1) 
-        || !(m_InputFormat.classAttribute().isNominal())) {
+    if ((getInputFormat().classIndex() == -1) 
+        || !(getInputFormat().classAttribute().isNominal())) {
 
       // Simple subsample
 
@@ -306,21 +305,21 @@ public class ResampleFilter extends Filter implements OptionHandler {
       // Convert pending input instances
       for(int i = 0; i < sampleSize; i++) {
         int index = (int) (random.nextDouble() * origSize);
-        push((Instance)m_InputFormat.instance(index).copy());
+        push((Instance)getInputFormat().instance(index).copy());
       }
     } else {
 
       // Subsample that takes class distribution into consideration
 
       // Sort according to class attribute.
-      m_InputFormat.sort(m_InputFormat.classIndex());
+      getInputFormat().sort(getInputFormat().classIndex());
       
       // Create an index of where each class value starts
-      int [] classIndices = new int [m_InputFormat.numClasses() + 1];
+      int [] classIndices = new int [getInputFormat().numClasses() + 1];
       int currentClass = 0;
       classIndices[currentClass] = 0;
-      for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-        Instance current = m_InputFormat.instance(i);
+      for (int i = 0; i < getInputFormat().numInstances(); i++) {
+        Instance current = getInputFormat().instance(i);
         if (current.classIsMissing()) {
           for (int j = currentClass + 1; j < classIndices.length; j++) {
             classIndices[j] = i;
@@ -333,9 +332,9 @@ public class ResampleFilter extends Filter implements OptionHandler {
           currentClass = (int) current.classValue();
         }
       }
-      if (currentClass <= m_InputFormat.numClasses()) {
+      if (currentClass <= getInputFormat().numClasses()) {
         for (int j = currentClass + 1; j < classIndices.length; j++) {
-          classIndices[j] = m_InputFormat.numInstances();
+          classIndices[j] = getInputFormat().numInstances();
         }
       }
       for (int i = 0; i < classIndices.length; i++) {
@@ -369,7 +368,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
         } else {
           index = (int) (random.nextDouble() * origSize);
         }
-        push((Instance)m_InputFormat.instance(index).copy());
+        push((Instance)getInputFormat().instance(index).copy());
       }
     }
   }

@@ -35,7 +35,7 @@ import weka.core.*;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class InstanceFilter extends Filter implements OptionHandler {
 
@@ -151,8 +151,8 @@ public class InstanceFilter extends Filter implements OptionHandler {
     setModifyHeader(Utils.getFlag('H', options));
     // Re-initialize output format according to new options
     
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -194,25 +194,25 @@ public class InstanceFilter extends Filter implements OptionHandler {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
+    super.inputFormat(instanceInfo);
     if (m_AttributeSet == -1) {
-      m_Attribute = m_InputFormat.numAttributes() - 1;
+      m_Attribute = instanceInfo.numAttributes() - 1;
     } else {
       m_Attribute = m_AttributeSet;
     }
     if (!isNumeric() && !isNominal()) {
       throw new Exception("Can only handle numeric or nominal attributes.");
     }
-    m_Values.setUpper(m_InputFormat.attribute(m_Attribute).numValues() - 1);
+    m_Values.setUpper(instanceInfo.attribute(m_Attribute).numValues() - 1);
     if (isNominal() && m_ModifyHeader) {
-      Attribute oldAtt = m_InputFormat.attribute(m_Attribute);
+      Attribute oldAtt = instanceInfo.attribute(m_Attribute);
       int [] selection = m_Values.getSelection();
       FastVector newVals = new FastVector();
       for (int i = 0; i < selection.length; i++) {
 	newVals.addElement(oldAtt.value(selection[i]));
       }
-      m_InputFormat.deleteAttributeAt(m_Attribute);
-      m_InputFormat.insertAttributeAt(new Attribute(oldAtt.name(), newVals),
+      instanceInfo.deleteAttributeAt(m_Attribute);
+      instanceInfo.insertAttributeAt(new Attribute(oldAtt.name(), newVals),
 				      m_Attribute);
       m_NominalMapping = new int [oldAtt.numValues()];
       for (int i = 0; i < m_NominalMapping.length; i++) {
@@ -229,8 +229,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
 	}
       }
     }
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    setOutputFormat(instanceInfo);
     return true;
   }
 
@@ -247,7 +246,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -291,10 +290,10 @@ public class InstanceFilter extends Filter implements OptionHandler {
    */
   public boolean isNominal() {
     
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       return false;
     } else {
-      return m_InputFormat.attribute(m_Attribute).isNominal();
+      return getInputFormat().attribute(m_Attribute).isNominal();
     }
   }
 
@@ -305,10 +304,10 @@ public class InstanceFilter extends Filter implements OptionHandler {
    */
   public boolean isNumeric() {
     
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       return false;
     } else {
-      return m_InputFormat.attribute(m_Attribute).isNumeric();
+      return getInputFormat().attribute(m_Attribute).isNumeric();
     }
   }
   

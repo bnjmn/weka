@@ -41,7 +41,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributeExpressionFilter extends Filter 
   implements OptionHandler {
@@ -672,8 +672,7 @@ public class AttributeExpressionFilter extends Filter
 
     convertInfixToPostfix(new String(m_infixExpression));
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
 
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute;
@@ -685,7 +684,7 @@ public class AttributeExpressionFilter extends Filter
       newAttribute = new Attribute(m_infixExpression);
     }
     outputFormat.insertAttributeAt(newAttribute, 
-				   m_InputFormat.numAttributes());
+				   instanceInfo.numAttributes());
     setOutputFormat(outputFormat);
     return true;
   }
@@ -703,7 +702,7 @@ public class AttributeExpressionFilter extends Filter
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {

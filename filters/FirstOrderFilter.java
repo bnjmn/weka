@@ -34,7 +34,7 @@ import weka.core.*;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -81,8 +81,8 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
       setAttributeIndices("");
     }
     
-    if (m_InputFormat != null)
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null)
+      inputFormat(getInputFormat());
   }
 
 
@@ -118,14 +118,13 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
 
-    m_DeltaCols.setUpper(m_InputFormat.numAttributes() - 1);
+    m_DeltaCols.setUpper(getInputFormat().numAttributes() - 1);
 
-    for (int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
+    for (int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
       if (m_DeltaCols.isInRange(i) 
-	  && (m_InputFormat.attribute(i).type() != Attribute.NUMERIC)) {
+	  && (getInputFormat().attribute(i).type() != Attribute.NUMERIC)) {
 	throw new Exception("Selected attributes must be all numeric");
       }
     }
@@ -134,7 +133,7 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     Instances outputFormat = new Instances(instanceInfo, 0); 
 
     boolean inRange = false;
-    for (int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
+    for (int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
       if (m_DeltaCols.isInRange(i)) {
 	// If they want the class column modified, unassign it
 	if (i == outputFormat.classIndex()) {
@@ -170,7 +169,7 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {

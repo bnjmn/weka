@@ -17,7 +17,7 @@ import weka.core.*;
  * datasets. Currently doesn't like string attributes.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ObfuscateFilter extends Filter {
 
@@ -39,9 +39,9 @@ public class ObfuscateFilter extends Filter {
    * structure is required).
    * @return true if the outputFormat may be collected immediately
    */
-  public boolean inputFormat(Instances instanceInfo) {
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
+    super.inputFormat(instanceInfo);
     
     // Make the obfuscated header
     FastVector v = new FastVector();
@@ -69,7 +69,6 @@ public class ObfuscateFilter extends Filter {
     }
     Instances newHeader = new Instances("R", v, 10);
     setOutputFormat(newHeader);
-    m_NewBatch = true;
     return true;
   }
 
@@ -87,7 +86,7 @@ public class ObfuscateFilter extends Filter {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
