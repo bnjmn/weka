@@ -29,7 +29,7 @@
  * Cutoff. <p>
  *
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 package weka.clusterers;
 
@@ -308,8 +308,7 @@ public class Cobweb extends Clusterer implements OptionHandler{
    * @param data the training instances.
    * @exception Exception if something goes wrong.
    */
-  public void buildClusterer(Instances data) throws Exception
-  {
+  public void buildClusterer(Instances data) throws Exception {
 
     if (data.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
@@ -346,8 +345,7 @@ public class Cobweb extends Clusterer implements OptionHandler{
    *
    * @exception Exception if something goes wrong.
    */
-  public int numberOfClusters() throws Exception
-  {
+  public int numberOfClusters() throws Exception {
     return numClusters;
   }
 
@@ -357,8 +355,7 @@ public class Cobweb extends Clusterer implements OptionHandler{
    * @param instance the instance to cluster.
    * @exception Exception if something goes wrong.
    */
-  public int clusterInstance(Instance instance) throws Exception
-  {
+  public int clusterInstance(Instance instance) throws Exception {
     CTree node = new CTree(instance);
  
     double T;
@@ -368,20 +365,19 @@ public class Cobweb extends Clusterer implements OptionHandler{
     CTree host = tree;
     CTree temp = null;
     do {
-      if (host.children == null)
-	{
-	  temp = null;
-	}
-      else
-	{
-	  T = host.TU();
-	  n = host.nchildren;
-	  baseU = T/n; // base CU over child nodes
-	  U = (host.UIndividual(node) + T)/(n+1);
-	  temp = bestHostCluster(host, node, U, baseU);
-	}
-      if (temp != null)
+      if (host.children == null) {
+	temp = null;
+      }
+      else {
+	T = host.TU();
+	n = host.nchildren;
+	baseU = T/n; // base CU over child nodes
+	U = (host.UIndividual(node) + T)/(n+1);
+	temp = bestHostCluster(host, node, U, baseU);
+      }
+      if (temp != null) {
 	host = temp;
+      }
     } while (temp != null);
 
     //    System.out.println(host.clusterNum);
@@ -530,10 +526,13 @@ public class Cobweb extends Clusterer implements OptionHandler{
    * @return a string describing the clusterer.
    */
   public String toString() { 
-    if (tree == null)
+    if (tree == null) {
       return "Cobweb hasn't been built yet!";
-    else
+    }
+    else {
       return "Number of clusters: "+numClusters+"\n"+tree.toString(); 
+    }
+    
   }
 
   /**
@@ -541,16 +540,15 @@ public class Cobweb extends Clusterer implements OptionHandler{
    *
    * @return an enumeration of all the available options
    **/
-  public Enumeration listOptions() 
-  {
-
+  public Enumeration listOptions() {
+    
     Vector newVector = new Vector(2);
-
+    
     newVector.addElement(new Option("\tAcuity.\n"
 				    +"\t(default=100)", "A", 1,"-A <0-100%>"));
     newVector.addElement(new Option("\tCutoff.\n"
 				    +"a\t(default=0)", "C", 1,"-C <0-100%>"));
-
+    
     return newVector.elements();
   }
 
@@ -569,20 +567,23 @@ public class Cobweb extends Clusterer implements OptionHandler{
    * @exception Exception if an option is not supported
    *
    **/
-  public void setOptions(String[] options) throws Exception
-  {
+  public void setOptions(String[] options) throws Exception {
     String optionString;
 
     optionString = Utils.getOption('A', options); 
-    if (optionString.length() != 0) 
-      acuity = (double) Integer.parseInt(optionString)/100.0;
-    else
+    if (optionString.length() != 0) {
+	acuity = (double) Integer.parseInt(optionString)/100.0;
+    }
+    else {
       acuity = 1.0;
+    }
     optionString = Utils.getOption('C', options); 
-    if (optionString.length() != 0) 
+    if (optionString.length() != 0) {
       cutoff = (double) Integer.parseInt(optionString)/100.0;
-    else
+    }
+    else {
       cutoff = 0.01 * Cobweb.norm;
+    }
   }
 
   /**

@@ -16,8 +16,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.attributeSelection;
+
 import java.io.*;
 import weka.core.*;
 
@@ -25,10 +25,10 @@ import weka.core.*;
  * Abstract attribute selection search class.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public abstract class ASSearch implements Serializable 
-{
+public abstract class ASSearch implements Serializable {
+
   // ===============
   // Public methods.
   // ===============
@@ -47,4 +47,25 @@ public abstract class ASSearch implements Serializable
   public abstract int [] search(int [] startSet,
 				ASEvaluation ASEvaluator,
 				Instances data) throws Exception;
+
+  /**
+   * Creates a new instance of a search class given it's class name and
+   * (optional) arguments to pass to it's setOptions method. If the
+   * search method implements OptionHandler and the options parameter is
+   * non-null, the search method will have it's options set.
+   *
+   * @param searchName the fully qualified class name of the search class
+   * @param options an array of options suitable for passing to setOptions. May
+   * be null.
+   * @return the newly created search object, ready for use.
+   * @exception Exception if the search class name is invalid, or the options
+   * supplied are not acceptable to the search class.
+   */
+  public static ASSearch forName(String searchName,
+				 String [] options) throws Exception
+  {
+    return (ASSearch)Utils.forName(ASSearch.class,
+				   searchName,
+				   options);
+  }
 }

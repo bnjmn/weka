@@ -16,8 +16,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.attributeSelection;
+
 import java.io.*;
 import weka.core.*;
 
@@ -25,10 +25,9 @@ import weka.core.*;
  * Abstract attribute evaluator. Evaluate attributes individually.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public abstract class AttributeEvaluator extends ASEvaluation 
-{
+public abstract class AttributeEvaluator extends ASEvaluation {
     // ===============
     // Public methods.
     // ===============
