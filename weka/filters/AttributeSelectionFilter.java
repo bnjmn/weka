@@ -401,7 +401,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    *
    * @return the name of the attribute/subset evaluator as a string
    */
-  public String getEvaluator() throws Exception {
+  public String getEvaluator() {
     
       return m_EvaluatorString;
   }
@@ -411,7 +411,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    *
    * @return the name of the search method as a string
    */
-  public String getSearch() throws Exception {
+  public String getSearch() {
     
       return m_SearchString;
   }

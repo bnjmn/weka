@@ -64,7 +64,7 @@ import  weka.core.*;
  * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -265,6 +265,7 @@ public class ReliefFAttributeEval
    * Sets the sigma value.
    *
    * @param s the value of sigma (> 0)
+   * @exception Exception if s is not positive
    */
   public void setSigma (int s)
     throws Exception

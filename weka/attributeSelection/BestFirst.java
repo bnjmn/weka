@@ -35,7 +35,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class BestFirst
   extends ASSearch
@@ -276,6 +276,7 @@ public class BestFirst
    * search.
    *
    * @param t the number of non-improving nodes
+   * @exception Exception if t is less than 1
    */
   public void setSearchTermination (int t)
     throws Exception
@@ -303,6 +304,7 @@ public class BestFirst
    *
    * @param d the direction of the search (-1 =backward, 0 = bidirectional,
    * 1 = forward).
+   * @exception Exception if the search direction is not a valid value
    */
   public void setDirection (int d)
     throws Exception

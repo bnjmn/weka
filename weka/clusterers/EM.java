@@ -48,7 +48,7 @@ import  weka.estimators.*;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class EM
   extends DistributionClusterer
@@ -192,10 +192,11 @@ public class EM
    * Set the number of clusters (-1 to select by CV).
    *
    * @param n the number of clusters
+   * @exception Exception if n is 0
    */
   public void setNumClusters (int n)
-    throws Exception
-  {
+    throws Exception {
+    
     if (n == 0) {
       throw  new Exception("Number of clusters must be > 0. (or -1 to " 
 			   + "select by cross validation).");
@@ -224,6 +225,7 @@ public class EM
    * Set the maximum number of iterations to perform
    *
    * @param i the number of iterations
+   * @exception Exception if i is less than 1
    */
   public void setMaxIterations (int i)
     throws Exception

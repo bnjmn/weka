@@ -52,7 +52,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {
@@ -281,7 +281,7 @@ public class LogitBoost extends DistributionClassifier
    *
    * @param newClassifier the Classifier to use.
    */
-  public void setClassifier(Classifier newClassifier) throws Exception {
+  public void setClassifier(Classifier newClassifier) {
 
     m_Classifier = newClassifier;
   }
