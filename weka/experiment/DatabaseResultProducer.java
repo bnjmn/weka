@@ -36,7 +36,7 @@ import weka.core.Option;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler {
@@ -71,7 +71,21 @@ public class DatabaseResultProducer extends DatabaseResultListener
    * @exception Exception if a problem occurs while getting the keys
    */
   public void doRunKeys(int run) throws Exception {
-    // not needed in this class
+
+    if (m_ResultProducer == null) {
+      throw new Exception("No ResultProducer set");
+    }
+    if (m_ResultListener == null) {
+      throw new Exception("No ResultListener set");
+    }
+    if (m_Instances == null) {
+      throw new Exception("No Instances set");
+    }
+
+    // Tell the resultproducer to send results to us
+    m_ResultProducer.setResultListener(this);
+    m_ResultProducer.setInstances(m_Instances);
+    m_ResultProducer.doRunKeys(run);
   }
 
   /**
@@ -97,9 +111,6 @@ public class DatabaseResultProducer extends DatabaseResultListener
     // Tell the resultproducer to send results to us
     m_ResultProducer.setResultListener(this);
     m_ResultProducer.setInstances(m_Instances);
-    
-    //    System.err.println("Starting run " + run);
-    // Start generating / looking up results
     m_ResultProducer.doRun(run);
 
   }
