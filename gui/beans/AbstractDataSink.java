@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Abstract class for objects that store instances to some destination.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -47,9 +47,9 @@ public abstract class AbstractDataSink extends JPanel
    * Default visual for data sources
    */
   protected BeanVisual m_visual = 
-    new BeanVisual("AbstractDataSource", 
-		   BeanVisual.ICON_PATH+"DefaultDataSource.gif",
-		   BeanVisual.ICON_PATH+"DefaultDataSource_animated.gif");
+    new BeanVisual("AbstractDataSink", 
+		   BeanVisual.ICON_PATH+"DefaultDataSink.gif",
+		   BeanVisual.ICON_PATH+"DefaultDataSink_animated.gif");
 
   /**
    * Non null if this object is a target for any events.
@@ -89,8 +89,8 @@ public abstract class AbstractDataSink extends JPanel
    *
    */
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataSource.gif",
-		       BeanVisual.ICON_PATH+"DefaultDataSource_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataSink.gif",
+		       BeanVisual.ICON_PATH+"DefaultDataSink_animated.gif");
   }
 
   /**
