@@ -87,7 +87,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -582,7 +582,10 @@ public class ResultsPanel extends JPanel {
       setInstancesFromDatabaseTable(table);
       
     } catch (Exception ex) {
-      m_FromLab.setText("Problem reading database");
+       // 1. print complete stacktrace
+       ex.printStackTrace();
+       // 2. print message in panel
+       m_FromLab.setText("Problem reading database: '" + ex.getMessage() + "'");
     }
   }
   
