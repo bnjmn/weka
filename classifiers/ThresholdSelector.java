@@ -19,6 +19,7 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.AttributeStats;
 
 /**
  * Class for selecting a threshold on a probability output by a
@@ -29,10 +30,11 @@ import weka.core.Utils;
  *
  * Valid options are:<p>
  *
- * -C integer <br>
- * The class for which treshold is determined. Based on
- * this designated class the problem is treated as a two-class
- * problem (default 1). <p>
+ * -C num <br>
+ * The class for which threshold is determined. Valid values are:
+ * 1, 2 (for first and second classes, respectively), 3 (for whichever
+ * class is least frequent), and 4 (for whichever class value is most frequent).
+ * (default 3). <p>
  *
  * -W classname <br>
  * Specify the full class name of the base classifier. <p>
@@ -53,7 +55,7 @@ import weka.core.Utils;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -66,6 +68,18 @@ public class ThresholdSelector extends DistributionClassifier
     new Tag(EVAL_TRAINING_SET, "Entire training set"),
     new Tag(EVAL_TUNED_SPLIT, "Single tuned fold"),
     new Tag(EVAL_CROSS_VALIDATION, "N-Fold cross validation")
+  };
+
+  /* How to determine which class value to optimize for */
+  public final static int OPTIMIZE_0     = 0;
+  public final static int OPTIMIZE_1     = 1;
+  public final static int OPTIMIZE_LFREQ = 2;
+  public final static int OPTIMIZE_MFREQ = 3;
+  public static final Tag [] TAGS_OPTIMIZE = {
+    new Tag(OPTIMIZE_0, "First class value"),
+    new Tag(OPTIMIZE_1, "Second class value"),
+    new Tag(OPTIMIZE_LFREQ, "Least frequent class value"),
+    new Tag(OPTIMIZE_MFREQ, "Most frequent class value")
   };
 
   /** The generated base classifier */
@@ -84,11 +98,14 @@ public class ThresholdSelector extends DistributionClassifier
   /** Random number seed */
   protected int m_Seed = 1;
 
-  /** Designated class value */
+  /** Designated class value, determined during building */
   protected int m_DesignatedClass = 0;
 
+  /** Method to determine which class to optimize for */
+  protected int m_ClassMode = OPTIMIZE_LFREQ;
+
   /** The evaluation mode */
-  protected int m_Mode = EVAL_TUNED_SPLIT;
+  protected int m_EvalMode = EVAL_TUNED_SPLIT;
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
@@ -120,10 +137,11 @@ public class ThresholdSelector extends DistributionClassifier
       }
       return eu.getTrainTestPredictions(m_Classifier, trainData, evalData);
     case EVAL_TRAINING_SET:
-    default:
       return eu.getTrainTestPredictions(m_Classifier, instances, instances);
     case EVAL_CROSS_VALIDATION:
       return eu.getCVPredictions(m_Classifier, instances, m_NumXValFolds);
+    default:
+      throw new Exception("Unrecognized evaluation mode");
     }
   }
 
@@ -165,9 +183,10 @@ public class ThresholdSelector extends DistributionClassifier
     Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
-	      "\tThe class for which treshold is determined. Based on\n" +
-	      "\tthis designated class the problem is treated as a two-class problem\n" +
-	      "\t(default 1).\n",
+              "\tThe class for which threshold is determined. Valid values are:\n" +
+              "\t1, 2 (for first and second classes, respectively), 3 (for whichever\n" +
+              "\tclass is least frequent), and 4 (for whichever class value is most\n" +
+              "\tfrequent). (default 3).",
 	      "C", 1, "-C <integer>"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to perform parameter selection on.\n"
@@ -207,10 +226,11 @@ public class ThresholdSelector extends DistributionClassifier
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -C integer <br>
-   * The class for which treshold is determined. Based on
-   * this designated class the problem is treated as a two-class
-   * problem (default 1).<p>
+   * -C num <br>
+   * The class for which threshold is determined. Valid values are:
+   * 1, 2 (for first and second classes, respectively), 3 (for whichever
+   * class is least frequent), and 4 (for whichever class value is most 
+   * frequent). (default 3). <p>
    *
    * -W classname <br>
    * Specify the full class name of classifier to perform cross-validation
@@ -238,9 +258,11 @@ public class ThresholdSelector extends DistributionClassifier
     
     String classString = Utils.getOption('C', options);
     if (classString.length() != 0) {
-      m_DesignatedClass = Integer.parseInt(classString) - 1;
+      setDesignatedClass(new SelectedTag(Integer.parseInt(classString) - 1, 
+                                         TAGS_OPTIMIZE));
     } else {
-      m_DesignatedClass = 0;
+      setDesignatedClass(new SelectedTag(OPTIMIZE_LFREQ, 
+                                         TAGS_OPTIMIZE));
     }
 
     String foldsString = Utils.getOption('X', options);
@@ -265,9 +287,9 @@ public class ThresholdSelector extends DistributionClassifier
 
     String modeString = Utils.getOption('E', options);
     if (modeString.length() != 0) {
-      m_Mode = Integer.parseInt(modeString);
+      m_EvalMode = Integer.parseInt(modeString);
     } else {
-      m_Mode = EVAL_TUNED_SPLIT;
+      m_EvalMode = EVAL_TUNED_SPLIT;
     }
 
     setDistributionClassifier((DistributionClassifier)Classifier.
@@ -302,7 +324,7 @@ public class ThresholdSelector extends DistributionClassifier
       options[current++] = "-W";
       options[current++] = getDistributionClassifier().getClass().getName();
     }
-    options[current++] = "-E"; options[current++] = "" + m_Mode;
+    options[current++] = "-E"; options[current++] = "" + m_EvalMode;
     options[current++] = "--";
 
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -328,33 +350,44 @@ public class ThresholdSelector extends DistributionClassifier
     if (instances.numClasses() != 2) {
       throw new Exception("Only works for two-class datasets!");
     }
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    if (instances.numInstances() == 0) {
-      throw new Exception("No training instances without missing class.");
+    AttributeStats stats = instances.attributeStats(instances.classIndex());
+    if (stats.distinctCount <= 1) {
+      throw new Exception("Need two class values occuring in training data!");
+    }
+    if (stats.missingCount > 0) {
+      instances = new Instances(instances);
+      instances.deleteWithMissingClass();
     }
     if (instances.numInstances() < m_NumXValFolds) {
       throw new Exception("Number of training instances smaller than number of folds.");
     }
 
+    // Determine which class value to look for
+    switch (m_ClassMode) {
+    case OPTIMIZE_0:
+      m_DesignatedClass = 0;
+      break;
+    case OPTIMIZE_1:
+      m_DesignatedClass = 1;
+      break;
+    case OPTIMIZE_LFREQ:
+      m_DesignatedClass = (stats.nominalCounts[0] > stats.nominalCounts[1]) ? 1 : 0;
+      break;
+    case OPTIMIZE_MFREQ:
+      m_DesignatedClass = (stats.nominalCounts[0] > stats.nominalCounts[1]) ? 0 : 1;
+      break;
+    default:
+      throw new Exception("Unrecognized class value selection mode");
+    }
+
     // If data contains only one instance of positive data
     // optimize on training data
-    int numPosInstances = 0;
-    for (int i = 0; i < instances.numInstances(); i++) {
-       if (((int)instances.instance(i).classValue()) == m_DesignatedClass) {
-	numPosInstances++;
-      }
-    }
-    if (numPosInstances == 0) {
-      System.err.println("NO POSITIVES FOUND");
-      m_BestThreshold = Double.MAX_VALUE;
-      m_BestValue = 0;
-    } else if (numPosInstances == 1) {
-      System.err.println("ONLY 1 POSITIVE FOUND: OPTIMIZING ON TRAINING DATA");
+    if (stats.nominalCounts[m_DesignatedClass] == 1) {
+      System.err.println("Only 1 positive found: optimizing on training data");
       findThreshold(getPredictions(instances, EVAL_TRAINING_SET));
     } else {
-      findThreshold(getPredictions(instances, m_Mode));
-      if (m_Mode != EVAL_TRAINING_SET) {
+      findThreshold(getPredictions(instances, m_EvalMode));
+      if (m_EvalMode != EVAL_TRAINING_SET) {
 	m_Classifier.buildClassifier(instances);
       }
     }
@@ -400,40 +433,35 @@ public class ThresholdSelector extends DistributionClassifier
     pred[(m_DesignatedClass + 1) % 2] = 1.0 - prob;
     return pred;
   }
-  
-  /**
-   * Get the value of designatedClass.
-   * @return Value of designatedClass.
-   */
-  public int getDesignatedClass() {
     
-    return m_DesignatedClass;
-  }
-  
   /**
-   * Set the value of designatedClass.
-   * @param v  Value to assign to designatedClass.
-   */
-  public void setDesignatedClass(int v) {
-    
-    m_DesignatedClass = v;
-  }
-  
-  /**
-   * Gets the evaluation mode used. Will be one of
-   * EVAL_TRAINING, EVAL_TUNED_SPLIT, or EVAL_CROSS_VALIDATION
+   * Gets the method to determine which class value to optimize. Will
+   * be one of OPTIMIZE_0, OPTIMIZE_1, OPTIMIZE_LFREQ, OPTIMIZE_MFREQ.
    *
-   * @return the evaluation mode.
+   * @return the class selection mode.
    */
-  public SelectedTag getEvaluationMode() {
+  public SelectedTag getDesignatedClass() {
 
     try {
-      return new SelectedTag(m_Mode, TAGS_EVAL);
+      return new SelectedTag(m_ClassMode, TAGS_OPTIMIZE);
     } catch (Exception ex) {
       return null;
     }
   }
   
+  /**
+   * Sets the method to determine which class value to optimize. Will
+   * be one of OPTIMIZE_0, OPTIMIZE_1, OPTIMIZE_LFREQ, OPTIMIZE_MFREQ.
+   *
+   * @param newMethod the new class selection mode.
+   */
+  public void setDesignatedClass(SelectedTag newMethod) {
+    
+    if (newMethod.getTags() == TAGS_OPTIMIZE) {
+      m_ClassMode = newMethod.getSelectedTag().getID();
+    }
+  }
+
   /**
    * Sets the evaluation mode used. Will be one of
    * EVAL_TRAINING, EVAL_TUNED_SPLIT, or EVAL_CROSS_VALIDATION
@@ -443,10 +471,25 @@ public class ThresholdSelector extends DistributionClassifier
   public void setEvaluationMode(SelectedTag newMethod) {
     
     if (newMethod.getTags() == TAGS_EVAL) {
-      m_Mode = newMethod.getSelectedTag().getID();
+      m_EvalMode = newMethod.getSelectedTag().getID();
     }
   }
 
+  /**
+   * Gets the evaluation mode used. Will be one of
+   * EVAL_TRAINING, EVAL_TUNED_SPLIT, or EVAL_CROSS_VALIDATION
+   *
+   * @return the evaluation mode.
+   */
+  public SelectedTag getEvaluationMode() {
+
+    try {
+      return new SelectedTag(m_EvalMode, TAGS_EVAL);
+    } catch (Exception ex) {
+      return null;
+    }
+  }
+  
   /**
    * Sets the seed for random number generation.
    *
@@ -524,7 +567,7 @@ public class ThresholdSelector extends DistributionClassifier
     result += "Index of designated class: " + m_DesignatedClass + "\n";
 
     result += "Evaluation mode: ";
-    switch (m_Mode) {
+    switch (m_EvalMode) {
     case EVAL_CROSS_VALIDATION:
       result += m_NumXValFolds + "-fold cross-validation";
       break;
