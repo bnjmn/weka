@@ -40,7 +40,8 @@ import weka.experiment.Stats;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.11 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -134,7 +135,6 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
     }
     
     m_ClusterCentroids = new Instances(m_instances, m_NumClusters);
-    m_ClusterStdDevs = new Instances(m_instances, m_NumClusters);
     m_ClusterAssignments = new int [m_instances.numInstances()];
 
     Random RandomO = new Random(m_Seed);
@@ -142,8 +142,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
     int instIndex;
     for (int i = 0; i < m_NumClusters; i++) {
       do {
-	instIndex = Math.abs(RandomO.nextInt()) % 
-	  m_instances.numInstances();
+	instIndex = RandomO.nextInt(m_instances.numInstances());
       } while (selected[instIndex]);
       m_ClusterCentroids.add(m_instances.instance(instIndex));
       selected[instIndex] = true;
@@ -151,6 +150,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
     selected = null;
 
     boolean converged = false;
+    Instances [] tempI = new Instances[m_NumClusters];
     while (!converged) {
       m_Iterations++;
       converged = true;
@@ -164,7 +164,6 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
 	//	System.out.println(newC);
       }
       
-      Instances [] tempI = new Instances[m_NumClusters];
       // update centroids
       m_ClusterCentroids = new Instances(m_instances, m_NumClusters);
       for (int i = 0; i < m_NumClusters; i++) {
@@ -175,19 +174,23 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
       }
       for (int i = 0; i < m_NumClusters; i++) {
 	double [] vals = new double[m_instances.numAttributes()];
-	double [] vals2 = new double[m_instances.numAttributes()];
 	for (int j = 0; j < m_instances.numAttributes(); j++) {
 	  vals[j] = tempI[i].meanOrMode(j);
-	  if (m_instances.attribute(j).isNumeric()) {
-	    Stats ns = tempI[i].attributeStats(j).numericStats;
-	    vals2[j] = ns.stdDev;
-	  } else {
-	    vals2[j] = Instance.missingValue();
-	  }
 	}
 	m_ClusterCentroids.add(new Instance(1.0, vals));
-	m_ClusterStdDevs.add(new Instance(1.0, vals2));
       }
+    }
+    m_ClusterStdDevs = new Instances(m_instances, m_NumClusters);
+    for (int i = 0; i < m_NumClusters; i++) {
+      double [] vals2 = new double[m_instances.numAttributes()];
+      for (int j = 0; j < m_instances.numAttributes(); j++) {
+	if (m_instances.attribute(j).isNumeric()) {
+	  vals2[j] = Math.sqrt(tempI[i].variance(j));
+	} else {
+	  vals2[j] = Instance.missingValue();
+	}
+      }
+      m_ClusterStdDevs.add(new Instance(1.0, vals2));
     }
   }
 
