@@ -33,7 +33,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Standardize extends Filter implements UnsupervisedFilter {
 
@@ -107,7 +107,8 @@ public class Standardize extends Filter implements UnsupervisedFilter {
       m_Means = new double[input.numAttributes()];
       m_StdDevs = new double[input.numAttributes()];
       for (int i = 0; i < input.numAttributes(); i++) {
-	if (input.attribute(i).isNumeric()) {
+	if (input.attribute(i).isNumeric() &&
+	    (input.classIndex() != i)) {
 	  m_Means[i] = input.meanOrMode(i);
 	  m_StdDevs[i] = Math.sqrt(input.variance(i));
 	}
@@ -142,7 +143,8 @@ public class Standardize extends Filter implements UnsupervisedFilter {
       for (int j = 0; j < instance.numAttributes(); j++) {
 	double value;
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j]))) {
+	    (!Instance.isMissingValue(vals[j])) &&
+	    (getInputFormat().classIndex() != j)) {
 	  
 	  // Just subtract the mean if the standard deviation is zero
 	  if (m_StdDevs[j] > 0) { 
@@ -174,7 +176,8 @@ public class Standardize extends Filter implements UnsupervisedFilter {
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j]))) {
+	    (!Instance.isMissingValue(vals[j])) &&
+	    (getInputFormat().classIndex() != j)) {
 	  
 	  // Just subtract the mean if the standard deviation is zero
 	  if (m_StdDevs[j] > 0) { 

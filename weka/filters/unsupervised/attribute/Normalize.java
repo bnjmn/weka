@@ -33,7 +33,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Normalize extends Filter implements UnsupervisedFilter {
 
@@ -113,7 +113,8 @@ public class Normalize extends Filter implements UnsupervisedFilter {
       for (int j = 0; j < input.numInstances(); j++) {
 	double[] value = input.instance(j).toDoubleArray();
 	for (int i = 0; i < input.numAttributes(); i++) {
-	  if (input.attribute(i).isNumeric()) {
+	  if (input.attribute(i).isNumeric() &&
+	      (input.classIndex() != i)) {
 	    if (!Instance.isMissingValue(value[i])) {
 	      if (Double.isNaN(m_MinArray[i])) {
 		m_MinArray[i] = m_MaxArray[i] = value[i];
@@ -159,7 +160,8 @@ public class Normalize extends Filter implements UnsupervisedFilter {
       for (int j = 0; j < instance.numAttributes(); j++) {
 	double value;
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j]))) {
+	    (!Instance.isMissingValue(vals[j])) &&
+	    (getInputFormat().classIndex() != j)) {
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
 	    value = 0;
@@ -191,7 +193,8 @@ public class Normalize extends Filter implements UnsupervisedFilter {
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j]))) {
+	    (!Instance.isMissingValue(vals[j])) &&
+	    (getInputFormat().classIndex() != j)) {
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
 	    vals[j] = 0;

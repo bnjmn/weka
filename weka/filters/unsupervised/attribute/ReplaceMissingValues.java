@@ -33,7 +33,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ReplaceMissingValues extends Filter
   implements UnsupervisedFilter {
@@ -174,6 +174,7 @@ public class ReplaceMissingValues extends Filter
       int num = 0;
       for (int j = 0; j < instance.numValues(); j++) {
 	if (instance.isMissingSparse(j) &&
+	    (getInputFormat().classIndex() != instance.index(j)) &&
 	    (instance.attributeSparse(j).isNominal() ||
 	     instance.attributeSparse(j).isNumeric())) {
 	  if (m_ModesAndMeans[instance.index(j)] != 0.0) {
@@ -202,6 +203,7 @@ public class ReplaceMissingValues extends Filter
       double []vals = new double[getInputFormat().numAttributes()];
       for (int j = 0; j < instance.numAttributes(); j++) {
 	if (instance.isMissing(j) &&
+	    (getInputFormat().classIndex() != j) &&
 	    (getInputFormat().attribute(j).isNominal() ||
 	     getInputFormat().attribute(j).isNumeric())) {
 	  vals[j] = m_ModesAndMeans[j]; 
