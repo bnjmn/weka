@@ -100,7 +100,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Paul Conilione (paulc4321@yahoo.com.au)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class BVDecomposeSegCVSub implements OptionHandler {
@@ -730,7 +730,8 @@ public class BVDecomposeSegCVSub implements OptionHandler {
                     
                     Instances train = new Instances(TP, 0, m_TrainSize);
                     
-                    m_Classifier.buildClassifier(train); // create a clssifier using the instances in train.
+		    Classifier current = Classifier.makeCopy(m_Classifier);
+                    current.buildClassifier(train); // create a clssifier using the instances in train.
                     
                     int currentTestIndex = foldIndex[ j - 1 ][ 0 ]; //start index
                     int testFoldSize = foldIndex[ j - 1 ][ 1 ]; //size
@@ -739,7 +740,7 @@ public class BVDecomposeSegCVSub implements OptionHandler {
                     while( currentTestIndex <= endTestIndex ){
                         
                         Instance testInst = data.instance( currentSegment[currentTestIndex] );
-                        int pred = (int)m_Classifier.classifyInstance( testInst );
+                        int pred = (int)current.classifyInstance( testInst );
                         
                         
                         if(pred != testInst.classValue()) {
@@ -753,7 +754,7 @@ public class BVDecomposeSegCVSub implements OptionHandler {
                         int[] segmentElast = (int[])segmentList.lastElement();
                         for( currentIndex = 0; currentIndex < segmentElast.length; currentIndex++){
                             Instance testInst = data.instance( segmentElast[currentIndex] );
-                            int pred = (int)m_Classifier.classifyInstance( testInst );
+                            int pred = (int)current.classifyInstance( testInst );
                             if(pred != testInst.classValue()) {
                                 m_Error++; // add 1 to mis-classifications.
                             }

@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -274,7 +274,9 @@ public class CostSensitiveClassifierSplitEvaluator
   }
 
   /**
-   * Gets the results for the supplied train and test datasets.
+   * Gets the results for the supplied train and test datasets. Now performs
+   * a deep copy of the classifier before it is built and evaluated (just in case
+   * the classifier is not initialized properly in buildClassifier()).
    *
    * @param train the training Instances.
    * @param test the testing Instances.
@@ -288,7 +290,7 @@ public class CostSensitiveClassifierSplitEvaluator
     if (train.classAttribute().type() != Attribute.NOMINAL) {
       throw new Exception("Class attribute is not nominal!");
     }
-    if (m_Classifier == null) {
+    if (m_Template == null) {
       throw new Exception("No classifier has been specified");
     }
     int addm = (m_AdditionalMeasures != null) 
@@ -306,6 +308,7 @@ public class CostSensitiveClassifierSplitEvaluator
 
     Evaluation eval = new Evaluation(train, costMatrix);
 
+    m_Classifier = Classifier.makeCopy(m_Template);
     m_Classifier.buildClassifier(train);
     eval.evaluateModel(m_Classifier, test);
     m_result = eval.toSummaryString();
@@ -376,10 +379,10 @@ public class CostSensitiveClassifierSplitEvaluator
   public String toString() {
 
     String result = "CostSensitiveClassifierSplitEvaluator: ";
-    if (m_Classifier == null) {
+    if (m_Template == null) {
       return result + "<null> classifier";
     }
-    return result + m_Classifier.getClass().getName() + " " 
+    return result + m_Template.getClass().getName() + " " 
       + m_ClassifierOptions + "(version " + m_ClassifierVersion + ")";
   }
 } // CostSensitiveClassifierSplitEvaluator
