@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.44 $ */
+ * @version $Revision: 1.45 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -1623,7 +1623,7 @@ public class SMO extends DistributionClassifier implements OptionHandler,
     newVector.addElement(new Option("\tWhether to 0=normalize/1=standardize/2=neither. " +
 				    "(default 0=normalize)",
 				    "N", 1, "-N"));
-    newVector.addElement(new Option("\tFeature-space normalization (only  non-linear for polynomial kernels).",
+    newVector.addElement(new Option("\tFeature-space normalization (only for non-linear polynomial kernels).",
 				    "F", 0, "-F"));
     newVector.addElement(new Option("\tUse lower-order terms (only for non-linear polynomial kernels).",
 				    "O", 0, "-O"));
