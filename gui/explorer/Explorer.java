@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Explorer extends JPanel {
 
@@ -69,8 +69,8 @@ public class Explorer extends JPanel {
 						 SwingConstants.CENTER);
 
   /** Label for a panel that still need to be implemented */
-  protected JLabel m_AttributeSelectionPanel =
-    new JLabel("Not implemented yet :-)", SwingConstants.CENTER);
+  protected AttributeSelectionPanel m_AttributeSelectionPanel =
+    new AttributeSelectionPanel();
 
   /** Label for a panel that still need to be implemented */
   protected JLabel m_VisualizePanel =
@@ -98,6 +98,7 @@ public class Explorer extends JPanel {
     m_LogPanel.statusMessage("Welcome to the Weka Knowledge Explorer");
     m_PreprocessPanel.setLog(m_LogPanel);
     m_ClassifierPanel.setLog(m_LogPanel);
+    m_AttributeSelectionPanel.setLog(m_LogPanel);
     m_TabbedPane.addTab("Preprocess", null, m_PreprocessPanel,
 			"Open/Edit/Save instances");
     m_TabbedPane.addTab("Classify", null, m_ClassifierPanel,
@@ -120,6 +121,8 @@ public class Explorer extends JPanel {
       public void propertyChange(PropertyChangeEvent e) {
 	m_ClassifierPanel.setInstances(m_PreprocessPanel
 				       .getWorkingInstances());
+	m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
+					       .getWorkingInstances());
 	m_TabbedPane.setEnabledAt(1, true);
 	m_TabbedPane.setEnabledAt(2, true);
 	m_TabbedPane.setEnabledAt(3, true);
