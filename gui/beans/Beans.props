@@ -1,12 +1,3 @@
-# Lists the components to choose from
-
-# list of all bean components
-weka.gui.beans.KnowledgeFlow.components=\
- weka.gui.beans.Loader,\
- weka.gui.beans.TrainingSetMaker,\
- weka.gui.beans.TestSetMaker,\
- weka.gui.beans.Classifier
-
 # list of standard toolbars (containing bean tools that do not wrap weka
 # base class types)
 weka.gui.beans.KnowledgeFlow.standardToolBars=\
@@ -38,4 +29,4 @@ weka.filters.Filter=weka.gui.beans.Filter
 # toolbar naming aliases for weka algorithm classes
 weka.core.converters.Loader.alias=DataSources
 weka.classifiers.Classifier.alias=Classifiers
-weka.filters.Filters.alias=Filters
+weka.filters.Filter.alias=Filters
