@@ -40,6 +40,9 @@ import javax.swing.text.JTextComponent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.Point;
 
 /** 
@@ -50,7 +53,7 @@ import java.awt.Point;
  * single-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -75,13 +78,6 @@ public class ResultHistoryPanel extends JPanel {
   /** A hashtable mapping names to arbitrary objects */
   protected Hashtable m_Objs = new Hashtable();
 
-  /** An optional listener that we can inform when the user clicks
-      on the result history */
-  protected MouseListener m_listener=null;
-
-  public void addMouseListener(MouseListener act) {
-    m_listener = act;
-  }
 
   /**
    * Create the result history object
@@ -105,12 +101,26 @@ public class ResultHistoryPanel extends JPanel {
 	    openFrame((String)m_Model.elementAt(index));
 	  }
 	}
-	// Send on an action event if anyone is listening
-	if (m_listener != null) {
-	  m_listener.mouseClicked(e);
+      }
+    });
+    m_List.getSelectionModel()
+      .addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+	if (!e.getValueIsAdjusting()) {
+	  ListSelectionModel lm = (ListSelectionModel) e.getSource();
+	  for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
+	    if (lm.isSelectedIndex(i)) {
+	      //m_AttSummaryPanel.setAttribute(i);
+	       if ((i != -1) && (m_SingleText != null)) {
+		 setSingle((String)m_Model.elementAt(i));
+	       }
+	      break;
+	    }
+	  }
 	}
       }
     });
+
     setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Result history"));
     final JScrollPane js = new JScrollPane(m_List);
@@ -234,7 +244,17 @@ public class ResultHistoryPanel extends JPanel {
       currentText.setText(buff.toString());
     }
   }
-  
+
+  /**
+   * Gets the selection model used by the results list.
+   *
+   * @return a value of type 'ListSelectionModel'
+   */
+  public ListSelectionModel getSelectionModel() {
+    
+    return m_List.getSelectionModel();
+  }
+
   /**
    * Tests out the result history from the command line.
    *
