@@ -64,7 +64,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -248,14 +248,14 @@ public class GenericObjectEditor implements PropertyEditor {
 		    .newInstance());
 	  //System.err.println("done setting object from chooser");
 	} catch (Exception ex) {
-	  /*
+	  m_ObjectChooser.hidePopup();
+	  m_ObjectChooser.setSelectedIndex(0);
 	  JOptionPane.showMessageDialog(this,
 					"Could not create an example of\n"
 					+ className + "\n"
 					+ "from the current classpath",
 					"GenericObjectEditor",
 					JOptionPane.ERROR_MESSAGE);
-	  */	  
 	}
       }
     }
