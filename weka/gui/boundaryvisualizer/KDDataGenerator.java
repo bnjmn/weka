@@ -31,7 +31,7 @@ import java.io.*;
  * instances based on a supplied set of instances.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see DataGenerator
  * @see Serializable
@@ -70,6 +70,19 @@ public class KDDataGenerator implements DataGenerator, Serializable {
 
   private static double m_normConst = Math.sqrt(2*Math.PI);
 
+  // Number of neighbours to use for kernel bandwidth
+  private int m_kernelBandwidth = 3;
+
+  // standard deviations for numeric attributes computed from the 
+  // m_kernelBandwidth nearest neighbours for each kernel.
+  private double [][] m_kernelParams;
+
+  /** The minimum values for numeric attributes. */
+  protected double [] m_Min;
+  
+  /** The maximum values for numeric attributes. */
+  protected double [] m_Max;
+
   /**
    * Initialize the generator using the supplied instances
    *
@@ -85,7 +98,7 @@ public class KDDataGenerator implements DataGenerator, Serializable {
     if (m_weightingDimensions == null) {
       m_weightingDimensions = new boolean[m_instances.numAttributes()];
     }
-    for (int i = 0; i < m_instances.numAttributes(); i++) {
+    /*    for (int i = 0; i < m_instances.numAttributes(); i++) {
       if (i != m_instances.classIndex()) {
 	if (m_instances.attribute(i).isNumeric()) {
 	  // global standard deviations
@@ -105,7 +118,16 @@ public class KDDataGenerator implements DataGenerator, Serializable {
 	  m_globalMeansOrModes[i] = m_instances.meanOrMode(i);
 	}
       }
+      } */
+    for (int i = 0; i < m_instances.numAttributes(); i++) {
+      if (i != m_instances.classIndex()) {
+	m_globalMeansOrModes[i] = m_instances.meanOrMode(i);
+      }
     }
+
+    m_kernelParams = 
+      new double [m_instances.numInstances()][m_instances.numAttributes()];
+    computeParams();
   }
 
   public double [] getWeights() {
@@ -123,15 +145,12 @@ public class KDDataGenerator implements DataGenerator, Serializable {
 	    mean = m_globalMeansOrModes[i];
 	  }
 	  double wm = 1.0;
-	  if (m_instances.attribute(i).isNumeric()) {
-	    wm = normalDens(m_weightingValues[i], mean, m_standardDeviations[i]);
-	  } else {
-	    wm = (1.0 + m_laplaceConst) / 
-	      (m_instances.attribute(i).numValues() * m_laplaceConst); 
-	  }
-	  if (wm > 0) {
-	    weight *= wm;
-	  }
+	  
+	  //	    wm = normalDens(m_weightingValues[i], mean, m_standardDeviations[i]);
+	  wm = normalDens(m_weightingValues[i], mean, 
+			  m_kernelParams[k][i]);
+	  
+	  weight *= wm;
 	}
       }
       weights[k] = weight;
@@ -181,8 +200,10 @@ public class KDDataGenerator implements DataGenerator, Serializable {
 	    } else {
 	      mean = m_globalMeansOrModes[i];
 	    }
-	    val *= m_standardDeviations[i];
+	    
+	    val *= m_kernelParams[indices[k]][i];
 	    val += mean;
+
 	    values[indices[k]][i] = val;
 	  } else {
 	    // nominal attribute
@@ -260,30 +281,140 @@ public class KDDataGenerator implements DataGenerator, Serializable {
   }
 
   /**
-   * Main method for tesing this class
+   * Set the kernel bandwidth (number of nearest neighbours to cover)
    *
-   * @param args a <code>String[]</code> value
+   * @param kb an <code>int</code> value
    */
-  public static void main(String [] args) {
-    try {
-      Reader r = null;
-      if (args.length != 1) {
-	throw new Exception("Usage: KDDataGenerator <filename>");
-      } else {
-	/*	r = new BufferedReader(new FileReader(args[0]));
-	Instances insts = new Instances(r);
-	KDDataGenerator dg = new KDDataGenerator();
-	dg.buildGenerator(insts);
-	Instances header = new Instances(insts,0);
-	System.out.println(header);
-	for (int i = 0; i < insts.numInstances(); i++) {
-	  Instance newInst = dg.generateInstance();
-	  newInst.setDataset(header);
-	  System.out.println(newInst);
-	  } */
+  public void setKernelBandwidth(int kb) {
+    m_kernelBandwidth = kb;
+  }
+
+  /**
+   * Get the kernel bandwidth
+   *
+   * @return an <code>int</code> value
+   */
+  public int getKernelBandwidth() {
+    return m_kernelBandwidth;
+  } 
+
+  /**
+   * Calculates the distance between two instances
+   *
+   * @param test the first instance
+   * @param train the second instance
+   * @return the distance between the two given instances, between 0 and 1
+   */          
+  private double distance(Instance first, Instance second) {  
+
+    double diff, distance = 0;
+
+    for(int i = 0; i < m_instances.numAttributes(); i++) { 
+      if (i == m_instances.classIndex()) {
+	continue;
       }
-    } catch (Exception ex) {
-      ex.printStackTrace();
+      double firstVal = m_globalMeansOrModes[i];
+      double secondVal = m_globalMeansOrModes[i];
+
+      switch (m_instances.attribute(i).type()) {
+      case Attribute.NUMERIC:
+	// If attribute is numeric
+	if (!first.isMissing(i)) {
+	  firstVal = first.value(i);
+	}
+	
+	if (!second.isMissing(i)) {
+	  secondVal = second.value(i);
+	}
+
+	diff = norm(firstVal,i) - norm(secondVal,i);
+
+	break;
+      default:
+	diff = 0;
+	break;
+      }
+      distance += diff * diff;
+    }
+    return Math.sqrt(distance);
+  }
+
+  /**
+   * Normalizes a given value of a numeric attribute.
+   *
+   * @param x the value to be normalized
+   * @param i the attribute's index
+   */
+  private double norm(double x,int i) {
+    
+    if (Double.isNaN(m_Min[i]) || Utils.eq(m_Max[i], m_Min[i])) {
+      return 0;
+    } else {
+      return (x - m_Min[i]) / (m_Max[i] - m_Min[i]);
+    }
+  }
+
+  /**
+   * Updates the minimum and maximum values for all the attributes
+   * based on a new instance.
+   *
+   * @param instance the new instance
+   */
+  private void updateMinMax(Instance instance) {  
+
+    for (int j = 0; j < m_instances.numAttributes(); j++) {
+      if (!instance.isMissing(j)) {
+	if (Double.isNaN(m_Min[j])) {
+	  m_Min[j] = instance.value(j);
+	  m_Max[j] = instance.value(j);
+	} else if (instance.value(j) < m_Min[j]) {
+	  m_Min[j] = instance.value(j);
+	} else if (instance.value(j) > m_Max[j]) {
+	  m_Max[j] = instance.value(j);
+	}
+      }
+    }
+  }
+
+  private void computeParams() throws Exception {
+    // Calculate the minimum and maximum values
+    m_Min = new double [m_instances.numAttributes()];
+    m_Max = new double [m_instances.numAttributes()];
+    for (int i = 0; i < m_instances.numAttributes(); i++) {
+      m_Min[i] = m_Max[i] = Double.NaN;
+    }
+    for (int i = 0; i < m_instances.numInstances(); i++) {
+      updateMinMax(m_instances.instance(i));
+    }
+
+    double [] distances = new double[m_instances.numInstances()];
+    for (int i = 0; i < m_instances.numInstances(); i++) {
+      Instance current = m_instances.instance(i);
+      for (int j = 0; j < m_instances.numInstances(); j++) {
+	distances[j] = distance(current, m_instances.instance(j));
+      }
+      int [] sorted = Utils.sort(distances);
+      int k = m_kernelBandwidth;
+      double bandwidth = distances[sorted[k]];
+
+      // Check for bandwidth zero
+      if (bandwidth <= 0) {
+	for (int j = k + 1; j < sorted.length; j++) {
+	  if (distances[sorted[j]] > bandwidth) {
+	    bandwidth = distances[sorted[j]];
+	    break;
+	  }
+	}
+	if (bandwidth <= 0) {
+	  throw new Exception("All training instances coincide with "
+			      +"test instance!");
+	}
+      }
+      for (int j = 0; j < m_instances.numAttributes(); j++) {
+	if ((m_Max[j] - m_Min[j]) > 0) {
+	  m_kernelParams[i][j] = bandwidth * (m_Max[j] - m_Min[j]);
+	}
+      }
     }
   }
 }
