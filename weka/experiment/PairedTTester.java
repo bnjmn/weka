@@ -66,7 +66,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -1453,6 +1453,7 @@ public class PairedTTester implements OptionHandler {
   public void setRunColumn(int newRunColumn) {
     
     m_RunColumnSet = newRunColumn;
+    m_ResultsetsValid = false;
   }
 
   /**
@@ -1473,6 +1474,7 @@ public class PairedTTester implements OptionHandler {
   public void setFoldColumn(int newFoldColumn) {
     
     m_FoldColumn = newFoldColumn;
+    m_ResultsetsValid = false;
   }
   
   /**
