@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public final class Utils {
 
@@ -326,7 +326,8 @@ public final class Utils {
 	(string.indexOf('\t') != -1) ||
 	(string.indexOf('\n') != -1) ||
 	(string.indexOf(',') != -1) ||
-	(string.equals("?"))) {
+	(string.equals("?")) ||
+	(string.equals(""))) {
       string = ("'".concat(string)).concat("'");
     }
     return string;
@@ -378,6 +379,30 @@ public final class Utils {
     return options;
   }
 
+  /**
+   * Joins all the options in an option array into a single string,
+   * as might be used on the command line.
+   *
+   * @param optionArray the array of options
+   * @return the string containing all options.
+   */
+  public static String joinOptions(String [] optionArray) {
+
+    String optionString = "";
+    for (int i = 0; i < optionArray.length; i++) {
+      if (optionArray[i].equals("")) {
+	continue;
+      }
+      if (optionArray[i].indexOf('"') != -1) {
+	optionString += '"' + optionArray[i] + '"';
+      } else {
+	optionString += optionArray[i];
+      }
+      optionString += " ";
+    }
+    return optionString.trim();
+  }
+  
   /**
    * Computes entropy for an array of integers.
    *
