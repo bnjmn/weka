@@ -33,7 +33,7 @@ import weka.core.Utils;
  * Andrew Mccallum, Kamal Nigam (1998)<i>A Comparison of Event Models for Naive Bayes Text Classification </i>
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz) and Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 
 /**
@@ -252,27 +252,27 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
     
     public String toString()
     {
-	String result = new String("The independent probability of a class\n--------------------------------------\n");
+	StringBuffer result = new StringBuffer("The independent probability of a class\n--------------------------------------\n");
 	
 	for(int c = 0; c<numClasses; c++)
-	    result = result.concat(headerInfo.classAttribute().value(c)).concat("\t").concat(Double.toString(probOfClass[c])).concat("\n");
+	    result.append(headerInfo.classAttribute().value(c)).append("\t").append(Double.toString(probOfClass[c])).append("\n");
 	
-	result = result.concat("\nThe probability of a word given the class\n-----------------------------------------\n\t");
+	result.append("\nThe probability of a word given the class\n-----------------------------------------\n\t");
 
 	for(int c = 0; c<numClasses; c++)
-	    result = result.concat(headerInfo.classAttribute().value(c)).concat("\t");
+	    result.append(headerInfo.classAttribute().value(c)).append("\t");
 	
-	result = result.concat("\n");
+	result.append("\n");
 
 	for(int w = 0; w<numAttributes; w++)
 	    {
-		result = result.concat(headerInfo.attribute(w).name()).concat("\t");
+		result.append(headerInfo.attribute(w).name()).append("\t");
 		for(int c = 0; c<numClasses; c++)
-		    result = result.concat(Double.toString(Math.pow(10.0, probOfWordGivenClass[c][w]))).concat("\t");
-		result = result.concat("\n");
+		    result.append(Double.toString(Math.pow(10.0, probOfWordGivenClass[c][w]))).append("\t");
+		result.append("\n");
 	    }
 
-	return result;
+	return result.toString();
     }
     
     /**
