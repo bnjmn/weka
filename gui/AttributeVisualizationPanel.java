@@ -58,14 +58,15 @@ import weka.core.FastVector;
  * each nominal value of the attribute with its height 
  * equal to the frequecy that value appears in the
  * dataset. For numeric attributes, it displays a 
- * histogram. The number of intervals in the 
- * histogram is 10% of the number of instances in 
- * the dataset, otherwise number of intervals  is 
- * equal to the width of this panel in pixels minus 6
- * (if that 10% figure is > width).
+ * histogram. The width of an interval in the 
+ * histogram is calculated using Scott's(1979)
+ * method: <br> 
+ *    intervalWidth = Max(1, 3.49*Std.Dev*numInstances^(1/3)) 
+ * Then the number of intervals is calculated by: <br>
+ *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -403,12 +404,14 @@ public class AttributeVisualizationPanel extends JPanel {
 
 	  //This uses the Scott's method to calculate the histogram's interval width.
 	  //See "On optimal and data-based histograms". Biometrika, 66, 605-610 or 
-	  //see the same paper mentioned above.
+	  //see the same paper mentioned above.	  
 	  intervalWidth =  3.49 * as.numericStats.stdDev * Math.pow(m_data.numInstances(), -1/3D);
-
-	  intervals = (int)Math.round((as.numericStats.max - as.numericStats.min)/intervalWidth);
+	  //The Math.max is introduced to remove the possibility of intervals=0 that can happen
+	  //if the intervalWidth<1
+	  intervals = Math.max(1, (int)Math.round((as.numericStats.max - as.numericStats.min)/intervalWidth));
 	    
-                                 
+	  //System.out.println("Max: "+as.numericStats.max+" Min: "+as.numericStats.min+" stdDev: "+as.numericStats.stdDev+
+	  //	     "intervalWidth: "+intervalWidth);
 	  if(intervals > AttributeVisualizationPanel.this.getWidth()) {
 	      intervals = AttributeVisualizationPanel.this.getWidth()-4;
 	      if(intervals<1)
