@@ -26,7 +26,7 @@ import weka.core.Statistics;
  * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PairedStats {
   
@@ -207,8 +207,12 @@ public class PairedStats {
 				   new java.io.InputStreamReader(System.in));
       String line;
       while ((line = r.readLine()) != null) {
-	System.err.println("Read: " + line);
-	java.util.StringTokenizer s = new java.util.StringTokenizer(line);
+        line = line.trim();
+        if (line.equals("") || line.startsWith("@") || line.startsWith("%")) {
+          continue;
+        }
+	java.util.StringTokenizer s 
+          = new java.util.StringTokenizer(line, " ,\t\n\r\f");
 	int count = 0;
 	double v1 = 0, v2 = 0;
 	while (s.hasMoreTokens()) {
@@ -218,13 +222,15 @@ public class PairedStats {
 	  } else if (count == 1) {
 	    v2 = val;
 	  } else {
+            System.err.println("MSG: Too many values in line \"" 
+                               + line + "\", skipped.");
 	    break;
 	  }
 	  count++;
 	}
-	ps.add(v1, v2);
-	ps.calculateDerived();
-	System.err.println("" + ps.correlation);
+        if (count == 2) {
+          ps.add(v1, v2);
+        }
       }
       ps.calculateDerived();
       System.err.println(ps);
