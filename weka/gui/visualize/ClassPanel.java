@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClassPanel extends JPanel {
     
@@ -79,7 +79,7 @@ public class ClassPanel extends JPanel {
   private Font m_labelFont = null;
 
   /** The amount of space to leave either side of the legend */ 
-  private int m_HorizontalPad=10;
+  private int m_HorizontalPad=0;
 
   /** The precision with which to display real values */
   private int m_precisionC;
@@ -265,7 +265,7 @@ public class ClassPanel extends JPanel {
    */
   protected void setNominal() {
     m_isNumeric = false;
-    m_HorizontalPad = 10;
+    m_HorizontalPad = 0;
     setOn(true);
     m_oldWidth = -9000;
      
@@ -300,18 +300,44 @@ public class ClassPanel extends JPanel {
      
     m_minC = min; m_maxC = max;
 
-    m_fieldWidthC = (int)((Math.log(m_maxC)/Math.log(10)))+1;
-    m_precisionC = 1;
-    if ((Math.abs(m_maxC-m_minC) < 1) && ((m_maxC-m_minC) != 0)) {
-      m_precisionC = (int)Math.abs(((Math.log(Math.abs(m_maxC-m_minC)) / 
-				     Math.log(10))))+1;
-    }
+    int whole = (int)Math.abs(m_maxC);
+    double decimal = Math.abs(m_maxC) - whole;
+    int nondecimal;
+    nondecimal = (whole > 0) 
+      ? (int)(Math.log(whole) / Math.log(10))
+      : 1;
+    
+    m_precisionC = (decimal > 0) 
+      ? (int)Math.abs(((Math.log(Math.abs(m_maxC)) / 
+				      Math.log(10))))+2
+      : 1;
+
     String maxStringC = Utils.doubleToString(m_maxC,
-					     m_fieldWidthC+1+m_precisionC
+					     nondecimal+1+m_precisionC
 					     ,m_precisionC);
     if (m_labelMetrics != null) {
       m_HorizontalPad = m_labelMetrics.stringWidth(maxStringC);
     }
+
+    whole = (int)Math.abs(m_minC);
+    decimal = Math.abs(m_minC) - whole;
+    nondecimal = (whole > 0) 
+      ? (int)(Math.log(whole) / Math.log(10))
+      : 1;
+    
+     m_precisionC = (decimal > 0) 
+       ? (int)Math.abs(((Math.log(Math.abs(m_minC)) / 
+				      Math.log(10))))+2
+      : 1;
+     
+     maxStringC = Utils.doubleToString(m_minC,
+				       nondecimal+1+m_precisionC
+				       ,m_precisionC);
+     if (m_labelMetrics != null) {
+       if (m_labelMetrics.stringWidth(maxStringC) > m_HorizontalPad) {
+	 m_HorizontalPad = m_labelMetrics.stringWidth(maxStringC);
+       }
+     }
 
     setOn(true);
     this.repaint();
@@ -323,6 +349,7 @@ public class ClassPanel extends JPanel {
    */
   protected void paintNominal(Graphics gx) {
     setFonts(gx);
+
     int numClasses;
 
     numClasses = m_Instances.attribute(m_cIndex).numValues();
@@ -471,7 +498,12 @@ public class ClassPanel extends JPanel {
    * @param gx the graphics context
    */
   protected void paintNumeric(Graphics gx) {
+
     setFonts(gx);
+    if (m_HorizontalPad == 0) {
+      setCindex(m_cIndex);
+    }
+
     int w = this.getWidth();
     double rs = 15;
     double incr = 240.0 / (double)(w-(m_HorizontalPad*2));
@@ -486,11 +518,22 @@ public class ClassPanel extends JPanel {
       rs += incr;
     }
 
-    int fieldWidthC = (int)((Math.log(m_maxC)/Math.log(10)))+1;
-	
+    int whole = (int)Math.abs(m_maxC);
+    double decimal = Math.abs(m_maxC) - whole;
+    int nondecimal;
+    nondecimal = (whole > 0) 
+      ? (int)(Math.log(whole) / Math.log(10))
+      : 1;
+    
+    m_precisionC = (decimal > 0) 
+      ? (int)Math.abs(((Math.log(Math.abs(m_maxC)) / 
+			Math.log(10))))+2
+      : 1;
+
     String maxStringC = Utils.doubleToString(m_maxC,
-					     fieldWidthC+1+m_precisionC,
-					     m_precisionC);
+					     nondecimal+1+m_precisionC
+					     ,m_precisionC);
+
 	
     int mswc = m_labelMetrics.stringWidth(maxStringC);
     int tmsc = mswc;
@@ -515,10 +558,21 @@ public class ClassPanel extends JPanel {
 		  m_HorizontalPad,
 		  (m_spectrumHeight+5+m_tickSize));
 
-      fieldWidthC = (int)((Math.log(m_minC)/Math.log(10)))+1;
+      whole = (int)Math.abs(m_minC);
+      decimal = Math.abs(m_minC) - whole;
+      nondecimal = (whole > 0) 
+	? (int)(Math.log(whole) / Math.log(10))
+	: 1;
+      
+      m_precisionC = (decimal > 0) 
+	? (int)Math.abs(((Math.log(Math.abs(m_minC)) / 
+			  Math.log(10))))+2
+	: 1;
+      
       maxStringC = Utils.doubleToString(m_minC,
-					fieldWidthC+1+m_precisionC,
-					m_precisionC);
+					nondecimal+1+m_precisionC
+					,m_precisionC);
+
       mswc = m_labelMetrics.stringWidth(maxStringC);
       gx.drawString(maxStringC, 
 		    m_HorizontalPad-(mswc/2),
@@ -531,10 +585,22 @@ public class ClassPanel extends JPanel {
 		    (m_spectrumHeight+5),
 		    m_HorizontalPad+((w-(2*m_HorizontalPad))/2),
 		    (m_spectrumHeight+5+m_tickSize));
-	fieldWidthC = (int)((Math.log(mid)/Math.log(10)))+1;
+
+	whole = (int)Math.abs(mid);
+	decimal = Math.abs(mid) - whole;
+	nondecimal = (whole > 0) 
+	  ? (int)(Math.log(whole) / Math.log(10))
+	  : 1;
+	
+	m_precisionC = (decimal > 0) 
+	  ? (int)Math.abs(((Math.log(Math.abs(mid)) / 
+			    Math.log(10))))+2
+	  : 1;
+	
 	maxStringC = Utils.doubleToString(mid,
-					  fieldWidthC+1+m_precisionC,
-					  m_precisionC);
+					  nondecimal+1+m_precisionC
+					  ,m_precisionC);
+
 	mswc = m_labelMetrics.stringWidth(maxStringC);
 	gx.drawString(maxStringC,
 		      m_HorizontalPad+((w-(2*m_HorizontalPad))/2)-(mswc/2),
