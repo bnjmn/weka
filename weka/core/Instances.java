@@ -50,7 +50,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
 */
 public class Instances implements Serializable {
  
@@ -812,6 +812,34 @@ public class Instances implements Serializable {
     }
     return newData;
   }
+
+  /**
+   * Creates a new dataset of the same size using random sampling
+   * with replacement according to the current instance weights. The
+   * weights of the instances in the new dataset are set to one.
+   *
+   * @param random a random number generator
+   * @return the new dataset
+   * @exception Exception if something goes wrong
+   */
+  public final Instances resampleWithWeights(Random random) 
+    throws Exception {
+
+    double [] weights = new double[numInstances()];
+    boolean foundOne = false;
+    for (int i = 0; i < weights.length; i++) {
+      weights[i] = instance(i).weight();
+      if (!Utils.eq(weights[i], weights[0])) {
+        foundOne = true;
+      }
+    }
+    if (foundOne) {
+      return resampleWithWeights(random, weights);
+    } else {
+      return new Instances(this);
+    }
+  }
+
 
   /**
    * Creates a new dataset of the same size using random sampling

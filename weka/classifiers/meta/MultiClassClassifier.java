@@ -43,7 +43,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -78,24 +78,9 @@ public class MultiClassClassifier extends DistributionClassifier
 	Exception("MultiClassClassifier needs a nominal class!");
     }
     if (m_Classifier instanceof WeightedInstancesHandler) {
-
-      // Base classifier can handle weights
       insts = new Instances(insts);
     } else {
-
-      // Use resampling if base classifer can't handle weights
-      // and weights not all one
-      double[] weights = new double[insts.numInstances()];
-      boolean foundOne = false;
-      for (int i = 0; i < weights.length; i++) {
-	weights[i] = insts.instance(i).weight();
-	if (!Utils.eq(weights[i], weights[0])) {
-	  foundOne = true;
-	}
-      }
-      if (foundOne) {
-	insts = insts.resampleWithWeights(new Random(42), weights);
-      }
+      insts = insts.resampleWithWeights(new Random(42));
     }     
     insts.deleteWithMissingClass();
     if (insts.numInstances() == 0) {
