@@ -77,7 +77,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.19 $
+ * @version  $Revision: 1.20 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -129,6 +129,16 @@ public class AttributeSelection implements Serializable {
   private double [][] m_rankResults = null;
   private double [] m_subsetResults = null;
   private int m_trials = 0;
+
+  /**
+   * Return the number of attributes selected from the most recent
+   * run of attribute selection
+   * @return the number of attributes selected
+   */
+  public int numberAttributesSelected() throws Exception {
+    int [] att = selectedAttributes();
+    return att.length-1;
+  }
 
   /**
    * get the final selected set of attributes.
