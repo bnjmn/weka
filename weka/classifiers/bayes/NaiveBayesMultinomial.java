@@ -36,7 +36,7 @@ import weka.classifiers.Classifier;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 
 /**
@@ -217,14 +217,14 @@ public class NaiveBayesMultinomial extends Classifier
   private double probOfDocGivenClass(Instance inst, int classIndex)
   {
     double answer = 0;
-    int totalWords = 0;
+    //double totalWords = 0; //no need as we are not calculating the factorial at all.
 	
-    int freqOfWordInDoc;
+    double freqOfWordInDoc;  //should be double
     for(int i = 0; i<inst.numValues(); i++)
       if(inst.index(i) != inst.classIndex())
 	{
-	  freqOfWordInDoc = (int)inst.valueSparse(i);
-	  totalWords += freqOfWordInDoc;
+	  freqOfWordInDoc = inst.valueSparse(i);
+	  //totalWords += freqOfWordInDoc;
 	  answer += (freqOfWordInDoc * probOfWordGivenClass[classIndex][inst.index(i)] 
 		     ); //- lnFactorial(freqOfWordInDoc));
 	}
