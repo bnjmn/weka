@@ -158,6 +158,6 @@ weka.clusterers.Clusterer=\
 
 # Lists the Converters I want to choose from
 weka.converters.Converter =\
- weka.converters.CsvToArff
-# weka.converters.C5ToArff
+ weka.converters.CsvToArff, \
+ weka.converters.C45ToArff
  
