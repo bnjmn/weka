@@ -1,0 +1,426 @@
+/*
+ *    MultiScheme.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+package weka.classifiers;
+
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+
+
+/**
+ * Class for selecting a classifier from among several using cross 
+ * validation on the training data.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -S learnerstring <br>
+ * Learnerstring should contain the full class name of a scheme
+ * included for selection followed by options to the learner
+ * (required, option should be used once for each learner).<p>
+ *
+ * -X <br>
+ * Use cross validation error as the basis for learner selection.
+ * The default is to use error on the training data instead.<p>
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version 1.0 - 20 Dec 1998 - Initial version (Len)
+ */
+public class MultiScheme extends Classifier implements OptionHandler {
+
+  // ===================
+  // Protected variables
+  // ===================
+
+  /** The classifier that had the best performance on training data. */
+  protected Classifier m_Classifier;
+ 
+  /** The list of classifier class names */
+  protected FastVector m_ClassifierNames;
+
+  /** The list of options for each classifier */
+  protected FastVector m_ClassifierOptions;
+
+  /** The index into the vector for the selected scheme (and options) */
+  protected int m_ClassifierIndex;
+
+  /** Use cross validation rather than training error for selection */
+  protected boolean b_SelectByXVal;
+
+  /** Debugging mode, gives extra output if true */
+  protected boolean b_Debug;
+
+
+  // ===============
+  // Public methods.
+  // ===============
+
+  /**
+   * Returns an enumeration describing the available options
+   *
+   * @return an enumeration of all the available options
+   */
+  public Enumeration listOptions() {
+
+    Vector newVector = new Vector(3);
+
+    newVector.addElement(new Option(
+	      "\tTurn on debugging output.",
+	      "D", 0, "-D"));
+    newVector.addElement(new Option(
+	      "\tFull class name of learner to include, followed "
+	      + "by scheme options\n"
+	      + "\t(may be specified multiple times).\n"
+	      + "\teg: \"weka.classifiers.NaiveBayes -D\"",
+	      "S", 1, "-S"));
+    newVector.addElement(new Option(
+	      "\tUse cross validation for model selection (default is to use\n"
+	      + "\ttraining error).",
+	      "X", 0, "-X"));
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options. Valid options are:<p>
+   *
+   * -D <br>
+   * Turn on debugging output.<p>
+   *
+   * -S learnerstring <br>
+   * Learnerstring should contain the full class name of a scheme
+   * included for selection followed by options to the learner
+   * (required, option should be used once for each learner).<p>
+   *
+   * -X <br>
+   * Use cross validation error as the basis for learner selection.
+   * The default is to use error on the training data instead.<p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+
+    setDebug(Utils.getFlag('D', options));
+    
+    setSelectByXVal(Utils.getFlag('X', options));
+    
+    // Iterate through the schemes
+    m_ClassifierNames = null;
+    m_ClassifierOptions = null;
+    while (true) {
+      String learnerString = Utils.getOption('S', options);
+      if (learnerString.length() == 0) {
+	break;
+      }
+      addLearner(learnerString);
+    }
+    if ((m_ClassifierNames == null) || (m_ClassifierNames.size() <= 1)) {
+      throw new Exception("At least two learners must be specified"
+			  + " with the -S option.");
+    }
+  }
+
+  /**
+   * Gets the current settings of the Classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String [] getOptions() {
+
+    String [] options = new String [2];
+    int current = 0;
+
+    if (m_ClassifierNames != null) {
+      options = new String [m_ClassifierNames.size() * 2 + 2];
+      for (int i = 0; i < m_ClassifierNames.size(); i++) {
+	options[current++] = "-S"; options[current++] = "" + getLearner(i);
+      }
+    }
+    if (getSelectByXVal()) {
+      options[current++] = "-X";
+    }
+    if (getDebug()) {
+      options[current++] = "-D";
+    }
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
+  }
+
+  /**
+   * Add a learner to the set of learners.
+   *
+   * @param learnerString a string consisting of the class name of a classifier
+   * followed by any required learner options
+   * @exception Exception if the learner class name is not valid or the 
+   * classifier does not accept the supplied options
+   */
+  public void addLearner(String learnerString) throws Exception {
+
+    // Split the learner String into classname and options
+    learnerString = learnerString.trim();
+    int breakLoc = learnerString.indexOf(' ');
+    String learnerName = learnerString;
+    String learnerOptions = "";
+    if (breakLoc != -1) {
+      learnerName = learnerString.substring(0, breakLoc);
+      learnerOptions = learnerString.substring(breakLoc).trim();
+    }
+    Classifier tempClassifier;
+    try {
+      tempClassifier = (Classifier)Class.forName(learnerName).newInstance();
+    } catch (Exception ex) {
+      throw new Exception("Can't find Classifier with class name: "
+			  + learnerName);
+    }
+    if (tempClassifier instanceof OptionHandler) {
+      String [] options = splitOptions(learnerOptions);
+      ((OptionHandler)tempClassifier).setOptions(options);
+    }
+    // Everything good, so add the learner to the set.
+    if (m_ClassifierNames == null) {
+      m_ClassifierNames = new FastVector();
+      m_ClassifierOptions = new FastVector();
+    }
+    m_ClassifierNames.addElement(learnerName);
+    m_ClassifierOptions.addElement(learnerOptions);
+ }
+
+  /**
+   * Gets the learner string, which contains the class name of
+   * the learner and any options to the learner
+   *
+   * @param index the learner string to retrieve
+   * @return the learner string, or the empty string if no learner
+   * has been assigned (or the index given is out of range).
+   */
+  public String getLearner(int index) {
+    
+    if ((m_ClassifierNames == null) 
+	|| (m_ClassifierNames.size() < index)) {
+      return "";
+    }
+    if ((m_ClassifierOptions == null) 
+	|| (m_ClassifierOptions.size() < index)) {
+      return (String)m_ClassifierNames.elementAt(index);
+    }
+    return (String)m_ClassifierNames.elementAt(index) 
+      + " " + (String)m_ClassifierOptions.elementAt(index);
+  }
+
+  /**
+   * Set whether cross validation is used for model selection
+   *
+   * @param selectByXVal true if cross validation is used
+   */
+  public void setSelectByXVal(boolean selectByXVal) {
+
+    b_SelectByXVal = selectByXVal;
+  }
+
+  /**
+   * Get whether selection is by cross validation
+   *
+   * @return true if selection is by cross validation
+   */
+  public boolean getSelectByXVal() {
+
+    return b_SelectByXVal;
+  }
+
+  /**
+   * Set debugging mode
+   *
+   * @param debug true if debug output should be printed
+   */
+  public void setDebug(boolean debug) {
+
+    b_Debug = debug;
+  }
+
+  /**
+   * Get whether debugging is turned on
+   *
+   * @return true if debugging output is on
+   */
+  public boolean getDebug() {
+
+    return b_Debug;
+  }
+
+  /**
+   * Buildclassifier selects a classifier from the set of classifiers
+   * by minimising error on the training data.
+   *
+   * @param data the training data to be used for generating the
+   * boosted classifier.
+   * @exception Exception if the classifier could not be built successfully
+   */
+  public void buildClassifier(Instances data) throws Exception {
+
+    if (m_ClassifierNames == null) {
+      throw new Exception("No base learners have been set!");
+    }
+    int numFolds = 10;
+    Instances newData = new Instances(data);
+    newData.deleteWithMissingClass();
+    if (newData.classAttribute().isNominal())
+      newData.stratify(numFolds);
+    Instances train = newData;               // train on all data by default
+    Instances test = newData;               // test on training data by default
+    Classifier bestClassifier = null;
+    int bestIndex = -1;
+    double bestPerformance = Double.NaN;
+    int numClassifiers = m_ClassifierNames.size();
+    for (int i = 0; i < numClassifiers; i++) {
+      // Instantiate the classifier
+      String learnerName = (String)m_ClassifierNames.elementAt(i);
+      Classifier currentClassifier = (Classifier)Class.forName(learnerName)
+	.newInstance();
+      if (currentClassifier instanceof OptionHandler) {
+	String [] options = splitOptions((String)m_ClassifierOptions
+					 .elementAt(i));
+	((OptionHandler)currentClassifier).setOptions(options);
+      }
+
+      Evaluation evaluation;
+      if (b_SelectByXVal) {
+	evaluation = new Evaluation(newData);
+	for (int j = 0; j < numFolds; j++) {
+	  train = newData.trainCV(numFolds, j);
+	  test = newData.testCV(numFolds, j);
+	  currentClassifier.buildClassifier(train);
+	  evaluation.setPriors(train);
+	  evaluation.evaluateModel(currentClassifier, test);
+	}
+      } else {
+	currentClassifier.buildClassifier(train);
+	evaluation = new Evaluation(train);
+	evaluation.evaluateModel(currentClassifier, test);
+      }
+
+      double error = evaluation.errorRate();
+      if (b_Debug) {
+	System.err.println("Error rate: " + Utils.doubleToString(error, 6, 4)
+			   + " for classifier " + learnerName);
+      }
+
+      if ((i == 0) || (error < bestPerformance)) {
+	bestClassifier = currentClassifier;
+	bestPerformance = error;
+	bestIndex = i;
+      }
+    }
+    m_ClassifierIndex = bestIndex;
+    m_Classifier = bestClassifier;
+    if (b_SelectByXVal) {
+      m_Classifier.buildClassifier(newData);
+    }
+  }
+
+  /**
+   * Classifies a given instance using the selected classifier.
+   *
+   * @param instance the instance to be classified
+   * @exception Exception if instance could not be classified
+   * successfully
+   */
+  public double classifyInstance(Instance instance) throws Exception {
+
+    return m_Classifier.classifyInstance(instance);
+  }
+
+  /**
+   * Output a representation of this classifier
+   */
+  public String toString() {
+
+    if ((m_ClassifierNames == null) || (m_ClassifierNames.size() == 0)) {
+      return "MultiScheme: No schemes entered for selection";
+    }
+
+    String result = "MultiScheme selection using";
+    if (b_SelectByXVal) {
+      result += " cross validation error";
+    } else {
+      result += " error on training data";
+    }
+    result += " from the following:\n";
+    for (int i = 0; i < m_ClassifierNames.size(); i++) {
+      result += '\t' + (String)m_ClassifierNames.elementAt(i)
+      + ' ' + (String)m_ClassifierOptions.elementAt(i) + '\n';
+    }
+
+    if (m_Classifier == null) {
+      return result + "no scheme selected yet";
+    }
+    result += "Selected scheme: "
+      + (String)m_ClassifierNames.elementAt(m_ClassifierIndex)
+      + ' ' 
+      + (String)m_ClassifierOptions.elementAt(m_ClassifierIndex)
+      + "\n\n"
+      + m_Classifier.toString();
+    return result;
+  }
+
+  /**
+   * Main method for testing this class.
+   *
+   * @param argv should contain the following arguments:
+   * -t training file [-T test file] [-c class index]
+   */
+  public static void main(String [] argv) {
+
+    try {
+      System.out.println(Evaluation.evaluateModel(new MultiScheme(), argv));
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+    }
+  }
+
+  // =================
+  // Protected Methods
+  // =================
+
+  /**
+   * Split up a string containing options into an array of strings,
+   * one for each option.
+   *
+   * @param optionString the string containing the options
+   * @return the array of options
+   */
+  protected String [] splitOptions(String optionString) {
+
+    FastVector optionsVec = new FastVector();
+    StringTokenizer st = new StringTokenizer(optionString);
+    while (st.hasMoreTokens())
+      optionsVec.addElement(st.nextToken());
+
+    String [] options = new String[optionsVec.size()];
+    for (int i = 0; i < optionsVec.size(); i++) {
+      options[i] = (String)optionsVec.elementAt(i);
+    }
+    return options;
+  }
+}
