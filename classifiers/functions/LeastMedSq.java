@@ -41,7 +41,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -377,6 +377,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
   private void selectSubSample(Instances data)throws Exception{
 
     m_SplitFilter = new RemoveRange();
+    m_SplitFilter.setInvertSelection(true);
     m_SubSample = data;
     m_SplitFilter.setInputFormat(m_SubSample);
     m_SplitFilter.setInstancesIndices(selectIndices(m_SubSample));
