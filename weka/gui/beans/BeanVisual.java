@@ -41,7 +41,7 @@ import java.io.IOException;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -123,6 +123,34 @@ public class BeanVisual extends JPanel implements Serializable {
   }
 
   /**
+   * Reduce this BeanVisual's icon size by the given factor
+   *
+   * @param factor the factor by which to reduce the icon size by
+   */
+  public void scale(int factor) {
+    if (m_icon != null) {
+      removeAll();
+      Image pic = m_icon.getImage();
+      int width = m_icon.getIconWidth();
+      int height = m_icon.getIconHeight();
+      int reduction = width / factor;
+      width -= reduction;
+      height -= reduction;
+      pic = pic.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+      m_icon = new ImageIcon(pic);
+      m_visualLabel = new JLabel(m_icon);
+      add(m_visualLabel, BorderLayout.CENTER);
+      Dimension d = m_visualLabel.getPreferredSize();
+      //      this.setSize((int)d.getWidth()+50, (int)d.getHeight()+50);
+      Dimension d2 = new Dimension((int)d.getWidth() + 10, 
+				   (int)d.getHeight() + 10);
+      setMinimumSize(d2);
+      setPreferredSize(d2);
+      setMaximumSize(d2);   
+    }
+  }
+
+  /**
    * Loads static and animated versions of a beans icons. These are
    * assumed to be defined in the system resource location (i.e. in the
    * CLASSPATH). If the named icons do not exist, no changes to the
@@ -143,6 +171,7 @@ public class BeanVisual extends JPanel implements Serializable {
     } else {
       Image pic = Toolkit.getDefaultToolkit().
 	getImage(imageURL);
+
       m_icon = new ImageIcon(pic);
       if (m_visualLabel != null) {
 	m_visualLabel.setIcon(m_icon);
