@@ -17,7 +17,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class EvaluationUtils {
 
@@ -92,7 +92,9 @@ public class EvaluationUtils {
     
     FastVector predictions = new FastVector();
     for (int i = 0; i < test.numInstances(); i++) {
-      predictions.addElement(getPrediction(classifier, test.instance(i)));
+      if (!test.instance(i).classIsMissing()) {
+        predictions.addElement(getPrediction(classifier, test.instance(i)));
+      }
     }
     return predictions;
   }
@@ -110,7 +112,7 @@ public class EvaluationUtils {
                                   Instance test)
     throws Exception {
    
-    int actual = (int) test.classValue();
+    double actual = test.classValue();
     double [] dist = classifier.distributionForInstance(test);
     if (test.classAttribute().isNominal()) {
       return new NominalPrediction(actual, dist, test.weight());
