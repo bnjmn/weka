@@ -15,10 +15,7 @@ CLASSFILES = $(SOURCES:.java=.class)
 
 #-------------------------------------------------------------------------------#
 
-pace: $(CLASSFILES)
-
-all :	
-	make clean; make
+all :	$(CLASSFILES)
 
 clean : 
 	$(RM) $(CLASSFILES) *~ core

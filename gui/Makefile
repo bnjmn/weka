@@ -29,7 +29,7 @@ SOURCES = \
 	HierarchyPropertyParser.java \
 	CustomPanelSupplier.java \
 	AttributeVisualizationPanel.java \
-	AttributeListPanel
+	AttributeListPanel.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
