@@ -18,7 +18,7 @@ import weka.core.Instance;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface Loader extends Serializable {
 
@@ -37,7 +37,6 @@ public interface Loader extends Serializable {
    *
    * @param file the File
    * @exception IOException if an error occurs
-   * @exception UnsupportedOperationException if this Loader doesn't
    * support loading from a File.
    *
    * <pre><jml>
@@ -54,20 +53,17 @@ public interface Loader extends Serializable {
    *    signals: (IOException);
    * </jml></pre>
    */
-  public void setSource(File file) throws IOException, 
-  UnsupportedOperationException;
+  public void setSource(File file) throws IOException;
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
    * the supplied InputStream.
    *
    * @param input the source InputStream
-   * @exception IOException if an error occurs
-   * @exception UnsupportedOperationException if this Loader doesn't
+   * @exception IOException if this Loader doesn't
    * support loading from a File.
    */
-  public void setSource(InputStream input) throws IOException, 
-  UnsupportedOperationException;
+  public void setSource(InputStream input) throws IOException;
 
   /**
    * Determines and returns (if possible) the structure (internally the 

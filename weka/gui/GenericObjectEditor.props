@@ -123,7 +123,6 @@ weka.filters.Filter = \
  weka.filters.SplitDatasetFilter, \
  weka.filters.SpreadSubsampleFilter, \
  weka.filters.StringToNominalFilter, \
- weka.filters.StringToWordVectorFilter, \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
  weka.filters.TimeSeriesTranslateFilter

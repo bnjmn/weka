@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader {
@@ -76,10 +76,9 @@ public class ArffLoader extends AbstractLoader {
    * the supplied InputStream.
    *
    * @param in the source InputStream.
-   * @exception UnsupportedOperationException always thrown.
+   * @exception IOException always thrown.
    */
-  public void setSource(InputStream in) throws IOException, 
-  UnsupportedOperationException {
+  public void setSource(InputStream in) throws IOException {
 
     m_sourceReader = new BufferedReader(new InputStreamReader(in));
   }

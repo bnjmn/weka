@@ -24,7 +24,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -532,7 +532,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   class ControlPanel extends JPanel {
     
@@ -1547,6 +1547,9 @@ public class NeuralNetwork extends DistributionClassifier
    */
   public void buildClassifier(Instances i) throws Exception {
 
+    if (i.checkForStringAttributes()) {
+      throw new IllegalArgumentException("Can't handle string attributes!");
+    }
 
     if (i.numInstances() == 0) {
       throw new IllegalArgumentException("No training instances.");
@@ -2037,13 +2040,13 @@ public class NeuralNetwork extends DistributionClassifier
     //the defaults can be found here!!!!
     String learningString = Utils.getOption('L', options);
     if (learningString.length() != 0) {
-      setLearningRate(Double.parseDouble(learningString));
+      setLearningRate((new Double(learningString)).doubleValue());
     } else {
       setLearningRate(0.3);
     }
     String momentumString = Utils.getOption('M', options);
     if (momentumString.length() != 0) {
-      setMomentum(Double.parseDouble(momentumString));
+      setMomentum((new Double(momentumString)).doubleValue());
     } else {
       setMomentum(0.2);
     }

@@ -41,7 +41,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -153,7 +153,10 @@ public class MultiClassClassifier extends DistributionClassifier
     private boolean good() {
       boolean [] ninClass = new boolean[m_Codebits[0].length];
       boolean [] ainClass = new boolean[m_Codebits[0].length];
-      java.util.Arrays.fill(ainClass, true);
+      for (int i = 0; i < ainClass.length; i++) {
+	ainClass[i] = true;
+      }
+
       for (int i = 0; i < m_Codebits.length; i++) {
         boolean ninCode = false;
         boolean ainCode = true;
@@ -179,7 +182,8 @@ public class MultiClassClassifier extends DistributionClassifier
     private void randomize() {
       for (int i = 0; i < m_Codebits.length; i++) {
         for (int j = 0; j < m_Codebits[i].length; j++) {
-          m_Codebits[i][j] = r.nextBoolean();
+	  double temp = r.nextDouble();
+          m_Codebits[i][j] = (temp < 0.5) ? false : true;
         }
       }
     }
@@ -402,7 +406,7 @@ public class MultiClassClassifier extends DistributionClassifier
 
     String rfactorString = Utils.getOption('R', options);
     if (rfactorString.length() != 0) {
-      setRandomWidthFactor(Double.parseDouble(rfactorString));
+      setRandomWidthFactor((new Double(rfactorString)).doubleValue());
     } else {
       setRandomWidthFactor(2.0);
     }

@@ -16,10 +16,10 @@ import weka.core.Instance;
 /**
  * Abstract class for Loaders that contains default implementation of the
  * setSource methods: Any of these methods that are not overwritten will
- * result in throwing UnsupportedOperationException.
+ * result in throwing IOException.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractLoader implements Loader {
 
@@ -39,12 +39,11 @@ public abstract class AbstractLoader implements Loader {
    * the supplied File object.
    *
    * @param file the File.
-   * @exception UnsupportedOperationException always thrown.
+   * @exception IOException always thrown.
    */
-  public void setSource(File file) throws IOException, 
-  UnsupportedOperationException {
+  public void setSource(File file) throws IOException {
 
-    throw new UnsupportedOperationException();
+    throw new IOException("operation not supported");
   }
 
   /**
@@ -52,12 +51,11 @@ public abstract class AbstractLoader implements Loader {
    * the supplied InputStream.
    *
    * @param input the source InputStream.
-   * @exception UnsupportedOperationException always thrown.
+   * @exception IOException always thrown.
    */
-  public void setSource(InputStream input) throws IOException, 
-  UnsupportedOperationException {
+  public void setSource(InputStream input) throws IOException {
 
-    throw new UnsupportedOperationException();
+    throw new IOException("operation not supported");
   }
 
   /**
@@ -75,3 +73,8 @@ public abstract class AbstractLoader implements Loader {
    */
   public abstract Instance getNextInstance() throws IOException;
 }
+
+
+
+
+
