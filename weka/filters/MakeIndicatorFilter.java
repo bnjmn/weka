@@ -31,7 +31,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -212,6 +212,30 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
   }
 
   /**
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "A filter that creates a new dataset with a boolean attribute "
+      + "replacing a nominal attribute.  In the new dataset, a value of 1 is "
+      + "assigned to an instance that exhibits a particular range of attribute "
+      + "values, a 0 to an instance that doesn't. The boolean attribute is "
+      + "coded as numeric by default.";
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndexTipText() {
+
+    return "Sets which attribute should be replaced by the indicator. This "
+      + "attribute must be nominal. Give the attribute index (numbered from "
+      + "0). Use -1 to indicate the last attribute.";
+  }
+
+  /**
    * Get the index of the attribute used.
    *
    * @return the index of the attribute
@@ -238,6 +262,18 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    */
   public Range getValueRange() {
     return m_ValIndex;
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String valueIndicesTipText() {
+
+    return "Specify range of nominal values to act on."
+      + " This is a comma separated list of attribute indices (numbered from"
+      + " 1), with \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
   }
 
   /**
@@ -286,6 +322,16 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
   public void setValueIndicesArray(int [] indices) throws Exception {
     
     setValueIndices(Range.indicesToRangeList(indices));
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numericTipText() {
+
+    return "Determines whether the output indicator attribute is numeric. If "
+      + "this is set to false, the output attribute will be nominal.";
   }
 
   /**
