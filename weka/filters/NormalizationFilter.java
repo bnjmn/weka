@@ -29,7 +29,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NormalizationFilter extends Filter {
 
@@ -149,21 +149,20 @@ public class NormalizationFilter extends Filter {
    */
   private void convertInstance(Instance instance) throws Exception {
   
-    Instance newInstance = new Instance(instance);
-
+    double [] newVals = instance.toDoubleArray();
     for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
       if (instance.attribute(j).isNumeric() &&
 	  (!instance.isMissing(j))) {
 	if (Double.isNaN(m_MinArray[j]) ||
 	    (m_MaxArray[j] == m_MinArray[j])) {
-	  newInstance.setValue(j, 0); 
+	  newVals[j] = 0;
 	} else {
-	  newInstance.setValue(j, (instance.value(j) - m_MinArray[j]) / 
-			       (m_MaxArray[j] - m_MinArray[j]));
+	  newVals[j] = (instance.value(j) - m_MinArray[j]) / 
+            (m_MaxArray[j] - m_MinArray[j]);
 	}
       }
     }	
-    push(newInstance);
+    push(new Instance(instance.weight(), newVals));
   }
 
   /**
