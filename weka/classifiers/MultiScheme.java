@@ -45,7 +45,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -53,7 +53,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
   protected Classifier m_Classifier;
  
   /** The list of classifiers */
-  protected FastVector m_Classifiers = new FastVector();
+  protected Classifier [] m_Classifiers = new Classifier [0];
 
   /** The index into the vector for the selected scheme */
   protected int m_ClassifierIndex;
@@ -139,7 +139,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
 
     // Iterate through the schemes
-    m_Classifiers.removeAllElements();
+    FastVector classifiers = new FastVector();
     while (true) {
       String classifierString = Utils.getOption('B', options);
       if (classifierString.length() == 0) {
@@ -151,12 +151,20 @@ public class MultiScheme extends Classifier implements OptionHandler {
       }
       String classifierName = classifierSpec[0];
       classifierSpec[0] = "";
-      addClassifier(Classifier.forName(classifierName, classifierSpec));
+      classifiers.addElement(Classifier.forName(classifierName,
+						classifierSpec));
     }
-    if ((m_Classifiers == null) || (m_Classifiers.size() <= 1)) {
+    if (classifiers.size() <= 1) {
       throw new Exception("At least two classifiers must be specified"
 			  + " with the -B option.");
+    } else {
+      Classifier [] classifiersArray = new Classifier [classifiers.size()];
+      for (int i = 0; i < classifiersArray.length; i++) {
+	classifiersArray[i] = (Classifier) classifiers.elementAt(i);
+      }
+      setClassifiers(classifiersArray);
     }
+    
   }
 
   /**
@@ -169,9 +177,9 @@ public class MultiScheme extends Classifier implements OptionHandler {
     String [] options = new String [5];
     int current = 0;
 
-    if (m_Classifiers.size() != 0) {
-      options = new String [m_Classifiers.size() * 2 + 5];
-      for (int i = 0; i < m_Classifiers.size(); i++) {
+    if (m_Classifiers.length != 0) {
+      options = new String [m_Classifiers.length * 2 + 5];
+      for (int i = 0; i < m_Classifiers.length; i++) {
 	options[current++] = "-B";
 	options[current++] = "" + getClassifierSpec(i);
       }
@@ -191,18 +199,34 @@ public class MultiScheme extends Classifier implements OptionHandler {
   }
 
   /**
-   * Add a classifier to the set of classifiers.
+   * Sets the list of possible classifers to choose from.
    *
-   * @param classifier a classifier with all options set.
+   * @param classifiers an array of classifiers with all options set.
    */
-  public void addClassifier(Classifier classifier) {
+  public void setClassifiers(Classifier [] classifiers) {
 
-    m_Classifiers.addElement(classifier);
+    m_Classifiers = classifiers;
   }
 
+  /**
+   * Gets the list of possible classifers to choose from.
+   *
+   * @return the array of Classifiers
+   */
+  public Classifier [] getClassifiers() {
+
+    return m_Classifiers;
+  }
+  
+  /**
+   * Gets a single classifier from the set of available classifiers.
+   *
+   * @param index the index of the classifier wanted
+   * @return the Classifier
+   */
   public Classifier getClassifier(int index) {
 
-    return (Classifier)m_Classifiers.elementAt(index);
+    return m_Classifiers[index];
   }
   
   /**
@@ -216,8 +240,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   protected String getClassifierSpec(int index) {
     
-    if ((m_Classifiers == null) 
-	|| (m_Classifiers.size() < index)) {
+    if (m_Classifiers.length < index) {
       return "";
     }
     Classifier c = getClassifier(index);
@@ -300,7 +323,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (m_Classifiers.size() == 0) {
+    if (m_Classifiers.length == 0) {
       throw new Exception("No base classifiers have been set!");
     }
     Instances newData = new Instances(data);
@@ -313,7 +336,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     Classifier bestClassifier = null;
     int bestIndex = -1;
     double bestPerformance = Double.NaN;
-    int numClassifiers = m_Classifiers.size();
+    int numClassifiers = m_Classifiers.length;
     for (int i = 0; i < numClassifiers; i++) {
       Classifier currentClassifier = getClassifier(i);
       Evaluation evaluation;
@@ -369,7 +392,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public String toString() {
 
-    if (m_Classifiers.size() == 0) {
+    if (m_Classifiers.length == 0) {
       return "MultiScheme: No schemes entered for selection";
     }
 
@@ -380,7 +403,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
       result += " error on training data";
     }
     result += " from the following:\n";
-    for (int i = 0; i < m_Classifiers.size(); i++) {
+    for (int i = 0; i < m_Classifiers.length; i++) {
       result += '\t' + getClassifierSpec(i) + '\n';
     }
 
