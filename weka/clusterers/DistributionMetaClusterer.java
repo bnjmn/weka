@@ -35,7 +35,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DistributionMetaClusterer extends DistributionClusterer 
   implements OptionHandler, WeightedInstancesHandler {
@@ -143,9 +143,9 @@ public class DistributionMetaClusterer extends DistributionClusterer
      for (int j = 0; j < data.numAttributes(); j++) {
        if (data.attribute(j).isNumeric()) {
 	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
-	   if (m_priors[i] > 1) {
+	   if (m_priors[i] > 0) {
 	     m_modelNormal[i][j][1] = 
-	       Math.sqrt(m_modelNormal[i][j][1] / (m_priors[i] - 1));
+	       Math.sqrt(m_modelNormal[i][j][1] / (m_priors[i]));
 	   } else if (m_priors[i] <= 0) {
 	     m_modelNormal[i][j][1] = Double.MAX_VALUE;
 	   }
@@ -267,7 +267,7 @@ public class DistributionMetaClusterer extends DistributionClusterer
     text.append("DistributionMetaClusterer: \n\nWrapped clusterer: " 
 		+ m_wrappedClusterer.toString());
 
-    text.append("\nFitted estimators: \n");
+    text.append("\nFitted estimators (with ML estimates of variance):\n");
     
     for (int j = 0; j < m_priors.length; j++) {
       text.append("\nCluster: " + j + " Prior probability: " 
