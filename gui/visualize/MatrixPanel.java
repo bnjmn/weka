@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 
@@ -483,13 +483,14 @@ public class MatrixPanel extends JPanel{
     m_selectedAttribs = m_attribList.getSelectedIndices();
     double minC=0, maxC=0;
 
-    int originalClassIndex = m_data.classIndex();
-    m_data.setClassIndex(m_classIndex);
     /** Resampling  **/
     if(Double.parseDouble(m_resamplePercent.getText())<100) {
       try {
-	if( m_data.attribute(m_classIndex).isNominal() ) {
-	  weka.filters.supervised.instance.Resample r = new weka.filters.supervised.instance.Resample();
+	if(m_data.attribute(m_classIndex).isNominal() ) {
+	  inst = new Instances(m_data); // To save class index
+	  inst.setClassIndex(m_classIndex);
+	  weka.filters.supervised.instance.Resample r = 
+	    new weka.filters.supervised.instance.Resample();
 		  
 	  r.setRandomSeed( Integer.parseInt(m_rseed.getText()) );
 	  r.setSampleSizePercent( Double.parseDouble(m_resamplePercent.getText()) );
@@ -498,11 +499,12 @@ public class MatrixPanel extends JPanel{
 	    r.setBiasToUniformClass(0);
 	  else
 	    r.setBiasToUniformClass(1);
-	  r.setInputFormat(m_data);
-	  inst = weka.filters.Filter.useFilter(m_data, r);
+	  r.setInputFormat(inst);
+	  inst = weka.filters.Filter.useFilter(inst, r);
 	}
 	else {
-	  weka.filters.unsupervised.instance.Resample r = new weka.filters.unsupervised.instance.Resample();
+	  weka.filters.unsupervised.instance.Resample r = 
+	    new weka.filters.unsupervised.instance.Resample();
 		  
 	  r.setRandomSeed( Integer.parseInt(m_rseed.getText()) );
 	  r.setSampleSizePercent( Double.parseDouble(m_resamplePercent.getText()) );
@@ -512,8 +514,6 @@ public class MatrixPanel extends JPanel{
       }
       catch(Exception ex) { System.out.println("Error occurred while sampling"); ex.printStackTrace();  }
     }
-
-    m_data.setClassIndex(originalClassIndex);
     
     m_points = new int[inst.numInstances()][m_selectedAttribs.length]; //changed
     m_pointColors = new int[inst.numInstances()];
