@@ -82,7 +82,7 @@ import weka.core.*;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 public class PaceRegression extends Classifier implements OptionHandler,
 					       WeightedInstancesHandler {
 
@@ -110,17 +110,17 @@ public class PaceRegression extends Classifier implements OptionHandler,
   private static final int bicEstimator = 9;
   private static final int ricEstimator = 10;
   public static final Tag [] TAGS_ESTIMATOR = {
-    new Tag(olsEstimator, "olsEstimator"),
-    new Tag(ebEstimator, "ebEstimator"),
-    new Tag(nestedEstimator, "nestedEstimator"),
-    new Tag(subsetEstimator, "subsetEstimator"),
-    new Tag(pace2Estimator, "pace2Estimator"),
-    new Tag(pace4Estimator, "pace4Estimator"),
-    new Tag(pace6Estimator, "pace6Estimator"),
-    new Tag(olscEstimator, "olscEstimator"),
-    new Tag(aicEstimator, "aicEstimator"),
-    new Tag(bicEstimator, "bicEstimator"),
-    new Tag(ricEstimator, "ricEstimator")
+    new Tag(olsEstimator, "Ordinary least squares"),
+    new Tag(ebEstimator, "Empirical Bayes"),
+    new Tag(nestedEstimator, "Nested model selector"),
+    new Tag(subsetEstimator, "Subset selector"),
+    new Tag(pace2Estimator, "PACE2"),
+    new Tag(pace4Estimator, "PACE4"),
+    new Tag(pace6Estimator, "PACE6"),
+    new Tag(olscEstimator, "Ordinary least squares selection"),
+    new Tag(aicEstimator, "AIC"),
+    new Tag(bicEstimator, "BIC"),
+    new Tag(ricEstimator, "RIC")
   };
 
   private int paceEstimator = ebEstimator;  
