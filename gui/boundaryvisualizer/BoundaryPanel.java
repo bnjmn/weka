@@ -25,6 +25,7 @@ package weka.gui.boundaryvisualizer;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
 import java.util.Vector;
 import java.util.Random;
 
@@ -118,11 +119,38 @@ public class BoundaryPanel extends JPanel {
 
   // small inner class for rendering the bitmap on to
   private class PlotPanel extends JPanel {
+    public PlotPanel() {
+      this.setToolTipText("");
+    }
+    
     public void paintComponent(Graphics g) {
       super.paintComponent(g);
       if (m_osi != null) {
 	g.drawImage(m_osi,0,0,this);
       }
+    }
+    
+    public String getToolTipText(MouseEvent event) {
+      if (m_probabilityCache == null) {
+	return null;
+      }
+      
+      if (m_probabilityCache[event.getY()][event.getX()] == null) {
+	return null;
+      }
+      
+      String pVec = "(X: "
+	+Utils.doubleToString(convertFromPanelX((double)event.getX()), 2)
+	+" Y: "
+	+Utils.doubleToString(convertFromPanelY((double)event.getY()), 2)+") ";
+      // construct a string holding the probability vector
+      for (int i = 0; i < m_trainingData.classAttribute().numValues(); i++) {
+	pVec += 
+	  Utils.
+	  doubleToString(m_probabilityCache[event.getY()][event.getX()][i],
+			 3)+" ";
+      }
+      return pVec;
     }
   }
 
@@ -153,6 +181,7 @@ public class BoundaryPanel extends JPanel {
    * @param panelHeight the height in pixels of the panel
    */
   public BoundaryPanel(int panelWidth, int panelHeight) {
+    ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
     m_panelWidth = panelWidth;
     m_panelHeight = panelHeight;
     setLayout(new BorderLayout());
@@ -171,26 +200,6 @@ public class BoundaryPanel extends JPanel {
 				    DEFAULT_COLORS[i].getBlue()));
     }
     m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
-    setToolTipText("bbb");
-  }
-
-  public String getToolTipText(MouseEvent event) {
-    if (m_probabilityCache == null) {
-      return null;
-    }
-
-    if (m_probabilityCache[event.getY()][event.getX()] == null) {
-      return null;
-    }
-
-    String pVec = "(X: "+event.getX()+" Y: "+event.getY()+") ";
-    // construct a string holding the probability vector
-    for (int i = 0; i < m_trainingData.classAttribute().numValues(); i++) {
-      pVec += 
-	Utils.doubleToString(m_probabilityCache[event.getY()][event.getX()][i],
-			     3)+" ";
-    }
-    return pVec;
   }
 
   /**
@@ -454,7 +463,6 @@ public class BoundaryPanel extends JPanel {
 		plotTrainingData();
 	      }
 	      
-	      //	      saveImage("test.jpg");
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    } finally {
@@ -525,6 +533,21 @@ public class BoundaryPanel extends JPanel {
     temp = m_panelHeight - temp;
 
     return (int)temp;
+  }
+
+  private double convertFromPanelX(double pX) {
+    pX /= (double) m_panelWidth;
+
+    pX *= m_rangeX;
+    return pX + m_minX;
+  }
+
+  private double convertFromPanelY(double pY) {
+    pY  = m_panelHeight - pY;
+    pY /= (double) m_panelHeight;
+    pY *= m_rangeY;
+
+    return pY + m_minY;
   }
 
   private void plotPoint(int x, int y, double [] probs) {
@@ -783,10 +806,10 @@ public class BoundaryPanel extends JPanel {
       final BoundaryPanel bv = new BoundaryPanel(panelWidth,panelHeight);
       bv.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
-	    classifierName = 
+	    String classifierNameNew = 
 	      classifierName.substring(classifierName.lastIndexOf('.')+1, 
 				       classifierName.length());
-	    bv.saveImage(classifierName+"_"+i.relationName()
+	    bv.saveImage(classifierNameNew+"_"+i.relationName()
 			 +"_X"+xatt+"_Y"+yatt+".jpg");
 	  }
 	});
