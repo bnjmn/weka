@@ -69,7 +69,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -139,6 +139,12 @@ public class PreprocessPanel extends JPanel {
 		      weka.gui.SelectedTagEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.filters.Filter.class,
+		      weka.gui.GenericObjectEditor.class);
+     java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.ASSearch.class,
+		      weka.gui.GenericObjectEditor.class);
+     java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.ASEvaluation.class,
 		      weka.gui.GenericObjectEditor.class);
   }
   
