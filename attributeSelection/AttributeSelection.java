@@ -21,6 +21,17 @@ package  weka.attributeSelection;
 import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
+import  weka.filters.Filter;
+import  weka.filters.AttributeFilter;
+
+import java.beans.MethodDescriptor;
+import java.beans.PropertyDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.Beans;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /** 
  * Attribute selection class. Takes the name of a search class and
@@ -66,7 +77,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.18 $
+ * @version  $Revision: 1.19 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -105,6 +116,13 @@ public class AttributeSelection implements Serializable {
 
   /** the attribute indexes and associated merits if a ranking is produced */
   private double [][] m_attributeRanking;
+
+  /** if a feature selection run involves an attribute transformer */
+  private AttributeTransformer m_transformer = null;
+  
+  /** the attribute filter for processing instances with respect to
+      the most recent feature selection run */
+  private AttributeFilter m_attributeFilter = null;
 
   /** hold statistics for repeated feature selection, such as
       under cross validation */
@@ -166,7 +184,7 @@ public class AttributeSelection implements Serializable {
   }
 
   /**
-   * produce a ranking (if possible with the set search an evaluator
+   * produce a ranking (if possible with the set search and evaluator)
    * @param r true if a ranking is to be produced
    */
   public void setRanking (boolean r) {
@@ -205,6 +223,47 @@ public class AttributeSelection implements Serializable {
     return m_selectionResults.toString();
   }
 
+  /**
+   * reduce the dimensionality of a set of instances to include only those 
+   * attributes chosen by the last run of attribute selection.
+   * @param in the instances to be reduced
+   * @return a dimensionality reduced set of instances
+   * @exception Exception if the instances can't be reduced
+   */
+  public Instances reduceDimensionality(Instances in) throws Exception {
+    if (m_attributeFilter == null) {
+      throw new Exception("No feature selection has been performed yet!");
+    }
+
+    if (m_transformer != null) {
+      Instances transformed = new Instances(m_transformer.transformedHeader(),
+					    in.numInstances());
+      for (int i=0;i<in.numInstances();i++) {
+	transformed.add(m_transformer.convertInstance(in.instance(i)));
+      }
+      return Filter.useFilter(transformed, m_attributeFilter);
+    }
+
+    return Filter.useFilter(in, m_attributeFilter);
+  }
+
+  /**
+   * reduce the dimensionality of a single instance to include only those 
+   * attributes chosen by the last run of attribute selection.
+   * @param in the instance to be reduced
+   * @return a dimensionality reduced instance
+   * @exception Exception if the instance can't be reduced
+   */
+  public Instance reduceDimensionality(Instance in) throws Exception {
+    if (m_attributeFilter == null) {
+      throw new Exception("No feature selection has been performed yet!");
+    }
+    if (m_transformer != null) {
+      in = m_transformer.convertInstance(in);
+    }
+    m_attributeFilter.input(in);
+    return m_attributeFilter.output();
+  }
 
   /**
    * constructor. Sets defaults for each member varaible. Default
@@ -490,6 +549,8 @@ public class AttributeSelection implements Serializable {
   public void SelectAttributes (Instances data) throws Exception {
     int [] attributeSet;
     
+    m_transformer = null;
+    m_attributeFilter = null;
     m_trainInstances = data;
     
     if (m_doXval == true && (m_ASEvaluator instanceof AttributeTransformer)) {
@@ -531,26 +592,54 @@ public class AttributeSelection implements Serializable {
     if (m_ASEvaluator instanceof AttributeTransformer) {
       m_trainInstances = 
 	((AttributeTransformer)m_ASEvaluator).transformedHeader();
+      m_transformer = (AttributeTransformer)m_ASEvaluator;
     }
     int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
 
     // Do the search
     attributeSet = m_searchMethod.search(m_ASEvaluator, 
 					 m_trainInstances);
-    // Do any postprocessing that a attribute selection method might require
-    attributeSet = m_ASEvaluator.postProcess(attributeSet);
-    if (!m_doRank) {
-      m_selectionResults.append(printSelectionResults(m_ASEvaluator, 
-						      m_searchMethod, 
-						      m_trainInstances));
-    }
-    
+    // try and determine if the search method uses an attribute transformer---
+    // this is a bit of a hack to make things work properly with RankSearch
+    // using PrincipalComponents as its attribute ranker
+     try {
+       BeanInfo bi = Introspector.getBeanInfo(m_searchMethod.getClass());
+       PropertyDescriptor properties[];
+       MethodDescriptor methods[];
+       //       methods = bi.getMethodDescriptors();
+       properties = bi.getPropertyDescriptors();
+       for (int i=0;i<properties.length;i++) {
+	 String name = properties[i].getDisplayName();
+	 Method meth = properties[i].getReadMethod();
+	 Object retType = meth.getReturnType();
+	 if (retType.equals(ASEvaluation.class)) {
+	   Class args [] = { };
+	   ASEvaluation tempEval = (ASEvaluation)(meth.invoke(m_searchMethod,
+							     args));
+	   if (tempEval instanceof AttributeTransformer) {
+	     // grab the transformed data header
+	     m_trainInstances = 
+	       ((AttributeTransformer)tempEval).transformedHeader();
+	     m_transformer = (AttributeTransformer)tempEval;
+	   }
+	 }
+       }
+     } catch (IntrospectionException ex) {
+       System.err.println("AttributeSelection: Couldn't "
+			  +"introspect");
+     }
+     
+     
+     // Do any postprocessing that a attribute selection method might require
+     attributeSet = m_ASEvaluator.postProcess(attributeSet);
+     if (!m_doRank) {
+       m_selectionResults.append(printSelectionResults());
+     }
+     
     if ((m_searchMethod instanceof RankedOutputSearch) && m_doRank == true) {
       m_attributeRanking = 
 	((RankedOutputSearch)m_searchMethod).rankedAttributes();
-      m_selectionResults.append(printSelectionResults(m_ASEvaluator, 
-						      m_searchMethod, 
-						      m_trainInstances));
+      m_selectionResults.append(printSelectionResults());
       m_selectionResults.append("Ranked attributes:\n");
 
       // retrieve the number of attributes to retain
@@ -596,8 +685,8 @@ public class AttributeSelection implements Serializable {
       // whatever
       if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
 	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
-	// one more for the class
 	{
+	  // one more for the class
 	  m_selectedAttributeSet = new int[m_numToSelect + 1];
 	  m_selectedAttributeSet[m_numToSelect] = 
 	    m_trainInstances.classIndex();
@@ -636,7 +725,7 @@ public class AttributeSelection implements Serializable {
       else {
 	m_selectedAttributeSet = new int[attributeSet.length];
       }
-
+      
       for (int i = 0; i < attributeSet.length; i++) {
 	m_selectedAttributeSet[i] = attributeSet[i];
       }
@@ -668,7 +757,16 @@ public class AttributeSelection implements Serializable {
       m_selectionResults.append(CrossValidateAttributes()); 
     }
 
-    m_trainInstances = null;
+    // set up the attribute filter with the selected attributes
+    if (m_selectedAttributeSet != null && !m_doXval) {
+      m_attributeFilter = new AttributeFilter();
+      m_attributeFilter.setAttributeIndicesArray(m_selectedAttributeSet);
+      m_attributeFilter.setInvertSelection(true);
+      m_attributeFilter.inputFormat(m_trainInstances);  
+    }
+
+    // Save space
+    m_trainInstances = new Instances(m_trainInstances, 0);
   }
 
   /**
@@ -849,49 +947,46 @@ public class AttributeSelection implements Serializable {
   /**
    * Assembles a text description of the attribute selection results.
    *
-   * @param ASEvaluator the attribute/subset evaluator
-   * @param searchMethod the search method
-   * @param train the input instances
    * @return a string describing the results of attribute selection.
    */
-  private static String printSelectionResults (ASEvaluation ASEvaluator, 
-					       ASSearch searchMethod, 
-					       Instances train) {
+  private String printSelectionResults () {
     StringBuffer text = new StringBuffer();
     text.append("\n\n=== Attribute Selection on all input data ===\n\n" 
 		+ "Search Method:\n");
-    text.append(searchMethod.toString());
+    text.append(m_searchMethod.toString());
     text.append("\nAttribute ");
 
-    if (ASEvaluator instanceof SubsetEvaluator) {
+    if (m_ASEvaluator instanceof SubsetEvaluator) {
       text.append("Subset Evaluator (");
     }
     else {
       text.append("Evaluator (");
     }
 
-    if (!(ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	&& !(ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
+	&& !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
       text.append("supervised, ");
       text.append("Class (");
 
-      if (train.attribute(train.classIndex()).isNumeric()) {
+      if (m_trainInstances.attribute(m_trainInstances.classIndex())
+	  .isNumeric()) {
 	text.append("numeric): ");
       }
       else {
 	text.append("nominal): ");
       }
 
-      text.append((train.classIndex() + 1) 
+      text.append((m_trainInstances.classIndex() + 1) 
 		  + " " 
-		  + train.attribute(train.classIndex()).name() 
+		  + m_trainInstances.attribute(m_trainInstances
+					       .classIndex()).name() 
 		  + "):\n");
     }
     else {
       text.append("unsupervised):\n");
     }
 
-    text.append(ASEvaluator.toString() + "\n");
+    text.append(m_ASEvaluator.toString() + "\n");
     return  text.toString();
   }
 
