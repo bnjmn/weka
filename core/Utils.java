@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public final class Utils {
 
@@ -1113,8 +1113,15 @@ public final class Utils {
       sum += vector[i];
       sumSquared += (vector[i] * vector[i]);
     }
-    return (sumSquared - (sum * sum / (double) vector.length)) / 
+    double result = (sumSquared - (sum * sum / (double) vector.length)) / 
       (double) (vector.length - 1);
+
+    // We don't like negative variance
+    if (result < 0) {
+      return 0;
+    } else {
+      return result;
+    }
   }
 
   /**
