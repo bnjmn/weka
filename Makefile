@@ -1,5 +1,5 @@
 #
-# $Revision: 1.16 $
+# $Revision: 1.17 $
 #
 
 JAVA = javac
@@ -93,6 +93,7 @@ install : all
 	weka/gui/*.class \
 	weka/gui/*.props \
 	weka/gui/*.jpg \
+	weka/gui/*.gif \
 	weka/gui/experiment/*.class \
 	weka/gui/explorer/*.class \
 	weka/gui/streams/*.class \
