@@ -1,5 +1,5 @@
 #
-# $Revision: 1.7 $
+# $Revision: 1.8 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -50,7 +50,7 @@ clean :
 
 doc :
 	(cd ..; \
-	javadoc -public -author -version -d doc \
+	javadoc -Jmx100m -public -author -version -d doc \
 	weka.core \
 	weka.classifiers \
 	weka.classifiers.j48 \
@@ -105,7 +105,7 @@ install : all
 	weka/gui/streams/*.java \
 	;\
 	rm manifest.tmp )
-	javadoc -public -author -version -d $$JAWSHOME/doc \
+	javadoc -Jmx100m -public -author -version -d $$JAWSHOME/doc \
 	weka.core \
 	weka.classifiers \
 	weka.classifiers.j48 \
