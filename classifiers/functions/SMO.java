@@ -93,7 +93,7 @@ import weka.core.*;
  *
  * -A num <br>
  * Sets the size of the kernel cache. Should be a prime number. 
- * (default 1000003) <p>
+ * (default 250007, use 0 for full cache) <p>
  *
  * -T num <br>
  * Sets the tolerance parameter. (default 1.0e-3)<p>
@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.53 $ */
+ * @version $Revision: 1.54 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -618,11 +618,18 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
 		      m_supportVectors.numElements());
 	}
 	int numEval = 0;
+	int numCacheHits = -1;
 	if(m_kernel != null)
+	{
 	  numEval = m_kernel.numEvals();
-	else
-	  numEval = 0;	
+	  numCacheHits = m_kernel.numCacheHits();
+	}
 	text.append("\n\nNumber of kernel evaluations: " + numEval);
+	if (numCacheHits >= 0 && numEval > 0)
+	{
+		double hitRatio = 1 - numEval*1.0/(numCacheHits+numEval);
+		text.append(" (" + Utils.doubleToString(hitRatio*100, 7, 3).trim() + "% cached)");
+	}
 
       } catch (Exception e) {
 	e.printStackTrace();
@@ -1007,7 +1014,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
   protected boolean m_useRBF = false;
   
   /** The size of the cache (a prime number) */
-  protected int m_cacheSize = 1000003;
+  protected int m_cacheSize = 250007;
 
   /** The filter used to make attributes numeric. */
   protected NominalToBinary m_NominalToBinary;
@@ -1483,7 +1490,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
     				    "(default poly)",
 				    "R", 0, "-R"));
     newVector.addElement(new Option("\tThe size of the kernel cache. " +
-				    "(default 1000003)",
+				    "(default 250007, use 0 for full cache)",
 				    "A", 1, "-A <int>"));
     newVector.addElement(new Option("\tThe tolerance parameter. " +
 				    "(default 1.0e-3)",
@@ -1528,8 +1535,8 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
    * -R <br>
    * Use RBF kernel (default poly). <p>
    * 
-   * -A num <br>
-   * Sets the size of the kernel cache. Should be a prime number. (default 1000003) <p>
+   * -A num <br> Sets the size of the kernel cache. Should be a prime
+   * number. (default 250007, use 0 for full cache) <p>
    *
    * -T num <br>
    * Sets the tolerance parameter. (default 1.0e-3)<p>
@@ -1574,7 +1581,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
     if (cacheString.length() != 0) {
       m_cacheSize = Integer.parseInt(cacheString);
     } else {
-      m_cacheSize = 1000003;
+      m_cacheSize = 250007;
     }
     String toleranceString = Utils.getOption('T', options);
     if (toleranceString.length() != 0) {
@@ -1815,7 +1822,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
    * displaying in the explorer/experimenter gui
    */
   public String cacheSizeTipText() {
-    return "The size of the kernel cache (should be a prime number).";
+    return "The size of the kernel cache (should be a prime number). Use 0 for full cache.";
   }
   
   /**

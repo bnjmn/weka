@@ -35,7 +35,7 @@ import java.io.*;
 public  abstract class Kernel implements Serializable {
 
   /** The dataset */
-  Instances m_data;
+  protected Instances m_data;
     
   /**
    * Computes the result of the kernel function for two instances.
@@ -65,5 +65,12 @@ public  abstract class Kernel implements Serializable {
    * @return the number of kernel evaluation performed.
    */
   public abstract int numEvals();
+
+  /**
+   * Returns the number of dot product cache hits.
+   *
+   * @return the number of dot product cache hits, or -1 if not supported by this kernel.
+   */
+  public abstract int numCacheHits();
     
 }
