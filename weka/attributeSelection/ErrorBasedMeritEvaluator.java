@@ -14,7 +14,7 @@ import weka.core.*;
  * as the error of a learning scheme
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision 1.1 $
+ * @version $Revision: 1.3 $
  */
 public interface ErrorBasedMeritEvaluator {
 
