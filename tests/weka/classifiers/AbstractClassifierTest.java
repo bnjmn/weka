@@ -21,15 +21,15 @@ import weka.test.Regression;
 import weka.core.UnsupportedClassTypeException;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.NoSupportForMissingValuesException;
-import weka.filters.AttributeTypeFilter;
-import weka.filters.ReplaceMissingValuesFilter;
+import weka.filters.unsupervised.attribute.RemoveType;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.Filter;
 
 /**
  * Abstract Test class for Classifiers.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class AbstractClassifierTest extends TestCase {
 
@@ -130,17 +130,17 @@ public abstract class AbstractClassifierTest extends TestCase {
 	    (msg.indexOf("attributes") != -1)) {
 	  System.err.println("\nDeleting string attributes.");
 	  tag = new SelectedTag(Attribute.STRING,
-				AttributeTypeFilter.TAGS_ATTRIBUTETYPE);
+				RemoveType.TAGS_ATTRIBUTETYPE);
 	} else if ((msg.indexOf("only") != -1) && 
 		   (msg.indexOf("nominal") != -1)) {
 	  System.err.println("\nDeleting non-nominal attributes.");
 	  tag = new SelectedTag(Attribute.NOMINAL,
-				AttributeTypeFilter.TAGS_ATTRIBUTETYPE);
+				RemoveType.TAGS_ATTRIBUTETYPE);
 	  invert = true;
 	} else {
 	  throw ex;
 	}
-	AttributeTypeFilter attFilter = new AttributeTypeFilter();
+	RemoveType attFilter = new RemoveType();
 	attFilter.setAttributeType(tag);
 	attFilter.setInvertSelection(invert);
 	attFilter.setInputFormat(train);
@@ -153,7 +153,7 @@ public abstract class AbstractClassifierTest extends TestCase {
 	}
       } catch (NoSupportForMissingValuesException ex2) {
 	System.err.println("\nReplacing missing values.");
-	ReplaceMissingValuesFilter rmFilter = new ReplaceMissingValuesFilter();
+	ReplaceMissingValues rmFilter = new ReplaceMissingValues();
 	rmFilter.setInputFormat(train);
 	train = Filter.useFilter(train, rmFilter);
 	rmFilter.batchFinished();
