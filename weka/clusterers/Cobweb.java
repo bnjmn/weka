@@ -47,7 +47,7 @@ import weka.experiment.Stats;
  * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -739,6 +739,10 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
     if (data.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
+    
+    // randomize the instances
+    data = new Instances(data);
+    data.randomize(new Random(42));
 
     for (int i = 0; i < data.numInstances(); i++) {
       addInstance(data.instance(i));
