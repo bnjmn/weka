@@ -1,5 +1,5 @@
 /*
- *    DatabaseUtils.java
+ *    Experiment.java
  *    Copyright (C) 1999 Len Trigg
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -59,10 +59,13 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
+  /** The filename extension that should be used for experiment files */
+  public static String FILE_EXTENSION = ".exp";
+
   /** Where results will be sent */
   protected ResultListener m_ResultListener = new CSVResultListener();
   
