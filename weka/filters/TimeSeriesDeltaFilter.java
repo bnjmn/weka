@@ -40,7 +40,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
 
@@ -55,11 +55,7 @@ public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    // XXX this is probably not right... It should only call
-    // Filter.inputFormat, not TimeSeriesTranslateFilter.inputFormat
     super.inputFormat(instanceInfo);
-    resetHistory();
-    m_SelectedCols.setUpper(instanceInfo.numAttributes() - 1);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
     for(int i = 0; i < instanceInfo.numAttributes(); i++) {
@@ -89,8 +85,7 @@ public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
    * @return the new merged instance
    * @exception Exception if a problem occurs during merging
    */
-  protected Instance mergeInstances(Instance source, Instance dest)
-    throws Exception {
+  protected Instance mergeInstances(Instance source, Instance dest) {
 
     Instances outputFormat = outputFormatPeek();
     double[] vals = new double[outputFormat.numAttributes()];
@@ -105,11 +100,14 @@ public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
 	vals[i] = dest.value(i);
       }
     }
+    Instance inst = null;
     if (dest instanceof SparseInstance) {
-      return new SparseInstance(dest.weight(), vals);
+      inst = new SparseInstance(dest.weight(), vals);
     } else {
-      return new Instance(dest.weight(), vals);
+      inst = new Instance(dest.weight(), vals);
     }
+    inst.setDataset(dest.dataset());
+    return inst;
   }
   
   /**

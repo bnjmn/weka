@@ -29,7 +29,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -322,9 +322,9 @@ public class AddFilter extends Filter implements OptionHandler {
    * Set the labels for nominal attribute creation.
    *
    * @param labelList a comma separated list of labels
-   * @exception Exception if the labelList was invalid
+   * @exception IllegalArgumentException if the labelList was invalid
    */
-  public void setNominalLabels(String labelList) throws Exception {
+  public void setNominalLabels(String labelList) {
 
     FastVector labels = new FastVector (10);
 
@@ -335,8 +335,8 @@ public class AddFilter extends Filter implements OptionHandler {
       if (!label.equals("")) {
 	labels.addElement(label);
       } else {
-	throw new Exception("Invalid label list at "+
-			    labelList.substring(commaLoc));
+	throw new IllegalArgumentException("Invalid label list at "+
+                                           labelList.substring(commaLoc));
       }
       labelList = labelList.substring(commaLoc + 1);
     }
