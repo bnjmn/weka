@@ -46,7 +46,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -210,14 +210,18 @@ public class Instance implements Copyable, Serializable {
   }
 
   /**
-   * Produces a shallow copy of this instance. The copy doesn't have
-   * access to a dataset.
+   * Produces a shallow copy of this instance. The copy has
+   * access to the same dataset. (if you want to make a copy
+   * that doesn't have access to the dataset, use 
+   * <code>new Instance(instance)</code>
    *
    * @return the shallow copy
    */
   public Object copy() {
 
-    return new Instance(this);
+    Instance result = new Instance(this);
+    result.m_Dataset = m_Dataset;
+    return result;
   }
 
   /**
