@@ -63,7 +63,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -77,7 +77,7 @@ public class AttributeVisualizationPanel extends JPanel {
   int classIndex;
   Thread hc; 
   boolean threadRun=false;
-  JComboBox m_colorAttrib=new JComboBox();
+  JComboBox m_colorAttrib;
   ShowColorCombo m_comboShow = new ShowColorCombo() ;
 
   FontMetrics fm;
@@ -96,15 +96,16 @@ public class AttributeVisualizationPanel extends JPanel {
 						   new Color(255, 0, 255),
 						   new Color(255, 0, 0),
 						   new Color(0, 255, 0),
-  };
+                                                  };
 
-
-    
   public AttributeVisualizationPanel() {
+      this(false);
+  }
+  public AttributeVisualizationPanel(boolean showColouringOption) {
     this.setFont( new Font("Default", Font.PLAIN, 8) );
     fm = this.getFontMetrics( this.getFont() );
     this.setToolTipText("");
-    FlowLayout fl= new FlowLayout(FlowLayout.RIGHT);
+    FlowLayout fl= new FlowLayout(FlowLayout.LEFT);
     this.setLayout(fl);
     this.addComponentListener( new ComponentAdapter() {
 	public void componentResized(ComponentEvent ce) {
@@ -113,6 +114,8 @@ public class AttributeVisualizationPanel extends JPanel {
 	      setAttribute(attribIndex);
 	}
       });
+
+    /*
     this.addMouseListener( new MouseAdapter() {
 	public void mouseClicked(MouseEvent me) {
 	  if(!m_comboShow.isAlive())
@@ -126,8 +129,8 @@ public class AttributeVisualizationPanel extends JPanel {
 	    { m_comboShow=new ShowColorCombo(); m_comboShow.start();}
 	}
 	public void mouseExited(MouseEvent me) {
-	  if(!AttributeVisualizationPanel.this.contains( me.getX(), me.getY() ))
-	    m_colorAttrib.setVisible(false);
+	    if(!AttributeVisualizationPanel.this.contains( me.getX(), me.getY() ))
+		m_colorAttrib.setVisible(false);
 	  m_comboShow.stop();
 	}
       });
@@ -143,19 +146,26 @@ public class AttributeVisualizationPanel extends JPanel {
 	    m_comboShow.keepRunning=true; //}
 	}
       });
+    */ 
 
-    this.add(m_colorAttrib);
-    m_colorAttrib.addItemListener( new ItemListener() {
-	public void itemStateChanged(ItemEvent ie) {
-	  if(ie.getStateChange()==ItemEvent.SELECTED) {
-	    if(m_comboShow!=null)
-	      m_comboShow.keepRunning=true;
-	    setAttribute(attribIndex);
+    m_colorAttrib = new JComboBox();
+      m_colorAttrib.addItemListener( new ItemListener() {
+	  public void itemStateChanged(ItemEvent ie) {
+	    if(ie.getStateChange()==ItemEvent.SELECTED) {
+	      //if(m_comboShow!=null)
+	      //    m_comboShow.keepRunning=true;
+	      classIndex = m_colorAttrib.getSelectedIndex();
+	      setAttribute(attribIndex);
+	    }
 	  }
-	}
-      });
-    //m_comboShow.start();
-    m_colorAttrib.setVisible(false);
+	});
+
+    if(showColouringOption) {
+	//m_colorAttrib.setVisible(false);
+      this.add(m_colorAttrib);
+      validate();
+      
+    }
   }
 
   /**
@@ -167,27 +177,33 @@ public class AttributeVisualizationPanel extends JPanel {
     attribIndex = 0;
     m_data = newins;
     as=null;
-    m_colorAttrib.removeAllItems();
-    for(int i=0; i<m_data.numAttributes(); i++) {
-      m_colorAttrib.addItem(new String("Colour: "+m_data.attribute(i).name()+" "+
-				       ((m_data.attribute(i).isNominal()) ? "(Nom)":"(Num)")));
-    }
-    m_colorAttrib.setSelectedIndex(m_data.numAttributes()-1);  
-    if (m_data.classIndex() >= 0) {
-      m_colorAttrib.setSelectedIndex(m_data.classIndex());
-    }
+    if(m_colorAttrib!=null) {
+	m_colorAttrib.removeAllItems();
+	for(int i=0; i<m_data.numAttributes(); i++) {
+	    m_colorAttrib.addItem(new String("Colour: "+m_data.attribute(i).name()+" "+
+					     ((m_data.attribute(i).isNominal()) ? "(Nom)":"(Num)")));
+	}
+	m_colorAttrib.setSelectedIndex(m_data.numAttributes()-1);  
+	//if (m_data.classIndex() >= 0) {
+	//    m_colorAttrib.setSelectedIndex(m_data.classIndex());
+	//}
+  }
     classIndex = m_data.numAttributes()-1;
     
     this.repaint();
   }
-    
+
+  public JComboBox getColorBox() {
+    return m_colorAttrib;
+  }
+
   /**
    * Get the coloring index for the plot
    *
    * @return an <code>int</code> value
    */
   public int getColoringIndex() {
-    return m_colorAttrib.getSelectedIndex();
+      return classIndex; //m_colorAttrib.getSelectedIndex();
   }
 
   /**
@@ -196,7 +212,11 @@ public class AttributeVisualizationPanel extends JPanel {
    * @param ci an <code>int</code> value
    */
   public void setColoringIndex(int ci) {
-    m_colorAttrib.setSelectedIndex(ci);
+      classIndex = ci;
+      if(m_colorAttrib!=null) 
+	  m_colorAttrib.setSelectedIndex(ci);
+      else 
+	  setAttribute(attribIndex);
   }
 
   /**
@@ -210,7 +230,7 @@ public class AttributeVisualizationPanel extends JPanel {
     if(hc!=null && hc.isAlive()) hc.stop(); 
     attribIndex=index;
     as = m_data.attributeStats(attribIndex);
-    classIndex = m_colorAttrib.getSelectedIndex();
+    //classIndex = m_colorAttrib.getSelectedIndex();
 
     if(as.nominalCounts!=null) {
       hc = new BarCalc();
@@ -551,209 +571,215 @@ public class AttributeVisualizationPanel extends JPanel {
     g.clearRect(0,0,this.getWidth(), this.getHeight());
 
     if(as!=null) {
-      if(as.nominalCounts != null) { 
 	if(threadRun==false) {
-	  float heightRatio, intervalWidth;
-	  int x=0, y=0, barHeight, barWidth;
-
-	  if(m_data.attribute(classIndex).isNominal()) {
-	    intervalWidth =  (this.getWidth()/(float)histBarClassCounts.length);
-		  
-	    if(intervalWidth>5)
-	      barWidth = (int)Math.floor(intervalWidth*0.8F);
-	    else
-	      barWidth = 1;
-		  
-	    x = x + (int)( (Math.floor(intervalWidth*0.1F))<1 ? 1:(Math.floor(intervalWidth*0.1F)) );
-	  
-	    if( this.getWidth() - 
-		(x + histBarClassCounts.length*barWidth 
-		 +(int)( (Math.floor(intervalWidth*0.2F))<1 ? 
-			 1:(Math.floor(intervalWidth*0.2F)) )*histBarClassCounts.length) > 5 )
-	      x += (this.getWidth() - 
-		    (x + histBarClassCounts.length*barWidth + 
-		     (int)( (Math.floor(intervalWidth*0.2F))<1 ? 
-			    1:(Math.floor(intervalWidth*0.2F)) )*histBarClassCounts.length))/2;
-
-	    int sum=0;
-	    for(int i=0; i<histBarClassCounts.length; i++) {
-	      heightRatio = (this.getHeight()-(float)fm.getHeight())/maxValue;
-	      y=this.getHeight();
-	      for(int j=0; j<histBarClassCounts[i].length; j++) {
-		sum = sum + histBarClassCounts[i][j];
-		y = y-Math.round(histBarClassCounts[i][j]*heightRatio);
-		g.setColor( (Color)m_colorList.elementAt(j) );
-		g.fillRect(x, y, barWidth, Math.round(histBarClassCounts[i][j]*heightRatio));
-		g.setColor(Color.black);
-	      }
-	      if(fm.stringWidth(Integer.toString(sum))<intervalWidth)
-		g.drawString(Integer.toString(sum), x, y-1);
-	      x = x+barWidth+(int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) );
-	      sum=0;
+	    int buttonHeight=0;
+	    if(m_colorAttrib!=null)
+		buttonHeight = m_colorAttrib.getHeight()+m_colorAttrib.getLocation().y;
+	    if(as.nominalCounts != null) { 
+		float heightRatio, intervalWidth;
+		int x=0, y=0, barHeight, barWidth;
+		
+		if(m_data.attribute(classIndex).isNominal()) {
+		    intervalWidth =  (this.getWidth()/(float)histBarClassCounts.length);
+		    
+		    if(intervalWidth>5)
+			barWidth = (int)Math.floor(intervalWidth*0.8F);
+		    else
+			barWidth = 1;
+		    
+		    x = x + (int)( (Math.floor(intervalWidth*0.1F))<1 ? 1:(Math.floor(intervalWidth*0.1F)) );
+		    
+		    if( this.getWidth() - 
+			(x + histBarClassCounts.length*barWidth 
+			 +(int)( (Math.floor(intervalWidth*0.2F))<1 ? 
+				 1:(Math.floor(intervalWidth*0.2F)) )*histBarClassCounts.length) > 5 )
+			x += (this.getWidth() - 
+			      (x + histBarClassCounts.length*barWidth + 
+			       (int)( (Math.floor(intervalWidth*0.2F))<1 ? 
+				      1:(Math.floor(intervalWidth*0.2F)) )*histBarClassCounts.length))/2;
+		    
+		    int sum=0;
+		    for(int i=0; i<histBarClassCounts.length; i++) {
+			heightRatio = (this.getHeight()-(float)fm.getHeight()-buttonHeight)/maxValue;
+			y=this.getHeight();
+			for(int j=0; j<histBarClassCounts[i].length; j++) {
+			    sum = sum + histBarClassCounts[i][j];
+			    y = y-Math.round(histBarClassCounts[i][j]*heightRatio);
+			    g.setColor( (Color)m_colorList.elementAt(j) );
+			    g.fillRect(x, y, barWidth, Math.round(histBarClassCounts[i][j]*heightRatio));
+			    g.setColor(Color.black);
+			}
+			if(fm.stringWidth(Integer.toString(sum))<intervalWidth)
+			    g.drawString(Integer.toString(sum), x, y-1);
+			x = x+barWidth+(int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) );
+			sum=0;
+		    }
+		    
+		}
+		else {   //else if class attribute is numeric
+		    intervalWidth =  (this.getWidth()/(float)histBarCounts.length);
+		    
+		    if(intervalWidth>5)
+			barWidth = (int)Math.floor(intervalWidth*0.8F);
+		    else
+			barWidth = 1;
+		    
+		    x = x + (int)( (Math.floor(intervalWidth*0.1F))<1 ? 1:(Math.floor(intervalWidth*0.1F)) );
+		    
+		    if( this.getWidth() - 
+			(x + histBarCounts.length*barWidth 
+			 +(int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) )*histBarCounts.length) > 5 )
+			x += (this.getWidth() - 
+			      (x + histBarCounts.length*barWidth + 
+			       (int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) )*histBarCounts.length))/2;
+		    
+		    for(int i=0; i<histBarCounts.length; i++) {
+			heightRatio = (this.getHeight()-(float)fm.getHeight()-buttonHeight)/maxValue;
+			y = this.getHeight()-Math.round(histBarCounts[i]*heightRatio);
+			g.fillRect(x, y, barWidth, Math.round(histBarCounts[i]*heightRatio));
+			if(fm.stringWidth(Integer.toString(histBarCounts[i]))<intervalWidth)
+			    g.drawString(Integer.toString(histBarCounts[i]), x, y-1);
+			
+			x = x+barWidth+(int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) );
+		    }
+		}
+		
 	    }
-
-	  }
-	  else {   //else if class attribute is numeric
-	    intervalWidth =  (this.getWidth()/(float)histBarCounts.length);
-		  
-	    if(intervalWidth>5)
-	      barWidth = (int)Math.floor(intervalWidth*0.8F);
-	    else
-	      barWidth = 1;
-		  
-	    x = x + (int)( (Math.floor(intervalWidth*0.1F))<1 ? 1:(Math.floor(intervalWidth*0.1F)) );
-		  
-	    if( this.getWidth() - 
-		(x + histBarCounts.length*barWidth 
-		 +(int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) )*histBarCounts.length) > 5 )
-	      x += (this.getWidth() - 
-		    (x + histBarCounts.length*barWidth + 
-		     (int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) )*histBarCounts.length))/2;
-
-	    for(int i=0; i<histBarCounts.length; i++) {
-	      heightRatio = (this.getHeight()-(float)fm.getHeight())/maxValue;
-	      y = this.getHeight()-Math.round(histBarCounts[i]*heightRatio);
-	      g.fillRect(x, y, barWidth, Math.round(histBarCounts[i]*heightRatio));
-	      if(fm.stringWidth(Integer.toString(histBarCounts[i]))<intervalWidth)
-		g.drawString(Integer.toString(histBarCounts[i]), x, y-1);
-		      
-	      x = x+barWidth+(int)( (Math.floor(intervalWidth*0.2F))<1 ? 1:(Math.floor(intervalWidth*0.2F)) );
-	    }
-	  }
-
-	}
-	else {
-	  g.clearRect(0, 0, this.getWidth(), this.getHeight()); 
-	  g.drawString("Calculating. Please Wait...", 
-		       this.getWidth()/2 - fm.stringWidth("Calculating. Please Wait...")/2,
-		       this.getHeight()/2-fm.getHeight()/2);
-	}
-      } 
-      else if(as.numericStats != null) {
-
-	if(threadRun==false && (histBarClassCounts!=null || histBarCounts!=null)) {
-	  float heightRatio, intervalWidth;
-	  int x=0, y=0,  barWidth;
-	      
-	  if(m_data.attribute(classIndex).isNominal()) {
-	    barWidth = ((this.getWidth()-6)/histBarClassCounts.length)<1 ? 1:((this.getWidth()-6)/histBarClassCounts.length);
-	      
-	    x = 3;
-	    if( (this.getWidth() - (x + histBarClassCounts.length*barWidth)) > 5 )
-	      x += (this.getWidth() - (x + histBarClassCounts.length*barWidth))/2;
-	      
-	    for(int i=0; i<histBarClassCounts.length; i++) {
-	      heightRatio = (this.getHeight()-(float)fm.getHeight()-19)/maxValue;
-	      y = this.getHeight()-19;
-	      int sum = 0;
-	      for(int j=0; j<histBarClassCounts[i].length; j++) {
-		y = y-Math.round(histBarClassCounts[i][j]*heightRatio);
-		//System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+" height:"+(histBarCounts[i]*heightRatio));
-		g.setColor( (Color)m_colorList.elementAt(j) );
-		if(barWidth>1)
-		  g.fillRect(x, y, barWidth, Math.round(histBarClassCounts[i][j]*heightRatio));
-		else if((histBarClassCounts[i][j]*heightRatio)>0)
-		  g.drawLine(x, y, x, y+Math.round(histBarClassCounts[i][j]*heightRatio));
-		g.setColor(Color.black);
-		sum = sum + histBarClassCounts[i][j];
-	      }
-	      if(fm.stringWidth(" "+Integer.toString(sum))<barWidth)
-		g.drawString(" "+Integer.toString(sum), x, y-1);
-
-	      x = x+barWidth;
-	    }
-
-	    x = 3;
-	    if( (this.getWidth() - (x + histBarClassCounts.length*barWidth)) > 5 )
-	      x += (this.getWidth() - (x + histBarClassCounts.length*barWidth))/2;
-	      
-	    g.drawLine(x, this.getHeight()-17, 
-		       (barWidth==1) ? x+barWidth*histBarClassCounts.length-1:x+barWidth*histBarClassCounts.length,
-		       this.getHeight()-17); //axis line
-	    g.drawLine(x, this.getHeight()-16, x, this.getHeight()-12); //minimum line
-	    g.drawString(Utils.doubleToString(as.numericStats.min, 2), 
-			 x, 
-			 this.getHeight()-12+fm.getHeight()); //minimum value
-	    g.drawLine(x+(barWidth*histBarClassCounts.length)/2,
-		       this.getHeight()-16,
-		       x+(barWidth*histBarClassCounts.length)/2,
-		       this.getHeight()-12); //median line
-	    g.drawString(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2), 
-			 x+(barWidth*histBarClassCounts.length)/2
-			 -fm.stringWidth(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2))/2,
+	    //else {
+	    //g.clearRect(0, 0, this.getWidth(), this.getHeight()); 
+	    //g.drawString("Calculating. Please Wait...", 
+	    //       this.getWidth()/2 - fm.stringWidth("Calculating. Please Wait...")/2,
+	    //       this.getHeight()/2-fm.getHeight()/2);
+	    //}
+	    //} 
+	    else if(as.numericStats != null) {
+		
+		if(histBarClassCounts!=null || histBarCounts!=null) {
+		    //threadRun==false && (histBarClassCounts!=null || histBarCounts!=null)) {
+		    float heightRatio, intervalWidth;
+		    int x=0, y=0,  barWidth;
+		    
+		    if(m_data.attribute(classIndex).isNominal()) {
+			barWidth = ((this.getWidth()-6)/histBarClassCounts.length)<1 ? 1:((this.getWidth()-6)/histBarClassCounts.length);
+			
+			x = 3;
+			if( (this.getWidth() - (x + histBarClassCounts.length*barWidth)) > 5 )
+			    x += (this.getWidth() - (x + histBarClassCounts.length*barWidth))/2;
+			
+			for(int i=0; i<histBarClassCounts.length; i++) {
+			    heightRatio = (this.getHeight()-(float)fm.getHeight()-buttonHeight-19)/maxValue;
+			    y = this.getHeight()-19;
+			    int sum = 0;
+			    for(int j=0; j<histBarClassCounts[i].length; j++) {
+				y = y-Math.round(histBarClassCounts[i][j]*heightRatio);
+				//System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+" height:"+(histBarCounts[i]*heightRatio));
+				g.setColor( (Color)m_colorList.elementAt(j) );
+				if(barWidth>1)
+				    g.fillRect(x, y, barWidth, Math.round(histBarClassCounts[i][j]*heightRatio));
+				else if((histBarClassCounts[i][j]*heightRatio)>0)
+				    g.drawLine(x, y, x, y+Math.round(histBarClassCounts[i][j]*heightRatio));
+				g.setColor(Color.black);
+				sum = sum + histBarClassCounts[i][j];
+			    }
+			    if(fm.stringWidth(" "+Integer.toString(sum))<barWidth)
+				g.drawString(" "+Integer.toString(sum), x, y-1);
+			    
+			    x = x+barWidth;
+			}
+			
+			x = 3;
+			if( (this.getWidth() - (x + histBarClassCounts.length*barWidth)) > 5 )
+			    x += (this.getWidth() - (x + histBarClassCounts.length*barWidth))/2;
+			
+			g.drawLine(x, this.getHeight()-17, 
+				   (barWidth==1) ? x+barWidth*histBarClassCounts.length-1:x+barWidth*histBarClassCounts.length,
+				   this.getHeight()-17); //axis line
+			g.drawLine(x, this.getHeight()-16, x, this.getHeight()-12); //minimum line
+			g.drawString(Utils.doubleToString(as.numericStats.min, 2), 
+				     x, 
+				     this.getHeight()-12+fm.getHeight()); //minimum value
+			g.drawLine(x+(barWidth*histBarClassCounts.length)/2,
+				   this.getHeight()-16,
+				   x+(barWidth*histBarClassCounts.length)/2,
+				   this.getHeight()-12); //median line
+			g.drawString(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2), 
+				     x+(barWidth*histBarClassCounts.length)/2
+				     -fm.stringWidth(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2))/2,
+				     this.getHeight()-12+fm.getHeight()); //median value
+			g.drawLine( (barWidth==1) ? x+barWidth*histBarClassCounts.length-1:x+barWidth*histBarClassCounts.length, 
+				    this.getHeight()-16, 
+				    (barWidth==1) ? x+barWidth*histBarClassCounts.length-1:x+barWidth*histBarClassCounts.length, 
+				    this.getHeight()-12); //maximum line
+			g.drawString(Utils.doubleToString(as.numericStats.max, 2), 
+				     (barWidth==1) ?
+				     x+barWidth*histBarClassCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2))-1:
+				     x+barWidth*histBarClassCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2)), 
+				     this.getHeight()-12+fm.getHeight()); //maximum value
+		    }
+		    else {  //if class attribute is numeric
+			barWidth = ((this.getWidth()-6)/histBarCounts.length)<1 ? 1:((this.getWidth()-6)/histBarCounts.length);
+			
+			x = 3;
+			if( (this.getWidth() - (x + histBarCounts.length*barWidth)) > 5 )
+			    x += (this.getWidth() - (x + histBarCounts.length*barWidth))/2;
+			
+			for(int i=0; i<histBarCounts.length; i++) {
+			    heightRatio = (this.getHeight()-(float)fm.getHeight()-buttonHeight-19)/maxValue;
+			    y = this.getHeight()-Math.round(histBarCounts[i]*heightRatio)-19;
+			    //System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+" height:"+(histBarCounts[i]*heightRatio));
+			    if(barWidth>1)
+				g.drawRect(x, y, barWidth, Math.round(histBarCounts[i]*heightRatio));
+			    else if((histBarCounts[i]*heightRatio)>0)
+				g.drawLine(x, y, x, y+Math.round(histBarCounts[i]*heightRatio));
+			    if(fm.stringWidth(" "+Integer.toString(histBarCounts[i]))<barWidth)
+				g.drawString(" "+Integer.toString(histBarCounts[i]), x, y-1);
+			    
+			    x = x+barWidth;
+			}
+			
+			x = 3;
+			if( (this.getWidth() - (x + histBarCounts.length*barWidth)) > 5 )
+			    x += (this.getWidth() - (x + histBarCounts.length*barWidth))/2;
+			
+			g.drawLine(x, this.getHeight()-17, 
+				   (barWidth==1) ? x+barWidth*histBarCounts.length-1:x+barWidth*histBarCounts.length,
+				   this.getHeight()-17); //axis line
+			g.drawLine(x, this.getHeight()-16, x, this.getHeight()-12); //minimum line
+			g.drawString(Utils.doubleToString(as.numericStats.min, 2), 
+				     x, 
+				     this.getHeight()-12+fm.getHeight()); //minimum value
+			g.drawLine(x+(barWidth*histBarCounts.length)/2,
+				   this.getHeight()-16,
+				   x+(barWidth*histBarCounts.length)/2,
+				   this.getHeight()-12); //median line
+			g.drawString(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2), 
+				     x+(barWidth*histBarCounts.length)/2
+				     -fm.stringWidth(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2))/2,
 			 this.getHeight()-12+fm.getHeight()); //median value
-	    g.drawLine( (barWidth==1) ? x+barWidth*histBarClassCounts.length-1:x+barWidth*histBarClassCounts.length, 
-			this.getHeight()-16, 
-			(barWidth==1) ? x+barWidth*histBarClassCounts.length-1:x+barWidth*histBarClassCounts.length, 
-			this.getHeight()-12); //maximum line
-	    g.drawString(Utils.doubleToString(as.numericStats.max, 2), 
-			 (barWidth==1) ?
-			 x+barWidth*histBarClassCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2))-1:
-			 x+barWidth*histBarClassCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2)), 
-			 this.getHeight()-12+fm.getHeight()); //maximum value
-	  }
-	  else {
-	    barWidth = ((this.getWidth()-6)/histBarCounts.length)<1 ? 1:((this.getWidth()-6)/histBarCounts.length);
-	      
-	    x = 3;
-	    if( (this.getWidth() - (x + histBarCounts.length*barWidth)) > 5 )
-	      x += (this.getWidth() - (x + histBarCounts.length*barWidth))/2;
-	      
-	    for(int i=0; i<histBarCounts.length; i++) {
-	      heightRatio = (this.getHeight()-(float)fm.getHeight()-19)/maxValue;
-	      y = this.getHeight()-Math.round(histBarCounts[i]*heightRatio)-19;
-	      //System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+" height:"+(histBarCounts[i]*heightRatio));
-	      if(barWidth>1)
-		g.drawRect(x, y, barWidth, Math.round(histBarCounts[i]*heightRatio));
-	      else if((histBarCounts[i]*heightRatio)>0)
-		g.drawLine(x, y, x, y+Math.round(histBarCounts[i]*heightRatio));
-	      if(fm.stringWidth(" "+Integer.toString(histBarCounts[i]))<barWidth)
-		g.drawString(" "+Integer.toString(histBarCounts[i]), x, y-1);
-		  
-	      x = x+barWidth;
+			g.drawLine( (barWidth==1) ? x+barWidth*histBarCounts.length-1:x+barWidth*histBarCounts.length, 
+				    this.getHeight()-16, 
+				    (barWidth==1) ? x+barWidth*histBarCounts.length-1:x+barWidth*histBarCounts.length, 
+				    this.getHeight()-12); //maximum line
+			g.drawString(Utils.doubleToString(as.numericStats.max, 2), 
+				     (barWidth==1) ?
+				     x+barWidth*histBarCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2))-1:
+				     x+barWidth*histBarCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2)), 
+				     this.getHeight()-12+fm.getHeight()); //maximum value
+		    }
+		    //System.out.println("barWidth:"+barWidth+" histBarCount:"+histBarCounts.length);
+		    
+		}
 	    }
-	      
-	    x = 3;
-	    if( (this.getWidth() - (x + histBarCounts.length*barWidth)) > 5 )
-	      x += (this.getWidth() - (x + histBarCounts.length*barWidth))/2;
-	      
-	    g.drawLine(x, this.getHeight()-17, 
-		       (barWidth==1) ? x+barWidth*histBarCounts.length-1:x+barWidth*histBarCounts.length,
-		       this.getHeight()-17); //axis line
-	    g.drawLine(x, this.getHeight()-16, x, this.getHeight()-12); //minimum line
-	    g.drawString(Utils.doubleToString(as.numericStats.min, 2), 
-			 x, 
-			 this.getHeight()-12+fm.getHeight()); //minimum value
-	    g.drawLine(x+(barWidth*histBarCounts.length)/2,
-		       this.getHeight()-16,
-		       x+(barWidth*histBarCounts.length)/2,
-		       this.getHeight()-12); //median line
-	    g.drawString(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2), 
-			 x+(barWidth*histBarCounts.length)/2
-			 -fm.stringWidth(Utils.doubleToString(as.numericStats.max/2+as.numericStats.min/2, 2))/2,
-			 this.getHeight()-12+fm.getHeight()); //median value
-	    g.drawLine( (barWidth==1) ? x+barWidth*histBarCounts.length-1:x+barWidth*histBarCounts.length, 
-			this.getHeight()-16, 
-			(barWidth==1) ? x+barWidth*histBarCounts.length-1:x+barWidth*histBarCounts.length, 
-			this.getHeight()-12); //maximum line
-	    g.drawString(Utils.doubleToString(as.numericStats.max, 2), 
-			 (barWidth==1) ?
-			 x+barWidth*histBarCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2))-1:
-			 x+barWidth*histBarCounts.length-fm.stringWidth(Utils.doubleToString(as.numericStats.max, 2)), 
-			 this.getHeight()-12+fm.getHeight()); //maximum value
-	  }
-	  //System.out.println("barWidth:"+barWidth+" histBarCount:"+histBarCounts.length);
-	      
 	}
-	else {
-	  g.clearRect(0, 0, this.getWidth(), this.getHeight()); 
-	  g.drawString("Calculating. Please Wait...", 
-		       this.getWidth()/2 - fm.stringWidth("Calculating. Please Wait...")/2,
-		       this.getHeight()/2-fm.getHeight()/2);
+	else {   //if still calculating the plot
+	    g.clearRect(0, 0, this.getWidth(), this.getHeight()); 
+	    g.drawString("Calculating. Please Wait...", 
+			 this.getWidth()/2 - fm.stringWidth("Calculating. Please Wait...")/2,
+			 this.getHeight()/2-fm.getHeight()/2);
 	}
-      }
     }
   }
+
     
     
   /**
