@@ -76,11 +76,14 @@ import weka.core.*;
  * Set the threshold for the improvement of the
  * average loglikelihood (default -Double.MAX_VALUE). <p>
  *
+ * -H num <br> 
+ * Set the value of the shrinkage parameter (default 1). <p>
+ *
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable, WeightedInstancesHandler {
@@ -132,6 +135,9 @@ public class LogitBoost extends DistributionClassifier
 
   /** The threshold on the improvement of the likelihood */   
   protected double m_Precision = -Double.MAX_VALUE;
+
+  /** The value of the shrinkage parameter */
+  protected double m_Shrinkage = 1;
 
   /** The random number generator used */
   protected Random m_RandomInstance = null;
@@ -189,8 +195,8 @@ public class LogitBoost extends DistributionClassifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(9);
-
+    Vector newVector = new Vector(10);
+    
     newVector.addElement(new Option(
 	      "\tTurn on debugging output.",
 	      "D", 0, "-D"));
@@ -223,7 +229,11 @@ public class LogitBoost extends DistributionClassifier
     newVector.addElement(new Option(
 	      "\tThreshold on the improvement of the likelihood.\n"
 	      +"\t(default -Double.MAX_VALUE)",
-	      "T", 1, "-L <num>"));
+	      "L", 1, "-L <num>"));
+    newVector.addElement(new Option(
+	      "\tShrinkage parameter.\n"
+	      +"\t(default 1)",
+	      "H", 1, "-H <num>"));
 
     if ((m_Classifier != null) &&
 	(m_Classifier instanceof OptionHandler)) {
@@ -274,6 +284,9 @@ public class LogitBoost extends DistributionClassifier
    * Set the threshold for the improvement of the
    * average loglikelihood (default -Double.MAX_VALUE). <p>
    *
+   * -H num <br> 
+   * Set the value of the shrinkage parameter (default 1). <p>
+   *
    * Options after -- are passed to the designated learner.<p>
    *
    * @param options the list of options as an array of strings
@@ -319,6 +332,14 @@ public class LogitBoost extends DistributionClassifier
       setLikelihoodThreshold(-Double.MAX_VALUE);
     }
 
+    String shrinkageString = Utils.getOption('H', options);
+    if (shrinkageString.length() != 0) {
+      setShrinkage(new Double(shrinkageString).
+	doubleValue());
+    } else {
+      setShrinkage(1.0);
+    }
+
     setUseResampling(Utils.getFlag('Q', options));
     if (m_UseResampling && (thresholdString.length() != 0)) {
       throw new Exception("Weight pruning with resampling"+
@@ -354,7 +375,7 @@ public class LogitBoost extends DistributionClassifier
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
 
-    String [] options = new String [classifierOptions.length + 15];
+    String [] options = new String [classifierOptions.length + 17];
     int current = 0;
     if (getDebug()) {
       options[current++] = "-D";
@@ -373,6 +394,7 @@ public class LogitBoost extends DistributionClassifier
     options[current++] = "-F"; options[current++] = "" + getNumFolds();
     options[current++] = "-R"; options[current++] = "" + getNumRuns();
     options[current++] = "-L"; options[current++] = "" + getLikelihoodThreshold();
+    options[current++] = "-H"; options[current++] = "" + getShrinkage();
 
     if (getClassifier() != null) {
       options[current++] = "-W";
@@ -388,7 +410,27 @@ public class LogitBoost extends DistributionClassifier
     }
     return options;
   }
+			 
+  /**
+   * Get the value of Shrinkage.
+   *
+   * @return Value of Shrinkage.
+   */
+  public double getShrinkage() {
+    
+    return m_Shrinkage;
+  }
   
+  /**
+   * Set the value of Shrinkage.
+   *
+   * @param newShrinkage Value to assign to Shrinkage.
+   */
+  public void setShrinkage(double newShrinkage) {
+    
+    m_Shrinkage = newShrinkage;
+  }
+			 
   /**
    * Get the value of Precision.
    *
@@ -829,7 +871,7 @@ public class LogitBoost extends DistributionClassifier
       double [] pred = new double [m_NumClasses];
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	pred[j] = m_Classifiers[j][m_NumIterations]
+	pred[j] = m_Shrinkage * m_Classifiers[j][m_NumIterations]
 	  .classifyInstance(data.instance(i));
 	predSum += pred[j];
       }
