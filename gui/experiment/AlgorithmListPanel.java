@@ -68,8 +68,8 @@ import java.beans.PropertyEditor;
  * This panel controls setting a list of algorithms for an experiment to
  * iterate over.
  *
- * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -110,7 +110,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   
   /** Lets the user configure the classifier */
   protected GenericObjectEditor m_ClassifierEditor =
-    new GenericObjectEditor();
+    new GenericObjectEditor(true);
 
   /** The currently displayed property dialog, if any */
   protected PropertyDialog m_PD;
