@@ -46,14 +46,17 @@ import weka.gui.visualize.ClassPanel;
  * visualization dimensions but random in the other dimensions. These
  * instances are classified by the classifier and plotted as points with
  * colour corresponding to the probability distribution predicted by the
- * classifier. At present, 2 * number of training instances are generated
- * for each pixel in the display. predicted probability distributions are
- * weighted (acording to the fixed visualization dimensions) and averaged
- * to produce an RGB value for the pixel.
+ * classifier. At present, 2 * 2^(# non-fixed dimensions) points are generated 
+ * from each kernel per pixel in the display. In practice, fewer points than
+ * this are actually classified because kernels are weighted (on a per-pixel
+ * basis) according to the fixexd dimensions and kernels corresponding 
+ * to the lowest 1% of the weight mass are discarded. Predicted probability 
+ * distributions are weighted (acording to the fixed visualization dimensions)
+ * and averaged to produce an RGB value for the pixel.
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see JPanel
  */
@@ -244,8 +247,13 @@ public class BoundaryVisualizer extends JPanel {
 
   // number of samples per pixel (fixed dimensions only)
   private int m_numberOfSamplesFromEachRegion;
+
+  private int m_generatorSamplesBase;
   
-  private JTextField m_samplesText = 
+  private JTextField m_regionSamplesText = 
+    new JTextField(""+0);
+
+  private JTextField m_generatorSamplesText = 
     new JTextField(""+0);
 
   /**
@@ -286,12 +294,7 @@ public class BoundaryVisualizer extends JPanel {
     JPanel cHolder = new JPanel();
     cHolder.setBorder(BorderFactory.createTitledBorder("Class Attribute"));
     cHolder.add(m_classAttBox);
-    /*    JPanel cValHolder = new JPanel();
-    cValHolder.setLayout(new GridLayout(3,1));
-    cValHolder.setBorder(BorderFactory.createTitledBorder("Class Values"));
-    cValHolder.add(m_redClassValueBox);
-    cValHolder.add(m_greenClassValueBox);
-    cValHolder.add(m_blueClassValueBox); */
+
     JPanel vAttHolder = new JPanel();
     vAttHolder.setLayout(new GridLayout(2,1));
     vAttHolder.setBorder(BorderFactory.
@@ -303,16 +306,18 @@ public class BoundaryVisualizer extends JPanel {
     colOne.setLayout(new BorderLayout());
     colOne.add(cHolder, BorderLayout.NORTH);
     colOne.add(vAttHolder, BorderLayout.CENTER);
-    //    JPanel samplesHolder = new JPanel();
-    m_samplesText.setBorder(BorderFactory.
+
+    m_regionSamplesText.setBorder(BorderFactory.
 			    createTitledBorder("Num. samples per region"));
-    m_samplesText.setBackground(colOne.getBackground());
-    //    samplesHolder.add(m_samplesText);
-    //    colOne.add(m_samplesText, BorderLayout.SOUTH);
+    m_regionSamplesText.setBackground(colOne.getBackground());
+    m_generatorSamplesText.setBorder(BorderFactory.
+				     createTitledBorder("Base for sampling in "
+				     +"non-fixed dimensions"));
+    m_generatorSamplesText.setBackground(colOne.getBackground());
 
     JPanel colTwo = new JPanel();
     colTwo.setLayout(new BorderLayout());
-    //    colTwo.add(cValHolder, BorderLayout.NORTH);
+    colTwo.add(m_generatorSamplesText, BorderLayout.NORTH);
 
     JPanel startPanel = new JPanel();
     startPanel.setBorder(BorderFactory.
@@ -321,9 +326,8 @@ public class BoundaryVisualizer extends JPanel {
     startPanel.add(m_startBut, BorderLayout.CENTER);
     JPanel tempPanel = new JPanel();
     tempPanel.setLayout(new BorderLayout());
-    tempPanel.add(m_samplesText, BorderLayout.NORTH);
+    tempPanel.add(m_regionSamplesText, BorderLayout.NORTH);
     tempPanel.add(startPanel, BorderLayout.SOUTH);
-    //    colTwo.add(startPanel, BorderLayout.SOUTH);
     colTwo.add(tempPanel, BorderLayout.SOUTH);
 
     m_controlPanel.add(colOne, BorderLayout.WEST);
@@ -332,16 +336,14 @@ public class BoundaryVisualizer extends JPanel {
     classHolder.setBorder(BorderFactory.createTitledBorder("Class color"));
     classHolder.add(m_classPanel);
     m_controlPanel.add(classHolder, BorderLayout.SOUTH);
-    /*    m_controlPanel.add(cHolder);
-    m_controlPanel.add(cValHolder);
-    m_controlPanel.add(vAttHolder);
-    m_controlPanel.add(m_startBut); */
 
     add(m_controlPanel, BorderLayout.NORTH);
 
     m_boundaryPanel = new BoundaryPanel(m_plotAreaWidth, m_plotAreaHeight);
     m_numberOfSamplesFromEachRegion = m_boundaryPanel.getNumSamplesPerRegion();
-    m_samplesText.setText(""+m_numberOfSamplesFromEachRegion);
+    m_regionSamplesText.setText(""+m_numberOfSamplesFromEachRegion);
+    m_generatorSamplesBase = (int)m_boundaryPanel.getGeneratorSamplesBase();
+    m_generatorSamplesText.setText(""+m_generatorSamplesBase);
     m_boundaryPanel.setDataGenerator(new KDDataGenerator());
     add(m_boundaryPanel, BorderLayout.CENTER);
 
@@ -359,13 +361,24 @@ public class BoundaryVisualizer extends JPanel {
 		int tempSamples = m_numberOfSamplesFromEachRegion;
 		try {
 		  tempSamples = 
-		    Integer.parseInt(m_samplesText.getText().trim());
+		    Integer.parseInt(m_regionSamplesText.getText().trim());
 		} catch (Exception ex) {
-		  m_samplesText.setText(""+tempSamples);
+		  m_regionSamplesText.setText(""+tempSamples);
 		}
 		m_numberOfSamplesFromEachRegion = tempSamples;
 		m_boundaryPanel.
 		  setNumSamplesPerRegion(tempSamples);
+
+		tempSamples = m_generatorSamplesBase;
+		try {
+		  tempSamples = 
+		    Integer.parseInt(m_generatorSamplesText.getText().trim());
+		} catch (Exception ex) {
+		  m_generatorSamplesText.setText(""+tempSamples);
+		}
+		m_generatorSamplesBase = tempSamples;
+		m_boundaryPanel.setGeneratorSamplesBase((double)tempSamples);
+
 		m_trainingInstances.
 		  setClassIndex(m_classAttBox.getSelectedIndex());
 		m_boundaryPanel.setClassifier(m_classifier);
@@ -410,7 +423,8 @@ public class BoundaryVisualizer extends JPanel {
     m_classAttBox.setEnabled(status);
     m_xAttBox.setEnabled(status);
     m_yAttBox.setEnabled(status);
-    m_samplesText.setEnabled(status);
+    m_regionSamplesText.setEnabled(status);
+    m_generatorSamplesText.setEnabled(status);
   }
 
   /**
