@@ -94,6 +94,7 @@ weka.filters.Filter = \
  weka.filters.AttributeTypeFilter, \
  weka.filters.CopyAttributesFilter, \
  weka.filters.DiscretizeFilter, \
+ weka.filters.EmptyAttributeFilter, \
  weka.filters.FirstOrderFilter, \
  weka.filters.InstanceFilter, \
  weka.filters.MakeIndicatorFilter, \
@@ -106,12 +107,14 @@ weka.filters.Filter = \
  weka.filters.RandomizeFilter, \
  weka.filters.ReplaceMissingValuesFilter, \
  weka.filters.ResampleFilter, \
+ weka.filters.SparseToNonSparseFilter, \
  weka.filters.SplitDatasetFilter, \
+ weka.filters.SpreadSubsampleFilter, \
  weka.filters.StringToNominalFilter, \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
  weka.filters.TimeSeriesTranslateFilter, \
- weka.filters.NonsparseToSparseFilter, \
+ weka.filters.NonSparseToSparseFilter, \
  weka.filters.NumericToBinaryFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from

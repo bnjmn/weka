@@ -1,6 +1,6 @@
 /*
- *    AllFilter.java
- *    Copyright (C) 1999 Len Trigg
+ *    NonSparseToSparseFilter.java
+ *    Copyright (C) 2000 Eibe Frank
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 1.1 $
  */
-public class NonsparseToSparseFilter extends Filter {
+public class NonSparseToSparseFilter extends Filter {
 
   /**
    * Returns a string describing this filter
@@ -92,9 +92,9 @@ public class NonsparseToSparseFilter extends Filter {
     
     try {
       if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new NonsparseToSparseFilter(), argv);
+	Filter.batchFilterFile(new NonSparseToSparseFilter(), argv);
       } else {
-	Filter.filterFile(new NonsparseToSparseFilter(), argv);
+	Filter.filterFile(new NonSparseToSparseFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());
