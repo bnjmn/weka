@@ -28,648 +28,397 @@ import weka.core.*;
 import weka.classifiers.*;
 
 /**
- * This class implements a single rule that predicts the 2-class distribution.  
+ * This class implements a single conjunctive rule learner that can predict
+ * for numeric and nominal class labels.<p>  
  *
  * A rule consists of antecedents "AND"ed together and the consequent (class value) 
- * for the classification.  In this case, the consequent is the distribution of
- * the available classes (always 2 classes) in the dataset.  
-
- * In this class, the Information Gain (p*[log(p/t) - log(P/T)]) is used to select 
- * an antecedent and Reduced Error Prunning (REP) is used to prune the rule. 
+ * for the classification/regression.  In this case, the consequent is the 
+ * distribution of the available classes (or numeric value) in the dataset.  
+ * If the test instance is not covered by this rule, then it's predicted
+ * using the default class distributions/value of the data not covered by the
+ * rule in the training data. <br>
+ * This learner selects an antecedent by computing the Information Gain of each 
+ * antecendent and prunes the generated rule using Reduced Error Prunning (REP). <p>
+ *
+ * For classification, the Information of one antecedent is the weighted average of
+ * the entropies of both the data covered and not covered by the rule. <br>
+ *
+ * For regression, the Information is the weighted average of the mean-squared errors 
+ * of both the data covered and not covered by the rule. <p>
+ *
+ * In pruning, weighted average of accuracy rate of the pruning data is used 
+ * for classification while the weighted average of the mean-squared errors
+ * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
-public class ConjunctiveRule extends DistributionClassifier implements OptionHandler, WeightedInstancesHandler{
+public class ConjunctiveRule extends DistributionClassifier
+  implements OptionHandler, WeightedInstancesHandler{
     
-    /** The internal representation of the class label to be predicted*/
-    private double m_Class = -1;
+  /** The number of folds to split data into Grow and Prune for REP*/
+  private int m_Folds = 3;
     
-    /** The number of folds to split data into Grow and Prune for REP*/
-    private int m_Folds = 3;
-
-    /** The class attribute of the data*/
-    private Attribute m_ClassAttribute;
+  /** The class attribute of the data*/
+  private Attribute m_ClassAttribute;
     
-    /** The vector of antecedents of this rule*/
-    protected FastVector m_Antds = null;
+  /** The vector of antecedents of this rule*/
+  protected FastVector m_Antds = null;
     
-    /** The default distribution of the training data*/
-    protected double[] m_DefDstr = null;
+  /** The default rule distribution of the data not covered*/
+  protected double[] m_DefDstr = null;
     
-    /** The consequent of this rule, i.e. the classification*/
-    protected double[] m_Cnsqt = null;
+  /** The consequent of this rule */
+  protected double[] m_Cnsqt = null;
+        
+  /** Number of classes in the training data */
+  private int m_NumClasses = 0;
     
-    /** The worth rate of this rule, in this case, accuracy rate in the pruning data*/
-    private double m_WorthRate = 0;
+  /** The seed to perform randomization */
+  private long m_Seed = -1;
     
-    /** The worth value of this rule, in this case, accurate # in pruning data*/
-    private double m_Worth = 0;
-   
-    /**
-     * Returns an enumeration describing the available options
-     * Valid options are: <p>
-     *
-     * -N number <br>
-     * Set number of folds for REP. One fold is
-     * used as the pruning set. (Default: 3) <p>
-     *
-     * -P predicted_class <br>
-     * Set the class label to be predicted.  If not set, it always predicts 
-     * the minority of the two classes. (Default: -1)<p> 
-     * 
-     * @return an enumeration of all the available options
-     */
-    public Enumeration listOptions() {
-	Vector newVector = new Vector(2);
-	
-	newVector.addElement(new Option("\tSet number of folds for REP\n" +
-					"\tOne fold is used as pruning set.\n" +
-					"\t(default 3)","N", 1, "-N <number of folds>"));
-	newVector.addElement(new Option("\tSet the class label to be predicted.\n" +
-					"\tIf not set, it always predicts the minority\n" +
-					"\tof the two classes.(Default: -1)",
-					"P", 1, "-P <predicted_class>"));
-	return newVector.elements();
-    }
+  /** The Random object used for randomization */
+  private Random m_Random = null;
+
+  /** Whether randomize the data */
+  private boolean m_IsRandomized = false;
     
-    /**
-     * Parses a given list of options.
-     *
-     * @param options the list of options as an array of strings
-     * @exception Exception if an option is not supported
-     */
-    public void setOptions(String[] options) throws Exception{
-	
-	String numFoldsString = Utils.getOption('N', options);
-	if (numFoldsString.length() != 0) 
-	    m_Folds = Integer.parseInt(numFoldsString);
-	else 
-	    m_Folds = 3;
+  /** The predicted classes recorded for each antecedent in the growing data */
+  private FastVector m_Targets;
 
-	String classString = Utils.getOption('P', options);
-	if (classString.length() != 0) 
-	    m_Class = Double.parseDouble(classString);
-	else 
-	    m_Class = -1.0;
-    }
+  /** Whether to use exlusive expressions for nominal attributes */
+  private boolean m_IsExclude = false;
+
+  /** The minimal number of instance weights within a split*/
+  private double m_MinNo = 2.0;
     
-    /**
-     * Gets the current settings of the Classifier.
-     *
-     * @return an array of strings suitable for passing to setOptions
-     */
-    public String [] getOptions() {
-	
-	String [] options = new String [4];
-	int current = 0;
-	options[current++] = "-N"; options[current++] = "" + m_Folds;
-	options[current++] = "-P"; options[current++] = "" + m_Class;
-
-	while (current < options.length) 
-	    options[current++] = "";
-	return options;
-    }
-
-    /** The access functions for parameters */
-    public void setFolds(int folds){  m_Folds = folds; }
-    public int getFolds(){ return m_Folds; }
-    public void setPredictedClass(double cl){  m_Class = cl; }
-    public double getPredictedClass(){ return m_Class; }
-
-    /**
-     * Builds a single rule learner with REP dealing with 2 classes.
-     * This rule learner always tries to predict the class with label 
-     * m_Class.
-     *
-     * @param instances the training data
-     * @exception Exception if classifier can't be built successfully
-     */
-    public void buildClassifier(Instances instances) throws Exception{
-	m_ClassAttribute = instances.classAttribute();
-	if (!m_ClassAttribute.isNominal()) 
-	    throw new Exception(" Only nominal class, please.");
-	if(instances.numClasses() != 2)
-	    throw new Exception(" Only 2 classes, please.");
-
-	Instances data = new Instances(instances);
-	data.deleteWithMissingClass();
-	
-	if(data.numInstances() < m_Folds)
-	    throw new Exception(" Not enough data for REP.");
-
-	m_Antds = new FastVector();
-	m_DefDstr = new double[2];
-	m_Cnsqt = new double[2];
-	
-	for(int i=0; i<2; i++){
-	    m_DefDstr[i] = 0;
-	    m_Cnsqt[i] = 0;
-	}
-	
-	/* Calculate the default distribution of the data */	
-	for(int j=0; j<data.numInstances(); j++){
-	    Instance inst = data.instance(j);
-	    m_DefDstr[(int)inst.classValue()] += inst.weight();
-	}	
-	
-	if(Utils.eq(m_Class, -1.0)){
-	    m_Class = (double)Utils.minIndex(m_DefDstr);   
-	}
-
-	/* The minority class has no weights.  Cannot derive rule for minority class */
-	if(Utils.eq(m_DefDstr[(int)m_Class],0)){
-	    m_Cnsqt[(int)m_Class] = 0;
-	    m_Cnsqt[1-(int)m_Class] = 1;
-	    return;
-	}
-	
-	/* Split data into Grow and Prune*/
-	data.stratify(m_Folds);
-	Instances growData=data.trainCV(m_Folds, m_Folds-1);
-	Instances pruneData=data.testCV(m_Folds, m_Folds-1);
-	
-	grow(growData);      // Build this rule
-		    
-	prune(pruneData);    // Prune this rule
-
-	/* Compute the Consequent (i.e. the distribution) on the whole data*/
-	Instances coveredData = coveredByRule(data)[0];
-	for(int k=0; k<coveredData.numInstances(); k++){
-	    Instance inst = coveredData.instance(k);
-	    m_Cnsqt[(int)inst.classValue()] += inst.weight();
-	}
-    }
+  /** 
+   * The single antecedent in the rule, which is composed of an attribute and 
+   * the corresponding value.  There are two inherited classes, namely NumericAntd
+   * and NominalAntd in which the attributes are numeric and nominal respectively.
+   */
     
-    /**
-     * Computes class distribution for instance of the two classes.
-     *
-     * @param instance the instance for which distribution is to be computed
-     * @return the class distribution for the given instance
-     */
-    public double[] distributionForInstance(Instance instance) throws Exception{
-	if (isCover(instance)){
-	    Utils.normalize(m_Cnsqt);
-	    return m_Cnsqt;
-	}
-	else{
-	    double[] dist = new double[2];
-	    for(int i=0; i<2; i++)
-		dist[i] = m_DefDstr[i] - m_Cnsqt[i];
-	    Utils.normalize(dist);
-	    return dist;
-	}
-    }
-
-    /**
-     * Find all the instances in the dataset covered by this rule.
-     * The instances not covered will also be deducted from the the original data
-     * and returned by this procedure.
-     * 
-     * @param insts the dataset to be covered by this rule.
-     * @return the instances covered and not covered by this rule
-     */
-    public Instances[] coveredByRule(Instances insts){
-	Instances[] data = new Instances[2];
-	data[0] = new Instances(insts, insts.numInstances());
-	data[1] = new Instances(insts, insts.numInstances());
-	
-	for(int i=0; i<insts.numInstances(); i++){
-	    Instance datum = insts.instance(i);
-	    if(isCover(datum))
-		data[0].add(datum);        // Covered by this rule
-	    else
-		data[1].add(datum);        // Not covered by this rule
-	}
-
-	return data;
-    }
-    
-    /**
-     * Whether the instance covered by this rule
-     * 
-     * @param inst the instance in question
-     * @return the boolean value indicating whether the instance is covered by this rule
-     */
-    public boolean isCover(Instance datum){
-	boolean isCover=true;
-
-	for(int i=0; i<m_Antds.size(); i++){
-	    Antd antd = (Antd)m_Antds.elementAt(i);
-	    if(!antd.isCover(datum)){
-		isCover = false;
-		break;
-	    }
-	}
-	
-	return isCover;
-    }        
-    
-    /**
-     * Whether this rule has antecedents, i.e. whether it is a default rule
-     * 
-     * @return the boolean value indicating whether the rule has antecedents
-     */
-    public boolean hasAntds(){
-	if (m_Antds == null)
-	    return false;
-	else
-	    return (m_Antds.size() > 0);
-    }      
-
-    /**
-     * Build one rule using the growing data
-     *
-     * @param data the growing data used to build the rule
-     */    
-    private void grow(Instances data){
-	Instances growData = new Instances(data);
-	
-	/* Compute the default accurate rate of the growing data */
-	double defAcRt= computeDefAccu(growData) / growData.sumOfWeights();
-	
-	/* Keep the record of which attributes have already been used*/    
-	boolean[] used=new boolean [growData.numAttributes()];
-	for (int k=0; k<used.length; k++)
-	    used[k]=false;
-	int numUnused=used.length;
-	
-	double maxInfoGain;
-	boolean isContinue = true; // The stopping criterion of this rule
-	
-	while (isContinue){   
-	    maxInfoGain = 0;       // We require that infoGain be positive
-	    
-	    /* Build a list of antecedents */
-	    Antd oneAntd=null;
-	    Instances coverData = null;
-	    Enumeration enumAttr=growData.enumerateAttributes();	    
-	    int index=-1;  
-	    
-	    /* Build one condition based on all attributes not used yet*/
-	    while (enumAttr.hasMoreElements()){
-		Attribute att= (Attribute)(enumAttr.nextElement());
-		index++;
-		
-		Antd antd =null;	
-		if(att.isNumeric())
-		    antd = new NumericAntd(att);
-		else
-		    antd = new NominalAntd(att);
-		
-		if(!used[index]){
-		    /* Compute the best information gain for each attribute,
-		       it's stored in the antecedent formed by this attribute.
-		       This procedure returns the data covered by the antecedent*/
-		    Instances coveredData = computeInfoGain(growData, defAcRt, antd);
-		    double infoGain = antd.getMaxInfoGain();
-		
-		    if(Utils.gr(infoGain, maxInfoGain)){
-			oneAntd=antd;
-			coverData = coveredData;  
-			maxInfoGain = infoGain;		    
-		    }
-		}
-	    }
-	    
-	    if(oneAntd == null)	 return;
-	    
-	    //Numeric attributes can be used more than once
-	    if(!oneAntd.getAttr().isNumeric()){ 
-		used[oneAntd.getAttr().index()]=true;
-		numUnused--;
-	    }
-
-	    m_Antds.addElement((Object)oneAntd);
-	    growData = coverData;// Grow data size is shrinking 
-	    
-	    defAcRt = oneAntd.getAccuRate();
-	    
-	    /* Stop if no more data, rule perfect, no more attributes */
-	    if(Utils.eq(growData.sumOfWeights(), 0.0) || Utils.eq(defAcRt, 1.0) || (numUnused == 0))
-		isContinue = false;
-	}
-    }
-    
-    /** 
-     * Compute the best information gain for the specified antecedent
-     *  
-     * @param data the data based on which the infoGain is computed
-     * @param defAcRt the default accuracy rate of data
-     * @param antd the specific antecedent
-     * @return the data covered by the antecedent
-     */
-    private Instances computeInfoGain(Instances instances, double defAcRt, Antd antd){
-	Instances data = new Instances(instances);
-	
-	/* Split the data into bags.
-	   The information gain of each bag is also calculated in this procedure */
-	Instances[] splitData = antd.splitData(data, defAcRt, m_Class); 
-	
-	/* Get the bag of data to be used for next antecedents */
-	if(splitData != null)
-	    return splitData[(int)antd.getAttrValue()];
-	else return null;
-    }
-    
-    /**
-     * Prune the rule using the pruning data and update the worth parameters for this rule
-     * The accuracy rate is used to prune the rule.
-     *
-     * @param pruneData the pruning data used to prune the rule
-     */    
-    private void prune(Instances pruneData){
-	Instances data=new Instances(pruneData);
-
-	double total = data.sumOfWeights();
-
-	/* The default accurate# and the the accuracy rate on pruning data */
-	double defAccu=0, defAccuRate=0;
-	
-	int size=m_Antds.size();
-	if(size == 0) return; // Default rule before pruning
-	
-	double[] worthRt = new double[size];
-	double[] coverage = new double[size];
-	double[] worthValue = new double[size];
-	for(int w=0; w<size; w++){
-	    worthRt[w]=coverage[w]=worthValue[w]=0.0;
-	}
-	
-	/* Calculate accuracy parameters for all the antecedents in this rule */
-	for(int x=0; x<size; x++){
-	    Antd antd=(Antd)m_Antds.elementAt(x);
-	    Attribute attr= antd.getAttr();
-	    Instances newData = new Instances(data);
-	    data = new Instances(newData, newData.numInstances()); // Make data empty
-	    
-	    for(int y=0; y<newData.numInstances(); y++){
-		Instance ins=newData.instance(y);
-		if(!ins.isMissing(attr)){              // Attribute not missing
-		    if(antd.isCover(ins)){             // Covered by this antecedent
-			coverage[x] += ins.weight();
-			data.add(ins);                 // Add to data for further pruning
-			if(Utils.eq(ins.classValue(), m_Class)) // Accurate prediction
-			    worthValue[x] += ins.weight();
-		    }
-		}
-	    }
-	    
-	    if(coverage[x] != 0)  
-		worthRt[x] = worthValue[x]/coverage[x];
-	}
-	
-	/* Prune the antecedents according to the accuracy parameters */
-	for(int z=(size-1); z > 0; z--)
-	    if(Utils.sm(worthRt[z], worthRt[z-1]))
-		m_Antds.removeElementAt(z);
-	    else  break;
-	
-	/* Check whether this rule is a default rule */
-	if(m_Antds.size() == 1){
-	    defAccu = computeDefAccu(pruneData);
-	    defAccuRate = defAccu/total;                // Compute def. accuracy
-	    if(Utils.sm(worthRt[0], defAccuRate)){      // Becomes a default rule
-		m_Antds.removeAllElements();
-	    }
-	}   
-	
-	/* Update the worth parameters of this rule*/
-	int antdsSize = m_Antds.size();
-	if(antdsSize != 0){                          // Not a default rule
-	    m_Worth = worthValue[antdsSize-1];       // WorthValues of the last antecedent
-	    m_WorthRate = worthRt[antdsSize-1];
-	}
-	else{                                        // Default rule    
-	    m_Worth = defAccu;                       // Default WorthValues
-	    m_WorthRate = defAccuRate;
-	}
-    }
-
-    /**
-     * Private function to compute default number of accurate instances
-     * in the specified data for m_Class
-     * 
-     * @param data the data in question
-     * @return the default accuracy number
-     */
-    private double computeDefAccu(Instances data){ 
-      	double defAccu=0;
-	for(int i=0; i<data.numInstances(); i++){
-	    Instance inst = data.instance(i);
-	    if(Utils.eq(inst.classValue(), m_Class))
-		defAccu += inst.weight();
-	}
-	return defAccu;
-    }
-    
-    /** The following are get functions after prune() has set the value of worthRate and worth*/
-    public double getWorthRate(){ return m_WorthRate; }
-    public double getWorth(){ return m_Worth; }
-    
-    /**
-     * Prints this rule with the specified class label
-     *
-     * @param att the string standing for attribute in the consequent of this rule
-     * @param cl the string standing for value in the consequent of this rule
-     * @return a textual description of this rule with the specified class label
-     */
-    public String toString(String att, String cl) {
-	StringBuffer text =  new StringBuffer();
-	if(m_Antds.size() > 0){
-	    for(int j=0; j< (m_Antds.size()-1); j++)
-		text.append("(" + ((Antd)(m_Antds.elementAt(j))).toString()+ ") and ");
-	    text.append("("+((Antd)(m_Antds.lastElement())).toString() + ")");
-	}
-	text.append(" => " + att + " = " 
-		    + cl);
-	return text.toString();
-    }
-
-    /**
-     * Prints this rule
-     *
-     * @return a textual description of this rule
-     */
-    public String toString() {
-	return toString(m_ClassAttribute.name(), m_ClassAttribute.value((int)m_Class));
-    }
-    
-    /**
-     * Main method.
-     *
-     * @param args the options for the classifier
-     */
-    public static void main(String[] args) {	
-	try {
-	    System.out.println(Evaluation.evaluateModel(new ConjunctiveRule(), args));
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    System.err.println(e.getMessage());
-	}
-    }
-}
-
-/** 
- * The single antecedent in the rule, which is composed of an attribute and 
- * the corresponding value.  There are two inherited classes, namely NumericAntd
- * and NominalAntd in which the attributes are numeric and nominal respectively.
- */
-
-abstract class Antd{
-    /* The attribute of the antecedent */
+  private abstract class Antd{
+    /** The attribute of the antecedent */
     protected Attribute att;
-    
-    /* The attribute value of the antecedent.  
-       For numeric attribute, value is either 0(1st bag) or 1(2nd bag) */
+	
+    /** The attribute value of the antecedent.  
+	For numeric attribute, value is either 0(1st bag) or 1(2nd bag) */
     protected double value; 
-
-    /* The maximum infoGain achieved by this antecedent test */
+	
+    /** The maximum infoGain achieved by this antecedent test */
     protected double maxInfoGain;
-
-    /* The accurate rate of this antecedent test on the growing data */
-    protected double accuRate;
-
-    /* Constructor*/
-    public Antd(Attribute a){
-	att=a;
-	value=Double.NaN; 
-	maxInfoGain = 0;
-	accuRate = Double.NaN;
+	
+    /** The information of this antecedent test on the growing data */
+    protected double inform;
+	
+    /** The parameter related to the meanSquaredError of the data not covered 
+	by the previous antecedents when the class is numeric */
+    protected double uncoverWtSq, uncoverWtVl, uncoverSum;
+	
+    /** The parameters related to the data not covered by the previous
+	antecedents when the class is nominal */
+    protected double[] uncover;
+	
+    /** Constructor for nominal class */
+    public Antd(Attribute a, double[] unc){
+      att=a;
+      value=Double.NaN; 
+      maxInfoGain = 0;
+      inform = Double.NaN;
+      uncover = unc;	
     }
-    
+	
+    /* Constructor for numeric class */
+    public Antd(Attribute a, double uncoveredWtSq, 
+		double uncoveredWtVl, double uncoveredWts){
+      att=a;
+      value=Double.NaN; 
+      maxInfoGain = 0;
+      inform = Double.NaN;
+      uncoverWtSq = uncoveredWtSq;
+      uncoverWtVl = uncoveredWtVl;
+      uncoverSum = uncoveredWts;
+    }
+	
     /* The abstract members for inheritance */
-    public abstract Instances[] splitData(Instances data, double defAcRt, double cla);
+    public abstract Instances[] splitData(Instances data, double defInfo);
     public abstract boolean isCover(Instance inst);
     public abstract String toString();
- 
+	
     /* Get functions of this antecedent */
     public Attribute getAttr(){ return att; }
     public double getAttrValue(){ return value; }
     public double getMaxInfoGain(){ return maxInfoGain; }
-    public double getAccuRate(){ return accuRate; } 
-}
+    public double getInfo(){ return inform;}
+	
+    /** 
+     * Function used to calculate the weighted mean squared error,
+     * i.e., sum[x-avg(x)]^2 based on the given elements of the formula:
+     * meanSquaredError = sum(Wi*Xi^2) - (sum(WiXi))^2/sum(Wi)
+     * 
+     * @param weightedSq sum(Wi*Xi^2)
+     * @param weightedValue sum(WiXi)
+     * @param sum sum of weights
+     * @return the weighted mean-squared error
+     */
+    protected double wtMeanSqErr(double weightedSq, double weightedValue, double sum){
+      if(Utils.smOrEq(sum, 1.0E-6))
+	return 0;	    
+      return (weightedSq - (weightedValue * weightedValue) / sum);
+    }
+	
+    /**
+     * Function used to calculate the entropy of given vector of values
+     * entropy = (1/sum)*{-sigma[i=1..P](Xi*log2(Xi)) + sum*log2(sum)}
+     * where P is the length of the vector
+     *
+     * @param value the given vector of values
+     * @param sum the sum of the given values.  It's provided just for efficiency.
+     * @return the entropy
+     */
+    protected double entropy(double[] value, double sum){	   
+      if(Utils.smOrEq(sum, 1.0E-6))
+	return 0;
 
-/** 
- * The antecedent with numeric attribute
- */
-class NumericAntd extends Antd{
-
+      double entropy = 0;	    
+      for(int i=0; i < value.length; i++){
+	if(!Utils.eq(value[i],0))
+	  entropy -= value[i] * Utils.log2(value[i]);
+      }
+      entropy += sum * Utils.log2(sum);
+      entropy /= sum;
+      return entropy;
+    }
+  }
+    
+  /** 
+   * The antecedent with numeric attribute
+   */
+  private class NumericAntd extends Antd{
+	
     /* The split point for this numeric antecedent */
     private double splitPoint;
-    
-    /* Constructor*/
-    public NumericAntd(Attribute a){ 
-	super(a);
-	splitPoint = Double.NaN;
+	
+    /* Constructor for nominal class */
+    public NumericAntd(Attribute a, double[] unc){ 
+      super(a, unc);
+      splitPoint = Double.NaN;
     }    
-
+	
+    /* Constructor for numeric class */
+    public NumericAntd(Attribute a, double sq, double vl, double wts){ 
+      super(a, sq, vl, wts);
+      splitPoint = Double.NaN;
+    }
+	
     /* Get split point of this numeric antecedent */
     public double getSplitPoint(){ return splitPoint; }
-
+	
     /**
      * Implements the splitData function.  
      * This procedure is to split the data into two bags according 
      * to the information gain of the numeric attribute value
+     * the data with missing values are stored in the last split.
      * The maximum infoGain is also calculated.  
      * 
      * @param insts the data to be split
-     * @param defAcRt the default accuracy rate for data
-     * @param cl the class label to be predicted
+     * @param defInfo the default information for data
      * @return the array of data after split
      */
-    public Instances[] splitData(Instances insts, double defAcRt, double cl){
-	Instances data = new Instances(insts);
-	data.sort(att);
-	int total=data.numInstances();// Total number of instances without 
-	                              // missing value for att
-
-	int split=1;                  // Current split position
-	int prev=0;                   // Previous split position
-	int finalSplit=split;         // Final split position
-	maxInfoGain = 0;
-	value = 0;	
-	
-	double fstCover=0, sndCover=0, fstAccu=0, sndAccu=0;
-	
-	for(int x=0; x<data.numInstances(); x++){
-	    Instance inst = data.instance(x);
-	    if(inst.isMissing(att)){
-		total = x;
-		break;
-	    }
-
-	    if(x < split){
-		fstCover += inst.weight();
-		if(Utils.eq(inst.classValue(), cl))
-		    fstAccu += inst.weight();
-	    }  
-	    else{
-		sndCover += inst.weight();
-		if(Utils.eq(inst.classValue(), cl))
-		    sndAccu += inst.weight();
-	    }
+    public Instances[] splitData(Instances insts, double defInfo){	
+      Instances data = new Instances(insts);
+      data.sort(att);
+      int total=data.numInstances();// Total number of instances without 
+      // missing value for att
+      maxInfoGain = 0;
+      value = 0;	
+	    
+      // Compute minimum number of Instances required in each split
+      double minSplit;
+      if(m_ClassAttribute.isNominal()){
+	minSplit =  0.1 * (data.sumOfWeights()) /
+	  ((double)m_ClassAttribute.numValues());
+	if (Utils.smOrEq(minSplit,m_MinNo)) 
+	  minSplit = m_MinNo;
+	else if (Utils.gr(minSplit,25)) 
+	  minSplit = 25;
+      }
+      else
+	minSplit = m_MinNo;
+	    
+      double[] fst=null, snd=null, missing=null;
+      if(m_ClassAttribute.isNominal()){
+	fst = new double[m_NumClasses];
+	snd = new double[m_NumClasses];
+	missing = new double[m_NumClasses];
+		
+	for(int v=0; v < m_NumClasses; v++)
+	  fst[v]=snd[v]=missing[v]=0.0;
+      }
+      double fstCover=0, sndCover=0, fstWtSq=0, sndWtSq=0, fstWtVl=0, sndWtVl=0;
+	    
+      int split=1;                  // Current split position
+      int prev=0;                   // Previous split position		    
+      int finalSplit=split;         // Final split position
+		    
+      for(int x=0; x<data.numInstances(); x++){
+	Instance inst = data.instance(x);
+	if(inst.isMissing(att)){
+	  total = x;
+	  break;
 	}
-	
-	if(total == 0) return null; // Data all missing for the attribute 	
-	splitPoint = data.instance(total-1).value(att);	
-
-	for(; split < total; split++){
-	    if(!Utils.eq(data.instance(split).value(att), 
-			 data.instance(prev).value(att))){ // Can't split within same value
 		
-		for(int y=prev; y<split; y++){
-		    Instance inst = data.instance(y);
-		    fstCover += inst.weight(); sndCover -= inst.weight();
-		    if(Utils.eq(data.instance(y).classValue(), cl)){
-			fstAccu += inst.weight();  // First bag positive# ++
-			sndAccu -= inst.weight();  // Second bag positive# --
-		    }
-		}
-		
-		double fstAccuRate = 0, sndAccuRate = 0;
-		if(!Utils.eq(fstCover,0))
-		    fstAccuRate = fstAccu/fstCover;
-		if(!Utils.eq(sndCover,0))
-		    sndAccuRate = sndAccu/sndCover;
-		
-		boolean isFirst; 
-		
-		/* Which bag has higher accuracy? */
-		if(Utils.eq(fstAccuRate, sndAccuRate))
-		    isFirst = (Utils.grOrEq(fstAccu,sndAccu)) ? true : false;
-		else
-		    isFirst = (Utils.gr(fstAccuRate,sndAccuRate)) ? true : false;
-		
-		double accRate= ((isFirst) ? fstAccuRate : sndAccuRate);
-		double accu = ((isFirst) ? fstAccu : sndAccu);
-		
-		/* Compute infoGain according to the higher accuracy*/
-		double infoGain = Utils.eq(accRate, 0) ? 
-		    0 : (accu*(Utils.log2(accRate) - Utils.log2(defAcRt)));
-	
-		/* Check whether so far the max infoGain */
-		if(Utils.gr(infoGain, maxInfoGain)){
-		    splitPoint = (data.instance(split).value(att) + 
-				  data.instance(prev).value(att))/2;
-		    value = ((isFirst) ? 0 : 1);
-		    accuRate = accRate;
-		    maxInfoGain = infoGain;
-		    finalSplit = split;
-		}
-		prev=split;
-	    }
+	sndCover += inst.weight();
+	if(m_ClassAttribute.isNominal()) // Nominal class
+	  snd[(int)inst.classValue()] += inst.weight();		
+	else{                            // Numeric class
+	  sndWtSq += inst.weight() * inst.classValue() * inst.classValue();
+	  sndWtVl += inst.weight() * inst.classValue();
 	}
-
-	/* Split the data */
-	Instances[] splitData = new Instances[2];
-	splitData[0] = new Instances(data, 0, finalSplit);
-	splitData[1] = new Instances(data, finalSplit, total-finalSplit);
-
-	return splitData;
+      }
+	    
+	    
+      // Enough Instances with known values?
+      if (Utils.sm(sndCover,(2*minSplit)))
+	return null;
+	    
+      double msingWtSq=0, msingWtVl=0;
+      Instances missingData = new Instances(data, 0);
+      for(int y=total; y < data.numInstances(); y++){	    
+	Instance inst = data.instance(y);
+	missingData.add(inst);
+	if(m_ClassAttribute.isNominal())
+	  missing[(int)inst.classValue()] += inst.weight();
+	else{ 
+	  msingWtSq += inst.weight() * inst.classValue() * inst.classValue();
+	  msingWtVl += inst.weight() * inst.classValue();
+	}			
+      }	    
+	    
+      if(total == 0) return null; // Data all missing for the attribute 	
+	    
+      splitPoint = data.instance(total-1).value(att);	
+	    
+      for(; split < total; split++){	
+	if(!Utils.eq(data.instance(split).value(att), // Can't split 
+		     data.instance(prev).value(att))){// within same value 	 
+		    
+	  // Move the split point
+	  for(int y=prev; y<split; y++){
+	    Instance inst = data.instance(y);
+	    fstCover += inst.weight(); sndCover -= inst.weight();
+	    if(m_ClassAttribute.isNominal()){ // Nominal class
+	      fst[(int)inst.classValue()] += inst.weight();
+	      snd[(int)inst.classValue()] -= inst.weight();
+	    }   
+	    else{                             // Numeric class
+	      fstWtSq += inst.weight() * inst.classValue() * inst.classValue();
+	      fstWtVl += inst.weight() * inst.classValue();
+	      sndWtSq -= inst.weight() * inst.classValue() * inst.classValue();
+	      sndWtVl -= inst.weight() * inst.classValue();
+	    }
+	  }
+		    
+	  if(Utils.sm(fstCover, minSplit) || Utils.sm(sndCover, minSplit)){
+	    prev=split;  // Cannot split because either
+	    continue;    // split has not enough data
+	  }
+		    
+	  double fstEntp = 0, sndEntp = 0;
+		    
+	  if(m_ClassAttribute.isNominal()){
+	    fstEntp = entropy(fst, fstCover);
+	    sndEntp = entropy(snd, sndCover);
+	  }
+	  else{
+	    fstEntp = wtMeanSqErr(fstWtSq, fstWtVl, fstCover)/fstCover;
+	    sndEntp = wtMeanSqErr(sndWtSq, sndWtVl, sndCover)/sndCover;
+	  }
+		    
+	  /* Which bag has higher information gain? */
+	  boolean isFirst; 
+	  double fstInfoGain, sndInfoGain;
+	  double info, infoGain, fstInfo, sndInfo;
+	  if(m_ClassAttribute.isNominal()){
+	    double sum = data.sumOfWeights();
+	    double otherCover, whole = sum + Utils.sum(uncover), otherEntropy; 
+	    double[] other = null;
+			
+	    // InfoGain of first bag			
+	    other = new double[m_NumClasses];
+	    for(int z=0; z < m_NumClasses; z++)
+	      other[z] = uncover[z] + snd[z] + missing[z];   
+	    otherCover = whole - fstCover;			
+	    otherEntropy = entropy(other, otherCover);
+	    // Weighted average
+	    fstInfo = (fstEntp*fstCover + otherEntropy*otherCover)/whole;
+	    fstInfoGain = defInfo - fstInfo;
+			
+	    // InfoGain of second bag 			
+	    other = new double[m_NumClasses];
+	    for(int z=0; z < m_NumClasses; z++)
+	      other[z] = uncover[z] + fst[z] + missing[z]; 
+	    otherCover = whole - sndCover;			
+	    otherEntropy = entropy(other, otherCover);
+	    // Weighted average
+	    sndInfo = (sndEntp*sndCover + otherEntropy*otherCover)/whole;			    
+	    sndInfoGain = defInfo - sndInfo;			
+	  }
+	  else{
+	    double sum = data.sumOfWeights();
+	    double otherWtSq = (sndWtSq + msingWtSq + uncoverWtSq), 
+	      otherWtVl = (sndWtVl + msingWtVl + uncoverWtVl),
+	      otherCover = (sum - fstCover + uncoverSum);
+			
+	    fstInfo = Utils.eq(fstCover, 0) ? 0 : (fstEntp * fstCover);
+	    fstInfo += wtMeanSqErr(otherWtSq, otherWtVl, otherCover);
+	    fstInfoGain = defInfo - fstInfo;
+			
+	    otherWtSq = (fstWtSq + msingWtSq + uncoverWtSq); 
+	    otherWtVl = (fstWtVl + msingWtVl + uncoverWtVl);
+	    otherCover = sum - sndCover + uncoverSum;
+	    sndInfo = Utils.eq(sndCover, 0) ? 0 : (sndEntp * sndCover);
+	    sndInfo += wtMeanSqErr(otherWtSq, otherWtVl, otherCover);
+	    sndInfoGain = defInfo - sndInfo;
+	  }
+		    
+	  if(Utils.gr(fstInfoGain,sndInfoGain) || 
+	     (Utils.eq(fstInfoGain,sndInfoGain)&&(Utils.sm(fstEntp,sndEntp)))){ 
+	    isFirst = true;
+	    infoGain = fstInfoGain;
+	    info = fstInfo;
+	  }
+	  else{
+	    isFirst = false;
+	    infoGain = sndInfoGain;
+	    info = sndInfo;
+	  }
+		    
+	  boolean isUpdate = Utils.gr(infoGain, maxInfoGain);
+		    
+	  /* Check whether so far the max infoGain */
+	  if(isUpdate){
+	    splitPoint = ((data.instance(split).value(att)) + (data.instance(prev).value(att)))/2.0;
+	    value = ((isFirst) ? 0 : 1);
+	    inform = info;
+	    maxInfoGain = infoGain;
+	    finalSplit = split;			
+	  }
+	  prev=split;
+	}
+      }
+	    
+      /* Split the data */
+      Instances[] splitData = new Instances[3];
+      splitData[0] = new Instances(data, 0, finalSplit);
+      splitData[1] = new Instances(data, finalSplit, total-finalSplit);
+      splitData[2] = new Instances(missingData);
+	    
+      return splitData;
     }
-
+	
     /**
      * Whether the instance is covered by this antecedent
      * 
@@ -678,113 +427,231 @@ class NumericAntd extends Antd{
      *         by this antecedent
      */
     public boolean isCover(Instance inst){
-	boolean isCover=false;
-	if(!inst.isMissing(att)){
-	    if(Utils.eq(value, 0)){
-		if(Utils.smOrEq(inst.value(att), splitPoint))
-		    isCover=true;
-	    }
-	    else if(Utils.gr(inst.value(att), splitPoint))
-		isCover=true;
+      boolean isCover=false;
+      if(!inst.isMissing(att)){
+	if(Utils.eq(value, 0)){
+	  if(Utils.smOrEq(inst.value(att), splitPoint))
+	    isCover=true;
 	}
-	return isCover;
+	else if(Utils.gr(inst.value(att), splitPoint))
+	  isCover=true;
+      }
+      return isCover;
     }
-    
+	
     /**
      * Prints this antecedent
      *
      * @return a textual description of this antecedent
      */
     public String toString() {
-	String symbol = Utils.eq(value, 0.0) ? " <= " : " > ";
-	return (att.name() + symbol + splitPoint);
+      String symbol = Utils.eq(value, 0.0) ? " <= " : " > ";
+      return (att.name() + symbol + Utils.doubleToString(splitPoint, 6));
     }   
-}
-
-
-/** 
- * The antecedent with nominal attribute
- */
-class NominalAntd extends Antd{
-   
-    /* The parameters of infoGain calculated for each attribute value */
-    private double[] accu;
-    private double[] coverage;
-    private double[] infoGain;
-
-    /* Constructor*/
-    public NominalAntd(Attribute a){ 
-	super(a);
-	int bag = att.numValues();
-	accu = new double[bag];
-	coverage = new double[bag];
-	infoGain = new double[bag];
-    }   
+  }
     
+    
+  /** 
+   * The antecedent with nominal attribute
+   */
+  class NominalAntd extends Antd{
+	
+    /* The parameters of infoGain calculated for each attribute value */
+    private double[][] stats;
+    private double[] coverage;
+    private boolean isIn;
+	
+    /* Constructor for nominal class */
+    public NominalAntd(Attribute a, double[] unc){ 
+      super(a, unc);
+      int bag = att.numValues();
+      stats = new double[bag][m_NumClasses];
+      coverage = new double[bag];
+      isIn = true;
+    }   
+	
+    /* Constructor for numeric class */
+    public NominalAntd(Attribute a, double sq, double vl, double wts){ 
+      super(a, sq, vl, wts);
+      int bag = att.numValues();	    
+      stats = null;
+      coverage = new double[bag];
+      isIn = true;
+    }
+	
     /**
      * Implements the splitData function.  
      * This procedure is to split the data into bags according 
      * to the nominal attribute value
+     * the data with missing values are stored in the last bag.
      * The infoGain for each bag is also calculated.  
      * 
      * @param data the data to be split
-     * @param defAcRt the default accuracy rate for data
-     * @param cl the class label to be predicted
+     * @param defInfo the default information for data
      * @return the array of data after split
      */
-    public Instances[] splitData(Instances data, double defAcRt, double cl){
-	int bag = att.numValues();
-	Instances[] splitData = new Instances[bag];
-	
-	for(int x=0; x<bag; x++){
-	    accu[x] = coverage[x] = infoGain[x] = 0;
-	    splitData[x] = new Instances(data, data.numInstances());
+    public Instances[] splitData(Instances data, double defInfo){
+      int bag = att.numValues();
+      Instances[] splitData = new Instances[bag+1];
+      double[] wSq = new double[bag];
+      double[] wVl = new double[bag];
+      double totalWS=0, totalWV=0, msingWS=0, msingWV=0, sum=data.sumOfWeights();
+      double[] all = new double[m_NumClasses];
+      double[] missing = new double[m_NumClasses];	   
+	    
+      for(int w=0; w < m_NumClasses; w++)
+	all[w] = missing[w] = 0;
+
+      for(int x=0; x<bag; x++){
+	coverage[x] = wSq[x] = wVl[x] = 0;
+	if(stats != null)
+	  for(int y=0; y < m_NumClasses; y++)
+	    stats[x][y] = 0;		
+	splitData[x] = new Instances(data, data.numInstances());
+      }
+      splitData[bag] = new Instances(data, data.numInstances());
+	    
+      // Record the statistics of data
+      for(int x=0; x<data.numInstances(); x++){
+	Instance inst=data.instance(x);
+	if(!inst.isMissing(att)){
+	  int v = (int)inst.value(att);
+	  splitData[v].add(inst);
+	  coverage[v] += inst.weight();
+	  if(m_ClassAttribute.isNominal()){ // Nominal class			
+	    stats[v][(int)inst.classValue()] += inst.weight();
+	    all[(int)inst.classValue()] += inst.weight();	    
+	  }
+	  else{                             // Numeric class
+	    wSq[v] += inst.weight() * inst.classValue() * inst.classValue();
+	    wVl[v] += inst.weight() * inst.classValue();
+	    totalWS += inst.weight() * inst.classValue() * inst.classValue();
+	    totalWV += inst.weight() * inst.classValue();
+	  }
 	}
-	
-	for(int x=0; x<data.numInstances(); x++){
-	    Instance inst=data.instance(x);
-	    if(!inst.isMissing(att)){
-		int v = (int)inst.value(att);
-		splitData[v].add(inst);
-		coverage[v] += inst.weight();
-		if(Utils.eq(inst.classValue(), cl))
-		    accu[v] += inst.weight();
-	    }
+	else{
+	  splitData[bag].add(inst);
+	  if(m_ClassAttribute.isNominal()){ // Nominal class
+	    all[(int)inst.classValue()] += inst.weight();
+	    missing[(int)inst.classValue()] += inst.weight();
+	  }
+	  else{                            // Numeric class
+	    totalWS += inst.weight() * inst.classValue() * inst.classValue();
+	    totalWV += inst.weight() * inst.classValue();
+	    msingWS += inst.weight() * inst.classValue() * inst.classValue();
+	    msingWV += inst.weight() * inst.classValue();		 
+	  }
 	}
-	
-	for(int x=0; x<bag; x++){
-	    double p = accu[x];
-	    double t = coverage[x];
-	    if(!Utils.eq(t, 0.0))
-		infoGain[x] = p *((Utils.log2(p/t)) - (Utils.log2(defAcRt)));
+      }
+	    
+      // The total weights of the whole grow data
+      double whole;
+      if(m_ClassAttribute.isNominal())
+	whole = sum + Utils.sum(uncover);
+      else
+	whole = sum + uncoverSum;
+	  
+      // Find the split  
+      double minEntrp=Double.MAX_VALUE;
+      maxInfoGain = 0;
+	    
+      // Check if >=2 splits have more than the minimal data
+      int count=0;
+      for(int x=0; x<bag; x++)
+	if(Utils.grOrEq(coverage[x], m_MinNo))		    
+	  ++count;
+	    
+      if(count < 2){ // Don't split
+	maxInfoGain = 0;
+	inform = defInfo;
+	value = Double.NaN;
+	return null;
+      }
+	    
+      for(int x=0; x<bag; x++){		
+	double t = coverage[x], entrp, infoGain;
+
+	if(Utils.sm(t, m_MinNo))
+	  continue;
+		
+	if(m_ClassAttribute.isNominal()){ // Nominal class	   
+	  double[] other = new double[m_NumClasses];
+	  for(int y=0; y < m_NumClasses; y++)
+	    other[y] = all[y] - stats[x][y] + uncover[y]; 
+	  double otherCover = whole - t;	
+		    
+	  // Entropies of data covered and uncovered 	
+	  entrp = entropy(stats[x], t);
+	  double uncEntp = entropy(other, otherCover);
+		    
+	  // Weighted average
+	  infoGain = defInfo - (entrp*t + uncEntp*otherCover)/whole;		   
+	}	
+	else{                             // Numeric class
+	  double weight = (whole - t);
+	  entrp = wtMeanSqErr(wSq[x], wVl[x], t)/t;
+	  infoGain = defInfo - (entrp * t) - 
+	    wtMeanSqErr((totalWS-wSq[x]+uncoverWtSq),
+			(totalWV-wVl[x]+uncoverWtVl), 
+			weight);		  
+	}   		
+		
+	// Test the exclusive expression
+	boolean isWithin =true;		
+	if(m_IsExclude){
+	  double infoGain2, entrp2;
+	  if(m_ClassAttribute.isNominal()){ // Nominal class	
+	    double[] other2 = new double[m_NumClasses];
+	    double[] notIn = new double[m_NumClasses];
+	    for(int y=0; y < m_NumClasses; y++){
+	      other2[y] = stats[x][y] + missing[y] + uncover[y];
+	      notIn[y] = all[y] - stats[x][y] - missing[y];
+	    } 
+			
+	    double msSum = Utils.sum(missing);
+	    double otherCover2 = t + msSum + Utils.sum(uncover);
+			
+	    entrp2 = entropy(notIn, (sum-t-msSum));
+	    double uncEntp2 = entropy(other2, otherCover2);
+	    infoGain2 = defInfo - 
+	      (entrp2*(sum-t-msSum) + uncEntp2*otherCover2)/whole;
+	  }
+	  else{                             // Numeric class
+	    double msWts = splitData[bag].sumOfWeights();
+	    double weight2 = t + uncoverSum + msWts;
+			
+	    entrp2 = wtMeanSqErr((totalWS-wSq[x]-msingWS),
+				 (totalWV-wVl[x]-msingWV),(sum-t-msWts))
+	      /(sum-t-msWts);
+	    infoGain2 = defInfo - entrp2 * (sum-t-msWts) -
+	      wtMeanSqErr((wSq[x]+uncoverWtSq+msingWS),
+			  (wVl[x]+uncoverWtVl+msingWV), 
+			  weight2);
+	  }
+		    
+	  // Use the exclusive expression?
+	  if (Utils.gr(infoGain2, infoGain) ||
+	      (Utils.eq(infoGain2, infoGain) && Utils.sm(entrp2, entrp))){
+	    infoGain = infoGain2;
+	    entrp = entrp2;
+	    isWithin =false;
+	  }
 	}
-	value = (double)Utils.maxIndex(infoGain);
-	return splitData;
+		
+	// Test this split
+	if (Utils.gr(infoGain, maxInfoGain) ||
+	    (Utils.eq(infoGain, maxInfoGain) && Utils.sm(entrp, minEntrp))){
+	  value = (double)x;
+	  maxInfoGain = infoGain;
+	  inform = maxInfoGain - defInfo;
+	  minEntrp = entrp;
+	  isIn = isWithin;
+	}		
+      }
+	    
+      return splitData;
     }
-    
-    /**
-     * This function overrides the corresponding member of super class
-     * 
-     * @return maximum infoGain achieved by this nominal antecedent test
-     */
-    public double getMaxInfoGain(){ 
-	maxInfoGain = infoGain [(int)value];
-	return maxInfoGain;
-    } 
-    
-    /**
-     * This function overrides the corresponding member of super class
-     * 
-     * @return accuracy rate of this nominal antecedent test
-     */
-    public double getAccuRate(){ 
-	if(!Utils.eq(coverage[(int)value],0))
-	    accuRate = accu [(int)value] / coverage[(int)value];
-	else accuRate = 0;
-	return accuRate;
-    } 
-
-
+	
     /**
      * Whether the instance is covered by this antecedent
      * 
@@ -792,21 +659,683 @@ class NominalAntd extends Antd{
      * @return the boolean value indicating whether the instance is covered 
      *         by this antecedent
      */
-    public boolean isCover(Instance inst){
-	boolean isCover=false;
-	if(!inst.isMissing(att)){
-	    if(Utils.eq(inst.value(att), value))
-		isCover=true;	    
+    public boolean isCover(Instance inst){	  
+      boolean isCover=false;
+      if(!inst.isMissing(att)){
+	if(isIn){
+	  if(Utils.eq(inst.value(att), value))
+	    isCover=true;
 	}
-	return isCover;
+	else if(!Utils.eq(inst.value(att), value))
+	  isCover=true;
+      }
+      return isCover;
     }
-    
+	
+    /**
+     * Whether the expression is "att = value" or att != value"
+     * for this nominal attribute.  True if in the former expression, 
+     * otherwise the latter
+     * 
+     * @return the boolean value
+     */
+    public boolean isIn(){	 
+      return isIn;
+    }
+	
     /**
      * Prints this antecedent
      *
      * @return a textual description of this antecedent
      */
     public String toString() {
-	return (att.name() + " = " +att.value((int)value));
+      String symbol = isIn ? " = " : " != ";	    
+      return (att.name() + symbol + att.value((int)value));
     } 
+  }
+    
+  /**
+   * Returns an enumeration describing the available options
+   * Valid options are: <p>
+   *
+   * -N number <br>
+   * Set number of folds for REP. One fold is
+   * used as the pruning set. (Default: 3) <p>
+   *
+   * -R <br>
+   * Set whether randomize the data before split to growing and 
+   * pruning data. If set, but the seed is not set, this learner
+   * will use the current system time as the seed. (Default: false) <p>
+   * 
+   * -E <br>
+   * Set whether consider the exclusive expressions for nominal
+   * attribute split. (Default: false) <p>
+   *
+   * -M number <br>
+   * Set the minimal weights of instances within a split.
+   * (Default: 2) <p>
+   *
+   * @return an enumeration of all the available options
+   */
+  public Enumeration listOptions() {
+    Vector newVector = new Vector(4);
+	
+    newVector.addElement(new Option("\tSet number of folds for REP\n" +
+				    "\tOne fold is used as pruning set.\n" +
+				    "\t(default 3)","N", 1, "-N <number of folds>"));
+	
+    newVector.addElement(new Option("\tSet whether uses randomization\n" +
+				    "\t(default false)","R", 0, "-R"));
+
+    newVector.addElement(new Option("\tSet whether consider the exclusive\n" +
+				    "\texpressions for nominal attributes\n"+
+				    "(default false)","E", 0, "-E"));
+	
+    newVector.addElement(new Option("\tSet the minimal weights of instances\n" +
+				    "\twithin a split.\n" +
+				    "\t(default 2.0)","M", 1, "-M <min. weights>"));	
+	
+    return newVector.elements();
+  }
+    
+  /**
+   * Parses a given list of options.
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception{
+	
+    String numFoldsString = Utils.getOption('N', options);
+    if (numFoldsString.length() != 0) 
+      m_Folds = Integer.parseInt(numFoldsString);
+    else 
+      m_Folds = 3;
+
+    String minNoString = Utils.getOption('M', options);
+    if (minNoString.length() != 0) 
+      m_MinNo = Double.parseDouble(minNoString);
+    else 
+      m_MinNo = 2.0;
+	
+    String seedString = Utils.getOption('s', options);
+    if (seedString.length() != 0) 
+      m_Seed = Integer.parseInt(seedString);
+    else 
+      m_Seed = -1;
+	
+    m_IsRandomized = Utils.getFlag('R', options);
+    m_IsExclude = Utils.getFlag('E', options);	
+  }
+    
+  /**
+   * Gets the current settings of the Classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String [] getOptions() {
+	
+    String [] options = new String [6];
+    int current = 0;
+    options[current++] = "-N"; options[current++] = "" + m_Folds;
+    options[current++] = "-M"; options[current++] = "" + m_MinNo;
+    if(m_IsRandomized)
+      options[current++] = "-R";
+    if(m_IsExclude)
+      options[current++] = "-E";
+	
+    while (current < options.length) 
+      options[current++] = "";
+    return options;
+  }
+    
+  /** The access functions for parameters */
+  public void setFolds(int folds){  m_Folds = folds; }
+  public int getFolds(){ return m_Folds; }
+  public void setSeed(long s){ m_Seed = s; }
+  public long getSeed(){ return m_Seed; }
+  public boolean getRandomized(){ return m_IsRandomized;}
+  public void setRandomized(boolean r){ m_IsRandomized = r;}
+  public boolean getExclusive(){ return m_IsExclude;}
+  public void setExclusive(boolean e){ m_IsExclude = e;}
+  public void setMinNo(double m){  m_MinNo = m; }
+  public double getMinNo(){ return m_MinNo; }
+  
+  /**
+   * Builds a single rule learner with REP dealing with nominal classes or
+   * numeric classes.
+   * For nominal classes, this rule learner predicts a distribution on
+   * the classes.
+   * For numeric classes, this learner predicts a single value.
+   *
+   * @param instances the training data
+   * @exception Exception if classifier can't be built successfully
+   */
+  public void buildClassifier(Instances instances) throws Exception{
+    if (instances.checkForStringAttributes())
+      throw new Exception("Can't handle string attributes!");
+	
+    m_ClassAttribute = instances.classAttribute();
+	
+    Instances data = new Instances(instances);
+    data.deleteWithMissingClass();
+	
+    if(data.numInstances() < m_Folds)
+      throw new Exception("Not enough data for REP.");
+
+    if(m_ClassAttribute.isNominal())
+      m_NumClasses = m_ClassAttribute.numValues();
+    else
+      m_NumClasses = 1;
+	
+    m_Antds = new FastVector();
+    m_DefDstr = new double[m_NumClasses];
+    m_Cnsqt = new double[m_NumClasses];
+    m_Targets = new FastVector();	
+	
+    /* Split data into Grow and Prune*/
+    if(m_IsRandomized){
+      if(m_Random == null){		    
+	if(m_Seed == -1)
+	  m_Seed = System.currentTimeMillis();
+	m_Random = new Random(m_Seed);
+      }
+	    
+      data.randomize(m_Random);
+    }	
+    data.stratify(m_Folds);
+    Instances growData=data.trainCV(m_Folds, m_Folds-1);
+    Instances pruneData=data.testCV(m_Folds, m_Folds-1);
+	
+    grow(growData);      // Build this rule  	
+    prune(pruneData);    // Prune this rule	
+	
+    if(m_ClassAttribute.isNominal()){		
+      Utils.normalize(m_Cnsqt);
+      if(Utils.gr(Utils.sum(m_DefDstr), 0))
+	Utils.normalize(m_DefDstr);
+    }	
+  }
+    
+  /**
+   * Computes class distribution for the given instance.
+   *
+   * @param instance the instance for which distribution is to be computed
+   * @return the class distribution for the given instance
+   */
+  public double[] distributionForInstance(Instance instance) throws Exception{
+	
+    if (isCover(instance))		
+      return m_Cnsqt;
+    else
+      return m_DefDstr;
+  }
+ 
+  /**
+   * Whether the instance covered by this rule
+   * 
+   * @param inst the instance in question
+   * @return the boolean value indicating whether the instance is covered by this rule
+   */
+  public boolean isCover(Instance datum){
+    boolean isCover=true;
+
+    for(int i=0; i<m_Antds.size(); i++){
+      Antd antd = (Antd)m_Antds.elementAt(i);
+      if(!antd.isCover(datum)){
+	isCover = false;
+	break;
+      }
+    }
+	
+    return isCover;
+  }        
+    
+  /**
+   * Whether this rule has antecedents, i.e. whether it is a default rule
+   * 
+   * @return the boolean value indicating whether the rule has antecedents
+   */
+  public boolean hasAntds(){
+    if (m_Antds == null)
+      return false;
+    else
+      return (m_Antds.size() > 0);
+  }      
+
+  /**
+   * Build one rule using the growing data
+   *
+   * @param data the growing data used to build the rule
+   */    
+  private void grow(Instances data){
+    Instances growData = new Instances(data);	
+    double defInfo;	
+    double whole = data.sumOfWeights();
+	
+    /* Class distribution for data both covered and not covered by one antecedent */
+    double[][] classDstr = new double[2][m_NumClasses];
+	
+    /* Compute the default accuracy rate of the growing data */
+    for(int j=0; j < m_NumClasses; j++){
+      classDstr[0][j] = 0;
+      classDstr[1][j] = 0;
+    }	
+    if(m_ClassAttribute.isNominal()){	    
+      for(int i=0; i < growData.numInstances(); i++){
+	Instance datum = growData.instance(i);
+	classDstr[0][(int)datum.classValue()] += datum.weight();
+      }
+      defInfo = ContingencyTables.entropy(classDstr[0]);	    
+    }
+    else{
+      for(int i=0; i < growData.numInstances(); i++){
+	Instance datum = growData.instance(i);
+	classDstr[0][0] += datum.weight() * datum.classValue();
+      }
+
+      // No need to be divided by the denomitor because
+      // it's always the same
+      double defMean = (classDstr[0][0] / whole);
+      defInfo = meanSquaredError(growData, defMean) * growData.sumOfWeights();    
+    }
+	
+    // Store the default class distribution	
+    double[][] tmp = new double[2][m_NumClasses];
+    for(int y=0; y < m_NumClasses; y++){
+      if(m_ClassAttribute.isNominal()){	
+	tmp[0][y] = classDstr[0][y];
+	tmp[1][y] = classDstr[1][y];
+      }
+      else{
+	tmp[0][y] = classDstr[0][y]/whole;
+	tmp[1][y] = classDstr[1][y];
+      }
+    }
+    m_Targets.addElement(tmp); 
+	
+    /* Keep the record of which attributes have already been used*/    
+    boolean[] used=new boolean[growData.numAttributes()];
+    for (int k=0; k<used.length; k++)
+      used[k]=false;
+    int numUnused=used.length;	
+    double maxInfoGain, uncoveredWtSq=0, uncoveredWtVl=0, uncoveredWts=0;	
+    boolean isContinue = true; // The stopping criterion of this rule	
+
+    while (isContinue){   
+      maxInfoGain = 0;       // We require that infoGain be positive
+	    
+      /* Build a list of antecedents */
+      Antd oneAntd=null;
+      Instances coverData = null, uncoverData = null;
+      Enumeration enumAttr=growData.enumerateAttributes();	    
+      int index=-1;  
+	 
+      /* Build one condition based on all attributes not used yet*/
+      while (enumAttr.hasMoreElements()){
+	Attribute att= (Attribute)(enumAttr.nextElement());
+	index++;
+		
+	Antd antd =null;	
+	if(m_ClassAttribute.isNominal()){		    
+	  if(att.isNumeric())
+	    antd = new NumericAntd(att, classDstr[1]);
+	  else
+	    antd = new NominalAntd(att, classDstr[1]);
+	}
+	else
+	  if(att.isNumeric())
+	    antd = new NumericAntd(att, uncoveredWtSq, uncoveredWtVl, uncoveredWts);
+	  else
+	    antd = new NominalAntd(att, uncoveredWtSq, uncoveredWtVl, uncoveredWts); 
+		
+	if(!used[index]){
+	  /* Compute the best information gain for each attribute,
+	     it's stored in the antecedent formed by this attribute.
+	     This procedure returns the data covered by the antecedent*/
+	  Instances[] coveredData = computeInfoGain(growData, defInfo, antd);	 
+		    
+	  if(coveredData != null){
+	    double infoGain = antd.getMaxInfoGain();			
+	    boolean isUpdate = Utils.gr(infoGain, maxInfoGain);
+			
+	    if(isUpdate){
+	      oneAntd=antd;
+	      coverData = coveredData[0]; 
+	      uncoverData = coveredData[1];  
+	      maxInfoGain = infoGain;		    
+	    }
+	  }
+	}
+      }
+	    
+      if(oneAntd == null) 		
+	return;	    
+	    
+      //Numeric attributes can be used more than once
+      if(!oneAntd.getAttr().isNumeric()){ 
+	used[oneAntd.getAttr().index()]=true;
+	numUnused--;
+      }
+	    
+      m_Antds.addElement(oneAntd);
+      growData = coverData;// Grow data size is shrinking 	    
+	    
+      for(int x=0; x < uncoverData.numInstances(); x++){
+	Instance datum = uncoverData.instance(x);
+	if(m_ClassAttribute.isNumeric()){
+	  uncoveredWtSq += datum.weight() * datum.classValue() * datum.classValue();
+	  uncoveredWtVl += datum.weight() * datum.classValue();
+	  uncoveredWts += datum.weight();
+	  classDstr[0][0] -= datum.weight() * datum.classValue();
+	  classDstr[1][0] += datum.weight() * datum.classValue();
+	}
+	else{
+	  classDstr[0][(int)datum.classValue()] -= datum.weight();
+	  classDstr[1][(int)datum.classValue()] += datum.weight();
+	}
+      }	       
+	    
+      // Store class distribution of growing data
+      tmp = new double[2][m_NumClasses];
+      for(int y=0; y < m_NumClasses; y++){
+	if(m_ClassAttribute.isNominal()){	
+	  tmp[0][y] = classDstr[0][y];
+	  tmp[1][y] = classDstr[1][y];
+	}
+	else{
+	  tmp[0][y] = classDstr[0][y]/(whole-uncoveredWts);
+	  tmp[1][y] = classDstr[1][y]/uncoveredWts;
+	}
+      }
+      m_Targets.addElement(tmp);  
+	    
+      defInfo = oneAntd.getInfo();
+	    
+      if(Utils.eq(growData.sumOfWeights(), 0.0) || (numUnused == 0))
+	isContinue = false;
+    }
+  }
+    
+  /** 
+   * Compute the best information gain for the specified antecedent
+   *  
+   * @param data the data based on which the infoGain is computed
+   * @param defInfo the default information of data
+   * @param antd the specific antecedent
+   * @return the data covered and not covered by the antecedent
+   */
+  private Instances[] computeInfoGain(Instances instances, double defInfo, Antd antd){	
+    Instances data = new Instances(instances);
+	
+    /* Split the data into bags.
+       The information gain of each bag is also calculated in this procedure */
+    Instances[] splitData = antd.splitData(data, defInfo); 
+    Instances[] coveredData = new Instances[2];
+	
+    /* Get the bag of data to be used for next antecedents */
+    Instances tmp1 = new Instances(data, 0);
+    Instances tmp2 = new Instances(data, 0);
+	
+    if(splitData == null)	    
+      return null;
+	
+    for(int x=0; x < (splitData.length-1); x++){
+      if(x == ((int)antd.getAttrValue()))
+	tmp1 = splitData[x];
+      else{		
+	for(int y=0; y < splitData[x].numInstances(); y++)
+	  tmp2.add(splitData[x].instance(y));		    
+      }		
+    }
+	
+    if(antd.getAttr().isNominal()){ // Nominal attributes
+      if(((NominalAntd)antd).isIn()){ // Inclusive expression
+	coveredData[0] = new Instances(tmp1);
+	coveredData[1] = new Instances(tmp2);
+      }
+      else{                           // Exclusive expression
+	coveredData[0] = new Instances(tmp2);
+	coveredData[1] = new Instances(tmp1);
+      }	
+    }
+    else{                           // Numeric attributes
+      coveredData[0] = new Instances(tmp1);
+      coveredData[1] = new Instances(tmp2);
+    }
+	
+    /* Add data with missing value */
+    for(int z=0; z<splitData[splitData.length-1].numInstances(); z++)
+      coveredData[1].add(splitData[splitData.length-1].instance(z));
+	
+    return coveredData;
+  }
+    
+  /**
+   * Prune the rule using the pruning data.
+   * The weighted average of accuracy rate/mean-squared error is 
+   * used to prune the rule.
+   *
+   * @param pruneData the pruning data used to prune the rule
+   */    
+  private void prune(Instances pruneData){
+    Instances data=new Instances(pruneData);
+    Instances otherData = new Instances(data, 0);
+    double total = data.sumOfWeights();
+	
+    /* The default accurate# and the the accuracy rate on pruning data */
+    double defAccu;
+    if(m_ClassAttribute.isNumeric())
+      defAccu = meanSquaredError(pruneData,
+				 ((double[][])m_Targets.firstElement())[0][0]);
+    else{
+      int predict = Utils.maxIndex(((double[][])m_Targets.firstElement())[0]);
+      defAccu = computeAccu(pruneData, predict)/total;
+    }
+	
+    int size=m_Antds.size();
+    if(size == 0){
+      m_Cnsqt = ((double[][])m_Targets.lastElement())[0];
+      m_DefDstr = ((double[][])m_Targets.lastElement())[1];
+      return; // Default rule before pruning
+    }
+	
+    double[] worthValue = new double[size];
+	
+    /* Calculate accuracy parameters for all the antecedents in this rule */
+    for(int x=0; x<size; x++){
+      Antd antd=(Antd)m_Antds.elementAt(x);
+      Attribute attr= antd.getAttr();
+      Instances newData = new Instances(data);
+      if(Utils.eq(newData.sumOfWeights(),0.0))
+	break;
+	    
+      data = new Instances(newData, newData.numInstances()); // Make data empty
+	    
+      for(int y=0; y<newData.numInstances(); y++){
+	Instance ins=newData.instance(y);
+	if(antd.isCover(ins))              // Covered by this antecedent
+	  data.add(ins);                 // Add to data for further 		
+	else
+	  otherData.add(ins);            // Not covered by this antecedent
+      }
+	    
+      double covered, other;	    
+      double[][] classes = 
+	(double[][])m_Targets.elementAt(x+1); // m_Targets has one more element
+      if(m_ClassAttribute.isNominal()){		
+	int coverClass = Utils.maxIndex(classes[0]),
+	  otherClass = Utils.maxIndex(classes[1]);
+		
+	covered = computeAccu(data, coverClass); 
+	other = computeAccu(otherData, otherClass);		
+      }
+      else{
+	double coverClass = classes[0][0],
+	  otherClass = classes[1][0];
+	covered = (data.sumOfWeights())*meanSquaredError(data, coverClass); 
+	other = (otherData.sumOfWeights())*meanSquaredError(otherData, otherClass);
+      }
+	    
+      worthValue[x] = (covered + other)/total;
+    }
+	
+    /* Prune the antecedents according to the accuracy parameters */
+    for(int z=(size-1); z > 0; z--){	
+      // Treatment to avoid precision problems
+      double valueDelta;
+      if(m_ClassAttribute.isNominal()){
+	if(Utils.sm(worthValue[z], 1.0))
+	  valueDelta = (worthValue[z] - worthValue[z-1]) / worthValue[z];
+	else
+	  valueDelta = worthValue[z] - worthValue[z-1];
+      }
+      else{
+	if(Utils.sm(worthValue[z], 1.0))
+	  valueDelta = (worthValue[z-1] - worthValue[z]) / worthValue[z];
+	else
+	  valueDelta = (worthValue[z-1] - worthValue[z]);
+      }
+	    
+      if(Utils.smOrEq(valueDelta, 0.0)){	
+	m_Antds.removeElementAt(z);
+	m_Targets.removeElementAt(z+1);
+      }
+      else  break;
+    }	
+	
+    // Check whether this rule is a default rule
+    if(m_Antds.size() == 1){
+      double valueDelta;
+      if(m_ClassAttribute.isNominal()){
+	if(Utils.sm(worthValue[0], 1.0))
+	  valueDelta = (worthValue[0] - defAccu) / worthValue[0];
+	else
+	  valueDelta = (worthValue[0] - defAccu);
+      }
+      else{
+	if(Utils.sm(worthValue[0], 1.0))
+	  valueDelta = (defAccu - worthValue[0]) / worthValue[0];
+	else
+	  valueDelta = (defAccu - worthValue[0]);
+      }
+	    
+      if(Utils.smOrEq(valueDelta, 0.0)){
+	m_Antds.removeAllElements();
+	m_Targets.removeElementAt(1);
+      }
+    }
+	
+    m_Cnsqt = ((double[][])m_Targets.lastElement())[0];
+    m_DefDstr = ((double[][])m_Targets.lastElement())[1];
+  }
+    
+  /**
+   * Private function to compute number of accurate instances
+   * based on the specified predicted class
+   * 
+   * @param data the data in question
+   * @param clas the predicted class
+   * @return the default accuracy number
+   */
+  private double computeAccu(Instances data, int clas){ 
+    double accu = 0;
+    for(int i=0; i<data.numInstances(); i++){
+      Instance inst = data.instance(i);
+      if((int)inst.classValue() == clas)
+	accu += inst.weight();
+    }
+    return accu;
+  }
+    
+
+  /**
+   * Private function to compute the squared error of
+   * the specified data and the specified mean
+   * 
+   * @param data the data in question
+   * @param mean the specified mean
+   * @return the default mean-squared error
+   */
+  private double meanSquaredError(Instances data, double mean){ 
+    if(Utils.eq(data.sumOfWeights(),0.0))
+      return 0;
+	
+    double mSqErr=0, sum = data.sumOfWeights();
+    for(int i=0; i < data.numInstances(); i++){
+      Instance datum = data.instance(i);
+      mSqErr += datum.weight()*
+	(datum.classValue() - mean)*
+	(datum.classValue() - mean);
+    }	 
+	
+    return (mSqErr / sum);
+  }
+     
+  /**
+   * Prints this rule with the specified class label
+   *
+   * @param att the string standing for attribute in the consequent of this rule
+   * @param cl the string standing for value in the consequent of this rule
+   * @return a textual description of this rule with the specified class label
+   */
+  public String toString(String att, String cl) {
+    StringBuffer text =  new StringBuffer();
+    if(m_Antds.size() > 0){
+      for(int j=0; j< (m_Antds.size()-1); j++)
+	text.append("(" + ((Antd)(m_Antds.elementAt(j))).toString()+ ") and ");
+      text.append("("+((Antd)(m_Antds.lastElement())).toString() + ")");
+    }
+    text.append(" => " + att + " = " + cl);
+	
+    return text.toString();
+  }
+    
+  /**
+   * Prints this rule
+   *
+   * @return a textual description of this rule
+   */
+  public String toString() {
+    String title = 
+      "\n\nSingle conjunctive rule learner:\n"+
+      "--------------------------------\n", body = null;
+    StringBuffer text =  new StringBuffer();
+    if(m_ClassAttribute != null){
+      if(m_ClassAttribute.isNominal()){
+	body = toString(m_ClassAttribute.name(), m_ClassAttribute.value(Utils.maxIndex(m_Cnsqt)));
+		
+	text.append("\n\nClass distributions:\nCovered by the rule:\n");
+	for(int k=0; k < m_Cnsqt.length; k++)
+	  text.append(m_ClassAttribute.value(k)+ "\t");
+	text.append('\n');
+	for(int l=0; l < m_Cnsqt.length; l++)
+	  text.append(Utils.doubleToString(m_Cnsqt[l], 6)+"\t");
+		
+	text.append("\n\nNot covered by the rule:\n");
+	for(int k=0; k < m_DefDstr.length; k++)
+	  text.append(m_ClassAttribute.value(k)+ "\t");
+	text.append('\n');
+	for(int l=0; l < m_DefDstr.length; l++)
+	  text.append(Utils.doubleToString(m_DefDstr[l], 6)+"\t");	    
+      }
+      else
+	body = toString(m_ClassAttribute.name(), Utils.doubleToString(m_Cnsqt[0], 6));
+    }
+    return (title + body + text.toString());
+  }
+    
+  /**
+   * Main method.
+   *
+   * @param args the options for the classifier
+   */
+  public static void main(String[] args) {	
+    try {
+      System.out.println(Evaluation.evaluateModel(new ConjunctiveRule(), args));
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.err.println(e.getMessage());
+    }
+  }
 }
