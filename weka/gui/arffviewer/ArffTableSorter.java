@@ -34,7 +34,7 @@ import javax.swing.event.TableModelListener;
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.1.2.1 $ 
  */
 
 public class ArffTableSorter extends TableSorter implements Undoable {
