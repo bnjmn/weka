@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.FirstOrderFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision:
+ * @version $Revision: 1.2 $
  */
 public class FirstOrderFilterTest extends AbstractFilterTest {
   
@@ -49,9 +49,14 @@ public class FirstOrderFilterTest extends AbstractFilterTest {
     assertEquals(m_Instances.numAttributes() - 1, result.numAttributes());
     for (int i = 0; i < result.numInstances(); i++) {
       Instance orig = m_Instances.instance(i);
-      assertEquals(orig.value(5) - orig.value(2), 
-                   result.instance(i).value(result.numAttributes() - 1), 
-                   EXPR_DELTA);
+      if (orig.isMissing(5) || orig.isMissing(2)) {
+        assert("Instance " + (i + 1) + " should have been ?" , 
+               result.instance(i).isMissing(result.numAttributes() - 1));
+      } else {
+        assertEquals(orig.value(5) - orig.value(2), 
+                     result.instance(i).value(result.numAttributes() - 1), 
+                     EXPR_DELTA);
+      }
     }
   }
 
@@ -61,9 +66,14 @@ public class FirstOrderFilterTest extends AbstractFilterTest {
     assertEquals(m_Instances.numAttributes() - 1, result.numAttributes());
     for (int i = 0; i < result.numInstances(); i++) {
       Instance orig = m_Instances.instance(i);
-      assertEquals(orig.value(5) - orig.value(2), 
-                   result.instance(i).value(result.numAttributes() - 1), 
-                   EXPR_DELTA);
+      if (orig.isMissing(5) || orig.isMissing(2)) {
+        assert("Instance " + (i + 1) + " should have been ?" , 
+               result.instance(i).isMissing(result.numAttributes() - 1));
+      } else {
+        assertEquals(orig.value(5) - orig.value(2), 
+                     result.instance(i).value(result.numAttributes() - 1), 
+                     EXPR_DELTA);
+      }
     }
   }
 
