@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -453,6 +453,43 @@ public class PairedTTester implements OptionHandler {
 
   /**
    * Carries out a comparison between all resultsets, counting the number
+   * of datsets where one resultset outperforms the other.
+   *
+   * @param comparisonColumn the index of the comparison column
+   * @return a 2d array where element [i][j] is the number of times resultset
+   * j performed significantly better than resultset i.
+   * @exception Exception if an error occurs
+   */
+  public int [][] multiResultsetWins(int comparisonColumn)
+    throws Exception {
+
+    int numResultsets = getNumResultsets();
+    int [][] win = new int [numResultsets][numResultsets];
+    for (int i = 0; i < numResultsets; i++) {
+      for (int j = i + 1; j < numResultsets; j++) {
+	System.err.print("Comparing (" + (i + 1) + ") with ("
+			 + (j + 1) + ")\r");
+	System.err.flush();
+	for (int k = 0; k < getNumDatasets(); k++) {
+	  try {
+	    PairedStats pairedStats = calculateStatistics(k, i, j,
+							  comparisonColumn);
+	    if (pairedStats.differencesSignificance < 0) {
+	      win[i][j]++;
+	    } else if (pairedStats.differencesSignificance > 0) {
+	      win[j][i]++;
+	    }
+	  } catch (Exception ex) {
+	    System.err.println(ex.getMessage());
+	  }
+	}
+      }
+    }
+    return win;
+  }
+  
+  /**
+   * Carries out a comparison between all resultsets, counting the number
    * of datsets where one resultset outperforms the other. The results
    * are summarized in a table.
    *
@@ -462,36 +499,14 @@ public class PairedTTester implements OptionHandler {
    */
   public String multiResultsetSummary(int comparisonColumn)
     throws Exception {
-
-    String result = "";
-    int datasetLength = 25;
+    
+    int [][] win = multiResultsetWins(comparisonColumn);
     int numResultsets = getNumResultsets();
     int resultsetLength = 1 + Math.max((int)(Math.log(numResultsets)
 					     / Math.log(10)),
 				       (int)(Math.log(getNumDatasets()) / 
 					     Math.log(10)));
-    int [][] win = new int [numResultsets][numResultsets];
-    for (int i = 0; i < numResultsets; i++) {
-      for (int j = i + 1; j < numResultsets; j++) {
-	System.err.print("Comparing (" + (i + 1) + ") with ("
-			 + (j + 1) + ")\r");
-	System.err.flush();
-	try {
-	  for (int k = 0; k < getNumDatasets(); k++) {
-	    PairedStats pairedStats = calculateStatistics(k, i, j,
-							  comparisonColumn);
-	    if (pairedStats.differencesSignificance < 0) {
-	      win[i][j]++;
-	    } else if (pairedStats.differencesSignificance > 0) {
-	      win[j][i]++;
-	    }
-	  }
-	} catch (Exception ex) {
-	  System.err.println(ex.getMessage());
-	}
-      }
-    }
-    
+    String result = "";
     String titles = "";
     for (int i = 0; i < numResultsets; i++) {
       titles += ' ' + Utils.padLeft("" + (char)((int)'a' + i % 26),
@@ -508,6 +523,40 @@ public class PairedTTester implements OptionHandler {
       }
       result += " | " + (char)((int)'a' + i % 26)
 	+ " = " + getResultsetName(i) + '\n';
+    }
+    return result;
+  }
+
+  public String multiResultsetRanking(int comparisonColumn)
+    throws Exception {
+
+    int [][] win = multiResultsetWins(comparisonColumn);
+    int numResultsets = getNumResultsets();
+    int [] wins = new int [numResultsets];
+    int [] losses = new int [numResultsets];
+    int [] diff = new int [numResultsets];
+    for (int i = 0; i < win.length; i++) {
+      for (int j = 0; j < win[i].length; j++) {
+	wins[j] += win[i][j];
+	diff[j] += win[i][j];
+	losses[i] += win[i][j];
+	diff[i] -= win[i][j];
+      }
+    }
+    int biggest = Math.max(wins[Utils.maxIndex(wins)],
+			   losses[Utils.maxIndex(losses)]);
+    int width = Math.max(2 + (int)(Math.log(biggest) / Math.log(10)),
+			 "<".length());
+    String result = Utils.padLeft(">-<", width) + ' '
+      + Utils.padLeft(">", width) + ' '
+      + Utils.padLeft("<", width) + " Scheme\n";
+    int [] ranking = Utils.sort(diff);
+    for (int i = numResultsets - 1; i >= 0; i--) {
+      int curr = ranking[i];
+      result += Utils.padLeft("" + diff[curr], width) + ' '
+	+ Utils.padLeft("" + wins[curr], width) + ' '
+	+ Utils.padLeft("" + losses[curr], width) + ' '
+	+ getResultsetName(curr) + '\n';
     }
     return result;
   }
@@ -861,6 +910,7 @@ public class PairedTTester implements OptionHandler {
       String compareColStr = Utils.getOption('c', args);
       String baseColStr = Utils.getOption('b', args);
       boolean summaryOnly = Utils.getFlag('s', args);
+      boolean rankingOnly = Utils.getFlag('r', args);
       try {
 	if ((datasetName.length() == 0)
 	    || (compareColStr.length() == 0)) {
@@ -886,6 +936,8 @@ public class PairedTTester implements OptionHandler {
 	      + "\tSet the column to perform a comparison on\n"
 	      + "-s\n"
 	      + "\tSummarize wins over all resultset pairs\n\n"
+	      + "-r\n"
+	      + "\tGenerate a resultset ranking\n\n"
 	      + result);
       }
       Instances data = new Instances(new BufferedReader(
@@ -894,7 +946,9 @@ public class PairedTTester implements OptionHandler {
       //      tt.prepareData();
       int compareCol = Integer.parseInt(compareColStr) - 1;
       System.out.println(tt.header(compareCol));
-      if (summaryOnly) {
+      if (rankingOnly) {
+	System.out.println(tt.multiResultsetRanking(compareCol));
+      } else if (summaryOnly) {
 	System.out.println(tt.multiResultsetSummary(compareCol));
       } else {
 	System.out.println(tt.resultsetKey());
