@@ -34,7 +34,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RandomSearch extends ASSearch implements OptionHandler {
 
@@ -251,6 +251,7 @@ public class RandomSearch extends ASSearch implements OptionHandler {
      double best_merit;
      int sizeOfBest = m_numAttribs;
      BitSet temp;
+     m_bestGroup = new BitSet(m_numAttribs);
      
      m_onlyConsiderBetterAndSmaller = false;
      if (!(ASEval instanceof SubsetEvaluator)) {
@@ -321,10 +322,15 @@ public class RandomSearch extends ASSearch implements OptionHandler {
 	     m_bestGroup = temp;
 	     best_merit = tempMerit;
 	     if (m_verbose) {
-	       System.out.println("New best subset ("
+	       System.out.print("New best subset ("
 				  +Utils.doubleToString(Math.
 							abs(best_merit),8,5)
-				  +"): "+printSubset(m_bestGroup));
+				  +"): "+printSubset(m_bestGroup) + " :");
+	       System.out.println(Utils.
+				  doubleToString((((double)i)/
+						  ((double)m_iterations)*
+						  100.0),5,1)
+				  +"% done");
 	     }
 	   }
 	 }
@@ -334,9 +340,14 @@ public class RandomSearch extends ASSearch implements OptionHandler {
 	   m_bestGroup = temp;
 	   best_merit = tempMerit;
 	   if (m_verbose) {
-	     System.out.println("New best subset ("
+	     System.out.print("New best subset ("
 				+Utils.doubleToString(Math.abs(best_merit),8,5)
-				+"): "+printSubset(m_bestGroup));
+				+"): "+printSubset(m_bestGroup) + " :");
+	     System.out.println(Utils.
+				doubleToString((((double)i)/
+						((double)m_iterations)
+						*100.0),5,1)
+				+"% done");
 	   }
 	 }
        }
@@ -415,7 +426,7 @@ public class RandomSearch extends ASSearch implements OptionHandler {
    */
   private int countFeatures(BitSet featureSet) {
     int count = 0;
-    for (int i=0;i>m_numAttribs;i++) {
+    for (int i=0;i<m_numAttribs;i++) {
       if (featureSet.get(i)) {
 	count++;
       }
