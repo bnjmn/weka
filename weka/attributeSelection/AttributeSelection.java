@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.31 $
+ * @version  $Revision: 1.32 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -293,7 +293,7 @@ public class AttributeSelection implements Serializable {
     setSeed(1);
     //    m_threshold = -Double.MAX_VALUE;
     setEvaluator(new CfsSubsetEval());
-    setSearch(new ForwardSelection());
+    setSearch(new GreedyStepwise());
     m_selectionResults = new StringBuffer();
     m_selectedAttributeSet = null;
     m_attributeRanking = null;
