@@ -44,10 +44,10 @@ import java.lang.reflect.InvocationTargetException;
  *
  * -C class index <br>
  * The index of the class for which IR statistics are to
- * be output. (default 0) <p>
+ * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -123,7 +123,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 	     "-W <class name>"));
     newVector.addElement(new Option(
 	     "\tThe index of the class for which IR statistics\n" +
-	     "\tare to be output. (default 0)",
+	     "\tare to be output. (default 1)",
 	     "C", 1, 
 	     "-C <index>"));
 
@@ -149,7 +149,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    *
    * -C class index <br>
    * The index of the class for which IR statistics are to
-   * be output. (default 0) <p>
+   * be output. (default 1) <p>
    *
    * All option after -- will be passed to the classifier.
    *
@@ -175,7 +175,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 
     String indexName = Utils.getOption('C', options);
     if (indexName.length() != 0) {
-      m_IRclass = (new Integer(indexName)).intValue();
+      m_IRclass = (new Integer(indexName)).intValue() - 1;
     } else {
       m_IRclass = 0;
     }
@@ -202,7 +202,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "-C"; 
-    options[current++] = "" + m_IRclass;
+    options[current++] = "" + (m_IRclass + 1);
     options[current++] = "--";
 
     System.arraycopy(classifierOptions, 0, options, current, 
