@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Explorer extends JPanel {
 
@@ -95,9 +95,12 @@ public class Explorer extends JPanel {
     m_LogPanel.logMessage("Started on " + date);
     m_LogPanel.statusMessage("Welcome to the Weka Knowledge Explorer");
     m_PreprocessPanel.setLog(m_LogPanel);
+
     m_ClassifierPanel.setLog(m_LogPanel);
+    m_ClassifierPanel.setPreprocess(m_PreprocessPanel);
     m_AssociationPanel.setLog(m_LogPanel);
     m_ClustererPanel.setLog(m_LogPanel);
+    m_ClustererPanel.setPreprocess(m_PreprocessPanel);
     m_AttributeSelectionPanel.setLog(m_LogPanel);
     m_TabbedPane.addTab("Preprocess", null, m_PreprocessPanel,
 			"Open/Edit/Save instances");
@@ -121,10 +124,14 @@ public class Explorer extends JPanel {
       public void propertyChange(PropertyChangeEvent e) {
 	m_ClassifierPanel.setInstances(m_PreprocessPanel
        				       .getWorkingInstances());
+	m_ClassifierPanel.filterUserTestInstances();
+
 	m_AssociationPanel.setInstances(m_PreprocessPanel
 				       .getWorkingInstances());
 	m_ClustererPanel.setInstances(m_PreprocessPanel
 				      .getWorkingInstances());
+	m_ClustererPanel.filterUserTestInstances();
+
 	m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
 					       .getWorkingInstances());
 	m_VisualizePanel.setInstances(m_PreprocessPanel
