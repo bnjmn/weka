@@ -45,7 +45,7 @@ import weka.core.Instance;
  * written out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class InstancesResultListener extends CSVResultListener {
 
@@ -60,7 +60,15 @@ public class InstancesResultListener extends CSVResultListener {
 
   /** Contains strings seen so far for each nominal attribute */ 
   protected transient FastVector [] m_NominalStrings;
-  
+ 
+  /** 
+   * Sets temporary file.
+   */
+  public InstancesResultListener() {
+    
+    super();
+  } 
+
   /**
    * Returns a string describing this result listener
    * @return a description of the result listener suitable for

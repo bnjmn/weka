@@ -63,7 +63,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -71,7 +71,7 @@ public class Experiment implements Serializable, OptionHandler {
   public static String FILE_EXTENSION = ".exp";
 
   /** Where results will be sent */
-  protected ResultListener m_ResultListener = new CSVResultListener();
+  protected ResultListener m_ResultListener = new InstancesResultListener();
   
   /** The result producer */
   protected ResultProducer m_ResultProducer = new RandomSplitResultProducer();

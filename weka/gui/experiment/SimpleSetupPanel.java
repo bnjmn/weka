@@ -91,7 +91,7 @@ import javax.swing.event.DocumentEvent;
  * This panel controls the configuration of an experiment.
  *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -105,7 +105,7 @@ public class SimpleSetupPanel extends JPanel {
   protected String m_destinationDatabaseURL;
 
   /** The filename to store results into */
-  protected String m_destinationFilename = "-";
+  protected String m_destinationFilename = "";
 
   /** The number of folds for a cross-validation experiment */
   protected int m_numFolds = 10;
@@ -250,7 +250,6 @@ public class SimpleSetupPanel extends JPanel {
     // create action listeners
     m_NewBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-
 	  Experiment newExp = new Experiment();
 	  CrossValidationResultProducer cvrp = new CrossValidationResultProducer();
 	  cvrp.setNumFolds(10);
@@ -275,12 +274,6 @@ public class SimpleSetupPanel extends JPanel {
     m_FileChooser.setFileFilter(m_ExpFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_DestFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    
-    m_ResultsDestinationCBox.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  destinationTypeChanged();
-	}
-      });
 
     m_BrowseDestinationButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -290,12 +283,6 @@ public class SimpleSetupPanel extends JPanel {
 	  } else {
 	    chooseDestinationFile();
 	  }
-	}
-      });
-
-    m_ExperimentTypeCBox.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  expTypeChanged();
 	}
       });
 
@@ -384,9 +371,15 @@ public class SimpleSetupPanel extends JPanel {
     destName.add(m_ResultsDestinationPathLabel, BorderLayout.WEST);
     destName.add(m_ResultsDestinationPathTField, BorderLayout.CENTER);
     
-    m_ResultsDestinationCBox.addItem(DEST_DATABASE_TEXT);
     m_ResultsDestinationCBox.addItem(DEST_ARFF_TEXT);
     m_ResultsDestinationCBox.addItem(DEST_CSV_TEXT);
+    m_ResultsDestinationCBox.addItem(DEST_DATABASE_TEXT);
+    
+    m_ResultsDestinationCBox.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  destinationTypeChanged();
+	}
+      });
 
     JPanel destInner = new JPanel();
     destInner.setLayout(new BorderLayout(5, 5));
@@ -420,6 +413,12 @@ public class SimpleSetupPanel extends JPanel {
     m_ExperimentTypeCBox.addItem(TYPE_CROSSVALIDATION_TEXT);
     m_ExperimentTypeCBox.addItem(TYPE_RANDOMSPLIT_TEXT);
     m_ExperimentTypeCBox.addItem(TYPE_FIXEDSPLIT_TEXT);
+
+    m_ExperimentTypeCBox.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  expTypeChanged();
+	}
+      });
 
     JPanel typeInner = new JPanel();
     typeInner.setLayout(new GridLayout(0,1));
@@ -548,13 +547,13 @@ public class SimpleSetupPanel extends JPanel {
     } else if (exp.getResultListener() instanceof InstancesResultListener) {
       m_ResultsDestinationCBox.setSelectedItem(DEST_ARFF_TEXT);
       m_ResultsDestinationPathLabel.setText("Filename:");
-      m_destinationFilename = ((InstancesResultListener)exp.getResultListener()).getOutputFile().toString();
+      m_destinationFilename = ((InstancesResultListener)exp.getResultListener()).outputFileName();
       m_ResultsDestinationPathTField.setText(m_destinationFilename);
       m_BrowseDestinationButton.setEnabled(true);
     } else if (exp.getResultListener() instanceof CSVResultListener) {
       m_ResultsDestinationCBox.setSelectedItem(DEST_CSV_TEXT);
       m_ResultsDestinationPathLabel.setText("Filename:");
-      m_destinationFilename = ((CSVResultListener)exp.getResultListener()).getOutputFile().toString();
+      m_destinationFilename = ((CSVResultListener)exp.getResultListener()).outputFileName();
       m_ResultsDestinationPathTField.setText(m_destinationFilename);
       m_BrowseDestinationButton.setEnabled(true);
     } else {
@@ -563,7 +562,7 @@ public class SimpleSetupPanel extends JPanel {
       if (userWantsToConvert()) {
 	m_ResultsDestinationCBox.setSelectedItem(DEST_ARFF_TEXT);
 	m_ResultsDestinationPathLabel.setText("Filename:");
-	m_destinationFilename = "-";
+	m_destinationFilename = "";
 	m_ResultsDestinationPathTField.setText(m_destinationFilename);
 	m_BrowseDestinationButton.setEnabled(true);
       } else {
@@ -813,14 +812,20 @@ public class SimpleSetupPanel extends JPanel {
       }
       drl.setDatabaseURL(m_destinationDatabaseURL);
       m_Exp.setResultListener(drl);
-    } else if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
-      InstancesResultListener irl = new InstancesResultListener();
-      irl.setOutputFile(new File(m_destinationFilename));
-      m_Exp.setResultListener(irl);
-    } else if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
-      CSVResultListener crl = new CSVResultListener();
-      crl.setOutputFile(new File(m_destinationFilename));
-      m_Exp.setResultListener(crl);
+    } else {
+      if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
+	InstancesResultListener irl = new InstancesResultListener();
+	if (!m_destinationFilename.equals("")) {
+	  irl.setOutputFile(new File(m_destinationFilename));
+	}
+	m_Exp.setResultListener(irl);
+      } else if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
+	CSVResultListener crl = new CSVResultListener();
+	if (!m_destinationFilename.equals("")) {
+	  crl.setOutputFile(new File(m_destinationFilename));
+	}
+	m_Exp.setResultListener(crl);
+      }
     }
 
     m_Support.firePropertyChange("", null, null);
@@ -838,15 +843,32 @@ public class SimpleSetupPanel extends JPanel {
       if (m_Exp.getResultListener() instanceof DatabaseResultListener) {
 	((DatabaseResultListener)m_Exp.getResultListener()).setDatabaseURL(m_destinationDatabaseURL);
       }
-    } else if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
-      m_destinationFilename = m_ResultsDestinationPathTField.getText();
-      if (m_Exp.getResultListener() instanceof InstancesResultListener) {
-	((InstancesResultListener)m_Exp.getResultListener()).setOutputFile(new File(m_destinationFilename));
+    } else {
+      File resultsFile = null;
+
+      // Use temporary file if no file name is provided
+      if (m_destinationFilename.equals("")) {
+	try {
+	  resultsFile = File.createTempFile("weka_experiment", null);
+	  resultsFile.deleteOnExit();
+	} catch (Exception e) {
+	  System.err.println("Cannot create temp file, writing to standard out.");
+	  resultsFile = new File("-");
+	}
+      } else {
+	resultsFile = new File(m_destinationFilename);
       }
-    } else if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
-      m_destinationFilename = m_ResultsDestinationPathTField.getText();
-      if (m_Exp.getResultListener() instanceof CSVResultListener) {
-	((CSVResultListener)m_Exp.getResultListener()).setOutputFile(new File(m_destinationFilename));
+      
+      if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
+	m_destinationFilename = m_ResultsDestinationPathTField.getText();
+	if (m_Exp.getResultListener() instanceof InstancesResultListener) {
+	  ((InstancesResultListener)m_Exp.getResultListener()).setOutputFile(resultsFile);
+	}
+      } else if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
+	m_destinationFilename = m_ResultsDestinationPathTField.getText();
+	if (m_Exp.getResultListener() instanceof CSVResultListener) {
+	  ((CSVResultListener)m_Exp.getResultListener()).setOutputFile(resultsFile);
+	}
       }
     }
 
