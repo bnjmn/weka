@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 import java.io.*;
@@ -25,44 +24,62 @@ import java.io.*;
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class Queue extends Object implements Serializable {
 
+  /**
+   * Represents one node in the queue.
+   */
   protected class QueueNode implements Serializable {
 
+    /** The next node in the queue */
     protected QueueNode m_Next;
+
+    /** The nodes contents */
     protected Object m_Contents;
 
+    /** 
+     * Creates a queue node with the given contents 
+     */
     public QueueNode(Object contents) {
 
       m_Contents = contents;
       next(null);
     }
 
+    /**
+     * Sets the next node in the queue, and returns it.
+     */
     public QueueNode next(QueueNode next) {
 
       return m_Next = next;
     }
 
+    /**
+     * Gets the next node in the queue. 
+     */
     public QueueNode next() {
 
       return m_Next;
     }
 
+    /**
+     * Sets the contents of the node.
+     */
     public Object contents(Object contents) {
 
       return m_Contents = contents;
     }
 
+    /**
+     * Returns the contents in the node.
+     */
     public Object contents() {
+
       return m_Contents;
     }
   }
-
-  // =================
-  // Protected members
-  // =================
 
   /** Store a reference to the head of the queue */
   protected QueueNode m_Head = null;
@@ -72,10 +89,6 @@ public class Queue extends Object implements Serializable {
 
   /** Store the current number of elements in the queue */
   protected int m_Size = 0;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Removes all objects from the queue.
@@ -176,14 +189,10 @@ public class Queue extends Object implements Serializable {
     return retval;
   }
 
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain arguments to the filter: use -h for help
+   * @param argv a set of strings that are pushed on a test queue
    */
   public static void main(String [] argv) {
 

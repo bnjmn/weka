@@ -16,302 +16,326 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 import java.util.*;
 import java.io.*;
 
 /**
- * Class for handling an instance.
+ * Class for handling an instance. All values (numeric, nominal, or
+ * string) are internally stored as floating-point numbers. If an
+ * attribute is nominal (or a string), the stored value is the index
+ * of the corresponding nominal (or string) value in the attribute's
+ * definition. We have chosen this approach in favor of a more elegant
+ * object-oriented approach because it is much faster. <p>
  *
- * All methods that change an instance are
- * safe, ie. a change of an instance does
- * not affect any other instances. All
- * methods that change an instance's
- * attribute values clone the attribute value
+ * Typical usage (code from the main() method of this class): <p>
+ *
+ * <code>
+ * ... <br>
+ *      
+ * // Create empty instance with three attribute values <br>
+ * Instance inst = new Instance(3); <br><br>
+ *     
+ * // Set instance's values for the attributes "length", "weight", and "position"<br>
+ * inst.setValue(length, 5.3); <br>
+ * inst.setValue(weight, 300); <br>
+ * inst.setValue(position, "first"); <br><br>
+ *   
+ * // Set instance's dataset to be the dataset "race" <br>
+ * inst.setDataset(race); <br><br>
+ *   
+ * // Print the instance <br>
+ * System.out.println("The instance: " + inst); <br>
+ *
+ * ... <br>
+ * </code><p>
+ *
+ * All methods that change an instance are safe, ie. a change of an
+ * instance does not affect any other instances. All methods that
+ * change an instance's attribute values clone the attribute value
  * vector before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.1 Sep 1998 Eibe
- */
-
+ * @version $Revision: 1.2 $ 
+*/
 public class Instance implements Copyable, Serializable {
-
-  // =================
-  // Private variables
-  // =================
   
-  /**
-   * Constant representing a missing value.
-   */
-
+  /** Constant representing a missing value. */
   private final static double MISSING_VALUE = Double.NaN;
 
-  /**
-   * The dataset the instance belongs to. Null
-   * if the instance does not belong to any dataset.
+  /** 
+   * The dataset the instance has access to.  Null if the instance
+   * doesn't have access to any dataset.  Only if an instance has
+   * access to a dataset, it knows about the actual attribute types.  
    */
+  private Instances m_Dataset;
 
-  private Instances theDataset;
+  /** The instance's attribute values. */
+  private double[] m_AttValues;
 
-  /**
-   * The instance's attribute values.
-   */
-
-  private double[] theAttValues;
-
-  /**
-   * The instance's weight.
-   */
-
-  private double theWeight;
-
-  // ===============
-  // Public methods.
-  // ===============
+  /** The instance's weight. */
+  private double m_Weight;
 
   /**
-   * Constructor that copies the attributeinformation 
-   * from the given instance. Reference to a dataset is set to null.
+   * Constructor that copies the attribute values and the weight from
+   * the given instance. Reference to the dataset is set to null.
+   * (ie. the instance doesn't have access to information about the
+   * attribute types)
+   *
    * @param instance the instance from which the attribute
-   * information is to be copied
+   * values and the weight are to be copied 
    */
-
   public Instance(Instance instance) {
     
-    theAttValues = instance.theAttValues;
-    theWeight = instance.theWeight;
-    theDataset = null;
+    m_AttValues = instance.m_AttValues;
+    m_Weight = instance.m_Weight;
+    m_Dataset = null;
   }
 
   /**
-   * Constructor that inititalizes instance variable with given 
-   * values. Reference to a dataset is set to null.
+   * Constructor that inititalizes instance variable with given
+   * values. Reference to the dataset is set to null. (ie. the instance
+   * doesn't have access to information about the attribute types)
+   *
    * @param weight the instance's weight
-   * @param attValues a vector of attribute values
+   * @param attValues a vector of attribute values 
    */
-  
   public Instance(double weight, double[] attValues){
     
-    theAttValues = attValues;
-    theWeight = weight;
-    theDataset = null;
+    m_AttValues = attValues;
+    m_Weight = weight;
+    m_Dataset = null;
   }
 
   /**
-   * Constructor that inititalizes variables, sets weight
-   * to one, and sets all values to be missing.
-   * Reference to a dataset is set to null.
-   * @param numAttributes the size of the instance
+   * Constructor of an instance that sets weight to one, all values to
+   * be missing, and the reference to the dataset to null. (ie. the instance
+   * doesn't have access to information about the attribute types)
+   *
+   * @param numAttributes the size of the instance 
    */
-  
   public Instance(int numAttributes) {
     
-    theAttValues = new double[numAttributes];
-    for (int i = 0; i < theAttValues.length; i++)
-      theAttValues[i] = MISSING_VALUE;
-    theWeight = 1;
-    theDataset = null;
+    m_AttValues = new double[numAttributes];
+    for (int i = 0; i < m_AttValues.length; i++) {
+      m_AttValues[i] = MISSING_VALUE;
+    }
+    m_Weight = 1;
+    m_Dataset = null;
   }
 
   /**
-   * Returns an attribute.
+   * Returns the attribute with the given index.
+   *
    * @param index the attribute's index
-   * @return the attribute with the given position
-   * @exception Exception if instance doesn't belong to any
+   * @return the attribute at the given position
+   * @exception Exception if instance doesn't have access to a
    * dataset
    */ 
-
   public final Attribute attribute(int index) throws Exception {
    
-    if (theDataset == null)
-      throw new Exception("Instance doesn't belong to a dataset!");
-    return theDataset.attribute(index);
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
+    return m_Dataset.attribute(index);
   }
 
   /**
    * Returns class attribute.
+   *
    * @return the class attribute
    * @exception Exception if the class is not set or the
-   * instance doesn't belong to any dataset
+   * instance doesn't have access to a dataset
    */
-
   public final Attribute classAttribute() throws Exception {
 
-    if (theDataset == null)
-      throw new Exception("Instance doesn't belong to a dataset!");
-    return theDataset.classAttribute();
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
+    return m_Dataset.classAttribute();
   }
 
   /**
    * Returns the class attribute's index.
-   * @return the class index as an integer
-   * @exception Exception if instance doesn't belong to any
-   * dataset
+   *
+   * @return the class index as an integer 
+   * @exception Exception if instance doesn't have access to a dataset 
    */
-
   public final int classIndex() throws Exception {
     
-    if (theDataset == null)
-      throw new Exception("Instance doesn't belong to a dataset!");
-    return theDataset.classIndex();
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
+    return m_Dataset.classIndex();
   }
 
   /**
    * Tests if an instance's class is missing.
+   *
    * @return true if the instance's class is missing
-   * @exception Exception if the class is not set
+   * @exception Exception if the class is not set or the instance doesn't
+   * have access to a dataset
    */
-
   public final boolean classIsMissing() throws Exception {
 
-    if (classIndex() < 0)
+    if (classIndex() < 0) {
       throw new Exception("Class is not set!");
+    }
     return isMissing(classIndex());
   }
 
   /**
    * Returns the class label of an instance.
-   * otherwise an empty string.
+   *
    * @return the instance's class as a string
-   * @exception Exception if the class is not set
+   * @exception Exception if the class is not set or the instance doesn't
+   * have access to a dataset
    */
-
   public final String classLabel() throws Exception {
     
-    if (classIndex() < 0)
+    if (classIndex() < 0) {
       throw new Exception("Class is not set!");
+    }
     return toString(classIndex());
   }
 
   /**
-   * Returns an instance's class value in internal format.
+   * Returns an instance's class value in internal format. (ie. as a
+   * floating-point number)
+   *
    * @return the corresponding value as a double (If the 
-   * corresponding attribute is nominal then it returns the 
-   * value's index as a double; if the corresponding attribute 
-   * is integer-valued then it returns the integer value as 
-   * a double).
-   * @exception Exception if the class is not set
+   * corresponding attribute is nominal (or a string) then it returns the 
+   * value's index as a double).
+   * @exception Exception if the class is not set or the instance doesn't
+   * have access to a dataset 
    */
-
   public final double classValue() throws Exception {
     
-    if (classIndex() < 0)
+    if (classIndex() < 0) {
       throw new Exception("Class is not set!");
+    }
     return value(classIndex());
   }
 
   /**
-   * Produces a shallow copy of this instance.
+   * Produces a shallow copy of this instance. The copy doesn't have
+   * access to a dataset.
+   *
    * @return the shallow copy
    */
-
   public final Object copy() {
 
-    Object newInstance = new Instance(this);
-
-    return newInstance;
+    return new Instance(this);
   }
 
   /**
-   * Returns the dataset this instance belongs to.
-   * @return the dataset the instance belongs to
+   * Returns the dataset this instance has access to. (ie. obtains
+   * information about attribute types from) Null if the instance
+   * doesn't have access to a dataset.
+   *
+   * @return the dataset the instance has accesss to
    */
-
   public final Instances dataset() {
 
-    return theDataset;
+    return m_Dataset;
   }
 
   /**
    * Deletes an attribute at the given position (0 to 
-   * numAttributes() - 1) if the instance does not
-   * belong to any dataset. 
+   * numAttributes() - 1). Only succeeds if the instance does not
+   * have access to any dataset because otherwise inconsistencies
+   * could be introduced.
+   *
    * @param pos the attribute's position
-   * @exception Exception if the instance belongs to a
-   * dataset
+   * @exception Exception if the instance has access to a
+   * dataset 
    */
-
   public final void deleteAttributeAt(int position) 
        throws Exception {
 
-    if (theDataset != null)
-      throw new Exception("Instance belongs to a dataset!");
+    if (m_Dataset != null) {
+      throw new Exception("Instance has access to a dataset!");
+    }
     forceDeleteAttributeAt(position);
   }
 
   /**
    * Returns an enumeration of all the attributes.
+   *
    * @return enumeration of all the attributes
+   * @exception Exception if the instance doesn't
+   * have access to a dataset 
    */
+  public Enumeration enumerateAttributes() throws Exception {
 
-  public Enumeration enumerateAttributes() {
-
-    return theDataset.enumerateAttributes();
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
+    return m_Dataset.enumerateAttributes();
   }
 
   /**
    * Tests if the headers of two instances are equivalent.
+   *
    * @param instance another instance
    * @return true if the header of the given instance is 
-   * equivalent to this header
-   * @exception Exception if instance doesn't belong to any
+   * equivalent to this instance's header
+   * @exception Exception if instance doesn't have access to any
    * dataset
    */
-
   public final boolean equalHeaders(Instance inst) 
        throws Exception {
 
-    if (theDataset == null)
-      throw new Exception("Instance doesn't belong to a dataset!");
-    return theDataset.equalHeaders(inst.theDataset);
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
+    return m_Dataset.equalHeaders(inst.m_Dataset);
   }
 
   /**
    * Inserts an attribute at the given position (0 to 
-   * numAttributes() - 1) if the instance does not
-   * belong to any dataset.
+   * numAttributes()). Only succeeds if the instance does not
+   * have access to any dataset because otherwise inconsistencies
+   * could be introduced.
+   *
    * @param pos the attribute's position
-   * @exception Exception if the instance belongs to a
-   * dataset
+   * @exception Exception if the instance has accesss to a
+   * dataset, or the position is out of range
    */
-
   public final void insertAttributeAt(int position) 
-       throws  Exception {
+       throws Exception {
 
-    if (theDataset != null)
-      throw new Exception("Instance belongs to a dataset!");
+    if (m_Dataset != null) {
+      throw new Exception("Instance has accesss to a dataset!");
+    }
+    if ((position < 0) ||
+	(position > numAttributes())) {
+      throw new Exception("Can't insert attribute: index out "+
+			  "of range");
+    }
     forceInsertAttributeAt(position);
   }
 
   /**
-   * Returns the dataset the instance belongs to.
-   * @return the dataset the instance belongs to
-   */
-
-  public final Instances instances() {
-
-    return theDataset;
-  }
-
-  /**
    * Tests if a specific value is "missing".
+   *
    * @param attIndex the attribute's index
    */
-
   public final boolean isMissing(int attIndex) {
 
-    if (Double.isNaN(theAttValues[attIndex]))
+    if (Double.isNaN(m_AttValues[attIndex])) {
       return true;
+    }
     return false;
   }
 
   /**
    * Tests if a specific value is "missing".
+   * The given attribute has to belong to a dataset.
+   *
    * @param att the attribute
    */
-
   public final boolean isMissing(Attribute att) {
 
     return isMissing(att.index());
@@ -319,10 +343,10 @@ public class Instance implements Copyable, Serializable {
 
   /**
    * Tests if the given value codes "missing".
+   *
    * @param val the value to be tested
    * @return true if val codes "missing"
    */
-
   public static boolean isMissingValue(double val) {
 
     return Double.isNaN(val);
@@ -330,9 +354,9 @@ public class Instance implements Copyable, Serializable {
 
   /**
    * Returns the double that codes "missing".
+   *
    * @return the double that codes "missing"
    */
-
   public static double missingValue() {
 
     return MISSING_VALUE;
@@ -340,128 +364,144 @@ public class Instance implements Copyable, Serializable {
 
   /**
    * Returns the number of attributes.
+   *
    * @return the number of attributes as an integer
    */
-
   public final int numAttributes() {
 
-    return theAttValues.length;
+    return m_AttValues.length;
   }
 
   /**
    * Returns the number of class labels.
+   *
    * @return the number of class labels as an integer if the 
    * class attribute is nominal, 1 otherwise.
-   * @exception Exception if instance doesn't belong to any
+   * @exception Exception if instance doesn't have access to any
    * dataset
    */
-  
   public final int numClasses() throws Exception {
     
-    if (theDataset == null)
-      throw new Exception("Instance doesn't belong to a dataset!");
-    return theDataset.numClasses();
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
+    return m_Dataset.numClasses();
   }
 
   /** 
    * Replaces all missing values in the instance with the modes 
-   * and means contained in the given array and returns a new 
-   * instance.
+   * and means contained in the given array. A deep copy of
+   * the vector of attribute values is performed before the
+   * values are replaced.
+   *
    * @param array containing the means and modes
    * @exception Exception if numbers of attributes are unequal
    */
-  
   public final void replaceMissingValues(double[] array) 
        throws Exception {
 	 
     if ((array == null) || 
-	(array.length != theAttValues.length))
+	(array.length != m_AttValues.length)) {
       throw new Exception("Unequal number of attributes!");
+    }
     freshAttributeVector();
-    for (int i = 0; i < theAttValues.length; i++) 
-      if (isMissing(i))
-	theAttValues[i] = array[i];
+    for (int i = 0; i < m_AttValues.length; i++) {
+      if (isMissing(i)) {
+	m_AttValues[i] = array[i];
+      }
+    }
   }
 
   /**
-   * Sets the class value of an instance to be "missing".
-   * @exception Exception if the class is not set
+   * Sets the class value of an instance to be "missing". A deep copy of
+   * the vector of attribute values is performed before the
+   * value is set to be missing.
+   *
+   * @exception Exception if the class is not set or the instance doesn't
+   * have access to a dataset
    */
-
   public final void setClassMissing() throws Exception {
 
-    if (classIndex() < 0)
+    if (classIndex() < 0) {
       throw new Exception("Class is not set!");
+    }
     freshAttributeVector();
     setMissing(classIndex());
   }
 
   /**
-   * Sets the class value of an instance to the given value 
-   * (internal format).
-   * @param value the new attribute value (If the corresponding 
-   * attribute is nominal then this is the new value's index as 
-   * a double. If the corresponding attribute is integer-valued 
-   * then this is the new integer value as a double).
-   * @exception Exception if the class is not set
+   * Sets the class value of an instance to the given value (internal
+   * floating-point format).  A deep copy of the vector of attribute
+   * values is performed before the value is set.
+   *
+   * @param value the new attribute value (If the corresponding
+   * attribute is nominal (or a string) then this is the new value's
+   * index as a double).  
+   * @exception Exception if the class is not set or the instance doesn't
+   * have access to a dataset 
    */
-
   public final void setClassValue(double value) throws Exception {
 
-    if (classIndex() < 0)
+    if (classIndex() < 0) {
       throw new Exception("Class is not set!");
+    }
     freshAttributeVector();
-    theAttValues[classIndex()] = value;
+    m_AttValues[classIndex()] = value;
   }
 
   /**
-   * Sets the class value of an instance to the given value.
+   * Sets the class value of an instance to the given value. A deep
+   * copy of the vector of attribute values is performed before the
+   * value is set.
+   *
    * @param value the new class value (If the class
    * is a string attribute and the value can't be found,
-   * the value is added to the attribute.)
-   * @exception Exception if the dataset or the class is not set, the 
-   * attribute is not nominal or a string or the value couldn't 
-   * be found for a nominal attribute
+   * the value is added to the attribute).
+   * @exception Exception if the dataset or the class is not set, or the 
+   * attribute is not nominal or a string, or the value couldn't 
+   * be found for a nominal attribute 
    */
-
   public final void setClassValue(String value) throws Exception {
 
-    if (classIndex() < 0)
+    if (classIndex() < 0) {
       throw new Exception("Class is not set!");
+    }
     setValue(classIndex(), value);
   }
 
   /**
-   * Sets the reference to a dataset. Checks if the instance
-   * has the right format for the dataset. Note: the dataset
-   * does not know about this instance. If the structure of
-   * the dataset's header gets changed, this instance will not
-   * be adjusted automatically. Does not check if the instance
-   * is compatible with the dataset.
-   * @param instances the reference to the dataset
+   * Sets the reference to the dataset. Does not check if the instance
+   * is compatible with the dataset. Note: the dataset does not know
+   * about this instance. If the structure of the dataset's header
+   * gets changed, this instance will not be adjusted automatically.
+   *
+   * @param instances the reference to the dataset 
    */
-
   public final void setDataset(Instances instances) {
     
-    theDataset = instances;
+    m_Dataset = instances;
   }
 
   /**
-   * Sets a specific value to be "missing".
+   * Sets a specific value to be "missing". Performs a deep copy
+   * of the vector of attribute values before the value is set to
+   * be missing.
+   *
    * @param attIndex the attribute's index
    */
-
   public final void setMissing(int attIndex) {
 
     freshAttributeVector();
-    theAttValues[attIndex] = MISSING_VALUE;
+    m_AttValues[attIndex] = MISSING_VALUE;
   }
 
   /**
-   * Sets a specific value to be "missing".
+   * Sets a specific value to be "missing". Performs a deep copy
+   * of the vector of attribute values before the value is set to
+   * be missing. The given attribute has to belong to a dataset.
+   *
    * @param att the attribute
    */
-
   public final void setMissing(Attribute att) {
 
     setMissing(att.index());
@@ -469,107 +509,127 @@ public class Instance implements Copyable, Serializable {
 
   /**
    * Sets a specific value in the instance to the given value 
-   * (internal format).
-   * @param attIndex the attribute's index
-   * @param value the new attribute value (If the corresponding 
-   * attribute is nominal then this is the new value's index as 
-   * a double. If the corresponding attribute is integer-valued 
-   * then this is the new integer value as a double).
+   * (internal floating-point format). Performs a deep copy
+   * of the vector of attribute values before the value is set.
+   *
+   * @param attIndex the attribute's index 
+   * @param value the new attribute value (If the corresponding
+   * attribute is nominal (or a string) then this is the new value's
+   * index as a double).  
    */
-
   public final void setValue(int attIndex, double value) {
     
     freshAttributeVector();
-    theAttValues[attIndex] = value;
+    m_AttValues[attIndex] = value;
   }
 
   /**
-   * Sets a value of an nominal or string attribute to the 
-   * given value.
+   * Sets a value of a nominal or string attribute to the given
+   * value. Performs a deep copy of the vector of attribute values
+   * before the value is set.
+   *
    * @param attIndex the attribute's index
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
-   * the value is added to the attribute.)
-   * @exception Exception if the dataset is not set, the 
-   * attribute is not nominal or a string or the value couldn't 
-   * be found for a nominal attribute
+   * the value is added to the attribute).
+   * @exception Exception if the dataset is not set, or the 
+   * attribute is not nominal or a string, or the value couldn't 
+   * be found for a nominal attribute 
    */
-
   public final void setValue(int attIndex, String value) throws Exception {
     
     int valIndex;
 
-    if (theDataset == null)
-      throw new Exception("Instance doesn't belong to a dataset!");
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    }
     if (!attribute(attIndex).isNominal() &&
-	!attribute(attIndex).isString())
+	!attribute(attIndex).isString()) {
       throw new Exception("Attribute neither nominal nor string!");
+    }
     valIndex = attribute(attIndex).indexOfValue(value);
-    if (valIndex == -1)
-      if (attribute(attIndex).isNominal())
+    if (valIndex == -1) {
+      if (attribute(attIndex).isNominal()) {
 	throw new Exception("Value not defined for given nominal attribute!");
-      else {
+      } else {
 	attribute(attIndex).forceAddValue(value);
 	valIndex = attribute(attIndex).indexOfValue(value);
       }
+    }
     freshAttributeVector();
-    theAttValues[attIndex] = (double)valIndex;
+    m_AttValues[attIndex] = (double)valIndex;
   }
 
   /**
-   * Sets a specific value in the instance to the given value 
-   * (internal format).
-   * @param att the attribute
+   * Sets a specific value in the instance to the given value
+   * (internal floating-point format). Performs a deep copy of the
+   * vector of attribute values before the value is set.
+   * The given attribute has to belong to a dataset.
+   *
+   * @param att the attribute 
    * @param value the new attribute value (If the corresponding
-   * attribute is nominal then this is the new value's index as
-   * a double. If the corresponding attribute is integer-valued 
-   * then this is the new integer value as a double).
+   * attribute is nominal (or a string) then this is the new value's
+   * index as a double).
    */
+  public final void setValue(Attribute att, double value) {
 
-  public final void setValue(Attribute att, double value){
-    
-    setValue(att.index(), value);
+    freshAttributeVector();
+    m_AttValues[att.index()] = (double)value;
   }
 
   /**
-   * Sets a value of an nominal or string attribute to the 
-   * given value.
+   * Sets a value of an nominal or string attribute to the given
+   * value. Performs a deep copy of the vector of attribute values
+   * before the value is set. The given attribute has to belong to a dataset.
+   *
    * @param att the attribute
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
-   * the value is added to the attribute.)
-   * @exception Exception if the dataset is not set, the 
-   * attribute is not nominal or a string or the value couldn't 
-   * be found for a nominal attribute
+   * the value is added to the attribute).
+   * @exception Exception if the the attribute is not nominal or a
+   * string, or the value couldn't be found for a nominal attribute 
    */
-
   public final void setValue(Attribute att, String value) throws Exception {
-    
-    setValue(att.index(), value);
+
+    if (!att.isNominal() &&
+	!att.isString()) {
+      throw new Exception("Attribute neither nominal nor string!");
+    }
+    int valIndex = att.indexOfValue(value);
+    if (valIndex == -1) {
+      if (att.isNominal()) {
+	throw new Exception("Value not defined for given nominal attribute!");
+      } else {
+	att.forceAddValue(value);
+	valIndex = att.indexOfValue(value);
+      }
+    }
+    freshAttributeVector();
+    m_AttValues[att.index()] = (double)valIndex;
   }
 
   /**
-   * Sets the weight of an instance to the given value.
+   * Sets the weight of an instance.
+   *
    * @param weight the weight
    */
-
   public final void setWeight(double weight) {
 
-    theWeight = weight;
+    m_Weight = weight;
   }
 
   /**
    * Returns the description of one instance. If the instance
-   * doesn't belong to any dataset it returns the internal
-   * values.
+   * doesn't have access to a dataset, it returns the internal
+   * floating-point values.
+   *
    * @return the instance's description as a string
    */
-
   public final String toString() {
 
     StringBuffer text = new StringBuffer();
     
-    for (int i = 0; i < theAttValues.length; i++){
+    for (int i = 0; i < m_AttValues.length; i++) {
       if (i > 0) text.append(",");
       text.append(toString(i));
     }
@@ -579,138 +639,272 @@ public class Instance implements Copyable, Serializable {
 
   /**
    * Returns the description of one value of the instance as a 
-   * string. If the instance doesn't belong to any dataset it 
-   * returns the internal values.
+   * string. If the instance doesn't have access to a dataset, it 
+   * returns the internal floating-point value.
+   *
    * @param attIndex the attribute's index
    * @return the value's description as a string
    */
-
   public final String toString(int attIndex) {
 
    StringBuffer text = new StringBuffer();
    
-   if (isMissing(attIndex))
+   if (isMissing(attIndex)) {
      text.append("?");
-   else
-     if (theDataset == null)
-       text.append(Utils.doubleToString(theAttValues[attIndex],6));
-     else
-       if (theDataset.attribute(attIndex).isNominal() || 
-	   theDataset.attribute(attIndex).isString())
-	 text.append(theDataset.attribute(attIndex).
-		     value((int) theAttValues[attIndex]));
-       else
-	 text.append(Utils.doubleToString(theAttValues[attIndex],6));
-   
+   } else {
+     if (m_Dataset == null) {
+       text.append(Utils.doubleToString(m_AttValues[attIndex],6));
+     } else {
+       if (m_Dataset.attribute(attIndex).isNominal() || 
+	   m_Dataset.attribute(attIndex).isString()) {
+	 text.append(m_Dataset.attribute(attIndex).
+		     value((int) m_AttValues[attIndex]));
+       } else {
+	 text.append(Utils.doubleToString(m_AttValues[attIndex],6));
+       }
+     }
+   }
    return text.toString();
   }
 
   /**
    * Returns the description of one value of the instance as a 
-   * string.
+   * string. If the instance doesn't have access to a dataset it 
+   * returns the internal floating-point value.
+   * The given attribute has to belong to a dataset.
+   *
    * @param att the attribute
    * @return the value's description as a string
    */
-
-  public final String toString(Attribute att){
+  public final String toString(Attribute att) {
    
    return toString(att.index());
   }
 
   /**
    * Returns an instance's attribute value in internal format.
+   *
    * @param attIndex the attribute's index
    * @return the specified value as a double (If the corresponding
-   * attribute is nominal then it returns the value's index as a 
-   * double. If the corresponding attribute is integer-valued then 
-   * it returns the integer value as a double).
+   * attribute is nominal (or a string) then it returns the value's index as a 
+   * double).
    */
-
   public final double value(int attIndex) {
 
-    return theAttValues[attIndex];
+    return m_AttValues[attIndex];
   }
 
   /**
    * Returns an instance's attribute value in internal format.
+   * The given attribute has to belong to a dataset.
+   *
    * @param att the attribute
    * @return the specified value as a double (If the corresponding
-   * attribute is nominal then it returns the value's index as a
-   * double. If the corresponding attribute is integer-valued then 
-   * it returns the integer value as a double).
+   * attribute is nominal (or a string) then it returns the value's index as a
+   * double).
    */
-
   public final double value(Attribute att) {
 
-    return theAttValues[att.index()];
+    return m_AttValues[att.index()];
   }
 
   /**
-   * Returns an instance's weight.
+   * Returns the instance's weight.
+   *
    * @return the instance's weight as a double
    */
-
   public final double weight(){
 
-    return theWeight;
+    return m_Weight;
   }
-
-  // ===============
-  // Package methods
-  // ===============
 
   /**
    * Deletes an attribute at the given position (0 to 
    * numAttributes() - 1).
+   *
    * @param pos the attribute's position
    */
 
   final void forceDeleteAttributeAt(int position) {
 
-    double[] newValues = new double[theAttValues.length - 1];
+    double[] newValues = new double[m_AttValues.length - 1];
 
-    System.arraycopy(theAttValues, 0, newValues, 0, position);
-    if (position < theAttValues.length - 1)
-      System.arraycopy(theAttValues, position + 1, 
+    System.arraycopy(m_AttValues, 0, newValues, 0, position);
+    if (position < m_AttValues.length - 1) {
+      System.arraycopy(m_AttValues, position + 1, 
 		       newValues, position, 
-		       theAttValues.length - (position + 1));
-    theAttValues = newValues;
+		       m_AttValues.length - (position + 1));
+    }
+    m_AttValues = newValues;
   }
 
   /**
    * Inserts an attribute at the given position
-   * (0 to numAttributes()) and sets its value to be 
-   * missing. 
+   *
+   * (0 to numAttributes()) and sets its value to be missing. 
    * @param pos the attribute's position
    */
-
   final void forceInsertAttributeAt(int position)  {
 
-    double[] newValues = new double[theAttValues.length + 1];
+    double[] newValues = new double[m_AttValues.length + 1];
 
-    System.arraycopy(theAttValues, 0, newValues, 0, position);
+    System.arraycopy(m_AttValues, 0, newValues, 0, position);
     newValues[position] = MISSING_VALUE;
-    System.arraycopy(theAttValues, position, newValues, 
-		     position + 1, theAttValues.length - position);
-    theAttValues = newValues;
+    System.arraycopy(m_AttValues, position, newValues, 
+		     position + 1, m_AttValues.length - position);
+    m_AttValues = newValues;
   }
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Clones the attribute vector of the instance and
    * overwrites it with the clone.
    */
-
   private void freshAttributeVector() {
 
     double[] newValues;
 
-    newValues = new double[theAttValues.length];
-    System.arraycopy(theAttValues, 0, newValues, 0, 
-		     theAttValues.length);
-    theAttValues = newValues;
+    newValues = new double[m_AttValues.length];
+    System.arraycopy(m_AttValues, 0, newValues, 0, 
+		     m_AttValues.length);
+    m_AttValues = newValues;
+  }
+
+  /**
+   * Main method for testing this class.
+   */
+  public static void main(String[] options) {
+
+    try {
+
+      // Create numeric attributes "length" and "weight"
+      Attribute length = new Attribute("length");
+      Attribute weight = new Attribute("weight");
+      
+      // Create vector to hold nominal values "first", "second", "third" 
+      FastVector my_nominal_values = new FastVector(3); 
+      my_nominal_values.addElement("first"); 
+      my_nominal_values.addElement("second"); 
+      my_nominal_values.addElement("third"); 
+      
+      // Create nominal attribute "position" 
+      Attribute position = new Attribute("position", my_nominal_values);
+      
+      // Create vector of the above attributes 
+      FastVector attributes = new FastVector(3);
+      attributes.addElement(length);
+      attributes.addElement(weight);
+      attributes.addElement(position);
+      
+      // Create the empty dataset "race" with above attributes
+      Instances race = new Instances("race", attributes, 0);
+      
+      // Make position the class attribute
+      race.setClassIndex(position.index());
+      
+      // Create empty instance with three attribute values
+      Instance inst = new Instance(3);
+      
+      // Set instance's values for the attributes "length", "weight", and "position"
+      inst.setValue(length, 5.3);
+      inst.setValue(weight, 300);
+      inst.setValue(position, "first");
+      
+      // Set instance's dataset to be the dataset "race"
+      inst.setDataset(race);
+      
+      // Print the instance
+      System.out.println("The instance: " + inst);
+      
+      // Print the first attribute
+      System.out.println("First attribute: " + inst.attribute(0));
+      
+      // Print the class attribute
+      System.out.println("Class attribute: " + inst.classAttribute());
+      
+      // Print the class index
+      System.out.println("Class index: " + inst.classIndex());
+      
+      // Say if class is missing
+      System.out.println("Class is missing: " + inst.classIsMissing());
+      
+      // Print the instance's class label
+      System.out.println("Class label: " + inst.classLabel());
+      
+      // Print the instance's class value in internal format
+      System.out.println("Class value (internal format): " + inst.classValue());
+      
+      // Print a shallow copy of this instance
+      Instance copy = (Instance) inst.copy();
+      System.out.println("Shallow copy: " + copy);
+      
+      // Set dataset for shallow copy
+      copy.setDataset(inst.dataset());
+      System.out.println("Shallow copy with dataset set: " + copy);
+      
+      // Unset dataset for copy, delete first attribute, and insert it again
+      copy.setDataset(null);
+      copy.deleteAttributeAt(0);
+      copy.insertAttributeAt(0);
+      copy.setDataset(inst.dataset());
+      System.out.println("Copy with first attribute deleted and inserted: " + copy); 
+      
+      // Enumerate attributes (leaving out the class attribute)
+      System.out.println("Enumerating attributes (leaving out class):");
+      Enumeration enum = inst.enumerateAttributes();
+      while (enum.hasMoreElements()) {
+	Attribute att = (Attribute) enum.nextElement();
+	System.out.println(att);
+      }
+      
+      // Headers are equivalent?
+      System.out.println("Header of original and copy equivalent: " +
+			 inst.equalHeaders(copy));
+
+      // Test for missing values
+      System.out.println("Length of copy missing: " + copy.isMissing(length));
+      System.out.println("Weight of copy missing: " + copy.isMissing(weight.index()));
+      System.out.println("Length of copy missing: " + 
+			 Instance.isMissingValue(copy.value(length)));
+      System.out.println("Missing value coded as: " + Instance.missingValue());
+
+      // Prints number of attributes and classes
+      System.out.println("Number of attributes: " + copy.numAttributes());
+      System.out.println("Number of classes: " + copy.numClasses());
+
+      // Replace missing values
+      double[] meansAndModes = {2, 3, 0};
+      copy.replaceMissingValues(meansAndModes);
+      System.out.println("Copy with missing value replaced: " + copy);
+
+      // Setting and getting values and weights
+      copy.setClassMissing();
+      System.out.println("Copy with missing class: " + copy);
+      copy.setClassValue(0);
+      System.out.println("Copy with class value set to first value: " + copy);
+      copy.setClassValue("third");
+      System.out.println("Copy with class value set to \"third\": " + copy);
+      copy.setMissing(1);
+      System.out.println("Copy with second attribute set to be missing: " + copy);
+      copy.setMissing(length);
+      System.out.println("Copy with length set to be missing: " + copy);
+      copy.setValue(0, 0);
+      System.out.println("Copy with first attribute set to 0: " + copy);
+      copy.setValue(weight, 1);
+      System.out.println("Copy with weight attribute set to 1: " + copy);
+      copy.setValue(position, "second");
+      System.out.println("Copy with position set to \"second\": " + copy);
+      copy.setValue(2, "first");
+      System.out.println("Copy with last attribute set to \"first\": " + copy);
+      System.out.println("Current weight of instance copy: " + copy.weight());
+      copy.setWeight(2);
+      System.out.println("Current weight of instance copy (set to 2): " + copy.weight());
+      System.out.println("Last value of copy: " + copy.toString(2));
+      System.out.println("Value of position for copy: " + copy.toString(position));
+      System.out.println("Last value of copy (internal format): " + copy.value(2));
+      System.out.println("Value of position for copy (internal format): " + 
+			 copy.value(position));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 /** 
@@ -24,20 +23,16 @@ package weka.core;
  * to toString() which is usually a fairly complete description) of itself.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 9 Apr 1999 - Initial version
+ * @version $Revision: 1.2 $
  */
 public interface Summarizable {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns a string that summarizes the object.
    *
    * @return the object summarized as a string
    */
-  String toSummaryString();
+  public String toSummaryString();
 }
 
 

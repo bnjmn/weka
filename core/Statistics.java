@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 /**
@@ -24,22 +23,14 @@ package weka.core;
  * code is adapted from Gary Perlman's unixstat.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class Statistics {
 
-  // =================
-  // Private variables
-  // =================
-
+  /** Some constants */
   private static double logSqrtPi = Math.log(Math.sqrt(Math.PI));
   private static double rezSqrtPi = 1/Math.sqrt(Math.PI);
   private static double bigx = 20.0;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Computes standard error for observed values of a binomial
@@ -49,22 +40,23 @@ public class Statistics {
    * @param n the size of the sample
    * @return the standard error
    */
-
   public static double binomialStandardError(double p, int n) {
 
-    if (n == 0)
+    if (n == 0) {
       return 0; 
+    }
     return Math.sqrt((p*(1-p))/(double) n);
   }
 
   /**
    * Returns chi-squared probability for given value and degrees
-   * of freedom. Adapted from unixstat by Gary Perlman.
+   * of freedom. (The probability that the chi-squared variate
+   * will be greater than x for the given degrees of freedom.)
+   * Adapted from unixstat by Gary Perlman.
    *
    * @param x the value
    * @param df the number of degrees of freedom
    */
-
   public static double chiSquaredProbability(double x, int df) {
 
     double a, y = 0, s, e, c, z, val;
@@ -114,8 +106,7 @@ public class Statistics {
    * @param df2 the second number of degrees of freedom
    * @return the critical value for the given probability
    */
-
-  private static double FCriticalValue(double p, int df1, int df2) {
+  public static double FCriticalValue(double p, int df1, int df2) {
 
     double  fval;
     double  maxf = 99999.0;     /* maximum possible F ratio */
@@ -149,8 +140,7 @@ public class Statistics {
    * @param df2 the second number of degrees of freedom
    * @return the probability of the F-ratio.
    */
-  
-  private static double FProbability(double F, int df1, int df2) {
+  public static double FProbability(double F, int df1, int df2) {
 
     int     i, j;
     int     a, b;
@@ -194,7 +184,6 @@ public class Statistics {
     }
     
     // correction for approximation errors suggested in certification
-    
     if (p < 0.0)
       p = 0.0;
     else if (p > 1.0)
@@ -205,12 +194,11 @@ public class Statistics {
   /**
    * Returns probability that the standardized normal variate Z (mean = 0, standard
    * deviation = 1) is less than z.
-   *
    * Adapted from unixstat by Gary Perlman.
+   *
    * @param the z-value
    * @return the probability of the z value according to the normal pdf
    */
-
   public static double normalProbability(double z) {
 
     double  y, x, w;
@@ -246,18 +234,36 @@ public class Statistics {
 
   /**
    * Computes absolute size of half of a student-t confidence interval 
-   * for degrees of freedom, probability, and standard error.
+   * for given degrees of freedom, probability, and observed value.
    *
    * @param df the number of degrees of freedom
    * @param p the probability
-   * @param se the standard error
+   * @param se the observed value
    * @return absolute size of half of a student-t confidence interval
    */
-
   public static double studentTConfidenceInterval(int df, double p,
 						  double se) {
 
     return Math.sqrt(FCriticalValue(p, 1, df))*se;
+  }
+
+  /**
+   * Main method for testing this class.
+   */
+  public static void main(String[] ops) {
+
+    System.out.println("Binomial standard error (0.5, 100): " + 
+		       Statistics.binomialStandardError(0.5, 100));
+    System.out.println("Chi-squared probability (2.558, 10): " +
+		       Statistics.chiSquaredProbability(2.558, 10));
+    System.out.println("Normal probability (0.2): " +
+		       Statistics.normalProbability(0.2));
+    System.out.println("F critical value (0.05, 4, 5): " +
+		       Statistics.FCriticalValue(0.05, 4, 5));
+    System.out.println("F probability (5.1922, 4, 5): " +
+		       Statistics.FProbability(5.1922, 4, 5));
+    System.out.println("Student-t confidence interval (9, 0.01, 2): " +
+		       Statistics.studentTConfidenceInterval(9, 0.01, 2));
   }
 }
 

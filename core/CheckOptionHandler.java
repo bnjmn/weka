@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 import java.util.*;
@@ -24,15 +23,26 @@ import java.util.*;
 /**
  * Simple command line checking of classes that implement OptionHandler.<p>
  *
- * Usage: <br>
+ * Usage: <p>
  * <code> CheckOptionHandler -W optionHandlerClassName -- test options </code>
  *
+ * Valid options are: <p>
+ *
+ * -W classname <br>
+ * The name of a class implementing an OptionHandler.
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 26 Mar 1999 - Initial version (Len)
+ * @version $Revision: 1.2 $
  */
 public class CheckOptionHandler {
   
+  /**
+   * Prints the given options to stdout.
+   *
+   * @param options the options to be printed
+   */
   public static void printOptions(String [] options) {
+    
     if (options == null) {
       System.out.println("<null>");
     } else {
@@ -47,6 +57,13 @@ public class CheckOptionHandler {
     }
   }
 
+  /**
+   * Compares the two given sets of options.
+   *
+   * @param options1 the first set of options
+   * @param options2 the second set of options
+   * @exception Exception if the two sets of options differ
+   */
   public static void compareOptions(String [] options1, String [] options2) 
     throws Exception {
 
@@ -66,7 +83,18 @@ public class CheckOptionHandler {
     }
   }
 
+  /** 
+   * Main method for using the CheckOptionHandler.<p>
+   *
+   * Valid options are: <p>
+   *
+   * -W classname <br>
+   * The name of the class implementing an OptionHandler.
+   *
+   * @param the options to the CheckOptionHandler
+   */
   public static void main(String [] args) {
+
     try {
       String className = Utils.getOption('W', args);
       if (className.length() == 0) {
