@@ -30,7 +30,7 @@ import weka.estimators.*;
  * Symbolic probability estimator based on symbol counts and a prior.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DiscreteEstimatorBayes implements Estimator, Scoreable {
 
@@ -120,12 +120,12 @@ public class DiscreteEstimatorBayes implements Estimator, Scoreable {
 
     case (Scoreable.BAYES): {
       for (int iSymbol = 0; iSymbol < m_nSymbols; iSymbol++) {
-	fScore += SpecialFunctions.lnGamma(m_Counts[iSymbol]);
+	fScore += Statistics.lnGamma(m_Counts[iSymbol]);
       } 
 
-      fScore -= SpecialFunctions.lnGamma(m_SumOfCounts);
-      fScore -= m_nSymbols * SpecialFunctions.lnGamma(m_fPrior);
-      fScore += SpecialFunctions.lnGamma(m_nSymbols * m_fPrior);
+      fScore -= Statistics.lnGamma(m_SumOfCounts);
+      fScore -= m_nSymbols * Statistics.lnGamma(m_fPrior);
+      fScore += Statistics.lnGamma(m_nSymbols * m_fPrior);
     } 
 
       break;
