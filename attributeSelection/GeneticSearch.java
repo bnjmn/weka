@@ -58,7 +58,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class GeneticSearch extends ASSearch implements 
   StartSetHandler, OptionHandler {
@@ -128,7 +128,7 @@ public class GeneticSearch extends ASSearch implements
   private StringBuffer m_generationReports;
 
   // Inner class
-  protected class GABitSet implements Cloneable {
+  protected class GABitSet implements Cloneable, Serializable {
     
     private BitSet m_chromosome;
 

@@ -42,7 +42,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -53,7 +53,7 @@ public class BestFirst extends ASSearch
    * Class for a node in a linked list. Used in best first search.
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    **/
-  public class Link2 {
+  public class Link2 implements Serializable {
 
     BitSet group;
     double merit;
