@@ -38,15 +38,14 @@ import weka.core.*;
  * (default last)<p>
  *
  * -L label1,label2,...<br>
- * Create nominal attribute with the given labels. Creates a string
- * attribute if list is a single '?'. Creates a numeric attribute
- * if list is empty. (default numeric attribute)<p>
+ * Create nominal attribute with the given labels
+ * (default numeric attribute)<p>
  *
  * -N name<br>
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -61,11 +60,6 @@ public class AddFilter extends Filter implements OptionHandler {
 
   /** The list of labels for nominal attribute */
   protected FastVector m_Labels = new FastVector(5);
-
-  /** The indices of the string attributes in the source
-      and destination datasets */
-  protected int[] m_indicesOfStringAttsInSrc = null;
-  protected int[] m_indicesOfStringAttsInDest = null;
 
   /**
    * Returns a string describing this filter
@@ -93,9 +87,7 @@ public class AddFilter extends Filter implements OptionHandler {
 	      +"\tare valid indexes.(default last)",
               "C", 1, "-C <index>"));
     newVector.addElement(new Option(
-	      "\tCreate nominal attribute with given labels.\n"
-	      +"\tCreates a string attribute if list is a single '?'.\n"
-	      +"\tCreates a numeric attribute if list is empty.\n"
+	      "\tCreate nominal attribute with given labels\n"
 	      +"\t(default numeric attribute)",
               "L", 1, "-L <label1,label2,...>"));
     newVector.addElement(new Option(
@@ -114,15 +106,15 @@ public class AddFilter extends Filter implements OptionHandler {
    * Specify where to insert the column. First and last are valid indexes.
    * (default last)<p>
    *
-   * -L label1,label2,...<br> Create nominal attribute with the given
-   * labels. Creates a string attribute if list is a single '?'. Creates
-   * a numeric attribute if list is empty.(default numeric attribute)<p>
+   * -L label1,label2,...<br>
+   * Create nominal attribute with the given labels
+   * (default numeric attribute)<p>
    *
    * -N name<br>
    * Name of the new attribute. (default = 'Unnamed')<p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported 
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -137,10 +129,7 @@ public class AddFilter extends Filter implements OptionHandler {
       }
     }
 
-    String nominalString = Utils.getOption('L', options);
-    if (nominalString.length() != 0) {
-      setNominalLabels(nominalString);
-    }
+    setNominalLabels(Utils.getOption('L', options));
     setAttributeName(Utils.getOption('N', options));
 
     if (getInputFormat() != null) {
@@ -159,8 +148,7 @@ public class AddFilter extends Filter implements OptionHandler {
     int current = 0;
 
     options[current++] = "-N"; options[current++] = getAttributeName();
-    if ((m_AttributeType == Attribute.NOMINAL) ||
-	(m_AttributeType == Attribute.STRING)) { 
+    if (m_AttributeType == Attribute.NOMINAL) {
       options[current++] = "-L"; options[current++] = getNominalLabels();
     }
     options[current++] = "-C";
@@ -185,29 +173,6 @@ public class AddFilter extends Filter implements OptionHandler {
 
     super.setInputFormat(instanceInfo);
 
-    // Find all the string attributes in the input dataset
-    int numStringAttributes = 0;
-    m_indicesOfStringAttsInSrc = new int[instanceInfo.numAttributes()];
-    for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-      if (instanceInfo.attribute(i).isString()) {
-	m_indicesOfStringAttsInSrc[numStringAttributes++] = i;
-      }
-    }
-    int[] trimmed = new int[numStringAttributes];
-    System.arraycopy(m_indicesOfStringAttsInSrc, 0, trimmed, 0,
-		     numStringAttributes);
-    m_indicesOfStringAttsInSrc = trimmed;
-
-    // Find the corresponding string attributes in the ouput dataset
-    m_indicesOfStringAttsInDest = new int[numStringAttributes];
-    for (int i = 0; i < numStringAttributes; i++) {
-      if (m_indicesOfStringAttsInSrc[i] < m_Insert) {
-	m_indicesOfStringAttsInDest[i] = m_indicesOfStringAttsInSrc[i];
-      } else {
-	m_indicesOfStringAttsInDest[i] = m_indicesOfStringAttsInSrc[i] + 1;
-      }
-    }
-
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute = null;
     switch (m_AttributeType) {
@@ -216,9 +181,6 @@ public class AddFilter extends Filter implements OptionHandler {
       break;
     case Attribute.NOMINAL:
       newAttribute = new Attribute(m_Name, m_Labels);
-      break;
-    case Attribute.STRING:
-      newAttribute = new Attribute(m_Name, (FastVector)null);
       break;
     default:
       throw new Error("Unknown attribute type in AddFilter");
@@ -255,8 +217,9 @@ public class AddFilter extends Filter implements OptionHandler {
     Instance inst = (Instance)instance.copy();
 
     // First copy string values from input to output
-    copyStringValues(inst, true, inst.dataset(), m_indicesOfStringAttsInSrc,
-		     getOutputFormat(), m_indicesOfStringAttsInDest);
+    // Will break if the attribute being created is of type STRING (currently
+    // AddFilter only adds NOMINAL or NUMERIC types)
+    copyStringValues(inst, true, inst.dataset(), getOutputFormat());
 
     // Insert the new attribute and reassign to output
     inst.setDataset(null);
@@ -347,9 +310,9 @@ public class AddFilter extends Filter implements OptionHandler {
    * displaying in the explorer/experimenter gui
    */
   public String nominalLabelsTipText() {
-    return "The list of value labels. "
+    return "The list of value labels (nominal attribute creation only). "
       + " The list must be comma-separated, eg: \"red,green,blue\"."
-      + " If this is empty, a string attribute will be created.";
+      + " If this is empty, the created attribute will be numeric.";
   }
 
   /**
@@ -378,12 +341,6 @@ public class AddFilter extends Filter implements OptionHandler {
    */
   public void setNominalLabels(String labelList) {
 
-    // Check whether the attribute should be a string attribute
-    if ((labelList.length() == 1) && (labelList.charAt(0) == '?')) {
-      m_AttributeType = Attribute.STRING;
-      return;
-    }
-
     FastVector labels = new FastVector (10);
 
     // Split the labelList up into the vector
@@ -403,7 +360,7 @@ public class AddFilter extends Filter implements OptionHandler {
       labels.addElement(label);
     }
 
-    // Make the attribute a string attribute if the list was empty
+    // If everything is OK, make the type change
     m_Labels = labels;
     if (labels.size() == 0) {
       m_AttributeType = Attribute.NUMERIC;
