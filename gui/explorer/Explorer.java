@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Explorer extends JPanel {
 
@@ -61,8 +61,7 @@ public class Explorer extends JPanel {
   protected ClassifierPanel m_ClassifierPanel = new ClassifierPanel();
 
   /** Label for a panel that still need to be implemented */
-  protected JLabel m_ClustererPanel = new JLabel("Not implemented yet :-)",
-						 SwingConstants.CENTER);
+  protected ClustererPanel m_ClustererPanel = new ClustererPanel();
 
   /** Label for a panel that still need to be implemented */
   protected AssociationsPanel m_AssociationPanel = new AssociationsPanel();
@@ -98,6 +97,7 @@ public class Explorer extends JPanel {
     m_PreprocessPanel.setLog(m_LogPanel);
     m_ClassifierPanel.setLog(m_LogPanel);
     m_AssociationPanel.setLog(m_LogPanel);
+    m_ClustererPanel.setLog(m_LogPanel);
     m_AttributeSelectionPanel.setLog(m_LogPanel);
     m_TabbedPane.addTab("Preprocess", null, m_PreprocessPanel,
 			"Open/Edit/Save instances");
@@ -123,6 +123,8 @@ public class Explorer extends JPanel {
 				       .getWorkingInstances());
 	m_AssociationPanel.setInstances(m_PreprocessPanel
 				       .getWorkingInstances());
+	m_ClustererPanel.setInstances(m_PreprocessPanel
+				      .getWorkingInstances());
 	m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
 					       .getWorkingInstances());
 	m_TabbedPane.setEnabledAt(1, true);
