@@ -37,7 +37,6 @@ import weka.core.OptionHandler;
 
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.unsupervised.attribute.NominalToBinary;
 
 /**
  * XMeans clustering class.
@@ -106,7 +105,7 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
  * @author Gabi Schmidberger <gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware <mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -114,7 +113,6 @@ public class XMeans extends Clusterer implements OptionHandler {
 
   private AlgVector algv; // TODO just a trick
 
-  /*
   /* training instances */
   private Instances m_Instances = null;
 
@@ -123,9 +121,6 @@ public class XMeans extends Clusterer implements OptionHandler {
   
   /* replace missing values in training instances */
   private ReplaceMissingValues m_ReplaceMissingFilter;
-
-  /* replace nominal to binary attributes */
-  private NominalToBinary m_NominalToBinary;
 
   /**
    * Distance value between true and false of binary attributes and 
@@ -380,8 +375,6 @@ public class XMeans extends Clusterer implements OptionHandler {
    */
   public void buildClusterer(Instances data) throws Exception {
 
-    OOPS("buildClusterer classIndex " + data.classIndex());
-
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
     }
@@ -389,19 +382,8 @@ public class XMeans extends Clusterer implements OptionHandler {
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
     data = Filter.useFilter(data, m_ReplaceMissingFilter);
-    // replace nominal with binary numeric
-    if (checkForNominalAttributes(data)) {
-      m_NominalToBinary = new NominalToBinary();
-      m_NominalToBinary.setInputFormat(data);
-      //m_NominalToBinary.setValue(Math.sqrt(2.0));
-      data = Filter.useFilter(data, m_NominalToBinary);
-    } else {
-      m_NominalToBinary = null;
-    }
-    OOPS("after nominal filter classIndex " + data.classIndex());
     m_Instances = data;
-    System.out.println(data);
-
+    
     // initialize random function
     Random random0 = new Random(m_Seed);
 
@@ -409,8 +391,13 @@ public class XMeans extends Clusterer implements OptionHandler {
     m_NumClusters =  m_MinNumClusters;
 
     // set distance function to default
-    if (m_DistanceF == null) 
+    if (m_DistanceF == null) {
       m_DistanceF = new EuclideanDistance(data);
+      checkInstances();
+    }
+    if (m_DistanceF != null) {
+      checkInstances();
+    }
 
     // 
     if (m_DebugVektorsFile != null)
@@ -519,7 +506,7 @@ public class XMeans extends Clusterer implements OptionHandler {
 	  }*/
 	PFD(D_FOLLOWSPLIT, "\nMain loop - Assign - centers:");
 	PrCentersFD(D_FOLLOWSPLIT);
-	System.out.println(" ");
+	//System.out.println(" ");
 	// compute new centers = centers of mass of points
         converged = recomputeCenters(m_ClusterCenters, // clusters
 				     instOfCent,       // their instances
@@ -1904,7 +1891,6 @@ throws Exception{
     return "random number seed";
   }
 
-
   /**
    * Sets the random number seed.
    * @param s the seed
@@ -1922,6 +1908,15 @@ throws Exception{
     return  m_Seed;
   }
 
+  /**
+   * Checks the instances.
+   * No checks in this KDTree but it calls the check of the distance function.
+   */
+  private void checkInstances () throws Exception {
+    
+    m_DistanceF.checkInstances();
+  }
+  
   /**
    * Parses a given list of options.
    * @param options the list of options as an array of strings
@@ -2126,6 +2121,7 @@ throws Exception{
     if (debugLevel == m_DebugLevel)
       System.out.println(output);
   }
+
   private void OOPS(String output) {
     System.out.println(output);
   }
