@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.6 $
+ * @version  $Revision: 1.7 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1510,12 +1510,14 @@ public class Evaluation implements Summarizable {
 			Utils.doubleToString(100.0*m_IncorrectWithCost/
 					     m_WithClassWithCost, 12, 4) 
 			+ " %\n");
-	    text.append("UnClassified With Cost             ");
-	    text.append(Utils.doubleToString(m_UnclassifiedWithCost, 12, 4) +
-			 "     " +
-			Utils.doubleToString(100.0*m_UnclassifiedWithCost/
-					     m_WithClassWithCost, 12, 4) 
-			+ " %\n");
+	    if (Utils.gr(m_UnclassifiedWithCost, 0)) {
+	      text.append("UnClassified With Cost             ");
+	      text.append(Utils.doubleToString(m_UnclassifiedWithCost, 12, 4) +
+			  "     " +
+			  Utils.doubleToString(100.0*m_UnclassifiedWithCost/
+					       m_WithClassWithCost, 12, 4) 
+			  + " %\n");
+	    }
 	  }
 	  if (printComplexityStatistics) {
 	    text.append("K&B Relative Info Score            ");
@@ -1563,10 +1565,12 @@ public class Evaluation implements Summarizable {
 	text.append(Utils.doubleToString(rootRelativeSquaredError(), 
 					 12, 4) + " %\n");
       }
-      text.append("UnClassified Instances             ");
-      text.append(Utils.doubleToString(unclassified(), 12,4) +  "     " +
-		  Utils.doubleToString(pctUnclassified(),
-				       12, 4) + " %\n");
+      if (Utils.gr(unclassified(), 0)) {
+	text.append("UnClassified Instances             ");
+	text.append(Utils.doubleToString(unclassified(), 12,4) +  "     " +
+		    Utils.doubleToString(pctUnclassified(),
+					 12, 4) + " %\n");
+      }
       text.append("Total Number of Instances          ");
       text.append(Utils.doubleToString(m_WithClass, 12, 4));
       if (m_CostMatrix != null) {

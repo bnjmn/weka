@@ -46,7 +46,8 @@ import weka.core.*;
  * (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ */
+ * @version $Revision: 1.6 $ 
+ */
 public class Stacking extends Classifier implements OptionHandler {
 
   /** The meta classifier. */
@@ -381,6 +382,9 @@ public class Stacking extends Classifier implements OptionHandler {
     Instances newData = new Instances(data);
     m_BaseFormat = new Instances(data, 0);
     newData.deleteWithMissingClass();
+    if (newData.numInstances() == 0) {
+      throw new Exception("No training instances without missing class!");
+    }
     newData.randomize(new Random(m_Seed));
     if (newData.classAttribute().isNominal())
       newData.stratify(m_NumFolds);

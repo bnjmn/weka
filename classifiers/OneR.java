@@ -35,7 +35,8 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ 
+*/
 public class OneR extends Classifier implements OptionHandler {
 
   /**
