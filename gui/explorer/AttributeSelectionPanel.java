@@ -105,7 +105,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -666,6 +666,7 @@ public class AttributeSelectionPanel extends JPanel {
 
 		PlotData2D tempd = new PlotData2D(transformed);
 		tempd.setPlotName(name+" ("+transformed.relationName()+")");
+		m_CurrentVis.setLog(m_Log);
 		try {
 		  m_CurrentVis.addPlot(tempd);
 		  m_CurrentVis.setColourIndex(transformed.classIndex());

@@ -116,7 +116,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1246,6 +1246,7 @@ public class ClassifierPanel extends JPanel {
 		}
 		m_CurrentVis = new VisualizePanel();
 		m_CurrentVis.setName(name+" ("+inst.relationName()+")");
+		m_CurrentVis.setLog(m_Log);
 		PlotData2D tempd = new PlotData2D(predInstances);
 		tempd.setShapeSize(plotSize);
 		tempd.setShapeType(plotShape);
@@ -1393,6 +1394,7 @@ public class ClassifierPanel extends JPanel {
 		Instances result = tc.getCurve(preds);
 		VisualizePanel vmc = new VisualizePanel();
 		vmc.setName(result.relationName());
+		vmc.setLog(m_Log);
 		PlotData2D tempd = new PlotData2D(result);
 		tempd.setPlotName(result.relationName());
 		vmc.addPlot(tempd);
@@ -1415,6 +1417,7 @@ public class ClassifierPanel extends JPanel {
 		  ThresholdCurve tc = new ThresholdCurve();
 		  Instances result = tc.getCurve(preds, classValue);
 		  VisualizePanel vmc = new VisualizePanel();
+		  vmc.setLog(m_Log);
 		  vmc.setName(result.relationName()+". Class value "+
 			      classAtt.value(classValue)+")");
 		  PlotData2D tempd = new PlotData2D(result);
