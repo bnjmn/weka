@@ -25,6 +25,7 @@ import weka.core.Attribute;
 import weka.core.Utils;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.CostMatrix;
 import weka.filters.Filter;
 import weka.gui.Logger;
 import weka.gui.SysErrLog;
@@ -32,6 +33,8 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
+import weka.gui.CostMatrixEditor;
+import weka.gui.PropertyDialog;
 
 import java.util.Random;
 import java.util.Date;
@@ -84,7 +87,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -136,6 +139,12 @@ public class ClassifierPanel extends JPanel {
   protected JCheckBox m_OutputConfusionBut =
     new JCheckBox("Output confusion matrix");
 
+  /** Check to output a confusion matrix */
+  protected JCheckBox m_EvalWRTCostsBut =
+    new JCheckBox("Cost-sensitive evaluation");
+
+  protected JButton m_SetCostsBut = new JButton("Set...");
+
   /** Label by where the cv folds are entered */
   protected JLabel m_CVLab = new JLabel("Folds", SwingConstants.RIGHT);
 
@@ -154,6 +163,9 @@ public class ClassifierPanel extends JPanel {
   /** The frame used to show the test set selection panel */
   protected JFrame m_SetTestFrame;
 
+  /** The frame used to show the cost matrix editing panel */
+  protected PropertyDialog m_SetCostsFrame;
+
   /**
    * Alters the enabled/disabled status of elements associated with each
    * radio button
@@ -165,7 +177,7 @@ public class ClassifierPanel extends JPanel {
   };
 
   /** Button for further output/visualize options */
-  JButton m_MoreOptions = new JButton("More Options");
+  JButton m_MoreOptions = new JButton("More options...");
 
   /** Click to start running the classifier */
   protected JButton m_StartBut = new JButton("Start");
@@ -175,7 +187,10 @@ public class ClassifierPanel extends JPanel {
 
   /** Click to visualize the current classifier's predictions */
   protected JButton m_VisualizeBut = new JButton("Visualize");
-  
+
+  /** The cost matrix editor for evaluation costs */
+  protected CostMatrixEditor m_CostMatrixEditor = new CostMatrixEditor();
+
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
@@ -279,7 +294,36 @@ public class ClassifierPanel extends JPanel {
 	setTestSet();
       }
     });
-
+    m_EvalWRTCostsBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_SetCostsBut.setEnabled(m_EvalWRTCostsBut.isSelected());
+	if ((m_SetCostsFrame != null) 
+	    && (!m_EvalWRTCostsBut.isSelected())) {
+	  m_SetCostsFrame.setVisible(false);
+	}
+      }
+    });
+    m_CostMatrixEditor.setValue(new CostMatrix(1));
+    m_SetCostsBut.setEnabled(m_EvalWRTCostsBut.isSelected());
+    m_SetCostsBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_SetCostsBut.setEnabled(false);
+	if (m_SetCostsFrame == null) {
+	  m_SetCostsFrame = new PropertyDialog(m_CostMatrixEditor, 100, 100);
+	  //	pd.setSize(250,150);
+	  m_SetCostsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+	    public void windowClosing(java.awt.event.WindowEvent p) {
+	      m_SetCostsBut.setEnabled(m_EvalWRTCostsBut.isSelected());
+	      if ((m_SetCostsFrame != null) 
+		  && (!m_EvalWRTCostsBut.isSelected())) {
+		m_SetCostsFrame.setVisible(false);
+	      }
+	    }
+	  });
+	}
+	m_SetCostsFrame.setVisible(true);
+      }
+    });
     m_VisualizeBut.setEnabled(false);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
@@ -327,15 +371,17 @@ public class ClassifierPanel extends JPanel {
       public void actionPerformed(ActionEvent e) {
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
-	moreOptionsPanel.setBorder(BorderFactory.createCompoundBorder(
-			BorderFactory.createTitledBorder("Output Options"),
-			BorderFactory.createEmptyBorder(0, 5, 5, 5)
-			       				      ));
+	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
 	moreOptionsPanel.setLayout(new GridLayout(5, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputTFPosBut);	  
 	moreOptionsPanel.add(m_OutputConfusionBut);	  
 	moreOptionsPanel.add(m_StorePredictionsBut);
+	JPanel costMatrixOption = new JPanel();
+	costMatrixOption.setLayout(new BorderLayout());
+	costMatrixOption.add(m_EvalWRTCostsBut, BorderLayout.WEST);
+	costMatrixOption.add(m_SetCostsBut, BorderLayout.EAST);
+	moreOptionsPanel.add(costMatrixOption);
 
 	JPanel all = new JPanel();
 	all.setLayout(new BorderLayout());	
@@ -346,27 +392,27 @@ public class ClassifierPanel extends JPanel {
 	okP.setLayout(new GridLayout(1,1,5,5));
 	okP.add(oK);
 
-	all.add(moreOptionsPanel,BorderLayout.CENTER);
-	all.add(okP,BorderLayout.SOUTH);
+	all.add(moreOptionsPanel, BorderLayout.CENTER);
+	all.add(okP, BorderLayout.SOUTH);
 	
 	final javax.swing.JFrame jf = 
-	  new javax.swing.JFrame("Classifier ouptut options");
+	  new javax.swing.JFrame("Classifier evaluation options");
 	jf.getContentPane().setLayout(new BorderLayout());
 	jf.getContentPane().add(all, BorderLayout.CENTER);
 	jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	  public void windowClosing(java.awt.event.WindowEvent e) {
+	  public void windowClosing(java.awt.event.WindowEvent w) {
 	    jf.dispose();
 	    m_MoreOptions.setEnabled(true);
 	  }
 	});
 	oK.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
+	  public void actionPerformed(ActionEvent a) {
 	    m_MoreOptions.setEnabled(true);
 	    jf.dispose();
 	  }
 	});
 	jf.pack();
-	jf.setSize(370,200);
+	jf.setLocation(m_MoreOptions.getLocationOnScreen());
 	jf.setVisible(true);
       }
     });
@@ -652,6 +698,7 @@ public class ClassifierPanel extends JPanel {
 	public void run() {
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
+	  CostMatrix costMatrix = null;
 	  Instances inst = new Instances(m_Instances);
 	  Instances userTest = null;
 	  double [] predictions = null;
@@ -659,7 +706,10 @@ public class ClassifierPanel extends JPanel {
 	  if (m_TestInstances != null) {
 	    userTest = new Instances(m_TestInstances);
 	  }
-
+	  if (m_EvalWRTCostsBut.isSelected()) {
+	    costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
+					.getValue());
+	  }
 	  boolean outputModel = m_OutputModelBut.isSelected();
 	  boolean outputConfusion = m_OutputConfusionBut.isSelected();
 	  boolean outputTFPos = m_OutputTFPosBut.isSelected();
@@ -768,7 +818,7 @@ public class ClassifierPanel extends JPanel {
 	    switch (testMode) {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
-	      eval = new Evaluation(inst);
+	      eval = new Evaluation(inst, costMatrix, null);
 	      predInstances = new Instances(inst,inst.numInstances());
 	      predictions = new double [inst.numInstances()];
 	      for (int jj=0;jj<inst.numInstances();jj++) {
@@ -786,7 +836,7 @@ public class ClassifierPanel extends JPanel {
 		m_Log.statusMessage("Stratifying instances...");
 		inst.stratify(numFolds);
 	      }
-	      eval = new Evaluation(inst);
+	      eval = new Evaluation(inst, costMatrix, null);
 	      int p_index = 0;
 	      predInstances = new Instances(inst,inst.numInstances());
 	      predictions = new double [inst.numInstances()];
@@ -824,7 +874,7 @@ public class ClassifierPanel extends JPanel {
 	      Instances test = new Instances(inst, trainSize, testSize);
 	      m_Log.statusMessage("Building model on training split...");
 	      classifier.buildClassifier(train);
-	      eval = new Evaluation(train);
+	      eval = new Evaluation(train, costMatrix, null);
 	      m_Log.statusMessage("Evaluating on test split...");
 	      predictions = new double [test.numInstances()];
 	      predInstances = new Instances(test,test.numInstances());
@@ -839,7 +889,7 @@ public class ClassifierPanel extends JPanel {
 		
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
-	      eval = new Evaluation(inst);
+	      eval = new Evaluation(inst, costMatrix, null);
 	      predictions = new double [userTest.numInstances()];
 	      predInstances = new Instances(userTest,
 					    userTest.numInstances());
