@@ -14,7 +14,6 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 /*
  *    MisclassificationFilter.java
  *    Copyright (C) 2002 Richard Kirkby
@@ -53,7 +52,8 @@ import java.util.Vector;
  * Invert the match so that correctly classified instances are discarded.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class MisclassificationFilter extends Filter implements OptionHandler {
 
@@ -92,7 +92,9 @@ public class MisclassificationFilter extends Filter implements OptionHandler {
   }
 
   /**
+   * Cleanses the data based on misclassifications when used training data.
    *
+   * @param data the data to train with and cleanse
    */
   private Instances cleanseTrain(Instances data) throws Exception {
     
@@ -154,6 +156,11 @@ public class MisclassificationFilter extends Filter implements OptionHandler {
     }
   }
 
+  /**
+   * Cleanses the data based on misclassifications when performing cross-validation.
+   *
+   * @param data the data to train with and cleanse
+   */
   private Instances cleanseCross(Instances data) throws Exception {
     
     Instance inst;
@@ -463,8 +470,8 @@ public class MisclassificationFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Sets the attribute on which misclassifications are based. If < 0 will use any current set class or default
-   * to the last attribute.
+   * Sets the attribute on which misclassifications are based. If < 0 will use any current set class
+   * or default to the last attribute.
    *
    * @param classIndex the class index.
    */
