@@ -40,7 +40,7 @@ import weka.filters.Filter;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class NeuralNetwork extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -327,7 +327,8 @@ public class NeuralNetwork extends Classifier
 	    if (!m_stopped) {
 	      return;
 	    }
-	    if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
+	    if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK && 
+		!e.isAltDown()) {
 	      Graphics g = NodePanel.this.getGraphics();
 	      int x = e.getX();
 	      int y = e.getY();
@@ -553,7 +554,7 @@ public class NeuralNetwork extends Classifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    */
   class ControlPanel extends JPanel {
     
