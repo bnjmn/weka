@@ -75,9 +75,166 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.6 $
+ * @version  $Revision: 1.7 $
  */
 public class AttributeSelection {
+
+  /** the instances to select attributes from */
+  private Instances m_trainInstances;
+
+  /** a starting set of attributes */
+  private Range m_startSet;
+
+  /** the attribute/subset evaluator */
+  private ASEvaluation m_ASEvaluator;
+
+  /** the search method */
+  private ASSearch m_searchMethod;
+
+  /** the number of folds to use for cross validation */
+  private int m_numFolds;
+
+  /** holds a string describing the results of the attribute selection */
+  private StringBuffer m_selectionResults;
+
+  /** rank features (if allowed by the search method) */
+  private boolean m_doRank;
+  
+  /** do cross validation */
+  private boolean m_doXval;
+
+  /** seed used to randomly shuffle instances for cross validation */
+  private int m_seed;
+
+  /** cutoff value by which to select attributes for ranked results */
+  private double m_threshold;
+  
+  /** the selected attributes */
+  private int [] m_selectedAttributeSet;
+
+  /** the attribute indexes and associated merits if a ranking is produced */
+  private double [][] m_attributeRanking;
+
+  /**
+   * get the final selected set of attributes.
+   * @return an array of attribute indexes
+   * @exception if attribute selection has not been performed yet
+   */
+  public int [] selectedAttributes () throws Exception {
+    if (m_selectedAttributeSet == null) {
+      throw new Exception("Attribute selection has not been performed yet!");
+    }
+    return m_selectedAttributeSet;
+  }
+
+  /**
+   * get the final ranking of the attributes.
+   * @return a two dimensional array of ranked attribute indexes and their
+   * associated merit scores as doubles.
+   * @exception if a ranking has not been produced
+   */
+  public double [][] rankedAttributes () throws Exception {
+    if (m_attributeRanking == null) {
+      throw new Exception("Ranking has not been performed");
+    }
+    return m_attributeRanking;
+  }
+
+  /**
+   * set the attribute/subset evaluator
+   * @param evaluator the evaluator to use
+   */
+  public void setEvaluator (ASEvaluation evaluator) {
+    m_ASEvaluator = evaluator;
+  }
+
+  /**
+   * set the search method
+   * @param search the search method to use
+   */
+  public void setSearch (ASSearch search) {
+    m_searchMethod = search;
+  }
+
+  /**
+   * set a starting set
+   * @param startSet a Range object giving a range of attributes to use
+   * as a starting set
+   */
+  public void setStartSet(Range startSet) {
+    m_startSet = startSet;
+  }
+  
+
+  /**
+   * set the number of folds for cross validation
+   * @param folds the number of folds
+   */
+  public void setFolds (int folds) {
+    m_numFolds = folds;
+  }
+
+  /**
+   * produce a ranking (if possible with the set search an evaluator
+   * @param r true if a ranking is to be produced
+   */
+  public void setRanking (boolean r) {
+    m_doRank = r;
+  }
+
+  /**
+   * do a cross validation
+   * @param x true if a cross validation is to be performed
+   */
+  public void setXval (boolean x) {
+    m_doXval = x;
+  }
+
+  /**
+   * set the seed for use in cross validation
+   * @param s the seed
+   */
+  public void setSeed (int s) {
+    m_seed = s;
+  }
+
+  /**
+   * set the threshold by which to select features from a ranked list
+   * @param t the threshold
+   */
+  public void setThreshold (double t) {
+    m_threshold = t;
+  }
+
+  /**
+   * get a description of the attribute selection
+   * @return a String describing the results of attribute selection
+   */
+  public String toResultsString() {
+    return m_selectionResults.toString();
+  }
+
+
+  /**
+   * constructor. Sets defaults for each member varaible. Default
+   * attribute evaluator is CfsSubsetEval; default search method is
+   * BestFirst.
+   */
+  public AttributeSelection () {
+    Range r = new Range();
+    r.setInvert(false);
+    setStartSet(r);
+    setFolds(10);
+    setRanking(false);
+    setXval(false);
+    setSeed(1);
+    setThreshold(-Double.MAX_VALUE);
+    setEvaluator(new CfsSubsetEval());
+    setSearch(new BestFirst());
+    m_selectionResults = new StringBuffer();
+    m_selectedAttributeSet = null;
+    m_attributeRanking = null;
+  }
 
   /**
    * Perform attribute selection with a particular evaluator and
@@ -93,7 +250,6 @@ public class AttributeSelection {
 					 String[] options)
     throws Exception
   {
-    int[][] finalFeatSet = new int[1][0];
     String trainFileName, searchName;
     Instances train = null;
     ASSearch searchMethod = null;
@@ -118,7 +274,7 @@ public class AttributeSelection {
     }
 
     train = new Instances(new FileReader(trainFileName));
-    return  SelectAttributes(ASEvaluator, options, finalFeatSet, train);
+    return  SelectAttributes(ASEvaluator, options, train);
   }
 
 
@@ -135,34 +291,33 @@ public class AttributeSelection {
    * @return the results of cross validation as a String
    * @exception Exception if no class attribute is set for the data
    */
-  public static String CrossValidateAttributes (ASEvaluation ASEvaluator, 
-						int[] initialSet, 
-						ASSearch searchMethod, 
-						boolean ranking, 
-						Instances data, 
-						int folds, 
-						int seed, 
-						double cutoff)
-    throws Exception
-  {
+  public String CrossValidateAttributes () throws Exception {
     StringBuffer CvString = new StringBuffer();
-    Instances cvData = new Instances(data);
+    Instances cvData = new Instances(m_trainInstances);
     Instances train;
     double[][] rankResults;
     double[] subsetResults;
     double[][] attributeRanking = null;
+    int [] initialSet;
 
-    if (ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
+    cvData.randomize(new Random(m_seed));
+
+    initialSet = m_startSet.getSelection();
+    if (initialSet.length == 0) {
+      initialSet = null;
+    }
+
+    if (m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
       subsetResults = new double[cvData.numAttributes()];
     }
     else {
       subsetResults = new double[cvData.numAttributes() - 1];
     }
 
-    if (!(ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
-	!(ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
+	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
       if (cvData.classAttribute().isNominal()) {
-	cvData.stratify(folds);
+	cvData.stratify(m_numFolds);
       }
       rankResults = new double[4][cvData.numAttributes() - 1];
     }
@@ -170,19 +325,21 @@ public class AttributeSelection {
       rankResults = new double[4][cvData.numAttributes()];
     }
 
-    for (int i = 0; i < folds; i++) {
+    for (int i = 0; i < m_numFolds; i++) {
       // Perform attribute selection
-      train = cvData.trainCV(folds, i);
-      ASEvaluator.buildEvaluator(train);
+      train = cvData.trainCV(m_numFolds, i);
+      m_ASEvaluator.buildEvaluator(train);
       // Do the search
-      int[] attributeSet = searchMethod.search(initialSet, ASEvaluator, train);
+      int[] attributeSet = m_searchMethod.search(initialSet, 
+						 m_ASEvaluator, 
+						 train);
       // Do any postprocessing that a attribute selection method might 
       // require
-      attributeSet = ASEvaluator.postProcess(attributeSet);
+      attributeSet = m_ASEvaluator.postProcess(attributeSet);
 
-      if ((searchMethod instanceof RankedOutputSearch) && 
-	  (ranking == true)) {
-        attributeRanking = ((RankedOutputSearch)searchMethod).
+      if ((m_searchMethod instanceof RankedOutputSearch) && 
+	  (m_doRank == true)) {
+        attributeRanking = ((RankedOutputSearch)m_searchMethod).
 	  rankedAttributes();
 
         // System.out.println(attributeRanking[0][1]);
@@ -207,11 +364,11 @@ public class AttributeSelection {
       }
     }
 
-    CvString.append("\n\n=== Attribute selection " + folds 
+    CvString.append("\n\n=== Attribute selection " + m_numFolds 
 		    + " fold cross-validation ");
 
-    if (!(ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
-	!(ASEvaluator instanceof UnsupervisedAttributeEvaluator) &&
+    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
+	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator) &&
 	(cvData.classAttribute().isNominal())) {
 	CvString.append("(stratified) ===\n\n");
     }
@@ -219,15 +376,15 @@ public class AttributeSelection {
       CvString.append("===\n\n");
     }
 
-    if ((searchMethod instanceof RankedOutputSearch) && (ranking == true)) {
+    if ((m_searchMethod instanceof RankedOutputSearch) && (m_doRank == true)) {
       CvString.append("average merit      average rank  attribute\n");
 
       // calcualte means and std devs
       for (int i = 0; i < attributeRanking.length; i++) {
-	rankResults[0][i] /= folds; // mean merit
-	double var = rankResults[0][i]*rankResults[0][i]*folds;
+	rankResults[0][i] /= m_numFolds; // mean merit
+	double var = rankResults[0][i]*rankResults[0][i]*m_numFolds;
 	var = (rankResults[2][i] - var);
-	var /= folds;
+	var /= m_numFolds;
 
 	if (var <= 0.0) {
 	  var = 0.0;
@@ -237,10 +394,10 @@ public class AttributeSelection {
 	  rankResults[2][i] = Math.sqrt(var);
 	}
 
-	rankResults[1][i] /= folds; // mean rank
-	var = rankResults[1][i]*rankResults[1][i]*folds;
+	rankResults[1][i] /= m_numFolds; // mean rank
+	var = rankResults[1][i]*rankResults[1][i]*m_numFolds;
 	var = (rankResults[3][i] - var);
-	var /= folds;
+	var /= m_numFolds;
 
 	if (var <= 0.0) {
 	  var = 0.0;
@@ -274,7 +431,8 @@ public class AttributeSelection {
       for (int i = 0; i < subsetResults.length; i++) {
 	CvString.append(Utils.doubleToString(subsetResults[i], 12, 0) 
 			+ "(" 
-			+ Utils.doubleToString((subsetResults[i]/folds*100.0)
+			+ Utils.doubleToString((subsetResults[i] / 
+						m_numFolds * 100.0)
 					       , 3, 0) 
 			+ " %)  " 
 			+ (i + 1) + " " 
@@ -286,6 +444,174 @@ public class AttributeSelection {
     return  CvString.toString();
   }
 
+  /**
+   * Perform attribute selection on the supplied training instances.
+   *
+   * @param data the instances to select attributes from
+   * @exception Exception if there is a problem during selection
+   */
+  public void SelectAttributes (Instances data) throws Exception {
+    int [] initialSet;
+    int [] attributeSet;
+
+    m_trainInstances = data;
+    
+    if (m_ASEvaluator instanceof SubsetEvaluator &&
+	m_searchMethod instanceof Ranker) {
+      throw new Exception(m_ASEvaluator.getClass().getName()
+			  +" must use a search method other than Ranker");
+    }
+
+    if (m_ASEvaluator instanceof AttributeEvaluator &&
+	!(m_searchMethod instanceof Ranker)) {
+      m_searchMethod = new Ranker();
+    }
+
+    if (m_doRank && !(m_searchMethod instanceof RankedOutputSearch)) {
+      throw new Exception(m_searchMethod.getClass().getName()
+			  +"is not capable of ranking attributes");
+    }
+    
+    if (m_threshold != -Double.MAX_VALUE 
+	&& !(m_searchMethod instanceof RankedOutputSearch)) {
+      throw  new Exception("can't use a cutoff with a non ranking " 
+			   + "search method.\n");
+    }
+
+    if (m_ASEvaluator instanceof UnsupervisedAttributeEvaluator ||
+	m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
+      // unset the class index
+      m_trainInstances.setClassIndex(-1);
+    } else {
+      // check that a class index has been set
+      if (m_trainInstances.classIndex() < 0) {
+	m_trainInstances.setClassIndex(m_trainInstances.numAttributes()-1);
+      }
+    }
+
+    m_startSet.setUpper(m_trainInstances.numAttributes() - 1);
+    initialSet = m_startSet.getSelection();
+    if (initialSet.length == 0) {
+      initialSet = null;
+    }
+
+    // Initialize the attribute evaluator
+    m_ASEvaluator.buildEvaluator(m_trainInstances);
+    // Do the search
+    attributeSet = m_searchMethod.search(initialSet, 
+					 m_ASEvaluator, 
+					 m_trainInstances);
+    // Do any postprocessing that a attribute selection method might require
+    attributeSet = m_ASEvaluator.postProcess(attributeSet);
+    m_selectionResults.append(printSelectionResults(m_ASEvaluator, 
+						    m_searchMethod, 
+						    m_trainInstances));
+    
+    if ((m_searchMethod instanceof RankedOutputSearch) && m_doRank == true) {
+      m_attributeRanking = 
+	((RankedOutputSearch)m_searchMethod).rankedAttributes();
+      m_selectionResults.append("Ranked attributes:\n");
+
+      for (int i = 0; i < m_attributeRanking.length; i++) {
+	if (m_attributeRanking[i][1] > m_threshold) {
+	  m_selectionResults.
+	    append(Utils.doubleToString(m_attributeRanking[i][1],6,3) 
+		   + Utils.doubleToString((m_attributeRanking[i][0] + 1),5,0) 
+		   + " " 
+		   + m_trainInstances.
+		   attribute((int)m_attributeRanking[i][0]).name() 
+		   + "\n");
+	}
+      }
+
+      int count = 0;
+
+      for (int i = 0; i < m_attributeRanking.length; i++) {
+	if (m_attributeRanking[i][1] > m_threshold) {
+	  count++;
+	}
+      }
+      
+      // set up the selected attributes array - usable by a filter or
+      // whatever
+      if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
+	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
+	// one more for the class
+	{
+	  m_selectedAttributeSet = new int[count + 1];
+	  m_selectedAttributeSet[count] = m_trainInstances.classIndex();
+	}
+      else {
+	m_selectedAttributeSet = new int[count];
+      }
+
+      m_selectionResults.append("\nSelected attributes: ");
+
+      for (int i = 0; i < m_attributeRanking.length; i++) {
+	if (m_attributeRanking[i][1] > m_threshold) {
+	  m_selectedAttributeSet[i] = (int)m_attributeRanking[i][0];
+	}
+
+	if (i == (m_attributeRanking.length - 1)) {
+	  if (m_attributeRanking[i][1] > m_threshold) {
+	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1) 
+				      + " : " 
+				      + (i + 1) 
+				      + "\n");
+	  }
+	}
+	else {
+	  if (m_attributeRanking[i][1] > m_threshold) {
+	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1));
+
+	    if (m_attributeRanking[i + 1][1] > m_threshold) {
+	      m_selectionResults.append(",");
+	    }
+	    else {
+	      m_selectionResults.append(" : " + (i + 1) + "\n");
+	    }
+	  }
+	}
+      }
+    } else {
+       // set up the selected attributes array - usable by a filter or
+       // whatever
+       if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
+	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
+	// one more for the class
+	{
+	  m_selectedAttributeSet = new int[attributeSet.length + 1];
+	  m_selectedAttributeSet[attributeSet.length] = 
+	    m_trainInstances.classIndex();
+	}
+      else {
+	m_selectedAttributeSet = new int[attributeSet.length];
+      }
+
+      for (int i = 0; i < attributeSet.length; i++) {
+	m_selectedAttributeSet[i] = attributeSet[i];
+      }
+
+      m_selectionResults.append("Selected attributes: ");
+
+      for (int i = 0; i < attributeSet.length; i++) {
+	if (i == (attributeSet.length - 1)) {
+	  m_selectionResults.append((attributeSet[i] + 1) 
+		      + " : " 
+		      + attributeSet.length 
+		      + "\n\t");
+	}
+	else {
+	  m_selectionResults.append((attributeSet[i] + 1) + ",");
+	}
+      }
+    }
+
+    // Cross validation should be called from here
+    if (m_doXval == true) {
+      m_selectionResults.append(CrossValidateAttributes()); 
+    }
+  }
 
   /**
    * Perform attribute selection with a particular evaluator and
@@ -303,7 +629,6 @@ public class AttributeSelection {
    */
   public static String SelectAttributes (ASEvaluation ASEvaluator, 
 					 String[] options, 
-					 int[][] outAttributes, 
 					 Instances train)
     throws Exception
   {
@@ -324,6 +649,7 @@ public class AttributeSelection {
     boolean helpRequested = false;
     StringBuffer text = new StringBuffer();
     initialRange = new Range();
+    AttributeSelection trainSelector = new AttributeSelection();
 
     try {
       if (Utils.getFlag('h', options)) {
@@ -349,13 +675,16 @@ public class AttributeSelection {
 	classIndex = train.numAttributes();
 	train.setClassIndex(classIndex - 1);
       }
-
+      
       foldsString = Utils.getOption('X', options);
 
       if (foldsString.length() != 0) {
 	folds = Integer.parseInt(foldsString);
 	doCrossVal = true;
       }
+      
+      trainSelector.setFolds(folds);
+      trainSelector.setXval(doCrossVal);
 
       seedString = Utils.getOption('N', options);
 
@@ -363,12 +692,16 @@ public class AttributeSelection {
 	seed = Integer.parseInt(seedString);
       }
 
+      trainSelector.setSeed(seed);
+
       ranking = Utils.getFlag('R', options);
 
       // Attribute Evaluators always result in a ranked list of attributes
       if (ASEvaluator instanceof AttributeEvaluator) {
 	ranking = true;
       }
+      
+      trainSelector.setRanking(ranking);
 
       searchName = Utils.getOption('S', options);
 
@@ -414,9 +747,12 @@ public class AttributeSelection {
       }
 
       if (ranking && !(searchMethod instanceof RankedOutputSearch)) {
-	throw  new Exception(searchName + " is not capable of ranking " 
+	throw new Exception(searchName + " is not capable of ranking " 
 			     + "attributes.");
       }
+
+      // set the search method
+      trainSelector.setSearch(searchMethod);
 
       cutString = Utils.getOption('T', options);
 
@@ -431,6 +767,8 @@ public class AttributeSelection {
 	throw  new Exception("can't use a cutoff with a non ranking " 
 			     + "search method.\n");
       }
+      
+      trainSelector.setThreshold(cutoff);
 
       rangeString = Utils.getOption('P', options);
 
@@ -438,6 +776,7 @@ public class AttributeSelection {
 	initialRange.setUpper(train.numAttributes() - 1);
 	initialRange.setRanges(rangeString);
 	initialSet = initialRange.getSelection();
+	trainSelector.setStartSet(initialRange);
       }
     }
     catch (Exception e) {
@@ -479,126 +818,14 @@ public class AttributeSelection {
       System.exit(0);
     }
 
-    // Initialize the attribute evaluator
-    ASEvaluator.buildEvaluator(train);
-    // Do the search
-    int[] attributeSet = searchMethod.search(initialSet, ASEvaluator, train);
-    // Do any postprocessing that a attribute selection method might require
-    attributeSet = ASEvaluator.postProcess(attributeSet);
-    text.append(printSelectionResults(ASEvaluator, searchMethod, train));
+    // set the attribute evaluator
+    trainSelector.setEvaluator(ASEvaluator);
 
-    if ((searchMethod instanceof RankedOutputSearch) && ranking == true) {
-      double[][] attributeRanking = 
-	((RankedOutputSearch)searchMethod).rankedAttributes();
-      text.append("Ranked attributes:\n");
+    // do the attribute selection
+    trainSelector.SelectAttributes(train);
 
-      for (int i = 0; i < attributeRanking.length; i++) {
-	if (attributeRanking[i][1] > cutoff) {
-	  text.append(Utils.doubleToString(attributeRanking[i][1], 6, 3) 
-		      + Utils.doubleToString((attributeRanking[i][0] + 1)
-					     , 5, 0) 
-		      + " " 
-		      + train.attribute((int)attributeRanking[i][0]).name() 
-		      + "\n");
-	}
-      }
-
-      int count = 0;
-
-      for (int i = 0; i < attributeRanking.length; i++) {
-	if (attributeRanking[i][1] > cutoff) {
-	  count++;
-	}
-      }
-
-      // set up the selected attributes array - usable by a filter or
-      // whatever
-      if (!(ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	  && !(ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
-	// one more for the class
-	{
-	  selectedAttributes = new int[count + 1];
-	  selectedAttributes[count] = train.classIndex();
-	}
-      else {
-	selectedAttributes = new int[count];
-      }
-
-      text.append("\nSelected attributes: ");
-
-      for (int i = 0; i < attributeRanking.length; i++) {
-	if (attributeRanking[i][1] > cutoff) {
-	  selectedAttributes[i] = (int)attributeRanking[i][0];
-	}
-
-	if (i == (attributeRanking.length - 1)) {
-	  if (attributeRanking[i][1] > cutoff) {
-	    text.append(((int)attributeRanking[i][0] + 1) 
-			+ " : " 
-			+ (i + 1) 
-			+ "\n");
-	  }
-	}
-	else {
-	  if (attributeRanking[i][1] > cutoff) {
-	    text.append(((int)attributeRanking[i][0] + 1));
-
-	    if (attributeRanking[i + 1][1] > cutoff) {
-	      text.append(",");
-	    }
-	    else {
-	      text.append(" : " + (i + 1) + "\n");
-	    }
-	  }
-	}
-      }
-    }
-    else {
-      // set up the selected attributes array - usable by a filter or
-      // whatever
-      if (!(ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	  && !(ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
-	// one more for the class
-	{
-	  selectedAttributes = new int[attributeSet.length + 1];
-	  selectedAttributes[attributeSet.length] = train.classIndex();
-	}
-      else {
-	selectedAttributes = new int[attributeSet.length];
-      }
-
-      for (int i = 0; i < attributeSet.length; i++) {
-	selectedAttributes[i] = attributeSet[i];
-      }
-
-      text.append("Selected attributes: ");
-
-      for (int i = 0; i < attributeSet.length; i++) {
-	if (i == (attributeSet.length - 1)) {
-	  text.append((attributeSet[i] + 1) 
-		      + " : " 
-		      + attributeSet.length 
-		      + "\n\t");
-	}
-	else {
-	  text.append((attributeSet[i] + 1) + ",");
-	}
-      }
-    }
-
-    /* outAttributes = new int[selectedAttributes.length];
-       System.arraycopy(selectedAttributes, 0, outAttributes, 0, 
-       selectedAttributes.length); */
-    outAttributes[0] = selectedAttributes;
-
-    // Cross validation should be called from here
-    if (doCrossVal == true) {
-      text.append(CrossValidateAttributes(ASEvaluator, initialSet, 
-					  searchMethod, ranking, train, 
-					  folds, seed, cutoff));
-    }
-
-    return  text.toString();
+    // return the results string
+    return trainSelector.toResultsString();
   }
 
 
@@ -610,7 +837,9 @@ public class AttributeSelection {
    * @param train the input instances
    * @return a string describing the results of attribute selection.
    */
-  private static String printSelectionResults (ASEvaluation ASEvaluator, ASSearch searchMethod, Instances train) {
+  private static String printSelectionResults (ASEvaluation ASEvaluator, 
+					       ASSearch searchMethod, 
+					       Instances train) {
     StringBuffer text = new StringBuffer();
     text.append("\n\n=== Attribute Selection on all input data ===\n\n" 
 		+ "Search Method:\n");
