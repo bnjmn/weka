@@ -1,7 +1,8 @@
 JAVAC = javac
 
 SOURCES = Filter.java NullFilter.java AllFilter.java \
-	StreamableFilter.java SupervisedFilter.java UnsupervisedFilter.java
+	StreamableFilter.java SupervisedFilter.java UnsupervisedFilter.java \
+	Windowise.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
