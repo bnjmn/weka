@@ -44,6 +44,9 @@ import java.awt.Insets;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
@@ -72,7 +75,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -129,6 +132,14 @@ public class AssociationsPanel extends JPanel {
     m_OutText.setEditable(false);
     m_OutText.setFont(new Font("Dialoginput", Font.PLAIN, 10));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    m_OutText.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	    != InputEvent.BUTTON1_MASK) {
+	  m_OutText.selectAll();
+	}
+      }
+    });
     m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_AssociatorEditor.setClassType(Associator.class);
     m_AssociatorEditor.setValue(new weka.associations.Apriori());
