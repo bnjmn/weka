@@ -36,11 +36,11 @@ import weka.core.Instances;
  * Reads a source that contains serialized Instances.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see Loader
  */
 public class SerializedInstancesLoader extends AbstractLoader 
-  implements BatchLoader, FileSourcedLoader, IncrementalLoader {
+implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
   public static String FILE_EXTENSION = 
     Instances.SERIALIZED_OBJ_FILE_EXTENSION;

@@ -38,11 +38,11 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
-implements FileSourcedLoader, BatchLoader, IncrementalLoader {
+implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
   public static String FILE_EXTENSION = Instances.FILE_EXTENSION;
 
