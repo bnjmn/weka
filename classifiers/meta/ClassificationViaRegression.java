@@ -33,7 +33,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -109,8 +109,10 @@ public class ClassificationViaRegression extends DistributionClassifier
    */
   public String toString() {
 
+    if (m_Classifiers == null) {
+      return "Classification via Regression: No model built yet.";
+    }
     StringBuffer text = new StringBuffer();
-
     text.append("Classification via Regression\n\n");
     for (int i = 0; i < m_Classifiers.length; i++) {
       text.append(m_Classifiers[i].toString() + "\n");

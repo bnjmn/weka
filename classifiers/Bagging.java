@@ -43,7 +43,7 @@ import weka.core.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
@@ -295,8 +295,10 @@ public class Bagging extends DistributionClassifier
    */
   public String toString() {
     
+    if (m_Classifiers == null) {
+      return "Bagging: No model built yet.";
+    }
     StringBuffer text = new StringBuffer();
-    
     text.append("All the base classifiers: \n\n");
     for (int i = 0; i < m_Classifiers.length; i++)
       text.append(m_Classifiers[i].toString() + "\n\n");

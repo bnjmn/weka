@@ -39,7 +39,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -144,6 +144,9 @@ public class LinearRegression extends Classifier implements OptionHandler,
    */
   public String toString() {
 
+    if (m_TransformedData == null) {
+      return "Linear Regression: No model built yet.";
+    }
     try {
       StringBuffer text = new StringBuffer();
       int column = 0;

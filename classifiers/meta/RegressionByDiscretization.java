@@ -52,7 +52,7 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -383,11 +383,11 @@ public class RegressionByDiscretization extends Classifier
     StringBuffer text = new StringBuffer();
     int attIndex;
 
-    text.append("Regression by discretization\n");
+    text.append("Regression by discretization");
     if (m_Classifier == null) {
-      text.append("No classifier assigned");
+      text.append(": No model built yet.");
     } else {
-      text.append("\nClass attribute discretized into " 
+      text.append("\n\nClass attribute discretized into " 
 		  + m_ClassMeans.length + " values\n");
 
       text.append("\nSubclassifier: " + m_Classifier.getClass().getName() 

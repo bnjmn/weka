@@ -57,7 +57,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -631,8 +631,8 @@ public class CVParameterSelection extends Classifier
    */
   public String toString() {
 
-    if (m_Classifier == null)
-      return "CVParameterSelection: No classifier entered for selection";
+    if (m_BestClassifierOptions == null)
+      return "CVParameterSelection: No model built yet.";
 
     String result = "Cross-validated Parameter selection.\n"
     + "Classifier: " + m_Classifier.getClass().getName() + "\n";

@@ -45,7 +45,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -392,8 +392,8 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public String toString() {
 
-    if (m_Classifiers.length == 0) {
-      return "MultiScheme: No schemes entered for selection";
+    if (m_Classifier == null) {
+      return "MultiScheme: No model built yet.";
     }
 
     String result = "MultiScheme selection using";
@@ -407,9 +407,6 @@ public class MultiScheme extends Classifier implements OptionHandler {
       result += '\t' + getClassifierSpec(i) + '\n';
     }
 
-    if (m_Classifier == null) {
-      return result + "No scheme selected yet";
-    }
     result += "Selected scheme: "
       + getClassifierSpec(m_ClassifierIndex)
       + "\n\n"

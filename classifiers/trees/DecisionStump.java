@@ -31,7 +31,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler {
@@ -135,7 +135,10 @@ public class DecisionStump extends DistributionClassifier
    * @return a description of the classifier as a string.
    */
   public String toString(){
-    
+
+    if (theInstances == null) {
+      return "Decision Stump: No model built yet.";
+    }
     try {
       StringBuffer text = new StringBuffer();
       

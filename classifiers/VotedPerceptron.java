@@ -48,7 +48,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   
@@ -281,9 +281,7 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
    */
   public String toString() {
 
-    StringBuffer text = new StringBuffer();
-    text.append("Number of perceptrons: " + m_K);
-    return text.toString();
+    return "VotedPerceptron: Number of perceptrons=" + m_K;
   }
   
   /**

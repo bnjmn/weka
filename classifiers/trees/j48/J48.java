@@ -54,7 +54,7 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, WeightedInstancesHandler, Summarizable {
@@ -311,7 +311,10 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    * Returns a description of the classifier.
    */
   public String toString() {
-    
+
+    if (m_root == null) {
+      return "No classifier built";
+    }
     if (m_unpruned)
       return "J48 unpruned tree\n------------------\n" + m_root.toString();
     else

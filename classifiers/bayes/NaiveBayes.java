@@ -42,7 +42,7 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NaiveBayes extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -292,7 +292,7 @@ public class NaiveBayes extends DistributionClassifier
 
     text.append("Naive Bayes Classifier");
     if (m_Instances == null) {
-      text.append("\nHas not been trained yet");
+      text.append(": No model built yet.");
     } else {
       try {
 	for (int i = 0; i < m_Distributions[0].length; i++) {

@@ -46,7 +46,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class Stacking extends Classifier implements OptionHandler {
 
@@ -370,11 +370,14 @@ public class Stacking extends Classifier implements OptionHandler {
   public String toString() {
 
     if (m_BaseClassifiers.length == 0) {
-      return "Stacking: No base schemes entered";
+      return "Stacking: No base schemes entered.";
     }
-    if ((m_MetaClassifier == null))
-      return "Stacking: No meta scheme selected";
-
+    if (m_MetaClassifier == null) {
+      return "Stacking: No meta scheme selected.";
+    }
+    if (m_MetaFormat == null) {
+      return "Stacking: No model built yet.";
+    }
     String result = "Stacking\n\nBase classifiers\n\n";
     for (int i = 0; i < m_BaseClassifiers.length; i++) {
       result += getBaseClassifier(i).toString() +"\n\n";

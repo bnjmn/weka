@@ -31,7 +31,7 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
 */
 public class Prism extends Classifier {
 
@@ -417,6 +417,9 @@ public class Prism extends Classifier {
    */
   public String toString() {
 
+    if (m_rules == null) {
+      return "Prism: No model built yet.";
+    }
     return "Prism rules\n----------\n" + m_rules.toString();
   }
 

@@ -52,7 +52,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {
@@ -529,10 +529,10 @@ public class LogitBoost extends DistributionClassifier
     StringBuffer text = new StringBuffer();
     
     if (m_NumIterations == 0) {
-      text.append("No boosting performed!\n");
+      text.append("LogitBoost: No model built yet.");
       //      text.append(m_Classifiers[0].toString()+"\n");
     } else {
-      text.append("All the base classifiers and their weights: \n");
+      text.append("LogitBoost: Base classifiers and their weights: \n");
       for (int i = 0; i < m_NumIterations; i++) {
 	text.append("\nIteration "+(i+1));
 	for (int j = 0; j < m_NumClasses; j++) {

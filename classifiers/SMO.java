@@ -46,7 +46,7 @@ import weka.filters.*;
  * The seed for the random number generator. (default 1)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
   
@@ -307,8 +307,11 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     StringBuffer text = new StringBuffer();
     int printed = 0;
 
+    if (m_alpha == null) {
+      return "SMO: No model built yet.";
+    }
     try {
-      text.append("SMO classifier\n\n");
+      text.append("SMO\n\n");
       for (int i = 0; i < m_alpha.length; i++) {
 	if (m_alpha[i] > 0) {
 	  printed++;
