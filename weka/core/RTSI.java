@@ -28,6 +28,7 @@ import java.net.JarURLConnection;
 import java.util.jar.*;
 import java.util.zip.*;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -44,7 +45,7 @@ import java.util.Vector;
  *    <li>
  *       Modifications by FracPete:<br>
  *       <ul>
- *          <li>it returns Vectors with the classnames</li>
+ *          <li>it returns Vectors with the classnames (for the sorting see <code>StringCompare</code>)</li>
  *          <li>doesn't create an instance of class anymore, but rather tests, whether the superclass/interface is
  *              somewhere in the class hierarchy of the found class and whether it is abstract or not</li>
  *          <li>checks all parts of the classpath for the package and does not take the first one only
@@ -53,9 +54,10 @@ import java.util.Vector;
  *    </li>
  * </ul>
  *
+ * @see StringCompare
  * @author <a href="mailto:daniel@satlive.org">Daniel Le Berre</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.2 $
+ * @version $Revision: 1.2.2.3 $
  */
 public class RTSI {
   /** whether to output some debug information */
@@ -365,7 +367,8 @@ public class RTSI {
     }
     
     // sort the result
-    Collections.sort(result);
+    RTSI r = new RTSI();
+    Collections.sort(result, r.new StringCompare());
     
     return result;
   }
@@ -384,6 +387,99 @@ public class RTSI {
       else {
         System.out.println("Usage: java " + RTSI.class.getName() + " [<package>] <subclass>");
       }
+    }
+  }
+  
+  /**
+   * compares two strings with the following order:<br>
+   * <ul>
+   *    <li>case insensitive</li>
+   *    <li>german umlauts (&auml; , &ouml; etc.) or other non-ASCII letters are treated as special chars</li>
+   *    <li>special chars &lt; numbers &lt; letters</li>
+   * </ul>
+   */
+  protected class StringCompare implements Comparator {
+    /**
+     * appends blanks to the string if its shorter than <code>len</code>
+     */
+    private String fillUp(String s, int len) {
+      while (s.length() < len)
+        s += " ";
+      return s;
+    }
+    
+    /**
+     * returns the group of the character: 0=special char, 1=number, 2=letter 
+     */
+    private int charGroup(char c) {
+      int         result;
+      
+      result = 0;
+      
+      if ( (c >= 'a') && (c <= 'z') )
+        result = 2;
+      else if ( (c >= '0') && (c <= '9') )
+        result = 1;
+      
+      return result;
+    }
+    
+    /**
+     * Compares its two arguments for order.
+     */    
+    public int compare(Object o1, Object o2) {
+      String        s1;
+      String        s2;
+      int           i;
+      int           result;
+      int           v1;
+      int           v2;
+      
+      result = 0;   // they're equal
+      
+      // get lower case string
+      s1 = o1.toString().toLowerCase();
+      s2 = o2.toString().toLowerCase();
+      
+      // same length
+      s1 = fillUp(s1, s2.length());
+      s2 = fillUp(s2, s1.length());
+      
+      for (i = 0; i < s1.length(); i++) {
+        // same char?
+        if (s1.charAt(i) == s2.charAt(i)) {
+          result = 0;
+        }
+        else {
+          v1 = charGroup(s1.charAt(i));
+          v2 = charGroup(s2.charAt(i));
+          
+          // different type (special, number, letter)?
+          if (v1 != v2) {
+            if (v1 < v2)
+              result = -1;
+            else
+              result = 1;
+          }
+          else {
+            if (s1.charAt(i) < s2.charAt(i))
+              result = -1;
+            else
+              result = 1;
+          }
+          
+          break;
+        }
+      }
+      
+      return result;
+    }
+    
+    /**
+     * Indicates whether some other object is "equal to" this Comparator. 
+     */
+    public boolean equals(Object obj) {
+      return (obj instanceof StringCompare);
     }
   }
 }
