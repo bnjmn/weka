@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
  */
 public class Instances implements Serializable {
  
@@ -996,20 +996,20 @@ public class Instances implements Serializable {
    */
   public final void stratify(int numFolds) throws Exception {
     
-    Instance instance1, instance2;
-    int j, index;
-    
+    if (numFolds <= 0) {
+      throw new IllegalArgumentException("Number of folds must be greater than 1");
+    }
     if (m_ClassIndex < 0) {
       throw new Exception("Class index is negative (not set)!");
     }
     if (classAttribute().isNominal()) {
 
       // sort by class
-      index = 1;
+      int index = 1;
       while (index < numInstances()) {
-	instance1 = instance(index - 1);
-	for (j = index; j < numInstances(); j++) {
-	  instance2 = instance(j);
+	Instance instance1 = instance(index - 1);
+	for (int j = index; j < numInstances(); j++) {
+	  Instance instance2 = instance(j);
 	  if ((instance1.classValue() == instance2.classValue()) ||
 	      (instance1.classIsMissing() && 
 	       instance2.classIsMissing())) {
