@@ -1,0 +1,28 @@
+@relation FilterTest
+@attribute StringAtt1 string
+@attribute NominalAtt1 {r, g, b}
+@attribute NumericAtt1 numeric
+@attribute StringAtt2 string
+@attribute NominalAtt2 {a, b, c, d}
+@attribute NumericAtt2 numeric
+@data
+humpty ,g , 1.0 ,the   ,a ,-2.3
+dumpty ,b , 2.0 ,quick ,b ,-3.3
+sat    ,r , 3.0 ,brown ,c ,-2.4
+on     ,g , 4.0 ,fox   ,d ,-5.3
+a      ,b , 5.0 ,jumped,a ,-2.6
+wall   ,r , 6.0 ,over  ,b ,-7.3
+humpty ,g , 7.0 ,the   ,c ,-2.8
+dumpty ,b , 8.0 ,lazy  ,d ,-9.3
+had    ,r , 9.0 ,dog   ,? ,-2.0
+a      ,r , 9.4 ,?     ,? ,-9.0
+great  ,g , 1.4 ,the   ,a ,-8.3
+fall   ,b , 2.3 ,quick ,b ,-7.3
+all    ,r , 3.3 ,brown ,c ,?
+the    ,g , 4.3 ,fox   ,d ,-5.3
+kings  ,b , 5.3 ,jumped,? ,-5.6
+horses ,r , 6.5 ,over  ,b ,-4.3
+and    ,g , 7.5 ,the   ,c ,-3.8
+all    ,b , 8.5 ,lazy  ,d ,-2.3
+the    ,r , 9.4 ,?     ,a ,-1.0
+
