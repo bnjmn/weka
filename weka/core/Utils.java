@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public final class Utils {
 
@@ -73,6 +73,57 @@ public final class Utils {
     return c;
   }
 
+  /**
+   * Pads a string to a specified length, inserting spaces on the left
+   * as required. If the string is too long, characters are removed (from
+   * the right).
+   *
+   * @param inString the input string
+   * @param length the desired length of the output string
+   * @return the output string
+   */
+  public static String padLeft(String inString, int length) {
+
+    return fixStringLength(inString, length, false);
+  }
+  
+  /**
+   * Pads a string to a specified length, inserting spaces on the right
+   * as required. If the string is too long, characters are removed (from
+   * the right).
+   *
+   * @param inString the input string
+   * @param length the desired length of the output string
+   * @return the output string
+   */
+  public static String padRight(String inString, int length) {
+
+    return fixStringLength(inString, length, true);
+  }
+  
+  /**
+   * Pads a string to a specified length, inserting spaces as
+   * required. If the string is too long, characters are removed (from
+   * the right).
+   *
+   * @param inString the input string
+   * @param length the desired length of the output string
+   * @param right true if inserted spaces should be added to the right
+   * @return the output string
+   */
+  private static String fixStringLength(String inString, int length,
+					boolean right) {
+
+    if (inString.length() < length) {
+      while (inString.length() < length) {
+	inString = (right ? inString.concat(" ") : " ".concat(inString));
+      }
+    } else if (inString.length() > length) {
+      inString = inString.substring(0, length);
+    }
+    return inString;
+  }
+ 
   /**
    * Rounds a double and converts it into String.
    *
