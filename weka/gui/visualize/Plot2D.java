@@ -64,7 +64,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class Plot2D extends JPanel {
 
@@ -157,7 +157,7 @@ public class Plot2D extends JPanel {
   private boolean m_plotResize = true;
   
   /** if the user changes attribute assigned to an axis */
-  private boolean m_axisChanged = false;
+  protected boolean m_axisChanged = false;
 
   /** An array used to show if a point is hidden or not.
    * This is used for speeding up the drawing of the plot panel
@@ -168,7 +168,7 @@ public class Plot2D extends JPanel {
 
   /** Font for labels */
   private Font m_labelFont;
-  private FontMetrics m_labelMetrics=null; 
+  protected FontMetrics m_labelMetrics=null; 
 
   /** the level of jitter */
   private int m_JitterVal=0;
