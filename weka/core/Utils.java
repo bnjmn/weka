@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public final class Utils {
 
@@ -313,7 +313,9 @@ public final class Utils {
   }
 
   /**
-   * Quotes a string if it contains whitespace characters.
+   * Quotes a string if it contains whitespace characters, or a comma,
+   * or is a question mark (to distinguish it from the missing value which
+   * is represented as an unquoted question mark in arff files).
    *
    * @param string the string to be quoted
    * @return the string (quoted if it contains whitespace characters)
@@ -323,6 +325,7 @@ public final class Utils {
     if ((string.indexOf(' ') != -1) ||
 	(string.indexOf('\t') != -1) ||
 	(string.indexOf('\n') != -1) ||
+	(string.indexOf(',') != -1) ||
 	(string.equals("?"))) {
       string = ("'".concat(string)).concat("'");
     }
