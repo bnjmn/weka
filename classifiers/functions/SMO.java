@@ -113,7 +113,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.38 $ */
+ * @version $Revision: 1.39 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -1507,8 +1507,9 @@ public class SMO extends DistributionClassifier implements OptionHandler,
 	  p[i] = 0;
 	} else {
 	  double factor = firstSum[i] / secondSum[i];
+	  double pOld = p[i];
 	  p[i] *= factor;
-	  if (Math.abs(factor - 1.0) > 1.0e-2) {
+	  if (Math.abs(pOld - p[i]) > 1.0e-3) {
 	    changed = true;
 	  }
 	}
