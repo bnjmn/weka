@@ -36,18 +36,18 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
 
   /** The training instances used for classification. */
-  private Instances train;
+  private Instances m_Train;
 
   /** The minimum values for numeric attributes. */
-  private double [] minArray;
+  private double [] m_MinArray;
 
   /** The maximum values for numeric attributes. */
-  private double [] maxArray;
+  private double [] m_MaxArray;
 
   /**
    * Generates the classifier.
@@ -60,14 +60,16 @@ public class IB1 extends Classifier implements UpdateableClassifier {
     if (instances.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
+    // Throw away training instances with missing class
+    m_Train = new Instances(instances, 0, instances.numInstances());
+    m_Train.deleteWithMissingClass();
 
-    train = new Instances(instances);
-    minArray = new double [train.numAttributes()];
-    maxArray = new double [train.numAttributes()];
-    for (int i = 0; i < train.numAttributes(); i++) {
-      minArray[i] = maxArray[i] = Double.NaN;
+    m_MinArray = new double [m_Train.numAttributes()];
+    m_MaxArray = new double [m_Train.numAttributes()];
+    for (int i = 0; i < m_Train.numAttributes(); i++) {
+      m_MinArray[i] = m_MaxArray[i] = Double.NaN;
     }
-    Enumeration enum = train.enumerateInstances();
+    Enumeration enum = m_Train.enumerateInstances();
     while (enum.hasMoreElements()) {
       updateMinMax((Instance) enum.nextElement());
     }
@@ -81,7 +83,13 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    */
   public void updateClassifier(Instance instance) throws Exception {
   
-    train.add(instance);
+    if (m_Train.equalHeaders(instance.dataset()) == false) {
+      throw new Exception("Incompatible instance types");
+    }
+    if (instance.classIsMissing()) {
+      return;
+    }
+    m_Train.add(instance);
     updateMinMax(instance);
   }
 
@@ -94,10 +102,13 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    */
   public double classifyInstance(Instance instance) throws Exception {
     
-    double distance, minDistance = Double.MAX_VALUE, classValue = 0;
+    if (m_Train.numInstances() == 0) {
+      throw new Exception("No training instances!");
+    }
 
+    double distance, minDistance = Double.MAX_VALUE, classValue = 0;
     updateMinMax(instance);
-    Enumeration enum = train.enumerateInstances();
+    Enumeration enum = m_Train.enumerateInstances();
     while (enum.hasMoreElements()) {
       Instance trainInstance = (Instance) enum.nextElement();
       if (!trainInstance.classIsMissing()) {
@@ -125,19 +136,19 @@ public class IB1 extends Classifier implements UpdateableClassifier {
   /**
    * Calculates the distance between two instances
    *
-   * @param test the first instance
-   * @param train the second instance
+   * @param first the first instance
+   * @param second the second instance
    * @return the distance between the two given instances
    */          
   private double distance(Instance first, Instance second) {
     
     double diff, distance = 0;
 
-    for(int i = 0; i < train.numAttributes(); i++) { 
-      if (i == train.classIndex()) {
+    for(int i = 0; i < m_Train.numAttributes(); i++) { 
+      if (i == m_Train.classIndex()) {
 	continue;
       }
-      if (train.attribute(i).isNominal()) {
+      if (m_Train.attribute(i).isNominal()) {
 
 	// If attribute is nominal
 	if (first.isMissing(i) || second.isMissing(i) ||
@@ -178,10 +189,11 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    */
   private double norm(double x,int i) {
 
-    if (Double.isNaN(minArray[i]) || Utils.eq(maxArray[i], minArray[i])) {
+    if (Double.isNaN(m_MinArray[i])
+	|| Utils.eq(m_MaxArray[i], m_MinArray[i])) {
       return 0;
     } else {
-      return (x - minArray[i]) / (maxArray[i] - minArray[i]);
+      return (x - m_MinArray[i]) / (m_MaxArray[i] - m_MinArray[i]);
     }
   }
 
@@ -193,17 +205,17 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    */
   private void updateMinMax(Instance instance) {
     
-    for (int j = 0;j < train.numAttributes(); j++) {
-      if ((train.attribute(j).isNumeric()) && (!instance.isMissing(j))) {
-	if (Double.isNaN(minArray[j])) {
-	  minArray[j] = instance.value(j);
-	  maxArray[j] = instance.value(j);
+    for (int j = 0;j < m_Train.numAttributes(); j++) {
+      if ((m_Train.attribute(j).isNumeric()) && (!instance.isMissing(j))) {
+	if (Double.isNaN(m_MinArray[j])) {
+	  m_MinArray[j] = instance.value(j);
+	  m_MaxArray[j] = instance.value(j);
 	} else {
-	  if (instance.value(j) < minArray[j]) {
-	    minArray[j] = instance.value(j);
+	  if (instance.value(j) < m_MinArray[j]) {
+	    m_MinArray[j] = instance.value(j);
 	  } else {
-	    if (instance.value(j) > maxArray[j]) {
-	      maxArray[j] = instance.value(j);
+	    if (instance.value(j) > m_MaxArray[j]) {
+	      m_MaxArray[j] = instance.value(j);
 	    }
 	  }
 	}
