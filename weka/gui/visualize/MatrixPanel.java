@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 
@@ -178,14 +178,17 @@ public class MatrixPanel extends JPanel{
       it contains the precalculated red component for each instance's colour */
   private int [] m_pointColors;
 
-  /** Contains true for each value that is  missing, for each instance */ 
+  /** Contains true for each attribute value (only the selected attributes+class attribute) 
+      that is  missing, for each instance.
+      m_missing[i][j] == true if m_selectedAttribs[j] is missing in instance i. 
+      m_missing[i][m_missing[].length-1] == true  if class value is missing in instance i. */ 
   private boolean [][] m_missing;
 
-  /** This array contains: <br>
-      m_type[0][i] = [type of attribute, nominal, string or numeric]<br>
-      m_type[1][i] = [number of discrete values of nominal or string attribute <br>
-      or same as m_type[0][i] for numeric attribute] */
-  private int [][] m_type;
+  /** This array contains for the classAttribute: <br>
+      m_type[0] = [type of attribute, nominal, string or numeric]<br>
+      m_type[1] = [number of discrete values of nominal or string attribute <br>
+      or same as m_type[0] for numeric attribute] */
+  private int [] m_type;
 
   /** Stores the maximum size for PlotSize label to keep it's size constant */
   private Dimension m_plotLBSizeD;
@@ -273,7 +276,7 @@ public class MatrixPanel extends JPanel{
       
     m_updateBt.addActionListener( new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  m_selectedAttribs = m_attribList.getSelectedIndices();
+	    //m_selectedAttribs = m_attribList.getSelectedIndices();
 	  initInternalFields();
 					
 	  Plot a = m_plotsPanel;
@@ -477,6 +480,7 @@ public class MatrixPanel extends JPanel{
   public void initInternalFields() {
     Instances inst = m_data;
     m_classIndex = m_classAttrib.getSelectedIndex();
+    m_selectedAttribs = m_attribList.getSelectedIndices();
     double minC=0, maxC=0;
 
     int originalClassIndex = m_data.classIndex();
@@ -511,10 +515,10 @@ public class MatrixPanel extends JPanel{
 
     m_data.setClassIndex(originalClassIndex);
     
-    m_points = new int[inst.numInstances()][inst.numAttributes()];
+    m_points = new int[inst.numInstances()][m_selectedAttribs.length]; //changed
     m_pointColors = new int[inst.numInstances()];
-    m_missing = new boolean[inst.numInstances()][inst.numAttributes()];
-    m_type = new int[2][inst.numAttributes()];
+    m_missing = new boolean[inst.numInstances()][m_selectedAttribs.length+1]; //changed
+    m_type = new int[2]; //[m_selectedAttribs.length]; //changed
     jitterVals = new int[inst.numInstances()][2];
       
     /** Setting up the color list for non-numeric attribute as well as jittervals**/
@@ -525,7 +529,7 @@ public class MatrixPanel extends JPanel{
 	int ija =  i / 10;
 	ija *= 2; 
 	for (int j=0;j<ija;j++) {
-	  pc = pc.darker();     
+	    pc = pc.darker();
 	}
 	m_colorList.addElement(pc);
       }
@@ -575,52 +579,77 @@ public class MatrixPanel extends JPanel{
     }
 
     /** Creating local cache of the data values **/
-    double min[]=new double[inst.numAttributes()], max=0;
-    double ratio[] = new double[inst.numAttributes()];
+    double min[]=new double[m_selectedAttribs.length], max=0;  //changed
+    double ratio[] = new double[m_selectedAttribs.length];     //changed
     double cellSize = m_plotSize.getValue(), temp1=0, temp2=0;
 
-    for(int j=0; j<inst.numAttributes(); j++) {
+    for(int j=0; j<m_selectedAttribs.length; j++) {
       int i;
       for(i=0; i<inst.numInstances(); i++) {
 	min[j] = max = 0;
-	if(!(inst.instance(i).isMissing(j))) {
-	  min[j] = max = inst.instance(i).value(j);
+	if(!(inst.instance(i).isMissing(m_selectedAttribs[j]))) {
+	  min[j] = max = inst.instance(i).value(m_selectedAttribs[j]);
 	  break;
 	}
       }
       for( i=i; i<inst.numInstances(); i++ ) {
-	if(!(inst.instance(i).isMissing(j))) {
-	  if(inst.instance(i).value(j) < min[j])
-	    min[j] = inst.instance(i).value(j);
-	  if(inst.instance(i).value(j) > max)
-	    max = inst.instance(i).value(j);
+	if(!(inst.instance(i).isMissing(m_selectedAttribs[j]))) {
+	  if(inst.instance(i).value(m_selectedAttribs[j]) < min[j])
+	    min[j] = inst.instance(i).value(m_selectedAttribs[j]);
+	  if(inst.instance(i).value(m_selectedAttribs[j]) > max)
+	    max = inst.instance(i).value(m_selectedAttribs[j]);
 	}
       }
       ratio[j] =  cellSize / (max - min[j]);
     }
 
-    for(int j=0; j<inst.numAttributes(); j++) {
-      if(inst.attribute(j).isNominal() || inst.attribute(j).isString()) {
-	m_type[0][j] = 1;  m_type[1][j] = inst.attribute(j).numValues();
+    boolean classIndexProcessed=false;
+    for(int j=0; j<m_selectedAttribs.length; j++) {
+      if(inst.attribute(m_selectedAttribs[j]).isNominal() || inst.attribute(m_selectedAttribs[j]).isString()) {
+	  //m_type[0][j] = 1;  m_type[1][j] = inst.attribute(m_selectedAttribs[j]).numValues();
 
-	temp1 = cellSize/(double)m_type[1][j];
+	temp1 = cellSize/(double)inst.attribute(m_selectedAttribs[j]).numValues(); //m_type[1][j];
 	temp2 = temp1/2;
 	for(int i=0; i<inst.numInstances(); i++) {
-	  m_points[i][j] = (int) Math.round(temp2+temp1*inst.instance(i).value(j));
-	  if(inst.instance(i).isMissing(j))
+	  m_points[i][j] = (int) Math.round(temp2+temp1*inst.instance(i).value(m_selectedAttribs[j]));
+	  if(inst.instance(i).isMissing(m_selectedAttribs[j])) {
 	    m_missing[i][j] = true;    //represents missing value
+	    if(m_selectedAttribs[j]==m_classIndex) {
+		m_missing[i][m_missing[0].length-1] = true;
+		classIndexProcessed = true;
+	    }
+	  }
 	}
       }
       else {
-	m_type[0][j] = m_type[1][j] = 0;
+	  //m_type[0][j] = m_type[1][j] = 0;
 	for(int i=0; i<inst.numInstances(); i++) {
-	  m_points[i][j] = (int) Math.round((inst.instance(i).value(j)
+	  m_points[i][j] = (int) Math.round((inst.instance(i).value(m_selectedAttribs[j])
 					     -min[j])*ratio[j]);	
-	  if(inst.instance(i).isMissing(j))
+	  if(inst.instance(i).isMissing(m_selectedAttribs[j])) {
 	    m_missing[i][j] = true;    //represents missing value
+	    if(m_selectedAttribs[j]==m_classIndex) {
+		m_missing[i][m_missing[0].length-1] = true;
+		classIndexProcessed = true;
+	    }
+	  }
 	}
       }
     }
+
+    if(inst.attribute(m_classIndex).isNominal() || inst.attribute(m_classIndex).isString()) {
+	m_type[0] = 1; m_type[1] = inst.attribute(m_classIndex).numValues();
+    }
+    else
+	m_type[0] = m_type[1] = 0;
+
+    if(classIndexProcessed==false) {  //class Index has not been processed as class index is not among the selected attribs
+	for(int i=0; i<inst.numInstances(); i++) {
+	    if(inst.instance(i).isMissing(m_classIndex))
+		m_missing[i][m_missing[0].length-1] = true;
+	}
+    }
+
     m_cp.setColours(m_colorList);
   }
 
@@ -975,11 +1004,11 @@ public class MatrixPanel extends JPanel{
 
 	if( !(m_missing[i][yattrib] || m_missing[i][xattrib]) ) {      
 
-	  if(m_type[0][m_classIndex]==0)
-	    if(m_missing[i][m_classIndex])
+	  if(m_type[0]==0)
+	    if(m_missing[i][m_missing[0].length-1])
 	      g.setColor(m_defaultColors[m_defaultColors.length-1]);
 	    else
-		g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])) );
+	      g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])) );
 	  else 
 	    g.setColor((Color)m_colorList.elementAt(m_pointColors[i]));
 
@@ -1042,7 +1071,7 @@ public class MatrixPanel extends JPanel{
 		else if(xpos > r.x+r.width)
 		    break;
 		else
-		    paintGraph(g, m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
+		    paintGraph(g, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
 		xpos += cellSize+extpad;
 	    }
 	}
