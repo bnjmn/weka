@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -374,8 +374,8 @@ public class Loader extends AbstractDataSource
     Vector newVector = new Vector(0);
     boolean ok = true;
     if (m_ioThread == null) {
-      if (m_Loader instanceof FileSourcedLoader) {
-	if (! ((FileSourcedLoader) m_Loader).getFile().isFile()) {
+      if (m_Loader instanceof FileSourcedConverter) {
+	if (! ((FileSourcedConverter) m_Loader).getFile().isFile()) {
 	  ok = false;
 	}
       }
@@ -411,7 +411,7 @@ public class Loader extends AbstractDataSource
    */
   public boolean eventGeneratable(String eventName) {
     if (eventName.compareTo("instance") == 0) {
-      if (!(m_Loader instanceof weka.core.converters.IncrementalLoader)) {
+      if (!(m_Loader instanceof weka.core.converters.IncrementalConverter)) {
 	return false;
       }
       if (m_dataSetEventTargets > 0) {
@@ -425,7 +425,7 @@ public class Loader extends AbstractDataSource
     }
 
     if (eventName.compareTo("dataSet") == 0) {
-      if (!(m_Loader instanceof weka.core.converters.BatchLoader)) {
+      if (!(m_Loader instanceof weka.core.converters.BatchConverter)) {
 	return false;
       }
       if (m_instanceEventTargets > 0) {
