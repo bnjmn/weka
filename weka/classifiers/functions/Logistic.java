@@ -97,7 +97,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Tony Voyle (tv6@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
     
@@ -824,7 +824,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 	m_Par = new double [nR + 1][nK];   // Coefficients
 	double LLp = 2e+10;                // Log-likelihood on previous iteration
 	m_LL  = 1e+10;                     // Log-likelihood of current iteration
-	m_LLn = 0;                         // Log-likelihood of null hypothesis
 	
 	// Set up parameters for null model
 	for (int j = 0; j < m_Par.length; j++){ 	
@@ -835,7 +834,9 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 		    m_Par[j][k] = 0;
 	    }
 	}
-	
+
+	m_LLn = cLL(X, Y, m_Par);       // Log-likelihood of null hypothesis
+
 	double x[][] = new double[nR + 1][nK];
 	for (int q=0; q < x.length;q++)
 	    for (int r=0; r < nK; r++)
