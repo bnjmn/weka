@@ -38,11 +38,13 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
-implements BatchLoader, IncrementalLoader {
+implements FileSourcedLoader, BatchLoader, IncrementalLoader {
+
+  public static String FILE_EXTENSION = Instances.FILE_EXTENSION;
 
   /**
    * Holds the determined structure (header) of the data set.
@@ -58,6 +60,34 @@ implements BatchLoader, IncrementalLoader {
    * The reader for the source file.
    */
   private transient Reader m_sourceReader = null;
+
+  /**
+   * Returns a string describing this Loader
+   * @return a description of the Loader suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Reads a source that is in arff (attribute relation file format) "
+      +"format. ";
+  }
+
+  /**
+   * Get the file extension used for arff files
+   *
+   * @return the file extension
+   */
+  public String getFileExtension() {
+    return FILE_EXTENSION;
+  }
+
+  /**
+   * Returns a description of the file type.
+   *
+   * @return a short file description
+   */
+  public String getFileDescription() {
+    return "Arff data files";
+  }
 
   /**
    * Resets the Loader ready to read a new data set

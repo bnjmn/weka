@@ -36,12 +36,18 @@ import weka.core.Instances;
  * Reads a source that contains serialized Instances.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see Loader
  */
 public class SerializedInstancesLoader extends AbstractLoader 
-  implements BatchLoader, IncrementalLoader {
+  implements BatchLoader, FileSourcedLoader, IncrementalLoader {
 
+  public static String FILE_EXTENSION = 
+    Instances.SERIALIZED_OBJ_FILE_EXTENSION;
+
+  protected String m_File = 
+    (new File(System.getProperty("user.dir"))).getAbsolutePath();
+  
   /** Holds the structure (header) of the data set. */
   protected Instances m_Dataset = null;
 
@@ -53,6 +59,44 @@ public class SerializedInstancesLoader extends AbstractLoader
 
     m_Dataset = null;
     m_IncrementalIndex = 0;
+  }
+  
+  /**
+   * Get the file extension used for arff files
+   *
+   * @return the file extension
+   */
+  public String getFileExtension() {
+    return FILE_EXTENSION;
+  }
+
+  /**
+   * Returns a description of the file type.
+   *
+   * @return a short file description
+   */
+  public String getFileDescription() {
+    return "Binary serialized instances";
+  }
+
+  /**
+   * get the File specified as the source
+   *
+   * @return the source file
+   */
+  public File getFile() {
+    return new File(m_File);
+  }
+
+  /**
+   * sets the source File
+   *
+   * @param file the source file
+   * @exception IOException if an error occurs
+   */
+  public void setFile(File file) throws IOException {
+    m_File = file.getAbsolutePath();
+    setSource(file);
   }
 
   /**

@@ -41,14 +41,17 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see Loader
  */
 public class C45Loader extends AbstractLoader 
-  implements BatchLoader, IncrementalLoader {
+  implements FileSourcedLoader, BatchLoader, IncrementalLoader {
 
   public static String FILE_EXTENSION = ".names";
 
+  protected String m_File = 
+    (new File(System.getProperty("user.dir"))).getAbsolutePath();
+  
   /**
    * Holds the determined structure (header) of the data set.
    */
@@ -113,6 +116,44 @@ public class C45Loader extends AbstractLoader
   public void reset() {
     m_structure = null;
     setRetrieval(NONE);
+  }
+
+  /**
+   * Get the file extension used for arff files
+   *
+   * @return the file extension
+   */
+  public String getFileExtension() {
+    return FILE_EXTENSION;
+  }
+
+  /**
+   * Returns a description of the file type.
+   *
+   * @return a short file description
+   */
+  public String getFileDescription() {
+    return "C4.5 data files";
+  }
+
+  /**
+   * get the File specified as the source
+   *
+   * @return the source file
+   */
+  public File getFile() {
+    return new File(m_File);
+  }
+
+  /**
+   * sets the source File
+   *
+   * @param file the source file
+   * @exception IOException if an error occurs
+   */
+  public void setFile(File file) throws IOException {
+    m_File = file.getAbsolutePath();
+    setSource(file);
   }
 
   /**
