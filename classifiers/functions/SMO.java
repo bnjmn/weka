@@ -91,9 +91,10 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.35 $ 
+ * @version $Revision: 1.36 $ 
  */
-public class SMO extends Classifier implements OptionHandler {
+public class SMO extends Classifier implements OptionHandler, 
+					       WeightedInstancesHandler {
 
   /**
    * Class for building a binary support vector machine.
@@ -536,7 +537,8 @@ public class SMO extends Classifier implements OptionHandler {
 	  
 	  // This code implements Modification 1 from Keerthi et al.'s paper
 	  for (int i = 0; i < m_alpha.length; i++) {
-	    if ((m_alpha[i] > 0) &&  (m_alpha[i] < m_C)) {
+	    if ((m_alpha[i] > 0) &&  
+		(m_alpha[i] < m_C * m_data.instance(i).weight())) {
 	      if (examineExample(i)) {
 		numChanged++;
 	      }
@@ -802,6 +804,8 @@ public class SMO extends Classifier implements OptionHandler {
 
       double alph1, alph2, y1, y2, F1, s, L, H, k11, k12, k22, eta,
 	a1, a2, f1, f2, v1, v2, Lobj, Hobj, b1, b2, bOld;
+      double C1 = m_C * m_data.instance(i1).weight();
+      double C2 = m_C * m_data.instance(i2).weight();
 
       // Don't do anything if the two instances are the same
       if (i1 == i2) {
@@ -817,10 +821,10 @@ public class SMO extends Classifier implements OptionHandler {
       // Find the constraints on a2
       if (y1 != y2) {
 	L = Math.max(0, alph2 - alph1); 
-	H = Math.min(m_C, m_C + alph2 - alph1);
+	H = Math.min(C2, C1 + alph2 - alph1);
       } else {
-	L = Math.max(0, alph1 + alph2 - m_C);
-	H = Math.min(m_C, alph1 + alph2);
+	L = Math.max(0, alph1 + alph2 - C1);
+	H = Math.min(C2, alph1 + alph2);
       }
       if (L >= H) {
 	return false;
@@ -871,9 +875,9 @@ public class SMO extends Classifier implements OptionHandler {
       }
       
       // To prevent precision problems
-      if (a2 > m_C - m_Del * m_C) {
-	a2 = m_C;
-      } else if (a2 <= m_Del * m_C) {
+      if (a2 > C2 - m_Del * C2) {
+	a2 = C2;
+      } else if (a2 <= m_Del * C2) {
 	a2 = 0;
       }
       
@@ -881,9 +885,9 @@ public class SMO extends Classifier implements OptionHandler {
       a1 = alph1 + s * (alph2 - a2);
       
       // To prevent precision problems
-      if (a1 > m_C - m_Del * m_C) {
-	a1 = m_C;
-      } else if (a1 <= m_Del * m_C) {
+      if (a1 > C1 - m_Del * C1) {
+	a1 = C1;
+      } else if (a1 <= m_Del * C1) {
 	a1 = 0;
       }
       
@@ -893,7 +897,7 @@ public class SMO extends Classifier implements OptionHandler {
       } else {
 	m_supportVectors.delete(i1);
       }
-      if ((a1 > 0) && (a1 < m_C)) {
+      if ((a1 > 0) && (a1 < C1)) {
 	m_I0.insert(i1);
       } else {
 	m_I0.delete(i1);
@@ -903,12 +907,12 @@ public class SMO extends Classifier implements OptionHandler {
       } else {
 	m_I1.delete(i1);
       }
-      if ((y1 == -1) && (a1 == m_C)) {
+      if ((y1 == -1) && (a1 == C1)) {
 	m_I2.insert(i1);
       } else {
 	m_I2.delete(i1);
       }
-      if ((y1 == 1) && (a1 == m_C)) {
+      if ((y1 == 1) && (a1 == C1)) {
 	m_I3.insert(i1);
       } else {
 	m_I3.delete(i1);
@@ -923,7 +927,7 @@ public class SMO extends Classifier implements OptionHandler {
       } else {
 	m_supportVectors.delete(i2);
       }
-      if ((a2 > 0) && (a2 < m_C)) {
+      if ((a2 > 0) && (a2 < C2)) {
 	m_I0.insert(i2);
       } else {
 	m_I0.delete(i2);
@@ -933,12 +937,12 @@ public class SMO extends Classifier implements OptionHandler {
       } else {
 	m_I1.delete(i2);
       }
-      if ((y2 == -1) && (a2 == m_C)) {
+      if ((y2 == -1) && (a2 == C2)) {
 	m_I2.insert(i2);
       } else {
 	m_I2.delete(i2);
       }
-      if ((y2 == 1) && (a2 == m_C)) {
+      if ((y2 == 1) && (a2 == C2)) {
 	m_I3.insert(i2);
       } else {
 	m_I3.delete(i2);
@@ -1045,12 +1049,13 @@ public class SMO extends Classifier implements OptionHandler {
 	    System.err.println("KKT condition 1 violated: " + m_class[i] * output);
 	  }
 	} 
-	if (Utils.gr(m_alpha[i], 0) && Utils.sm(m_alpha[i], m_C)) {
+	if (Utils.gr(m_alpha[i], 0) && 
+	    Utils.sm(m_alpha[i], m_C * m_data.instance(i).weight())) {
 	  if (!Utils.eq(m_class[i] * output, 1)) {
 	    System.err.println("KKT condition 2 violated: " + m_class[i] * output);
 	  }
 	} 
-	if (Utils.eq(m_alpha[i], m_C)) {
+	if (Utils.eq(m_alpha[i], m_C * m_data.instance(i).weight())) {
 	  if (Utils.gr(m_class[i] * output, 1)) {
 	    System.err.println("KKT condition 3 violated: " + m_class[i] * output);
 	  }
