@@ -30,7 +30,7 @@ import weka.core.*;
  * (ie. a probability distribution).
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.9 $
+ * @version  $Revision: 1.10 $
  */
 public abstract class DistributionClusterer extends Clusterer {
 
@@ -39,14 +39,14 @@ public abstract class DistributionClusterer extends Clusterer {
   // ===============
 
   /**
-   * Computes the density for a given instance.
+   * Computes the log of the density for a given instance.
    * 
    * @param instance the instance to compute the density for
    * @return the density.
    * @exception Exception if the density could not be computed
    * successfully
    */
-  public abstract double densityForInstance(Instance instance) 
+  public abstract double logDensityForInstance(Instance instance) 
     throws Exception;
 
   /**

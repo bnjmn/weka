@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.21 $
+ * @version  $Revision: 1.22 $
  */
 public class ClusterEvaluation {
 
@@ -214,12 +214,9 @@ public class ClusterEvaluation {
       cnum = -1;
       try {
 	if (m_Clusterer instanceof DistributionClusterer) {
-	  temp = ((DistributionClusterer)m_Clusterer).
-	    densityForInstance(testCopy.instance(i));
+	  loglk += ((DistributionClusterer)m_Clusterer).
+	    logDensityForInstance(testCopy.instance(i));
 	  //	  temp = Utils.sum(dist);
-	  if (temp > 0) {
-	    loglk += Math.log(temp);
-	  }
 	  
 	  //	  Utils.normalize(dist);
 	  cnum = m_Clusterer.clusterInstance(testCopy.instance(i)); 
@@ -763,13 +760,9 @@ public class ClusterEvaluation {
 
       for (int j = 0; j < test.numInstances(); j++) {
 	try {
-	  double temp = ((DistributionClusterer)clusterer).
-	    densityForInstance(test.instance(j));
+	  foldAv += ((DistributionClusterer)clusterer).
+	    logDensityForInstance(test.instance(j));
 	  //	double temp = Utils.sum(tempDist);
-
-	  if (temp > 0) {
-	    foldAv += Math.log(temp);
-	  }
 	} catch (Exception ex) {
 	  // unclustered instances
 	}
@@ -828,13 +821,9 @@ public class ClusterEvaluation {
 	  cnum = clusterer.clusterInstance(inst.instance(0));
 
 	  if (clusterer instanceof DistributionClusterer) {
-	    temp = ((DistributionClusterer)clusterer).
-	      densityForInstance(inst.instance(0));
+	    loglk += ((DistributionClusterer)clusterer).
+	      logDensityForInstance(inst.instance(0));
 	    //	    temp = Utils.sum(dist);
-
-	    if (temp > 0) {
-	      loglk += Math.log(temp);
-	    }
 	  }
 	  instanceStats[cnum]++;
 	}
