@@ -1,6 +1,6 @@
 /*
  *    HyperPipes.java
- *    Copyright (C) 1999 Len Trigg, Lucio de Souza Coelho
+ *    Copyright (C) 1999 Intelligenesis Corp.
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */ 
 public class HyperPipes extends Classifier {
 
