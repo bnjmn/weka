@@ -137,7 +137,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.78 $
+ * @version $Revision: 1.79 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -271,12 +271,6 @@ public class ClassifierPanel extends JPanel {
   
   /** A thread that classification runs in */
   protected Thread m_RunThread;
-
-  /** default x index for visualizing */
-  protected int m_visXIndex;
-  
-  /** default y index for visualizing */
-  protected int m_visYIndex;
 
   /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
@@ -706,17 +700,6 @@ public class ClassifierPanel extends JPanel {
 
     m_Log = newLog;
   }
-  
-  /**
-   * Set the default attributes to use on the x and y axis
-   * of a new visualization object.
-   * @param x the index of the attribute to use on the x axis
-   * @param y the index of the attribute to use on the y axis
-   */
-  public void setXY_VisualizeIndexes(int x, int y) {
-    m_visXIndex = x;
-    m_visYIndex = y;
-  }
 
   /**
    * Tells the panel to use a new set of instances.
@@ -726,7 +709,6 @@ public class ClassifierPanel extends JPanel {
   public void setInstances(Instances inst) {
     m_Instances = inst;
 
-    setXY_VisualizeIndexes(0,0); // reset the default x and y indexes
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
       String type = "";
@@ -1350,20 +1332,6 @@ public class ClassifierPanel extends JPanel {
 		
 		m_CurrentVis.addPlot(tempd);
 		m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
-		
-		m_CurrentVis.setXIndex(m_visXIndex); 
-		m_CurrentVis.setYIndex(m_visYIndex);
-		
-		m_CurrentVis.addActionListener(new ActionListener() {
-		  public void actionPerformed(ActionEvent e) {
-		    if (m_CurrentVis.getInstances().
-			relationName().
-			compareTo(m_Instances.relationName()) == 0) {
-		      setXY_VisualizeIndexes(m_CurrentVis.getXIndex(), 
-					     m_CurrentVis.getYIndex());
-		    }
-		  }
-		  });
 	    
 		if (saveVis) {
 		  FastVector vv = new FastVector();
@@ -1680,7 +1648,7 @@ public class ClassifierPanel extends JPanel {
 		vmc.setROCString("(Area under ROC = " + 
 				 Utils.doubleToString(tc.getROCArea(result), 4) + ")");
 		vmc.setLog(m_Log);
-		vmc.setName(result.relationName()+". Class value "+
+		vmc.setName(result.relationName()+". (Class value "+
 			    classAtt.value(classValue)+")");
 		PlotData2D tempd = new PlotData2D(result);
 		tempd.setPlotName(result.relationName());
@@ -1711,7 +1679,7 @@ public class ClassifierPanel extends JPanel {
 		Instances result = cc.getCurve(preds, classValue);
 		VisualizePanel vmc = new VisualizePanel();
 		vmc.setLog(m_Log);
-		vmc.setName(result.relationName()+". Class value "+
+		vmc.setName(result.relationName()+". (Class value "+
 			    classAtt.value(classValue)+")");
 		PlotData2D tempd = new PlotData2D(result);
 		tempd.m_displayAllPoints = true;
@@ -2120,21 +2088,6 @@ public class ClassifierPanel extends JPanel {
 	  
 	  m_CurrentVis.addPlot(tempd);
 	  m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
-	  
-	  m_CurrentVis.setXIndex(m_visXIndex); 
-	  m_CurrentVis.setYIndex(m_visYIndex);
-	  
-	  m_CurrentVis.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
-		if (m_Instances != null &&
-		    m_CurrentVis.getInstances().
-		    relationName().
-		    compareTo(m_Instances.relationName()) == 0) {
-		  setXY_VisualizeIndexes(m_CurrentVis.getXIndex(), 
-					 m_CurrentVis.getYIndex());
-		}
-	      }
-	    });
 	  
 	  if (classifier instanceof Drawable) {
 	    try {

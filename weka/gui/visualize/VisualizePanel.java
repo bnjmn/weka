@@ -100,7 +100,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -2190,6 +2190,9 @@ public class VisualizePanel extends JPanel {
     setProperties(inst.relationName());
     int prefX = -1;
     int prefY = -1;
+    if (inst.numAttributes() > 1) {
+      prefY = 1;
+    }
     int prefC = -1;
     String [] XNames = new String [inst.numAttributes()];
     String [] YNames = new String [inst.numAttributes()];
