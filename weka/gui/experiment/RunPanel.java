@@ -54,7 +54,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -204,9 +204,11 @@ public class RunPanel extends JPanel implements ActionListener {
     JPanel output = new JPanel();
     output.setLayout(new BorderLayout());
     output.add(m_StatusLab, BorderLayout.NORTH);
-    JScrollPane logOut = new JScrollPane(m_ErrorLog);
-    logOut.setBorder(BorderFactory.createTitledBorder("Log"));
-    output.add(logOut, BorderLayout.CENTER);
+    JPanel outputText = new JPanel();
+    outputText.setLayout(new BorderLayout());
+    outputText.setBorder(BorderFactory.createTitledBorder("Log"));
+    outputText.add(new JScrollPane(m_ErrorLog), BorderLayout.CENTER);
+    output.add(outputText, BorderLayout.CENTER);
 
     setLayout(new BorderLayout());
     add(controls, BorderLayout.NORTH);

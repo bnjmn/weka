@@ -49,7 +49,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -60,10 +60,10 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   protected JList m_List;
 
   /** Click to add a dataset */
-  protected JButton m_AddBut = new JButton("Add New");
+  protected JButton m_AddBut = new JButton("Add new...");
 
   /** Click to remove the selected dataset from the list */
-  protected JButton m_DeleteBut = new JButton("DeleteSelected");
+  protected JButton m_DeleteBut = new JButton("Delete selected");
 
   /** A filter to ensure only arff files get selected */
   protected FileFilter m_ArffFilter = new FileFilter() {
