@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
@@ -492,15 +492,15 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 
 
   /**
-   * Predicts the class value for the given test instance.
+   * Predicts the class distribution for the given test instance.
    *
    * @param instance the instance to be classified
    * @return the predicted class value
    * @exception Exception if an error occurred during the prediction
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double[] distributionForInstance(Instance instance) throws Exception {
     
-    return m_Classifier.classifyInstance(instance);
+    return m_Classifier.distributionForInstance(instance);
   }
 
   /**
