@@ -39,7 +39,7 @@ import weka.core.*;
  * Index of the second value.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {
@@ -288,49 +288,45 @@ public class SwapAttributeValuesFilter extends Filter
    * Set the output format. Takes the current average class values
    * and m_InputFormat and calls setOutputFormat(Instances) 
    * appropriately.
+   *
+   * @exception Exception if a problem occurs when setting the output format
    */
-  private void setOutputFormat() {
+  private void setOutputFormat() throws Exception {
     
-    try {
+    Instances newData;
+    FastVector newAtts, newVals;
       
-      Instances newData;
-      FastVector newAtts, newVals;
+    // Compute new attributes
       
-      // Compute new attributes
-      
-      newAtts = new FastVector(m_InputFormat.numAttributes());
-      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-	Attribute att = m_InputFormat.attribute(j);
-	if (j != m_AttIndex) {
-	  newAtts.addElement(att.copy()); 
-	} else {
+    newAtts = new FastVector(m_InputFormat.numAttributes());
+    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
+      Attribute att = m_InputFormat.attribute(j);
+      if (j != m_AttIndex) {
+	newAtts.addElement(att.copy()); 
+      } else {
 	  
-	  // Compute list of attribute values
+	// Compute list of attribute values
 	  
-	  newVals = new FastVector(att.numValues());
-	  for (int i = 0; i < att.numValues(); i++) {
-	    if (i == m_FirstIndex) {
-	      newVals.addElement(att.value(m_SecondIndex));
-	    } else if (i == m_SecondIndex) {
-	      newVals.addElement(att.value(m_FirstIndex));
-	    } else {
-	      newVals.addElement(att.value(i)); 
-	    }
+	newVals = new FastVector(att.numValues());
+	for (int i = 0; i < att.numValues(); i++) {
+	  if (i == m_FirstIndex) {
+	    newVals.addElement(att.value(m_SecondIndex));
+	  } else if (i == m_SecondIndex) {
+	    newVals.addElement(att.value(m_FirstIndex));
+	  } else {
+	    newVals.addElement(att.value(i)); 
 	  }
-	  newAtts.addElement(new Attribute(att.name(), newVals));
 	}
+	newAtts.addElement(new Attribute(att.name(), newVals));
       }
-      
-      // Construct new header
-      
-      newData = new Instances(m_InputFormat.relationName(), newAtts,
-			      0);
-      newData.setClassIndex(m_InputFormat.classIndex());
-      setOutputFormat(newData);
-    } catch (Exception ex) {
-      System.err.println("Problem setting new output format");
-      System.exit(0);
     }
+      
+    // Construct new header
+      
+    newData = new Instances(m_InputFormat.relationName(), newAtts,
+			    0);
+    newData.setClassIndex(m_InputFormat.classIndex());
+    setOutputFormat(newData);
   }
   
   /**

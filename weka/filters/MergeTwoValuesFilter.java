@@ -38,7 +38,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MergeTwoValuesFilter extends Filter implements OptionHandler {
 
@@ -304,80 +304,76 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
    * Set the output format. Takes the current average class values
    * and m_InputFormat and calls setOutputFormat(Instances) 
    * appropriately.
+   *
+   * @exception Exception if a problem occurs when setting the output format
    */
-  private void setOutputFormat() {
+  private void setOutputFormat() throws Exception {
     
-    try {
+    Instances newData;
+    FastVector newAtts, newVals;
+    boolean firstEndsWithPrime = false, 
+      secondEndsWithPrime = false;
+    StringBuffer text = new StringBuffer();
       
-      Instances newData;
-      FastVector newAtts, newVals;
-      boolean firstEndsWithPrime = false, 
-	secondEndsWithPrime = false;
-      StringBuffer text = new StringBuffer();
+    // Compute new attributes
       
-      // Compute new attributes
-      
-      newAtts = new FastVector(m_InputFormat.numAttributes());
-      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-	Attribute att = m_InputFormat.attribute(j);
-	if (j != m_AttIndex) {
-	  newAtts.addElement(att.copy());
-	} else {
+    newAtts = new FastVector(m_InputFormat.numAttributes());
+    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
+      Attribute att = m_InputFormat.attribute(j);
+      if (j != m_AttIndex) {
+	newAtts.addElement(att.copy());
+      } else {
 	  
-	  // Compute new value
+	// Compute new value
 	  
-	  if (att.value(m_FirstIndex).endsWith("'")) {
-	    firstEndsWithPrime = true;
-	  }
-	  if (att.value(m_SecondIndex).endsWith("'")) {
-	    secondEndsWithPrime = true;
-	  }
-	  if (firstEndsWithPrime || secondEndsWithPrime) {
-	    text.append("'");
-	  }
-	  if (firstEndsWithPrime) {
-	    text.append(((String)att.value(m_FirstIndex)).
-			substring(1, ((String)att.value(m_FirstIndex)).
-				  length() - 1));
-	  } else {
-	    text.append((String)att.value(m_FirstIndex));
-	  }
-	  text.append('_');
-	  if (secondEndsWithPrime) {
-	    text.append(((String)att.value(m_SecondIndex)).
-			substring(1, ((String)att.value(m_SecondIndex)).
-				  length() - 1));
-	  } else {
-	    text.append((String)att.value(m_SecondIndex));
-	  }
-	  if (firstEndsWithPrime || secondEndsWithPrime) {
-	    text.append("'");
-	  }
-	  
-	  // Compute list of attribute values
-	  
-	  newVals = new FastVector(att.numValues() - 1);
-	  for (int i = 0; i < att.numValues(); i++) {
-	    if (i == m_FirstIndex) {
-	      newVals.addElement(text.toString());
-	    } else if (i != m_SecondIndex) {
-	      newVals.addElement(att.value(i));
-	    }
-	  }
-	  newAtts.addElement(new Attribute(att.name(), newVals));
+	if (att.value(m_FirstIndex).endsWith("'")) {
+	  firstEndsWithPrime = true;
 	}
+	if (att.value(m_SecondIndex).endsWith("'")) {
+	  secondEndsWithPrime = true;
+	}
+	if (firstEndsWithPrime || secondEndsWithPrime) {
+	  text.append("'");
+	}
+	if (firstEndsWithPrime) {
+	  text.append(((String)att.value(m_FirstIndex)).
+		      substring(1, ((String)att.value(m_FirstIndex)).
+				length() - 1));
+	} else {
+	  text.append((String)att.value(m_FirstIndex));
+	}
+	text.append('_');
+	if (secondEndsWithPrime) {
+	  text.append(((String)att.value(m_SecondIndex)).
+		      substring(1, ((String)att.value(m_SecondIndex)).
+				length() - 1));
+	} else {
+	  text.append((String)att.value(m_SecondIndex));
+	}
+	if (firstEndsWithPrime || secondEndsWithPrime) {
+	  text.append("'");
+	}
+	  
+	// Compute list of attribute values
+	  
+	newVals = new FastVector(att.numValues() - 1);
+	for (int i = 0; i < att.numValues(); i++) {
+	  if (i == m_FirstIndex) {
+	    newVals.addElement(text.toString());
+	  } else if (i != m_SecondIndex) {
+	    newVals.addElement(att.value(i));
+	  }
+	}
+	newAtts.addElement(new Attribute(att.name(), newVals));
       }
-      
-      // Construct new header
-      
-      newData = new Instances(m_InputFormat.relationName(), newAtts,
-			      0);
-      newData.setClassIndex(m_InputFormat.classIndex());
-      setOutputFormat(newData);
-    } catch (Exception ex) {
-      System.err.println("Problem setting new output format");
-      System.exit(0);
     }
+      
+    // Construct new header
+      
+    newData = new Instances(m_InputFormat.relationName(), newAtts,
+			    0);
+    newData.setClassIndex(m_InputFormat.classIndex());
+    setOutputFormat(newData);
   }
   
   /**

@@ -491,7 +491,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * Set the output format. Takes the currently defined attribute set 
    * m_InputFormat and calls setOutputFormat(Instances) appropriately.
    */
-  protected void setOutputFormat() {
+  protected void setOutputFormat() throws Exception {
     
     if (m_SelectedAttributes[0] == null) {
       setOutputFormat(null);
@@ -511,13 +511,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
     if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) &&
 	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
-      try {
-	outputFormat.setClassIndex(m_SelectedAttributes[0].length - 1);
-      } catch (Exception e) {
-	System.err.println(e.toString()
-			   + "\nProblem setting new output format");
-	System.exit(0);
-      }
+      outputFormat.setClassIndex(m_SelectedAttributes[0].length - 1);
     }
     
     setOutputFormat(outputFormat);  

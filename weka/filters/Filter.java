@@ -51,7 +51,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class Filter implements Serializable {
 
@@ -419,9 +419,8 @@ public abstract class Filter implements Serializable {
 	  System.err.println("Filter said collect immediately");
 	}
 	if (!printedHeader) {
-	  System.err.println("Filter didn't return true from inputFormat() "+
-			     "earlier!");
-	  System.exit(0);
+	  throw new Error("Filter didn't return true from inputFormat() "
+			  + "earlier!");
 	}
 	if (debug) {
 	  System.err.println("Getting output instance");
@@ -586,9 +585,8 @@ public abstract class Filter implements Serializable {
     while (firstData.readInstance(firstInput)) {
       if (filter.input(firstData.instance(0))) {
 	if (!printedHeader) {
-	  System.err.println("Filter didn't return true from inputFormat() "
-			     + "earlier!");
-	  System.exit(0);
+	  throw new Error("Filter didn't return true from inputFormat() "
+			  + "earlier!");
 	}
 	firstOutput.println(filter.output().toString());
       }
@@ -617,9 +615,8 @@ public abstract class Filter implements Serializable {
     while (secondData.readInstance(secondInput)) {
       if (filter.input(secondData.instance(0))) {
 	if (!printedHeader) {
-	  System.err.println("Filter didn't return true from"
-			     + " isOutputFormatDefined() earlier!");
-	  System.exit(0);
+	  throw new Error("Filter didn't return true from"
+			  + " isOutputFormatDefined() earlier!");
 	}
 	secondOutput.println(filter.output().toString());
       }

@@ -56,7 +56,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -944,87 +944,74 @@ public class DiscretizeFilter extends Filter
   /**
    * Set the output format. Takes the currently defined cutpoints and 
    * m_InputFormat and calls setOutputFormat(Instances) appropriately.
+   *
+   * @exception Exception if a problem occurs setting the output format
    */
-  protected void setOutputFormat() {
+  protected void setOutputFormat() throws Exception {
 
     if (m_CutPoints == null) {
       setOutputFormat(null);
       return;
     }
-    try {
-      FastVector attributes = new FastVector(m_InputFormat.numAttributes());
-      int classIndex = m_InputFormat.classIndex();
-      for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
-	if ((m_DiscretizeCols.isInRange(i)) 
-	    && (m_InputFormat.attribute(i).isNumeric())) {
-	  if (!m_MakeBinary) {
-	    FastVector attribValues = new FastVector(1);
-	    if (m_CutPoints[i] == null) {
-	      attribValues.addElement("'All'");
-	    } else {
-	      for(int j = 0; j <= m_CutPoints[i].length; j++) {
-		if (j == 0) {
-		  attribValues.addElement("'(-inf-"
-					  + Utils.doubleToString(
-					    m_CutPoints[i][j], 6) + "]'");
-		} else if (j == m_CutPoints[i].length) {
-		  attribValues.addElement("'("
-					  + Utils.doubleToString(
-                                            m_CutPoints[i][j - 1], 6) 
-					  + "-inf)'");
-		} else {
-		  attribValues.addElement("'("
-					  + Utils.doubleToString(
-					    m_CutPoints[i][j - 1], 6)
-					  + "-" + Utils.doubleToString(
-						  m_CutPoints[i][j], 6) 
-					  + "]'");
-		}
+    FastVector attributes = new FastVector(m_InputFormat.numAttributes());
+    int classIndex = m_InputFormat.classIndex();
+    for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
+      if ((m_DiscretizeCols.isInRange(i)) 
+	  && (m_InputFormat.attribute(i).isNumeric())) {
+	if (!m_MakeBinary) {
+	  FastVector attribValues = new FastVector(1);
+	  if (m_CutPoints[i] == null) {
+	    attribValues.addElement("'All'");
+	  } else {
+	    for(int j = 0; j <= m_CutPoints[i].length; j++) {
+	      if (j == 0) {
+		attribValues.addElement("'(-inf-"
+			+ Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
+	      } else if (j == m_CutPoints[i].length) {
+		attribValues.addElement("'("
+			+ Utils.doubleToString(m_CutPoints[i][j - 1], 6) 
+					+ "-inf)'");
+	      } else {
+		attribValues.addElement("'("
+			+ Utils.doubleToString(m_CutPoints[i][j - 1], 6) + "-"
+			+ Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
 	      }
 	    }
+	  }
+	  attributes.addElement(new Attribute(m_InputFormat.
+					      attribute(i).name(),
+					      attribValues));
+	} else {
+	  if (m_CutPoints[i] == null) {
+	    FastVector attribValues = new FastVector(1);
+	    attribValues.addElement("'All'");
 	    attributes.addElement(new Attribute(m_InputFormat.
 						attribute(i).name(),
 						attribValues));
 	  } else {
-	    if (m_CutPoints[i] == null) {
-	      FastVector attribValues = new FastVector(1);
-	      attribValues.addElement("'All'");
+	    if (i < m_InputFormat.classIndex()) {
+	      classIndex += m_CutPoints[i].length - 1;
+	    }
+	    for(int j = 0; j < m_CutPoints[i].length; j++) {
+	      FastVector attribValues = new FastVector(2);
+	      attribValues.addElement("'(-inf-"
+		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
+	      attribValues.addElement("'("
+		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "-inf)'");
 	      attributes.addElement(new Attribute(m_InputFormat.
 						  attribute(i).name(),
 						  attribValues));
-	    } else {
-	      if (i < m_InputFormat.classIndex()) {
-		classIndex += m_CutPoints[i].length - 1;
-	      }
-	      for(int j = 0; j < m_CutPoints[i].length; j++) {
-		FastVector attribValues = new FastVector(2);
-		attribValues.addElement("'(-inf-"
-					+ Utils.doubleToString(
-					  m_CutPoints[i][j], 6)
-					+ "]'");
-		attribValues.addElement("'("
-					+ Utils.doubleToString(
-					  m_CutPoints[i][j], 6) 
-					+ "-inf)'");
-		attributes.addElement(new Attribute(m_InputFormat.
-						    attribute(i).name(),
-						    attribValues));
-	      }
 	    }
 	  }
-	} else {
-	  attributes.addElement(m_InputFormat.attribute(i).copy());
 	}
+      } else {
+	attributes.addElement(m_InputFormat.attribute(i).copy());
       }
-      Instances outputFormat = 
-      new Instances(m_InputFormat.relationName(), attributes, 0);
-      outputFormat.setClassIndex(classIndex);
-      setOutputFormat(outputFormat);
-    } catch (Exception ex) {
-      System.err.println("Problem setting new output format:" 
-			 + ex.getMessage());
-      System.exit(0);
     }
+    Instances outputFormat = 
+      new Instances(m_InputFormat.relationName(), attributes, 0);
+    outputFormat.setClassIndex(classIndex);
+    setOutputFormat(outputFormat);
   }
 
   /**
