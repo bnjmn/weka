@@ -38,7 +38,8 @@ import java.sql.ResultSetMetaData;
  * database. The jdbc
  * driver and database to be used default to "jdbc.idbDriver" and
  * "jdbc:idb=experiments.prp". These may be changed by creating
- * a java properties file called .weka.experimentrc in user.home. eg:<p>
+ * a java properties file called .weka.experiment.DatabaseUtils in user.home or
+ * the current directory. eg:<p>
  *
  * <code><pre>
  * jdbcDriver=jdbc.idbDriver
@@ -46,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </code></pre><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DatabaseUtils implements Serializable {
 

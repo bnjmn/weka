@@ -1,3 +1,22 @@
+/*
+ *    DatabaseUtils.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.experiment;
 
 import weka.core.OptionHandler;
@@ -30,7 +49,7 @@ import java.io.ObjectOutputStream;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -61,26 +80,64 @@ public class Experiment implements Serializable, OptionHandler {
   /** User notes about the experiment */
   protected String m_Notes = "";
 
-  public PropertyNode [] getPropertyPath() {
-    
-    return m_PropertyPath;
-  }
-  public void setPropertyPath(PropertyNode [] newPropertyPath) {
-    
-    m_PropertyPath = newPropertyPath;
-  }
+  /**
+   * Gets whether the custom property iterator should be used.
+   *
+   * @return true if so
+   */
   public boolean getUsePropertyIterator() {
     
     return m_UsePropertyIterator;
   }
+
+  /**
+   * Sets whether the custom property iterator should be used.
+   *
+   * @param newUsePropertyIterator true if so
+   */
   public void setUsePropertyIterator(boolean newUsePropertyIterator) {
     
     m_UsePropertyIterator = newUsePropertyIterator;
   }
+
+  /**
+   * Gets the path of properties taken to get to the custom property
+   * to iterate over.
+   *
+   * @return an array of PropertyNodes
+   */
+  public PropertyNode [] getPropertyPath() {
+    
+    return m_PropertyPath;
+  }
+  
+  /**
+   * Sets the path of properties taken to get to the custom property
+   * to iterate over.
+   *
+   * @newPropertyPath an array of PropertyNodes
+   */
+  public void setPropertyPath(PropertyNode [] newPropertyPath) {
+    
+    m_PropertyPath = newPropertyPath;
+  }
+  
+  /**
+   * Sets the array of values to set the custom property to.
+   *
+   * @param newPropArray a value of type Object which should be an
+   * array of the appropriate values.
+   */
   public void setPropertyArray(Object newPropArray) {
 
     m_PropertyArray = newPropArray;
   }
+  /**
+   * Gets the array of values to set the custom property to.
+   *
+   * @return a value of type Object which should be an
+   * array of the appropriate values.
+   */
   public Object getPropertyArray() {
 
     return m_PropertyArray;
@@ -102,16 +159,40 @@ public class Experiment implements Serializable, OptionHandler {
   /** The custom property value that has actually been set */
   protected transient int m_CurrentCustom;
 
+  /**
+   * When an experiment is running, this returns the current run number.
+   *
+   * @return the current run number.
+   */
   public int getCurrentRunNumber() {
     return m_RunNumber;
   }
+
+  /**
+   * When an experiment is running, this returns the current dataset number.
+   *
+   * @return the current dataset number.
+   */
   public int getCurrentDatasetNumber() {
     return m_DatasetNumber;
   }
+
+  /**
+   * When an experiment is running, this returns the index of the
+   * current custom property value.
+   *
+   * @return the index of the current custom property value.
+   */
   public int getCurrentCustomNumber() {
     return m_CustomNumber;
   }
   
+  /**
+   * Prepares an experiment for running, initializing current iterator
+   * settings.
+   *
+   * @exception Exception if an error occurs
+   */
   public void initialize() throws Exception {
     
     m_RunNumber = getRunLower();
@@ -140,7 +221,15 @@ public class Experiment implements Serializable, OptionHandler {
   }
 
   
-  public void setProperty(int propertyDepth, Object origValue)
+  /**
+   * Recursively sets the custom property value, by setting all values
+   * along the property path.
+   *
+   * @param propertyDepth the current position along the property path
+   * @param origValue the value to set the property to
+   * @exception Exception if an error occurs
+   */
+  protected void setProperty(int propertyDepth, Object origValue)
     throws Exception {
     
     PropertyDescriptor current = m_PropertyPath[propertyDepth].property;
@@ -158,13 +247,21 @@ public class Experiment implements Serializable, OptionHandler {
     setter.invoke(origValue, args);
   }
 
-  
+  /**
+   * Returns true if there are more iterations to carry out in the experiment.
+   *
+   * @return true if so
+   */
   public boolean hasMoreIterations() {
 
     return !m_Finished;
   }
-
   
+  /**
+   * Carries out the next iteration of the experiment.
+   *
+   * @exception Exception if an error occurs
+   */
   public void nextIteration() throws Exception {
     
     if (m_UsePropertyIterator) {
@@ -187,7 +284,9 @@ public class Experiment implements Serializable, OptionHandler {
     advanceCounters();
   }
 
-  
+  /**
+   * Increments iteration counters appropriately.
+   */
   public void advanceCounters() {
 
     m_RunNumber ++;
@@ -209,6 +308,9 @@ public class Experiment implements Serializable, OptionHandler {
     }
   }
 
+  /**
+   * Runs all iterations of the experiment, continuing past errors.
+   */
   public void runExperiment() {
 
     while (hasMoreIterations()) {
@@ -222,6 +324,12 @@ public class Experiment implements Serializable, OptionHandler {
     }
   }
 
+  /**
+   * Signals that the experiment is finished running, so that cleanup
+   * can be done.
+   *
+   * @exception Exception if an error occurs
+   */
   public void postProcess() throws Exception {
 
     m_ResultProducer.postProcess();
@@ -535,7 +643,11 @@ public class Experiment implements Serializable, OptionHandler {
     return options;
   }
 
-  
+  /**
+   * Gets a string representation of the experiment configuration.
+   *
+   * @return a value of type 'String'
+   */
   public String toString() {
 
     String result = "Runs from: " + m_RunLower + " to: " + m_RunUpper + '\n';
@@ -582,9 +694,9 @@ public class Experiment implements Serializable, OptionHandler {
   }
 
   /**
-   * Runs the ExperimentIterator from the command line.
+   * Configures/Runs the Experiment from the command line.
    *
-   * @param args command line arguments to the ExperimentIterator
+   * @param args command line arguments to the Experiment.
    */
   public static void main(String[] args) {
 

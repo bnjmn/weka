@@ -19,16 +19,24 @@
 
 package weka.experiment;
 
-import java.util.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Option;
+import weka.core.Utils;
 
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Calendar;
+import java.util.TimeZone;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Generates a single train/test split and calls the appropriate
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class RandomSplitResultProducer 

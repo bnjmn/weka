@@ -37,16 +37,24 @@ import weka.core.Instance;
 
 /**
  * InstancesResultListener outputs the received results in arff format to
- * a Writer
+ * a Writer. All results must be received before the instances can be
+ * written out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class InstancesResultListener extends CSVResultListener {
 
+  /** Stores the instances created so far, before assigning to a header */
   protected transient FastVector m_Instances;
+  
+  /** Stores the attribute types for each column */
   protected transient int [] m_AttributeTypes;
+
+  /** For lookup of indices given a string value for each nominal attribute */
   protected transient Hashtable [] m_NominalIndexes;
+
+  /** Contains strings seen so far for each nominal attribute */ 
   protected transient FastVector [] m_NominalStrings;
   
   /**
@@ -154,7 +162,7 @@ public class InstancesResultListener extends CSVResultListener {
   }
 
   /**
-   * Just prints out each result as it is received.
+   * Collects each instance and adjusts the header information.
    *
    * @param rp the ResultProducer that generated the result
    * @param key The key for the results.

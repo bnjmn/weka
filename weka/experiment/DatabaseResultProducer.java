@@ -32,10 +32,11 @@ import weka.core.Option;
 /**
  * DatabaseResultProducer examines a database and extracts out
  * the results produced by the specified ResultProducer
- * and submits them to the specified result listener.
+ * and submits them to the specified ResultListener. If a result needs
+ * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler {
@@ -50,6 +51,12 @@ public class DatabaseResultProducer extends DatabaseResultListener
   protected ResultProducer m_ResultProducer
     = new CrossValidationResultProducer();
 
+  /**
+   * Creates the DatabaseResultProducer, letting the parent constructor do
+   * it's thing.
+   *
+   * @exception Exception if an error occurs
+   */
   public DatabaseResultProducer() throws Exception {
 
     super();

@@ -33,10 +33,12 @@ import weka.core.Utils;
 /**
  * Generates for each run, carries out an n-fold cross-validation,
  * using the set SplitEvaluator to generate some results. If the class
- * attribute is nominal, the dataset is stratified.
+ * attribute is nominal, the dataset is stratified. Results for each fold
+ * are generated, so you may wish to use this in addition with an
+ * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler {

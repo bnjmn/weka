@@ -30,7 +30,7 @@ import weka.classifiers.*;
  * on a nominal class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -367,6 +367,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     updateOptions();
   }
 
+  /**
+   * Updates the options that the current classifier is using.
+   */
   protected void updateOptions() {
     
     if (m_Classifier instanceof OptionHandler) {

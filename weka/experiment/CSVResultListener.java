@@ -35,7 +35,7 @@ import weka.core.Option;
  * a Writer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CSVResultListener implements ResultListener, OptionHandler {
 
@@ -210,6 +210,12 @@ public class CSVResultListener implements ResultListener, OptionHandler {
   }
 
 
+  /**
+   * Prints the names of each field out as the first row of the CSV output.
+   *
+   * @param rp the ResultProducer generating our results.
+   * @exception Exception if the field names could not be determined.
+   */
   private void printResultNames(ResultProducer rp) throws Exception {
 
     String [] key = rp.getKeyNames();
