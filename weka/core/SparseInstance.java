@@ -534,7 +534,7 @@ public class SparseInstance extends Instance {
       double[] tempValues = new double[m_AttValues.length];
       System.arraycopy(m_Indices, 0, tempIndices, 0, index + 1);
       System.arraycopy(m_AttValues, 0, tempValues, 0, index + 1);
-      for (int i = index + 1; i < m_Indices.length - 1; i++) {
+      for (int i = index + 1; i < m_Indices.length; i++) {
 	tempIndices[i] = m_Indices[i] - 1;
 	tempValues[i] = m_AttValues[i];
       }
