@@ -87,7 +87,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.VotedPerceptron,\
  weka.classifiers.VFI,\
  weka.classifiers.AdaBoostM1,\
- weka.classifiers.Bagging, \
+ weka.classifiers.Bagging,\
  weka.classifiers.ClassificationViaRegression,\
  weka.classifiers.DistributionMetaClassifier,\
  weka.classifiers.FilteredClassifier,\
