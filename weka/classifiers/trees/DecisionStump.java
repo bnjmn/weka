@@ -41,7 +41,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler, Sourcable {
@@ -71,7 +71,7 @@ public class DecisionStump extends DistributionClassifier
     int bestAtt = -1, numClasses;
 
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     double[][] bestDist = new double[3][instances.numClasses()];

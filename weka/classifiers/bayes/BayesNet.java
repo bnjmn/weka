@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class BayesNet extends DistributionClassifier implements OptionHandler, 
 	WeightedInstancesHandler {
@@ -109,11 +109,14 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    // Copy the instances
-    m_Instances = new Instances(instances);
+    // Check that class is nominal
+    if (!instances.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("BayesNet: nominal class, please.");
+    }
 
-    // check that all variables are nominal
-    Enumeration enum = m_Instances.enumerateAttributes();
+    // check that all variables are nominal and that there
+    // are no missing values
+    Enumeration enum = instances.enumerateAttributes();
 
     while (enum.hasMoreElements()) {
       Attribute attribute = (Attribute) enum.nextElement();
@@ -121,15 +124,19 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       if (attribute.type() != Attribute.NOMINAL) {
 	throw new UnsupportedAttributeTypeException("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
       } 
+      Enumeration enum2 = instances.enumerateInstances();
+      while (enum2.hasMoreElements()) {
+        if (((Instance) enum2.nextElement()).isMissing(attribute)) {
+          throw new NoSupportForMissingValuesException("BayesNet: no missing values, please.");
+        }
+      }
     } 
 
-    // TODO: check that there are no missing values
+    // Copy the instances
+    m_Instances = new Instances(instances);
+
     // sanity check: need more than 1 variable in datat set
     m_NumClasses = instances.numClasses();
-
-    if (m_NumClasses < 0) {
-      throw new Exception("Dataset has no class attribute");
-    } 
 
     // initialize ADTree
     if (m_bUseADTree) {

@@ -32,6 +32,7 @@ import weka.core.Utils;
 import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.WeightedInstancesHandler;
+import weka.core.UnsupportedClassTypeException;
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -109,7 +110,7 @@ import java.util.Vector;
  * Set exponential bias towards confident intervals. default = 1.0 <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class VFI extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -293,6 +294,9 @@ public class VFI extends DistributionClassifier
 
     if (instances.classIndex() == -1) {
       throw new Exception("No class attribute assigned");
+    }
+    if (!instances.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("VFI: class attribute needs to be nominal!");
     }
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
