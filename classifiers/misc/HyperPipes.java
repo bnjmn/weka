@@ -24,6 +24,7 @@ import weka.core.Instances;
 import weka.core.Utils;
 import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
+import java.io.*;
 
 /**
  * Class implementing a HyperPipe classifier. For each category a
@@ -37,7 +38,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */ 
 public class HyperPipes extends DistributionClassifier {
 
@@ -55,7 +56,7 @@ public class HyperPipes extends DistributionClassifier {
    * Represents an n-dimensional structure that bounds all instances 
    * passed to it (generally all of a given class value).
    */
-  class HyperPipe {
+  class HyperPipe implements Serializable {
 
     /** Contains the numeric bounds of all instances in the HyperPipe */
     protected double [][] m_NumericBounds;

@@ -31,14 +31,14 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 */
 public class Prism extends Classifier {
 
   /**
    * Class for storing a PRISM ruleset, i.e. a list of rules
    */
-  private class PrismRule {
+  private class PrismRule implements Serializable {
     
     /** The classification */
     private int m_classification;

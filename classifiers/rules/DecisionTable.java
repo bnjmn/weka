@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -228,7 +228,7 @@ public class DecisionTable
   /**
    * Class providing keys to the hash table
    */
-  public class hashKey {
+  public class hashKey implements Serializable {
     
     /** Array of attribute values for an instance */
     private double [] attributes;

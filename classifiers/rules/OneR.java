@@ -35,14 +35,14 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
 
   /**
    * Class for storing store a 1R rule.
    */
-  private class OneRRule {
+  private class OneRRule implements Serializable {
 
     /** The class attribute. */
     private Attribute m_class;
