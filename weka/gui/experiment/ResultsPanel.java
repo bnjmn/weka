@@ -66,6 +66,7 @@ import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JSplitPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.JOptionPane;
 import javax.swing.JCheckBox;
@@ -82,7 +83,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -471,19 +472,25 @@ public class ResultsPanel extends JPanel {
     //gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
+    gbC.weighty = 100;
     gbL.setConstraints(m_History, gbC);
     mondo.add(m_History);
-    gbC = new GridBagConstraints();
+    /*gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;     gbC.gridx = 1;
     gbC.gridheight = 3;
     gbC.weightx = 100; gbC.weighty = 100;
-    gbL.setConstraints(output, gbC);
-    mondo.add(output);
+    gbL.setConstraints(output, gbC);*/
+    //mondo.add(output);
+    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+					  mondo, output);
+    splitPane.setOneTouchExpandable(true);
+    //splitPane.setDividerLocation(100);
 
     setLayout(new BorderLayout());
     add(p1, BorderLayout.NORTH);
-    add(mondo , BorderLayout.CENTER);
+    //add(mondo , BorderLayout.CENTER);
+    add(splitPane , BorderLayout.CENTER);
   }
 
   /**
@@ -721,6 +728,9 @@ public class ResultsPanel extends JPanel {
       } else if (name.toLowerCase().indexOf("percent_correct") != -1) {
 	m_CompareCombo.setSelectedIndex(i);
 	//	break;
+      } else if ((name.toLowerCase().indexOf("root_relative_squared_error") != -1) &&
+		 (m_CompareCombo.getSelectedIndex() > 0)) {
+	m_CompareCombo.setSelectedIndex(i);
       }
     }
     if (runCol == -1) {
