@@ -47,10 +47,10 @@ import java.util.*;
  * Random number seed (default 1). <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RandomForest extends DistributionClassifier 
-  implements OptionHandler, Randomizable, WeightedInstancesHandler {
+  implements OptionHandler, Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer {
 
   /** Number of trees in forest. */
   protected int m_numTrees = 10;
@@ -126,6 +126,47 @@ public class RandomForest extends DistributionClassifier
   public int getSeed() {
 
     return m_randomSeed;
+  }
+
+  /**
+   * Gets the out of bag error that was calculated as the classifier was built.
+   *
+   * @return the out of bag error
+   */
+  public double measureOutOfBagError() {
+    
+    if (m_bagger != null) {
+      return m_bagger.measureOutOfBagError();
+    } else return Double.NaN;
+  }
+  
+  /**
+   * Returns an enumeration of the additional measure names.
+   *
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    
+    Vector newVector = new Vector(1);
+    newVector.addElement("measureOutOfBagError");
+    return newVector.elements();
+  }
+  
+  /**
+   * Returns the value of the named measure.
+   *
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception IllegalArgumentException if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) {
+    
+    if (additionalMeasureName.equals("measureOutOfBagError")) {
+      return measureOutOfBagError();
+    }
+    else {throw new IllegalArgumentException(additionalMeasureName 
+					     + " not supported (RandomForest)");
+    }
   }
 
   /**
@@ -219,6 +260,7 @@ public class RandomForest extends DistributionClassifier
     m_bagger.setClassifier(rTree);
     m_bagger.setSeed(m_randomSeed);
     m_bagger.setNumIterations(m_numTrees);
+    m_bagger.setCalcOutOfBag(true);
     m_bagger.buildClassifier(data);
   }
 
@@ -243,7 +285,10 @@ public class RandomForest extends DistributionClassifier
     if (m_bagger == null) return "Random forest not built yet";
     else return "Random forest of " + m_numTrees
 	   + " trees, each constructed while considering "
-	   + m_KValue + " random feature" + (m_KValue==1 ? "" : "s") + ".\n\n";
+	   + m_KValue + " random feature" + (m_KValue==1 ? "" : "s") + ".\n"
+	   + "Out of bag error: "
+	   + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4)
+	   + "\n\n";
   }
 
   /**
