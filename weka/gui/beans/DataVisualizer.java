@@ -41,7 +41,7 @@ import java.awt.*;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -52,9 +52,9 @@ public class DataVisualizer extends JPanel
 		   BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
 		   BeanVisual.ICON_PATH+"DefaultDataVisualizer_animated.gif");
 
-  private transient Instances m_visualizeDataSet;
+  protected transient Instances m_visualizeDataSet;
 
-  private boolean m_framePoppedUp = false;
+  protected boolean m_framePoppedUp = false;
 
   public DataVisualizer() {
     setLayout(new BorderLayout());
