@@ -25,6 +25,7 @@ package  weka.clusterers;
 import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import  weka.estimators.*;
 
 /**
@@ -70,7 +71,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.30.2.1 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -126,6 +127,9 @@ public class EM
 
   /** Verbose? */
   private boolean m_verbose;
+
+ /** globally replace missing values */
+  private ReplaceMissingValues m_replaceMissing;
 
   /**
    * Returns a string describing this clusterer
@@ -890,6 +894,10 @@ public class EM
       throw  new Exception("Can't handle string attributes!");
     }
     
+    m_replaceMissing = new ReplaceMissingValues();
+    m_replaceMissing.setInputFormat(data);
+    data = weka.filters.Filter.useFilter(data, m_replaceMissing);
+    
     m_theInstances = data;
     
     // calculate min and max values for attributes
@@ -933,6 +941,9 @@ public class EM
     int i, j;
     double logprob;
     double[] wghts = new double[m_num_clusters];
+    
+    m_replaceMissing.input(inst);
+    inst = m_replaceMissing.output();
 
     for (i = 0; i < m_num_clusters; i++) {
       //      System.err.println("Cluster : "+i);
