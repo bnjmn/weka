@@ -14,9 +14,22 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    Matrix.java
  *    Copyright (C) 1999 Yong Wang, Eibe Frank, Len Trigg, Gabi Schmidberger
+ *
+ *    The code contains some functions from the CERN Jet Java libraries
+ *    for these the following copyright applies:
+ *
+ *    Copyright (C) 1999 CERN - European Organization for Nuclear Research.
+ *    Permission to use, copy, modify, distribute and sell this software and
+ *    its documentation for any purpose is hereby granted without fee, provided
+ *    that the above copyright notice appear in all copies and that both that
+ *    copyright notice and this permission notice appear in supporting documentation. 
+ *    CERN and the University of Waikato make no representations about the
+ *    suitability of this software for any purpose.
+ *    It is provided "as is" without expressed or implied warranty.
  *
  */
 
@@ -35,15 +48,16 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Matrix implements Cloneable, Serializable {
 
-  /** The data in the matrix. */
+  /**
+   * The values of the matrix */
   protected double [][] m_Elements;
 
   /**
-   * Constructs a matrix.
+   * Constructs a matrix and initializes it with default values.
    *
    * @param nr the number of rows
    * @param nc the number of columns
@@ -57,8 +71,7 @@ public class Matrix implements Cloneable, Serializable {
   /**
    * Constructs a matrix using a given array.
    *
-   * @param nr the number of rows
-   * @param nc the number of columns
+   * @param array the values of the matrix
    */
   public Matrix(double[][] array) throws Exception {
     
@@ -150,7 +163,7 @@ public class Matrix implements Cloneable, Serializable {
   }
 
   /**
-   * Writes out a matrix
+   * Writes out a matrix.
    *
    * @param w the output Writer
    * @exception Exception if an error occurs
@@ -186,7 +199,7 @@ public class Matrix implements Cloneable, Serializable {
    *
    * @param rowIndex the row's index
    * @param columnIndex the column's index
-   * @return the value
+   * @return the value of the cell of the matrix
    */
   public final double getElement(int rowIndex, int columnIndex) {
     
@@ -251,6 +264,36 @@ public class Matrix implements Cloneable, Serializable {
   }
   
   /**
+   * Gets a row of the matrix and returns it as double array.
+   *
+   * @param index the row's index
+   * @return an array of doubles
+   */
+  public double[] getRow(int index) {
+
+    double [] newRow = new double[this.numColumns()];
+    for (int i = 0; i < newRow.length; i++) {
+      newRow[i] = m_Elements[index][i];
+    }
+    return newRow;
+  }
+
+  /**
+   * Gets a column of the matrix and returns it as a double array.
+   *
+   * @param index the column's index
+   * @return an array of doubles
+   */
+  public double[] getColumn(int index) {
+
+    double [] newColumn = new double[this.numRows()];
+    for (int i = 0; i < newColumn.length; i++) {
+      newColumn[i] = m_Elements[i][index];
+    }
+    return newColumn;
+  }
+
+  /**
    * Sets a column of the matrix to the given column. Performs a deep copy.
    *
    * @param index the column's index
@@ -309,7 +352,7 @@ public class Matrix implements Cloneable, Serializable {
   /**
    * Returns the sum of this matrix with another.
    *
-   * @return the sum.
+   * @return a matrix containing the sum.
    */
   public final Matrix add(Matrix other) {
 
@@ -332,7 +375,7 @@ public class Matrix implements Cloneable, Serializable {
   /**
    * Returns the transpose of a matrix.
    *
-   * @return the transposition of this instance).
+   * @return the transposition of this instance.
    */
   public final Matrix transpose() {
 
@@ -349,9 +392,29 @@ public class Matrix implements Cloneable, Serializable {
   }
   
   /**
-   * Reurns the multiplication of two matrices
+   * Returns true if the matrix is symmetric.
    *
-   * @param b the multiplication matrix 
+   * @return boolean true if matrix is symmetric.
+   */
+  public boolean isSymmetric() {
+
+    int nr = m_Elements.length, nc = m_Elements[0].length;
+    if (nr != nc)
+      return false;
+
+    for(int i = 0; i < nc; i++) {
+      for(int j = 0; j < i; j++) {
+	if (m_Elements[i][j] != m_Elements[j][i])
+	  return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Returns the multiplication of two matrices
+   *
+   * @param b the multiplication matrix
    * @return the product matrix
    */
   public final Matrix multiply(Matrix b) {
@@ -445,10 +508,8 @@ public class Matrix implements Cloneable, Serializable {
   /**
    * Returns the L part of the matrix.
    * This does only make sense after LU decomposition.
-   * Warning: The matrix object doesn't hold information if LU decomposition
-   * is performed beforehand.
    *
-   * @return L part of a matrix; 
+   * @return matrix with the L part of the matrix; 
    */
   public Matrix getL() throws Exception {
 
@@ -469,10 +530,8 @@ public class Matrix implements Cloneable, Serializable {
   /**
    * Returns the U part of the matrix.
    * This does only make sense after LU decomposition.
-   * Warning: The matrix object doesn't hold information if LU decomposition
-   * is performed beforehand.
    *
-   * @return U part of a matrix; 
+   * @return matrix with the U part of a matrix; 
    */
   public Matrix getU() throws Exception {
 
@@ -582,11 +641,13 @@ public class Matrix implements Cloneable, Serializable {
   }
   
   /**
-   * Solve A*X = B using backward substitution
+   * Solve A*X = B using backward substitution.
+   * A is current object (this) 
+   * B parameter bb
+   * X returned in parameter bb
    *
-   *  @param  b   A Vector with as many rows as this (=A).
-   *  @return     X so that L*U*X = B(piv,:)
-   *  @exception matrix is singulaer
+   * @param bb first vektor B in above equation then X in same equation.
+   * @exception matrix is singulaer
    */
   public void solve(double [] bb) throws Exception{
 
@@ -634,6 +695,412 @@ public class Matrix implements Cloneable, Serializable {
   }
 
   /**
+   * Performs Eigenvalue Decomposition using Householder QR Factorization
+   *
+   * This function is adapted from the CERN Jet Java libraries, for it 
+   * the following copyright applies (see also, text on top of file)
+   * Copyright (C) 1999 CERN - European Organization for Nuclear Research.
+   *
+   * Matrix must be symmetrical.
+   * Eigenvectors are return in parameter V, as columns of the 2D array.
+   * Eigenvalues are returned in parameter d.
+   *
+   *
+   * @param V double array in which the eigenvectors are returned 
+   * @param d array in which the eigenvalues are returned
+   * @exception if matrix is not symmetric
+   */
+
+  
+  public void eigenvalueDecomposition(double [][] V, double [] d) throws Exception {
+
+    if (!this.isSymmetric())
+      throw new Exception("EigenvalueDecomposition: Matrix must be symmetric.");
+    
+    int n = this.numRows();
+    double[]  e = new double [n]; //todo, don't know what this e is really for!
+    
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+	V[i][j] = m_Elements[i][j];
+      }
+    }
+      
+    // Tridiagonalize using householder reduction
+    tred2(V, d, e, n);
+      
+    // Diagonalize.
+    tql2(V, d, e, n);
+
+    // Matrix v = new Matrix (V);
+    // testEigen(v, d);
+  } 
+
+
+  /**
+   * Symmetric Householder reduction to tridiagonal form.
+   *
+   * This function is adapted from the CERN Jet Java libraries, for it 
+   * the following copyright applies (see also, text on top of file)
+   * Copyright (C) 1999 CERN - European Organization for Nuclear Research.
+   *
+   * @param V containing  a copy of the values of the matrix
+   * @param d 
+   * @param e
+   * @param n size of matrix
+   * @exception if reduction doesn't work
+   */
+  private void tred2 (double [][] V, double [] d, double [] e, int n) throws Exception
+  {
+    //  This is derived from the Algol procedures tred2 by
+    //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
+    //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
+    //  Fortran subroutine in EISPACK.
+    
+    for (int j = 0; j < n; j++) {
+      d[j] = V[n-1][j];
+    }
+    
+    // Householder reduction to tridiagonal form.
+
+    // Matrix v = new Matrix(V);
+    // System.out.println("before household - Matrix V \n" + v);
+    for (int i = n-1; i > 0; i--) {
+   
+      // Matrix v = new Matrix(V);
+      // System.out.println("Matrix V \n" + v);
+
+      // Scale to avoid under/overflow.
+      double scale = 0.0;
+      double h = 0.0;
+      for (int k = 0; k < i; k++) {
+	scale = scale + Math.abs(d[k]);
+      }
+      if (scale == 0.0) {
+	e[i] = d[i-1];
+	for (int j = 0; j < i; j++) {
+	  d[j] = V[i-1][j];
+	  V[i][j] = 0.0;
+	  V[j][i] = 0.0;
+	}
+      } else {
+	
+	// Generate Householder vector.
+	for (int k = 0; k < i; k++) {
+	  d[k] /= scale;
+	  h += d[k] * d[k];
+	}
+	double f = d[i-1];
+	double g = Math.sqrt(h);
+	if (f > 0) {
+	  g = -g;
+	}
+	e[i] = scale * g;
+	h = h - f * g;
+	d[i-1] = f - g;
+	for (int j = 0; j < i; j++) {
+	  e[j] = 0.0;
+	}
+	
+	// Apply similarity transformation to remaining columns.
+	for (int j = 0; j < i; j++) {
+	  f = d[j];
+	  V[j][i] = f;
+	  g = e[j] + V[j][j] * f;
+	  for (int k = j+1; k <= i-1; k++) {
+	    g += V[k][j] * d[k];
+	    e[k] += V[k][j] * f;
+	  }
+	  e[j] = g;
+	}
+	f = 0.0;
+	for (int j = 0; j < i; j++) {
+	  e[j] /= h;
+	  f += e[j] * d[j];
+	}
+	double hh = f / (h + h);
+	for (int j = 0; j < i; j++) {
+	  e[j] -= hh * d[j];
+	}
+	for (int j = 0; j < i; j++) {
+	  f = d[j];
+	  g = e[j];
+	  for (int k = j; k <= i-1; k++) {
+	    V[k][j] -= (f * e[k] + g * d[k]);
+	  }
+	  d[j] = V[i-1][j];
+	  V[i][j] = 0.0;
+	}
+      }
+      d[i] = h;
+
+    }
+
+    // v = new Matrix(V);
+    // System.out.println("before accumulate Matrix V \n" + v);
+
+    // Accumulate transformations.
+    
+    for (int i = 0; i < n-1; i++) {
+      V[n-1][i] = V[i][i];
+      V[i][i] = 1.0;
+      double h = d[i+1];
+      if (h != 0.0) {
+	for (int k = 0; k <= i; k++) {
+	  d[k] = V[k][i+1] / h;
+	}
+	for (int j = 0; j <= i; j++) {
+	  double g = 0.0;
+	  for (int k = 0; k <= i; k++) {
+	    g += V[k][i+1] * V[k][j];
+	  }
+	  for (int k = 0; k <= i; k++) {
+	    V[k][j] -= g * d[k];
+	  }
+	}
+      }
+      for (int k = 0; k <= i; k++) {
+	V[k][i+1] = 0.0;
+      }
+      
+      // v = new Matrix(V);
+      // System.out.println(" accumulate " + i + " Matrix V \n" + v);
+    }
+    for (int j = 0; j < n; j++) {
+      d[j] = V[n-1][j];
+      V[n-1][j] = 0.0;
+    }
+    V[n-1][n-1] = 1.0;
+    e[0] = 0.0;
+    // v = new Matrix(V);
+    // System.out.println(" end accumulate  Matrix V \n" + v);
+  }   
+
+  /**
+   * Symmetric tridiagonal QL algorithm.
+   *
+   * This function is adapted from the CERN Jet Java libraries, for it 
+   * the following copyright applies (see also, text on top of file)
+   * Copyright (C) 1999 CERN - European Organization for Nuclear Research.
+   *
+   * @param V tridiagonalized matrix
+   * @param d
+   * @param e
+   * @param n size of matrix
+   * @Exception if factorization fails
+   */
+  private void tql2 (double [][] V, double [] d, double [] e, int n)
+    throws Exception {
+    
+    //  This is derived from the Algol procedures tql2, by
+    //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
+    //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
+    //  Fortran subroutine in EISPACK.
+    
+    for (int i = 1; i < n; i++) {
+      e[i-1] = e[i];
+    }
+    e[n-1] = 0.0;
+    
+    double f = 0.0;
+    double tst1 = 0.0;
+    double eps = Math.pow(2.0,-52.0);
+    for (int l = 0; l < n; l++) {
+      
+      // Find small subdiagonal element
+      
+      tst1 = Math.max(tst1,Math.abs(d[l]) + Math.abs(e[l]));
+      int m = l;
+      while (m < n) {
+	if (Math.abs(e[m]) <= eps*tst1) {
+	  break;
+	}
+	m++;
+      }
+      
+      // If m == l, d[l] is an eigenvalue,
+      // otherwise, iterate.
+      
+      if (m > l) {
+	int iter = 0;
+	do {
+	  iter = iter + 1;  // (Could check iteration count here.)
+	  
+	  // Compute implicit shift
+	  
+	  double g = d[l];
+	  double p = (d[l+1] - g) / (2.0 * e[l]);
+	  double r = hypot(p,1.0);
+	  if (p < 0) {
+	    r = -r;
+	  }
+	  d[l] = e[l] / (p + r);
+	  d[l+1] = e[l] * (p + r);
+	  double dl1 = d[l+1];
+	  double h = g - d[l];
+	  for (int i = l+2; i < n; i++) {
+	    d[i] -= h;
+	  }
+	  f = f + h;
+	  
+	  // Implicit QL transformation.
+	  
+	  p = d[m];
+	  double c = 1.0;
+	  double c2 = c;
+	  double c3 = c;
+	  double el1 = e[l+1];
+	  double s = 0.0;
+	  double s2 = 0.0;
+	  for (int i = m-1; i >= l; i--) {
+	    c3 = c2;
+	    c2 = c;
+	    s2 = s;
+	    g = c * e[i];
+	    h = c * p;
+	    r = Matrix.hypot(p,e[i]);
+	    e[i+1] = s * r;
+	    s = e[i] / r;
+	    c = p / r;
+	    p = c * d[i] - s * g;
+	    d[i+1] = h + s * (c * g + s * d[i]);
+	    
+	    // Accumulate transformation.
+	    
+	    for (int k = 0; k < n; k++) {
+	      h = V[k][i+1];
+	      V[k][i+1] = s * V[k][i] + c * h;
+	      V[k][i] = c * V[k][i] - s * h;
+	    }
+	    // Matrix v = new Matrix(V);
+	    // System.out.println("Matrix V \n" + v);
+	  }
+	  p = -s * s2 * c3 * el1 * e[l] / dl1;
+	  e[l] = s * p;
+	  d[l] = c * p;
+	  
+	  // Check for convergence.
+	  
+	} while (Math.abs(e[l]) > eps*tst1);
+      }
+      d[l] = d[l] + f;
+      e[l] = 0.0;
+    }
+    
+    // Sort eigenvalues and corresponding vectors.
+    /* 
+    for (int i = 0; i < n-1; i++) {
+      int k = i;
+      double p = d[i];
+      for (int j = i+1; j < n; j++) {
+	if (d[j] < p) {
+	  k = j;
+	  p = d[j];
+	}
+      }
+      if (k != i) {
+	d[k] = d[i];
+	d[i] = p;
+	for (int j = 0; j < n; j++) {
+	  p = V[j][i];
+	  V[j][i] = V[j][k];
+	  V[j][k] = p;
+	}
+      }
+    }*/
+    
+  }   
+
+  /**
+   * Returns sqrt(a^2 + b^2) without under/overflow.
+   *   
+   * This function is adapted from the CERN Jet Java libraries, for it 
+   * the following copyright applies (see also, text on top of file)
+   * Copyright (C) 1999 CERN - European Organization for Nuclear Research.
+   *
+   * @param a length of one side of rectangular triangle
+   * @param b length of other side of rectangular triangle
+   * @return lenght of third side
+   */
+  protected static double hypot(double a, double b) {
+    double r;
+    if (Math.abs(a) > Math.abs(b)) {
+      r = b/a;
+      r = Math.abs(a)*Math.sqrt(1+r*r);
+    } else if (b != 0) {
+      r = a/b;
+      r = Math.abs(b)*Math.sqrt(1+r*r);
+    } else {
+      r = 0.0;
+    }
+    return r;
+  }
+
+  /**
+   * Test eigenvectors and eigenvalues.
+   * function is used for debugging
+   *
+   * @param V matrix with eigenvectors of A
+   * @param d array with eigenvalues of A
+   * @exception if new matrix cannot be made
+   */
+  public boolean testEigen(Matrix V, double [] d, boolean verbose)
+    throws Exception {
+
+    boolean equal = true;
+    if (verbose) {
+      System.out.println("--- test Eigenvectors and Eigenvalues of Matrix A --------");
+      System.out.println("Matrix A \n" + this);
+      System.out.println("Matrix V, the columns are the Eigenvectors\n" + V);
+      System.out.println("the Eigenvalues are");
+      for (int k = 0; k < d.length; k++) {
+	System.out.println( Utils.doubleToString(d[k], 2));
+      }
+      System.out.println("\n---");
+    }
+    double [][] f = new double[V.numRows()][1];
+    Matrix F = new Matrix(f);
+    for (int i = 0; i < V.numRows(); i++) {
+      double [] col =  V.getColumn(i);
+      double norm = 0.0;
+      for (int j = 0; j < col.length; j++) {
+	norm += Math.pow(col[j], 2.0);
+      }
+      norm = Math.pow(norm, 0.5);
+      
+      F.setColumn(0, V.getColumn(i));
+      if (verbose)
+	System.out.println("Eigenvektor " + i + " =\n" + F + "\nNorm " + norm);
+      Matrix R = this.multiply(F);
+      if (verbose) {
+	System.out.println("this x Eigenvektor " + i + " =\n");
+	for (int k = 0; k < V.numRows(); k++) {
+	  System.out.print(Utils.doubleToString(R.getElement(k, 0), 2) + "  ");
+	}
+	System.out.println(" ");
+	System.out.println(" ");
+	System.out.println("Eigenvektor "+ i + " x Eigenvalue " +
+			   Utils.doubleToString(d[i], 2) +" =");
+      }
+      for (int k = 0; k < V.numRows() && equal; k++) {
+	double dd = F.getElement(k, 0) * d[i];
+	double diff = dd - R.getElement(k, 0);
+	equal = Math.abs(diff) < Utils.SMALL;
+	if (Math.abs(diff) > Utils.SMALL)
+	  System.out.println("OOOOOOps");
+	if (verbose) {
+	  System.out.print( Utils.doubleToString(dd, 2) + "  ");
+	}
+      }
+      if (verbose) {
+	System.out.println(" ");
+	System.out.println("---");
+      }
+    }
+    return equal;
+  }
+  
+  /**
    * Main method for testing this class.
    */
   public static void main(String[] ops) {
@@ -644,6 +1111,18 @@ public class Matrix implements Cloneable, Serializable {
     double[] weights = {1, 2, 3};
 
     try {
+      // test eigenvaluedecomposition
+      double [][] m = {{1, 2, 3}, {2, 5, 6},{3, 6, 9}};
+      Matrix M = new Matrix(m);
+      int n = M.numRows();
+      double [][] V = new double[n][n];
+      double [] d = new double[n];
+      double [] e = new double[n];
+      M.eigenvalueDecomposition(V, d);
+      Matrix v = new Matrix(V);
+      // M.testEigen(v, d, );
+      // end of test-eigenvaluedecomposition
+      
       Matrix a = new Matrix(2, 3);
       Matrix b = new Matrix(3, 2);
       System.out.println("Number of columns for a: " + a.numColumns());
@@ -687,4 +1166,9 @@ public class Matrix implements Cloneable, Serializable {
       e.printStackTrace();
     }
   }
+  
 }
+
+
+
+
