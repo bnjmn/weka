@@ -51,7 +51,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -68,15 +68,24 @@ public class LinearRegression extends Classifier implements OptionHandler,
   /** The filter for removing missing values. */
   private ReplaceMissingValuesFilter m_MissingFilter;
 
-  /** The filter storing the transformation from nominal to binary attributes.
-   */
+  /** The filter storing the transformation from nominal to 
+      binary attributes. */
   private NominalToBinaryFilter m_TransformFilter;
 
-  /** The standard deviations of the attributes */
-  private double [] m_StdDev;
+  /** The standard deviations of the class attribute */
+  private double m_ClassStdDev;
+
+  /** The mean of the class attribute */
+  private double m_ClassMean;
 
   /** The index of the class attribute */
   private int m_ClassIndex;
+
+  /** The attributes means */
+  private double[] m_Means;
+
+  /** The attribute standard deviations */
+  private double[] m_StdDevs;
 
   /** True if debug output will be printed */
   private boolean b_Debug;
@@ -105,6 +114,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
   /**
    * Turns off checks for missing values, etc. Use with caution.
+   * Also turns off scaling.
    */
   public void turnChecksOff() {
 
@@ -112,7 +122,8 @@ public class LinearRegression extends Classifier implements OptionHandler,
   }
 
   /**
-   * Turns on checks for missing values, etc.
+   * Turns on checks for missing values, etc. Also turns
+   * on scaling.
    */
   public void turnChecksOn() {
 
@@ -141,29 +152,52 @@ public class LinearRegression extends Classifier implements OptionHandler,
     }
 
     // Preprocess instances
-    m_TransformedData = data;
     if (!m_checksTurnedOff) {
       m_TransformFilter = new NominalToBinaryFilter();
-      m_TransformFilter.setInputFormat(m_TransformedData);
-      m_TransformedData = Filter.useFilter(m_TransformedData, m_TransformFilter);
+      m_TransformFilter.setInputFormat(data);
+      data = Filter.useFilter(data, m_TransformFilter);
       m_MissingFilter = new ReplaceMissingValuesFilter();
-      m_MissingFilter.setInputFormat(m_TransformedData);
-      m_TransformedData = Filter.useFilter(m_TransformedData, m_MissingFilter);
-      m_TransformedData.deleteWithMissingClass();
+      m_MissingFilter.setInputFormat(data);
+      data = Filter.useFilter(data, m_MissingFilter);
+      data.deleteWithMissingClass();
     } else {
       m_TransformFilter = null;
       m_MissingFilter = null;
     }
-    m_ClassIndex = m_TransformedData.classIndex();
 
-    // Calculate attribute standard deviations
-    calculateAttributeDeviations();
+    m_ClassIndex = data.classIndex();
+    m_TransformedData = data;
+
+    // Turn all attributes on for a start
+    m_SelectedAttributes = new boolean[data.numAttributes()];
+    for (int i = 0; i < data.numAttributes(); i++) {
+      if (i != m_ClassIndex) {
+	m_SelectedAttributes[i] = true;
+      }
+    }
+    m_Coefficients = null;
+
+    // Compute means and standard deviations
+    m_Means = new double[data.numAttributes()];
+    m_StdDevs = new double[data.numAttributes()];
+    for (int j = 0; j < data.numAttributes(); j++) {
+      if (j != data.classIndex()) {
+	m_Means[j] = data.meanOrMode(j);
+	m_StdDevs[j] = Math.sqrt(data.variance(j));
+	if (m_StdDevs[j] == 0) {
+	  m_SelectedAttributes[j] = false;
+	} 
+      }
+    }
+
+    m_ClassStdDev = Math.sqrt(data.variance(m_TransformedData.classIndex()));
+    m_ClassMean = data.meanOrMode(m_TransformedData.classIndex());
 
     // Perform the regression
     findBestModel();
 
     // Save memory
-    m_TransformedData = new Instances(m_TransformedData, 0);
+    m_TransformedData = new Instances(data, 0);
   }
 
   /**
@@ -302,8 +336,6 @@ public class LinearRegression extends Classifier implements OptionHandler,
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       if ((m_SelectedAttributes[i]) && ((i != m_ClassIndex))) {
 	coefficients[i] = m_Coefficients[counter++];
-      } else {
-	coefficients[i] = 0;
       }
     }
     coefficients[m_SelectedAttributes.length] = m_Coefficients[counter];
@@ -433,20 +465,6 @@ public class LinearRegression extends Classifier implements OptionHandler,
   }
 
   /**
-   * Calculates the standard deviations of each attribute. The
-   * results are stored in m_StdDev.
-   *
-   * @exception Exception if any of the attributes are not numeric
-   */
-  private void calculateAttributeDeviations() throws Exception {
-
-    m_StdDev = new double [m_TransformedData.numAttributes()];
-    for (int i = 0; i < m_TransformedData.numAttributes(); i++) {
-      m_StdDev[i] = Math.sqrt(m_TransformedData.variance(i));
-    }
-  }
-
-  /**
    * Removes the attribute with the highest standardised coefficient
    * greater than 1.5 from the selected attributes.
    *
@@ -463,8 +481,8 @@ public class LinearRegression extends Classifier implements OptionHandler,
     int maxAttr = -1, coeff = 0;
     for (int i = 0; i < selectedAttributes.length; i++) {
       if (selectedAttributes[i]) {
-	double SC = Math.abs(coefficients[coeff] * m_StdDev[i] 
-			     / m_StdDev[m_ClassIndex]);
+	double SC = Math.abs(coefficients[coeff] * m_StdDevs[i] 
+			     / m_ClassStdDev);
 	if (SC > maxSC) {
 	  maxSC = SC;
 	  maxAttr = i;
@@ -491,27 +509,30 @@ public class LinearRegression extends Classifier implements OptionHandler,
    */
   private void findBestModel() throws Exception {
 
-    int numAttributes = m_TransformedData.numAttributes();
+    // For the weighted case we still use numInstances in
+    // the calculation of the Akaike criterion. 
     int numInstances = m_TransformedData.numInstances();
-    boolean [] selectedAttributes = new boolean[numAttributes];
-    for (int i = 0; i < numAttributes; i++) {
-      if (i != m_ClassIndex) {
-	selectedAttributes[i] = true;
-      }
-    }
 
     if (b_Debug) {
       System.out.println((new Instances(m_TransformedData, 0)).toString());
     }
 
     // Perform a regression for the full model, and remove colinear attributes
-    double [] coefficients;
     do {
-      coefficients = doRegression(selectedAttributes);
+      m_Coefficients = doRegression(m_SelectedAttributes);
     } while (m_EliminateColinearAttributes && 
-	     deselectColinearAttributes(selectedAttributes, coefficients));
+	     deselectColinearAttributes(m_SelectedAttributes, m_Coefficients));
 
-    double fullMSE = calculateMSE(selectedAttributes, coefficients);
+    // Figure out current number of attributes + 1. (We treat this model
+    // as the full model for the Akaike-based methods.)
+    int numAttributes = 1;
+    for (int i = 0; i < m_SelectedAttributes.length; i++) {
+      if (m_SelectedAttributes[i]) {
+	numAttributes++;
+      }
+    }
+
+    double fullMSE = calculateSE(m_SelectedAttributes, m_Coefficients);
     double akaike = (numInstances - numAttributes) + 2 * numAttributes;
     if (b_Debug) {
       System.out.println("Initial Akaike value: " + akaike);
@@ -525,20 +546,20 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
       // Greedy attribute removal
       do {
-	boolean [] currentSelected = (boolean []) selectedAttributes.clone();
+	boolean [] currentSelected = (boolean []) m_SelectedAttributes.clone();
 	improved = false;
 	currentNumAttributes--;
 
-	for (int i = 0; i < numAttributes; i++) {
+	for (int i = 0; i < m_SelectedAttributes.length; i++) {
 	  if (currentSelected[i]) {
 
 	    // Calculate the akaike rating without this attribute
 	    currentSelected[i] = false;
 	    double [] currentCoeffs = doRegression(currentSelected);
-	    double currentMSE = calculateMSE(currentSelected, currentCoeffs);
+	    double currentMSE = calculateSE(currentSelected, currentCoeffs);
 	    double currentAkaike = currentMSE / fullMSE 
-	    * (numInstances - numAttributes)
-	    + 2 * currentNumAttributes;
+	      * (numInstances - numAttributes)
+	      + 2 * currentNumAttributes;
 	    if (b_Debug) {
 	      System.out.println("(akaike: " + currentAkaike);
 	    }
@@ -552,9 +573,9 @@ public class LinearRegression extends Classifier implements OptionHandler,
 	      improved = true;
 	      akaike = currentAkaike;
 	      System.arraycopy(currentSelected, 0,
-			       selectedAttributes, 0,
-			       selectedAttributes.length);
-	      coefficients = currentCoeffs;
+			       m_SelectedAttributes, 0,
+			       m_SelectedAttributes.length);
+	      m_Coefficients = currentCoeffs;
 	    }
 	    currentSelected[i] = true;
 	  }
@@ -573,11 +594,10 @@ public class LinearRegression extends Classifier implements OptionHandler,
 	// Find attribute with smallest SC
 	double minSC = 0;
 	int minAttr = -1, coeff = 0;
-	for (int i = 0; i < selectedAttributes.length; i++) {
-	  if (selectedAttributes[i]) {
-	    double SC = Math.abs(coefficients[coeff] * m_StdDev[i] 
-				 / m_StdDev[m_ClassIndex]);
-
+	for (int i = 0; i < m_SelectedAttributes.length; i++) {
+	  if (m_SelectedAttributes[i]) {
+	    double SC = Math.abs(m_Coefficients[coeff] * m_StdDevs[i] 
+				 / m_ClassStdDev);
 	    if ((coeff == 0) || (SC < minSC)) {
 	      minSC = SC;
 	      minAttr = i;
@@ -588,12 +608,12 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
 	// See whether removing it improves the Akaike score
 	if (minAttr >= 0) {
-	  selectedAttributes[minAttr] = false;
-	  double [] currentCoeffs = doRegression(selectedAttributes);
-	  double currentMSE = calculateMSE(selectedAttributes, currentCoeffs);
+	  m_SelectedAttributes[minAttr] = false;
+	  double [] currentCoeffs = doRegression(m_SelectedAttributes);
+	  double currentMSE = calculateSE(m_SelectedAttributes, currentCoeffs);
 	  double currentAkaike = currentMSE / fullMSE 
-	  * (numInstances - numAttributes)
-	  + 2 * currentNumAttributes;
+	    * (numInstances - numAttributes)
+	    + 2 * currentNumAttributes;
 	  if (b_Debug) {
 	    System.out.println("(akaike: " + currentAkaike);
 	  }
@@ -606,9 +626,9 @@ public class LinearRegression extends Classifier implements OptionHandler,
 	    }
 	    improved = true;
 	    akaike = currentAkaike;
-	    coefficients = currentCoeffs;
+	    m_Coefficients = currentCoeffs;
 	  } else {
-	    selectedAttributes[minAttr] = true;
+	    m_SelectedAttributes[minAttr] = true;
 	  }
 	}
       } while (improved);
@@ -617,12 +637,10 @@ public class LinearRegression extends Classifier implements OptionHandler,
     case SELECTION_NONE:
       break;
     }
-    m_SelectedAttributes = selectedAttributes;
-    m_Coefficients = coefficients;
   }
 
   /**
-   * Calculate the mean squared error of a regression model on the 
+   * Calculate the squared error of a regression model on the 
    * training data
    *
    * @param selectedAttributes an array of flags indicating which 
@@ -633,7 +651,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * @exception Exception if there is a missing class value in the training
    * data
    */
-  private double calculateMSE(boolean [] selectedAttributes, 
+  private double calculateSE(boolean [] selectedAttributes, 
 			      double [] coefficients) throws Exception {
 
     double mse = 0;
@@ -667,12 +685,13 @@ public class LinearRegression extends Classifier implements OptionHandler,
     
     double result = 0;
     int column = 0;
-    for (int j = 0; j < transformedInstance.numAttributes(); j++) 
+    for (int j = 0; j < transformedInstance.numAttributes(); j++) {
       if ((m_ClassIndex != j) 
 	  && (selectedAttributes[j])) {
 	result += coefficients[column] * transformedInstance.value(j);
 	column++;
       }
+    }
     result += coefficients[column];
     
     return result;
@@ -697,41 +716,81 @@ public class LinearRegression extends Classifier implements OptionHandler,
       }
       System.out.println(" )");
     }
-    int numAttributes = 1;
+    int numAttributes = 0;
     for (int i = 0; i < selectedAttributes.length; i++) {
       if (selectedAttributes[i]) {
 	numAttributes++;
       }
     }
 
-    Matrix independent = new Matrix(m_TransformedData.numInstances(), 
-				    numAttributes);
-    Matrix dependent = new Matrix(m_TransformedData.numInstances(), 1);
-    for (int i = 0; i < m_TransformedData.numInstances(); i ++) {
-      int column = 0;
-      for (int j = 0; j < m_TransformedData.numAttributes(); j++) {
-	if (j == m_ClassIndex) {
-	  dependent.setElement(i, 0, 
-			       m_TransformedData.instance(i).classValue());
-	} else {
-	  if (selectedAttributes[j]) {
-	    independent.setElement(i, column,
-				   m_TransformedData.instance(i).value(j));
-	    column++;
+    // Check whether there are still attributes left
+    Matrix independent = null, dependent = null;
+    double[] weights = null;
+    if (numAttributes > 0) {
+      independent = new Matrix(m_TransformedData.numInstances(), 
+			       numAttributes);
+      dependent = new Matrix(m_TransformedData.numInstances(), 1);
+      for (int i = 0; i < m_TransformedData.numInstances(); i ++) {
+	Instance inst = m_TransformedData.instance(i);
+	int column = 0;
+	for (int j = 0; j < m_TransformedData.numAttributes(); j++) {
+	  if (j == m_ClassIndex) {
+	    dependent.setElement(i, 0, inst.classValue());
+	  } else {
+	    if (selectedAttributes[j]) {
+	      double value = inst.value(j) - m_Means[j];
+	      
+	      // We only need to do this if we want to
+	      // scale the input
+	      if (!m_checksTurnedOff) {
+		value /= m_StdDevs[j];
+	      }
+	      independent.setElement(i, column, value);
+	      column++;
+	    }
 	  }
 	}
       }
-      independent.setElement(i, column, 1.0);
+      
+      // Grab instance weights
+      weights = new double [m_TransformedData.numInstances()];
+      for (int i = 0; i < weights.length; i++) {
+	weights[i] = m_TransformedData.instance(i).weight();
+      }
     }
 
-    // Grab instance weights
-    double [] weights = new double [m_TransformedData.numInstances()];
-    for (int i = 0; i < weights.length; i++) {
-      weights[i] = m_TransformedData.instance(i).weight();
+    // Compute coefficients (note that we have to treat the
+    // intercept separately so that it doesn't get affected
+    // by the ridge constant.)
+    double[] coefficients = new double[numAttributes + 1];
+    if (numAttributes > 0) {
+      double[] coeffsWithoutIntercept  =
+	independent.regression(dependent, weights, m_Ridge);
+      System.arraycopy(coeffsWithoutIntercept, 0, coefficients, 0,
+		       numAttributes);
+    }
+    coefficients[numAttributes] = m_ClassMean;
+	   
+    // Convert coefficients into original scale
+    int column = 0;
+    for(int i = 0; i < m_TransformedData.numAttributes(); i++) {
+      if ((i != m_TransformedData.classIndex()) &&
+	  (selectedAttributes[i])) {
+
+	// We only need to do this if we have scaled the
+	// input.
+	if (!m_checksTurnedOff) {
+	  coefficients[column] /= m_StdDevs[i];
+	}
+
+	// We have centred the input
+	coefficients[coefficients.length - 1] -= 
+	  coefficients[column] * m_Means[i];
+	column++;
+      }
     }
 
-    // Compute coefficients
-    return independent.regression(dependent, weights, m_Ridge);
+    return coefficients;
   }
  
   /**
@@ -745,6 +804,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
       System.out.println(Evaluation.evaluateModel(new LinearRegression(),
 						  argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.out.println(e.getMessage());
     }
   }
