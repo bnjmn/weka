@@ -62,6 +62,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.JOptionPane;
+import javax.swing.JCheckBox;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -75,7 +76,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -144,6 +145,11 @@ public class ResultsPanel extends JPanel {
 
   /** Lets the user select which scheme to base comparisons against */
   protected JComboBox m_TestsCombo = new JComboBox(m_TestsModel);
+
+  /** Lets the user select whether standard deviations are to be output
+      or not */
+  protected JCheckBox m_ShowStdDevs = 
+    new JCheckBox("");
 
   /** Click to start the test */
   protected JButton m_PerformBut = new JButton("Perform test");
@@ -369,6 +375,20 @@ public class ResultsPanel extends JPanel {
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_TestsCombo, gbC);
     p3.add(m_TestsCombo);
+
+    lab = new JLabel("Show standard deviations", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 6;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 6;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
+    gbL.setConstraints(m_ShowStdDevs, gbC);
+    p3.add(m_ShowStdDevs);
 
     JPanel output = new JPanel();
     output.setLayout(new BorderLayout());
@@ -630,6 +650,7 @@ public class ResultsPanel extends JPanel {
       m_RunModel.addElement(name);
       m_ResultKeyModel.addElement(name);
       m_CompareModel.addElement(name);
+
       if ((datasetCol == -1)
 	  && (name.toLowerCase().indexOf("dataset") != -1)) {
 	m_DatasetCombo.setSelectedIndex(i);
@@ -648,7 +669,7 @@ public class ResultsPanel extends JPanel {
       }
       if (name.toLowerCase().indexOf("percent_correct") != -1) {
 	m_CompareCombo.setSelectedIndex(i);
-	break;
+	//	break;
       }
     }
     if (datasetCol == -1) {
@@ -730,6 +751,7 @@ public class ResultsPanel extends JPanel {
     }
 
     // Carry out the test chosen and biff the results to the output area
+    m_TTester.setShowStdDevs(m_ShowStdDevs.isSelected());
     int compareCol = m_CompareCombo.getSelectedIndex();
     int tType = m_TestsCombo.getSelectedIndex();
     String name = (new SimpleDateFormat("HH:mm:ss - "))
