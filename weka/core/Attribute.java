@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -328,6 +328,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return a copy of this attribute with the same index
    */
+  //@ also ensures \result instanceof Attribute;
   public /*@ pure non_null @*/ Object copy() {
 
     Attribute copy = new Attribute(m_Name);
