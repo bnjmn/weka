@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 
 public class Ridor extends Classifier
@@ -438,7 +438,7 @@ public class Ridor extends Classifier
    *
    */
     
-  private class RidorRule implements WeightedInstancesHandler{
+  private class RidorRule implements WeightedInstancesHandler, Serializable {
 	
     /** The internal representation of the class label to be predicted*/
     private double m_Class = -1;	
