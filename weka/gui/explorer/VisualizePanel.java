@@ -83,7 +83,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -271,6 +271,9 @@ public class VisualizePanel extends JPanel {
 	    longest = m_plotInstances.attribute(j).name().length();
 	  }
 	}
+	if (m_preds != null) {
+	  longest = (longest < 9) ? 9 : longest;
+	}
 	StringBuffer insts = new StringBuffer(); 
 	for (int i=0;i<m_plotInstances.numInstances();i++) {
 	  if (m_pointLookup[i][0] != Double.NEGATIVE_INFINITY) {
@@ -301,7 +304,26 @@ public class VisualizePanel extends JPanel {
 		    insts.append(m_plotInstances.instance(i).value(j));
 		  }
 		  insts.append("\n");
-		}		
+		}
+		if (m_preds != null && 
+		    (!m_plotInstances.instance(i).
+		     isMissing(m_plotInstances.classIndex()))) {
+		  if (longest > 9) {
+		    for (int k = 0;k < (longest-9); k++) {
+		      insts.append(" ");
+		    }
+		  }
+		    
+		  insts.append("predicted : ");
+		  if (m_plotInstances.attribute(m_cIndex).isNominal()) {
+		    insts.append(m_plotInstances.
+				 attribute(m_plotInstances.classIndex()).
+				 value((int)m_preds[i]));
+		  } else {
+		    insts.append(m_preds[i]);
+		  }
+		  insts.append("\n");
+		}
 	      }
 	    }
 	  }
