@@ -28,6 +28,7 @@ import weka.gui.GenericArrayEditor;
 import weka.gui.Logger;
 import weka.gui.SysErrLog;
 import weka.gui.InstancesSummaryPanel;
+import weka.gui.TaskLogger;
 import weka.experiment.InstanceQuery;
 
 import java.io.Reader;
@@ -73,7 +74,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -427,11 +428,17 @@ public class PreprocessPanel extends JPanel {
     Filter [] filters = getFilters();
     Instances temp = instances;
     try {
+      if (m_Log instanceof TaskLogger) {
+	((TaskLogger)m_Log).taskStarted();
+      }
       for (int i = 0; i < filters.length; i++) {
 	m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
 			    + filters[i].getClass().getName());
 	filters[i].inputFormat(temp);
 	temp = Filter.useFilter(temp, filters[i]);
+      }
+      if (m_Log instanceof TaskLogger) {
+	((TaskLogger)m_Log).taskFinished();
       }
       // try to save a copy of the filters using serialization
       try {
