@@ -57,7 +57,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -118,7 +118,7 @@ public class ThresholdSelector extends DistributionClassifier
   /**
    * Collects the classifier predictions using the specified evaluation method.
    */
-  protected FastVector getPredictions(Instances instances, int mode) 
+  protected FastVector getPredictions(Instances instances, int mode, int numFolds) 
     throws Exception {
 
     EvaluationUtils eu = new EvaluationUtils();
@@ -129,12 +129,12 @@ public class ThresholdSelector extends DistributionClassifier
       Instances trainData = null, evalData = null;
       Instances data = new Instances(instances);
       data.randomize(new Random(m_Seed));
-      data.stratify(m_NumXValFolds);
+      data.stratify(numFolds);
       
       // Make sure that both subsets contain at least one positive instance
-      for (int subsetIndex = 0; subsetIndex < m_NumXValFolds; subsetIndex++) {
-        trainData = data.trainCV(m_NumXValFolds, subsetIndex);
-        evalData = data.testCV(m_NumXValFolds, subsetIndex);
+      for (int subsetIndex = 0; subsetIndex < numFolds; subsetIndex++) {
+        trainData = data.trainCV(numFolds, subsetIndex);
+        evalData = data.testCV(numFolds, subsetIndex);
         if (checkForInstance(trainData) && checkForInstance(evalData)) {
           break;
         }
@@ -143,7 +143,7 @@ public class ThresholdSelector extends DistributionClassifier
     case EVAL_TRAINING_SET:
       return eu.getTrainTestPredictions(m_Classifier, instances, instances);
     case EVAL_CROSS_VALIDATION:
-      return eu.getCVPredictions(m_Classifier, instances, m_NumXValFolds);
+      return eu.getCVPredictions(m_Classifier, instances, numFolds);
     default:
       throw new Exception("Unrecognized evaluation mode");
     }
@@ -416,9 +416,11 @@ public class ThresholdSelector extends DistributionClassifier
     // optimize on training data
     if (stats.nominalCounts[m_DesignatedClass] == 1) {
       System.err.println("Only 1 positive found: optimizing on training data");
-      findThreshold(getPredictions(instances, EVAL_TRAINING_SET));
+      findThreshold(getPredictions(instances, EVAL_TRAINING_SET, 0));
     } else {
-      findThreshold(getPredictions(instances, m_EvalMode));
+      int numFolds = Math.min(m_NumXValFolds, stats.nominalCounts[m_DesignatedClass]);
+      //System.err.println("Number of folds for threshold selector: " + numFolds);
+      findThreshold(getPredictions(instances, m_EvalMode, numFolds));
       if (m_EvalMode != EVAL_TRAINING_SET) {
 	m_Classifier.buildClassifier(instances);
       }
