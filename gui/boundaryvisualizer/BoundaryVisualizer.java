@@ -53,7 +53,7 @@ import weka.gui.visualize.ClassPanel;
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see JPanel
  */
@@ -393,6 +393,12 @@ public class BoundaryVisualizer extends JPanel {
 	  setControlEnabledStatus(true);
 	}
       });
+
+    m_classPanel.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_boundaryPanel.replot();
+	}
+      });
   }
 
   /**
@@ -520,7 +526,7 @@ public class BoundaryVisualizer extends JPanel {
 
     m_classAttBox.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  setUpClassValuesBoxes();
+	  configureForClassAttribute();
 	}
       });
 
@@ -549,7 +555,7 @@ public class BoundaryVisualizer extends JPanel {
   /**
    * Set up the class values combo boxes
    */
-  private void setUpClassValuesBoxes() {
+  private void configureForClassAttribute() {
     int classIndex = m_classAttBox.getSelectedIndex();
     if (classIndex >= 0) {
       // see if this is a nominal attribute
@@ -557,6 +563,15 @@ public class BoundaryVisualizer extends JPanel {
 	m_startBut.setEnabled(false);
       } else {
 	m_startBut.setEnabled(true);
+	// set up class colours
+	FastVector colors = new FastVector();
+	for (int i = 0; i < 
+	       m_trainingInstances.attribute(classIndex).numValues(); i++) {
+	  colors.addElement(BoundaryPanel.
+		    DEFAULT_COLORS[i % BoundaryPanel.DEFAULT_COLORS.length]);
+	  m_classPanel.setColours(colors);	  
+	  m_boundaryPanel.setColors(colors);
+	}
       }
     }
   }
