@@ -69,7 +69,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class EM
   extends DistributionClusterer
@@ -656,6 +656,23 @@ public class EM
     m_verbose = false;
   }
 
+  /**
+   * Return the normal distributions for the cluster models
+   *
+   * @return a <code>double[][][]</code> value
+   */
+  public double [][][] getClusterModelsNumericAtts() {
+    return m_modelNormal;
+  }
+
+  /**
+   * Return the priors for the clusters
+   *
+   * @return a <code>double[]</code> value
+   */
+  public double [] getClusterPriors() {
+    return m_priors;
+  }
 
   /**
    * Outputs the generated clusters into a string.
