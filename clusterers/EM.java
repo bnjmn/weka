@@ -48,7 +48,7 @@ import  weka.estimators.*;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class EM
   extends DistributionClusterer
@@ -76,8 +76,12 @@ public class EM
   /** training instances */
   private Instances m_theInstances = null;
 
-  /** number of clusters */
+  /** number of clusters selected by the user or cross validation */
   private int m_num_clusters;
+
+  /** the initial number of clusters requested by the user--- -1 if
+      xval is to be used to find the number of clusters */
+  private int m_initialNumClusters;
 
   /** number of attributes */
   private int m_num_attribs;
@@ -204,9 +208,11 @@ public class EM
 
     if (n < 0) {
       m_num_clusters = -1;
+      m_initialNumClusters = -1;
     }
     else {
       m_num_clusters = n;
+      m_initialNumClusters = n;
     }
   }
 
@@ -217,7 +223,7 @@ public class EM
    * @return the number of clusters.
    */
   public int getNumClusters () {
-    return  m_num_clusters;
+    return  m_initialNumClusters;
   }
 
 
@@ -284,7 +290,7 @@ public class EM
     options[current++] = "-I";
     options[current++] = "" + m_max_iterations;
     options[current++] = "-N";
-    options[current++] = "" + m_num_clusters;
+    options[current++] = "" + getNumClusters();
     options[current++] = "-S";
     options[current++] = "" + m_rseed;
 
@@ -383,7 +389,7 @@ public class EM
   private void estimate_priors (Instances inst, int num_cl)
     throws Exception
   {
-    for (int i = 0; i < m_num_clusters; i++) {
+    for (int i = 0; i < num_cl; i++) {
       m_priors[i] = 0.0;
     }
 
@@ -571,6 +577,7 @@ public class EM
     m_max_iterations = 100;
     m_rseed = 100;
     m_num_clusters = -1;
+    m_initialNumClusters = -1;
     m_verbose = false;
   }
 
@@ -581,7 +588,12 @@ public class EM
   public String toString () {
     StringBuffer text = new StringBuffer();
     text.append("\nEM\n==\n");
-    text.append("\nNumber of clusters: " + m_num_clusters + "\n");
+    if (m_initialNumClusters == -1) {
+      text.append("\nNumber of clusters selected by cross validation: "
+		  +m_num_clusters+"\n");
+    } else {
+      text.append("\nNumber of clusters: " + m_num_clusters + "\n");
+    }
 
     for (int j = 0; j < m_num_clusters; j++) {
       text.append("\nCluster: " + j + " Prior probability: " 
@@ -823,7 +835,7 @@ public class EM
 
     // setDefaultStdDevs(theInstances);
     // cross validate to determine number of clusters?
-    if (m_num_clusters == -1) {
+    if (m_initialNumClusters == -1) {
       m_num_clusters = CVClusters();
     }
 

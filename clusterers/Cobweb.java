@@ -29,7 +29,7 @@
  * Cutoff. <p>
  *
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 package weka.clusterers;
 
@@ -572,18 +572,50 @@ public class Cobweb extends Clusterer implements OptionHandler{
 
     optionString = Utils.getOption('A', options); 
     if (optionString.length() != 0) {
-	acuity = (double) Integer.parseInt(optionString)/100.0;
+	setAcuity(Integer.parseInt(optionString));
     }
     else {
       acuity = 1.0;
     }
     optionString = Utils.getOption('C', options); 
     if (optionString.length() != 0) {
-      cutoff = (double) Integer.parseInt(optionString)/100.0;
+      setCutoff(Integer.parseInt(optionString));
     }
     else {
       cutoff = 0.01 * Cobweb.norm;
     }
+  }
+
+  /**
+   * set the accuity.
+   * @param a the accuity between 0 and 100
+   */
+  public void setAcuity(int a) {
+    acuity = (double) a / 100.0;
+  }
+
+  /**
+   * get the accuity value
+   * @return the accuity as a value between 0 and 100
+   */
+  public int getAcuity() {
+    return (int) (acuity * 100.0);
+  }
+
+  /**
+   * set the cutoff
+   * @param c the cutoff between 0 and 100
+   */
+  public void setCutoff(int c) {
+    cutoff = (double) c / 100.0;;
+  }
+
+  /**
+   * get the cutoff
+   * @return the cutoff as a value between 1 and 100\
+   */
+  public int getCutoff() {
+    return (int) (cutoff * 100.0);
   }
 
   /**
