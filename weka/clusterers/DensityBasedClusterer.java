@@ -31,7 +31,7 @@ import weka.core.*;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.1 $
+ * @version  $Revision: 1.2 $
  */
 public abstract class DensityBasedClusterer extends Clusterer {
 
@@ -82,8 +82,7 @@ public abstract class DensityBasedClusterer extends Clusterer {
   }
 
   /**
-   * Returns the cluster probability distribution for an instance. Will simply have a
-   * probability of 1 for the chosen cluster and 0 for the others.
+   * Returns the cluster probability distribution for an instance.
    *
    * @param instance the instance to be clustered
    * @return the probability distribution
