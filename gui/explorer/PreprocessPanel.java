@@ -83,7 +83,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -342,6 +342,7 @@ public class PreprocessPanel extends JPanel {
     m_AttSummaryPanel.setBorder(BorderFactory
 		    .createTitledBorder("Selected attribute"));
     m_UndoBut.setEnabled(false);
+    m_SaveBut.setEnabled(false);
     m_ApplyFilterBut.setEnabled(false);
     
     // Set up the GUI layout
@@ -473,6 +474,7 @@ public class PreprocessPanel extends JPanel {
 			   + m_Instances.relationName()
 			   + " (" + m_Instances.numInstances()
 			   + " instances)");
+	  m_SaveBut.setEnabled(true);
 	  m_Log.statusMessage("OK");
 	  // Fire a propertychange event
 	  m_Support.firePropertyChange("", null, null);
