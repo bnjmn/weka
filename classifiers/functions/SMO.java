@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import java.util.*;
 import java.io.*;
@@ -33,8 +32,7 @@ import weka.filters.*;
 /**
  * Implements John C. Platt's sequential minimal optimization
  * algorithm for training a support vector classifier using polynomial
- * kernels. Transforms output of SVM into probabilities by applying a
- * standard sigmoid function that is not fitted to the data.
+ * kernels. 
  *
  * This implementation globally replaces all missing values and
  * transforms nominal attributes into binary ones. For more
@@ -83,175 +81,878 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
  */
-public class SMO extends DistributionClassifier implements OptionHandler {
+public class SMO extends Classifier implements OptionHandler {
 
   /**
-   * Stores a set of a given size.
+   * Class for building a binary support vector machine.
    */
-  private class SMOset implements Serializable {
-
-    /** The current number of elements in the set */
-    private int m_number;
-
-    /** The first element in the set */
-    private int m_first;
-
-    /** Indicators */
-    private boolean[] m_indicators;
-
-    /** The next element for each element */
-    private int[] m_next;
-
-    /** The previous element for each element */
-    private int[] m_previous;
-
+  private class BinarySMO implements Serializable {
+    
     /**
-     * Creates a new set of the given size.
+     * Stores a set of a given size.
      */
-    private SMOset(int size) {
+    private class SMOset implements Serializable {
+
+      /** The current number of elements in the set */
+      private int m_number;
+
+      /** The first element in the set */
+      private int m_first;
+
+      /** Indicators */
+      private boolean[] m_indicators;
+
+      /** The next element for each element */
+      private int[] m_next;
+
+      /** The previous element for each element */
+      private int[] m_previous;
+
+      /**
+       * Creates a new set of the given size.
+       */
+      private SMOset(int size) {
       
-      m_indicators = new boolean[size];
-      m_next = new int[size];
-      m_previous = new int[size];
-      m_number = 0;
-      m_first = -1;
-    }
+	m_indicators = new boolean[size];
+	m_next = new int[size];
+	m_previous = new int[size];
+	m_number = 0;
+	m_first = -1;
+      }
  
-    /**
-     * Checks whether an element is in the set.
-     */
-    private boolean contains(int index) {
+      /**
+       * Checks whether an element is in the set.
+       */
+      private boolean contains(int index) {
 
-      return m_indicators[index];
-    }
+	return m_indicators[index];
+      }
 
-    /**
-     * Deletes an element from the set.
-     */
-    private void delete(int index) {
+      /**
+       * Deletes an element from the set.
+       */
+      private void delete(int index) {
 
-      if (m_indicators[index]) {
-	if (m_first == index) {
-	  m_first = m_next[index];
+	if (m_indicators[index]) {
+	  if (m_first == index) {
+	    m_first = m_next[index];
+	  } else {
+	    m_next[m_previous[index]] = m_next[index];
+	  }
+	  if (m_next[index] != -1) {
+	    m_previous[m_next[index]] = m_previous[index];
+	  }
+	  m_indicators[index] = false;
+	  m_number--;
+	}
+      }
+
+      /**
+       * Inserts an element into the set.
+       */
+      private void insert(int index) {
+
+	if (!m_indicators[index]) {
+	  if (m_number == 0) {
+	    m_first = index;
+	    m_next[index] = -1;
+	    m_previous[index] = -1;
+	  } else {
+	    m_previous[m_first] = index;
+	    m_next[index] = m_first;
+	    m_previous[index] = -1;
+	    m_first = index;
+	  }
+	  m_indicators[index] = true;
+	  m_number++;
+	}
+      }
+
+      /** 
+       * Gets the next element in the set. -1 gets the first one.
+       */
+      private int getNext(int index) {
+
+	if (index == -1) {
+	  return m_first;
 	} else {
-	  m_next[m_previous[index]] = m_next[index];
+	  return m_next[index];
 	}
-	if (m_next[index] != -1) {
-	  m_previous[m_next[index]] = m_previous[index];
-	}
-	m_indicators[index] = false;
-	m_number--;
       }
-    }
 
-    /**
-     * Inserts an element into the set.
-     */
-    private void insert(int index) {
+      /**
+       * Prints all the current elements in the set.
+       */
+      private void printElements() {
 
-      if (!m_indicators[index]) {
-	if (m_number == 0) {
-	  m_first = index;
-	  m_next[index] = -1;
-	  m_previous[index] = -1;
-	} else {
-	  m_previous[m_first] = index;
-	  m_next[index] = m_first;
-	  m_previous[index] = -1;
-	  m_first = index;
-	}
-	m_indicators[index] = true;
-	m_number++;
-      }
-    }
-
-    /** 
-     * Gets the next element in the set. -1 gets the first one.
-     */
-    private int getNext(int index) {
-
-      if (index == -1) {
-	return m_first;
-      } else {
-	return m_next[index];
-      }
-    }
-
-    /**
-     * Prints all the current elements in the set.
-     */
-    private void printElements() {
-
-      for (int i = getNext(-1); i != -1; i = getNext(i)) {
-	System.err.print(i + " ");
-      }
-      System.err.println();
-      for (int i = 0; i < m_indicators.length; i++) {
-	if (m_indicators[i]) {
+	for (int i = getNext(-1); i != -1; i = getNext(i)) {
 	  System.err.print(i + " ");
 	}
+	System.err.println();
+	for (int i = 0; i < m_indicators.length; i++) {
+	  if (m_indicators[i]) {
+	    System.err.print(i + " ");
+	  }
+	}
+	System.err.println();
+	System.err.println(m_number);
       }
-      System.err.println();
-      System.err.println(m_number);
+
+      /** 
+       * Returns the number of elements in the set.
+       */
+      private int numElements() {
+      
+	return m_number;
+      }
     }
 
-    /** 
-     * Returns the number of elements in the set.
+    /** The Lagrange multipliers. */
+    private double[] m_alpha;
+
+    /** The thresholds. */
+    private double m_b, m_bLow, m_bUp;
+
+    /** The indices for m_bLow and m_bUp */
+    private int m_iLow, m_iUp;
+
+    /** The training data. */
+    private Instances m_data;
+
+    /** Weight vector for linear machine. */
+    private double[] m_weights;
+
+    /** Variables to hold weight vector in sparse form.
+	(To reduce storage requirements.) */
+    private double[] m_sparseWeights;
+    private int[] m_sparseIndices;
+
+    /** Kernel function cache */
+    private double[] m_storage;
+    private int[] m_keys;
+
+    /** The transformed class values. */
+    private double[] m_class;
+
+    /** The current set of errors for all non-bound examples. */
+    private double[] m_errors;
+
+    /** The five different sets used by the algorithm. */
+    private SMOset m_I0; // {i: 0 < m_alpha[i] < C}
+    private SMOset m_I1; // {i: m_class[i] = 1, m_alpha[i] = 0}
+    private SMOset m_I2; // {i: m_class[i] = -1, m_alpha[i] =C}
+    private SMOset m_I3; // {i: m_class[i] = 1, m_alpha[i] = C}
+    private SMOset m_I4; // {i: m_class[i] = -1, m_alpha[i] = 0}
+
+    /** The set of support vectors */
+    private SMOset m_supportVectors; // {i: 0 < m_alpha[i]}
+
+    /** Counts the number of kernel evaluations. */
+    private int m_kernelEvals;
+
+    /**
+     * Method for building the binary classifier.
+     *
+     * @param insts the set of training instances
+     * @param cl1 the first class' index
+     * @param cl2 the second class' index
+     * @exception Exception if the classifier can't be built successfully
      */
-    private int numElements() {
+    private void buildClassifier(Instances insts, int cl1, int cl2) throws Exception {
       
-      return m_number;
+      // Initialize the number of kernel evaluations
+      int m_kernelEvals = 0;
+      
+      // Initialize thresholds
+      m_bUp = -1; m_bLow = 1; m_b = 0;
+      
+      // Set class values
+      m_class = new double[insts.numInstances()];
+      m_iUp = -1; m_iLow = -1;
+      for (int i = 0; i < m_class.length; i++) {
+	if ((int) insts.instance(i).classValue() == cl1) {
+	  m_class[i] = -1; m_iLow = i;
+	} else if ((int) insts.instance(i).classValue() == cl2) {
+	  m_class[i] = 1; m_iUp = i;
+	} else {
+	  throw new Exception ("This should never happen!");
+	}
+      }
+      if ((m_iUp == -1) || (m_iLow == -1)) {
+	if (m_iUp == -1) {
+	  m_b = 1;
+	} else {
+	  m_b = -1;
+	}
+	if (m_exponent == 1.0) {
+	  m_sparseWeights = new double[0];
+	  m_sparseIndices = new int[0];
+	}
+	m_class = null;
+	return;
+      }
+      
+      // Set the reference to the data
+      m_data = insts;
+
+      // If machine is linear, reserve space for weights
+      if (m_exponent == 1.0) {
+	m_weights = new double[m_data.numAttributes()];
+      } else {
+	m_weights = null;
+      }
+      
+      // Initialize alpha array to zero
+      m_alpha = new double[m_data.numInstances()];
+      
+      // Initialize sets
+      m_supportVectors = new SMOset(m_data.numInstances());
+      m_I0 = new SMOset(m_data.numInstances());
+      m_I1 = new SMOset(m_data.numInstances());
+      m_I2 = new SMOset(m_data.numInstances());
+      m_I3 = new SMOset(m_data.numInstances());
+      m_I4 = new SMOset(m_data.numInstances());
+
+      // Clean out some instance variables
+      m_sparseWeights = null;
+      m_sparseIndices = null;
+      
+      // Initialize error cache
+      m_errors = new double[m_data.numInstances()];
+      m_errors[m_iLow] = 1; m_errors[m_iUp] = -1;
+      
+      // The kernel calculations are cached
+      m_storage = new double[m_cacheSize];
+      m_keys = new int[m_cacheSize];
+      
+      // Build up I1 and I4
+      for (int i = 0; i < m_class.length; i++ ) {
+	if (m_class[i] == 1) {
+	  m_I1.insert(i);
+	} else {
+	  m_I4.insert(i);
+	}
+      }
+      
+      // Loop to find all the support vectors
+      int numChanged = 0;
+      boolean examineAll = true;
+      while ((numChanged > 0) || examineAll) {
+	numChanged = 0;
+	if (examineAll) {
+	  for (int i = 0; i < m_alpha.length; i++) {
+	    if (examineExample(i)) {
+	      numChanged++;
+	    }
+	  }
+	} else {
+	  
+	  // This code implements Modification 1 from Keerthi et al.'s paper
+	  for (int i = 0; i < m_alpha.length; i++) {
+	    if ((m_alpha[i] > 0) &&  (m_alpha[i] < m_C)) {
+	      if (examineExample(i)) {
+		numChanged++;
+	      }
+	      
+	      // Is optimality on unbound vectors obtained?
+	      if (m_bUp > m_bLow - 2 * m_tol) {
+		numChanged = 0;
+		break;
+	      }
+	    }
+	  }
+	  
+	  //This is the code for Modification 2 from Keerthi et al.'s paper
+	  /*boolean innerLoopSuccess = true; 
+	    numChanged = 0;
+	    while ((m_bUp < m_bLow - 2 * m_tol) && (innerLoopSuccess == true)) {
+	    innerLoopSuccess = takeStep(m_iUp, m_iLow, m_errors[m_iLow]);
+	    }*/
+	}
+	
+	if (examineAll) {
+	  examineAll = false;
+	} else if (numChanged == 0) {
+	  examineAll = true;
+	}
+      }
+      
+      // Set threshold
+      m_b = (m_bLow + m_bUp) / 2.0;
+      
+      // Save memory
+      m_storage = null; m_keys = null; m_errors = null;
+      m_I0 = m_I1 = m_I2 = m_I3 = m_I4 = null;
+      
+      // If machine is linear, delete training data
+      // and store weight vector in sparse format
+      if (m_exponent == 1.0) {
+	
+	// We don't need to store the set of support vectors
+	m_supportVectors = null;
+	
+	// Clean out training data
+	if (!m_checksTurnedOff) {
+	  m_data = new Instances(m_data, 0);
+	} else {
+	  m_data = null;
+	}
+	
+	// Convert weight vector
+	double[] sparseWeights = new double[m_weights.length];
+	int[] sparseIndices = new int[m_weights.length];
+	int counter = 0;
+	for (int i = 0; i < m_weights.length; i++) {
+	  if (m_weights[i] != 0.0) {
+	    sparseWeights[counter] = m_weights[i];
+	    sparseIndices[counter] = i;
+	    counter++;
+	  }
+	}
+	m_sparseWeights = new double[counter];
+	m_sparseIndices = new int[counter];
+	System.arraycopy(sparseWeights, 0, m_sparseWeights, 0, counter);
+	System.arraycopy(sparseIndices, 0, m_sparseIndices, 0, counter);
+	
+	// Clean out weight vector
+	m_weights = null;
+	
+	// We don't need the alphas in the linear case
+	m_alpha = null;
+      }
     }
+    
+    /**
+     * Computes SVM output for given instance.
+     *
+     * @param index the instance for which output is to be computed
+     * @param inst the instance 
+     * @return the output of the SVM for the given instance
+     */
+    private double SVMOutput(int index, Instance inst) throws Exception {
+      
+      double result = 0;
+      
+      // Is the machine linear?
+      if (m_exponent == 1.0) {
+	
+	// Is weight vector stored in sparse format?
+	if (m_sparseWeights == null) {
+	  int n1 = inst.numValues(); 
+	  for (int p = 0; p < n1; p++) {
+	    if (inst.index(p) != m_classIndex) {
+	      result += m_weights[inst.index(p)] * inst.valueSparse(p);
+	    }
+	  }
+	} else {
+	  int n1 = inst.numValues(); int n2 = m_sparseWeights.length;
+	  for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
+	    int ind1 = inst.index(p1); 
+	    int ind2 = m_sparseIndices[p2];
+	    if (ind1 == ind2) {
+	      if (ind1 != m_classIndex) {
+		result += inst.valueSparse(p1) * m_sparseWeights[p2];
+	      }
+	      p1++; p2++;
+	    } else if (ind1 > ind2) {
+	      p2++;
+	    } else { 
+	      p1++;
+	    }
+	  }
+	}
+      } else {
+	for (int i = m_supportVectors.getNext(-1); i != -1; 
+	     i = m_supportVectors.getNext(i)) {
+	  result += m_class[i] * m_alpha[i] * kernel(index, i, inst);
+	}
+      }
+      result -= m_b;
+      
+      return result;
+    }
+
+    /**
+     * Prints out the classifier.
+     *
+     * @return a description of the classifier as a string
+     */
+    public String toString() {
+
+      StringBuffer text = new StringBuffer();
+      int printed = 0;
+
+      if ((m_alpha == null) && (m_sparseWeights == null)) {
+	return "BinarySMO: No model built yet.";
+      }
+      try {
+	text.append("BinarySMO\n\n");
+
+	// If machine linear, print weight vector
+	if (m_exponent == 1.0) {
+	  text.append("Machine linear: showing attribute weights, ");
+	  text.append("not support vectors.\n\n");
+
+	  // We can assume that the weight vector is stored in sparse
+	  // format because the classifier has been built
+	  for (int i = 0; i < m_sparseWeights.length; i++) {
+	    if (i != (int)m_classIndex) {
+	      if (printed > 0) {
+		text.append(" + ");
+	      } else {
+		text.append("   ");
+	      }
+	      if (!m_checksTurnedOff) {
+		text.append(m_sparseWeights[i] + " * " + 
+			    m_data.attribute(m_sparseIndices[i]).name()+"\n");
+	      } else {
+		text.append(m_sparseWeights[i] + " * " + "attribute with index " + 
+			    m_sparseIndices[i] +"\n");
+	      }
+	      printed++;
+	    }
+	  }
+	} else {
+	  for (int i = 0; i < m_alpha.length; i++) {
+	    if (m_supportVectors.contains(i)) {
+	      if (printed > 0) {
+		text.append(" + ");
+	      } else {
+		text.append("   ");
+	      }
+	      text.append(((int)m_class[i]) + " * " +
+			  m_alpha[i] + " * K[X(" + i + ") * X]\n");
+	      printed++;
+	    }
+	  }
+	}
+	text.append(" - " + m_b);
+
+	if (m_exponent != 1.0) {
+	  text.append("\n\nNumber of support vectors: " + m_supportVectors.numElements());
+	}
+	text.append("\n\nNumber of kernel evaluations: " + m_kernelEvals);
+      } catch (Exception e) {
+	return "Can't print BinarySMO classifier.";
+      }
+    
+      return text.toString();
+    }
+
+    /**
+     * Computes the result of the kernel function for two instances.
+     *
+     * @param id1 the index of the first instance
+     * @param id2 the index of the second instance
+     * @param inst the instance corresponding to id1
+     * @return the result of the kernel function
+     */
+    private double kernel(int id1, int id2, Instance inst1) throws Exception {
+
+      double result = 0;
+      int key = -1, location = -1;
+
+      // we can only cache if we know the indexes
+      if (id1 >= 0) {
+	if (id1 > id2) {
+	  key = id1 * m_alpha.length + id2;
+	} else {
+	  key = id2 * m_alpha.length + id1;
+	}
+	if (key < 0) {
+	  key = -key;
+	}
+	location = key % m_keys.length;
+	if (m_keys[location] == (key + 1)) {
+	  return m_storage[location];
+	}
+      }
+	
+      // we can do a fast dot product
+      Instance inst2 = m_data.instance(id2);
+      int n1 = inst1.numValues(); int n2 = inst2.numValues();
+      for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
+	int ind1 = inst1.index(p1); 
+	int ind2 = inst2.index(p2);
+	if (ind1 == ind2) {
+	  if (ind1 != m_classIndex) {
+	    result += inst1.valueSparse(p1) * inst2.valueSparse(p2);
+	  }
+	  p1++; p2++;
+	} else if (ind1 > ind2) {
+	  p2++;
+	} else { 
+	  p1++;
+	}
+      }
+    
+      // Use lower order terms?
+      if (m_lowerOrder) {
+	result += 1.0;
+      }
+
+      // Rescale kernel?
+      if (m_rescale) {
+	result /= (double)m_data.numAttributes() - 1;
+      }      
+    
+      if (m_exponent != 1.0) {
+	result = Math.pow(result, m_exponent);
+      }
+      m_kernelEvals++;
+    
+      // store result in cache 	
+      if (key != -1){
+	m_storage[location] = result;
+	m_keys[location] = (key + 1);
+      }
+      return result;
+    }
+
+    /**
+     * Examines instance.
+     *
+     * @param i2 index of instance to examine
+     * @return true if examination was successfull
+     * @exception Exception if something goes wrong
+     */
+    private boolean examineExample(int i2) throws Exception {
+    
+      double y2, alph2, F2;
+      int i1 = -1;
+    
+      y2 = m_class[i2];
+      alph2 = m_alpha[i2];
+      if (m_I0.contains(i2)) {
+	F2 = m_errors[i2];
+      } else {
+	F2 = SVMOutput(i2, m_data.instance(i2)) + m_b - y2;
+	m_errors[i2] = F2;
+      
+	// Update thresholds
+	if ((m_I1.contains(i2) || m_I2.contains(i2)) && (F2 < m_bUp)) {
+	  m_bUp = F2; m_iUp = i2;
+	} else if ((m_I3.contains(i2) || m_I4.contains(i2)) && (F2 > m_bLow)) {
+	  m_bLow = F2; m_iLow = i2;
+	}
+      }
+
+      // Check optimality using current bLow and bUp and, if
+      // violated, find an index i1 to do joint optimization
+      // with i2...
+      boolean optimal = true;
+      if (m_I0.contains(i2) || m_I1.contains(i2) || m_I2.contains(i2)) {
+	if (m_bLow - F2 > 2 * m_tol) {
+	  optimal = false; i1 = m_iLow;
+	}
+      }
+      if (m_I0.contains(i2) || m_I3.contains(i2) || m_I4.contains(i2)) {
+	if (F2 - m_bUp > 2 * m_tol) {
+	  optimal = false; i1 = m_iUp;
+	}
+      }
+      if (optimal) {
+	return false;
+      }
+
+      // For i2 unbound choose the better i1...
+      if (m_I0.contains(i2)) {
+	if (m_bLow - F2 > F2 - m_bUp) {
+	  i1 = m_iLow;
+	} else {
+	  i1 = m_iUp;
+	}
+      }
+      if (i1 == -1) {
+	throw new Exception("This should never happen!");
+      }
+      return takeStep(i1, i2, F2);
+    }
+
+    /**
+     * Method solving for the Lagrange multipliers for
+     * two instances.
+     *
+     * @param i1 index of the first instance
+     * @param i2 index of the second instance
+     * @return true if multipliers could be found
+     * @exception Exception if something goes wrong
+     */
+    private boolean takeStep(int i1, int i2, double F2) throws Exception {
+
+      double alph1, alph2, y1, y2, F1, s, L, H, k11, k12, k22, eta,
+	a1, a2, f1, f2, v1, v2, Lobj, Hobj, b1, b2, bOld;
+
+      // Don't do anything if the two instances are the same
+      if (i1 == i2) {
+	return false;
+      }
+
+      // Initialize variables
+      alph1 = m_alpha[i1]; alph2 = m_alpha[i2];
+      y1 = m_class[i1]; y2 = m_class[i2];
+      F1 = m_errors[i1];
+      s = y1 * y2;
+
+      // Find the constraints on a2
+      if (y1 != y2) {
+	L = Math.max(0, alph2 - alph1); 
+	H = Math.min(m_C, m_C + alph2 - alph1);
+      } else {
+	L = Math.max(0, alph1 + alph2 - m_C);
+	H = Math.min(m_C, alph1 + alph2);
+      }
+      if (L == H) {
+	return false;
+      }
+
+      // Compute second derivative of objective function
+      k11 = kernel(i1, i1, m_data.instance(i1));
+      k12 = kernel(i1, i2, m_data.instance(i1));
+      k22 = kernel(i2, i2, m_data.instance(i2));
+      eta = 2 * k12 - k11 - k22;
+
+      // Check if second derivative is negative
+      if (eta < 0) {
+
+	// Compute unconstrained maximum
+	a2 = alph2 - y2 * (F1 - F2) / eta;
+
+	// Compute constrained maximum
+	if (a2 < L) {
+	  a2 = L;
+	} else if (a2 > H) {
+	  a2 = H;
+	}
+      } else {
+
+	// Look at endpoints of diagonal
+	f1 = SVMOutput(i1, m_data.instance(i1));
+	f2 = SVMOutput(i2, m_data.instance(i2));
+	v1 = f1 + m_b - y1 * alph1 * k11 - y2 * alph2 * k12; 
+	v2 = f2 + m_b - y1 * alph1 * k12 - y2 * alph2 * k22; 
+	double gamma = alph1 + s * alph2;
+	Lobj = (gamma - s * L) + L - 0.5 * k11 * (gamma - s * L) * (gamma - s * L) - 
+	  0.5 * k22 * L * L - s * k12 * (gamma - s * L) * L - 
+	  y1 * (gamma - s * L) * v1 - y2 * L * v2;
+	Hobj = (gamma - s * H) + H - 0.5 * k11 * (gamma - s * H) * (gamma - s * H) - 
+	  0.5 * k22 * H * H - s * k12 * (gamma - s * H) * H - 
+	  y1 * (gamma - s * H) * v1 - y2 * H * v2;
+	if (Lobj > Hobj + m_eps) {
+	  a2 = L;
+	} else if (Lobj < Hobj - m_eps) {
+	  a2 = H;
+	} else {
+	  a2 = alph2;
+	}
+      }
+      if (Math.abs(a2 - alph2) < m_eps * (a2 + alph2 + m_eps)) {
+	return false;
+      }
+
+      // Compute new value of a1
+      a1 = alph1 + s * (alph2 - a2);
+    
+      // Update weight vector to reflect change a1 and a2, if linear SVM
+      if (m_exponent == 1.0) {
+	Instance inst1 = m_data.instance(i1);
+	for (int p1 = 0; p1 < inst1.numValues(); p1++) {
+	  if (inst1.index(p1) != m_classIndex) {
+	    m_weights[inst1.index(p1)] += 
+	      y1 * (a1 - alph1) * inst1.valueSparse(p1);
+	  }
+	}
+	Instance inst2 = m_data.instance(i2);
+	for (int p2 = 0; p2 < inst2.numValues(); p2++) {
+	  if (inst2.index(p2) != m_classIndex) {
+	    m_weights[inst2.index(p2)] += 
+	      y2 * (a2 - alph2) * inst2.valueSparse(p2);
+	  }
+	}
+      }
+
+      // Update error cache using new Lagrange multipliers
+      for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
+	if ((j != i1) && (j != i2)) {
+	  m_errors[j] += 
+	    y1 * (a1 - alph1) * kernel(i1, j, m_data.instance(i1)) + 
+	    y2 * (a2 - alph2) * kernel(i2, j, m_data.instance(i2));
+	}
+      }
+
+      // Update sets
+      if (a1 > 0) {
+	m_supportVectors.insert(i1);
+      } else {
+	m_supportVectors.delete(i1);
+      }
+      if ((a1 > 0) && (a1 < m_C)) {
+	m_I0.insert(i1);
+      } else {
+	m_I0.delete(i1);
+      }
+      if ((y1 == 1) && (!(a1 > 0))) {
+	m_I1.insert(i1);
+      } else {
+	m_I1.delete(i1);
+      }
+      if ((y1 == -1) && (!(a1 < m_C))) {
+	m_I2.insert(i1);
+      } else {
+	m_I2.delete(i1);
+      }
+      if ((y1 == 1) && (!(a1 < m_C))) {
+	m_I3.insert(i1);
+      } else {
+	m_I3.delete(i1);
+      }
+      if ((y1 == -1) && (!(a1 > 0))) {
+	m_I4.insert(i1);
+      } else {
+	m_I4.delete(i1);
+      }
+      if (a2 > 0) {
+	m_supportVectors.insert(i2);
+      } else {
+	m_supportVectors.delete(i2);
+      }
+      if ((a2 > 0) && (a2 < m_C)) {
+	m_I0.insert(i2);
+      } else {
+	m_I0.delete(i2);
+      }
+      if ((y2 == 1) && (!(a2 > 0))) {
+	m_I1.insert(i2);
+      } else {
+	m_I1.delete(i2);
+      }
+      if ((y2 == -1) && (!(a2 < m_C))) {
+	m_I2.insert(i2);
+      } else {
+	m_I2.delete(i2);
+      }
+      if ((y2 == 1) && (!(a2 < m_C))) {
+	m_I3.insert(i2);
+      } else {
+	m_I3.delete(i2);
+      }
+      if ((y2 == -1) && (!(a2 > 0))) {
+	m_I4.insert(i2);
+      } else {
+	m_I4.delete(i2);
+      }
+
+      // Update array with Lagrange multipliers
+      m_alpha[i1] = a1;
+      m_alpha[i2] = a2;
+
+      // Update error cache for i1 and i2
+      m_errors[i1] += y1 * (a1 - alph1) * k11 + y2 * (a2 - alph2) * k12;
+      m_errors[i2] += y1 * (a1 - alph1) * k12 + y2 * (a2 - alph2) * k22;
+      
+      // Update thresholds
+      m_bLow = -Double.MAX_VALUE; m_bUp = Double.MAX_VALUE;
+      m_iLow = -1; m_iUp = -1;
+      for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
+	if (m_errors[j] < m_bUp) {
+	  m_bUp = m_errors[j]; m_iUp = j;
+	}
+	if (m_errors[j] > m_bLow) {
+	  m_bLow = m_errors[j]; m_iLow = j;
+	}
+      }
+      if (!m_I0.contains(i1)) {
+	if (m_I3.contains(i1) || m_I4.contains(i1)) {
+	  if (m_errors[i1] > m_bLow) {
+	    m_bLow = m_errors[i1]; m_iLow = i1;
+	  } 
+	} else {
+	  if (m_errors[i1] < m_bUp) {
+	    m_bUp = m_errors[i1]; m_iUp = i1;
+	  }
+	}
+      }
+      if (!m_I0.contains(i2)) {
+	if (m_I3.contains(i2) || m_I4.contains(i2)) {
+	  if (m_errors[i2] > m_bLow) {
+	    m_bLow = m_errors[i2]; m_iLow = i2;
+	  }
+	} else {
+	  if (m_errors[i2] < m_bUp) {
+	    m_bUp = m_errors[i2]; m_iUp = i2;
+	  }
+	}
+      }
+      if ((m_iLow == -1) || (m_iUp == -1)) {
+	throw new Exception("This should never happen!");
+      }
+
+      // Made some progress.
+      return true;
+    }
+  
+    /**
+     * Quick and dirty check whether the quadratic programming problem is solved.
+     */
+    private void checkClassifier() throws Exception {
+
+      double sum = 0;
+      for (int i = 0; i < m_alpha.length; i++) {
+	if (m_alpha[i] > 0) {
+	  sum += m_class[i] * m_alpha[i];
+	}
+      }
+      System.err.println("Sum of y(i) * alpha(i): " + sum);
+
+      for (int i = 0; i < m_alpha.length; i++) {
+	double output = SVMOutput(i, m_data.instance(i));
+	if (Utils.eq(m_alpha[i], 0)) {
+	  if (Utils.sm(m_class[i] * output, 1)) {
+	    System.err.println("KKT condition 1 violated: " + m_class[i] * output);
+	  }
+	} 
+	if (Utils.gr(m_alpha[i], 0) && Utils.sm(m_alpha[i], m_C)) {
+	  if (!Utils.eq(m_class[i] * output, 1)) {
+	    System.err.println("KKT condition 2 violated: " + m_class[i] * output);
+	  }
+	} 
+	if (Utils.eq(m_alpha[i], m_C)) {
+	  if (Utils.gr(m_class[i] * output, 1)) {
+	    System.err.println("KKT condition 3 violated: " + m_class[i] * output);
+	  }
+	} 
+      }
+    }  
   }
+
+  /** The binary classifier(s) */
+  private BinarySMO[][] m_classifiers = null;
 
   /** The exponent for the polnomial kernel. */
   private double m_exponent = 1.0;
-
+  
   /** The complexity parameter. */
   private double m_C = 1.0;
-
+  
   /** Epsilon for rounding. */
   private double m_eps = 1.0e-12;
   
   /** Tolerance for accuracy of result. */
   private double m_tol = 1.0e-3;
 
-  /** The Lagrange multipliers. */
-  private double[] m_alpha;
+  /** True if we don't want to normalize */
+  private boolean m_Normalize = true;
+  
+  /** Rescale? */
+  private boolean m_rescale = false;
+  
+  /** Use lower-order terms? */
+  private boolean m_lowerOrder = false;
 
-  /** The thresholds. */
-  private double m_b, m_bLow, m_bUp;
-
-  /** The indices for m_bLow and m_bUp */
-  private int m_iLow, m_iUp;
-
-  /** The training data. */
-  private Instances m_data;
-
-  /** Weight vector for linear machine. */
-  private double[] m_weights;
-
-  /** Kernel function cache */
-  private double[] m_storage;
-  private int[] m_keys;
-
-  /** The transformed class values. */
-  private double[] m_class;
-
-  /** The current set of errors for all non-bound examples. */
-  private double[] m_errors;
-
-  /** The five different sets used by the algorithm. */
-  private SMOset m_I0; // {i: 0 < m_alpha[i] < C}
-  private SMOset m_I1; // {i: m_class[i] = 1, m_alpha[i] = 0}
-  private SMOset m_I2; // {i: m_class[i] = -1, m_alpha[i] =C}
-  private SMOset m_I3; // {i: m_class[i] = 1, m_alpha[i] = C}
-  private SMOset m_I4; // {i: m_class[i] = -1, m_alpha[i] = 0}
-
-  /** The set of support vectors */
-  private SMOset m_supportVectors; // {i: 0 < m_alpha[i]}
+  /** The size of the cache (a prime number) */
+  private int m_cacheSize = 1000003;
 
   /** The filter used to make attributes numeric. */
   private NominalToBinaryFilter m_NominalToBinary;
@@ -262,238 +963,144 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   /** The filter used to get rid of missing values. */
   private ReplaceMissingValuesFilter m_Missing;
 
-  /** Counts the number of kernel evaluations. */
-  private int m_kernelEvals;
-
-  /** The size of the cache (a prime number) */
-  private int m_cacheSize = 1000003;
-
-  /** True if we don't want to normalize */
-  private boolean m_Normalize = true;
-
-  /** Rescale? */
-  private boolean m_rescale = false;
-  
-  /** Use lower-order terms? */
-  private boolean m_lowerOrder = false;
-
   /** Only numeric attributes in the dataset? */
   private boolean m_onlyNumeric;
 
+  /** The class index from the training data */
+  private int m_classIndex = -1;
+
+  /** The class attribute */
+  private Attribute m_classAttribute;
+
+  /** Turn off all checks and conversions? Turning them off assumes
+      that data is purely numeric, doesn't contain any missing values,
+      and has a nominal class. Turning them off also means that
+      no header information will be stored if the machine is linear. */
+  private boolean m_checksTurnedOff;
+
   /**
-   * Method for building the classifier.
+   * Turns off checks for missing values, etc. Use with caution.
+   */
+  public void turnChecksOff() {
+
+    m_checksTurnedOff = true;
+  }
+
+  /**
+   * Turns on checks for missing values, etc.
+   */
+  public void turnChecksOn() {
+
+    m_checksTurnedOff = false;
+  }
+
+  /**
+   * Method for building the classifier. Implements a one-against-one
+   * wrapper for multi-class problems.
    *
    * @param insts the set of training instances
    * @exception Exception if the classifier can't be built successfully
    */
   public void buildClassifier(Instances insts) throws Exception {
 
-    int m_kernelEvals = 0;
-
-    if (insts.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+    if (!m_checksTurnedOff) {
+      if (insts.checkForStringAttributes()) {
+	throw new Exception("Can't handle string attributes!");
+      }
+      if (insts.classAttribute().isNumeric()) {
+	throw new Exception("SMO can't handle a numeric class!");
+      }
+      insts = new Instances(insts);
+      insts.deleteWithMissingClass();
+      if (insts.numInstances() == 0) {
+	throw new Exception("No training instances without a missing class!");
+      }
     }
-    if (insts.numClasses() > 2) {
-      throw new Exception("Can only handle two-class datasets!");
-    }
-    if (insts.classAttribute().isNumeric()) {
-      throw new Exception("SMO can't handle a numeric class!");
-    }
-
-    m_data = insts;
 
     m_onlyNumeric = true;
-    for (int i = 0; i < m_data.numAttributes(); i++) {
-      if (i != m_data.classIndex()) {
-	if (!m_data.attribute(i).isNumeric()) {
-	  m_onlyNumeric = false;
-	  break;
+    if (!m_checksTurnedOff) {
+      for (int i = 0; i < insts.numAttributes(); i++) {
+	if (i != insts.classIndex()) {
+	  if (!insts.attribute(i).isNumeric()) {
+	    m_onlyNumeric = false;
+	    break;
+	  }
 	}
       }
     }
 
-    m_Missing = new ReplaceMissingValuesFilter();
-    m_Missing.setInputFormat(m_data);
-    m_data = Filter.useFilter(m_data, m_Missing); 
+    if (!m_checksTurnedOff) {
+      m_Missing = new ReplaceMissingValuesFilter();
+      m_Missing.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_Missing); 
+    } else {
+      m_Missing = null;
+    }
 
     if (m_Normalize) {
       m_Normalization = new NormalizationFilter();
-      m_Normalization.setInputFormat(m_data);
-      m_data = Filter.useFilter(m_data, m_Normalization); 
+      m_Normalization.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_Normalization); 
     } else {
       m_Normalization = null;
     }
 
     if (!m_onlyNumeric) {
       m_NominalToBinary = new NominalToBinaryFilter();
-      m_NominalToBinary.setInputFormat(m_data);
-      m_data = Filter.useFilter(m_data, m_NominalToBinary);
+      m_NominalToBinary.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_NominalToBinary);
     } else {
       m_NominalToBinary = null;
     }
 
-    // If machine is linear, reserve space for weights
-    if (m_exponent == 1.0) {
-      m_weights = new double[m_data.numAttributes()];
-    } else {
-      m_weights = null;
+    m_classIndex = insts.classIndex();
+    m_classAttribute = insts.classAttribute();
+
+    // Generate subsets representing each class
+    Instances[] subsets = new Instances[insts.numClasses()];
+    for (int i = 0; i < insts.numClasses(); i++) {
+      subsets[i] = new Instances(insts, insts.numInstances());
+    }
+    for (int j = 0; j < insts.numInstances(); j++) {
+      Instance inst = insts.instance(j);
+      subsets[(int)inst.classValue()].add(inst);
+    }
+    for (int i = 0; i < insts.numClasses(); i++) {
+      subsets[i].compactify();
     }
 
-    // Initialize alpha array to zero
-    m_alpha = new double[m_data.numInstances()];
-
-    // Initialize thresholds
-    m_bUp = -1; m_bLow = 1; m_b = 0;
-
-    // Initialize sets
-    m_supportVectors = new SMOset(m_data.numInstances());
-    m_I0 = new SMOset(m_data.numInstances());
-    m_I1 = new SMOset(m_data.numInstances());
-    m_I2 = new SMOset(m_data.numInstances());
-    m_I3 = new SMOset(m_data.numInstances());
-    m_I4 = new SMOset(m_data.numInstances());
-
-    // Set class values
-    m_class = new double[m_data.numInstances()];
-    m_iUp = -1; m_iLow = -1;
-    for (int i = 0; i < m_class.length; i++) {
-      if ((int) m_data.instance(i).classValue() == 0) {
-	m_class[i] = -1; m_iLow = i;
-      } else {
-	m_class[i] = 1; m_iUp = i;
-      }
-    }
-    if ((m_iUp == -1) || (m_iLow == -1)) {
-      if ((m_iUp == -1) && (m_iLow == -1)) {
-	throw new Exception ("No instances without missing class values!");
-      } else {
-	if (m_iUp == -1) {
-	  m_b = 1;
-	} else {
-	  m_b = -1;
+    // Build the binary classifiers
+    m_classifiers = new BinarySMO[insts.numClasses()][insts.numClasses()];
+    for (int i = 0; i < insts.numClasses(); i++) {
+      for (int j = i + 1; j < insts.numClasses(); j++) {
+	m_classifiers[i][j] = new BinarySMO();
+	Instances data = new Instances(insts, insts.numInstances());
+	for (int k = 0; k < subsets[i].numInstances(); k++) {
+	  data.add(subsets[i].instance(k));
 	}
-	return;
-      }
-    }
-
-    // Initialize error cache
-    m_errors = new double[m_data.numInstances()];
-    m_errors[m_iLow] = 1; m_errors[m_iUp] = -1;
-
-    // The kernel calculations are cached
-    m_storage = new double[m_cacheSize];
-    m_keys = new int[m_cacheSize];
-
-    // Build up I1 and I4
-    for (int i = 0; i < m_class.length; i++ ) {
-      if (m_class[i] == 1) {
-	m_I1.insert(i);
-      } else {
-	m_I4.insert(i);
-      }
-    }
-
-    // Loop to find all the support vectors
-    int numChanged = 0;
-    boolean examineAll = true;
-    while ((numChanged > 0) || examineAll) {
-      numChanged = 0;
-      if (examineAll) {
-	for (int i = 0; i < m_alpha.length; i++) {
-	  if (examineExample(i)) {
-	    numChanged++;
-	  }
+	for (int k = 0; k < subsets[j].numInstances(); k++) {
+	  data.add(subsets[j].instance(k));
 	}
-      } else {
-
-	// This code implements Modification 1 from Keerthi et al.'s paper
-	for (int i = 0; i < m_alpha.length; i++) {
-	  if ((m_alpha[i] > 0) &&  (m_alpha[i] < m_C)) {
-	    if (examineExample(i)) {
-	      numChanged++;
-	    }
-	    
-	    // Is optimality on unbound vectors obtained?
-	    if (m_bUp > m_bLow - 2 * m_tol) {
-	      numChanged = 0;
-	      break;
-	    }
-	  }
-	}
-	
-	//This is the code for Modification 2 from Keerthi et al.'s paper
-	/*boolean innerLoopSuccess = true; 
-	numChanged = 0;
-	while ((m_bUp < m_bLow - 2 * m_tol) && (innerLoopSuccess == true)) {
-	  innerLoopSuccess = takeStep(m_iUp, m_iLow, m_errors[m_iLow]);
-	  }*/
+	data.compactify();
+	m_classifiers[i][j].buildClassifier(data, i, j);
       }
-
-      if (examineAll) {
-	examineAll = false;
-      } else if (numChanged == 0) {
-	examineAll = true;
-      }
-    }
-    
-    // Set threshold
-    m_b = (m_bLow + m_bUp) / 2.0;
-
-    // Save memory
-    m_storage = null; m_keys = null; m_errors = null;
-    m_I0 = m_I1 = m_I2 = m_I3 = m_I4 = null;
-
-    // If machine is linear, delete training data
-    if (m_exponent == 1.0) {
-      m_data = new Instances(m_data, 0);
     }
   }
-  
-  /**
-   * Computes SVM output for given instance.
-   *
-   * @param index the instance for which output is to be computed
-   * @param inst the instance 
-   * @return the output of the SVM for the given instance
-   */
-  private double SVMOutput(int index, Instance inst) throws Exception {
-
-    double result = 0;
-
-    // Is the machine linear?
-    if (m_exponent == 1.0) {
-      int n1 = inst.numValues(); int classIndex = m_data.classIndex();
-      for (int p = 0; p < n1; p++) {
-	if (inst.index(p) != classIndex) {
-	  result += m_weights[inst.index(p)] * inst.valueSparse(p);
-	}
-      }
-    } else {
-      for (int i = m_supportVectors.getNext(-1); i != -1; 
-	   i = m_supportVectors.getNext(i)) {
-	result += m_class[i] * m_alpha[i] * kernel(index, i, inst);
-      }
-    }
-    result -= m_b;
-    
-    return result;
-  }
-
 
   /**
-   * Outputs the distribution for the given output.
-   *
-   * Pipes output of SVM through sigmoid function.
-   * @param inst the instance for which distribution is to be computed
-   * @return the distribution
+   * Classifies a given instance
+   * @param inst the instance
+   * @return the classification in internal format
    * @exception Exception if something goes wrong
    */
-  public double[] distributionForInstance(Instance inst) throws Exception {
+  public double classifyInstance(Instance inst) throws Exception {
 
     // Filter instance
-    m_Missing.input(inst);
-    m_Missing.batchFinished();
-    inst = m_Missing.output();
+    if (!m_checksTurnedOff) {
+      m_Missing.input(inst);
+      m_Missing.batchFinished();
+      inst = m_Missing.output();
+    }
     
     if (m_Normalize) {
       m_Normalization.input(inst);
@@ -507,13 +1114,18 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       inst = m_NominalToBinary.output();
     }
 
-    // Get probabilities
-    double output = SVMOutput(-1, inst);
-    double[] result = new double[2];
-    result[1] = 1.0 / (1.0 + Math.exp(-output));
-    result[0] = 1.0 - result[1];
-
-    return result;
+    int[] votes = new int[inst.numClasses()];
+    for (int i = 0; i < inst.numClasses(); i++) {
+      for (int j = i + 1; j < inst.numClasses(); j++) {
+	double output = m_classifiers[i][j].SVMOutput(-1, inst);
+	if (output > 0) {
+	  votes[j] += 1;
+	} else {
+	  votes[i] += 1;
+	}
+      }
+    }
+    return Utils.maxIndex(votes);
   }
 
   /**
@@ -652,61 +1264,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       options[current++] = "";
     }
     return options;
-  }
-
-  /**
-   * Prints out the classifier.
-   *
-   * @return a description of the classifier as a string
-   */
-  public String toString() {
-
-    StringBuffer text = new StringBuffer();
-    int printed = 0;
-
-    if (m_alpha == null) {
-      return "SMO: No model built yet.";
-    }
-    try {
-      text.append("SMO\n\n");
-
-      // If machine linear, print weight vector
-      if (m_exponent == 1.0) {
-	text.append("Machine linear: showing attribute weights, ");
-	text.append("not support vectors.\n\n");
-	for (int i = 0; i < m_weights.length; i++) {
-	  if (i != (int)m_data.classIndex()) {
-	    if (printed > 0) {
-	      text.append(" + ");
-	    } else {
-	      text.append("   ");
-	    }
-	    text.append(m_weights[i] + " * " + m_data.attribute(i).name()+"\n");
-	    printed++;
-	  }
-	}
-      } else {
-	for (int i = 0; i < m_alpha.length; i++) {
-	  if (m_supportVectors.contains(i)) {
-	    if (printed > 0) {
-	      text.append(" + ");
-	    } else {
-	      text.append("   ");
-	    }
-	    text.append(((int)m_class[i]) + " * " +
-			m_alpha[i] + " * K[X(" + i + ") * X]\n");
-	    printed++;
-	  }
-	}
-      }
-      text.append(" - " + m_b);
-      text.append("\n\nNumber of support vectors: " + m_supportVectors.numElements());
-      text.append("\n\nNumber of kernel evaluations: " + m_kernelEvals);
-    } catch (Exception e) {
-      return "Can't print SMO classifier.";
-    }
-    
-    return text.toString();
   }
   
   /**
@@ -873,391 +1430,35 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
   }
 
-  /**
-   * Computes the result of the kernel function for two instances.
-   *
-   * @param id1 the index of the first instance
-   * @param id2 the index of the second instance
-   * @param inst the instance corresponding to id1
-   * @return the result of the kernel function
-   */
-  private double kernel(int id1, int id2, Instance inst1) throws Exception {
+    /**
+     * Prints out the classifier.
+     *
+     * @return a description of the classifier as a string
+     */
+    public String toString() {
 
-    double result = 0;
-    int key = -1, location = -1;
+      StringBuffer text = new StringBuffer();
+      int printed = 0;
 
-    // we can only cache if we know the indexes
-    if (id1 >= 0) {
-      if (id1 > id2) {
-	key = id1 * m_alpha.length + id2;
-      } else {
-	key = id2 * m_alpha.length + id1;
+      if ((m_classAttribute == null)) {
+	return "SMO: No model built yet.";
       }
-      if (key < 0) {
-        key = -key;
-      }
-      location = key % m_keys.length;
-      if (m_keys[location] == (key + 1)) {
-	return m_storage[location];
-      }
-    }
-	
-    // we can do a fast dot product
-    Instance inst2 = m_data.instance(id2);
-    int n1 = inst1.numValues(); int n2 = inst2.numValues();
-    int classIndex = m_data.classIndex();
-    for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
-      int ind1 = inst1.index(p1); 
-      int ind2 = inst2.index(p2);
-      if (ind1 == ind2) {
-	if (ind1 != classIndex) {
-	  result += inst1.valueSparse(p1) * inst2.valueSparse(p2);
+      try {
+	text.append("SMO\n\n");
+	for (int i = 0; i < m_classAttribute.numValues(); i++) {
+	  for (int j = i + 1; j < m_classAttribute.numValues(); j++) {
+	    text.append("Classifier for classes: " + 
+			m_classAttribute.value(i) + ", " +
+			m_classAttribute.value(j) + "\n\n");
+	    text.append(m_classifiers[i][j] + "\n\n");
+	  }
 	}
-	p1++; p2++;
-      } else if (ind1 > ind2) {
-	p2++;
-      } else { 
-	p1++;
+      } catch (Exception e) {
+	return "Can't print SMO classifier.";
       }
-    }
     
-    // Use lower order terms?
-    if (m_lowerOrder) {
-      result += 1.0;
+      return text.toString();
     }
-
-    // Rescale kernel?
-    if (m_rescale) {
-      result /= (double)m_data.numAttributes() - 1;
-    }      
-    
-    if (m_exponent != 1.0) {
-      result = Math.pow(result, m_exponent);
-    }
-    m_kernelEvals++;
-    
-    // store result in cache 	
-    if (key != -1){
-      m_storage[location] = result;
-      m_keys[location] = (key + 1);
-    }
-    return result;
-  }
-
-  /**
-   * Examines instance.
-   *
-   * @param i2 index of instance to examine
-   * @return true if examination was successfull
-   * @exception Exception if something goes wrong
-   */
-  private boolean examineExample(int i2) throws Exception {
-    
-    double y2, alph2, F2;
-    int i1 = -1;
-    
-    y2 = m_class[i2];
-    alph2 = m_alpha[i2];
-    if (m_I0.contains(i2)) {
-      F2 = m_errors[i2];
-    } else {
-      F2 = SVMOutput(i2, m_data.instance(i2)) + m_b - y2;
-      m_errors[i2] = F2;
-      
-      // Update thresholds
-      if ((m_I1.contains(i2) || m_I2.contains(i2)) && (F2 < m_bUp)) {
-	m_bUp = F2; m_iUp = i2;
-      } else if ((m_I3.contains(i2) || m_I4.contains(i2)) && (F2 > m_bLow)) {
-	m_bLow = F2; m_iLow = i2;
-      }
-    }
-
-    // Check optimality using current bLow and bUp and, if
-    // violated, find an index i1 to do joint optimization
-    // with i2...
-    boolean optimal = true;
-    if (m_I0.contains(i2) || m_I1.contains(i2) || m_I2.contains(i2)) {
-      if (m_bLow - F2 > 2 * m_tol) {
-	optimal = false; i1 = m_iLow;
-      }
-    }
-    if (m_I0.contains(i2) || m_I3.contains(i2) || m_I4.contains(i2)) {
-      if (F2 - m_bUp > 2 * m_tol) {
-	optimal = false; i1 = m_iUp;
-      }
-    }
-    if (optimal) {
-      return false;
-    }
-
-    // For i2 unbound choose the better i1...
-    if (m_I0.contains(i2)) {
-      if (m_bLow - F2 > F2 - m_bUp) {
-	i1 = m_iLow;
-      } else {
-	i1 = m_iUp;
-      }
-    }
-    if (i1 == -1) {
-      throw new Exception("This should never happen!");
-    }
-    return takeStep(i1, i2, F2);
-  }
-
-  /**
-   * Method solving for the Lagrange multipliers for
-   * two instances.
-   *
-   * @param i1 index of the first instance
-   * @param i2 index of the second instance
-   * @return true if multipliers could be found
-   * @exception Exception if something goes wrong
-   */
-  private boolean takeStep(int i1, int i2, double F2) throws Exception {
-
-    double alph1, alph2, y1, y2, F1, s, L, H, k11, k12, k22, eta,
-      a1, a2, f1, f2, v1, v2, Lobj, Hobj, b1, b2, bOld;
-
-    // Don't do anything if the two instances are the same
-    if (i1 == i2) {
-      return false;
-    }
-
-    // Initialize variables
-    alph1 = m_alpha[i1]; alph2 = m_alpha[i2];
-    y1 = m_class[i1]; y2 = m_class[i2];
-    F1 = m_errors[i1];
-    s = y1 * y2;
-
-    // Find the constraints on a2
-    if (y1 != y2) {
-      L = Math.max(0, alph2 - alph1); 
-      H = Math.min(m_C, m_C + alph2 - alph1);
-    } else {
-      L = Math.max(0, alph1 + alph2 - m_C);
-      H = Math.min(m_C, alph1 + alph2);
-    }
-    if (L == H) {
-      return false;
-    }
-
-    // Compute second derivative of objective function
-    k11 = kernel(i1, i1, m_data.instance(i1));
-    k12 = kernel(i1, i2, m_data.instance(i1));
-    k22 = kernel(i2, i2, m_data.instance(i2));
-    eta = 2 * k12 - k11 - k22;
-
-    // Check if second derivative is negative
-    if (eta < 0) {
-
-      // Compute unconstrained maximum
-      a2 = alph2 - y2 * (F1 - F2) / eta;
-
-      // Compute constrained maximum
-      if (a2 < L) {
-	a2 = L;
-      } else if (a2 > H) {
-	a2 = H;
-      }
-    } else {
-
-      // Look at endpoints of diagonal
-      f1 = SVMOutput(i1, m_data.instance(i1));
-      f2 = SVMOutput(i2, m_data.instance(i2));
-      v1 = f1 + m_b - y1 * alph1 * k11 - y2 * alph2 * k12; 
-      v2 = f2 + m_b - y1 * alph1 * k12 - y2 * alph2 * k22; 
-      double gamma = alph1 + s * alph2;
-      Lobj = (gamma - s * L) + L - 0.5 * k11 * (gamma - s * L) * (gamma - s * L) - 
-	0.5 * k22 * L * L - s * k12 * (gamma - s * L) * L - 
-	y1 * (gamma - s * L) * v1 - y2 * L * v2;
-      Hobj = (gamma - s * H) + H - 0.5 * k11 * (gamma - s * H) * (gamma - s * H) - 
-	0.5 * k22 * H * H - s * k12 * (gamma - s * H) * H - 
-	y1 * (gamma - s * H) * v1 - y2 * H * v2;
-      if (Lobj > Hobj + m_eps) {
-	a2 = L;
-      } else if (Lobj < Hobj - m_eps) {
-	a2 = H;
-      } else {
-	a2 = alph2;
-      }
-    }
-    if (Math.abs(a2 - alph2) < m_eps * (a2 + alph2 + m_eps)) {
-      return false;
-    }
-
-    // Compute new value of a1
-    a1 = alph1 + s * (alph2 - a2);
-    
-    // Update weight vector to reflect change a1 and a2, if linear SVM
-    if (m_exponent == 1.0) {
-      Instance inst1 = m_data.instance(i1);
-      for (int p1 = 0; p1 < inst1.numValues(); p1++) {
-	if (inst1.index(p1) != m_data.classIndex()) {
-	  m_weights[inst1.index(p1)] += 
-	    y1 * (a1 - alph1) * inst1.valueSparse(p1);
-	}
-      }
-      Instance inst2 = m_data.instance(i2);
-      for (int p2 = 0; p2 < inst2.numValues(); p2++) {
-	if (inst2.index(p2) != m_data.classIndex()) {
-	  m_weights[inst2.index(p2)] += 
-	    y2 * (a2 - alph2) * inst2.valueSparse(p2);
-	}
-      }
-    }
-
-    // Update error cache using new Lagrange multipliers
-    for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
-      if ((j != i1) && (j != i2)) {
-	m_errors[j] += 
-	  y1 * (a1 - alph1) * kernel(i1, j, m_data.instance(i1)) + 
-	  y2 * (a2 - alph2) * kernel(i2, j, m_data.instance(i2));
-      }
-    }
-
-    // Update sets
-    if (a1 > 0) {
-      m_supportVectors.insert(i1);
-    } else {
-      m_supportVectors.delete(i1);
-    }
-    if ((a1 > 0) && (a1 < m_C)) {
-      m_I0.insert(i1);
-    } else {
-      m_I0.delete(i1);
-    }
-    if ((y1 == 1) && (!(a1 > 0))) {
-      m_I1.insert(i1);
-    } else {
-      m_I1.delete(i1);
-    }
-    if ((y1 == -1) && (!(a1 < m_C))) {
-      m_I2.insert(i1);
-    } else {
-      m_I2.delete(i1);
-    }
-    if ((y1 == 1) && (!(a1 < m_C))) {
-      m_I3.insert(i1);
-    } else {
-      m_I3.delete(i1);
-    }
-    if ((y1 == -1) && (!(a1 > 0))) {
-      m_I4.insert(i1);
-    } else {
-      m_I4.delete(i1);
-    }
-    if (a2 > 0) {
-      m_supportVectors.insert(i2);
-    } else {
-      m_supportVectors.delete(i2);
-    }
-    if ((a2 > 0) && (a2 < m_C)) {
-      m_I0.insert(i2);
-    } else {
-      m_I0.delete(i2);
-    }
-    if ((y2 == 1) && (!(a2 > 0))) {
-      m_I1.insert(i2);
-    } else {
-      m_I1.delete(i2);
-    }
-    if ((y2 == -1) && (!(a2 < m_C))) {
-      m_I2.insert(i2);
-    } else {
-      m_I2.delete(i2);
-    }
-    if ((y2 == 1) && (!(a2 < m_C))) {
-      m_I3.insert(i2);
-    } else {
-      m_I3.delete(i2);
-    }
-    if ((y2 == -1) && (!(a2 > 0))) {
-      m_I4.insert(i2);
-    } else {
-      m_I4.delete(i2);
-    }
-
-    // Update array with Lagrange multipliers
-    m_alpha[i1] = a1;
-    m_alpha[i2] = a2;
-
-    // Update error cache for i1 and i2
-    m_errors[i1] += y1 * (a1 - alph1) * k11 + y2 * (a2 - alph2) * k12;
-    m_errors[i2] += y1 * (a1 - alph1) * k12 + y2 * (a2 - alph2) * k22;
-      
-    // Update thresholds
-    m_bLow = -Double.MAX_VALUE; m_bUp = Double.MAX_VALUE;
-    m_iLow = -1; m_iUp = -1;
-    for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
-      if (m_errors[j] < m_bUp) {
-	m_bUp = m_errors[j]; m_iUp = j;
-      }
-      if (m_errors[j] > m_bLow) {
-	m_bLow = m_errors[j]; m_iLow = j;
-      }
-    }
-    if (!m_I0.contains(i1)) {
-      if (m_I3.contains(i1) || m_I4.contains(i1)) {
-	if (m_errors[i1] > m_bLow) {
-	  m_bLow = m_errors[i1]; m_iLow = i1;
-	} 
-      } else {
-	if (m_errors[i1] < m_bUp) {
-	  m_bUp = m_errors[i1]; m_iUp = i1;
-	}
-      }
-    }
-    if (!m_I0.contains(i2)) {
-      if (m_I3.contains(i2) || m_I4.contains(i2)) {
-	if (m_errors[i2] > m_bLow) {
-	  m_bLow = m_errors[i2]; m_iLow = i2;
-	}
-      } else {
-	if (m_errors[i2] < m_bUp) {
-	  m_bUp = m_errors[i2]; m_iUp = i2;
-	}
-      }
-    }
-    if ((m_iLow == -1) || (m_iUp == -1)) {
-      throw new Exception("This should never happen!");
-    }
-
-    // Made some progress.
-    return true;
-  }
-  
-  /**
-   * Quick and dirty check whether the quadratic programming problem is solved.
-   */
-  private void checkClassifier() throws Exception {
-
-    double sum = 0;
-    for (int i = 0; i < m_alpha.length; i++) {
-      if (m_alpha[i] > 0) {
-	sum += m_class[i] * m_alpha[i];
-      }
-    }
-    System.err.println("Sum of y(i) * alpha(i): " + sum);
-
-    for (int i = 0; i < m_alpha.length; i++) {
-      double output = SVMOutput(i, m_data.instance(i));
-      if (Utils.eq(m_alpha[i], 0)) {
-	if (Utils.sm(m_class[i] * output, 1)) {
-	  System.err.println("KKT condition 1 violated: " + m_class[i] * output);
-	}
-      } 
-      if (Utils.gr(m_alpha[i], 0) && Utils.sm(m_alpha[i], m_C)) {
-	if (!Utils.eq(m_class[i] * output, 1)) {
-	  System.err.println("KKT condition 2 violated: " + m_class[i] * output);
-	}
-      } 
-      if (Utils.eq(m_alpha[i], m_C)) {
-	if (Utils.gr(m_class[i] * output, 1)) {
-	  System.err.println("KKT condition 3 violated: " + m_class[i] * output);
-	}
-      } 
-    }
-  }  
 
   /**
    * Main method for testing this class.
@@ -1270,6 +1471,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       scheme = new SMO();
       System.out.println(Evaluation.evaluateModel(scheme, argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
