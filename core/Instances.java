@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class Instances implements Serializable {
  
@@ -92,16 +92,16 @@ public class Instances implements Serializable {
    *
    * @param reader the reader
    * @param capacity the capacity
-   * @exception Exception if the header is not read successfully
+   * @exception IllegalArgumentException if the header is not read successfully
    * or the capacity is not positive or zero
+   * @exception IOException if there is a problem with the reader.
    */
-   public Instances(Reader reader, int capacity) 
-       throws Exception {
+   public Instances(Reader reader, int capacity) throws IOException {
 
     StreamTokenizer tokenizer;
 
     if (capacity < 0) {
-      throw new Exception("Capacity has to be positive!");
+      throw new IllegalArgumentException("Capacity has to be positive!");
     }
     tokenizer = new StreamTokenizer(reader); 
     initTokenizer(tokenizer);
@@ -154,16 +154,15 @@ public class Instances implements Serializable {
    * is to be created
    * @param first the index of the first instance to be copied
    * @param toCopy the number of instances to be copied
-   * @exception Exception if first and toCopy are out of range
+   * @exception IllegalArgumentException if first and toCopy are out of range
    */
-  public Instances(Instances source, int first, int toCopy)
-       throws Exception {
+  public Instances(Instances source, int first, int toCopy) {
     
     this(source, toCopy);
 
     if ((first < 0) || ((first + toCopy) > source.numInstances())) {
-      throw new Exception("Parameters first and/or toCopy out "+
-			  "of range");
+      throw new IllegalArgumentException("Parameters first and/or toCopy out "+
+                                         "of range");
     }
     source.copyInstances(first, this, toCopy);
   }
@@ -361,17 +360,16 @@ public class Instances implements Serializable {
    * information is performed before the attribute is deleted.
    *
    * @param pos the attribute's position
-   * @exception Exception if the given index is out of range or the
+   * @exception IllegalArgumentException if the given index is out of range or the
    * class attribute is being deleted
    */
-  public void deleteAttributeAt(int position) throws Exception {
+  public void deleteAttributeAt(int position) {
 	 
     if ((position < 0) || (position >= m_Attributes.size())) {
-      throw new Exception("Can't delete attribute: index out of "+
-			  "range");
+      throw new IllegalArgumentException("Index out of range");
     }
     if (position == m_ClassIndex) {
-      throw new Exception("Can't delete class attribute");
+      throw new IllegalArgumentException("Can't delete class attribute");
     }
     freshAttributeInfo();
     if (m_ClassIndex > position) {
@@ -391,13 +389,12 @@ public class Instances implements Serializable {
    * Deletes all string attributes in the dataset. A deep copy of the attribute
    * information is performed before an attribute is deleted.
    *
-   * @exception Exception if string attribute couldn't be 
-   * successfully deleted.
+   * @exception IllegalArgumentException if string attribute couldn't be 
+   * successfully deleted (probably because it is the class attribute).
    */
-  public void deleteStringAttributes() throws Exception {
+  public void deleteStringAttributes() {
 
     int i = 0;
-   
     while (i < m_Attributes.size()) {
       if (attribute(i).isString()) {
 	deleteAttributeAt(i);
@@ -512,15 +509,14 @@ public class Instances implements Serializable {
    *
    * @param att the attribute to be inserted
    * @param pos the attribute's position
-   * @exception Exception if the given index is out of range
+   * @exception IllegalArgumentException if the given index is out of range
    */
   public void insertAttributeAt(Attribute att, int position) 
        throws Exception {
 	 
     if ((position < 0) ||
 	(position > m_Attributes.size())) {
-      throw new Exception("Can't insert attribute: index out "+
-			  "of range");
+      throw new IllegalArgumentException("Index out of range");
     }
     att = (Attribute)att.copy();
     freshAttributeInfo();
@@ -868,14 +864,14 @@ public class Instances implements Serializable {
    * @param random a random number generator
    * @param weights the weight vector
    * @return the new dataset
-   * @exception Exception if something goes wrong
+   * @exception IllegalArgumentException if the weights array is of the wrong
+   * length or contains negative weights.
    */
   public final Instances resampleWithWeights(Random random, 
-					     double[] weights) 
-    throws Exception {
+					     double[] weights) {
 
     if (weights.length != numInstances()) {
-      throw new Exception("Length of weight vector incompatible.");
+      throw new IllegalArgumentException("weights.length != numInstances.");
     }
     Instances newData = new Instances(this, numInstances());
     double[] probabilities = new double[numInstances()];
@@ -892,7 +888,7 @@ public class Instances implements Serializable {
     sumProbs = 0;
     while ((k < numInstances() && (l < numInstances()))) {
       if (weights[l] < 0) {
-	throw new Exception("Weights have to be positive.");
+	throw new IllegalArgumentException("Weights have to be positive.");
       }
       sumProbs += weights[l];
       while ((k < numInstances()) &&
@@ -922,12 +918,12 @@ public class Instances implements Serializable {
    * (ie. it is undefined)
    *
    * @param classIndex the new class index
-   * @exception Exception if the class index is too big
+   * @exception IllegalArgumentException if the class index is too big or < 0
    */
-  public final void setClassIndex(int classIndex) throws Exception {
+  public final void setClassIndex(int classIndex) {
 
-    if (classIndex >= numAttributes()) {
-      throw new Exception("Class index to large!");
+    if (classIndex >= numAttributes() || (classIndex < 0)) {
+      throw new IllegalArgumentException("Class index to large!");
     }
     m_ClassIndex = classIndex;
   }
@@ -1046,20 +1042,19 @@ public class Instances implements Serializable {
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the test set as a set of weighted instances
-   * @exception Exception if dataset can't be generated 
-   * successfully
+   * @exception IllegalArgumentException if the number of folds is less than 2
+   * or greater than the number of instances.
    */
-  public Instances testCV(int numFolds, int numFold) 
-       throws Exception {
+  public Instances testCV(int numFolds, int numFold) {
 
     int numInstForFold, first, offset;
     Instances test;
     
     if (numFolds < 2) {
-      throw new Exception("Number of folds must be at least 2!");
+      throw new IllegalArgumentException("Number of folds must be at least 2!");
     }
     if (numFolds > numInstances()) {
-      throw new Exception("Can't have more folds than instances!");
+      throw new IllegalArgumentException("Can't have more folds than instances!");
     }
     numInstForFold = numInstances() / numFolds;
     if (numFold < numInstances() % numFolds){
@@ -1107,8 +1102,8 @@ public class Instances implements Serializable {
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the training set as a set of weighted 
    * instances
-   * @exception Exception if dataset can't be generated 
-   * successfully
+   * @exception IllegalArgumentException if the number of folds is less than 2
+   * or greater than the number of instances.
    */
   public Instances trainCV(int numFolds, int numFold) 
        throws Exception {
@@ -1117,10 +1112,10 @@ public class Instances implements Serializable {
     Instances train;
  
     if (numFolds < 2) {
-      throw new Exception("Number of folds must be at least 2!");
+      throw new IllegalArgumentException("Number of folds must be at least 2!");
     }
     if (numFolds > numInstances()) {
-      throw new Exception("Can't have more folds than instances!");
+      throw new IllegalArgumentException("Can't have more folds than instances!");
     }
     numInstForFold = numInstances() / numFolds;
     if (numFold < numInstances() % numFolds) {
@@ -1142,14 +1137,14 @@ public class Instances implements Serializable {
    *
    * @param attIndex the numeric attribute
    * @return the variance if the attribute is numeric
-   * @exception Exception if the attribute is not numeric
+   * @exception IllegalArgumentException if the attribute is not numeric
    */
-  public final double variance(int attIndex) throws Exception {
+  public final double variance(int attIndex) {
   
     double sum = 0, sumSquared = 0, sumOfWeights = 0;
 
     if (!attribute(attIndex).isNumeric()) {
-      throw new Exception("Can't compute variance because attribute is " +
+      throw new IllegalArgumentException("Can't compute variance because attribute is " +
 			  "not numeric!");
     }
     for (int i = 0; i < numInstances(); i++) {
@@ -1874,13 +1869,13 @@ public class Instances implements Serializable {
    * @param first the first set of Instances
    * @param second the second set of Instances
    * @return the merged set of Instances
-   * @exception Exception if an error occurs
+   * @exception IllegalArgumentException if the datasets are not the same size
    */
   public static Instances mergeInstances(Instances first, Instances second)
     throws Exception {
 
     if (first.numInstances() != second.numInstances()) {
-      throw new Exception("Instance sets must be of the same size");
+      throw new IllegalArgumentException("Instance sets must be of the same size");
     }
 
     // Create the vector of merged attributes

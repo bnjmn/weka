@@ -51,7 +51,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -406,11 +406,7 @@ public class IBk extends DistributionClassifier implements
    */
   public SelectedTag getDistanceWeighting() {
 
-    try {
-      return new SelectedTag(m_DistanceWeighting, TAGS_WEIGHTING);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_DistanceWeighting, TAGS_WEIGHTING);
   }
   
   /**
@@ -1042,12 +1038,8 @@ public class IBk extends DistributionClassifier implements
     }
 
     // Normalise distribution
-    try {
-      if (total > 0) {
-	Utils.normalize(distribution, total);
-      }
-    } catch (Exception ex) {
-      throw new Exception("Distribution normalization failed!");
+    if (total > 0) {
+      Utils.normalize(distribution, total);
     }
     return distribution;
   }

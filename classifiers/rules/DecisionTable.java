@@ -38,7 +38,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -1213,13 +1213,13 @@ public class DecisionTable
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareTo("measureNumRules") == 0) {
       return measureNumRules();
     } else {
-      throw new Exception(additionalMeasureName 
+      throw new IllegalArgumentException(additionalMeasureName 
 			  + " not supported (DecisionTable)");
     }
   }

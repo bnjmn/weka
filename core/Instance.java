@@ -46,7 +46,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -308,7 +308,8 @@ public class Instance implements Copyable, Serializable {
    *
    * @param pos the attribute's position
    * @exception Exception if the instance has accesss to a
-   * dataset, or the position is out of range
+   * dataset
+   * @exception IllegalArgumentException if the position is out of range
    */
   public void insertAttributeAt(int position) 
        throws Exception {
@@ -318,8 +319,8 @@ public class Instance implements Copyable, Serializable {
     }
     if ((position < 0) ||
 	(position > numAttributes())) {
-      throw new Exception("Can't insert attribute: index out "+
-			  "of range");
+      throw new IllegalArgumentException("Can't insert attribute: index out "+
+                                         "of range");
     }
     forceInsertAttributeAt(position);
   }
@@ -446,14 +447,13 @@ public class Instance implements Copyable, Serializable {
    * values are replaced.
    *
    * @param array containing the means and modes
-   * @exception Exception if numbers of attributes are unequal
+   * @exception IllegalArgumentException if numbers of attributes are unequal
    */
-  public void replaceMissingValues(double[] array) 
-       throws Exception {
+  public void replaceMissingValues(double[] array) {
 	 
     if ((array == null) || 
 	(array.length != m_AttValues.length)) {
-      throw new Exception("Unequal number of attributes!");
+      throw new IllegalArgumentException("Unequal number of attributes!");
     }
     freshAttributeVector();
     for (int i = 0; i < m_AttValues.length; i++) {
@@ -597,8 +597,9 @@ public class Instance implements Copyable, Serializable {
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @exception Exception if the dataset is not set, or the 
-   * attribute is not nominal or a string, or the value couldn't 
+   * @exception Exception if the dataset is not set
+   * @exception IllegalArgumentException if the selected
+   * attribute is not nominal or a string, or the supplied value couldn't 
    * be found for a nominal attribute 
    */
   public final void setValue(int attIndex, String value) throws Exception {
@@ -610,12 +611,12 @@ public class Instance implements Copyable, Serializable {
     }
     if (!attribute(attIndex).isNominal() &&
 	!attribute(attIndex).isString()) {
-      throw new Exception("Attribute neither nominal nor string!");
+      throw new IllegalArgumentException("Attribute neither nominal nor string!");
     }
     valIndex = attribute(attIndex).indexOfValue(value);
     if (valIndex == -1) {
       if (attribute(attIndex).isNominal()) {
-	throw new Exception("Value not defined for given nominal attribute!");
+	throw new IllegalArgumentException("Value not defined for given nominal attribute!");
       } else {
 	attribute(attIndex).forceAddValue(value);
 	valIndex = attribute(attIndex).indexOfValue(value);
@@ -653,19 +654,20 @@ public class Instance implements Copyable, Serializable {
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @exception Exception if the the attribute is not nominal or a
-   * string, or the value couldn't be found for a nominal attribute 
+   * @exception IllegalArgumentException if the the attribute is not
+   * nominal or a string, or the value couldn't be found for a nominal
+   * attribute 
    */
-  public final void setValue(Attribute att, String value) throws Exception {
+  public final void setValue(Attribute att, String value) {
 
     if (!att.isNominal() &&
 	!att.isString()) {
-      throw new Exception("Attribute neither nominal nor string!");
+      throw new IllegalArgumentException("Attribute neither nominal nor string!");
     }
     int valIndex = att.indexOfValue(value);
     if (valIndex == -1) {
       if (att.isNominal()) {
-	throw new Exception("Value not defined for given nominal attribute!");
+	throw new IllegalArgumentException("Value not defined for given nominal attribute!");
       } else {
 	att.forceAddValue(value);
 	valIndex = att.indexOfValue(value);
@@ -690,8 +692,9 @@ public class Instance implements Copyable, Serializable {
    *
    * @param attIndex the attribute's index
    * @return the value as a string
-   * @exception Exception if the attribute is not a nominal
-   * (or string) attribute, or the instance doesn't belong
+   * @exception IllegalArgumentException if the attribute is not a nominal
+   * (or string) attribute.
+   * @exception Exception if the instance doesn't belong
    * to a dataset.
    */
   public final String stringValue(int attIndex) throws Exception {
@@ -701,7 +704,7 @@ public class Instance implements Copyable, Serializable {
     } 
     if (!m_Dataset.attribute(attIndex).isNominal() &&
 	!m_Dataset.attribute(attIndex).isString()) {
-      throw new Exception("Attribute neither nominal nor string!");
+      throw new IllegalArgumentException("Attribute neither nominal nor string!");
     }
     return m_Dataset.attribute(attIndex).
       value((int) value(attIndex));

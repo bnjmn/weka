@@ -57,7 +57,7 @@ import weka.filters.AttributeFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ */
+ * @version $Revision: 1.8 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -665,11 +665,7 @@ public class Apriori extends Associator implements OptionHandler {
    * @return the type of metric to use for ranking rules
    */
   public SelectedTag getMetricType() {
-    try {
-      return new SelectedTag(m_metricType, TAGS_SELECTION);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_metricType, TAGS_SELECTION);
   }
 
   /**

@@ -25,7 +25,7 @@ import weka.classifiers.*;
  * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -247,14 +247,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (m_Classifier instanceof AdditionalMeasureProducer) {
       return ((AdditionalMeasureProducer)m_Classifier).
 	getMeasure(additionalMeasureName);
     } else {
-      throw new Exception("ClassifierSplitEvaluator: "
+      throw new IllegalArgumentException("ClassifierSplitEvaluator: "
 			  +"Can't return value for : "+additionalMeasureName
 			  +". "+m_Classifier.getClass().getName()+" "
 			  +"is not an AdditionalMeasureProducer");

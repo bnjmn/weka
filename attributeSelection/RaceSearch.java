@@ -55,7 +55,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -228,12 +228,8 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    *
    * @return the type of race
    */
-  public SelectedTag getRaceType () {
-    try {
-      return new SelectedTag(m_raceType, TAGS_SELECTION);
-    } catch (Exception ex) {
-      return null;
-    }
+  public SelectedTag getRaceType() {
+    return new SelectedTag(m_raceType, TAGS_SELECTION);
   }
 
   /**
@@ -315,11 +311,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * @return the type of xval
    */
   public SelectedTag getFoldsType () {
-    try {
-      return new SelectedTag(m_xvalType, XVALTAGS_SELECTION);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_xvalType, XVALTAGS_SELECTION);
   }
 
   /**

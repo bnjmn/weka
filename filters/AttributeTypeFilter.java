@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and "string". (default "string")<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
@@ -129,11 +129,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    */
   public SelectedTag getAttributeType() {
 
-    try {
-      return new SelectedTag(m_DeleteType, TAGS_ATTRIBUTES);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_DeleteType, TAGS_ATTRIBUTES);
   }
 
   /**

@@ -34,7 +34,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeSelectedClassifier extends DistributionClassifier 
 implements OptionHandler, AdditionalMeasureProducer {
@@ -478,9 +478,9 @@ implements OptionHandler, AdditionalMeasureProducer {
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareTo("measureNumAttributesSelected") == 0) {
       return measureNumAttributesSelected();
     } else if (additionalMeasureName.compareTo("measureSelectionTime") == 0) {
@@ -491,7 +491,7 @@ implements OptionHandler, AdditionalMeasureProducer {
       return ((AdditionalMeasureProducer)m_Classifier).
 	getMeasure(additionalMeasureName);
     } else {
-      throw new Exception(additionalMeasureName 
+      throw new IllegalArgumentException(additionalMeasureName 
 			  + " not supported (AttributeSelectedClassifier)");
     }
   }

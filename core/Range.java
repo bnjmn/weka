@@ -23,7 +23,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Range implements Serializable {
 
@@ -188,7 +188,7 @@ public class Range implements Serializable {
 
     try {
       if (m_Upper == -1) {
-	throw new Exception ("Upper limit has not been specified");
+	throw new RuntimeException("Upper limit has not been specified");
       }
       String cols = null;
       for (int i = 0; i < m_SelectFlags.length; i++) {

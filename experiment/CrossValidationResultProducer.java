@@ -28,7 +28,7 @@ import weka.core.AdditionalMeasureProducer;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
@@ -141,14 +141,14 @@ public class CrossValidationResultProducer
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
       return ((AdditionalMeasureProducer)m_SplitEvaluator).
 	getMeasure(additionalMeasureName);
     } else {
-      throw new Exception("CrossValidationResultProducer: "
+      throw new IllegalArgumentException("CrossValidationResultProducer: "
 			  +"Can't return value for : "+additionalMeasureName
 			  +". "+m_SplitEvaluator.getClass().getName()+" "
 			  +"is not an AdditionalMeasureProducer");

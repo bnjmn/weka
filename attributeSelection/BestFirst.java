@@ -26,7 +26,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -409,11 +409,8 @@ public class BestFirst extends ASSearch
    * @return the direction of the search
    */
   public SelectedTag getDirection () {
-    try {
-      return new SelectedTag(m_searchDirection, TAGS_SELECTION);
-    } catch (Exception ex) {
-      return null;
-    }
+
+    return new SelectedTag(m_searchDirection, TAGS_SELECTION);
   }
 
 
