@@ -33,9 +33,15 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Locally-weighted learning. Uses an instance-based algorithm to assign
- * instance weights which are then used by a specified WeightedInstancesHandler.  For
- * more information, see<p>
+ * Locally-weighted learning. Uses an instance-based algorithm to
+ * assign instance weights which are then used by a specified
+ * WeightedInstancesHandler.  A good choice for classification is
+ * NaiveBayes. LinearRegression is suitable for regression problems.
+ * For more information, see<p>
+ *
+ * Eibe Frank, Mark Hall, and Bernhard Pfahringer (2003). Locally
+ * Weighted Naive Bayes. Working Paper 04/03, Department of Computer
+ * Science, University of Waikato.
  *
  * Atkeson, C., A. Moore, and S. Schaal (1996) <i>Locally weighted
  * learning</i>
@@ -61,8 +67,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
- */
+ * @version $Revision: 1.6 $ */
 public class LWL extends DistributionClassifier 
   implements OptionHandler, UpdateableClassifier, 
   WeightedInstancesHandler {
