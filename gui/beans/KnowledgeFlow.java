@@ -100,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.12 $
+ * @version  $Revision: 1.13 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -235,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.13 $
    * @since 1.0
    * @see JPanel
    */
@@ -366,13 +366,13 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	    // been clicked over a bean.
 	    if (bi != null) {
 	      JComponent bc = (JComponent)bi.getBean();
-	      if ((me.getModifiers() & InputEvent.BUTTON1_MASK)
-		  != InputEvent.BUTTON1_MASK) {
+	      if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
+		   != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
 		doPopup(me.getPoint(), bi, me.getX(), me.getY());
 	      }
 	    } else {
-	      if ((me.getModifiers() & InputEvent.BUTTON1_MASK)
-		  != InputEvent.BUTTON1_MASK) {
+	      if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
+		   != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
 		// find connections if any close to this point
 		int delta = 10;
 		deleteConnectionPopup(BeanConnection.
