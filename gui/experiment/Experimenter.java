@@ -42,12 +42,12 @@ import javax.swing.JPanel;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Experimenter extends JPanel {
 
   /** The panel for configuring the experiment */
-  protected SetupPanel m_SetupPanel;
+  protected SetupModePanel m_SetupPanel;
 
   /** The panel for running the experiment */
   protected RunPanel m_RunPanel;
@@ -67,7 +67,7 @@ public class Experimenter extends JPanel {
    */
   public Experimenter(boolean classFirst) {
 
-    m_SetupPanel = new SetupPanel();
+    m_SetupPanel = new SetupModePanel();
     m_RunPanel = new RunPanel();
     m_ResultsPanel = new ResultsPanel();
 
@@ -89,11 +89,9 @@ public class Experimenter extends JPanel {
 	m_TabbedPane.setEnabledAt(1, true);
       }
     });
-    
     setLayout(new BorderLayout());
     add(m_TabbedPane, BorderLayout.CENTER);
   }
-
 
   /**
    * Tests out the experiment environment.
@@ -126,3 +124,20 @@ public class Experimenter extends JPanel {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
