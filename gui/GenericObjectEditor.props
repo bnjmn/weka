@@ -237,7 +237,9 @@ weka.classifiers.bayes.net.search.SearchAlgorithm =\
  weka.classifiers.bayes.net.search.score.TabuSearch, \
  weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm, \
  weka.classifiers.bayes.net.search.cv.SearchAlgorithmK2, \
- weka.classifiers.bayes.net.search.cv.SearchAlgorithmB
+ weka.classifiers.bayes.net.search.cv.SearchAlgorithmB, \
+ weka.classifiers.bayes.net.search.fixed.FromFile, \
+ weka.classifiers.bayes.net.search.fixed.NaiveBayes
 
 weka.classifiers.bayes.net.estimate.BayesNetEstimator =\
  weka.classifiers.bayes.net.estimate.SimpleEstimator, \
