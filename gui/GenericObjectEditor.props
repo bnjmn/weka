@@ -50,6 +50,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.FilteredClassifier,\
  weka.classifiers.meta.LogitBoost,\
  weka.classifiers.meta.MetaCost,\
+ weka.classifiers.meta.MultiBoostAB,\
  weka.classifiers.meta.MultiClassClassifier,\
  weka.classifiers.meta.MultiScheme,\
  weka.classifiers.meta.OrdinalClassClassifier,\
