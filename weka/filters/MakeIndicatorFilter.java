@@ -14,23 +14,24 @@ import weka.core.*;
 /** 
  * Creates a new dataset with a boolean attribute replacing a nominal
  * attribute.  In the new dataset, a value of 1 is assigned to an
- * instance that exhibits a particular attribute value, a 0 to an
+ * instance that exhibits a particular range of attribute values, a 0 to an
  * instance that doesn't. The boolean attribute is coded as numeric by
  * default.<p>
  * 
  * Valid filter-specific options are: <p>
  *
  * -C col <br>
- * Index of the attribute to be changed. (default last)<p>
+ * Index of the attribute to be changed. (default "last")<p>
  *
- * -V index <br>
- * The value's index. (default last)<p>
+ * -V index1,index2-index4,...<br>
+ * Specify list of values to indicate. First and last are valid indices.
+ * (default "last")<p>
  *
  * -N <br>
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -38,17 +39,23 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
   /** The attribute's index option setting. */
   private int m_AttIndexSet = -1;
 
-  /** The value's index option setting. */
-  private int m_ValIndexSet = -1;
-
   /** The attribute's index */
   private int m_AttIndex;
 
   /** The value's index */
-  private int m_ValIndex;
+  private Range m_ValIndex;
   
   /** Make boolean attribute numeric. */
   private boolean m_Numeric = true;
+
+  public MakeIndicatorFilter() {
+    try{
+      m_ValIndex = new Range("last");
+    } catch (Exception ex) {
+      System.err.println("This should never happen - panic, schnell");
+      ex.printStackTrace();
+    }
+  }
 
   /**
    * Sets the format of the input instances.
@@ -68,10 +75,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     if (m_AttIndex < 0) {
       m_AttIndex = instanceInfo.numAttributes() - 1;
     }
-    m_ValIndex = m_ValIndexSet;
-    if (m_ValIndex < 0) {
-      m_ValIndex = instanceInfo.attribute(m_AttIndex).numValues() - 1;
-    }
+    
+    m_ValIndex.setUpper(instanceInfo.attribute(m_AttIndex).numValues() - 1);
     if (!instanceInfo.attribute(m_AttIndex).isNominal()) {
       throw new Exception("Chosen attribute not nominal.");
     }
@@ -103,7 +108,7 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     }
     Instance newInstance = (Instance)instance.copy();
     if (!newInstance.isMissing(m_AttIndex)) {
-      if ((int)newInstance.value(m_AttIndex) == m_ValIndex) {
+      if (m_ValIndex.isInRange((int)newInstance.value(m_AttIndex))) {
 	newInstance.setValue(m_AttIndex, 1);
       } else {
 	newInstance.setValue(m_AttIndex, 0);
@@ -127,9 +132,9 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
               "C", 1, "-C <col>"));
 
     newVector.addElement(new Option(
-              "\tSets the value's index.",
-              "V", 1, "-V <index>"));
-
+              "\tSpecify the list of values to indicate. First and last are\n"+
+              "\tvalid indexes (default last)",
+              "V", 1, "-V <index1,index2-index4,...>"));
     newVector.addElement(new Option(
               "\tSet if new boolean attribute nominal.",
               "N", 0, "-N <index>"));
@@ -144,8 +149,9 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    * -C col <br>
    * Index of the attribute to be changed.<p>
    *
-   * -V index <br>
-   * The value's index.<p>
+   * -V index1,index2-index4,...<br>
+   * Specify list of values to indicate. First and last are valid indices.
+   * (default "last")<p>
    *
    * -N <br>
    * Set if new boolean attribute nominal.<p>
@@ -170,15 +176,9 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     
     String valIndex = Utils.getOption('V', options);
     if (valIndex.length() != 0) {
-      if (valIndex.toLowerCase().equals("last")) {
-	setValueIndex(-1);
-      } else if (valIndex.toLowerCase().equals("first")) {
-	setValueIndex(0);
-      } else {
-	setValueIndex(Integer.parseInt(valIndex) - 1);
-      }
+      setValueIndices(valIndex);
     } else {
-      setValueIndex(-1);
+      setValueIndices("last");
     }
 
     setNumeric(!Utils.getFlag('N', options));
@@ -201,7 +201,7 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     options[current++] = "-C";
     options[current++] = "" + (getAttributeIndex() + 1);
     options[current++] = "-V"; 
-    options[current++] = "" + (getValueIndex() + 1);
+    options[current++] = getValueIndices();
     if (!getNumeric()) {
       options[current++] = "-N"; 
     }
@@ -232,23 +232,60 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Get the index of the first value used.
+   * Get the range containing the indicator values.
    *
-   * @return the index of the first value
+   * @return the range containing the indicator values
    */
-  public int getValueIndex() {
-
-    return m_ValIndexSet;
+  public Range getValueRange() {
+    return m_ValIndex;
   }
 
   /**
-   * Sets index of of the first value used.
+   * Get the indices of the indicator values.
    *
-   * @param index the index of the first value
+   * @return the indices of the indicator values
    */
-  public void setValueIndex(int valIndex) {
+  public String getValueIndices() {
+    return m_ValIndex.getRanges();
+  }
+
+  /**
+   * Sets indices of the indicator values.
+   *
+   * @param range the string representation of the indicator value indices
+   * @see Range
+   */
+  public void setValueIndices(String range) {
     
-    m_ValIndexSet = valIndex;
+    try {
+      m_ValIndex.setRanges(range);
+    } catch (Exception ex) {
+      System.err.println("This should never happen - panic");
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Sets index of the indicator value.
+   *
+   * @param index the index of the indicator value
+   */
+  public void setValueIndex(int index) {
+
+    setValueIndices("" +  (index + 1));
+  }
+
+  /**
+   * Set which attributes are to be deleted (or kept if invert is true)
+   *
+   * @param attributes an array containing indexes of attributes to select.
+   * Since the array will typically come from a program, attributes are indexed
+   * from 0.
+   * @exception Exception if an invalid set of ranges is supplied
+   */
+  public void setValueIndicesArray(int [] indices) throws Exception {
+    
+    setValueIndices(Range.indicesToRangeList(indices));
   }
 
   /**
@@ -292,16 +329,22 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
 	if (m_Numeric) {
 	  newAtts.addElement(new Attribute(att.name()));
 	} else {
+          String vals;
+          int [] sel = m_ValIndex.getSelection();
+          if (sel.length == 1) {
+            vals = att.value(sel[0]);
+          } else {
+            vals = m_ValIndex.getRanges().replace(',','_');
+          }
 	  newVals = new FastVector(2);
-	  newVals.addElement("neg_" + att.value(m_ValIndex));
-	  newVals.addElement("pos_" + att.value(m_ValIndex));
+	  newVals.addElement("neg_" + vals);
+	  newVals.addElement("pos_" + vals);
 	  newAtts.addElement(new Attribute(att.name(), newVals));
 	}
       }
     }
-    
+
     // Construct new header
-    
     newData = new Instances(getInputFormat().relationName(), newAtts, 0);
     newData.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(newData);
