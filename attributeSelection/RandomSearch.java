@@ -34,7 +34,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RandomSearch extends ASSearch implements OptionHandler {
 
@@ -81,6 +81,9 @@ public class RandomSearch extends ASSearch implements OptionHandler {
   /** output new best subsets as the search progresses */
   private boolean m_verbose;
 
+  /**
+   * Constructor
+   */
   public RandomSearch () {
     resetOptions();
   }
@@ -240,7 +243,10 @@ public class RandomSearch extends ASSearch implements OptionHandler {
    *
    * @param startSet a (possibly) ordered array of attribute indexes from
    * which to start the search from. Set to null if no explicit start
-   * point.
+   * point. If a start point is supplied, random search evaluates the
+   * start point and then looks for subsets that are as good as or better 
+   * than the start point with the same or lower cardinality.
+   *
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
