@@ -43,7 +43,7 @@ import weka.classifiers.rules.ZeroR;
  * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -77,7 +77,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 24;
+  private static final int RESULT_SIZE = 25;
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 11;
@@ -218,8 +218,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * @param additionalMeasures a list of method names
    */
   public void setAdditionalMeasures(String [] additionalMeasures) {
-    System.err.println("ClassifierSplitEvaluator: setting additional measures");
-      m_AdditionalMeasures = additionalMeasures;
+    // System.err.println("ClassifierSplitEvaluator: setting additional measures");
+    m_AdditionalMeasures = additionalMeasures;
     
     // determine which (if any) of the additional measures this classifier
     // can produce
@@ -347,6 +347,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     Double doub = new Double(0);
     int current = 0;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -416,7 +417,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     overall_length += NUM_IR_STATISTICS;
     String [] resultNames = new String[overall_length];
     int current = 0;
-    resultNames[current++] = "Number_of_instances";
+    resultNames[current++] = "Number_of_training_instances";
+    resultNames[current++] = "Number_of_testing_instances";
 
     // Basic performance stats - right vs wrong
     resultNames[current++] = "Number_correct";
@@ -511,6 +513,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
     int current = 0;
+    result[current++] = new Double(train.numInstances());
     result[current++] = new Double(eval.numInstances());
     result[current++] = new Double(eval.correct());
     result[current++] = new Double(eval.incorrect());
@@ -610,8 +613,6 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     
     m_Classifier = newClassifier;
     updateOptions();
-    
-    System.err.println("ClassifierSplitEvaluator: In set classifier");
   }
   
   /**
