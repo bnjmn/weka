@@ -41,12 +41,6 @@ import java.util.Properties;
 import java.util.Enumeration;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.beans.Customizer;
-import java.beans.EventSetDescriptor;
-import java.beans.Beans;
-import java.beans.PropertyDescriptor;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JButton;
@@ -86,6 +80,13 @@ import java.awt.Toolkit;
 import java.awt.Insets;
 import java.awt.Component;
 
+import java.beans.Customizer;
+import java.beans.EventSetDescriptor;
+import java.beans.Beans;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.beancontext.*;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.IntrospectionException;
@@ -94,7 +95,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.8 $
+ * @version  $Revision: 1.9 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -229,7 +230,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.9 $
    * @since 1.0
    * @see JPanel
    */
@@ -311,11 +312,14 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 
   protected LogPanel m_logPanel = new LogPanel(null, true);
 
+  protected BeanContextSupport m_bcSupport = new BeanContextSupport();
+
   /**
    * Creates a new <code>KnowledgeFlow</code> instance.
    */
   public KnowledgeFlow() {
 
+    m_bcSupport.setDesignTime(true);
     m_beanLayout.setLayout(null);
 
     // handle mouse events
@@ -740,6 +744,10 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       }
     }
     
+    if (tempBean instanceof BeanContextChild) {
+      m_bcSupport.add(tempBean);
+    }
+
     // ---------------------------------------
     JToggleButton tempButton;
     JPanel tempP = new JPanel();
@@ -1047,6 +1055,9 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
   }
 
   private void addComponent(int x, int y) {
+    if (m_toolBarBean instanceof BeanContextChild) {
+      m_bcSupport.add(m_toolBarBean);
+    }
     BeanInstance bi = new BeanInstance(m_beanLayout, m_toolBarBean, x, y);
     //    addBean((JComponent)bi.getBean());
 
@@ -1089,6 +1100,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	Vector connections = (Vector) ois.readObject();
 	ois.close();
 	java.awt.Color bckC = getBackground();
+	m_bcSupport = new BeanContextSupport();
 
 	// register this panel as a property change listener with each
 	// bean
@@ -1106,6 +1118,9 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  }
 	  if (tempB.getBean() instanceof BeanCommon) {
 	    ((BeanCommon)(tempB.getBean())).setLog(m_logPanel);
+	  }
+	  if (tempB.getBean() instanceof BeanContextChild) {
+	    m_bcSupport.add(tempB.getBean());
 	  }
 	}
 	BeanInstance.setBeanInstances(beans, m_beanLayout);
