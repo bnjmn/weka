@@ -105,7 +105,7 @@ import javax.swing.JMenuItem;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -866,6 +866,8 @@ public class ClustererPanel extends JPanel {
 
   /**
    * Handles constructing a popup menu with visualization options
+   * @param name the name of the result history list entry clicked on by
+   * the user
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
