@@ -39,7 +39,7 @@ import weka.core.*;
  * Specify the random number seed (default 42).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Randomize extends Filter implements UnsupervisedFilter,
 						 OptionHandler {
@@ -49,6 +49,17 @@ public class Randomize extends Filter implements UnsupervisedFilter,
 
   /** The current random number generator */
   protected Random m_Random;
+  
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Randomly shuffles the order of instances passed through it. "
+      + "The random number generator is reset with the seed value whenever "
+      + "a new set of instances is passed in.";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -108,7 +119,15 @@ public class Randomize extends Filter implements UnsupervisedFilter,
     return options;
   }
 
-  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String randomSeedTipText() {
+    return "Seed for the random number generator.";
+  }
+
   /**
    * Get the random number generator seed value.
    *

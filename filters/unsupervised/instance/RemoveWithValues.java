@@ -67,7 +67,7 @@ import weka.core.SingleIndex;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -89,6 +89,15 @@ public class RemoveWithValues extends Filter
 
   /** If m_ModifyHeader, stores a mapping from old to new indexes */
   protected int [] m_NominalMapping;
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Filters instances according to the value of an attribute.";
+  }
 
   /** Default constructor */
   public RemoveWithValues() {
@@ -357,7 +366,17 @@ public class RemoveWithValues extends Filter
       return getInputFormat().attribute(m_AttIndex.getIndex()).isNumeric();
     }
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String modifyHeaderTipText() {
+    return "When selecting on nominal attributes, removes header references to "
+      + "excluded values.";
+  }
+
   /**
    * Gets whether the header will be modified when selecting on nominal
    * attributes.
@@ -381,6 +400,15 @@ public class RemoveWithValues extends Filter
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndexTipText() {
+    return "Choose attribute to be used for selection (default last).";
+  }
+
+  /**
    * Get the index of the attribute used.
    *
    * @return the index of the attribute
@@ -398,6 +426,16 @@ public class RemoveWithValues extends Filter
   public void setAttributeIndex(String attIndex) {
     
     m_AttIndex.setSingleIndex(attIndex);
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String splitPointTipText() {
+    return "Numeric value to be used for selection on numeric attribute. "
+     + "Instances with values smaller than given value will be selected.";
   }
 
   /**
@@ -421,6 +459,16 @@ public class RemoveWithValues extends Filter
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String matchMissingValuesTipText() {
+    return "Missing values count as a match. This setting is independent of "
+      + "the invertSelection option.";
+  }
+
+  /**
    * Gets whether missing values are counted as a match.
    *
    * @return true if missing values are counted as a match.
@@ -441,6 +489,15 @@ public class RemoveWithValues extends Filter
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+    return "Invert matching sense.";
+  }
+
+  /**
    * Get whether the supplied columns are to be removed or kept
    *
    * @return true if the supplied columns will be kept
@@ -459,6 +516,16 @@ public class RemoveWithValues extends Filter
   public void setInvertSelection(boolean invert) {
 
     m_Values.setInvert(!invert);
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String nominalIndicesTipText() {
+    return "Range of label indices to be used for selection on nominal attribute. "
+      +"First and last are valid indexes.";
   }
 
   /**
