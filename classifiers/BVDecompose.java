@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class BVDecompose implements OptionHandler {
 
@@ -104,9 +104,9 @@ public class BVDecompose implements OptionHandler {
   protected int m_TrainPoolSize = 100;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

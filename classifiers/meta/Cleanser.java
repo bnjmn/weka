@@ -15,7 +15,7 @@ import java.util.Enumeration;
  * the training set.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Cleanser extends DistributionClassifier
   implements OptionHandler, Drawable {
@@ -284,9 +284,9 @@ public class Cleanser extends DistributionClassifier
   
   
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
     

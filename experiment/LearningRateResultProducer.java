@@ -39,7 +39,7 @@ import java.util.Random;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LearningRateResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
@@ -393,9 +393,9 @@ public class LearningRateResultProducer
 
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options..
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

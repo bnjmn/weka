@@ -44,7 +44,7 @@ import weka.core.AdditionalMeasureProducer;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
@@ -541,9 +541,9 @@ public class CrossValidationResultProducer
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options..
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

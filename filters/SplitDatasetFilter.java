@@ -54,7 +54,7 @@ import java.util.*;
  * If set, data is not being stratified even if class index is set. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -77,9 +77,9 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   private boolean m_DontStratifyData = false;
 
   /**
-   * Gets an enumeration describing the available options.
+   * Gets an enumeration describing the available options..
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

@@ -59,7 +59,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -67,9 +67,9 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
   protected Range m_DeltaCols = new Range();
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

@@ -40,7 +40,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -134,9 +134,9 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

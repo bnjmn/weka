@@ -35,7 +35,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -483,9 +483,9 @@ public class LeastMedSq extends Classifier implements OptionHandler {
   }
 
   /**
-   * Returns an enumeration of all the available options.
+   * Returns an enumeration of all the available options..
    *
-   * @return an enumeration of all available options
+   * @return an enumeration of all available options.
    */
   public Enumeration listOptions(){
 

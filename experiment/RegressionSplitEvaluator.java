@@ -43,7 +43,7 @@ import java.io.ObjectStreamClass;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -93,9 +93,9 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options..
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

@@ -52,7 +52,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler,
  AdditionalMeasureProducer {
@@ -160,7 +160,7 @@ public final class  M5Prime extends Classifier implements OptionHandler,
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options..
    *
    * Valid options are: <p>
    *
@@ -177,7 +177,7 @@ public final class  M5Prime extends Classifier implements OptionHandler,
    * -V <0|1|2> <br>
    * Verbosity (default: 0). <p>
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

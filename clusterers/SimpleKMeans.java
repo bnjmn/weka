@@ -39,7 +39,7 @@ import  weka.filters.ReplaceMissingValuesFilter;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -348,7 +348,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
   }
 
   /**
-   * Returns an enumeration describing the available options. <p>
+   * Returns an enumeration describing the available options.. <p>
    *
    * Valid options are:<p>
    *
@@ -360,7 +360,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
    * -S <seed> <br>
    * Specify random number seed. <p>
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    *
    **/
   public Enumeration listOptions () {

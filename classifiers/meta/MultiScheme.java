@@ -49,7 +49,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -77,9 +77,9 @@ public class MultiScheme extends Classifier implements OptionHandler {
   protected int m_Seed = 1;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

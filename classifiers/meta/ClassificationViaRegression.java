@@ -42,7 +42,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -131,9 +131,9 @@ public class ClassificationViaRegression extends DistributionClassifier
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions()  {
 

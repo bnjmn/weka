@@ -57,7 +57,7 @@ import weka.core.Utils;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
@@ -78,9 +78,9 @@ public class Bagging extends DistributionClassifier
   protected int m_BagSizePercent = 100;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

@@ -50,7 +50,7 @@ import weka.core.*;
  * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -160,9 +160,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

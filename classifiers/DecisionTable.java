@@ -54,7 +54,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -871,9 +871,9 @@ public class DecisionTable
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

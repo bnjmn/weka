@@ -52,7 +52,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   
@@ -90,9 +90,9 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
   private ReplaceMissingValuesFilter m_ReplaceMissingValues;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

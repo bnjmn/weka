@@ -42,7 +42,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 
 public class RandomSplitResultProducer 
@@ -556,9 +556,9 @@ public class RandomSplitResultProducer
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options..
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

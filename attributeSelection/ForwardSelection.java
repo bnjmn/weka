@@ -42,7 +42,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -252,8 +252,8 @@ public class ForwardSelection extends ASSearch
   }
 
   /**
-   * Returns an enumeration describing the available options
-   * @return an enumeration of all the available options
+   * Returns an enumeration describing the available options.
+   * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);

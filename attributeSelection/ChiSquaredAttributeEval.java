@@ -40,7 +40,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class ChiSquaredAttributeEval
   extends AttributeEvaluator
@@ -74,8 +74,8 @@ public class ChiSquaredAttributeEval
   }
 
   /**
-   * Returns an enumeration describing the available options
-   * @return an enumeration of all the available options
+   * Returns an enumeration describing the available options.
+   * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(2);

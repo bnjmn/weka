@@ -73,7 +73,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler, Drawable {
@@ -114,9 +114,9 @@ public class CostSensitiveClassifier extends Classifier
   protected boolean m_MinimizeExpectedCost;
   
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

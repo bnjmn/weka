@@ -40,7 +40,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator
@@ -74,8 +74,8 @@ public class InfoGainAttributeEval
   }
 
   /**
-   * Returns an enumeration describing the available options
-   * @return an enumeration of all the available options
+   * Returns an enumeration describing the available options.
+   * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(2);

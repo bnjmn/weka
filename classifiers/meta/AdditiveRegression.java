@@ -113,7 +113,7 @@ import weka.classifiers.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -187,9 +187,9 @@ public class AdditiveRegression extends Classifier
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 

@@ -45,7 +45,7 @@ import weka.core.Utils;
  * Specify the full class name of a sub-clusterer (required).<p>
  *
  * @author Richard Littin (richard@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DistributionMetaClusterer extends DistributionClusterer
   implements OptionHandler {
@@ -108,9 +108,9 @@ public class DistributionMetaClusterer extends DistributionClusterer
   }
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
