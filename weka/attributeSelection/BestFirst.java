@@ -35,7 +35,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class BestFirst
   extends ASSearch
@@ -193,20 +193,38 @@ public class BestFirst
   // member variables
   /** maximum number of stale nodes before terminating search */
   private int m_maxStale;
-  /** -1 == backward search, 1 == forward search, 0 == bidirectional */
+
+  /** 0 == backward search, 1 == forward search, 2 == bidirectional */
   private int m_searchDirection;
+
+  /** search directions */
+  private static final int SELECTION_BACKWARD = 0;
+  private static final int SELECTION_FORWARD = 1;
+  private static final int SELECTION_BIDIRECTIONAL = 2;
+  public static final Tag [] TAGS_SELECTION = {
+    new Tag(SELECTION_BACKWARD, "Backward"),
+    new Tag(SELECTION_FORWARD, "Forward"),
+    new Tag(SELECTION_BIDIRECTIONAL, "Bi-directional"),
+  };
+
   /** holds a starting set (if one is supplied) */
   private int[] m_starting;
+
   /** does the data have a class */
   private boolean m_hasClass;
+
   /** holds the class index */
   private int m_classIndex;
+
   /** number of attributes in the data */
   private int m_numAttribs;
+
   /** total number of subsets evaluated during a search */
   private int m_totalEvals;
+
   /** for debugging */
   private boolean m_debug;
+
   /** holds the merit of the best subset found */
   private double m_bestMerit;
 
@@ -227,8 +245,8 @@ public class BestFirst
     Vector newVector = new Vector(2);
     newVector.addElement(new Option("\tDirection of search. (default = 1)."
 				    , "D", 1
-				    , "-D <-1 = backward | 0 = bidirectional " 
-				    + "| 1 = forward>"));
+				    , "-D <0 = backward | 1 = forward " 
+				    + "| 2 = bi-directional>"));
     newVector.addElement(new Option("\tNumber of non-improving nodes to" 
 				    + "\n\tconsider before terminating search."
 				    , "N", 1, "-N <num>"));
@@ -259,7 +277,10 @@ public class BestFirst
     optionString = Utils.getOption('D', options);
 
     if (optionString.length() != 0) {
-      setDirection(Integer.parseInt(optionString));
+      setDirection(new SelectedTag(Integer.parseInt(optionString),
+				   TAGS_SELECTION));
+    } else {
+      setDirection(new SelectedTag(SELECTION_FORWARD, TAGS_SELECTION));
     }
 
     optionString = Utils.getOption('N', options);
@@ -303,18 +324,13 @@ public class BestFirst
   /**
    * Set the search direction
    *
-   * @param d the direction of the search (-1 =backward, 0 = bidirectional,
-   * 1 = forward).
-   * @exception Exception if the search direction is not a valid value
+   * @param d the direction of the search
    */
-  public void setDirection (int d)
-    throws Exception
-  {
-    if ((d < -1) || (d > 1)) {
-      throw  new Exception("The value of -D must be -1,0, or 1.");
+  public void setDirection (SelectedTag d) {
+    
+    if (d.getTags() == TAGS_SELECTION) {
+      m_searchDirection = d.getSelectedTag().getID();
     }
-
-    m_searchDirection = d;
   }
 
 
@@ -323,8 +339,12 @@ public class BestFirst
    *
    * @return the direction of the search
    */
-  public int getDirection () {
-    return  m_searchDirection;
+  public SelectedTag getDirection () {
+    try {
+      return new SelectedTag(m_searchDirection, TAGS_SELECTION);
+    } catch (Exception ex) {
+      return null;
+    }
   }
 
 
