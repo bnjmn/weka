@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -135,7 +135,7 @@ public class Filter extends JPanel
     m_Filter = c;
     String filterName = c.getClass().toString();
     filterName = filterName.substring(filterName.
-				      lastIndexOf('.')+1, 
+				      indexOf('.')+1, 
 				      filterName.length());
     if (loadImages) {
       if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
@@ -143,7 +143,8 @@ public class Filter extends JPanel
 	useDefaultVisual();
       }
     }
-    m_visual.setText(filterName);
+    m_visual.setText(filterName.substring(filterName.lastIndexOf('.')+1,
+					  filterName.length()));
 
     if (!(m_Filter instanceof StreamableFilter) &&
 	(m_listenees.containsKey("instance"))) {
