@@ -39,24 +39,28 @@ import java.util.*;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SingleIndex implements Serializable {
 
   /** Record the string representation of the number */
-  protected String m_IndexString = "";
+  protected /*@non_null spec_public@*/ String m_IndexString = "";
 
   /** The selected index */
-  protected int m_SelectedIndex = -1;
+  protected /*@ spec_public @*/ int m_SelectedIndex = -1;
 
   /** Store the maximum value permitted. -1 indicates that no upper
       value has been set */
-  protected int m_Upper = -1;
+  protected /*@ spec_public @*/ int m_Upper = -1;
 
   /**
    * Default constructor.
    *
    */
+  //@ assignable m_IndexString, m_SelectedIndex, m_Upper;
+  //@ ensures m_IndexString.equals("");
+  //@ ensures m_SelectedIndex == -1;
+  //@ ensures m_Upper == -1;
   public SingleIndex() {
   }
 
@@ -66,7 +70,11 @@ public class SingleIndex implements Serializable {
    * @param rangeList the initial index
    * @exception IllegalArgumentException if the index is invalid
    */
-  public SingleIndex(String index) {
+  //@ assignable m_IndexString, m_SelectedIndex, m_Upper;
+  //@ ensures m_IndexString == index;
+  //@ ensures m_SelectedIndex == -1;
+  //@ ensures m_Upper == -1;
+  public SingleIndex(/*@non_null@*/ String index) {
 
     setSingleIndex(index);
   }
@@ -76,6 +84,10 @@ public class SingleIndex implements Serializable {
    *
    * @param newUpper the value of "last"
    */
+  //@ requires ! m_IndexString.equals("");
+  //@ assignable m_Upper, m_IndexString, m_SelectedIndex;
+  //@ ensures newUpper < 0 ==> m_Upper == \old(m_Upper);
+  //@ ensures newUpper >= 0 ==> m_Upper == newUpper;
   public void setUpper(int newUpper) {
 
     if (newUpper >= 0) {
@@ -89,7 +101,8 @@ public class SingleIndex implements Serializable {
    *
    * @return the range selection string
    */
-  public String getSingleIndex() {
+  //@ ensures \result == m_IndexString;
+  public /*@pure@*/ String getSingleIndex() {
 
     return m_IndexString;
   }
@@ -101,7 +114,10 @@ public class SingleIndex implements Serializable {
    * @param index the index set
    * @exception IllegalArgumentException if the index was not well formed
    */
-  public void setSingleIndex(String index) {
+  //@ assignable m_IndexString, m_SelectedIndex;
+  //@ ensures m_IndexString == index;
+  //@ ensures m_SelectedIndex == -1;
+  public void setSingleIndex(/*@non_null@*/ String index) {
 
     m_IndexString = index;
     m_SelectedIndex = -1;
@@ -113,7 +129,9 @@ public class SingleIndex implements Serializable {
    * 
    * @return the string representation of the current range
    */
-  public String toString() {
+  //@ also signals (RuntimeException e) \old(m_Upper) < 0;
+  //@ ensures \result != null;
+  public /*@pure@*/ String toString() {
 
     if (m_IndexString.equals("")) {
       return "No index set";
@@ -130,7 +148,9 @@ public class SingleIndex implements Serializable {
    * @return the selected index
    * @exception RuntimeException if the upper limit of the index hasn't been defined
    */
-  public int getIndex() {
+  //@ requires ! m_IndexString.equals("");
+  //@ requires m_Upper >= 0;
+  public /*@pure@*/ int getIndex() {
 
     if (m_IndexString.equals("")) {
       throw new RuntimeException("No index set");
@@ -148,7 +168,8 @@ public class SingleIndex implements Serializable {
    * Since the array will typically come from a program, indices are assumed
    * from 0, and thus will have 1 added in the String representation.
    */
-  public static String indexToString(int index) {
+  //@ requires index >= 0;
+  public static /*@pure non_null@*/ String indexToString(int index) {
 
     return "" + (index + 1);
   }
@@ -159,6 +180,8 @@ public class SingleIndex implements Serializable {
    * @param single the string representing the selection (eg: 1 first last)
    * @return the number corresponding to the selected value
    */
+  //@ requires ! m_IndexString.equals("");
+  //@ assignable m_SelectedIndex, m_IndexString;
   protected void setValue() {
 
     if (m_IndexString.equals("")) {
@@ -186,7 +209,8 @@ public class SingleIndex implements Serializable {
    *
    * @param argv one parameter: a test index specification
    */
-  public static void main(String [] argv) {
+  //@ requires \nonnullelements(argv);
+  public static void main(/*@non_null@*/ String [] argv) {
 
     try {
       if (argv.length == 0) {
