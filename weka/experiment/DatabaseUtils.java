@@ -47,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -67,7 +67,7 @@ public class DatabaseUtils implements Serializable {
   public static final String EXP_RESULT_PREFIX = "Results";
   
   /** The max length of a string in a string field */
-  protected static final int STRING_FIELD_LENGTH  = 300;
+  protected static final int STRING_FIELD_LENGTH  = 255;
 
   /** The name of the properties file */
   protected static String PROPERTY_FILE
@@ -380,7 +380,7 @@ public class DatabaseUtils implements Serializable {
 				 Object[] key)
     throws Exception {
 
-    String query = "SELECT Run"
+    String query = "SELECT Key_Run"
       + " FROM " + tableName;
     String [] keyNames = rp.getKeyNames();
     if (keyNames.length != key.length) {
@@ -533,6 +533,8 @@ public class DatabaseUtils implements Serializable {
       if (key[i] != null) {
 	if (key[i] instanceof String) {
 	  query += '\'' + key[i].toString() + '\'';
+	} else if (key[i] instanceof Double) {
+	  query += safeDoubleToString((Double)key[i]);
 	} else {
 	  query += key[i].toString();
 	}
@@ -545,6 +547,8 @@ public class DatabaseUtils implements Serializable {
       if (result[i] != null) {
 	if (result[i] instanceof String) {
 	  query += '"' + result[i].toString() + '"';
+	} else  if (result[i] instanceof Double) {
+	  query += safeDoubleToString((Double)result[i]);
 	} else {
 	  query += result[i].toString();
 	}
@@ -563,6 +567,24 @@ public class DatabaseUtils implements Serializable {
     }
   }
   
+  /**
+   * Inserts a + if the double is in scientific notation.
+   * MySQL doesn't understand the number otherwise.
+   */
+  private String safeDoubleToString(Double number) {
+
+    String orig = number.toString();
+
+    int pos = orig.indexOf('E');
+    if ((pos == -1) || (orig.charAt(pos + 1) == '-')) {
+      return orig;
+    } else {
+      StringBuffer buff = new StringBuffer(orig);
+      buff.insert(pos + 1, '+');
+      return new String(buff);
+    }
+  }
+
   /**
    * Returns true if the experiment index exists.
    *
@@ -587,7 +609,7 @@ public class DatabaseUtils implements Serializable {
     String query = "CREATE TABLE " + EXP_INDEX_TABLE 
       + " ( " + EXP_TYPE_COL + " VARCHAR (" + STRING_FIELD_LENGTH + "),"
       + "  " + EXP_SETUP_COL + " VARCHAR (" + STRING_FIELD_LENGTH + "),"
-      + "  " + EXP_RESULT_COL + " INT AUTO INCREMENT )";
+      + "  " + EXP_RESULT_COL + " INT )";
     // Other possible fields:
     //   creator user name (from System properties)
     //   creation date
@@ -612,18 +634,56 @@ public class DatabaseUtils implements Serializable {
     if (m_Debug) {
       System.err.println("Creating experiment index entry...");
     }
+
+    // Execute compound transaction
+    int numRows = 0;
+    
+    // Workaround for MySQL (doesn't support transactions)
+    if (m_Connection.getMetaData().getDriverName().
+	equals("Mark Matthews' MySQL Driver")) {
+      m_Statement.execute("LOCK TABLES " + EXP_INDEX_TABLE + " WRITE");
+      System.err.println("LOCKING TABLE");
+    } else {
+      m_Connection.setAutoCommit(false);
+    }
+
+    // Get the number of rows
+    String query = "SELECT COUNT(*) FROM " + EXP_INDEX_TABLE;
+    if (m_Statement.execute(query)) {
+      if (m_Debug) {
+	System.err.println("...getting number of rows");
+      }
+      ResultSet rs = m_Statement.getResultSet();
+      if (rs.next()) {
+	numRows = rs.getInt(1);
+      }
+      rs.close();
+    }
+
     // Add an entry in the index table
     String expType = rp.getClass().getName();
     String expParams = rp.getCompatibilityState();
-    String query = "INSERT INTO " + EXP_INDEX_TABLE
+    query = "INSERT INTO " + EXP_INDEX_TABLE
       + " VALUES ( \""
       + expType + "\", \"" + expParams
-      + "\",)";
+      + "\", " + numRows + " )";
     if (m_Statement.execute(query)) {
       if (m_Debug) {
 	System.err.println("...create returned resultset");
       }
     }
+    
+    // Finished compound transaction
+    // Workaround for MySQL (doesn't support transactions)
+    if (m_Connection.getMetaData().getDriverName().
+	equals("Mark Matthews' MySQL Driver")) {
+      m_Statement.execute("UNLOCK TABLES");
+      System.err.println("UNLOCKING TABLE");
+    } else {
+      m_Connection.commit();
+      m_Connection.setAutoCommit(true);
+    }
+
     String tableName = getResultsTableName(rp);
     if (tableName == null) {
       throw new Exception("Problem adding experiment index entry");
@@ -726,7 +786,7 @@ public class DatabaseUtils implements Serializable {
       throw new Exception("result names and types differ in length");
     }
     for (int i = 0; i < names.length; i++) {
-      query += '"' + names[i] + "\" ";
+      query += names[i] + " ";
       if (types[i] instanceof Double) {
 	query += "DOUBLE";
       } else if (types[i] instanceof String) {
@@ -739,6 +799,7 @@ public class DatabaseUtils implements Serializable {
       }
     }
     query += " )";
+    System.err.println(query);
     if (m_Statement.execute(query)) {
       if (m_Debug) {
 	System.err.println("...create returned resultset");
