@@ -123,12 +123,14 @@ weka.filters.Filter = \
  weka.filters.AttributeFilter, \
  weka.filters.AttributeSelectionFilter, \
  weka.filters.AttributeTypeFilter, \
+ weka.filters.ClassOrderFilter, \
  weka.filters.CopyAttributesFilter, \
  weka.filters.DiscretizeFilter, \
  weka.filters.FirstOrderFilter, \
  weka.filters.InstanceFilter, \
  weka.filters.MakeIndicatorFilter, \
  weka.filters.MergeTwoValuesFilter, \
+ weka.filters.MisclassificationFilter, \
  weka.filters.NominalToBinaryFilter, \
  weka.filters.NonSparseToSparseFilter, \
  weka.filters.NormalizationFilter, \
@@ -147,8 +149,7 @@ weka.filters.Filter = \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
  weka.filters.TimeSeriesTranslateFilter, \
- weka.filters.UselessAttributeFilter, \
- weka.filters.ClassOrderFilter
+ weka.filters.UselessAttributeFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
