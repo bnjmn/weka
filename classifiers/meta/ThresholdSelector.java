@@ -87,7 +87,7 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -126,7 +126,7 @@ public class ThresholdSelector extends DistributionClassifier
 
   /** The generated base classifier */
   protected DistributionClassifier m_Classifier = 
-    new weka.classifiers.rules.ZeroR();
+    new weka.classifiers.functions.Logistic();
 
   /** The upper threshold used as the basis of correction */
   protected double m_HighThreshold = 1;
