@@ -39,8 +39,15 @@ import java.lang.reflect.InvocationTargetException;
  * A SplitEvaluator that produces results for a classification scheme
  * on a nominal class attribute.
  *
+ * -W classname <br>
+ * Specify the full class name of the classifier to evaluate. <p>
+ *
+ * -C class index <br>
+ * The index of the class for which IR statistics are to
+ * be output. (default 0) <p>
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -76,6 +83,20 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   /** The length of a result */
   private static final int RESULT_SIZE = 21;
 
+  /** The number of IR statistics */
+  private static final int NUM_IR_STATISTICS = 11;
+
+  /** Class index for information retrieval statistics (default 0) */
+  private int m_IRclass = 0;
+
+  /**
+   * No args constructor.
+   */
+  public ClassifierSplitEvaluator() {
+
+    updateOptions();
+  }
+
   /**
    * Returns a string describing this split evaluator
    * @return a description of the split evaluator suitable for
@@ -93,13 +114,18 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
 	     "\tThe full class name of the classifier.\n"
 	      +"\teg: weka.classifiers.NaiveBayes", 
 	     "W", 1, 
 	     "-W <class name>"));
+    newVector.addElement(new Option(
+	     "\tThe index of the class for which IR statistics\n" +
+	     "\tare to be output. (default 0)",
+	     "C", 1, 
+	     "-C <index>"));
 
     if ((m_Classifier != null) &&
 	(m_Classifier instanceof OptionHandler)) {
@@ -120,6 +146,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    *
    * -W classname <br>
    * Specify the full class name of the classifier to evaluate. <p>
+   *
+   * -C class index <br>
+   * The index of the class for which IR statistics are to
+   * be output. (default 0) <p>
    *
    * All option after -- will be passed to the classifier.
    *
@@ -142,6 +172,13 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 	.setOptions(Utils.partitionOptions(options));
       updateOptions();
     }
+
+    String indexName = Utils.getOption('C', options);
+    if (indexName.length() != 0) {
+      m_IRclass = (new Integer(indexName)).intValue();
+    } else {
+      m_IRclass = 0;
+    }
   }
 
   /**
@@ -157,13 +194,15 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
     
-    String [] options = new String [classifierOptions.length + 3];
+    String [] options = new String [classifierOptions.length + 5];
     int current = 0;
 
     if (getClassifier() != null) {
       options[current++] = "-W";
       options[current++] = getClassifier().getClass().getName();
     }
+    options[current++] = "-C"; 
+    options[current++] = "" + m_IRclass;
     options[current++] = "--";
 
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -281,7 +320,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    Object [] resultTypes = new Object[RESULT_SIZE+addm];
+    int overall_length = RESULT_SIZE+addm;
+    overall_length += NUM_IR_STATISTICS;
+    Object [] resultTypes = new Object[overall_length];
     Double doub = new Double(0);
     int current = 0;
     resultTypes[current++] = doub;
@@ -309,13 +350,26 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
+    // IR stats
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+
     resultTypes[current++] = "";
 
     // add any additional measures
     for (int i=0;i<addm;i++) {
       resultTypes[current++] = doub;
     }
-    if (current != RESULT_SIZE+addm) {
+    if (current != overall_length) {
       throw new Error("ResultTypes didn't fit RESULT_SIZE");
     }
     return resultTypes;
@@ -332,7 +386,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    String [] resultNames = new String[RESULT_SIZE+addm];
+    int overall_length = RESULT_SIZE+addm;
+    overall_length += NUM_IR_STATISTICS;
+    String [] resultNames = new String[overall_length];
     int current = 0;
     resultNames[current++] = "Number_of_instances";
 
@@ -363,13 +419,26 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "KB_mean_information";
     resultNames[current++] = "KB_relative_information";
 
+    // IR stats
+    resultNames[current++] = "True_positive_rate";
+    resultNames[current++] = "Num_true_positives";
+    resultNames[current++] = "False_positive_rate";
+    resultNames[current++] = "Num_false_positives";
+    resultNames[current++] = "True_negative_rate";
+    resultNames[current++] = "Num_true_negatives";
+    resultNames[current++] = "False_negative_rate";
+    resultNames[current++] = "Num_false_negatives";
+    resultNames[current++] = "IR_precision";
+    resultNames[current++] = "IR_recall";
+    resultNames[current++] = "F_measure";
+
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
     for (int i=0;i<addm;i++) {
       resultNames[current++] = m_AdditionalMeasures[i];
     }
-    if (current != RESULT_SIZE+addm) {
+    if (current != overall_length) {
       throw new Error("ResultNames didn't fit RESULT_SIZE");
     }
     return resultNames;
@@ -396,7 +465,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    Object [] result = new Object[RESULT_SIZE+addm];
+    int overall_length = RESULT_SIZE+addm;
+    overall_length += NUM_IR_STATISTICS;
+
+    Object [] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
     m_Classifier.buildClassifier(train);
     eval.evaluateModel(m_Classifier, test);
@@ -429,6 +501,19 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.KBMeanInformation());
     result[current++] = new Double(eval.KBRelativeInformation());
 
+    // IR stats
+    result[current++] = new Double(eval.truePositiveRate(m_IRclass));
+    result[current++] = new Double(eval.numTruePositives(m_IRclass));
+    result[current++] = new Double(eval.falsePositiveRate(m_IRclass));
+    result[current++] = new Double(eval.numFalsePositives(m_IRclass));
+    result[current++] = new Double(eval.trueNegativeRate(m_IRclass));
+    result[current++] = new Double(eval.numTrueNegatives(m_IRclass));
+    result[current++] = new Double(eval.falseNegativeRate(m_IRclass));
+    result[current++] = new Double(eval.numFalseNegatives(m_IRclass));
+    result[current++] = new Double(eval.precision(m_IRclass));
+    result[current++] = new Double(eval.recall(m_IRclass));
+    result[current++] = new Double(eval.fMeasure(m_IRclass));
+
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
@@ -452,7 +537,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       }
     }
 
-    if (current != RESULT_SIZE+addm) {
+    if (current != overall_length) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
     return result;
@@ -489,7 +574,25 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     
     System.err.println("ClassifierSplitEvaluator: In set classifier");
   }
-
+  
+  /**
+   * Get the value of ClassForIRStatistics.
+   * @return Value of ClassForIRStatistics.
+   */
+  public int getClassForIRStatistics() {
+    
+    return m_IRclass;
+  }
+  
+  /**
+   * Set the value of ClassForIRStatistics.
+   * @param v  Value to assign to ClassForIRStatistics.
+   */
+  public void setClassForIRStatistics(int v) {
+    
+    m_IRclass = v;
+  }
+  
   /**
    * Updates the options that the current classifier is using.
    */
