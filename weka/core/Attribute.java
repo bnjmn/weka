@@ -50,7 +50,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -278,8 +278,7 @@ public class Attribute implements Copyable, Serializable {
   }
   
   /**
-   * Returns the number of attribute values. Returns 0 for numeric attributes
-   * and string attributes.
+   * Returns the number of attribute values. Returns 0 for numeric attributes.
    *
    * @return the number of attribute values
    */
