@@ -89,7 +89,8 @@ weka.attributeSelection.ASEvaluation = \
  weka.attributeSelection.ReliefFAttributeEval, \
  weka.attributeSelection.InfoGainAttributeEval, \
  weka.attributeSelection.GainRatioAttributeEval, \
- weka.attributeSelection.SymmetricalUncertAttributeEval
+ weka.attributeSelection.SymmetricalUncertAttributeEval, \
+ weka.attributeSelection.OneRAttributeEval
 
 # Lists the Attribute Selection Search methods I want to choose from
 weka.attributeSelection.ASSearch = \
@@ -98,7 +99,8 @@ weka.attributeSelection.ASSearch = \
  weka.attributeSelection.GeneticSearch, \
  weka.attributeSelection.RandomSearch, \
  weka.attributeSelection.ExhaustiveSearch, \
- weka.attributeSelection.Ranker
+ weka.attributeSelection.Ranker, \
+ weka.attributeSelection.RankSearch
 
 # Lists the Associators I want to choose from
 weka.associations.Associator=\
