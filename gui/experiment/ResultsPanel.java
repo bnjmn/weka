@@ -75,7 +75,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -260,7 +260,7 @@ public class ResultsPanel extends JPanel {
 	performTest();
       }
     });
-    m_OutText.setFont(new Font("Dialoginput", Font.PLAIN, 10));
+    m_OutText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutText.setEditable(false);
     m_History.setBorder(BorderFactory.createTitledBorder("Result list"));

@@ -52,7 +52,7 @@ import java.util.Vector;
  * through previous commmands. This gui uses only AWT (i.e. no Swing).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SimpleCLI extends Frame implements ActionListener {
   
@@ -202,7 +202,7 @@ public class SimpleCLI extends Frame implements ActionListener {
       }
     });
     m_OutputArea.setEditable(false);
-    m_OutputArea.setFont(new Font("Dialoginput", Font.PLAIN, 10));
+    m_OutputArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
     // Redirect System.out to the text area
     //    System.out.println("Redirecting System.out");
     PipedInputStream pio = new PipedInputStream(m_POO);
