@@ -54,7 +54,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class GeneticSearch extends ASSearch implements OptionHandler {
 
@@ -566,7 +566,9 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
 	  ((i % m_reportFrequency) == 0) ||
 	  (converged == true)) {
 	m_generationReports.append(populationReport(i));
-	break;
+	if (converged == true) {
+	  break;
+	}
       }
     }
     return attributeList(m_best.getChromosome());
@@ -613,6 +615,7 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
     GABitSet localbest = null;
     BitSet temp;
     boolean converged = false;
+    int oldcount = Integer.MAX_VALUE;
 
     if (m_maxFitness - m_minFitness > 0) {
       // find the best in this population
@@ -620,18 +623,27 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
 	if (m_population[i].getObjective() > b) {
 	  b = m_population[i].getObjective();
 	  localbest = m_population[i];
-	} 
+	  oldcount = countFeatures(localbest.getChromosome());
+	} else if (Utils.eq(m_population[i].getObjective(), b)) {
+	  // see if it contains fewer features
+	  count = countFeatures(m_population[i].getChromosome());
+	  if (count < oldcount) {
+	    b = m_population[i].getObjective();
+	    localbest = m_population[i];
+	    oldcount = count;
+	  }
+	}
       }
     } else {
       // look for the smallest subset
       for (i=0;i<m_popSize;i++) {
 	temp = m_population[i].getChromosome();
-	count = 0;
-	for (j=0;j<m_numAttribs;j++) {
+	count = countFeatures(temp);;
+	/*	for (j=0;j<m_numAttribs;j++) {
 	  if (temp.get(j)) {
 	    count++;
 	  }
-	}
+	  }*/
 	if (count < lowestCount) {
 	  lowestCount = count;
 	  localbest = m_population[i];
@@ -644,11 +656,12 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
     // count the number of features in localbest
     count = 0;
     temp = localbest.getChromosome();
-    for (j=0;j<m_numAttribs;j++) {
+    count = countFeatures(temp);
+    /*    for (j=0;j<m_numAttribs;j++) {
       if (temp.get(j)) {
 	count++;
       }
-    }
+      } */
 
     // compare to the best found so far
     if (m_best == null) {
@@ -668,12 +681,29 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
   }
 
   /**
+   * counts the number of features in a subset
+   * @param featureSet the feature set for which to count the features
+   * @return the number of features in the subset
+   */
+  private int countFeatures(BitSet featureSet) {
+    int count = 0;
+    for (int i=0;i<m_numAttribs;i++) {
+      if (featureSet.get(i)) {
+	count++;
+      }
+    }
+    return count;
+  }
+
+  /**
    * performs a single generation---selection, crossover, and mutation
    * @exception if an error occurs
    */
   private void generation () throws Exception {
     int i,j=0;
-    double best_fit = 0.0;
+    double best_fit = -Double.MAX_VALUE;
+    int old_count = 0;
+    int count;
     GABitSet [] newPop = new GABitSet [m_popSize];
     int parent1,parent2;
 
@@ -683,6 +713,14 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
       if (m_population[i].getFitness() > best_fit) {
 	j = i;
 	best_fit = m_population[i].getFitness();
+	old_count = countFeatures(m_population[i].getChromosome());
+      } else if (Utils.eq(m_population[i].getFitness(), best_fit)) {
+	count = countFeatures(m_population[i].getChromosome());
+	if (count < old_count) {
+	  j = i;
+	  best_fit = m_population[i].getFitness();
+	  old_count = count;
+	}
       }
     }
     newPop[0] = (GABitSet)(m_population[j].clone());
