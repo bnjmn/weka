@@ -131,7 +131,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class JRip extends DistributionClassifier 
   implements OptionHandler, 
@@ -1114,13 +1114,27 @@ public class JRip extends DistributionClassifier
       for(int i=y; i<orderedClasses.length; i++)
 	all += orderedClasses[i];
       double expFPRate = orderedClasses[y] / all;	    
-	    
+		
+      double classYWeights = 0, totalWeights = 0;
+      for(int j=0; j < data.numInstances(); j++){
+	  Instance datum = data.instance(j);
+	  totalWeights += datum.weight();
+	  if((int)datum.classValue() == y){
+	      classYWeights += datum.weight();
+	  }	          
+      }	
+          
       // DL of default rule, no theory DL, only data DL
-      double defDL = RuleStats.dataDL(expFPRate, 
-				      0.0,
-				      Utils.sum(orderedClasses),
-				      0.0,
-				      orderedClasses[y]);	    
+      double defDL;
+      if(classYWeights > 0)
+	  defDL = RuleStats.dataDL(expFPRate, 
+				   0.0,
+				   totalWeights,
+				   0.0,
+				   classYWeights);	    
+      else
+	  continue oneClass; // Subsumed by previous rules
+
       if(Double.isNaN(defDL) || Double.isInfinite(defDL))
 	throw new Exception("Should never happen: "+
 			    "defDL NaN or infinite!");
@@ -1198,19 +1212,7 @@ public class JRip extends DistributionClassifier
     double[] rst;
 	
     // Check whether data have positive examples
-    boolean defHasPositive = false;
-	
-    for(int j=0; j < newData.numInstances(); j++){
-      Instance datum = newData.instance(j);
-      if((int)datum.classValue() == (int)classIndex){
-	defHasPositive = true;
-	break;
-      }	          
-    }	
-	
-    if(!defHasPositive)// Subsumed by previous rules
-      return data;
-	
+    boolean defHasPositive = true; // No longer used
     boolean hasPositive = defHasPositive;
 	
     /********************** Building stage ***********************/	
@@ -1610,10 +1612,10 @@ public class JRip extends DistributionClassifier
    */
   public String toString() {
     if (m_Ruleset == null) 
-      return "RIPPER: No model built yet.";
+      return "JRIP: No model built yet.";
 	
-    StringBuffer sb = new StringBuffer("RIPPER rules:\n"+
-				       "=============\n\n"); 
+    StringBuffer sb = new StringBuffer("JRIP rules:\n"+
+				       "===========\n\n"); 
     for(int j=0; j<m_RulesetStats.size(); j++){
       RuleStats rs = (RuleStats)m_RulesetStats.elementAt(j);
       FastVector rules = rs.getRuleset();
