@@ -42,7 +42,7 @@ import java.util.Vector;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoveType extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -80,6 +80,7 @@ public class RemoveType extends Filter
     int[] attsToDelete = new int[instanceInfo.numAttributes()];
     int numToDelete = 0;
     for (int i=0; i<instanceInfo.numAttributes(); i++) {
+      if (i == instanceInfo.classIndex()) continue; // skip class
       if (instanceInfo.attribute(i).type() == m_attTypeToDelete)
 	attsToDelete[numToDelete++] = i;
     }
