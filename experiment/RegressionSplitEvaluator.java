@@ -48,7 +48,7 @@ import java.lang.reflect.InvocationTargetException;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -324,7 +324,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    String [] resultNames = new String[RESULT_SIZE];
+    String [] resultNames = new String[RESULT_SIZE+addm];
     int current = 0;
     resultNames[current++] = "Number_of_instances";
 
@@ -376,7 +376,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    Object [] result = new Object[RESULT_SIZE];
+    Object [] result = new Object[RESULT_SIZE+addm];
     Evaluation eval = new Evaluation(train);
     m_Classifier.buildClassifier(train);
     eval.evaluateModel(m_Classifier, test);
