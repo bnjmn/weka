@@ -48,7 +48,7 @@ import java.awt.Point;
  * single-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -135,6 +135,7 @@ public class ResultHistoryPanel extends JPanel {
     if (buff != null) {
       m_SingleName = name;
       m_SingleText.setText(buff.toString());
+      m_List.setSelectedValue(name, true);
     }
   }
   
