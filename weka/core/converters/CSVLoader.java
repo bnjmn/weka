@@ -35,12 +35,13 @@ import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.Attribute;
 import java.io.StreamTokenizer;
+import java.lang.String;
 
 /**
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Loader
  */
 public class CSVLoader extends AbstractLoader 
@@ -108,7 +109,7 @@ implements FileSourcedConverter, BatchConverter {
    *
    * @return the source file
    */
-  public File getFile() {
+  public File retrieveFile() {
     return new File(m_File);
   }
 
@@ -261,7 +262,8 @@ implements FileSourcedConverter, BatchConverter {
     }
 
     // make the instances
-    Instances dataSet = new Instances(m_sourceFile.getName(), 
+    String relationName = (m_sourceFile.getName()).replaceAll("\\.[cC][sS][vV]$","");
+    Instances dataSet = new Instances(relationName, 
 				      atts, 
 				      m_cumulativeInstances.size());
 
@@ -493,8 +495,8 @@ implements FileSourcedConverter, BatchConverter {
       attribNames.addElement(new Attribute(tokenizer.sval));
       ConverterUtils.getToken(tokenizer);
     }
-    
-    m_structure = new Instances(m_sourceFile.getName(), attribNames, 0);
+    String relationName = (m_sourceFile.getName()).replaceAll("\\.[cC][sS][vV]$","");
+    m_structure = new Instances(relationName, attribNames, 0);
   }
 
   /**

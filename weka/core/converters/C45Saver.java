@@ -48,24 +48,29 @@ import weka.core.FastVector;
  * Valid options:
  *
  * -i input arff file <br>
- * The input filw in arff format. <p>
+ * The input filw in ARFF format. <p>
  *
  * -o the output file <br>
- * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
+ * The output file. The prefix of the output file is sufficient.<p>
  *
  * -c class index <br>
  * The index of the class attribute. first and last are valid as well (default: last). <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class C45Saver extends AbstractSaver implements BatchConverter, IncrementalConverter, OptionHandler {
+public class C45Saver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, OptionHandler {
 
+  /** Constructor */  
+  public C45Saver(){
+  
+      resetOptions();
+  }
    
   /**
-   * Returns a string describing this Loader
-   * @return a description of the Loader suitable for
+   * Returns a string describing this Saver
+   * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
@@ -112,7 +117,7 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
       }
       if(getRetrieval() == BATCH || getRetrieval() == NONE)
           throw new IOException("Batch and incremental saving cannot be mixed.");
-      if(getFile() == null || getWriter() == null){
+      if(retrieveFile() == null || getWriter() == null){
           throw new IOException("C4.5 format requires two files. Therefore no output to standard out can be generated.\nPlease specifiy output files using the -o option.");
       }
       
@@ -168,7 +173,7 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
           
           writeMode = getWriteMode();
           
-          String out = getFile().getAbsolutePath();
+          String out = retrieveFile().getAbsolutePath();
           setFileExtension(".data");
           out = out.substring(0, out.lastIndexOf('.')) + getFileExtension();
           File namesFile = new File(out);
@@ -178,7 +183,7 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
           } catch(Exception ex){
             throw new IOException("Cannot create data file, only names file created.");
           }
-          if(getFile() == null || getWriter() == null){
+          if(retrieveFile() == null || getWriter() == null){
             throw new IOException("Cannot create data file, only names file created.");
           }
           outW = new PrintWriter(getWriter());
@@ -209,6 +214,12 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
                 outW.write(structure.attribute(structure.classIndex()).value((int)inst.value(structure.classIndex())));
             }
             outW.write("\n");
+            //flushes every 100 instances
+            m_incrementalCounter++;
+            if(m_incrementalCounter > 100){
+                m_incrementalCounter = 0;
+                outW.flush();
+            }
           }
           else{
           //close
@@ -217,8 +228,8 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
                 outW.close();
               }
               setFileExtension(".names");
-              setWriteMode(WAIT);
-              setStructure(null);
+              m_incrementalCounter = 0;
+              resetStructure();
           }
       }
   }
@@ -243,11 +254,12 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
           throw new IOException("Batch and incremental saving cannot be mixed.");
       
       setRetrieval(BATCH);
-      if(getFile() == null || getWriter() == null){
+      if(retrieveFile() == null || getWriter() == null){
           throw new IOException("C4.5 format requires two files. Therefore no output to standard out can be generated.\nPlease specifiy output files using the -o option.");
       }
       setWriteMode(WRITE);
       //print names file
+      setFileExtension(".names");
       PrintWriter outW = new PrintWriter(getWriter());
       for (int i = 0; i < instances.attribute(instances.classIndex()).numValues(); i++) {
         outW.write(instances.attribute(instances.classIndex()).value(i));
@@ -279,17 +291,17 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
       outW.close();
       
       //print data file
-      String out = getFile().getAbsolutePath();
+      String out = retrieveFile().getAbsolutePath();
       setFileExtension(".data");
       out = out.substring(0, out.lastIndexOf('.')) + getFileExtension();
       File namesFile = new File(out);
       try{
         setFile(namesFile);
-        setDestination(namesFile);
+        setDestination(retrieveFile());
       } catch(Exception ex){
           throw new IOException("Cannot create data file, only names file created.");
       }
-      if(getFile() == null || getWriter() == null){
+      if(retrieveFile() == null || getWriter() == null){
           throw new IOException("Cannot create data file, only names file created.");
       }
       outW = new PrintWriter(getWriter());
@@ -350,10 +362,10 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
    * Parses a given list of options. Valid option is:<p>
    *   
    * -i input arff file <br>
-   * The input filw in arff format. <p>
+   * The input filw in ARFF format. <p>
    *  
    * -o the output file <br>
-   * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
+   * The output file. The prefix of the output file is sufficient.<p>
    *
    * -c class index <br>
    * The index of the class attribute. first and last are valid as well (default: last). <p>
@@ -396,7 +408,7 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
         } catch(Exception ex){
             throw new IOException("Cannot create output file.");
         } finally{
-            setDestination(getFile());
+            setDestination(retrieveFile());
         }
     }
     if(indexString.length() != 0){
@@ -420,7 +432,7 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
   }
 
   /**
-   * Gets the current settings of the PredictiveApriori object.
+   * Gets the current settings of the C45Saver object.
    *
    * @return an array of strings suitable for passing to setOptions
    */
@@ -428,19 +440,20 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
 
     String [] options = new String [10];
     int current = 0;
-    if(getFile() != null){
-        options[current++] = "-o"; options[current++] = "" + getFile();
+    if(retrieveFile() != null){
+        options[current++] = "-o"; options[current++] = "" + retrieveFile();
     }
     else{
         options[current++] = "-o"; options[current++] = "";
     }
     if(getInstances() != null){
         options[current++] = "-i"; options[current++] = "" + getInstances().relationName();
+        options[current++] = "-c"; options[current++] = "" + getInstances().classIndex();
     }
     else{
         options[current++] = "-i"; options[current++] = "";
+        options[current++] = "-c"; options[current++] = "";
     }
-    options[current++] = "-c"; options[current++] = "" + getInstances().classIndex();
     while (current < options.length) {
       options[current++] = "";
     }
@@ -455,21 +468,32 @@ public class C45Saver extends AbstractSaver implements BatchConverter, Increment
    * @param options should contain the options of a Saver.
    */
   public static void main(String [] options) {
+      
+      StringBuffer text = new StringBuffer();
       try {
 	C45Saver csv = new C45Saver();
+        text.append("\n\nC45Saver options:\n\n");
+        Enumeration enumi = csv.listOptions();
+        while (enumi.hasMoreElements()) {
+            Option option = (Option)enumi.nextElement();
+            text.append(option.synopsis()+'\n');
+            text.append(option.description()+'\n');
+        }
         try {
           csv.setOptions(options);  
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println("\n"+text);
+            System.exit(1);
 	}
         //incremental
         /*
         csv.setRetrieval(INCREMENTAL);
         Instances instances = csv.getInstances();
         csv.setStructure(instances);
-        for(int i = 0; i <= instances.numInstances(); i++){ //last instance is null and finishes incremental saving
+        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
             csv.writeIncremental(instances.instance(i));
         }
+        csv.writeIncremental(null);
         */
         
         //batch

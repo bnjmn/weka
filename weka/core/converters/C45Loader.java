@@ -41,7 +41,7 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Loader
  */
 public class C45Loader extends AbstractLoader 
@@ -141,7 +141,7 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    *
    * @return the source file
    */
-  public File getFile() {
+  public File retrieveFile() {
     return new File(m_File);
   }
 
@@ -182,7 +182,7 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       fileStem = fname;
       fname += ".names";
     } else {
-      fileStem = fname.substring(0, fname.indexOf('.'));
+      fileStem = fname.substring(0, fname.lastIndexOf('.'));
       fname = fileStem + ".names";
     }
     m_fileStem = fileStem;
@@ -256,7 +256,7 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       result.add(current);
       current = getInstance(st);
     }
-
+    reset();
     return result;
   }
 
@@ -295,6 +295,9 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
     Instance nextI = getInstance(st);
     if (nextI != null) {
       nextI.setDataset(m_structure);
+    }
+    else{
+        reset();
     }
     return nextI;
   }

@@ -33,9 +33,11 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.ObjectOutputStream;
 import java.io.BufferedOutputStream;
+import java.util.Enumeration;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
 
 /**
  * Serialzes to a destination.
@@ -49,15 +51,21 @@ import weka.core.Instances;
  * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class SerializedInstancesSaver extends AbstractSaver implements BatchConverter, IncrementalConverter {
+public class SerializedInstancesSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
 
-   
+   /** Constructor */  
+  public SerializedInstancesSaver(){
+  
+      resetOptions();
+  }
+    
+    
   /**
-   * Returns a string describing this Loader
-   * @return a description of the Loader suitable for
+   * Returns a string describing this Saver
+   * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
@@ -94,7 +102,7 @@ public class SerializedInstancesSaver extends AbstractSaver implements BatchConv
     boolean success = false;
     String out = file.getAbsolutePath();
     
-    if(getFile() != null){
+    if(retrieveFile() != null){
         try{
             if(out.lastIndexOf(File.separatorChar) == -1)
                 success = file.createNewFile();
@@ -137,14 +145,14 @@ public class SerializedInstancesSaver extends AbstractSaver implements BatchConv
       if(getInstances() == null)
           throw new IOException("No instances to save");
       setRetrieval(BATCH);
-      if(getFile() == null){
+      if(retrieveFile() == null){
         throw new IOException("No output to standard out for serialization.");
       }
       setWriteMode(WRITE);
       ObjectOutputStream outW = 
 		  new ObjectOutputStream(
 		  new BufferedOutputStream(
-		  new FileOutputStream(getFile())));
+		  new FileOutputStream(retrieveFile())));
 
       outW.writeObject(getInstances());
       outW.flush();
@@ -158,12 +166,22 @@ public class SerializedInstancesSaver extends AbstractSaver implements BatchConv
    * @param options should contain the options of a Saver.
    */
   public static void main(String [] options) {
+      
+      StringBuffer text = new StringBuffer();
       try {
 	SerializedInstancesSaver ssv = new SerializedInstancesSaver();
+        text.append("\n\nSerializedInstancesSaver options:\n\n");
+        Enumeration enumi = ssv.listOptions();
+        while (enumi.hasMoreElements()) {
+            Option option = (Option)enumi.nextElement();
+            text.append(option.synopsis()+'\n');
+            text.append(option.description()+'\n');
+        }
         try {
           ssv.setOptions(options);  
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println("\n"+text);
+            System.exit(1);
 	}
         ssv.writeBatch();
       } catch (Exception ex) {
