@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -516,7 +516,7 @@ public class ClassifierSubsetEval
     // copy the training instances
     trainCopy = new Instances(m_trainingInstances);
     
-    testCopy = new Instance(holdOut);
+    testCopy = (Instance)holdOut.copy();
 
     // count attributes set in the BitSet
     for (i = 0; i < m_numAttribs; i++) {

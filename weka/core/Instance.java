@@ -62,7 +62,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.19.2.1 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -92,7 +92,7 @@ public class Instance implements Copyable, Serializable {
    * values and the weight are to be copied 
    */
   //@ ensures m_Dataset == null;
-  public Instance(/*@non_null@*/ Instance instance) {
+  protected Instance(/*@non_null@*/ Instance instance) {
     
     m_AttValues = instance.m_AttValues;
     m_Weight = instance.m_Weight;

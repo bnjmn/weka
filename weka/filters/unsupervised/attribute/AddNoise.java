@@ -54,7 +54,7 @@ import java.util.Vector;
  * and for choosing the value it is changed to (default 1). <p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.2.2.1 $ 
  **/
 public class AddNoise extends Filter implements UnsupervisedFilter,
 						OptionHandler {
@@ -392,7 +392,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
               m_UseMissing);
 
     for(int i=0; i<getInputFormat().numInstances(); i++) {
-      push (new Instance(getInputFormat().instance(i)));
+      push ((Instance)getInputFormat().instance(i).copy());
     }
 
     m_NewBatch = true;
