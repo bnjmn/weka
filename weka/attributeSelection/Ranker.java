@@ -40,7 +40,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -383,10 +383,6 @@ public class Ranker extends ASSearch
 			   + " is not a" 
 			   + "Attribute evaluator!");
     }
-    
-    if (ASEval instanceof AttributeTransformer) {
-      data = ((AttributeTransformer)ASEval).transformedHeader();
-    }
 
     m_numAttribs = data.numAttributes();
 
@@ -394,8 +390,22 @@ public class Ranker extends ASSearch
       m_hasClass = false;
     }
     else {
-      m_hasClass = true;
       m_classIndex = data.classIndex();
+      if (m_classIndex >= 0) {	
+	m_hasClass = true;
+      } else {
+	m_hasClass = false;
+      }
+    }
+
+    // get the transformed data and check to see if the transformer
+    // preserves a class index
+    if (ASEval instanceof AttributeTransformer) {
+      data = ((AttributeTransformer)ASEval).transformedHeader();
+      if (m_classIndex >= 0 && data.classIndex() >= 0) {
+	m_classIndex = data.classIndex();
+	m_hasClass = true;
+      }
     }
 
 
