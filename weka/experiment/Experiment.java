@@ -47,7 +47,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -90,6 +90,10 @@ public class Experiment implements Serializable, OptionHandler {
       datasets involved in this experiment. */
   protected boolean m_ClassFirst = false;
 
+  /** If true an experiment will advance the current data set befor
+      any custom itererator */
+  protected boolean m_AdvanceDataSetFirst = true;
+
   /**
    * Sets whether the first attribute is treated as the class
    * for all datasets involved in the experiment. This information
@@ -100,6 +104,29 @@ public class Experiment implements Serializable, OptionHandler {
     m_ClassFirst = flag;
   }
 
+  
+  boolean m_m_AdvanceRunFirst;
+  
+  /**
+   * Get the value of m_DataSetFirstFirst.
+   *
+   * @return Value of m_DataSetFirstFirst.
+   */
+  public boolean getAdvanceDataSetFirst() {
+    
+    return m_AdvanceDataSetFirst;
+  }
+  
+  /**
+   * Set the value of m_AdvanceDataSetFirst.
+   *
+   * @param newm_AdvanceDataSetFirst Value to assign to m_AdvanceRunFirst.
+   */
+  public void setAdvanceDataSetFirst(boolean newAdvanceDataSetFirst) {
+    
+    m_AdvanceDataSetFirst = newAdvanceDataSetFirst;
+  }
+  
   /**
    * Gets whether the custom property iterator should be used.
    *
@@ -410,20 +437,44 @@ public class Experiment implements Serializable, OptionHandler {
    */
   public void advanceCounters() {
 
-    m_RunNumber ++;
-    if (m_RunNumber > getRunUpper()) {
-      m_RunNumber = getRunLower();
-      m_DatasetNumber ++;
-      m_CurrentInstances = null;
-      if (m_DatasetNumber >= getDatasets().size()) {
-	m_DatasetNumber = 0;
+    if (m_AdvanceDataSetFirst) {
+      m_RunNumber ++;
+      if (m_RunNumber > getRunUpper()) {
+	m_RunNumber = getRunLower();
+	m_DatasetNumber ++;
+	m_CurrentInstances = null;
+	if (m_DatasetNumber >= getDatasets().size()) {
+	  m_DatasetNumber = 0;
+	  if (m_UsePropertyIterator) {
+	    m_PropertyNumber ++;
+	    if (m_PropertyNumber >= Array.getLength(m_PropertyArray)) {
+	      m_Finished = true;
+	    }
+	  } else {
+	    m_Finished = true;
+	  }
+	}
+      }
+    } else { // advance by custom iterator before data set
+      m_RunNumber ++;
+      if (m_RunNumber > getRunUpper()) {
+	m_RunNumber = getRunLower();
 	if (m_UsePropertyIterator) {
 	  m_PropertyNumber ++;
 	  if (m_PropertyNumber >= Array.getLength(m_PropertyArray)) {
-	    m_Finished = true;
+	    m_PropertyNumber = 0;
+	    m_DatasetNumber ++;
+	    m_CurrentInstances = null;
+	    if (m_DatasetNumber >= getDatasets().size()) {
+	      m_Finished = true;
+	    } 
 	  }
 	} else {
-	  m_Finished = true;
+	  m_DatasetNumber ++;
+	  m_CurrentInstances = null;
+	  if (m_DatasetNumber >= getDatasets().size()) {
+	    m_Finished = true;
+	  }
 	}
       }
     }
