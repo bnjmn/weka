@@ -27,7 +27,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -497,7 +497,7 @@ public class ClassifierTree implements Drawable, Serializable {
 		    " [label=\""+m_localModel.dumpLabel(i,m_train)+"\" "+ 
 		    "shape=box style=filled ");
 	if (m_train != null) {
-	  text.append("data =\n" + m_train + "\n");
+	  text.append("data =\n" + m_sons[i].m_train + "\n");
 	  text.append(",\n");
 	}
 	text.append("]\n");
@@ -506,7 +506,7 @@ public class ClassifierTree implements Drawable, Serializable {
 		    " [label=\""+m_sons[i].m_localModel.leftSide(m_train) + 
 		    "\" ");
 	if (m_train != null) {
-	  text.append("data =\n" + m_train + "\n");
+	  text.append("data =\n" + m_sons[i].m_train + "\n");
 	  text.append(",\n");
 	}
 	text.append("]\n");
