@@ -23,6 +23,7 @@ package weka.classifiers.rules;
 
 import java.util.Enumeration;
 import java.util.Random;
+import java.io.Serializable;
 
 import weka.core.FastVector;
 import weka.core.Instances;
@@ -43,9 +44,9 @@ import weka.core.Utils;
  * an object of this class. <p>
  *  
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class RuleStats{
+public class RuleStats implements Serializable {
 
   /** The data on which the stats calculation is based */
   private Instances m_Data;

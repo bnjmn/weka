@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 
 public class Ridor extends Classifier
@@ -784,7 +784,7 @@ public class Ridor extends Classifier
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */
     
-  private abstract class Antd{
+  private abstract class Antd implements Serializable {
     /* The attribute of the antecedent */
     protected Attribute att;
 	
