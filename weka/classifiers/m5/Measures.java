@@ -31,7 +31,7 @@ import weka.core.*;
 /**
  * Class for performance measures
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public final class Measures {
@@ -56,7 +56,7 @@ public final class Measures {
    * Converts the performance measures to a string
    * @param absDev the absolute deviation of the class attribute
    * @param sd the standard deviation of the class attribute
-   * @set the type of the performance measures, is one of "t","T","f","F","x", for training, test, training of one fold in cross-validation, test of one test in cross-validation, cross-validation final resuls respectively
+   * @param set the type of the performance measures, is one of "t","T","f","F","x", for training, test, training of one fold in cross-validation, test of one test in cross-validation, cross-validation final resuls respectively
    * @param smooth either "u" or "s" for unsmoothed or smoothed
    * @return the converted string
    */

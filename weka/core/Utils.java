@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public final class Utils {
 
@@ -728,7 +728,7 @@ public final class Utils {
    * Computes entropy for an array of integers.
    *
    * @param counts array of counts
-   * @returns - a log2 a - b log2 b - c log2 c + (a+b+c) log2 (a+b+c)
+   * @return - a log2 a - b log2 b - c log2 c + (a+b+c) log2 (a+b+c)
    * when given array [a b c]
    */
   public static double info(int counts[]) {
@@ -1121,7 +1121,7 @@ public final class Utils {
    * Computes the sum of the elements of an array of doubles.
    *
    * @param doubles the array of double
-   * @returns the sum of the elements
+   * @return the sum of the elements
    */
   public static double sum(double[] doubles) {
 
@@ -1137,7 +1137,7 @@ public final class Utils {
    * Computes the sum of the elements of an array of integers.
    *
    * @param ints the array of integers
-   * @returns the sum of the elements
+   * @return the sum of the elements
    */
   public static int sum(int[] ints) {
 
@@ -1153,7 +1153,7 @@ public final class Utils {
    * Returns c*log2(c) for a given integer value c.
    *
    * @param c an integer value
-   * @returns c*log2(c) (but is careful to return 0 if c is 0)
+   * @return c*log2(c) (but is careful to return 0 if c is 0)
    */
   public static double xlogx(int c) {
     

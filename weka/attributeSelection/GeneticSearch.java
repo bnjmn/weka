@@ -58,7 +58,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class GeneticSearch extends ASSearch implements 
   StartSetHandler, OptionHandler {
@@ -192,7 +192,7 @@ public class GeneticSearch extends ASSearch implements
 
     /**
      * get the chromosome
-     * @returns the chromosome of this population member
+     * @return the chromosome of this population member
      */
     public BitSet getChromosome() {
       return m_chromosome;

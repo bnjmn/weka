@@ -63,7 +63,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -178,7 +178,7 @@ public class Experiment implements Serializable, OptionHandler {
    * Sets the path of properties taken to get to the custom property
    * to iterate over.
    *
-   * @newPropertyPath an array of PropertyNodes
+   * @param newPropertyPath an array of PropertyNodes
    */
   public void setPropertyPath(PropertyNode [] newPropertyPath) {
     

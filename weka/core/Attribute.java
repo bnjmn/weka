@@ -66,7 +66,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -352,7 +352,7 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Returns the attribute's type as an integer.
    *
-   * @returns the attribute's type.
+   * @return the attribute's type.
    */
   public final int type() {
 

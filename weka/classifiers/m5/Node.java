@@ -30,7 +30,7 @@ import weka.core.*;
 /**
  * Class for handing a node in the tree or the subtree under this node
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public final class Node implements Serializable {
@@ -476,7 +476,7 @@ public final class Node implements Serializable {
    * Calculates a multiplication factor used at this node
    * @param n the number of instances
    * @param v the number of the coefficients
-   * @pruningFactor the pruning factor
+   * @param pruningFactor the pruning factor
    * @return multiplication factor
    */
   public final double  factor(int n,int v,double pruningFactor) {
@@ -641,8 +641,8 @@ public final class Node implements Serializable {
   /**
    * Predicts the class value of an instance by the tree 
    * @param i instance i
-   * @smooth =true, uses the smoothed model; otherwise uses the unsmoothed 
-   * @inst instances
+   * @param smooth =true, uses the smoothed model; otherwise uses the unsmoothed 
+   *   instances
    * @return the predicted value
    */
   public final double  predict(Instance instance,boolean smooth) {
@@ -670,7 +670,7 @@ public final class Node implements Serializable {
   /**
    * Evaluates a tree
    * @param inst instances
-   * @smooth =true, evaluates the smoothed models; 
+   * @param smooth =true, evaluates the smoothed models; 
    *         =false, evaluats the unsmoothed models
    * @return the evaluation results
    * @exception Exception if something goes wrong
