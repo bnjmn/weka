@@ -1,5 +1,8 @@
 # Properties for visualization
 
+# Maximum precision for numeric values
+weka.gui.visualize.precision=10
+
 # Colour for the axis in the 2D plot (can use R,G,B format)
 weka.gui.visualize.Plot2D.axisColour=green
 

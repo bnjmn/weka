@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Plot2D extends JPanel {
 
@@ -1141,6 +1141,9 @@ public class Plot2D extends JPanel {
       ? (int)Math.abs(((Math.log(Math.abs(m_maxX)) / 
 				      Math.log(10))))+2
       : 1;
+    if (precisionXmax > VisualizeUtils.MAX_PRECISION) {
+      precisionXmax = 1;
+    }
 
     String maxStringX = Utils.doubleToString(m_maxX,
 					     nondecimal+1+precisionXmax
@@ -1155,6 +1158,9 @@ public class Plot2D extends JPanel {
       ? (int)Math.abs(((Math.log(Math.abs(m_minX)) / 
 				      Math.log(10))))+2
       : 1;
+    if (precisionXmin > VisualizeUtils.MAX_PRECISION) {
+      precisionXmin = 1;
+    }
    
     String minStringX = Utils.doubleToString(m_minX,
 					     nondecimal+1+precisionXmin,
@@ -1174,6 +1180,9 @@ public class Plot2D extends JPanel {
       ? (int)Math.abs(((Math.log(Math.abs(m_maxY)) / 
 				      Math.log(10))))+2
       : 1;
+    if (precisionYmax > VisualizeUtils.MAX_PRECISION) {
+      precisionYmax = 1;
+    }
     
     String maxStringY = Utils.doubleToString(m_maxY,
 					     nondecimal+1+precisionYmax
@@ -1189,6 +1198,9 @@ public class Plot2D extends JPanel {
       ? (int)Math.abs(((Math.log(Math.abs(m_minY)) / 
 				      Math.log(10))))+2
       : 1;
+    if (precisionYmin > VisualizeUtils.MAX_PRECISION) {
+      precisionYmin = 1;
+    }
    
     String minStringY = Utils.doubleToString(m_minY,
 					     nondecimal+1+precisionYmin
@@ -1238,6 +1250,9 @@ public class Plot2D extends JPanel {
 	     ? (int)Math.abs(((Math.log(Math.abs(mid)) / 
 			       Math.log(10))))+2
 	     : 1;
+	   if (precisionXmid > VisualizeUtils.MAX_PRECISION) {
+	     precisionXmid = 1;
+	   }
 	  
 	  String maxString = Utils.doubleToString(mid,
 						  nondecimal+1+precisionXmid,
@@ -1325,6 +1340,9 @@ public class Plot2D extends JPanel {
 	    ? (int)Math.abs(((Math.log(Math.abs(mid)) / 
 			      Math.log(10))))+2
 	    : 1;
+	  if (precisionYmid > VisualizeUtils.MAX_PRECISION) {
+	    precisionYmid = 1;
+	  }
 	 
 	  String maxString = Utils.doubleToString(mid,
 						  nondecimal+1+precisionYmid,

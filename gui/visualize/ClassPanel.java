@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassPanel extends JPanel {
     
@@ -313,6 +313,9 @@ public class ClassPanel extends JPanel {
       ? (int)Math.abs(((Math.log(Math.abs(m_maxC)) / 
 				      Math.log(10))))+2
       : 1;
+    if (m_precisionC > VisualizeUtils.MAX_PRECISION) {
+      m_precisionC = 1;
+    }
 
     String maxStringC = Utils.doubleToString(m_maxC,
 					     nondecimal+1+m_precisionC
@@ -331,7 +334,10 @@ public class ClassPanel extends JPanel {
        ? (int)Math.abs(((Math.log(Math.abs(m_minC)) / 
 				      Math.log(10))))+2
       : 1;
-     
+     if (m_precisionC > VisualizeUtils.MAX_PRECISION) {
+       m_precisionC = 1;
+     }
+    
      maxStringC = Utils.doubleToString(m_minC,
 				       nondecimal+1+m_precisionC
 				       ,m_precisionC);
@@ -534,6 +540,9 @@ public class ClassPanel extends JPanel {
       ? (int)Math.abs(((Math.log(Math.abs(m_maxC)) / 
 			Math.log(10))))+2
       : 1;
+    if (m_precisionC > VisualizeUtils.MAX_PRECISION) {
+      m_precisionC = 1;
+    }
 
     String maxStringC = Utils.doubleToString(m_maxC,
 					     nondecimal+1+m_precisionC
@@ -573,6 +582,10 @@ public class ClassPanel extends JPanel {
 	? (int)Math.abs(((Math.log(Math.abs(m_minC)) / 
 			  Math.log(10))))+2
 	: 1;
+
+      if (m_precisionC > VisualizeUtils.MAX_PRECISION) {
+	m_precisionC = 1;
+      }
       
       maxStringC = Utils.doubleToString(m_minC,
 					nondecimal+1+m_precisionC
@@ -601,6 +614,9 @@ public class ClassPanel extends JPanel {
 	  ? (int)Math.abs(((Math.log(Math.abs(mid)) / 
 			    Math.log(10))))+2
 	  : 1;
+	if (m_precisionC > VisualizeUtils.MAX_PRECISION) {
+	  m_precisionC = 1;
+	}
 	
 	maxStringC = Utils.doubleToString(mid,
 					  nondecimal+1+m_precisionC
