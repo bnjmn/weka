@@ -40,7 +40,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class ChiSquaredAttributeEval
   extends AttributeEvaluator
@@ -62,8 +62,7 @@ public class ChiSquaredAttributeEval
    */
   public String globalInfo() {
     return "ChiSquaredAttributeEval :\n\nEvaluates the worth of an attribute "
-      +"by measuring the chi-squared value with respect to the class.\n\n"
-      +"ChiSquared(Class,Attribute) = H(Class) - H(Class | Attribute).\n";
+      +"by computing the value of the chi-squared statistic with respect to the class.\n";
   }
 
   /**
@@ -74,8 +73,8 @@ public class ChiSquaredAttributeEval
   }
 
   /**
-   * Returns an enumeration describing the available options.
-   * @return an enumeration of all the available options.
+   * Returns an enumeration describing the available options
+   * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(2);
