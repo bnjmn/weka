@@ -59,7 +59,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -277,7 +277,7 @@ public class Experiment implements Serializable, OptionHandler {
    * Iterate over the objects in the property array to determine what
    * (if any) additional measures they support
    */
-  private void determineAdditionalResultMeasures() {
+  private void determineAdditionalResultMeasures() throws Exception {
     m_AdditionalMeasures = null;
     FastVector measureNames = new FastVector();
     
@@ -289,8 +289,15 @@ public class Experiment implements Serializable, OptionHandler {
 	  enumerateMeasures();
 	while (am.hasMoreElements()) {
 	  String mname = (String)am.nextElement();
-	  if (measureNames.indexOf(mname) == -1) {
-	    measureNames.addElement(mname);
+	  if (mname.startsWith("measure")) {
+	    if (measureNames.indexOf(mname) == -1) {
+	      measureNames.addElement(mname);
+	    }
+	  } else {
+	    throw new Exception ("Additional measures in "
+				 + current.getClass().getName()
+				 +" must obey the naming convention"
+				 +" of starting with \"measure\"");
 	  }
 	}
       }
