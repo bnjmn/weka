@@ -28,7 +28,8 @@ SOURCES = \
 	CostMatrixEditor.java \
 	HierarchyPropertyParser.java \
 	CustomPanelSupplier.java \
-	AttributeVisualizationPanel.java
+	AttributeVisualizationPanel.java \
+	AttributeListPanel
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
