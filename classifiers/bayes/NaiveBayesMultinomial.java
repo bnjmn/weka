@@ -35,7 +35,7 @@ import weka.classifiers.Classifier;
  * Andrew Mccallum, Kamal Nigam (1998)<i>A Comparison of Event Models for Naive Bayes Text Classification </i>
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz) and Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 
 /**
@@ -214,10 +214,12 @@ public class NaiveBayesMultinomial extends Classifier
 		    freqOfWordInDoc = (int)inst.valueSparse(i);
 		    totalWords += freqOfWordInDoc;
 		    answer += (freqOfWordInDoc * probOfWordGivenClass[classIndex][inst.index(i)] 
-			       - lnFactorial(freqOfWordInDoc));
+			       ); //- lnFactorial(freqOfWordInDoc));
 		}
 	
-	answer += lnFactorial(totalWords);
+	//answer += lnFactorial(totalWords);//The factorial terms don't make 
+                                            //any difference to the classifier's
+                                            //accuracy, so not needed.
 	
 	return answer;
     }
