@@ -862,7 +862,7 @@ public class CheckClassifier implements OptionHandler {
     System.out.print("classifier uses instance weights");
     printAttributeSummary(nominalPredictor, numericPredictor, numericClass);
     System.out.print("...");
-    int numTrain = 20, numTest = 20, numClasses = 2, missingLevel = 0;
+    int numTrain = 40, numTest = 20, numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
 
     Instances train = null;
@@ -874,14 +874,14 @@ public class CheckClassifier implements OptionHandler {
     boolean built = false;
     boolean evalFail = false;
     try {
-      train = makeTestDataset(42, numTrain, 
-			      nominalPredictor ? 2 : 0,
-			      numericPredictor ? 1 : 0, 
+      train = makeTestDataset(43, numTrain, 
+			      nominalPredictor ? 3 : 0,
+			      numericPredictor ? 2 : 0, 
 			      numClasses, 
 			      numericClass);
       test = makeTestDataset(24, numTest,
-			     nominalPredictor ? 2 : 0,
-			     numericPredictor ? 1 : 0, 
+			     nominalPredictor ? 3 : 0,
+			     numericPredictor ? 2 : 0, 
 			     numClasses, 
 			     numericClass);
       if (nominalPredictor) {
@@ -1320,14 +1320,15 @@ public class CheckClassifier implements OptionHandler {
       for (int j = 0; j < numAttributes - 1; j++) {
 	switch (data.attribute(j).type()) {
 	case Attribute.NUMERIC:
-	  newVal = classVal + random.nextFloat() * 0.2 - 0.1;
+	  newVal = classVal + random.nextFloat() * 2 - 0.5;
 	  current.setValue(j, newVal);
 	  break;
 	case Attribute.NOMINAL:
-	  newVal = ((int)classVal 
-		    + Math.abs(random.nextInt() % 10) 
-		    * data.attribute(j).numValues())
-	    % data.attribute(j).numValues();
+	  if (random.nextFloat() < 0.2) {
+	    newVal = Math.abs(random.nextInt()) % data.attribute(j).numValues();
+	  } else {
+	    newVal = ((int)classVal) % data.attribute(j).numValues();
+	  }
 	  current.setValue(j, newVal);
 	  break;
 	case Attribute.STRING:

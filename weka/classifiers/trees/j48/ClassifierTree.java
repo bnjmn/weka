@@ -196,9 +196,10 @@ public class ClassifierTree implements Drawable, Serializable {
     double [] doubles = 
       new double[instance.numClasses()];
 
-    for (int i = 0; i < doubles.length; i++)
+    for (int i = 0; i < doubles.length; i++) {
       doubles[i] = getProbs(i,instance,1);
-    
+    }
+
     return doubles;
   }
 

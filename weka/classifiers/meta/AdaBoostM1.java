@@ -758,7 +758,6 @@ public class AdaBoostM1 extends DistributionClassifier
     try {
       System.out.println(Evaluation.evaluateModel(new AdaBoostM1(), argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }

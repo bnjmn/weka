@@ -51,20 +51,14 @@ public class Bagging extends DistributionClassifier
   // Private variables
   // =================
 
-  /** A reference to the instance format */
-  protected Instances m_Training;
-
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers;
-  
-  /** A random number generator. */
-  protected Random m_Random = new Random();
   
   /** The number of iterations. */
   protected int m_NumIterations = 10;
 
   /** The seed for random number generation. */
-  protected int m_Seed = -1;
+  protected int m_Seed = 1;
 
   // ===============
   // Public methods.
@@ -87,7 +81,8 @@ public class Bagging extends DistributionClassifier
 	      "\tFull name of scheme to bag.\n"
 	      + "\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W"));
-    newVector.addElement(new Option("\tSeed for random number generator.",
+    newVector.addElement(new Option("\tSeed for random number generator.\n" +
+				    "\t(default 1)",
 				    "S", 1, "-S"));
 
     if ((m_Classifiers != null) &&
@@ -128,17 +123,20 @@ public class Bagging extends DistributionClassifier
     if (learnerString.length() == 0) {
       throw new Exception("A scheme must be specified with the -W option.");
     }
+    setScheme(learnerString);
 
     String bagIterations = Utils.getOption('I', options);
     if (bagIterations.length() != 0) {
       setNumIterations(Integer.parseInt(bagIterations));
+    } else {
+      setNumIterations(10);
     }
-
-    setScheme(learnerString);
 
     String seed = Utils.getOption('S', options);
     if (seed.length() != 0) {
       setSeed(Integer.parseInt(seed));
+    } else {
+      setSeed(1);
     }
 
     // Set the options for each classifier
@@ -243,7 +241,6 @@ public class Bagging extends DistributionClassifier
   public void setSeed(int seed) {
 
     m_Seed = seed;
-    m_Random.setSeed(seed);
   }
 
   /**
@@ -275,30 +272,16 @@ public class Bagging extends DistributionClassifier
       throw new Exception("Can't handle string attributes!");
     }
 
-    m_Training = data;
+    Random random = new Random(m_Seed);
     for (j = 0; j < m_Classifiers.length; j++) {
       baggData = new Instances(data, data.numInstances());
       while (baggData.numInstances() < data.numInstances()) {
-	i = (int) (m_Random.nextDouble() * 
+	i = (int) (random.nextDouble() * 
 		   (double) data.numInstances());
 	baggData.add(data.instance(i));
       }
       m_Classifiers[j].buildClassifier(baggData);
     }
-  }
-  
-  /**
-   * Classifies a given instance using the bagged classifier.
-   *
-   * @param data the test data
-   * @param index the index of the instance to be classified
-   * @exception Exception if instance could not be classified
-   * successfully
-   */
-  public double classifyInstance(Instance instance)
-       throws Exception {
-      
-    return (double)Utils.maxIndex(distributionForInstance(instance));
   }
 
   /**
@@ -322,8 +305,12 @@ public class Bagging extends DistributionClassifier
 	sums[(int)m_Classifiers[i].classifyInstance(instance)]++;
       }
     }
-    Utils.normalize(sums);
-    return sums;
+    if (Utils.eq(Utils.sum(sums), 0)) {
+      return sums;
+    } else {
+      Utils.normalize(sums);
+      return sums;
+    }
   }
 
   /**

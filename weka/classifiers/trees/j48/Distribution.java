@@ -295,8 +295,13 @@ public class Distribution implements Cloneable, Serializable {
     int j;
 
     probs = new double [perBaG.length];
-    for (j=0;j<perBaG.length;j++)
-      probs[j] = perBaG[j]/totaL;
+    for (j=0;j<perBaG.length;j++) {
+      if (Utils.eq(totaL, 0)) {
+	probs[j] = 1.0 / probs.length;
+      } else {
+	probs[j] = perBaG[j]/totaL;
+      }
+    }
     Enumeration enum = source.enumerateInstances();
     while (enum.hasMoreElements()){
       instance = (Instance) enum.nextElement();
@@ -637,7 +642,11 @@ public class Distribution implements Cloneable, Serializable {
  
   public final double prob(int classIndex){
 
-    return perClasS[classIndex]/totaL;
+    if (!Utils.eq(totaL, 0)) {
+      return perClasS[classIndex]/totaL;
+    } else {
+      return 0;
+    }
   }
 
   /**
