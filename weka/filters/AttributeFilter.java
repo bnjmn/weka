@@ -36,7 +36,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -185,6 +185,31 @@ public class AttributeFilter extends Filter implements OptionHandler {
   }
 
   /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "An instance filter that removes a range of"
+      + " attributes from the dataset.";
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+
+    return "Determines whether action is to select or delete."
+      + " If set to true, only the specified attributes will be kept;"
+      + " If set to false, specified attributes will be deleted.";
+  }
+
+  /**
    * Get whether the supplied columns are to be removed or kept
    *
    * @return true if the supplied columns will be kept
@@ -204,6 +229,20 @@ public class AttributeFilter extends Filter implements OptionHandler {
   public void setInvertSelection(boolean invert) {
 
     m_SelectCols.setInvert(!invert);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndicesTipText() {
+
+    return "Specify range of attributes to act on."
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
   }
 
   /**

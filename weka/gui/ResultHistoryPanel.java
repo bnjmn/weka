@@ -45,6 +45,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.BorderFactory;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
@@ -54,7 +55,7 @@ import javax.swing.event.ListSelectionListener;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -249,6 +250,7 @@ public class ResultHistoryPanel extends JPanel {
     if ((buff != null) && (currentText == null)) {
       // Open the frame.
       JTextArea ta = new JTextArea();
+      ta.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
       ta.setFont(new Font("Monospaced", Font.PLAIN, 12));
       ta.setEditable(false);
       ta.setText(buff.toString());

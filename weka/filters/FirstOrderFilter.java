@@ -46,7 +46,7 @@ import weka.core.*;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -217,6 +217,19 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     return true;
   }
 
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndicesTipText() {
+    return "Specify range of attributes to act on."
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
+  }
 
   /**
    * Get the current range selection

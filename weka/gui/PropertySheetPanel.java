@@ -59,6 +59,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
+import java.awt.FlowLayout;
 
 
 /** 
@@ -66,7 +67,7 @@ import javax.swing.JScrollPane;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -94,6 +95,15 @@ public class PropertySheetPanel extends JPanel
 
   /** The tool tip text for each property */
   private String m_TipTexts[];
+
+  /** StringBuffer containing help text for the object being edited */
+  private StringBuffer m_HelpText;
+
+  /** Help frame */
+  private JFrame m_HelpFrame;
+
+  /** Button to pop up the full help text in a separate frame */
+  private JButton m_HelpBut;
 
   /** A count of the number of properties we have an editor for */
   private int m_NumEditable = 0;
@@ -170,6 +180,7 @@ public class PropertySheetPanel extends JPanel
 
     int rowHeight = 12;
     JTextArea jt = new JTextArea();
+    m_HelpText = null;
     JScrollPane js = null;
     // Look for a globalInfo method that returns a string
     // describing the target
@@ -181,24 +192,32 @@ public class PropertySheetPanel extends JPanel
 	  try {
 	    Object args[] = { };
 	    String globalInfo = (String)(meth.invoke(m_Target, args));
+            String summary = globalInfo;
+            int ci = globalInfo.indexOf('.');
+            if (ci != -1) {
+              summary = globalInfo.substring(0, ci + 1);
+            }
 	    final String className = targ.getClass().getName();
-	    /*	    m_globalAboutBut = new JButton("About");
-	    m_globalAboutBut.setToolTipText("Click for information about "
-			       +className);
+            m_HelpText = new StringBuffer("NAME\n");
+            m_HelpText.append(className).append("\n\n");
+            m_HelpText.append("SYNOPSIS\n").append(globalInfo).append("\n\n");
+            m_HelpBut = new JButton("More");
+	    m_HelpBut.setToolTipText("More information about "
+                                     + className);
 	    
-	    m_globalAboutBut.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent a) {
-		  popupGlobalInfo(className, globalInfo);
-		  m_globalAboutBut.setEnabled(false);
-		}
-	      });
-	    */
+	    m_HelpBut.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent a) {
+                openHelpFrame();
+                m_HelpBut.setEnabled(false);
+              }
+            });
 
 	    jt.setFont(new Font("SansSerif", Font.PLAIN,12));
 	    jt.setEditable(false);
 	    jt.setLineWrap(true);
 	    jt.setWrapStyleWord(true);
-	    jt.setText(globalInfo);
+	    jt.setText(summary);
+            jt.setBackground(getBackground());
 	    rowHeight = 12;
 	    JPanel jp = new JPanel();
 	    jp.setBorder(BorderFactory.createCompoundBorder(
@@ -206,21 +225,14 @@ public class PropertySheetPanel extends JPanel
 			 BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		 ));
 	    jp.setLayout(new BorderLayout());
-	    js = new JScrollPane();
-	    //js.setLayout(new BorderLayout());
-	    js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	    js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-	    
-	    js.setViewportView(jt);
-	    Dimension d = jt.getPreferredScrollableViewportSize();
-	    js.setMinimumSize(new Dimension(300, d.height));
-	    js.setPreferredSize(new Dimension(300, d.height));
-
-
-	    jp.add(js,BorderLayout.CENTER);
+	    jp.add(jt, BorderLayout.CENTER);
+            JPanel p2 = new JPanel();
+            p2.setLayout(new BorderLayout());
+            p2.add(m_HelpBut, BorderLayout.NORTH);
+            jp.add(p2, BorderLayout.EAST);
 	    GridBagConstraints gbConstraints = new GridBagConstraints();
 	    //	    gbConstraints.anchor = GridBagConstraints.EAST;
-	    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+	    gbConstraints.fill = GridBagConstraints.BOTH;
 	    //	    gbConstraints.gridy = 0;     gbConstraints.gridx = 0;
 	    gbConstraints.gridwidth = 2;
 	    gbConstraints.insets = new Insets(0,5,0,5);
@@ -240,6 +252,7 @@ public class PropertySheetPanel extends JPanel
     m_Views = new JComponent[m_Properties.length];
     m_Labels = new JLabel[m_Properties.length];
     m_TipTexts = new String[m_Properties.length];
+    boolean firstTip = true;
     for (int i = 0; i < m_Properties.length; i++) {
 
       // Don't display hidden or expert properties.
@@ -309,10 +322,11 @@ public class PropertySheetPanel extends JPanel
 	editor.setValue(value);
 
 	// now look for a TipText method for this property
-	for (int j = 0;j < m_Methods.length; j++) {
+        String tipName = name + "TipText";
+	for (int j = 0; j < m_Methods.length; j++) {
 	  String mname = m_Methods[j].getDisplayName();
 	  Method meth = m_Methods[j].getMethod();
-	  if (mname.startsWith(name)) {
+	  if (mname.equals(tipName)) {
 	    if (meth.getReturnType().equals(String.class)) {
 	      try {
 		String tempTip = (String)(meth.invoke(m_Target, args));
@@ -320,11 +334,16 @@ public class PropertySheetPanel extends JPanel
 		if (ci < 0) {
 		  m_TipTexts[i] = tempTip;
 		} else {
-		  m_TipTexts[i] = tempTip.substring(0,ci);
-		  String info = jt.getText();
-		  info += "\n"+name+" : \n"
-		    +tempTip.substring(0,tempTip.length())+"\n";
-		  jt.setText(info);
+		  m_TipTexts[i] = tempTip.substring(0, ci);
+                  if (m_HelpText != null) {
+                    if (firstTip) {
+                      m_HelpText.append("OPTIONS\n");
+                      firstTip = false;
+                    }
+                    m_HelpText.append(name).append(" -- ");
+                    m_HelpText.append(tempTip).append("\n\n");
+                    //jt.setText(m_HelpText.toString());
+                  }
 		}
 	      } catch (Exception ex) {
 
@@ -389,18 +408,14 @@ public class PropertySheetPanel extends JPanel
       add(newPanel);
       m_NumEditable ++;
     }
-    if (js != null) {
-      Dimension d = jt.getPreferredScrollableViewportSize();
-      if (d.height > (10*rowHeight)) {
-	js.setMinimumSize(new Dimension(d.width, (10*rowHeight)));
-	js.setPreferredSize(new Dimension(d.width, (10*rowHeight)));
-      }
-    }
     if (m_NumEditable == 0) {
-      JLabel empty = new JLabel("No editable properties");
+      JLabel empty = new JLabel("No editable properties", 
+                                SwingConstants.CENTER);
+      Dimension d = empty.getPreferredSize();
+      empty.setPreferredSize(new Dimension(d.width * 2, d.height * 2));
       empty.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
       GridBagConstraints gbConstraints = new GridBagConstraints();
-      gbConstraints.anchor = GridBagConstraints.EAST;
+      gbConstraints.anchor = GridBagConstraints.CENTER;
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(empty, gbConstraints);
@@ -410,6 +425,36 @@ public class PropertySheetPanel extends JPanel
     validate();
     setVisible(true);	
   }
+
+  protected void openHelpFrame() {
+
+    JTextArea ta = new JTextArea();
+    ta.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    ta.setLineWrap(true);
+    ta.setWrapStyleWord(true);
+    //ta.setBackground(getBackground());
+    ta.setEditable(false);
+    ta.setText(m_HelpText.toString());
+    final JFrame jf = new JFrame("Information");
+    jf.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        jf.dispose();
+        if (m_HelpFrame == jf) {
+          m_HelpBut.setEnabled(true);
+        }
+      }
+    });
+    jf.getContentPane().setLayout(new BorderLayout());
+    jf.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
+    jf.pack();
+    jf.setSize(300, 350);
+    jf.setLocation(getTopLevelAncestor().getLocationOnScreen().x 
+                   + getTopLevelAncestor().getWidth(),
+                   getTopLevelAncestor().getLocationOnScreen().y);
+    jf.setVisible(true);
+    m_HelpFrame = jf;
+  }
+
 
   /**
    * Gets the number of editable properties for the current target.

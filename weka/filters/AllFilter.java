@@ -28,9 +28,20 @@ import weka.core.*;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AllFilter extends Filter {
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "An instance filter that passes all instances through unmodified."
+      + " Primarily for testing purposes.";
+  }
 
   /**
    * Sets the format of the input instances.
