@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -30,6 +29,11 @@ import weka.estimators.*;
  * training data (for this reason, the classifier is not an 
  * UpdateableClassifier).<p>
  *
+ * Reference: George H. John and Pat Langley (1995). <i>Estimating
+ * Continuous Distributions in Bayesian Classifiers</i>. Proceedings
+ * of the Eleventh Conference on Uncertainty in Artificial
+ * Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.
+ *
  * Valid options are:<p>
  *
  * -K <br>
@@ -38,15 +42,9 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.1 - Sep 1998 - Now uses estimators (Len) <br>
- *          1.0 - ??? 1998 - Initial version (NaiveBayesSimple) (Eibe)
- */
+ * @version $Revision: 1.3 $ */
 public class NaiveBayes extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
-
-  // =================
-  // Private variables
-  // =================
 
   /** The attribute estimators. */
   protected Estimator [][] m_Distributions;
@@ -63,18 +61,12 @@ public class NaiveBayes extends DistributionClassifier
   /** The number of classes (or 1 for numeric class) */
   protected int m_NumClasses;
 
-  /**
-   * The dataset header for the purposes of printing out a
-   * semi-intelligible model
+  /** The dataset header for the purposes of printing out a semi-intelligible model
    */
   protected Instances m_Instances;
 
   /*** The precision parameter used for numeric attributes */
   protected static final double DEFAULT_NUM_PRECISION = 0.01;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Generates the classifier.
@@ -96,16 +88,16 @@ public class NaiveBayes extends DistributionClassifier
       throw new Exception ("Dataset has no class attribute");
     }
 
-    // Copy the header information
-    m_Instances = new Instances(instances, 0);
+    // Copy the instances
+    m_Instances = new Instances(instances);
 
     // Reserve space for the distributions
-    m_Distributions = new Estimator[instances.numAttributes() - 1]
-    [instances.numClasses()];
-    m_ClassDistribution = new DiscreteEstimator(instances.numClasses(), 
+    m_Distributions = new Estimator[m_Instances.numAttributes() - 1]
+    [m_Instances.numClasses()];
+    m_ClassDistribution = new DiscreteEstimator(m_Instances.numClasses(), 
 						true);
     int attIndex = 0;
-    Enumeration enum = instances.enumerateAttributes();
+    Enumeration enum = m_Instances.enumerateAttributes();
     while (enum.hasMoreElements()) {
       Attribute attribute = (Attribute) enum.nextElement();
 
@@ -113,14 +105,14 @@ public class NaiveBayes extends DistributionClassifier
       // numeric precision from differences between adjacent values
       double numPrecision = DEFAULT_NUM_PRECISION;
       if (attribute.type() == Attribute.NUMERIC) {
-	instances.sort(attribute);
-	if ((instances.numInstances() > 0)
-	    && !instances.instance(0).isMissing(attribute)) {
-	  double lastVal = instances.instance(0).value(attribute);
+	m_Instances.sort(attribute);
+	if ((m_Instances.numInstances() > 0)
+	    && !m_Instances.instance(0).isMissing(attribute)) {
+	  double lastVal = m_Instances.instance(0).value(attribute);
 	  double currentVal, deltaSum = 0;
 	  int distinct = 0;
-	  for (int i = 1; i < instances.numInstances(); i++) {
-	    Instance currentInst = instances.instance(i);
+	  for (int i = 1; i < m_Instances.numInstances(); i++) {
+	    Instance currentInst = m_Instances.instance(i);
 	    if (currentInst.isMissing(attribute)) {
 	      break;
 	    }
@@ -134,15 +126,10 @@ public class NaiveBayes extends DistributionClassifier
 	  if (distinct > 0) {
 	    numPrecision = deltaSum / distinct;
 	  }
-	  /*
-	  System.err.println("Attribute: " + attribute.name()
-			     + " Distinct values: " + distinct
-			     + " Average delta: " + numPrecision);
-			     */
 	}
       }
 
-      for (int j = 0; j < instances.numClasses(); j++) {
+      for (int j = 0; j < m_Instances.numClasses(); j++) {
 	switch (attribute.type()) {
 	case Attribute.NUMERIC: 
 	  if (m_UseKernelEstimator) {
@@ -167,12 +154,12 @@ public class NaiveBayes extends DistributionClassifier
     // Compute counts
     double sum;
 
-    Enumeration enumInsts = instances.enumerateInstances();
+    Enumeration enumInsts = m_Instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) {
       Instance instance = 
 	(Instance) enumInsts.nextElement();
       if (!instance.classIsMissing()) {
-	Enumeration enumAtts = instances.enumerateAttributes();
+	Enumeration enumAtts = m_Instances.enumerateAttributes();
 	attIndex = 0;
 	while (enumAtts.hasMoreElements()) {
 	  Attribute attribute = (Attribute) enumAtts.nextElement();
@@ -186,6 +173,9 @@ public class NaiveBayes extends DistributionClassifier
 				     instance.weight());
       }
     }
+
+    // Save space
+    m_Instances = new Instances(m_Instances, 0);
   }
 
   /**
@@ -224,25 +214,15 @@ public class NaiveBayes extends DistributionClassifier
 	  }
 	}
 	if ((max > 0) && (max < 1e-75)) { // Danger of probability underflow
-	  // System.err.println("Probability underflow danger, rescaling.");
-	  // System.err.print("Distribution: ");
 	  for (int j = 0; j < m_NumClasses; j++) {
-	    // System.err.print(" " + probs[j]);
 	    probs[j] *= 1e75;
 	  }
-	  // System.err.println("");
 	}
       }
       attIndex++;
     }
 
     // Display probabilities
-    /*
-    for (int i = 0; i < m_NumClasses; i++) {
-      System.err.print(" " + probs[i]);
-    }
-    System.err.print('\n');
-    */
     Utils.normalize(probs);
     return probs;
   }
@@ -335,16 +315,31 @@ public class NaiveBayes extends DistributionClassifier
 
     return text.toString();
   }
- 
-  // ============
-  // Test method.
-  // ============
+  
+  /**
+   * Gets if kernel estimator is being used.
+   *
+   * @return Value of m_UseKernelEstimatory.
+   */
+  public boolean getUseKernelEstimator() {
+    
+    return m_UseKernelEstimator;
+  }
+  
+  /**
+   * Sets if kernel estimator is to be used.
+   *
+   * @param v  Value to assign to m_UseKernelEstimatory.
+   */
+  public void setUseKernelEstimator(boolean v) {
+    
+    m_UseKernelEstimator = v;
+  }
 
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

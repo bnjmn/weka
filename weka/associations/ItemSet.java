@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.associations;
 
 import java.io.*;
@@ -28,57 +27,43 @@ import weka.core.*;
  * order, which is determined by the header information of the set of instances
  * used for generating the set of items. All methods in this class assume that
  * item sets are stored in lexicographic order.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class ItemSet {
 
-  // =================
-  // Private variables
-  // =================
+  /** The items stored as an array of of ints. */
+  private int[] m_items;
 
-  /**
-   * The items stored as an array of of ints.
-   */
-
-  private int[] theItems;
-
-  /**
-   * Counter for how many transactions contain this item set.
-   */
-
-  private int counter;
-
-  // ==============
-  // Public methods
-  // ==============
+  /** Counter for how many transactions contain this item set. */
+  private int m_counter;
 
   /**
    * Outputs the confidence for a rule.
+   *
    * @param premise the premise of the rule
    * @param consequence the consequence of the rule
    * @return the confidence on the training data
    */
-
   public static double confidenceForRule(ItemSet premise, ItemSet consequence) {
 
-    return (double)consequence.counter/(double)premise.counter;
+    return (double)consequence.m_counter/(double)premise.m_counter;
   }
 
   /**
    * Checks if an instance contains an item set.
+   *
    * @param instance the instance to be tested
    * @return true if the given instance contains this item set
    */
-
   public final boolean containedBy(Instance instance) {
     
     for (int i = 0; i < instance.numAttributes(); i++) 
-      if (theItems[i] > -1) {
+      if (m_items[i] > -1) {
 	if (instance.isMissing(i))
 	  return false;
-	if (theItems[i] != (int)instance.value(i))
+	if (m_items[i] != (int)instance.value(i))
 	  return false;
       }
     return true;
@@ -86,18 +71,18 @@ public class ItemSet {
 
   /**
    * Deletes all item sets that don't have minimum support.
+   *
    * @param itemSets the set of item sets to be pruned
    * @param minSupport the minimum number of transactions to be covered
    * @return the reduced set of item sets
    */
-
   public static FastVector deleteItemSets(FastVector itemSets, int minSupport) {
 
     FastVector newVector = new FastVector(itemSets.size());
 
     for (int i = 0; i < itemSets.size(); i++) {
       ItemSet current = (ItemSet)itemSets.elementAt(i);
-      if (current.counter >= minSupport)
+      if (current.m_counter >= minSupport)
 	newVector.addElement(current);
     }
     return newVector;
@@ -105,22 +90,23 @@ public class ItemSet {
 
   /**
    * Tests if two item sets are equal.
+   *
    * @param itemSet another item set
    * @return true if this item set contains the same items as the given one
    */
-
   public final boolean equals(Object itemSet) {
 
-    if (theItems.length != ((ItemSet)itemSet).theItems.length)
+    if (m_items.length != ((ItemSet)itemSet).m_items.length)
       return false;
-    for (int i = 0; i < theItems.length; i++)
-      if (theItems[i] != ((ItemSet)itemSet).theItems[i])
+    for (int i = 0; i < m_items.length; i++)
+      if (m_items[i] != ((ItemSet)itemSet).m_items[i])
 	return false;
     return true;
   }
 
   /**
    * Generates all rules for an item set.
+   *
    * @param minConfidence the minimum confidence the rules have to have
    * @param hashtables containing all(!) previously generated
    * item sets
@@ -128,7 +114,6 @@ public class ItemSet {
    * are to be generated
    * @return all the rules with minimum confidence for the given item set
    */
-
   public final FastVector[] generateRules(double minConfidence, 
 					  FastVector hashtables,
 					  int numItemsInSet) {
@@ -140,20 +125,19 @@ public class ItemSet {
     Hashtable hashtable = (Hashtable)hashtables.elementAt(numItemsInSet - 2);
 
     // Generate all rules with one item in the consequence.
-
-    for (int i = 0; i < theItems.length; i++) 
-      if (theItems[i] != -1) {
+    for (int i = 0; i < m_items.length; i++) 
+      if (m_items[i] != -1) {
 	premise = new ItemSet();
 	consequence = new ItemSet();
-	premise.theItems = new int[theItems.length];
-	consequence.theItems = new int[theItems.length];
-	consequence.counter = counter;
-	for (int j = 0; j < theItems.length; j++) 
-	  consequence.theItems[j] = -1;
-	System.arraycopy(theItems, 0, premise.theItems, 0, theItems.length);
-	premise.theItems[i] = -1;
-	consequence.theItems[i] = theItems[i];
-	premise.counter = ((Integer)hashtable.get(premise)).intValue();
+	premise.m_items = new int[m_items.length];
+	consequence.m_items = new int[m_items.length];
+	consequence.m_counter = m_counter;
+	for (int j = 0; j < m_items.length; j++) 
+	  consequence.m_items[j] = -1;
+	System.arraycopy(m_items, 0, premise.m_items, 0, m_items.length);
+	premise.m_items[i] = -1;
+	consequence.m_items[i] = m_items[i];
+	premise.m_counter = ((Integer)hashtable.get(premise)).intValue();
 	premises.addElement(premise);
 	consequences.addElement(consequence);
 	conf.addElement(new Double(confidenceForRule(premise, consequence)));
@@ -164,7 +148,6 @@ public class ItemSet {
     pruneRules(rules, minConfidence);
 
     // Generate all the other rules
-
     moreResults = moreComplexRules(rules, numItemsInSet, 1, minConfidence,
 				   hashtables);
     if (moreResults != null) 
@@ -178,6 +161,7 @@ public class ItemSet {
 
   /**
    * Generates all significant rules for an item set.
+   *
    * @param minConfidence the minimum confidence the rules have to have
    * @param hashtables containing all(!) previously generated
    * item sets
@@ -186,7 +170,6 @@ public class ItemSet {
    * @param the significance level for testing the rules
    * @return all the rules with minimum confidence for the given item set
    */
-
   public final FastVector[] generateRulesBruteForce(double minConfidence, 
 						FastVector hashtables,
 						int numItemsInSet,
@@ -204,7 +187,6 @@ public class ItemSet {
 
     // Generate all possible rules for this item set and test their
     // significance.
-
     max = (int)Math.pow(2, numItemsInSet);
     for (int j = 1; j < max; j++) {
       numItemsInPremise = 0;
@@ -221,34 +203,34 @@ public class ItemSet {
 	  (Hashtable)hashtables.elementAt(numItemsInSet-numItemsInPremise-1);
 	premise = new ItemSet();
 	consequence = new ItemSet();
-	premise.theItems = new int[theItems.length];
-	consequence.theItems = new int[theItems.length];
-	consequence.counter = counter;
+	premise.m_items = new int[m_items.length];
+	consequence.m_items = new int[m_items.length];
+	consequence.m_counter = m_counter;
 	help = j;
-	for (int i = 0; i < theItems.length; i++) 
-	  if (theItems[i] != -1) {
+	for (int i = 0; i < m_items.length; i++) 
+	  if (m_items[i] != -1) {
 	    if (help % 2 == 1) {          
-	      premise.theItems[i] = theItems[i];
-	      consequence.theItems[i] = -1;
+	      premise.m_items[i] = m_items[i];
+	      consequence.m_items[i] = -1;
 	    } else {
-	      premise.theItems[i] = -1;
-	      consequence.theItems[i] = theItems[i];
+	      premise.m_items[i] = -1;
+	      consequence.m_items[i] = m_items[i];
 	    }
 	    help /= 2;
 	  } else {
-	    premise.theItems[i] = -1;
-	    consequence.theItems[i] = -1;
+	    premise.m_items[i] = -1;
+	    consequence.m_items[i] = -1;
 	  }
-	premise.counter = ((Integer)hashtableForPremise.get(premise)).intValue();
+	premise.m_counter = ((Integer)hashtableForPremise.get(premise)).intValue();
 	consequenceUnconditionedCounter =
 	  ((Integer)hashtableForConsequence.get(consequence)).intValue();
-	contingencyTable[0][0] = (double)(consequence.counter);
-	contingencyTable[0][1] = (double)(premise.counter - consequence.counter);
+	contingencyTable[0][0] = (double)(consequence.m_counter);
+	contingencyTable[0][1] = (double)(premise.m_counter - consequence.m_counter);
 	contingencyTable[1][0] = (double)(consequenceUnconditionedCounter -
-					  consequence.counter);
-	contingencyTable[1][1] = (double)(numTransactions - premise.counter -
+					  consequence.m_counter);
+	contingencyTable[1][1] = (double)(numTransactions - premise.m_counter -
 					  consequenceUnconditionedCounter +
-					  consequence.counter);
+					  consequence.m_counter);
 	chiSquared = ContingencyTables.chiSquared(contingencyTable, false);
 	confidence = confidenceForRule(premise, consequence);
 	if ((!(confidence < minConfidence)) &&
@@ -267,44 +249,44 @@ public class ItemSet {
 
   /**
    * Return a hashtable filled with the given item sets.
+   *
    * @param itemSets the set of item sets to be used for filling the hash table
    * @param initialSize the initial size of the hashtable
    * @return the generated hashtable
    */
-
   public static Hashtable getHashtable(FastVector itemSets, int initialSize) {
 
     Hashtable hashtable = new Hashtable(initialSize);
 
     for (int i = 0; i < itemSets.size(); i++) {
       ItemSet current = (ItemSet)itemSets.elementAt(i);
-      hashtable.put(current, new Integer(current.counter));
+      hashtable.put(current, new Integer(current.m_counter));
     }
     return hashtable;
   }
 
   /**
    * Produces a hash code for a item set.
+   *
    * @return a hash code for a set of items
    */
-
   public final int hashCode() {
 
     long result = 0;
 
-    for (int i = theItems.length-1; i >= 0; i--)
-      result += (i * theItems[i]);
+    for (int i = m_items.length-1; i >= 0; i--)
+      result += (i * m_items[i]);
     return (int)result;
   }
 
   /**
    * Merges all item sets in the set of (k-1)-item sets 
    * to create the (k)-item sets and updates the counters.
+   *
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
    * @return the generated (k)-item sets
    */
-
   public static FastVector mergeAllItemSets(FastVector itemSets, int size) {
 
     FastVector newVector = new FastVector();
@@ -317,37 +299,35 @@ public class ItemSet {
       for (int j = i+1; j < itemSets.size(); j++) {
 	ItemSet second = (ItemSet)itemSets.elementAt(j);
 	result = new ItemSet();
-	result.theItems = new int[first.theItems.length];
+	result.m_items = new int[first.m_items.length];
 
 	// Find and copy common prefix of size 'size'
-	
 	numFound = 0;
 	k = 0;
 	while (numFound < size) {
-	  if (first.theItems[k] == second.theItems[k]) {
-	    if (first.theItems[k] != -1) 
+	  if (first.m_items[k] == second.m_items[k]) {
+	    if (first.m_items[k] != -1) 
 	      numFound++;
-	    result.theItems[k] = first.theItems[k];
+	    result.m_items[k] = first.m_items[k];
 	  } else 
 	    break out;
 	  k++;
 	}
 	
 	// Check difference
-	
-	while (k < first.theItems.length) {
-	  if ((first.theItems[k] != -1) && (second.theItems[k] != -1))
+	while (k < first.m_items.length) {
+	  if ((first.m_items[k] != -1) && (second.m_items[k] != -1))
 	    break;
 	  else {
-	    if (first.theItems[k] != -1)
-	      result.theItems[k] = first.theItems[k];
+	    if (first.m_items[k] != -1)
+	      result.m_items[k] = first.m_items[k];
 	    else
-	      result.theItems[k] = second.theItems[k];
+	      result.m_items[k] = second.m_items[k];
 	  }
 	  k++;
 	}
-	if (k == first.theItems.length) {
-	  result.counter = 0;
+	if (k == first.m_items.length) {
+	  result.m_counter = 0;
 	  newVector.addElement(result);
 	}
       }
@@ -357,11 +337,11 @@ public class ItemSet {
 
   /**
    * Prunes a set of (k)-item sets using the given (k-1)-item sets.
+   *
    * @param toPrune the set of (k)-item sets to be pruned
    * @param kMinusOne the (k-1)-item sets to be used for pruning
    * @return the pruned set of item sets
    */
-
   public static FastVector pruneItemSets(FastVector toPrune, Hashtable kMinusOne) {
 
     FastVector newVector = new FastVector(toPrune.size());
@@ -369,17 +349,17 @@ public class ItemSet {
 
     for (int i = 0; i < toPrune.size(); i++) {
       ItemSet current = (ItemSet)toPrune.elementAt(i);
-      for (j = 0; j < current.theItems.length; j++)
-	if (current.theItems[j] != -1) {
-	  help = current.theItems[j];
-	  current.theItems[j] = -1;
+      for (j = 0; j < current.m_items.length; j++)
+	if (current.m_items[j] != -1) {
+	  help = current.m_items[j];
+	  current.m_items[j] = -1;
 	  if (kMinusOne.get(current) == null) {
-	    current.theItems[j] = help;
+	    current.m_items[j] = help;
 	    break;
 	  } else 
-	    current.theItems[j] = help;
+	    current.m_items[j] = help;
 	}
-      if (j == current.theItems.length) 
+      if (j == current.m_items.length) 
 	newVector.addElement(current);
     }
     return newVector;
@@ -387,11 +367,11 @@ public class ItemSet {
 
   /**
    * Prunes a set of rules.
+   *
    * @param rules a two-dimensional array of lists of item sets. The first list
    * of item sets contains the premises, the second one the consequences.
    * @param minConfidence the minimum confidence the rules have to have
    */
-
   public static void pruneRules(FastVector[] rules, double minConfidence) {
 
     FastVector newPremises = new FastVector(rules[0].size()),
@@ -414,11 +394,11 @@ public class ItemSet {
    * Converts the header info of the given set of instances into a set 
    * of item sets (singletons). The ordering of values in the header file 
    * determines the lexicographic order.
+   *
    * @param instances the set of instances whose header info is to be used
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-
   public static FastVector singletons(Instances instances) throws Exception {
 
     FastVector setOfItemSets = new FastVector();
@@ -429,10 +409,10 @@ public class ItemSet {
 	throw new Exception("Can't handle numeric attributes!");
       for (int j = 0; j < instances.attribute(i).numValues(); j++) {
 	current = new ItemSet();
-	current.theItems = new int[instances.numAttributes()];
+	current.m_items = new int[instances.numAttributes()];
 	for (int k = 0; k < instances.numAttributes(); k++)
-	  current.theItems[k] = -1;
-	current.theItems[i] = j;
+	  current.m_items[k] = -1;
+	current.m_items[i] = j;
 	setOfItemSets.addElement(current);
       }
     }
@@ -441,71 +421,71 @@ public class ItemSet {
   
   /**
    * Subtracts an item set from another one.
+   *
    * @param toSubtract the item set to be subtracted from this one.
    * @return an item set that only contains items form this item sets that
    * are not contained by toSubtract
    */
-
   public final ItemSet subtract(ItemSet toSubtract) {
 
     ItemSet result = new ItemSet();
     
-    result.theItems = new int[theItems.length];
-    for (int i = 0; i < theItems.length; i++) 
-      if (toSubtract.theItems[i] == -1)
-	result.theItems[i] = theItems[i];
+    result.m_items = new int[m_items.length];
+    for (int i = 0; i < m_items.length; i++) 
+      if (toSubtract.m_items[i] == -1)
+	result.m_items[i] = m_items[i];
       else
-	result.theItems[i] = -1;
-    result.counter = 0;
+	result.m_items[i] = -1;
+    result.m_counter = 0;
     return result;
   }
 
   /**
    * Outputs the support for an item set.
+   *
    * @return the support
    */
-
   public final int support() {
 
-    return counter;
+    return m_counter;
   }
 
   /**
    * Returns the contents of an item set as a string.
+   *
    * @param instances contains the relevant header information
    * @return string describing the item set
    */
-
   public final String toString(Instances instances) {
 
     StringBuffer text = new StringBuffer();
 
     for (int i = 0; i < instances.numAttributes(); i++)
-      if (theItems[i] != -1) {
+      if (m_items[i] != -1) {
 	text.append(instances.attribute(i).name()+'=');
-	text.append(instances.attribute(i).value(theItems[i])+' ');
+	text.append(instances.attribute(i).value(m_items[i])+' ');
       }
-    text.append(counter);
+    text.append(m_counter);
     return text.toString();
   }
 
   /**
    * Updates counter of item set with respect to given transaction.
+   *
    * @param instance the instance to be used for ubdating the counter
    */
-
   public final void upDateCounter(Instance instance) {
 
     if (containedBy(instance))
-      counter++;
+      m_counter++;
   }
 
   /**
    * Updates counters for a set of item sets and a set of instances.
+   *
    * @param itemSets the set of item sets which are to be updated
    * @param instances the instances to be used for updating the counters
    */
-
   public static void upDateCounters(FastVector itemSets, Instances instances) {
 
     for (int i = 0; i < instances.numInstances(); i++) {
@@ -515,12 +495,9 @@ public class ItemSet {
     }
   }
 
-  // ===============
-  // Private methods
-  // ===============
-
   /**
    * Generates rules with more than one item in the consequence.
+   *
    * @param rules all the rules having (k-1)-item sets as consequences
    * @param numItemsInSet the size of the item set for which the rules
    * are to be generated
@@ -530,7 +507,6 @@ public class ItemSet {
    * item sets
    * @return all the rules having (k)-item sets as consequences
    */
-
   private final FastVector[] moreComplexRules(FastVector[] rules, 
 					      int numItemsInSet, 
 					      int numItemsInConsequence,
@@ -550,9 +526,9 @@ public class ItemSet {
       Enumeration enum = newConsequences.elements();
       while (enum.hasMoreElements()) {
 	ItemSet current = (ItemSet)enum.nextElement();
-	current.counter = counter;
+	current.m_counter = m_counter;
 	newPremise = subtract(current);
-	newPremise.counter = ((Integer)hashtable.get(newPremise)).intValue();
+	newPremise.m_counter = ((Integer)hashtable.get(newPremise)).intValue();
 	newPremises.addElement(newPremise);
 	newConf.addElement(new Double(confidenceForRule(newPremise, current)));
       }

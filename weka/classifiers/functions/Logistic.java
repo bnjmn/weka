@@ -16,13 +16,11 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.util.*;
 import weka.core.*;
 import weka.filters.*;
-
 
 /**
  * Class for building and using a two-class logistic regression model.
@@ -36,13 +34,9 @@ import weka.filters.*;
  * Turn on debugging output.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
-
-  // =================
-  // Protected members
-  // =================
 
   /** The log-likelihood of the built model */
   protected double m_LL;
@@ -68,11 +62,9 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
   /** Debugging output */
   protected boolean m_Debug;
 
-
-  // =================
-  // Protected methods
-  // =================
-  
+  /**
+   * Returns probability.
+   */
   protected static double Norm(double z) { 
 
     return Statistics.chiSquaredProbability(z * z, 1);
@@ -120,6 +112,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 
     // For each data point
     for (int i = 0; i < X.length; i++) {	
+
       // Evaluate the probability for this point using the current coefficients
       double p = evaluateProbability(X[i]);
 
@@ -141,6 +134,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 	}
       }
     }
+
     // Fill out the rest of the array
     for (int j = 1; j < Arr.length; j++) {
       for (int k = 0; k < j; k++) {
@@ -160,10 +154,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     */
     return LL;
   }
-
-  // ==============
-  // Public methods
-  // ==============
 
   /**
    * Returns an enumeration describing the available options
@@ -312,6 +302,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
       xSD[j] = Math.sqrt(Math.abs( xSD[j] - xMean[j] * xMean[j]));
     }
     if (m_Debug) {
+
       // Output stats about input data
       System.out.println("Descriptives...");
       System.out.println("" + sY0 + " cases have Y=0; " 
@@ -373,7 +364,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     if (m_Debug) {
       System.out.println(" (Converged)");
     }
-
 
     // Convert coefficients back to non-normalized attribute units
     for(int j = 1; j <= nR; j++) {
@@ -454,10 +444,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     }
     return result;
   }
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.

@@ -16,16 +16,17 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /**
  * Class for bagging a classifier.<p>
+ *
+ * Reference: Leo Breiman (1996). <i>Bagging predictors</i>. Machine
+ * Learning, 24(2):123-140. <p>
  *
  * Valid options are:<p>
  *
@@ -37,19 +38,15 @@ import weka.core.*;
  * Set the number of bagging iterations (default 10). <p>
  *
  * -S seed <br>
- * Random number seed for resampling. <p>
+ * Random number seed for resampling (default 1).. <p>
  *
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.4 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
-
-  // =================
-  // Private variables
-  // =================
 
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers;
@@ -59,10 +56,6 @@ public class Bagging extends DistributionClassifier
 
   /** The seed for random number generation. */
   protected int m_Seed = 1;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -110,7 +103,7 @@ public class Bagging extends DistributionClassifier
    * Set the number of bagging iterations (default 10). <p>
    *
    * -S seed <br>
-   * Random number seed for resampling. <p>
+   * Random number seed for resampling (default 1).<p>
    *
    * Options after -- are passed to the designated learner.<p>
    *
@@ -332,8 +325,7 @@ public class Bagging extends DistributionClassifier
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
    

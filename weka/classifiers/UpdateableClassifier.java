@@ -16,22 +16,18 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import weka.core.*;
 
 /**
- * Interface to incremental classification models.
+ * Interface to incremental classification models that can learn using
+ * one instance at a time.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public interface UpdateableClassifier {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Updates a classifier using the given instance.

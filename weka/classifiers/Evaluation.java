@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.util.*;
@@ -25,8 +24,63 @@ import weka.core.*;
 import weka.estimators.*;
 
 /**
- * Class for evaluating machine learning models. Example usage as the
- * main of a classifier (called FunkyClassifier):
+ * Class for evaluating machine learning models. <p>
+ *
+ * ------------------------------------------------------------------- <p>
+ *
+ * General options when evaluating a learning scheme from the command-line: <p>
+ *
+ * -t name of training file <br>
+ * Name of the file with the training data. (required) <p>
+ *
+ * -T name of test file <br>
+ * Name of the file with the test data. If missing a cross-validation 
+ * is performed. <p>
+ *
+ * -c class index <br>
+ * Index of the class attribute (1, 2, ...; default: last). <p>
+ *
+ * -x number of folds <br>
+ * The number of folds for the cross-validation (default: 10). <p>
+ *
+ * -s random number seed <br>
+ * Random number seed for the cross-validation (default: 1). <p>
+ *
+ * -m file with cost matrix <br>
+ * The name of a file containing a cost matrix. <p>
+ *
+ * -l name of model input file <br>
+ * Loads classifier from the given file. <p>
+ *
+ * -d name of model output file <br>
+ * Saves classifier built from the training data into the given file. <p>
+ *
+ * -v <br>
+ * Outputs no statistics for the training data. <p>
+ *
+ * -o <br>
+ * Outputs statistics only, not the classifier. <p>
+ * 
+ * -i <br>
+ * Outputs information-retrieval statistics for two-class problems. <p>
+ *
+ * -k <br>
+ * Outputs information-theoretic statistics. <p>
+ *
+ * -p <br>
+ * Outputs predictions for test instances (and nothing else). <p>
+ *
+ * -r <br>
+ * Outputs cumulative margin distribution (and nothing else). <p>
+ *
+ * -g <br> 
+ * Only for classifiers that implement "Graphable." Outputs
+ * the graph representation of the classifier (and nothing
+ * else). <p>
+ *
+ * ------------------------------------------------------------------- <p>
+ *
+ * Example usage as the main of a classifier (called FunkyClassifier):
  * <code> <pre>
  * public static void main(String [] args) {
  *   try {
@@ -38,6 +92,9 @@ import weka.estimators.*;
  * }
  * </code> </pre>
  * <p>
+ *
+ * ------------------------------------------------------------------ <p>
+ *
  * Example usage from within an application:
  * <code> <pre>
  * Instances trainInstances = ... instances got from somewhere
@@ -52,13 +109,9 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.3 $
+ * @version  $Revision: 1.4 $
   */
 public class Evaluation implements Summarizable {
-
-  // =================
-  // Private variables
-  // =================
 
   /** The number of classes. */
   private int m_NumClasses;
@@ -179,10 +232,6 @@ public class Evaluation implements Summarizable {
   
   /** Random instance for dataset shuffling and resampling */
   private Random m_Random = null;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Initializes all the counters for the evaluation.
@@ -320,7 +369,6 @@ public class Evaluation implements Summarizable {
     for (int i = 0; i < numFolds; i++) {
 
       // Create classifier
-
       try {
 	classifier = 
 	  (Classifier)Class.forName(classifierString).
@@ -331,13 +379,12 @@ public class Evaluation implements Summarizable {
       }
 
       // Save options
-
       if (options != null) {
 	System.arraycopy(options, 0, savedOptions, 0, 
 			 options.length);
       }
-      // Parse options
 
+      // Parse options
       if (classifier instanceof OptionHandler) {
 	try {
 	  ((OptionHandler)classifier).setOptions(savedOptions);
@@ -349,7 +396,6 @@ public class Evaluation implements Summarizable {
       }
 
       // Build and test classifier 
-
       train = data.trainCV(numFolds, i);
       if (m_CostMatrix != null) {
 	train = train.applyCostMatrix(m_CostMatrix, m_Random);
@@ -364,25 +410,57 @@ public class Evaluation implements Summarizable {
 
   /**
    * Evaluates a classifier with the options given in an array of
-   * strings. It takes the string indicated by "-t" as training file,
-   * the string indicated by "-T" as test file and the number
-   * indicated by "-c" as the class index. If the test file is
-   * missing, a stratified ten-fold cross-validation is
-   * performed. Using -x you can change the number of folds to be
-   * used, and using -s the random seed.  If a file with a cost matrix
-   * is given using "-m", this cost matrix is used for the
-   * evaluation. If the "-o" flag is set, only the statistics are
-   * output, not the classifier itself. If the "-i" flag is set for a
-   * two-class classification problem it outputs some information
-   * retrieval statistics. If the "-p" flag is set it outputs the
-   * classification for each test instance. If the "-v" flag is set,
-   * no statistics for the training data are output even if no test
-   * test data is provided. If the "-k" flag is set, information-
-   * theoretic complexity figures are output. If you provide the name
-   * of an object file using "-l", a classifier will be loaded from
-   * the given file. If you provide the name of an object file using
-   * "-d", the classifier build from the training data will be saved
-   * into the given file.
+   * strings. <p>
+   *
+   * Valid options are: <p>
+   *
+   * -t name of training file <br>
+   * Name of the file with the training data. (required) <p>
+   *
+   * -T name of test file <br>
+   * Name of the file with the test data. If missing a cross-validation 
+   * is performed. <p>
+   *
+   * -c class index <br>
+   * Index of the class attribute (1, 2, ...; default: last). <p>
+   *
+   * -x number of folds <br>
+   * The number of folds for the cross-validation (default: 10). <p>
+   *
+   * -s random number seed <br>
+   * Random number seed for the cross-validation (default: 1). <p>
+   *
+   * -m file with cost matrix <br>
+   * The name of a file containing a cost matrix. <p>
+   *
+   * -l name of model input file <br>
+   * Loads classifier from the given file. <p>
+   *
+   * -d name of model output file <br>
+   * Saves classifier built from the training data into the given file. <p>
+   *
+   * -v <br>
+   * Outputs no statistics for the training data. <p>
+   *
+   * -o <br>
+   * Outputs statistics only, not the classifier. <p>
+   * 
+   * -i <br>
+   * Outputs information-retrieval statistics for two-class problems. <p>
+   *
+   * -k <br>
+   * Outputs information-theoretic statistics. <p>
+   *
+   * -p <br>
+   * Outputs predictions for test instances (and nothing else). <p>
+   *
+   * -r <br>
+   * Outputs cumulative margin distribution (and nothing else). <p>
+   *
+   * -g <br> 
+   * Only for classifiers that implement "Graphable." Outputs
+   * the graph representation of the classifier (and nothing
+   * else). <p>
    *
    * @param classifierString class of machine learning classifier as a string
    * @param options the array of string containing the options
@@ -428,31 +506,62 @@ public class Evaluation implements Summarizable {
 
   /**
    * Evaluates a classifier with the options given in an array of
-   * strings. It takes the string indicated by "-t" as training file,
-   * the string indicated by "-T" as test file and the number
-   * indicated by "-c" as the class index. If the test file is
-   * missing, a stratified ten-fold cross-validation is
-   * performed. Using -x you can change the number of folds to be
-   * used, and using -s the random seed.  If a file with a cost matrix
-   * is given using "-m", this cost matrix is used for the
-   * evaluation. If the "-o" flag is set, only the statistics are
-   * output, not the classifier itself. If the "-i" flag is set for a
-   * two-class classification problem it outputs some information
-   * retrieval statistics. If the "-p" flag is set it outputs the
-   * classification for each test instance. If the "-v" flag is set,
-   * no statistics for the training data are output even if no test
-   * test data is provided. If the "-k" flag is set,
-   * information-theoretic complexity figures are output. If you
-   * provide the name of an object file using "-l", a classifier will
-   * be loaded from the given file. If you provide the name of an
-   * object file using "-d", the classifier build from the training 
-   * data will be saved into the given file.
+   * strings. <p>
+   *
+   * Valid options are: <p>
+   *
+   * -t name of training file <br>
+   * Name of the file with the training data. (required) <p>
+   *
+   * -T name of test file <br>
+   * Name of the file with the test data. If missing a cross-validation 
+   * is performed. <p>
+   *
+   * -c class index <br>
+   * Index of the class attribute (1, 2, ...; default: last). <p>
+   *
+   * -x number of folds <br>
+   * The number of folds for the cross-validation (default: 10). <p>
+   *
+   * -s random number seed <br>
+   * Random number seed for the cross-validation (default: 1). <p>
+   *
+   * -m file with cost matrix <br>
+   * The name of a file containing a cost matrix. <p>
+   *
+   * -l name of model input file <br>
+   * Loads classifier from the given file. <p>
+   *
+   * -d name of model output file <br>
+   * Saves classifier built from the training data into the given file. <p>
+   *
+   * -v <br>
+   * Outputs no statistics for the training data. <p>
+   *
+   * -o <br>
+   * Outputs statistics only, not the classifier. <p>
+   * 
+   * -i <br>
+   * Outputs information-retrieval statistics for two-class problems. <p>
+   *
+   * -k <br>
+   * Outputs information-theoretic statistics. <p>
+   *
+   * -p <br>
+   * Outputs predictions for test instances (and nothing else). <p>
+   *
+   * -r <br>
+   * Outputs cumulative margin distribution (and nothing else). <p>
+   *
+   * -g <br> 
+   * Only for classifiers that implement "Graphable." Outputs
+   * the graph representation of the classifier (and nothing
+   * else). <p>
    *
    * @param classifier machine learning classifier
    * @param options the array of string containing the options
    * @exception Exception if model could not be evaluated successfully
-   * @return a string describing the results 
-   */
+   * @return a string describing the results */
   public static String evaluateModel(Classifier classifier,
 				     String [] options) throws Exception {
 			      
@@ -713,11 +822,7 @@ public class Evaluation implements Summarizable {
     if (!(noOutput || printMargins)) {
       if (classifier instanceof OptionHandler) {
 	if (schemeOptionsText != null) {
-	  //String[] ops = ((OptionHandler)classifier).getOptions();
 	  text.append("\nOptions: "+schemeOptionsText);
-	  /*for (int i = 0; i  < ops.length; i++) {
-	    text.append(ops[i]+" ");
-	    }*/
 	  text.append("\n");
 	}
       }
@@ -1025,7 +1130,6 @@ public class Evaluation implements Summarizable {
     }
   }
 
-  
   /**
    * Returns the correlation coefficient if the class is numeric.
    *
@@ -1670,10 +1774,9 @@ public class Evaluation implements Summarizable {
     return true;
   }
 
-  // ===============
-  // Private methods
-  // ===============
-
+  /**
+   * Prints the predictions for the given dataset into a String variable.
+   */
   private static String printClassifications(Classifier classifier, 
 					     Instances trainWithoutStrings,
 					     String testFileName,
@@ -1750,7 +1853,6 @@ public class Evaluation implements Summarizable {
     return text.toString();
   }
 
-
   /**
    * Make up the help string giving all the command line options
    *
@@ -1769,19 +1871,19 @@ public class Evaluation implements Summarizable {
     optionsText.append("\tSets test file. If missing, a cross-validation\n");
     optionsText.append("\twill be performed on the training data.\n");
     optionsText.append("-c <class index>\n");
-    optionsText.append("\tSets index of class attribute.\n");
+    optionsText.append("\tSets index of class attribute (default: last).\n");
     optionsText.append("-x <number of folds>\n");
-    optionsText.append("\tSets number of folds for cross-validation.\n");
+    optionsText.append("\tSets number of folds for cross-validation (default: 10).\n");
     optionsText.append("-s <random number seed>\n");
-    optionsText.append("\tSets random number seed for cross-validation.\n");
+    optionsText.append("\tSets random number seed for cross-validation (default: 1).\n");
     optionsText.append("-m <name of file with cost matrix>\n");
     optionsText.append("\tSets file with cost matrix.\n");
-    optionsText.append("-v\n");
-    optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-l <name of input file>\n");
     optionsText.append("\tSets model input file.\n");
     optionsText.append("-d <name of output file>\n");
     optionsText.append("\tSets model output file.\n");
+    optionsText.append("-v\n");
+    optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
     optionsText.append("\tOutputs statistics only, not the classifier.\n");
     optionsText.append("-i\n");
@@ -1795,12 +1897,11 @@ public class Evaluation implements Summarizable {
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
     if (classifier instanceof Drawable) {
       optionsText.append("-g\n");
-      optionsText.append("\tOnly outputs the graph represenation"
+      optionsText.append("\tOnly outputs the graph representation"
 			 + " of the classifier.\n");
     }
 
     // Get scheme-specific options
-
     if (classifier instanceof OptionHandler) {
       optionsText.append("\nOptions specific to "
 			  + classifier.getClass().getName()
@@ -1915,14 +2016,6 @@ public class Evaluation implements Summarizable {
       double priorProb = Math.max(MIN_SF_PROB,
 				  m_ClassPriors[actualClass]
 				  / m_ClassPriorsSum);
-      /*
-      if (predictedProb == MIN_SF_PROB) {
-	System.out.print("Actual Index: " + actualClass + " Dist: ");
-	for (int i = 0; i < m_NumClasses; i++)
-	  System.out.print(" " + predictedDistribution[i]);
-	System.out.print('\n');
-      }
-      */
       if (predictedProb >= priorProb) {
 	m_SumKBInfo += (Utils.log2(predictedProb) - 
 			Utils.log2(priorProb))
@@ -1999,24 +2092,6 @@ public class Evaluation implements Summarizable {
 
       m_SumSchemeEntropy -= Utils.log2(predictedProb) * instance.weight();
       m_SumPriorEntropy -= Utils.log2(priorProb) * instance.weight();
-      /*
-      System.out.print("PredictionError: "
-			 + Utils.doubleToString(predictedValue
-						- instance.classValue(),
-						6, 4)
-			 + " (" 
-			 + Utils.doubleToString(predictedProb, 6, 4) 
-			 + ") "
-			 + " Prior: " 
-			 + Utils.doubleToString(priorProb, 6, 4)
-			 + " SchemeEnt: " 
-			 + Utils.doubleToString(m_SumSchemeEntropy, 6, 4)
-			 + " PriorEnt: " 
-			 + Utils.doubleToString(m_SumPriorEntropy, 6, 4)
-			 + "\nSEst: " + m_ErrorEstimator.toString()
-			 + "\nPEst: " + m_PriorErrorEstimator.toString()
-      );
-      */      
       m_ErrorEstimator.addValue(predictedValue - instance.classValue(), 
 				instance.weight());
 

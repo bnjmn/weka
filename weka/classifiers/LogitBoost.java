@@ -16,13 +16,11 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-
 
 /**
  * Class for boosting any classifier that can handle weighted instances.
@@ -53,22 +51,15 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {
 
-  // ===================
-  // Protected variables
-  // ===================
-
   /** Array for storing the generated base classifiers. */
   protected Classifier [][] m_Classifiers;
 
-  /**
-   * An instantiated base classifier used for getting and testing validity 
-   * of options
-   */
+  /** An instantiated base classifier used for getting and testing options */
   protected Classifier m_ClassifierExample;
 
   /** The options to be passed to the base classifiers. */
@@ -117,6 +108,7 @@ public class LogitBoost extends DistributionClassifier
     }
     double weightMassToSelect = sumOfWeights * quantile;
     int [] sortedIndices = Utils.sort(weights);
+
     // Select the instances
     sumOfWeights = 0;
     for (int i = numInstances-1; i >= 0; i--) {
@@ -156,10 +148,6 @@ public class LogitBoost extends DistributionClassifier
     }
    return Math.exp(R[j]) / Rsum;
   }
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -294,7 +282,6 @@ public class LogitBoost extends DistributionClassifier
     return options;
   }
 
-
   /**
    * Set the 'weak' learner for boosting. The learner should be able to
    * handle numeric class attributes.
@@ -394,7 +381,6 @@ public class LogitBoost extends DistributionClassifier
     return m_Debug;
   }
 
-
   /**
    * Boosting method. Boosts any classifier that can handle weighted
    * instances.
@@ -422,10 +408,12 @@ public class LogitBoost extends DistributionClassifier
     }
 
     m_NumClasses = data.numClasses();
+
     // Create a copy of the data with the class transformed into numeric
     boostData = new Instances(data);
     boostData.deleteWithMissingClass();
     int numInstances = boostData.numInstances();
+
     // Temporarily unset the class index
     boostData.setClassIndex(-1);
     boostData.deleteAttributeAt(classIndex);
@@ -442,6 +430,7 @@ public class LogitBoost extends DistributionClassifier
     if (m_Debug) {
       System.err.println("Creating base classifiers");
     }
+
     // Create the base classifiers
     m_Classifiers = new Classifier [m_NumClasses][getMaxIterations()];
     for (int i = 0; i < getMaxIterations(); i++) {
@@ -450,6 +439,7 @@ public class LogitBoost extends DistributionClassifier
 	  .newInstance();
       }
     }
+
     // Set the options for the classifiers
     if (m_ClassifierExample instanceof OptionHandler) {
       if (m_Debug) {
@@ -476,6 +466,7 @@ public class LogitBoost extends DistributionClassifier
 	if (m_Debug) {
 	  System.err.println("\t...for class " + (j + 1));
 	}
+
 	// Set instance pseudoclass and weights
 	for (int i = 0; i < numInstances; i++) {
 	  double p = RtoP(trainFs[i], j);
@@ -498,6 +489,7 @@ public class LogitBoost extends DistributionClassifier
 	  current.setValue(classIndex, z);
 	  current.setWeight(numInstances * w);
 	}
+
 	// Select instances to train the classifier on
 	if (m_WeightThreshold < 100) {
 	  trainData = selectWeightQuantile(boostData, 
@@ -526,18 +518,6 @@ public class LogitBoost extends DistributionClassifier
 	}
       }
     }
-  }
-  
-  /**
-   * Classifies a given instance using the boosted classifier.
-   *
-   * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
-   * successfully
-   */
-  public double classifyInstance(Instance instance) throws Exception {
-
-    return (double)Utils.maxIndex(distributionForInstance(instance));
   }
 
   /**
@@ -603,8 +583,7 @@ public class LogitBoost extends DistributionClassifier
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

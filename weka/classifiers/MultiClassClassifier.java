@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.util.*;
@@ -25,7 +24,7 @@ import weka.filters.*;
 
 /**
  * Class for handling multi-class datasets with 2-class distribution
- * classifiers. Globally replaces all missing values.<p>
+ * classifiers.<p>
  *
  * Valid options are:<p>
  *
@@ -35,16 +34,10 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.1 - 26 Mar 1999 - Made the classifier work for non 
- *          OptionHandler base classifiers (Len) <br>
- *          1.0 - initial version (Eibe)
+ * @version $Revision: 1.3 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
-
-  // ==========================
-  // Private instance variables
-  // ==========================
 
   /** The classifiers. (One for each class.) */
   private DistributionClassifier[] m_Classifiers;
@@ -58,9 +51,8 @@ public class MultiClassClassifier extends DistributionClassifier
   /** The class name of the base classifier. */
   private String m_BaseClassifier;
 
-  // ==============
-  // Public methods
-  // ==============
+  /** ZeroR classifier for when all base classifier return zero probability. */
+  private ZeroR m_ZeroR;
 
   /**
    * Builds the classifiers.
@@ -81,8 +73,12 @@ public class MultiClassClassifier extends DistributionClassifier
     }
     if (Class.forName(m_BaseClassifier).newInstance() instanceof 
 	WeightedInstancesHandler) {
+
+      // Base classifier can handle weights
       insts = new Instances(insts);
     } else {
+
+      // Use resampling if base classifer can't handle weights and weights not all one
       double[] weights = new double[insts.numInstances()];
       boolean foundOne = false;
       for (int i = 0; i < weights.length; i++) {
@@ -99,6 +95,8 @@ public class MultiClassClassifier extends DistributionClassifier
     if (insts.numInstances() == 0) {
       throw new Exception("No train instances without missing class!");
     }
+    m_ZeroR = new ZeroR();
+    m_ZeroR.buildClassifier(insts);
     m_Classifiers = new DistributionClassifier[insts.numClasses()];
     m_ClassFilters = new MakeIndicatorFilter[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
@@ -134,9 +132,12 @@ public class MultiClassClassifier extends DistributionClassifier
       newInst = m_ClassFilters[i].output();
       probs[i] = m_Classifiers[i].distributionForInstance(newInst)[1];
     }
-    Utils.normalize(probs);
-    
-    return probs;
+    if (Utils.gr(Utils.sum(probs), 0)) {
+      Utils.normalize(probs);
+      return probs;
+    } else {
+      return m_ZeroR.distributionForInstance(inst);
+    }
   }
 
   /**
@@ -196,7 +197,6 @@ public class MultiClassClassifier extends DistributionClassifier
   
     m_BaseClassifier = Utils.getOption('W', options);
     if (m_BaseClassifier.length() == 0) {
-      m_BaseClassifier = null;
       throw new Exception("A 'base' learner must be specified "+
 			  "with the -W option.");
     }
@@ -252,16 +252,32 @@ public class MultiClassClassifier extends DistributionClassifier
     }
     return options;
   }
-  
-  // ============
-  // Test method.
-  // ============
+
+  /**
+   * Sets the base learner.
+   *
+   * @param learnerName the full class name of the learner
+   * @exception Exception if learnerName is not a valid class name
+   */
+  public void setBaseLearner(String learnerName) throws Exception {
+
+    m_BaseClassifier = learnerName;
+  }
+
+  /**
+   * Gets the name of the base learner
+   *
+   * @return the full class name of the weak learner
+   */
+  public String getBaseLearner() {
+
+    return m_BaseClassifier;
+  }
 
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

@@ -16,17 +16,20 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /**
  * Class for boosting a classifier using Freund & Schapire's Adaboost 
  * M1 method.<p>
+ *
+ * Reference: Yoav Freund and Robert E. Schapire
+ * (1996). <i>Experiments with a new boosting algorithm</i>.  Proc
+ * International Conference on Machine Learning, pages 148-156, Morgan
+ * Kaufmann, San Francisco. <p>
  *
  * Valid options are:<p>
  *
@@ -48,31 +51,19 @@ import weka.core.*;
  * Use resampling instead of reweighting.<p>
  *
  * -S seed <br>
- * Random number seed for resampling. <p>
+ * Random number seed for resampling (default 1). <p>
  *
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.1 - November 1998 - Made the booster able to take any classifier
- * (Len) <br>
- *          1.0 - ?? ??? 1998 - Initial version (Eibe)
+ * @version $Revision: 1.4 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
 
-  // =================
-  // Private constants
-  // =================
-
-  /**
-   * Maximum number of iterations tried to find classifier with non-zero error.
-   */ 
+  /** Maximum number of iterations tried to find classifier with non-zero error. */ 
   private static int MAX_NUM_RESAMPLING_ITERATIONS = 10;
-
-  // ===================
-  // Protected variables
-  // ===================
 
   /** Array for storing the generated base classifiers. */
   protected Classifier [] m_Classifiers;
@@ -123,23 +114,13 @@ public class AdaBoostM1 extends DistributionClassifier
     }
     double weightMassToSelect = sumOfWeights * quantile;
     int [] sortedIndices = Utils.sort(weights);
-    /*
-    if (b_Debug)
-      System.err.println("quantile:"+quantile
-			 +" sumOfWeights:"+sumOfWeights
-			 +" weightMassToSelect:"+weightMassToSelect);
-			 */
+
     // Select the instances
     sumOfWeights = 0;
     for(int i = numInstances - 1; i >= 0; i--) {
       Instance instance = (Instance)data.instance(sortedIndices[i]).copy();
       trainData.add(instance);
       sumOfWeights += weights[sortedIndices[i]];
-      /*
-      if (b_Debug)
-	System.err.println("Kept instance "+sortedIndices[i]
-			   +" with weight "+weights[sortedIndices[i]]);
-			   */
       if ((sumOfWeights > weightMassToSelect) && 
 	  (i > 0) && 
 	  (weights[sortedIndices[i]] != weights[sortedIndices[i - 1]])) {
@@ -153,11 +134,6 @@ public class AdaBoostM1 extends DistributionClassifier
     return trainData;
   }
 
-
-  // ===============
-  // Public methods.
-  // ===============
-
   /**
    * Returns an enumeration describing the available options
    *
@@ -165,7 +141,7 @@ public class AdaBoostM1 extends DistributionClassifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(6);
 
     newVector.addElement(new Option(
 	      "\tTurn on debugging output.",
@@ -226,7 +202,7 @@ public class AdaBoostM1 extends DistributionClassifier
    * Use resampling instead of reweighting.<p>
    *
    * -S seed <br>
-   * Random number seed for resampling. <p>
+   * Random number seed for resampling (default 1).<p>
    *
    * Options after -- are passed to the designated learner.<p>
    *
@@ -303,7 +279,7 @@ public class AdaBoostM1 extends DistributionClassifier
       options[current++] = "-D";
     }
     if (getUseResampling()) {
-      options[current++] = "Q";
+      options[current++] = "-Q";
     } else {
       options[current++] = "-P"; 
       options[current++] = "" + getWeightThreshold();
@@ -612,6 +588,7 @@ public class AdaBoostM1 extends DistributionClassifier
     // Initialize data
     m_Betas = new double [m_Classifiers.length];
     m_NumIterations = 0;
+
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
     m_Training = new Instances(data, 0, numInstances);
@@ -674,18 +651,6 @@ public class AdaBoostM1 extends DistributionClassifier
     }
   }
   
-  /**
-   * Classifies a given instance using the boosted classifier.
-   *
-   * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
-   * successfully
-   */
-  public double classifyInstance(Instance instance) throws Exception {
-
-    return (double)Utils.maxIndex(distributionForInstance(instance));
-  }
-
   /**
    * Calculates the class membership probabilities for the given test instance.
    *
@@ -750,8 +715,7 @@ public class AdaBoostM1 extends DistributionClassifier
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

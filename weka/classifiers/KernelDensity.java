@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -25,35 +24,27 @@ import weka.core.*;
 
 
 /**
- * Class for building and using a kernel density classifier.
+ * Class for building and using a very simple kernel density classifier.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.3 $
  */
 public class KernelDensity extends DistributionClassifier {
 
-  // =================
-  // Private variables
-  // =================
-
   /** The number of instances in each class (null if class numeric). */
-  private double [] theCounts;
+  private double [] m_Counts;
   
   /** The instances used for "training". */
-  private Instances theInstances;
+  private Instances m_Instances;
 
   /** The minimum values for numeric attributes. */
-  private double [] minArray;
+  private double [] m_MinArray;
 
   /** The maximum values for numeric attributes. */
-  private double [] maxArray;
+  private double [] m_MaxArray;
  
   /** Constant */
   private static double CO = Math.sqrt(2 * Math.PI);
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns value for normal kernel
@@ -72,7 +63,6 @@ public class KernelDensity extends DistributionClassifier {
    * @param instances set of instances serving as training data 
    * @exception Exception if the classifier has not been generated successfully
    */
-
   public void buildClassifier(Instances instances) throws Exception {
 
     if (!instances.classAttribute().isNominal()) {
@@ -81,32 +71,20 @@ public class KernelDensity extends DistributionClassifier {
     if (instances.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
-    theInstances = instances;
-    minArray = new double [theInstances.numAttributes()];
-    maxArray = new double [theInstances.numAttributes()];
-    for (int i = 0; i < theInstances.numAttributes(); i++) {
-      minArray[i] = maxArray[i] = Double.NaN;
+    m_Instances = instances;
+    m_MinArray = new double [m_Instances.numAttributes()];
+    m_MaxArray = new double [m_Instances.numAttributes()];
+    for (int i = 0; i < m_Instances.numAttributes(); i++) {
+      m_MinArray[i] = m_MaxArray[i] = Double.NaN;
     }
-    theCounts = new double[theInstances.numClasses()];
-    for (int i = 0; i < theInstances.numInstances(); i++) {
-      Instance inst = theInstances.instance(i);
+    m_Counts = new double[m_Instances.numClasses()];
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      Instance inst = m_Instances.instance(i);
       if (!inst.classIsMissing()) {
-	theCounts[(int) inst.classValue()] += inst.weight();
+	m_Counts[(int) inst.classValue()] += inst.weight();
       }
       updateMinMax(inst);
     }
-  }
-
-  /**
-   * Classifies a given instance.
-   *
-   * @param instance the instance to be classified
-   * @return index of the predicted class
-   * @exception Exception if instance can't be classified
-   */
-  public double classifyInstance(Instance instance) throws Exception {
-
-    return Utils.maxIndex(distributionForInstance(instance));
   }
 
   /**
@@ -118,18 +96,26 @@ public class KernelDensity extends DistributionClassifier {
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
     
-    double[] probs = new double[theInstances.numClasses()];
-    double prob, sum;
+    double[] probs = new double[m_Instances.numClasses()];
+    double prob, sum, temp;
+    double lowerBound = Math.pow(Double.MIN_VALUE, 1.0 / 
+				 (instance.numAttributes() - 1.0)); 
 
-    sum = Math.sqrt(Utils.sum(theCounts));
+    System.out.println("lowerBound " + lowerBound);
+    sum = Math.sqrt(Utils.sum(m_Counts));
     updateMinMax(instance);
-    for (int i = 0; i < theInstances.numInstances(); i++) {
-      Instance inst = theInstances.instance(i);
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      Instance inst = m_Instances.instance(i);
       if (!inst.classIsMissing()) {
 	prob = 1;
-	for (int j = 0; j < theInstances.numAttributes(); j++) {
-	  if (j != theInstances.classIndex()) {
-	    prob *= normalKernel(distance(instance, inst, j) * sum) * sum;  
+	for (int j = 0; j < m_Instances.numAttributes(); j++) {
+	  if (j != m_Instances.classIndex()) {
+	    temp = normalKernel(distance(instance, inst, j) * sum) * sum;
+	    if (temp < lowerBound) {
+	      prob *= lowerBound;
+	    } else {
+	      prob *= temp;
+	    }
 	  }
 	}
 	probs[(int) inst.classValue()] += prob;
@@ -150,23 +136,18 @@ public class KernelDensity extends DistributionClassifier {
     return "Kernel Density Estimator";
   }
 
-  // ===============
-  // Private methods
-  // ===============
-
   /**
    * Calculates the distance between two instances according to one attribute
    *
    * @param test the first instance
    * @param train the second instance
    * @return the distance between the two given instances
-   */          
-
+   */
   private double distance(Instance first, Instance second, int i) {
     
     double diff, distance = 0;
 
-    if (theInstances.attribute(i).isNominal()) {
+    if (m_Instances.attribute(i).isNominal()) {
       
       // If attribute is nominal
       if (first.isMissing(i) || second.isMissing(i) ||
@@ -206,10 +187,10 @@ public class KernelDensity extends DistributionClassifier {
    */
   private double norm(double x, int i) {
 
-    if (Double.isNaN(minArray[i]) || Utils.eq(maxArray[i],minArray[i])) {
+    if (Double.isNaN(m_MinArray[i]) || Utils.eq(m_MaxArray[i],m_MinArray[i])) {
       return 0;
     } else {
-      return (x - minArray[i]) / (maxArray[i] - minArray[i]);
+      return (x - m_MinArray[i]) / (m_MaxArray[i] - m_MinArray[i]);
     }
   }
 
@@ -221,18 +202,18 @@ public class KernelDensity extends DistributionClassifier {
    */
   private void updateMinMax(Instance instance) {
     
-    for (int j = 0; j < theInstances.numAttributes(); j++) {
-      if ((theInstances.attribute(j).isNumeric()) 
+    for (int j = 0; j < m_Instances.numAttributes(); j++) {
+      if ((m_Instances.attribute(j).isNumeric()) 
 	  && (!instance.isMissing(j))) {
-	if (Double.isNaN(minArray[j])) {
-	  minArray[j] = instance.value(j);
-	  maxArray[j] = instance.value(j);
+	if (Double.isNaN(m_MinArray[j])) {
+	  m_MinArray[j] = instance.value(j);
+	  m_MaxArray[j] = instance.value(j);
 	} else {
-	  if (instance.value(j) < minArray[j]) {
-	    minArray[j] = instance.value(j);
+	  if (instance.value(j) < m_MinArray[j]) {
+	    m_MinArray[j] = instance.value(j);
 	  } else {
-	    if (instance.value(j) > maxArray[j]) {
-	      maxArray[j] = instance.value(j);
+	    if (instance.value(j) > m_MaxArray[j]) {
+	      m_MaxArray[j] = instance.value(j);
 	    }
 	  }
 	}
@@ -240,15 +221,10 @@ public class KernelDensity extends DistributionClassifier {
     }
   }
  
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

@@ -1,6 +1,6 @@
 /*
  *    IB1.java
- *    Copyright (C) 1999 Eibe Frank,Len Trigg,Stuart Inglis
+ *    Copyright (C) 1999 Stuart Inglis,Len Trigg,Eibe Frank
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -37,13 +36,9 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
-  
-  // =================
-  // Private variables
-  // =================
 
   /** The training instances used for classification. */
   private Instances train;
@@ -53,10 +48,6 @@ public class IB1 extends Classifier implements UpdateableClassifier {
 
   /** The maximum values for numeric attributes. */
   private double [] maxArray;
-  
-  // ==============
-  // Public methods
-  // ==============
 
   /**
    * Generates the classifier.
@@ -130,10 +121,6 @@ public class IB1 extends Classifier implements UpdateableClassifier {
 
     return ("IB1 classifier");
   }
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Calculates the distance between two instances
@@ -223,10 +210,6 @@ public class IB1 extends Classifier implements UpdateableClassifier {
       }
     }
   }
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.

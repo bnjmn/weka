@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.associations;
 
 import java.io.*;
@@ -24,119 +23,107 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class implementing an Apriori-type algorithm
+ * Class implementing an Apriori-type algorithm. Iteratively reduces the minimum
+ * support until it finds the required number of rules with the given minimum 
+ * confidence. <p>
+ *
+ * Reference: R. Agrawal, R. Srikant (1994). <i>Fast algorithms for
+ * mining association rules in large databases </i>. Proc
+ * International Conference on Very Large Databases,
+ * pp. 478-499. Santiage, Chile: Morgan Kaufmann, Los Altos, CA. <p>
+ *
+ * Valid options are:<p>
+ *   
+ * -N required number of rules <br>
+ * The required number of rules (default: 10). <p>
+ *
+ * -C minimum confidence of a rule <br>
+ * The minimum confidence of a rule (default: 0.9). <p>
+ *
+ * -D delta for minimum support <br>
+ * The delta by which the minimum support is decreased in
+ * each iteration (default: 0.05).
+ *
+ * -M lower bound for minimum support <br>
+ * The lower bound for the minimum support (default = 0.1). <p>
+ *
+ * -S significance level <br>
+ * If used, rules are tested for significance at
+ * the given level. Slower (default = no significance testing). <p>
+ *
+ * -I <br>
+ * If set the itemsets found are also output (default = no). <p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
- */
-
+ * @version $Revision: 1.3 $ */
 public class Apriori implements OptionHandler {
-
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * The set of all sets of itemsets L.
-   */
-
-  private FastVector Ls;
-
-  /**
-   * The same information stored in hash tables.
-   */
-
-  private FastVector hashtables;
-
-  /**
-   * The list of all generated rules.
-   */
-
-  private FastVector[] allTheRules;
-
-  /**
-   * The minimum support.
-   */
-
-  private double minSupport;
-
-  /**
-   * The lower bound for the minimum support.
-   */
   
-  private double lowerBoundMinSupport;
+  /** The minimum support. */
+  private double m_minSupport;
 
-  /**
-   * The minimum confidence.
-   */
+  /** The lower bound for the minimum support. */
+  private double m_lowerBoundMinSupport;
 
-  private double minConfidence;
+  /** The minimum confidence. */
+  private double m_minConfidence;
 
-  /**
-   * The maximum number of rules that are output.
-   */
+  /** The maximum number of rules that are output. */
+  private int m_numRules;
 
-  private int numRules;
+  /** Delta by which m_minSupport is decreased in each iteration. */
+  private double m_delta;
 
-  /**
-   * Delta by which minSupport is decreased in each iteration.
-   */
+  /** Significance level for optional significance test. */
+  private double m_significanceLevel;
 
-  private double delta;
+  /** Number of cycles used before required number of rules was one. */
+  private int m_cycles;
 
-  /**
-   * Number of cycles used before required number of rules was one.
-   */
+  /** The set of all sets of itemsets L. */
+  private FastVector m_Ls;
 
-  private int cycles;
+  /** The same information stored in hash tables. */
+  private FastVector m_hashtables;
 
-  /**
-   * Significance level for optional significance test.
-   */
+  /** The list of all generated rules. */
+  private FastVector[] m_allTheRules;
 
-  private double significanceLevel;
+  /** The instances (transactions) to be used for generating the association rules. */
+  private Instances m_instances;
 
-  /**
-   * The instances (transactions) to be used for generating the association rules.
-   */
-
-  private Instances theInstances;
-
-  /**
-   * Output itemsets found?
-   */
-  
-  private boolean outputItemSets;
-
-  // ==============
-  // Public methods
-  // ==============
+  /** Output itemsets found? */
+  private boolean m_outputItemSets;
 
   /**
    * Constructor that allows to sets default values for the 
    * minimum confidence and the maximum number of rules
    * the minimum confidence.
    */
-
   public Apriori() {
+
     resetOptions();
   }
 
+  /**
+   * Resets the options to the default values.
+   */
   public void resetOptions() {
-    delta = 0.05;
-    minConfidence = 0.90;
-    numRules = 10;
-    lowerBoundMinSupport = 0.1;
-    significanceLevel = -1;
-    outputItemSets = false;
+
+    m_delta = 0.05;
+    m_minConfidence = 0.90;
+    m_numRules = 10;
+    m_lowerBoundMinSupport = 0.1;
+    m_significanceLevel = -1;
+    m_outputItemSets = false;
   }
 
   /**
    * Method that generates all large itemsets with a minimum support, and from
    * these all association rules with a minimum confidence.
+   *
    * @param instances the instances to be used for generating the associations
    * @exception Exception if rules can't be built successfully
    */
-
   public void buildAssociations(Instances instances) throws Exception {
 
     double[] confidences, supports;
@@ -148,86 +135,81 @@ public class Apriori implements OptionHandler {
     }
 
     // Decrease minimum support until desired number of rules found.
-
-    cycles = 0;
-    minSupport = 1.0;
+    m_cycles = 0;
+    m_minSupport = 1.0;
     do {
 
       // Reserve space for variables
-      
-      Ls = new FastVector();
-      hashtables = new FastVector();
-      allTheRules = new FastVector[3];
-      allTheRules[0] = new FastVector();
-      allTheRules[1] = new FastVector();
-      allTheRules[2] = new FastVector();
+      m_Ls = new FastVector();
+      m_hashtables = new FastVector();
+      m_allTheRules = new FastVector[3];
+      m_allTheRules[0] = new FastVector();
+      m_allTheRules[1] = new FastVector();
+      m_allTheRules[2] = new FastVector();
       sortedRuleSet = new FastVector[3];
       sortedRuleSet[0] = new FastVector();
       sortedRuleSet[1] = new FastVector();
       sortedRuleSet[2] = new FastVector();
 
       // Find large itemsets and rules
-      
       findLargeItemSets(instances);
-      if (significanceLevel != -1) 
+      if (m_significanceLevel != -1) 
 	findRulesBruteForce();
       else
 	findRulesQuickly();
       
       // Sort rules according to their support
-
-      supports = new double[allTheRules[2].size()];
-      for (int i = 0; i < allTheRules[2].size(); i++) 
-	supports[i] = (double)((ItemSet)allTheRules[1].elementAt(i)).support();
+      supports = new double[m_allTheRules[2].size()];
+      for (int i = 0; i < m_allTheRules[2].size(); i++) 
+	supports[i] = (double)((ItemSet)m_allTheRules[1].elementAt(i)).support();
       indices = Utils.sort(supports);
-      for (int i = 0; i < allTheRules[2].size(); i++) {
-	sortedRuleSet[0].addElement(allTheRules[0].elementAt(indices[i]));
-	sortedRuleSet[1].addElement(allTheRules[1].elementAt(indices[i]));
-	sortedRuleSet[2].addElement(allTheRules[2].elementAt(indices[i]));
+      for (int i = 0; i < m_allTheRules[2].size(); i++) {
+	sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[i]));
+	sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[i]));
+	sortedRuleSet[2].addElement(m_allTheRules[2].elementAt(indices[i]));
       }
 
       // Sort rules according to their confidence
-
-      allTheRules[0].removeAllElements();
-      allTheRules[1].removeAllElements();
-      allTheRules[2].removeAllElements();
+      m_allTheRules[0].removeAllElements();
+      m_allTheRules[1].removeAllElements();
+      m_allTheRules[2].removeAllElements();
       confidences = new double[sortedRuleSet[2].size()];
       for (int i = 0; i < sortedRuleSet[2].size(); i++) 
 	confidences[i] = ((Double)sortedRuleSet[2].elementAt(i)).doubleValue();
       indices = Utils.sort(confidences);
       for (int i = sortedRuleSet[0].size() - 1; 
-	   (i >= (sortedRuleSet[0].size() - numRules)) && (i >= 0); i--) {
-	allTheRules[0].addElement(sortedRuleSet[0].elementAt(indices[i]));
-	allTheRules[1].addElement(sortedRuleSet[1].elementAt(indices[i]));
-	allTheRules[2].addElement(sortedRuleSet[2].elementAt(indices[i]));
+	   (i >= (sortedRuleSet[0].size() - m_numRules)) && (i >= 0); i--) {
+	m_allTheRules[0].addElement(sortedRuleSet[0].elementAt(indices[i]));
+	m_allTheRules[1].addElement(sortedRuleSet[1].elementAt(indices[i]));
+	m_allTheRules[2].addElement(sortedRuleSet[2].elementAt(indices[i]));
       }
-      minSupport -= delta;
-      cycles++;
-    } while ((allTheRules[0].size() < numRules) && 
-	     (Utils.grOrEq(minSupport, lowerBoundMinSupport)));
-    minSupport += delta;
+      m_minSupport -= m_delta;
+      m_cycles++;
+    } while ((m_allTheRules[0].size() < m_numRules) && 
+	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)));
+    m_minSupport += m_delta;
   }
 
   /**
    * Returns an enumeration describing the available options
+   *
    * @return an enumeration of all the available options
    */
-
   public Enumeration listOptions() {
 
-    String string1 = "\tThe required number of rules. (default = " + numRules + ")",
+    String string1 = "\tThe required number of rules. (default = " + m_numRules + ")",
       string2 = 
-      "\tThe minimum confidence of a rule. (default = " + minConfidence + ")",
+      "\tThe minimum confidence of a rule. (default = " + m_minConfidence + ")",
       string3 = "\tThe delta by which the minimum support is decreased in\n",
-      string4 = "\teach iteration. (default = " + delta + ")",
+      string4 = "\teach iteration. (default = " + m_delta + ")",
       string5 = 
       "\tThe lower bound for the minimum support. (default = " + 
-      lowerBoundMinSupport + ")",
+      m_lowerBoundMinSupport + ")",
       string6 = "\tIf used, rules are tested for significance at\n",
       string7 = "\tthe given level. Slower. (default = no significance testing)",
       string8 = "\tIf set the itemsets found are also output. (default = no)";
 
-    FastVector newVector = new FastVector(2);
+    FastVector newVector = new FastVector(6);
 
     newVector.addElement(new Option(string1, "N", 1, 
 				    "-N <required number of rules output>"));
@@ -246,11 +228,31 @@ public class Apriori implements OptionHandler {
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. Valid options are:<p>
+   *   
+   * -N required number of rules <br>
+   * The required number of rules (default: 10). <p>
+   *
+   * -C minimum confidence of a rule <br>
+   * The minimum confidence of a rule (default: 0.9). <p>
+   *
+   * -D delta for minimum support <br>
+   * The delta by which the minimum support is decreased in
+   * each iteration (default: 0.05).
+   *
+   * -M lower bound for minimum support <br>
+   * The lower bound for the minimum support (default = 0.1). <p>
+   *
+   * -S significance level <br>
+   * If used, rules are tested for significance at
+   * the given level. Slower (default = no significance testing). <p>
+   *
+   * -I <br>
+   * If set the itemsets found are also output (default = no). <p>
+   *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @exception Exception if an option is not supported 
    */
-
   public void setOptions(String[] options) throws Exception{
     
     resetOptions();
@@ -260,18 +262,22 @@ public class Apriori implements OptionHandler {
       minSupportString = Utils.getOption('M', options),
       significanceLevelString = Utils.getOption('S', options);
     
-    if (numRulesString.length() != 0)
-      numRules = Integer.parseInt(numRulesString);
-
-    if (minConfidenceString.length() != 0)
-      minConfidence = (new Double(minConfidenceString)).doubleValue();
-    if (deltaString.length() != 0)
-      delta = (new Double(deltaString)).doubleValue();
-    if (minSupportString.length() != 0)
-      lowerBoundMinSupport = (new Double(minSupportString)).doubleValue();
-    if (significanceLevelString.length() != 0)
-      significanceLevel = (new Double(significanceLevelString)).doubleValue();
-    outputItemSets = Utils.getFlag('I', options);
+    if (numRulesString.length() != 0) {
+      m_numRules = Integer.parseInt(numRulesString);
+    }
+    if (minConfidenceString.length() != 0) {
+      m_minConfidence = (new Double(minConfidenceString)).doubleValue();
+    }
+    if (deltaString.length() != 0) {
+      m_delta = (new Double(deltaString)).doubleValue();
+    }
+    if (minSupportString.length() != 0) {
+      m_lowerBoundMinSupport = (new Double(minSupportString)).doubleValue();
+    }
+    if (significanceLevelString.length() != 0) {
+      m_significanceLevel = (new Double(significanceLevelString)).doubleValue();
+    }
+    m_outputItemSets = Utils.getFlag('I', options);
   }
 
   /**
@@ -284,14 +290,14 @@ public class Apriori implements OptionHandler {
     String [] options = new String [11];
     int current = 0;
 
-    if (outputItemSets) {
+    if (m_outputItemSets) {
       options[current++] = "-I";
     }
-    options[current++] = "-N"; options[current++] = "" + numRules;
-    options[current++] = "-C"; options[current++] = "" + minConfidence;
-    options[current++] = "-D"; options[current++] = "" + delta;
-    options[current++] = "-M"; options[current++] = "" + minSupport;
-    options[current++] = "-S"; options[current++] = "" + significanceLevel;
+    options[current++] = "-N"; options[current++] = "" + m_numRules;
+    options[current++] = "-C"; options[current++] = "" + m_minConfidence;
+    options[current++] = "-D"; options[current++] = "" + m_delta;
+    options[current++] = "-M"; options[current++] = "" + m_minSupport;
+    options[current++] = "-S"; options[current++] = "" + m_significanceLevel;
 
     while (current < options.length) {
       options[current++] = "";
@@ -299,79 +305,193 @@ public class Apriori implements OptionHandler {
     return options;
   }
 
- /**
+  /**
    * Outputs the size of all the generated sets of itemsets and the rules.
    */
-
   public String toString() {
 
     StringBuffer text = new StringBuffer();
 
-    if (Ls.size() <= 1)
+    if (m_Ls.size() <= 1)
       return "\nNo large itemsets and rules found!\n";
     text.append("\nApriori\n=======\n\n");
-    text.append("Minimum support: " + Utils.doubleToString(minSupport,2) + '\n');
-    text.append("Minimum confidence: "+Utils.doubleToString(minConfidence,2)+'\n');
-    if (significanceLevel != -1)
+    text.append("Minimum support: " + Utils.doubleToString(m_minSupport,2) + '\n');
+    text.append("Minimum confidence: "+Utils.doubleToString(m_minConfidence,2)+'\n');
+    if (m_significanceLevel != -1)
       text.append("Significance level: "+
-		  Utils.doubleToString(significanceLevel,2)+'\n');
-    text.append("Number of cycles performed: " + cycles+'\n');
+		  Utils.doubleToString(m_significanceLevel,2)+'\n');
+    text.append("Number of cycles performed: " + m_cycles+'\n');
     text.append("\nGenerated sets of large itemsets:\n");
-    for (int i = 0; i < Ls.size(); i++) {
+    for (int i = 0; i < m_Ls.size(); i++) {
       text.append("\nSize of set of large itemsets L("+(i+1)+"): "+
-		  ((FastVector)Ls.elementAt(i)).size()+'\n');
-      if (outputItemSets) {
+		  ((FastVector)m_Ls.elementAt(i)).size()+'\n');
+      if (m_outputItemSets) {
 	text.append("\nLarge Itemsets L("+(i+1)+"):\n");
-	for (int j = 0; j < ((FastVector)Ls.elementAt(i)).size(); j++)
-	  text.append(((ItemSet)((FastVector)Ls.elementAt(i)).elementAt(j)).
-		      toString(theInstances)+"\n");
+	for (int j = 0; j < ((FastVector)m_Ls.elementAt(i)).size(); j++)
+	  text.append(((ItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).
+		      toString(m_instances)+"\n");
       }
     }
     text.append("\nBest rules found:\n\n");
-    for (int i = 0; i < allTheRules[0].size(); i++) 
+    for (int i = 0; i < m_allTheRules[0].size(); i++) 
       text.append(Utils.doubleToString((double)i+1, 
-				       (int)(Math.log(numRules)/Math.log(10)+1),0)+
-		  ". " + ((ItemSet)allTheRules[0].elementAt(i)).
-		  toString(theInstances) 
-		  + " ==> " + ((ItemSet)allTheRules[1].elementAt(i)).
-		  toString(theInstances) +" ("+  
-		  Utils.doubleToString(((Double)allTheRules[2].
+				       (int)(Math.log(m_numRules)/Math.log(10)+1),0)+
+		  ". " + ((ItemSet)m_allTheRules[0].elementAt(i)).
+		  toString(m_instances) 
+		  + " ==> " + ((ItemSet)m_allTheRules[1].elementAt(i)).
+		  toString(m_instances) +" ("+  
+		  Utils.doubleToString(((Double)m_allTheRules[2].
 					elementAt(i)).doubleValue(),2)+")\n");
     return text.toString();
   }
-
-  // ===============
-  // Private methods
-  // ===============
+  
+  /**
+   * Get the value of minSupport.
+   *
+   * @return Value of minSupport.
+   */
+  public double getMinSupport() {
+    
+    return m_minSupport;
+  }
+  
+  /**
+   * Set the value of minSupport.
+   *
+   * @param v  Value to assign to minSupport.
+   */
+  public void setMinSupport(double v) {
+    
+    m_minSupport = v;
+  }
+  
+  /**
+   * Get the value of lowerBoundMinSupport.
+   *
+   * @return Value of lowerBoundMinSupport.
+   */
+  public double getLowerBoundMinSupport() {
+    
+    return m_lowerBoundMinSupport;
+  }
+  
+  /**
+   * Set the value of lowerBoundMinSupport.
+   *
+   * @param v  Value to assign to lowerBoundMinSupport.
+   */
+  public void setLowerBoundMinSupport(double v) {
+    
+    m_lowerBoundMinSupport = v;
+  }
+  
+  /**
+   * Get the value of minConfidence.
+   *
+   * @return Value of minConfidence.
+   */
+  public double getMinConfidence() {
+    
+    return m_minConfidence;
+  }
+  
+  /**
+   * Set the value of minConfidence.
+   *
+   * @param v  Value to assign to minConfidence.
+   */
+  public void setMinConfidence(double v) {
+    
+    m_minConfidence = v;
+  }
+  
+  /**
+   * Get the value of numRules.
+   *
+   * @return Value of numRules.
+   */
+  public int getNumRules() {
+    
+    return m_numRules;
+  }
+  
+  /**
+   * Set the value of numRules.
+   *
+   * @param v  Value to assign to numRules.
+   */
+  public void setNumRules(int v) {
+    
+    m_numRules = v;
+  }
+  
+  /**
+   * Get the value of delta.
+   *
+   * @return Value of delta.
+   */
+  public double getDelta() {
+    
+    return m_delta;
+  }
+  
+  /**
+   * Set the value of delta.
+   *
+   * @param v  Value to assign to delta.
+   */
+  public void setDelta(double v) {
+    
+    m_delta = v;
+  }
+  
+  /**
+   * Get the value of significanceLevel.
+   *
+   * @return Value of significanceLevel.
+   */
+  public double getSignificanceLevel() {
+    
+    return m_significanceLevel;
+  }
+  
+  /**
+   * Set the value of significanceLevel.
+   *
+   * @param v  Value to assign to significanceLevel.
+   */
+  public void setSignificanceLevel(double v) {
+    
+    m_significanceLevel = v;
+  }
 
   /** 
    * Method that finds all large itemsets for the given set of instances.
+   *
    * @param the instances to be used
    * @exception Exception if an attribute is numeric
    */
-
   private void findLargeItemSets(Instances instances) throws Exception {
     
     FastVector kMinusOneSets, kSets;
     Hashtable hashtable;
     int necSupport, i = 0;
     
-    theInstances = instances;
+    m_instances = instances;
     
     // Find large itemsets
-
-    necSupport = (int)(minSupport * (double)instances.numInstances());
+    necSupport = (int)(m_minSupport * (double)instances.numInstances());
     kSets = ItemSet.singletons(instances);
     ItemSet.upDateCounters(kSets, instances);
     kSets = ItemSet.deleteItemSets(kSets, necSupport);
     if (kSets.size() == 0)
       return;
     do {
-      Ls.addElement(kSets);
+      m_Ls.addElement(kSets);
       kMinusOneSets = kSets;
       kSets = ItemSet.mergeAllItemSets(kMinusOneSets, i);
       hashtable = ItemSet.getHashtable(kMinusOneSets, kMinusOneSets.size());
-      hashtables.addElement(hashtable);
+      m_hashtables.addElement(hashtable);
       kSets = ItemSet.pruneItemSets(kSets, hashtable);
       ItemSet.upDateCounters(kSets, instances);
       kSets = ItemSet.deleteItemSets(kSets, necSupport);
@@ -381,27 +501,26 @@ public class Apriori implements OptionHandler {
 
   /** 
    * Method that finds all association rules and performs significance test.
+   *
    * @exception Exception if an attribute is numeric
    */
-
   private void findRulesBruteForce() throws Exception {
 
     FastVector[] rules;
 
     // Build rules
-
-    for (int j = 1; j < Ls.size(); j++) {
-      FastVector currentItemSets = (FastVector)Ls.elementAt(j);
+    for (int j = 1; j < m_Ls.size(); j++) {
+      FastVector currentItemSets = (FastVector)m_Ls.elementAt(j);
       Enumeration enumItemSets = currentItemSets.elements();
       while (enumItemSets.hasMoreElements()) {
 	ItemSet currentItemSet = (ItemSet)enumItemSets.nextElement();
-	rules=currentItemSet.generateRulesBruteForce(minConfidence,hashtables,j+1,
-						     theInstances.numInstances(),
-						     significanceLevel);
+	rules=currentItemSet.generateRulesBruteForce(m_minConfidence,m_hashtables,j+1,
+						     m_instances.numInstances(),
+						     m_significanceLevel);
 	for (int k = 0; k < rules[0].size(); k++) {
-	  allTheRules[0].addElement(rules[0].elementAt(k));
-	  allTheRules[1].addElement(rules[1].elementAt(k));
-	  allTheRules[2].addElement(rules[2].elementAt(k));
+	  m_allTheRules[0].addElement(rules[0].elementAt(k));
+	  m_allTheRules[1].addElement(rules[1].elementAt(k));
+	  m_allTheRules[2].addElement(rules[2].elementAt(k));
 	}
       }
     }
@@ -409,38 +528,32 @@ public class Apriori implements OptionHandler {
 
   /** 
    * Method that finds all association rules.
+   *
    * @exception Exception if an attribute is numeric
    */
-
   private void findRulesQuickly() throws Exception {
 
     FastVector[] rules;
 
     // Build rules
-
-    for (int j = 1; j < Ls.size(); j++) {
-      FastVector currentItemSets = (FastVector)Ls.elementAt(j);
+    for (int j = 1; j < m_Ls.size(); j++) {
+      FastVector currentItemSets = (FastVector)m_Ls.elementAt(j);
       Enumeration enumItemSets = currentItemSets.elements();
       while (enumItemSets.hasMoreElements()) {
 	ItemSet currentItemSet = (ItemSet)enumItemSets.nextElement();
-	rules = currentItemSet.generateRules(minConfidence, hashtables, j + 1);
+	rules = currentItemSet.generateRules(m_minConfidence, m_hashtables, j + 1);
 	for (int k = 0; k < rules[0].size(); k++) {
-	  allTheRules[0].addElement(rules[0].elementAt(k));
-	  allTheRules[1].addElement(rules[1].elementAt(k));
-	  allTheRules[2].addElement(rules[2].elementAt(k));
+	  m_allTheRules[0].addElement(rules[0].elementAt(k));
+	  m_allTheRules[1].addElement(rules[1].elementAt(k));
+	  m_allTheRules[2].addElement(rules[2].elementAt(k));
 	}
       }
     }
   }
 
-  // ===========
-  // Main method
-  // ===========
-
   /**
    * Main method for testing this class.
    */
-
   public static void main(String[] options) {
 
     String trainFileString;

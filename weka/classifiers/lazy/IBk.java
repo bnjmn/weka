@@ -1,6 +1,6 @@
 /*
  *    IBk.java
- *    Copyright (C) 1999 Eibe Frank,Len Trigg,Stuart Inglis
+ *    Copyright (C) 1999 Stuart Inglis,Len Trigg,Eibe Frank
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,13 +16,11 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-
 
 /**
  * IB1-type classifier class. Predicts enumerated class attributes. May
@@ -67,15 +65,17 @@ import weka.core.*;
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
 
-  // Classes for a linked list to store the nearest k neighbours
-  // to an instance. We use a list so that we can take care of
-  // cases where multiple neighbours are the same distance away.
-  // i.e. the minimum length of the list is k
-  public class NeighborNode {
+  /**
+   * Classes for a linked list to store the nearest k neighbours
+   * to an instance. We use a list so that we can take care of
+   *cases where multiple neighbours are the same distance away.
+   * i.e. the minimum length of the list is k.
+   */
+  private class NeighborNode {
 
-    protected double m_Distance;
-    protected Instance m_Instance;
-    protected NeighborNode m_Next;
+    private double m_Distance;
+    private Instance m_Instance;
+    private NeighborNode m_Next;
     
     public NeighborNode(double distance, Instance instance, NeighborNode next){
       m_Distance = distance;
@@ -89,10 +89,10 @@ public class IBk extends DistributionClassifier implements
     }
   }
 
-  class NeighborList {
+  private class NeighborList {
 
-    NeighborNode m_First, m_Last;
-    int m_Length;
+    private NeighborNode m_First, m_Last;
+    private int m_Length;
     
     public NeighborList(int length) {
 
@@ -139,6 +139,7 @@ public class IBk extends DistributionClassifier implements
 	    m_Last = current.m_Next;
 	  }
 	}
+
 	// Trip down the list until we've got k list elements (or more if the
 	// distance to the last elements is the same).
 	int valcount = 0;
@@ -175,8 +176,6 @@ public class IBk extends DistributionClassifier implements
 	  break;
 	}
       }
-      //      System.err.println("Pruned to " + k);
-      // printList();
     }
 
     public void printList() {
@@ -194,11 +193,6 @@ public class IBk extends DistributionClassifier implements
       }
     }
   }
-  
-  
-  // =================
-  // Private variables
-  // =================
 
   /** The training instances used for classification. */
   protected Instances m_Train;
@@ -258,10 +252,6 @@ public class IBk extends DistributionClassifier implements
   public static final int WEIGHT_INVERSE = 1;
   public static final int WEIGHT_SIMILARITY = 2;
 
-  // ============
-  // Experimental
-  // ============
-
   /** Whether to simulate sensor validation during cross-validation */
   protected boolean xxx_Validation;
 
@@ -270,10 +260,6 @@ public class IBk extends DistributionClassifier implements
 
   /** Store the model weights */
   protected double [] xxx_BayesWeights;
-
-  // ==============
-  // Public methods
-  // ==============
 
   /**
    * IBk classifier. Simple instance-based learner that uses the class
@@ -492,7 +478,7 @@ public class IBk extends DistributionClassifier implements
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(8);
 
     newVector.addElement(new Option(
 	      "\tWeight neighbours by the inverse of their distance\n"
@@ -569,17 +555,22 @@ public class IBk extends DistributionClassifier implements
     String knnString = Utils.getOption('K', options);
     if (knnString.length() != 0) {
       setKNN(Integer.parseInt(knnString));
+    } else {
+      setKNN(1);
     }
     String windowString = Utils.getOption('W', options);
     if (windowString.length() != 0) {
       m_WindowSize = Integer.parseInt(windowString);
+    } else {
+      m_WindowSize = 0;
     }
     if (Utils.getFlag('D', options)) {
       m_DistanceWeighted = WEIGHT_INVERSE;
     } else if (Utils.getFlag('F', options)) {
       m_DistanceWeighted = WEIGHT_SIMILARITY;
-    } else
+    } else {
       m_DistanceWeighted = WEIGHT_NONE;
+    }
     m_CrossValidate = Utils.getFlag('X', options);
     m_MeanSquared = Utils.getFlag('S', options);
     xxx_Validation = Utils.getFlag('V', options);
