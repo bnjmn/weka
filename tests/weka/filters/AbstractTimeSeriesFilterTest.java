@@ -9,13 +9,16 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import weka.core.Instances;
 import weka.core.Instance;
+import weka.filters.unsupervised.attribute.TimeSeriesDelta;
+import weka.filters.unsupervised.attribute.TimeSeriesTranslate;
+import weka.filters.unsupervised.attribute.TimeSeriesTranslateTest;
 
 /**
  * Tests TimeSeriesTranslateFilter. Run from the command line with:<p>
  * java weka.filters.TimeSeriesTranslateFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
 
@@ -28,7 +31,7 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
   abstract public Filter getFilter();
 
   public void testDefault() {
-    testInstanceRange_X(((TimeSeriesTranslateFilter)m_Filter).getInstanceRange());
+    testInstanceRange_X(((TimeSeriesTranslate)m_Filter).getInstanceRange());
   }
 
   public void testInstanceRange() {
@@ -41,7 +44,7 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
 
   public void testFillWithMissing() {
 
-    ((TimeSeriesTranslateFilter)m_Filter).setFillWithMissing(true);
+    ((TimeSeriesTranslate)m_Filter).setFillWithMissing(true);
     Instances result = useFilter();
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
@@ -72,7 +75,7 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
   }
 
   private void testInstanceRange_X(int range) {
-    ((TimeSeriesTranslateFilter)m_Filter).setInstanceRange(range);
+    ((TimeSeriesTranslate)m_Filter).setInstanceRange(range);
     Instances result = useFilter();
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
@@ -103,7 +106,7 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
   }
 
   public static Test suite() {
-    return new TestSuite(TimeSeriesTranslateFilterTest.class);
+    return new TestSuite(TimeSeriesTranslateTest.class);
   }
 
   public static void main(String[] args){
