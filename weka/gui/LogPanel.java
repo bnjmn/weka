@@ -46,7 +46,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -148,6 +148,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 	    JMenuItem availMem = new JMenuItem("Available memory");
 	    availMem.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent ee) {
+		  System.gc();
 		  Runtime currR = Runtime.getRuntime();
 		  long freeM = currR.freeMemory();
 		  logMessage("Available memory : "+freeM+" bytes");
