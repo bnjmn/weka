@@ -81,7 +81,7 @@ import javax.swing.JCheckBox;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -117,6 +117,11 @@ public class ClassifierPanel extends JPanel {
   protected JRadioButton m_TestSplitBut =
     new JRadioButton("Supplied test set");
 
+  /** Check to save the predictions in the results list for visualizing
+      later on */
+  protected JCheckBox m_StorePredictionsBut = 
+    new JCheckBox("Store predictions for visualization");
+
   /** Check to output the model built from the training data */
   protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
 
@@ -146,12 +151,6 @@ public class ClassifierPanel extends JPanel {
   /** The frame used to show the test set selection panel */
   protected JFrame m_SetTestFrame;
 
-  /** The predictions of the most recently excecuted classifier */
-  protected double [] m_predictions=null;
-  
-  /** The instances that the most recently excecuted classifier predicted */
-  protected Instances m_predInstances=null;
-  
   /**
    * Alters the enabled/disabled status of elements associated with each
    * radio button
@@ -161,6 +160,9 @@ public class ClassifierPanel extends JPanel {
       updateRadioLinks();
     }
   };
+
+  /** Button for further output/visualize options */
+  JButton m_MoreOptions = new JButton("More Options");
 
   /** Click to start running the classifier */
   protected JButton m_StartBut = new JButton("Start");
@@ -179,6 +181,15 @@ public class ClassifierPanel extends JPanel {
   
   /** A thread that classification runs in */
   protected Thread m_RunThread;
+
+  /** default x index for visualizing */
+  protected int m_visXIndex;
+  
+  /** default y index for visualizing */
+  protected int m_visYIndex;
+
+  /** The current visualization object */
+  protected VisualizePanel m_CurrentVis = null;
 
   /* Register the property editors we need */
   static {
@@ -235,12 +246,16 @@ public class ClassifierPanel extends JPanel {
     m_TestSplitBut.setToolTipText("Test on a user-specified dataset");
     m_StartBut.setToolTipText("Starts the classification");
     m_StopBut.setToolTipText("Stops a running classification");
+    m_StorePredictionsBut.
+      setToolTipText("Store predictions in the result list for later "
+		     +"visualization");
     m_OutputModelBut
       .setToolTipText("Output the model obtained from the full training set");
     m_OutputTFPosBut.setToolTipText("Output the true positives and false"
 				    + " positives for each class");
     m_OutputConfusionBut
       .setToolTipText("Output the matrix displaying class confusions");
+    m_StorePredictionsBut.setSelected(true);
     m_OutputModelBut.setSelected(true);
     m_OutputTFPosBut.setSelected(true);
     m_OutputConfusionBut.setSelected(true);
@@ -277,16 +292,76 @@ public class ClassifierPanel extends JPanel {
     });
     m_VisualizeBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	m_VisualizeBut.setEnabled(false);
+	if (!m_StorePredictionsBut.isSelected()) {
+	  m_VisualizeBut.setEnabled(false);
+	}
 	visualizeClassifier();
       }
     });
     m_ClassCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	int selected = m_ClassCombo.getSelectedIndex();
-	boolean isNominal = m_Instances.attribute(selected).isNominal();
-	m_OutputTFPosBut.setEnabled(isNominal);
-	m_OutputConfusionBut.setEnabled(isNominal);	
+	if (selected > 0) {
+	  boolean isNominal = m_Instances.attribute(selected).isNominal();
+	  m_OutputTFPosBut.setEnabled(isNominal);
+	  m_OutputConfusionBut.setEnabled(isNominal);	
+	}
+      }
+    });
+    m_StorePredictionsBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  if (m_StorePredictionsBut.isSelected()) {
+	    if (m_CurrentVis != null) {
+	      m_VisualizeBut.setEnabled(true);
+	    }
+	  }
+	}
+      });
+    m_MoreOptions.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_MoreOptions.setEnabled(false);
+	JPanel moreOptionsPanel = new JPanel();
+	moreOptionsPanel.setBorder(BorderFactory.createCompoundBorder(
+			BorderFactory.createTitledBorder("Output Options"),
+			BorderFactory.createEmptyBorder(0, 5, 5, 5)
+			       				      ));
+	moreOptionsPanel.setLayout(new GridLayout(5, 1));
+	moreOptionsPanel.add(m_OutputModelBut);
+	moreOptionsPanel.add(m_OutputTFPosBut);	  
+	moreOptionsPanel.add(m_OutputConfusionBut);	  
+	moreOptionsPanel.add(m_StorePredictionsBut);
+
+	JPanel all = new JPanel();
+	all.setLayout(new BorderLayout());	
+
+	JButton oK = new JButton("OK");
+	JPanel okP = new JPanel();
+	okP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+	okP.setLayout(new GridLayout(1,1,5,5));
+	okP.add(oK);
+
+	all.add(moreOptionsPanel,BorderLayout.CENTER);
+	all.add(okP,BorderLayout.SOUTH);
+	
+	final javax.swing.JFrame jf = 
+	  new javax.swing.JFrame("Classifier ouptut options");
+	jf.getContentPane().setLayout(new BorderLayout());
+	jf.getContentPane().add(all, BorderLayout.CENTER);
+	jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    jf.dispose();
+	    m_MoreOptions.setEnabled(true);
+	  }
+	});
+	oK.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    m_MoreOptions.setEnabled(true);
+	    jf.dispose();
+	  }
+	});
+	jf.pack();
+	jf.setSize(370,200);
+	jf.setVisible(true);
       }
     });
 
@@ -370,36 +445,35 @@ public class ClassifierPanel extends JPanel {
     gbL.setConstraints(m_PercentText, gbC);
     p2.add(m_PercentText);
 
-    gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.WEST;
-    gbC.gridy = 4;     gbC.gridx = 0;  gbC.gridwidth = 2;
-    gbL.setConstraints(m_OutputModelBut, gbC);
-    p2.add(m_OutputModelBut);
 
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.WEST;
-    gbC.gridy = 5;     gbC.gridx = 0;  gbC.gridwidth = 2;
-    gbL.setConstraints(m_OutputTFPosBut, gbC);
-    p2.add(m_OutputTFPosBut);
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = 4;     gbC.gridx = 0;  gbC.weightx = 100;
+    gbC.gridwidth = 3;
+    //gbC.ipadx = 20;
+    gbC.insets = new Insets(3, 0, 1, 0);
+    gbL.setConstraints(m_MoreOptions, gbC);
+    p2.add(m_MoreOptions);
 
-    gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.WEST;
-    gbC.gridy = 6;     gbC.gridx = 0;  gbC.gridwidth = 2;
-    gbL.setConstraints(m_OutputConfusionBut, gbC);
-    p2.add(m_OutputConfusionBut);
+
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(2, 1));
+    buttons.setLayout(new GridLayout(3, 2));
     buttons.add(m_ClassCombo);
     m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    ssButs.setLayout(new GridLayout(1, 3, 5, 5));
+    ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
-    ssButs.add(m_VisualizeBut);
-    buttons.add(ssButs);
 
+    buttons.add(ssButs);
+    JPanel vPl = new JPanel();
+    vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    vPl.setLayout(new GridLayout(1,1,5,5));
+    vPl.add(m_VisualizeBut);
+    buttons.add(vPl);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Classifier output"));
@@ -480,16 +554,28 @@ public class ClassifierPanel extends JPanel {
   }
   
   /**
+   * Set the default attributes to use on the x and y axis
+   * of a new visualization object.
+   * @param x the index of the attribute to use on the x axis
+   * @param y the index of the attribute to use on the y axis
+   */
+  public void setXY_VisualizeIndexes(int x, int y) {
+    m_visXIndex = x;
+    m_visYIndex = y;
+  }
+
+  /**
    * Tells the panel to use a new set of instances.
    *
    * @param inst a set of Instances
    */
   public void setInstances(Instances inst) {
-    
     m_Instances = inst;
-    m_predictions = null;
-    m_predInstances = null;
-    m_VisualizeBut.setEnabled(false);
+
+    if (!m_StorePredictionsBut.isSelected()) {
+      m_VisualizeBut.setEnabled(false);
+    }
+    setXY_VisualizeIndexes(0,0); // reset the default x and y indexes
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
       String type = "";
@@ -565,6 +651,8 @@ public class ClassifierPanel extends JPanel {
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
 	  Instances userTest = null;
+	  double [] predictions = null;
+	  Instances predInstances = null;
 	  if (m_TestInstances != null) {
 	    userTest = new Instances(m_TestInstances);
 	  }
@@ -573,6 +661,7 @@ public class ClassifierPanel extends JPanel {
 	  boolean outputConfusion = m_OutputConfusionBut.isSelected();
 	  boolean outputTFPos = m_OutputTFPosBut.isSelected();
 	  boolean outputSummary = true;
+	  boolean saveVis = m_StorePredictionsBut.isSelected();
 
 	  int testMode = 0;
 	  int numFolds = 10, percent = 66;
@@ -677,12 +766,12 @@ public class ClassifierPanel extends JPanel {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
 	      eval = new Evaluation(inst);
-	      m_predInstances = new Instances(inst,inst.numInstances());
-	      m_predictions = new double [inst.numInstances()];
+	      predInstances = new Instances(inst,inst.numInstances());
+	      predictions = new double [inst.numInstances()];
 	      for (int jj=0;jj<inst.numInstances();jj++) {
-		m_predictions[jj] = 
+		predictions[jj] = 
 		  eval.evaluateModelOnce(classifier, inst.instance(jj));
-		m_predInstances.add(inst.instance(jj));
+		predInstances.add(inst.instance(jj));
 	      }
 	      outBuff.append("=== Evaluation on training set ===\n");
 	      break;
@@ -696,8 +785,8 @@ public class ClassifierPanel extends JPanel {
 	      }
 	      eval = new Evaluation(inst);
 	      int p_index = 0;
-	      m_predInstances = new Instances(inst,inst.numInstances());
-	      m_predictions = new double [inst.numInstances()];
+	      predInstances = new Instances(inst,inst.numInstances());
+	      predictions = new double [inst.numInstances()];
 	      // Make some splits and do a CV
 	      for (int fold = 0; fold < numFolds; fold++) {
 		m_Log.statusMessage("Creating splits for fold "
@@ -710,9 +799,9 @@ public class ClassifierPanel extends JPanel {
 		m_Log.statusMessage("Evaluating model for fold "
 				    + (fold + 1) + "...");
 		for (int jj=0;jj<test.numInstances();jj++) {
-		  m_predictions[p_index++] = 
+		  predictions[p_index++] = 
 		    eval.evaluateModelOnce(classifier, test.instance(jj));
-		  m_predInstances.add(test.instance(jj));
+		  predInstances.add(test.instance(jj));
 		}
 		//		eval.evaluateModel(classifier, test);
 	      }
@@ -734,12 +823,12 @@ public class ClassifierPanel extends JPanel {
 	      classifier.buildClassifier(train);
 	      eval = new Evaluation(train);
 	      m_Log.statusMessage("Evaluating on test split...");
-	      m_predictions = new double [test.numInstances()];
-	      m_predInstances = new Instances(test,test.numInstances());
+	      predictions = new double [test.numInstances()];
+	      predInstances = new Instances(test,test.numInstances());
 	      for (int jj=0;jj<test.numInstances();jj++) {
-		m_predictions[jj] = 
+		predictions[jj] = 
 		  eval.evaluateModelOnce(classifier, test.instance(jj));
-		m_predInstances.add(test.instance(jj));
+		predInstances.add(test.instance(jj));
 	      }
 	      //	      eval.evaluateModel(classifier, test);
 	      outBuff.append("=== Evaluation on test split ===\n");
@@ -748,13 +837,13 @@ public class ClassifierPanel extends JPanel {
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
 	      eval = new Evaluation(inst);
-	      m_predictions = new double [userTest.numInstances()];
-	      m_predInstances = new Instances(userTest,
-					      userTest.numInstances());
+	      predictions = new double [userTest.numInstances()];
+	      predInstances = new Instances(userTest,
+					    userTest.numInstances());
 	      for (int jj=0;jj<userTest.numInstances();jj++) {
-		m_predictions[jj] = 
+		predictions[jj] = 
 		  eval.evaluateModelOnce(classifier, userTest.instance(jj));
-		m_predInstances.add(userTest.instance(jj));
+		predInstances.add(userTest.instance(jj));
 	      }
 	      //	      eval.evaluateModel(classifier, userTest);
 	      outBuff.append("=== Evaluation on test set ===\n");
@@ -763,7 +852,7 @@ public class ClassifierPanel extends JPanel {
 	      default:
 	      throw new Exception("Test mode not implemented");
 	    }
-
+	    
 	    if (outputSummary) {
 	      outBuff.append(eval.toSummaryString() + "\n");
 	    }
@@ -794,6 +883,38 @@ public class ClassifierPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
+	    if (predInstances != null) {
+	      m_CurrentVis = new VisualizePanel();
+	      m_CurrentVis.setInstances(predInstances);
+	      m_CurrentVis.setPredictions(predictions);
+	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
+	      m_CurrentVis.setColourIndex(predInstances.classIndex());
+	      try {
+		m_CurrentVis.setXIndex(m_visXIndex); m_CurrentVis.setYIndex(m_visYIndex);
+	      } catch (Exception ex) {
+		System.err.println(ex);
+	      }
+	      m_CurrentVis.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		  if (m_CurrentVis.getInstances().
+		      relationName().
+		      compareTo(m_Instances.relationName()) == 0) {
+			setXY_VisualizeIndexes(m_CurrentVis.getXIndex(), 
+					       m_CurrentVis.getYIndex());
+		      }
+		}
+	      });
+	      
+	      if (predInstances.
+		  attribute(predInstances.classIndex()).isNumeric()) {
+		    m_CurrentVis.setPredictionsNumeric(true);
+		  } else {
+		    m_CurrentVis.setPredictionsNumeric(false);
+		  }
+	      if (saveVis) {
+		m_History.addVis(name, m_CurrentVis);
+	      }
+	    }
 	    m_VisualizeBut.setEnabled(true);
 	  }
 	}
@@ -807,29 +928,56 @@ public class ClassifierPanel extends JPanel {
    * Pops up a VisualizePanel for the most recently run classifier.
    */
   protected void visualizeClassifier() {
-    final javax.swing.JFrame jf = 
-      new javax.swing.JFrame("Weka Knowledge Explorer: Visualize");
-    jf.setSize(500,400);
-    jf.getContentPane().setLayout(new BorderLayout());
-    final VisualizePanel sp = new VisualizePanel();
-    jf.getContentPane().add(sp, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) {
-	jf.dispose();
-      }
-    });
+    final VisualizePanel sp;
+    if (m_StorePredictionsBut.isSelected()) {
+      sp = m_History.getSelectedVis();
+    } else {
+      sp = m_CurrentVis;
+    }
+
+    if (sp != null) {
+      String plotName = sp.getName(); 
+	final javax.swing.JFrame jf = 
+	new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
+	jf.setSize(500,400);
+	jf.getContentPane().setLayout(new BorderLayout());
+    //    final VisualizePanel sp = new VisualizePanel();
+
+	jf.getContentPane().add(sp, BorderLayout.CENTER);
+	jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    jf.dispose();
+	  }
+	});
     //      jf.pack();
-    jf.setVisible(true);
-    sp.setInstances(m_predInstances);
+	/*    sp.setInstances(m_predInstances);
     sp.setPredictions(m_predictions);
-    sp.setColourIndex(m_predInstances.classIndex());
+    sp.setColourIndex(m_predInstances.classIndex()); */
+    jf.setVisible(true);
+
+    /* 
+    try {
+      sp.setXIndex(m_visXIndex); sp.setYIndex(m_visYIndex);
+    } catch (Exception ex) {
+      System.err.println(ex);
+    }
+    sp.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  if (sp.getInstances().
+	      relationName().compareTo(m_Instances.relationName()) == 0) {
+	    setXY_VisualizeIndexes(sp.getXIndex(), sp.getYIndex());
+	  }
+	}
+      });
 
     if (m_predInstances.attribute(m_predInstances.classIndex()).isNumeric()) {
       sp.setPredictionsNumeric(true);
     } else {
       sp.setPredictionsNumeric(false);
+      } */
     }
   }
+  
 
   /**
    * Stops the currently running classifier (if any).
