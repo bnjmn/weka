@@ -77,7 +77,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -118,15 +118,25 @@ public class ResultsPanel extends JPanel {
   /** The model embedded in m_TestsCombo */
   protected DefaultComboBoxModel m_TestsModel = 
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
-  
-  /** Lets the user select which column contains the datset name */
-  protected JComboBox m_DatasetCombo = new JComboBox(m_DatasetModel);
+
+  /** Displays the currently selected column names for the scheme & options */
+  protected JLabel m_DatasetKeyLabel = new JLabel("Row key fields",
+						 SwingConstants.RIGHT);
+
+  /** Click to edit the columns used to determine the scheme */
+  protected JButton m_DatasetKeyBut = new JButton("Select keys...");
+
+  /** Stores the list of attributes for selecting the scheme columns */
+  protected DefaultListModel m_DatasetKeyModel = new DefaultListModel();
+
+  /** Displays the list of selected columns determining the scheme */
+  protected JList m_DatasetKeyList = new JList(m_DatasetKeyModel);
 
   /** Lets the user select which column contains the run number */
   protected JComboBox m_RunCombo = new JComboBox(m_RunModel);
 
   /** Displays the currently selected column names for the scheme & options */
-  protected JLabel m_ResultKeyLabel = new JLabel("Result key fields",
+  protected JLabel m_ResultKeyLabel = new JLabel("Column key fields",
 						 SwingConstants.RIGHT);
 
   /** Click to edit the columns used to determine the scheme */
@@ -193,6 +203,7 @@ public class ResultsPanel extends JPanel {
   /** An actionlisteners that updates ttest settings */
   protected ActionListener m_ConfigureListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
+      m_TTester.setRunColumn(m_RunCombo.getSelectedIndex());
       setTTester();
     }
   };
@@ -252,8 +263,14 @@ public class ResultsPanel extends JPanel {
       }
     });
     setComboSizes();
-    m_DatasetCombo.setEnabled(false);
-    m_DatasetCombo.addActionListener(m_ConfigureListener);
+    m_DatasetKeyBut.setEnabled(false);
+    m_DatasetKeyBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	setDatasetKeyFromDialog();
+      }
+    });
+    m_DatasetKeyList.setSelectionMode(ListSelectionModel
+				      .MULTIPLE_INTERVAL_SELECTION);
     m_RunCombo.setEnabled(false);
     m_RunCombo.addActionListener(m_ConfigureListener);
     m_ResultKeyBut.setEnabled(false);
@@ -314,20 +331,20 @@ public class ResultsPanel extends JPanel {
     p3.setBorder(BorderFactory.createTitledBorder("Configure test"));
     GridBagLayout gbL = new GridBagLayout();
     p3.setLayout(gbL);
-    JLabel lab = new JLabel("Dataset field", SwingConstants.RIGHT);
+
     GridBagConstraints gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = 0;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
-    gbL.setConstraints(lab,gbC);
-    p3.add(lab);
+    gbL.setConstraints(m_DatasetKeyLabel,gbC);
+    p3.add(m_DatasetKeyLabel);
     gbC = new GridBagConstraints();
     gbC.gridy = 0;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
-    gbL.setConstraints(m_DatasetCombo, gbC);
-    p3.add(m_DatasetCombo);
+    gbL.setConstraints(m_DatasetKeyBut, gbC);
+    p3.add(m_DatasetKeyBut);
 
-    lab = new JLabel("Run field", SwingConstants.RIGHT);
+    JLabel lab = new JLabel("Run field", SwingConstants.RIGHT);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = 1;     gbC.gridx = 0;
@@ -456,21 +473,21 @@ public class ResultsPanel extends JPanel {
    */
   protected void setComboSizes() {
     
-    m_DatasetCombo.setPreferredSize(COMBO_SIZE);
+    m_DatasetKeyBut.setPreferredSize(COMBO_SIZE);
     m_RunCombo.setPreferredSize(COMBO_SIZE);
     m_ResultKeyBut.setPreferredSize(COMBO_SIZE);
     m_CompareCombo.setPreferredSize(COMBO_SIZE);
     m_SigTex.setPreferredSize(COMBO_SIZE);
     m_TestsCombo.setPreferredSize(COMBO_SIZE);
 
-    m_DatasetCombo.setMaximumSize(COMBO_SIZE);
+    m_DatasetKeyBut.setMaximumSize(COMBO_SIZE);
     m_RunCombo.setMaximumSize(COMBO_SIZE);
     m_ResultKeyBut.setMaximumSize(COMBO_SIZE);
     m_CompareCombo.setMaximumSize(COMBO_SIZE);
     m_SigTex.setMaximumSize(COMBO_SIZE);
     m_TestsCombo.setMaximumSize(COMBO_SIZE);
 
-    m_DatasetCombo.setMinimumSize(COMBO_SIZE);
+    m_DatasetKeyBut.setMinimumSize(COMBO_SIZE);
     m_RunCombo.setMinimumSize(COMBO_SIZE);
     m_ResultKeyBut.setMinimumSize(COMBO_SIZE);
     m_CompareCombo.setMinimumSize(COMBO_SIZE);
@@ -653,62 +670,51 @@ public class ResultsPanel extends JPanel {
     m_FromLab.setText("Got " + m_Instances.numInstances() + " results");
 
     // Temporarily remove the configuration listener
-    m_DatasetCombo.removeActionListener(m_ConfigureListener);
     m_RunCombo.removeActionListener(m_ConfigureListener);
     
     // Do other stuff
-    m_DatasetModel.removeAllElements();
+    m_DatasetKeyModel.removeAllElements();
     m_RunModel.removeAllElements();
     m_ResultKeyModel.removeAllElements();
     m_CompareModel.removeAllElements();
     int datasetCol = -1;
     int runCol = -1;
     String selectedList = "";
+    String selectedListDataset = "";
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
-      m_DatasetModel.addElement(name);
+      m_DatasetKeyModel.addElement(name);
       m_RunModel.addElement(name);
       m_ResultKeyModel.addElement(name);
       m_CompareModel.addElement(name);
 
-      if ((datasetCol == -1)
-	  && (name.toLowerCase().indexOf("dataset") != -1)) {
-	m_DatasetCombo.setSelectedIndex(i);
-	datasetCol = i;
-      }
-      if ((runCol == -1)
+      if (name.toLowerCase().startsWith("key_dataset")) {
+	m_DatasetKeyList.addSelectionInterval(i, i);
+	selectedListDataset += "," + (i + 1);
+      } else if ((runCol == -1)
 	  && (name.toLowerCase().indexOf("run") != -1)) {
 	m_RunCombo.setSelectedIndex(i);
 	runCol = i;
-      }
-      if (name.toLowerCase().startsWith("key_")) {
-	if ((i != datasetCol) && (i != runCol)) {
-	  m_ResultKeyList.addSelectionInterval(i, i);
-	  selectedList += "," + (i + 1);
-	}
-      }
-      if (name.toLowerCase().indexOf("percent_correct") != -1) {
+      } else if (name.toLowerCase().startsWith("key_")) {
+	m_ResultKeyList.addSelectionInterval(i, i);
+	selectedList += "," + (i + 1);
+      } else if (name.toLowerCase().indexOf("percent_correct") != -1) {
 	m_CompareCombo.setSelectedIndex(i);
 	//	break;
       }
     }
-    if (datasetCol == -1) {
-      datasetCol = 0;
-    }
     if (runCol == -1) {
       runCol = 0;
     }
-    m_DatasetCombo.setEnabled(true);
+    m_DatasetKeyBut.setEnabled(true);
     m_RunCombo.setEnabled(true);
     m_ResultKeyBut.setEnabled(true);
     m_CompareCombo.setEnabled(true);
     
     // Reconnect the configuration listener
-    m_DatasetCombo.addActionListener(m_ConfigureListener);
     m_RunCombo.addActionListener(m_ConfigureListener);
     
     // Set up the TTester with the new data
-    m_TTester.setDatasetColumn(datasetCol);
     m_TTester.setRunColumn(runCol);
     Range generatorRange = new Range();
     if (selectedList.length() != 0) {
@@ -720,6 +726,17 @@ public class ResultsPanel extends JPanel {
       }
     }
     m_TTester.setResultsetKeyColumns(generatorRange);
+
+    generatorRange = new Range();
+    if (selectedListDataset.length() != 0) {
+      try {
+	generatorRange.setRanges(selectedListDataset);
+      } catch (Exception ex) {
+	ex.printStackTrace();
+	System.err.println(ex.getMessage());
+      }
+    }
+    m_TTester.setDatasetKeyColumns(generatorRange);
 
     m_SigTex.setEnabled(true);
 
@@ -808,7 +825,6 @@ public class ResultsPanel extends JPanel {
     
     // If accepted, update the ttester
     if (result == ListSelectorDialog.APPROVE_OPTION) {
-      System.err.println("Fields Selected");
       int [] selected = m_ResultKeyList.getSelectedIndices();
       String selectedList = "";
       for (int i = 0; i < selected.length; i++) {
@@ -824,6 +840,34 @@ public class ResultsPanel extends JPanel {
 	}
       }
       m_TTester.setResultsetKeyColumns(generatorRange);
+      setTTester();
+    }
+  }
+  
+  public void setDatasetKeyFromDialog() {
+
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_DatasetKeyList);
+
+    // Open the dialog
+    int result = jd.showDialog();
+    
+    // If accepted, update the ttester
+    if (result == ListSelectorDialog.APPROVE_OPTION) {
+      int [] selected = m_DatasetKeyList.getSelectedIndices();
+      String selectedList = "";
+      for (int i = 0; i < selected.length; i++) {
+	selectedList += "," + (selected[i] + 1);
+      }
+      Range generatorRange = new Range();
+      if (selectedList.length() != 0) {
+	try {
+	  generatorRange.setRanges(selectedList);
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  System.err.println(ex.getMessage());
+	}
+      }
+      m_TTester.setDatasetKeyColumns(generatorRange);
       setTTester();
     }
   }
