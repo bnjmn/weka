@@ -57,10 +57,10 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
 */
 public class CVParameterSelection extends Classifier 
-  implements OptionHandler {
+  implements OptionHandler, Summarizable {
 
   /*
    * A data structure to hold values associated with a single
@@ -671,6 +671,15 @@ public class CVParameterSelection extends Classifier
     return result;
   }
 
+  public String toSummaryString() {
+
+    String result = "Selected values:";
+    for (int i = 0; i < m_BestClassifierOptions.length; i++) {
+      result  += " " + m_BestClassifierOptions[i];
+    }
+    return result + '\n';
+  }
+  
   /**
    * Main method for testing this class.
    *
