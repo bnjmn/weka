@@ -62,7 +62,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class UserClassifier extends Classifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -631,7 +631,7 @@ TreeDisplayListener, VisualizePanelListener {
   /**
    * Inner class used to represent the actual decision tree structure and data.
    */
-  private class TreeClass {
+  private class TreeClass implements Serializable {
     
     /**
      * This contains the info for the coords of the shape converted 
