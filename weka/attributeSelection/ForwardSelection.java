@@ -26,7 +26,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -61,6 +61,8 @@ public class ForwardSelection extends ASSearch
   /** The number of attributes to select. -1 indicates that all attributes
       are to be retained. Has precedence over m_threshold */
   private int m_numToSelect = -1;
+
+  private int m_calculatedNumToSelect;
 
   /** the merit of the best subset found */
   private double m_bestMerit;
@@ -159,6 +161,20 @@ public class ForwardSelection extends ASSearch
    */
   public int getNumToSelect() {
     return m_numToSelect;
+  }
+
+  /**
+   * Gets the calculated number of attributes to retain. This is the
+   * actual number of attributes to retain. This is the same as
+   * getNumToSelect if the user specifies a number which is not less
+   * than zero. Otherwise it should be the number of attributes in the
+   * (potentially transformed) data.
+   */
+  public int getCalculatedNumToSelect() {
+    if (m_numToSelect >= 0) {
+      m_calculatedNumToSelect = m_numToSelect;
+    }
+    return m_calculatedNumToSelect;
   }
 
   /**
@@ -540,7 +556,7 @@ public class ForwardSelection extends ASSearch
 
     if (m_numToSelect <= 0) {
       if (m_threshold == -Double.MAX_VALUE) {
-	m_numToSelect = final_rank.length;
+	m_calculatedNumToSelect = final_rank.length;
       } else {
 	determineNumToSelectFromThreshold(final_rank);
       }
@@ -556,7 +572,7 @@ public class ForwardSelection extends ASSearch
 	count++;
       }
     }
-    m_numToSelect = count;
+    m_calculatedNumToSelect = count;
   }
 
   /**

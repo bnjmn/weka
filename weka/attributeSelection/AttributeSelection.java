@@ -65,7 +65,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.24 $
+ * @version  $Revision: 1.25 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -636,7 +636,8 @@ public class AttributeSelection implements Serializable {
       m_selectionResults.append("Ranked attributes:\n");
 
       // retrieve the number of attributes to retain
-      m_numToSelect = ((RankedOutputSearch)m_searchMethod).getNumToSelect();
+      m_numToSelect = 
+	((RankedOutputSearch)m_searchMethod).getCalculatedNumToSelect();
 
       // determine fieldwidth for merit
       int f_p=0;

@@ -15,7 +15,7 @@ import weka.core.*;
  * ranked list of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public interface RankedOutputSearch {
 
@@ -52,7 +52,7 @@ public interface RankedOutputSearch {
   public abstract double getThreshold();
 
   /**
-   * Specify the number of attributes to select from the ranked list. -1
+   * Specify the number of attributes to select from the ranked list. < 0
    * indicates that all attributes are to be retained. NumToSelect has
    * precedence over threshold, ie. if there is a non -1 value for NumToSelect
    * then this will take precedence over any threshold value.
@@ -61,10 +61,19 @@ public interface RankedOutputSearch {
   public abstract void setNumToSelect(int numToSelect);
 
   /**
-   * Gets the number of attributes to be retained.
+   * Gets the user specified number of attributes to be retained.
    * @return the number of attributes to retain
    */
   public abstract int getNumToSelect();
+
+  /**
+   * Gets the calculated number of attributes to retain. This is the
+   * actual number of attributes to retain. This is the same as
+   * getNumToSelect if the user specifies a number which is not less
+   * than zero. Otherwise it should be the number of attributes in the
+   * (potentially transformed) data.
+   */
+  public abstract int getCalculatedNumToSelect();
   
   /**
    * Sets whether or not ranking is to be performed.

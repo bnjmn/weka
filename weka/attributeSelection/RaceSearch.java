@@ -55,7 +55,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -143,6 +143,8 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
       indicates that all attributes are to be retained. Has precedence over
       m_threshold */
   private int m_numToSelect = -1;
+
+  private int m_calculatedNumToSelect = -1;
 
   /** the threshold for removing attributes if ranking is requested */
   private double m_threshold = -Double.MAX_VALUE;
@@ -429,6 +431,20 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    */
   public int getNumToSelect() {
     return m_numToSelect;
+  }
+
+  /**
+   * Gets the calculated number of attributes to retain. This is the
+   * actual number of attributes to retain. This is the same as
+   * getNumToSelect if the user specifies a number which is not less
+   * than zero. Otherwise it should be the number of attributes in the
+   * (potentially transformed) data.
+   */
+  public int getCalculatedNumToSelect() {
+    if (m_numToSelect >= 0) {
+      m_calculatedNumToSelect = m_numToSelect;
+    }
+    return m_calculatedNumToSelect;
   }
 
   /**
@@ -766,7 +782,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 
     if (m_numToSelect <= 0) {
       if (m_threshold == -Double.MAX_VALUE) {
-	m_numToSelect = final_rank.length;
+	m_calculatedNumToSelect = final_rank.length;
       } else {
 	determineNumToSelectFromThreshold(final_rank);
       }
@@ -782,7 +798,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 	count++;
       }
     }
-    m_numToSelect = count;
+    m_calculatedNumToSelect = count;
   }
 
   /**
