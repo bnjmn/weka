@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.48 $ 
+ * @version $Revision: 1.49 $ 
  */
 public class Instances implements Serializable {
  
@@ -1176,7 +1176,7 @@ public class Instances implements Serializable {
    */
   public Instances trainCV(int numFolds, int numFold, Random random) {
 
-    Instances train = trainCV(numFold, numFold);
+    Instances train = trainCV(numFolds, numFold);
     train.randomize(random);
     return train;
   }
