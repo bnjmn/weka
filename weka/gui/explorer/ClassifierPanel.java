@@ -38,6 +38,7 @@ import weka.gui.SetInstancesPanel;
 import weka.gui.CostMatrixEditor;
 import weka.gui.PropertyDialog;
 import weka.gui.InstancesSummaryPanel;
+import weka.gui.SaveBuffer;
 
 import java.util.Random;
 import java.util.Date;
@@ -101,7 +102,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -117,6 +118,9 @@ public class ClassifierPanel extends JPanel {
 
   /** The destination for log/status messages */
   protected Logger m_Log = new SysErrLog();
+
+  /** The buffer saving object for saving output */
+  SaveBuffer m_SaveOut = new SaveBuffer(m_Log, this);
 
   /** A panel controlling results viewing */
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
@@ -1144,22 +1148,8 @@ public class ClassifierPanel extends JPanel {
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();
     if (sb != null) {
-      JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      int returnVal = fileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File sFile = fileChooser.getSelectedFile();
-	try {
-	  m_Log.statusMessage("Saving to file...");
-	  PrintWriter out
-	    = new PrintWriter(new BufferedWriter(new FileWriter(sFile)));
-	  out.write(sb.toString(),0,sb.toString().length());
-	  out.close();
-	  m_Log.statusMessage("OK");
-	} catch (Exception ex) {
-	  ex.printStackTrace();
-	  m_Log.logMessage(ex.getMessage());
-	}
+      if (m_SaveOut.save(sb)) {
+	m_Log.logMessage("Save succesful.");
       }
     }
   }

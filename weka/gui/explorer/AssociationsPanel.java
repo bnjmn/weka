@@ -32,6 +32,7 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
+import weka.gui.SaveBuffer;
 
 import java.util.Random;
 import java.util.Date;
@@ -83,7 +84,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -99,6 +100,9 @@ public class AssociationsPanel extends JPanel {
 
   /** The destination for log/status messages */
   protected Logger m_Log = new SysErrLog();
+
+  /** The buffer saving object for saving output */
+  protected SaveBuffer m_SaveOut = new SaveBuffer(m_Log, this);
 
   /** A panel controlling results viewing */
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
@@ -399,26 +403,12 @@ public class AssociationsPanel extends JPanel {
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();
     if (sb != null) {
-      JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      int returnVal = fileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File sFile = fileChooser.getSelectedFile();
-	try {
-	  m_Log.statusMessage("Saving to file...");
-	  PrintWriter out
-	    = new PrintWriter(new BufferedWriter(new FileWriter(sFile)));
-	  out.write(sb.toString(),0,sb.toString().length());
-	  out.close();
-	  m_Log.statusMessage("OK");
-	} catch (Exception ex) {
-	  ex.printStackTrace();
-	  m_Log.logMessage(ex.getMessage());
-	}
+      if (m_SaveOut.save(sb)) {
+	m_Log.logMessage("Save succesful.");
       }
     }
   }
-  
+    
   /**
    * Tests out the Associator panel from the command line.
    *
