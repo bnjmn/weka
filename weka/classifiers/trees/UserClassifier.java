@@ -44,7 +44,7 @@ import java.beans.PropertyChangeSupport;
  *
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -117,10 +117,32 @@ TreeDisplayListener, VisualizePanelListener {
       System.err.println(e.getMessage());
       e.printStackTrace();
     }
-    
+    System.exit(0);
     //System.out.println("im done");
   }
 
+  /**
+   * @return a string that represents this objects tree.
+   */
+  public String toString() {
+    if (!m_built) {
+
+      return "Tree Not Built";
+    }
+    StringBuffer text = new StringBuffer();
+    try {
+      m_top.toString(0, text);
+      
+      m_top.objectStrings(text);
+
+    } catch(Exception e) {
+      System.out.println("error: " + e.getMessage());
+    }
+    
+    return text.toString();
+
+
+  }
 
 
   /**
@@ -680,6 +702,7 @@ TreeDisplayListener, VisualizePanelListener {
      */
     public void setInfo(int at1, int at2, FastVector ar) throws Exception {
       m_classObject = null;
+      m_filter = null;
       m_attrib1 = at1;
       m_attrib2 = at2;
       m_ranges = ar;
@@ -835,59 +858,8 @@ TreeDisplayListener, VisualizePanelListener {
 	//rt = new double[m_training.numClasses()];
 	
 	if (m_training.classAttribute().isNumeric()) {
-	  //then set default behaviour for node.
-	  //set linear regression combined with attribute filter
-	  
-	  //find the attributes used for splitting.
-	  boolean[] attributeList = new boolean[m_training.numAttributes()];
-	  for (int noa = 0; noa < m_training.numAttributes(); noa++) {
-	    attributeList[noa] = false;
-	  }
-	  
-	  TreeClass temp = this;
-	  attributeList[m_training.classIndex()] = true;
-	  while (temp != null) {
-	    attributeList[temp.m_attrib1] = true;
-	    attributeList[temp.m_attrib2] = true;
-	    temp = temp.m_parent;
-	  }
-	  int classind = 0;
-	  
-
-	  //find the new class index
-	  for (int noa = 0; noa < m_training.classIndex(); noa++) {
-	    if (attributeList[noa]) {
-	      classind++;
-	    }
-	  }
-	  //count how many attribs were used
-	  int count = 0;
-	  for (int noa = 0; noa < m_training.numAttributes(); noa++) {
-	    if (attributeList[noa]) {
-	      count++;
-	    }
-	  }
-	  
-
-	  //fill an int array with the numbers of those attribs
-	  int[] attributeList2 = new int[count];
-	  count = 0;
-	  for (int noa = 0; noa < m_training.numAttributes(); noa++) {
-	    if (attributeList[noa]) {
-	      attributeList2[count] = noa;
-	      count++;
-	    }
-	  }
-	  
-	  m_filter = new AttributeFilter();
-	  ((AttributeFilter)m_filter).setInvertSelection(true);
-	  ((AttributeFilter)m_filter).setAttributeIndicesArray(attributeList2);
-	  m_filter.inputFormat(m_training);
-
-	  Instances temp2 = Filter.useFilter(m_training, m_filter);
-	  temp2.setClassIndex(classind);
-	  m_classObject = new LinearRegression();
-	  m_classObject.buildClassifier(temp2);
+	 
+	  setLinear();
 	  m_filter.input(i);
 	  rt[0] = m_classObject.classifyInstance(m_filter.output());
 	  return rt;
@@ -967,6 +939,71 @@ TreeDisplayListener, VisualizePanelListener {
 	rt = m_set2.calcClassType(i);
       }
       return rt;
+    }
+    
+    
+    /**
+     * This function gets called to set the node to use a linear regression
+     * and attribute filter.
+     * @exception If can't set a default linear egression model.
+     */
+    private void setLinear() throws Exception {
+      //then set default behaviour for node.
+      //set linear regression combined with attribute filter
+      
+      //find the attributes used for splitting.
+      boolean[] attributeList = new boolean[m_training.numAttributes()];
+      for (int noa = 0; noa < m_training.numAttributes(); noa++) {
+	attributeList[noa] = false;
+      }
+      
+      TreeClass temp = this;
+      attributeList[m_training.classIndex()] = true;
+      while (temp != null) {
+	attributeList[temp.m_attrib1] = true;
+	attributeList[temp.m_attrib2] = true;
+	temp = temp.m_parent;
+      }
+      int classind = 0;
+      
+      
+      //find the new class index
+      for (int noa = 0; noa < m_training.classIndex(); noa++) {
+	if (attributeList[noa]) {
+	  classind++;
+	}
+      }
+      //count how many attribs were used
+      int count = 0;
+      for (int noa = 0; noa < m_training.numAttributes(); noa++) {
+	if (attributeList[noa]) {
+	  count++;
+	}
+      }
+      
+      
+      //fill an int array with the numbers of those attribs
+      int[] attributeList2 = new int[count];
+      count = 0;
+      for (int noa = 0; noa < m_training.numAttributes(); noa++) {
+	if (attributeList[noa]) {
+	  attributeList2[count] = noa;
+	  count++;
+	}
+      }
+      
+      m_filter = new AttributeFilter();
+      ((AttributeFilter)m_filter).setInvertSelection(true);
+      ((AttributeFilter)m_filter).setAttributeIndicesArray(attributeList2);
+      m_filter.inputFormat(m_training);
+      
+      Instances temp2 = Filter.useFilter(m_training, m_filter);
+      temp2.setClassIndex(classind);
+      m_classObject = new LinearRegression();
+      m_classObject.buildClassifier(temp2);
+      
+      
+      
     }
     
     
@@ -1151,22 +1188,77 @@ TreeDisplayListener, VisualizePanelListener {
     }
     
     
+    /**
+     * Returns a string containing a bit of information about this node, in 
+     * alternate form.
+     * @param s The string buffer to fill.
+     * @exception Exception if can't create label.
+     */
+    public void getAlternateLabel(StringBuffer s) throws Exception {
+      
+      //StringBuffer s = new StringBuffer();
+      
+      FastVector tmp = (FastVector)m_ranges.elementAt(0);
+      
+      if (m_classObject != null && m_training.classAttribute().isNominal()) {
+	s.append("Classified by " + m_classObject.getClass().getName());
+      }
+      else if (((Double)tmp.elementAt(0)).intValue() == LEAF) {
+	if (m_training.classAttribute().isNominal()) {
+	  double high = -1000;
+	  int num = 0;
+	  double count = 0;
+	  for (int noa = 0; noa < m_training.classAttribute().numValues();
+	       noa++) {
+	    if (((Double)tmp.elementAt(noa + 1)).doubleValue() > high) {
+	      high = ((Double)tmp.elementAt(noa + 1)).doubleValue();
+	      num  = noa + 1;
+	    }
+	    count += ((Double)tmp.elementAt(noa + 1)).doubleValue();
+	  }
+	  s.append(m_training.classAttribute().value(num-1) + "(" + count);
+	  if (count > high) {
+	    s.append("/" + (count - high));
+	  }
+	  s.append(")");
+	}
+	else {
+	  if (m_classObject == null 
+	      && ((Double)tmp.elementAt(0)).intValue() == LEAF) {
+	    setLinear();
+	  }
+	  s.append("Standard Deviation = " 
+		   + Utils.doubleToString(((Double)tmp.elementAt(1))
+					  .doubleValue(), 6));
+	  
+	}
+      }
+      else {
+	s.append("Split on ");
+	s.append(m_training.attribute(m_attrib1).name() + " AND ");
+	s.append(m_training.attribute(m_attrib2).name());
+	
+	
+      }
+      
+      //return s.toString();
+    }
     
 
     
     /**
      * Returns a string containing a bit of information about this node.
-     * @return Description.
+     * @param s The stringbuffer to fill.
      * @exception Exception if can't create label.
      */
-    public String getLabel() throws Exception {
+    public void getLabel(StringBuffer s) throws Exception {
       //for now just return identity
-      StringBuffer s = new StringBuffer();
+      //StringBuffer s = new StringBuffer();
       
       FastVector tmp = (FastVector)m_ranges.elementAt(0);
       
       
-      if (m_classObject != null) {
+      if (m_classObject != null && m_training.classAttribute().isNominal()) {
 	s.append("Classified by\\n" + m_classObject.getClass().getName());
       }
       else if (((Double)tmp.elementAt(0)).intValue() == LEAF) {
@@ -1191,6 +1283,10 @@ TreeDisplayListener, VisualizePanelListener {
 	  }
 	}
 	else {
+	  if (m_classObject == null 
+	      && ((Double)tmp.elementAt(0)).intValue() == LEAF) {
+	    setLinear();
+	  }
 	  s.append("Standard Deviation = " 
 		   + Utils.doubleToString(((Double)tmp.elementAt(1))
 		   .doubleValue(), 6));
@@ -1201,59 +1297,7 @@ TreeDisplayListener, VisualizePanelListener {
 	s.append(m_training.attribute(m_attrib1).name() + " AND\\n");
 	s.append(m_training.attribute(m_attrib2).name());
       }
-      /*
-	for (int nob = 0; nob < ranges.size(); nob++)
-	{
-	tmp = (FastVector)ranges.elementAt(noa);
-	if (((Double)tmp.elementAt(0)).intValue() == RECTANGLE)
-	{
-	if (m_training.attribute(attrib1).isNominal())
-	{
-	s.append(m_training.attribute(attrib1).name() + " [");
-	//System.out.println(ranges[0] + " " + ranges[2]);
-	for (int noa = (int)Math.ceil(ranges[0]); noa <= 
-	(int)Math.floor(ranges[2]); noa++)
-	{
-	s.append(m_training.attribute(attrib1).value(noa));
-	if (noa < (int)ranges[2])
-	{
-	s.append(", ");
-	}
-	}
-	s.append("]\\n");
-	}
-	else if (m_training.attribute(attrib1).isNumeric())
-	{
-	s.append(Utils.doubleToString(ranges[0], 6) + " <= " + 
-	m_training.attribute(attrib1).name() + " <= " + 
-	Utils.doubleToString(ranges[2], 6) + "\\n");
-	}
-	s.append("AND\\n");
-	if (m_training.attribute(attrib2).isNominal())
-	{
-	s.append(m_training.attribute(attrib2).name() + " [");
-	for (int noa = (int)Math.ceil(ranges[3]); noa <= 
-	(int)Math.floor(ranges[1]); noa++)
-	{
-	s.append(m_training.attribute(attrib2).value(noa));
-	if (noa < (int)ranges[1])
-	{
-	s.append(", ");
-	}
-	}
-	s.append("]");
-	}
-	else if (m_training.attribute(attrib2).isNumeric())
-	{
-	s.append(Utils.doubleToString(ranges[3], 6) + " <= " + 
-	m_training.attribute(attrib2).name() + " <= " + 
-	Utils.doubleToString(ranges[1], 6));
-	}
-	      
-	}
-	}
-      */
-      return s.toString();
+      //return s.toString();
     }
 
     /**
@@ -1263,8 +1307,9 @@ TreeDisplayListener, VisualizePanelListener {
      */
     public void toDotty(StringBuffer t) throws Exception {
       //this will recursively create all the dotty info for the structure
-      t.append(m_identity + " [label=\"" + 
-	       getLabel() + "\" ");
+      t.append(m_identity + " [label=\"");
+      getLabel(t);
+      t.append("\" ");
       //System.out.println(((Double)((FastVector)ranges.elementAt(0)).
       //elementAt(0)).intValue() + " A num ");
       if (((Double)((FastVector)m_ranges.elementAt(0)).elementAt(0)).intValue()
@@ -1292,8 +1337,62 @@ TreeDisplayListener, VisualizePanelListener {
       
     }
     
+    /**
+     * This will append the class Object in the tree to the string buffer.
+     * @param t The stringbuffer.
+     */
+    public void objectStrings(StringBuffer t) {
+      
+      if (m_classObject != null) {
+	t.append("\n\n" + m_identity +" {\n" + m_classObject.toString()+"\n}");
+      }
+      if (m_set1 != null) {
+	m_set1.objectStrings(t);
+      }
+      if (m_set2 != null) {
+	m_set2.objectStrings(t);
+      }
+    }
+    
+    /**
+     * Converts the tree structure to a string. for people to read.
+     * @param l How deep this node is in the tree.
+     * @param t The stringbuffer to fill with the string.
+     * @exception Exception if can't convert th string.
+     */
+    public void toString(int l, StringBuffer t) throws Exception {
+      
+
+      
+      if (((Double)((FastVector)m_ranges.elementAt(0)).elementAt(0)).intValue()
+	  == LEAF) {
+	t.append(": " + m_identity + " ");
+	getAlternateLabel(t);
+      }
+      if (m_set1 != null) {
+	t.append("\n");
+	for (int noa = 0; noa < l; noa++) {
+	  t.append("|   ");
+	  
+	}
+	getAlternateLabel(t);
+	t.append(" (In Set)");
+	m_set1.toString(l+1, t);
+      }
+      if (m_set2 != null) {
+	t.append("\n");
+	for (int noa = 0; noa < l; noa++) {
+	  t.append("|   ");
+	}
+	getAlternateLabel(t);
+	t.append(" (Not in Set)");
+	m_set2.toString(l+1, t);
+      }
+      //return t.toString();
+    }
     
   }
+  
   
   
 }
