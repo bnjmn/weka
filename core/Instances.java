@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class Instances implements Serializable {
  
@@ -751,6 +751,18 @@ public class Instances implements Serializable {
   }
 
   /**
+   * Shuffles the instances in the set so that they are ordered 
+   * randomly.
+   *
+   * @param random a random number generator
+   */
+  public final void randomize(Random random) {
+
+    for (int j = numInstances() - 1; j > 0; j--)
+      swap(j,(int)(random.nextDouble()*(double)j));
+  }
+
+  /**
    * Reads misclassification cost matrix from given reader. 
    * Each line has to contain three numbers: the index of the true 
    * class, the index of the incorrectly assigned class, and the 
@@ -871,18 +883,6 @@ public class Instances implements Serializable {
   }    
 
   /**
-   * Shuffles the instances in the set so that they are ordered 
-   * randomly.
-   *
-   * @param random a random number generator
-   */
-  public final void randomize(Random random) {
-
-    for (int j = numInstances() - 1; j > 0; j--)
-      swap(j,(int)(random.nextDouble()*(double)j));
-  }
-
-  /**
    * Returns the relation's name.
    *
    * @return the relation's name as a string
@@ -893,13 +893,78 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Sets the relation's name.
+   * Renames an attribute. This change only affects this
+   * dataset.
    *
-   * @param newName the new relation name.
+   * @param att the attribute's index
+   * @param name the new name
    */
-  public final void setRelationName(String newName) {
-    
-    m_RelationName = newName;
+  public final void renameAttribute(int att, String name) {
+
+    Attribute newAtt = attribute(att).copy(name);
+    FastVector newVec = new FastVector(numAttributes());
+
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att) {
+	newVec.addElement(newAtt);
+      } else {
+	newVec.addElement(attribute(i));
+      }
+    }
+    m_Attributes = newVec;
+  }
+
+  /**
+   * Renames an attribute. This change only affects this
+   * dataset.
+   *
+   * @param att the attribute
+   * @param name the new name
+   */
+  public final void renameAttribute(Attribute att, String name) {
+
+    renameAttribute(att.index(), name);
+  }
+
+  /**
+   * Renames the value of a nominal (or string) attribute value. This
+   * change only affects this dataset.
+   *
+   * @param att the attribute's index
+   * @param val the value's index
+   * @param name the new name 
+   * @exception Exception if renaming fails
+   */
+  public final void renameAttributeValue(int att, int val, String name) 
+    throws Exception {
+
+    Attribute newAtt = (Attribute)attribute(att).copy();
+    FastVector newVec = new FastVector(numAttributes());
+
+    newAtt.setValue(val, name);
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att) {
+	newVec.addElement(newAtt);
+      } else {
+	newVec.addElement(attribute(i));
+      }
+    }
+    m_Attributes = newVec;
+  }
+
+  /**
+   * Renames the value of a nominal (or string) attribute value. This
+   * change only affects this dataset.
+   *
+   * @param att the attribute
+   * @param val the value
+   * @param name the new name
+   * @exception Exception if renaming fails
+   */
+  public final void renameAttributeValue(Attribute att, String val, String name) 
+    throws Exception {
+
+    renameAttributeValue(att.index(), att.indexOfValue(val), name);
   }
 
   /**
@@ -969,6 +1034,16 @@ public class Instances implements Serializable {
   }
 
   /** 
+   * Sets the class attribute.
+   *
+   * @param att attribute to be the class
+   */
+  public final void setClass(Attribute att) {
+
+    m_ClassIndex = att.index();
+  }
+
+  /** 
    * Sets the class index of the set.
    * If the class index is negative there is assumed to be no class.
    * (ie. it is undefined)
@@ -982,6 +1057,16 @@ public class Instances implements Serializable {
       throw new Exception("Class index to large!");
     }
     m_ClassIndex = classIndex;
+  }
+
+  /**
+   * Sets the relation's name.
+   *
+   * @param newName the new relation name.
+   */
+  public final void setRelationName(String newName) {
+    
+    m_RelationName = newName;
   }
 
   /**
@@ -1679,6 +1764,8 @@ public class Instances implements Serializable {
       instances = new Instances("test_set", testAtts, 10);
       instances.add(new Instance(instances.numAttributes()));
       instances.add(new Instance(instances.numAttributes()));
+      instances.add(new Instance(instances.numAttributes()));
+      instances.setClassIndex(0);
       System.out.println("\nSet of instances created from scratch:\n");
       System.out.println(instances);
       
@@ -1779,6 +1866,17 @@ public class Instances implements Serializable {
       empty = new Instances(instances, 0);
       System.out.println(empty);
       System.out.println("\nClass name: "+empty.classAttribute().name());
+
+      // Create copy and rename an attribute and a value (if possible)
+      if (empty.classAttribute().isNominal()) {
+	Instances copy = new Instances(empty, 0);
+	copy.renameAttribute(copy.classAttribute(), "new_name");
+	copy.renameAttributeValue(copy.classAttribute(), 
+				  copy.classAttribute().value(0), 
+				  "new_val_name");
+	System.out.println("\nDataset with names changed:\n" + copy);
+	System.out.println("\nOriginal dataset:\n" + empty);
+      }
 
       // Create and prints subset of instances.
       start = instances.numInstances() / 4;
