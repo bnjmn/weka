@@ -44,7 +44,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -372,7 +372,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     public Enumeration listOptions() {
         Vector newVector = new Vector(4);
 
-        newVector.addElement(new Option("\tUse ADTree data structure\n", "D", 0, "-D"));
+        newVector.addElement(new Option("\tDo not use ADTree data structure\n", "D", 0, "-D"));
         newVector.addElement(new Option("\tBIF file to compare with\n", "B", 1, "-B <BIF file>"));
         newVector.addElement(new Option("\tSearch algorithm\n", "Q", 1, "-Q weka.classifiers.bayes.net.search.SearchAlgorithm"));
         newVector.addElement(new Option("\tEstimator algorithm\n", "E", 1, "-E weka.classifiers.bayes.net.estimate.SimpleEstimator"));
