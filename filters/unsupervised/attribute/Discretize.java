@@ -65,7 +65,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Discretize extends PotentialClassIgnorer 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
@@ -259,6 +259,11 @@ public class Discretize extends PotentialClassIgnorer
    * @exception Exception if the input format can't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
+
+    if (m_MakeBinary && m_IgnoreClass) {
+      throw new IllegalArgumentException("Can't ignore class when " +
+					 "changing the number of attributes!");
+    }
 
     super.setInputFormat(instanceInfo);
 

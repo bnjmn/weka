@@ -53,7 +53,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Discretize extends Filter 
   implements SupervisedFilter, OptionHandler, WeightedInstancesHandler {
@@ -676,8 +676,8 @@ public class Discretize extends Filter
 	instances.instance(i).weight();
       if (instances.instance(i).value(attIndex) < 
 	  instances.instance(i + 1).value(attIndex)) {
-	currentCutPoint = instances.instance(i).value(attIndex); //+ 
-	//instances.instance(i + 1).value(attIndex)) / 2.0;
+	currentCutPoint = (instances.instance(i).value(attIndex) + 
+	  instances.instance(i + 1).value(attIndex)) / 2.0;
 	currentEntropy = ContingencyTables.entropyConditionedOnRows(counts);
 	if (currentEntropy < bestEntropy) {
 	  bestCutPoint = currentCutPoint;
