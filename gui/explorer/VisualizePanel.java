@@ -85,7 +85,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -729,6 +729,10 @@ public class VisualizePanel extends JPanel {
 	    }
 	  }
 	  m_minX = min; m_maxX = max;
+	  if (min == max) {
+	    m_maxX += 0.05;
+	    m_minX -= 0.05;
+	  }
 	}
 
 	// y bounds
@@ -750,6 +754,10 @@ public class VisualizePanel extends JPanel {
 	    }
 	  }
 	  m_minY = min; m_maxY = max;
+	  if (min == max) {
+	    m_maxY += 0.05;
+	    m_minY -= 0.05;
+	  }
 	}
       
 	// colour bounds
