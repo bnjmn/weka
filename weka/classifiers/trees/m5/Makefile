@@ -1,8 +1,7 @@
 JAVAC = javac 
 
-SOURCES = M5Prime.java Options.java M5Utils.java Errors.java Node.java SplitInfo.java \
-	Impurity.java Values.java Matrix.java Ivector.java Dvector.java \
-	Measures.java Function.java
+SOURCES = CorrelationSplitInfo.java M5Base.java M5P.java Rule.java RuleNode.java \
+	Impurity.java Values.java SplitEvaluate.java YongSplitInfo.java \
 
 CLASSFILES = $(SOURCES:.java=.class)
 
