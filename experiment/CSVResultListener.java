@@ -39,7 +39,7 @@ import weka.core.Option;
  * a Writer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class CSVResultListener implements ResultListener, OptionHandler {
 
@@ -62,7 +62,7 @@ public class CSVResultListener implements ResultListener, OptionHandler {
 
     File resultsFile;
     try {
-      resultsFile = File.createTempFile("weka_experiment", null);
+      resultsFile = File.createTempFile("weka_experiment", ".csv");
       resultsFile.deleteOnExit();
     } catch (Exception e) {
       System.err.println("Cannot create temp file, writing to standard out.");
@@ -227,7 +227,7 @@ public class CSVResultListener implements ResultListener, OptionHandler {
    * @exception Exception if an error occurs
    */
   public void postProcess(ResultProducer rp) throws Exception {
-
+    
     if (!(m_OutputFile == null) && !(m_OutputFile.getName().equals("-"))) {
       m_Out.close();
     }
@@ -316,7 +316,7 @@ public class CSVResultListener implements ResultListener, OptionHandler {
       if (key[i] == null) {
 	m_Out.print("?");
       } else {
-	m_Out.print(key[i].toString());
+	m_Out.print("Key_" + key[i].toString());
       }
     }
     String [] result = rp.getResultNames();

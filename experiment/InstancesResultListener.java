@@ -45,7 +45,7 @@ import weka.core.Instance;
  * written out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class InstancesResultListener extends CSVResultListener {
 
@@ -65,8 +65,17 @@ public class InstancesResultListener extends CSVResultListener {
    * Sets temporary file.
    */
   public InstancesResultListener() {
-    
-    super();
+
+    File resultsFile;
+    try {
+      resultsFile = File.createTempFile("weka_experiment", ".arff");
+      resultsFile.deleteOnExit();
+    } catch (Exception e) {
+      System.err.println("Cannot create temp file, writing to standard out.");
+      resultsFile = new File("-");
+    }
+    setOutputFile(resultsFile);
+    setOutputFileName("");
   } 
 
   /**

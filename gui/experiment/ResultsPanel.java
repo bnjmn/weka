@@ -30,6 +30,7 @@ import weka.gui.SaveBuffer;
 import weka.gui.DatabaseConnectionDialog;
 import weka.experiment.Experiment;
 import weka.experiment.InstancesResultListener;
+import weka.experiment.CSVResultListener;
 import weka.experiment.DatabaseResultListener;
 import weka.experiment.PairedCorrectedTTester;
 import weka.experiment.PairedTTester;
@@ -39,6 +40,8 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Range;
 import weka.core.Instance;
+import weka.core.converters.Loader;
+import weka.core.converters.CSVLoader;
 
 import java.io.Reader;
 import java.io.FileReader;
@@ -84,7 +87,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -178,14 +181,18 @@ public class ResultsPanel extends JPanel {
 
   /** A panel controlling results viewing */
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
-
-  /** Filter to ensure only arff files are selected for result files */  
-  protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
-
   
   /** The file chooser for selecting result files */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
+ 
+  /** File filters for various file types */
+  protected ExtensionFileFilter m_csvFileFilter = 
+    new ExtensionFileFilter(CSVLoader.FILE_EXTENSION,
+			    "CSV data files");
+
+  protected ExtensionFileFilter m_arffFileFilter = 
+    new ExtensionFileFilter(Instances.FILE_EXTENSION,
+			    "Arff data files");
 
   /** The PairedTTester object */
   protected PairedTTester m_TTester = new PairedCorrectedTTester();
@@ -210,7 +217,12 @@ public class ResultsPanel extends JPanel {
   public ResultsPanel() {
 
     // Create/Configure/Connect components
-    m_FileChooser.setFileFilter(m_ArffFilter);
+    
+    m_FileChooser.
+      addChoosableFileFilter(m_csvFileFilter);
+    m_FileChooser.
+      addChoosableFileFilter(m_arffFileFilter);
+
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_FromExpBut.setEnabled(false);
     m_FromExpBut.addActionListener(new ActionListener() {
@@ -494,21 +506,7 @@ public class ResultsPanel extends JPanel {
   public void setExperiment(Experiment exp) {
     
     m_Exp = exp;
-    setFromExpEnabled();
-  }
-
-  /**
-   * Updates whether the current experiment is of a type that we can
-   * determine the results destination.
-   */
-  protected void setFromExpEnabled() {
-
-    if ((m_Exp.getResultListener() instanceof InstancesResultListener)
-	|| (m_Exp.getResultListener() instanceof DatabaseResultListener)) {
-      m_FromExpBut.setEnabled(true);
-    } else {
-      m_FromExpBut.setEnabled(false);
-    }
+    m_FromExpBut.setEnabled(exp != null);
   }
 
   /**
@@ -596,10 +594,10 @@ public class ResultsPanel extends JPanel {
    */
   protected void setInstancesFromExp(Experiment exp) {
 
-    if (exp.getResultListener() instanceof InstancesResultListener) {
-      File resultFile = ((InstancesResultListener) exp.getResultListener())
+    if ((exp.getResultListener() instanceof CSVResultListener)) { 
+      File resultFile = ((CSVResultListener) exp.getResultListener())
 	.getOutputFile();
-      if ((resultFile == null) || (resultFile.getName().equals("-"))) {
+      if ((resultFile == null)) {
 	m_FromLab.setText("No result file");
       } else {
 	setInstancesFromFile(resultFile);
@@ -655,15 +653,41 @@ public class ResultsPanel extends JPanel {
    * @param f a value of type 'File'
    */
   protected void setInstancesFromFile(File f) {
-      
+
+    String fileType = f.getName();
     try {
       m_FromLab.setText("Reading from file...");
-      Reader r = new BufferedReader(new FileReader(f));
-      setInstances(new Instances(r));
+      if (f.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {	    
+	fileType = "arff";
+	Reader r = new BufferedReader(new FileReader(f));
+	setInstances(new Instances(r));
+	r.close();
+      } else if (f.getName().toLowerCase().endsWith(CSVLoader.FILE_EXTENSION)) {
+	fileType = "csv";
+	CSVLoader cnv = new CSVLoader();
+	cnv.setSource(f);
+	Instances inst = cnv.getDataSet();
+	setInstances(inst);
+      } else {
+	throw new Exception("Unrecognized file type");
+      }
     } catch (Exception ex) {
-      ex.printStackTrace();
-      m_FromLab.setText(ex.getMessage());
-    }
+      m_FromLab.setText("File '" + f.getName() + "' not recognised as an "
+			  +fileType+" file.");
+      if (JOptionPane.showOptionDialog(ResultsPanel.this,
+				       "File '" + f.getName()
+				       + "' not recognised as an "
+				       +fileType+" file.\n"
+				       + "Reason:\n" + ex.getMessage(),
+				       "Load Instances",
+				       0,
+				       JOptionPane.ERROR_MESSAGE,
+				       null,
+				       new String[] {"OK"},
+				       null) == 1) {
+	
+      }
+    }  
   }
 
   /**
