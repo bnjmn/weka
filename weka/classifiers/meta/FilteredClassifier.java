@@ -44,19 +44,16 @@ import weka.core.Drawable;
  *
  * -W classifierstring <br>
  * Classifierstring should contain the full class name of a classifier
- * followed by options to the classifier.
- * (required).<p>
+ * followed by options to the classifier. <p>
  *
  * -F filterstring <br>
  * Filterstring should contain the full class name of a filter
- * followed by options to the filter.
- * (required).<p>
+ * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
-public class FilteredClassifier extends Classifier
-  implements OptionHandler, Drawable {
+public class FilteredClassifier extends Classifier implements Drawable {
 
   /** The classifier */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -66,6 +63,20 @@ public class FilteredClassifier extends Classifier
 
   /** The instance structure of the filtered instances */
   protected Instances m_FilteredInstances;
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return   "Class for running an arbitrary classifier on data that has been passed "
+      + "through an arbitrary filter, providing the only way to access \"supervised\" "
+      + "filters in the Explorer. Like the classifier, the structure of the filter "
+      + "is based exclusively on the training data and test instances will be processed "
+      + "by the filter without changing its structure.";
+
+  }
   
   /**
    * Default constructor specifying ZeroR as the classifier and
@@ -74,7 +85,8 @@ public class FilteredClassifier extends Classifier
    */
   public FilteredClassifier() {
 
-    this(new weka.classifiers.rules.ZeroR(), new weka.filters.supervised.attribute.AttributeSelection());
+    this(new weka.classifiers.rules.ZeroR(), 
+	 new weka.filters.supervised.attribute.AttributeSelection());
   }
 
   /**
@@ -127,12 +139,12 @@ public class FilteredClassifier extends Classifier
 
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use, followed\n"
-	      + "\tby scheme options. (required)\n"
+	      + "\tby scheme options.\n"
 	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
 	      "W", 1, "-W <classifier specification>"));
     newVector.addElement(new Option(
 	      "\tFull class name of filter to use, followed\n"
-	      + "\tby filter options. (required)\n"
+	      + "\tby filter options.\n"
 	      + "\teg: \"weka.filters.AttributeFilter -V -R 1,2\"",
 	      "F", 1, "-F <filter specification>"));
     return newVector.elements();
@@ -143,13 +155,11 @@ public class FilteredClassifier extends Classifier
    *
    * -W classifierstring <br>
    * Classifierstring should contain the full class name of a classifier
-   * followed by options to the classifier.
-   * (required).<p>
+   * followed by options to the classifier.<p>
    *
    * -F filterstring <br>
    * Filterstring should contain the full class name of a filter
-   * followed by options to the filter.
-   * (required).<p>
+   * followed by options to the filter.<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -157,31 +167,31 @@ public class FilteredClassifier extends Classifier
   public void setOptions(String[] options) throws Exception {
 
     String classifierString = Utils.getOption('W', options);
-    if (classifierString.length() == 0) {
-      throw new Exception("A classifier must be specified"
-			  + " with the -W option.");
+    if (classifierString.length() > 0) {
+      String [] classifierSpec = Utils.splitOptions(classifierString);
+      if (classifierSpec.length == 0) {
+	throw new IllegalArgumentException("Invalid classifier specification string");
+      }
+      String classifierName = classifierSpec[0];
+      classifierSpec[0] = "";
+      setClassifier(Classifier.forName(classifierName, classifierSpec));
+    } else {
+      setClassifier(new weka.classifiers.rules.ZeroR());
     }
-    String [] classifierSpec = Utils.splitOptions(classifierString);
-    if (classifierSpec.length == 0) {
-      throw new Exception("Invalid classifier specification string");
-    }
-    String classifierName = classifierSpec[0];
-    classifierSpec[0] = "";
-    setClassifier(Classifier.forName(classifierName, classifierSpec));
-    
+
     // Same for filter
     String filterString = Utils.getOption('F', options);
-    if (filterString.length() == 0) {
-      throw new Exception("A filter must be specified"
-			  + " with the -F option.");
+    if (filterString.length() > 0) {
+      String [] filterSpec = Utils.splitOptions(filterString);
+      if (filterSpec.length == 0) {
+	throw new IllegalArgumentException("Invalid filter specification string");
+      }
+      String filterName = filterSpec[0];
+      filterSpec[0] = "";
+      setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
+    } else {
+      setFilter(new weka.filters.supervised.attribute.AttributeSelection());
     }
-    String [] filterSpec = Utils.splitOptions(filterString);
-    if (filterSpec.length == 0) {
-      throw new Exception("Invalid filter specification string");
-    }
-    String filterName = filterSpec[0];
-    filterSpec[0] = "";
-    setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
   }
 
   /**
@@ -200,11 +210,17 @@ public class FilteredClassifier extends Classifier
     // Same for filter
     options[current++] = "-F";
     options[current++] = "" + getFilterSpec();
-    
-    while (current < options.length) {
-      options[current++] = "";
-    }
+
     return options;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifierTipText() {
+    return "The classifier to be used.";
   }
 
   /**
@@ -241,6 +257,15 @@ public class FilteredClassifier extends Classifier
 	+ Utils.joinOptions(((OptionHandler)c).getOptions());
     }
     return c.getClass().getName();
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String filterTipText() {
+    return "The filter to be used.";
   }
 
   /**

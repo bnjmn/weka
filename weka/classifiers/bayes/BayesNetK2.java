@@ -37,7 +37,7 @@ import java.util.Random;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class BayesNetK2 extends BayesNet {
 	/** Holds flag to indicate ordering should be random **/
@@ -200,7 +200,7 @@ public class BayesNetK2 extends BayesNet {
    */
   public String globalInfo() {
     return "This Bayes Network learning algorithm uses a hill climbing algorithm" +
-    " restricted by an order on the variables";
+    " restricted by an order on the variables. Works with nominal variables only.";
   }
   
   

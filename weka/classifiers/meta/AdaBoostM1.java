@@ -65,7 +65,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -102,6 +102,22 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
       + "Yoav Freund and Robert E. Schapire (1996). \"Experiments with a new boosting "
       + "algorithm\".  Proc International Conference on Machine Learning, "
       + "pages 148-156, Morgan Kaufmann, San Francisco.";
+  }
+    
+  /**
+   * Constructor.
+   */
+  public AdaBoostM1() {
+    
+    m_Classifier = new weka.classifiers.trees.DecisionStump();
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.DecisionStump";
   }
 
   /**

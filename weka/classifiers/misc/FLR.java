@@ -41,7 +41,7 @@ import java.util.*;
  *  Set vignilance parameter rhoa  (a float in range [0,1])<p>
  * -B BoundsPath <br>
  *  Point the boundaries file (use full path of the file)<p>
- * -D Display the induced ruleset <br>
+ * -Y Display the induced ruleset <br>
  *  (if set true) <p>
  * <p> For further information contact I.N.Athanasiadis (ionathan@iti.gr)
  *
@@ -64,8 +64,7 @@ import java.util.*;
 
 public class FLR
     extends Classifier
-    implements OptionHandler, Serializable, Summarizable,
-    AdditionalMeasureProducer {
+    implements Serializable, Summarizable, AdditionalMeasureProducer {
 
   public static final float EPSILON = 0.000001f;
   private Vector learnedCode; // the RuleSet: a vector keeping the learned Fuzzy Lattices
@@ -321,7 +320,7 @@ public class FLR
    *  Set vignilance parameter rhoa  (a float in range [0,1])<p>
    * -B BoundsPath <br>
    *  Set the path pointing to the boundaries file (a full path of the file)<p>
-   * -D Display the induced ruleset <br>
+   * -Y Display the induced ruleset <br>
    *  (if set true) <p>
    *
    * Note:  The boundaries file is a simple text file containing a row with a
@@ -342,7 +341,7 @@ public class FLR
     newVector.addElement(new Option("\tSet vigilance parameter rhoa.", "R", 1,
                                     "-R"));
     newVector.addElement(new Option("\tSet boundaries File", "B", 1, "-B"));
-    newVector.addElement(new Option("\tShow Rules", "D", 0, "-D"));
+    newVector.addElement(new Option("\tShow Rules", "Y", 0, "-Y"));
     return newVector.elements();
   } //listOptions
 
@@ -353,8 +352,8 @@ public class FLR
    * @exception Exception if an option is not supported (
    */
   public void setOptions(String[] options) throws Exception {
-    // Option -D
-    m_showRules = Utils.getFlag('D', options);
+    // Option -Y
+    m_showRules = Utils.getFlag('Y', options);
     // Option -R
     String rhoaString = Utils.getOption('R', options);
     if (rhoaString.length() != 0) {
@@ -386,7 +385,7 @@ public class FLR
     options[current++] = "-R";
     options[current++] = "" + getRhoa();
     if (m_showRules) {
-      options[current++] = "-D";
+      options[current++] = "-Y";
     }
     if (m_BoundsFile.toString() != "") {
       options[current++] = "-B";

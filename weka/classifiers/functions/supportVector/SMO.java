@@ -113,7 +113,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 public class SMO extends Classifier implements OptionHandler, 
   WeightedInstancesHandler {
 
@@ -254,8 +254,12 @@ public class SMO extends Classifier implements OptionHandler,
 				 boolean fitLogistic, int numFolds,
 				 int randomSeed) throws Exception {
       
-      // Initialize thresholds
-      m_bUp = -1; m_bLow = 1; m_b = 0;
+      // Initialize some variables
+      m_bUp = -1; m_bLow = 1; m_b = 0; 
+      m_alpha = null; m_data = null; m_weights = null; m_errors = null;
+      m_logistic = null; m_I0 = null; m_I1 = null; m_I2 = null;
+      m_I3 = null; m_I4 = null;
+						     
 
       // Store the sum of weights
       m_sumOfWeights = insts.sumOfWeights();

@@ -64,10 +64,10 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
 */
-public class CVParameterSelection extends Classifier 
-  implements OptionHandler, Drawable, Summarizable {
+public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
+  implements Drawable, Summarizable {
 
   /*
    * A data structure to hold values associated with a single
@@ -169,9 +169,6 @@ public class CVParameterSelection extends Classifier
     }
   }
 
-  /** The generated base classifier */
-  protected Classifier m_Classifier = new weka.classifiers.trees.j48.J48();
-
   /**
    * The base classifier options (not including those being set
    * by cross-validation)
@@ -199,12 +196,6 @@ public class CVParameterSelection extends Classifier
   
   /** The number of folds used in cross-validation */
   protected int m_NumFolds = 10;
-
-  /** Random number seed */
-  protected int m_Seed = 1;
-
-  /** Debugging mode, gives extra output if true */
-  protected boolean m_Debug;
 
   /**
    * Create the options array to pass to the classifier. The parameter
@@ -311,7 +302,6 @@ public class CVParameterSelection extends Classifier
     }
   }
 
-
   /**
    * Returns a string describing this classifier
    * @return a description of the classifier suitable for
@@ -332,15 +322,8 @@ public class CVParameterSelection extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(2);
 
-    newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
-    newVector.addElement(new Option(
-	      "\tFull name of classifier to perform parameter selection on.\n"
-	      + "\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W <classifier class name>"));
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation (default 10).",
 	      "X", 1, "-X <number of folds>"));
@@ -355,21 +338,11 @@ public class CVParameterSelection extends Classifier
 	      + "\tonce to optimise over several classifier options\n"
 	      + "\tsimultaneously.",
 	      "P", 1, "-P <classifier parameter>"));
-    newVector.addElement(new Option(
-	      "\tSets the random number seed (default 1).",
-	      "S", 1, "-S <random number seed>"));
 
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option("",
-	        "", 0,
-		"\nOptions specific to sub-classifier "
-	        + m_Classifier.getClass().getName()
-		+ ":\n(use -- to signal start of sub-classifier options)"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
-      }
+
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
     }
     return newVector.elements();
   }
@@ -406,21 +379,12 @@ public class CVParameterSelection extends Classifier
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
-    setDebug(Utils.getFlag('D', options));
 
     String foldsString = Utils.getOption('X', options);
     if (foldsString.length() != 0) {
       setNumFolds(Integer.parseInt(foldsString));
     } else {
       setNumFolds(10);
-    }
-
-    String randomString = Utils.getOption('S', options);
-    if (randomString.length() != 0) {
-      setSeed(Integer.parseInt(randomString));
-    } else {
-      setSeed(1);
     }
 
     String cvParam;
@@ -431,21 +395,8 @@ public class CVParameterSelection extends Classifier
 	addCVParameter(cvParam);
       }
     } while (cvParam.length() != 0);
-    if (m_CVParams.size() == 0) {
-      throw new Exception("A parameter specifier must be given with"
-			  + " the -P option.");
-    }
 
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
-    if (!(m_Classifier instanceof OptionHandler)) {
-      throw new Exception("Base classifier must accept options");
-    }
+    super.setOptions(options);
   }
 
   /**
@@ -455,43 +406,31 @@ public class CVParameterSelection extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      if (m_InitOptions == null) {
-	classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-      } else {
-	classifierOptions = m_InitOptions;
-      }
+    String[] superOptions;
+
+    if (m_InitOptions != null) {
+      try {
+	m_Classifier.setOptions((String[])m_InitOptions.clone());
+	superOptions = super.getOptions();
+	m_Classifier.setOptions((String[])m_BestClassifierOptions.clone());
+      } catch (Exception e) {
+	throw new RuntimeException("CVParameterSelection: could not set options " +
+				   "in getOptions().");
+      } 
+    } else {
+      superOptions = super.getOptions();
     }
+    String [] options = new String [superOptions.length + m_CVParams.size() * 2 + 2];
 
     int current = 0;
-    String [] options = new String [classifierOptions.length + 8];
-    if (m_CVParams.size() > 0) {
-      options = new String [m_CVParams.size() * 2 + options.length];
-      for (int i = 0; i < m_CVParams.size(); i++) {
-	options[current++] = "-P"; options[current++] = "" + getCVParameter(i);
-      }
-    }
-
-    if (getDebug()) {
-      options[current++] = "-D";
+    for (int i = 0; i < m_CVParams.size(); i++) {
+      options[current++] = "-P"; options[current++] = "" + getCVParameter(i);
     }
     options[current++] = "-X"; options[current++] = "" + getNumFolds();
-    options[current++] = "-S"; options[current++] = "" + getSeed();
 
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
     return options;
   }
 
@@ -520,21 +459,23 @@ public class CVParameterSelection extends Classifier
       throw new IllegalArgumentException("Base classifier should be OptionHandler.");
     }
     m_InitOptions = ((OptionHandler)m_Classifier).getOptions();
+    m_BestPerformance = -99;
+    m_NumAttributes = trainData.numAttributes();
+    Random random = new Random(m_Seed);
+    trainData.randomize(random);
+    m_TrainFoldSize = trainData.trainCV(m_NumFolds, 0, random).numInstances();
 
     // Check whether there are any parameters to optimize
     if (m_CVParams.size() == 0) {
        m_Classifier.buildClassifier(trainData);
+       m_BestClassifierOptions = m_InitOptions;
        return;
     }
-    Random random = new Random(m_Seed);
-    trainData.randomize(random);
+
     if (trainData.classAttribute().isNominal()) {
       trainData.stratify(m_NumFolds);
     }
-    m_BestPerformance = -99;
     m_BestClassifierOptions = null;
-    m_NumAttributes = trainData.numAttributes();
-    m_TrainFoldSize = trainData.trainCV(m_NumFolds, 0, random).numInstances();
     
     // Set up m_ClassifierOptions -- take getOptions() and remove
     // those being optimised.
@@ -561,35 +502,6 @@ public class CVParameterSelection extends Classifier
   public double classifyInstance(Instance instance) throws Exception {
     
     return m_Classifier.classifyInstance(instance);
-  }
-
-  /**
-   * Sets the seed for random number generation.
-   *
-   * @param seed the random number seed
-   */
-  public void setSeed(int seed) {
-    
-    m_Seed = seed;;
-  }
-
-  /**
-   * Gets the random number seed.
-   * 
-   * @return the random number seed
-   */
-  public int getSeed() {
-
-    return m_Seed;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-    return "Sets the seed for random number generation.";
   }
 
   /**
@@ -621,6 +533,23 @@ public class CVParameterSelection extends Classifier
     return ((CVParameter)m_CVParams.elementAt(index)).toString();
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String CVParametersTipText() {
+    return "Sets the scheme parameters which are to be set "+
+	   "by cross-validation.\n"+
+	   "The format for each string should be:\n"+
+	   "param_char lower_bound upper_bound increment\n"+
+	   "eg to search a parameter -P from 1 to 10 by increments of 2:\n"+
+	   "    \"P 1 10 2\" ";
+  }
+
+  /**
+   * Get method for CVParameters.
+   */
   public Object[] getCVParameters() {
       
       Object[] CVParams = m_CVParams.toArray();
@@ -634,6 +563,9 @@ public class CVParameterSelection extends Classifier
       
   }
   
+  /**
+   * Set method for CVParameters.
+   */
   public void setCVParameters(Object[] params) throws Exception {
       
       FastVector backup = m_CVParams;
@@ -652,100 +584,33 @@ public class CVParameterSelection extends Classifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String CVParametersTipText() {
-    return "Sets the scheme parameters which are to be set "+
-	   "by cross-validation.\n"+
-	   "The format for each string should be:\n"+
-	   "param_char lower_bound upper_bound increment\n"+
-	   "eg to search a parameter -P from 1 to 10 by increments of 2:\n"+
-	   "    \"P 1 10 2\" ";
-  }
-
-  /**
-   * Sets debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-
-    m_Debug = debug;
-  }
-
-  /**
-   * Gets whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String debugTipText() {
-    return "Sets debugging mode";
-  }
-
-  /**
-   * Get the number of folds used for cross-validation.
-   *
-   * @return the number of folds used for cross-validation.
-   */
-  public int getNumFolds() {
-    
-    return m_NumFolds;
-  }
-  
-  /**
-   * Set the number of folds used for cross-validation.
-   *
-   * @param newNumFolds the number of folds used for cross-validation.
-   */
-  public void setNumFolds(int newNumFolds) {
-    
-    m_NumFolds = newNumFolds;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
   public String numFoldsTipText() {
     return "Get the number of folds used for cross-validation.";
   }
 
-  /**
-   * Set the classifier for boosting. 
+  /** 
+   * Gets the number of folds for the cross-validation.
    *
-   * @param newClassifier the Classifier to use.
+   * @return the number of folds for the cross-validation
    */
-  public void setClassifier(Classifier newClassifier) {
+  public int getNumFolds() {
 
-    m_Classifier = newClassifier;
+    return m_NumFolds;
   }
 
   /**
-   * Get the classifier used as the classifier
+   * Sets the number of folds for the cross-validation.
    *
-   * @return the classifier used as the classifier
+   * @param numFolds the number of folds for the cross-validation
+   * @exception Exception if parameter illegal
    */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "Sets the classifier for boosting.";
+  public void setNumFolds(int numFolds) throws Exception {
+    
+    if (numFolds < 0) {
+      throw new IllegalArgumentException("Stacking: Number of cross-validation " +
+					 "folds must be positive.");
+    }
+    m_NumFolds = numFolds;
   }
  
   /**
@@ -783,7 +648,7 @@ public class CVParameterSelection extends Classifier
    */
   public String toString() {
 
-    if (m_BestClassifierOptions == null)
+    if (m_InitOptions == null)
       return "CVParameterSelection: No model built yet.";
 
     String result = "Cross-validated Parameter selection.\n"
