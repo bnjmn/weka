@@ -66,7 +66,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -251,13 +251,8 @@ public class Attribute implements Copyable, Serializable {
       }
     }
     Integer val = (Integer)m_Hashtable.get(store);
-    if (val == null) {
-      throw new IllegalArgumentException("Value \"" + value + 
-					 "\" not found in attribute " +
-					 "declaration!");
-    } else {
-      return val.intValue();
-    }
+    if (val == null) return -1;
+    else return val.intValue();
   }
 
   /**
