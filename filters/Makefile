@@ -13,7 +13,7 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	ResampleFilter.java AttributeTypeFilter.java \
 	StringToNominalFilter.java ObfuscateFilter.java \
 	NonSparseToSparseFilter.java SparseToNonSparseFilter.java \
-	EmptyAttributeFilter.java SpreadSubsampleFilter.java \
+	UselessAttributeFilter.java SpreadSubsampleFilter.java \
 	StringToWordVectorFilter.java \
 	AttributeExpressionFilter.java AddNoiseFilter.java \
 	ClassOrderFilter.java
