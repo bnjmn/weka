@@ -25,6 +25,10 @@ package weka.experiment;
 
 import weka.core.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Enumeration;
+
 /**
  * Behaves the same as PairedTTester, only it uses the corrected
  * resampled t-test statistic.<p>
@@ -35,7 +39,7 @@ import weka.core.*;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -132,5 +136,75 @@ public class PairedCorrectedTTester extends PairedTTester {
     }
     pairedStats.calculateDerived();
     return pairedStats;
-  }  
+  }
+
+  /**
+   * Test the class from the command line.
+   *
+   * @param args contains options for the instance ttests
+   */
+  public static void main(String args[]) {
+    
+    try {
+      PairedCorrectedTTester tt = new PairedCorrectedTTester();
+      String datasetName = Utils.getOption('t', args);
+      String compareColStr = Utils.getOption('c', args);
+      String baseColStr = Utils.getOption('b', args);
+      boolean summaryOnly = Utils.getFlag('s', args);
+      boolean rankingOnly = Utils.getFlag('r', args);
+      try {
+	if ((datasetName.length() == 0)
+	    || (compareColStr.length() == 0)) {
+	  throw new Exception("-t and -c options are required");
+	}
+	tt.setOptions(args);
+	Utils.checkForRemainingOptions(args);
+      } catch (Exception ex) {
+	String result = "";
+	Enumeration enum = tt.listOptions();
+	while (enum.hasMoreElements()) {
+	  Option option = (Option) enum.nextElement();
+	  result += option.synopsis() + '\n'
+	    + option.description() + '\n';
+	}
+	throw new Exception(
+	      "Usage:\n\n"
+	      + "-t <file>\n"
+	      + "\tSet the dataset containing data to evaluate\n"
+	      + "-b <index>\n"
+	      + "\tSet the resultset to base comparisons against (optional)\n"
+	      + "-c <index>\n"
+	      + "\tSet the column to perform a comparison on\n"
+	      + "-s\n"
+	      + "\tSummarize wins over all resultset pairs\n\n"
+	      + "-r\n"
+	      + "\tGenerate a resultset ranking\n\n"
+	      + result);
+      }
+      Instances data = new Instances(new BufferedReader(
+				  new FileReader(datasetName)));
+      tt.setInstances(data);
+      //      tt.prepareData();
+      int compareCol = Integer.parseInt(compareColStr) - 1;
+      System.out.println(tt.header(compareCol));
+      if (rankingOnly) {
+	System.out.println(tt.multiResultsetRanking(compareCol));
+      } else if (summaryOnly) {
+	System.out.println(tt.multiResultsetSummary(compareCol));
+      } else {
+	System.out.println(tt.resultsetKey());
+	if (baseColStr.length() == 0) {
+	  for (int i = 0; i < tt.getNumResultsets(); i++) {
+	    System.out.println(tt.multiResultsetFull(i, compareCol));
+	  }
+	} else {
+	  int baseCol = Integer.parseInt(baseColStr) - 1;
+	  System.out.println(tt.multiResultsetFull(baseCol, compareCol));
+	}
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
+      System.err.println(e.getMessage());
+    }
+  }
 }
