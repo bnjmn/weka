@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.50 $
+ * @version  $Revision: 1.51 $
   */
 public class Evaluation implements Summarizable {
 
@@ -956,12 +956,15 @@ public class Evaluation implements Summarizable {
 				  Instance instance) throws Exception {
   
     Instance classMissing = (Instance)instance.copy();
-    double pred=0;
+    double pred = 0;
     classMissing.setDataset(instance.dataset());
     classMissing.setClassMissing();
     if (m_ClassIsNominal) {
 	double [] dist = classifier.distributionForInstance(classMissing);
 	pred = Utils.maxIndex(dist);
+	if (dist[(int)pred] <= 0) {
+	  pred = Instance.missingValue();
+	}
 	updateStatsForClassifier(dist, instance);
     } else {
       pred = classifier.classifyInstance(classMissing);
@@ -983,6 +986,9 @@ public class Evaluation implements Summarizable {
     double pred;
     if (m_ClassIsNominal) {
       pred = Utils.maxIndex(dist);
+      if (dist[(int)pred] <= 0) {
+	pred = Instance.missingValue();
+      }
       updateStatsForClassifier(dist, instance);
     } else {
       pred = dist[0];
