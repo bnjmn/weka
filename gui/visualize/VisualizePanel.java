@@ -71,6 +71,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
 import javax.swing.JSlider;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -95,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1549,6 +1550,10 @@ public class VisualizePanel extends JPanel {
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
 
+  /** Filter to ensure only arff files are selected */  
+  protected FileFilter m_ArffFilter =
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
+
   /** Label for the jitter slider */
   protected JLabel m_JitterLab= new JLabel("Jitter",SwingConstants.RIGHT);
 
@@ -1599,6 +1604,9 @@ public class VisualizePanel extends JPanel {
    * Constructor
    */
   public VisualizePanel() {
+    m_FileChooser.setFileFilter(m_ArffFilter);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
     m_XCombo.setToolTipText("Select the attribute for the x axis");
     m_YCombo.setToolTipText("Select the attribute for the y axis");
     m_ColourCombo.setToolTipText("Select the attribute to colour on");
