@@ -16,7 +16,14 @@
 
 /*
  *    PKIDiscretize.java
- *    Copyright (C) 1999 Eibe Frank,Len Trigg
+ *
+ *    http://www.cm.deakin.edu.au/webb
+ *
+ *    Copyright (C) 2001 Deakin University
+ *    School of Computing and Mathematics
+ *    Deakin University
+ *    Geelong, Vic, 3217, Australia
+ *
  */
 
 package weka.filters.unsupervised.attribute;
@@ -61,11 +68,9 @@ import weka.core.*;
  * -D <br>
  * Make binary nominal attributes. <p>
  *
- * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
  * @author Deakin University http://www.cm.deakin.edu.au/webb (webb@deakin.edu.au)
  * @author Richard Kirkby
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PKIDiscretize extends Filter 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
