@@ -32,7 +32,7 @@ import java.io.Serializable;
  * for learning Bayesian network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.1 $
+ * Version: $Revision: 1.2 $
  */
 public class HillClimber extends LocalScoreSearchAlgorithm {
 
@@ -408,6 +408,7 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 
 		newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
 		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
+		newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)\n", "N", 0, "-N"));
 
 		Enumeration enum = super.listOptions();
 		while (enum.hasMoreElements()) {
