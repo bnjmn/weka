@@ -450,8 +450,8 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
 			if(min>nodesLevel[j])
 			    min = nodesLevel[j];
 		}
-		if(min>1)
-		    nodesLevel[i]=min-1;
+		if(min!=65536 && min>1) //if the shallowest child of a parent has a depth greater than 1
+		    nodesLevel[i]=min-1;       // and it is not a lone parent with no children
 	   }
 	}
 	
@@ -467,7 +467,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
 	for(int i=0; i<nodesLevel.length; i++) {
 	    levelCounts[nodesLevel[i]]++;
 	}
-
+	//System.out.println("------------------------------------------");
 	//****Assigning nodes to each level
 	int levelsCounter[] = new int[maxLevel+1];
 	nodeLevels = new int[maxLevel+1][];
@@ -475,6 +475,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
 	    if(nodeLevels[nodesLevel[i]]==null)
 		nodeLevels[nodesLevel[i]] = new int[ levelCounts[nodesLevel[i]] ];
 	    //nodeLevels[nodesLevel[i]].addElement(new Integer(i));
+	    //System.out.println(((GraphNode)m_nodes.elementAt(i)).ID+" "+nodesLevel[i]+">"+levelCounts[nodesLevel[i]]);
 	    nodeLevels[nodesLevel[i]][levelsCounter[nodesLevel[i]]++] = i;
 	}
 
@@ -508,14 +509,12 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
 		if(graphMatrix[i][j]!=0)
 		    sum++;
 
-	    if(sum!=0) {
 		n.edges = new int[sum][2];
 	    	for(int j=0, k=0; j<graphMatrix[i].length; j++)
 	    	    if(graphMatrix[i][j]!=0) {
 	    		n.edges[k][0] = j;
 	    		n.edges[k][1] = graphMatrix[i][j]; k++;
 	    	    }
-	    }
 	    //n.edges = graphMatrix[i];
 	}
 
