@@ -54,7 +54,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class GUIChooser extends Frame {
 
@@ -169,7 +169,7 @@ public class GUIChooser extends Frame {
       public void actionPerformed(ActionEvent e) {
 	if (m_ExplorerFrame == null) {
 	  m_ExplorerBut.setEnabled(false);
-	  m_ExplorerFrame = new JFrame("Weka Knowledge Explorer");
+	  m_ExplorerFrame = new JFrame("Weka Explorer");
 	  m_ExplorerFrame.getContentPane().setLayout(new BorderLayout());
 	  m_ExplorerFrame.getContentPane()
 	    .add(new Explorer(), BorderLayout.CENTER);

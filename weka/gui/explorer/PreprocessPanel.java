@@ -85,7 +85,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -936,7 +936,7 @@ public class PreprocessPanel extends JPanel {
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Weka Knowledge Explorer: Preprocess");
+      final JFrame jf = new JFrame("Weka Explorer: Preprocess");
       jf.getContentPane().setLayout(new BorderLayout());
       final PreprocessPanel sp = new PreprocessPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);

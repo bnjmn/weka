@@ -91,7 +91,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -476,7 +476,7 @@ public class AssociationsPanel extends JPanel {
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Knowledge Explorer: Associator");
+	new javax.swing.JFrame("Weka Explorer: Associator");
       jf.getContentPane().setLayout(new BorderLayout());
       final AssociationsPanel sp = new AssociationsPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);

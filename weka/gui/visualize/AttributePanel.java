@@ -57,7 +57,7 @@ import java.awt.Graphics;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AttributePanel extends JScrollPane {
   /** The instances to be plotted */
@@ -569,7 +569,7 @@ public class AttributePanel extends JScrollPane {
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Knowledge Explorer: Attribute");
+	new javax.swing.JFrame("Weka Explorer: Attribute");
       jf.setSize(100,100);
       jf.getContentPane().setLayout(new BorderLayout());
       final AttributePanel p2 = new AttributePanel();

@@ -64,7 +64,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class Plot2D extends JPanel {
 
@@ -1540,7 +1540,7 @@ public class Plot2D extends JPanel {
       }
 
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Knowledge Explorer: Visualize");
+	new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       final Plot2D p2 = new Plot2D();

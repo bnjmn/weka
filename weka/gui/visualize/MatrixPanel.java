@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 
@@ -693,7 +693,7 @@ public class MatrixPanel extends JPanel{
      Main method for testing this class
   */
   public static void main(String [] args)  {
-    final JFrame jf = new JFrame("Weka Knowledge Explorer: MatrixPanel");
+    final JFrame jf = new JFrame("Weka Explorer: MatrixPanel");
     final JButton setBt = new JButton("Set Instances");
     Instances data = null;
     try {
@@ -906,7 +906,7 @@ public class MatrixPanel extends JPanel{
       if(found==0)
 	return;
 
-      JFrame jf = new JFrame("Weka Knowledge Explorer: Visualizing "+m_data.relationName() );
+      JFrame jf = new JFrame("Weka Explorer: Visualizing "+m_data.relationName() );
       VisualizePanel vp = new VisualizePanel();
       try {
 	PlotData2D pd = new PlotData2D(m_data);

@@ -60,7 +60,7 @@ import java.io.Serializable;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -402,7 +402,7 @@ public class ResultHistoryPanel extends JPanel {
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Knowledge Explorer: Classifier");
+	new javax.swing.JFrame("Weka Explorer: Classifier");
       jf.getContentPane().setLayout(new BorderLayout());
       final ResultHistoryPanel jd = new ResultHistoryPanel(null);
       jd.addResult("blah", new StringBuffer("Nothing to see here"));
