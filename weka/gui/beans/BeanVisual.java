@@ -41,7 +41,7 @@ import java.io.IOException;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -139,7 +139,7 @@ public class BeanVisual extends JPanel implements Serializable {
     boolean success = true;
     java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
     if (imageURL == null) {
-      System.err.println("Warning: unable to load "+iconPath);
+      //      System.err.println("Warning: unable to load "+iconPath);
     } else {
       Image pic = Toolkit.getDefaultToolkit().
 	getImage(imageURL);
@@ -151,7 +151,7 @@ public class BeanVisual extends JPanel implements Serializable {
     
     imageURL = ClassLoader.getSystemResource(animatedIconPath);
     if (imageURL == null) {
-      System.err.println("Warning: unable to load "+animatedIconPath);
+      //      System.err.println("Warning: unable to load "+animatedIconPath);
       success = false;
     } else {
       Image pic2 = Toolkit.getDefaultToolkit().
