@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.53 $ 
+ * @version $Revision: 1.54 $ 
  */
 public class Instances implements Serializable {
  
@@ -76,6 +76,9 @@ public class Instances implements Serializable {
 
   /** The attribute information. */
   protected /*@non_null@*/ FastVector m_Attributes;
+  /*@ protected invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
+                    m_Attributes.elementAt(i) != null);
+  */
 
   /** The instances. */
   protected /*@non_null@*/ FastVector m_Instances;
@@ -257,7 +260,8 @@ public class Instances implements Serializable {
    *
    * @param index the attribute's index
    * @return the attribute at the given position
-   */ 
+   */
+  //@ ensures \result != null;
   public /*@pure@*/ Attribute attribute(int index) {
     
     return (Attribute) m_Attributes.elementAt(index);
