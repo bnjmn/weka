@@ -28,6 +28,7 @@ import weka.core.Instances;
 import weka.core.FastVector;
 import weka.core.Utils;
 import weka.core.Option;
+import weka.core.AdditionalMeasureProducer;
 
 /**
  * DatabaseResultProducer examines a database and extracts out
@@ -36,10 +37,10 @@ import weka.core.Option;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
-  implements ResultProducer, OptionHandler {
+  implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
 
   /** The dataset of interest */
   protected Instances m_Instances;
@@ -448,7 +449,9 @@ public class DatabaseResultProducer extends DatabaseResultListener
 
   /**
    * Set a list of method names for additional measures to look for
-   * in SplitEvaluators.
+   * in SplitEvaluators. This could contain many measures (of which only a
+   * subset may be produceable by the current resultProducer) if an experiment
+   * is the type that iterates over a set of properties.
    * @param additionalMeasures an array of measure names, null if none
    */
   public void setAdditionalMeasures(String [] additionalMeasures) {
@@ -461,6 +464,43 @@ public class DatabaseResultProducer extends DatabaseResultListener
       m_ResultProducer.setAdditionalMeasures(m_AdditionalMeasures);
     }
   }
+
+  /**
+   * Returns an enumeration of any additional measure names that might be
+   * in the result producer
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
+    if (m_ResultProducer instanceof AdditionalMeasureProducer) {
+      Enumeration en = ((AdditionalMeasureProducer)m_ResultProducer).
+	enumerateMeasures();
+      while (en.hasMoreElements()) {
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
+      }
+    }
+    return newVector.elements();
+  }
+
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (m_ResultProducer instanceof AdditionalMeasureProducer) {
+      return ((AdditionalMeasureProducer)m_ResultProducer).
+	getMeasure(additionalMeasureName);
+    } else {
+      throw new Exception("DatabaseResultProducer: "
+			  +"Can't return value for : "+additionalMeasureName
+			  +". "+m_ResultProducer.getClass().getName()+" "
+			  +"is not an AdditionalMeasureProducer");
+    }
+  }
+  
   
   /**
    * Sets the dataset that results will be obtained for.

@@ -39,10 +39,10 @@ import java.io.ObjectStreamClass;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
-  OptionHandler {
+  OptionHandler, AdditionalMeasureProducer {
   
   /** The classifier used for evaluation */
   protected Classifier m_Classifier = new weka.classifiers.ZeroR();
@@ -179,7 +179,9 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
 
   /**
    * Set a list of method names for additional measures to look for
-   * in SplitEvaluators.
+   * in Classifiers. This could contain many measures (of which only a
+   * subset may be produceable by the current Classifier) if an experiment
+   * is the type that iterates over a set of properties.
    * @param additionalMeasures an array of method names.
    */
   public void setAdditionalMeasures(String [] additionalMeasures) {
@@ -207,6 +209,43 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     }
   }
   
+
+    /**
+   * Returns an enumeration of any additional measure names that might be
+   * in the classifier
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
+    if (m_Classifier instanceof AdditionalMeasureProducer) {
+      Enumeration en = ((AdditionalMeasureProducer)m_Classifier).
+	enumerateMeasures();
+      while (en.hasMoreElements()) {
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
+      }
+    }
+    return newVector.elements();
+  }
+  
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (m_Classifier instanceof AdditionalMeasureProducer) {
+      return ((AdditionalMeasureProducer)m_Classifier).
+	getMeasure(additionalMeasureName);
+    } else {
+      throw new Exception("RegressionSplitEvaluator: "
+			  +"Can't return value for : "+additionalMeasureName
+			  +". "+m_Classifier.getClass().getName()+" "
+			  +"is not an AdditionalMeasureProducer");
+    }
+  }
+
   /**
    * Gets the data types of each of the key columns produced for a single run.
    * The number of key fields must be constant

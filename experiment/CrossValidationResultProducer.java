@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.Utils;
+import weka.core.AdditionalMeasureProducer;
 
 
 /**
@@ -39,10 +40,10 @@ import weka.core.Utils;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CrossValidationResultProducer 
-  implements ResultProducer, OptionHandler {
+  implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
   
   /** The dataset of interest */
   protected Instances m_Instances;
@@ -114,7 +115,9 @@ public class CrossValidationResultProducer
 
   /**
    * Set a list of method names for additional measures to look for
-   * in SplitEvaluators.
+   * in SplitEvaluators. This could contain many measures (of which only a
+   * subset may be produceable by the current SplitEvaluator) if an experiment
+   * is the type that iterates over a set of properties.
    * @param additionalMeasures an array of measure names, null if none
    */
   public void setAdditionalMeasures(String [] additionalMeasures) {
@@ -128,6 +131,42 @@ public class CrossValidationResultProducer
     }
   }
 
+  /**
+   * Returns an enumeration of any additional measure names that might be
+   * in the SplitEvaluator
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
+    if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
+      Enumeration en = ((AdditionalMeasureProducer)m_SplitEvaluator).
+	enumerateMeasures();
+      while (en.hasMoreElements()) {
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
+      }
+    }
+    return newVector.elements();
+  }
+  
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
+      return ((AdditionalMeasureProducer)m_SplitEvaluator).
+	getMeasure(additionalMeasureName);
+    } else {
+      throw new Exception("CrossValidationResultProducer: "
+			  +"Can't return value for : "+additionalMeasureName
+			  +". "+m_SplitEvaluator.getClass().getName()+" "
+			  +"is not an AdditionalMeasureProducer");
+    }
+  }
+  
   /**
    * Gets a Double representing the current date and time.
    * eg: 1:46pm on 20/5/1999 -> 19990520.1346
