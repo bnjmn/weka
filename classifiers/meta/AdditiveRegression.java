@@ -117,11 +117,12 @@ import weka.classifiers.meta.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
-	     AdditionalMeasureProducer {
+	     AdditionalMeasureProducer,
+	     WeightedInstancesHandler {
   
   /**
    * Base classifier.
@@ -458,7 +459,11 @@ public class AdditiveRegression extends Classifier
     zr.buildClassifier(newData);
     m_additiveModels.addElement(zr);
     newData = residualReplace(newData, zr);
-    sum = newData.attributeStats(m_classIndex).numericStats.sumSq;
+    for (int i = 0; i < newData.numInstances(); i++) {
+      sum += newData.instance(i).weight() *
+	newData.instance(i).classValue() *
+	newData.instance(i).classValue();
+    }
     if (m_debug) {
       System.err.println("Sum of squared residuals "
 			 +"(predicting the mean) : "+sum);
@@ -471,14 +476,17 @@ public class AdditiveRegression extends Classifier
       nextC.buildClassifier(newData);
       m_additiveModels.addElement(nextC);
       newData = residualReplace(newData, nextC);
-      sum = newData.attributeStats(m_classIndex).numericStats.sumSq;
+      sum = 0;
+      for (int i = 0; i < newData.numInstances(); i++) {
+	sum += newData.instance(i).weight() *
+	  newData.instance(i).classValue() *
+	  newData.instance(i).classValue();
+      }
       if (m_debug) {
 	System.err.println("Sum of squared residuals : "+sum);
       }
       modelCount++;
-    } while (((temp_sum - 
-		   (sum = newData.attributeStats(m_classIndex).
-		    numericStats.sumSq)) > Utils.SMALL) && 
+    } while (((temp_sum - sum) > Utils.SMALL) && 
 	     (m_maxModels > 0 ? (modelCount < m_maxModels) : true));
 
     // remove last classifier
