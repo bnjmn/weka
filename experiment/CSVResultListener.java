@@ -35,7 +35,7 @@ import weka.core.Option;
  * a Writer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CSVResultListener implements ResultListener, OptionHandler {
 
@@ -47,6 +47,16 @@ public class CSVResultListener implements ResultListener, OptionHandler {
 
   /** The destination for results (typically connected to the output file) */
   protected transient PrintWriter m_Out = new PrintWriter(System.out, true);
+
+  /**
+   * Returns a string describing this result listener
+   * @return a description of the result listener suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Takes results from a result producer and assembles them into "
+      +"comma separated value form.";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -103,7 +113,16 @@ public class CSVResultListener implements ResultListener, OptionHandler {
     }
     return options;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String outputFileTipText() {
+    return "File to save to. Use '-' to write to standard out.";
+  }
+
   /**
    * Get the value of OutputFile.
    *

@@ -47,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -241,7 +241,15 @@ public class DatabaseUtils implements Serializable {
     }
   }
 
-  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String databaseURLTipText() {
+    return "Set the URL to the database.";
+  }
+
   /**
    * Get the value of DatabaseURL.
    *
