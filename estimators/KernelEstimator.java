@@ -30,7 +30,7 @@ import weka.core.*;
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class KernelEstimator implements Estimator {
 
@@ -115,6 +115,8 @@ public class KernelEstimator implements Estimator {
     m_SumOfWeights = 0;
     m_AllWeightsOne = true;
     m_Precision = precision;
+    // precision cannot be zero
+    if (m_Precision < Utils.SMALL) m_Precision = Utils.SMALL;
     //    m_StandardDev = 1e10 * m_Precision; // Set the standard deviation initially very wide
     m_StandardDev = m_Precision / (2 * 3);
   }
