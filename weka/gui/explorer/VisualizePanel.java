@@ -84,7 +84,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -625,23 +625,31 @@ public class VisualizePanel extends JPanel {
 		  }
 		  insts.append("\n");
 		}
+
 		if (m_preds != null && 
-		    (!m_plotInstances.instance(i).
+		    (m_plotInstances.classIndex() < 0 || 
+		     !m_plotInstances.instance(i).
 		     isMissing(m_plotInstances.classIndex()))) {
 		  if (longest > 9) {
 		    for (int k = 0;k < (longest-9); k++) {
 		      insts.append(" ");
 		    }
 		  }
-		    
-		  insts.append("predicted : ");
-		  if (m_plotInstances.attribute(m_cIndex).isNominal()) {
-		    insts.append(m_plotInstances.
-				 attribute(m_plotInstances.classIndex()).
-				 value((int)m_preds[i]));
+		   
+		  if (m_plotInstances.classIndex() >=0) {
+		    insts.append("predicted : ");
+		    if (m_plotInstances.attribute(m_cIndex).isNominal()) {
+		      insts.append(m_plotInstances.
+				   attribute(m_plotInstances.classIndex()).
+				   value((int)m_preds[i]));
+		    } else {
+		      insts.append(m_preds[i]);
+		    }
 		  } else {
-		    insts.append(m_preds[i]);
+		    insts.append("  cluster : ");
+		    insts.append((int)m_preds[i]);
 		  }
+		 
 		  insts.append("\n");
 		}
 	      }
