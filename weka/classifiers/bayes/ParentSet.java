@@ -22,6 +22,7 @@
  */
 package weka.classifiers.bayes;
 
+import java.io.Serializable;
 import weka.core.*;
 
 /**
@@ -29,9 +30,9 @@ import weka.core.*;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class ParentSet {
+public class ParentSet implements Serializable {
 
   /**
    * Holds indexes of parents
