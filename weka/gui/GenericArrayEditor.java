@@ -68,7 +68,7 @@ import javax.swing.JOptionPane;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -172,7 +172,7 @@ public class GenericArrayEditor extends JPanel
     m_DeleteBut.setToolTipText("Delete the selected list item");
   }
 
-  /* This class handles the creation of list cell renderers from the 
+  /** This class handles the creation of list cell renderers from the 
    * property editors.
    */
   private class EditorListCellRenderer implements ListCellRenderer {
@@ -267,6 +267,30 @@ public class GenericArrayEditor extends JPanel
 	if (editor instanceof GenericObjectEditor) {
 	  ((GenericObjectEditor) editor).setClassType(elementClass);
 	}
+
+        //setting the value in the editor so that
+        //we don't get a NullPointerException
+        //when we do getAsText() in the constructor of
+        //PropertyValueSelector()
+	if(Array.getLength(o) > 0) {
+	  editor.setValue(Array.get(o,0));
+	} else {
+	  if (editor instanceof GenericObjectEditor) {
+	    ((GenericObjectEditor)editor).setDefaultValue();
+	  } else {   
+            try {
+	    editor.setValue(elementClass.newInstance());
+            } catch(Exception ex) {
+              m_ElementEditor=null;
+              System.err.println(ex.getMessage());
+              add(m_Label, BorderLayout.CENTER);
+              m_Support.firePropertyChange("", null, null);
+              validate();
+              return;
+            }
+	  }
+	}
+        
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
 	  lcr = new EditorListCellRenderer(editor.getClass(), elementClass);
@@ -297,16 +321,17 @@ public class GenericArrayEditor extends JPanel
 	  m_DeleteBut.setEnabled(false);
 	}
 
-	try {
-	  if (m_ListModel.getSize() > 0) {
-	    m_ElementEditor.setValue(m_ListModel.getElementAt(0));
-	  } else {
-	    if (m_ElementEditor instanceof GenericObjectEditor) {
-	      ((GenericObjectEditor)m_ElementEditor).setDefaultValue();
-	    } else {
-	      m_ElementEditor.setValue(m_ElementClass.newInstance());
-	    }
-	  }
+        //have already set the value above in the editor
+	//try {
+	  //if (m_ListModel.getSize() > 0) {
+	  //  m_ElementEditor.setValue(m_ListModel.getElementAt(0));
+	  //} else {
+	  //  if (m_ElementEditor instanceof GenericObjectEditor) {
+	  //    ((GenericObjectEditor)m_ElementEditor).setDefaultValue();
+	  //  } else {
+	  //    m_ElementEditor.setValue(m_ElementClass.newInstance());
+	  //  }
+	  //}
 	  
 	  JPanel panel = new JPanel();
 	  panel.setLayout(new BorderLayout());
@@ -321,10 +346,10 @@ public class GenericArrayEditor extends JPanel
 	      repaint();
 	    }
 	  });
-	} catch (Exception ex) {
-	  System.err.println(ex.getMessage());
-	  m_ElementEditor = null;
-	}
+	//} catch (Exception ex) {
+	//  System.err.println(ex.getMessage());
+	//  m_ElementEditor = null;
+	//}
       }
     }
     if (m_ElementEditor == null) {
