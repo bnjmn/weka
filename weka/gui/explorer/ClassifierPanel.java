@@ -137,7 +137,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.77 $
+ * @version $Revision: 1.78 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -829,10 +829,7 @@ public class ClassifierPanel extends JPanel {
       }
 
       double [] values = new double[plotInstances.numAttributes()];
-      System.out.println(plotInstances);
       for (int i = 0; i < plotInstances.numAttributes(); i++) {
-          System.out.println(toPredict.classIndex());
-          System.out.println(toPredict.dataset());
 	if (i < toPredict.classIndex()) {
 	  values[i] = toPredict.value(i);
 	} else if (i == toPredict.classIndex()) {
