@@ -26,24 +26,19 @@ import weka.core.*;
 /** 
  * Converts all nominal attributes into binary numeric 
  * attributes. An attribute with k values is transformed into
- * k-1 new binary attributes (in a similar manner to CART if the
- * class is numeric).<p>
+ * k-1 new binary attributes (in a similar manner to CART if a
+ * numeric class is assigned). Currently requires that a class attribute
+ * be set (but this should be changed).<p>
  *
  * Valid scheme-specific options are: <p>
- *
- * -C col <br>
- * Us this column as the class.<p>
  *
  * -N <br>
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
-
-  /** The index of the attribute to be treated as the class. */
-  private int m_ClassIndex = -1;
 
   /** The average class values for all nominal values in the training data. */
   private double[][] m_AvgClassValues = null;
@@ -68,12 +63,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
        throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    if (m_ClassIndex > -1) {
-      m_InputFormat.setClassIndex(m_ClassIndex);
-    } else {
-      if (m_InputFormat.classIndex() < 0) {
-	m_InputFormat.setClassIndex(m_InputFormat.numAttributes()-1);
-      }
+    if (m_InputFormat.classIndex() < 0) {
+      throw new Exception("No class has been assigned to the instances");
     }
     m_NewBatch = true;
     setOutputFormat();
@@ -154,11 +145,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(1);
 
-    newVector.addElement(new Option(
-              "\tSets the class index.",
-              "C", 1, "-C <col>"));
     newVector.addElement(new Option(
 	      "\tSets if binary attributes are to be coded as nominal ones.",
 	      "N", 0, "-N"));
@@ -170,9 +158,6 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   /**
    * Parses the options for this object. Valid options are: <p>
    *
-   * -C col <br>
-   * Us this column as the class.<p>
-   *
    * -N <br>
    * If binary attributes are to be coded as nominal ones.<p>
    *
@@ -180,18 +165,6 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
-    String classIndex = Utils.getOption('C', options);
-    if (classIndex.length() != 0) {
-      if (classIndex.toLowerCase().equals("last"))
-	setClassIndex(-1);
-      else if (classIndex.toLowerCase().equals("first"))
-	setClassIndex(0);
-      else
-	setClassIndex(Integer.parseInt(classIndex) - 1);
-    } else {
-      setClassIndex(-1);
-    }
     
     setBinaryAttributesNominal(Utils.getFlag('N', options));
 
@@ -206,41 +179,17 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [3];
+    String [] options = new String [1];
     int current = 0;
 
     if (getBinaryAttributesNominal()) {
       options[current++] = "-N";
     }
-    options[current++] = "-C";
-    options[current++] = "" + (getClassIndex() + 1);
 
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
-  }
-
-  /**
-   * Get the index of the attribute used as the 
-   * class.
-   *
-   * @return the index of the class
-   */
-  public int getClassIndex() {
-
-    return m_ClassIndex;
-  }
-
-  /**
-   * Sets index of the attribute used as the 
-   * class.
-   *
-   * @param index the index of the class
-   */
-  public void setClassIndex(int classIndex) {
-    
-    m_ClassIndex = classIndex;
   }
 
   /**

@@ -24,23 +24,19 @@ import java.util.*;
 import weka.core.*;
 
 /** 
- * An instance filter that Discretizes a range of numeric attributes in 
- * the dataset into nominal attributes. Discretisation can be either by 
- * simple binning, or by Fayyad & Irani's MDL method.<p>
+ * An instance filter that discretizes a range of numeric attributes in 
+ * the dataset into nominal attributes. Discretization can be either by 
+ * simple binning, or by Fayyad & Irani's MDL method (the default).<p>
  *
  * Valid scheme-specific options are: <p>
  *
  * -B num <br>
  * Specify the (maximum) number of bins to divide numeric attributes into.
- * (default 10).<p>
+ * (default class-based discretisation).<p>
  *
  * -O <br>
  * Optimizes the number of bins using a leave-one-out estimate of the 
  * entropy.<p>
- *
- * -C col <br>
- * Determine cuts using Fayyad & Irani method using this column
- * for the class.<p>
  *
  * -R col1,col2-col4,... <br>
  * Specify list of columns to Discretize. First
@@ -60,7 +56,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -70,9 +66,6 @@ public class DiscretizeFilter extends Filter
 
   /** The number of bins to divide the attribute into */
   protected int m_NumBins = 10;
-
-  /** The attribute to use as the class index for Fayyad & Irani's method  */
-  protected int m_ClassIndex = -1;
 
   /** Store the current cutpoints */
   protected double [][] m_CutPoints = null;
@@ -116,18 +109,13 @@ public class DiscretizeFilter extends Filter
     newVector.addElement(new Option(
               "\tSpecify the (maximum) number of bins to divide numeric"
 	      + " attributes into.\n"
-	      + "\t(default 10)",
+	      + "\t(default class-based discretization)",
               "B", 1, "-B <num>"));
 
     newVector.addElement(new Option(
               "\tOptimize number of bins using leave-one-out estimate\n"+
 	      "\t of estimated entropy.",
               "O", 0, "-O"));
-
-    newVector.addElement(new Option(
-              "\tDetermine cuts using Fayyad & Irani method"
-	      + " using this column for the class.",
-              "C", 1, "-C <col>"));
 
     /* If we decide to implement loading and saving cutfiles like 
      * the C Discretizer (which is probably not necessary)
@@ -169,19 +157,15 @@ public class DiscretizeFilter extends Filter
    * Parses the options for this object. Valid options are: <p>
    *
    * -B num <br>
-   * Specify the (maximum) number of bins to divide numeric attributes into.
-   * (default 10).<p>
+   * Specify the (maximum) number of equal-width bins to divide
+   * numeric attributes into. (default class-based discretization).<p>
    *
    * -O
    * Optimizes the number of bins using a leave-one-out estimate of the 
    * entropy.
    *
-   * -C col <br>
-   * Determine cuts using Fayyad & Irani method using this column
-   * for the class.<p>
-   *
    * -R col1,col2-col4,... <br>
-   * Specify list of columns to Discretize. First
+   * Specify list of columns to discretize. First
    * and last are valid indexes. (default none) <p>
    *
    * -V <br>
@@ -223,18 +207,6 @@ public class DiscretizeFilter extends Filter
       setAttributeIndices("first-last");
     }
 
-    String classIndex = Utils.getOption('C', options);
-    if (classIndex.length() != 0) {
-      if (classIndex.toLowerCase().equals("last")) {
-	setClassIndex(-1);
-      } else if (classIndex.toLowerCase().equals("first")) {
-	setClassIndex(0);
-      } else {
-	setClassIndex(Integer.parseInt(classIndex) - 1);
-      }
-      setUseMDL(true);
-    }
-    
     if (m_InputFormat != null) {
       inputFormat(m_InputFormat);
     }
@@ -264,10 +236,7 @@ public class DiscretizeFilter extends Filter
     if (getInvertSelection()) {
       options[current++] = "-V";
     }
-    if (getUseMDL()) {
-      options[current++] = "-C";
-      options[current++] = "" + (getClassIndex() + 1);
-    } else {
+    if (!getUseMDL()) {
       options[current++] = "-B"; options[current++] = "" + getBins();
     }
     if (!getAttributeIndices().equals("")) {
@@ -298,13 +267,11 @@ public class DiscretizeFilter extends Filter
     m_DiscretizeCols.setUpper(m_InputFormat.numAttributes() - 1);
     m_CutPoints = null;
     if (m_UseMDL) {
-      if (m_ClassIndex >= 0) {
-	m_InputFormat.setClassIndex(m_ClassIndex);
-      } else if ((m_ClassIndex == -1) && (m_InputFormat.classIndex() < 0)) {
-	m_InputFormat.setClassIndex(m_InputFormat.numAttributes() - 1);
+      if (m_InputFormat.classIndex() < 0) {
+	throw new Exception("Cannot use class-based discretization: "
+			    + "no class assigned to the dataset");
       }
-      if ((m_ClassIndex >= -1) 
-	  && (!m_InputFormat.classAttribute().isNominal())) {
+      if (!m_InputFormat.classAttribute().isNominal()) {
 	throw new Exception("Supervised discretization not possible:"
 			    + " class is not nominal!");
       }
@@ -423,6 +390,7 @@ public class DiscretizeFilter extends Filter
   /**
    * Gets whether MDL will be used as the discretisation method
    *
+   * @return true if so
    */
   public boolean getUseMDL() {
 
@@ -497,27 +465,6 @@ public class DiscretizeFilter extends Filter
   public void setBins(int numBins) {
 
     m_NumBins = numBins;
-  }
-
-  /**
-   * Gets the index of the attribute used as the class when
-   * using MDL discretisation
-   *
-   * @return the class attribute index
-   */
-  public int getClassIndex() {
-
-    return m_ClassIndex;
-  }
-
-  /**
-   * Sets index of attribute to discretize on
-   *
-   * @param index the index of the class
-   */
-  public void setClassIndex(int classIndex) {
-
-    m_ClassIndex = classIndex;
   }
 
   /**

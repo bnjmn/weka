@@ -23,7 +23,9 @@ import weka.core.*;
 import java.util.*;
 
 /**
- * This filter takes a dataset and outputs a subset of it.
+ * This filter takes a dataset and outputs a subset of it. If a class
+ * attribute is assigned, the dataset will be stratified when fold-based
+ * splitting.
  *
  * Valid options are: <p>
  *
@@ -44,13 +46,8 @@ import java.util.*;
  * Specifies a random number seed for shuffling the dataset.
  * (default 0, don't randomize)<p>
  *
- * -C attribute index <br>
- * Specifies the attribute to be used for
- * stratification. Attribute will be class in new dataset. Doesn't
- * stratify if attribute is not nominal. (default last)<p>
- *  
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -69,9 +66,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   /** Random number seed. */
   private long m_Seed = 0;
 
-  /** Attribute to be used for stratification */
-  private int m_AttributeIndex = -1;
-
   /**
    * Gets an enumeration describing the available options.
    *
@@ -79,7 +73,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
               "\tSpecifies list of instances to select. First and last\n"
@@ -102,12 +96,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     newVector.addElement(new Option(
 	      "\tSpecifies random number seed. (default 0, no randomizing)\n",
 	      "S", 1, "-S <seed>"));
-
-    newVector.addElement(new Option(
-	      "\tIndex of attribute used for stratification. Attribute\n"+
-	      "\twill be class in new dataset. Doesn't stratify if\n"+
-	      "\tattribute is not nominal. (default last)",
-	      "C", 1, "-C <attribute index>"));
 
     return newVector.elements();
   }
@@ -132,11 +120,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * Specifies a random number seed for shuffling the dataset.
    * (default 0, no randomizing)<p>
    *
-   * -C attribute index <br> 
-   * Specifies the attribute to be used for
-   * stratification. Attribute will be class in new dataset. Doesn't
-   * stratify if attribute is not nominal. (default last)<p>
-   *  
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -162,18 +145,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     } else {
       setSeed(0);
     }
-    String attIndex = Utils.getOption('C', options);
-    if (attIndex.length() != 0) {
-      if (attIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(-1);
-      } else if (attIndex.toLowerCase().equals("first")) {
-	setAttributeIndex(0);
-      } else {
-	setAttributeIndex(Integer.parseInt(attIndex) - 1);
-      }
-    } else {
-      setAttributeIndex(-1);
-    }
     if (m_InputFormat != null) {
       inputFormat(m_InputFormat);
     }
@@ -196,8 +167,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
 	options[current++] = "-V";
       }
     } else {
-      options[current++] = "-C";
-      options[current++] = "" + (getAttributeIndex() + 1);
       options[current++] = "-N"; options[current++] = "" + getNumFolds();
       options[current++] = "-F"; options[current++] = "" + getFold();
     }
@@ -331,27 +300,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Gets index of attribute being used for stratification.
-   *
-   * @return index of attribute being used for stratification
-   */
-  public int getAttributeIndex() {
-
-    return m_AttributeIndex;
-  }
-
-  /**
-   * Sets the attribute to be used for stratification. In the new
-   * dataset, this attribute will be the class.
-   *
-   * @param att the index of the attribute to be used for stratification
-   */
-  public void setAttributeIndex(int att) {
-
-    m_AttributeIndex = att;
-  }
-
-  /**
    * Sets the format of the input instances.
    *
    * @param instanceInfo an Instances object containing the input instance
@@ -367,14 +315,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
 			  "number of folds.");
     }
     m_InputFormat = new Instances(instanceInfo, 0);
-    if (m_Range != null) {
-      if (m_AttributeIndex >= 0) {
-	if (m_AttributeIndex >= m_InputFormat.numAttributes()) {
-	  throw new Exception("Invalid attribute index.");
-	}
-	m_InputFormat.setClassIndex(m_AttributeIndex);
-      }
-    }
     setOutputFormat(m_InputFormat);
     m_NewBatch = true;
     return true;
