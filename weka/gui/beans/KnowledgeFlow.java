@@ -100,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.19 $
+ * @version  $Revision: 1.20 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -235,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.19 $
+   * @version $Revision: 1.20 $
    * @since 1.0
    * @see JPanel
    */
@@ -995,14 +995,24 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	menuItemCount++;
       }
       while (req.hasMoreElements()) {
-	final String tempS = (String)req.nextElement();
-	JMenuItem custItem = new JMenuItem(tempS);
+	String tempS = (String)req.nextElement();
+	boolean disabled = false;
+	// check to see if this item is currently disabled
+	if (tempS.charAt(0) == '$') {
+	  tempS = tempS.substring(1, tempS.length());
+	  disabled = true;
+	}
+	final String tempS2 = tempS;
+	JMenuItem custItem = new JMenuItem(tempS2);
 	custItem.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
-	      ((UserRequestAcceptor)bc).performRequest(tempS);
+	      ((UserRequestAcceptor)bc).performRequest(tempS2);
 	      
 	    }
 	  });
+	if (disabled) {
+	  custItem.setEnabled(false);
+	}
 	beanContextMenu.add(custItem);
 	menuItemCount++;
       }
