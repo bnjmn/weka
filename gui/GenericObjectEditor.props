@@ -27,6 +27,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.bayes.BayesNetB,\
  weka.classifiers.bayes.NaiveBayes,\
  weka.classifiers.bayes.NaiveBayesSimple,\
+ weka.classifiers.bayes.NaiveBayesUpdateable,\
  weka.classifiers.functions.LeastMedSq,\
  weka.classifiers.functions.LinearRegression,\
  weka.classifiers.functions.Logistic,\
@@ -87,6 +88,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.bayes.BayesNetB,\
  weka.classifiers.bayes.NaiveBayes,\
  weka.classifiers.bayes.NaiveBayesSimple,\
+ weka.classifiers.bayes.NaiveBayesUpdateable,\
  weka.classifiers.functions.Logistic,\
  weka.classifiers.functions.neural.NeuralNetwork,\
  weka.classifiers.functions.SMO,\
