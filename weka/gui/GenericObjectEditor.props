@@ -122,7 +122,6 @@ weka.filters.Filter = \
  weka.filters.AttributeTypeFilter, \
  weka.filters.CopyAttributesFilter, \
  weka.filters.DiscretizeFilter, \
- weka.filters.EmptyAttributeFilter, \
  weka.filters.FirstOrderFilter, \
  weka.filters.InstanceFilter, \
  weka.filters.MakeIndicatorFilter, \
@@ -144,7 +143,8 @@ weka.filters.Filter = \
  weka.filters.StringToWordVectorFilter, \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
- weka.filters.TimeSeriesTranslateFilter
+ weka.filters.TimeSeriesTranslateFilter, \
+ weka.filters.UselessAttributeFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
