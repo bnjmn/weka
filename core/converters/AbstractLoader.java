@@ -15,82 +15,88 @@
  */
 
 /*
- *    Loader.java
- *    Copyright (C) 2000 Webmind Corp.
+ *    AbstractLoader.java
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
 package weka.core.converters;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.Serializable;
 import weka.core.Instances;
 import weka.core.Instance;
+import java.io.*;
 
 /**
- * Abstract class for Loaders that contains default implementation of the
- * setSource methods: Any of these methods that are not overwritten will
- * result in throwing IOException.
+ * Abstract class gives default implementation of setSource 
+ * methods. All other methods must be overridden.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractLoader implements Loader {
-
-  /** For state where no instances have been retrieved yet */
+  
+  /** The retrieval modes */
   protected static final int NONE = 0;
-  /** For representing that instances have been retrieved in batch mode */
   protected static final int BATCH = 1;
-  /** For representing that instances have been retrieved incrementally */
   protected static final int INCREMENTAL = 2;
 
-  protected int m_Retrieval = NONE;
-  protected void setRetrieval(int mode) { m_Retrieval = mode; }
-  protected int getRetrieval() { return m_Retrieval; }
+  /** The current retrieval mode */
+  protected int m_retrieval;
 
   /**
-   * Resets the Loader object and sets the source of the data set to be 
-   * the supplied File object.
+   * Sets the retrieval mode.
    *
-   * @param file the File.
-   * @exception IOException always thrown.
+   * @param mode the retrieval mode
+   */
+  protected void setRetrieval(int mode) {
+
+    m_retrieval = mode;
+  }
+
+  /**
+   * Gets the retrieval mode.
+   *
+   * @return the retrieval mode
+   */
+  protected int getRetrieval() {
+
+    return m_retrieval;
+  }
+
+  /**
+   * Default implementation throws an IOException.
+   *
+   * @param file the File
+   * @exception IOException always
    */
   public void setSource(File file) throws IOException {
 
-    throw new IOException("operation not supported");
+    throw new IOException("Setting File as source not supported");
   }
-
+  
   /**
-   * Resets the Loader object and sets the source of the data set to be 
-   * the supplied InputStream.
+   * Default implementation throws an IOException.
    *
-   * @param input the source InputStream.
-   * @exception IOException always thrown.
+   * @param input the input stream
+   * @exception IOException always
    */
   public void setSource(InputStream input) throws IOException {
 
-    throw new IOException("operation not supported");
+    throw new IOException("Setting InputStream as source not supported");
   }
-
-  /**
-   * Must be overridden by subclasses.
+  
+  /*
+   * To be overridden.
    */
   public abstract Instances getStructure() throws IOException;
 
-  /**
-   * Must be overridden by subclasses.
+  /*
+   * To be overridden.
    */
   public abstract Instances getDataSet() throws IOException;
 
-  /**
-   * Must be overridden by subclasses.
+  /*
+   * To be overridden.
    */
   public abstract Instance getNextInstance() throws IOException;
 }
-
-
-
-
-
