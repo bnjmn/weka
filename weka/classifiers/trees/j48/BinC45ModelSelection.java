@@ -25,27 +25,35 @@ import weka.core.*;
  * Class for selecting a C4.5-like binary (!) split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class BinC45ModelSelection extends ModelSelection{
 
   /** Minimum number of instances in interval. */
-  private int minNoObJ;               
+  private int m_minNoObj;               
 
   /** The FULL training dataset. */
-  private Instances allDatA; 
+  private Instances m_allData; 
 
   /**
    * Initializes the split selection method with the given parameters.
    *
-   * @param minNoObj minimum number of instances that have to occur in at least two
+   * @param m_minNoObj minimum number of instances that have to occur in at least two
    * subsets induced by split
    * @param allData FULL training dataset (necessary for
    * selection of split points).
    */
-  public BinC45ModelSelection(int minNoObj,Instances allData){
-    minNoObJ = minNoObj;
-    allDatA = allData;
+  public BinC45ModelSelection(int m_minNoObj,Instances allData){
+    m_minNoObj = m_minNoObj;
+    m_allData = allData;
+  }
+
+  /**
+   * Sets reference to training data to null.
+   */
+  public void cleanup() {
+
+    m_allData = null;
   }
 
   /**
@@ -71,7 +79,7 @@ public class BinC45ModelSelection extends ModelSelection{
       // enough Instances to split.
       checkDistribution = new Distribution(data);
       noSplitModel = new NoSplit(checkDistribution);
-      if (Utils.sm(checkDistribution.total(),2*minNoObJ) ||
+      if (Utils.sm(checkDistribution.total(),2*m_minNoObj) ||
 	  Utils.eq(checkDistribution.total(),
 		   checkDistribution.perClass(checkDistribution.maxClass())))
 	return noSplitModel;
@@ -83,7 +91,7 @@ public class BinC45ModelSelection extends ModelSelection{
 	Attribute attribute = (Attribute) enum.nextElement();
 	if ((attribute.isNumeric()) ||
 	    (Utils.sm((double)attribute.numValues(),
-		      (0.3*(double)allDatA.numInstances())))){
+		      (0.3*(double)m_allData.numInstances())))){
 	  multiVal = false;
 	  break;
 	}
@@ -98,7 +106,7 @@ public class BinC45ModelSelection extends ModelSelection{
 	if (i != (data).classIndex()){
 	  
 	  // Get models for current attribute.
-	  currentModel[i] = new BinC45Split(i,minNoObJ,sumOfWeights);
+	  currentModel[i] = new BinC45Split(i,m_minNoObj,sumOfWeights);
 	  currentModel[i].buildClassifier(data);
 	  
 	  // Check if useful split for current attribute
@@ -107,7 +115,7 @@ public class BinC45ModelSelection extends ModelSelection{
 	  if (currentModel[i].checkModel())
 	    if ((data.attribute(i).isNumeric()) ||
 		(multiVal || Utils.sm((double)data.attribute(i).numValues(),
-				      (0.3*(double)allDatA.numInstances())))){
+				      (0.3*(double)m_allData.numInstances())))){
 	      averageInfoGain = averageInfoGain+currentModel[i].infoGain();
 	      validModels++;
 	    }
@@ -146,7 +154,7 @@ public class BinC45ModelSelection extends ModelSelection{
 	addInstWithUnknown(data,bestModel.attIndex());
       
       // Set the split point analogue to C45 if attribute numeric.
-      bestModel.setSplitPoint(allDatA);
+      bestModel.setSplitPoint(m_allData);
       return bestModel;
     }catch(Exception e){
       e.printStackTrace();

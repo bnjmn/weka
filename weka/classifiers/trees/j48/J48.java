@@ -54,7 +54,7 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, WeightedInstancesHandler, Summarizable {
@@ -103,6 +103,11 @@ public class J48 extends DistributionClassifier implements OptionHandler,
     else
       m_root = new PruneableClassifierTree(modSelection, !m_unpruned, m_numFolds);
     m_root.buildClassifier(instances);
+    if (m_binarySplits) {
+      ((BinC45ModelSelection)modSelection).cleanup();
+    } else {
+      ((C45ModelSelection)modSelection).cleanup();
+    }
   }
 
   /**

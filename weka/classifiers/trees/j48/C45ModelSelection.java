@@ -25,7 +25,7 @@ import weka.core.*;
  * Class for selecting a C4.5-type split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $y
+ * @version $Revision: 1.3 $y
  */
 public class C45ModelSelection extends ModelSelection {
 
@@ -46,6 +46,14 @@ public class C45ModelSelection extends ModelSelection {
   public C45ModelSelection(int minNoObj, Instances allData){
     m_minNoObj = minNoObj;
     m_allData = allData;
+  }
+
+  /**
+   * Sets reference to training data to null.
+   */
+  public void cleanup() {
+
+    m_allData = null;
   }
 
   /**
