@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.10 $
+ * @version  $Revision: 1.11 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1676,6 +1676,18 @@ public class Evaluation implements Summarizable {
     return text.toString();
   }
 
+  /**
+   * Calculate the true positive rate with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * correctly classified positives
+   * ------------------------------
+   *       total positives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the true positive rate
+   */
   public double truePositives(int classIndex) {
 
     double correct = 0, total = 0;
@@ -1691,6 +1703,18 @@ public class Evaluation implements Summarizable {
     return correct / total;
   }
 
+  /**
+   * Calculate the false positive rate with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * incorrectly classified negatives
+   * --------------------------------
+   *        total negatives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the false positive rate
+   */
   public double falsePositives(int classIndex) {
 
     double incorrect = 0, total = 0;
