@@ -23,10 +23,11 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.Standardize;
 import weka.filters.Filter;
 import java.util.*;
 import java.io.*;
@@ -38,8 +39,12 @@ import weka.core.*;
  * or RBF kernels. 
  *
  * This implementation globally replaces all missing values and
- * transforms nominal attributes into binary ones. For more
- * information on the SMO algorithm, see<p>
+ * transforms nominal attributes into binary ones. It also
+ * standardizes all attributes by default. (Note that the coefficients
+ * in the output are based on the standardized data, not the original
+ * data.)
+ *
+ * For more information on the SMO algorithm, see<p>
  *
  * J. Platt (1998). <i>Fast Training of Support Vector
  * Machines using Sequential Minimal Optimization</i>. Advances in Kernel
@@ -51,7 +56,7 @@ import weka.core.*;
  * Technical Report CD-99-14. Control Division, Dept of Mechanical and
  * Production Engineering, National University of Singapore. <p>
  *
- * Note: for improved speed normalization should be turned off when
+ * Note: for improved speed standardization should be turned off when
  * operating on SparseInstances.<p>
  *
  * Valid options are:<p>
@@ -65,11 +70,11 @@ import weka.core.*;
  * -G num <br>
  * Gamma for the RBF kernel. (default 0.01)<p>
  *
- * -N <br>
- * Don't normalize the training instances. <p>
+ * -S <br>
+ * Don't standardize the training instances. <p>
  *
- * -L <br>
- * Rescale kernel (only for non-linear polynomial kernels). <p>
+ * -F <br>
+ * Feature-space normalization (only for non-linear polynomial kernels). <p>
  *
  * -O <br>
  * Use lower-order terms (only for non-linear polynomial kernels). <p>
@@ -91,8 +96,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.36 $ 
- */
+ * @version $Revision: 1.37 $ */
 public class SMO extends Classifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -105,7 +109,9 @@ public class SMO extends Classifier implements OptionHandler,
      * Calculates a dot product between two instances
      *
      */
-    private double dotProd(Instance inst1, Instance inst2) throws Exception {
+    private double dotProd(Instance inst1, Instance inst2) 
+      throws Exception {
+      
       double result=0;
     
       // we can do a fast dot product
@@ -142,23 +148,40 @@ public class SMO extends Classifier implements OptionHandler,
        * @param inst the instance corresponding to id1
        * @return the result of the kernel function
        */
-      public abstract double eval(int id1, int id2, Instance inst1) throws Exception;
+      public abstract double eval(int id1, int id2, Instance inst1) 
+	throws Exception;
     }
  
     /**
+     * The normalized polynomial kernel.
+     */
+    private class NormalizedPolyKernel extends Kernel {
+
+      PolyKernel polyKernel = new PolyKernel();
+
+      public double eval(int id1, int id2, Instance inst1) 
+	throws Exception {
+
+	return polyKernel.eval(id1, id2, inst1) /
+	  Math.sqrt(polyKernel.eval(id1, id1, inst1) * 
+		    polyKernel.eval(id2, id2, m_data.instance(id2)));
+      }
+    }
+
+    /**
      * The polynomial kernel.
-     *
      */
     private class PolyKernel extends Kernel {
 
-      public double eval(int id1, int id2, Instance inst1) throws Exception {
+      public double eval(int id1, int id2, Instance inst1) 
+	throws Exception {
       
 	double result = 0;
 	long key = -1;
 	int location = -1;
 
 	// we can only cache if we know the indexes
-	if (id1 >= 0) {
+	if ((id1 >= 0) && (m_keys != null)) {
 	  if (id1 > id2) {
 	    key = (long)id1 * m_alpha.length + id2;
 	  } else {
@@ -173,17 +196,16 @@ public class SMO extends Classifier implements OptionHandler,
 	  }
         }
 	
-        result=dotProd(inst1, m_data.instance(id2));
+	if (id1 == id2) {
+	  result = dotProd(inst1, inst1);
+	} else {
+	  result = dotProd(inst1, m_data.instance(id2));
+	}
     
         // Use lower order terms?
         if (m_lowerOrder) {
  	  result += 1.0;
         }
-
-        // Rescale kernel?
-        if (m_rescale) {
-	  result /= (double)m_data.numAttributes() - 1;
-        }      
     
         if (m_exponent != 1.0) {
 	  result = Math.pow(result, m_exponent);
@@ -196,13 +218,11 @@ public class SMO extends Classifier implements OptionHandler,
 	  m_keys[location] = (key + 1);
         }
         return result;
-	//
       }
     }
     
     /**
      * The RBF kernel.
-     *
      */
     private class RBFKernel extends Kernel {
     
@@ -211,7 +231,6 @@ public class SMO extends Classifier implements OptionHandler,
 
       /**
        * Constructor. Initializes m_kernelPrecalc[].
-       *
        */
       public RBFKernel(Instances data) throws Exception {
         
@@ -222,7 +241,8 @@ public class SMO extends Classifier implements OptionHandler,
       
       }
 
-      public double eval(int id1, int id2, Instance inst1) throws Exception {
+      public double eval(int id1, int id2, Instance inst1) 
+	throws Exception {
   
 	double result = 0;
 	long key = -1;
@@ -248,12 +268,13 @@ public class SMO extends Classifier implements OptionHandler,
 
 	double precalc1;
 
-	if(id1==-1)
-	  precalc1=dotProd(inst1,inst1);
+	if(id1 == -1)
+	  precalc1 = dotProd(inst1,inst1);
 	else
-          precalc1=m_kernelPrecalc[id1];
+          precalc1 = m_kernelPrecalc[id1];
 	
-        result=Math.exp(m_gamma*(2.*dotProd(inst1, inst2)-precalc1-m_kernelPrecalc[id2]));
+        result = Math.exp(m_gamma * (2. * dotProd(inst1, inst2) -
+				     precalc1 - m_kernelPrecalc[id2]));
   
         m_kernelEvals++;
     
@@ -504,10 +525,15 @@ public class SMO extends Classifier implements OptionHandler,
       m_errors[m_iLow] = 1; m_errors[m_iUp] = -1;
      
       // Initialize kernel
-      if(m_useRBF)
-      	m_kernel=new RBFKernel(m_data);
-      else
-        m_kernel=new PolyKernel();
+      if(m_useRBF) {
+      	m_kernel = new RBFKernel(m_data);
+      } else {
+	if (m_featureSpaceNormalization) {
+	  m_kernel = new NormalizedPolyKernel();
+	} else {
+	  m_kernel = new PolyKernel();
+	}
+      }
      
       // The kernel calculations are cached
       m_storage = new double[m_cacheSize];
@@ -694,11 +720,15 @@ public class SMO extends Classifier implements OptionHandler,
 	      } else {
 		text.append("   ");
 	      }
+	      text.append(Utils.doubleToString(m_sparseWeights[i], 12, 4) +
+			  " * ");
+	      if (m_standardize) {
+		text.append("(standardized) ");
+	      }
 	      if (!m_checksTurnedOff) {
-		text.append(m_sparseWeights[i] + " * " + 
-			    m_data.attribute(m_sparseIndices[i]).name()+"\n");
+		text.append(m_data.attribute(m_sparseIndices[i]).name()+"\n");
 	      } else {
-		text.append(m_sparseWeights[i] + " * " + "attribute with index " + 
+		text.append("attribute with index " + 
 			    m_sparseIndices[i] +"\n");
 	      }
 	      printed++;
@@ -707,21 +737,29 @@ public class SMO extends Classifier implements OptionHandler,
 	} else {
 	  for (int i = 0; i < m_alpha.length; i++) {
 	    if (m_supportVectors.contains(i)) {
-	      if (printed > 0) {
-		text.append(" + ");
+	      double val = m_alpha[i];
+	      if (m_class[i] == 1) {
+		if (printed > 0) {
+		  text.append(" + ");
+		}
 	      } else {
-		text.append("   ");
+		text.append(" - ");
 	      }
-	      text.append(((int)m_class[i]) + " * " +
-			  m_alpha[i] + " * K[X(" + i + ") * X]\n");
+	      text.append(Utils.doubleToString(val, 12, 4) 
+			  + " * K[X(" + i + ") * X]\n");
 	      printed++;
 	    }
 	  }
 	}
-	text.append(" - " + m_b);
+	if (m_b > 0) {
+	  text.append(" - " + Utils.doubleToString(m_b, 12, 4));
+	} else {
+	  text.append(" + " + Utils.doubleToString(-m_b, 12, 4));
+	}
 
 	if (m_useRBF || m_exponent != 1.0) {
-	  text.append("\n\nNumber of support vectors: " + m_supportVectors.numElements());
+	  text.append("\n\nNumber of support vectors: " + 
+		      m_supportVectors.numElements());
 	}
 	text.append("\n\nNumber of kernel evaluations: " + m_kernelEvals);
       } catch (Exception e) {
@@ -1082,11 +1120,11 @@ public class SMO extends Classifier implements OptionHandler,
   /** Tolerance for accuracy of result. */
   private double m_tol = 1.0e-3;
 
-  /** True if we don't want to normalize */
-  private boolean m_Normalize = true;
+  /** True if we don't want to standardize */
+  private boolean m_standardize = true;
   
-  /** Rescale? */
-  private boolean m_rescale = false;
+  /** Feature-space normalization? */
+  private boolean m_featureSpaceNormalization = false;
   
   /** Use lower-order terms? */
   private boolean m_lowerOrder = false;
@@ -1100,8 +1138,8 @@ public class SMO extends Classifier implements OptionHandler,
   /** The filter used to make attributes numeric. */
   private NominalToBinary m_NominalToBinary;
 
-  /** The filter used to normalize all values. */
-  private Normalize m_Normalization;
+  /** The filter used to standardize all values. */
+  private Standardize m_Standardization;
 
   /** The filter used to get rid of missing values. */
   private ReplaceMissingValues m_Missing;
@@ -1183,20 +1221,20 @@ public class SMO extends Classifier implements OptionHandler,
       m_Missing = null;
     }
 
-    if (m_Normalize) {
-      m_Normalization = new Normalize();
-      m_Normalization.setInputFormat(insts);
-      insts = Filter.useFilter(insts, m_Normalization); 
-    } else {
-      m_Normalization = null;
-    }
-
     if (!m_onlyNumeric) {
       m_NominalToBinary = new NominalToBinary();
       m_NominalToBinary.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_NominalToBinary);
     } else {
       m_NominalToBinary = null;
+    }
+
+    if (m_standardize) {
+      m_Standardization = new Standardize();
+      m_Standardization.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_Standardization); 
+    } else {
+      m_Standardization = null;
     }
 
     m_classIndex = insts.classIndex();
@@ -1247,17 +1285,17 @@ public class SMO extends Classifier implements OptionHandler,
       m_Missing.batchFinished();
       inst = m_Missing.output();
     }
-    
-    if (m_Normalize) {
-      m_Normalization.input(inst);
-      m_Normalization.batchFinished();
-      inst = m_Normalization.output();
-    }
 
     if (!m_onlyNumeric) {
       m_NominalToBinary.input(inst);
       m_NominalToBinary.batchFinished();
       inst = m_NominalToBinary.output();
+    }
+    
+    if (m_standardize) {
+      m_Standardization.input(inst);
+      m_Standardization.batchFinished();
+      inst = m_Standardization.output();
     }
 
     int[] votes = new int[inst.numClasses()];
@@ -1323,10 +1361,10 @@ public class SMO extends Classifier implements OptionHandler,
     newVector.addElement(new Option("\tGamma for the "
 				    + "RBF kernel. (default 0.01)",
 				    "G", 1, "-G <double>"));
-    newVector.addElement(new Option("\tDon't normalize the data.",
-				    "N", 0, "-N"));
-    newVector.addElement(new Option("\tRescale the kernel (only for non-linear polynomial kernels).",
-				    "L", 0, "-L"));
+    newVector.addElement(new Option("\tDon't standardize the data.",
+				    "S", 0, "-S"));
+    newVector.addElement(new Option("\tFeature-space normalization (only  non-linear for polynomial kernels).",
+				    "F", 0, "-F"));
     newVector.addElement(new Option("\tUse lower-order terms (only for non-linear polynomial kernels).",
 				    "O", 0, "-O"));
     newVector.addElement(new Option("\tUse RBF kernel. " +
@@ -1358,11 +1396,11 @@ public class SMO extends Classifier implements OptionHandler,
    * -G num <br>
    * Gamma for the RBF kernel. (default 0.01) <p>
    *
-   * -N <br>
-   * Don't normalize the training instances. <p>
+   * -S <br>
+   * Don't standardize the training instances. <p>
    *
-   * -L <br>
-   * Rescale kernel (only for non-linear polynomial kernels). <p>
+   * -F <br>
+   * Feature-space normalization (only for  non-linear polynomial kernels). <p>
    *
    * -O <br>
    * Use lower-order terms (only for non-linear polynomial kernels). <p>
@@ -1421,13 +1459,13 @@ public class SMO extends Classifier implements OptionHandler,
       m_eps = 1.0e-12;
     }
     m_useRBF = Utils.getFlag('R', options);
-    m_Normalize = !Utils.getFlag('N', options);
-    m_rescale = Utils.getFlag('L', options);
-    if ((m_useRBF) && (m_rescale)) {
-      throw new Exception("Can't use rescaling with RBF machine.");
+    m_standardize = !Utils.getFlag('S', options);
+    m_featureSpaceNormalization = Utils.getFlag('F', options);
+    if ((m_useRBF) && (m_featureSpaceNormalization)) {
+      throw new Exception("RBF machine doesn't require feature-space normalization.");
     }
-    if ((m_exponent == 1.0) && (m_rescale)) {
-      throw new Exception("Can't use rescaling with linear machine.");
+    if ((m_exponent == 1.0) && (m_featureSpaceNormalization)) {
+      throw new Exception("Can't use feature-space normalization with linear machine.");
     }
     m_lowerOrder = Utils.getFlag('O', options);
     if ((m_useRBF) && (m_lowerOrder)) {
@@ -1454,11 +1492,11 @@ public class SMO extends Classifier implements OptionHandler,
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
     options[current++] = "-T"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
-    if (!m_Normalize) {
-      options[current++] = "-N";
+    if (!m_standardize) {
+      options[current++] = "-S";
     }
-    if (m_rescale) {
-      options[current++] = "-L";
+    if (m_featureSpaceNormalization) {
+      options[current++] = "-F";
     }
     if (m_lowerOrder) {
       options[current++] = "-O";
@@ -1493,7 +1531,7 @@ public class SMO extends Classifier implements OptionHandler,
   public void setExponent(double v) {
     
     if (v == 1.0) {
-      m_rescale = false;
+      m_featureSpaceNormalization = false;
       m_lowerOrder = false;
     }
     m_exponent = v;
@@ -1594,21 +1632,21 @@ public class SMO extends Classifier implements OptionHandler,
   }
   
   /**
-   * Check whether data is to be normalized.
-   * @return true if data is to be normalized
+   * Check whether data is to be standardized.
+   * @return true if data is to be standardized
    */
-  public boolean getNormalizeData() {
+  public boolean getStandardizeData() {
     
-    return m_Normalize;
+    return m_standardize;
   }
   
   /**
-   * Set whether data is to be normalized.
-   * @param v  true if data is to be normalized
+   * Set whether data is to be standardized.
+   * @param v  true if data is to be standardized
    */
-  public void setNormalizeData(boolean v) {
+  public void setStandardizeData(boolean v) {
     
-    m_Normalize = v;
+    m_standardize = v;
   }
   
   /**
@@ -1627,32 +1665,31 @@ public class SMO extends Classifier implements OptionHandler,
   public void setUseRBF(boolean v) {
 
     if (v) {
-      m_rescale = false;
+      m_featureSpaceNormalization = false;
       m_lowerOrder = false;
     }
     m_useRBF = v;
   }
   
   /**
-   * Check whether kernel is being rescaled.
-   * @return Value of rescale.
+   * Check whether feature spaces is being normalized.
+   * @return true if feature space is normalized.
    */
-  public boolean getRescaleKernel() throws Exception {
+  public boolean getFeatureSpaceNormalization() throws Exception {
 
-    return m_rescale;
+    return m_featureSpaceNormalization;
   }
   
   /**
-   * Set whether kernel is to be rescaled. Defaults
-   * to false if a linear machine is built.
-   * @param v  Value to assign to rescale.
+   * Set whether feature space is normalized.
+   * @param v  true if feature space is to be normalized.
    */
-  public void setRescaleKernel(boolean v) throws Exception {
+  public void setFeatureSpaceNormalization(boolean v) throws Exception {
     
-    if (m_exponent == 1.0 || m_useRBF) {
-      m_rescale = false;
+    if ((m_useRBF) || (m_exponent == 1.0)) {
+      m_featureSpaceNormalization = false;
     } else {
-      m_rescale = v;
+      m_featureSpaceNormalization = v;
     }
   }
   
@@ -1679,36 +1716,36 @@ public class SMO extends Classifier implements OptionHandler,
     }
   }
 
-    /**
-     * Prints out the classifier.
-     *
-     * @return a description of the classifier as a string
-     */
-    public String toString() {
-
-      StringBuffer text = new StringBuffer();
-      int printed = 0;
-
-      if ((m_classAttribute == null)) {
-	return "SMO: No model built yet.";
-      }
-      try {
-	text.append("SMO\n\n");
-	for (int i = 0; i < m_classAttribute.numValues(); i++) {
-	  for (int j = i + 1; j < m_classAttribute.numValues(); j++) {
-	    text.append("Classifier for classes: " + 
-			m_classAttribute.value(i) + ", " +
-			m_classAttribute.value(j) + "\n\n");
-	    text.append(m_classifiers[i][j] + "\n\n");
-	  }
-	}
-      } catch (Exception e) {
-	return "Can't print SMO classifier.";
-      }
+  /**
+   * Prints out the classifier.
+   *
+   * @return a description of the classifier as a string
+   */
+  public String toString() {
     
-      return text.toString();
+    StringBuffer text = new StringBuffer();
+    int printed = 0;
+    
+    if ((m_classAttribute == null)) {
+      return "SMO: No model built yet.";
     }
-
+    try {
+      text.append("SMO\n\n");
+      for (int i = 0; i < m_classAttribute.numValues(); i++) {
+	for (int j = i + 1; j < m_classAttribute.numValues(); j++) {
+	  text.append("Classifier for classes: " + 
+		      m_classAttribute.value(i) + ", " +
+		      m_classAttribute.value(j) + "\n\n");
+	  text.append(m_classifiers[i][j] + "\n\n");
+	}
+      }
+    } catch (Exception e) {
+      return "Can't print SMO classifier.";
+    }
+    
+    return text.toString();
+  }
+  
   /**
    * Main method for testing this class.
    */
@@ -1720,6 +1757,7 @@ public class SMO extends Classifier implements OptionHandler,
       scheme = new SMO();
       System.out.println(Evaluation.evaluateModel(scheme, argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
