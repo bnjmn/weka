@@ -20,11 +20,12 @@
  *
  */
 
-package weka.classifiers.functions;
+package weka.classifiers.functions.supportVector;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.functions.Logistic;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -113,316 +114,15 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.48 $ */
+ * @version $Revision: 1.1 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
-					       WeightedInstancesHandler {
+  WeightedInstancesHandler {
 
   /**
    * Class for building a binary support vector machine.
    */
   private class BinarySMO implements Serializable {
-
-    /**
-     * Calculates a dot product between two instances
-     */
-    private double dotProd(Instance inst1, Instance inst2) 
-      throws Exception {
-      
-      double result=0;
     
-      // we can do a fast dot product
-      int n1 = inst1.numValues(); int n2 = inst2.numValues();
-      int classIndex = m_data.classIndex();
-      for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
-        int ind1 = inst1.index(p1); 
-        int ind2 = inst2.index(p2);
-        if (ind1 == ind2) {
-	  if (ind1 != classIndex) {
-	    result += inst1.valueSparse(p1) * inst2.valueSparse(p2);
-	  }
-	  p1++; p2++;
-	} else if (ind1 > ind2) {
-	  p2++;
-        } else {
-          p1++;
-	}
-      }
-      return(result);
-    }
-
-    /**
-     * Abstract kernel. 
-     */
-    private abstract class Kernel implements Serializable {
-    
-      /**
-       * Computes the result of the kernel function for two instances.
-       *
-       * @param id1 the index of the first instance
-       * @param id2 the index of the second instance
-       * @param inst the instance corresponding to id1
-       * @return the result of the kernel function
-       */
-      public abstract double eval(int id1, int id2, Instance inst1) 
-	throws Exception;
-    }
- 
-    /**
-     * The normalized polynomial kernel.
-     */
-    private class NormalizedPolyKernel extends Kernel {
-
-      PolyKernel polyKernel = new PolyKernel();
-
-      public double eval(int id1, int id2, Instance inst1) 
-	throws Exception {
-
-	return polyKernel.eval(id1, id2, inst1) /
-	  Math.sqrt(polyKernel.eval(id1, id1, inst1) * 
-		    polyKernel.eval(id2, id2, m_data.instance(id2)));
-      }
-    }
-
-    /**
-     * The polynomial kernel.
-     */
-    private class PolyKernel extends Kernel {
-
-      public double eval(int id1, int id2, Instance inst1) 
-	throws Exception {
-      
-	double result = 0;
-	long key = -1;
-	int location = -1;
-
-	// we can only cache if we know the indexes
-	if ((id1 >= 0) && (m_keys != null)) {
-	  if (id1 > id2) {
-	    key = (long)id1 * m_alpha.length + id2;
-	  } else {
-	    key = (long)id2 * m_alpha.length + id1;
-	  }
-	  if (key < 0) {
-	    throw new Exception("Cache overflow detected!");
-	  }
-	  location = (int)(key % m_keys.length);
-	  if (m_keys[location] == (key + 1)) {
-	    return m_storage[location];
-	  }
-        }
-	
-	if (id1 == id2) {
-	  result = dotProd(inst1, inst1);
-	} else {
-	  result = dotProd(inst1, m_data.instance(id2));
-	}
-    
-        // Use lower order terms?
-        if (m_lowerOrder) {
- 	  result += 1.0;
-        }
-    
-        if (m_exponent != 1.0) {
-	  result = Math.pow(result, m_exponent);
-        }
-        m_kernelEvals++;
-    
-        // store result in cache 	
-        if (key != -1){
-	  m_storage[location] = result;
-	  m_keys[location] = (key + 1);
-        }
-        return result;
-      }
-    }
-    
-    /**
-     * The RBF kernel.
-     */
-    private class RBFKernel extends Kernel {
-    
-      /** The precalculated dotproducts of <inst_i,inst_i> */
-      private double m_kernelPrecalc[];
-
-      /**
-       * Constructor. Initializes m_kernelPrecalc[].
-       */
-      public RBFKernel(Instances data) throws Exception {
-        
-	m_kernelPrecalc=new double[data.numInstances()];
-
-	for(int i=0;i<data.numInstances();i++)
-	  m_kernelPrecalc[i]=dotProd(data.instance(i),data.instance(i));
-      
-      }
-
-      public double eval(int id1, int id2, Instance inst1) 
-	throws Exception {
-  
-	double result = 0;
-	long key = -1;
-	int location = -1;
-      
-	// we can only cache if we know the indexes
-	if (id1 >= 0) {
-	  if (id1 > id2) {
-  	    key = (long)id1 * m_alpha.length + id2;
-	  } else {
-	    key = (long)id2 * m_alpha.length + id1;
-	  }
-	  if (key < 0) {
-	    throw new Exception("Cache overflow detected!");
-	  }
-	  location = (int)(key % m_keys.length);
-	  if (m_keys[location] == (key + 1)) {
-	    return m_storage[location];
-	  }
-        }
-	
-	Instance inst2 = m_data.instance(id2);
-
-	double precalc1;
-
-	if(id1 == -1)
-	  precalc1 = dotProd(inst1,inst1);
-	else
-          precalc1 = m_kernelPrecalc[id1];
-	
-        result = Math.exp(m_gamma * (2. * dotProd(inst1, inst2) -
-				     precalc1 - m_kernelPrecalc[id2]));
-  
-        m_kernelEvals++;
-    
-        // store result in cache 	
-        if (key != -1){
-          m_storage[location] = result;
-          m_keys[location] = (key + 1);
-        }
-
-        return result;
-      }
-    }
-    
-    /**
-     * Stores a set of a given size.
-     */
-    private class SMOset implements Serializable {
-
-      /** The current number of elements in the set */
-      private int m_number;
-
-      /** The first element in the set */
-      private int m_first;
-
-      /** Indicators */
-      private boolean[] m_indicators;
-
-      /** The next element for each element */
-      private int[] m_next;
-
-      /** The previous element for each element */
-      private int[] m_previous;
-
-      /**
-       * Creates a new set of the given size.
-       */
-      private SMOset(int size) {
-      
-	m_indicators = new boolean[size];
-	m_next = new int[size];
-	m_previous = new int[size];
-	m_number = 0;
-	m_first = -1;
-      }
- 
-      /**
-       * Checks whether an element is in the set.
-       */
-      private boolean contains(int index) {
-
-	return m_indicators[index];
-      }
-
-      /**
-       * Deletes an element from the set.
-       */
-      private void delete(int index) {
-
-	if (m_indicators[index]) {
-	  if (m_first == index) {
-	    m_first = m_next[index];
-	  } else {
-	    m_next[m_previous[index]] = m_next[index];
-	  }
-	  if (m_next[index] != -1) {
-	    m_previous[m_next[index]] = m_previous[index];
-	  }
-	  m_indicators[index] = false;
-	  m_number--;
-	}
-      }
-
-      /**
-       * Inserts an element into the set.
-       */
-      private void insert(int index) {
-
-	if (!m_indicators[index]) {
-	  if (m_number == 0) {
-	    m_first = index;
-	    m_next[index] = -1;
-	    m_previous[index] = -1;
-	  } else {
-	    m_previous[m_first] = index;
-	    m_next[index] = m_first;
-	    m_previous[index] = -1;
-	    m_first = index;
-	  }
-	  m_indicators[index] = true;
-	  m_number++;
-	}
-      }
-
-      /** 
-       * Gets the next element in the set. -1 gets the first one.
-       */
-      private int getNext(int index) {
-
-	if (index == -1) {
-	  return m_first;
-	} else {
-	  return m_next[index];
-	}
-      }
-
-      /**
-       * Prints all the current elements in the set.
-       */
-      private void printElements() {
-
-	for (int i = getNext(-1); i != -1; i = getNext(i)) {
-	  System.err.print(i + " ");
-	}
-	System.err.println();
-	for (int i = 0; i < m_indicators.length; i++) {
-	  if (m_indicators[i]) {
-	    System.err.print(i + " ");
-	  }
-	}
-	System.err.println();
-	System.err.println(m_number);
-      }
-
-      /** 
-       * Returns the number of elements in the set.
-       */
-      private int numElements() {
-      
-	return m_number;
-      }
-    }
-
     /** The Lagrange multipliers. */
     private double[] m_alpha;
 
@@ -446,10 +146,6 @@ public class SMO extends DistributionClassifier implements OptionHandler,
     /** Kernel to use **/
     private Kernel m_kernel;
 
-    /** Kernel function cache */
-    private double[] m_storage;
-    private long[] m_keys;
-
     /** The transformed class values. */
     private double[] m_class;
 
@@ -465,9 +161,6 @@ public class SMO extends DistributionClassifier implements OptionHandler,
 
     /** The set of support vectors */
     private SMOset m_supportVectors; // {i: 0 < m_alpha[i]}
-
-    /** Counts the number of kernel evaluations. */
-    private int m_kernelEvals;
 
     /** Stores logistic regression model for probability estimate */
     private Logistic m_logistic = null;
@@ -562,9 +255,6 @@ public class SMO extends DistributionClassifier implements OptionHandler,
 				 boolean fitLogistic, int numFolds,
 				 int randomSeed) throws Exception {
       
-      // Initialize the number of kernel evaluations
-      m_kernelEvals = 0;
-      
       // Initialize thresholds
       m_bUp = -1; m_bLow = 1; m_b = 0;
 
@@ -633,18 +323,14 @@ public class SMO extends DistributionClassifier implements OptionHandler,
      
       // Initialize kernel
       if(m_useRBF) {
-      	m_kernel = new RBFKernel(m_data);
+	m_kernel = new RBFKernel(m_data, m_cacheSize, m_gamma);
       } else {
 	if (m_featureSpaceNormalization) {
-	  m_kernel = new NormalizedPolyKernel();
+	  m_kernel = new NormalizedPolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
 	} else {
-	  m_kernel = new PolyKernel();
+	  m_kernel = new PolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
 	}
       }
-     
-      // The kernel calculations are cached
-      m_storage = new double[m_cacheSize];
-      m_keys = new long[m_cacheSize];
       
       // Build up I1 and I4
       for (int i = 0; i < m_class.length; i++ ) {
@@ -703,7 +389,9 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       m_b = (m_bLow + m_bUp) / 2.0;
       
       // Save memory
-      m_storage = null; m_keys = null; m_errors = null;
+      m_kernel.clean(); 
+      
+      m_errors = null;
       m_I0 = m_I1 = m_I2 = m_I3 = m_I4 = null;
       
       // If machine is linear, delete training data
@@ -750,6 +438,7 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       if (fitLogistic) {
 	fitLogistic(insts, cl1, cl2, numFolds, new Random(randomSeed));
       }
+
     }
     
     /**
@@ -875,8 +564,16 @@ public class SMO extends DistributionClassifier implements OptionHandler,
 	  text.append("\n\nNumber of support vectors: " + 
 		      m_supportVectors.numElements());
 	}
-	text.append("\n\nNumber of kernel evaluations: " + m_kernelEvals);
+	int numEval = 0;
+	if(m_kernel != null)
+	  numEval = m_kernel.numEvals();
+	else
+	  numEval = 0;	
+	text.append("\n\nNumber of kernel evaluations: " + numEval);
+
       } catch (Exception e) {
+	e.printStackTrace();
+
 	return "Can't print BinarySMO classifier.";
       }
     
@@ -1232,6 +929,9 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   /** The exponent for the polynomial kernel. */
   private double m_exponent = 1.0;
  
+  /** Use lower-order terms? */
+  private boolean m_lowerOrder = false;
+  
   /** Gamma for the RBF kernel. */
   private double m_gamma = 0.01;
   
@@ -1250,9 +950,6 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   /** Feature-space normalization? */
   private boolean m_featureSpaceNormalization = false;
   
-  /** Use lower-order terms? */
-  private boolean m_lowerOrder = false;
-
   /** Use RBF kernel? (default: poly) */
   private boolean m_useRBF = false;
   
@@ -1280,7 +977,8 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   /** Turn off all checks and conversions? Turning them off assumes
       that data is purely numeric, doesn't contain any missing values,
       and has a nominal class. Turning them off also means that
-      no header information will be stored if the machine is linear. */
+      no header information will be stored if the machine is linear. 
+      Finally, it also assumes that no instance has a weight equal to 0.*/
   private boolean m_checksTurnedOff;
 
   /** Precision constant for updating sets */
@@ -1325,13 +1023,29 @@ public class SMO extends DistributionClassifier implements OptionHandler,
 	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
       }
       if (insts.classAttribute().isNumeric()) {
-	throw new UnsupportedClassTypeException("SMO can't handle a numeric class!");
+	throw new UnsupportedClassTypeException("SMO can't handle a numeric class! Use SMOreg for performing regression.");
       }
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
       if (insts.numInstances() == 0) {
 	throw new Exception("No training instances without a missing class!");
       }
+
+      
+      /* Removes all the instances with weight equal to 0.
+	 MUST be done since condition (8) of Keerthi's paper 
+	 is made with the assertion Ci > 0 (See equation (3a). */
+      Instances data = new Instances(insts, insts.numInstances());
+      for(int i = 0; i < insts.numInstances(); i++){
+	if(insts.instance(i).weight() > 0)
+	  data.add(insts.instance(i));
+      }
+      if (data.numInstances() == 0) {
+	throw new Exception("No training instances left after removing " + 
+			    "instance with either a weight null or a missing class!");
+      }
+      insts = data;
+      
     }
 
     m_onlyNumeric = true;
@@ -2210,5 +1924,4 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       System.err.println(e.getMessage());
     }
   }
-} 
-   
+}
