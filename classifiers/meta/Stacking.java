@@ -53,7 +53,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
@@ -278,8 +278,22 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
     if (newData.classAttribute().isNominal()) {
       newData.stratify(m_NumFolds);
     }
-    int numClassifiers = m_Classifiers.length;
-    // Create meta data
+
+    // Create meta level
+    generateMetaLevel(newData, random);
+
+    // Rebuilt all the base classifiers on the full training data
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      getClassifier(i).buildClassifier(newData);
+    }
+  }
+
+  /**
+   * Generates the meta data
+   */
+  protected void generateMetaLevel(Instances newData, Random random) 
+    throws Exception {
+
     Instances metaData = metaFormat(newData);
     m_MetaFormat = new Instances(metaData, 0);
     for (int j = 0; j < m_NumFolds; j++) {
@@ -296,20 +310,6 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 	metaData.add(metaInstance(test.instance(i)));
       }
     }
-
-    // Rebuilt all the base classifiers on the full training data
-    for (int i = 0; i < numClassifiers; i++) {
-      getClassifier(i).buildClassifier(newData);
-    }
-   
-    // Build meta classifier
-    buildMetaLevel(metaData);
-  }
-
-  /**
-   * Method that builds meta level.
-   */
-  protected void buildMetaLevel(Instances metaData) throws Exception {
 
     m_MetaClassifier.buildClassifier(metaData);
   }

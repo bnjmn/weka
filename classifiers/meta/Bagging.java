@@ -68,7 +68,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -81,6 +81,19 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
 
   /** The out of bag error that has been calculated */
   protected double m_OutOfBagError;  
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+ 
+    return "Class for bagging a classifier to reduce variance. Can do classification "
+      + "and regression depending on the base learner. For more information, see\n\n"
+      + "Leo Breiman (1996). \"Bagging predictors\". Machine "
+      + "Learning, 24(2):123-140.";
+  }
 
   /**
    * Returns an enumeration describing the available options.

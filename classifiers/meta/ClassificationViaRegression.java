@@ -46,19 +46,30 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
 */
-public class ClassificationViaRegression extends Classifier 
-  implements OptionHandler {
+public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
   /** The classifiers. (One for each class.) */
   private Classifier[] m_Classifiers;
 
   /** The filters used to transform the class. */
   private MakeIndicator[] m_ClassFilters;
-
-  /** The class name of the base classifier. */
-  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+ 
+    return "Class for doing classification using regression methods. Class is "
+      + "binarized and one regression model is built for each class value. For more "
+      + "information, see, for example\n\n"
+      + "E. Frank, Y. Wang, S. Inglis, G. Holmes, and I.H. Witten (1998) "
+      + "\"Using model trees for classification\", Machine Learning, "
+      + "Vol.32, No.1, pp. 63-76.";
+  }
 
   /**
    * Builds the classifiers.
@@ -68,11 +79,11 @@ public class ClassificationViaRegression extends Classifier
    */
   public void buildClassifier(Instances insts) throws Exception {
 
-    String[] copy;
     Instances newInsts;
 
     if (insts.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("ClassificationViaRegression can't handle a numeric class!");
+      throw new UnsupportedClassTypeException("ClassificationViaRegression can't "
+					      + "handle a numeric class!");
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, insts.numClasses());
     m_ClassFilters = new MakeIndicator[insts.numClasses()];
@@ -134,105 +145,6 @@ public class ClassificationViaRegression extends Classifier
   }
 
   /**
-   * Returns an enumeration describing the available options.
-   *
-   * @return an enumeration of all the available options.
-   */
-  public Enumeration listOptions()  {
-
-    Vector vec = new Vector(1);
-    Object c;
-    
-    vec.addElement(new Option("\tSets the base classifier.",
-			      "W", 1, "-W <base classifier>"));
-    
-    if (m_Classifier != null) {
-      try {
-	vec.addElement(new Option("",
-				  "", 0, "\nOptions specific to classifier "
-				  + m_Classifier.getClass().getName() + ":"));
-	Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-	while (enum.hasMoreElements()) {
-	  vec.addElement(enum.nextElement());
-	}
-      } catch (Exception e) {
-      }
-    }
-    return vec.elements();
-  }
-
-  /**
-   * Sets a given list of options. Valid options are:<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a numeric predictor as the basis for 
-   * the classifier (required).<p>
-   *
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   */
-  public void setOptions(String[] options) throws Exception {
-  
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
-  }
-
-  /**
-   * Gets the current settings of the Classifier.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
-  public String [] getOptions() {
-    
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
-    String [] options = new String [classifierOptions.length + 3];
-    int current = 0;
-
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
-
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
-  }
-
-  /**
-   * Set the base classifier. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the base classifier (regression scheme) used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
-  /**
    * Main method for testing this class.
    *
    * @param argv the options for the learner
@@ -245,7 +157,6 @@ public class ClassificationViaRegression extends Classifier
       scheme = new ClassificationViaRegression();
       System.out.println(Evaluation.evaluateModel(scheme,argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.out.println(e.getMessage());
     }
   }

@@ -62,7 +62,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class StackingC extends Stacking implements OptionHandler {
   
@@ -129,7 +129,25 @@ public class StackingC extends Stacking implements OptionHandler {
   /**
    * Method that builds meta level.
    */
-  protected void buildMetaLevel(Instances metaData) throws Exception {
+  protected void generateMetaLevel(Instances newData, Random random) 
+    throws Exception {
+
+    Instances metaData = metaFormat(newData);
+    m_MetaFormat = new Instances(metaData, 0);
+    for (int j = 0; j < m_NumFolds; j++) {
+      Instances train = newData.trainCV(m_NumFolds, j, random);
+
+      // Build base classifiers
+      for (int i = 0; i < m_Classifiers.length; i++) {
+	getClassifier(i).buildClassifier(train);
+      }
+
+      // Classify test instances and add to meta data
+      Instances test = newData.testCV(m_NumFolds, j);
+      for (int i = 0; i < test.numInstances(); i++) {
+	metaData.add(metaInstance(test.instance(i)));
+      }
+    }
     
     m_MetaClassifiers = Classifier.makeCopies(m_MetaClassifier,
 					      m_BaseFormat.numClasses());
