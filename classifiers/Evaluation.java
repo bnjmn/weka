@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.19 $
+ * @version  $Revision: 1.20 $
   */
 public class Evaluation implements Summarizable {
 
@@ -659,7 +659,6 @@ public class Evaluation implements Summarizable {
 	    throw ex;
 	  }
 	}
-	System.err.println(costMatrix.toString());
       }
       IRstatistics = Utils.getFlag('i', options);
       noOutput = Utils.getFlag('o', options);
