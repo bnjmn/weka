@@ -37,7 +37,7 @@ debug : clean
 	(cd m5; make debug JAVAC=$(JAVAC))
 	(cd kstar; make debug JAVAC=$(JAVAC))
 	(cd evaluation; make debug JAVAC=$(JAVAC))
-	(cd nn; make debug JAVAC=$(JAVAC))
+	(cd neural; make debug JAVAC=$(JAVAC))
 
 optimized : clean
 	$(JAVAC) -O $(SOURCES)
@@ -45,7 +45,7 @@ optimized : clean
 	(cd m5; make optimized JAVAC=$(JAVAC))
 	(cd kstar; make optimized JAVAC=$(JAVAC))
 	(cd evaluation; make optimized JAVAC=$(JAVAC))
-	(cd nn; make optimized JAVAC=$(JAVAC))
+	(cd neural; make optimized JAVAC=$(JAVAC))
 
 clean : 
 	$(RM) *.class *~
@@ -53,5 +53,5 @@ clean :
 	(cd m5; make clean)
 	(cd kstar; make clean)
 	(cd evaluation; make clean)
-	(cd nn; make clean)
+	(cd neural; make clean)
 
