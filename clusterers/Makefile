@@ -1,4 +1,4 @@
-JAVA = javac
+JAVAC = javac
 
 SOURCES = ClusterEvaluation.java Clusterer.java Cobweb.java \
 	  DistributionClusterer.java EM.java
@@ -6,7 +6,7 @@ SOURCES = ClusterEvaluation.java Clusterer.java Cobweb.java \
 CLASSFILES = $(SOURCES:.java=.class)
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: all debug optimized clean
 
@@ -15,10 +15,10 @@ CLASSFILES = $(SOURCES:.java=.class)
 all :   $(CLASSFILES)
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
+	$(JAVAC) -g $(SOURCES)
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
+	$(JAVAC) -O $(SOURCES)
 
 clean : 
 	$(RM) *.class *~

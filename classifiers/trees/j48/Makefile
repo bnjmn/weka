@@ -1,4 +1,4 @@
-JAVA = javac
+JAVAC = javac
 
 SOURCES = C45ModelSelection.java EntropyBasedSplitCrit.java \
 	C45PruneableClassifierTree.java GainRatioSplitCrit.java \
@@ -13,7 +13,7 @@ SOURCES = C45ModelSelection.java EntropyBasedSplitCrit.java \
 CLASSFILES = $(SOURCES:.java=.class)
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: all debug optimized clean
 
@@ -22,10 +22,10 @@ CLASSFILES = $(SOURCES:.java=.class)
 all :   $(CLASSFILES)
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
+	$(JAVAC) -g $(SOURCES)
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
+	$(JAVAC) -O $(SOURCES)
 
 clean : 
 	$(RM) *.class *~

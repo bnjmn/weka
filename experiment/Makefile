@@ -1,5 +1,5 @@
-JAVA = javac
-JAVADOC = javadoc
+JAVAC = javac
+JAVACDOC = javadoc
 SOURCES = InstanceQuery.java \
 	ResultListener.java \
 	ResultProducer.java \
@@ -27,7 +27,7 @@ PACKAGEDIR = weka/experiment
 PACKAGE = weka.experiment
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: doc
 
@@ -36,10 +36,10 @@ PACKAGE = weka.experiment
 all :	$(CLASSFILES)
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
+	$(JAVAC) -g $(SOURCES)
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
+	$(JAVAC) -O $(SOURCES)
 
 fulljar : all
 	(cd $(TOPDIR) ;\
@@ -58,7 +58,7 @@ classjar : all
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
 
 doc : all
-	$(JAVADOC) -public -author -version -d $(DOCDIR) $(PACKAGE)
+	$(JAVACDOC) -public -author -version -d $(DOCDIR) $(PACKAGE)
 
 clean : 
 	$(RM) *.class *~

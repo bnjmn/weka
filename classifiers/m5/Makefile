@@ -1,4 +1,4 @@
-JAVA = javac 
+JAVAC = javac 
 
 SOURCES = M5Prime.java Options.java M5Utils.java Errors.java Node.java SplitInfo.java \
 	Impurity.java Values.java Matrix.java Ivector.java Dvector.java \
@@ -9,7 +9,7 @@ CLASSFILES = $(SOURCES:.java=.class)
 CLASSFILES = $(SOURCES:.java=.class)
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: all debug optimized clean
 
@@ -18,10 +18,10 @@ CLASSFILES = $(SOURCES:.java=.class)
 all :   $(CLASSFILES)
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
+	$(JAVAC) -g $(SOURCES)
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
+	$(JAVAC) -O $(SOURCES)
 
 clean : 
 	$(RM) *.class *~

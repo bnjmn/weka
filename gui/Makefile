@@ -1,5 +1,5 @@
-JAVA = javac
-JAVADOC = javadoc
+JAVAC = javac
+JAVACDOC = javadoc
 SOURCES = \
 	AttributeSelectionPanel.java \
 	AttributeSummaryPanel.java \
@@ -33,28 +33,28 @@ PACKAGEDIR = weka/gui
 PACKAGE = weka.gui
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: doc
 
 #----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
-	(cd experiment; make all JAVA=$(JAVA))
-	(cd explorer; make all JAVA=$(JAVA))
-	(cd streams; make all JAVA=$(JAVA))
+	(cd experiment; make all JAVAC=$(JAVAC))
+	(cd explorer; make all JAVAC=$(JAVAC))
+	(cd streams; make all JAVAC=$(JAVAC))
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
-	(cd experiment; make debug JAVA=$(JAVA))
-	(cd explorer; make debug JAVA=$(JAVA))
-	(cd streams; make debug JAVA=$(JAVA))
+	$(JAVAC) -g $(SOURCES)
+	(cd experiment; make debug JAVAC=$(JAVAC))
+	(cd explorer; make debug JAVAC=$(JAVAC))
+	(cd streams; make debug JAVAC=$(JAVAC))
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
-	(cd experiment; make optimized JAVA=$(JAVA))
-	(cd explorer; make optimized JAVA=$(JAVA))
-	(cd streams; make optimized JAVA=$(JAVA))
+	$(JAVAC) -O $(SOURCES)
+	(cd experiment; make optimized JAVAC=$(JAVAC))
+	(cd explorer; make optimized JAVAC=$(JAVAC))
+	(cd streams; make optimized JAVAC=$(JAVAC))
 
 fulljar : all
 	(cd $(TOPDIR) ; \
@@ -76,7 +76,7 @@ classjar :  all
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
 
 doc : all
-	$(JAVADOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
+	$(JAVACDOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
 
 clean : 
 	$(RM) *.class *~

@@ -1,4 +1,4 @@
-JAVA = javac
+JAVAC = javac
 
 SOURCES = Classifier.java DistributionClassifier.java \
 	Evaluation.java  UpdateableClassifier.java CheckClassifier.java \
@@ -16,28 +16,28 @@ SOURCES = Classifier.java DistributionClassifier.java \
 CLASSFILES = $(SOURCES:.java=.class)
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: all debug optimized clean
 
 #--------------------------------------------------------------------
 
 all :   $(CLASSFILES) 
-	(cd j48; make all JAVA=$(JAVA))
-	(cd m5; make all JAVA=$(JAVA))
-	(cd kstar; make all JAVA=$(JAVA))
+	(cd j48; make all JAVAC=$(JAVAC))
+	(cd m5; make all JAVAC=$(JAVAC))
+	(cd kstar; make all JAVAC=$(JAVAC))
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
-	(cd j48; make debug JAVA=$(JAVA))
-	(cd m5; make debug JAVA=$(JAVA))
-	(cd kstar; make debug JAVA=$(JAVA))
+	$(JAVAC) -g $(SOURCES)
+	(cd j48; make debug JAVAC=$(JAVAC))
+	(cd m5; make debug JAVAC=$(JAVAC))
+	(cd kstar; make debug JAVAC=$(JAVAC))
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
-	(cd j48; make optimized JAVA=$(JAVA))
-	(cd m5; make optimized JAVA=$(JAVA))
-	(cd kstar; make optimized JAVA=$(JAVA))
+	$(JAVAC) -O $(SOURCES)
+	(cd j48; make optimized JAVAC=$(JAVAC))
+	(cd m5; make optimized JAVAC=$(JAVAC))
+	(cd kstar; make optimized JAVAC=$(JAVAC))
 
 clean : 
 	$(RM) *.class *~

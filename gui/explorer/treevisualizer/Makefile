@@ -1,5 +1,5 @@
-JAVA = javac
-JAVADOC = javadoc
+JAVAC = javac
+JAVACDOC = javadoc
 SOURCES = \
 	Colors.java \
 	Edge.java \
@@ -21,7 +21,7 @@ PACKAGEDIR = weka/gui/explorer/treevisualizer
 PACKAGE = weka.gui.explorer.treevisualizer
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: doc
 
@@ -30,10 +30,10 @@ PACKAGE = weka.gui.explorer.treevisualizer
 all :	$(CLASSFILES)
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
+	$(JAVAC) -g $(SOURCES)
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
+	$(JAVAC) -O $(SOURCES)
 
 fulljar : all
 	(cd $(TOPDIR) ; \
@@ -50,7 +50,7 @@ classjar : all
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
 
 doc : all
-	$(JAVADOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
+	$(JAVACDOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
 
 clean : 
 	$(RM) *.class *~
