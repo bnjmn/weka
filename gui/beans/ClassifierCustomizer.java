@@ -30,6 +30,7 @@ import java.awt.event.*;
 import javax.swing.JPanel;
 import javax.swing.JCheckBox;
 import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
 import weka.gui.PropertyPanel;
 import weka.classifiers.Classifier;
 
@@ -38,7 +39,7 @@ import weka.classifiers.Classifier;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierCustomizer extends JPanel
   implements Customizer {
@@ -74,8 +75,10 @@ public class ClassifierCustomizer extends JPanel
     new PropertyChangeSupport(this);
   
   private weka.gui.beans.Classifier m_dsClassifier;
-  private GenericObjectEditor m_ClassifierEditor = 
-    new GenericObjectEditor(true);
+  /*  private GenericObjectEditor m_ClassifierEditor = 
+      new GenericObjectEditor(true); */
+  private PropertySheetPanel m_ClassifierEditor = 
+    new PropertySheetPanel();
 
   private JPanel m_incrementalPanel = new JPanel();
   private JCheckBox m_updateIncrementalClassifier 
@@ -83,30 +86,6 @@ public class ClassifierCustomizer extends JPanel
   private boolean m_panelVisible = false;
 
   public ClassifierCustomizer() {
-    try {
-      m_ClassifierEditor.
-	setClassType(Classifier.class);      
-      m_ClassifierEditor.setValue(new weka.classifiers.bayes.NaiveBayes());
-      m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
-	  public void propertyChange(PropertyChangeEvent e) {
-	    repaint();
-	    if (m_dsClassifier != null) {
-	      Classifier editedC = (Classifier)m_ClassifierEditor.getValue();
-	      m_dsClassifier.setClassifier(editedC);
-	      // should pass on the property change to any other interested
-	      // listeners
-	      //	      System.err.println("--> "+Utils.joinOptions(((OptionHandler)editedC).getOptions()));
-	      //	      System.err.println("Setting classifier in weka.gui.Classifier");
-	      checkOnClassifierType();
-	    }
-	  }
-	});
-      //      System.out.println("Here");
-      repaint();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
     m_updateIncrementalClassifier.
       setToolTipText("Train the classifier on "
 		     +"each individual incoming streamed instance.");
@@ -122,12 +101,11 @@ public class ClassifierCustomizer extends JPanel
 	});
     m_incrementalPanel.add(m_updateIncrementalClassifier);
     setLayout(new BorderLayout());
-    add(m_ClassifierEditor.getCustomEditor(), BorderLayout.CENTER);
-    checkOnClassifierType();
+    add(m_ClassifierEditor, BorderLayout.CENTER);
   }
   
   private void checkOnClassifierType() {
-    Classifier editedC = (Classifier)m_ClassifierEditor.getValue();
+    Classifier editedC = m_dsClassifier.getClassifier();
     if (editedC instanceof weka.classifiers.UpdateableClassifier && 
 	m_dsClassifier.hasIncomingStreamInstances()) {
       if (!m_panelVisible) {
@@ -150,8 +128,7 @@ public class ClassifierCustomizer extends JPanel
   public void setObject(Object object) {
     m_dsClassifier = (weka.gui.beans.Classifier)object;
     //    System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
-    m_ClassifierEditor.setValue(m_dsClassifier.getClassifier());
-    //    m_ClassifierEditor.setValue(m_dsClassifier.getClassifier());
+    m_ClassifierEditor.setTarget(m_dsClassifier.getClassifier());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
     checkOnClassifierType();
