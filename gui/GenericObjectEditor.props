@@ -53,7 +53,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.MultiClassClassifier,\
  weka.classifiers.MultiScheme,\
  weka.classifiers.RegressionByDiscretization,\
- weka.classifiers.Stacking
+ weka.classifiers.Stacking,\
+ weka.classifiers.kstar.KStar
 
 # Lists the Filters I want to choose from
 weka.filters.Filter = \

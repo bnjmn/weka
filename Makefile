@@ -1,5 +1,5 @@
 #
-# $Revision: 1.17 $
+# $Revision: 1.18 $
 #
 
 JAVA = javac
@@ -57,6 +57,7 @@ doc :
 	weka.classifiers \
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
+	weka.classifiers.kstar \
 	weka.filters \
 	weka.estimators \
 	weka.associations \
@@ -120,6 +121,7 @@ install : all
 	weka.classifiers \
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
+	weka.classifiers.kstar \
 	weka.filters \
 	weka.estimators \
 	weka.associations \
