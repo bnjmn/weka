@@ -61,7 +61,7 @@ import  weka.filters.AttributeFilter;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.17 $
+ * @version  $Revision: 1.18 $
  */
 public class ClusterEvaluation {
 
@@ -563,7 +563,7 @@ public class ClusterEvaluation {
 
     try {
       if (trainFileName.length() != 0) {
-	train = new Instances(new FileReader(trainFileName));
+	train = new Instances(new BufferedReader(new FileReader(trainFileName)));
 
 	String classString = Utils.getOption('c',options);
 	if (classString.length() != 0) {
@@ -813,10 +813,10 @@ public class ClusterEvaluation {
     int unclusteredInstances = 0;
 
     if (fileName.length() != 0) {
-      FileReader inStream = null;
+      BufferedReader inStream = null;
 
       try {
-	inStream = new FileReader(fileName);
+	inStream = new BufferedReader(new FileReader(fileName));
       }
       catch (Exception e) {
 	throw  new Exception("Can't open file " + e.getMessage() + '.');
@@ -916,10 +916,10 @@ public class ClusterEvaluation {
     int cnum;
 
     if (testFileName.length() != 0) {
-      FileReader testStream = null;
+      BufferedReader testStream = null;
 
       try {
-	testStream = new FileReader(testFileName);
+	testStream = new BufferedReader(new FileReader(testFileName));
       }
       catch (Exception e) {
 	throw  new Exception("Can't open file " + e.getMessage() + '.');
