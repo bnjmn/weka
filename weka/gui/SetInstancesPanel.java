@@ -48,7 +48,7 @@ import javax.swing.BorderFactory;
  * lets the user open a set of instances from either a file or URL.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SetInstancesPanel extends JPanel {
   
@@ -63,7 +63,7 @@ public class SetInstancesPanel extends JPanel {
   
   /** Filter to ensure only arff files are selected */  
   protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(".arff", "Arff data files");
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
   /** The file chooser for selecting arff files */
   protected JFileChooser m_FileChooser
