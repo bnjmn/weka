@@ -9,23 +9,26 @@ grant {
 
 /* file permission for data sets */
   permission java.io.FilePermission
-	     "/path to data sets/-", "read";
+	     "/path_to_data_sets/-", "read";
 
-/* file permission to load server classes from remoteEngine.jar */
+/* file permission to load server classes from remoteEngine.jar. */
+/* only needed if RemoteEngine_Skel.class/_Stub.class are going to */
+/* be downloaded by clients (ie, if these files are not already in the */
+/* client's classpath) */
   permission java.io.FilePermission
-	     "/path to dir containing remoteEngine.jar/-", "read";
+	     "/path_to_dir_containing_remoteEngine.jar/-", "read";
 
 /* file permissions for the properties files */
   permission java.io.FilePermission
-	     "/home dir/DatabaseUtils.props", "read";
+	     "/user_home/DatabaseUtils.props", "read";
   permission java.io.FilePermission
-	     "/path to dir containing remoteEngine.jar/DatabaseUtils.props", "read";
+	     "/path_to_dir_containing_remoteEngine.jar/DatabaseUtils.props", "read";
 
 /* file permissions for downloading classes from client file url's */
-  permission java.io.FilePermission
-	     "/joe user's path to weka classes/-", "read";
-  permission java.io.FilePermission
-	     "/jill user's path to weka classes/-", "read";
+/*  permission java.io.FilePermission */
+/*	     "/joe user's path to weka classes/-", "read"; */
+/*  permission java.io.FilePermission */
+/*	     "/jill user's path to weka classes/-", "read"; */
 
 /* read write for properties */
   permission java.util.PropertyPermission "*", "read,write";
