@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.59 $
+ * @version $Revision: 1.60 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1142,7 +1142,7 @@ public class ClassifierPanel extends JPanel {
 	      int rnd = 1;
 	      try {
 		rnd = Integer.parseInt(m_RandomSeedText.getText().trim());
-		System.err.println("Using random seed "+rnd);
+		// System.err.println("Using random seed "+rnd);
 	      } catch (Exception ex) {
 		m_Log.logMessage("Trouble parsing random seed value");
 		rnd = 1;
