@@ -49,7 +49,7 @@ import  weka.core.*;
  * be performed if the test file is missing.
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.8 $
+ * @version  $Revision: 1.9 $
  */
 public class ClusterEvaluation {
 
@@ -143,6 +143,7 @@ public class ClusterEvaluation {
    * statistics and stores cluster assigments for the instances in
    * m_clusterAssignments
    * @param test the set of instances to cluster
+   * @exception Exception if something goes wrong
    */
   public void evaluateClusterer(Instances test) throws Exception {
     int i = 0;

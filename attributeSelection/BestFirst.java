@@ -38,7 +38,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -343,7 +343,7 @@ public class BestFirst extends ASSearch
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
