@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClassPanel extends JPanel {
     
@@ -224,14 +224,16 @@ public class ClassPanel extends JPanel {
    * @param cIndex the index of the attribute to display coloured labels for
    */
   protected void setCindex(int cIndex) {
-    m_cIndex = cIndex;
-    if (m_Instances.attribute(m_cIndex).isNumeric()) {
-      setNumeric();
-    } else {
-      if (m_Instances.attribute(m_cIndex).numValues() > m_colorList.size()) {
-	extendColourMap();
+    if (!m_colourUsingPreds) {
+      m_cIndex = cIndex;
+      if (m_Instances.attribute(m_cIndex).isNumeric()) {
+	setNumeric();
+      } else {
+	if (m_Instances.attribute(m_cIndex).numValues() > m_colorList.size()) {
+	  extendColourMap();
+	}
+	setNominal();
       }
-      setNominal();
     }
   }
 

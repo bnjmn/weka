@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Plot2D extends JPanel {
 
@@ -1360,7 +1360,6 @@ public class Plot2D extends JPanel {
     if (m_XaxisStart != mxs || m_XaxisEnd != mxe ||
 	m_YaxisStart != mys || m_YaxisEnd != mye) {
       m_plotResize = true;
-      System.err.println("plot resize");
     }
   }
 
@@ -1403,7 +1402,7 @@ public class Plot2D extends JPanel {
 	if (y_range < 10) {
 	  y_range = 10;
 	}
-	System.err.println("xrange : "+x_range+" yrange : "+y_range);
+
 	m_drawnPoints = new int[x_range + 1][y_range + 1];
 	fillLookup();
 	m_plotResize = false;
