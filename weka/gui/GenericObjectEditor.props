@@ -145,6 +145,7 @@ weka.filters.Filter = \
  weka.filters.unsupervised.attribute.RemoveType, \
  weka.filters.unsupervised.attribute.RemoveUseless, \
  weka.filters.unsupervised.attribute.ReplaceMissingValues, \
+ weka.filters.unsupervised.attribute.Standardize, \
  weka.filters.unsupervised.attribute.StringToNominal, \
  weka.filters.unsupervised.attribute.StringToWordVector, \
  weka.filters.unsupervised.attribute.SwapValues, \
@@ -181,6 +182,7 @@ weka.filters.UnsupervisedFilter = \
  weka.filters.unsupervised.attribute.RemoveType, \
  weka.filters.unsupervised.attribute.RemoveUseless, \
  weka.filters.unsupervised.attribute.ReplaceMissingValues, \
+ weka.filters.unsupervised.attribute.Standardize, \
  weka.filters.unsupervised.attribute.StringToNominal, \
  weka.filters.unsupervised.attribute.StringToWordVector, \
  weka.filters.unsupervised.attribute.SwapValues, \
