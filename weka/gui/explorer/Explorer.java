@@ -61,7 +61,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class Explorer extends JPanel {
 
@@ -133,8 +133,8 @@ public class Explorer extends JPanel {
     m_TabbedPane.addTab("Visualize", null, m_VisualizePanel,
 		      "Explore the data");
     m_TabbedPane.setSelectedIndex(0);
-    m_TabbedPane.setEnabledAt(1, true);
-    m_TabbedPane.setEnabledAt(2, true);
+    m_TabbedPane.setEnabledAt(1, false);
+    m_TabbedPane.setEnabledAt(2, false);
     m_TabbedPane.setEnabledAt(3, false);
     m_TabbedPane.setEnabledAt(4, false);
     m_TabbedPane.setEnabledAt(5, false);
