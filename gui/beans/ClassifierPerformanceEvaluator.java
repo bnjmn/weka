@@ -23,9 +23,13 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.FastVector;
 import weka.gui.Logger;
+import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
 import java.util.Vector;
@@ -44,7 +48,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -64,7 +68,7 @@ public class ClassifierPerformanceEvaluator
   private transient Thread m_evaluateThread = null;
   
   private Vector m_textListeners = new Vector();
-  private Vector m_rocListeners = new Vector();
+  private Vector m_thresholdListeners = new Vector();
 
   public ClassifierPerformanceEvaluator() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -82,7 +86,16 @@ public class ClassifierPerformanceEvaluator
   public String globalInfo() {
     return "Evaluate the performance of batch trained classifiers.";
   }
-  
+
+  // ----- Stuff for ROC curves
+  private boolean m_rocListenersConnected = false;
+  // Plottable Instances with predictions appended
+  private Instances m_predInstances = null;
+  // Actual predictions
+  private FastVector m_preds = null;
+  private FastVector m_plotShape = null;
+  private FastVector m_plotSize = null;
+
   /**
    * Accept a classifier to be evaluated
    *
@@ -102,6 +115,12 @@ public class ClassifierPerformanceEvaluator
 		    ce.getClassifier() != m_classifier) {
 		  m_eval = new Evaluation(ce.getTestSet().getDataSet());
 		  m_classifier = ce.getClassifier();
+		  m_predInstances = 
+		    weka.gui.explorer.ClassifierPanel.
+		    setUpVisualizableInstances(ce.getTestSet().getDataSet());
+		  m_preds = new FastVector();
+		  m_plotShape = new FastVector();
+		  m_plotSize = new FastVector();
 		}
 		
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
@@ -112,8 +131,17 @@ public class ClassifierPerformanceEvaluator
 					   +")...");
 		  }
 		  m_visual.setAnimated();
+		  /*
 		  m_eval.evaluateModel(ce.getClassifier(), 
-				       ce.getTestSet().getDataSet());
+		  ce.getTestSet().getDataSet()); */
+		  for (int i = 0; i < ce.getTestSet().getDataSet().numInstances(); i++) {
+		    Instance temp = ce.getTestSet().getDataSet().instance(i);
+		    weka.gui.explorer.ClassifierPanel.
+		    processClassifierPrediction(temp, ce.getClassifier(),
+						m_eval, m_preds,
+						m_predInstances, m_plotShape,
+						m_plotSize);
+		  }
 		}
 		
 		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
@@ -129,6 +157,31 @@ public class ClassifierPerformanceEvaluator
 				  m_eval.toSummaryString(),
 				  textTitle);
 		  notifyTextListeners(te);
+		  if (ce.getTestSet().getDataSet().classAttribute().isNominal()) {
+		    ThresholdCurve tc = new ThresholdCurve();
+		    Instances result = tc.getCurve(m_preds, 0);
+		    result.
+		      setRelationName(ce.getTestSet().getDataSet().relationName());
+		    PlotData2D pd = new PlotData2D(result);
+		    pd.setPlotName(textTitle+" ("
+				   +ce.getTestSet().getDataSet().
+				                   classAttribute().value(0)
+				   +")");
+		    boolean [] connectPoints = 
+		      new boolean [result.numInstances()];
+		    for (int jj = 1; jj < connectPoints.length; jj++) {
+		      connectPoints[jj] = true;
+		    }
+		    pd.setConnectPoints(connectPoints);
+		    ThresholdDataEvent rde = 
+		      new ThresholdDataEvent(ClassifierPerformanceEvaluator.this,
+				       pd);
+		    notifyThresholdListeners(rde);
+		    /*te = new TextEvent(ClassifierPerformanceEvaluator.this,
+				       result.toString(),
+				       "ThresholdCurveInst");
+				       notifyTextListeners(te); */
+		  }
 		  if (m_logger != null) {
 		    m_logger.statusMessage("Done.");
 		  }
@@ -248,6 +301,24 @@ public class ClassifierPerformanceEvaluator
   public synchronized void removeTextListener(TextListener cl) {
     m_textListeners.remove(cl);
   }
+  
+  /**
+   * Add a threshold data listener
+   *
+   * @param cl a <code>ThresholdDataListener</code> value
+   */
+  public synchronized void addThresholdDataListener(ThresholdDataListener cl) {
+    m_thresholdListeners.addElement(cl);
+  }
+
+  /**
+   * Remove a Threshold data listener
+   *
+   * @param cl a <code>ThresholdDataListener</code> value
+   */
+  public synchronized void removeThresholdDataListener(ThresholdDataListener cl) {
+    m_thresholdListeners.remove(cl);
+  }
 
   /**
    * Notify all text listeners of a TextEvent
@@ -264,6 +335,25 @@ public class ClassifierPerformanceEvaluator
 	//	System.err.println("Notifying text listeners "
 	//			   +"(ClassifierPerformanceEvaluator)");
 	((TextListener)l.elementAt(i)).acceptText(te);
+      }
+    }
+  }
+
+  /**
+   * Notify all ThresholdDataListeners of a ThresholdDataEvent
+   *
+   * @param te a <code>ThresholdDataEvent</code> value
+   */
+  private void notifyThresholdListeners(ThresholdDataEvent re) {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_thresholdListeners.clone();
+    }
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+	//	System.err.println("Notifying text listeners "
+	//			   +"(ClassifierPerformanceEvaluator)");
+	((ThresholdDataListener)l.elementAt(i)).acceptDataSet(re);
       }
     }
   }

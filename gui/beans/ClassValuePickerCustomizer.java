@@ -94,7 +94,9 @@ public class ClassValuePickerCustomizer extends JPanel
     }
     m_ClassValueCombo.setModel(new DefaultComboBoxModel(attribValNames));
     if (attribValNames.length > 0) {
-      m_ClassValueCombo.setSelectedIndex(existingClassVal);
+      if (existingClassVal < attribValNames.length) {
+	m_ClassValueCombo.setSelectedIndex(existingClassVal);
+      }
     }
     if (m_displayValNames == false) {
       add(m_holderP, BorderLayout.CENTER);
@@ -118,7 +120,7 @@ public class ClassValuePickerCustomizer extends JPanel
       // add ourselves as a data format listener
       m_classValuePicker.addDataFormatListener(this);
       if (m_classValuePicker.getConnectedFormat() != null) {
-	setUpValueSelection(m_classValuePicker.getConnectedFormat());
+	setUpValueSelection(m_classValuePicker.getConnectedFormat());	
       }
     }
   }

@@ -79,6 +79,9 @@ public class ClassValuePicker extends JPanel
    * @return an <code>Instances</code> value
    */
   public Instances getConnectedFormat() {
+    if (m_connectedFormat ==null) {
+      System.err.println("Is null!!!!!!");
+    }
     return m_connectedFormat;
   }
 
@@ -146,6 +149,7 @@ public class ClassValuePicker extends JPanel
 	sv.setSecondValueIndex(""+(m_classValueIndex+1));
 	sv.setInputFormat(dataSet);
 	Instances newDataSet = Filter.useFilter(dataSet, sv);
+	newDataSet.setRelationName(dataSet.relationName());
 	return newDataSet;
       } catch (Exception ex) {
 	if (m_logger != null) {

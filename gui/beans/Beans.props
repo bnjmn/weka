@@ -18,6 +18,7 @@ weka.gui.beans.KnowledgeFlow.Evaluation=weka.gui.beans.TrainingSetMaker,\
 weka.gui.beans.KnowledgeFlow.Visualization=weka.gui.beans.DataVisualizer,\
  weka.gui.beans.ScatterPlotMatrix,\
  weka.gui.beans.AttributeSummarizer,\
+ weka.gui.beans.ModelPerformanceChart,\
  weka.gui.beans.TextViewer,\
  weka.gui.beans.GraphViewer,\
  weka.gui.beans.StripChart
