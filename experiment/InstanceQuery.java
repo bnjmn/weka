@@ -41,7 +41,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -212,6 +212,9 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
       case Types.CHAR:
       case Types.VARCHAR:
       case Types.LONGVARCHAR:
+      case Types.BINARY:
+      case Types.VARBINARY:
+      case Types.LONGVARBINARY:
 	//System.err.println("String --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
 	nominalIndexes[i - 1] = new Hashtable();
@@ -257,12 +260,12 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	//System.err.println("double --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case Types.BINARY:
+	/*case Types.BINARY:
       case Types.VARBINARY:
       case Types.LONGVARBINARY:
 	//System.err.println("byte[] --> unsupported");
 	attributeTypes[i - 1] = Attribute.STRING;
-	break;
+	break; */
       case Types.DATE:
 	//System.err.println("Date --> unsupported");
 	attributeTypes[i - 1] = Attribute.STRING;
@@ -296,6 +299,9 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	case Types.CHAR:
 	case Types.VARCHAR:
 	case Types.LONGVARCHAR:
+	case Types.BINARY:
+	case Types.VARBINARY:
+	case Types.LONGVARBINARY:
 	  String str = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
@@ -379,9 +385,9 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = (double)dou;
 	  }
 	  break;
-	case Types.BINARY:
+	  /*case Types.BINARY:
 	case Types.VARBINARY:
-	case Types.LONGVARBINARY:
+	case Types.LONGVARBINARY: */
 	case Types.DATE:
 	case Types.TIME:
 	case Types.TIMESTAMP:
