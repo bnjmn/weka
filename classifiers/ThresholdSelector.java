@@ -45,7 +45,7 @@ import weka.core.*;
  * -X num <br> 
  * Number of folds used for cross validation. If just a
  * hold-out set is used, this determines the size of the hold-out set
- * (default 10).<p>
+ * (default 3).<p>
  *
  * -S seed <br>
  * Random number seed (default 1).<p>
@@ -53,12 +53,12 @@ import weka.core.*;
  * -E integer <br>
  * Sets the evaluation mode. Use 0 for evaluation using cross-validation,
  * 1 for evaluation using hold-out set, and 2 for evaluation on the
- * training data (default 0).<p>
+ * training data (default 1).<p>
  *
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler {
@@ -79,7 +79,7 @@ public class ThresholdSelector extends Classifier
   protected double m_BestValue = - Double.MAX_VALUE;
   
   /** The number of folds used in cross-validation */
-  protected int m_NumFolds = 10;
+  protected int m_NumFolds = 3;
 
   /** Random number seed */
   protected int m_Seed = 1;
@@ -97,7 +97,7 @@ public class ThresholdSelector extends Classifier
   protected Instances m_EvalData;
 
   /** The evaluation mode */
-  protected int m_Mode = ThresholdSelector.CROSS_VALIDATION;
+  protected int m_Mode = ThresholdSelector.TUNING_DATA;
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
@@ -228,7 +228,7 @@ public class ThresholdSelector extends Classifier
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation. If just a\n" +
 	      "\thold-out set is used, this determines the size of the hold-out set\n" +
-	      "\t(default 10).",
+	      "\t(default 3).",
 	      "X", 1, "-X <number of folds>"));
     newVector.addElement(new Option(
 	      "\tSets the random number seed (default 1).",
@@ -238,7 +238,7 @@ public class ThresholdSelector extends Classifier
 	      "\tevaluation using cross-validation,\n" +
 	      "\t1 for evaluation using hold-out set,\n" +
 	      "\tand 2 for evaluation on the\n" +
-	      "\ttraining data (default 0).",
+	      "\ttraining data (default 1).",
 	      "E", 1, "-E <integer>"));
 
     if ((m_Classifier != null) &&
@@ -274,7 +274,7 @@ public class ThresholdSelector extends Classifier
    * -X num <br> 
    * Number of folds used for cross validation. If just a
    * hold-out set is used, this determines the size of the hold-out set
-   * (default 10).<p>
+   * (default 3).<p>
    *
    * -S seed <br>
    * Random number seed (default 1).<p>
@@ -282,7 +282,7 @@ public class ThresholdSelector extends Classifier
    * -E integer <br>
    * Sets the evaluation mode. Use 0 for evaluation using cross-validation,
    * 1 for evaluation using hold-out set, and 2 for evaluation on the
-   * training data (default 0).<p>
+   * training data (default 1).<p>
    *
    * Options after -- are passed to the designated sub-classifier. <p>
    *
@@ -304,7 +304,7 @@ public class ThresholdSelector extends Classifier
     if (foldsString.length() != 0) {
       setNumFolds(Integer.parseInt(foldsString));
     } else {
-      setNumFolds(10);
+      setNumFolds(3);
     }
 
     String randomString = Utils.getOption('S', options);
@@ -324,7 +324,7 @@ public class ThresholdSelector extends Classifier
     if (modeString.length() != 0) {
       m_Mode = Integer.parseInt(modeString);
     } else {
-      m_Mode = 0;
+      m_Mode = ThresholdSelector.TUNING_DATA;
     }
 
     setDistributionClassifier((DistributionClassifier)Classifier.
