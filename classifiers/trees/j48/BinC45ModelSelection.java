@@ -29,7 +29,7 @@ import weka.core.*;
  * Class for selecting a C4.5-like binary (!) split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class BinC45ModelSelection extends ModelSelection{
 
@@ -42,13 +42,13 @@ public class BinC45ModelSelection extends ModelSelection{
   /**
    * Initializes the split selection method with the given parameters.
    *
-   * @param m_minNoObj minimum number of instances that have to occur in at least two
-   * subsets induced by split
-   * @param allData FULL training dataset (necessary for
-   * selection of split points).
+   * @param minNoObj minimum number of instances that have to occur in
+   * at least two subsets induced by split
+   * @param allData FULL training dataset (necessary for selection of
+   * split points).  
    */
-  public BinC45ModelSelection(int m_minNoObj,Instances allData){
-    m_minNoObj = m_minNoObj;
+  public BinC45ModelSelection(int minNoObj,Instances allData){
+    m_minNoObj = minNoObj;
     m_allData = allData;
   }
 
