@@ -14,7 +14,7 @@ import weka.filters.supervised.instance.*;
  * java weka.filters.AllTests
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AllTests extends TestSuite {
 
@@ -44,6 +44,7 @@ public class AllTests extends TestSuite {
     suite.addTest(RandomizeTest.suite());
     suite.addTest(RemoveFrequentValuesTest.suite());
     suite.addTest(RemoveWithValuesTest.suite());
+    suite.addTest(ReorderTest.suite());
     suite.addTest(ReplaceMissingValuesTest.suite());
     suite.addTest(weka.filters.unsupervised.instance.ResampleTest.suite());
     suite.addTest(weka.filters.supervised.instance.ResampleTest.suite());
