@@ -74,6 +74,7 @@ weka.filters.Filter = \
  weka.filters.NormalizationFilter, \
  weka.filters.NullFilter, \
  weka.filters.NumericTransformFilter, \
+ weka.filters.ObfuscateFilter, \
  weka.filters.RandomizeFilter, \
  weka.filters.ReplaceMissingValuesFilter, \
  weka.filters.ResampleFilter, \
