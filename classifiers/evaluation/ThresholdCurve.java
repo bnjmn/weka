@@ -34,14 +34,29 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ThresholdCurve {
 
   /**
    * Calculates the performance stats for the default class and return 
-   * results as a set of Instances.
+   * results as a set of Instances. The
+   * structure of these Instances is as follows:<p> <ul> 
+   * <li> <b>True Positives </b>
+   * <li> <b>False Negatives</b>
+   * <li> <b>False Positives</b>
+   * <li> <b>True Negatives</b>
+   * <li> <b>False Positive Rate</b>
+   * <li> <b>True Positive Rate</b>
+   * <li> <b>Precision</b>
+   * <li> <b>Recall</b>  
+   * <li> <b>Fallout</b>  
+   * <li> <b>Threshold</b> contains the probability threshold that gives
+   * rise to the previous performance values. 
+   * </ul> <p>
+   * For the definitions of these measures, see TwoClassStats <p>
    *
+   * @see TwoClassStats
    * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances, null if no predictions
    * have been made.
@@ -130,14 +145,15 @@ public class ThresholdCurve {
     fv.addElement(new Attribute("True Positive Rate"));
     fv.addElement(new Attribute("Precision"));
     fv.addElement(new Attribute("Recall"));
-    fv.addElement(new Attribute("Threshold"));
+    fv.addElement(new Attribute("Fallout"));
+    fv.addElement(new Attribute("Threshold"));      
     return new Instances("Threshold Curve", fv, 100);
   }
   
   private Instance makeInstance(TwoClassStats tc, double prob) {
 
     int count = 0;
-    double [] vals = new double[9];
+    double [] vals = new double[10];
     vals[count++] = tc.getTruePositive();
     vals[count++] = tc.getFalseNegative();
     vals[count++] = tc.getFalsePositive();
@@ -146,6 +162,7 @@ public class ThresholdCurve {
     vals[count++] = tc.getTruePositiveRate();
     vals[count++] = tc.getPrecision();
     vals[count++] = tc.getRecall();
+    vals[count++] = tc.getFallout();
     vals[count++] = prob;
     return new Instance(1.0, vals);
   }
@@ -159,7 +176,6 @@ public class ThresholdCurve {
   public static void main(String [] args) {
 
     try {
-      Utils.SMALL = 0;
       Instances inst = new Instances(new java.io.InputStreamReader(System.in));
       inst.setClassIndex(inst.numAttributes() - 1);
       ThresholdCurve tc = new ThresholdCurve();
