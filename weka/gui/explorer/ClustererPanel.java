@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -232,10 +232,6 @@ public class ClustererPanel extends JPanel {
   
   /** A thread that clustering runs in */
   protected Thread m_RunThread;
-
-  /** The pre-process object from which to fetch filters for applying
-      to a user specified test set */
-  protected PreprocessPanel m_Preprocess;
   
   /** The instances summary panel displayed by m_SetTestFrame */
   protected InstancesSummaryPanel m_Summary;
@@ -524,15 +520,6 @@ public class ClustererPanel extends JPanel {
   }
 
   /**
-   * Sets the preprocess panel through which user selected
-   * filters can be applied to any supplied test data
-   * @param p the preprocess panel to use
-   */
-  public void setPreprocess(PreprocessPanel p) {
-    m_Preprocess = p;
-  }
-
-  /**
    * Sets the Logger to receive informational messages
    *
    * @param newLog the Logger that will now get info messages
@@ -600,51 +587,6 @@ public class ClustererPanel extends JPanel {
   }
 
   /**
-   * Attempts to filter the user specified test set through
-   * the most currently used set of filters (if any) from the
-   * pre-process panel.
-   */
-  protected void filterUserTestInstances() {
-
-    if (m_Preprocess != null && m_TestInstances != null) {
-      m_TestInstancesCopy = new Instances(m_TestInstances);
-      SerializedObject sf = m_Preprocess.getMostRecentFilters();
-      if (sf != null) {
-	Filter [] filters = null;
-	try {
-	  filters = (Filter [])sf.getObject();
-	} catch (Exception ex) {
-	  JOptionPane.showMessageDialog(this,
-					"Could not deserialize filters",
-					null,
-					JOptionPane.ERROR_MESSAGE);
-	}
-	if (filters.length != 0) {
-	  try {
-	    m_Log.statusMessage("Applying preprocess filters to test data...");
-	    m_TestInstancesCopy = new Instances(m_TestInstances);
-	    for (int i = 0; i < filters.length; i++) {
-	      m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
-				  + filters[i].getClass().getName());
-	      filters[i].setInputFormat(m_TestInstancesCopy);
-	      m_TestInstancesCopy = Filter.useFilter(m_TestInstancesCopy, 
-						     filters[i]);
-	    }
-	    m_Log.statusMessage("OK");
-	  } catch (Exception ex) {
-	    m_Log.statusMessage("See error log");
-	    m_Log.logMessage("Problem applying filters to test data "
-			     +"(Cluster Panel");
-	  }
-	  if (m_Summary != null && m_TestInstancesCopy != null) {
-	    m_Summary.setInstances(m_TestInstancesCopy);
-	  }
-	}
-      }
-    }
-  }
-
-  /**
    * Sets the user test set. Information about the current test set
    * is displayed in an InstanceSummaryPanel and the user is given the
    * ability to load another set from a file or url.
@@ -661,7 +603,6 @@ public class ClustererPanel extends JPanel {
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
 	  m_TestInstances = sp.getInstances();
-	  filterUserTestInstances();
 	}
       });
       // Add propertychangelistener to update m_TestInstances whenever
