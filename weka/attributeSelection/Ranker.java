@@ -28,18 +28,24 @@ import  weka.core.*;
  *
  * Valid options are: <p>
  *
+ * -P <start set> <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
  * -T <threshold> <br>
  * Specify a threshold by which the AttributeSelection module can. <br>
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Ranker extends ASSearch 
-  implements RankedOutputSearch, OptionHandler {
+  implements RankedOutputSearch, StartSetHandler, OptionHandler {
 
-  /** Holds the starting set of attributes if specified */
+  /** Holds the starting set as an array of attributes */
   private int[] m_starting;
+
+  /** Holds the start set for the search as a range */
+  private Range m_startRange;
 
   /** Holds the ordered list of attributes */
   private int[] m_attributeList;
@@ -61,7 +67,6 @@ public class Ranker extends ASSearch
    * AttributeSelection module
    */
   private double m_threshold;
-
 
   /**
    * Constructor
@@ -88,11 +93,57 @@ public class Ranker extends ASSearch
   }
 
   /**
+   * This is a dummy set method---Ranker is ONLY capable of producing
+   * a ranked list of attributes for attribute evaluators.
+   * @param doRank this parameter is N/A and is ignored
+   */
+  public void setGenerateRanking(boolean doRank) {
+    
+  }
+
+  /**
+   * This is a dummy method. Ranker can ONLY be used with attribute
+   * evaluators and as such can only produce a ranked list of attributes
+   * @return true all the time.
+   */
+  public boolean getGenerateRanking() {
+    return true;
+  }
+
+  /**
+   * Sets a starting set of attributes for the search. It is the
+   * search method's responsibility to report this start set (if any)
+   * in its toString() method.
+   * @param startSet a string containing a list of attributes (and or ranges),
+   * eg. 1,2,6,10-15.
+   * @exception if start set can't be set.
+   */
+  public void setStartSet (String startSet) throws Exception {
+    m_startRange.setRanges(startSet);
+  }
+
+  /**
+   * Returns a list of attributes (and or attribute ranges) as a String
+   * @return a list of attributes (and or attribute ranges)
+   */
+  public String getStartSet () {
+    return m_startRange.getRanges();
+  }
+
+  /**
    * Returns an enumeration describing the available options
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(2);
+
+    newVector
+      .addElement(new Option("\tSpecify a starting set of attributes." 
+			     + "\n\tEg. 1,3,5-7."
+			     +"\t\nAny starting attributes specified are"
+			     +"\t\nignored during the ranking."
+			     ,"P",1
+			     , "-P <start set>"));
     newVector
       .addElement(new Option("\tSpecify a theshold by which attributes" 
 			     + "\tmay be discarded from the ranking.","T",1
@@ -106,6 +157,9 @@ public class Ranker extends ASSearch
    * Parses a given list of options.
    *
    * Valid options are: <p>
+   *
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
    *
    * -T <threshold> <br>
    * Specify a threshold by which the AttributeSelection module can. <br>
@@ -121,6 +175,11 @@ public class Ranker extends ASSearch
     String optionString;
     resetOptions();
 
+    optionString = Utils.getOption('P', options);
+    if (optionString.length() != 0) {
+      setStartSet(optionString);
+    }
+
     optionString = Utils.getOption('T', options);
     if (optionString.length() != 0) {
       Double temp;
@@ -135,8 +194,13 @@ public class Ranker extends ASSearch
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[2];
+    String[] options = new String[4];
     int current = 0;
+
+    if (!(getStartSet().equals(""))) {
+      options[current++] = "-P";
+      options[current++] = ""+startSetToString();
+    }
 
     options[current++] = "-T";
     options[current++] = "" + getThreshold();
@@ -148,19 +212,55 @@ public class Ranker extends ASSearch
   }
 
   /**
+   * converts the array of starting attributes to a string. This is
+   * used by getOptions to return the actual attributes specified
+   * as the starting set. This is better than using m_startRanges.getRanges()
+   * as the same start set can be specified in different ways from the
+   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
+   * is stored in a database is comparable.
+   * @return a comma seperated list of individual attribute numbers as a String
+   */
+  private String startSetToString() {
+    StringBuffer FString = new StringBuffer();
+    boolean didPrint;
+    
+    if (m_starting == null) {
+      return getStartSet();
+    }
+
+    for (int i = 0; i < m_starting.length; i++) {
+      didPrint = false;
+      
+      if ((m_hasClass == false) || 
+	  (m_hasClass == true && i != m_classIndex)) {
+	FString.append((m_starting[i] + 1));
+	didPrint = true;
+      }
+      
+      if (i == (m_starting.length - 1)) {
+	FString.append("");
+      }
+      else {
+	if (didPrint) {
+	  FString.append(",");
+	}
+      }
+    }
+    
+    return FString.toString();
+  }
+
+  /**
    * Kind of a dummy search algorithm. Calls a Attribute evaluator to
    * evaluate each attribute not included in the startSet and then sorts
    * them to produce a ranked list of attributes.
    *
-   * @param startSet a (possibly) ordered array of attribute indexes from
-   * which to start the search from. Set to null if no explicit start
-   * point.
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @exception Exception if the search can't be completed
    */
-  public int[] search (int[] startSet, ASEvaluation ASEval, Instances data)
+  public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception
   {
     int i, j;
@@ -173,10 +273,6 @@ public class Ranker extends ASSearch
 
     m_numAttribs = data.numAttributes();
 
-    if (startSet != null) {
-      m_starting = startSet;
-    }
-
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
     }
@@ -185,16 +281,18 @@ public class Ranker extends ASSearch
       m_classIndex = data.classIndex();
     }
 
-    int sl = 0;
+    m_startRange.setUpper(m_numAttribs - 1);
+    if (!(getStartSet().equals(""))) {
+      m_starting = m_startRange.getSelection();
+    }
 
+    int sl=0;
     if (m_starting != null) {
       sl = m_starting.length;
     }
-
-    if ((sl != 0) && (m_hasClass == true)) {
+    if ((m_starting != null) && (m_hasClass == true)) {
       // see if the supplied list contains the class index
       boolean ok = false;
-
       for (i = 0; i < sl; i++) {
         if (m_starting[i] == m_classIndex) {
           ok = true;
@@ -206,9 +304,10 @@ public class Ranker extends ASSearch
         sl++;
       }
     }
-    else {if (m_hasClass == true) {
-      sl++;
-    }
+    else {
+      if (m_hasClass == true) {
+	sl++;
+      }
     }
 
     m_attributeList = new int[m_numAttribs - sl];
@@ -284,14 +383,8 @@ public class Ranker extends ASSearch
     if (m_starting != null) {
       BfString.append("\tIgnored attributes: ");
 
-      for (int i = 0; i < m_starting.length; i++) {
-	if (i == (m_starting.length - 1)) {
-	  BfString.append((m_starting[i] + 1) + "\n");
-	}
-	else {
-	  BfString.append((m_starting[i] + 1) + ",");
-	}
-      }
+      BfString.append(startSetToString());
+      BfString.append("\n");
     }
 
     if (m_threshold != -Double.MAX_VALUE) {
@@ -308,6 +401,7 @@ public class Ranker extends ASSearch
    */
   protected void resetOptions () {
     m_starting = null;
+    m_startRange = new Range();
     m_attributeList = null;
     m_attributeMerit = null;
     m_threshold = -Double.MAX_VALUE;
