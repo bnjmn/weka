@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @since 1.0
  * @see JPanel
  */
@@ -658,6 +658,14 @@ public class BoundaryPanel extends JPanel {
       curr.getRGBColorComponents(tempCols);
       for (int z = 0 ; z < 3; z++) {
         colVal[z] += probs[k] * tempCols[z];
+      }
+    }
+
+    for (int z = 0; z < 3; z++) {
+      if (colVal[z] < 0) {
+	colVal[z] = 0;
+      } else if (colVal[z] > 1) {
+	colVal[z] = 1;
       }
     }
     
