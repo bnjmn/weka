@@ -29,6 +29,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -55,7 +58,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -188,9 +191,19 @@ public class RunPanel extends JPanel implements ActionListener {
 
     // Set the GUI layout
     JPanel controls = new JPanel();
-    controls.setLayout(new GridLayout(1,2));
-    controls.add(m_StartBut);
-    controls.add(m_StopBut);
+    GridBagLayout gb = new GridBagLayout();
+    GridBagConstraints constraints = new GridBagConstraints();
+    controls.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    //    controls.setLayout(new GridLayout(1,2));
+    controls.setLayout(gb);
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    controls.add(m_StartBut,constraints);
+    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    controls.add(m_StopBut,constraints);
     setLayout(new BorderLayout());
     add(controls, BorderLayout.NORTH);
     add(m_Log, BorderLayout.CENTER);

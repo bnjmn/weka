@@ -30,6 +30,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -50,7 +53,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -103,9 +106,19 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createTitledBorder("Datasets"));
     JPanel topLab = new JPanel();
-    topLab.setLayout(new GridLayout(1,2));
-    topLab.add(m_AddBut);
-    topLab.add(m_DeleteBut);
+    GridBagLayout gb = new GridBagLayout();
+    GridBagConstraints constraints = new GridBagConstraints();
+    topLab.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    //    topLab.setLayout(new GridLayout(1,2,5,5));
+    topLab.setLayout(gb);
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    topLab.add(m_AddBut,constraints);
+    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    topLab.add(m_DeleteBut,constraints);
     add(topLab, BorderLayout.NORTH);
     add(new JScrollPane(m_List), BorderLayout.CENTER);
   }
