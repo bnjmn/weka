@@ -28,6 +28,10 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
+import javax.swing.JViewport;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import java.awt.Point;
 
 /** 
  * This panel allows log and status messages to be posted. Log messages
@@ -35,7 +39,7 @@ import javax.swing.SwingConstants;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LogPanel extends JPanel implements Logger {
 
@@ -45,6 +49,12 @@ public class LogPanel extends JPanel implements Logger {
   /** Displays the log messages */
   protected JTextArea m_LogText = new JTextArea(5, 20);
 
+  /** To determine whether a change was caused by scrolling or appending */
+  protected int m_TextHeight;
+
+  /** An indicator for whether text has been output yet */
+  protected boolean m_First = true;
+  
   /**
    * Creates the log panel
    */
@@ -59,8 +69,24 @@ public class LogPanel extends JPanel implements Logger {
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createTitledBorder("Log"));
     p1.setLayout(new BorderLayout());
-    p1.add(new JScrollPane(m_LogText), BorderLayout.CENTER);
-    
+    JScrollPane js = new JScrollPane(m_LogText);
+    p1.add(js, BorderLayout.CENTER);
+    m_TextHeight = js.getViewport().getViewSize().height;
+    js.getViewport().addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+	JViewport vp = (JViewport)e.getSource();
+	int h = vp.getViewSize().height; 
+	// If new content is added ViewSize changes. This event is also
+	// fired when the user moves the scrollbar - in this case we
+	// don't want to move it back to the bottom.
+	if (h != m_TextHeight) {
+	  m_TextHeight = h;
+	  int x = h - vp.getExtentSize().height;
+	  vp.setViewPosition(new Point(0, x));
+	}
+      }
+    });
+
     setLayout(new BorderLayout());
     add(p1, BorderLayout.CENTER);
     add(m_StatusLab, BorderLayout.SOUTH);
@@ -84,8 +110,13 @@ public class LogPanel extends JPanel implements Logger {
    * @param message a value of type 'String'
    */
   public void logMessage(String message) {
-    
-    m_LogText.append(LogPanel.getTimestamp() + ' ' + message + '\n');
+
+    if (m_First) {
+      m_First = false;
+    } else {
+      m_LogText.append("\n");
+    }
+    m_LogText.append(LogPanel.getTimestamp() + ' ' + message);
   }
 
   /**
