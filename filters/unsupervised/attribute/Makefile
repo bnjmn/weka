@@ -7,7 +7,7 @@ SOURCES = AbstractTimeSeries.java Add.java AddCluster.java \
 	NumericTransform.java Obfuscate.java PKIDiscretize.java Remove.java \
 	RemoveType.java RemoveUseless.java ReplaceMissingValues.java \
 	StringToNominal.java StringToWordVector.java SwapValues.java \
-	TimeSeriesDelta.java TimeSeriesTranslate.java
+	TimeSeriesDelta.java TimeSeriesTranslate.java Standardize.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
