@@ -52,15 +52,15 @@ import java.util.*;
  * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class SimpleLogistic extends DistributionClassifier implements OptionHandler, 
 								      AdditionalMeasureProducer, 
 								      WeightedInstancesHandler {
 
-    //format of serial: 1**date## (** = algorithm id, ##= version)
-    static final long serialVersionUID = 1110506200300L;
+  //format of serial: 1**date## (** = algorithm id, ##= version)
+  //static final long serialVersionUID = 1110506200300L;
     
     /**The actual logistic regression model */
     protected LogisticBase m_boostedModel;
@@ -371,6 +371,75 @@ public class SimpleLogistic extends DistributionClassifier implements OptionHand
 	    throw new IllegalArgumentException(additionalMeasureName 
 					       + " not supported (SimpleLogistic)");
 	}
+    }    
+
+
+    /**
+     * Returns a string describing classifier
+     * @return a description suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String globalInfo() {
+	return "Classifier for building linear logistic regression models. LogitBoost with simple regression "
+	    +"functions as base learners is used for fitting the logistic models. The optimal number of LogitBoost "
+	    +"iterations to perform is cross-validated, which leads to automatic attribute selection. "
+	    +"For more information see: N.Landwehr, M.Hall, E. Frank 'Logistic Model Trees' (ECML 2003).";	    
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String numBoostingIterationsTipText() {
+	return "Set fixed number of iterations for LogitBoost. If >= 0, this sets the number of LogitBoost iterations "
+	    +"to perform. If < 0, the number is cross-validated or a stopping criterion on the training set is used "
+	    +"(depending on the value of useCrossValidation).";
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String useCrossValidationTipText() {
+	return "Sets whether the number of LogitBoost iterations is to be cross-validated or the stopping criterion "
+	    +"on the training set should be used. If not set (and no fixed number of iterations was given), "
+	    +"the number of LogitBoost iterations is used that minimizes the error on the training set "
+	    +"(misclassification error or error on probabilities depending on errorOnProbabilities).";
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String errorOnProbabilitiesTipText() {
+	return "Use error on the probabilties as error measure when determining the best number of LogitBoost iterations. "
+	    +"If set, the number of LogitBoost iterations is chosen that minimizes the root mean squared error "
+	    +"(either on the training set or in the cross-validation, depending on useCrossValidation).";
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String maxBoostingIterationsTipText() {
+	return "Sets the maximum number of iterations for LogitBoost. Default value is 500, for very small/large "
+	    +"datasets a lower/higher value might be preferable.";
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String heuristicStopTipText() {
+	return "If heuristicStop > 0, the heuristic for greedy stopping while cross-validating the number of "
+	    +"LogitBoost iterations is enabled. This means LogitBoost is stopped if no new error minimum "
+	    +"has been reached in the last heuristicStop iterations. It is recommended to use this heuristic, "
+	    +"it gives a large speed-up especially on small datasets. The default value is 50.";
     }    
 
     /**
