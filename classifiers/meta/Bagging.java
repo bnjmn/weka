@@ -68,7 +68,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class Bagging extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable,
@@ -372,6 +372,62 @@ public class Bagging extends Classifier
   }
 
   /**
+   * Creates a new dataset of the same size using random sampling
+   * with replacement according to the given weight vector. The
+   * weights of the instances in the new dataset are set to one.
+   * The length of the weight vector has to be the same as the
+   * number of instances in the dataset, and all weights have to
+   * be positive.
+   *
+   * @param data the data to be sampled from
+   * @param random a random number generator
+   * @param sampled indicating which instance has been sampled
+   * @return the new dataset
+   * @exception IllegalArgumentException if the weights array is of the wrong
+   * length or contains negative weights.
+   */
+  public final Instances resampleWithWeights(Instances data,
+					     Random random, 
+					     boolean[] sampled) {
+
+    double[] weights = new double[data.numInstances()];
+    for (int i = 0; i < weights.length; i++) {
+      weights[i] = data.instance(i).weight();
+    }
+    Instances newData = new Instances(data, data.numInstances());
+    if (data.numInstances() == 0) {
+      return newData;
+    }
+    double[] probabilities = new double[data.numInstances()];
+    double sumProbs = 0, sumOfWeights = Utils.sum(weights);
+    for (int i = 0; i < data.numInstances(); i++) {
+      sumProbs += random.nextDouble();
+      probabilities[i] = sumProbs;
+    }
+    Utils.normalize(probabilities, sumProbs / sumOfWeights);
+
+    // Make sure that rounding errors don't mess things up
+    probabilities[data.numInstances() - 1] = sumOfWeights;
+    int k = 0; int l = 0;
+    sumProbs = 0;
+    while ((k < data.numInstances() && (l < data.numInstances()))) {
+      if (weights[l] < 0) {
+	throw new IllegalArgumentException("Weights have to be positive.");
+      }
+      sumProbs += weights[l];
+      while ((k < data.numInstances()) &&
+	     (probabilities[k] <= sumProbs)) { 
+	newData.add(data.instance(l));
+	sampled[l] = true;
+	newData.instance(k).setWeight(1);
+	k++;
+      }
+      l++;
+    }
+    return newData;
+  }
+
+  /**
    * Bagging method.
    *
    * @param data the training data to be used for generating the
@@ -386,6 +442,10 @@ public class Bagging extends Classifier
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
+    if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {
+      throw new IllegalArgumentException("Bag size needs to be 100% if " +
+					 "out-of-bag error is to be calculated!");
+    }
     double outOfBagCount = 0.0;
     double errorSum = 0.0;
 
@@ -399,12 +459,7 @@ public class Bagging extends Classifier
       // create the in-bag dataset
       if (m_CalcOutOfBag) {
 	inBag = new boolean[data.numInstances()];
-	bagData = new Instances(data, bagSize);
-	while (bagData.numInstances() < bagSize) {
-	  int i = random.nextInt(data.numInstances());
-	  bagData.add(data.instance(i));
-	  inBag[i] = true;
-	}
+	bagData = resampleWithWeights(data, random, inBag);
       } else {
 	bagData = data.resampleWithWeights(random);
 	if (bagSize < data.numInstances()) {
@@ -423,15 +478,15 @@ public class Bagging extends Classifier
 	for (int i=0; i<inBag.length; i++) {  
 	  if (!inBag[i]) {
 	    Instance outOfBagInst = data.instance(i);
-	    outOfBagCount++;
+	    outOfBagCount += outOfBagInst.weight();
 	    if (data.classAttribute().isNumeric()) {
-	      errorSum +=
+	      errorSum += outOfBagInst.weight() *
 		Math.abs(m_Classifiers[j].classifyInstance(outOfBagInst)
 			 - outOfBagInst.classValue());
 	    } else {
 	      if (m_Classifiers[j].classifyInstance(outOfBagInst)
 		  != outOfBagInst.classValue()) {
-		errorSum++;
+		errorSum += outOfBagInst.weight();
 	      }
 	    }
 	  }
