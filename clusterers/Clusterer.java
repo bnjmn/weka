@@ -33,7 +33,7 @@ import weka.core.Utils;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class Clusterer implements Cloneable, Serializable {
 
@@ -85,8 +85,7 @@ public abstract class Clusterer implements Cloneable, Serializable {
    * options supplied are not acceptable to the clusterer.
    */
   public static Clusterer forName(String clustererName,
-				  String [] options) throws Exception
-  {
+				  String [] options) throws Exception {
     return (Clusterer)Utils.forName(Clusterer.class,
 				    clustererName,
 				    options);

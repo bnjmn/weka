@@ -28,7 +28,7 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Rule {
 
@@ -519,7 +519,7 @@ public class Rule {
    * @param inst the instances
    * @return the standard deviation value
    */
-  protected final static double stdDev(int attr, Instances inst) {
+  protected static final double stdDev(int attr, Instances inst) {
     int i,count=0;
     double sd,va,sum=0.0,sqrSum=0.0,value;
     
@@ -548,7 +548,7 @@ public class Rule {
    * @param inst the instances
    * @return the absolute deviation value
    */
-  protected final static double absDev(int attr, Instances inst) {
+  protected static final double absDev(int attr, Instances inst) {
     int i;
     double average=0.0,absdiff=0.0,absDev;
     

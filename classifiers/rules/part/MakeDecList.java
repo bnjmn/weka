@@ -32,7 +32,7 @@ import weka.classifiers.*;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MakeDecList implements Serializable {
 
@@ -83,7 +83,7 @@ public class MakeDecList implements Serializable {
    *
    * @exception Exception if dec list can't be built successfully
    */
-  public void buildClassifier(Instances data) throws Exception{
+  public void buildClassifier(Instances data) throws Exception {
     
     ClassifierDecList currentRule;
     double currentWeight;

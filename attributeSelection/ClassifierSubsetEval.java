@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -170,8 +170,7 @@ public class ClassifierSubsetEval
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
 
@@ -316,8 +315,7 @@ public class ClassifierSubsetEval
    * generated successfully
    */
   public void buildEvaluator (Instances data)
-    throws Exception
-  {
+    throws Exception {
     if (data.checkForStringAttributes()) {
       throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
@@ -349,8 +347,7 @@ public class ClassifierSubsetEval
    * @exception Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset)
-    throws Exception
-  {
+    throws Exception {
     int i,j;
     double errorRate = 0;
     int numAttributes = 0;

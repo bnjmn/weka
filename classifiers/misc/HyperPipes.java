@@ -45,7 +45,7 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */ 
 public class HyperPipes extends DistributionClassifier {
 
@@ -177,7 +177,7 @@ public class HyperPipes extends DistributionClassifier {
    * @param instances set of instances serving as training data 
    * @exception Exception if the classifier has not been generated successfully
    */
-  public void buildClassifier(Instances instances) throws Exception{
+  public void buildClassifier(Instances instances) throws Exception {
     
     if (instances.classIndex() == -1) {
       throw new Exception("No class attribute assigned");

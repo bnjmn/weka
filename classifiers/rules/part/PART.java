@@ -59,7 +59,7 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
@@ -88,7 +88,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
    * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) 
-       throws Exception{
+       throws Exception {
 
     ModelSelection modSelection;	 
 
@@ -186,7 +186,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
 
     // Pruning options
     m_reducedErrorPruning = Utils.getFlag('R', options);

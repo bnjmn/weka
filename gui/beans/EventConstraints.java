@@ -29,7 +29,7 @@ package weka.gui.beans;
  * to be generated.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface EventConstraints {
   

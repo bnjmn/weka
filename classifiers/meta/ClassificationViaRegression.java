@@ -47,7 +47,7 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -172,7 +172,7 @@ public class ClassificationViaRegression extends DistributionClassifier
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
   
     String classifierName = Utils.getOption('W', options);
     if (classifierName.length() == 0) {

@@ -63,7 +63,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -73,12 +73,12 @@ TreeDisplayListener, VisualizePanelListener {
    * so I am making them private to avoid confusion, (note that they will
    * be correct in this class, VLINE and HLINE aren't used).
    */
-  private final static int LEAF = 0;
-  private final static int RECTANGLE = 1;
-  private final static int POLYGON = 2;
-  private final static int POLYLINE = 3;
-  private final static int VLINE = 5;
-  private final static int HLINE =6;
+  private static final int LEAF = 0;
+  private static final int RECTANGLE = 1;
+  private static final int POLYGON = 2;
+  private static final int POLYLINE = 3;
+  private static final int VLINE = 5;
+  private static final int HLINE =6;
   
 
   /** The tree display panel. */

@@ -42,7 +42,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -305,8 +305,7 @@ public class ForwardSelection extends ASSearch
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
 

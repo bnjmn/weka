@@ -28,7 +28,7 @@ import java.util.EventObject;
  * Event that encapsulates some textual information
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TextEvent extends EventObject {
   

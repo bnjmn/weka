@@ -104,7 +104,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -113,10 +113,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   
   /** Holds a copy of the current object that can be reverted to
       if the user decides to cancel */
-  protected  Object m_Backup;
+  protected Object m_Backup;
     
   /** Handles property change notification */
-  protected  PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
+  protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
     
   /** The Class of objects being edited */
   protected Class m_ClassType;
@@ -797,7 +797,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @exception IllegalArgumentException as we don't support
    * getting/setting values as text.
    */
-  public void setAsText(String text) throws IllegalArgumentException {
+  public void setAsText(String text) {
 
     throw new IllegalArgumentException(text);
   }

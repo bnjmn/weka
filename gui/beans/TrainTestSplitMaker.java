@@ -272,7 +272,7 @@ public class TrainTestSplitMaker
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) throws IllegalArgumentException {
+  public void performRequest(String request) {
     if (request.compareTo("Stop") == 0) {
       stop();
     } else {

@@ -29,7 +29,7 @@ import java.io.*;
  * Abstract unit in a NeuralNetwork.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public abstract class NeuralConnection implements Serializable {
@@ -38,22 +38,22 @@ public abstract class NeuralConnection implements Serializable {
   //bitwise flags for the types of unit.
 
   /** This unit is not connected to any others. */
-  public final static int UNCONNECTED = 0;
+  public static final int UNCONNECTED = 0;
   
   /** This unit is a pure input unit. */
-  public final static int PURE_INPUT = 1;
+  public static final int PURE_INPUT = 1;
   
   /** This unit is a pure output unit. */
-  public final static int PURE_OUTPUT = 2;
+  public static final int PURE_OUTPUT = 2;
   
   /** This unit is an input unit. */
-  public final static int INPUT = 4;
+  public static final int INPUT = 4;
   
   /** This unit is an output unit. */
-  public final static int OUTPUT = 8;
+  public static final int OUTPUT = 8;
   
   /** This flag is set once the unit has a connection. */
-  public final static int CONNECTED = 16;
+  public static final int CONNECTED = 16;
 
 
 

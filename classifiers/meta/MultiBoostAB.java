@@ -92,7 +92,7 @@ import weka.core.*;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MultiBoostAB extends DistributionClassifier
   implements OptionHandler, WeightedInstancesHandler, Sourcable {

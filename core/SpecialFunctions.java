@@ -28,7 +28,7 @@ import java.lang.Math;
  * Class implementing some mathematical functions.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public final class SpecialFunctions {
 
@@ -53,7 +53,7 @@ public final class SpecialFunctions {
    * @param b lower part
    * @return the base 2 logarithm of the binominal coefficient a over b
    */
-  public static double log2Binomial(double a, double b) throws ArithmeticException{
+  public static double log2Binomial(double a, double b) {
     
     if (Utils.gr(b,a)) {
       throw new ArithmeticException("Can't compute binomial coefficient.");
@@ -69,7 +69,7 @@ public final class SpecialFunctions {
    * @return multinomial coefficient of a over the bs
    */
   public static double log2Multinomial(double a, double[] bs)
-       throws ArithmeticException{
+       {
     
     double sum = 0;
     int i;

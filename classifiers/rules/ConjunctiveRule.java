@@ -51,7 +51,7 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 
 public class ConjunctiveRule extends DistributionClassifier implements OptionHandler, WeightedInstancesHandler{
@@ -761,7 +761,7 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
 	
     String numFoldsString = Utils.getOption('N', options);
     if (numFoldsString.length() != 0) 
@@ -839,7 +839,7 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    * @param instances the training data
    * @exception Exception if classifier can't be built successfully
    */
-  public void buildClassifier(Instances instances) throws Exception{
+  public void buildClassifier(Instances instances) throws Exception {
     if (instances.checkForStringAttributes())
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
 	 
@@ -898,7 +898,7 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    * @param instance the instance for which distribution is to be computed
    * @return the class distribution for the given instance
    */
-  public double[] distributionForInstance(Instance instance) throws Exception{
+  public double[] distributionForInstance(Instance instance) throws Exception {
       if(instance == null)
 	  throw new Exception("Testing instance is NULL!");
 	

@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 
 public class Ridor extends Classifier
@@ -120,7 +120,7 @@ public class Ridor extends Classifier
      * @param lvl the level of the parent node
      * @exception Exception if ruleset of this node cannot be built
      */
-    public void findRules(Instances[] dataByClass, int lvl) throws Exception{
+    public void findRules(Instances[] dataByClass, int lvl) throws Exception {
       Vector finalRules = null;
       int clas = -1;
       double[] isPure = new double[dataByClass.length];
@@ -241,7 +241,7 @@ public class Ridor extends Classifier
      * @exception if the rules cannot be built properly
      */
     private double buildRuleset(Instances insts, double classCount, Vector ruleset) 
-      throws Exception{	    
+      throws Exception {	    
       Instances data = new Instances(insts);
       double wAcRt = 0;  // The weighted accuracy rate of this ruleset
       double total = data.sumOfWeights();
@@ -460,7 +460,7 @@ public class Ridor extends Classifier
      * @param instances the training data
      * @exception Exception if classifier can't be built successfully
      */
-    public void buildClassifier(Instances instances) throws Exception{
+    public void buildClassifier(Instances instances) throws Exception {
       m_ClassAttribute = instances.classAttribute();
       if (!m_ClassAttribute.isNominal()) 
 	throw new UnsupportedClassTypeException(" Only nominal class, please.");
@@ -1114,7 +1114,7 @@ public class Ridor extends Classifier
    * @param data the training data
    * @exception Exception if classifier can't be built successfully
    */
-  public void buildClassifier(Instances instances) throws Exception{
+  public void buildClassifier(Instances instances) throws Exception {
 
     Instances data = new Instances(instances);
     if (data.checkForStringAttributes())
@@ -1253,7 +1253,7 @@ public class Ridor extends Classifier
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
 	
     String numFoldsString = Utils.getOption('F', options);
     if (numFoldsString.length() != 0) 

@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -897,7 +897,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Inserts hold-out set into tree.
      */
-    protected void insertHoldOutSet(Instances data) throws Exception{
+    protected void insertHoldOutSet(Instances data) throws Exception {
 
       for (int i = 0; i < data.numInstances(); i++) {
 	insertHoldOutInstance(data.instance(i), data.instance(i).weight(),
@@ -1177,7 +1177,7 @@ public class REPTree extends DistributionClassifier
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
     
     String minNumString = Utils.getOption('M', options);
     if (minNumString.length() != 0) {

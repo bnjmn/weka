@@ -31,10 +31,10 @@ import java.text.FieldPosition;
 
 public class FloatingPointFormat extends DecimalFormat {
     
-  protected  DecimalFormat nf ;
-  protected  int width;
-  protected  int decimal;
-  protected  boolean trailing = true;
+  protected DecimalFormat nf ;
+  protected int width;
+  protected int decimal;
+  protected boolean trailing = true;
 
   /**
    * Default constructor

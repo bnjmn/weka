@@ -38,7 +38,7 @@ import  weka.filters.Filter;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class SymmetricalUncertAttributeEval
   extends AttributeEvaluator
@@ -105,8 +105,7 @@ public class SymmetricalUncertAttributeEval
    * @exception Exception if an option is not supported
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     resetOptions();
     setMissingMerge(!(Utils.getFlag('M', options)));
   }
@@ -171,8 +170,7 @@ public class SymmetricalUncertAttributeEval
    * generated successfully
    */
   public void buildEvaluator (Instances data)
-    throws Exception
-  {
+    throws Exception {
     if (data.checkForStringAttributes()) {
       throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
@@ -210,8 +208,7 @@ public class SymmetricalUncertAttributeEval
    * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
-    throws Exception
-  {
+    throws Exception {
     int i, j, ii, jj;
     int nnj, nni, ni, nj;
     double sum = 0.0;

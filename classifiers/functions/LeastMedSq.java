@@ -41,7 +41,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -519,7 +519,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception{
+  public void setOptions(String[] options) throws Exception {
 
     String curropt = Utils.getOption('S', options);
     if ( curropt.length() != 0){

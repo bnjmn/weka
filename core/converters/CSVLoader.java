@@ -40,7 +40,7 @@ import java.io.StreamTokenizer;
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Loader
  */
 public class CSVLoader extends AbstractLoader 

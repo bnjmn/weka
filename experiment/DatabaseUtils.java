@@ -52,7 +52,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -168,7 +168,7 @@ public class DatabaseUtils implements Serializable {
    * @param type the SQL type
    * @return the name of the type
    */
-  static public String typeName(int type) {
+  public static String typeName(int type) {
   
     switch (type) {
     case Types.BIGINT :

@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -284,7 +284,7 @@ public class CrossValidationFoldMaker
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) throws IllegalArgumentException {
+  public void performRequest(String request) {
     if (request.compareTo("Stop") == 0) {
       stop();
     } else {

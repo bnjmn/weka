@@ -29,18 +29,18 @@ import java.util.EventObject;
  * An event encapsulating an instance stream event.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class InstanceEvent extends EventObject {
   
   /** Specifies that the instance format is available */
-  public final static int FORMAT_AVAILABLE   = 1;
+  public static final int FORMAT_AVAILABLE   = 1;
 
   /** Specifies that an instance is available */
-  public final static int INSTANCE_AVAILABLE = 2;
+  public static final int INSTANCE_AVAILABLE = 2;
 
   /** Specifies that the batch of instances is finished */
-  public final static int BATCH_FINISHED     = 3;
+  public static final int BATCH_FINISHED     = 3;
 
   private int m_ID;
 

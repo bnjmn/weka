@@ -47,7 +47,7 @@ import java.util.Date;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class TextViewer 
   extends JPanel
@@ -239,7 +239,7 @@ public class TextViewer
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) throws IllegalArgumentException {
+  public void performRequest(String request) {
     if (request.compareTo("Show results") == 0) {
       showResults();
     } else if (request.compareTo("Clear results") == 0) {

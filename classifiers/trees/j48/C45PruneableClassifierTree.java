@@ -29,7 +29,7 @@ import weka.core.*;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class C45PruneableClassifierTree extends ClassifierTree{
@@ -59,7 +59,7 @@ public class C45PruneableClassifierTree extends ClassifierTree{
 				    boolean pruneTree,float cf,
 				    boolean raiseTree,
 				    boolean cleanup)
-       throws Exception{
+       throws Exception {
 
     super(toSelectLocModel);
 
@@ -74,7 +74,7 @@ public class C45PruneableClassifierTree extends ClassifierTree{
    *
    * @exception Exception if something goes wrong
    */
-  public void buildClassifier(Instances data) throws Exception{
+  public void buildClassifier(Instances data) throws Exception {
 
    if (data.classAttribute().isNumeric())
      throw new UnsupportedClassTypeException("Class is numeric!");
@@ -186,7 +186,7 @@ public class C45PruneableClassifierTree extends ClassifierTree{
    *
    * @exception Exception if something goes wrong
    */
-  protected ClassifierTree getNewTree(Instances data) throws Exception{
+  protected ClassifierTree getNewTree(Instances data) throws Exception {
     
     C45PruneableClassifierTree newTree = 
       new C45PruneableClassifierTree(m_toSelectModel, m_pruneTheTree, m_CF,

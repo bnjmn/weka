@@ -42,7 +42,7 @@ import java.io.*;
  * goToXXX() and information accessing functions).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class HierarchyPropertyParser implements Serializable{
 
@@ -95,7 +95,7 @@ public class HierarchyPropertyParser implements Serializable{
      * @param p the given property string
      * @param delim the given dilimitor
      */
-    public HierarchyPropertyParser(String p, String delim) throws Exception{
+    public HierarchyPropertyParser(String p, String delim) throws Exception {
 	this();		
 	build(p, delim);
     }
@@ -122,7 +122,7 @@ public class HierarchyPropertyParser implements Serializable{
      * @param p the given property
      * @param delim the given delimitor
      */
-    public void build(String p, String delim) throws Exception{
+    public void build(String p, String delim) throws Exception {
 	StringTokenizer st = new StringTokenizer(p, delim);
 	//System.err.println("delim: "+delim);
 	while(st.hasMoreTokens()){
@@ -408,7 +408,7 @@ public class HierarchyPropertyParser implements Serializable{
      * @param pos the position of the given child
      * @exception if the position is out of range or leaf is reached
      */
-    public synchronized void goToChild(int pos) throws Exception{
+    public synchronized void goToChild(int pos) throws Exception {
 	if((m_Current.children == null) || 
 	   (pos < 0) || (pos >= m_Current.children.size()))
 	    throw new Exception("Position out of range or leaf reached");

@@ -39,24 +39,24 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ThresholdCurve {
 
   /** The name of the relation used in threshold curve datasets */
-  public final static String RELATION_NAME = "ThresholdCurve";
+  public static final String RELATION_NAME = "ThresholdCurve";
 
-  public final static String TRUE_POS_NAME  = "True Positives";
-  public final static String FALSE_NEG_NAME = "False Negatives";
-  public final static String FALSE_POS_NAME = "False Positives";
-  public final static String TRUE_NEG_NAME  = "True Negatives";
-  public final static String FP_RATE_NAME   = "False Positive Rate";
-  public final static String TP_RATE_NAME   = "True Positive Rate";
-  public final static String PRECISION_NAME = "Precision";
-  public final static String RECALL_NAME    = "Recall";
-  public final static String FALLOUT_NAME   = "Fallout";
-  public final static String FMEASURE_NAME  = "FMeasure";
-  public final static String THRESHOLD_NAME = "Threshold";
+  public static final String TRUE_POS_NAME  = "True Positives";
+  public static final String FALSE_NEG_NAME = "False Negatives";
+  public static final String FALSE_POS_NAME = "False Positives";
+  public static final String TRUE_NEG_NAME  = "True Negatives";
+  public static final String FP_RATE_NAME   = "False Positive Rate";
+  public static final String TP_RATE_NAME   = "True Positive Rate";
+  public static final String PRECISION_NAME = "Precision";
+  public static final String RECALL_NAME    = "Recall";
+  public static final String FALLOUT_NAME   = "Fallout";
+  public static final String FMEASURE_NAME  = "FMeasure";
+  public static final String THRESHOLD_NAME = "Threshold";
 
   /**
    * Calculates the performance stats for the default class and return 

@@ -50,7 +50,7 @@ import java.io.IOException;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -188,7 +188,7 @@ public class Loader extends AbstractDataSource
    * @exception IllegalArgumentException if an error occurs
    */
   public void setWrappedAlgorithm(Object algorithm) 
-    throws IllegalArgumentException {
+    {
 
     if (!(algorithm instanceof weka.core.converters.Loader)) { 
       throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
@@ -278,7 +278,7 @@ public class Loader extends AbstractDataSource
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) throws IllegalArgumentException {
+  public void performRequest(String request) {
     if (request.compareTo("Start loading") == 0) {
       startLoading();
     } else {

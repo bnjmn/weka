@@ -41,7 +41,7 @@ import java.awt.*;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -138,7 +138,7 @@ public class DataVisualizer extends JPanel
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) throws IllegalArgumentException {
+  public void performRequest(String request) {
     if (request.compareTo("Show plot") == 0) {
       try {
 	// popup visualize panel

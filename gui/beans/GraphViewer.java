@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GraphViewer 
   extends JPanel
@@ -198,7 +198,7 @@ public class GraphViewer
    * @exception IllegalArgumentException if an error occurs
    */
   public void performRequest(String request) 
-    throws IllegalArgumentException {
+    {
     if (request.compareTo("Show results") == 0) {
       showResults();
     } else {

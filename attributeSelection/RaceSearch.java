@@ -71,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -601,8 +601,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
     
@@ -712,8 +711,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * @exception Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
-    throws Exception
-  {
+    throws Exception {
     if (!(ASEval instanceof SubsetEvaluator)) {
       throw  new Exception(ASEval.getClass().getName() 
 			   + " is not a " 

@@ -66,7 +66,7 @@ import weka.attributeSelection.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {

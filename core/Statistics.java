@@ -17,7 +17,7 @@ package weka.core;
  * @author wolfgang.hoschek@cern.ch
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Statistics {
 
@@ -133,7 +133,7 @@ public class Statistics {
    * @param df the number of degrees of freedom
    * @return the chi-squared probability
    */
-  public static double chiSquaredProbability(double x, double v) throws ArithmeticException { 
+  public static double chiSquaredProbability(double x, double v) { 
 
     if( x < 0.0 || v < 1.0 ) return 0.0;
     return incompleteGammaComplement( v/2.0, x/2.0 );
@@ -206,7 +206,7 @@ public class Statistics {
    * @param y0 the area under the normal pdf
    * @return the z-value
    */
-  public static double normalInverse(double y0) throws ArithmeticException { 
+  public static double normalInverse(double y0) { 
 
     double x, y, z, y2, x0, x1;
     int code;
@@ -250,7 +250,7 @@ public class Statistics {
    * @param x the value
    * @return natural logarithm of gamma function
    */
-  public static double lnGamma(double x) throws ArithmeticException {
+  public static double lnGamma(double x) {
 
     double p, q, w, z;
  
@@ -505,7 +505,7 @@ public class Statistics {
    * @param coef the coefficients of the polynomial.
    * @param N the degree of the polynomial.
    */
-  static double p1evl( double x, double coef[], int N ) throws ArithmeticException {
+  static double p1evl( double x, double coef[], int N ) {
   
     double ans;
     ans = x + coef[0];
@@ -533,7 +533,7 @@ public class Statistics {
    * @param coef the coefficients of the polynomial.
    * @param N the degree of the polynomial.
    */
-  static double polevl( double x, double coef[], int N ) throws ArithmeticException {
+  static double polevl( double x, double coef[], int N ) {
 
     double ans;
     ans = coef[0];
@@ -549,7 +549,7 @@ public class Statistics {
    * @param x the integration end point.
    */
   static double incompleteGamma(double a, double x) 
-    throws ArithmeticException { 
+    { 
  
     double ans, ax, c, r;
  
@@ -583,7 +583,7 @@ public class Statistics {
    * @param a the parameter of the gamma distribution.
    * @param x the integration start point.
    */
-  static double incompleteGammaComplement( double a, double x ) throws ArithmeticException {
+  static double incompleteGammaComplement( double a, double x ) {
 
     double ans, ax, c, yc, r, t, y, z;
     double pk, pkm1, pkm2, qk, qkm1, qkm2;
@@ -639,7 +639,7 @@ public class Statistics {
   /**
    * Returns the Gamma function of the argument.
    */
-  static double gamma(double x) throws ArithmeticException {
+  static double gamma(double x) {
 
     double P[] = {
       1.60119522476751861407E-4,
@@ -727,7 +727,7 @@ public class Statistics {
    * Returns the Gamma function computed by Stirling's formula.
    * The polynomial STIR is valid for 33 <= x <= 172.
    */
-  static double stirlingFormula(double x) throws ArithmeticException {
+  static double stirlingFormula(double x) {
 
     double STIR[] = {
       7.87311395793093628397E-4,
@@ -761,7 +761,7 @@ public class Statistics {
    * @param bb the beta parameter of the beta distribution.
    * @param xx the integration end point.
    */
-  public static double incompleteBeta( double aa, double bb, double xx ) throws ArithmeticException {
+  public static double incompleteBeta( double aa, double bb, double xx ) {
 
     double a, b, t, x, xc, w, y;
     boolean flag;
@@ -847,7 +847,7 @@ public class Statistics {
   /**
    * Continued fraction expansion #1 for incomplete beta integral.
    */
-  static double incompleteBetaFraction1( double a, double b, double x ) throws ArithmeticException {
+  static double incompleteBetaFraction1( double a, double b, double x ) {
 
     double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
     double k1, k2, k3, k4, k5, k6, k7, k8;
@@ -926,7 +926,7 @@ public class Statistics {
   /**
    * Continued fraction expansion #2 for incomplete beta integral.
    */
-  static double incompleteBetaFraction2( double a, double b, double x ) throws ArithmeticException {
+  static double incompleteBetaFraction2( double a, double b, double x ) {
 
     double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
     double k1, k2, k3, k4, k5, k6, k7, k8;
@@ -1007,7 +1007,7 @@ public class Statistics {
    * Power series for incomplete beta integral.
    * Use when b*x is small and x not too close to 1.  
    */
-  static double powerSeries( double a, double b, double x ) throws ArithmeticException {
+  static double powerSeries( double a, double b, double x ) {
 
     double s, t, u, v, n, t1, z, ai;
     

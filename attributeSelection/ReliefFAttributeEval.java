@@ -68,7 +68,7 @@ import  weka.core.*;
  * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -245,8 +245,7 @@ public class ReliefFAttributeEval
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     String optionString;
     resetOptions();
     setWeightByDistance(Utils.getFlag('W', options));
@@ -295,8 +294,7 @@ public class ReliefFAttributeEval
    * @exception Exception if s is not positive
    */
   public void setSigma (int s)
-    throws Exception
-  {
+    throws Exception {
     if (s <= 0) {
       throw  new Exception("value of sigma must be > 0!");
     }
@@ -505,8 +503,7 @@ public class ReliefFAttributeEval
    * generated successfully
    */
   public void buildEvaluator (Instances data)
-    throws Exception
-  {
+    throws Exception {
     int z, totalInstances;
     Random r = new Random(m_seed);
 
@@ -645,8 +642,7 @@ public class ReliefFAttributeEval
    * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
-    throws Exception
-  {
+    throws Exception {
     return  m_weights[attribute];
   }
 

@@ -34,7 +34,7 @@ import weka.classifiers.trees.m5.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class M5Rules extends M5Base {
 

@@ -95,7 +95,7 @@ import java.util.Vector;
  * % RULE 2:   c2 := not(a0), a1 >= 0.562<br>
  *<p>
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  **/
 public class RDG1 extends Generator implements OptionHandler,
 			                       Serializable {
@@ -734,7 +734,7 @@ public class RDG1 extends Generator implements OptionHandler,
    * @param random random number generator
    * @return dataset header
    */
-  private Instances defineDataset(Random random) throws Exception{
+  private Instances defineDataset(Random random) throws Exception {
 
     boolean [] attList_Irr;
     int [] attList_Num;

@@ -69,7 +69,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class EM
   extends DistributionClusterer
@@ -192,8 +192,7 @@ public class EM
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
     resetOptions();
     setDebug(Utils.getFlag('V', options));
     String optionString = Utils.getOption('I', options);
@@ -338,8 +337,7 @@ public class EM
    * @exception Exception if i is less than 1
    */
   public void setMaxIterations (int i)
-    throws Exception
-  {
+    throws Exception {
     if (i < 1) {
       throw  new Exception("Maximum number of iterations must be > 0!");
     }
@@ -414,8 +412,7 @@ public class EM
    * @param num_cl the number of clusters
    **/
   private void EM_Init (Instances inst, int num_cl)
-    throws Exception
-  {
+    throws Exception {
     int i, j, k;
     m_weights = new double[inst.numInstances()][num_cl];
     m_model = new DiscreteEstimator[num_cl][m_num_attribs];
@@ -457,8 +454,7 @@ public class EM
    * @exception Exception if priors can't be calculated
    **/
   private void estimate_priors (Instances inst, int num_cl)
-    throws Exception
-  {
+    throws Exception {
     for (int i = 0; i < num_cl; i++) {
       m_priors[i] = 0.0;
     }
@@ -514,8 +510,7 @@ public class EM
    * @param num_cl the number of clusters
    */
   private void M (Instances inst, int num_cl)
-    throws Exception
-  {
+    throws Exception {
     int i, j, l;
     new_estimators(num_cl);
 
@@ -583,8 +578,7 @@ public class EM
    * @return the average log likelihood
    */
   private double E (Instances inst, int num_cl)
-    throws Exception
-  {
+    throws Exception {
     int i, j, l;
     double prob;
     double loglk = 0.0;
@@ -783,8 +777,7 @@ public class EM
    * @return the number of clusters selected
    */
   private int CVClusters ()
-    throws Exception
-  {
+    throws Exception {
     double CVLogLikely = -Double.MAX_VALUE;
     double templl, tll;
     boolean CVincreased = true;
@@ -854,8 +847,7 @@ public class EM
    * successfully
    */
   public int numberOfClusters ()
-    throws Exception
-  {
+    throws Exception {
     if (m_num_clusters == -1) {
       throw  new Exception("Haven't generated any clusters!");
     }
@@ -992,8 +984,7 @@ public class EM
    * Perform the EM algorithm
    */
   private void doEM ()
-    throws Exception
-  {
+    throws Exception {
     if (m_verbose) {
       System.out.println("Seed: " + m_rseed);
     }
@@ -1041,8 +1032,7 @@ public class EM
    * @return the log likelihood of the data
    */
   private double iterate (Instances inst, int num_cl, boolean report)
-    throws Exception
-  {
+    throws Exception {
     int i;
     double llkold = 0.0;
     double llk = 0.0;

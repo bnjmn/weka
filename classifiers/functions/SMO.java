@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.45 $ */
+ * @version $Revision: 1.46 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -1217,9 +1217,9 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   }
 
   /** The filter to apply to the training data */
-  public final static int FILTER_NORMALIZE = 0;
-  public final static int FILTER_STANDARDIZE = 1;
-  public final static int FILTER_NONE = 2;
+  public static final int FILTER_NORMALIZE = 0;
+  public static final int FILTER_STANDARDIZE = 1;
+  public static final int FILTER_NONE = 2;
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),

@@ -40,7 +40,7 @@ public interface WekaWrapper {
    * @exception IllegalArgumentException if the supplied object is
    * not of the class of algorithms handled by this wrapper.
    */
-  void setWrappedAlgorithm(Object algorithm) throws IllegalArgumentException;
+  void setWrappedAlgorithm(Object algorithm);
 
   /**
    * Get the algorithm

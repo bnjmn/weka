@@ -68,7 +68,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -104,10 +104,10 @@ public class MultiClassClassifier extends DistributionClassifier
   private int m_Method = METHOD_1_AGAINST_ALL;
 
   /** The error correction modes */
-  public final static int METHOD_1_AGAINST_ALL    = 0;
-  public final static int METHOD_ERROR_RANDOM     = 1;
-  public final static int METHOD_ERROR_EXHAUSTIVE = 2;
-  public final static int METHOD_1_AGAINST_1      = 3;
+  public static final int METHOD_1_AGAINST_ALL    = 0;
+  public static final int METHOD_ERROR_RANDOM     = 1;
+  public static final int METHOD_ERROR_EXHAUSTIVE = 2;
+  public static final int METHOD_1_AGAINST_1      = 3;
   public static final Tag [] TAGS_METHOD = {
     new Tag(METHOD_1_AGAINST_ALL, "1-against-all"),
     new Tag(METHOD_ERROR_RANDOM, "Random correction code"),

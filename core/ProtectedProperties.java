@@ -32,7 +32,7 @@ import java.io.InputStream;
  * unable to be modified.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ProtectedProperties extends Properties {
 
@@ -63,8 +63,7 @@ public class ProtectedProperties extends Properties {
    * @exception UnsupportedOperationException always.
    */
   public Object setProperty(String key, String value)
-    throws UnsupportedOperationException
-  {
+    {
     
     if (closed) 
       throw new
@@ -78,7 +77,7 @@ public class ProtectedProperties extends Properties {
    * @return never returns without throwing an exception.
    * @exception UnsupportedOperationException always.
    */  
-  public void load(InputStream inStream) throws UnsupportedOperationException {
+  public void load(InputStream inStream) {
     
     throw new
       UnsupportedOperationException("ProtectedProperties cannot be modified!");
@@ -90,7 +89,7 @@ public class ProtectedProperties extends Properties {
    * @return never returns without throwing an exception.
    * @exception UnsupportedOperationException always.
    */
-  public void clear() throws UnsupportedOperationException {
+  public void clear() {
     
     throw new
       UnsupportedOperationException("ProtectedProperties cannot be modified!");
@@ -103,7 +102,7 @@ public class ProtectedProperties extends Properties {
    * @exception UnsupportedOperationException always.
    */
   public Object put(Object key,
-		    Object value) throws UnsupportedOperationException {
+		    Object value) {
 
     if (closed) 
       throw new
@@ -117,7 +116,7 @@ public class ProtectedProperties extends Properties {
    * @return never returns without throwing an exception.
    * @exception UnsupportedOperationException always.
    */
-  public void putAll(Map t) throws UnsupportedOperationException {
+  public void putAll(Map t) {
     
     throw new
       UnsupportedOperationException("ProtectedProperties cannot be modified!");
@@ -129,7 +128,7 @@ public class ProtectedProperties extends Properties {
    * @return never returns without throwing an exception.
    * @exception UnsupportedOperationException always.
    */
-  public Object remove(Object key) throws UnsupportedOperationException {
+  public Object remove(Object key) {
 
     throw new
       UnsupportedOperationException("ProtectedProperties cannot be modified!");

@@ -149,7 +149,7 @@ public class FlexibleDecimalFormat extends DecimalFormat {
     this.grouping = grouping;
   }
     
-  private static  void println ( Object obj ){
+  private static void println ( Object obj ){
     System.out.println( obj );
   }
 

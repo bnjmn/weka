@@ -60,7 +60,7 @@ import java.lang.Math;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class KDTree implements OptionHandler, Serializable{
 
@@ -1145,7 +1145,7 @@ public class KDTree implements OptionHandler, Serializable{
    * @param p True if pruning should be used.
    */
   public void centerInstances(Instances centers, int [] assignments,
-				double pc) throws Exception{
+				double pc) throws Exception {
     
     int [] centList = new int[centers.numInstances()];
     for (int i = 0; i < centers.numInstances(); i++)

@@ -34,10 +34,10 @@ import java.util.Vector;
  * Journal of Artificial Intelligence Research 8 (1998) 67-91
  * *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ADNode {
-        final static int MIN_RECORD_SIZE = 5;
+        static final int MIN_RECORD_SIZE = 5;
 	
 	/** list of VaryNode children **/
 	public VaryNode [] m_VaryNodes;

@@ -58,7 +58,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AddExpression extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -125,7 +125,7 @@ public class AddExpression extends Filter
     /** the operator */
     protected char m_operator;
 
-    public Operator(char opp) throws IllegalArgumentException {
+    public Operator(char opp) {
       if (!isOperator(opp)) {
 	throw new IllegalArgumentException("Unrecognized operator:" + opp);
       }
@@ -443,7 +443,7 @@ public class AddExpression extends Filter
    * @param char the operator
    * @return the infix priority
    */
-  private int infixPriority(char opp) throws IllegalArgumentException {
+  private int infixPriority(char opp) {
     switch (opp) {
     case 'l' : 
     case 'b' :
@@ -480,7 +480,7 @@ public class AddExpression extends Filter
    * @param char the operator
    * @return the stack priority
    */
-  private int stackPriority(char opp) throws IllegalArgumentException {
+  private int stackPriority(char opp) {
      switch (opp) {
      case 'l' :
      case 'b' :
