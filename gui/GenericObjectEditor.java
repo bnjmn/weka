@@ -63,7 +63,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -508,6 +508,12 @@ public class GenericObjectEditor implements PropertyEditor {
 			GenericObjectEditor.class);
       java.beans.PropertyEditorManager
 	.registerEditor(weka.classifiers.Classifier.class,
+			GenericObjectEditor.class);
+      java.beans.PropertyEditorManager
+	.registerEditor(weka.attributeSelection.ASEvaluation.class,
+			GenericObjectEditor.class);
+      java.beans.PropertyEditorManager
+	.registerEditor(weka.attributeSelection.ASSearch.class,
 			GenericObjectEditor.class);
       java.beans.PropertyEditorManager
 	.registerEditor(SelectedTag.class,
