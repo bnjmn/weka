@@ -33,12 +33,11 @@ import java.util.Vector;
  *
  * Valid filter-specific options are: <p>
  *
- * -T type <br>
- * Attribute type to delete.
- * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
+ * -M percentage <br>
+ * The maximum variance allowed before an attribute will be deleted (default 100).<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class UselessAttributeFilter extends Filter implements OptionHandler {
 
@@ -162,9 +161,8 @@ public class UselessAttributeFilter extends Filter implements OptionHandler {
   /**
    * Parses the options for this object. Valid options are: <p>
    *
-   * -T type <br>
-   * Attribute type to delete.
-   * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
+   * -M percentage <br>
+   * The maximum variance allowed before an attribute will be deleted (default 100).
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
