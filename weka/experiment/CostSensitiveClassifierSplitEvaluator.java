@@ -25,22 +25,12 @@ import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
 
-import java.beans.MethodDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyEditorManager;
-import java.beans.PropertyVetoException;
-import java.beans.Beans;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * A SplitEvaluator that produces results for a classification scheme
  * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -355,14 +345,13 @@ public class CostSensitiveClassifierSplitEvaluator
     for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
 	try {
-	  Class args [] = { };
-	  Method meth = m_Classifier.getClass()
-	    .getDeclaredMethod(m_AdditionalMeasures[i], args);
-	  Double value = (Double)(meth.invoke(m_Classifier, args));
+	  double dv = ((AdditionalMeasureProducer)m_Classifier).
+	    getMeasure(m_AdditionalMeasures[i]);
+	  Double value = new Double(dv);
+
 	  result[current++] = value;
 	} catch (Exception ex) {
-	  System.err.println("Problem with invoking method in "
-			     +"CostSensitiveClassifierSplitEvaluator");
+	  System.err.println(ex);
 	}
       } else {
 	result[current++] = null;
