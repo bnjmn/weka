@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 
@@ -439,6 +439,7 @@ public class MatrixPanel extends JPanel{
     m_classIndex = m_classAttrib.getSelectedIndex();
     double minC=0, maxC=0;
 
+    int originalClassIndex = m_data.classIndex();
     m_data.setClassIndex(m_classIndex);
     /** Resampling  **/
     if(Double.parseDouble(m_resamplePercent.getText())<100) {
@@ -467,6 +468,8 @@ public class MatrixPanel extends JPanel{
       }
       catch(Exception ex) { System.out.println("Error occurred while sampling"); ex.printStackTrace();  }
     }
+
+    m_data.setClassIndex(originalClassIndex);
     
     m_points = new int[inst.numInstances()][inst.numAttributes()];
     m_pointColors = new int[inst.numInstances()];
@@ -633,6 +636,7 @@ public class MatrixPanel extends JPanel{
       @param newInst The new set of Instances
   */
   public void setInstances(Instances newInst) {
+
     m_data = newInst;
     setPercent();
     setupAttribLists();
