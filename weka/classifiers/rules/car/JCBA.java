@@ -71,7 +71,7 @@ import weka.associations.ItemSet;
  *   
  * 
  * @author Stefan Mutter
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeasureProducer {
@@ -365,7 +365,7 @@ public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeas
    /** Gets the tipText for the specified option.
     * @return the tipText for the specified option.
     */   
-   public String cfTipText(){
+   public String CFTipText(){
    
        return "Sets the confidence value for the optional pessimistic-error-rate-based pruning step.";
    }
@@ -417,7 +417,7 @@ public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeas
    /** Gets the tipText for the specified option.
     * @return the tipText for the specified option.
     */   
-   public String cBATipText(){
+   public String CBATipText(){
    
        return "If set to false, a simple decision list classification without pruning (no opt. and no obligatory pruning step) is performed,"
                + "otherwise JCBA performs at least its obligatory pruning step.";
