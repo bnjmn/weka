@@ -26,7 +26,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class MergeTwoValuesFilter extends Filter implements OptionHandler {
 
@@ -75,12 +75,13 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
       m_SecondIndex = instanceInfo.attribute(m_AttIndex).numValues() - 1;
     }
     if (!instanceInfo.attribute(m_AttIndex).isNominal()) {
-      throw new Exception("Chosen attribute not nominal.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
     }
     if (instanceInfo.attribute(m_AttIndex).numValues() < 2) {
-      throw new Exception("Chosen attribute has less than two values.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute has less than two values.");
     }
     if (m_SecondIndex <= m_FirstIndex) {
+      // XXX Maybe we should just swap the values??
       throw new Exception("The second index has to be greater "+
 			  "than the first.");
     }
@@ -95,13 +96,12 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been set.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -291,10 +291,8 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
    * Set the output format. Takes the current average class values
    * and m_InputFormat and calls setOutputFormat(Instances) 
    * appropriately.
-   *
-   * @exception Exception if a problem occurs when setting the output format
    */
-  private void setOutputFormat() throws Exception {
+  private void setOutputFormat() {
     
     Instances newData;
     FastVector newAtts, newVals;

@@ -28,7 +28,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CopyAttributesFilter extends Filter implements OptionHandler {
 
@@ -167,13 +167,12 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the correct 
-   * format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been defined.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();

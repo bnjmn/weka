@@ -30,7 +30,7 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@intelligenesis.net)
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  **/
 public class StringToWordVectorFilter extends Filter {
 
@@ -98,16 +98,15 @@ public class StringToWordVectorFilter extends Filter {
    * Input an instance for filtering. Filter requires all
    * training instances be read before producing output.
    *
-   * @param instance the input instance
+   * @param instance the input instance.
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input structure has been defined.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -127,13 +126,13 @@ public class StringToWordVectorFilter extends Filter {
    * If the filter requires all instances prior to filtering,
    * output() may now be called to retrieve the filtered instances.
    *
-   * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @return true if there are instances pending output.
+   * @exception IllegalStateException if no input structure has been defined.
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
 
     // Determine the dictionary
@@ -197,7 +196,7 @@ public class StringToWordVectorFilter extends Filter {
   }
 
 
-  private void determineDictionary() throws Exception {
+  private void determineDictionary() {
     
     int classInd = getInputFormat().classIndex();
     int values = 1;
@@ -333,7 +332,7 @@ public class StringToWordVectorFilter extends Filter {
   }
 
 
-  private void convertInstance(Instance instance) throws Exception {
+  private void convertInstance(Instance instance) {
 
     // Convert the instance into a sorted set of indexes
     TreeMap contained = new TreeMap();

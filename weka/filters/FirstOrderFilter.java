@@ -18,6 +18,7 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.UnsupportedAttributeTypeException;
 
 /** 
  * This instance filter takes a range of N numeric attributes and replaces
@@ -42,7 +43,7 @@ import weka.core.Utils;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -121,8 +122,9 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if any of the selected attributes are
-   * not numeric
+   * @exception UnsupportedAttributeTypeException if any of the
+   * selected attributes are not numeric 
+   * @exception Exception if only one attribute has been selected.
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
@@ -134,7 +136,7 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
       if (m_DeltaCols.isInRange(i)) {
         selectedCount++;
         if (getInputFormat().attribute(i).type() != Attribute.NUMERIC) {
-          throw new Exception("Selected attributes must be all numeric");
+          throw new UnsupportedAttributeTypeException("Selected attributes must be all numeric");
         }
       }
     }
@@ -172,13 +174,12 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the correct 
-   * format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been defined.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();

@@ -44,7 +44,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -76,12 +76,7 @@ public class DiscretizeFilter extends Filter
   /** Constructor - initialises the filter */
   public DiscretizeFilter() {
 
-    try {
-      setAttributeIndices("first-last");
-    } catch (Exception ex) {
-      System.err.println("Problem setting attribute indices: "
-			 + ex.getMessage());
-    }
+    setAttributeIndices("first-last");
   }
 
 
@@ -254,12 +249,12 @@ public class DiscretizeFilter extends Filter
     m_CutPoints = null;
     if (m_UseMDL) {
       if (instanceInfo.classIndex() < 0) {
-	throw new Exception("Cannot use class-based discretization: "
-			    + "no class assigned to the dataset");
+	throw new UnassignedClassException("Cannot use class-based discretization: "
+                                           + "no class assigned to the dataset");
       }
       if (!instanceInfo.classAttribute().isNominal()) {
-	throw new Exception("Supervised discretization not possible:"
-			    + " class is not nominal!");
+	throw new UnsupportedClassTypeException("Supervised discretization not possible:"
+                                                + " class is not nominal!");
       }
     }
 
@@ -278,13 +273,12 @@ public class DiscretizeFilter extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the correct 
-   * format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been defined.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -307,12 +301,12 @@ public class DiscretizeFilter extends Filter
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_CutPoints == null) {
       calculateCutPoints();
@@ -608,9 +602,9 @@ public class DiscretizeFilter extends Filter
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @exception Exception if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
-  public void setAttributeIndices(String rangeList) throws Exception {
+  public void setAttributeIndices(String rangeList) {
 
     m_DiscretizeCols.setRanges(rangeList);
   }
@@ -622,9 +616,10 @@ public class DiscretizeFilter extends Filter
    * @param attributes an array containing indexes of attributes to Discretize.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @exception Exception if an invalid set of ranges is supplied 
+   * @exception IllegalArgumentException if an invalid set of ranges
+   * is supplied 
    */
-  public void setAttributeIndicesArray(int [] attributes) throws Exception {
+  public void setAttributeIndicesArray(int [] attributes) {
 
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
@@ -645,7 +640,7 @@ public class DiscretizeFilter extends Filter
   }
 
   /** Generate the cutpoints for each attribute */
-  protected void calculateCutPoints() throws Exception {
+  protected void calculateCutPoints() {
 
     Instances copy = null;
 
@@ -677,7 +672,7 @@ public class DiscretizeFilter extends Filter
    * @param index the index of the attribute to set cutpoints for
    */
   protected void calculateCutPointsByMDL(int index,
-					 Instances data) throws Exception {
+					 Instances data) {
 
     // Sort instances
     data.sort(data.attribute(index));
@@ -800,8 +795,7 @@ public class DiscretizeFilter extends Filter
 
   /** Selects cutpoints for sorted subset. */
   private double[] cutPointsForSubset(Instances instances, int attIndex, 
-				      int first, int lastPlusOne) 
-       throws Exception { 
+				      int first, int lastPlusOne) { 
 
     double[][] counts, bestCounts;
     double[] priorCounts, left, right, cutPoints;
@@ -1017,10 +1011,8 @@ public class DiscretizeFilter extends Filter
   /**
    * Set the output format. Takes the currently defined cutpoints and 
    * m_InputFormat and calls setOutputFormat(Instances) appropriately.
-   *
-   * @exception Exception if a problem occurs setting the output format
    */
-  protected void setOutputFormat() throws Exception {
+  protected void setOutputFormat() {
 
     if (m_CutPoints == null) {
       setOutputFormat(null);
@@ -1093,7 +1085,7 @@ public class DiscretizeFilter extends Filter
    *
    * @param instance the instance to convert
    */
-  protected void convertInstance(Instance instance) throws Exception {
+  protected void convertInstance(Instance instance) {
 
     int index = 0;
     double [] vals = new double [outputFormatPeek().numAttributes()];

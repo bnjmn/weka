@@ -27,7 +27,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {
@@ -57,6 +57,8 @@ public class SwapAttributeValuesFilter extends Filter
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @exception UnsupportedAttributeTypeException if the selected attribute
+   * is not nominal or if it only has one value.
    * @exception Exception if the input format can't be set 
    * successfully
    */
@@ -77,10 +79,10 @@ public class SwapAttributeValuesFilter extends Filter
       m_SecondIndex = instanceInfo.attribute(m_AttIndex).numValues() - 1;
     }
     if (!instanceInfo.attribute(m_AttIndex).isNominal()) {
-      throw new Exception("Chosen attribute not nominal.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
     }
     if (instanceInfo.attribute(m_AttIndex).numValues() < 2) {
-      throw new Exception("Chosen attribute has less than two values.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute has less than two values.");
     }
     setOutputFormat();
     return true;
@@ -93,13 +95,12 @@ public class SwapAttributeValuesFilter extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input structure has been defined.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -288,10 +289,8 @@ public class SwapAttributeValuesFilter extends Filter
   /**
    * Set the output format. Swapss the desired nominal attribute values in
    * the header and calls setOutputFormat(Instances) appropriately.
-   *
-   * @exception Exception if a problem occurs when setting the output format
    */
-  private void setOutputFormat() throws Exception {
+  private void setOutputFormat() {
     
     Instances newData;
     FastVector newAtts, newVals;

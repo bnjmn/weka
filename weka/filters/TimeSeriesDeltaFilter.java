@@ -40,7 +40,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
 
@@ -51,7 +51,8 @@ public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the format couldn't be set successfully
+   * @exception UnsupportedAttributeTypeException if selected
+   * attributes are not numeric.  
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
@@ -66,7 +67,7 @@ public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
 				       + (m_InstanceRange < 0 ? '-' : '+')
 				       + Math.abs(m_InstanceRange));
 	} else {
-	  throw new Exception("Time delta attributes must be numeric!");
+	  throw new UnsupportedAttributeTypeException("Time delta attributes must be numeric!");
 	}
       }
     }

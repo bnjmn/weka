@@ -22,7 +22,7 @@ import weka.core.*;
  * Specify the random number seed (default 42).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RandomizeFilter extends Filter implements OptionHandler {
 
@@ -138,12 +138,12 @@ public class RandomizeFilter extends Filter implements OptionHandler {
    * implementation randomizes all the instances received in the batch.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined 
+   * @exception IllegalStateException if no input format has been set. 
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
 
     getInputFormat().randomize(m_Random);

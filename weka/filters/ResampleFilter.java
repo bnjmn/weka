@@ -40,7 +40,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -241,13 +241,12 @@ public class ResampleFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -268,12 +267,12 @@ public class ResampleFilter extends Filter implements OptionHandler {
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
 
     if (!m_FirstBatchDone) {
@@ -292,7 +291,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
    * Creates a subsample of the current set of input instances. The output
    * instances are pushed onto the output queue for collection.
    */
-  private void createSubsample() throws Exception {
+  private void createSubsample() {
 
     int origSize = getInputFormat().numInstances();
     int sampleSize = (int) (origSize * m_SampleSizePercent / 100);

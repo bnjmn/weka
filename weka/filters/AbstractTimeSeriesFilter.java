@@ -39,7 +39,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractTimeSeriesFilter extends Filter
   implements OptionHandler {
@@ -223,12 +223,12 @@ public abstract class AbstractTimeSeriesFilter extends Filter
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (getFillWithMissing() && (m_InstanceRange > 0)) {
       while (!m_History.empty()) {

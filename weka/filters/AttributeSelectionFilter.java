@@ -25,7 +25,7 @@ import weka.attributeSelection.*;
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
@@ -232,13 +232,14 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
+   * @exception IllegalStateException if no input format has been defined.
    * @exception Exception if the input instance was not of the correct format 
    * or if there was a problem with the filtering.
    */
   public boolean input(Instance instance) throws Exception {
     
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
 
     if (m_NewBatch) {
@@ -260,13 +261,14 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * requires all instances prior to filtering, output() may now be called
    * to retrieve the filtered instances.
    *
-   * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @return true if there are instances pending output.
+   * @exception IllegalStateException if no input structure has been defined.
+   * @exception Exception if there is a problem during the attribute selection.
    */
   public boolean batchFinished() throws Exception {
     
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
 
     if (!isOutputFormatDefined()) {

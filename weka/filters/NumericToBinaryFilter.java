@@ -20,7 +20,7 @@ import weka.core.*;
  * attribute will be one. The new attributes will nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class NumericToBinaryFilter extends Filter {
 
@@ -47,13 +47,12 @@ public class NumericToBinaryFilter extends Filter {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been defined.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -66,7 +65,7 @@ public class NumericToBinaryFilter extends Filter {
   /** 
    * Set the output format. 
    */
-  private void setOutputFormat() throws Exception {
+  private void setOutputFormat() {
 
     FastVector newAtts;
     int newClassIndex;
@@ -99,7 +98,7 @@ public class NumericToBinaryFilter extends Filter {
    *
    * @param instance the instance to convert
    */
-  private void convertInstance(Instance instance) throws Exception {
+  private void convertInstance(Instance instance) {
   
     Instance inst = null;
     if (instance instanceof SparseInstance) {

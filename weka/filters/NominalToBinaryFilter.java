@@ -24,7 +24,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -49,7 +49,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
     super.inputFormat(instanceInfo);
     if (instanceInfo.classIndex() < 0) {
-      throw new Exception("No class has been assigned to the instances");
+      throw new UnassignedClassException("No class has been assigned to the instances");
     }
     setOutputFormat();
     m_Indices = null;
@@ -67,13 +67,12 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been set
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -94,12 +93,12 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if ((m_Indices == null) && 
 	(getInputFormat().classAttribute().isNumeric())) {
@@ -193,7 +192,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   }
 
   /** Computes average class values for each attribute and value */
-  private void computeAverageClassValues() throws Exception {
+  private void computeAverageClassValues() {
     
     double totalCounts, sum;
     Instance instance;
@@ -232,7 +231,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   }
 
   /** Set the output format. */
-  private void setOutputFormat() throws Exception {
+  private void setOutputFormat() {
 
     if (getInputFormat().classAttribute().isNominal()) {
       setOutputFormatNominal();
@@ -247,7 +246,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    *
    * @param instance the instance to convert
    */
-  private void convertInstance(Instance inst) throws Exception {
+  private void convertInstance(Instance inst) {
 
     if (getInputFormat().classAttribute().isNominal()) {
       convertInstanceNominal(inst);
@@ -258,10 +257,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
   /**
    * Set the output format if the class is nominal.
-   *
-   * @exception Exception if a problem occurs when setting the output format
    */
-  private void setOutputFormatNominal() throws Exception {
+  private void setOutputFormatNominal() {
 
     FastVector newAtts;
     int newClassIndex;
@@ -317,10 +314,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
   /**
    * Set the output format if the class is numeric.
-   *
-   * @exception Exception if a problem occurs when setting the output format
    */
-  private void setOutputFormatNumeric() throws Exception {
+  private void setOutputFormatNumeric() {
 
     if (m_Indices == null) {
       setOutputFormat(null);
@@ -380,7 +375,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    *
    * @param instance the instance to convert
    */
-  private void convertInstanceNominal(Instance instance) throws Exception {
+  private void convertInstanceNominal(Instance instance) {
   
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
@@ -430,7 +425,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    *
    * @param instance the instance to convert
    */
-  private void convertInstanceNumeric(Instance instance) throws Exception {
+  private void convertInstanceNumeric(Instance instance) {
   
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;

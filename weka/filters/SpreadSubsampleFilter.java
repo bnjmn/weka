@@ -7,16 +7,17 @@
 
 package weka.filters;
 
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Random;
+import java.util.Vector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.OptionHandler;
 import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.Utils;
-
-import java.util.Random;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Hashtable;
+import weka.core.UnsupportedClassTypeException;
 
 /** 
  * Produces a random subsample of a dataset. The original dataset must
@@ -48,7 +49,7 @@ import java.util.Hashtable;
  *  <p>
  *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  **/
 public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
@@ -275,14 +276,18 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
-   * successfully
+   * @exception UnassignedClassException if no class attribute has been set.
+   * @exception UnsupportedClassTypeException if the class attribute
+   * is not nominal. 
    */
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
     super.inputFormat(instanceInfo);
-    setOutputFormat(getInputFormat());
+    if (instanceInfo.classAttribute().isNominal() == false) {
+      throw new UnsupportedClassTypeException("The class attribute must be nominal.");
+    }
+    setOutputFormat(instanceInfo);
     m_FirstBatchDone = false;
     return true;
   }
@@ -294,13 +299,12 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input structure has been defined 
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -321,12 +325,12 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
 
     if (!m_FirstBatchDone) {
@@ -345,17 +349,9 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    * Creates a subsample of the current set of input instances. The output
    * instances are pushed onto the output queue for collection.
    */
-  private void createSubsample() throws Exception {
+  private void createSubsample() {
 
     int classI = getInputFormat().classIndex();
-    if (classI == -1) {
-      throw new Exception("No class attribute is set");
-    }
-
-    if (getInputFormat().classAttribute().isNominal() == false) {
-      throw new Exception ("The class attribute must be nominal.");
-    }
-
     // Sort according to class attribute.
     getInputFormat().sort(classI);
     // Determine where each class starts in the sorted dataset
@@ -453,7 +449,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    * Creates an index containing the position where each class starts in 
    * the getInputFormat(). m_InputFormat must be sorted on the class attribute.
    */
-  private int []getClassIndices() throws Exception {
+  private int []getClassIndices() {
 
     // Create an index of where each class value starts
     int [] classIndices = new int [getInputFormat().numClasses() + 1];

@@ -18,6 +18,7 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.UnsupportedAttributeTypeException;
 
 /** 
  * Filters instances according to the value of an attribute.<p>
@@ -48,7 +49,7 @@ import weka.core.Utils;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class InstanceFilter extends Filter implements OptionHandler {
 
@@ -224,7 +225,8 @@ public class InstanceFilter extends Filter implements OptionHandler {
    * @param instanceInfo an Instances object containing the input instance
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
-   * @exception Exception if selection is not possible
+   * @exception UnsupportedAttributeTypeException if the specified attribute
+   * is neither numeric or nominal.
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
@@ -235,7 +237,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
       m_Attribute = m_AttributeSet;
     }
     if (!isNumeric() && !isNominal()) {
-      throw new Exception("Can only handle numeric or nominal attributes.");
+      throw new UnsupportedAttributeTypeException("Can only handle numeric or nominal attributes.");
     }
     m_Values.setUpper(instanceInfo.attribute(m_Attribute).numValues() - 1);
     if (isNominal() && m_ModifyHeader) {
@@ -275,13 +277,12 @@ public class InstanceFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the correct 
-   * format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been set.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -469,9 +470,9 @@ public class InstanceFilter extends Filter implements OptionHandler {
    *
    * @param rangeList a string representing the list of nominal indices.
    * eg: first-3,5,6-last
-   * @exception Exception if an invalid range list is supplied
+   * @exception InvalidArgumentException if an invalid range list is supplied
    */
-  public void setNominalIndices(String rangeList) throws Exception {
+  public void setNominalIndices(String rangeList) {
     
     m_Values.setRanges(rangeList);
   }
@@ -482,9 +483,9 @@ public class InstanceFilter extends Filter implements OptionHandler {
    *
    * @param values an array containing indexes of values to be
    * used for selection
-   * @exception Exception if an invalid set of ranges is supplied
+   * @exception InvalidArgumentException if an invalid set of ranges is supplied
    */
-  public void setNominalIndicesArr(int [] values) throws Exception {
+  public void setNominalIndicesArr(int [] values) {
 
     String rangeList = "";
     for(int i = 0; i < values.length; i++) {

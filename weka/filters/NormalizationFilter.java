@@ -17,7 +17,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class NormalizationFilter extends Filter {
 
@@ -53,13 +53,12 @@ public class NormalizationFilter extends Filter {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been set.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -80,12 +79,12 @@ public class NormalizationFilter extends Filter {
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_MinArray == null) {
       Instances input = getInputFormat();
@@ -133,7 +132,7 @@ public class NormalizationFilter extends Filter {
    *
    * @param instance the instance to convert
    */
-  private void convertInstance(Instance instance) throws Exception {
+  private void convertInstance(Instance instance) {
   
     Instance inst = null;
     if (instance instanceof SparseInstance) {
