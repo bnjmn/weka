@@ -37,7 +37,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class RandomSplitResultProducer 
@@ -190,7 +190,7 @@ public class RandomSplitResultProducer
     // Add in some fields to the key like run number, dataset name
     Object [] seKey = m_SplitEvaluator.getKey();
     Object [] key = new Object [seKey.length + 2];
-    key[0] = m_Instances.relationName();
+    key[0] = Utils.backQuoteChars(m_Instances.relationName());
     key[1] = "" + run;
     System.arraycopy(seKey, 0, key, 2, seKey.length);
     if (m_ResultListener.isResultRequired(this, key)) {
@@ -225,7 +225,7 @@ public class RandomSplitResultProducer
     // Add in some fields to the key like run number, dataset name
     Object [] seKey = m_SplitEvaluator.getKey();
     Object [] key = new Object [seKey.length + 2];
-    key[0] = m_Instances.relationName();
+    key[0] = Utils.backQuoteChars(m_Instances.relationName());
     key[1] = "" + run;
     System.arraycopy(seKey, 0, key, 2, seKey.length);
     if (m_ResultListener.isResultRequired(this, key)) {
@@ -244,9 +244,11 @@ public class RandomSplitResultProducer
 	System.arraycopy(seResults, 0, results, 1,
 			 seResults.length);
 	if (m_debugOutput) {
-	  String resultName = (""+run+"."+runInstances.relationName()
-			       +"."
-			       +m_SplitEvaluator.toString()).replace(' ','_');
+	  String resultName = 
+	    (""+run+"."+
+	     Utils.backQuoteChars(runInstances.relationName())
+	     +"."
+	     +m_SplitEvaluator.toString()).replace(' ','_');
 	  m_ZipDest.zipit(m_SplitEvaluator.getRawResultOutput(), resultName);
 	}
 	m_ResultListener.acceptResult(this, key, results);
@@ -628,7 +630,7 @@ public class RandomSplitResultProducer
     if (m_Instances == null) {
       result += ": <null Instances>";
     } else {
-      result += ": " + m_Instances.relationName();
+      result += ": " + Utils.backQuoteChars(m_Instances.relationName());
     }
     return result;
   }

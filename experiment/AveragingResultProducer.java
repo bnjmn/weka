@@ -35,7 +35,7 @@ import weka.core.Option;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler {
@@ -967,7 +967,7 @@ public class AveragingResultProducer
     if (m_Instances == null) {
       result += ": <null Instances>";
     } else {
-      result += ": " + m_Instances.relationName();
+      result += ": " + Utils.backQuoteChars(m_Instances.relationName());
     }
     return result;
   }

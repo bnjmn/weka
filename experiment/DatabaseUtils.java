@@ -47,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -65,9 +65,6 @@ public class DatabaseUtils implements Serializable {
 
   /** The prefix for result table names */
   public static final String EXP_RESULT_PREFIX = "Results";
-  
-  /** The max length of a string in a string field */
-  protected static final int STRING_FIELD_LENGTH  = 255;
 
   /** The name of the properties file */
   protected static String PROPERTY_FILE
@@ -480,6 +477,9 @@ public class DatabaseUtils implements Serializable {
       case Types.CHAR:
       case Types.VARCHAR:
       case Types.LONGVARCHAR:
+      case Types.BINARY:
+      case Types.VARBINARY:
+      case Types.LONGVARBINARY:
 	result[i - 1] = rs.getString(i);
 	if (rs.wasNull()) {
 	  result[i - 1] = null;
@@ -606,10 +606,21 @@ public class DatabaseUtils implements Serializable {
     if (m_Debug) {
       System.err.println("Creating experiment index table...");
     }
-    String query = "CREATE TABLE " + EXP_INDEX_TABLE 
-      + " ( " + EXP_TYPE_COL + " VARCHAR (" + STRING_FIELD_LENGTH + "),"
-      + "  " + EXP_SETUP_COL + " VARCHAR (" + STRING_FIELD_LENGTH + "),"
-      + "  " + EXP_RESULT_COL + " INT )";
+    String query;
+
+    // Workaround for MySQL (doesn't support LONGVARBINARY)
+    if (m_Connection.getMetaData().getDriverName().
+	equals("Mark Matthews' MySQL Driver")) {
+      query = "CREATE TABLE " + EXP_INDEX_TABLE 
+	+ " ( " + EXP_TYPE_COL + " TEXT,"
+	+ "  " + EXP_SETUP_COL + " TEXT,"
+	+ "  " + EXP_RESULT_COL + " INT )";
+    } else {
+      query = "CREATE TABLE " + EXP_INDEX_TABLE 
+	+ " ( " + EXP_TYPE_COL + " LONGVARBINARY,"
+	+ "  " + EXP_SETUP_COL + " LONGVARBINARY,"
+	+ "  " + EXP_RESULT_COL + " INT )";
+    }
     // Other possible fields:
     //   creator user name (from System properties)
     //   creation date
@@ -773,7 +784,14 @@ public class DatabaseUtils implements Serializable {
       if (types[i] instanceof Double) {
 	query += "DOUBLE";
       } else if (types[i] instanceof String) {
-	query += "VARCHAR (" + STRING_FIELD_LENGTH + ")";
+
+	// Workaround for MySQL (doesn't support LONGVARCHAR)
+	if (m_Connection.getMetaData().getDriverName().
+	    equals("Mark Matthews' MySQL Driver")) {
+	  query += "TEXT ";
+	} else {
+	  query += "LONGVARBINARY ";
+	}
       } else {
 	throw new Exception("Unknown/unsupported field type in key");
       }
@@ -790,7 +808,14 @@ public class DatabaseUtils implements Serializable {
       if (types[i] instanceof Double) {
 	query += "DOUBLE";
       } else if (types[i] instanceof String) {
-	query += "VARCHAR (" + STRING_FIELD_LENGTH + ")";
+	
+	// Workaround for MySQL (doesn't support LONGVARCHAR)
+	if (m_Connection.getMetaData().getDriverName().
+	    equals("Mark Matthews' MySQL Driver")) {
+	  query += "TEXT ";
+	} else {
+	  query += "LONGVARBINARY ";
+	}
       } else {
 	throw new Exception("Unknown/unsupported field type in key");
       }
