@@ -33,6 +33,7 @@ import java.util.Random;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.WeightedInstancesHandler;
 import weka.core.Option;
 import weka.core.Utils;
 import weka.core.UnsupportedAttributeTypeException;
@@ -62,10 +63,10 @@ import weka.core.UnsupportedAttributeTypeException;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class Bagging extends DistributionClassifier 
-  implements OptionHandler {
+  implements OptionHandler, WeightedInstancesHandler {
 
   /** The model base classifier to use */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -303,14 +304,14 @@ public class Bagging extends DistributionClassifier
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
+
     int bagSize = data.numInstances() * m_BagSizePercent / 100;
     Random random = new Random(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {
-      Instances bagData = new Instances(data, bagSize);
-      while (bagData.numInstances() < bagSize) {
-	int i = (int) (random.nextDouble() * 
-		   (double) data.numInstances());
-	bagData.add(data.instance(i));
+      Instances bagData = data.resampleWithWeights(random);
+      if (bagSize < data.numInstances()) {
+	Instances newBagData = new Instances(bagData, 0, bagSize);
+	bagData = newBagData;
       }
       m_Classifiers[j].buildClassifier(bagData);
     }
