@@ -20,9 +20,11 @@
 package weka.gui.explorer;
 
 import weka.core.Instances;
+import weka.core.Instance;
 import weka.core.OptionHandler;
 import weka.core.Attribute;
 import weka.core.Utils;
+import weka.core.FastVector;
 import weka.clusterers.Clusterer;
 import weka.clusterers.ClusterEvaluation;
 import weka.gui.Logger;
@@ -37,6 +39,7 @@ import weka.gui.SaveBuffer;
 import weka.filters.Filter;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.Plot2D;
 
 import java.util.Random;
 import java.util.Date;
@@ -98,7 +101,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -568,6 +571,47 @@ public class ClustererPanel extends JPanel {
     }
     m_SetTestFrame.setVisible(true);
   }
+
+  /**
+   * Sets up the structure for the visualizable instances. This dataset
+   * contains the original attributes plus the clusterer's cluster assignments
+   * @param testInstancs the instances that the clusterer has clustered
+   * @return a new set of instances containing one more attribute (predicted
+   * cluster) than the testInstances
+   */
+  private Instances setUpVisualizableInstances(Instances testInstances,
+					       int numClusters,
+					       double [] clusterAssignments) {
+    FastVector hv = new FastVector();
+    Instances newInsts;
+
+    Attribute predictedCluster;
+    FastVector clustVals = new FastVector();
+
+    for (int i = 0; i < numClusters; i++) {
+      clustVals.addElement("cluster"+i);
+    }
+    predictedCluster = new Attribute("Cluster", clustVals);
+    for (int i = 0; i < testInstances.numAttributes(); i++) {
+      hv.addElement(testInstances.attribute(i).copy());
+    }
+    hv.addElement(predictedCluster);
+    
+    newInsts = new Instances(testInstances.relationName()+"_clustered", hv, 
+			     testInstances.numInstances());
+
+    double [] values;
+    int j;
+    for (int i = 0; i < testInstances.numInstances(); i++) {
+       values = new double[newInsts.numAttributes()];
+      for (j = 0; j < testInstances.numAttributes(); j++) {
+	values[j] = testInstances.instance(i).value(j);
+      }
+      values[j] = clusterAssignments[i];
+      newInsts.add(new Instance(1.0, values));
+    }
+    return newInsts;
+  }
   
   /**
    * Starts running the currently configured clusterer with the current
@@ -677,14 +721,17 @@ public class ClustererPanel extends JPanel {
 	    outBuff.append(clusterer.toString() + '\n');
 	    m_History.updateResult(name);
 	    
+	    int numClusters;
 	    ClusterEvaluation eval = new ClusterEvaluation();
 	    eval.setClusterer(clusterer);
 	    switch (testMode) {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Clustering training data...");
 	      eval.evaluateClusterer(inst);
-	      predInstances = inst;
+	      numClusters = eval.getNumClusters();
 	      predictions = eval.getClusterAssignments();
+	      predInstances = setUpVisualizableInstances(inst, numClusters,
+							 predictions);
 	      outBuff.append("=== Evaluation on training set ===\n");
 	      break;
 
@@ -699,16 +746,20 @@ public class ClustererPanel extends JPanel {
 	      clusterer.buildClusterer(train);
 	      m_Log.statusMessage("Evaluating on test split...");
 	      eval.evaluateClusterer(test);
-	      predInstances = test;
+	      numClusters = eval.getNumClusters();
 	      predictions = eval.getClusterAssignments();
+	      predInstances = setUpVisualizableInstances(test, numClusters,
+							  predictions);
 	      outBuff.append("=== Evaluation on test split ===\n");
 	      break;
 		
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
 	      eval.evaluateClusterer(userTest);
-	      predInstances = userTest;
+	      numClusters = eval.getNumClusters();
 	      predictions = eval.getClusterAssignments();
+	      predInstances = setUpVisualizableInstances(userTest, numClusters,
+							 predictions);
 	      outBuff.append("=== Evaluation on test set ===\n");
 	      break;
 
@@ -730,15 +781,11 @@ public class ClustererPanel extends JPanel {
 	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
 	      PlotData2D tempd = new PlotData2D(predInstances);
 	      tempd.setPlotName(name+" ("+inst.relationName()+")");
-	      try {
-		tempd.setPredictions(predictions);
-		m_CurrentVis.addPlot(tempd);
-	      } catch (Exception ex) {
-		ex.printStackTrace();
-	      }
 	      
 	      try {
-		m_CurrentVis.setXIndex(m_visXIndex); m_CurrentVis.setYIndex(m_visYIndex);
+		m_CurrentVis.addPlot(tempd);
+		m_CurrentVis.setXIndex(m_visXIndex); 
+		m_CurrentVis.setYIndex(m_visYIndex);
 	      } catch (Exception ex) {
 		System.err.println(ex);
 	      }
@@ -796,11 +843,6 @@ public class ClustererPanel extends JPanel {
   protected void visualizeClusterer() {
     final VisualizePanel sp;
     sp = (VisualizePanel)m_History.getSelectedObject();
-    /*    if (m_StorePredictionsBut.isSelected()) {  
-      sp = m_History.getSelectedVis();
-    } else {
-      sp = m_CurrentVis;
-      } */
   
     if (sp != null) {
       String plotName = sp.getName();
@@ -817,10 +859,6 @@ public class ClustererPanel extends JPanel {
     //      jf.pack();
       jf.setVisible(true);
     }
-    /*sp.setInstances(m_predInstances);
-    sp.setPredictions(m_predictions);
-    sp.setColourIndex(-1); // do colouring using predictions, not dataset
-    sp.setPredictionsNumeric(false);*/
   }
 
   /**
