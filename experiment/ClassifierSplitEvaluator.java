@@ -41,7 +41,7 @@ import weka.classifiers.*;
  * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -75,7 +75,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 22;
+  private static final int RESULT_SIZE = 24;
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 11;
@@ -383,6 +383,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
+    // Timing stats
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+
     resultTypes[current++] = "";
 
     // add any additional measures
@@ -453,6 +457,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "IR_recall";
     resultNames[current++] = "F_measure";
 
+    // Timing stats
+    resultNames[current++] = "Time_training";
+    resultNames[current++] = "Time_testing";
+
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -491,8 +499,12 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 
     Object [] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
+    long trainTimeStart = System.currentTimeMillis();
     m_Classifier.buildClassifier(train);
+    long trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
+    long testTimeStart = System.currentTimeMillis();
     eval.evaluateModel(m_Classifier, test);
+    long testTimeElapsed = System.currentTimeMillis() - testTimeStart;
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
@@ -535,6 +547,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.precision(m_IRclass));
     result[current++] = new Double(eval.recall(m_IRclass));
     result[current++] = new Double(eval.fMeasure(m_IRclass));
+
+    // Timing stats
+    result[current++] = new Double(trainTimeElapsed / 1000.0);
+    result[current++] = new Double(testTimeElapsed / 1000.0);
 
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
