@@ -14,7 +14,7 @@ import weka.filters.supervised.instance.*;
  * java weka.filters.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AllTests extends TestSuite {
 
@@ -24,7 +24,7 @@ public class AllTests extends TestSuite {
     suite.addTest(AllFilterTest.suite());
     suite.addTest(AddExpressionTest.suite());
     suite.addTest(RemoveTest.suite());
-    suite.addTest(AttributeSelectionFilterTest.suite());
+    suite.addTest(AttributeSelectionTest.suite());
     suite.addTest(RemoveTypeTest.suite());
     suite.addTest(CopyTest.suite());
     suite.addTest(weka.filters.unsupervised.attribute.DiscretizeTest.suite());
