@@ -22,6 +22,7 @@
 
 package weka.classifiers.evaluation;
 
+import weka.classifiers.functions.SMO;
 import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -38,7 +39,7 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ThresholdCurve {
 
@@ -381,7 +382,7 @@ public class ThresholdCurve {
         inst.setClassIndex(inst.numAttributes() - 1);
         ThresholdCurve tc = new ThresholdCurve();
         EvaluationUtils eu = new EvaluationUtils();
-        DistributionClassifier classifier = new weka.classifiers.SMO();
+        DistributionClassifier classifier = new weka.classifiers.functions.SMO();
         FastVector predictions = new FastVector();
         for (int i = 0; i < 2; i++) { // Do two runs.
           eu.setSeed(i);

@@ -22,6 +22,7 @@
 
 package weka.classifiers.evaluation;
 
+import weka.classifiers.meta.LogitBoost;
 import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -37,7 +38,7 @@ import weka.classifiers.DistributionClassifier;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MarginCurve {
 
@@ -146,8 +147,8 @@ public class MarginCurve {
       inst.setClassIndex(inst.numAttributes() - 1);
       MarginCurve tc = new MarginCurve();
       EvaluationUtils eu = new EvaluationUtils();
-      weka.classifiers.LogitBoost classifier 
-        = new weka.classifiers.LogitBoost();
+      weka.classifiers.meta.LogitBoost classifier 
+        = new weka.classifiers.meta.LogitBoost();
       classifier.setMaxIterations(20);
       FastVector predictions 
         = eu.getTrainTestPredictions(classifier, inst, inst);

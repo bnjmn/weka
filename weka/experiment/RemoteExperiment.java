@@ -89,7 +89,7 @@ import java.io.BufferedOutputStream;
  * -P "weka.experiment.RandomSplitResultProducer" \
  * -h rosebud.cs.waikato.ac.nz -h blackbird.cs.waikato.ac.nz -r -- \
  * -W weka.experiment.ClassifierSplitEvaluator -- \
- * -W weka.classifiers.NaiveBayes
+ * -W weka.classifiers.bayes.NaiveBayes
  *
  * </pre> <p>
  * The "codebase" property tells rmi where to serve up weka classes from.
@@ -101,7 +101,7 @@ import java.io.BufferedOutputStream;
  * file. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RemoteExperiment extends Experiment {
 

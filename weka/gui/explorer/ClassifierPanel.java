@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -328,7 +328,7 @@ public class ClassifierPanel extends JPanel {
     });
     m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_ClassifierEditor.setClassType(Classifier.class);
-    m_ClassifierEditor.setValue(new weka.classifiers.ZeroR());
+    m_ClassifierEditor.setValue(new weka.classifiers.rules.ZeroR());
     m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	repaint();
