@@ -36,7 +36,7 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 import weka.gui.ExtensionFileFilter;
 import weka.core.converters.Loader;
-import weka.core.converters.FileSourcedLoader;
+import weka.core.converters.FileSourcedConverter;
 
 /**
  * GUI Customizer for the loader bean
@@ -132,7 +132,7 @@ public class LoaderCustomizer extends JPanel
 	public void actionPerformed(ActionEvent e) {
 	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 	    try {
-	      ((FileSourcedLoader)m_dsLoader.getLoader()).
+	      ((FileSourcedConverter)m_dsLoader.getLoader()).
 		setFile(m_fileChooser.getSelectedFile());
 	      // tell the loader that a new file has been selected so
 	      // that it can attempt to load the header
@@ -163,11 +163,11 @@ public class LoaderCustomizer extends JPanel
   public void setUpFile() {
     removeAll();
     m_fileChooser.
-      setSelectedFile(((FileSourcedLoader)m_dsLoader.getLoader()).getFile());
+      setSelectedFile(((FileSourcedConverter)m_dsLoader.getLoader()).getFile());
     ExtensionFileFilter ff = 
-      new ExtensionFileFilter(((FileSourcedLoader)m_dsLoader.getLoader()).
+      new ExtensionFileFilter(((FileSourcedConverter)m_dsLoader.getLoader()).
 			      getFileExtension(),
-			      ((FileSourcedLoader)m_dsLoader.getLoader()).
+			      ((FileSourcedConverter)m_dsLoader.getLoader()).
 			      getFileDescription());
     m_fileChooser.addChoosableFileFilter(ff);
     JPanel about = m_LoaderEditor.getAboutPanel();
@@ -186,7 +186,7 @@ public class LoaderCustomizer extends JPanel
     m_dsLoader = (weka.gui.beans.Loader)object;
     m_LoaderEditor.setTarget(m_dsLoader.getLoader());
     //    m_fileEditor.setValue(m_dsLoader.getDataSetFile());
-    if (m_dsLoader.getLoader() instanceof FileSourcedLoader) {
+    if (m_dsLoader.getLoader() instanceof FileSourcedConverter) {
       setUpFile();
     } else {
       setUpOther();
