@@ -110,7 +110,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -778,6 +778,10 @@ public class ClustererPanel extends JPanel {
 	    if (m_ClassesToClustersBut.isSelected()) {
 	      trainInst.setClassIndex(m_ClassCombo.getSelectedIndex());
 	      inst.setClassIndex(m_ClassCombo.getSelectedIndex());
+	      if (inst.classAttribute().isNumeric()) {
+		throw new Exception("Class must be nominal for class based "
+				    +"evaluation!");
+	      }
 	    }
 	    if (!m_ignoreKeyList.isSelectionEmpty()) {
 	      trainInst = removeIgnoreCols(trainInst);
