@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -242,7 +242,7 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Test if the attribute is nominal.
    *
-   * @result true if the attribute is nominal
+   * @return true if the attribute is nominal
    */
   public final boolean isNominal() {
 
@@ -252,7 +252,7 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Tests if the attribute is numeric.
    *
-   * @result true if the attribute is numeric
+   * @return true if the attribute is numeric
    */
   public final boolean isNumeric() {
 
@@ -262,7 +262,7 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Tests if the attribute is a string.
    *
-   * @result true if the attribute is a string
+   * @return true if the attribute is a string
    */
   public final boolean isString() {
 
