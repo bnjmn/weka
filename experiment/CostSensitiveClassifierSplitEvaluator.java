@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -354,9 +354,12 @@ public class CostSensitiveClassifierSplitEvaluator
 	try {
 	  double dv = ((AdditionalMeasureProducer)m_Classifier).
 	    getMeasure(m_AdditionalMeasures[i]);
-	  Double value = new Double(dv);
-
-	  result[current++] = value;
+	  if (!Instance.isMissingValue(dv)) {
+	    Double value = new Double(dv);
+	    result[current++] = value;
+	  } else {
+	    result[current++] = null;
+	  }
 	} catch (Exception ex) {
 	  System.err.println(ex);
 	}
