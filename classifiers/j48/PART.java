@@ -51,10 +51,10 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
-  WeightedInstancesHandler {
+  WeightedInstancesHandler, Summarizable {
 
   /** The decision list */
   private MakeDecList m_root;
@@ -247,6 +247,14 @@ public class PART extends DistributionClassifier implements OptionHandler,
   public String toString() {
     
     return "PART decision list\n------------------\n\n" + m_root.toString();
+  }
+  
+  /**
+   * Returns a superconcise version of the model
+   */
+  public String toSummaryString() {
+
+    return "Number of rules: " + m_root.numRules() + "\n";
   }
   
   /**
