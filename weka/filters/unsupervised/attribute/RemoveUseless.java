@@ -36,10 +36,10 @@ import java.util.Vector;
  * Valid filter-specific options are: <p>
  *
  * -M percentage <br>
- * The maximum variance allowed before an attribute will be deleted (default 100).<p>
+ * The maximum variance allowed before an attribute will be deleted (default 99).<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RemoveUseless extends Filter implements UnsupervisedFilter,
 						     OptionHandler {
@@ -120,7 +120,9 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
 	  // remove nominal attributes that vary too much
 	  double variancePercent = (double) stats.distinctCount
 	    / (double) stats.totalCount * 100.0;
-	  if (variancePercent > m_maxVariancePercentage) attsToDelete[numToDelete++] = i;
+	  if (variancePercent > m_maxVariancePercentage) {
+	      attsToDelete[numToDelete++] = i;
+	  }
 	}
       }
       
@@ -176,7 +178,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    * Parses the options for this object. Valid options are: <p>
    *
    * -M percentage <br>
-   * The maximum variance allowed before an attribute will be deleted (default 100).
+   * The maximum variance allowed before an attribute will be deleted (default 99).
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
