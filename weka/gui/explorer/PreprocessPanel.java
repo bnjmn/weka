@@ -70,7 +70,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -92,7 +92,7 @@ public class PreprocessPanel extends JPanel {
   protected JButton m_OpenDBBut = new JButton("Open DB...");
 
   /** Click to apply filters and replace the working dataset */
-  protected JButton m_ApplyBut = new JButton("Apply");
+  protected JButton m_ApplyBut = new JButton("Apply Filters");
 
   /** Click to replace the base dataset with the working dataset */
   protected JButton m_ReplaceBut = new JButton("Replace");
@@ -219,10 +219,11 @@ public class PreprocessPanel extends JPanel {
 			      .createTitledBorder("Base relation"));
     m_WorkingInstPanel.setBorder(BorderFactory
 				 .createTitledBorder("Working relation"));
-    m_AttPanel.setBorder(BorderFactory.createTitledBorder("Attributes"));
+    m_AttPanel.setBorder(BorderFactory
+		    .createTitledBorder("Attributes in base relation"));
     m_Filters.setBorder(BorderFactory.createTitledBorder("Filters"));
     m_AttSummaryPanel.setBorder(BorderFactory
-				.createTitledBorder("Attribute info"));
+		    .createTitledBorder("Attribute info for base relation"));
     m_Filters.setValue(new Filter [0]);
     m_ReplaceBut.setEnabled(false);
     m_ApplyBut.setEnabled(false);
