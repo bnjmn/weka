@@ -44,65 +44,65 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GreedyStepwise extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
 
  /** does the data have a class */
-  private boolean m_hasClass;
+  protected boolean m_hasClass;
  
   /** holds the class index */
-  private int m_classIndex;
+  protected int m_classIndex;
  
   /** number of attributes in the data */
-  private int m_numAttribs;
+  protected int m_numAttribs;
 
   /** true if the user has requested a ranked list of attributes */
-  private boolean m_rankingRequested;
+  protected boolean m_rankingRequested;
 
   /** 
    * go from one side of the search space to the other in order to generate
    * a ranking
    */
-  private boolean m_doRank;
+  protected boolean m_doRank;
 
   /** used to indicate whether or not ranking has been performed */
-  private boolean m_doneRanking;
+  protected boolean m_doneRanking;
 
   /**
    * A threshold by which to discard attributes---used by the
    * AttributeSelection module
    */
-  private double m_threshold;
+  protected double m_threshold;
 
   /** The number of attributes to select. -1 indicates that all attributes
       are to be retained. Has precedence over m_threshold */
-  private int m_numToSelect = -1;
+  protected int m_numToSelect = -1;
 
-  private int m_calculatedNumToSelect;
+  protected int m_calculatedNumToSelect;
 
   /** the merit of the best subset found */
-  private double m_bestMerit;
+  protected double m_bestMerit;
 
   /** a ranked list of attribute indexes */
-  private double [][] m_rankedAtts;
-  private int m_rankedSoFar;
+  protected double [][] m_rankedAtts;
+  protected int m_rankedSoFar;
 
   /** the best subset found */
-  private BitSet m_best_group;
-  private ASEvaluation m_ASEval;
+  protected BitSet m_best_group;
+  protected ASEvaluation m_ASEval;
 
-  private Instances m_Instances;
+  protected Instances m_Instances;
 
   /** holds the start set for the search as a Range */
-  private Range m_startRange;
+  protected Range m_startRange;
 
   /** holds an array of starting attributes */
-  private int [] m_starting;
+  protected int [] m_starting;
 
   /** Use a backwards search instead of a forwards one */
-  private boolean m_backward = false;
+  protected boolean m_backward = false;
 
   /**
    * Returns a string describing this search method
@@ -415,7 +415,7 @@ public class GreedyStepwise extends ASSearch
    * is stored in a database is comparable.
    * @return a comma seperated list of individual attribute numbers as a String
    */
-  private String startSetToString() {
+  protected String startSetToString() {
     StringBuffer FString = new StringBuffer();
     boolean didPrint;
     
@@ -686,7 +686,7 @@ public class GreedyStepwise extends ASSearch
    * @param group the BitSet to convert
    * @return an array of attribute indexes
    **/
-  private int[] attributeList (BitSet group) {
+  protected int[] attributeList (BitSet group) {
     int count = 0;
 
     // count how many were selected
@@ -711,7 +711,7 @@ public class GreedyStepwise extends ASSearch
   /**
    * Resets options
    */
-  private void resetOptions() {
+  protected void resetOptions() {
     m_doRank = false;
     m_best_group = null;
     m_ASEval = null;
