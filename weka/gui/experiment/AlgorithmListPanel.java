@@ -28,9 +28,11 @@ import weka.core.Utils;
 
 import weka.classifiers.Classifier;
 
+import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyDialog;
 
+import weka.classifiers.xml.XMLClassifier;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.experiment.Experiment;
@@ -49,6 +51,7 @@ import java.awt.Insets;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.SwingConstants;
 import javax.swing.JTextField;
@@ -58,18 +61,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JButton;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.filechooser.FileFilter;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
+import java.io.File;
 
 /** 
  * This panel controls setting a list of algorithms for an experiment to
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -104,9 +109,30 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
 
   /** Click to add an algorithm */
   protected JButton m_AddBut = new JButton("Add new...");
+  
+  /** Click to edit the selected algorithm */
+  protected JButton m_EditBut = new JButton("Edit selected...");
 
   /** Click to remove the selected dataset from the list */
   protected JButton m_DeleteBut = new JButton("Delete selected");
+  
+  /** Click to edit the load the options for athe selected algorithm */
+  protected JButton m_LoadOptionsBut = new JButton("Load options...");
+  
+  /** Click to edit the save the options from selected algorithm */
+  protected JButton m_SaveOptionsBut = new JButton("Save options...");
+  
+  /** The file chooser for selecting experiments */
+  protected JFileChooser m_FileChooser =
+    new JFileChooser(new File(System.getProperty("user.dir")));
+
+  /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
+  protected FileFilter m_XMLFilter = 
+    new ExtensionFileFilter(".xml", 
+                            "Experiment configuration files (*.xml)");
+
+  /** Whether an algorithm is added or only edited  */
+  protected boolean m_Editing = false;
   
   /** Lets the user configure the classifier */
   protected GenericObjectEditor m_ClassifierEditor =
@@ -180,7 +206,16 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     m_DeleteBut.addActionListener(this);
     m_AddBut.setEnabled(false);
     m_AddBut.addActionListener(this);
+    m_EditBut.setEnabled(false);
+    m_EditBut.addActionListener(this);
+    m_LoadOptionsBut.setEnabled(false);
+    m_LoadOptionsBut.addActionListener(this);
+    m_SaveOptionsBut.setEnabled(false);
+    m_SaveOptionsBut.addActionListener(this);
     
+    m_FileChooser.addChoosableFileFilter(m_XMLFilter);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createTitledBorder("Algorithms"));
     JPanel topLab = new JPanel();
@@ -196,10 +231,29 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     topLab.add(m_AddBut,constraints);
     constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
     constraints.gridwidth=1;constraints.gridheight=1;
+    topLab.add(m_EditBut,constraints);
+    constraints.gridx=2;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
     topLab.add(m_DeleteBut,constraints);
+
+    JPanel bottomLab = new JPanel();
+    gb = new GridBagLayout();
+    constraints = new GridBagConstraints();
+    bottomLab.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    bottomLab.setLayout(gb);
+    
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    bottomLab.add(m_LoadOptionsBut,constraints);
+    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    bottomLab.add(m_SaveOptionsBut,constraints);
 
     add(topLab, BorderLayout.NORTH);
     add(new JScrollPane(m_List), BorderLayout.CENTER);
+    add(bottomLab, BorderLayout.SOUTH);
   }
 
   /**
@@ -220,9 +274,10 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
 	m_AlgorithmListModel.addElement(algorithms[i]);
       }
     }
-    if (m_AlgorithmListModel.size() > 0) {
-      m_DeleteBut.setEnabled(true);
-    }
+    m_EditBut.setEnabled((m_AlgorithmListModel.size() > 0));
+    m_DeleteBut.setEnabled((m_AlgorithmListModel.size() > 0));
+    m_LoadOptionsBut.setEnabled((m_AlgorithmListModel.size() > 0));
+    m_SaveOptionsBut.setEnabled((m_AlgorithmListModel.size() > 0));
   }
 
   /**
@@ -230,12 +285,16 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
    */
   private void addNewAlgorithm(Classifier newScheme) {
 
-    m_AlgorithmListModel.addElement(newScheme);
+    if (!m_Editing)
+      m_AlgorithmListModel.addElement(newScheme);
+    else
+      m_AlgorithmListModel.setElementAt(newScheme, m_List.getSelectedIndex());
     Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
     for (int i=0; i<cArray.length; i++) {
       cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
     }
     m_Exp.setPropertyArray(cArray); 
+    m_Editing = false;
   }
 
   /**
@@ -254,8 +313,24 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
       } else {
 	m_PD.setVisible(true);
       }
+      m_EditBut.setEnabled(true);
       m_DeleteBut.setEnabled(true);
+      m_LoadOptionsBut.setEnabled(true);
+      m_SaveOptionsBut.setEnabled(true);
      
+    } else if (e.getSource() == m_EditBut) {
+      if (m_List.getSelectedValue() != null) {
+         m_Editing = true;
+         if (m_PD == null) {
+            int x = getLocationOnScreen().x;
+            int y = getLocationOnScreen().y;
+            m_PD = new PropertyDialog(m_ClassifierEditor, x, y);
+         } else {
+            m_PD.setVisible(true);
+         }
+         m_PD.getEditor().setValue(m_List.getSelectedValue());
+      }
+
     } else if (e.getSource() == m_DeleteBut) {
 
       int [] selected = m_List.getSelectedIndices();
@@ -271,7 +346,10 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
 	}
       }
       if (m_List.getSelectedIndex() == -1) {
-	m_DeleteBut.setEnabled(false);
+        m_EditBut.setEnabled(false);
+        m_DeleteBut.setEnabled(false);
+        m_LoadOptionsBut.setEnabled(false);
+        m_SaveOptionsBut.setEnabled(false);
       }
 
       Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
@@ -279,6 +357,33 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
 	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
       }
       m_Exp.setPropertyArray(cArray); 
+    } else if (e.getSource() == m_LoadOptionsBut) {
+      if (m_List.getSelectedValue() != null) {
+         int returnVal = m_FileChooser.showOpenDialog(this);
+         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            try {
+               XMLClassifier xmlcls = new XMLClassifier();
+               Classifier c = (Classifier) xmlcls.read(m_FileChooser.getSelectedFile());
+               m_AlgorithmListModel.setElementAt(c, m_List.getSelectedIndex());
+            }
+            catch (Exception ex) {
+               ex.printStackTrace();
+            }
+         }
+      }
+   } else if (e.getSource() == m_SaveOptionsBut) {
+      if (m_List.getSelectedValue() != null) {
+         int returnVal = m_FileChooser.showSaveDialog(this);
+         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            try {
+               XMLClassifier xmlcls = new XMLClassifier();
+               xmlcls.write(m_FileChooser.getSelectedFile(), m_List.getSelectedValue());
+            }
+            catch (Exception ex) {
+               ex.printStackTrace();
+            }
+         }
+      }
     }
   }
 
