@@ -47,7 +47,7 @@ import java.beans.beancontext.*;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeSummarizer extends DataVisualizer {
 
@@ -62,9 +62,7 @@ public class AttributeSummarizer extends DataVisualizer {
   protected int m_maxPlots = 100;
 
   /**
-   * Index on which to color the plots. -1 indicates that we let the
-   * attribute visualize panels set this on the basis of the class index
-   * in the data.
+   * Index on which to color the plots.
    */
   protected int m_coloringIndex = -1;
 
@@ -220,9 +218,7 @@ public class AttributeSummarizer extends DataVisualizer {
 
       AttributeVisualizationPanel ap = new AttributeVisualizationPanel();
       ap.setInstances(m_visualizeDataSet);
-      if (m_coloringIndex >= 0) {
-	ap.setColoringIndex(m_coloringIndex);
-      }
+      ap.setColoringIndex(m_coloringIndex);
       temp.add(ap, BorderLayout.CENTER);
       ap.setAttribute(i);
       hp.add(temp);

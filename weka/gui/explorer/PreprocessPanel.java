@@ -58,6 +58,7 @@ import weka.core.converters.CSVLoader;
 import weka.core.converters.C45Loader;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.AttributeSelectionPanel;
 import weka.gui.AttributeSummaryPanel;
@@ -82,7 +83,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -371,7 +372,7 @@ public class PreprocessPanel extends JPanel {
 
     JComboBox colorBox = m_AttVisualizePanel.getColorBox();
     colorBox.setToolTipText("The chosen attribute will also be used as the " +
-			    "class attribute in a supervised filter.");
+			    "class attribute when a filter is applied.");
     final JButton visAllBut = new JButton("Visualize All");
     visAllBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent ae) {
@@ -539,8 +540,14 @@ public class PreprocessPanel extends JPanel {
 	      }
 	      m_Log.statusMessage("Passing dataset through filter "
 				  + filter.getClass().getName());
+	      int classIndex = m_AttVisualizePanel.getColoringIndex();
+	      if ((classIndex < 0) && (filter instanceof SupervisedFilter)) {
+		throw new IllegalArgumentException("Class (colour) needs to " +
+						   "be set for supervised " +
+						   "filter.");
+	      }
 	      Instances copy = new Instances(m_Instances);
-	      copy.setClassIndex(m_AttVisualizePanel.getColoringIndex());
+	      copy.setClassIndex(classIndex);
 	      filter.setInputFormat(copy);
 	      Instances newInstances = filter.useFilter(copy, filter);
 	      if (newInstances == null || newInstances.numAttributes() < 1) {

@@ -65,7 +65,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -120,7 +120,7 @@ public class AttributeVisualizationPanel extends JPanel {
     m_colorAttrib.addItemListener( new ItemListener() {
 	public void itemStateChanged(ItemEvent ie) {
 	  if(ie.getStateChange()==ItemEvent.SELECTED) {
-	    classIndex = m_colorAttrib.getSelectedIndex();
+	    classIndex = m_colorAttrib.getSelectedIndex() - 1;
 	    if (as != null) {
 	      setAttribute(attribIndex);
 	    }
@@ -146,16 +146,25 @@ public class AttributeVisualizationPanel extends JPanel {
     as=null;
     if(m_colorAttrib!=null) {
       m_colorAttrib.removeAllItems();
+      m_colorAttrib.addItem("No class");
       for(int i=0; i<m_data.numAttributes(); i++) {
-	m_colorAttrib.addItem(new String("Colour: "+m_data.attribute(i).name()+" "+
+	m_colorAttrib.addItem(new String("Class: "+m_data.attribute(i).name()+" "+
 					 ((m_data.attribute(i).isNominal()) ? "(Nom)":"")));
       }
-      m_colorAttrib.setSelectedIndex(m_data.numAttributes()-1);  
+      if (m_data.classIndex() >= 0) {
+	m_colorAttrib.setSelectedIndex(m_data.classIndex() + 1);  
+      } else {
+	m_colorAttrib.setSelectedIndex(m_data.numAttributes());  
+      }
       //if (m_data.classIndex() >= 0) {
       //    m_colorAttrib.setSelectedIndex(m_data.classIndex());
       //}
     }
-    classIndex = m_data.numAttributes()-1;
+    if (m_data.classIndex() >= 0) {
+      classIndex = m_data.classIndex();
+    } else {
+      classIndex = m_data.numAttributes()-1;
+    }
     
     this.repaint();
   }
@@ -181,7 +190,7 @@ public class AttributeVisualizationPanel extends JPanel {
   public void setColoringIndex(int ci) {
     classIndex = ci;
     if(m_colorAttrib!=null) 
-      m_colorAttrib.setSelectedIndex(ci);
+      m_colorAttrib.setSelectedIndex(ci + 1);
     else 
       setAttribute(attribIndex);
   }
@@ -196,7 +205,7 @@ public class AttributeVisualizationPanel extends JPanel {
     synchronized (m_locker) {
       threadRun = true;
       //if(hc!=null && hc.isAlive()) hc.stop(); 
-      attribIndex=index;
+      attribIndex = index;
       as = m_data.attributeStats(attribIndex);
       //classIndex = m_colorAttrib.getSelectedIndex();
     }
@@ -234,7 +243,7 @@ public class AttributeVisualizationPanel extends JPanel {
   private class BarCalc extends Thread { 
     public void run() {
       synchronized (m_locker) {
-	if(m_data.attribute(classIndex).isNominal()) {
+	if((classIndex >= 0) && (m_data.attribute(classIndex).isNominal())) {
 	  int histClassCounts[][]; 
 	  histClassCounts = new int[m_data.attribute(attribIndex).numValues()]
 	    [m_data.attribute(classIndex).numValues()+1];
@@ -313,7 +322,7 @@ public class AttributeVisualizationPanel extends JPanel {
   private class HistCalc extends Thread {
     public void run() {
       synchronized (m_locker) {
-	if(m_data.attribute(classIndex).isNominal()) {
+	if((classIndex >= 0) && (m_data.attribute(classIndex).isNominal())) {
 
 	  int intervals = as.totalCount>10 ? 
 	                  (int)(as.totalCount*0.1):(int)as.totalCount;  //At the time of this coding the
@@ -388,7 +397,7 @@ public class AttributeVisualizationPanel extends JPanel {
 	  m_barRange =  barRange;
 	  
 	}
-	else { //else if the class attribute is numeric
+	else { //else if the class attribute is numeric or the class is not set
 
 	  int intervals =  as.totalCount>10 ? 
 	                  (int)(as.totalCount*0.1):(int)as.totalCount;//At the time of this coding the
@@ -490,7 +499,7 @@ public class AttributeVisualizationPanel extends JPanel {
       int x=0, y=0,  barWidth;
       double bar = as.numericStats.min;
       
-      if(m_data.attribute(classIndex).isNominal()) {
+      if((classIndex >= 0) && (m_data.attribute(classIndex).isNominal())) {
 	barWidth = ((this.getWidth()-6)/histBarClassCounts.length)<1 ? 1:((this.getWidth()-6)/histBarClassCounts.length);
 	  
 	x = 3;
@@ -566,7 +575,7 @@ public class AttributeVisualizationPanel extends JPanel {
 	  float heightRatio, intervalWidth;
 	  int x=0, y=0, barHeight, barWidth;
 		
-	  if(m_data.attribute(classIndex).isNominal()) {
+	  if((classIndex >= 0) && (m_data.attribute(classIndex).isNominal())) {
 	    intervalWidth =  (this.getWidth()/(float)histBarClassCounts.length);
 		    
 	    if(intervalWidth>5)
@@ -646,7 +655,7 @@ public class AttributeVisualizationPanel extends JPanel {
 	    float heightRatio, intervalWidth;
 	    int x=0, y=0,  barWidth;
 		    
-	    if(m_data.attribute(classIndex).isNominal()) {
+	    if((classIndex >=0) && (m_data.attribute(classIndex).isNominal())) {
 	      barWidth = ((this.getWidth()-6)/histBarClassCounts.length)<1 ? 1:((this.getWidth()-6)/histBarClassCounts.length);
 			
 	      x = 3;
