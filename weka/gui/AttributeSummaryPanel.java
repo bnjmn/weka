@@ -21,7 +21,7 @@ package weka.gui;
 
 import weka.core.Attribute;
 import weka.core.Instances;
-import weka.core.Instances.AttributeStats;
+import weka.core.AttributeStats;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
@@ -52,7 +52,7 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributeSummaryPanel extends JPanel {
 
