@@ -73,6 +73,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules.M5Rules,\
  weka.classifiers.rules.Prism,\
  weka.classifiers.rules.Ridor,\
+ weka.classifiers.rules.JRip,\
  weka.classifiers.rules.ZeroR
 
 # Lists the DistributionClassifiers I want to choose from
@@ -110,6 +111,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.rules.ConjunctiveRule,\
  weka.classifiers.rules.DecisionTable,\
  weka.classifiers.rules.part.PART,\
+ weka.classifiers.rules.JRip,\
  weka.classifiers.rules.ZeroR
 
 # Lists the Filters I want to choose from
@@ -145,7 +147,8 @@ weka.filters.Filter = \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
  weka.filters.TimeSeriesTranslateFilter, \
- weka.filters.UselessAttributeFilter
+ weka.filters.UselessAttributeFilter, \
+ weka.filters.ClassOrderFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
