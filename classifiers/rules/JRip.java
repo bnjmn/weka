@@ -46,7 +46,7 @@ import weka.classifiers.Evaluation;
 /**
  * This class implements a propositional rule learner, Repeated Incremental
  * Pruning to Produce Error Reduction (RIPPER), which is proposed by William
- * W. Cohen as a optimzed version of IERP. <p>
+ * W. Cohen as an optimzed version of IREP. <p>
  * 
  * The algorithm is briefly described as follows: <p>
  * Initialize RS = {}, and for each class from the less prevalent one to 
@@ -124,7 +124,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class JRip extends Classifier 
   implements OptionHandler, 
@@ -1039,6 +1039,18 @@ public class JRip extends Classifier
    * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception{
+
+    instances = new Instances(instances);
+	
+    if (!instances.classAttribute().isNominal()) 
+      throw new Exception(" Only nominal class, please.");
+	
+    instances.deleteWithMissingClass();
+    if(Utils.eq(instances.sumOfWeights(),0))
+      throw new Exception(" No instances with a class value!");
+	
+    if(instances.numInstances() < m_Folds)
+      throw new Exception(" Not enough data for REP.");
     
     m_Random = new Random(m_Seed); 
     m_Total = RuleStats.numAllConditions(instances);
@@ -1060,19 +1072,6 @@ public class JRip extends Classifier
       throw new Exception(" Unable to randomize the class orders.");
 	
     m_Class = data.classAttribute();
-	
-    if (!m_Class.isNominal()) 
-      throw new Exception(" Only nominal class, please.");
-	
-    if(Utils.eq(data.sumOfWeights(),0))
-      throw new Exception(" No training data.");
-	
-    data.deleteWithMissingClass();
-    if(Utils.eq(data.sumOfWeights(),0))
-      throw new Exception(" The class labels of all the training data are missing.");
-	
-    if(data.numInstances() < m_Folds)
-      throw new Exception(" Not enough data for REP.");
 	
     m_Ruleset = new FastVector();
     m_RulesetStats = new FastVector();
