@@ -197,7 +197,8 @@ weka.attributeSelection.ASEvaluation = \
  weka.attributeSelection.OneRAttributeEval, \
  weka.attributeSelection.ChiSquaredAttributeEval, \
  weka.attributeSelection.PrincipalComponents, \
- weka.attributeSelection.SVMAttributeEval
+ weka.attributeSelection.SVMAttributeEval, \
+ weka.attributeSelection.SymmetricalUncertAttributeSetEval
 
 # Lists the Attribute Selection Search methods I want to choose from
 weka.attributeSelection.ASSearch = \
@@ -207,6 +208,7 @@ weka.attributeSelection.ASSearch = \
  weka.attributeSelection.GeneticSearch, \
  weka.attributeSelection.RandomSearch, \
  weka.attributeSelection.ExhaustiveSearch, \
+ weka.attributeSelection.FCBFSearch, \
  weka.attributeSelection.Ranker, \
  weka.attributeSelection.RankSearch
 
