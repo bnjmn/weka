@@ -39,7 +39,7 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
@@ -275,13 +275,13 @@ public class PART extends DistributionClassifier implements OptionHandler,
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareTo("measureNumRules") == 0) {
       return measureNumRules();
     } else {
-      throw new Exception(additionalMeasureName 
+      throw new IllegalArgumentException(additionalMeasureName 
 			  + " not supported (PART)");
     }
   }

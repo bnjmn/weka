@@ -183,10 +183,9 @@ public class BinarySparseInstance extends SparseInstance {
    * Does nothing, since we don't support missing values.
    *
    * @param array containing the means and modes
-   * @exception Exception if numbers of attributes are unequal
+   * @exception IllegalArgumentException if numbers of attributes are unequal
    */
-  public void replaceMissingValues(double[] array) 
-       throws Exception {
+  public void replaceMissingValues(double[] array) {
 	 
     // Does nothing, since we don't store missing values.
   }

@@ -41,7 +41,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -518,11 +518,7 @@ public class MultiClassClassifier extends DistributionClassifier
    */
   public SelectedTag getErrorCorrectionMode() {
       
-    try {
-      return new SelectedTag(m_ErrorMode, TAGS_ERROR);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_ErrorMode, TAGS_ERROR);
   }
 
   /**

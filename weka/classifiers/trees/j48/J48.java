@@ -45,7 +45,7 @@ import weka.classifiers.*;
  * Do not clean up after the tree has been built.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -395,9 +395,9 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareTo("measureNumRules") == 0) {
       return measureNumRules();
     } else if (additionalMeasureName.compareTo("measureTreeSize") == 0) {
@@ -405,7 +405,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
     } else if (additionalMeasureName.compareTo("measureNumLeaves") == 0) {
       return measureNumLeaves();
     } else {
-      throw new Exception(additionalMeasureName 
+      throw new IllegalArgumentException(additionalMeasureName 
 			  + " not supported (j48)");
     }
   }

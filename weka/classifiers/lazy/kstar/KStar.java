@@ -266,11 +266,7 @@ public class KStar extends DistributionClassifier
    */
   public SelectedTag getMissingMode() {
 
-    try {
-      return new SelectedTag(m_MissingMode, TAGS_MISSING);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_MissingMode, TAGS_MISSING);
   }
   
   /**

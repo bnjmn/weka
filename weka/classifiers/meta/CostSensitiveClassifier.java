@@ -56,7 +56,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler {
@@ -290,11 +290,7 @@ public class CostSensitiveClassifier extends Classifier
    */
   public SelectedTag getCostMatrixSource() {
 
-    try {
-      return new SelectedTag(m_MatrixSource, TAGS_MATRIX_SOURCE);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_MatrixSource, TAGS_MATRIX_SOURCE);
   }
   
   /**

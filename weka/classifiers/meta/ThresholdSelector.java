@@ -66,7 +66,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -587,11 +587,7 @@ public class ThresholdSelector extends DistributionClassifier
    */
   public SelectedTag getDesignatedClass() {
 
-    try {
-      return new SelectedTag(m_ClassMode, TAGS_OPTIMIZE);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_ClassMode, TAGS_OPTIMIZE);
   }
   
   /**
@@ -642,11 +638,7 @@ public class ThresholdSelector extends DistributionClassifier
    */
   public SelectedTag getEvaluationMode() {
 
-    try {
-      return new SelectedTag(m_EvalMode, TAGS_EVAL);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_EvalMode, TAGS_EVAL);
   }
 
   /**
@@ -683,11 +675,7 @@ public class ThresholdSelector extends DistributionClassifier
    */
   public SelectedTag getRangeCorrection() {
 
-    try {
-      return new SelectedTag(m_RangeMode, TAGS_RANGE);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_RangeMode, TAGS_RANGE);
   }
   
   /**

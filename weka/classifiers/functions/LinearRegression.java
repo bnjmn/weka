@@ -27,7 +27,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -271,11 +271,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    */
   public SelectedTag getAttributeSelectionMethod() {
     
-    try {
-      return new SelectedTag(m_AttributeSelection, TAGS_SELECTION);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_AttributeSelection, TAGS_SELECTION);
   }
 
   /**

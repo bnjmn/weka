@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Matrix implements Cloneable, Serializable {
 
@@ -344,12 +344,12 @@ public class Matrix implements Cloneable, Serializable {
    *
    * @param y the dependent variable vector
    * @return the coefficients 
-   * @exception Exception if not successful
+   * @exception IllegalArgumentException if not successful
    */
-  public final double[] regression(Matrix y) throws Exception {
+  public final double[] regression(Matrix y) {
 
     if (y.numColumns() > 1) {
-      throw new Exception("Only one dependent variable allowed");
+      throw new IllegalArgumentException("Only one dependent variable allowed");
     }
     int nc = m_Elements[0].length;
     double[] b = new double[nc];
@@ -389,12 +389,13 @@ public class Matrix implements Cloneable, Serializable {
    * @param y the dependent variable vector
    * @param w the array of data point weights
    * @return the coefficients 
-   * @exception Exception if not successful
+   * @exception IllegalArgumentException if the wrong number of weights were
+   * provided.
    */
-  public final double[] regression(Matrix y, double [] w) throws Exception {
+  public final double[] regression(Matrix y, double [] w) {
 
     if (w.length != numRows()) {
-      throw new Exception("Incorrect number of weights provided");
+      throw new IllegalArgumentException("Incorrect number of weights provided");
     }
     Matrix weightedThis = new Matrix(numRows(), numColumns());
     Matrix weightedDep = new Matrix(numRows(), 1);

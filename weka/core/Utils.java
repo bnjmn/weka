@@ -18,7 +18,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public final class Utils {
 
@@ -889,23 +889,15 @@ public final class Utils {
    * Normalizes the doubles in the array by their sum.
    *
    * @param doubles the array of double
-   * @exception Exception if sum is NaN
+   * @exception IllegalArgumentException if sum is Zero or NaN
    */
-  public static void normalize(double[] doubles) throws Exception {
+  public static void normalize(double[] doubles) {
 
     double sum = 0;
-
     for (int i = 0; i < doubles.length; i++) {
       sum += doubles[i];
     }
-    if (Double.isNaN(sum)) {
-      throw new Exception("Array contains NaN - can't normalize");
-    }
-    if (sum != 0) {
-      for (int i = 0; i < doubles.length; i++) {
-	doubles[i] /= sum;
-      }
-    }
+    normalize(doubles, sum);
   }
 
   /**
@@ -913,13 +905,15 @@ public final class Utils {
    *
    * @param doubles the array of double
    * @param sum the value by which the doubles are to be normalized
-   * @exception Exception if sum is zero
+   * @exception IllegalArgumentException if sum is zero or NaN
    */
-  public static void normalize(double[] doubles, double sum) 
-       throws Exception {
+  public static void normalize(double[] doubles, double sum) {
 
+    if (Double.isNaN(sum)) {
+      throw new IllegalArgumentException("Can't normalize array. Sum is NaN.");
+    }
     if (sum == 0) {
-      throw new Exception("Can't normalize array. Sum is zero.");
+      throw new IllegalArgumentException("Can't normalize array. Sum is zero.");
     }
     for (int i = 0; i < doubles.length; i++) {
       doubles[i] /= sum;

@@ -304,13 +304,12 @@ public class SparseInstance extends Instance {
    * values are replaced.
    *
    * @param array containing the means and modes
-   * @exception Exception if numbers of attributes are unequal
+   * @exception IllegalArgumentException if numbers of attributes are unequal
    */
-  public void replaceMissingValues(double[] array) 
-       throws Exception {
+  public void replaceMissingValues(double[] array) {
 	 
     if ((array == null) || (array.length != m_NumAttributes)) {
-      throw new Exception("Unequal number of attributes!");
+      throw new IllegalArgumentException("Unequal number of attributes!");
     }
     double[] tempValues = new double[m_AttValues.length];
     int[] tempIndices = new int[m_AttValues.length];

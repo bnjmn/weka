@@ -27,7 +27,7 @@ import java.io.ObjectStreamClass;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -220,14 +220,14 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (m_Classifier instanceof AdditionalMeasureProducer) {
       return ((AdditionalMeasureProducer)m_Classifier).
 	getMeasure(additionalMeasureName);
     } else {
-      throw new Exception("RegressionSplitEvaluator: "
+      throw new IllegalArgumentException("RegressionSplitEvaluator: "
 			  +"Can't return value for : "+additionalMeasureName
 			  +". "+m_Classifier.getClass().getName()+" "
 			  +"is not an AdditionalMeasureProducer");

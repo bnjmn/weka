@@ -50,7 +50,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -487,13 +487,13 @@ public class Attribute implements Copyable, Serializable {
    * fresh list of attribute values before removing it.
    *
    * @param index the value's index
-   * @exception Exception if the attribute is not nominal
+   * @exception IllegalArgumentException if the attribute is not nominal
    */
-  final void delete(int index) throws Exception {
+  final void delete(int index) {
     
     if (!isNominal() && !isString()) 
-      throw new Exception("Can only remove value of"+
-			  "nominal or string attribute!");
+      throw new IllegalArgumentException("Can only remove value of" +
+                                         "nominal or string attribute!");
     else {
       m_Values = (FastVector)m_Values.copy();
       m_Values.removeElementAt(index);
@@ -549,14 +549,14 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param index the value's index
    * @param string the value
-   * @exception Exception if the attribute is not nominal
+   * @exception IllegalArgumentException if the attribute is not nominal or 
+   * string.
    */
-  final void setValue(int index, String string) 
-       throws Exception {
+  final void setValue(int index, String string) {
 
     if (!isNominal() && !isString()) {
-      throw new Exception("Can only set value of nominal"+
-			  "or string attribute!");
+      throw new IllegalArgumentException("Can only set value of nominal"+
+                                         "or string attribute!");
     } else {
       m_Values = (FastVector)m_Values.copy();
       m_Hashtable = (Hashtable)m_Hashtable.clone();

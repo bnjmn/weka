@@ -36,7 +36,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler,
  AdditionalMeasureProducer {
@@ -374,9 +374,9 @@ public final class  M5Prime extends Classifier implements OptionHandler,
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) throws Exception {
+  public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareTo("measureNumRules") == 0) {
       return measureNumRules();
     } else if (additionalMeasureName.compareTo("measureNumLinearModels") == 0){
@@ -384,7 +384,7 @@ public final class  M5Prime extends Classifier implements OptionHandler,
     } else if (additionalMeasureName.compareTo("measureNumLeaves") == 0) {
       return measureNumLeaves();
     } else {
-      throw new Exception(additionalMeasureName 
+      throw new IllegalArgumentException(additionalMeasureName 
 			  + " not supported (M5)");
     }
   }
@@ -436,11 +436,7 @@ public final class  M5Prime extends Classifier implements OptionHandler,
    */
   public SelectedTag getModelType() {
     
-    try {
-      return new SelectedTag(m_Model, TAGS_MODEL_TYPES);
-    } catch (Exception ex) {
-      return null;
-    }
+    return new SelectedTag(m_Model, TAGS_MODEL_TYPES);
   }
   
   /**
