@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class BayesNet extends DistributionClassifier implements OptionHandler, 
 	WeightedInstancesHandler {
@@ -63,8 +63,11 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * The dataset header for the purposes of printing out a semi-intelligible
    * model
    */
-  protected Instances     m_Instances;
+  public Instances     m_Instances;
 
+  
+  ADNode m_ADTree;
+  
   public static final Tag [] TAGS_SCORE_TYPE = {
     new Tag(Scoreable.BAYES, "BAYES"),
     new Tag(Scoreable.MDL, "MDL"),
@@ -91,6 +94,11 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * determines whether initial structure is an empty graph or a Naive Bayes network
    */
   boolean		  m_bInitAsNaiveBayes = true;
+
+  /**
+   * Use the experimental ADTree datastructure for calculating contingency tables
+   */
+  boolean                 m_bUseADTree = true;
 
   /**
    * Generates the classifier.
@@ -123,6 +131,12 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       throw new Exception("Dataset has no class attribute");
     } 
 
+    // initialize ADTree
+    if (m_bUseADTree) {
+      m_ADTree = ADNode.MakeADTree(instances);
+//      System.out.println("Oef, done!");
+    }
+
     // build the network structure
     initStructure();
 
@@ -134,6 +148,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 
     // Save space
     // m_Instances = new Instances(m_Instances, 0);
+    m_ADTree = null;
   }    // buildClassifier
  
   /**
@@ -330,12 +345,59 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
   }    // distributionForInstance
  
   /**
+   * Calculates the counts for Dirichlet distribution for the 
+   * class membership probabilities for the given test instance.
+   * 
+   * @param instance the instance to be classified
+   * @return counts for Dirichlet distribution for class probability 
+   * @exception Exception if there is a problem generating the prediction
+   */
+  public double[] countsForInstance(Instance instance) 
+	  throws Exception {
+    double[] fCounts = new double[m_NumClasses];
+
+    for (int iClass = 0; iClass < m_NumClasses; iClass++) {
+      fCounts[iClass] = 0.0;
+    } 
+
+    for (int iClass = 0; iClass < m_NumClasses; iClass++) {
+      double fCount = 0;
+
+      for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); 
+	   iAttribute++) {
+	double iCPT = 0;
+
+	for (int iParent = 0; 
+	     iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
+	  int nParent = m_ParentSets[iAttribute].GetParent(iParent);
+
+	  if (nParent == m_Instances.classIndex()) {
+	    iCPT = iCPT * m_NumClasses + iClass;
+	  } else {
+	    iCPT = iCPT * m_Instances.attribute(nParent).numValues() 
+		   + instance.value(nParent);
+	  } 
+	} 
+
+	if (iAttribute == m_Instances.classIndex()) {
+          fCount += ((DiscreteEstimatorBayes)m_Distributions[iAttribute][(int) iCPT]).getCount(iClass);
+	} else {
+          fCount += ((DiscreteEstimatorBayes)m_Distributions[iAttribute][(int) iCPT]).getCount(instance.value(iAttribute));
+	} 
+      } 
+
+      fCounts[iClass] += fCount;
+    } 
+    return fCounts;
+  }    // countsForInstance
+
+  /**
    * Returns an enumeration describing the available options
    * 
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(5);
 
     newVector
       .addElement(new Option("\tScore type (BAYES, MDL, ENTROPY, or AIC)\n", 
@@ -345,6 +407,9 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
     newVector
       .addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)\n", 
 			     "N", 0, "-N"));
+    newVector
+      .addElement(new Option("\tUse ADTree data structure\n", 
+			     "D", 0, "-D"));
     newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, 
 				    "-P <nr of parents>"));
 
@@ -359,6 +424,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    */
   public void setOptions(String[] options) throws Exception {
     m_bInitAsNaiveBayes = !(Utils.getFlag('N', options));
+    m_bUseADTree = !(Utils.getFlag('D', options));
 
     String sScore = Utils.getOption('S', options);
 
@@ -467,6 +533,26 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
   /**
    * Method declaration
    *
+   * @param bUseADTree
+   *
+   */
+  public void setUseADTree(boolean bUseADTree) {
+    m_bUseADTree = bUseADTree;
+  } 
+
+  /**
+   * Method declaration
+   *
+   * @return
+   *
+   */
+  public boolean getUseADTree() {
+    return m_bUseADTree;
+  } 
+
+  /**
+   * Method declaration
+   *
    * @param nMaxNrOfParents
    *
    */
@@ -490,7 +576,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[7];
+    String[] options = new String[8];
     int      current = 0;
 
     options[current++] = "-S";
@@ -523,6 +609,10 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 
     if (!m_bInitAsNaiveBayes) {
       options[current++] = "-N";
+    } 
+
+    if (!m_bUseADTree) {
+      options[current++] = "-D";
     } 
 
     if (m_nMaxNrOfParents != 10000) {
@@ -592,6 +682,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
     StringBuffer text = new StringBuffer();
 
     text.append("Bayes Network Classifier");
+    text.append("\n" + (m_bUseADTree ? "Using " : "not using ") + "ADTree");
 
     if (m_Instances == null) {
       text.append(": No model built yet.");
@@ -683,15 +774,72 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @return log score
    */
   protected double CalcNodeScore(int nNode) {
-    return CalcNodeScore(nNode, m_Instances);
+    if (m_bUseADTree && m_ADTree != null) {
+      return CalcNodeScoreADTree(nNode, m_Instances);
+    } else {
+      return CalcNodeScore(nNode, m_Instances);
+    }
   } 
 
   /**
-   * helper function for CalcNodeScore above
+   * helper function for CalcNodeScore above using the ADTree data structure
    * @param nNode node for which the score is calculate
    * @param instances used to calculate score with
    * @return log score
    */
+  private double CalcNodeScoreADTree(int nNode, Instances instances) {
+    // get set of parents, insert iNode
+    int nNrOfParents = m_ParentSets[nNode].GetNrOfParents();
+    int [] nNodes = new int [nNrOfParents + 1];
+    for (int iParent = 0; iParent < nNrOfParents; iParent++) {
+      nNodes[iParent] = m_ParentSets[nNode].GetParent(iParent);
+    }
+    nNodes[nNrOfParents] = nNode;
+
+    // calculate offsets
+    int [] nOffsets = new int [nNrOfParents + 1];
+    int nOffset = 1;
+    nOffsets[nNrOfParents] = 1;
+    nOffset *= instances.attribute(nNode).numValues();
+    for (int iNode = nNrOfParents - 1; iNode >=0; iNode--) {
+      nOffsets[iNode] = nOffset;
+      nOffset *= instances.attribute(nNodes[iNode]).numValues();
+    }
+
+    // sort nNodes & offsets
+    for (int iNode = 1; iNode < nNodes.length; iNode++) {
+      int iNode2 = iNode;
+      while (iNode2 > 0 && nNodes[iNode2] < nNodes[iNode2 - 1]) {
+        int h = nNodes[iNode2]; nNodes[iNode2] = nNodes[iNode2 - 1]; nNodes[iNode2 - 1] = h;
+        h = nOffsets[iNode2]; nOffsets[iNode2] = nOffsets[iNode2 - 1]; nOffsets[iNode2 - 1] = h;
+        iNode2--;
+      }
+    }
+
+    // get counts from ADTree
+    int    nCardinality = m_ParentSets[nNode].GetCardinalityOfParents();
+    int    numValues = instances.attribute(nNode).numValues();
+    int [] nCounts = new int[nCardinality * numValues];
+//if (nNrOfParents > 1) {
+    /*
+  System.out.println("===========================");
+  for (int iNode = 0; iNode < nNodes.length; iNode++) {
+    System.out.print(nNodes[iNode] + " " + nOffsets[iNode] + ": ");
+  }
+  System.out.println();
+     */
+//  int i = 3;
+//}
+//CalcNodeScore2(nNode, instances);
+    m_ADTree.getCounts(nCounts, nNodes, nOffsets, 0, 0, false);
+//  for (int iNode = 0; iNode < nCounts.length; iNode++) {
+//    System.out.print(nCounts[iNode] + " ");
+//  }
+//  System.out.println();
+
+    return CalcScoreOfCounts(nCounts, nCardinality, numValues, instances);
+  } // CalcNodeScore
+  
   private double CalcNodeScore(int nNode, Instances instances) {
 
     // determine cardinality of parent set & reserve space for frequency counts
@@ -726,7 +874,16 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       nCounts[(int) iCPT][(int) instance.value(nNode)]++;
     } 
 
-    return CalcScoreOfCounts(nCounts, nCardinality, numValues, instances);
+/*
+  System.out.print("Counts:");
+  for (int iNode = 0; iNode < nCardinality; iNode++) {
+  for (int iNode2 = 0; iNode2 < numValues; iNode2++) {
+    System.out.print(nCounts[iNode][iNode2] + " ");
+  }
+  }
+  System.out.println();
+*/
+  return CalcScoreOfCounts2(nCounts, nCardinality, numValues, instances);
   }    // CalcNodeScore
  
   /**
@@ -739,7 +896,85 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @param instances to calc score with
    * @return log score
    */
-  protected double CalcScoreOfCounts(int[][] nCounts, int nCardinality, 
+  protected double CalcScoreOfCounts(int [] nCounts, int nCardinality, 
+				     int numValues, Instances instances) {
+
+    // calculate scores using the distributions
+    double fLogScore = 0.0;
+
+    for (int iParent = 0; iParent < nCardinality; iParent++) {
+      switch (m_nScoreType) {
+
+      case (Scoreable.BAYES): {
+	double nSumOfCounts = 0;
+
+	for (int iSymbol = 0; iSymbol < numValues; iSymbol++) {
+	  if (m_fAlpha + nCounts[iParent * numValues + iSymbol] != 0) {
+	    fLogScore += 
+	      Statistics.lnGamma(m_fAlpha + nCounts[iParent * numValues + iSymbol]);
+	    nSumOfCounts += m_fAlpha + nCounts[iParent * numValues + iSymbol];
+	  } 
+	} 
+
+	if (nSumOfCounts != 0) {
+	  fLogScore -= Statistics.lnGamma(nSumOfCounts);
+	} 
+
+	if (m_fAlpha != 0) {
+	  fLogScore -= numValues * Statistics.lnGamma(m_fAlpha);
+	  fLogScore += Statistics.lnGamma(numValues * m_fAlpha);
+	} 
+      } 
+
+	break;
+
+      case (Scoreable.MDL):
+
+      case (Scoreable.AIC):
+
+      case (Scoreable.ENTROPY): {
+	double nSumOfCounts = 0;
+
+	for (int iSymbol = 0; iSymbol < numValues; iSymbol++) {
+	  nSumOfCounts += nCounts[iParent * numValues + iSymbol];
+	} 
+
+	for (int iSymbol = 0; iSymbol < numValues; iSymbol++) {
+	  if (nCounts[iParent * numValues + iSymbol] > 0) {
+	    fLogScore += nCounts[iParent * numValues + iSymbol] 
+			 * Math.log(nCounts[iParent * numValues + iSymbol] / nSumOfCounts);
+	  } 
+	} 
+      } 
+
+	break;
+
+      default: {}
+      }
+    } 
+
+    switch (m_nScoreType) {
+
+    case (Scoreable.MDL): {
+      fLogScore -= 0.5 * nCardinality * (numValues - 1) 
+		   * Math.log(instances.numInstances());
+
+      // it seems safe to assume that numInstances>0 here
+    } 
+
+      break;
+
+    case (Scoreable.AIC): {
+      fLogScore -= nCardinality * (numValues - 1);
+    } 
+
+      break;
+    }
+
+    return fLogScore;
+  }    // CalcNodeScore
+
+  protected double CalcScoreOfCounts2(int[][] nCounts, int nCardinality, 
 				     int numValues, Instances instances) {
 
     // calculate scores using the distributions
@@ -817,6 +1052,54 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
     return fLogScore;
   }    // CalcNodeScore
  
+  /**
+   * @return a string to describe the ScoreType option.
+   */
+  public String scoreTypeTipText() {
+    return "The score type determines the measure used to judge the quality of a" +
+    " network structure. It can be one of Bayes, Minimum Description Length (MDL)," +
+    " Akaike Information Criterion (AIC), and Entropy.";
+  }
+  /**
+   * @return a string to describe the Alpha option.
+   */
+  public String alphaTipText() {
+    return "Alpha is used for estimating the probability tables and can be interpreted" +
+    " as the initial count on each value.";
+  }
+  /**
+   * @return a string to describe the InitAsNaiveBayes option.
+   */
+  public String initAsNaiveBayesTipText() {
+    return "When set to true (default), the initial network used for structure learning" +
+    " is a Naive Bayes Network, that is, a network with an arrow from the classifier" +
+    " node to each other node. When set to false, an empty network is used as initial"+
+    " network structure";
+  }
+  /**
+   * @return a string to describe the UseADTreeoption.
+   */
+  public String useADTreeTipText() {
+    return "When ADTree (the data structure for increasing speed on counts," +
+    " not to be confused with the classifier under the same name) is used" +
+    " learning time goes down typically. However, because ADTrees are memory" +
+    " intensive, memory problems may occur. Switching this option off makes" +
+    " the structure learning algorithms slower, and run with less memory." +
+    " By default, ADTrees are used.";
+  }
+  /**
+   * @return a string to describe the MaxNrOfParentsoption.
+   */
+  public String maxNrOfParentsTipText() {
+    return "Set the maximum number of parents a node in the Bayes net can have." +
+    " When initialized as Naive Bayes, setting this parameter to 1 results in" +
+    " a Naive Bayes classifier. When set to 2, a Tree Augmented Bayes Network (TAN)" +
+    " is learned, and when set >2, a Bayes Net Augmented Bayes Network (BAN)" +
+    " is learned. By setting it to a value much larger than the number of nodes" +
+    " in the network (the default of 100000 pretty much guarantees this), no" +
+    " restriction on the number of parents is enforced";
+  }
+    
   /**
    * Main method for testing this class.
    * 
