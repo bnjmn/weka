@@ -134,10 +134,13 @@ public class SparseInstance extends Instance {
    * Constructor that inititalizes instance variable with given
    * values. Reference to the dataset is set to null. (ie. the instance
    * doesn't have access to information about the attribute types)
+   * Note that the indices need to be sorted in ascending order. Otherwise
+   * things won't work properly.
    *
    * @param weight the instance's weight
    * @param attValues a vector of attribute values (just the ones to be stored)
-   * @param indices the indices of the given values in the full vector
+   * @param indices the indices of the given values in the full vector (need to
+   * be sorted in ascending order)
    * @param maxNumValues the maximium number of values that can be stored
    */
   public SparseInstance(double weight, double[] attValues,
