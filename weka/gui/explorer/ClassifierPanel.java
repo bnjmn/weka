@@ -54,6 +54,7 @@ import weka.gui.SaveBuffer;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
+import weka.gui.ExtensionFileFilter;
 
 import weka.gui.treevisualizer.*;
 
@@ -85,6 +86,15 @@ import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
 
+import java.io.OutputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import java.util.zip.GZIPOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
+import java.util.zip.GZIPInputStream;
+
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -110,6 +120,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.filechooser.FileFilter;
 
 /** 
  * This panel allows the user to select and configure a classifier, set the
@@ -121,7 +132,8 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.45 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.46 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -261,6 +273,20 @@ public class ClassifierPanel extends JPanel {
   /** The instances summary panel displayed by m_SetTestFrame */
   protected InstancesSummaryPanel m_Summary = null;
 
+  /** Click to save the classifier */
+  protected JButton m_SaveBut = new JButton("Save model");
+
+  /** Click to load the classifier */
+  protected JButton m_LoadBut = new JButton("Load model");
+
+  /** Filter to ensure only model files are selected */  
+  protected FileFilter m_ModelFilter =
+    new ExtensionFileFilter("model", "Model object files");
+
+  /** The file chooser for selecting model files */
+  protected JFileChooser m_FileChooser 
+    = new JFileChooser(new File(System.getProperty("user.dir")));
+
   /* Register the property editors we need */
   static {
     java.beans.PropertyEditorManager
@@ -331,6 +357,13 @@ public class ClassifierPanel extends JPanel {
       .setToolTipText("Output entropy-based evaluation measures");
     m_EvalWRTCostsBut
       .setToolTipText("Evaluate errors with respect to a cost matrix");
+
+    m_SaveBut.setToolTipText("Saves the selected model");
+    m_LoadBut.setToolTipText("Loads a model");
+
+    m_FileChooser.setFileFilter(m_ModelFilter);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
     m_StorePredictionsBut.setSelected(true);
     m_OutputModelBut.setSelected(true);
     m_OutputPerClassBut.setSelected(true);
@@ -399,6 +432,18 @@ public class ClassifierPanel extends JPanel {
 	stopClassifier();
       }
     });
+
+    m_SaveBut.setEnabled(false);
+    m_SaveBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	saveClassifier();
+      }
+    });
+    m_LoadBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	loadClassifier();
+      }
+    });
    
     m_ClassCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -417,6 +462,7 @@ public class ClassifierPanel extends JPanel {
 	public void mouseClicked(MouseEvent e) {
 	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	      == InputEvent.BUTTON1_MASK) {
+	    updateSaveButton();
 	  } else {
 	    int index = m_History.getList().locationToIndex(e.getPoint());
 	    if (index != -1) {
@@ -582,6 +628,12 @@ public class ClassifierPanel extends JPanel {
     ssButs.add(m_StopBut);
 
     buttons.add(ssButs);
+
+    JPanel slButs = new JPanel();
+    slButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    slButs.setLayout(new GridLayout(1, 2, 5, 5));
+    slButs.add(m_SaveBut);
+    slButs.add(m_LoadBut);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Classifier output"));
@@ -604,28 +656,39 @@ public class ClassifierPanel extends JPanel {
     JPanel mondo = new JPanel();
     gbL = new GridBagLayout();
     mondo.setLayout(gbL);
+
+    gbC = new GridBagConstraints();
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = 0;     gbC.gridx = 0; gbC.weightx = 0;
+    gbL.setConstraints(slButs, gbC);
+    mondo.add(slButs);
+
     gbC = new GridBagConstraints();
     //    gbC.anchor = GridBagConstraints.WEST;
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 0;     gbC.gridx = 0;
+    gbC.gridy = 1;     gbC.gridx = 0;
     gbL.setConstraints(p2, gbC);
     mondo.add(p2);
+
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 1;     gbC.gridx = 0;
+    gbC.gridy = 2;     gbC.gridx = 0;
     gbL.setConstraints(buttons, gbC);
     mondo.add(buttons);
+
     gbC = new GridBagConstraints();
     //gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.BOTH;
-    gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
+    gbC.gridy = 3;     gbC.gridx = 0; gbC.weightx = 0;
     gbL.setConstraints(m_History, gbC);
     mondo.add(m_History);
+
+
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;     gbC.gridx = 1;
-    gbC.gridheight = 3;
+    gbC.gridheight = 4;
     gbC.weightx = 100; gbC.weighty = 100;
     gbL.setConstraints(p3, gbC);
     mondo.add(p3);
@@ -1286,6 +1349,12 @@ public class ClassifierPanel extends JPanel {
 	    
 		if (saveVis) {
 		  FastVector vv = new FastVector();
+		  if (outputModel) {
+		    vv.addElement(classifier);
+		    Instances trainHeader = new Instances(m_Instances, 0);
+		    trainHeader.setClassIndex(classIndex);
+		    vv.addElement(trainHeader);
+		  }
 		  vv.addElement(m_CurrentVis);
 		  if (grph != null) {
 		    vv.addElement(grph);
@@ -1295,8 +1364,16 @@ public class ClassifierPanel extends JPanel {
 		    vv.addElement(inst.classAttribute());
 		  }
 		  m_History.addObject(name, vv);
+		} else if (outputModel) {
+		  FastVector vv = new FastVector();
+		  vv.addElement(classifier);
+		  Instances trainHeader = new Instances(m_Instances, 0);
+		  trainHeader.setClassIndex(classIndex);
+		  vv.addElement(trainHeader);
+		  m_History.addObject(name, vv);
 		}
 	      }
+	      updateSaveButton();
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    }
@@ -1309,6 +1386,7 @@ public class ClassifierPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
+	    updateSaveButton();
             if (m_Log instanceof TaskLogger) {
               ((TaskLogger)m_Log).taskFinished();
             }
@@ -1330,7 +1408,7 @@ public class ClassifierPanel extends JPanel {
   protected void visualize(String name, int x, int y) {
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
-
+    
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
     visMainBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -1338,7 +1416,7 @@ public class ClassifierPanel extends JPanel {
 	}
       });
     resultListMenu.add(visMainBuffer);
-
+    
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
     visSepBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -1346,7 +1424,7 @@ public class ClassifierPanel extends JPanel {
 	}
       });
     resultListMenu.add(visSepBuffer);
-
+    
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
     saveOutput.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -1355,18 +1433,24 @@ public class ClassifierPanel extends JPanel {
       });
     resultListMenu.add(saveOutput);
     resultListMenu.addSeparator();
-
+    
     FastVector o = (FastVector)m_History.getNamedObject(selectedName);
-
+    
     if (o != null) {
       VisualizePanel temp_vp = null;
       String temp_grph = null;
       FastVector temp_preds = null;
       Attribute temp_classAtt = null;
-     
+      Classifier temp_classifier = null;
+      Instances temp_trainHeader = null;
+      
       for (int i = 0; i < o.size(); i++) {
 	Object temp = o.elementAt(i);
-	if (temp instanceof VisualizePanel) { // normal errors
+	if (temp instanceof Classifier) {
+	  temp_classifier = (Classifier)temp;
+	} else if (temp instanceof Instances) { // training header
+	  temp_trainHeader = (Instances)temp;
+	} else if (temp instanceof VisualizePanel) { // normal errors
 	  temp_vp = (VisualizePanel)temp;
 	} else if (temp instanceof String) { // graphable output
 	  temp_grph = (String)temp;
@@ -1381,6 +1465,18 @@ public class ClassifierPanel extends JPanel {
       final String grph = temp_grph;
       final FastVector preds = temp_preds;
       final Attribute classAtt = temp_classAtt;
+      final Classifier classifier = temp_classifier;
+      final Instances trainHeader = temp_trainHeader;
+
+      JMenuItem reEvaluate = new JMenuItem("Re-evaluate model on current test set");
+      if (classifier != null) {
+	reEvaluate.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      reevaluateModel(selectedName, classifier, trainHeader);
+	    }
+	  });
+	resultListMenu.add(reEvaluate);
+      }
 
       JMenuItem visErrors = new JMenuItem("Visualize classifer errors");
       if (vp != null) {
@@ -1395,7 +1491,10 @@ public class ClassifierPanel extends JPanel {
       if (grph != null) {
 	visTree.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
-	      visualizeTree(grph,vp.getName());
+	      String title;
+	      if (vp != null) title = vp.getName();
+	      else title = selectedName;
+	      visualizeTree(grph, title);
 	    }
 	  });
 	resultListMenu.add(visTree);
@@ -1562,6 +1661,329 @@ public class ClassifierPanel extends JPanel {
       
       // This is deprecated (and theoretically the interrupt should do).
       m_RunThread.stop();
+      
+    }
+  }
+
+  /**
+   * Determines whether saving is possible, and if so enables the save button
+   */
+  protected void updateSaveButton() {
+
+    FastVector o = (FastVector)m_History.getSelectedObject();
+    m_SaveBut.setEnabled(o != null && o.size() > 0 &&
+			 o.firstElement() instanceof Classifier);
+  }
+
+  /**
+   * Saves the currently selected classifier
+   */
+  protected void saveClassifier() {
+
+    Classifier classifier = null;
+    Instances trainHeader = null;
+    File sFile = null;
+    boolean saveOK = true;
+    FastVector o = (FastVector)m_History.getSelectedObject();
+
+    if (o != null)
+      for (int i=0; i<o.size(); i++) {
+	Object obj = o.elementAt(i);
+	if (obj instanceof Classifier) classifier = (Classifier) obj;
+	else if (obj instanceof Instances) trainHeader = (Instances) obj;
+      }
+    
+    if (classifier != null) {
+      
+      int returnVal = m_FileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	sFile = m_FileChooser.getSelectedFile();
+
+	m_Log.statusMessage("Saving model to file...");
+
+	try {
+	  OutputStream os = new FileOutputStream(sFile);
+	  if (sFile.getName().endsWith(".gz")) {
+	    os = new GZIPOutputStream(os);
+	  }
+	  ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
+	  objectOutputStream.writeObject(classifier);
+	  if (trainHeader != null) objectOutputStream.writeObject(trainHeader);
+	  objectOutputStream.flush();
+	  objectOutputStream.close();
+	} catch (Exception e) {
+	  
+	  JOptionPane.showMessageDialog(null, e, "Save Failed",
+					JOptionPane.ERROR_MESSAGE);
+	  saveOK = false;
+	}
+	if (saveOK)
+	  m_Log.logMessage("Saved model (" + m_History.getSelectedName()
+			   + ") to file '" + sFile.getName() + "'");
+	m_Log.statusMessage("OK");
+      }
+    } else {
+      
+      System.err.println("No classifier to save!");
+    }
+  }
+
+  /**
+   * Loads a classifier
+   */
+  protected void loadClassifier() {
+
+    int returnVal = m_FileChooser.showOpenDialog(this);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      File selected = m_FileChooser.getSelectedFile();
+      Classifier classifier = null;
+      Instances trainHeader = null;
+
+      m_Log.statusMessage("Loading model from file...");
+
+      try {
+	InputStream is = new FileInputStream(selected);
+	if (selected.getName().endsWith(".gz")) {
+	  is = new GZIPInputStream(is);
+	}
+	ObjectInputStream objectInputStream = new ObjectInputStream(is);
+	classifier = (Classifier) objectInputStream.readObject();
+	try { // see if we can load the header
+	  trainHeader = (Instances) objectInputStream.readObject();
+	} catch (Exception e) {} // don't fuss if we can't
+	objectInputStream.close();
+      } catch (Exception e) {
+	
+	JOptionPane.showMessageDialog(null, e, "Load Failed",
+				      JOptionPane.ERROR_MESSAGE);
+      }	
+
+      m_Log.statusMessage("OK");
+      
+      if (classifier != null) {
+	m_Log.logMessage("Loaded model from file '" + selected.getName()+ "'");
+	String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
+	String cname = classifier.getClass().getName();
+	if (cname.startsWith("weka.classifiers."))
+	  cname = cname.substring("weka.classifiers.".length());
+	name += cname + " from file '" + selected.getName() + "'";
+	StringBuffer outBuff = new StringBuffer();
+
+	outBuff.append("=== Model information ===\n\n");
+	outBuff.append("Filename:     " + selected.getName() + "\n");
+	outBuff.append("Scheme:       " + cname);
+	if (classifier instanceof OptionHandler) {
+	  String [] o = ((OptionHandler) classifier).getOptions();
+	  outBuff.append(" " + Utils.joinOptions(o));
+	}
+	outBuff.append("\n");
+	if (trainHeader != null) {
+	  outBuff.append("Relation:     " + trainHeader.relationName() + '\n');
+	  outBuff.append("Attributes:   " + trainHeader.numAttributes() + '\n');
+	  if (trainHeader.numAttributes() < 100) {
+	    for (int i = 0; i < trainHeader.numAttributes(); i++) {
+	      outBuff.append("              " + trainHeader.attribute(i).name()
+			     + '\n');
+	    }
+	  } else {
+	    outBuff.append("              [list of attributes omitted]\n");
+	  }
+	} else {
+	  outBuff.append("\nTraining data unknown\n");
+	} 
+
+	outBuff.append("\n=== Classifier model ===\n\n");
+	outBuff.append(classifier.toString() + "\n");
+	
+	m_History.addResult(name, outBuff);
+	m_History.setSingle(name);
+	FastVector vv = new FastVector();
+	vv.addElement(classifier);
+	if (trainHeader != null) vv.addElement(trainHeader);
+	// allow visualization of graphable classifiers
+	String grph = null;
+	if (classifier instanceof Drawable) {
+	  try {
+	    grph = ((Drawable)classifier).graph();
+	  } catch (Exception ex) {
+	  }
+	}
+	if (grph != null) vv.addElement(grph);
+	
+	m_History.addObject(name, vv);
+      }
+    }
+    updateSaveButton();
+  }
+  
+  /**
+   * Re-evaluates the named classifier with the current test set. Unpredictable
+   * things will happen if the data set is not compatible with the classifier.
+   *
+   * @param name the name of the classifier entry
+   * @param classifier the classifier to evaluate
+   */
+  protected void reevaluateModel(String name, Classifier classifier, Instances trainHeader) {
+
+    StringBuffer outBuff = m_History.getNamedBuffer(name);
+    Instances userTest = null;
+    // additional vis info (either shape type or point size)
+    FastVector plotShape = new FastVector();
+    FastVector plotSize = new FastVector();
+    Instances predInstances = null;
+    
+    // will hold the prediction objects if the class is nominal
+    FastVector predictions = null;
+    CostMatrix costMatrix = null;
+    if (m_EvalWRTCostsBut.isSelected()) {
+      costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
+				  .getValue());
+    }    
+    boolean outputConfusion = m_OutputConfusionBut.isSelected();
+    boolean outputPerClass = m_OutputPerClassBut.isSelected();
+    boolean outputSummary = true;
+    boolean outputEntropy = m_OutputEntropyBut.isSelected();
+    boolean saveVis = m_StorePredictionsBut.isSelected();
+    String grph = null;    
+    
+    try {
+
+      if (m_TestInstances != null) {
+	userTest = new Instances(m_TestInstancesCopy);
+      }
+      // Check the test instance compatibility
+      if (userTest == null) {
+	throw new Exception("No user test set has been opened");
+      }
+      if (trainHeader != null) {
+	if (trainHeader.classIndex() > userTest.numAttributes()-1)
+	  throw new Exception("Train and test set are not compatible");
+	userTest.setClassIndex(trainHeader.classIndex());
+	if (!trainHeader.equalHeaders(userTest)) {
+	  throw new Exception("Train and test set are not compatible");
+	}
+      } else {
+	userTest.setClassIndex(userTest.numAttributes()-1);
+      }
+      m_Log.statusMessage("Evaluating on test data...");
+      m_Log.logMessage("Re-evaluating classifier (" + name + ") on test set");
+      Evaluation eval = new Evaluation(userTest, costMatrix);
+      
+      // set up the structure of the plottable instances for 
+      // visualization
+      predInstances = setUpVisualizableInstances(userTest);
+      predInstances.setClassIndex(userTest.classIndex()+1);
+      
+      if (userTest.classAttribute().isNominal() && 
+	  classifier instanceof DistributionClassifier) {
+	predictions = new FastVector();
+      }
+      
+      for (int jj=0;jj<userTest.numInstances();jj++) {
+	processClassifierPrediction(userTest.instance(jj), classifier,
+				    eval, predictions,
+				    predInstances, plotShape,
+				    plotSize);
+	if ((jj % 100) == 0) {
+	  m_Log.statusMessage("Evaluating on test data. Processed "
+			      +jj+" instances...");
+	}
+      }
+      outBuff.append("\n=== Re-evaluation on test set ===\n\n");
+      outBuff.append("User supplied test set\n");  
+      outBuff.append("Relation:     " + userTest.relationName() + '\n');
+      outBuff.append("Instances:    " + userTest.numInstances() + '\n');
+      outBuff.append("Attributes:   " + userTest.numAttributes() + "\n\n");
+      if (trainHeader == null)
+	outBuff.append("NOTE - if test set is not compatible then results are "
+		       + "unpredictable\n\n");
+      
+      if (outputSummary) {
+	outBuff.append(eval.toSummaryString(outputEntropy) + "\n");
+      }
+      
+      if (userTest.classAttribute().isNominal()) {
+	
+	if (outputPerClass) {
+	  outBuff.append(eval.toClassDetailsString() + "\n");
+	}
+	
+	if (outputConfusion) {
+	  outBuff.append(eval.toMatrixString() + "\n");
+	}
+      }
+      
+      m_History.updateResult(name);
+      m_Log.logMessage("Finished re-evaluation");
+      m_Log.statusMessage("OK");
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      m_Log.logMessage(ex.getMessage());
+      m_Log.statusMessage("See error log");
+    } finally {
+      try {
+	if (predInstances != null && predInstances.numInstances() > 0) {
+	  if (predInstances.attribute(predInstances.classIndex())
+	      .isNumeric()) {
+	    postProcessPlotInfo(plotSize);
+	  }
+	  m_CurrentVis = new VisualizePanel();
+	  m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
+	  m_CurrentVis.setLog(m_Log);
+	  PlotData2D tempd = new PlotData2D(predInstances);
+	  tempd.setShapeSize(plotSize);
+	  tempd.setShapeType(plotShape);
+	  tempd.setPlotName(name+" ("+userTest.relationName()+")");
+	  tempd.addInstanceNumberAttribute();
+	  
+	  m_CurrentVis.addPlot(tempd);
+	  m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
+	  
+	  m_CurrentVis.setXIndex(m_visXIndex); 
+	  m_CurrentVis.setYIndex(m_visYIndex);
+	  
+	  m_CurrentVis.addActionListener(new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+		if (m_Instances != null &&
+		    m_CurrentVis.getInstances().
+		    relationName().
+		    compareTo(m_Instances.relationName()) == 0) {
+		  setXY_VisualizeIndexes(m_CurrentVis.getXIndex(), 
+					 m_CurrentVis.getYIndex());
+		}
+	      }
+	    });
+	  
+	  if (classifier instanceof Drawable) {
+	    try {
+	      grph = ((Drawable)classifier).graph();
+	    } catch (Exception ex) {
+	    }
+	  }
+
+	  if (saveVis) {
+	    FastVector vv = new FastVector();
+	    vv.addElement(classifier);
+	    if (trainHeader != null) vv.addElement(trainHeader);
+	    vv.addElement(m_CurrentVis);
+	    if (grph != null) {
+	      vv.addElement(grph);
+	    }
+	    if (predictions != null) {
+	      vv.addElement(predictions);
+	      vv.addElement(userTest.classAttribute());
+	    }
+	    m_History.addObject(name, vv);
+	  } else {
+	    FastVector vv = new FastVector();
+	    vv.addElement(classifier);
+	    if (trainHeader != null) vv.addElement(trainHeader);
+	    m_History.addObject(name, vv);
+	  }
+	}
+      } catch (Exception ex) {
+	ex.printStackTrace();
+      }
       
     }
   }

@@ -49,6 +49,7 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
 import weka.gui.treevisualizer.*;
 import weka.gui.ListSelectorDialog;
+import weka.gui.ExtensionFileFilter;
 
 import java.util.Random;
 import java.util.Date;
@@ -75,6 +76,15 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
+
+import java.io.OutputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import java.util.zip.GZIPOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
+import java.util.zip.GZIPInputStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -104,6 +114,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.filechooser.FileFilter;
 
 /** 
  * This panel allows the user to select and configure a clusterer, and evaluate
@@ -113,7 +124,8 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.32 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -195,6 +207,12 @@ public class ClustererPanel extends JPanel {
   /** Click to stop a running clusterer */
   protected JButton m_StopBut = new JButton("Stop");
 
+  /** Click to save the clusterer */
+  protected JButton m_SaveBut = new JButton("Save clusterer");
+
+  /** Click to load the clusterer */
+  protected JButton m_LoadBut = new JButton("Load clusterer");
+
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
@@ -227,6 +245,14 @@ public class ClustererPanel extends JPanel {
   
   /** The instances summary panel displayed by m_SetTestFrame */
   protected InstancesSummaryPanel m_Summary;
+
+  /** Filter to ensure only model files are selected */  
+  protected FileFilter m_ModelFilter =
+    new ExtensionFileFilter("model", "Model object files");
+
+  /** The file chooser for selecting model files */
+  protected JFileChooser m_FileChooser 
+    = new JFileChooser(new File(System.getProperty("user.dir")));
 
   /* Register the property editors we need */
   static {
@@ -279,6 +305,11 @@ public class ClustererPanel extends JPanel {
       setToolTipText("Store predictions in the result list for later "
 		     +"visualization");
     m_ignoreBut.setToolTipText("Ignore attributes during clustering");
+    m_SaveBut.setToolTipText("Saves the selected model");
+    m_LoadBut.setToolTipText("Loads a model");
+
+    m_FileChooser.setFileFilter(m_ModelFilter);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     m_ClassCombo.setPreferredSize(COMBO_SIZE);
     m_ClassCombo.setMaximumSize(COMBO_SIZE);
@@ -317,6 +348,18 @@ public class ClustererPanel extends JPanel {
       }
     });
 
+    m_SaveBut.setEnabled(false);
+    m_SaveBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	saveClusterer();
+      }
+    });
+    m_LoadBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	loadClusterer();
+      }
+    });
+
     m_ignoreBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  setIgnoreColumns();
@@ -329,6 +372,7 @@ public class ClustererPanel extends JPanel {
 	public void mouseClicked(MouseEvent e) {
 	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	      == InputEvent.BUTTON1_MASK) {
+	    updateSaveButton();
 	  } else {
 	    int index = m_History.getList().locationToIndex(e.getPoint());
 	    if (index != -1) {
@@ -423,6 +467,13 @@ public class ClustererPanel extends JPanel {
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
+
+    JPanel slButs = new JPanel();
+    slButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    slButs.setLayout(new GridLayout(1, 2, 5, 5));
+    slButs.add(m_SaveBut);
+    slButs.add(m_LoadBut);
+
     JPanel ib = new JPanel();
     ib.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ib.setLayout(new GridLayout(1, 1, 5, 5));
@@ -452,27 +503,31 @@ public class ClustererPanel extends JPanel {
     gbL = new GridBagLayout();
     mondo.setLayout(gbL);
     gbC = new GridBagConstraints();
-    //    gbC.anchor = GridBagConstraints.WEST;
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 0;     gbC.gridx = 0;
+    gbL.setConstraints(p2, gbC);
+    mondo.add(slButs);
+    //    gbC.anchor = GridBagConstraints.WEST;
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = 1;     gbC.gridx = 0;
     gbL.setConstraints(p2, gbC);
     mondo.add(p2);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 1;     gbC.gridx = 0;
+    gbC.gridy = 2;     gbC.gridx = 0;
     gbL.setConstraints(buttons, gbC);
     mondo.add(buttons);
     gbC = new GridBagConstraints();
     //gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.BOTH;
-    gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
+    gbC.gridy = 3;     gbC.gridx = 0; gbC.weightx = 0;
     gbL.setConstraints(m_History, gbC);
     mondo.add(m_History);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;     gbC.gridx = 1;
-    gbC.gridheight = 3;
+    gbC.gridheight = 4;
     gbC.weightx = 100; gbC.weighty = 100;
     gbL.setConstraints(p3, gbC);
     mondo.add(p3);
@@ -738,6 +793,7 @@ public class ClustererPanel extends JPanel {
 	  
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
 	  String grph = null;
+	  int[] ignoredAtts = null;
 
 	  int testMode = 0;
 	  int percent = 66;
@@ -825,7 +881,7 @@ public class ClustererPanel extends JPanel {
 	      }
 	      if (!m_ignoreKeyList.isSelectionEmpty() 
 		  || m_ClassesToClustersBut.isSelected()) {
-		outBuff.append("Ingored:\n");
+		outBuff.append("Ignored:\n");
 		for (int i = 0; i < inst.numAttributes(); i++) {
 		  if (!selected[i]) {
 		    outBuff.append("              " + inst.attribute(i).name()
@@ -836,6 +892,24 @@ public class ClustererPanel extends JPanel {
 	    } else {
 	      outBuff.append("              [list of attributes omitted]\n");
 	    }
+
+	    if (!m_ignoreKeyList.isSelectionEmpty()) {
+	      ignoredAtts = m_ignoreKeyList.getSelectedIndices();
+	    }
+
+	    if (m_ClassesToClustersBut.isSelected()) {
+	      // add class to ignored list
+	      if (ignoredAtts == null) {
+		ignoredAtts = new int[1];
+		ignoredAtts[0] = m_ClassCombo.getSelectedIndex();
+	      } else {
+		int[] newIgnoredAtts = new int[ignoredAtts.length+1];
+		System.arraycopy(ignoredAtts, 0, newIgnoredAtts, 0, ignoredAtts.length);
+		newIgnoredAtts[ignoredAtts.length] = m_ClassCombo.getSelectedIndex();
+		ignoredAtts = newIgnoredAtts;
+	      }
+	    }
+
 
 	    outBuff.append("Test mode:    ");
 	    switch (testMode) {
@@ -950,14 +1024,20 @@ public class ClustererPanel extends JPanel {
 		  }
 		});
 
+	      FastVector vv = new FastVector();
+	      vv.addElement(clusterer);
+	      Instances trainHeader = new Instances(m_Instances, 0);
+	      vv.addElement(trainHeader);
+	      if (ignoredAtts != null) vv.addElement(ignoredAtts);
 	      if (saveVis) {
-		FastVector vv = new FastVector();
 		vv.addElement(m_CurrentVis);
 		if (grph != null) {
 		  vv.addElement(grph);
 		}
-		m_History.addObject(name, vv);
+		
 	      }
+	      m_History.addObject(name, vv);
+	      updateSaveButton();
 	    }
 	    if (isInterrupted()) {
 	      m_Log.logMessage("Interrupted " + cname);
@@ -967,6 +1047,7 @@ public class ClustererPanel extends JPanel {
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
 	    m_ignoreBut.setEnabled(true);
+	    updateSaveButton();
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskFinished();
 	    }
@@ -1014,6 +1095,23 @@ public class ClustererPanel extends JPanel {
 
     try {
       af.setAttributeIndicesArray(selected);
+      af.setInvertSelection(false);
+      af.setInputFormat(inst);
+      retI = Filter.useFilter(inst, af);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    return retI;
+  }
+
+  private Instances removeIgnoreCols(Instances inst, int[] toIgnore) {
+
+    AttributeFilter af = new AttributeFilter();
+    Instances retI = null;
+
+    try {
+      af.setAttributeIndicesArray(toIgnore);
       af.setInvertSelection(false);
       af.setInputFormat(inst);
       retI = Filter.useFilter(inst, af);
@@ -1125,18 +1223,40 @@ public class ClustererPanel extends JPanel {
     if (o != null) {
       VisualizePanel temp_vp = null;
       String temp_grph = null;
+      Clusterer temp_clusterer = null;
+      Instances temp_trainHeader = null;
+      int[] temp_ignoreAtts = null;
      
       for (int i = 0; i < o.size(); i++) {
 	Object temp = o.elementAt(i);
-	if (temp instanceof VisualizePanel) { // normal errors
+	if (temp instanceof Clusterer) {
+	  temp_clusterer = (Clusterer)temp;
+	} else if (temp instanceof Instances) { // training header
+	  temp_trainHeader = (Instances)temp;
+	} else if (temp instanceof int[]) { // ignored attributes
+	  temp_ignoreAtts = (int[])temp;
+	} else if (temp instanceof VisualizePanel) { // normal errors
 	  temp_vp = (VisualizePanel)temp;
 	} else if (temp instanceof String) { // graphable output
 	  temp_grph = (String)temp;
 	}
       }
-
+      
       final VisualizePanel vp = temp_vp;
       final String grph = temp_grph;
+      final Clusterer clusterer = temp_clusterer;
+      final Instances trainHeader = temp_trainHeader;
+      final int[] ignoreAtts = temp_ignoreAtts;
+
+      JMenuItem reEvaluate = new JMenuItem("Re-evaluate model on current test set");
+      if (clusterer != null) {
+	reEvaluate.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      reevaluateModel(selectedName, clusterer, trainHeader, ignoreAtts);
+	    }
+	  });
+	resultListMenu.add(reEvaluate);
+      }
 
       JMenuItem visClusts = new JMenuItem("Visualize cluster assignments");
       if (vp != null) {
@@ -1151,7 +1271,10 @@ public class ClustererPanel extends JPanel {
       if (grph != null) {
 	visTree.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
-	      visualizeTree(grph,vp.getName());
+	      String title;
+	      if (vp != null) title = vp.getName();
+	      else title = selectedName;
+	      visualizeTree(grph, title);
 	    }
 	  });
 	resultListMenu.add(visTree);
@@ -1183,6 +1306,288 @@ public class ClustererPanel extends JPanel {
     if (result != ListSelectorDialog.APPROVE_OPTION) {
       // clear selected indices
       m_ignoreKeyList.clearSelection();
+    }
+  }
+
+  /**
+   * Saves the currently selected clusterer
+   */
+  protected void saveClusterer() {
+
+    Clusterer clusterer = null;
+    Instances trainHeader = null;
+    int[] ignoredAtts = null;
+    File sFile = null;
+    boolean saveOK = true;
+    FastVector o = (FastVector)m_History.getSelectedObject();
+
+    if (o != null)
+      for (int i=0; i<o.size(); i++) {
+	Object obj = o.elementAt(i);
+	if (obj instanceof Clusterer) clusterer = (Clusterer) obj;
+	else if (obj instanceof Instances) trainHeader = (Instances) obj;
+	else if (obj instanceof int[]) ignoredAtts = (int[]) obj;
+      }
+    
+    if (clusterer != null) {
+      
+      int returnVal = m_FileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	sFile = m_FileChooser.getSelectedFile();
+
+	m_Log.statusMessage("Saving model to file...");
+
+	try {
+	  OutputStream os = new FileOutputStream(sFile);
+	  if (sFile.getName().endsWith(".gz")) {
+	    os = new GZIPOutputStream(os);
+	  }
+	  ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
+	  objectOutputStream.writeObject(clusterer);
+	  if (trainHeader != null) objectOutputStream.writeObject(trainHeader);
+	  if (ignoredAtts != null) objectOutputStream.writeObject(ignoredAtts);
+	  objectOutputStream.flush();
+	  objectOutputStream.close();
+	} catch (Exception e) {
+	  
+	  JOptionPane.showMessageDialog(null, e, "Save Failed",
+					JOptionPane.ERROR_MESSAGE);
+	  saveOK = false;
+	}
+	if (saveOK)
+	  m_Log.logMessage("Saved model (" + m_History.getSelectedName()
+			   + ") to file '" + sFile.getName() + "'");
+	m_Log.statusMessage("OK");
+      }
+    } else {
+      
+      System.err.println("No clusterer to save!");
+    }
+  }
+
+  /**
+   * Determines whether saving is possible, and if so enables the save button
+   */
+  protected void updateSaveButton() {
+
+    FastVector o = (FastVector)m_History.getSelectedObject();
+    m_SaveBut.setEnabled(o != null && o.size() > 0 &&
+			 o.firstElement() instanceof Clusterer);
+  }
+
+  /**
+   * Loads a clusterer
+   */
+  protected void loadClusterer() {
+
+    int returnVal = m_FileChooser.showOpenDialog(this);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      File selected = m_FileChooser.getSelectedFile();
+      Clusterer clusterer = null;
+      Instances trainHeader = null;
+      int[] ignoredAtts = null;
+
+      m_Log.statusMessage("Loading model from file...");
+
+      try {
+	InputStream is = new FileInputStream(selected);
+	if (selected.getName().endsWith(".gz")) {
+	  is = new GZIPInputStream(is);
+	}
+	ObjectInputStream objectInputStream = new ObjectInputStream(is);
+	clusterer = (Clusterer) objectInputStream.readObject();
+	try { // see if we can load the header & ignored attribute info
+	  trainHeader = (Instances) objectInputStream.readObject();
+	  ignoredAtts = (int[]) objectInputStream.readObject();
+	} catch (Exception e) {} // don't fuss if we can't
+	objectInputStream.close();
+      } catch (Exception e) {
+	
+	JOptionPane.showMessageDialog(null, e, "Load Failed",
+				      JOptionPane.ERROR_MESSAGE);
+      }	
+
+      m_Log.statusMessage("OK");
+      
+      if (clusterer != null) {
+	m_Log.logMessage("Loaded model from file '" + selected.getName()+ "'");
+	String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
+	String cname = clusterer.getClass().getName();
+	if (cname.startsWith("weka.clusterers."))
+	  cname = cname.substring("weka.clusterers.".length());
+	name += cname + " from file '" + selected.getName() + "'";
+	StringBuffer outBuff = new StringBuffer();
+
+	outBuff.append("=== Model information ===\n\n");
+	outBuff.append("Filename:     " + selected.getName() + "\n");
+	outBuff.append("Scheme:       " + cname);
+	if (clusterer instanceof OptionHandler) {
+	  String [] o = ((OptionHandler) clusterer).getOptions();
+	  outBuff.append(" " + Utils.joinOptions(o));
+	}
+	outBuff.append("\n");
+
+	if (trainHeader != null) {
+
+	  outBuff.append("Relation:     " + trainHeader.relationName() + '\n');
+	  outBuff.append("Attributes:   " + trainHeader.numAttributes() + '\n');
+	  if (trainHeader.numAttributes() < 100) {
+	    boolean [] selectedAtts = new boolean [trainHeader.numAttributes()];
+	    for (int i = 0; i < trainHeader.numAttributes(); i++) {
+	      selectedAtts[i] = true;
+	    }
+	    
+	    if (ignoredAtts != null)
+	      for (int i=0; i<ignoredAtts.length; i++)
+		selectedAtts[ignoredAtts[i]] = false;
+	   
+	    for (int i = 0; i < trainHeader.numAttributes(); i++) {
+	      if (selectedAtts[i]) {
+		outBuff.append("              " + trainHeader.attribute(i).name()
+			       + '\n');
+	      }
+	    }
+	    if (ignoredAtts != null) {
+	      outBuff.append("Ignored:\n");
+	      for (int i=0; i<ignoredAtts.length; i++)
+		outBuff.append("              "
+			       + trainHeader.attribute(ignoredAtts[i]).name()
+			       + '\n');
+	    }
+	  } else {
+	    outBuff.append("              [list of attributes omitted]\n");
+	  }
+	} else {
+	  outBuff.append("\nTraining data unknown\n");
+	} 
+	
+	outBuff.append("\n=== Clustering model ===\n\n");
+	outBuff.append(clusterer.toString() + "\n");
+
+	m_History.addResult(name, outBuff);
+	m_History.setSingle(name);
+	FastVector vv = new FastVector();
+	vv.addElement(clusterer);
+	if (trainHeader != null) vv.addElement(trainHeader);
+	if (ignoredAtts != null) vv.addElement(ignoredAtts);
+	// allow visualization of graphable classifiers
+	String grph = null;
+	if (clusterer instanceof Drawable) {
+	  try {
+	    grph = ((Drawable)clusterer).graph();
+	  } catch (Exception ex) {
+	  }
+	}
+	if (grph != null) vv.addElement(grph);
+	
+	m_History.addObject(name, vv);
+	
+      }
+    }
+    updateSaveButton();
+  }
+
+  /**
+   * Re-evaluates the named clusterer with the current test set. Unpredictable
+   * things will happen if the data set is not compatible with the clusterer.
+   *
+   * @param name the name of the clusterer entry
+   * @param classifier the clusterer to evaluate
+   */
+  protected void reevaluateModel(String name, Clusterer clusterer,
+				 Instances trainHeader, int[] ignoredAtts) {
+
+    StringBuffer outBuff = m_History.getNamedBuffer(name);
+    Instances userTest = null;
+
+    PlotData2D predData = null;
+    if (m_TestInstances != null) {
+      userTest = new Instances(m_TestInstancesCopy);
+    }
+    
+    boolean saveVis = m_StorePredictionsBut.isSelected();
+    String grph = null;
+
+    try {
+      if (userTest == null) {
+	throw new Exception("No user test set has been opened");
+      }
+      if (trainHeader != null && !trainHeader.equalHeaders(userTest)) {
+	throw new Exception("Train and test set are not compatible");
+      }
+
+      m_Log.statusMessage("Evaluating on test data...");
+      m_Log.logMessage("Re-evaluating clusterer (" + name + ") on test set");
+      ClusterEvaluation eval = new ClusterEvaluation();
+      eval.setClusterer(clusterer);
+    
+      Instances userTestT = new Instances(userTest);
+      if (ignoredAtts != null) {
+	userTestT = removeIgnoreCols(userTestT, ignoredAtts);
+      }
+
+      eval.evaluateClusterer(userTestT);
+      
+      predData = setUpVisualizableInstances(userTest, eval);
+
+      outBuff.append("\n=== Re-evaluation on test set ===\n\n");
+      outBuff.append("User supplied test set\n");  
+      outBuff.append("Relation:     " + userTest.relationName() + '\n');
+      outBuff.append("Instances:    " + userTest.numInstances() + '\n');
+      outBuff.append("Attributes:   " + userTest.numAttributes() + "\n\n");
+      if (trainHeader == null)
+	outBuff.append("NOTE - if test set is not compatible then results are "
+		       + "unpredictable\n\n");
+      
+      outBuff.append(eval.clusterResultsToString());
+      outBuff.append("\n");
+      m_History.updateResult(name);
+      m_Log.logMessage("Finished re-evaluation");
+      m_Log.statusMessage("OK");
+    } catch (Exception ex) {
+      m_Log.logMessage(ex.getMessage());
+      m_Log.statusMessage("See error log");
+      ex.printStackTrace();
+    } finally {
+      if (predData != null) {
+	m_CurrentVis = new VisualizePanel();
+	m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
+	m_CurrentVis.setLog(m_Log);
+	predData.setPlotName(name+" ("+userTest.relationName()+")");
+	
+	try {
+	  m_CurrentVis.addPlot(predData);
+	  m_CurrentVis.setXIndex(m_visXIndex); 
+	  m_CurrentVis.setYIndex(m_visYIndex);
+	} catch (Exception ex) {
+	  System.err.println(ex);
+	}
+	m_CurrentVis.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      if (m_Instances != null &&
+		  m_CurrentVis.getInstances().
+		  relationName().
+		  compareTo(m_Instances.relationName()) == 0) {
+		setXY_VisualizeIndexes(m_CurrentVis.getXIndex(), 
+				       m_CurrentVis.getYIndex());
+	      }
+	    }
+	  });
+	
+	FastVector vv = new FastVector();
+	vv.addElement(clusterer);
+	if (trainHeader != null) vv.addElement(trainHeader);
+	if (ignoredAtts != null) vv.addElement(ignoredAtts);
+	if (saveVis) {
+	  vv.addElement(m_CurrentVis);
+	  if (grph != null) {
+	    vv.addElement(grph);
+	  }
+	  
+	}
+	m_History.addObject(name, vv);
+	updateSaveButton();
+      }
     }
   }
 
