@@ -27,8 +27,8 @@ import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.Filter;
 
 /**
- * Implements base routines for generating M5 Model trees and
- * rules. <p>
+ * M5Base. Implements base routines
+ * for generating M5 Model trees and rules. <p>
  * 
  * Valid options are:<p>
  * 
@@ -38,13 +38,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * -M <num> <br>
- * Minimum number of objects per leaf. <p>
- *
- * -N  <br>
- * Turns pruning off. <p>
- *
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -158,14 +152,8 @@ public abstract class M5Base extends Classifier
    * Use unsmoothed predictions. <p>
    *
    * -R <br>
-   * Build regression tree/rule rather than model tree/rule
-   *
-   * -M <num> <br>
-   * Minimum number of objects per leaf. <p>
-   *
-   * -N  <br>
-   * Turns pruning off. <p>
-   *
+   * Build a regression tree rather than a model tree. <p>
+   * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -211,15 +199,6 @@ public abstract class M5Base extends Classifier
   } 
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String unprunedTipText() {
-    return "Whether classifier is pruned.";
-  }
-
-  /**
    * Use unpruned tree/rules
    *
    * @param unpruned true if unpruned tree/rules are to be generated
@@ -256,15 +235,6 @@ public abstract class M5Base extends Classifier
   } 
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String useUnsmoothedTipText() {
-    return "Whether predictions are smoothed.";
-  }
-
-  /**
    * Use unsmoothed predictions
    * 
    * @param s true if unsmoothed predictions are to be used
@@ -281,15 +251,6 @@ public abstract class M5Base extends Classifier
   public boolean getUseUnsmoothed() {
     return m_unsmoothedPredictions;
   } 
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String buildRegressionTreeTipText() {
-    return "Whether linear models are built.";
-  }
 
   /**
    * Get the value of regressionTree.
@@ -309,15 +270,6 @@ public abstract class M5Base extends Classifier
   public void setBuildRegressionTree(boolean newregressionTree) {
     
     m_regressionTree = newregressionTree;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String minNumInstancesTipText() {
-    return "The minimum number of instances per leaf node.";
   }
 
   /**
@@ -492,7 +444,7 @@ public abstract class M5Base extends Classifier
 		  + "rules ");
 
       if (!m_unsmoothedPredictions) {
-	text.append("\n(using smoothed predictions) ");
+	text.append("\n(using smoothed linear models) ");
       }
 
       text.append(":\n");
@@ -548,5 +500,10 @@ public abstract class M5Base extends Classifier
       return m_ruleSet.size();
     }
     return ((Rule)m_ruleSet.elementAt(0)).m_topOfTree.numberOfLinearModels();
+  }
+
+  public RuleNode getM5RootNode() {
+    Rule temp = (Rule) m_ruleSet.elementAt(0);
+    return temp.getM5RootNode();
   }
 }

@@ -28,10 +28,9 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @author Dale Fletcher
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class Rule implements Serializable {
+public class Rule {
 
   protected static int LEFT = 0;
   protected static int RIGHT = 1;
@@ -179,18 +178,20 @@ public class Rule implements Serializable {
     m_globalAbsDev = Rule.absDev(m_classIndex, m_instances);
 
     m_topOfTree = new RuleNode(m_globalStdDev, m_globalAbsDev, null);
-    m_topOfTree.setSmoothing(m_smoothPredictions);
     m_topOfTree.setSaveInstances(m_saveInstances);
     m_topOfTree.setRegressionTree(m_regressionTree);
     m_topOfTree.setMinNumInstances(m_minNumInstances);
     m_topOfTree.buildClassifier(m_instances);
 
 
-
     if (!m_useUnpruned) {
       m_topOfTree.prune();
     } else {
       m_topOfTree.installLinearModels();
+    }
+
+    if (m_smoothPredictions) {
+      m_topOfTree.installSmoothedModels();
     }
     //m_topOfTree.printAllModels();
     m_topOfTree.numLeaves(0);
@@ -203,6 +204,7 @@ public class Rule implements Serializable {
 
     // save space
     m_instances = new Instances(m_instances, 0);
+    
   } 
 
   /**
@@ -235,20 +237,6 @@ public class Rule implements Serializable {
     } 
 
     // the linear model's prediction for this rule
-    // add smoothing code here
-    if (m_smoothPredictions) {
-      double pred = m_ruleModel.classifyInstance(instance);
-      int n = m_ruleModel.m_numInstances;
-      double supportPred;
-      Instance tempInst;
-      for (int i = 0; i < m_internalNodes.length; i++) {
-	tempInst = m_internalNodes[i].applyNodeFilter(instance);
-	supportPred = m_internalNodes[i].getModel().classifyInstance(tempInst);
-	pred = RuleNode.smoothingOriginal(n, pred, supportPred);
-	n = m_internalNodes[i].m_numInstances;
-      }
-      return pred;
-    }
     return m_ruleModel.classifyInstance(instance);
   } 
 
@@ -383,7 +371,7 @@ public class Rule implements Serializable {
 		+"tree:\n");
 
     if (m_smoothPredictions == true) {
-      text.append("(using smoothed predictions)\n");
+      text.append("(using smoothed linear models)\n");
     } 
 
     text.append(m_topOfTree.treeToString(0));
@@ -616,6 +604,10 @@ public class Rule implements Serializable {
    */
   public double getMinNumInstances() {
     return m_minNumInstances;
+  }
+
+  public RuleNode getM5RootNode() {
+    return m_topOfTree;
   }
 }
 
