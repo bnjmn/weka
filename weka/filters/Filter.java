@@ -51,7 +51,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class Filter implements Serializable {
 
@@ -158,7 +158,7 @@ public abstract class Filter implements Serializable {
     if (this instanceof OptionHandler) {
       String [] options = ((OptionHandler)this).getOptions();
       for (int i = 0; i < options.length; i++) {
-	relationName += options[i].trim().replace(' ','_').replace(',','_');
+	relationName += options[i].trim();
       }
     }
     result.setRelationName(relationName);
