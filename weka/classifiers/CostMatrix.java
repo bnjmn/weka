@@ -36,7 +36,7 @@ import java.util.Random;
  * having class i.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CostMatrix extends Matrix {
 
@@ -261,7 +261,7 @@ public class CostMatrix extends Matrix {
     for (int i = 0; i < size(); i++) {
       double diag = getElement(i, i);
       for (int j = 0; j < size(); j++) {
-        setElement(i, j, getElement(i, j) - diag);
+        addElement(i, j, -diag);
       }
     }
   }
