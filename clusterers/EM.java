@@ -70,7 +70,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -417,6 +417,7 @@ public class EM
     m_priors = new double[m_num_clusters];
 
     for (i = 0; i < m_num_clusters; i++) {
+      Instance clusterStartPt = inst.instance(m_rr.nextInt(inst.numInstances()));
       for (j = 0; j < m_num_attribs; j++) {
 	if (inst.attribute(j).isNominal()) {
 	  m_model[i][j] = new DiscreteEstimator(m_theInstances.
@@ -425,15 +426,16 @@ public class EM
 	  for (k=0; k<m_theInstances.attribute(j).numValues(); k++) {
 	    m_model[i][j].addValue(k, 10*m_rr.nextDouble());
 	  }
-	}
-	else {
+	} else {
 	  double delta_init = m_maxValues[j]-m_minValues[j];
 	  if (delta_init <= 0) {
-	    m_modelNormal[i][j][0] = m_minValues[j];
+	    //	    m_modelNormal[i][j][0] = m_minValues[j];
+	    m_modelNormal[i][j][0] = clusterStartPt.value(j);
 	    m_modelNormal[i][j][1] = m_minStdDev;
 	    m_modelNormal[i][j][2] = 1.0;
 	  } else {
-	    m_modelNormal[i][j][0] = m_minValues[j]+delta_init*m_rr.nextDouble();
+	    //	    m_modelNormal[i][j][0] = m_minValues[j]+delta_init*m_rr.nextDouble();
+	    m_modelNormal[i][j][0] = clusterStartPt.value(j);
 	    m_modelNormal[i][j][1] = delta_init/(2*m_num_clusters);
 	    m_modelNormal[i][j][2] = 1.0;
 	  }
