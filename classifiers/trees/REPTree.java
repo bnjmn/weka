@@ -52,11 +52,11 @@ import java.io.*;
  * -P <br>
  * No pruning. <p>
  *
- * -T <br>
+ * -L <br>
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1419,7 +1419,7 @@ public class REPTree extends Classifier
 			    "P", 0, "-P"));
     newVector.
       addElement(new Option("\tMaximum tree depth (default -1, no maximum)",
-			    "T", 1, "-T"));
+			    "L", 1, "-L"));
 
     return newVector.elements();
   } 
@@ -1439,7 +1439,7 @@ public class REPTree extends Classifier
     options[current++] = "" + getNumFolds();
     options[current++] = "-S"; 
     options[current++] = "" + getSeed();
-    options[current++] = "-T"; 
+    options[current++] = "-L"; 
     options[current++] = "" + getMaxDepth();
     if (getNoPruning()) {
       options[current++] = "-P";
@@ -1482,7 +1482,7 @@ public class REPTree extends Classifier
       m_Seed = 1;
     }
     m_NoPruning = Utils.getFlag('P', options);
-    String depthString = Utils.getOption('D', options);
+    String depthString = Utils.getOption('L', options);
     if (depthString.length() != 0) {
       m_MaxDepth = Integer.parseInt(depthString);
     } else {
