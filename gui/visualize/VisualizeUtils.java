@@ -29,7 +29,7 @@ import javax.swing.JOptionPane;
  * This class contains utility routines for visualization
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class VisualizeUtils {
@@ -87,7 +87,7 @@ public class VisualizeUtils {
       JOptionPane.showMessageDialog(null,
        "VisualizeUtils: Could not read a visualization configuration file.\n"
        +"An example file is included in the Weka distribution.\n"
-       +"This file should be names \"" + PROPERTY_FILE + "\"  and\n"
+       +"This file should be named \"" + PROPERTY_FILE + "\"  and\n"
        +"should be placed either in your user home (which is set\n"
        +"to \"" + systemProps.getProperty("user.home") + "\")\n"
        +"or the directory that java was started from\n",
