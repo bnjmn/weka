@@ -18,6 +18,7 @@
  */
 package weka.gui.visualize;
 
+import weka.core.Utils;
 import java.util.Properties;
 import java.io.FileInputStream;
 
@@ -29,13 +30,13 @@ import javax.swing.JOptionPane;
  * This class contains utility routines for visualization
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class VisualizeUtils {
 
   /** The name of the properties file */
-  protected static String PROPERTY_FILE = "Visualize.props";
+  protected static String PROPERTY_FILE = "weka/gui/visualize/Visualize.props";
 
   /** Contains the visualization properties */
   protected static Properties VISUALIZE_PROPERTIES;
@@ -44,59 +45,10 @@ public class VisualizeUtils {
   protected static int MAX_PRECISION = 10;
 
   static {
-    boolean noDefaultProps = false;
-    boolean noUserProps = false;
-    boolean noLocalProps = false;
 
-    // Properties for user info
-    Properties systemProps = System.getProperties();
-
-    // Get default properties from the weka distribution
-    Properties defaultProps = new Properties();
-    try {
-      defaultProps.load(ClassLoader.
-			getSystemResourceAsStream("weka/gui/visualize/"
-						  +PROPERTY_FILE));
-      
-    } catch (Exception ex) {
-      noDefaultProps = true;
-      System.err.println("Warning: couldn't load default visualization "
-			 +"properties.");
-    }
-
-    // Allow a properties file in the user's home directory to override
-    Properties userProps = new Properties(defaultProps);
-    try {
-      userProps.load(new FileInputStream(systemProps.getProperty("user.home")
-			 + systemProps.getProperty("file.separator")
-			 + PROPERTY_FILE));
-    } catch (Exception ex) {
-      noUserProps = true;
-      System.err.println("Warning: couldn't load user visualization "
-			 +"properties");
-    }
-
-    // Allow a properties file in the current directory to override
-    VISUALIZE_PROPERTIES = new Properties(userProps);
-    try {
-      VISUALIZE_PROPERTIES.load(new FileInputStream(PROPERTY_FILE));
-    } catch (Exception ex) {
-      noLocalProps = true;
-      System.err.println("Warning: couldn't load localdir visualization "
-			 +"properties.");
-    }
     
-    if (noDefaultProps && noUserProps && noLocalProps) {
-      JOptionPane.showMessageDialog(null,
-       "VisualizeUtils: Could not read a visualization configuration file.\n"
-       +"An example file is included in the Weka distribution.\n"
-       +"This file should be named \"" + PROPERTY_FILE + "\"  and\n"
-       +"should be placed either in your user home (which is set\n"
-       +"to \"" + systemProps.getProperty("user.home") + "\")\n"
-       +"or the directory that java was started from\n",
-       "Plot2D",
-       JOptionPane.ERROR_MESSAGE);
-    } else {
+    try {
+      VISUALIZE_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
       String precision = 
 	VISUALIZE_PROPERTIES.getProperty("weka.gui.visualize.precision");
       if (precision == null) {
@@ -108,6 +60,16 @@ public class VisualizeUtils {
 	MAX_PRECISION = Integer.parseInt(precision);
 	System.err.println("Setting numeric precision to: "+precision);
       }
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(null,
+       "VisualizeUtils: Could not read a visualization configuration file.\n"
+       +"An example file is included in the Weka distribution.\n"
+       +"This file should be named \"" + PROPERTY_FILE + "\"  and\n"
+       +"should be placed either in your user home (which is set\n"
+       +"to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+       +"or the directory that java was started from\n",
+       "Plot2D",
+       JOptionPane.ERROR_MESSAGE);
     }
   }
 
