@@ -70,7 +70,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -411,41 +411,66 @@ public class EM
   private void EM_Init (Instances inst)
     throws Exception {
     int i, j, k;
+
+    // run k means 10 times and choose best solution
+    SimpleKMeans bestK = null;
+    double bestSqE = Double.MAX_VALUE;
+    for (i = 0; i < 10; i++) {
+      SimpleKMeans sk = new SimpleKMeans();
+      sk.setSeed(m_rr.nextInt());
+      sk.setNumClusters(m_num_clusters);
+      sk.buildClusterer(inst);
+      if (sk.getSquaredError() < bestSqE) {
+	bestSqE = sk.getSquaredError();
+	bestK = sk;
+      }
+    }
+    
+    // initialize with best k-means solution
+    m_num_clusters = bestK.numberOfClusters();
     m_weights = new double[inst.numInstances()][m_num_clusters];
     m_model = new DiscreteEstimator[m_num_clusters][m_num_attribs];
     m_modelNormal = new double[m_num_clusters][m_num_attribs][3];
     m_priors = new double[m_num_clusters];
+    Instances centers = bestK.getClusterCentroids();
+    Instances stdD = bestK.getClusterStandardDevs();
+    int [][][] nominalCounts = bestK.getClusterNominalCounts();
+    int [] clusterSizes = bestK.getClusterSizes();
 
     for (i = 0; i < m_num_clusters; i++) {
-      Instance clusterStartPt = inst.instance(m_rr.nextInt(inst.numInstances()));
+      Instance center = centers.instance(i);
       for (j = 0; j < m_num_attribs; j++) {
 	if (inst.attribute(j).isNominal()) {
 	  m_model[i][j] = new DiscreteEstimator(m_theInstances.
 						attribute(j).numValues()
 						, true);
-	  for (k=0; k<m_theInstances.attribute(j).numValues(); k++) {
-	    m_model[i][j].addValue(k, 10*m_rr.nextDouble());
+	  for (k = 0; k < inst.attribute(j).numValues(); k++) {
+	    m_model[i][j].addValue(k, nominalCounts[i][j][k]);
 	  }
 	} else {
-	  double delta_init = m_maxValues[j]-m_minValues[j];
-	  if (delta_init <= 0) {
-	    //	    m_modelNormal[i][j][0] = m_minValues[j];
-	    m_modelNormal[i][j][0] = clusterStartPt.value(j);
-	    m_modelNormal[i][j][1] = m_minStdDev;
-	    m_modelNormal[i][j][2] = 1.0;
-	  } else {
-	    //	    m_modelNormal[i][j][0] = m_minValues[j]+delta_init*m_rr.nextDouble();
-	    m_modelNormal[i][j][0] = clusterStartPt.value(j);
-	    m_modelNormal[i][j][1] = delta_init/(2*m_num_clusters);
-	    m_modelNormal[i][j][2] = 1.0;
+	  double mean = (center.isMissing(j))
+	    ? inst.meanOrMode(j)
+	    : center.value(j);
+	  m_modelNormal[i][j][0] = mean;
+	  double stdv = (stdD.instance(i).isMissing(j))
+	    ? ((m_maxValues[j] - m_minValues[j]) / (2 * m_num_clusters))
+	    : stdD.instance(i).value(j);
+	  if (stdv < m_minStdDev) {
+	    stdv = inst.attributeStats(j).numericStats.stdDev;
+	    if (stdv < m_minStdDev) {
+	      stdv = m_minStdDev;
+	    }
 	  }
+	  m_modelNormal[i][j][1] = stdv;
+	  m_modelNormal[i][j][2] = 1.0;
 	}
-      }
-    }
+      } 
+    }    
     
-    // initially equal priors
+    
     for (j = 0; j < m_num_clusters; j++) {
-      m_priors[j] += 1.0;
+      //      m_priors[j] += 1.0;
+      m_priors[j] = clusterSizes[j];
     }
     Utils.normalize(m_priors);
   }
@@ -486,6 +511,8 @@ public class EM
   private double logNormalDens (double x, double mean, double stdDev) {
 
     double diff = x - mean;
+    //    System.err.println("x: "+x+" mean: "+mean+" diff: "+diff+" stdv: "+stdDev);
+    //    System.err.println("diff*diff/(2*stdv*stdv): "+ (diff * diff / (2 * stdDev * stdDev)));
     
     return - (diff * diff / (2 * stdDev * stdDev))  - m_normConst - Math.log(stdDev);
   }
@@ -550,7 +577,8 @@ public class EM
         for (i = 0; i < m_num_clusters; i++) {
           if (m_modelNormal[i][j][2] <= 0) {
             m_modelNormal[i][j][1] = Double.MAX_VALUE;
-	    m_modelNormal[i][j][0] = 0;
+	    //	    m_modelNormal[i][j][0] = 0;
+	    m_modelNormal[i][j][0] = m_minStdDev;
           } else {
 	    if (m_modelNormal[i][j][2] > 0) {
 	      
@@ -569,7 +597,10 @@ public class EM
 	      m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]); 
 
 	      if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
-		m_modelNormal[i][j][1] = m_minStdDev;
+		m_modelNormal[i][j][1] = inst.attributeStats(j).numericStats.stdDev;
+		if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
+		  m_modelNormal[i][j][1] = m_minStdDev;
+		}
 	      }
 	    } else {
 	      m_modelNormal[i][j][1] = m_minStdDev;
@@ -658,6 +689,9 @@ public class EM
    * Outputs the generated clusters into a string.
    */
   public String toString () {
+    if (m_priors == null) {
+      return "No clusterer built yet!";
+    }
     StringBuffer text = new StringBuffer();
     text.append("\nEM\n==\n");
     if (m_initialNumClusters == -1) {
@@ -765,6 +799,7 @@ public class EM
       for (i = 0; i < numFolds; i++) {
 	Instances cvTrain = trainCopy.trainCV(numFolds, i, cvr);
 	Instances cvTest = trainCopy.testCV(numFolds, i);
+	m_rr = new Random(m_rseed);
 	EM_Init(cvTrain);
 	iterate(cvTrain, false);
 	tll = E(cvTest, false);
@@ -904,6 +939,7 @@ public class EM
     double[] wghts = new double[m_num_clusters];
 
     for (i = 0; i < m_num_clusters; i++) {
+      //      System.err.println("Cluster : "+i);
       logprob = 0.0;
 
       for (j = 0; j < m_num_attribs; j++) {
@@ -915,13 +951,16 @@ public class EM
 	    logprob += logNormalDens(inst.value(j), 
 				     m_modelNormal[i][j][0], 
 				     m_modelNormal[i][j][1]);
+	    /*	    System.err.println(logNormalDens(inst.value(j), 
+				     m_modelNormal[i][j][0], 
+				     m_modelNormal[i][j][1]) + " "); */
 	  }
 	}
       }
+      //      System.err.println("");
 
       wghts[i] = logprob;
     }
-
     return  wghts;
   }
 
@@ -957,6 +996,8 @@ public class EM
     if (m_initialNumClusters == -1) {
       if (m_theInstances.numInstances() > 9) {
 	CVClusters();
+	m_rr = new Random(m_rseed);
+	for (int i=0; i<10; i++) m_rr.nextDouble();
       } else {
 	m_num_clusters = 1;
       }
