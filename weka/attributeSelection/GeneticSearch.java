@@ -31,7 +31,7 @@ import  weka.core.*;
  *
  * Valid options are: <p>
  *
- * -P <size of the population> <br>
+ * -Z <size of the population> <br>
  * Sets the size of the population. (default = 20). <p>
  *
  * -G <number of generations> <br>
@@ -54,15 +54,19 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class GeneticSearch extends ASSearch implements OptionHandler {
+public class GeneticSearch extends ASSearch implements 
+  StartSetHandler, OptionHandler {
 
   /** 
-   * holds a starting set (if one is supplied). Becomes one member of the
+   * holds a starting set as an array of attributes. Becomes one member of the
    * initial random population
    */
   private int[] m_starting;
+
+  /** holds the start set for the search as a Range */
+  private Range m_startRange;
   
  /** does the data have a class */
   private boolean m_hasClass;
@@ -230,10 +234,18 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(6);
+
+    newVector.addElement(new Option("\tSpecify a starting set of attributes." 
+				    + "\n\tEg. 1,3,5-7."
+				    +"If supplied, the starting set becomes"
+				    +"\n\tone member of the initial random"
+				    +"\n\tpopulation."
+				    ,"P",1
+				    , "-P <start set>"));
     newVector.addElement(new Option("\tSet the size of the population."
 				    +"\n\t(default = 10)."
-				    , "P", 1
-				    , "-P <population size>"));
+				    , "Z", 1
+				    , "-Z <population size>"));
     newVector.addElement(new Option("\tSet the number of generations."
 				    +"\n\t(default = 20)" 
 				    , "G", 1, "-G <number of generations>"));
@@ -261,7 +273,7 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
    *
    * Valid options are: <p>
    *
-   * -P <size of the population> <br>
+   * -Z <size of the population> <br>
    * Sets the size of the population. (default = 20). <p>
    *
    * -G <number of generations> <br>
@@ -294,6 +306,11 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
     resetOptions();
 
     optionString = Utils.getOption('P', options);
+    if (optionString.length() != 0) {
+      setStartSet(optionString);
+    }
+
+    optionString = Utils.getOption('Z', options);
     if (optionString.length() != 0) {
       setPopulationSize(Integer.parseInt(optionString));
     }
@@ -331,10 +348,14 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[12];
+    String[] options = new String[14];
     int current = 0;
 
-    options[current++] = "-P";
+    if (!(getStartSet().equals(""))) {
+      options[current++] = "-P";
+      options[current++] = ""+startSetToString();
+    }
+    options[current++] = "-Z";
     options[current++] = "" + getPopulationSize();
     options[current++] = "-G";
     options[current++] = "" + getMaxGenerations();
@@ -352,7 +373,27 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
     }
     return  options;
   }
-  
+
+  /**
+   * Sets a starting set of attributes for the search. It is the
+   * search method's responsibility to report this start set (if any)
+   * in its toString() method.
+   * @param startSet a string containing a list of attributes (and or ranges),
+   * eg. 1,2,6,10-15.
+   * @exception if start set can't be set.
+   */
+  public void setStartSet (String startSet) throws Exception {
+    m_startRange.setRanges(startSet);
+  }
+
+  /**
+   * Returns a list of attributes (and or attribute ranges) as a String
+   * @return a list of attributes (and or attribute ranges)
+   */
+  public String getStartSet () {
+    return m_startRange.getRanges();
+  }
+
   /**
    * set the seed for random number generation
    * @param s seed value
@@ -458,6 +499,45 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
   }
 
   /**
+   * converts the array of starting attributes to a string. This is
+   * used by getOptions to return the actual attributes specified
+   * as the starting set. This is better than using m_startRanges.getRanges()
+   * as the same start set can be specified in different ways from the
+   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
+   * is stored in a database is comparable.
+   * @return a comma seperated list of individual attribute numbers as a String
+   */
+  private String startSetToString() {
+    StringBuffer FString = new StringBuffer();
+    boolean didPrint;
+    
+    if (m_starting == null) {
+      return getStartSet();
+    }
+
+    for (int i = 0; i < m_starting.length; i++) {
+      didPrint = false;
+      
+      if ((m_hasClass == false) || 
+	  (m_hasClass == true && i != m_classIndex)) {
+	FString.append((m_starting[i] + 1));
+	didPrint = true;
+      }
+      
+      if (i == (m_starting.length - 1)) {
+	FString.append("");
+      }
+      else {
+	if (didPrint) {
+	  FString.append(",");
+	  }
+      }
+    }
+
+    return FString.toString();
+  }
+
+  /**
    * returns a description of the search
    * @return a description of the search as a String
    */
@@ -469,26 +549,7 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
       GAString.append("no attributes\n");
     }
     else {
-      boolean didPrint;
-
-      for (int i = 0; i < m_starting.length; i++) {
-	didPrint = false;
-
-	if ((m_hasClass == false) || 
-	    (m_hasClass == true && i != m_classIndex)) {
-	  GAString.append((m_starting[i] + 1));
-	  didPrint = true;
-	}
-
-	if (i == (m_starting.length - 1)) {
-	  GAString.append("\n");
-	}
-	else {
-	  if (didPrint) {
-	    GAString.append(",");
-	  }
-	}
-      }
+      GAString.append(startSetToString()+"\n");
     }
     GAString.append("\tPopulation size: "+m_popSize);
     GAString.append("\n\tNumber of generations: "+m_maxGenerations);
@@ -505,15 +566,12 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
   /**
    * Searches the attribute subset space using a genetic algorithm.
    *
-   * @param startSet a (possibly) ordered array of attribute indexes from
-   * which to start the search from. Set to null if no explicit start
-   * point.
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @exception Exception if the search can't be completed
    */
-   public int[] search (int[] startSet, ASEvaluation ASEval, Instances data)
+   public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
 
      m_best = null;
@@ -525,10 +583,6 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
 			    + "Subset evaluator!");
      }
      
-    if (startSet != null) {
-      m_starting = startSet;
-    }
-
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
     }
@@ -539,6 +593,11 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
 
     SubsetEvaluator ASEvaluator = (SubsetEvaluator)ASEval;
     m_numAttribs = data.numAttributes();
+
+    m_startRange.setUpper(m_numAttribs-1);
+    if (!(getStartSet().equals(""))) {
+      m_starting = m_startRange.getSelection();
+    }
 
     // initial random population
     m_lookupTable = new Hashtable(m_lookupTableSize);
@@ -1029,6 +1088,7 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
     m_maxGenerations = 20;
     m_reportFrequency = m_maxGenerations;
     m_starting = null;
+    m_startRange = new Range();
     m_seed = 1;
   }
 }
