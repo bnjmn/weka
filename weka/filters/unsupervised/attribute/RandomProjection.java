@@ -73,7 +73,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 
 
   /** Stores the number of dimensions to reduce the data to */
-  private int m_k=0;
+  private int m_k=10;
 
   /** Stores the dimensionality the data should be reduced to as percentage of the original dimension */
   private double m_percent=0.0;
@@ -208,7 +208,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 	if (mString.length() != 0) 
 	    setNumberOfAttributes(Integer.parseInt(mString));	    
 	else	    
-	    setNumberOfAttributes(15);
+	    setNumberOfAttributes(10);
     }    
     
     mString = Utils.getOption('R', options);
