@@ -32,32 +32,24 @@ import  weka.filters.*;
  * -M <br>
  * Treat missing values as a seperate value. <br>
  *
+ * -B <br>
+ * Just binarize numeric attributes instead of properly discretizing them. <br>
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator
-  implements OptionHandler
-{
-
-  /** The training instances */
-  private Instances m_trainInstances;
-
-  /** The class index */
-  private int m_classIndex;
-
-  /** The number of attributes */
-  private int m_numAttribs;
-
-  /** The number of instances */
-  private int m_numInstances;
-
-  /** The number of classes */
-  private int m_numClasses;
+  implements OptionHandler {
 
   /** Treat missing values as a seperate value */
   private boolean m_missing_merge;
 
+  /** Just binarize numeric attributes */
+  private boolean m_Binarize;
+
+  /** The info gain for each attribute */
+  private double[] m_InfoGains;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -77,15 +69,17 @@ public class InfoGainAttributeEval
     resetOptions();
   }
 
-
   /**
    * Returns an enumeration describing the available options
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(2);
     newVector.addElement(new Option("\ttreat missing values as a seperate " 
 				    + "value.", "M", 0, "-M"));
+    newVector.addElement(new Option("\tjust binarize numeric attributes instead\n " 
+				    +"\tof properly discretizing them.", "B", 0, 
+				    "-B"));
     return  newVector.elements();
   }
 
@@ -98,15 +92,19 @@ public class InfoGainAttributeEval
    * -M <br>
    * Treat missing values as a seperate value. <br>
    *
+   * -B <br>
+   * Just binarize numeric attributes instead of properly discretizing them. <br>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
-    throws Exception
-  {
+    throws Exception {
+
     resetOptions();
     setMissingMerge(!(Utils.getFlag('M', options)));
+    setBinarizeNumericAttributes(Utils.getFlag('B', options));
   }
 
 
@@ -116,11 +114,14 @@ public class InfoGainAttributeEval
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[1];
+    String[] options = new String[2];
     int current = 0;
 
     if (!getMissingMerge()) {
       options[current++] = "-M";
+    }
+    if (getBinarizeNumericAttributes()) {
+      options[current++] = "-B";
     }
 
     while (current < options.length) {
@@ -128,6 +129,34 @@ public class InfoGainAttributeEval
     }
 
     return  options;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String binarizeNumericAttributesTipText() {
+    return "Just binarize numeric attributes instead of properly discretizing them.";
+  }
+
+  /**
+   * Binarize numeric attributes.
+   *
+   * @param b true=binarize numeric attributes
+   */
+  public void setBinarizeNumericAttributes (boolean b) {
+    m_Binarize = b;
+  }
+
+
+  /**
+   * get whether numeric attributes are just being binarized.
+   *
+   * @return true if missing values are being distributed.
+   */
+  public boolean getBinarizeNumericAttributes () {
+    return  m_Binarize;
   }
 
   /**
@@ -170,35 +199,166 @@ public class InfoGainAttributeEval
    * generated successfully
    */
   public void buildEvaluator (Instances data)
-    throws Exception
-  {
+    throws Exception {
+
+    try {
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
     }
-
-    m_trainInstances = data;
-    m_classIndex = m_trainInstances.classIndex();
-    m_numAttribs = m_trainInstances.numAttributes();
-    m_numInstances = m_trainInstances.numInstances();
-
-    if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
+    
+    int classIndex = data.classIndex();
+    if (data.attribute(classIndex).isNumeric()) {
       throw  new Exception("Class must be nominal!");
     }
+    int numInstances = data.numInstances();
+    
+    if (!m_Binarize) {
+      DiscretizeFilter disTransform = new DiscretizeFilter();
+      disTransform.setUseBetterEncoding(true);
+      disTransform.inputFormat(data);
+      data = Filter.useFilter(data, disTransform);
+    } else {
+      NumericToBinaryFilter binTransform = new NumericToBinaryFilter();
+      binTransform.inputFormat(data);
+      data = Filter.useFilter(data, binTransform);
+    }      
+    int numClasses = data.attribute(classIndex).numValues();
 
-    DiscretizeFilter disTransform = new DiscretizeFilter();
-    disTransform.setUseBetterEncoding(true);
-    disTransform.inputFormat(m_trainInstances);
-    m_trainInstances = Filter.useFilter(m_trainInstances, disTransform);
-    m_numClasses = m_trainInstances.attribute(m_classIndex).numValues();
+    // Reserve space and initialize counters
+    double[][][] counts = new double[data.numAttributes()][][];
+    for (int k = 0; k < data.numAttributes(); k++) {
+      if (k != classIndex) {
+	int numValues = data.attribute(k).numValues();
+	counts[k] = new double[numValues + 1][numClasses + 1];
+      }
+    }
+
+    // Initialize counters
+    double[] temp = new double[numClasses + 1];
+    for (int k = 0; k < numInstances; k++) {
+      Instance inst = data.instance(k);
+      if (inst.classIsMissing()) {
+	temp[numClasses] += inst.weight();
+      } else {
+	temp[(int)inst.classValue()] += inst.weight();
+      }
+    }
+    for (int k = 0; k < counts.length; k++) {
+      if (k != classIndex) {
+	for (int i = 0; i < temp.length; i++) {
+	  counts[k][0][i] = temp[i];
+	}
+      }
+    }
+
+    // Get counts
+    for (int k = 0; k < numInstances; k++) {
+      Instance inst = data.instance(k);
+      for (int i = 0; i < inst.numValues(); i++) {
+	if (inst.index(i) != classIndex) {
+	  if (inst.isMissingSparse(i) || inst.classIsMissing()) {
+	    if (!inst.isMissingSparse(i)) {
+	      counts[inst.index(i)][(int)inst.valueSparse(i)][numClasses] += 
+		inst.weight();
+	      counts[inst.index(i)][0][numClasses] -= inst.weight();
+	    } else if (!inst.classIsMissing()) {
+	      counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
+		[(int)inst.classValue()] += inst.weight();
+	      counts[inst.index(i)][0][(int)inst.classValue()] -= 
+		inst.weight();
+	    } else {
+	      counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
+		[numClasses] += inst.weight();
+	      counts[inst.index(i)][0][numClasses] -= inst.weight();
+	    }
+	  } else {
+	    counts[inst.index(i)][(int)inst.valueSparse(i)]
+	      [(int)inst.classValue()] += inst.weight();
+	    counts[inst.index(i)][0][(int)inst.classValue()] -= inst.weight();
+	  }
+	}
+      }
+    }
+
+    // distribute missing counts if required
+    if (m_missing_merge) {
+      
+      for (int k = 0; k < data.numAttributes(); k++) {
+	if (k != classIndex) {
+	  int numValues = data.attribute(k).numValues();
+
+	  // Compute marginals
+	  double[] rowSums = new double[numValues];
+	  double[] columnSums = new double[numClasses];
+	  double sum = 0;
+	  for (int i = 0; i < numValues; i++) {
+	    for (int j = 0; j < numClasses; j++) {
+	      rowSums[i] += counts[k][i][j];
+	      columnSums[j] += counts[k][i][j];
+	    }
+	    sum += rowSums[i];
+	  }
+
+	  if (Utils.gr(sum, 0)) {
+	    double[][] additions = new double[numValues][numClasses];
+
+	    // Compute what needs to be added to each row
+	    for (int i = 0; i < numValues; i++) {
+	      for (int j = 0; j  < numClasses; j++) {
+		additions[i][j] = (rowSums[i] / sum) * counts[k][numValues][j];
+	      }
+	    }
+	    
+	    // Compute what needs to be added to each column
+	    for (int i = 0; i < numClasses; i++) {
+	      for (int j = 0; j  < numValues; j++) {
+		additions[j][i] += (columnSums[i] / sum) * 
+		  counts[k][j][numClasses];
+	      }
+	    }
+	    
+	    // Compute what needs to be added to each cell
+	    for (int i = 0; i < numClasses; i++) {
+	      for (int j = 0; j  < numValues; j++) {
+		additions[j][i] += (counts[k][j][i] / sum) * 
+		  counts[k][numValues][numClasses];
+	      }
+	    }
+	    
+	    // Make new contingency table
+	    double[][] newTable = new double[numValues][numClasses];
+	    for (int i = 0; i < numValues; i++) {
+	      for (int j = 0; j < numClasses; j++) {
+		newTable[i][j] = counts[k][i][j] + additions[i][j];
+	      }
+	    }
+	    counts[k] = newTable;
+	  }
+	}
+      }
+    }
+
+    // Compute info gains
+    m_InfoGains = new double[data.numAttributes()];
+    for (int i = 0; i < data.numAttributes(); i++) {
+      if (i != classIndex) {
+	m_InfoGains[i] = 
+	  (ContingencyTables.entropyOverColumns(counts[i]) 
+	   - ContingencyTables.entropyConditionedOnRows(counts[i]));
+      }
+    }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
-
 
   /**
    * Reset options to their default values
    */
   protected void resetOptions () {
-    m_trainInstances = null;
+    m_InfoGains = null;
     m_missing_merge = true;
+    m_Binarize = false;
   }
 
 
@@ -210,140 +370,10 @@ public class InfoGainAttributeEval
    * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
-    throws Exception
-  {
-    int i, j, ii, jj;
-    int nnj, nni, ni, nj;
-    double sum = 0.0;
-    ni = m_trainInstances.attribute(attribute).numValues() + 1;
-    nj = m_numClasses + 1;
-    double[] sumi, sumj;
-    Instance inst;
-    double temp = 0.0;
-    sumi = new double[ni];
-    sumj = new double[nj];
-    double[][] counts = new double[ni][nj];
-    sumi = new double[ni];
-    sumj = new double[nj];
+    throws Exception {
 
-    for (i = 0; i < ni; i++) {
-      sumi[i] = 0.0;
-
-      for (j = 0; j < nj; j++) {
-        sumj[j] = 0.0;
-        counts[i][j] = 0.0;
-      }
-    }
-
-    // Fill the contingency table
-    for (i = 0; i < m_numInstances; i++) {
-      inst = m_trainInstances.instance(i);
-
-      if (inst.isMissing(attribute)) {
-        ii = ni - 1;
-      }
-      else {
-        ii = (int)inst.value(attribute);
-      }
-
-      if (inst.isMissing(m_classIndex)) {
-        jj = nj - 1;
-      }
-      else {
-        jj = (int)inst.value(m_classIndex);
-      }
-
-      counts[ii][jj]++;
-    }
-
-    // get the row totals
-    for (i = 0; i < ni; i++) {
-      sumi[i] = 0.0;
-
-      for (j = 0; j < nj; j++) {
-        sumi[i] += counts[i][j];
-        sum += counts[i][j];
-      }
-    }
-
-    // get the column totals
-    for (j = 0; j < nj; j++) {
-      sumj[j] = 0.0;
-
-      for (i = 0; i < ni; i++) {
-        sumj[j] += counts[i][j];
-      }
-    }
-
-    // distribute missing counts
-    if (m_missing_merge) {
-      double[] i_copy = new double[sumi.length]; 
-      double[] j_copy = new double[sumj.length];
-      double[][] counts_copy = new double[sumi.length][sumj.length];
-
-      for (i = 0; i < ni; i++) {
-        System.arraycopy(counts[i], 0, counts_copy[i], 0, sumj.length);
-      }
-
-      System.arraycopy(sumi, 0, i_copy, 0, sumi.length);
-      System.arraycopy(sumj, 0, j_copy, 0, sumj.length);
-      double total_missing = (sumi[ni - 1] + sumj[nj - 1] - 
-			      counts[ni - 1][nj - 1]);
-
-      // do the missing i's
-      if (sumi[ni - 1] > 0.0) {
-        for (j = 0; j < nj - 1; j++) {
-          if (counts[ni - 1][j] > 0.0) {
-            for (i = 0; i < ni - 1; i++) {
-              temp = ((i_copy[i]/(sum - i_copy[ni - 1]))*counts[ni - 1][j]);
-              counts[i][j] += temp;
-              sumi[i] += temp;
-            }
-
-            counts[ni - 1][j] = 0.0;
-          }
-        }
-      }
-
-      sumi[ni - 1] = 0.0;
-
-      // do the missing j's
-      if (sumj[nj - 1] > 0.0) {
-        for (i = 0; i < ni - 1; i++) {
-          if (counts[i][nj - 1] > 0.0) {
-            for (j = 0; j < nj - 1; j++) {
-              temp = ((j_copy[j]/(sum - j_copy[nj - 1]))*counts[i][nj - 1]);
-              counts[i][j] += temp;
-              sumj[j] += temp;
-            }
-
-            counts[i][nj - 1] = 0.0;
-          }
-        }
-      }
-
-      sumj[nj - 1] = 0.0;
-
-      // do the both missing
-      if (counts[ni - 1][nj - 1] > 0.0) {
-        for (i = 0; i < ni - 1; i++) {
-          for (j = 0; j < nj - 1; j++) {
-            temp = (counts_copy[i][j]/(sum - total_missing)) * 
-	      counts_copy[ni - 1][nj - 1];
-            counts[i][j] += temp;
-            sumi[i] += temp;
-            sumj[j] += temp;
-          }
-        }
-
-        counts[ni - 1][nj - 1] = 0.0;
-      }
-    }
-
-    return  (ContingencyTables.entropyOverColumns(counts) 
-	     - ContingencyTables.entropyConditionedOnRows(counts));
+    return m_InfoGains[attribute];
   }
-
 
   /**
    * Describe the attribute evaluator
@@ -352,40 +382,42 @@ public class InfoGainAttributeEval
   public String toString () {
     StringBuffer text = new StringBuffer();
 
-    if (m_trainInstances == null) {
+    if (m_InfoGains == null) {
       text.append("Information Gain attribute evaluator has not been built");
     }
     else {
       text.append("\tInformation Gain Ranking Filter");
       if (!m_missing_merge) {
 	text.append("\n\tMissing values treated as seperate");
+      }
+      if (m_Binarize) {
+	text.append("\n\tNumeric attributes are just binarized");
+      }
     }
+    
+    text.append("\n");
+    return  text.toString();
   }
 
-  text.append("\n");
-  return  text.toString();
-}
-
-
-// ============
-// Test method.
-// ============
-/**
+  
+  // ============
+  // Test method.
+  // ============
+  /**
    * Main method for testing this class.
    *
    * @param argv the options
    */
-public static void main (String[] args) {
-  try {
-    System.out.println(AttributeSelection.
-		       SelectAttributes(new InfoGainAttributeEval(), args));
+  public static void main (String[] args) {
+    try {
+      System.out.println(AttributeSelection.
+			 SelectAttributes(new InfoGainAttributeEval(), args));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+    }
   }
-  catch (Exception e) {
-    e.printStackTrace();
-    System.out.println(e.getMessage());
-  }
-}
-
 }
 
 
