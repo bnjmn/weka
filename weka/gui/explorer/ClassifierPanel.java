@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.48 $
+ * @version $Revision: 1.49 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -320,7 +320,7 @@ public class ClassifierPanel extends JPanel {
 	}
       }
     });
-    m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
+    m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
     m_ClassifierEditor.setClassType(Classifier.class);
     m_ClassifierEditor.setValue(new weka.classifiers.rules.ZeroR());
     m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -1175,7 +1175,7 @@ public class ClassifierPanel extends JPanel {
 
 	      case 1: // CV mode
 	      m_Log.statusMessage("Randomizing instances...");
-	      inst.randomize(new Random(42));
+	      inst.randomize(new Random(1));
 	      if (inst.attribute(classIndex).isNominal()) {
 		m_Log.statusMessage("Stratifying instances...");
 		inst.stratify(numFolds);
@@ -1209,7 +1209,7 @@ public class ClassifierPanel extends JPanel {
 		
 	      case 2: // Percent split
 	      m_Log.statusMessage("Randomizing instances...");
-	      inst.randomize(new Random(42));
+	      inst.randomize(new Random(1));
 	      int trainSize = inst.numInstances() * percent / 100;
 	      int testSize = inst.numInstances() - trainSize;
 	      Instances train = new Instances(inst, 0, trainSize);
@@ -1394,6 +1394,14 @@ public class ClassifierPanel extends JPanel {
     resultListMenu.add(saveOutput);
     resultListMenu.addSeparator();
     
+    JMenuItem loadModel = new JMenuItem("Load model");
+    loadModel.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  loadClassifier();
+	}
+      });
+    resultListMenu.add(loadModel);
+
     FastVector o = (FastVector)m_History.getNamedObject(selectedName);
     
     if (o != null) {
@@ -1448,6 +1456,8 @@ public class ClassifierPanel extends JPanel {
 	  });
 	resultListMenu.add(reEvaluate);
       }
+
+      resultListMenu.addSeparator();
 
       JMenuItem visErrors = new JMenuItem("Visualize classifer errors");
       if (vp != null) {
