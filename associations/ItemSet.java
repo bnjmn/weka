@@ -29,7 +29,7 @@ import weka.core.*;
  * item sets are stored in lexicographic order.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ItemSet implements Serializable {
 
@@ -184,6 +184,9 @@ public class ItemSet implements Serializable {
    */
   public final boolean equals(Object itemSet) {
 
+    if ((itemSet == null) || !(itemSet.getClass().equals(this.getClass()))) {
+      return false;
+    }
     if (m_items.length != ((ItemSet)itemSet).m_items.length)
       return false;
     for (int i = 0; i < m_items.length; i++)

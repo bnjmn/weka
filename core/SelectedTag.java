@@ -39,7 +39,7 @@ public class SelectedTag {
   
   public boolean equals(Object o) {
     
-    if (!(o instanceof SelectedTag)) {
+    if ((o == null) || !(o.getClass().equals(this.getClass()))) {
       return false;
     }
     SelectedTag s = (SelectedTag)o;
