@@ -29,7 +29,7 @@
  * Cutoff. <p>
  *
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 package weka.clusterers;
 
@@ -374,8 +374,10 @@ public class Cobweb extends Clusterer implements OptionHandler{
 	T = host.TU();
 	n = host.nchildren;
 	baseU = T/n; // base CU over child nodes
-	U = (host.UIndividual(node) + T)/(n+1);
+	host.updateStats(node);
+	U = (host.UIndividual(node) + host.TU())/(n+1);
 	temp = bestHostCluster(host, node, U, baseU);
+	host.downdateStats(node);
       }
       if (temp != null) {
 	host = temp;
@@ -403,9 +405,10 @@ public class Cobweb extends Clusterer implements OptionHandler{
       double T = tree.TU();
       int n = tree.nchildren;
       double baseU = T/n; // base CU over child nodes
-      double U = (tree.UIndividual(node) + T)/(n+1);
-      CTree host = bestHost(tree, node, U, baseU);
+      
       tree.updateStats(node);
+      double U = (tree.UIndividual(node) + tree.TU())/(n+1);
+      CTree host = bestHost(tree, node, U, baseU);
       if (host == null) tree.addChild(node);
       else if (host.children == null) {
 	host.addChild(host.copyNode());
