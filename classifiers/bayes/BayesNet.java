@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class BayesNet extends DistributionClassifier implements OptionHandler, 
 	WeightedInstancesHandler {
@@ -275,7 +275,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
     } 
 
     for (int iClass = 0; iClass < m_NumClasses; iClass++) {
-      double fP = 1.0;
+      double logfP = 0;
 
       for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); 
 	   iAttribute++) {
@@ -294,18 +294,35 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 	} 
 
 	if (iAttribute == m_Instances.classIndex()) {
-	  fP *= 
-	    m_Distributions[iAttribute][(int) iCPT].getProbability(iClass);
+//	  fP *= 
+//	    m_Distributions[iAttribute][(int) iCPT].getProbability(iClass);
+          logfP += Math.log(m_Distributions[iAttribute][(int) iCPT].getProbability(iClass));
 	} else {
-	  fP *= 
-	    m_Distributions[iAttribute][(int) iCPT]
-	      .getProbability(instance.value(iAttribute));
+//	  fP *= 
+//	    m_Distributions[iAttribute][(int) iCPT]
+//	      .getProbability(instance.value(iAttribute));
+          logfP += Math.log(m_Distributions[iAttribute][(int) iCPT]
+	      .getProbability(instance.value(iAttribute)));
 	} 
       } 
 
-      fProbs[iClass] *= fP;
+//      fProbs[iClass] *= fP;
+      fProbs[iClass] += logfP;
     } 
 
+    // Find maximum
+    double fMax = fProbs[0];
+    for (int iClass = 0; iClass < m_NumClasses; iClass++) {
+        if (fProbs[iClass] > fMax) {
+            fMax = fProbs[iClass];
+        }
+    } 
+    // transform from log-space to normal-space
+    for (int iClass = 0; iClass < m_NumClasses; iClass++) {
+        fProbs[iClass] = Math.exp(fProbs[iClass] - fMax);
+    } 
+  
+    
     // Display probabilities
     Utils.normalize(fProbs);
 
