@@ -53,7 +53,7 @@ import java.awt.Graphics;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributePanel extends JScrollPane {
   /** The instances to be plotted */
@@ -358,15 +358,18 @@ public class AttributePanel extends JScrollPane {
     m_maxC = h;
     m_minC = l;
     
-    if (m_plotInstances.numAttributes() > 0) {
-      if (m_plotInstances.attribute(m_cIndex).isNominal()) {
-	if (m_plotInstances.attribute(m_cIndex).numValues() > 
+    if (m_span != null) {
+      if (m_plotInstances.numAttributes() > 0 &&
+	  m_cIndex < m_plotInstances.numAttributes()) {
+	if (m_plotInstances.attribute(m_cIndex).isNominal()) {
+	  if (m_plotInstances.attribute(m_cIndex).numValues() > 
 	    m_colorList.size()) {
-	  extendColourMap();
+	    extendColourMap();
+	  }
 	}
       }
+      this.repaint();
     }
-    this.repaint();
   }
 
   /**
@@ -380,32 +383,35 @@ public class AttributePanel extends JScrollPane {
     /*    m_maxC = h;
 	  m_minC = l; */
 
-    if (m_plotInstances.attribute(m_cIndex).isNumeric()) {
-      double min=Double.POSITIVE_INFINITY;
-      double max=Double.NEGATIVE_INFINITY;
-      double value;
+    if (m_span != null) {
+      if (m_cIndex < m_plotInstances.numAttributes() && 
+	  m_plotInstances.attribute(m_cIndex).isNumeric()) {
+	double min=Double.POSITIVE_INFINITY;
+	double max=Double.NEGATIVE_INFINITY;
+	double value;
 
-      for (int i=0;i<m_plotInstances.numInstances();i++) {
-	if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
-	  value = m_plotInstances.instance(i).value(m_cIndex);
-	  if (value < min) {
-	    min = value;
+	for (int i=0;i<m_plotInstances.numInstances();i++) {
+	  if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
+	    value = m_plotInstances.instance(i).value(m_cIndex);
+	    if (value < min) {
+	      min = value;
+	    }
+	    if (value > max) {
+	      max = value;
+	    }
 	  }
-	  if (value > max) {
-	    max = value;
-	  }
+	}
+    
+	m_minC = min; m_maxC = max;
+      } else {
+	if (m_plotInstances.attribute(m_cIndex).numValues() > 
+	    m_colorList.size()) {
+	  extendColourMap();
 	}
       }
     
-      m_minC = min; m_maxC = max;
-    } else {
-      if (m_plotInstances.attribute(m_cIndex).numValues() > 
-	  m_colorList.size()) {
-	extendColourMap();
-      }
+      this.repaint();
     }
-    
-    this.repaint();
   }
 
   /**
@@ -440,7 +446,11 @@ public class AttributePanel extends JScrollPane {
    * This sets the instances to be drawn into the attribute panel
    * @param ins The instances.
    */
-  public void setInstances(Instances ins) {
+  public void setInstances(Instances ins) throws Exception {
+    if (ins.numAttributes() > 512) {
+      throw new Exception("Can't display more than 512 attributes!");
+    }
+
     if (m_span == null) {
       m_span = new JPanel() {
 	  public void paintComponent(Graphics gx) {
@@ -523,8 +533,10 @@ public class AttributePanel extends JScrollPane {
    * @param x The attributes index.
    */
   public void setX(int x) {
-    m_xIndex = x;
-    m_span.repaint();
+    if (m_span != null) {
+      m_xIndex = x;
+      m_span.repaint();
+    }
   }
     
   /**
@@ -532,8 +544,10 @@ public class AttributePanel extends JScrollPane {
    * @param y The attributes index.
    */
   public void setY(int y) {
-    m_yIndex = y;
-    m_span.repaint();
+    if (m_span != null) {
+      m_yIndex = y;
+      m_span.repaint();
+    }
   }
 
   /**
