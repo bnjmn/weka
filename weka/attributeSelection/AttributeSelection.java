@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.10 $
+ * @version  $Revision: 1.11 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -112,7 +112,7 @@ public class AttributeSelection implements Serializable {
   /**
    * get the final selected set of attributes.
    * @return an array of attribute indexes
-   * @exception if attribute selection has not been performed yet
+   * @exception Exception if attribute selection has not been performed yet
    */
   public int [] selectedAttributes () throws Exception {
     if (m_selectedAttributeSet == null) {
@@ -125,7 +125,7 @@ public class AttributeSelection implements Serializable {
    * get the final ranking of the attributes.
    * @return a two dimensional array of ranked attribute indexes and their
    * associated merit scores as doubles.
-   * @exception if a ranking has not been produced
+   * @exception Exception if a ranking has not been produced
    */
   public double [][] rankedAttributes () throws Exception {
     if (m_attributeRanking == null) {
@@ -266,7 +266,7 @@ public class AttributeSelection implements Serializable {
    * returns a string summarizing the results of repeated attribute
    * selection runs on splits of a dataset.
    * @return a summary of attribute selection results
-   * @exception if no attribute selection has been performed.
+   * @exception Exception if no attribute selection has been performed.
    */
   public String CVResultsString () throws Exception {
     StringBuffer CvString = new StringBuffer();
@@ -372,7 +372,7 @@ public class AttributeSelection implements Serializable {
    * splits.
    *
    * @param split the instances to select attributes from
-   * @exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void selectAttributesCVSplit(Instances split) throws Exception {
     double[][] attributeRanking = null;
