@@ -24,6 +24,7 @@ import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.OptionHandler;
 import weka.core.Option;
+import weka.core.WeightedInstancesHandler;
 import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import java.io.*;
@@ -103,9 +104,10 @@ import java.util.Vector;
  * Set exponential bias towards confident intervals. default = 1.0 <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class VFI extends DistributionClassifier implements OptionHandler {
+public class VFI extends DistributionClassifier 
+  implements OptionHandler, WeightedInstancesHandler {
 
   /** The index of the class attribute */
   protected int m_ClassIndex;
@@ -287,6 +289,7 @@ public class VFI extends DistributionClassifier implements OptionHandler {
     if (instances.classIndex() == -1) {
       throw new Exception("No class attribute assigned");
     }
+    instances = new Instances(instances);
     instances.deleteWithMissingClass();
 
     m_ClassIndex = instances.classIndex();
@@ -373,9 +376,9 @@ public class VFI extends DistributionClassifier implements OptionHandler {
 
     // collect class counts
     for (int i = 0; i < instances.numInstances(); i++) {
-      m_globalCounts[(int)instances.instance(i).classValue()]++;
+      Instance inst = instances.instance(i);
+      m_globalCounts[(int)instances.instance(i).classValue()] += inst.weight();
       for (int j = 0; j < instances.numAttributes(); j++) {
-	Instance inst = instances.instance(i);
 	if (!inst.isMissing(j) && j != m_ClassIndex) {
 	  if (instances.attribute(j).isNumeric()) {
 	    double val = inst.value(j);
@@ -385,19 +388,22 @@ public class VFI extends DistributionClassifier implements OptionHandler {
 	    for (k = m_intervalBounds[j].length-1; k >= 0; k--) {
 	      if (val > m_intervalBounds[j][k]) {
 		ok = true;
-		m_counts[j][k][(int)inst.classValue()]++;
+		m_counts[j][k][(int)inst.classValue()] += inst.weight();
 		break;
 	      } else if (val == m_intervalBounds[j][k]) {
 		ok = true;
-		m_counts[j][k][(int)inst.classValue()] += 0.5;
-		m_counts[j][k-1][(int)inst.classValue()] += 0.5;
+		m_counts[j][k][(int)inst.classValue()] += 
+		  (inst.weight() / 2.0);
+		m_counts[j][k-1][(int)inst.classValue()] += 
+		  (inst.weight() / 2.0);;
 		break;
 	      }
 	    }
 	   
 	  } else {
 	    // nominal attribute
-	    m_counts[j][(int)inst.value(j)][(int)inst.classValue()]++;
+	    m_counts[j][(int)inst.value(j)][(int)inst.classValue()] += 
+	      inst.weight();;
 	  }
 	}
       }
