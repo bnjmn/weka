@@ -42,7 +42,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 
 public class RandomSplitResultProducer 
@@ -282,59 +282,73 @@ public class RandomSplitResultProducer
       Instances train;
       Instances test;
 
-      if (m_randomize) {
-	runInstances.randomize(new Random(run));
-      }
-      if (m_randomize && runInstances.classAttribute().isNominal()) {
+      if (!m_randomize) {
 
-	// stratify the train and test sets
-
-	int numClasses = runInstances.numClasses();
-
-	// create the subsets
-	Instances[] subsets = new Instances[numClasses + 1];
-	for (int i=0; i<numClasses+1; i++) {
-	  subsets[i] = new Instances(runInstances, 10);
-	}
-	
-	// divide instances into subsets
-	Enumeration e = runInstances.enumerateInstances();
-	while(e.hasMoreElements()) {
-	  Instance inst = (Instance) e.nextElement();
-	  if (inst.classIsMissing()) {
-	    subsets[numClasses].add(inst);
-	  } else {
-	    subsets[(int) inst.classValue()].add(inst);
-	  }
-	}
-
-	// merge into train and test sets
-	int trainSize = Utils.round(runInstances.numInstances() * m_TrainPercent / 100);
-	int testSize = runInstances.numInstances() - trainSize;
-	train = new Instances(runInstances, trainSize);
-	test = new Instances(runInstances, testSize);
-	for (int i=0; i<numClasses+1; i++) {
-	  trainSize = Utils.round(subsets[i].numInstances() * m_TrainPercent / 100);
-	  for (int j=0; j<trainSize; j++) {
-	    train.add(subsets[i].instance(j));
-	  }
-	  for (int j=trainSize; j<subsets[i].numInstances(); j++) {
-	    test.add(subsets[i].instance(j));
-	  }
-	  // free the memory
-	  subsets[i] = null;
-	}
-
-	// randomize the final sets
-	train.randomize(new Random(run));
-	test.randomize(new Random(run));
-
-      } else {
-
+	// Don't do any randomization
 	int trainSize = Utils.round(runInstances.numInstances() * m_TrainPercent / 100);
 	int testSize = runInstances.numInstances() - trainSize;
 	train = new Instances(runInstances, 0, trainSize);
 	test = new Instances(runInstances, trainSize, testSize);
+      } else {
+	Random rand = new Random(run);
+	runInstances.randomize(rand);
+	
+	// Nominal class
+	if (runInstances.classAttribute().isNominal()) {
+	  
+	  // create the subset for each classs
+	  int numClasses = runInstances.numClasses();
+	  Instances[] subsets = new Instances[numClasses + 1];
+	  for (int i=0; i < numClasses + 1; i++) {
+	    subsets[i] = new Instances(runInstances, 10);
+	  }
+	  
+	  // divide instances into subsets
+	  Enumeration e = runInstances.enumerateInstances();
+	  while(e.hasMoreElements()) {
+	    Instance inst = (Instance) e.nextElement();
+	    if (inst.classIsMissing()) {
+	      subsets[numClasses].add(inst);
+	    } else {
+	      subsets[(int) inst.classValue()].add(inst);
+	    }
+	  }
+	  
+	  // Compactify them
+	  for (int i=0; i < numClasses + 1; i++) {
+	    subsets[i].compactify();
+	  }
+	  
+	  // merge into train and test sets
+	  train = new Instances(runInstances, runInstances.numInstances());
+	  test = new Instances(runInstances, runInstances.numInstances());
+	  for (int i = 0; i < numClasses + 1; i++) {
+	    int trainSize = 
+	      Utils.probRound(subsets[i].numInstances() * m_TrainPercent / 100, rand);
+	    for (int j = 0; j < trainSize; j++) {
+	      train.add(subsets[i].instance(j));
+	    }
+	    for (int j = trainSize; j < subsets[i].numInstances(); j++) {
+	      test.add(subsets[i].instance(j));
+	    }
+	    // free memory
+	    subsets[i] = null;
+	  }
+	  train.compactify();
+	  test.compactify();
+	  
+	  // randomize the final sets
+	  train.randomize(rand);
+	  test.randomize(rand);
+	} else {
+	  
+	  // Numeric target 
+	  int trainSize = 
+	    Utils.probRound(runInstances.numInstances() * m_TrainPercent / 100, rand);
+	  int testSize = runInstances.numInstances() - trainSize;
+	  train = new Instances(runInstances, 0, trainSize);
+	  test = new Instances(runInstances, trainSize, testSize);
+	}
       }
       try {
 	Object [] seResults = m_SplitEvaluator.getResult(train, test);
@@ -501,7 +515,8 @@ public class RandomSplitResultProducer
    * displaying in the explorer/experimenter gui
    */
   public String randomizeDataTipText() {
-    return "Do not randomize dataset if true";
+    return "Do not randomize dataset and do not perform probabilistic rounding " +
+      "if true";
   }
 
   /**
@@ -581,7 +596,7 @@ public class RandomSplitResultProducer
    * displaying in the explorer/experimenter gui
    */
   public String splitEvaluatorTipText() {
-    return "The evaluator to apply to the cross validation folds. "
+    return "The evaluator to apply to the test data. "
       +"This may be a classifier, regression scheme etc.";
   }
 
@@ -641,7 +656,8 @@ public class RandomSplitResultProducer
 	     "-W <class name>"));
 
     newVector.addElement(new Option(
-	     "Set when data is not to be randomized.",
+	     "\tSet when data is not to be randomized and the data sets' size.\n"
+	     + "\tIs not to be determined via probabilistic rounding.",
 	     "R",0,"-R"));
 
  
