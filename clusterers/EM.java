@@ -69,7 +69,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class EM
   extends DistributionClusterer
@@ -112,6 +112,12 @@ public class EM
 
   /** maximum iterations to perform */
   private int m_max_iterations;
+
+  /** attribute min values */
+  private double [] m_minValues;
+
+  /** attribute max values */
+  private double [] m_maxValues;
 
   /** random numbers and seed */
   private Random m_rr;
@@ -402,7 +408,7 @@ public class EM
   }
 
   /**
-   * Initialised estimators and storage.
+   * Initialise estimators and storage.
    *
    * @param inst the instances
    * @param num_cl the number of clusters
@@ -410,22 +416,36 @@ public class EM
   private void EM_Init (Instances inst, int num_cl)
     throws Exception
   {
+    int i, j, k;
     m_weights = new double[inst.numInstances()][num_cl];
-    int z;
-    m_model = new Estimator[num_cl][m_num_attribs];
+    m_model = new DiscreteEstimator[num_cl][m_num_attribs];
     m_modelNormal = new double[num_cl][m_num_attribs][3];
     m_priors = new double[num_cl];
 
-    for (int i = 0; i < inst.numInstances(); i++) {
-      for (int j = 0; j < num_cl; j++) {
-        m_weights[i][j] = m_rr.nextDouble();
+    for (i = 0; i < num_cl; i++) {
+      for (j = 0; j < m_num_attribs; j++) {
+	if (inst.attribute(j).isNominal()) {
+	  m_model[i][j] = new DiscreteEstimator(m_theInstances.
+						attribute(j).numValues()
+						, true);
+	  for (k=0; k<m_theInstances.attribute(j).numValues(); k++) {
+	    m_model[i][j].addValue(k, 10*m_rr.nextDouble());
+	  }
+	}
+	else {
+	  double delta_init = m_maxValues[j]-m_minValues[j];
+	  m_modelNormal[i][j][0] = m_minValues[j]+delta_init*m_rr.nextDouble();
+	  m_modelNormal[i][j][1] = delta_init/(2*num_cl);
+	  m_modelNormal[i][j][2] = 1.0;
+	}
       }
-
-      Utils.normalize(m_weights[i]);
     }
-
-    // initial priors
-    estimate_priors(inst, num_cl);
+    
+    // initially equal priors
+    for (j = 0; j < num_cl; j++) {
+      m_priors[j] += 1.0;
+    }
+    Utils.normalize(m_priors);
   }
 
 
@@ -519,7 +539,7 @@ public class EM
       }
     }
     
-       // calcualte mean and std deviation for numeric attributes
+    // calcualte mean and std deviation for numeric attributes
     for (j = 0; j < m_num_attribs; j++) {
       if (!inst.attribute(j).isNominal()) {
         for (i = 0; i < num_cl; i++) {
@@ -843,7 +863,32 @@ public class EM
     return  m_num_clusters;
   }
 
-
+ /**
+  * Updates the minimum and maximum values for all the attributes
+  * based on a new instance.
+  *
+  * @param instance the new instance
+  */
+  private void updateMinMax(Instance instance) {
+    
+    for (int j = 0; j < m_theInstances.numAttributes(); j++) {
+      if (!instance.isMissing(j)) {
+	if (Double.isNaN(m_minValues[j])) {
+	  m_minValues[j] = instance.value(j);
+	  m_maxValues[j] = instance.value(j);
+	} else {
+	  if (instance.value(j) < m_minValues[j]) {
+	    m_minValues[j] = instance.value(j);
+	  } else {
+	    if (instance.value(j) > m_maxValues[j]) {
+	      m_maxValues[j] = instance.value(j);
+	    }
+	  }
+	}
+      }
+    }
+  }
+  
   /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
@@ -857,8 +902,19 @@ public class EM
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
     }
-
+    
     m_theInstances = data;
+    
+    // calculate min and max values for attributes
+    m_minValues = new double [m_theInstances.numAttributes()];
+    m_maxValues = new double [m_theInstances.numAttributes()];
+    for (int i = 0; i < m_theInstances.numAttributes(); i++) {
+      m_minValues[i] = m_maxValues[i] = Double.NaN;
+    }
+    for (int i = 0; i < m_theInstances.numInstances(); i++) {
+      updateMinMax(m_theInstances.instance(i));
+    }
+
     doEM();
     
     // save memory
@@ -943,6 +999,11 @@ public class EM
     }
 
     m_rr = new Random(m_rseed);
+
+    // throw away numbers to avoid problem of similar initial numbers
+    // from a similar seed
+    for (int i=0; i<10; i++) m_rr.nextDouble();
+
     m_num_instances = m_theInstances.numInstances();
     m_num_attribs = m_theInstances.numAttributes();
 
@@ -971,7 +1032,7 @@ public class EM
 
 
   /**
-   * iterates the M and E steps until the log likelihood of the data
+   * iterates the E and M steps until the log likelihood of the data
    * converges.
    *
    * @param inst the training instances.
@@ -991,7 +1052,6 @@ public class EM
     }
 
     for (i = 0; i < m_max_iterations; i++) {
-      M(inst, num_cl);
       llkold = llk;
       llk = E(inst, num_cl);
 
@@ -1004,6 +1064,7 @@ public class EM
 	  break;
 	}
       }
+      M(inst, num_cl);
     }
 
     if (report) {
@@ -1034,4 +1095,3 @@ public class EM
     }
   }
 }
-
