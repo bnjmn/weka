@@ -46,7 +46,7 @@ import  weka.core.*;
  * of the number of attributes in the data set. (default = 1). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.24.2.1 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -734,9 +734,11 @@ public class BestFirst extends ASSearch
 	    // set the bit (attribute to add/delete)
 	    if (sd == SELECTION_FORWARD) {
 	      temp_group.set(i);
+	      size++;
 	    }
 	    else {
 	      temp_group.clear(i);
+	      size--;
 	    }
 
 	    /* if this subset has been seen before, then it is already 
@@ -758,7 +760,12 @@ public class BestFirst extends ASSearch
 		z = ((merit - best_merit) > 0.00001);
 	      }
 	      else {
-		z = ((merit >= best_merit) && ((size) < best_size));
+		//		z = ((merit >= best_merit) && ((size) < best_size));
+		if (merit == best_merit) {
+		  z = (size < best_size);
+		} else {
+		  z = (merit > best_merit);
+		}
 	      }
 
 	      if (z) {
@@ -788,9 +795,11 @@ public class BestFirst extends ASSearch
 	    // unset this addition(deletion)
 	    if (sd == SELECTION_FORWARD) {
 	      temp_group.clear(i);
+	      size--;
 	    }
 	    else {
 	      temp_group.set(i);
+	      size++;
 	    }
 	  }
 	}
