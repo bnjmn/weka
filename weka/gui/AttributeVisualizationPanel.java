@@ -63,7 +63,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -173,7 +173,7 @@ public class AttributeVisualizationPanel extends JPanel {
    *
    * @param newins a set of Instances
    */
-  public void setInstances(Instances newins) {
+  public synchronized void setInstances(Instances newins) {
     attribIndex = 0;
     m_data = newins;
     as=null;
@@ -345,13 +345,18 @@ public class AttributeVisualizationPanel extends JPanel {
   private class HistCalc extends Thread {
     public void run() {
       if(m_data.attribute(classIndex).isNominal()) {
-	int tempVal = AttributeVisualizationPanel.this.getWidth()-4;
-	if (tempVal < 1) {
-	  tempVal = 1;
+	int histClassCounts[][] = null;
+	if (AttributeVisualizationPanel.this.getWidth()<(int)(as.totalCount*0.1)) {
+	  int tempVal = AttributeVisualizationPanel.this.getWidth()-4;
+	  if (tempVal < 1) {
+	    tempVal = 1;
+	  }
+	  histClassCounts = 
+	    new int[tempVal][m_data.attribute(classIndex).numValues()+1];
+	} else {
+	  histClassCounts = 
+	    new int[(int)(as.totalCount*0.1)][m_data.attribute(classIndex).numValues()+1];
 	}
-	int histClassCounts[][]  = (AttributeVisualizationPanel.this.getWidth()<(int)(as.totalCount*0.1)) ?
-	  new int[tempVal][m_data.attribute(classIndex).numValues()+1] : 
-	  new int[(int)(as.totalCount*0.1)][m_data.attribute(classIndex).numValues()+1];
 	double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histClassCounts.length;
 	double currentBar = as.numericStats.min; // + barRange;
 	maxValue = 0;
