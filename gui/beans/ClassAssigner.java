@@ -38,7 +38,7 @@ import java.awt.*;
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
@@ -147,6 +147,7 @@ public class ClassAssigner extends JPanel
       notifyInstanceListeners(e);
 
       // tell any listening customizers (or other interested parties)
+      System.err.println("Notifying customizer...");
       notifyDataFormatListeners();
     } else {
       //      Instances dataSet = e.getInstance().dataset();
@@ -225,6 +226,7 @@ public class ClassAssigner extends JPanel
       for(int i = 0; i < l.size(); i++) {
 	//	System.err.println("Notifying instance listeners "
 	//			   +"(ClassAssigner)");
+	
 	((InstanceListener)l.elementAt(i)).acceptInstance(tse);
       }
     }
@@ -421,8 +423,10 @@ public class ClassAssigner extends JPanel
 
     if (eventName.compareTo("dataSet") == 0) { 
       if (m_dataProvider == null) {
-	m_connectedFormat = null;
-	notifyDataFormatListeners();
+	if (m_instanceProvider == null) {
+	  m_connectedFormat = null;
+	  notifyDataFormatListeners();
+	}
 	return false;
       } else {
 	if (m_dataProvider instanceof EventConstraints) {
@@ -438,11 +442,17 @@ public class ClassAssigner extends JPanel
 
     if (eventName.compareTo("instance") == 0) { 
       if (m_instanceProvider == null) {
+	if (m_dataProvider == null) {
+	  m_connectedFormat = null;
+	  notifyDataFormatListeners();
+	}
 	return false;
       } else {
 	if (m_instanceProvider instanceof EventConstraints) {
 	  if (!((EventConstraints)m_instanceProvider).
 	      eventGeneratable("instance")) {
+	    m_connectedFormat = null;
+	    notifyDataFormatListeners();
 	    return false;
 	  }
 	}
