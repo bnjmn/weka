@@ -36,12 +36,12 @@ import weka.core.*;
  * <code><pre>
  * jdbcDriver=jdbc.idbDriver
  * jdbcURL=jdbc:idb=experiments.prp
- * </code></pre><p>
+ * </pre></code><p>
  *
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class InstanceQuery extends DatabaseUtils {
 
