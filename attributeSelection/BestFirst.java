@@ -41,8 +41,12 @@ import  weka.core.*;
  * Number of non improving nodes to consider before terminating search.
  * (default = 5). <p>
  *
+ * -S <num> <br>
+ * Size of lookup cache for evaluated subsets. Expressed as a multiple
+ * of the number of attributes in the data set. (default = 1). <p>
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -232,6 +236,9 @@ public class BestFirst extends ASSearch
 
   /** holds the merit of the best subset found */
   private double m_bestMerit;
+
+  /** holds the maximum size of the lookup cache for evaluated subsets */
+  private int m_cacheSize;
   
   /**
    * Returns a string describing this search method
@@ -263,7 +270,7 @@ public class BestFirst extends ASSearch
    *
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(4);
     
     newVector.addElement(new Option("\tSpecify a starting set of attributes." 
 				    + "\n\tEg. 1,3,5-7."
@@ -276,6 +283,11 @@ public class BestFirst extends ASSearch
     newVector.addElement(new Option("\tNumber of non-improving nodes to" 
 				    + "\n\tconsider before terminating search."
 				    , "N", 1, "-N <num>"));
+    newVector.addElement(new Option("\tSize of lookup cache for evaluated subsets."
+				    +"\n\tExpressed as a multiple of the number of"
+				    +"\n\tattributes in the data set. (default = 1)",
+				    "S", 1, "-S <num>"));
+				    
     return  newVector.elements();
   }
 
@@ -294,6 +306,11 @@ public class BestFirst extends ASSearch
    * -N <num> <br>
    * Number of non improving nodes to consider before terminating search.
    * (default = 5). <p>
+   *
+   * -S <num> <br>
+   * Size of lookup cache for evaluated subsets. Expressed as a multiple
+   * of the number of attributes in the data set. (default = 1). <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    *
@@ -323,7 +340,46 @@ public class BestFirst extends ASSearch
       setSearchTermination(Integer.parseInt(optionString));
     }
 
+    optionString = Utils.getOption('S', options);
+    if (optionString.length() != 0) {
+      setLookupCacheSize(Integer.parseInt(optionString));
+    }
+
     m_debug = Utils.getFlag('Z', options);
+  }
+
+  /**
+   * Set the maximum size of the evaluated subset cache (hashtable). This is
+   * expressed as a multiplier for the number of attributes in the data set.
+   * (default = 1).
+   *
+   * @param size the maximum size of the hashtable
+   */
+  public void setLookupCacheSize(int size) {
+    if (size >= 0) {
+      m_cacheSize = size;
+    }
+  }
+
+  /**
+   * Return the maximum size of the evaluated subset cache (expressed as a multiplier
+   * for the number of attributes in a data set.
+   *
+   * @return the maximum size of the hashtable.
+   */
+  public int getLookupCacheSize() {
+    return m_cacheSize;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String lookupCacheSizeTipText() {
+    return "Set the maximum size of the lookup cache of evaluated subsets. This is "
+      +"expressed as a multiplier of the number of attributes in the data set. "
+      +"(default = 1).";
   }
 
   /**
@@ -579,7 +635,9 @@ public class BestFirst extends ASSearch
     boolean z;
     boolean added;
     Link2 tl;
-    Hashtable lookup = new Hashtable((int)(200.0*m_numAttribs*1.5));
+    Hashtable lookup = new Hashtable(m_cacheSize * m_numAttribs);
+    int insertCount = 0;
+    int cacheHits = 0;
     LinkedList2 bfList = new LinkedList2(m_maxStale);
     best_merit = -Double.MAX_VALUE;
     stale = 0;
@@ -705,9 +763,16 @@ public class BestFirst extends ASSearch
 		best_group = (BitSet)(temp_group.clone());
 	      }
 
+	      if (insertCount > m_cacheSize * m_numAttribs) {
+		lookup = new Hashtable(m_cacheSize * m_numAttribs);
+		insertCount = 0;
+	      }
 	      // insert this one in the list and in the hash table
 	      bfList.addToList(tt, merit);
 	      lookup.put(tt, "");
+	      insertCount++;
+	    } else {
+	      cacheHits++;
 	    }
 
 	    // unset this addition(deletion)
@@ -749,6 +814,7 @@ public class BestFirst extends ASSearch
     m_startRange = new Range();
     m_classIndex = -1;
     m_totalEvals = 0;
+    m_cacheSize = 1;
     m_debug = false;
   }
 
