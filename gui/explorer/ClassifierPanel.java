@@ -50,6 +50,7 @@ import weka.gui.CostMatrixEditor;
 import weka.gui.PropertyDialog;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
@@ -135,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.70 $
+ * @version $Revision: 1.71 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1624,7 +1625,9 @@ public class ClassifierPanel extends JPanel {
 	      try {
 		ThresholdCurve tc = new ThresholdCurve();
 		Instances result = tc.getCurve(preds, classValue);
-		VisualizePanel vmc = new VisualizePanel();
+		//VisualizePanel vmc = new VisualizePanel();
+		ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
+		vmc.setROCString("(Area under ROC = "+tc.getROCArea(result)+")");
 		vmc.setLog(m_Log);
 		vmc.setName(result.relationName()+". Class value "+
 			    classAtt.value(classValue)+")");
