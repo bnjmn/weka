@@ -13,7 +13,7 @@ import java.io.Serializable;
  * plus the actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NumericPrediction implements Prediction, Serializable {
 
@@ -99,5 +99,18 @@ public class NumericPrediction implements Prediction, Serializable {
       return MISSING_VALUE;
     }
     return m_Predicted - m_Actual;
+  }
+
+  /**
+   * Gets a human readable representation of this prediction.
+   *
+   * @return a human readable representation of this prediction.
+   */
+  public String toString() {
+
+    StringBuffer sb = new StringBuffer();
+    sb.append("NUM: ").append(actual()).append(' ').append(predicted());
+    sb.append(' ').append(weight());
+    return sb.toString();
   }
 }
