@@ -40,7 +40,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -296,7 +296,12 @@ public class NeuralNetwork extends DistributionClassifier
       }
     }
     
-      
+    /**
+     * @return link for this node.
+     */
+    public int getLink() {
+      return m_link;
+    }
     
 
   }
@@ -548,7 +553,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   class ControlPanel extends JPanel {
     
@@ -2182,7 +2187,64 @@ public class NeuralNetwork extends DistributionClassifier
     return options;
   }
   
-  
+  /**
+   * @return string describing the model.
+   */
+  public String toString() {
+    StringBuffer model = new StringBuffer(m_neuralNodes.length * 100); 
+    //just a rough size guess
+    NeuralNode con;
+    double[] weights;
+    NeuralConnection[] inputs;
+    for (int noa = 0; noa < m_neuralNodes.length; noa++) {
+      con = (NeuralNode) m_neuralNodes[noa];  //this would need a change
+                                              //for items other than nodes!!!
+      weights = con.getWeights();
+      inputs = con.getInputs();
+      if (con.getMethod() instanceof SigmoidUnit) {
+	model.append("Sigmoid ");
+      }
+      else if (con.getMethod() instanceof LinearUnit) {
+	model.append("Linear ");
+      }
+      model.append("Node " + con.getId() + "\n    Inputs    Weights\n");
+      model.append("    Threshold    " + weights[0] + "\n");
+      for (int nob = 1; nob < con.getNumInputs() + 1; nob++) {
+	if ((inputs[nob - 1].getType() & NeuralConnection.PURE_INPUT) 
+	    == NeuralConnection.PURE_INPUT) {
+	  model.append("    Attrib " + 
+		       m_instances.attribute(((NeuralEnd)inputs[nob-1]).
+					     getLink()).name()
+		       + "    " + weights[nob] + "\n");
+	}
+	else {
+	  model.append("    Node " + inputs[nob-1].getId() + "    " +
+		       weights[nob] + "\n");
+	}
+      }      
+    }
+    //now put in the ends
+    for (int noa = 0; noa < m_outputs.length; noa++) {
+      inputs = m_outputs[noa].getInputs();
+      model.append("Class " + 
+		   m_instances.classAttribute().
+		   value(m_outputs[noa].getLink()) + 
+		   "\n    Input\n");
+      for (int nob = 0; nob < m_outputs[noa].getNumInputs(); nob++) {
+	if ((inputs[nob].getType() & NeuralConnection.PURE_INPUT)
+	    == NeuralConnection.PURE_INPUT) {
+	  model.append("    Attrib " +
+		       m_instances.attribute(((NeuralEnd)inputs[nob]).
+					     getLink()).name() + "\n");
+	}
+	else {
+	  model.append("    Node " + inputs[nob].getId() + "\n");
+	}
+      }
+    }
+    return model.toString();
+  }
+
   /**
    * This will return a string describing the classifier.
    * @return The string.
