@@ -51,10 +51,10 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
-  WeightedInstancesHandler, Summarizable {
+  WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
 
   /** The decision list */
   private MakeDecList m_root;
@@ -273,6 +273,31 @@ public class PART extends DistributionClassifier implements OptionHandler,
     return m_root.numRules();
   }
   
+  /**
+   * Returns an enumeration of the additional measure names
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(1);
+    newVector.addElement("measureNumRules");
+    return newVector.elements();
+  }
+
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+      return measureNumRules();
+    } else {
+      throw new Exception(additionalMeasureName 
+			  + " not supported (PART)");
+    }
+  }
+
   /**
    * Get the value of CF.
    *

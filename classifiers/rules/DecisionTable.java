@@ -50,11 +50,12 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler, WeightedInstancesHandler, 
+	     AdditionalMeasureProducer {
   
   /** The hashtable used to hold training instances */
   private Hashtable m_entries;
@@ -1203,6 +1204,31 @@ public class DecisionTable
    */
   public double measureNumRules() {
     return m_entries.size();
+  }
+
+  /**
+   * Returns an enumeration of the additional measure names
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(1);
+    newVector.addElement("measureNumRules");
+    return newVector.elements();
+  }
+
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+      return measureNumRules();
+    } else {
+      throw new Exception(additionalMeasureName 
+			  + " not supported (DecisionTable)");
+    }
   }
 
   /**
