@@ -61,6 +61,8 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import java.util.Hashtable;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -117,7 +119,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.38.2.1 $
+ * @version $Revision: 1.38.2.2 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -135,7 +137,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   protected Class m_ClassType;
     
   /** The model containing the list of names to select from */
-  protected HierarchyPropertyParser m_ObjectNames;
+  protected Hashtable m_ObjectNames;
 
   /** The GUI component for editing values, created when needed */
   protected GOEPanel m_EditorComponent;
@@ -603,13 +605,94 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
     m_canChangeClassInDialog = canChangeClassInDialog;
   }
+  
+  /**
+   * returns the name of the root element of the given class name, 
+   * <code>null</code> if it doesn't contain the separator
+   */
+  protected String getRootFromClass(String clsname, String separator) {
+    if (clsname.indexOf(separator) > -1)
+      return clsname.substring(0, clsname.indexOf(separator));
+    else
+      return null;
+  }
+  
+  /**
+   * parses the given string of classes separated by ", " and returns the
+   * a hashtable with as many entries as there are different root elements in 
+   * the class names (the key is the root element). E.g. if there's only 
+   * "weka." as the prefix for all classes the a hashtable of size 1 is returned. 
+   * if NULL is the input, then NULL is also returned.
+   * 
+   * @param classes the classnames to work on
+   * @return for each distinct root element in the classnames, one entry in
+   * the hashtable (with the root element as key)
+   */
+  protected Hashtable sortClassesByRoot(String classes) {
+    Hashtable                 roots;
+    Hashtable                 result;
+    Enumeration               enm;
+    int                       i;
+    StringTokenizer           tok;
+    String                    clsname;
+    Vector                    list;
+    HierarchyPropertyParser   hpp;
+    String                    separator;
+    String                    root;
+    String                    tmpStr;
+    
+    if (classes == null)
+      return null;
+    
+    roots     = new Hashtable();
+    hpp       = new HierarchyPropertyParser();
+    separator = hpp.getSeperator();
+    
+    // go over all classnames and store them in the hashtable, with the
+    // root element as the key
+    tok   = new StringTokenizer(classes, ", ");
+    while (tok.hasMoreElements()) {
+      clsname = tok.nextToken();
+      root    = getRootFromClass(clsname, separator);
+      if (root == null)
+        continue;
+      
+      // already stored?
+      if (!roots.containsKey(root)) {
+        list = new Vector();
+        roots.put(root, list);
+      }
+      else {
+        list = (Vector) roots.get(root);
+      }
+      
+      list.add(clsname);
+    }
+    
+    // build result
+    result = new Hashtable();
+    enm    = roots.keys();
+    while (enm.hasMoreElements()) {
+      root = (String) enm.nextElement();
+      list = (Vector) roots.get(root);
+      tmpStr = "";
+      for (i = 0; i < list.size(); i++) {
+        if (i > 0)
+          tmpStr += ",";
+        tmpStr += (String) list.get(i);
+      }
+      result.put(root, tmpStr);
+    }
+      
+    return result;
+  }
 
   /** Called when the class of object being edited changes. */
-  protected HierarchyPropertyParser getClassesFromProperties() {	    
+  protected Hashtable getClassesFromProperties() {	    
 
-    HierarchyPropertyParser hpp = new HierarchyPropertyParser();
+    Hashtable hpps = new Hashtable();
     String className = m_ClassType.getName();
-    String typeOptions = EDITOR_PROPERTIES.getProperty(className);
+    Hashtable typeOptions = sortClassesByRoot(EDITOR_PROPERTIES.getProperty(className));
     if (typeOptions == null) {
       /*
       System.err.println("Warning: No configuration property found in\n"
@@ -618,12 +701,19 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       */
     } else {		    
       try {
-	hpp.build(typeOptions, ", ");
+        Enumeration enm = typeOptions.keys();
+        while (enm.hasMoreElements()) {
+          String root = (String) enm.nextElement();
+          String typeOption = (String) typeOptions.get(root);
+          HierarchyPropertyParser hpp = new HierarchyPropertyParser();
+          hpp.build(typeOption, ", ");
+	  hpps.put(root, hpp);
+        }
       } catch (Exception ex) {
 	System.err.println("Invalid property: " + typeOptions);
       }	    
     }
-    return hpp;
+    return hpps;
   }
   
   /**
@@ -637,8 +727,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     if (m_Object != null) {
       String className = m_Object.getClass().getName();
-      if(!m_ObjectNames.contains(className)){
-	m_ObjectNames.add(className);
+      String root = getRootFromClass(className, new HierarchyPropertyParser().getSeperator());
+      HierarchyPropertyParser hpp = (HierarchyPropertyParser) m_ObjectNames.get(root);
+      if (hpp != null) {
+        if(!hpp.contains(className)){
+          hpp.add(className);
+        }
       }
     }
   }
@@ -678,15 +772,21 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       return;
     }	
     
-    HierarchyPropertyParser hpp = getClassesFromProperties();
+    Hashtable hpps = getClassesFromProperties();
+    HierarchyPropertyParser hpp = null;
+    Enumeration enm = hpps.elements();
+    
     try{
-      if(hpp.depth() > 0){		
-	hpp.goToRoot();
-	while(!hpp.isLeafReached())
-	  hpp.goToChild(0);
-	
-	String defaultValue = hpp.fullValue();
-	setValue(Class.forName(defaultValue).newInstance());
+      while (enm.hasMoreElements()) {
+        hpp = (HierarchyPropertyParser) enm.nextElement(); 
+        if(hpp.depth() > 0) {		
+          hpp.goToRoot();
+          while(!hpp.isLeafReached())
+            hpp.goToChild(0);
+          
+          String defaultValue = hpp.fullValue();
+          setValue(Class.forName(defaultValue).newInstance());
+        }
       }
     }catch(Exception ex){
       System.err.println("Problem loading the first class: "+
@@ -976,8 +1076,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    TreePath selectedPath = tree.getSelectionPath();
 	    StringBuffer classSelected = new StringBuffer();
 	    // recreate class name from path
-	    for (int i=0; i<selectedPath.getPathCount(); i++) {
-	      if (i>0) classSelected.append(".");
+	    int start = 0;
+	    if (m_ObjectNames.size() > 1)
+	      start = 1;
+	    for (int i=start; i<selectedPath.getPathCount(); i++) {
+              
+	      if (i>start) classSelected.append(".");
 	      classSelected.append((String)
 				   ((DefaultMutableTreeNode)
 				    selectedPath.getPathComponent(i))
@@ -998,13 +1102,32 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @param hpp the hierarchy of objects to mirror in the tree
    * @return a JTree representation of the hierarchy
    */
-  protected JTree createTree(HierarchyPropertyParser hpp) {
+  protected JTree createTree(Hashtable hpps) {
+    DefaultMutableTreeNode  superRoot;
+    Enumeration             enm;
+    HierarchyPropertyParser hpp;
     
-    hpp.goToRoot();
-    DefaultMutableTreeNode root =
-      new DefaultMutableTreeNode(hpp.getValue());
-    addChildrenToTree(root, hpp);
-    JTree tree = new JTree(root);
+    if (hpps.size() > 1)
+      superRoot = new DefaultMutableTreeNode("root");
+    else
+      superRoot = null;
+
+    enm = hpps.elements();
+    while (enm.hasMoreElements()) {
+      hpp = (HierarchyPropertyParser) enm.nextElement();
+      hpp.goToRoot();
+      DefaultMutableTreeNode root =
+        new DefaultMutableTreeNode(hpp.getValue());
+      addChildrenToTree(root, hpp);
+      
+      if (superRoot == null)
+        superRoot = root;
+      else
+        superRoot.add(root);
+    }
+    
+    JTree tree = new JTree(superRoot);
+    
     return tree;
   }
 
@@ -1092,6 +1215,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       java.beans.PropertyEditorManager
 	.registerEditor(weka.classifiers.Classifier.class,
 			GenericObjectEditor.class);
+      java.beans.PropertyEditorManager
+        .registerEditor(weka.core.NearestNeighbourSearch.class,
+		      weka.gui.GenericObjectEditor.class);
+      java.beans.PropertyEditorManager
+        .registerEditor(weka.core.DistanceFunction.class,
+		      weka.gui.GenericObjectEditor.class);
       java.beans.PropertyEditorManager
 	.registerEditor(weka.attributeSelection.ASEvaluation.class,
 			GenericObjectEditor.class);

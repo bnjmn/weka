@@ -30,13 +30,15 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import weka.core.RTSI;
+import weka.core.Utils;
 
 /**
  * This class can generate the properties object that is normally loaded from
  * the <code>GenericObjectEditor.props</code> file (= PROPERTY_FILE). It takes
  * the <code>GenericPropertiesCreator.props</code> file as a template to
  * determine all the derived classes by checking the classes in the given
- * packages. <br>
+ * packages (a file with the same name in your home directory overrides the
+ * the one in the weka/gui directory/package). <br>
  * E.g. if we want to have all the subclasses of the <code>Classifier</code>
  * class then we specify the superclass ("weka.classifiers.Classifier") and the
  * packages where to look for ("weka.classifiers.bayes" etc.):
@@ -74,7 +76,7 @@ import weka.core.RTSI;
  * @see GenericObjectEditor
  * @see weka.core.RTSI
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -198,7 +200,7 @@ public class GenericPropertiesCreator {
       if (f.exists())
         inputProperties.load(new FileInputStream(getInputFilename()));
       else
-        inputProperties.load(ClassLoader.getSystemResourceAsStream(getInputFilename()));
+        inputProperties = Utils.readProperties(getInputFilename());
     }
     catch (Exception e) {
       e.printStackTrace();
