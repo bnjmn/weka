@@ -1,12 +1,13 @@
 /*
  *    GeneratorPropertyIteratorPanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 Len Trigg, Mark Hall
  *
  */
 
 
 package weka.gui.experiment;
 
+import weka.core.FastVector;
 import weka.gui.GenericArrayEditor;
 import weka.gui.PropertySelectorDialog;
 import weka.experiment.PropertyNode;
@@ -50,7 +51,7 @@ import java.beans.PropertyChangeEvent;
  * resultgenerator property for an experiment to iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GeneratorPropertyIteratorPanel extends JPanel
   implements ActionListener {
@@ -66,6 +67,10 @@ public class GeneratorPropertyIteratorPanel extends JPanel
 
   /** The experiment this all applies to */
   protected Experiment m_Exp;
+
+  /** Listeners who want to be notified about editing status of this
+      panel */
+  protected FastVector m_Listeners = new FastVector();
   
   /**
    * Creates the property iterator panel initially disabled.
@@ -120,7 +125,20 @@ public class GeneratorPropertyIteratorPanel extends JPanel
     this();
     setExperiment(exp);
   }
-  
+
+  /**
+   * Returns true if the editor is currently in an active status---that
+   * is the array is active and able to be edited.
+   * @return true if editor is active
+   */
+  public boolean getEditorActive() {
+    if (m_StatusBox.getSelectedIndex() == 0) {
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Sets the experiment which will have the custom properties edited.
    *
@@ -183,11 +201,20 @@ public class GeneratorPropertyIteratorPanel extends JPanel
     if (e.getSource() == m_ConfigureBut) {
       selectProperty();
     } else if (e.getSource() == m_StatusBox) {
+      // notify any listeners
+      for (int i = 0; i < m_Listeners.size(); i++) {
+	ActionListener temp = ((ActionListener)m_Listeners.elementAt(i));
+	temp.actionPerformed(new ActionEvent(this, 
+					     ActionEvent.ACTION_PERFORMED, 
+					     "Editor status change"));
+      }
+
       // Toggles whether the custom property is used
       if (m_StatusBox.getSelectedIndex() == 0) {
 	m_Exp.setUsePropertyIterator(false);
 	m_ConfigureBut.setEnabled(false);
 	m_ArrayEditor.setEnabled(false);
+	m_ArrayEditor.setValue(null);
 	validate();
       } else {
 	if (m_Exp.getPropertyArray() == null) {
@@ -204,7 +231,15 @@ public class GeneratorPropertyIteratorPanel extends JPanel
       }
     }
   }
-  
+
+  /**
+   * Add a listener interested in kowing about editor status changes
+   * @param newA an listener to add
+   */
+  public void addActionListener(ActionListener newA) {
+    m_Listeners.addElement(newA);
+  }
+
   /**
    * Tests out the panel from the command line.
    *
