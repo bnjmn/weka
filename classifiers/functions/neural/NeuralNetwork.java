@@ -40,7 +40,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -553,7 +553,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.7 $
+   * @version $Revision: 1.8 $
    */
   class ControlPanel extends JPanel {
     
@@ -2134,9 +2134,9 @@ public class NeuralNetwork extends DistributionClassifier
       setReset(true);
     }
     if (Utils.getFlag('D', options)) {
-      setNormalizeAttributes(true);
+      setDecay(true);
     } else {
-      setNormalizeAttributes(false);
+      setDecay(false);
     }
     
     Utils.checkForRemainingOptions(options);
