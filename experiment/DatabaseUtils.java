@@ -47,7 +47,7 @@ import java.sql.ResultSetMetaData;
  * </code></pre><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -389,7 +389,7 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += '"' + key[i].toString() + '"';
+	  query += '\'' + key[i].toString() + '\'';
 	} else {
 	  query += key[i].toString();
 	}
@@ -524,7 +524,7 @@ public class DatabaseUtils implements Serializable {
       }
       if (key[i] != null) {
 	if (key[i] instanceof String) {
-	  query += '"' + key[i].toString() + '"';
+	  query += '\'' + key[i].toString() + '\'';
 	} else {
 	  query += key[i].toString();
 	}
