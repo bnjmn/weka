@@ -29,7 +29,6 @@ import java.util.*;
 
 /**
  * This filter outputs a given percentage of a dataset.
- * If you want the subsets to be stratified use the supervised version.
  *
  * Valid options are: <p>
  *
@@ -41,7 +40,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (eibe@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
 */
 public class RemovePercentage extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -128,7 +127,7 @@ public class RemovePercentage extends Filter
    */
   public String globalInfo() {
 
-    return "A filter that outputs a given percentage of a dataset. If you want the subsets to be stratified use the supervised version.";
+    return "A filter that outputs a given percentage of a dataset.";
   }
 
   /**
