@@ -15,7 +15,7 @@
  */
 
 /*
- *    Randomize.java
+ *    Normalize.java
  *    Copyright (C) 2003 Prados Julien
  *
  */
@@ -30,7 +30,7 @@ import weka.core.*;
 
 /** 
  * This filter normalize all instances of a dataset to have a given norm.
- * Only numeric values are considered, and the class label is ignored
+ * Only numeric values are considered, and the class attribute is ignored.
  *
  * Valid filter-specific options are:<p>
  *
@@ -185,7 +185,7 @@ public class Normalize extends Filter implements UnsupervisedFilter, OptionHandl
    * @param the L-norm
    */
   public void setLNorm(double newLNorm) {
-    m_Norm = newLNorm;
+    m_LNorm = newLNorm;
   }
   
   
@@ -267,9 +267,9 @@ public class Normalize extends Filter implements UnsupervisedFilter, OptionHandl
     
     try {
       if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new Randomize(), argv);
+	Filter.batchFilterFile(new Normalize(), argv);
       } else {
-	Filter.filterFile(new Randomize(), argv);
+	Filter.filterFile(new Normalize(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());
