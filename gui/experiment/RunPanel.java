@@ -60,7 +60,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -290,8 +290,11 @@ public class RunPanel extends JPanel implements ActionListener {
       }
     } else if (e.getSource() == m_StopBut) {
       m_StopBut.setEnabled(false);
-      logMessage("User aborting experiment. Waiting for remote tasks to "
-		 +"complete...");
+      logMessage("User aborting experiment. ");
+      if (m_Exp instanceof RemoteExperiment) {
+	logMessage("Waiting for remote tasks to "
+		   +"complete...");
+      }
       ((ExperimentRunner)m_RunThread).abortExperiment();
       // m_RunThread.stop() ??
       m_RunThread = null;
