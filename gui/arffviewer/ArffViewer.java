@@ -62,7 +62,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class ArffViewer 
@@ -89,6 +89,7 @@ implements  ActionListener, ChangeListener, WindowListener
   private JMenuItem             menuFileSave;
   private JMenuItem             menuFileSaveAs;
   private JMenuItem             menuFileClose;
+  private JMenuItem             menuFileCloseAll;
   private JMenuItem             menuFileProperties;
   private JMenuItem             menuFileExit;
   private JMenu                 menuEdit;
@@ -98,6 +99,8 @@ implements  ActionListener, ChangeListener, WindowListener
   private JMenuItem             menuEditClearSearch;
   private JMenuItem             menuEditDeleteAttribute;
   private JMenuItem             menuEditDeleteAttributes;
+  private JMenuItem             menuEditRenameAttribute;
+  private JMenuItem             menuEditAttributeAsClass;
   private JMenuItem             menuEditDeleteInstance;
   private JMenuItem             menuEditDeleteInstances;
   private JMenuItem             menuEditSortInstances;
@@ -167,6 +170,8 @@ implements  ActionListener, ChangeListener, WindowListener
     menuFileClose  = new JMenuItem("Close", ComponentHelper.getImageIcon("empty.gif"));
     menuFileClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_MASK));
     menuFileClose.addActionListener(this);
+    menuFileCloseAll = new JMenuItem("Close all", ComponentHelper.getImageIcon("empty.gif"));
+    menuFileCloseAll.addActionListener(this);
     menuFileProperties  = new JMenuItem("Properties", ComponentHelper.getImageIcon("empty.gif"));
     menuFileProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_MASK));
     menuFileProperties.addActionListener(this);
@@ -177,6 +182,7 @@ implements  ActionListener, ChangeListener, WindowListener
     menuFile.add(menuFileSave);
     menuFile.add(menuFileSaveAs);
     menuFile.add(menuFileClose);
+    menuFile.add(menuFileCloseAll);
     menuFile.addSeparator();
     menuFile.add(menuFileProperties);
     menuFile.addSeparator();
@@ -196,6 +202,10 @@ implements  ActionListener, ChangeListener, WindowListener
     menuEditClearSearch   = new JMenuItem("Clear search", ComponentHelper.getImageIcon("empty.gif"));
     menuEditClearSearch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuEditClearSearch.addActionListener(this);
+    menuEditRenameAttribute = new JMenuItem("Rename attribute", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditRenameAttribute.addActionListener(this);
+    menuEditAttributeAsClass = new JMenuItem("Attribute as class", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditAttributeAsClass.addActionListener(this);
     menuEditDeleteAttribute = new JMenuItem("Delete attribute", ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteAttribute.addActionListener(this);
     menuEditDeleteAttributes = new JMenuItem("Delete attributes", ComponentHelper.getImageIcon("empty.gif"));
@@ -213,6 +223,8 @@ implements  ActionListener, ChangeListener, WindowListener
     menuEdit.add(menuEditSearch);
     menuEdit.add(menuEditClearSearch);
     menuEdit.addSeparator();
+    menuEdit.add(menuEditRenameAttribute);
+    menuEdit.add(menuEditAttributeAsClass);
     menuEdit.add(menuEditDeleteAttribute);
     menuEdit.add(menuEditDeleteAttributes);
     menuEdit.addSeparator();
@@ -344,6 +356,7 @@ implements  ActionListener, ChangeListener, WindowListener
     menuFileSave.setEnabled(isChanged);
     menuFileSaveAs.setEnabled(fileOpen);
     menuFileClose.setEnabled(fileOpen);
+    menuFileCloseAll.setEnabled(fileOpen);
     menuFileProperties.setEnabled(fileOpen);
     menuFileExit.setEnabled(true);
     // Edit
@@ -351,6 +364,8 @@ implements  ActionListener, ChangeListener, WindowListener
     menuEditCopy.setEnabled(fileOpen);
     menuEditSearch.setEnabled(fileOpen);
     menuEditClearSearch.setEnabled(fileOpen);
+    menuEditAttributeAsClass.setEnabled(fileOpen);
+    menuEditRenameAttribute.setEnabled(fileOpen);
     menuEditDeleteAttribute.setEnabled(fileOpen);
     menuEditDeleteAttributes.setEnabled(fileOpen);
     menuEditDeleteInstance.setEnabled(fileOpen);
@@ -519,6 +534,18 @@ implements  ActionListener, ChangeListener, WindowListener
     
     return result;
   }
+
+  /**
+   * loads the specified file
+   */
+  private void loadFile(String filename) {
+    ArffPanel         panel;
+
+    panel    = new ArffPanel(filename);
+    panel.addChangeListener(this);
+    tabbedPane.addTab(panel.getTitle(), panel);
+    tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+  }
   
   /**
    * loads the specified file into the table
@@ -527,7 +554,6 @@ implements  ActionListener, ChangeListener, WindowListener
     int               retVal;
     int               i;
     String            filename;
-    ArffPanel         panel;
     
     retVal = fileChooser.showOpenDialog(this);
     if (retVal != FileChooser.APPROVE_OPTION)
@@ -537,10 +563,7 @@ implements  ActionListener, ChangeListener, WindowListener
     
     for (i = 0; i< fileChooser.getSelectedFiles().length; i++) {
       filename = fileChooser.getSelectedFiles()[i].getAbsolutePath();
-      panel    = new ArffPanel(filename);
-      panel.addChangeListener(this);
-      tabbedPane.addTab(panel.getTitle(), panel);
-      tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+      loadFile(filename);
     }
     
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -646,6 +669,20 @@ implements  ActionListener, ChangeListener, WindowListener
   }
   
   /**
+   * closes all open files
+   */
+  private void closeAllFiles() {
+    while (tabbedPane.getTabCount() > 0) {
+      if (!saveChanges(true))
+        return;
+      
+      tabbedPane.removeTabAt(getCurrentIndex());
+      setFrameTitle();
+      System.gc();
+    }
+  }
+  
+  /**
    * displays some properties of the instances
    */
   private void showProperties() {
@@ -722,6 +759,27 @@ implements  ActionListener, ChangeListener, WindowListener
       return;
 
     getCurrentPanel().clearSearch();
+  }
+  
+  /**
+   * renames the current selected Attribute
+   */
+  private void renameAttribute() {
+    if (!isPanelSelected())
+      return;
+    
+    getCurrentPanel().renameAttribute();
+  }
+  
+  /**
+   * sets the current selected Attribute as class attribute, i.e. it moves it
+   * to the end of the attributes
+   */
+  private void attributeAsClass() {
+    if (!isPanelSelected())
+      return;
+    
+    getCurrentPanel().attributeAsClass();
   }
   
   /**
@@ -857,6 +915,8 @@ implements  ActionListener, ChangeListener, WindowListener
       saveFileAs();
     else if (o == menuFileClose)
       closeFile();
+    else if (o == menuFileCloseAll)
+      closeAllFiles();
     else if (o == menuFileProperties)
       showProperties();
     else if (o == menuFileExit)
@@ -873,6 +933,10 @@ implements  ActionListener, ChangeListener, WindowListener
       deleteAttribute(false);
     else if (o == menuEditDeleteAttributes)
       deleteAttribute(true);
+    else if (o == menuEditRenameAttribute)
+      renameAttribute();
+    else if (o == menuEditAttributeAsClass)
+      attributeAsClass();
     else if (o == menuEditDeleteInstance)
       deleteInstance(false);
     else if (o == menuEditDeleteInstances)
@@ -967,9 +1031,23 @@ implements  ActionListener, ChangeListener, WindowListener
   }
   
   /**
-   * shows the frame
+   * shows the frame and it tries to load all the arff files that were
+   * provided as arguments.
    */
   public static void main(String[] args) throws Exception {
-    new ArffViewer().show();
+    ArffViewer      viewer;
+    int             i;
+    
+    viewer = new ArffViewer();
+    viewer.show();
+
+    if (args.length > 0) {
+      for (i = 0; i < args.length; i++) {
+        System.out.println("Loading " + (i+1) + "/" + args.length +  ": '" + args[i] + "'...");
+        viewer.loadFile(args[i]);
+      }
+      viewer.tabbedPane.setSelectedIndex(0);
+      System.out.println("Finished!");
+    }
   }
 }
