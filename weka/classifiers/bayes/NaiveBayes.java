@@ -37,15 +37,8 @@ import weka.estimators.*;
  * training data. For this reason, the classifier is not an 
  * UpdateableClassifier (which in typical usage are initialized with zero 
  * training instances) -- if you need the UpdateableClassifier functionality,
- * Create an empty class such as the following: <p>
- *
- * <pre><code>
- * public class NaiveBayesUpdateable extends NaiveBayes 
- *     implements UpdateableClassifier {
- *
- * }
- * </code></pre>
- * This classifier will use a default precision of 0.1 for numeric attributes
+ * use the NaiveBayesUpdateable classifier. The NaiveBayesUpdateable
+ * classifier will  use a default precision of 0.1 for numeric attributes
  * when buildClassifier is called with zero training instances.
  * <p>
  * For more information on Naive Bayes classifiers, see<p>
@@ -63,7 +56,7 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class NaiveBayes extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
