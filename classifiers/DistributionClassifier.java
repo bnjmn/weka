@@ -27,7 +27,7 @@ import weka.core.*;
  *
  * @author   Eibe Frank (trigg@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class DistributionClassifier extends Classifier {
 
@@ -50,7 +50,7 @@ public abstract class DistributionClassifier extends Classifier {
 
   /**
    * Classifies the given test instance. The instance has to belong to a
-   * datasets when it's being classified.
+   * dataset when it's being classified.
    *
    * @param instance the instance to be classified
    * @return the predicted most likely class for the instance or 
