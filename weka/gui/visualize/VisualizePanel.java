@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1566,8 +1566,7 @@ public class VisualizePanel extends JPanel {
 					new Color(255, 0, 0),
 					new Color(0, 255, 0),
 					Color.white};
-
-
+  
   /** Lets the user select the attribute for the x axis */
   protected JComboBox m_XCombo = new JComboBox();
 
@@ -1589,6 +1588,10 @@ public class VisualizePanel extends JPanel {
 
   /** Button for the user to save the visualized set of instances */
   protected JButton m_saveBut = new JButton("Save");
+
+  /** Stop the combos from growing out of control */
+  private Dimension COMBO_SIZE = new Dimension(250, m_saveBut
+					       .getPreferredSize().height);
 
   /** file chooser for saving instances */
   protected JFileChooser m_FileChooser 
@@ -1741,6 +1744,21 @@ public class VisualizePanel extends JPanel {
     m_YCombo.setToolTipText("Select the attribute for the y axis");
     m_ColourCombo.setToolTipText("Select the attribute to colour on");
     m_ShapeCombo.setToolTipText("Select the shape to use for data selection"); 
+
+    m_XCombo.setPreferredSize(COMBO_SIZE);
+    m_YCombo.setPreferredSize(COMBO_SIZE);
+    m_ColourCombo.setPreferredSize(COMBO_SIZE);
+    m_ShapeCombo.setPreferredSize(COMBO_SIZE);
+
+    m_XCombo.setMaximumSize(COMBO_SIZE);
+    m_YCombo.setMaximumSize(COMBO_SIZE);
+    m_ColourCombo.setMaximumSize(COMBO_SIZE);
+    m_ShapeCombo.setMaximumSize(COMBO_SIZE);
+    
+    m_XCombo.setMinimumSize(COMBO_SIZE);
+    m_YCombo.setMinimumSize(COMBO_SIZE);
+    m_ColourCombo.setMinimumSize(COMBO_SIZE);
+    m_ShapeCombo.setMinimumSize(COMBO_SIZE);
     //////////
     m_XCombo.setEnabled(false);
     m_YCombo.setEnabled(false);
@@ -2241,6 +2259,7 @@ public class VisualizePanel extends JPanel {
     m_plot.setMasterPlot(newPlot);
     setUpComboBoxes(newPlot.m_plotInstances);
     m_saveBut.setEnabled(true);
+    repaint();
   }
 
   /**
@@ -2254,6 +2273,7 @@ public class VisualizePanel extends JPanel {
       setUpComboBoxes(newPlot.m_plotInstances);
     }
     m_saveBut.setEnabled(true);
+    repaint();
   }
 
   /**
