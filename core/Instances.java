@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $ 
+ * @version $Revision: 1.47 $ 
  */
 public class Instances implements Serializable {
  
@@ -598,7 +598,7 @@ public class Instances implements Serializable {
 	  result += instance(j).weight()*instance(j).value(attIndex);
 	}
       }
-      if (Utils.eq(found, 0)) {
+      if (found <= 0) {
 	return 0;
       } else {
 	return result / found;
@@ -679,7 +679,7 @@ public class Instances implements Serializable {
 	  break;
 	}
 	if ((i == 0) || 
-	    Utils.gr(current.value(attIndex), prev)) {
+	    (current.value(attIndex) > prev)) {
 	  prev = current.value(attIndex);
 	  counter++;
 	}
@@ -1092,7 +1092,8 @@ public class Instances implements Serializable {
     
     StringBuffer text = new StringBuffer();
     
-    text.append(ARFF_RELATION).append(" ").append(Utils.quote(m_RelationName)).append("\n\n");
+    text.append(ARFF_RELATION).append(" ").
+      append(Utils.quote(m_RelationName)).append("\n\n");
     for (int i = 0; i < numAttributes(); i++) {
       text.append(attribute(i)).append("\n");
     }
@@ -1169,7 +1170,7 @@ public class Instances implements Serializable {
 	sumOfWeights += instance(i).weight();
       }
     }
-    if (Utils.smOrEq(sumOfWeights, 1)) {
+    if (sumOfWeights <= 1) {
       return 0;
     }
     double result = (sumSquared - (sum * sum / sumOfWeights)) / 
@@ -1223,7 +1224,7 @@ public class Instances implements Serializable {
 	result.missingCount = numInstances() - j;
 	break;
       }
-      if (Utils.eq(current.value(index), prev)) {
+      if (current.value(index) == prev) {
 	currentCount++;
       } else {
 	result.addDistinct(prev, currentCount);

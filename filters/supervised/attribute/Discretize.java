@@ -53,7 +53,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Discretize extends Filter 
   implements SupervisedFilter, OptionHandler, WeightedInstancesHandler {
@@ -573,7 +573,7 @@ public class Discretize extends Filter
     after = Utils.log2(numCutPoints) + distAfter + instAfter;
 
     // Check if split is to be accepted
-    return (Utils.gr(before, after));
+    return (before > after);
   }
 
 
@@ -631,8 +631,7 @@ public class Discretize extends Filter
        (numClassesLeft * entropyLeft));
 
     // Check if split is to be accepted
-    return (Utils.gr(gain, (Utils.log2(numCutPoints) + delta) /
-		     (double)numInstances));
+    return (gain > (Utils.log2(numCutPoints) + delta) / (double)numInstances);
   }
     
 
@@ -675,12 +674,12 @@ public class Discretize extends Filter
 	instances.instance(i).weight();
       counts[1][(int)instances.instance(i).classValue()] -=
 	instances.instance(i).weight();
-      if (Utils.sm(instances.instance(i).value(attIndex), 
-		   instances.instance(i + 1).value(attIndex))) {
+      if (instances.instance(i).value(attIndex) < 
+	  instances.instance(i + 1).value(attIndex)) {
 	currentCutPoint = instances.instance(i).value(attIndex); //+ 
 	//instances.instance(i + 1).value(attIndex)) / 2.0;
 	currentEntropy = ContingencyTables.entropyConditionedOnRows(counts);
-	if (Utils.sm(currentEntropy, bestEntropy)) {
+	if (currentEntropy < bestEntropy) {
 	  bestCutPoint = currentCutPoint;
 	  bestEntropy = currentEntropy;
 	  bestIndex = i;
@@ -700,7 +699,7 @@ public class Discretize extends Filter
 
     // Checks if gain is zero
     gain = priorEntropy - bestEntropy;
-    if (Utils.eq(gain, 0)) {
+    if (gain <= 0) {
       return null;
     }
 
