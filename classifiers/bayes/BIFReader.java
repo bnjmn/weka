@@ -38,7 +38,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 
@@ -223,7 +223,6 @@ public class BIFReader extends BayesNet {
 		m_Instances.setClassIndex(nNodes - 1);
  		m_bUseADTree = false;
  		m_bInitAsNaiveBayes = false;
- 		m_bMarkovBlanketClassifier = false;
 		initStructure();
 	} // buildInstances
 
