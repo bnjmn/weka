@@ -81,7 +81,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -704,7 +704,7 @@ public class SMO extends Classifier implements OptionHandler {
 	L = Math.max(0, alph1 + alph2 - m_C);
 	H = Math.min(m_C, alph1 + alph2);
       }
-      if (L == H) {
+      if (L >= H) {
 	return false;
       }
 
@@ -751,37 +751,24 @@ public class SMO extends Classifier implements OptionHandler {
       if (Math.abs(a2 - alph2) < m_eps * (a2 + alph2 + m_eps)) {
 	return false;
       }
-
-      // Compute new value of a1
+      
+      // To prevent precision problems
+      if (a2 > m_C - m_Del * m_C) {
+	a2 = m_C;
+      } else if (a2 <= m_Del * m_C) {
+	a2 = 0;
+      }
+      
+      // Recompute a1
       a1 = alph1 + s * (alph2 - a2);
-    
-      // Update weight vector to reflect change a1 and a2, if linear SVM
-      if (m_exponent == 1.0) {
-	Instance inst1 = m_data.instance(i1);
-	for (int p1 = 0; p1 < inst1.numValues(); p1++) {
-	  if (inst1.index(p1) != m_classIndex) {
-	    m_weights[inst1.index(p1)] += 
-	      y1 * (a1 - alph1) * inst1.valueSparse(p1);
-	  }
-	}
-	Instance inst2 = m_data.instance(i2);
-	for (int p2 = 0; p2 < inst2.numValues(); p2++) {
-	  if (inst2.index(p2) != m_classIndex) {
-	    m_weights[inst2.index(p2)] += 
-	      y2 * (a2 - alph2) * inst2.valueSparse(p2);
-	  }
-	}
+      
+      // To prevent precision problems
+      if (a1 > m_C - m_Del * m_C) {
+	a1 = m_C;
+      } else if (a1 <= m_Del * m_C) {
+	a1 = 0;
       }
-
-      // Update error cache using new Lagrange multipliers
-      for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
-	if ((j != i1) && (j != i2)) {
-	  m_errors[j] += 
-	    y1 * (a1 - alph1) * kernel(i1, j, m_data.instance(i1)) + 
-	    y2 * (a2 - alph2) * kernel(i2, j, m_data.instance(i2));
-	}
-      }
-
+      
       // Update sets
       if (a1 > 0) {
 	m_supportVectors.insert(i1);
@@ -793,22 +780,22 @@ public class SMO extends Classifier implements OptionHandler {
       } else {
 	m_I0.delete(i1);
       }
-      if ((y1 == 1) && (!(a1 > 0))) {
+      if ((y1 == 1) && (a1 == 0)) {
 	m_I1.insert(i1);
       } else {
 	m_I1.delete(i1);
       }
-      if ((y1 == -1) && (!(a1 < m_C))) {
+      if ((y1 == -1) && (a1 == m_C)) {
 	m_I2.insert(i1);
       } else {
 	m_I2.delete(i1);
       }
-      if ((y1 == 1) && (!(a1 < m_C))) {
+      if ((y1 == 1) && (a1 == m_C)) {
 	m_I3.insert(i1);
       } else {
 	m_I3.delete(i1);
       }
-      if ((y1 == -1) && (!(a1 > 0))) {
+      if ((y1 == -1) && (a1 == 0)) {
 	m_I4.insert(i1);
       } else {
 	m_I4.delete(i1);
@@ -823,34 +810,61 @@ public class SMO extends Classifier implements OptionHandler {
       } else {
 	m_I0.delete(i2);
       }
-      if ((y2 == 1) && (!(a2 > 0))) {
+      if ((y2 == 1) && (a2 == 0)) {
 	m_I1.insert(i2);
       } else {
 	m_I1.delete(i2);
       }
-      if ((y2 == -1) && (!(a2 < m_C))) {
+      if ((y2 == -1) && (a2 == m_C)) {
 	m_I2.insert(i2);
       } else {
 	m_I2.delete(i2);
       }
-      if ((y2 == 1) && (!(a2 < m_C))) {
+      if ((y2 == 1) && (a2 == m_C)) {
 	m_I3.insert(i2);
       } else {
 	m_I3.delete(i2);
       }
-      if ((y2 == -1) && (!(a2 > 0))) {
+      if ((y2 == -1) && (a2 == 0)) {
 	m_I4.insert(i2);
       } else {
 	m_I4.delete(i2);
       }
-
-      // Update array with Lagrange multipliers
-      m_alpha[i1] = a1;
-      m_alpha[i2] = a2;
-
+      
+      // Update weight vector to reflect change a1 and a2, if linear SVM
+      if (m_exponent == 1.0) {
+	Instance inst1 = m_data.instance(i1);
+	for (int p1 = 0; p1 < inst1.numValues(); p1++) {
+	  if (inst1.index(p1) != m_data.classIndex()) {
+	    m_weights[inst1.index(p1)] += 
+	      y1 * (a1 - alph1) * inst1.valueSparse(p1);
+	  }
+	}
+	Instance inst2 = m_data.instance(i2);
+	for (int p2 = 0; p2 < inst2.numValues(); p2++) {
+	  if (inst2.index(p2) != m_data.classIndex()) {
+	    m_weights[inst2.index(p2)] += 
+	      y2 * (a2 - alph2) * inst2.valueSparse(p2);
+	  }
+	}
+      }
+      
+      // Update error cache using new Lagrange multipliers
+      for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
+	if ((j != i1) && (j != i2)) {
+	  m_errors[j] += 
+	    y1 * (a1 - alph1) * kernel(i1, j, m_data.instance(i1)) + 
+	    y2 * (a2 - alph2) * kernel(i2, j, m_data.instance(i2));
+	}
+      }
+      
       // Update error cache for i1 and i2
       m_errors[i1] += y1 * (a1 - alph1) * k11 + y2 * (a2 - alph2) * k12;
       m_errors[i2] += y1 * (a1 - alph1) * k12 + y2 * (a2 - alph2) * k22;
+      
+      // Update array with Lagrange multipliers
+      m_alpha[i1] = a1;
+      m_alpha[i2] = a2;
       
       // Update thresholds
       m_bLow = -Double.MAX_VALUE; m_bUp = Double.MAX_VALUE;
@@ -977,6 +991,9 @@ public class SMO extends Classifier implements OptionHandler {
       and has a nominal class. Turning them off also means that
       no header information will be stored if the machine is linear. */
   private boolean m_checksTurnedOff;
+
+  /** Precision constant for updating sets */
+  private static double m_Del = 1000 * Double.MIN_VALUE;
 
   /**
    * Turns off checks for missing values, etc. Use with caution.
