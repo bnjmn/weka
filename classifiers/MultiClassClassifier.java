@@ -25,6 +25,7 @@ import weka.core.AttributeStats;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.Attribute;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
@@ -43,7 +44,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -60,6 +61,9 @@ public class MultiClassClassifier extends DistributionClassifier
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
 
+  /** Internal copy of the class attribute for output purposes */
+  private Attribute m_ClassAttribute;
+
   /**
    * Builds the classifiers.
    *
@@ -73,6 +77,9 @@ public class MultiClassClassifier extends DistributionClassifier
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }
+
+    m_ClassAttribute = insts.classAttribute();
+
     if (!insts.classAttribute().isNominal()) {
       throw new 
 	Exception("MultiClassClassifier needs a nominal class!");
@@ -146,7 +153,8 @@ public class MultiClassClassifier extends DistributionClassifier
     StringBuffer text = new StringBuffer();
     text.append("MultiClassClassifier\n\n");
     for (int i = 0; i < m_Classifiers.length; i++) {
-      text.append("Classifier for class " + (i + 1) + "\n");
+      text.append("Classifier for class " + m_ClassAttribute.value(i) 
+                  + " (" + (i+1) + ")\n");
       if (m_Classifiers[i] != null) {
         text.append(m_Classifiers[i].toString() + "\n");
       } else {
