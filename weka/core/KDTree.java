@@ -21,10 +21,12 @@
  */
 
 package weka.core;
+import  weka.core.*;
 
+import java.io.Serializable;
 import java.util.*;
 import java.lang.Math;
-import  weka.core.*;
+
 
 /** 
  * This is a KD-Tree structure that stores instances using a divide and conquer 
@@ -58,9 +60,9 @@ import  weka.core.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class KDTree implements OptionHandler {
+public class KDTree implements OptionHandler, Serializable{
 
   /** flag for pruning */
   boolean m_Prune = false;
@@ -152,7 +154,7 @@ public class KDTree implements OptionHandler {
    * A class for storing a KDTree node.
    *
    **************************************************************************/
-  private class KDTreeNode {
+  private class KDTreeNode implements Serializable {
 
     /** node number (only for debug) */
     private int m_NodeNumber;
