@@ -1,6 +1,10 @@
 JAVAC = javac
 
-SOURCES = Converter.java ArffToArff.java CsvToArff.java C45ToArff.java
+SOURCES = Loader.java AbstractLoader.java \
+	ArffLoader.java CSVLoader.java C45Loader.java \
+	SerializedInstancesLoader.java \
+	ConverterUtils.java
+
 
 CLASSFILES = $(SOURCES:.java=.class)
 

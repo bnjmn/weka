@@ -1,18 +1,23 @@
 /*
- *    C45ToArff.java
+ *    C45Loader.java
  *    Copyright (C) 2000 Mark Hall
  *
  */
 
-package weka.converters;
+package weka.core.converters;
 
-import java.io.*;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.Attribute;
 import weka.core.Utils;
+import java.io.StreamTokenizer;
 
 /**
  * Reads C4.5 input files. Takes a filestem or filestem with .names or .data
@@ -20,11 +25,10 @@ import weka.core.Utils;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
- * @see Converter
- * @see Serializable
+ * @version $Revision: 1.1 $
+ * @see Loader
  */
-public class C45ToArff implements Converter, Serializable {
+public class C45Loader extends AbstractLoader {
 
   /**
    * Holds the determined structure (header) of the data set.
@@ -85,14 +89,14 @@ public class C45ToArff implements Converter, Serializable {
   }
   
   /**
-   * Resets the converter ready to read a new data set
+   * Resets the Loader ready to read a new data set
    */
   public void reset() {
     m_structure = null;
   }
 
   /**
-   * Resets the Converter object and sets the source of the data set to be 
+   * Resets the Loader object and sets the source of the data set to be 
    * the supplied File object.
    *
    * @param file the source file.
@@ -149,7 +153,7 @@ public class C45ToArff implements Converter, Serializable {
    */
   public Instances getStructure() throws IOException {
     if (m_sourceFile == null) {
-      throw new IOException("No source file specified");
+      throw new IOException("No source has beenspecified");
     }
 
     if (m_structure == null) {
@@ -172,7 +176,7 @@ public class C45ToArff implements Converter, Serializable {
    */
   public Instances getDataSet() throws IOException {
     if (m_sourceFile == null) {
-      throw new IOException("No source file specified");
+      throw new IOException("No source has been specified");
     }
 
     if (m_structure == null) {
@@ -208,7 +212,7 @@ public class C45ToArff implements Converter, Serializable {
    */
   public Instance getNextInstance() throws IOException {
     if (m_sourceFile == null) {
-      throw new IOException("No source file specified");
+      throw new IOException("No source has been specified");
     }
 
     if (m_structure == null) {
@@ -414,7 +418,7 @@ public class C45ToArff implements Converter, Serializable {
       File inputfile;
       inputfile = new File(args[0]);
       try {
-	C45ToArff cta = new C45ToArff();
+	C45Loader cta = new C45Loader();
 	cta.setSource(inputfile);
 	System.out.println(cta.getStructure());
 	Instance temp = cta.getNextInstance();
@@ -426,7 +430,7 @@ public class C45ToArff implements Converter, Serializable {
 	ex.printStackTrace();
       }
     } else {
-      System.err.println("Usage:\n\tC45ToArff <filestem>[.names | data]\n");
+      System.err.println("Usage:\n\tC45Loader <filestem>[.names | data]\n");
     }
   }
 }

@@ -9,7 +9,7 @@ package weka.gui.explorer;
 
 import weka.core.Instances;
 import weka.core.SerializedObject;
-import weka.converters.*;
+import weka.core.converters.Loader;
 import weka.filters.Filter;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.AttributeSelectionPanel;
@@ -64,7 +64,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -161,7 +161,7 @@ public class PreprocessPanel extends JPanel {
       .registerEditor(weka.experiment.InstanceQuery.class,
 		      weka.gui.GenericObjectEditor.class);
      java.beans.PropertyEditorManager
-       .registerEditor(weka.converters.Converter.class,
+       .registerEditor(weka.core.converters.Loader.class,
 		      weka.gui.GenericObjectEditor.class);
   }
   
@@ -691,12 +691,12 @@ public class PreprocessPanel extends JPanel {
     final GenericObjectEditor convEd = new GenericObjectEditor();
 
     try {
-      convEd.setClassType(weka.converters.Converter.class);
-      convEd.setValue(new CsvToArff());
+      convEd.setClassType(weka.core.converters.Loader.class);
+      convEd.setValue(new weka.core.converters.CSVLoader());
       ((GenericObjectEditor.GOEPanel)convEd.getCustomEditor())
 	.addOkListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
-	      tryConverter((Converter)convEd.getValue(), f);
+	      tryConverter((Loader)convEd.getValue(), f);
 	    }
 	  });
     } catch (Exception ex) {
@@ -711,7 +711,7 @@ public class PreprocessPanel extends JPanel {
    * @param cnv the converter to apply to the input file
    * @param f the input file
    */
-  private void tryConverter(final Converter cnv, final File f) {
+  private void tryConverter(final Loader cnv, final File f) {
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {

@@ -1,5 +1,5 @@
 #
-# $Revision: 1.28 $
+# $Revision: 1.29 $
 #
 
 # Java Compiler to use
@@ -21,7 +21,6 @@ all :
 	(cd estimators; make all JAVAC=$(JAVAC))
 	(cd associations; make all JAVAC=$(JAVAC))
 	(cd clusterers; make all JAVAC=$(JAVAC))
-	(cd converters; make all JAVAC=$(JAVAC))
 	(cd attributeSelection; make all JAVAC=$(JAVAC))
 	(cd experiment; make all JAVAC=$(JAVAC))
 	(cd gui; make all JAVAC=$(JAVAC))
@@ -33,7 +32,6 @@ optimized :
 	(cd estimators; make optimized JAVAC=$(JAVAC))
 	(cd associations; make optimized JAVAC=$(JAVAC))
 	(cd clusterers; make optimized JAVAC=$(JAVAC))
-	(cd converters; make optimized JAVAC=$(JAVAC))
 	(cd attributeSelection; make optimized JAVAC=$(JAVAC))
 	(cd experiment; make optimized JAVAC=$(JAVAC))
 	(cd gui; make optimized JAVAC=$(JAVAC))
@@ -45,7 +43,6 @@ debug :
 	(cd estimators; make debug JAVAC=$(JAVAC))
 	(cd associations; make debug JAVAC=$(JAVAC))
 	(cd clusterers; make debug JAVAC=$(JAVAC))
-	(cd converters; make debug JAVAC=$(JAVAC))
 	(cd attributeSelection; make debug JAVAC=$(JAVAC))
 	(cd experiment; make debug JAVAC=$(JAVAC))
 	(cd gui; make debug JAVAC=$(JAVAC))
@@ -57,7 +54,6 @@ clean :
 	(cd estimators; make clean)
 	(cd associations; make clean)
 	(cd clusterers; make clean)
-	(cd converters; make clean)
 	(cd attributeSelection; make clean)
 	(cd experiment; make clean)
 	(cd gui; make clean)
@@ -68,6 +64,7 @@ doc :
 	(mkdir doc 2>&1 ) >/dev/null ; \
 	javadoc -J-mx100m -public -author -version -1.1 -d doc \
 	weka.core \
+	weka.core.converters \
 	weka.classifiers \
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
@@ -77,7 +74,6 @@ doc :
 	weka.estimators \
 	weka.associations \
 	weka.clusterers \
-	weka.converters \
 	weka.attributeSelection \
 	weka.experiment \
 	weka.gui \
@@ -98,6 +94,7 @@ install : all
 	echo "Main-Class: weka.gui.GUIChooser" > manifest.tmp ;\
 	jar cvfm $(WEKAHOME)/weka.jar manifest.tmp \
 	weka/core/*.class \
+	weka/core/converters/*.class \
 	weka/classifiers/*.class \
 	weka/classifiers/j48/*.class \
 	weka/classifiers/m5/*.class \
@@ -107,7 +104,6 @@ install : all
 	weka/estimators/*class \
 	weka/associations/*.class \
 	weka/clusterers/*.class \
-	weka/converters/*.class \
 	weka/attributeSelection/*.class \
 	weka/experiment/*.class \
 	weka/experiment/*.props \
@@ -125,6 +121,7 @@ install : all
 	; \
 	jar cvf $(WEKAHOME)/weka-src.jar \
 	weka/core/*.java \
+	weka/core/converters/*.java \
 	weka/classifiers/*.java \
 	weka/classifiers/j48/*.java \
 	weka/classifiers/m5/*.java \
@@ -134,7 +131,6 @@ install : all
 	weka/estimators/*java \
 	weka/associations/*.java \
 	weka/clusterers/*.java \
-	weka/converters/*.java \
 	weka/attributeSelection/*.java \
 	weka/experiment/*.java \
 	weka/experiment/*.props \
@@ -154,6 +150,7 @@ install : all
 	(mkdir $(WEKAHOME)/doc 2>&1 ) >/dev/null ; \
 	javadoc -J-mx100m -public -author -version -1.1 -d $(WEKAHOME)/doc \
 	weka.core \
+	weka.core.converters \
 	weka.classifiers \
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
@@ -163,7 +160,6 @@ install : all
 	weka.estimators \
 	weka.associations \
 	weka.clusterers \
-	weka.converters \
 	weka.attributeSelection \
 	weka.experiment \
 	weka.gui \

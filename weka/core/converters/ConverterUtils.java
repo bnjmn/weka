@@ -4,7 +4,7 @@
  *
  */
 
-package weka.converters;
+package weka.core.converters;
 
 import java.io.StreamTokenizer;
 import java.io.Serializable;
