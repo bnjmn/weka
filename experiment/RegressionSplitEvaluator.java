@@ -39,7 +39,7 @@ import java.io.ObjectStreamClass;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -500,18 +500,20 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     if (m_result != null) {
       result.append(m_result);
       
-      for (int i=0;i<m_doesProduce.length;i++) {
-	if (m_doesProduce[i]) {
-	  try {
-	    double dv = ((AdditionalMeasureProducer)m_Classifier).
-	    getMeasure(m_AdditionalMeasures[i]);
-	    Double value = new Double(dv);
+      if (m_doesProduce != null) {
+	for (int i=0;i<m_doesProduce.length;i++) {
+	  if (m_doesProduce[i]) {
+	    try {
+	      double dv = ((AdditionalMeasureProducer)m_Classifier).
+		getMeasure(m_AdditionalMeasures[i]);
+	      Double value = new Double(dv);
 
-	    result.append(m_AdditionalMeasures[i]+" : "+value+'\n');
-	  } catch (Exception ex) {
-	    System.err.println(ex);
-	  }
-	} 
+	      result.append(m_AdditionalMeasures[i]+" : "+value+'\n');
+	    } catch (Exception ex) {
+	      System.err.println(ex);
+	    }
+	  } 
+	}
       }
     }
     return result.toString();
