@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -77,6 +77,11 @@ public class Filter extends JPanel
 
   private transient Instances m_trainingSet;
   private transient Instances m_testingSet;
+
+  /**
+   * Global info for the wrapped filter (if it exists).
+   */
+  protected String m_globalInfo;
 
   /**
    * Objects talking to us
@@ -114,6 +119,15 @@ public class Filter extends JPanel
   private InstanceEvent m_ie = new InstanceEvent(this);
 
   private transient Logger m_log = null;
+  
+  /**
+   * Global info (if it exists) for the wrapped filter
+   *
+   * @return the global info
+   */
+  public String globalInfo() {
+    return m_globalInfo;
+  }
 
   public Filter() {
     setLayout(new BorderLayout());
@@ -153,6 +167,9 @@ public class Filter extends JPanel
 			 +" is not an incremental filter");
       }
     }
+    
+    // get global info
+    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Filter);
   }
 
   public weka.filters.Filter getFilter() {

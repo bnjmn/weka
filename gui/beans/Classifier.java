@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -83,6 +83,11 @@ public class Classifier extends JPanel
   private int m_state = IDLE;
 
   private Thread m_buildThread = null;
+
+  /**
+   * Global info for the wrapped classifier (if it exists).
+   */
+  protected String m_globalInfo;
 
   /**
    * Objects talking to us
@@ -136,6 +141,15 @@ public class Classifier extends JPanel
    */
   private InstanceEvent m_incrementalEvent;
   private Double m_dummy = new Double(0.0);
+
+  /**
+   * Global info (if it exists) for the wrapped classifier
+   *
+   * @return the global info
+   */
+  public String globalInfo() {
+    return m_globalInfo;
+  }
   
   /**
    * Creates a new <code>Classifier</code> instance.
@@ -181,6 +195,8 @@ public class Classifier extends JPanel
 			 +" is not an incremental classifier (Classifier)");
       }
     }
+    // get global info
+    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Classifier);
   }
 
   /**
