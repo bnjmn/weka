@@ -23,7 +23,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Range implements Serializable {
 
@@ -39,6 +39,21 @@ public class Range implements Serializable {
   /** Store the maximum value permitted in the range. -1 indicates that
       no upper value has been set */
   int m_Upper = -1;
+
+  /** Default constructor. */
+  public Range() {
+  }
+
+  /**
+   * Constructor to set initial range.
+   *
+   * @param rangeList the initial range
+   * @exception Exception if the range list is invalid
+   */
+  public Range(String rangeList) throws Exception {
+
+    setRanges(rangeList);
+  }
 
   /**
    * Sets the value of "last".
@@ -233,6 +248,38 @@ public class Range implements Serializable {
     int [] result = new int [numSelected];
     System.arraycopy(selectIndices, 0, result, 0, numSelected);
     return result;
+  }
+
+  /**
+   * Creates a string representation of the indices in the supplied array.
+   *
+   * @param indices an array containing indices to select.
+   * Since the array will typically come from a program, indices are assumed
+   * from 0, and thus will have 1 added in the String representation.
+   */
+  public static String indicesToRangeList(int []indices) {
+
+    StringBuffer rl = new StringBuffer();
+    int last = -2;
+    boolean range = false;
+    for(int i = 0; i < indices.length; i++) {
+      if (i == 0) {
+	rl.append(indices[i] + 1);
+      } else if (indices[i] == last) {
+        range = true;
+      } else {
+        if (range) {
+          rl.append('-').append(last);
+          range = false;
+        }
+	rl.append(',').append(indices[i] + 1);
+      }
+      last = indices[i] + 1;
+    }
+    if (range) {
+      rl.append('-').append(last);
+    }
+    return rl.toString();
   }
 
   /** Sets the flags array. */
