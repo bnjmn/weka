@@ -38,7 +38,7 @@ import java.awt.*;
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
@@ -249,6 +249,10 @@ public class ClassAssigner extends JPanel
 
   public synchronized void addInstanceListener(InstanceListener tsl) {
     m_instanceListeners.addElement(tsl);
+    if (m_connectedFormat != null) {
+      InstanceEvent e = new InstanceEvent(this, m_connectedFormat);
+      tsl.acceptInstance(e);
+    }
   }
 
   public synchronized void removeInstanceListener(InstanceListener tsl) {

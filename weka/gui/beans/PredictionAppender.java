@@ -42,7 +42,7 @@ import weka.core.Instance;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
@@ -220,13 +220,14 @@ public class PredictionAppender extends JPanel
     } else {
       oldNumAtts = currentI.dataset().numAttributes();
     }
-
     if (status == IncrementalClassifierEvent.NEW_BATCH) {
       m_instanceEvent = new InstanceEvent(this, null, 0);
       // create new header structure
       Instances oldStructure = new Instances(e.getStructure(), 0);
-      String relationNameModifier = oldStructure.relationName()
-	+"_with predictions";
+      //String relationNameModifier = oldStructure.relationName()
+	//+"_with predictions";
+      String relationNameModifier = "_with predictions";
+	//+"_with predictions";
        if (!m_appendProbabilities 
 	   || oldStructure.classAttribute().isNumeric()) {
 	 try {
@@ -303,12 +304,12 @@ public class PredictionAppender extends JPanel
       weka.classifiers.Classifier classifier = e.getClassifier();
       String relationNameModifier = "_set_"+e.getSetNumber()+"_of_"
 	+e.getMaxSetNumber();
-      
       if (!m_appendProbabilities || testSet.classAttribute().isNumeric()) {
 	try {
 	  Instances newInstances = makeDataSetClass(testSet, classifier,
 						    relationNameModifier);
-	  if (e.getTestSet().isStructureOnly()) {
+	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
+          if (e.getTestSet().isStructureOnly()) {
 	    m_format = newInstances;
 	  }
 	  // fill in predicted values
@@ -330,7 +331,8 @@ public class PredictionAppender extends JPanel
 	  Instances newInstances = 
 	    makeDataSetProbabilities(testSet,
 				     classifier,relationNameModifier);
-	  if (e.getTestSet().isStructureOnly()) {
+	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
+          if (e.getTestSet().isStructureOnly()) {
 	    m_format = newInstances;
 	  }
 	  // fill in predicted probabilities

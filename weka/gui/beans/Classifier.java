@@ -53,7 +53,11 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+<<<<<<< Classifier.java
+ * @version $Revision: 1.15 $
+=======
+ * @version $Revision: 1.15 $
+>>>>>>> 1.14
  * @since 1.0
  * @see JPanel
  * @see BeanCommon

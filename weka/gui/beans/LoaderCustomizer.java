@@ -27,16 +27,19 @@ import weka.gui.FileEditor;
 import java.io.File;
 import java.beans.*;
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.FlowLayout;
 import java.awt.event.*;
-import javax.swing.JPanel;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JDialog;
+import java.awt.Font;
+import javax.swing.*;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 import weka.gui.ExtensionFileFilter;
 import weka.core.converters.Loader;
+import weka.core.converters.DatabaseLoader;
+import weka.core.converters.DatabaseConverter;
 import weka.core.converters.FileSourcedConverter;
+
 
 /**
  * GUI Customizer for the loader bean
@@ -96,6 +99,16 @@ public class LoaderCustomizer extends JPanel
     true); */
 
   private JFrame m_parentFrame;
+  
+  private JTextField m_dbaseURLText;
+  
+  private JTextField m_userNameText;
+  
+  private JTextField m_queryText;
+   
+  private JTextField m_keyText;
+  
+  private JPasswordField m_passwordText;
 
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -159,11 +172,114 @@ public class LoaderCustomizer extends JPanel
     validate();
     repaint();
   }
+  
+  
+  /** Sets up a customizer window for a Database Connection*/
+  private void setUpDatabase() {
+  
+      removeAll();
+      
+      JPanel db = new JPanel();
+      db.setLayout(new GridLayout(6, 1));
+      m_dbaseURLText = new JTextField(((DatabaseConverter)m_dsLoader.getLoader()).getUrl(),50); 
+      JLabel dbaseURLLab = new JLabel(" Database URL:", SwingConstants.LEFT);
+      dbaseURLLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+      m_userNameText = new JTextField(((DatabaseConverter)m_dsLoader.getLoader()).getUser(),50); 
+      JLabel userNameLab = new JLabel(" Username:    ", SwingConstants.LEFT);
+      userNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+      m_passwordText = new JPasswordField(50); 
+      JLabel passwordLab = new JLabel(" Password:    ", SwingConstants.LEFT);
+      passwordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
+      
+      m_queryText = new JTextField(((DatabaseLoader)m_dsLoader.getLoader()).getQuery(),50); 
+      JLabel queryLab = new JLabel(" Query:       ", SwingConstants.LEFT);
+      queryLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+      m_keyText = new JTextField(((DatabaseLoader)m_dsLoader.getLoader()).getKeys(),50); 
+      JLabel keyLab = new JLabel(" Key columns: ", SwingConstants.LEFT);
+      keyLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+      JPanel urlP = new JPanel();   
+
+      urlP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      urlP.add(dbaseURLLab);
+      urlP.add(m_dbaseURLText);
+      db.add(urlP);
+
+      JPanel usernameP = new JPanel();   
+      //usernameP.setLayout(new BorderLayout());
+      usernameP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      usernameP.add(userNameLab);
+      usernameP.add(m_userNameText);
+      db.add(usernameP);
+
+      JPanel passwordP = new JPanel();   
+      //passwordP.setLayout(new BorderLayout());
+      passwordP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      passwordP.add(passwordLab);
+      passwordP.add(m_passwordText);
+      db.add(passwordP);
+      
+      JPanel queryP = new JPanel();   
+
+      queryP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      queryP.add(queryLab);
+      queryP.add(m_queryText);
+      db.add(queryP);
+      
+      JPanel keyP = new JPanel();   
+
+      keyP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      keyP.add(keyLab);
+      keyP.add(m_keyText);
+      db.add(keyP);
+
+      JPanel buttonsP = new JPanel();
+      buttonsP.setLayout(new FlowLayout());
+      JButton ok,cancel;
+      buttonsP.add(ok = new JButton("OK"));
+      buttonsP.add(cancel=new JButton("Cancel"));
+      ok.addActionListener(new ActionListener(){
+	public void actionPerformed(ActionEvent evt){
+          ((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();  
+	  ((DatabaseConverter)m_dsLoader.getLoader()).setUrl(m_dbaseURLText.getText());
+          ((DatabaseConverter)m_dsLoader.getLoader()).setUser(m_userNameText.getText());
+          ((DatabaseConverter)m_dsLoader.getLoader()).setPassword(new String(m_passwordText.getPassword()));
+	  ((DatabaseLoader)m_dsLoader.getLoader()).setQuery(m_queryText.getText());
+          ((DatabaseLoader)m_dsLoader.getLoader()).setKeys(m_keyText.getText());
+          try{
+           m_dsLoader.notifyStructureAvailable(((DatabaseLoader)m_dsLoader.getLoader()).getStructure());
+           //database connection has been configured
+           m_dsLoader.setDB(true);
+          }catch (Exception ex){
+          }
+          if (m_parentFrame != null) {
+	    m_parentFrame.dispose();
+	  }
+      }
+     });
+     cancel.addActionListener(new ActionListener(){
+	public void actionPerformed(ActionEvent evt){
+	  if (m_parentFrame != null) {
+	    m_parentFrame.dispose();
+	  }
+      }
+    });
+   
+    db.add(buttonsP);
+    JPanel about = m_LoaderEditor.getAboutPanel();
+    if (about != null) {
+      add(about, BorderLayout.NORTH);
+    }
+    add(db,BorderLayout.SOUTH);
+  }
 
   public void setUpFile() {
     removeAll();
     m_fileChooser.
-      setSelectedFile(((FileSourcedConverter)m_dsLoader.getLoader()).getFile());
+      setSelectedFile(((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile());
     ExtensionFileFilter ff = 
       new ExtensionFileFilter(((FileSourcedConverter)m_dsLoader.getLoader()).
 			      getFileExtension(),
@@ -188,7 +304,11 @@ public class LoaderCustomizer extends JPanel
     //    m_fileEditor.setValue(m_dsLoader.getDataSetFile());
     if (m_dsLoader.getLoader() instanceof FileSourcedConverter) {
       setUpFile();
-    } else {
+    } else{ 
+        if(m_dsLoader.getLoader() instanceof DatabaseConverter) {
+            setUpDatabase();
+        }
+        else
       setUpOther();
     }
   }

@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -95,6 +95,9 @@ public class Loader extends AbstractDataSource
    */
   private int m_instanceEventTargets = 0;
   private int m_dataSetEventTargets = 0;
+  
+  /** Flag indicating that a database has already been configured*/
+  private boolean m_dbSet = false;
   
   private class LoadThread extends Thread {
     private DataSource m_DP;
@@ -191,6 +194,11 @@ public class Loader extends AbstractDataSource
     setLoader(m_Loader);
     appearanceFinal();
   }
+  
+  public void setDB(boolean flag){
+  
+      m_dbSet = flag;
+  }
 
   protected void appearanceFinal() {
     removeAll();
@@ -248,14 +256,16 @@ public class Loader extends AbstractDataSource
       }
     }
     m_visual.setText(loaderName);
-
-    // try to load structure (if possible) and notify any listeners
-    try {
-      m_dataFormat = m_Loader.getStructure();
-      //      System.err.println(m_dataFormat);
-      System.err.println("Notifying listeners of instance structure avail. (Loader).");
-      notifyStructureAvailable(m_dataFormat);
-    } catch (Exception ex) {
+    
+    if(! (loader instanceof DatabaseLoader)){
+        // try to load structure (if possible) and notify any listeners
+        try {
+            m_dataFormat = m_Loader.getStructure();
+            //      System.err.println(m_dataFormat);
+            System.err.println("Notifying listeners of instance structure avail. (Loader).");
+            notifyStructureAvailable(m_dataFormat);
+        }catch (Exception ex) {
+        }
     }
     
     // get global info
@@ -375,7 +385,7 @@ public class Loader extends AbstractDataSource
     boolean ok = true;
     if (m_ioThread == null) {
       if (m_Loader instanceof FileSourcedConverter) {
-	if (! ((FileSourcedConverter) m_Loader).getFile().isFile()) {
+	if (! ((FileSourcedConverter) m_Loader).retrieveFile().isFile()) {
 	  ok = false;
 	}
       }
@@ -449,6 +459,13 @@ public class Loader extends AbstractDataSource
     super.addDataSourceListener(dsl);
     m_dataSetEventTargets ++;
     // pass on any current instance format
+    try{
+        if(m_dbSet){
+            m_dataFormat = m_Loader.getStructure();
+            m_dbSet = false;
+        }
+    }catch(Exception ex){
+    }
     notifyStructureAvailable(m_dataFormat);
   }
   
@@ -470,6 +487,13 @@ public class Loader extends AbstractDataSource
   public synchronized void addInstanceListener(InstanceListener dsl) {
     super.addInstanceListener(dsl);
     m_instanceEventTargets ++;
+    try{
+        if(m_dbSet){
+            m_dataFormat = m_Loader.getStructure();
+            m_dbSet = false;
+        }
+    }catch(Exception ex){
+    }
     // pass on any current instance format
     notifyStructureAvailable(m_dataFormat);
   }
