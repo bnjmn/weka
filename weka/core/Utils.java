@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public final class Utils {
 
@@ -1322,7 +1322,7 @@ public final class Utils {
   //@ requires 0 <= lo0 && lo0 <= hi0 && hi0 < index.length;
   //@ requires (\forall int i; 0 <= i && i < index.length; 0 <= index[i] && index[i] < array.length);
   //@ requires array != index;
-  //@ assignable index;
+  //  assignable index;
   private static void quickSort(/*@non_null@*/ int [] array, 
 				/*@non_null@*/ int [] index,
 				int lo0, int hi0) {
