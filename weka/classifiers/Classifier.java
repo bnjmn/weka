@@ -27,7 +27,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class Classifier implements Cloneable, Serializable {
  
@@ -79,7 +79,9 @@ public abstract class Classifier implements Cloneable, Serializable {
 
   /**
    * Creates copies of the current classifier, which can then
-   * be used for boosting etc.
+   * be used for boosting etc. Note that this is not
+   * designed to copy any currently built <i>model</i>, just the
+   * option settings.
    *
    * @param model an example classifier to copy
    * @param num the number of classifiers copies to create.
