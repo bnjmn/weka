@@ -57,15 +57,17 @@ import weka.core.*;
  * When k is selected by cross-validation for numeric class attributes,
  * minimize mean-squared error. (default mean absolute error) <p>
  *
+ * -N <br>
+ * Turns off normalization. <p>
+ *
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
 
-  
   /*
    * A class for storing data about a neighboring instance
    */
@@ -300,6 +302,9 @@ public class IBk extends DistributionClassifier implements
   /** True if debugging output should be printed */
   boolean m_Debug;
 
+  /** True if normalization is turned off */
+  protected boolean m_DontNormalize;
+
   /* Define possible instance weighting methods */
   public static final int WEIGHT_NONE = 1;
   public static final int WEIGHT_INVERSE = 2;
@@ -309,6 +314,9 @@ public class IBk extends DistributionClassifier implements
     new Tag(WEIGHT_INVERSE, "Weight by 1/distance"),
     new Tag(WEIGHT_SIMILARITY, "Weight by 1-distance")
   };
+
+  /** The number of attributes the contribute to a prediction */
+  protected double m_NumAttributesUsed;
 								   
   /**
    * IBk classifier. Simple instance-based learner that uses the class
@@ -485,19 +493,43 @@ public class IBk extends DistributionClassifier implements
   /**
    * Get an attributes minimum observed value
    */
-  public double getAttributeMin(int index) {
+  public double getAttributeMin(int index) throws Exception {
 
+    if (m_Min == null) {
+      throw new Exception("Minimum value for attribute not available!");
+    }
     return m_Min[index];
   }
 
   /**
    * Get an attributes maximum observed value
    */
-  public double getAttributeMax(int index) {
+  public double getAttributeMax(int index) throws Exception {
 
+    if (m_Max == null) {
+      throw new Exception("Maximum value for attribute not available!");
+    }
     return m_Max[index];
   }
-
+  
+  /**
+   * Gets whether normalization is turned off.
+   * @return Value of DontNormalize.
+   */
+  public boolean getNoNormalization() {
+    
+    return m_DontNormalize;
+  }
+  
+  /**
+   * Set whether normalization is turned off.
+   * @param v  Value to assign to DontNormalize.
+   */
+  public void setNoNormalization(boolean v) {
+    
+    m_DontNormalize = v;
+  }
+  
   /**
    * Generates the classifier.
    *
@@ -532,14 +564,29 @@ public class IBk extends DistributionClassifier implements
     }
 
     // Calculate the minimum and maximum values
-    m_Min = new double [m_Train.numAttributes()];
-    m_Max = new double [m_Train.numAttributes()];
-    for (int i = 0; i < m_Train.numAttributes(); i++) {
-      m_Min[i] = m_Max[i] = Double.NaN;
+    if (m_DontNormalize) {
+      m_Min = null; m_Max = null;
+    } else {
+      m_Min = new double [m_Train.numAttributes()];
+      m_Max = new double [m_Train.numAttributes()];
+      for (int i = 0; i < m_Train.numAttributes(); i++) {
+	m_Min[i] = m_Max[i] = Double.NaN;
+      }
+      Enumeration enum = m_Train.enumerateInstances();
+      while (enum.hasMoreElements()) {
+	updateMinMax((Instance) enum.nextElement());
+      }
     }
-    Enumeration enum = m_Train.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      updateMinMax((Instance) enum.nextElement());
+
+    // Compute the number of attributes that contribute
+    // to each prediction
+    m_NumAttributesUsed = 0.0;
+    for (int i = 0; i < m_Train.numAttributes(); i++) {
+      if ((i != m_Train.classIndex()) && 
+	  (m_Train.attribute(i).isNominal() ||
+	   m_Train.attribute(i).isNumeric())) {
+	m_NumAttributesUsed += 1.0;
+      }
     }
 
     // Invalidate any currently cross-validation selected k
@@ -561,7 +608,9 @@ public class IBk extends DistributionClassifier implements
     if (instance.classIsMissing()) {
       return;
     }
-    updateMinMax(instance);
+    if (!m_DontNormalize) {
+      updateMinMax(instance);
+    }
     m_Train.add(instance);
     m_kNNValid = false;
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
@@ -595,7 +644,9 @@ public class IBk extends DistributionClassifier implements
     if (!m_kNNValid && (m_CrossValidate) && (m_kNN > 1)) {
       crossValidate();
     }
-    updateMinMax(instance);
+    if (!m_DontNormalize) {
+      updateMinMax(instance);
+    }
 
     NeighborList neighborlist = findNeighbors(instance);
     return makeDistribution(neighborlist);
@@ -636,6 +687,9 @@ public class IBk extends DistributionClassifier implements
 	      +"\tand the k value specified using hold-one-out evaluation\n"
 	      +"\ton the training data (use when k > 1)",
 	      "X", 0,"-X"));
+    newVector.addElement(new Option(
+	      "\tDon't normalize the data.\n",
+	      "N", 0, "-N"));
     return newVector.elements();
   }
 
@@ -694,6 +748,7 @@ public class IBk extends DistributionClassifier implements
     }
     setCrossValidate(Utils.getFlag('X', options));
     setMeanSquared(Utils.getFlag('S', options));
+    setNoNormalization(Utils.getFlag('N', options));
 
     Utils.checkForRemainingOptions(options);
   }
@@ -705,7 +760,7 @@ public class IBk extends DistributionClassifier implements
    */
   public String [] getOptions() {
 
-    String [] options = new String [10];
+    String [] options = new String [11];
     int current = 0;
     options[current++] = "-K"; options[current++] = "" + getKNN();
     options[current++] = "-W"; options[current++] = "" + m_WindowSize;
@@ -719,6 +774,9 @@ public class IBk extends DistributionClassifier implements
       options[current++] = "-D";
     } else if (m_DistanceWeighting == WEIGHT_SIMILARITY) {
       options[current++] = "-F";
+    }
+    if (m_DontNormalize) {
+      options[current++] = "-N";
     }
     while (current < options.length) {
       options[current++] = "";
@@ -771,6 +829,7 @@ public class IBk extends DistributionClassifier implements
     m_DistanceWeighting = WEIGHT_NONE;
     m_CrossValidate = false;
     m_MeanSquared = false;
+    m_DontNormalize = false;
   }
 
   /**
@@ -782,51 +841,91 @@ public class IBk extends DistributionClassifier implements
    */          
   private double distance(Instance first, Instance second) {  
 
-    double diff, distance = 0;
-    int numAttribsUsed = 0;
-    for(int i = 0; i < m_Train.numAttributes(); i++) { 
-      if (i == m_Train.classIndex()) {
-	continue;
+    double distance = 0;
+    int firstI, secondI;
+
+    for (int p1 = 0, p2 = 0; 
+	 p1 < first.numValues() || p2 < second.numValues();) {
+      if (p1 >= first.numValues()) {
+	firstI = m_Train.numAttributes();
+      } else {
+	firstI = first.index(p1); 
       }
-      switch (m_Train.attribute(i).type()) {
-      case Attribute.NOMINAL:
-	// If attribute is nominal
-	numAttribsUsed++;
-	if (first.isMissing(i) || second.isMissing(i) ||
-	    ((int)first.value(i) != (int)second.value(i))) {
-	  diff = 1;
-	} else {
-	  diff = 0;
-	}
-	break;
-      case Attribute.NUMERIC:
-	// If attribute is numeric
-	numAttribsUsed++;	
-	if (first.isMissing(i) || second.isMissing(i)) {
-	  if (first.isMissing(i) && second.isMissing(i)) {
-	    diff = 1;
-	  } else {
-	    if (second.isMissing(i)) {
-	      diff = norm(first.value(i),i);
-	    } else {
-	      diff = norm(second.value(i),i);
-	    }
-	    if (diff < 0.5) {
-	      diff = 1.0-diff;
-	    }
-	  }
-	} else {
-	  diff = norm(first.value(i),i) - norm(second.value(i),i);
-	}
-	break;
-      default:
-	diff = 0;
-	break;
+      if (p2 >= second.numValues()) {
+	secondI = m_Train.numAttributes();
+      } else {
+	secondI = second.index(p2);
+      }
+      if (firstI == m_Train.classIndex()) {
+	p1++; continue;
+      } 
+      if (secondI == m_Train.classIndex()) {
+	p2++; continue;
+      } 
+      double diff;
+      if (firstI == secondI) {
+	diff = difference(firstI, 
+			  first.valueSparse(p1),
+			  second.valueSparse(p2));
+	p1++; p2++;
+      } else if (firstI > secondI) {
+	diff = difference(secondI, 
+			  0, second.valueSparse(p2));
+	p2++;
+      } else {
+	diff = difference(firstI, 
+			  first.valueSparse(p1), 0);
+	p1++;
       }
       distance += diff * diff;
     }
     
-    return Math.sqrt(distance / numAttribsUsed);
+    return Math.sqrt(distance / m_NumAttributesUsed);
+  }
+   
+  /**
+   * Computes the difference between two given attribute
+   * values.
+   */
+  private double difference(int index, double val1, double val2) {
+
+    switch (m_Train.attribute(index).type()) {
+    case Attribute.NOMINAL:
+      
+      // If attribute is nominal
+      if (Instance.isMissingValue(val1) || 
+	  Instance.isMissingValue(val2) ||
+	  ((int)val1 != (int)val2)) {
+	return 1;
+      } else {
+	return 0;
+      }
+    case Attribute.NUMERIC:
+
+      // If attribute is numeric
+      if (Instance.isMissingValue(val1) || 
+	  Instance.isMissingValue(val2)) {
+	if (Instance.isMissingValue(val1) && 
+	    Instance.isMissingValue(val2)) {
+	  return 1;
+	} else {
+	  double diff;
+	  if (Instance.isMissingValue(val2)) {
+	    diff = norm(val1, index);
+	  } else {
+	    diff = norm(val2, index);
+	  }
+	  if (diff < 0.5) {
+	    diff = 1.0 - diff;
+	  }
+	  return diff;
+	}
+      } else {
+	return norm(val1, index) - norm(val2, index);
+      }
+    default:
+      return 0;
+    }
   }
 
   /**
@@ -835,9 +934,11 @@ public class IBk extends DistributionClassifier implements
    * @param x the value to be normalized
    * @param i the attribute's index
    */
-  private double norm(double x,int i) {
+  private double norm(double x, int i) {
 
-    if (Double.isNaN(m_Min[i]) || Utils.eq(m_Max[i],m_Min[i])) {
+    if (m_DontNormalize) {
+      return x;
+    } else if (Double.isNaN(m_Min[i]) || Utils.eq(m_Max[i],m_Min[i])) {
       return 0;
     } else {
       return (x - m_Min[i]) / (m_Max[i] - m_Min[i]);
@@ -1076,6 +1177,7 @@ public class IBk extends DistributionClassifier implements
     try {
       System.out.println(Evaluation.evaluateModel(new IBk(), argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
