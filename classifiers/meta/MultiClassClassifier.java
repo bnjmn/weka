@@ -32,7 +32,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -65,37 +65,23 @@ public class MultiClassClassifier extends DistributionClassifier
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }
-
-    m_ClassAttribute = insts.classAttribute();
-
-    if (!insts.classAttribute().isNominal()) {
-      throw new 
-	Exception("MultiClassClassifier needs a nominal class!");
-    }
     if (m_Classifier instanceof WeightedInstancesHandler) {
       insts = new Instances(insts);
     } else {
       insts = insts.resampleWithWeights(new Random(42));
     }     
-    insts.deleteWithMissingClass();
-    if (insts.numInstances() == 0) {
-      throw new Exception("No train instances without missing class!");
-    }
-    AttributeStats classStats = insts.attributeStats(insts.classIndex());
-    if (classStats.distinctCount == 1) {
-      throw new Exception("Only one class value found in training data!");
-    }
     m_ZeroR = new ZeroR();
     m_ZeroR.buildClassifier(insts);
 
     int numClassifiers = insts.numClasses();
-    if (numClassifiers == 2) {
+    if (numClassifiers <= 2) {
 
       m_Classifiers = Classifier.makeCopies(m_Classifier, 1);
       m_Classifiers[0].buildClassifier(insts);
 
     } else {
 
+      AttributeStats classStats = insts.attributeStats(insts.classIndex());
       m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
       m_ClassFilters = new MakeIndicatorFilter[insts.numClasses()];
       for (int i = 0; i < insts.numClasses(); i++) {
@@ -112,6 +98,7 @@ public class MultiClassClassifier extends DistributionClassifier
         }
       }
     }
+    m_ClassAttribute = insts.classAttribute();
   }
 
   /**
