@@ -66,6 +66,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees.Id3,\
  weka.classifiers.trees.j48.J48,\
  weka.classifiers.trees.m5.M5P,\
+ weka.classifiers.trees.RandomForest,\
+ weka.classifiers.trees.RandomTree,\
  weka.classifiers.trees.REPTree,\
  weka.classifiers.trees.UserClassifier,\
  weka.classifiers.rules.ConjunctiveRule,\
@@ -109,6 +111,8 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.trees.DecisionStump,\
  weka.classifiers.trees.Id3,\
  weka.classifiers.trees.j48.J48,\
+ weka.classifiers.trees.RandomForest,\
+ weka.classifiers.trees.RandomTree,\
  weka.classifiers.trees.REPTree,\
  weka.classifiers.trees.UserClassifier,\
  weka.classifiers.rules.ConjunctiveRule,\
