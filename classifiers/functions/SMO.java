@@ -81,7 +81,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -1105,12 +1105,12 @@ public class SMO extends Classifier implements OptionHandler {
   }
 
   /**
-   * Classifies a given instance
+   * Returns an array of votes for the given instance.
    * @param inst the instance
-   * @return the classification in internal format
+   * @return array of votex
    * @exception Exception if something goes wrong
    */
-  public double classifyInstance(Instance inst) throws Exception {
+  public int[] obtainVotes(Instance inst) throws Exception {
 
     // Filter instance
     if (!m_checksTurnedOff) {
@@ -1142,7 +1142,18 @@ public class SMO extends Classifier implements OptionHandler {
 	}
       }
     }
-    return Utils.maxIndex(votes);
+    return votes;
+  }
+
+  /**
+   * Classifies a given instance
+   * @param inst the instance
+   * @return the classification in internal format
+   * @exception Exception if something goes wrong
+   */
+  public double classifyInstance(Instance inst) throws Exception {
+
+    return (double)Utils.maxIndex(obtainVotes(inst));
   }
 
   /**
