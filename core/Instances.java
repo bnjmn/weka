@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 */
 public class Instances implements Serializable {
  
@@ -1309,6 +1309,106 @@ public class Instances implements Serializable {
     return variance(att.index());
   }
 
+  /**
+   * A Utility class that contains summary information on an
+   * the values that appear in a dataset for a particular attribute.
+   */
+  public class AttributeStats {    
+
+    /** The number of int-like values */
+    public int intCount = 0;
+
+    /** The number of real-like values (i.e. have a fractional part) */
+    public int realCount = 0;
+    
+    /** The number of missing values */
+    public int missingCount = 0;
+    
+    /** The number of distinct values */
+    public int distinctCount = 0;
+    
+    /** The number of values that only appear once */
+    public int uniqueCount = 0;
+    
+    /** The total number of values (i.e. number of instances) */
+    public int totalCount = 0;
+    
+    /** Stats on numeric value distributions */
+    // perhaps Stats should be moved from weka.experiment to weka.core
+    public weka.experiment.Stats numericStats;
+    
+    /** Counts of each nominal value */
+    public int [] nominalCounts;
+    
+    /**
+     * Updates the counters for one more observed distinct value.
+     *
+     * @param value the value that has just been seen
+     * @param count the number of times the value appeared
+     */
+    protected void addDistinct(double value, int count) {
+      
+      if (count > 0) {
+	if (count == 1) {
+	  uniqueCount++;
+	}
+	if (Utils.eq(value, (double)((int)value))) {
+	  intCount += count;
+	} else {
+	  realCount += count;
+	}
+	if (nominalCounts != null) {
+	  nominalCounts[(int)value] = count;
+	}
+	if (numericStats != null) {
+	  numericStats.add(value, count);
+	  numericStats.calculateDerived();
+	}
+      }
+      distinctCount++;
+    }
+  }
+  
+  /**
+   * Calculates summary statistics on the values that appear in this
+   * set of instances for a specified attribute.
+   *
+   * @param index the index of the attribute to summarize.
+   * @return an AttributeStats object with it's fields calculated.
+   */
+  public AttributeStats attributeStats(int index) {
+
+    Instances temp = new Instances(this);
+    Attribute att = temp.attribute(index);
+    AttributeStats result = new AttributeStats();
+    if (att.isNominal()) {
+      result.nominalCounts = new int [att.numValues()];
+    }
+    if (att.isNumeric()) {
+      result.numericStats = new weka.experiment.Stats();
+    }
+    result.totalCount = temp.numInstances();
+    temp.sort(index);
+    int currentCount = 0;
+    double prev = Instance.missingValue();
+    for (int j = 0; j < temp.numInstances(); j++) {
+      Instance current = temp.instance(j);
+      if (current.isMissing(index)) {
+	result.missingCount = temp.numInstances() - j;
+	break;
+      }
+      if (Utils.eq(current.value(index), prev)) {
+	currentCount++;
+      } else {
+	result.addDistinct(prev, currentCount);
+	currentCount = 1;
+	prev = current.value(index);
+      }
+    }
+    result.addDistinct(prev, currentCount);
+    result.distinctCount--; // So we don't count "missing" as a value 
+    return result;
+  }
   
   /**
    * Generates a string summarizing the set of instances. Gives a breakdown
@@ -1331,47 +1431,15 @@ public class Instances implements Serializable {
     result.append(Utils.padLeft("Missing", 12));
     result.append(Utils.padLeft("Unique", 12));
     result.append(Utils.padLeft("Dist", 6)).append('\n');
-    Instances temp = new Instances(this);
-    int total = temp.numInstances();
     for (int i = 0; i < numAttributes(); i++) {
       Attribute a = attribute(i);
-      temp.sort(i);
-      int intCount = 0, realCount = 0, missingCount = 0;
-      int distinctCount = 0, uniqueCount = 0, currentCount = 0;
-      double prev = Instance.missingValue();
-      for (int j = 0; j < temp.numInstances(); j++) {
-	Instance current = temp.instance(j);
-	if (current.isMissing(i)) {
-	  missingCount = temp.numInstances() - j;
-	  break;
+      AttributeStats as = attributeStats(i);
+      if (a.isNominal()) {
+	for (int j = 0; j < as.distinctCount; j++) {
+	  System.err.println("" + (j + 1) + ": " + as.nominalCounts[j]);
 	}
-	if (Utils.eq(current.value(i), prev)) {
-	  currentCount++;
-	} else {
-	  distinctCount++;
-	  if (currentCount == 1) {
-	    uniqueCount++;
-	  }
-	  if (currentCount > 0) {
-	    if (Utils.eq(prev, (double)((int)prev))) {
-	      intCount += currentCount;
-	    } else {
-	      realCount += currentCount;
-	    }
-	  }
-	  currentCount = 1;
-	  prev = current.value(i);
-	}
-      }
-      if (currentCount == 1) {
-	uniqueCount++;
-      }
-      if (currentCount > 0) {
-	if (Utils.eq(prev, (double)((int)prev))) {
-	  intCount += currentCount;
-	} else {
-	  realCount += currentCount;
-	}
+      } else if (a.isNumeric()) {
+	System.err.println(as.numericStats.toString());
       }
       result.append(Utils.padLeft("" + (i + 1), 4)).append(' ');
       result.append(Utils.padRight(a.name(), 25)).append(' ');
@@ -1379,44 +1447,44 @@ public class Instances implements Serializable {
       switch (a.type()) {
       case Attribute.NOMINAL:
 	result.append(Utils.padLeft("Nom", 4)).append(' ');
-	percent = Math.round(100.0 * intCount / total);
+	percent = Math.round(100.0 * as.intCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * realCount / total);
+	percent = Math.round(100.0 * as.realCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       case Attribute.NUMERIC:
 	result.append(Utils.padLeft("Num", 4)).append(' ');
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * intCount / total);
+	percent = Math.round(100.0 * as.intCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	percent = Math.round(100.0 * realCount / total);
+	percent = Math.round(100.0 * as.realCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       case Attribute.STRING:
 	result.append(Utils.padLeft("Str", 4)).append(' ');
-	percent = Math.round(100.0 * intCount / total);
+	percent = Math.round(100.0 * as.intCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * realCount / total);
+	percent = Math.round(100.0 * as.realCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       default:
 	result.append(Utils.padLeft("???", 4)).append(' ');
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * intCount / total);
+	percent = Math.round(100.0 * as.intCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	percent = Math.round(100.0 * realCount / total);
+	percent = Math.round(100.0 * as.realCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
       }
-      result.append(Utils.padLeft("" + missingCount, 5)).append(" /");
-      percent = Math.round(100.0 * missingCount / total);
+      result.append(Utils.padLeft("" + as.missingCount, 5)).append(" /");
+      percent = Math.round(100.0 * as.missingCount / as.totalCount);
       result.append(Utils.padLeft("" + percent, 3)).append("% ");
-      result.append(Utils.padLeft("" + uniqueCount, 5)).append(" /");
-      percent = Math.round(100.0 * uniqueCount / total);
+      result.append(Utils.padLeft("" + as.uniqueCount, 5)).append(" /");
+      percent = Math.round(100.0 * as.uniqueCount / as.totalCount);
       result.append(Utils.padLeft("" + percent, 3)).append("% ");
-      result.append(Utils.padLeft("" + distinctCount, 5)).append(' ');
+      result.append(Utils.padLeft("" + as.distinctCount, 5)).append(' ');
       result.append('\n');
     }
     return result.toString();

@@ -48,7 +48,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler {
   
@@ -76,6 +76,15 @@ public final class  M5Prime extends Classifier implements OptionHandler {
   /** Filter for replacing nominal attributes with numeric binary ones. */
   private NominalToBinaryFilter m_NominalToBinaryFilter;
 
+  public static final int MODEL_LINEAR_REGRESSION = Node.LINEAR_REGRESSION;
+  public static final int MODEL_REGRESSION_TREE = Node.REGRESSION_TREE;
+  public static final int MODEL_MODEL_TREE = Node.MODEL_TREE;
+  public static final Tag [] TAGS_MODEL_TYPES = {
+    new Tag(MODEL_LINEAR_REGRESSION, "Simple linear regression"),
+    new Tag(MODEL_REGRESSION_TREE, "Regression tree"),
+    new Tag(MODEL_MODEL_TREE, "Model tree")
+  };
+  
   /**
    * Construct a model tree by training instances
    *
@@ -192,15 +201,19 @@ public final class  M5Prime extends Classifier implements OptionHandler {
     String modelString = Utils.getOption('O', options);
     if (modelString.length() != 0) {
       if (modelString.equals("l"))
-	setModelType(Node.LINEAR_REGRESSION);
+	setModelType(new SelectedTag(MODEL_LINEAR_REGRESSION,
+				     TAGS_MODEL_TYPES));
       else if (modelString.equals("r"))
-	setModelType(Node.REGRESSION_TREE);
+	setModelType(new SelectedTag(MODEL_REGRESSION_TREE,
+				     TAGS_MODEL_TYPES));
       else if (modelString.equals("m"))
-	setModelType(Node.MODEL_TREE);
+	setModelType(new SelectedTag(MODEL_MODEL_TREE,
+				     TAGS_MODEL_TYPES));
       else
 	throw new Exception("Don't know model type " + modelString);
     } else {
-      setModelType(Node.MODEL_TREE);
+      setModelType(new SelectedTag(MODEL_MODEL_TREE,
+				   TAGS_MODEL_TYPES));
     }
     
     setUseUnsmoothed(Utils.getFlag('U', options));
@@ -234,16 +247,16 @@ public final class  M5Prime extends Classifier implements OptionHandler {
     int current = 0;
 
     switch (m_Model) {
-    case Node.MODEL_TREE:
+    case MODEL_MODEL_TREE:
       options[current++] = "-O"; options[current++] = "m";
       if (m_UseUnsmoothed) {
 	options[current++] = "-U";
       }
       break;
-    case Node.REGRESSION_TREE:
+    case MODEL_REGRESSION_TREE:
       options[current++] = "-O"; options[current++] = "r";
       break;
-    case Node.LINEAR_REGRESSION:
+    case MODEL_LINEAR_REGRESSION:
       options[current++] = "-O"; options[current++] = "l";
       break;
     }
@@ -371,9 +384,13 @@ public final class  M5Prime extends Classifier implements OptionHandler {
    *
    * @return Value of Model.
    */
-  public int getModelType() {
+  public SelectedTag getModelType() {
     
-    return m_Model;
+    try {
+      return new SelectedTag(m_Model, TAGS_MODEL_TYPES);
+    } catch (Exception ex) {
+      return null;
+    }
   }
   
   /**
@@ -381,9 +398,11 @@ public final class  M5Prime extends Classifier implements OptionHandler {
    *
    * @param v  Value to assign to Model.
    */
-  public void setModelType(int v) {
+  public void setModelType(SelectedTag newMethod) {
     
-    m_Model = v;
+    if (newMethod.getTags() == TAGS_MODEL_TYPES) {
+      m_Model = newMethod.getSelectedTag().getID();
+    }
   }
   
   /**
