@@ -2,7 +2,7 @@
  * Copyright 2002 University of Waikato
  */
 
-package weka.classifiers.lazy;
+package weka.classifiers.functions.supportVector;
 
 import weka.classifiers.*;
 import junit.framework.Test;
@@ -11,23 +11,23 @@ import junit.framework.TestSuite;
 import weka.core.Instances;
 
 /**
- * Tests LWR. Run from the command line with:<p>
- * java weka.classifiers.LWRTest
+ * Tests SMOreg. Run from the command line with:<p>
+ * java weka.classifiers.SMOregTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
  * @version $Revision: 1.1 $
  */
-public class LWRTest extends AbstractClassifierTest {
+public class SMOregTest extends AbstractClassifierTest {
 
-  public LWRTest(String name) { super(name);  }
+  public SMOregTest(String name) { super(name);  }
 
-  /** Creates a default LWR */
+  /** Creates a default SMOreg */
   public Classifier getClassifier() {
-    return new LWR();
+    return new SMOreg();
   }
 
   public static Test suite() {
-    return new TestSuite(LWRTest.class);
+    return new TestSuite(SMOregTest.class);
   }
 
   public static void main(String[] args){

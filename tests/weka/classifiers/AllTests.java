@@ -7,6 +7,7 @@ import weka.classifiers.misc.*;
 import weka.classifiers.lazy.*;
 import weka.classifiers.meta.*;
 import weka.classifiers.functions.*;
+import weka.classifiers.functions.supportVector.*;
 import weka.classifiers.trees.j48.*;
 import weka.classifiers.trees.m5.*;
 import weka.classifiers.rules.part.*;
@@ -24,7 +25,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AllTests extends TestSuite {
 
@@ -43,11 +44,12 @@ public class AllTests extends TestSuite {
     suite.addTest(LinearRegressionTest.suite());
     suite.addTest(LogisticTest.suite());
     suite.addTest(SMOTest.suite());
+    suite.addTest(SMOregTest.suite());
     suite.addTest(VotedPerceptronTest.suite());
     suite.addTest(WinnowTest.suite());
     suite.addTest(IB1Test.suite());
     suite.addTest(IBkTest.suite());
-    suite.addTest(LWRTest.suite());
+    suite.addTest(LWLTest.suite());
     suite.addTest(AdaBoostM1Test.suite());
     suite.addTest(AdditiveRegressionTest.suite());
     suite.addTest(AttributeSelectedClassifierTest.suite());
