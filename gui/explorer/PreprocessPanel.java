@@ -82,7 +82,7 @@ import weka.core.UnassignedClassException;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -263,7 +263,7 @@ public class PreprocessPanel extends JPanel {
 		    .createTitledBorder("Attributes in base relation"));
     m_Filters.setBorder(BorderFactory.createTitledBorder("Filters"));
     m_AttSummaryPanel.setBorder(BorderFactory
-		    .createTitledBorder("Attribute info for base relation"));
+		    .createTitledBorder("Attribute information for base relation"));
     m_Filters.setValue(new UnsupervisedFilter [0]);
     m_ReplaceBut.setEnabled(false);
     m_ApplyBut.setEnabled(false);
