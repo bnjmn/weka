@@ -39,7 +39,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler, Sourcable {
@@ -78,7 +78,13 @@ public class DecisionStump extends DistributionClassifier
     m_Instances.deleteWithMissingClass();
 
     if (m_Instances.numInstances() == 0) {
-      throw new Exception("No instances without missing class values in training file!");
+      throw new IllegalArgumentException("No instances without missing " +
+					 "class values in training file!");
+    }
+
+    if (instances.numAttributes() == 1) {
+      throw new IllegalArgumentException("Attribute missing. Need at least one " +
+					 "attribute other than class attribute!");
     }
 
     if (m_Instances.classAttribute().isNominal()) {

@@ -41,6 +41,7 @@ import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.FastVector;
 import weka.core.Range;
+import weka.core.UnsupportedClassTypeException;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
 import weka.filters.Filter;
@@ -68,7 +69,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -167,7 +168,7 @@ public class MultiClassClassifier extends DistributionClassifier
       for (int i = 0; i < numClasses; i++) {
         m_Codebits[i][i] = true;
       }
-      System.err.println("Code:\n" + this);
+      //System.err.println("Code:\n" + this);
     }
   }
 
@@ -182,7 +183,7 @@ public class MultiClassClassifier extends DistributionClassifier
         randomize();
         //System.err.println(this);
       } while (!good() && (i++ < 100));
-      System.err.println("Code:\n" + this);
+      //System.err.println("Code:\n" + this);
     }
 
     private boolean good() {
@@ -246,7 +247,7 @@ public class MultiClassClassifier extends DistributionClassifier
           m_Codebits[j][i] = ((j / skip) % 2 != 0);
         }
       }
-      System.err.println("Code:\n" + this);
+      //System.err.println("Code:\n" + this);
     }
   }
 
@@ -262,6 +263,11 @@ public class MultiClassClassifier extends DistributionClassifier
 
     Instances newInsts;
 
+    // Check for non-nominal classes
+    if (!insts.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("MultiClassClassifier: class should " +
+					      "be nominal!");
+    }
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }

@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $ 
+ * @version $Revision: 1.45 $ 
  */
 public class Instances implements Serializable {
  
@@ -884,6 +884,9 @@ public class Instances implements Serializable {
       throw new IllegalArgumentException("weights.length != numInstances.");
     }
     Instances newData = new Instances(this, numInstances());
+    if (numInstances() == 0) {
+      return newData;
+    }
     double[] probabilities = new double[numInstances()];
     double sumProbs = 0, sumOfWeights = Utils.sum(weights);
     for (int i = 0; i < numInstances(); i++) {

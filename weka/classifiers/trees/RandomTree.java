@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RandomTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -241,7 +241,7 @@ public class RandomTree extends DistributionClassifier
 
     // Check for non-nominal classes
     if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Nominal class, please.");
+      throw new UnsupportedClassTypeException("RandomTree: Nominal class, please.");
     }
 
     // Delete instances with missing class
@@ -249,7 +249,13 @@ public class RandomTree extends DistributionClassifier
     data.deleteWithMissingClass();
 
     if (data.numInstances() == 0) {
-      throw new Exception("No instances without missing class values in training file!");
+      throw new IllegalArgumentException("RandomTree: zero training instances or all " +
+					 "instances have missing class!");
+    }
+
+    if (data.numAttributes() == 1) {
+      throw new IllegalArgumentException("RandomTree: Attribute missing. Need at least " +
+					 "one attribute other than class attribute!");
     }
 
     Instances train = data;
