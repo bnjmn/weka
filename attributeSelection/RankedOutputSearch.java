@@ -15,7 +15,7 @@ import weka.core.*;
  * ranked list of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision 1.1 $
+ * @version $Revision: 1.6 $
  */
 public interface RankedOutputSearch {
 
