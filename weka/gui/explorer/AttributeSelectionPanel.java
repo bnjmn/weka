@@ -43,8 +43,7 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
 import weka.gui.SaveBuffer;
 import weka.gui.FileEditor;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.*;
 
 import java.util.Random;
 import java.util.Date;
@@ -109,7 +108,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -182,9 +181,6 @@ public class AttributeSelectionPanel extends JPanel {
  /** Stop the class combo from taking up to much space */
   private Dimension COMBO_SIZE = new Dimension(150, m_StartBut
 					       .getPreferredSize().height);
-
-  /** The current visualization object */
-  protected VisualizePanel m_CurrentVis = null;
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -558,6 +554,9 @@ public class AttributeSelectionPanel extends JPanel {
 	  } else {
 	    name += (" + "+ename);
 	  }
+
+	  AttributeSelection eval = null;
+
 	  try {
 	    if (m_CVBut.isSelected()) {
 	      testMode = 1;
@@ -614,7 +613,7 @@ public class AttributeSelectionPanel extends JPanel {
 	    m_Log.statusMessage("Doing feature selection...");
 	    m_History.updateResult(name);
 	    
-	    AttributeSelection eval = new AttributeSelection();
+	    eval = new AttributeSelection();
 	    eval.setEvaluator(evaluator);
 	    eval.setSearch(search);
 	    eval.setFolds(numFolds);
@@ -665,27 +664,26 @@ public class AttributeSelectionPanel extends JPanel {
 	    m_Log.statusMessage("See error log");
 	  } finally {
 	    if (evaluator instanceof AttributeTransformer) {
-	      m_CurrentVis = new VisualizePanel();
 	      try {
 		Instances transformed = 
 		  ((AttributeTransformer)evaluator).transformedData();
+		transformed.
+		  setRelationName("AT: "+transformed.relationName());
 
-		PlotData2D tempd = new PlotData2D(transformed);
-		tempd.setPlotName(name+" ("+transformed.relationName()+")");
-		tempd.addInstanceNumberAttribute();
-		m_CurrentVis.setLog(m_Log);
-		try {
-		  m_CurrentVis.addPlot(tempd);
-		  m_CurrentVis.setColourIndex(transformed.classIndex()+1);
-		} catch (Exception ex) {
-		  ex.printStackTrace();
-		}
-		m_CurrentVis.setName(name+" ("+transformed.relationName()+")");
 		FastVector vv = new FastVector();
-		vv.addElement(m_CurrentVis);
+		vv.addElement(transformed);
 		m_History.addObject(name, vv);
 	      } catch (Exception ex) {
 		System.err.println(ex);
+		ex.printStackTrace();
+	      }
+	    } else if (testMode == 0) {
+	      try {
+		Instances reducedInst = eval.reduceDimensionality(inst);
+		FastVector vv = new FastVector();
+		vv.addElement(reducedInst);
+		m_History.addObject(name, vv);
+	      } catch (Exception ex) {
 		ex.printStackTrace();
 	      }
 	    }
@@ -736,17 +734,19 @@ public class AttributeSelectionPanel extends JPanel {
 
   /**
    * Popup a visualize panel for viewing transformed data
-   * @param sp the VisualizePanel to display
+   * @param sp the Instances to display
    */
-  protected void visualizeTransformedData(VisualizePanel sp) {
-    if (sp != null) {
-      String plotName = sp.getName();
+  protected void visualizeTransformedData(Instances ti) {
+    if (ti != null) {
+      MatrixPanel mp = new MatrixPanel();
+      mp.setInstances(ti);
+      String plotName = ti.relationName();
       final javax.swing.JFrame jf = 
 	new javax.swing.JFrame("Weka Attribute Selection Visualize: "
 			       +plotName);
-      jf.setSize(500,400);
+      jf.setSize(800,600);
       jf.getContentPane().setLayout(new BorderLayout());
-      jf.getContentPane().add(sp, BorderLayout.CENTER);
+      jf.getContentPane().add(mp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
 	    jf.dispose();
@@ -804,37 +804,51 @@ public class AttributeSelectionPanel extends JPanel {
     }
     resultListMenu.add(saveOutput);
     
-    resultListMenu.addSeparator();
 
     FastVector o = null;
     if (selectedName != null) {
       o = (FastVector)m_History.getNamedObject(selectedName);
     }    
 
-    VisualizePanel temp_vp = null;
-     
+    //    VisualizePanel temp_vp = null;
+    Instances tempTransformed = null;
+
     if (o != null) {
       for (int i = 0; i < o.size(); i++) {
 	Object temp = o.elementAt(i);
-	if (temp instanceof VisualizePanel) {
-	  temp_vp = (VisualizePanel)temp;
+	//	if (temp instanceof VisualizePanel) {
+	if (temp instanceof Instances) {
+	  //	  temp_vp = (VisualizePanel)temp;
+	  tempTransformed = (Instances) temp;
 	} 
       }
     }
     
-    final VisualizePanel vp = temp_vp;
+    //    final VisualizePanel vp = temp_vp;
+    final Instances ti = tempTransformed;
+    JMenuItem visTrans = null;
     
-    JMenuItem visTrans = new JMenuItem("Visualize transformed data");
-    if (vp != null) {
+    if (ti != null) {
+      if (ti.relationName().startsWith("AT:")) {
+	visTrans = new JMenuItem("Visualize transformed data");
+      } else {
+	visTrans = new JMenuItem("Visualize reduced data");
+      }
+      resultListMenu.addSeparator();
+    }
+
+    //    JMenuItem visTrans = new JMenuItem("Visualize transformed data");
+    if (ti != null && visTrans != null) {
       visTrans.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
-	    visualizeTransformedData(vp);
+	    visualizeTransformedData(ti);
 	  }
 	});
-    } else {
-      visTrans.setEnabled(false);
     }
-    resultListMenu.add(visTrans);
+     
+    if (visTrans != null) {
+      resultListMenu.add(visTrans);
+    }
     
     resultListMenu.show(m_History.getList(), x, y);
   }
