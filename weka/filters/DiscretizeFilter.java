@@ -56,7 +56,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -1022,9 +1022,8 @@ public class DiscretizeFilter extends Filter
    */
   protected void convertInstance(Instance instance) throws Exception {
 
-    Instance newInstance = new Instance(outputFormatPeek().numAttributes());
     int index = 0;
-
+    double [] newVals = new double [outputFormatPeek().numAttributes()];
     // Copy and convert the values
     for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
       if (m_DiscretizeCols.isInRange(i) && 
@@ -1033,45 +1032,44 @@ public class DiscretizeFilter extends Filter
 	double currentVal = instance.value(i);
 	if (m_CutPoints[i] == null) {
 	  if (instance.isMissing(i)) {
-	    newInstance.setMissing(index);
+	    newVals[index] = Instance.missingValue();
 	  } else {
-	    newInstance.setValue(index, 0);
+	    newVals[index] = 0;
 	  }
 	  index++;
 	} else {
 	  if (!m_MakeBinary) {
 	    if (instance.isMissing(i)) {
-	      newInstance.setMissing(index);
+	      newVals[index] = Instance.missingValue();
 	    } else {
 	      for (j = 0; j < m_CutPoints[i].length; j++) {
 		if (currentVal <= m_CutPoints[i][j]) {
 		  break;
 		}
 	      }
-	      newInstance.setValue(index, j);
+              newVals[index] = j;
 	    }
 	    index++;
 	  } else {
 	    for (j = 0; j < m_CutPoints[i].length; j++) {
 	      if (instance.isMissing(i)) {
-		newInstance.setMissing(index);
+                newVals[index] = Instance.missingValue();
 	      } else if (currentVal <= m_CutPoints[i][j]) {
-		newInstance.setValue(index, 0);
+                newVals[index] = 0;
 	      } else {
-		newInstance.setValue(index, 1);
+                newVals[index] = 1;
 	      }
 	      index++;
 	    }
 	  }   
 	}
       } else {
-	newInstance.setValue(index, instance.value(i));
+        newVals[index] = instance.value(i);
 	index++;
       }
     }
-    newInstance.setWeight(instance.weight());
     
-    push(newInstance);
+    push(new Instance(instance.weight(), newVals));
   }
 
   /**
