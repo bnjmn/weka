@@ -68,7 +68,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class MultiClassClassifier extends Classifier 
   implements OptionHandler {
@@ -313,9 +313,14 @@ public class MultiClassClassifier extends Classifier
 	tempInstances.setClassIndex(-1);
 	classFilter.setInputFormat(tempInstances);
 	newInsts = Filter.useFilter(insts, classFilter);
-	newInsts.setClassIndex(insts.classIndex());
-	m_Classifiers[i].buildClassifier(newInsts);
-	m_ClassFilters[i] = classFilter;
+	if (newInsts.numInstances() > 0) {
+	  newInsts.setClassIndex(insts.classIndex());
+	  m_Classifiers[i].buildClassifier(newInsts);
+	  m_ClassFilters[i] = classFilter;
+	} else {
+	  m_Classifiers[i] = null;
+	  m_ClassFilters[i] = null;
+	}
       }
 
       // construct a two-class header version of the dataset
@@ -429,7 +434,7 @@ public class MultiClassClassifier extends Classifier
 	  range.setUpper(m_ClassAttribute.numValues());
 	  int[] pair = range.getSelection();
 	  if (current[0] > current[1]) probs[pair[0]] += 1.0;
-	  else if (current[1] > current[0]) probs[pair[1]] += 1.0;
+	  else probs[pair[1]] += 1.0;
 	}
       }
     } else {
