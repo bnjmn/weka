@@ -39,7 +39,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -248,6 +248,16 @@ public class LinearRegression extends Classifier implements OptionHandler,
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Get the number of coefficients used in the model
+   *
+   * @return the number of coefficients
+   */
+  public int numParameters()
+  {
+    return m_Coefficients.length-1;
   }
 
   /**
