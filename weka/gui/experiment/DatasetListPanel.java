@@ -24,11 +24,13 @@
 package weka.gui.experiment;
 
 import weka.core.Instances;
+import weka.core.RTSI;
 import weka.experiment.Experiment;
 
 import weka.gui.ExtensionFileFilter;
 import java.io.File;
 import java.util.Vector;
+import java.util.Collections;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -60,7 +62,7 @@ import javax.swing.JCheckBox;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.13.4.1 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -276,6 +278,11 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	    if (selected[i].isDirectory()) {
 	      Vector files = new Vector();
 	      getFilesRecursively(selected[i], files);
+    
+	      // sort the result
+	      RTSI r = new RTSI();
+	      Collections.sort(files, r.new StringCompare());
+
 	      for (int j = 0; j < files.size(); j++) {
 		File temp = (File)files.elementAt(j);
 		if (useRelativePaths) {
@@ -304,6 +311,11 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	  if (m_FileChooser.getSelectedFile().isDirectory()) {
 	    Vector files = new Vector();
 	    getFilesRecursively(m_FileChooser.getSelectedFile(), files);
+    
+	    // sort the result
+	    RTSI r = new RTSI();
+	    Collections.sort(files, r.new StringCompare());
+
 	    for (int j = 0; j < files.size(); j++) {
 	      File temp = (File)files.elementAt(j);
 	      if (useRelativePaths) {

@@ -89,7 +89,7 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.3 $ 
+ * @version $Revision: 1.1.2.4 $ 
  */
 public class XMLSerialization {
    /** the tag for an object */
@@ -143,6 +143,10 @@ public class XMLSerialization {
    
    /** for handling custom read/write methods */
    protected XMLSerializationMethodHandler m_CustomMethods = null;
+
+   /** for overriding class names (Class &lt;-&gt; Classname (String)) 
+    * @see #overrideClassname(Class) */
+   protected Hashtable m_ClassnameOverride = null;
    
    /**
     * initializes the serialization
@@ -163,8 +167,15 @@ public class XMLSerialization {
       m_Document.setValidating(true);
       m_Document.newDocument(DOCTYPE, ROOT_NODE);
       
-      m_Properties    = new PropertyHandler();
-      m_CustomMethods = new XMLSerializationMethodHandler(this);
+      m_Properties        = new PropertyHandler();
+      m_CustomMethods     = new XMLSerializationMethodHandler(this);
+
+      m_ClassnameOverride = new Hashtable();
+      // java.io.File is sometimes represented as another class:
+      // - Win32: sun.awt.shell.Win32ShellFolder2 
+      // - Linux: sun.awt.shell.DefaultShellFolder
+      // -> we set it to "java.io.File"
+      m_ClassnameOverride.put(java.io.File.class, java.io.File.class.getName());
       
       setVersion(Version.VERSION); 
    }
@@ -331,6 +342,39 @@ public class XMLSerialization {
    }
    
    /**
+    * if the class of the given object (or one of its ancestors) is stored in 
+    * the classname override hashtable, then the override name is returned 
+    * otherwise the classname of the given object.<br>
+    * <b>Note:</b> does not work with Arays that have zero length! The 
+    * problem here is that we can't get an object reference to determine
+    * the class from.
+    * 
+    * @param o          the object to check for overriding its classname
+    * @return           if overridden then the classname stored in the hashtable,
+    *                   otherwise the classname of the given object
+    * @see              #m_ClassnameOverride
+    */
+   protected String overrideClassname(Object o) {
+      Enumeration    enm;
+      String         result;
+      Class          currentCls;
+     
+      result = o.getClass().getName();
+
+      // check overrides
+      enm    = m_ClassnameOverride.keys();
+      while (enm.hasMoreElements()) {
+         currentCls = (Class) enm.nextElement();
+         if (currentCls.isInstance(o)) {
+           result = (String) m_ClassnameOverride.get(currentCls);
+           break;
+         }
+      }
+      
+      return result;
+   }
+   
+   /**
     * returns a property descriptor if possible, otherwise <code>null</code>
     * 
     * @param className the name of the class to get the descriptor for
@@ -373,10 +417,16 @@ public class XMLSerialization {
       boolean              primitive;
       boolean              array;
       int                  i;
+      Object               obj;
+      
+      // used for overriding the classname
+      obj = null;
       
       // get information about object
       array = o.getClass().isArray();
       if (array) {
+         if (Array.getLength(o) > 0)
+           obj = Array.get(o, 0);
          classname = o.getClass().getComponentType().getName();
          primitive = o.getClass().getComponentType().isPrimitive(); 
       }
@@ -395,10 +445,13 @@ public class XMLSerialization {
          // for primitives: retrieve primitive type, otherwise the object's real 
          // class. For non-primitives we can't use the descriptor, since that
          // might only return an interface as class!
-         if (primitive)
+         if (primitive) {
             classname = desc.getPropertyType().getName();
-         else
+         }
+         else {
+            obj       = o;
             classname = o.getClass().getName();
+         }
       }
       
       // fix class/primitive if parent is array of primitives, thanks to 
@@ -410,6 +463,10 @@ public class XMLSerialization {
          classname = parent.getAttribute(ATT_CLASS);
       }
 
+      // we need to override the classname
+      if (obj != null)
+        classname = overrideClassname(obj);
+      
       // create node for current object
       node = addElement(parent, name, classname, primitive, array);
       

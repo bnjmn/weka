@@ -72,7 +72,7 @@ import weka.core.Option;
  * Produce comparison tables in csv format <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22.2.1 $
+ * @version $Revision: 1.22.2.2 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -1138,7 +1138,8 @@ public class PairedTTester implements OptionHandler {
     
     // how many "0" to add? -> determine current precision digits
     if (res.indexOf(".") == -1) {
-      res += ".";
+      if (b > 0)
+        res += ".";
       precision = 0;
     }
     else {
@@ -1229,13 +1230,13 @@ public class PairedTTester implements OptionHandler {
         result.append(Utils.padLeft('(' + Utils.doubleToString(pairedStats.count, 0) + ')', 5))
               .append(' ');
         if (!m_ShowStdDevs) {
-	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
+	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 1 + m_MeanPrec, m_MeanPrec);
         } else {
-          tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
+          tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 1 + m_MeanPrec, m_MeanPrec);
           if (Double.isInfinite(pairedStats.xStats.stdDev)) {
-            tmpStr += '(' + Utils.padRight("Inf", maxWidthStdDev + 3) +')';
+            tmpStr += '(' + Utils.padRight("Inf", maxWidthStdDev + 1 + m_StdDevPrec) +')';
           } else {
-            tmpStr += '(' + padIt(pairedStats.xStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + ')';
+            tmpStr += '(' + padIt(pairedStats.xStats.stdDev, maxWidthStdDev + 1 + m_StdDevPrec, m_StdDevPrec) + ')';
           }
         }
         result.append(Utils.padLeft(tmpStr, resultsetLength - 2)).append(" | ");

@@ -57,7 +57,7 @@ import java.util.Vector;
  * @see StringCompare
  * @author <a href="mailto:daniel@satlive.org">Daniel Le Berre</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.3 $
+ * @version $Revision: 1.2.2.4 $
  */
 public class RTSI {
   /** whether to output some debug information */
@@ -398,7 +398,7 @@ public class RTSI {
    *    <li>special chars &lt; numbers &lt; letters</li>
    * </ul>
    */
-  protected class StringCompare implements Comparator {
+  public class StringCompare implements Comparator {
     /**
      * appends blanks to the string if its shorter than <code>len</code>
      */
