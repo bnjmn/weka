@@ -111,7 +111,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.33 $
+ * @version  $Revision: 1.34 $
   */
 public class Evaluation implements Summarizable {
 
@@ -624,7 +624,7 @@ public class Evaluation implements Summarizable {
            +" weka.classifiers.CostSensitiveClassifier or"
            +" weka.classifiers.MetaCost");
 	try {
-	  costReader = new FileReader(costFileName);
+	  costReader = new BufferedReader(new FileReader(costFileName));
 	} catch (Exception e) {
 	  throw new Exception("Can't open file " + e.getMessage() + '.');
 	}
@@ -637,7 +637,7 @@ public class Evaluation implements Summarizable {
 	    //System.err.println("Attempting to read old format cost file");
 	    try {
 	      costReader.close(); // Close the old one
-	      costReader = new FileReader(costFileName);
+	      costReader = new BufferedReader(new FileReader(costFileName));
 	    } catch (Exception e) {
 	      throw new Exception("Can't open file " + e.getMessage() + '.');
 	    }
