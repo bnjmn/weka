@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -145,44 +145,38 @@ public class SimpleKMeans extends Clusterer
       updateMinMax(instances.instance(i));
     }
 
+    Instances tempInst = new Instances(instances);
     Random RandomO = new Random(m_Seed);
-    boolean [] selected = new boolean[instances.numInstances()];
     int instIndex;
     HashMap initC = new HashMap();
     DecisionTable.hashKey hk = null;
-    //    String hk = null;
     boolean centroidSearchBailOut = false;
     int i;
     int centroidCount = 0;
     for (i = 0; i < m_NumClusters; i++) {
       do {
-	instIndex = RandomO.nextInt(instances.numInstances());
-		hk = new DecisionTable.hashKey(instances.instance(instIndex), 
-		instances.numAttributes());
-	// hk = instances.instance(instIndex).toString();
+	instIndex = RandomO.nextInt(tempInst.numInstances());
+	hk = new DecisionTable.hashKey(tempInst.instance(instIndex), 
+				       tempInst.numAttributes());
 	if (initC.containsKey(hk)) {
-	//	if (initC.containsValue(instances.instance(instIndex))) {
-	  if (!selected[instIndex]) {
-	    centroidCount++;
-	    selected[instIndex] = true;
-	  }
+	  centroidCount++;
 	}
-      } while (selected[instIndex] && centroidCount < instances.numInstances());
+      } while (initC.containsKey(hk) && 
+	       centroidCount < instances.numInstances());
 
       if (centroidCount >= instances.numInstances()) {
 	// bail out and set the number of requested clusters to i
 	centroidSearchBailOut = true;
 	break;
       }
-      m_ClusterCentroids.add(instances.instance(instIndex));
+      m_ClusterCentroids.add(tempInst.instance(instIndex));
       initC.put(hk, null);
-      selected[instIndex] = true;
       centroidCount++;
     }
-    selected = null;
     if (centroidSearchBailOut) {
       m_NumClusters = i;
     }
+    tempInst = null;
 
     boolean converged = false;
     int emptyClusterCount;
@@ -200,7 +194,6 @@ public class SimpleKMeans extends Clusterer
 	  converged = false;
 	}
 	clusterAssignments[i] = newC;
-	//	System.out.println(newC);
       }
       
       // update centroids
