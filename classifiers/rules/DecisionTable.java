@@ -57,7 +57,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
  */
 public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
@@ -248,7 +248,7 @@ public class DecisionTable extends Classifier
   /**
    * Class providing keys to the hash table
    */
-  public class hashKey implements Serializable {
+  public static class hashKey implements Serializable {
     
     /** Array of attribute values for an instance */
     private double [] attributes;
