@@ -81,7 +81,7 @@ import weka.filters.unsupervised.attribute.*;
  * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $ */
+ * @version $Revision: 1.30 $ */
 public class Logistic extends Classifier 
     implements OptionHandler, WeightedInstancesHandler {
   
@@ -279,18 +279,23 @@ public class Logistic extends Classifier
 	    
 	    for(int i=0; i<cls.length; i++){ // ith instance
 
-		double[] exp = new double[m_NumClasses-1];
+	        double[] exp = new double[m_NumClasses-1];
+		int index;
 		for(int offset=0; offset<m_NumClasses-1; offset++){ 
+		    index = offset * dim;
 		    for(int j=0; j<dim; j++)
-			exp[offset] += m_Data[i][j]*x[offset*dim+j];
+			exp[offset] += m_Data[i][j]*x[index + j];
 		}
 		double max = exp[Utils.maxIndex(exp)];
 		double denom = Math.exp(-max);
-		double num = -max;
+		double num;
+		if (cls[i] == m_NumClasses - 1) { // Class of this instance
+		  num = -max;
+		} else {
+		  num = exp[cls[i]] - max;
+		}
 		for(int offset=0; offset<m_NumClasses-1; offset++){
 		    denom += Math.exp(exp[offset] - max);
-		    if(cls[i] == offset)     // Class of this instance
-			num = exp[offset] - max;
 		}
 		
 		nll -= weights[i]*(num - Math.log(denom)); // Weighted NLL
@@ -304,7 +309,7 @@ public class Logistic extends Classifier
 	    
 	    return nll;
 	}
-	
+
 	/** 
 	 * Evaluate Jacobian vector
 	 * @param x the current values of variables
@@ -315,11 +320,13 @@ public class Logistic extends Classifier
 	    int dim = m_NumPredictors+1; // Number of variables per class
 	    
 	    for(int i=0; i<cls.length; i++){ // ith instance
-		double[] num=new double[m_NumClasses-1]; // numerator of [-log(1+sum(exp))]'
+	        double[] num=new double[m_NumClasses-1]; // numerator of [-log(1+sum(exp))]'
+		int index;
 		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
-		    double exp=0.0;		    
+		    double exp=0.0;
+		    index = offset * dim;
 		    for(int j=0; j<dim; j++)
-			exp += m_Data[i][j]*x[offset*dim+j];
+			exp += m_Data[i][j]*x[index + j];
 		    num[offset] = exp;
 		}
 
@@ -332,9 +339,12 @@ public class Logistic extends Classifier
 		Utils.normalize(num, denom);
 		
 		// Update denominator of the gradient of -log(Posterior)
+		double firstTerm;
 		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
+		    index = offset * dim;
+		    firstTerm = weights[i] * num[offset];
 		    for(int q=0; q<dim; q++){
-			grad[offset*dim+q] += weights[i]*num[offset]*m_Data[i][q];
+			grad[index + q] += firstTerm * m_Data[i][q];
 		    }
 		}
 		
@@ -459,7 +469,7 @@ public class Logistic extends Classifier
 				   );
 	}
 	
-	// Normalise input data and remove ignored attributes
+	// Normalise input data 
 	for (int i = 0; i < nC; i++) {
 	    for (int j = 0; j <= nR; j++) {
 		if (xSD[j] != 0) {
