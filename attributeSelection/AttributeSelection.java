@@ -75,9 +75,9 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.7 $
+ * @version  $Revision: 1.8 $
  */
-public class AttributeSelection {
+public class AttributeSelection implements Serializable {
 
   /** the instances to select attributes from */
   private Instances m_trainInstances;
@@ -228,7 +228,7 @@ public class AttributeSelection {
     setRanking(false);
     setXval(false);
     setSeed(1);
-    setThreshold(-Double.MAX_VALUE);
+    //    m_threshold = -Double.MAX_VALUE;
     setEvaluator(new CfsSubsetEval());
     setSearch(new BestFirst());
     m_selectionResults = new StringBuffer();
@@ -464,7 +464,11 @@ public class AttributeSelection {
 
     if (m_ASEvaluator instanceof AttributeEvaluator &&
 	!(m_searchMethod instanceof Ranker)) {
-      m_searchMethod = new Ranker();
+      //      System.err.println("AttributeEvaluators must use a Ranker search "
+      //			 +"method. Switching to Ranker...");
+      //      m_searchMethod = new Ranker();
+      throw new Exception("AttributeEvaluators must use a Ranker search "
+			  + "method");
     }
 
     if (m_doRank && !(m_searchMethod instanceof RankedOutputSearch)) {
@@ -472,12 +476,6 @@ public class AttributeSelection {
 			  +"is not capable of ranking attributes");
     }
     
-    if (m_threshold != -Double.MAX_VALUE 
-	&& !(m_searchMethod instanceof RankedOutputSearch)) {
-      throw  new Exception("can't use a cutoff with a non ranking " 
-			   + "search method.\n");
-    }
-
     if (m_ASEvaluator instanceof UnsupervisedAttributeEvaluator ||
 	m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
       // unset the class index
@@ -503,14 +501,22 @@ public class AttributeSelection {
 					 m_trainInstances);
     // Do any postprocessing that a attribute selection method might require
     attributeSet = m_ASEvaluator.postProcess(attributeSet);
-    m_selectionResults.append(printSelectionResults(m_ASEvaluator, 
-						    m_searchMethod, 
-						    m_trainInstances));
+    if (!m_doRank) {
+      m_selectionResults.append(printSelectionResults(m_ASEvaluator, 
+						      m_searchMethod, 
+						      m_trainInstances));
+    }
     
     if ((m_searchMethod instanceof RankedOutputSearch) && m_doRank == true) {
       m_attributeRanking = 
 	((RankedOutputSearch)m_searchMethod).rankedAttributes();
+      m_selectionResults.append(printSelectionResults(m_ASEvaluator, 
+						       m_searchMethod, 
+						       m_trainInstances));
       m_selectionResults.append("Ranked attributes:\n");
+
+      // retrieve the threshold by which to select attributes
+      m_threshold = ((RankedOutputSearch)m_searchMethod).getThreshold();
 
       for (int i = 0; i < m_attributeRanking.length; i++) {
 	if (m_attributeRanking[i][1] > m_threshold) {
@@ -660,7 +666,13 @@ public class AttributeSelection {
       classString = Utils.getOption('C', options);
 
       if (classString.length() != 0) {
-	classIndex = Integer.parseInt(classString);
+	if (classString.equals("first")) {
+	  classIndex = 1;
+	} else if (classString.equals("last")) {
+	  classIndex = train.numAttributes();
+	} else {
+	  classIndex = Integer.parseInt(classString);
+	}
       }
 
       if ((classIndex != -1) && 
@@ -710,13 +722,7 @@ public class AttributeSelection {
 	throw  new Exception("No search method given.");
       }
 
-      if ((searchName.length() != 0) 
-	  && (ASEvaluator instanceof AttributeEvaluator)) {
-	throw  new Exception("Can't specify search method for " 
-			     + "attribute evaluators.");
-      }
-
-      if (!(ASEvaluator instanceof AttributeEvaluator)) {
+      if (searchName.length() != 0) {
 	searchName = searchName.trim();
 	// split off any search options
 	int breakLoc = searchName.indexOf(' ');
@@ -753,22 +759,6 @@ public class AttributeSelection {
 
       // set the search method
       trainSelector.setSearch(searchMethod);
-
-      cutString = Utils.getOption('T', options);
-
-      if (cutString.length() != 0) {
-	Double temp;
-	temp = Double.valueOf(cutString);
-	cutoff = temp.doubleValue();
-      }
-
-      if (cutoff != -Double.MAX_VALUE 
-	  && !(searchMethod instanceof RankedOutputSearch)) {
-	throw  new Exception("can't use a cutoff with a non ranking " 
-			     + "search method.\n");
-      }
-      
-      trainSelector.setThreshold(cutoff);
 
       rangeString = Utils.getOption('P', options);
 
@@ -907,12 +897,6 @@ public class AttributeSelection {
     optionsText.append("-R\n");
     optionsText.append("\tProduce a attribute ranking if the specified\n");
     optionsText.append("\tsearch method is capable of doing so.\n");
-    optionsText.append("-T <cutoff>\n");
-    optionsText.append("\tThreshold by which to discard attributes\n");
-    optionsText.append("\tfor attribute evaluators\n");
-    optionsText.append("\tfrom a ranked list " 
-		       + "(use with attribute evaluators\n");
-    optionsText.append("\tand ranked search.\n");
     optionsText.append("-X <number of folds>\n");
     optionsText.append("\tPerform a cross validation.\n");
     optionsText.append("-N <random number seed>\n");
