@@ -16,7 +16,7 @@
 
 /*
  *    LogitBoost.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999, 2002 Len Trigg, Eibe Frank
  *
  */
 
@@ -64,16 +64,29 @@ import weka.core.*;
  * Set the percentage of weight mass used to build classifiers
  * (default 100). <p>
  *
+ * -F num <br>
+ * Set number of folds for the internal cross-validation
+ * (default 0 -- no cross-validation). <p>
+ *
+ * -R num <br>
+ * Set number of runs for the internal cross-validation
+ * (default 1). <p>
+ *
+ * -L num <br> 
+ * Set the threshold for the improvement of the
+ * average loglikelihood (default -Double.MAX_VALUE). <p>
+ *
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.21 $ 
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
 
   // To maintain the same version number after adding m_ClassAttribute
-  static final long serialVersionUID = -217733168393629381L;
+  static final long serialVersionUID = -2177331683936258888L;
 
   /** Array for storing the generated base classifiers. */
   protected Classifier [][] m_Classifiers;
@@ -90,17 +103,20 @@ public class LogitBoost extends DistributionClassifier
   /** The number of successfully generated base classifiers. */
   protected int m_NumIterations;
 
+  /** The number of folds for the internal cross-validation. */
+  protected int m_NumFolds = 0;
+
+  /** The number of runs for the internal cross-validation. */
+  protected int m_NumRuns = 1;
+
   /** Weight thresholding. The percentage of weight mass used in training */
   protected int m_WeightThreshold = 100;
 
   /** Debugging mode, gives extra output if true */
   protected boolean m_Debug;
 
-  /** A very small number, below which weights cannot fall */
-  protected static final double VERY_SMALL = 2 * Double.MIN_VALUE;
-
   /** A threshold for responses (Friedman suggests between 2 and 4) */
-  protected static final double Z_MAX = 4;
+  protected static final double Z_MAX = 3;
 
   /** Dummy dataset with a numeric class */
   protected Instances m_NumericClassData;
@@ -113,6 +129,16 @@ public class LogitBoost extends DistributionClassifier
   
   /** Seed for boosting with resampling. */
   protected int m_Seed = 1;
+
+  /** The threshold on the improvement of the likelihood */   
+  protected double m_Precision = -Double.MAX_VALUE;
+
+  /** The random number generator used */
+  protected Random m_RandomInstance = null;
+
+  /** The value by which the actual target value for the
+      true class is offset. */
+  protected double m_Offset = 0.0;
 
   /**
    * Select only instances with weights that contribute to 
@@ -157,34 +183,13 @@ public class LogitBoost extends DistributionClassifier
   }
 
   /**
-   * Convert from function responses to probabilities
-   *
-   * @param R an array containing the responses from each function
-   * @param j the class value of interest
-   * @return the probability prediction for j
-   */
-  protected static double RtoP(double []R, int j) {
-
-    double Rcenter = 0;
-    for (int i = 0; i < R.length; i++) {
-      Rcenter += R[i];
-    }
-    Rcenter /= R.length;
-    double Rsum = 0;
-    for (int i = 0; i < R.length; i++) {
-      Rsum += Math.exp(R[i] - Rcenter);
-    }
-   return Math.exp(R[j]) / Rsum;
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(9);
 
     newVector.addElement(new Option(
 	      "\tTurn on debugging output.",
@@ -207,6 +212,18 @@ public class LogitBoost extends DistributionClassifier
 	      "\tFull name of 'weak' learner to boost.\n"
 	      +"\teg: weka.classifiers.trees.DecisionStump",
 	      "W", 1, "-W <learner class name>"));
+    newVector.addElement(new Option(
+	      "\tNumber of folds for internal cross-validation.\n"
+	      +"\t(default 0 -- no cross-validation)",
+	      "F", 1, "-F <num>"));
+    newVector.addElement(new Option(
+	      "\tNumber of runs for internal cross-validation.\n"
+	      +"\t(default 1)",
+	      "R", 1, "-R <num>"));
+    newVector.addElement(new Option(
+	      "\tThreshold on the improvement of the likelihood.\n"
+	      +"\t(default -Double.MAX_VALUE)",
+	      "T", 1, "-L <num>"));
 
     if ((m_Classifier != null) &&
 	(m_Classifier instanceof OptionHandler)) {
@@ -245,6 +262,18 @@ public class LogitBoost extends DistributionClassifier
    * Set the percentage of weight mass used to build classifiers
    * (default 100). <p>
    *
+   * -F num <br>
+   * Set number of folds for the internal cross-validation
+   * (default 0 -- no cross-validation). <p>
+   *
+   * -R num <br>
+   * Set number of runs for the internal cross-validation
+   * (default 1. <p>
+   *
+   * -L num <br> 
+   * Set the threshold for the improvement of the
+   * average loglikelihood (default -Double.MAX_VALUE). <p>
+   *
    * Options after -- are passed to the designated learner.<p>
    *
    * @param options the list of options as an array of strings
@@ -260,12 +289,34 @@ public class LogitBoost extends DistributionClassifier
     } else {
       setMaxIterations(10);
     }
+    
+    String numFolds = Utils.getOption('F', options);
+    if (numFolds.length() != 0) {
+      setNumFolds(Integer.parseInt(numFolds));
+    } else {
+      setNumFolds(0);
+    }
+    
+    String numRuns = Utils.getOption('R', options);
+    if (numRuns.length() != 0) {
+      setNumRuns(Integer.parseInt(numRuns));
+    } else {
+      setNumRuns(1);
+    }
 
     String thresholdString = Utils.getOption('P', options);
     if (thresholdString.length() != 0) {
       setWeightThreshold(Integer.parseInt(thresholdString));
     } else {
       setWeightThreshold(100);
+    }
+
+    String precisionString = Utils.getOption('L', options);
+    if (precisionString.length() != 0) {
+      setLikelihoodThreshold(new Double(precisionString).
+	doubleValue());
+    } else {
+      setLikelihoodThreshold(-Double.MAX_VALUE);
     }
 
     setUseResampling(Utils.getFlag('Q', options));
@@ -303,7 +354,7 @@ public class LogitBoost extends DistributionClassifier
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
 
-    String [] options = new String [classifierOptions.length + 9];
+    String [] options = new String [classifierOptions.length + 15];
     int current = 0;
     if (getDebug()) {
       options[current++] = "-D";
@@ -316,6 +367,9 @@ public class LogitBoost extends DistributionClassifier
       options[current++] = "" + getWeightThreshold();
     }
     options[current++] = "-I"; options[current++] = "" + getMaxIterations();
+    options[current++] = "-F"; options[current++] = "" + getNumFolds();
+    options[current++] = "-R"; options[current++] = "" + getNumRuns();
+    options[current++] = "-L"; options[current++] = "" + getLikelihoodThreshold();
 
     if (getClassifier() != null) {
       options[current++] = "-W";
@@ -331,7 +385,67 @@ public class LogitBoost extends DistributionClassifier
     }
     return options;
   }
-
+  
+  /**
+   * Get the value of Precision.
+   *
+   * @return Value of Precision.
+   */
+  public double getLikelihoodThreshold() {
+    
+    return m_Precision;
+  }
+  
+  /**
+   * Set the value of Precision.
+   *
+   * @param newPrecision Value to assign to Precision.
+   */
+  public void setLikelihoodThreshold(double newPrecision) {
+    
+    m_Precision = newPrecision;
+  }
+  
+  /**
+   * Get the value of NumRuns.
+   *
+   * @return Value of NumRuns.
+   */
+  public int getNumRuns() {
+    
+    return m_NumRuns;
+  }
+  
+  /**
+   * Set the value of NumRuns.
+   *
+   * @param newNumRuns Value to assign to NumRuns.
+   */
+  public void setNumRuns(int newNumRuns) {
+    
+    m_NumRuns = newNumRuns;
+  }
+  
+  /**
+   * Get the value of NumFolds.
+   *
+   * @return Value of NumFolds.
+   */
+  public int getNumFolds() {
+    
+    return m_NumFolds;
+  }
+  
+  /**
+   * Set the value of NumFolds.
+   *
+   * @param newNumFolds Value to assign to NumFolds.
+   */
+  public void setNumFolds(int newNumFolds) {
+    
+    m_NumFolds = newNumFolds;
+  }
+  
   /**
    * Set resampling mode
    *
@@ -456,16 +570,11 @@ public class LogitBoost extends DistributionClassifier
   }
 
   /**
-   * Boosting method. Boosts any classifier that can handle weighted
-   * instances.
-   *
-   * @param data the training data to be used for generating the
-   * boosted classifier.
-   * @exception Exception if the classifier could not be built successfully
+   * Builds the boosted classifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    Random randomInstance = new Random(m_Seed);
+    m_RandomInstance = new Random(m_Seed);
     Instances boostData, trainData;
     int classIndex = data.classIndex();
 
@@ -490,111 +599,284 @@ public class LogitBoost extends DistributionClassifier
     m_NumClasses = data.numClasses();
     m_ClassAttribute = data.classAttribute();
 
-    // Create a copy of the data with the class transformed into numeric
-    boostData = new Instances(data);
-    boostData.deleteWithMissingClass();
-    int numInstances = boostData.numInstances();
-
-    // Temporarily unset the class index
-    boostData.setClassIndex(-1);
-    boostData.deleteAttributeAt(classIndex);
-    boostData.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
-    boostData.setClassIndex(classIndex);
-    m_NumericClassData = new Instances(boostData, 0);
-    double [][] trainFs = new double [numInstances][m_NumClasses];
-    double [][] trainYs = new double [numInstances][m_NumClasses];
-    for (int j = 0; j < m_NumClasses; j++) {
-      for (int i = 0, k = 0; i < numInstances; i++, k++) {
-	while (data.instance(k).classIsMissing()) k++;
-	trainYs[i][j] = (data.instance(k).classValue() == j) ? 1 : 0;
-      }
-    }
+    // Create a copy of the data 
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
+    // Create the base classifiers
     if (m_Debug) {
       System.err.println("Creating base classifiers");
     }
-
-    // Create the base classifiers
     m_Classifiers = new Classifier [m_NumClasses][];
     for (int j = 0; j < m_NumClasses; j++) {
       m_Classifiers[j] = Classifier.makeCopies(m_Classifier,
 					       getMaxIterations());
     }
 
-    // Do boostrap iterations
-    for (m_NumIterations = 0; m_NumIterations < getMaxIterations(); 
-	 m_NumIterations++) {
+    // Do we want to select the appropriate number of iterations
+    // using cross-validation?
+    int bestNumIterations = getMaxIterations();
+    if (m_NumFolds > 1) {
       if (m_Debug) {
-	System.err.println("Training classifier " + (m_NumIterations + 1));
+	System.err.println("Processing first fold.");
+      }
+
+      // Array for storing the results
+      double[] results = new double[getMaxIterations()];
+
+      // Iterate throught the cv-runs
+      for (int r = 0; r < m_NumRuns; r++) {
+
+	// Stratify the data
+	data.randomize(m_RandomInstance);
+	data.stratify(m_NumFolds);
+	
+	// Perform the cross-validation
+	for (int i = 0; i < m_NumFolds; i++) {
+	  
+	  // Get train and test folds
+	  Instances train = data.trainCV(m_NumFolds, i);
+	  Instances test = data.testCV(m_NumFolds, i);
+	  
+	  // Make class numeric
+	  Instances trainN = new Instances(train);
+	  trainN.setClassIndex(-1);
+	  trainN.deleteAttributeAt(classIndex);
+	  trainN.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
+	  trainN.setClassIndex(classIndex);
+	  m_NumericClassData = new Instances(trainN, 0);
+	  
+	  // Get class values
+	  int numInstances = train.numInstances();
+	  double [][] trainFs = new double [numInstances][m_NumClasses];
+	  double [][] trainYs = new double [numInstances][m_NumClasses];
+	  for (int j = 0; j < m_NumClasses; j++) {
+	    for (int k = 0; k < numInstances; k++) {
+	      trainYs[k][j] = (train.instance(k).classValue() == j) ? 
+		1.0 - m_Offset: 0.0 + (m_Offset / (double)m_NumClasses);
+	    }
+	  }
+	  
+	  // Perform iterations
+	  double[][] probs = initialProbs(numInstances);
+	  m_NumIterations = 0;
+	  for (int j = 0; j < getMaxIterations(); j++) {
+	    performIteration(trainYs, trainFs, probs, trainN);
+	    Evaluation eval = new Evaluation(train);
+	    eval.evaluateModel(this, test);
+	    results[j] += eval.correct();
+	  }
+	}
       }
       
-      for (int j = 0; j < m_NumClasses; j++) {
-	if (m_Debug) {
-	  System.err.println("\t...for class " + (j + 1)
-			     + " (" + m_ClassAttribute.name() 
-			     + "=" + m_ClassAttribute.value(j) + ")");
+      // Find the number of iterations with the lowest error
+      double bestResult = -Double.MAX_VALUE;
+      for (int j = 0; j < getMaxIterations(); j++) {
+	if (results[j] > bestResult) {
+	  bestResult = results[j];
+	  bestNumIterations = j;
 	}
+      }
+      if (m_Debug) {
+	System.err.println("Best result for " + 
+			   bestNumIterations + " iterations: " +
+			   bestResult);
+      }
+    }
 
-	// Set instance pseudoclass and weights
-	for (int i = 0; i < numInstances; i++) {
-	  double p = RtoP(trainFs[i], j);
-	  Instance current = boostData.instance(i);
-	  double z, actual = trainYs[i][j];
-	  if (actual == 1) {
-	    z = 1.0 / p;
-	    if (z > Z_MAX) { // threshold
-	      z = Z_MAX;
-	    }
-	  } else if (actual == 0) {
-	    z = -1.0 / (1.0 - p);
-	    if (z < -Z_MAX) { // threshold
-	      z = -Z_MAX;
-	    }
-	  } else {
-	    z = (actual - p) / (p * (1 - p));
-	  }
-	  double w = Math.max(p * (1 - p), VERY_SMALL);
-	  current.setValue(classIndex, z);
-	  current.setWeight(numInstances * w);
-	}
-
-	// Select instances to train the classifier on
-	if (m_WeightThreshold < 100) {
-	  trainData = selectWeightQuantile(boostData, 
-					   (double)m_WeightThreshold/100);
-	} else {
-	  trainData = new Instances(boostData,0,numInstances);
-	  if (m_UseResampling) {
-	     double[] weights = new double[boostData.numInstances()];
-	     for (int kk = 0; kk < weights.length; kk++) {
-	       weights[kk] = boostData.instance(kk).weight();
-	     }
-	     trainData = boostData.resampleWithWeights(randomInstance, 
-						       weights);
-	  }
-	}
-      
-	// Build the classifier
-	m_Classifiers[j][m_NumIterations].buildClassifier(trainData);
-      }      
-
-      // Evaluate / increment trainFs from the classifier
-      for (int i = 0; i < numInstances; i++) {
-	double [] pred = new double [m_NumClasses];
-	double predSum = 0;
-	for (int j = 0; j < m_NumClasses; j++) {
-	  pred[j] = m_Classifiers[j][m_NumIterations]
-	    .classifyInstance(boostData.instance(i));
-	  predSum += pred[j];
-	}
-	predSum /= m_NumClasses;
-	for (int j = 0; j < m_NumClasses; j++) {
-	  trainFs[i][j] += (pred[j] - predSum) * (m_NumClasses-1) 
-	    / m_NumClasses;
-	}
+    // Build classifier on all the data
+    int numInstances = data.numInstances();
+    double [][] trainFs = new double [numInstances][m_NumClasses];
+    double [][] trainYs = new double [numInstances][m_NumClasses];
+    for (int j = 0; j < m_NumClasses; j++) {
+      for (int i = 0, k = 0; i < numInstances; i++, k++) {
+	trainYs[i][j] = (data.instance(k).classValue() == j) ? 
+	  1.0 - m_Offset: 0.0 + (m_Offset / (double)m_NumClasses);
+      }
+    }
+    
+    // Make class numeric
+    data.setClassIndex(-1);
+    data.deleteAttributeAt(classIndex);
+    data.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
+    data.setClassIndex(classIndex);
+    m_NumericClassData = new Instances(data, 0);
+	
+    // Perform iterations
+    double[][] probs = initialProbs(numInstances);
+    double logLikelihood = logLikelihood(trainYs, probs);
+    m_NumIterations = 0;
+    if (m_Debug) {
+      System.err.println("Avg. log-likelihood: " + logLikelihood);
+    }
+    for (int j = 0; j < bestNumIterations; j++) {
+      double previousLoglikelihood = logLikelihood;
+      performIteration(trainYs, trainFs, probs, data);
+      logLikelihood = logLikelihood(trainYs, probs);
+      if (m_Debug) {
+	System.err.println("Avg. log-likelihood: " + logLikelihood);
+      }
+      if (Math.abs(previousLoglikelihood - logLikelihood) < m_Precision) {
+	return;
       }
     }
   }
 
+  /**
+   * Gets the intial class probabilities.
+   */
+  private double[][] initialProbs(int numInstances) {
+
+    double[][] probs = new double[numInstances][m_NumClasses];
+    for (int i = 0; i < numInstances; i++) {
+      for (int j = 0 ; j < m_NumClasses; j++) {
+	probs[i][j] = 1.0 / m_NumClasses;
+      }
+    }
+    return probs;
+  }
+
+  /**
+   * Computes loglikelihood given class values
+   * and estimated probablities.
+   */
+  private double logLikelihood(double[][] trainYs, double[][] probs) {
+
+    double logLikelihood = 0;
+    for (int i = 0; i < trainYs.length; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+	if (trainYs[i][j] == 1.0 - m_Offset) {
+	  logLikelihood -= Math.log(probs[i][j]);
+	}
+      }
+    }
+    return logLikelihood / (double)trainYs.length;
+  }
+
+  /**
+   * Performs one boosting iteration.
+   */
+  private void performIteration(double[][] trainYs,
+				double[][] trainFs,
+				double[][] probs,
+				Instances boostData) throws Exception {
+
+    if (m_Debug) {
+      System.err.println("Training classifier " + (m_NumIterations + 1));
+    }
+    
+    // Build the new models
+    for (int j = 0; j < m_NumClasses; j++) {
+      if (m_Debug) {
+	System.err.println("\t...for class " + (j + 1)
+			   + " (" + m_ClassAttribute.name() 
+			   + "=" + m_ClassAttribute.value(j) + ")");
+      }
+      
+      // Set instance pseudoclass and weights
+      for (int i = 0; i < probs.length; i++) {
+
+	// Compute response and weight
+	double p = probs[i][j];
+	double z, actual = trainYs[i][j];
+	if (actual == 1 - m_Offset) {
+	  z = 1.0 / p;
+	  if (z > Z_MAX) { // threshold
+	    z = Z_MAX;
+	  }
+	} else {
+	  z = -1.0 / (1.0 - p);
+	  if (z < -Z_MAX) { // threshold
+	    z = -Z_MAX;
+	  }
+	}
+	double w = (actual - p) / z;
+
+	// Set values for instance
+	Instance current = boostData.instance(i);
+	current.setValue(boostData.classIndex(), z);
+	current.setWeight(/*trainYs.length **/ w);
+      }
+      
+      // Select instances to train the classifier on
+      Instances trainData = boostData;
+      if (m_WeightThreshold < 100) {
+	trainData = selectWeightQuantile(boostData, 
+					 (double)m_WeightThreshold / 100);
+      } else {
+	if (m_UseResampling) {
+	  double[] weights = new double[boostData.numInstances()];
+	  for (int kk = 0; kk < weights.length; kk++) {
+	    weights[kk] = boostData.instance(kk).weight();
+	  }
+	  trainData = boostData.resampleWithWeights(m_RandomInstance, 
+						    weights);
+	}
+      }
+      
+      // Build the classifier
+      m_Classifiers[j][m_NumIterations].buildClassifier(trainData);
+    }      
+    
+    // Evaluate / increment trainFs from the classifier
+    for (int i = 0; i < trainFs.length; i++) {
+      double [] pred = new double [m_NumClasses];
+      double predSum = 0;
+      for (int j = 0; j < m_NumClasses; j++) {
+	pred[j] = m_Classifiers[j][m_NumIterations]
+	  .classifyInstance(boostData.instance(i));
+	predSum += pred[j];
+      }
+      predSum /= m_NumClasses;
+      for (int j = 0; j < m_NumClasses; j++) {
+	trainFs[i][j] += (pred[j] - predSum) * (m_NumClasses - 1) 
+	  / m_NumClasses;
+      }
+    }
+    m_NumIterations++;
+    
+    // Compute the current probability estimates
+    for (int i = 0; i < trainYs.length; i++) {
+      probs[i] = probs(trainFs[i]);
+    }
+  }
+
+  /**
+   * Returns the array of classifiers that have been built.
+   */
+  public Classifier[][] classifiers() {
+
+    Classifier[][] classifiers = 
+      new Classifier[m_NumClasses][m_NumIterations];
+    for (int j = 0; j < m_NumClasses; j++) {
+      for (int i = 0; i < m_NumIterations; i++) {
+	classifiers[j][i] = m_Classifiers[j][i];
+      }
+    }
+    return classifiers;
+  }
+
+  /**
+   * Computes probabilities from F scores
+   */
+  private double[] probs(double[] Fs) {
+
+    double maxF = -Double.MAX_VALUE;
+    for (int i = 0; i < Fs.length; i++) {
+      if (Fs[i] > maxF) {
+	maxF = Fs[i];
+      }
+    }
+    double sum = 0;
+    double[] probs = new double[Fs.length];
+    for (int i = 0; i < Fs.length; i++) {
+      probs[i] = Math.exp(Fs[i] - maxF);
+      sum += probs[i];
+    }
+    Utils.normalize(probs, sum);
+    return probs;
+  }
+    
   /**
    * Calculates the class membership probabilities for the given test instance.
    *
@@ -608,25 +890,22 @@ public class LogitBoost extends DistributionClassifier
 
     instance = (Instance)instance.copy();
     instance.setDataset(m_NumericClassData);
+    double [] pred = new double [m_NumClasses];
     double [] Fs = new double [m_NumClasses]; 
     for (int i = 0; i < m_NumIterations; i++) {
-      double [] Fi = new double [m_NumClasses];
-      double Fsum = 0;
+      double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	Fi[j] = m_Classifiers[j][i].classifyInstance(instance);
-	Fsum += Fi[j];
+	pred[j] = m_Classifiers[j][i].classifyInstance(instance);
+	predSum += pred[j];
       }
-      Fsum /= m_NumClasses;
+      predSum /= m_NumClasses;
       for (int j = 0; j < m_NumClasses; j++) {
-	Fs[j] += (Fi[j] - Fsum) * (m_NumClasses - 1) / m_NumClasses;
+	Fs[j] += (pred[j] - predSum) * (m_NumClasses - 1) 
+	  / m_NumClasses;
       }
     }
-    double [] distribution = new double [m_NumClasses];
-    for (int j = 0; j < m_NumClasses; j++) {
-      distribution[j] = RtoP(Fs, j);
-    }
-    Utils.normalize(distribution);
-    return distribution;
+
+    return probs(Fs);
   }
 
   /**
@@ -739,6 +1018,7 @@ public class LogitBoost extends DistributionClassifier
     try {
       System.out.println(Evaluation.evaluateModel(new LogitBoost(), argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
