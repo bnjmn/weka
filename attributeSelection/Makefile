@@ -8,7 +8,7 @@ SOURCES = ASEvaluation.java ASSearch.java AttributeEvaluator.java \
 	  SymmetricalUncertAttributeEval.java  \
 	  UnsupervisedAttributeEvaluator.java \
 	  UnsupervisedSubsetEvaluator.java WrapperSubsetEval.java \
-	  ReliefFAttributeEval.java
+	  ReliefFAttributeEval.java ForwardSelection.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
