@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -943,7 +943,7 @@ public class DecisionTable
    *
    * @param ibk true if IBk is to be used
    */
-  public void set_useIBk(boolean ibk) {
+  public void setUseIBk(boolean ibk) {
 
     m_useIBk = ibk;
   }
@@ -953,7 +953,7 @@ public class DecisionTable
    *
    * @return true if IBk is being used
    */
-  public boolean get_useIBk() {
+  public boolean getUseIBk() {
 
     return m_useIBk;
   }
@@ -963,7 +963,7 @@ public class DecisionTable
    *
    * @param rules true if rules are to be printed
    */
-  public void set_displayRules(boolean rules) {
+  public void setDisplayRules(boolean rules) {
 
     m_displayRules = rules;
   }
@@ -973,7 +973,7 @@ public class DecisionTable
    *
    * @return true if rules are being printed
    */
-  public boolean get_displayRules() {
+  public boolean getDisplayRules() {
 
     return m_displayRules;
   }

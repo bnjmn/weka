@@ -34,22 +34,19 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
 
   /** The classifiers. (One for each class.) */
-  private DistributionClassifier[] m_Classifiers;
+  private Classifier [] m_Classifiers;
 
   /** The filters used to transform the class. */
   private MakeIndicatorFilter[] m_ClassFilters;
 
-  /** The options for the base classifiers. */
-  private String[] m_Options;
-
   /** The class name of the base classifier. */
-  private String m_BaseClassifier;
+  private Classifier m_Classifier = new weka.classifiers.ZeroR();
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
@@ -64,15 +61,14 @@ public class MultiClassClassifier extends DistributionClassifier
 
     Instances newInsts;
 
-    if (m_BaseClassifier == null) {
+    if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }
     if (!insts.classAttribute().isNominal()) {
       throw new 
 	Exception("MultiClassClassifier needs a nominal class!");
     }
-    if (Class.forName(m_BaseClassifier).newInstance() instanceof 
-	WeightedInstancesHandler) {
+    if (m_Classifier instanceof WeightedInstancesHandler) {
 
       // Base classifier can handle weights
       insts = new Instances(insts);
@@ -97,16 +93,9 @@ public class MultiClassClassifier extends DistributionClassifier
     }
     m_ZeroR = new ZeroR();
     m_ZeroR.buildClassifier(insts);
-    m_Classifiers = new DistributionClassifier[insts.numClasses()];
+    m_Classifiers = Classifier.makeCopies(m_Classifier, insts.numClasses());
     m_ClassFilters = new MakeIndicatorFilter[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
-      m_Classifiers[i] = (DistributionClassifier)Class.
-	forName(m_BaseClassifier).newInstance();
-      if (m_Classifiers[i] instanceof OptionHandler) {
-	String[] copy = new String[m_Options.length];
-	System.arraycopy(m_Options, 0, copy, 0, m_Options.length);
-	((OptionHandler)m_Classifiers[i]).setOptions(copy);
-      }
       m_ClassFilters[i] = new MakeIndicatorFilter();
       m_ClassFilters[i].setAttributeIndex(insts.classIndex());
       m_ClassFilters[i].setValueIndex(i);
@@ -130,7 +119,8 @@ public class MultiClassClassifier extends DistributionClassifier
     for (int i = 0; i < inst.numClasses(); i++) {
       m_ClassFilters[i].input(inst);
       newInst = m_ClassFilters[i].output();
-      probs[i] = m_Classifiers[i].distributionForInstance(newInst)[1];
+      probs[i] = ((DistributionClassifier)m_Classifiers[i])
+	.distributionForInstance(newInst)[1];
     }
     if (Utils.gr(Utils.sum(probs), 0)) {
       Utils.normalize(probs);
@@ -167,13 +157,12 @@ public class MultiClassClassifier extends DistributionClassifier
     vec.addElement(new Option("\tSets the base classifier.",
 			      "W", 1, "-W <base classifier>"));
     
-    if (m_BaseClassifier != null) {
+    if (m_Classifier != null) {
       try {
-	c = Class.forName(m_BaseClassifier).newInstance();
 	vec.addElement(new Option("",
 				  "", 0, "\nOptions specific to weak learner "
-				  + c.getClass().getName() + ":"));
-	Enumeration enum = ((OptionHandler)c).listOptions();
+				  + m_Classifier.getClass().getName() + ":"));
+	Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
 	while (enum.hasMoreElements()) {
 	  vec.addElement(enum.nextElement());
 	}
@@ -195,23 +184,13 @@ public class MultiClassClassifier extends DistributionClassifier
    */
   public void setOptions(String[] options) throws Exception {
   
-    m_BaseClassifier = Utils.getOption('W', options);
-    if (m_BaseClassifier.length() == 0) {
-      throw new Exception("A 'base' learner must be specified "+
-			  "with the -W option.");
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A classifier must be specified with"
+			  + " the -W option.");
     }
-      
-    // Set the options for the base classifier
-    Classifier c = (Classifier)Class.forName(m_BaseClassifier).newInstance();
-    if ((c != null) &&
-	(c instanceof OptionHandler)) {
-      m_Options = Utils.partitionOptions(options);
-      String [] tempOptions = (String [])m_Options.clone();
-      ((OptionHandler)c).setOptions(tempOptions);
-      Utils.checkForRemainingOptions(tempOptions);
-    } else {
-      m_Options = null;
-    }
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -222,25 +201,16 @@ public class MultiClassClassifier extends DistributionClassifier
   public String [] getOptions() {
     
     String [] classifierOptions = new String [0];
-    if (m_BaseClassifier != null) {
-      try {
-	Classifier c = (Classifier)Class.forName(m_BaseClassifier)
-	  .newInstance();
-	if (c instanceof OptionHandler) {
-	  if (m_Options != null) {
-	    ((OptionHandler)c).setOptions((String [])m_Options.clone());
-	  }
-	  classifierOptions = ((OptionHandler)c).getOptions();
-	}
-      } catch (Exception ex) {
-	;
-      }
+    if ((m_Classifier != null) &&
+	(m_Classifier instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
     String [] options = new String [classifierOptions.length + 3];
     int current = 0;
 
-    if (m_BaseClassifier != null) {
-      options[current++] = "-W"; options[current++] = m_BaseClassifier;
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
 
@@ -254,25 +224,25 @@ public class MultiClassClassifier extends DistributionClassifier
   }
 
   /**
-   * Sets the base learner.
+   * Set the classifier for boosting. 
    *
-   * @param learnerName the full class name of the learner
-   * @exception Exception if learnerName is not a valid class name
+   * @param newClassifier the Classifier to use.
    */
-  public void setBaseLearner(String learnerName) throws Exception {
+  public void setClassifier(Classifier newClassifier) {
 
-    m_BaseClassifier = learnerName;
+    m_Classifier = newClassifier;
   }
 
   /**
-   * Gets the name of the base learner
+   * Get the classifier used as the classifier
    *
-   * @return the full class name of the weak learner
+   * @return the classifier used as the classifier
    */
-  public String getBaseLearner() {
+  public Classifier getClassifier() {
 
-    return m_BaseClassifier;
+    return m_Classifier;
   }
+
 
   /**
    * Main method for testing this class.

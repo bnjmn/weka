@@ -36,7 +36,7 @@ import weka.core.*;
  * Turn on debugging output.<p>
  *
  * -W classname <br>
- * Specify the full class name of learner to perform cross-validation
+ * Specify the full class name of classifier to perform cross-validation
  * selection on.<p>
  *
  * -X num <br>
@@ -46,18 +46,18 @@ import weka.core.*;
  * Random number seed (default 1).<p>
  *
  * -P "N 1 5 10" <br>
- * Sets an optimisation parameter for the learner with name -N,
+ * Sets an optimisation parameter for the classifier with name -N,
  * lower bound 1, upper bound 5, and 10 optimisation steps.
  * The upper bound may be the character 'A' or 'I' to substitute 
  * the number of attributes or instances in the training data,
  * respectively.
  * This parameter may be supplied more than once to optimise over
- * several learner options simultaneously. <p>
+ * several classifier options simultaneously. <p>
  *
- * Options after -- are passed to the designated sub-learner. <p>
+ * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -84,10 +84,10 @@ public class CVParameterSelection extends Classifier
     private double m_ParamValue; 
 
     /**  True if the parameter should be added at the end of the argument list */
-    private boolean b_AddAtEnd;  
+    private boolean m_AddAtEnd;  
 
     /**  True if the parameter should be rounded to an integer */
-    private boolean b_RoundParam;
+    private boolean m_RoundParam;
 
     /**
      * Constructs a CVParameter.
@@ -132,7 +132,7 @@ public class CVParameterSelection extends Classifier
       m_Steps = st.nval;
       if (st.nextToken() == StreamTokenizer.TT_WORD) {
 	if (st.sval.toUpperCase().charAt(0) == 'R') {
-	  b_RoundParam = true;
+	  m_RoundParam = true;
 	}
       }
     }
@@ -155,7 +155,7 @@ public class CVParameterSelection extends Classifier
 	break;
       }
       result += " " + m_Steps;
-      if (b_RoundParam) {
+      if (m_RoundParam) {
 	result += " R";
       }
       return result;
@@ -163,7 +163,7 @@ public class CVParameterSelection extends Classifier
   }
 
   /** The generated base classifier */
-  protected Classifier m_Classifier;
+  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
 
   /**
    * The base classifier options (not including those being set
@@ -190,7 +190,7 @@ public class CVParameterSelection extends Classifier
   protected int m_Seed = 1;
 
   /** Debugging mode, gives extra output if true */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
   /**
    * Create the options array to pass to the classifier. The parameter
@@ -209,10 +209,10 @@ public class CVParameterSelection extends Classifier
     for (int i = 0; i < m_CVParams.size(); i++) {
       CVParameter cvParam = (CVParameter)m_CVParams.elementAt(i);
       double paramValue = cvParam.m_ParamValue;
-      if (cvParam.b_RoundParam) {
+      if (cvParam.m_RoundParam) {
 	paramValue = (double)((int) (paramValue + 0.5));
       }
-      if (cvParam.b_AddAtEnd) {
+      if (cvParam.m_AddAtEnd) {
 	options[--end] = "" + 
 	Utils.doubleToString(paramValue,4);
 	options[--end] = "-" + cvParam.m_ParamChar;
@@ -231,7 +231,11 @@ public class CVParameterSelection extends Classifier
   }
 
   /**
-   * Finds the best parameter.
+   * Finds the best parameter combination. (recursive for each parameter
+   * being optimised).
+   *
+   * @param depth the index of the parameter to be optimised at this level
+   * @exception Exception if an error occurs
    */
   protected void findParamsByCrossValidation(int depth) throws Exception {
 
@@ -262,7 +266,7 @@ public class CVParameterSelection extends Classifier
 
       // Set the classifier options
       String [] options = createOptions();
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.print("Setting options for " 
 			 + m_Classifier.getClass().getName() + ":");
 	for (int i = 0; i < options.length; i++) {
@@ -279,7 +283,7 @@ public class CVParameterSelection extends Classifier
 	evaluation.evaluateModel(m_Classifier, test);
       }
       double error = evaluation.errorRate();
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("Cross-validated error rate: " 
 			   + Utils.doubleToString(error, 6, 4));
       }
@@ -304,23 +308,23 @@ public class CVParameterSelection extends Classifier
 	      "\tTurn on debugging output.",
 	      "D", 0, "-D"));
     newVector.addElement(new Option(
-	      "\tFull name of learner to perform parameter selection on.\n"
+	      "\tFull name of classifier to perform parameter selection on.\n"
 	      + "\teg: weka.classifiers.NaiveBayes",
-	      "W", 1, "-W <learner class name>"));
+	      "W", 1, "-W <classifier class name>"));
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation (default 10).",
 	      "X", 1, "-X <number of folds>"));
     newVector.addElement(new Option(
-	      "\tLearner parameter options.\n"
+	      "\tClassifier parameter options.\n"
 	      + "\teg: \"N 1 5 10\" Sets an optimisation parameter for the\n"
-	      + "\tlearner with name -N, with lower bound 1, upper bound 5,\n"
-	      + "\tand 10 optimisation steps. The upper bound may be the\n"
+	      + "\tclassifier with name -N, with lower bound 1, upper bound\n"
+	      + "\t5, and 10 optimisation steps. The upper bound may be the\n"
 	      + "\tcharacter 'A' or 'I' to substitute the number of\n"
 	      + "\tattributes or instances in the training data,\n"
 	      + "\trespectively. This parameter may be supplied more than\n"
-	      + "\tonce to optimise over several learner options\n"
+	      + "\tonce to optimise over several classifier options\n"
 	      + "\tsimultaneously.",
-	      "P", 1, "-P <learner parameter>"));
+	      "P", 1, "-P <classifier parameter>"));
     newVector.addElement(new Option(
 	      "\tSets the random number seed (default 1).",
 	      "S", 1, "-S <random number seed>"));
@@ -329,9 +333,9 @@ public class CVParameterSelection extends Classifier
 	(m_Classifier instanceof OptionHandler)) {
       newVector.addElement(new Option("",
 	        "", 0,
-		"\nOptions specific to sub-learner "
+		"\nOptions specific to sub-classifier "
 	        + m_Classifier.getClass().getName()
-		+ ":\n(use -- to signal start of sub-learner options)"));
+		+ ":\n(use -- to signal start of sub-classifier options)"));
       Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
       while (enum.hasMoreElements()) {
 	newVector.addElement(enum.nextElement());
@@ -348,7 +352,7 @@ public class CVParameterSelection extends Classifier
    * Turn on debugging output.<p>
    *
    * -W classname <br>
-   * Specify the full class name of learner to perform cross-validation
+   * Specify the full class name of classifier to perform cross-validation
    * selection on.<p>
    *
    * -X num <br>
@@ -358,15 +362,15 @@ public class CVParameterSelection extends Classifier
    * Random number seed (default 1).<p>
    *
    * -P "N 1 5 10" <br>
-   * Sets an optimisation parameter for the learner with name -N,
+   * Sets an optimisation parameter for the classifier with name -N,
    * lower bound 1, upper bound 5, and 10 optimisation steps.
    * The upper bound may be the character 'A' or 'I' to substitute 
    * the number of attributes or instances in the training data,
    * respectively.
    * This parameter may be supplied more than once to optimise over
-   * several learner options simultaneously. <p>
+   * several classifier options simultaneously. <p>
    *
-   * Options after -- are passed to the designated sub-learner. <p>
+   * Options after -- are passed to the designated sub-classifier. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -374,11 +378,6 @@ public class CVParameterSelection extends Classifier
   public void setOptions(String[] options) throws Exception {
     
     setDebug(Utils.getFlag('D', options));
-
-    String learnerString = Utils.getOption('W', options);
-    if (learnerString.length() == 0) {
-      throw new Exception("A base learner must be given with the -W option.");
-    }
 
     String foldsString = Utils.getOption('X', options);
     if (foldsString.length() != 0) {
@@ -394,8 +393,6 @@ public class CVParameterSelection extends Classifier
       setSeed(1);
     }
 
-    setBaseLearner(learnerString);
-
     String cvParam;
     m_CVParams = new FastVector();
     do {
@@ -409,16 +406,15 @@ public class CVParameterSelection extends Classifier
 			  + " the -P option.");
     }
 
-    // Set the options for the classifier
-    if (m_Classifier != null) {
-      if (m_Classifier instanceof OptionHandler) {
-	m_ClassifierOptions = Utils.partitionOptions(options);
-	String [] classifierOptions = (String [])m_ClassifierOptions.clone();
-	((OptionHandler)m_Classifier).setOptions(classifierOptions);
-	Utils.checkForRemainingOptions(classifierOptions);
-      } else {
-	throw new Exception("Base classifier must accept options");
-      }
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A classifier must be specified with"
+			  + " the -W option.");
+    }
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
+    if (!(m_Classifier instanceof OptionHandler)) {
+      throw new Exception("Base classifier must accept options");
     }
   }
 
@@ -450,8 +446,9 @@ public class CVParameterSelection extends Classifier
     options[current++] = "-X"; options[current++] = "" + getNumFolds();
     options[current++] = "-S"; options[current++] = "" + getSeed();
 
-    if (getBaseLearner() != null) {
-      options[current++] = "-W"; options[current++] = getBaseLearner();
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
 
@@ -490,6 +487,13 @@ public class CVParameterSelection extends Classifier
     m_BestPerformance = -99;
     m_BestClassifierOptions = null;
 
+    // Set up m_ClassifierOptions -- take getOptions() and remove
+    // those being optimised.
+    m_ClassifierOptions = ((OptionHandler)m_Classifier).getOptions();
+    for (int i = 0; i < m_CVParams.size(); i++) {
+      Utils.getOption(((CVParameter)m_CVParams.elementAt(i)).m_ParamChar,
+		      m_ClassifierOptions);
+    }
     findParamsByCrossValidation(0);
 
     String [] options = (String [])m_BestClassifierOptions.clone();
@@ -560,41 +564,13 @@ public class CVParameterSelection extends Classifier
   }
 
   /**
-   * Sets the base learner for cross-validation.
-   *
-   * @param learnerName the full class name of the learner
-   * @exception Exception if learnerName is not a valid class name
-   */
-  public void setBaseLearner(String learnerName) throws Exception {
-
-    try {
-      m_Classifier = (Classifier)Class.forName(learnerName).newInstance();
-    } catch (Exception ex) {
-      throw new Exception("Can't find Classifier with class name: "
-			  + learnerName);
-    }
-  }
-
-  /**
-   * Gets the name of the base learner
-   *
-   * @return the full class name of the weak learner
-   */
-  public String getBaseLearner() {
-
-    if (m_Classifier == null)
-      return null;
-    return m_Classifier.getClass().getName();
-  }
-
-  /**
    * Sets debugging mode
    *
    * @param debug true if debug output should be printed
    */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
 
   /**
@@ -604,7 +580,7 @@ public class CVParameterSelection extends Classifier
    */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
   /**
@@ -626,7 +602,28 @@ public class CVParameterSelection extends Classifier
     
     m_NumFolds = newNumFolds;
   }
-  
+
+  /**
+   * Set the classifier for boosting. 
+   *
+   * @param newClassifier the Classifier to use.
+   */
+  public void setClassifier(Classifier newClassifier) {
+
+    m_Classifier = newClassifier;
+  }
+
+  /**
+   * Get the classifier used as the classifier
+   *
+   * @return the classifier used as the classifier
+   */
+  public Classifier getClassifier() {
+
+    return m_Classifier;
+  }
+
+ 
   /**
    * Returns description of the cross-validated classifier.
    *
@@ -662,21 +659,16 @@ public class CVParameterSelection extends Classifier
     } catch (Exception ex) {
       result += ex.getMessage();
     }
-    result += "Classifier Options:";
-    for (int i = 0; i < m_BestClassifierOptions.length; i++) {
-      result  += " " + m_BestClassifierOptions[i];
-      
-    }
-    result += "\n\n" + m_Classifier.toString();
+    result += "Classifier Options: "
+      + Utils.joinOptions(m_BestClassifierOptions)
+      + "\n\n" + m_Classifier.toString();
     return result;
   }
 
   public String toSummaryString() {
 
-    String result = "Selected values:";
-    for (int i = 0; i < m_BestClassifierOptions.length; i++) {
-      result  += " " + m_BestClassifierOptions[i];
-    }
+    String result = "Selected values: "
+      + Utils.joinOptions(m_BestClassifierOptions);
     return result + '\n';
   }
   
