@@ -45,7 +45,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class Explorer extends JPanel {
 
@@ -142,7 +142,7 @@ public class Explorer extends JPanel {
 	  tempd.setPlotName(m_PreprocessPanel.
 			    getWorkingInstances().relationName());
 	  tempd.addInstanceNumberAttribute();
-	  m_VisualizePanel.addPlot(tempd);
+	  m_VisualizePanel.setMasterPlot(tempd);
 	} catch (Exception ex) {
 	  ex.printStackTrace();
 	  m_LogPanel.logMessage(ex.toString());
