@@ -33,7 +33,7 @@ import weka.filters.*;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version "$Revision: 1.0 "
  */
 public class SymmetricalUncertAttributeEval 
   extends AttributeEvaluator

@@ -75,7 +75,7 @@ import weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision 1.0 $
+ * @version  $Revision: 1.4 $
  */
 public class AttributeSelection {
 

@@ -35,7 +35,7 @@ import weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision 1.0 $
+ * @version $Revision: 1.3 $
  */
 public class BestFirst extends ASSearch implements OptionHandler {
 
