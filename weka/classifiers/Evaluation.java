@@ -99,7 +99,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.36 $
+ * @version  $Revision: 1.37 $
   */
 public class Evaluation implements Summarizable {
 
@@ -490,24 +490,19 @@ public class Evaluation implements Summarizable {
 				     String [] options) throws Exception {
 			      
     Instances train = null, tempTrain, test = null, template = null;
-    CostMatrix costMatrix = null;
     int seed = 1, folds = 10, classIndex = -1;
-    double predValue;
-    double[] results;
-    String trainFileName, testFileName, costFileName, sourceClass, 
+    String trainFileName, testFileName, sourceClass, 
       classIndexString, seedString, foldsString, objectInputFileName, 
       objectOutputFileName;
     boolean IRstatistics = false, noOutput = false,
       printClassifications = false, trainStatistics = true,
       printMargins = false, printComplexityStatistics = false,
       printGraph = false, classStatistics = false, printSource = false;
-    Evaluation trainingEvaluation, testingEvaluation;
     StringBuffer text = new StringBuffer();
     BufferedReader trainReader = null, testReader = null;
-    Reader costReader;
     ObjectInputStream objectInputStream = null;
-    ObjectOutputStream objectOutputStream = null;
     Random random;
+    CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
     
     try {
@@ -527,7 +522,7 @@ public class Evaluation implements Summarizable {
 			      "input file given.");
 	} 
 	if (testFileName.length() == 0) {
-	  throw new Exception("Not training file and no test "+
+	  throw new Exception("No training file and no test "+
 			      "file given.");
 	}
       } else if ((objectInputFileName.length() != 0) &&
@@ -551,13 +546,6 @@ public class Evaluation implements Summarizable {
           }
 	  objectInputStream = new ObjectInputStream(is);
 	}
-	if (objectOutputFileName.length() != 0) {
-          OutputStream os = new FileOutputStream(objectOutputFileName);
-          if (objectOutputFileName.endsWith(".gz")) {
-            os = new GZIPOutputStream(os);
-          }
-	  objectOutputStream = new ObjectOutputStream(os);
-	}
       } catch (Exception e) {
 	throw new Exception("Can't open file " + e.getMessage() + '.');
       }
@@ -574,8 +562,7 @@ public class Evaluation implements Summarizable {
       }
       if (trainFileName.length() != 0) {
 	if ((classifier instanceof UpdateableClassifier) &&
-	    (testFileName.length() != 0) &&
-	    (costMatrix == null)) {
+	    (testFileName.length() != 0)) {
 	  train = new Instances(trainReader, 1);
 	} else {
 	  train = new Instances(trainReader);
@@ -602,44 +589,8 @@ public class Evaluation implements Summarizable {
       if (foldsString.length() != 0) {
 	folds = Integer.parseInt(foldsString);
       }
-      costFileName = Utils.getOption('m', options);
-      if (costFileName.length() != 0) {
-        System.out.println(
-           "NOTE: The behaviour of the -m option has changed between WEKA 3.0"
-           +" and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
-           +" only. For cost-sensitive *prediction*, use one of the"
-           +" cost-sensitive metaschemes such as"
-           +" weka.classifiers.CostSensitiveClassifier or"
-           +" weka.classifiers.MetaCost");
-	try {
-	  costReader = new BufferedReader(new FileReader(costFileName));
-	} catch (Exception e) {
-	  throw new Exception("Can't open file " + e.getMessage() + '.');
-	}
-	try {
-	  // First try as a proper cost matrix format
-	  costMatrix = new CostMatrix(costReader);
-	} catch (Exception ex) {
-	  try {
-	    // Now try as the poxy old format :-)
-	    //System.err.println("Attempting to read old format cost file");
-	    try {
-	      costReader.close(); // Close the old one
-	      costReader = new BufferedReader(new FileReader(costFileName));
-	    } catch (Exception e) {
-	      throw new Exception("Can't open file " + e.getMessage() + '.');
-	    }
-	    costMatrix = new CostMatrix(template.numClasses());
-	    //System.err.println("Created default cost matrix");
-	    costMatrix.readOldFormat(costReader);
-	    //System.err.println("Read old format");
-	  } catch (Exception e2) {
-	    // re-throw the original exception
-	    //System.err.println("Re-throwing original exception");
-	    throw ex;
-	  }
-	}
-      }
+      costMatrix = handleCostOption(Utils.getOption('m', options), template.numClasses());
+
       classStatistics = Utils.getFlag('i', options);
       noOutput = Utils.getFlag('o', options);
       trainStatistics = !Utils.getFlag('v', options);
@@ -679,9 +630,10 @@ public class Evaluation implements Summarizable {
 			   + makeOptionString(classifier));
     }
 
+
     // Setup up evaluation objects
-    trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
-    testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
+    Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
+    Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
     
     if (objectInputFileName.length() != 0) {
       
@@ -722,6 +674,11 @@ public class Evaluation implements Summarizable {
 
     // Save the classifier if an object output file is provided
     if (objectOutputFileName.length() != 0) {
+      OutputStream os = new FileOutputStream(objectOutputFileName);
+      if (objectOutputFileName.endsWith(".gz")) {
+        os = new GZIPOutputStream(os);
+      }
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
       objectOutputStream.writeObject(classifier);
       objectOutputStream.flush();
       objectOutputStream.close();
@@ -815,9 +772,8 @@ public class Evaluation implements Summarizable {
       // Testing is on the supplied test data
       while (test.readInstance(testReader)) {
 	  
-	testingEvaluation.
-	  evaluateModelOnce((Classifier)classifier, 
-			    test.instance(0));
+	testingEvaluation.evaluateModelOnce((Classifier)classifier, 
+                                            test.instance(0));
 	test.delete(0);
       }
       testReader.close();
@@ -850,6 +806,64 @@ public class Evaluation implements Summarizable {
       text.append("\n\n" + testingEvaluation.toMatrixString());
     }
     return text.toString();
+  }
+
+
+  /**
+   * Attempts to load a cost matrix.
+   *
+   * @param costFileName the filename of the cost matrix
+   * @param numClasses the number of classes that should be in the cost matrix
+   * (only used if the cost file is in old format).
+   * @return a <code>CostMatrix</code> value, or null if costFileName is empty
+   * @exception Exception if an error occurs.
+   */
+  private static CostMatrix handleCostOption(String costFileName, 
+                                             int numClasses) 
+    throws Exception {
+
+    if ((costFileName != null) && (costFileName.length() != 0)) {
+      System.out.println(
+           "NOTE: The behaviour of the -m option has changed between WEKA 3.0"
+           +" and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
+           +" only. For cost-sensitive *prediction*, use one of the"
+           +" cost-sensitive metaschemes such as"
+           +" weka.classifiers.CostSensitiveClassifier or"
+           +" weka.classifiers.MetaCost");
+
+      Reader costReader = null;
+      try {
+        costReader = new BufferedReader(new FileReader(costFileName));
+      } catch (Exception e) {
+        throw new Exception("Can't open file " + e.getMessage() + '.');
+      }
+      try {
+        // First try as a proper cost matrix format
+        return new CostMatrix(costReader);
+      } catch (Exception ex) {
+        try {
+          // Now try as the poxy old format :-)
+          //System.err.println("Attempting to read old format cost file");
+          try {
+            costReader.close(); // Close the old one
+            costReader = new BufferedReader(new FileReader(costFileName));
+          } catch (Exception e) {
+            throw new Exception("Can't open file " + e.getMessage() + '.');
+          }
+          CostMatrix costMatrix = new CostMatrix(numClasses);
+          //System.err.println("Created default cost matrix");
+          costMatrix.readOldFormat(costReader);
+          return costMatrix;
+          //System.err.println("Read old format");
+        } catch (Exception e2) {
+          // re-throw the original exception
+          //System.err.println("Re-throwing original exception");
+          throw ex;
+        }
+      }
+    } else {
+      return null;
+    }
   }
 
   /**
