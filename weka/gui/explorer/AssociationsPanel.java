@@ -88,7 +88,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -181,7 +181,7 @@ public class AssociationsPanel extends JPanel {
     });
     m_StopBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	startAssociator();
+	stopAssociator();
       }
     });
     m_SaveOutBut.addActionListener(new ActionListener() {
