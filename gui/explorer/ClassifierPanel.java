@@ -120,7 +120,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -868,7 +868,7 @@ public class ClassifierPanel extends JPanel {
 	  // otherwise set to constant (automatically assigned) point shape
 	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
 	}
-	plotSize.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
+	plotSize.addElement(new Double(Plot2D.DEFAULT_SHAPE_SIZE));
       } else {
 	// store the error (to be converted to a point size later)
 	Double errd = null;
