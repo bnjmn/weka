@@ -27,8 +27,6 @@ import weka.experiment.Experiment;
 import weka.gui.ExtensionFileFilter;
 
 import weka.classifiers.Classifier;
-
-import weka.experiment.AveragingResultProducer;
 import weka.experiment.CrossValidationResultProducer;
 import weka.experiment.SplitEvaluator;
 import weka.experiment.ClassifierSplitEvaluator;
@@ -92,7 +90,7 @@ import javax.swing.event.DocumentEvent;
  * This panel controls the configuration of an experiment.
  *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -253,13 +251,10 @@ public class SimpleSetupPanel extends JPanel {
 	public void actionPerformed(ActionEvent e) {
 
 	  Experiment newExp = new Experiment();
-	  AveragingResultProducer arp = new AveragingResultProducer();
 	  CrossValidationResultProducer cvrp = new CrossValidationResultProducer();
-	  arp.setExpectedResultsPerAverage(10);
 	  cvrp.setNumFolds(10);
 	  cvrp.setSplitEvaluator(new ClassifierSplitEvaluator());
-	  arp.setResultProducer(cvrp);
-	  newExp.setResultProducer(arp);
+	  newExp.setResultProducer(cvrp);
 	  newExp.setPropertyArray(new Classifier[0]);
 	  newExp.setUsePropertyIterator(true);
 	  setExperiment(newExp);
@@ -573,45 +568,28 @@ public class SimpleSetupPanel extends JPanel {
     m_ResultsDestinationPathLabel.setEnabled(true);
     m_ResultsDestinationPathTField.setEnabled(true);
 
-    if (exp.getResultProducer() instanceof AveragingResultProducer) {
-      AveragingResultProducer arp = (AveragingResultProducer) exp.getResultProducer();
-      if (arp.getResultProducer() instanceof CrossValidationResultProducer) {
-	CrossValidationResultProducer cvrp = (CrossValidationResultProducer) arp.getResultProducer();
-	m_numFolds = cvrp.getNumFolds();
-	m_ExperimentParameterTField.setText("" + m_numFolds);
-	
-	if (arp.getExpectedResultsPerAverage() != m_numFolds) {
-	  // unknown experiment setup
-	  System.out.println("SimpleSetup incompatibility: cross-validation folds doesn't match expected number");
-	  if (!userWantsToConvert()) {
-	    return false;
-	  }
-	}
-	if (cvrp.getSplitEvaluator() instanceof ClassifierSplitEvaluator) {
+    if (exp.getResultProducer() instanceof CrossValidationResultProducer) {
+      CrossValidationResultProducer cvrp = (CrossValidationResultProducer) exp.getResultProducer();
+      m_numFolds = cvrp.getNumFolds();
+      m_ExperimentParameterTField.setText("" + m_numFolds);
+      
+      if (cvrp.getSplitEvaluator() instanceof ClassifierSplitEvaluator) {
+	m_ExpClassificationRBut.setSelected(true);
+	m_ExpRegressionRBut.setSelected(false);
+      } else if (cvrp.getSplitEvaluator() instanceof RegressionSplitEvaluator) {
+	m_ExpClassificationRBut.setSelected(false);
+	m_ExpRegressionRBut.setSelected(true);
+      } else {
+	// unknown split evaluator
+	System.out.println("SimpleSetup incompatibility: unrecognised split evaluator");
+	if (userWantsToConvert()) {
 	  m_ExpClassificationRBut.setSelected(true);
 	  m_ExpRegressionRBut.setSelected(false);
-	} else if (cvrp.getSplitEvaluator() instanceof RegressionSplitEvaluator) {
-	  m_ExpClassificationRBut.setSelected(false);
-	  m_ExpRegressionRBut.setSelected(true);
 	} else {
-	  // unknown split evaluator
-	  System.out.println("SimpleSetup incompatibility: unrecognised split evaluator");
-	  if (userWantsToConvert()) {
-	    m_ExpClassificationRBut.setSelected(true);
-	    m_ExpRegressionRBut.setSelected(false);
-	  } else {
-	    return false;
-	  }
-	}
-	m_ExperimentTypeCBox.setSelectedItem(TYPE_CROSSVALIDATION_TEXT);
-       
-      } else {
-	// unknown experiment type
-	System.out.println("SimpleSetup incompatibility: unrecognised resultProducer inside averagingProducer");
-	if (!userWantsToConvert()) {
 	  return false;
 	}
       }
+      m_ExperimentTypeCBox.setSelectedItem(TYPE_CROSSVALIDATION_TEXT);
     } else if (exp.getResultProducer() instanceof RandomSplitResultProducer) {
       RandomSplitResultProducer rsrp = (RandomSplitResultProducer) exp.getResultProducer();
       if (rsrp.getRandomizeData()) {
@@ -908,29 +886,23 @@ public class SimpleSetupPanel extends JPanel {
     
     // build new ResultProducer
     if (m_ExperimentTypeCBox.getSelectedItem() == TYPE_CROSSVALIDATION_TEXT) {
-      AveragingResultProducer arp = new AveragingResultProducer();
       CrossValidationResultProducer cvrp = new CrossValidationResultProducer();
-      arp.setExpectedResultsPerAverage(m_numFolds);
       cvrp.setNumFolds(m_numFolds);
       cvrp.setSplitEvaluator(se);
-      arp.setResultProducer(cvrp);
-
-      PropertyNode[] propertyPath = new PropertyNode[3];
+      
+      PropertyNode[] propertyPath = new PropertyNode[2];
       try {
-	propertyPath[0] = new PropertyNode(cvrp, new PropertyDescriptor("resultProducer",
-									AveragingResultProducer.class),
-					   AveragingResultProducer.class);
-	propertyPath[1] = new PropertyNode(se, new PropertyDescriptor("splitEvaluator",
+	propertyPath[0] = new PropertyNode(se, new PropertyDescriptor("splitEvaluator",
 								      CrossValidationResultProducer.class),
 					   CrossValidationResultProducer.class);
-	propertyPath[2] = new PropertyNode(sec, new PropertyDescriptor("classifier",
+	propertyPath[1] = new PropertyNode(sec, new PropertyDescriptor("classifier",
 								       se.getClass()),
 					   se.getClass());
       } catch (IntrospectionException e) {
 	e.printStackTrace();
       }
-
-      m_Exp.setResultProducer(arp);
+      
+      m_Exp.setResultProducer(cvrp);
       m_Exp.setPropertyPath(propertyPath);
 
     } else {
@@ -983,16 +955,10 @@ public class SimpleSetupPanel extends JPanel {
 
     if (m_ExperimentTypeCBox.getSelectedItem() == TYPE_CROSSVALIDATION_TEXT) {
 
-      if (m_Exp.getResultProducer() instanceof AveragingResultProducer) {
-	AveragingResultProducer arp = (AveragingResultProducer) m_Exp.getResultProducer();
-	if (arp.getResultProducer() instanceof CrossValidationResultProducer) {
-	  CrossValidationResultProducer cvrp = (CrossValidationResultProducer) arp.getResultProducer();
-	  cvrp.setNumFolds(m_numFolds);
-	} else {
-	  //System.err.println("not arp.cvrp");
-	}
+      if (m_Exp.getResultProducer() instanceof CrossValidationResultProducer) {
+	CrossValidationResultProducer cvrp = (CrossValidationResultProducer) m_Exp.getResultProducer();
+	cvrp.setNumFolds(m_numFolds);
       } else {
-	//System.err.println("not arp");
 	return;
       }
 
