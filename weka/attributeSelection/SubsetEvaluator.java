@@ -26,7 +26,7 @@ import weka.core.*;
  * Abstract attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class SubsetEvaluator extends ASEvaluation {
 
@@ -39,6 +39,7 @@ public abstract class SubsetEvaluator extends ASEvaluation {
    *
    * @param subset a bitset representing the attribute subset to be 
    * evaluated 
+   * @return the "merit" of the subset
    * @exception Exception if the subset could not be evaluated
    */
   public abstract double evaluateSubset(BitSet subset) throws Exception;

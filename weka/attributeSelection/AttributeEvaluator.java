@@ -25,7 +25,7 @@ import weka.core.*;
  * Abstract attribute evaluator. Evaluate attributes individually.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class AttributeEvaluator extends ASEvaluation {
     // ===============
@@ -36,7 +36,12 @@ public abstract class AttributeEvaluator extends ASEvaluation {
      * evaluates an individual attribute
      *
      * @param attribute the index of the attribute to be evaluated
+     * @return the "merit" of the attribute
      * @exception Exception if the attribute could not be evaluated
      */
     public abstract double evaluateAttribute(int attribute) throws Exception;
 }
+
+
+
+
