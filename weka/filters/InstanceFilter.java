@@ -42,8 +42,12 @@ import weka.core.*;
  * -V<br>
  * Invert matching sense.<p>
  *
+ * -H<br>
+ * When selecting on nominal attributes, removes header references to
+ * excluded values. <p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class InstanceFilter extends Filter implements OptionHandler {
 
@@ -62,6 +66,12 @@ public class InstanceFilter extends Filter implements OptionHandler {
   /** Inverse of test to be used? */
   protected boolean m_Inverse = false;
 
+  /** Modify header for nominal attributes? */
+  protected boolean m_ModifyHeader = false;
+
+  /** If m_ModifyHeader, stores a mapping from old to new indexes */
+  protected int [] m_NominalMapping;
+  
   /**
    * Returns an enumeration describing the available options
    *
@@ -69,7 +79,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
               "\tChoose attribute to be used for selection.",
@@ -87,6 +97,10 @@ public class InstanceFilter extends Filter implements OptionHandler {
     newVector.addElement(new Option(
 	      "\tInvert matching sense.",
               "V", 0, "-V"));
+    newVector.addElement(new Option(
+	      "\tWhen selecting on nominal attributes, removes header\n"
+	      + "\treferences to excluded values.",
+              "H", 0, "-H"));
 
     return newVector.elements();
   }
@@ -109,6 +123,10 @@ public class InstanceFilter extends Filter implements OptionHandler {
    *
    * -V<br>
    * Invert matching sense.<p>
+   *
+   * -H<br>
+   * When selecting on nominal attributes, removes header references to
+   * excluded values. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -142,7 +160,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
       setNominalIndices("");
     }
     setInvertSelection(Utils.getFlag('V', options));
-
+    setModifyHeader(Utils.getFlag('H', options));
     // Re-initialize output format according to new options
     
     if (m_InputFormat != null) {
@@ -157,7 +175,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [7];
+    String [] options = new String [8];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = "" + getSplitPoint();
@@ -168,6 +186,9 @@ public class InstanceFilter extends Filter implements OptionHandler {
     }
     if (getInvertSelection()) {
       options[current++] = "-V";
+    }
+    if (getModifyHeader()) {
+      options[current++] = "-H";
     }
     while (current < options.length) {
       options[current++] = "";
@@ -192,10 +213,34 @@ public class InstanceFilter extends Filter implements OptionHandler {
       m_Attribute = m_AttributeSet;
     }
     if (!isNumeric() && !isNominal()) {
-      throw new Exception("Can only handle numeric or nominal "+ 
-			  "attributes.");
+      throw new Exception("Can only handle numeric or nominal attributes.");
     }
     m_Values.setUpper(m_InputFormat.attribute(m_Attribute).numValues() - 1);
+    if (isNominal() && m_ModifyHeader) {
+      Attribute oldAtt = m_InputFormat.attribute(m_Attribute);
+      int [] selection = m_Values.getSelection();
+      FastVector newVals = new FastVector();
+      for (int i = 0; i < selection.length; i++) {
+	newVals.addElement(oldAtt.value(selection[i]));
+      }
+      m_InputFormat.deleteAttributeAt(m_Attribute);
+      m_InputFormat.insertAttributeAt(new Attribute(oldAtt.name(), newVals),
+				      m_Attribute);
+      m_NominalMapping = new int [oldAtt.numValues()];
+      for (int i = 0; i < m_NominalMapping.length; i++) {
+	boolean found = false;
+	for (int j = 0; j < selection.length; j++) {
+	  if (selection[j] == i) {
+	    m_NominalMapping[i] = j;
+	    found = true;
+	    break;
+	  }
+	}
+	if (!found) {
+	  m_NominalMapping[i] = -1;
+	}
+      }
+    }
     setOutputFormat(m_InputFormat);
     m_NewBatch = true;
     return true;
@@ -239,7 +284,12 @@ public class InstanceFilter extends Filter implements OptionHandler {
     }
     if (isNominal()) {
       if (m_Values.isInRange((int)instance.value(m_Attribute))) {
-	  push((Instance)instance.copy());
+	Instance temp = (Instance)instance.copy();
+	if (getModifyHeader()) {
+	  temp.setValue(m_Attribute,
+			m_NominalMapping[(int)instance.value(m_Attribute)]);
+	}
+	push(temp);
 	return true;
       }
     }
@@ -272,6 +322,28 @@ public class InstanceFilter extends Filter implements OptionHandler {
     } else {
       return m_InputFormat.attribute(m_Attribute).isNumeric();
     }
+  }
+  
+  /**
+   * Gets whether the header will be modified when selecting on nominal
+   * attributes.
+   *
+   * @return true if so.
+   */
+  public boolean getModifyHeader() {
+    
+    return m_ModifyHeader;
+  }
+  
+  /**
+   * Sets whether the header will be modified when selecting on nominal
+   * attributes.
+   *
+   * @param newModifyHeader true if so.
+   */
+  public void setModifyHeader(boolean newModifyHeader) {
+    
+    m_ModifyHeader = newModifyHeader;
   }
   
   /**
