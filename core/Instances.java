@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class Instances implements Serializable {
  
@@ -189,6 +189,27 @@ public class Instances implements Serializable {
     m_Instances = new FastVector(capacity);
   }
  
+  /**
+   * Create a copy of the structure, but "cleanse" string types (i.e.
+   * doesn't contain references to the strings seen in the past).
+   *
+   * @return a copy of the instance structure.
+   */
+  public Instances stringFreeStructure() {
+
+    FastVector atts = new FastVector();
+    for (int i = 0 ; i < numAttributes(); i++) {
+      Attribute att = attribute(i);
+      if (att.type() == Attribute.STRING) {
+        att = new Attribute(att.name(), null);
+      }
+      atts.addElement(att);
+    }
+    Instances result = new Instances(relationName(), atts, 0);
+    result.m_ClassIndex = m_ClassIndex;
+    return result;
+  }
+
   /**
    * Adds one instance to the end of the set. 
    * Shallow copies instance before it is added. Increases the
