@@ -16,7 +16,7 @@
 
 /*
  *    ADTree.java
- *    Copyright (C) 2001 Richard Kirkby
+ *    Copyright (C) 2001 Richard Kirkby, Bernhard Pfahringer
  *
  */
 
@@ -53,7 +53,8 @@ import java.util.*;
  * Save the instance data with the model <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
  */
 public class ADTree
   extends DistributionClassifier implements OptionHandler, Drawable,
@@ -821,7 +822,6 @@ public class ADTree
     return text.toString() +"}\n";
   }
 
-
   /**
    * Traverses the tree, graphing each node.
    *
@@ -929,7 +929,7 @@ public class ADTree
       + " heuristic, so they are not guaranteed to find an optimal solution but they are"
       + " much faster. Expand the heaviest path: searches the path with the most heavily"
       + " weighted instances. Expand the best z-pure path: searches the path determined"
-      + " by the z-pure estimate. Expand a random path: the fastest method, simply"
+      + " by the best z-pure estimate. Expand a random path: the fastest method, simply"
       + " searches down a single random path on each iteration.";
   }
 
@@ -1116,7 +1116,8 @@ public class ADTree
   }
 
   /**
-   * Calls measure function for leaf size - the number of prediction nodes.
+   * Calls measure function for prediction leaf size - the number of 
+   * prediction nodes without children.
    *
    * @return the leaf size
    */
@@ -1233,7 +1234,8 @@ public class ADTree
   }
 
   /**
-   * Returns the number of leaf nodes in a tree.
+   * Returns the number of leaf nodes in a tree - prediction nodes without
+   * children.
    *
    * @param root the root of the tree being measured
    * @return tree leaf size in number of prediction nodes
