@@ -30,6 +30,7 @@ import java.awt.Point;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.FontMetrics;
+import java.awt.Font;
 import javax.swing.JComponent;
 import java.io.Serializable;
 
@@ -37,7 +38,7 @@ import java.io.Serializable;
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.1 $
+ * @version  $Revision: 1.2 $
  * @since 1.0
  */
 public class BeanInstance implements Serializable {
@@ -146,6 +147,7 @@ public class BeanInstance implements Serializable {
    * the labels
    */
   public static void paintLabels(Graphics gx) {
+    gx.setFont(new Font("Monospaced", Font.PLAIN, 10));
     FontMetrics fm = gx.getFontMetrics();
     int hf = fm.getAscent();
     for (int i = 0; i < COMPONENTS.size(); i++) {
@@ -158,7 +160,41 @@ public class BeanInstance implements Serializable {
       int height = ((JComponent)bi.getBean()).getHeight();
       String label = ((Visible)bi.getBean()).getVisual().getText();
       int labelwidth = fm.stringWidth(label);
-      gx.drawString(label, (cx+(width/2)) - (labelwidth / 2), cy+height+hf+2);
+      if (labelwidth < width) {
+	gx.drawString(label, (cx+(width/2)) - (labelwidth / 2), cy+height+hf+2);
+      } else {
+	// split label
+	int hM = 1;
+	boolean foundOne = false;
+	while (labelwidth > width) {
+	  foundOne = false;
+	  String tempL = label;
+	  for (int z = 1; z < tempL.length(); z++) {
+	    if (fm.stringWidth(tempL.substring(0,z)) >= width) {
+	      if (tempL.charAt(z) < 'a') {
+		String cut = tempL.substring(0, z);
+		label = tempL.substring(z, tempL.length());
+		gx.drawString(cut, (cx+(width/2)) - (fm.stringWidth(cut) / 2), 
+			      cy+height+(hf * hM)+2);
+		hM++;
+		labelwidth = fm.stringWidth(label);
+		foundOne = true;
+		break;
+	      }
+	    }
+	  }
+	  if (!foundOne) {
+	    gx.drawString(tempL, (cx+(width/2)) - (labelwidth / 2), 
+			  cy+height+(hf * hM)+2);
+	    break;
+	  }
+	}
+	if (foundOne) {
+	  // do the leftover bit
+	  gx.drawString(label, (cx+(width/2)) - (labelwidth / 2), 
+			cy+height+(hf * hM)+2);
+	}
+      }
     }
   }
 
