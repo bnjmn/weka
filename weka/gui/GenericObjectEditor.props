@@ -243,6 +243,12 @@ weka.core.converters.Loader =\
  weka.core.converters.C45Loader, \
  weka.core.converters.SerializedInstancesLoader
 
+# Lists the Savers I want to choose from
+weka.core.converters.Saver =\
+ weka.core.converters.ArffSaver, \
+ weka.core.converters.CSVSaver, \
+ weka.core.converters.C45Saver, \
+ weka.core.converters.SerializedInstancesSaver
 
 # Lists the Search algorithm for Bayes net structure learning I want to choose from
 weka.classifiers.bayes.net.search.SearchAlgorithm =\
