@@ -9,6 +9,7 @@ SOURCES = InstanceQuery.java \
 	Experiment.java \
 	SplitEvaluator.java \
 	ClassifierSplitEvaluator.java \
+	RegressionSplitEvaluator.java \
 	RandomSplitResultProducer.java \
 	CrossValidationResultProducer.java \
 	AveragingResultProducer.java \
@@ -17,7 +18,6 @@ SOURCES = InstanceQuery.java \
 	DatabaseResultListener.java \
 	DatabaseResultProducer.java \
 	PairedTTester.java
-#	NumericSplitEvaluator.java \
 #	LearningRateResultProducer.java \
 #	TreeMatchingEvaluator.java
 

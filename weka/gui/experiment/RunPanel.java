@@ -46,6 +46,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.io.File;
 
 
 
@@ -53,7 +54,7 @@ import java.util.Date;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -120,16 +121,24 @@ public class RunPanel extends JPanel implements ActionListener {
       m_StopBut.setEnabled(true);
       try {
 	logMessage("Started");
-	System.err.println("Initializing...");
+	m_StatusLab.setText("Initializing...");
 	m_ExpCopy.initialize();
 	int errors = 0;
-	System.err.println("Iterating...");
+	m_StatusLab.setText("Iterating...");
 	while (m_RunThread != null && m_ExpCopy.hasMoreIterations()) {
 	  try {
-	    String current = "Iteration: CustomValue="
-	      + (m_ExpCopy.getCurrentCustomNumber() + 1)
-	      + " DatasetNumber=" + (m_ExpCopy.getCurrentDatasetNumber() + 1)
-	      + " RunNumber=" + (m_ExpCopy.getCurrentRunNumber());
+	    String current = "Iteration:";
+	    if (m_ExpCopy.getUsePropertyIterator()) {
+	      int cnum = m_ExpCopy.getCurrentPropertyNumber();
+	      String cname = " Custom="
+		+ (cnum + 1)
+		+ m_ExpCopy.getPropertyArrayValue(cnum).getClass().getName();
+	      current += cname;
+	    }
+	    String dname = ((File) m_ExpCopy.getDatasets()
+	      .elementAt(m_ExpCopy.getCurrentDatasetNumber())).getName();
+	    current += " Dataset=" + dname
+	      + " Run=" + (m_ExpCopy.getCurrentRunNumber());
 	    m_StatusLab.setText(current);
 	    m_ExpCopy.nextIteration();
 	  } catch (Exception ex) {
@@ -143,7 +152,7 @@ public class RunPanel extends JPanel implements ActionListener {
 	    }
 	  }
 	}
-	System.err.println("Postprocessing...");
+	m_StatusLab.setText("Postprocessing...");
 	m_ExpCopy.postProcess();
 	if (m_RunThread == null) {
 	  logMessage("Interrupted");

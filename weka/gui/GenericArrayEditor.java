@@ -55,6 +55,13 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.JOptionPane;
+import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
+import java.io.ObjectInputStream;
 
 
 /** 
@@ -62,7 +69,7 @@ import javax.swing.event.ListSelectionEvent;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -111,12 +118,33 @@ public class GenericArrayEditor extends JPanel
 	}
       } else if (e.getSource() == m_AddBut) {
 	int selected = m_ElementList.getSelectedIndex();
-	if (selected != -1) {
-	  m_ListModel.insertElementAt(m_ElementEditor.getValue(), selected);
-	} else {
-	  m_ListModel.addElement(m_ElementEditor.getValue());
+	Object addObj = m_ElementEditor.getValue();
+	
+	// Make a full copy of the object using serialization
+	try {
+	  ByteArrayOutputStream bo = new ByteArrayOutputStream();
+	  BufferedOutputStream bbo = new BufferedOutputStream(bo);
+	  ObjectOutputStream oo = new ObjectOutputStream(bbo);
+	  oo.writeObject(addObj);
+	  oo.close();
+	  
+	  ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
+	  BufferedInputStream bbi = new BufferedInputStream(bi);
+	  ObjectInputStream oi = new ObjectInputStream(bbi);
+	  addObj = oi.readObject();
+	  oi.close();
+	  if (selected != -1) {
+	    m_ListModel.insertElementAt(addObj, selected);
+	  } else {
+	    m_ListModel.addElement(addObj);
+	  }
+	  m_Support.firePropertyChange("", null, null);
+	} catch (Exception ex) {
+	  JOptionPane.showMessageDialog(GenericArrayEditor.this,
+					"Could not create an object copy",
+					null,
+					JOptionPane.ERROR_MESSAGE);
 	}
-	m_Support.firePropertyChange("", null, null);
       } 
     }
   };

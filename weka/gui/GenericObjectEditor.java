@@ -45,6 +45,7 @@ import javax.swing.DefaultComboBoxModel;
 import java.util.Properties;
 import java.io.FileInputStream;
 import java.util.StringTokenizer;
+import javax.swing.JOptionPane;
 
 
 /** 
@@ -58,7 +59,7 @@ import java.util.StringTokenizer;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GenericObjectEditor
   implements PropertyEditor {
@@ -261,14 +262,23 @@ public class GenericObjectEditor
       //System.err.println("GOE::itemStateChanged()");
       if ((e.getSource() == m_ObjectChooser)
 	  && (e.getStateChange() == ItemEvent.SELECTED)){
+	String className = (String)m_ObjectChooser
+			     .getSelectedItem();
 	try {
 	  //System.err.println("Setting object from chooser");
 	  setObject((Object)Class
-		    .forName((String)m_ObjectChooser
-			     .getSelectedItem())
+		    .forName(className)
 		    .newInstance());
 	  //System.err.println("done setting object from chooser");
 	} catch (Exception ex) {
+	  /*
+	  JOptionPane.showMessageDialog(this,
+					"Could not create an example of\n"
+					+ className + "\n"
+					+ "from the current classpath",
+					"GenericObjectEditor",
+					JOptionPane.ERROR_MESSAGE);
+	  */	  
 	}
       }
     }
@@ -346,11 +356,9 @@ public class GenericObjectEditor
     System.err.println("Didn't even try to make a Object copy!! "
 		       + "(using original)");
     */
-    //    System.err.println("setObject()");
     m_Object = c;
 
     if (m_EditorComponent != null) {
-      //    System.err.println("ObjectEditor::firePropertyChange()");
       m_EditorComponent.updateChildPropertySheet();
       m_Support.firePropertyChange("", null, null);
     }
@@ -515,8 +523,8 @@ public class GenericObjectEditor
 	.registerEditor(java.io.File.class,
 			FileEditor.class);
       GenericObjectEditor ce = new GenericObjectEditor();
-      ce.setClassType(weka.experiment.ResultListener.class);
-      Object initial = new weka.experiment.CSVResultListener();
+      ce.setClassType(weka.classifiers.Classifier.class);
+      Object initial = new weka.classifiers.ZeroR();
       if (args.length > 0) {
 	initial = (Object)Class.forName(args[0]).newInstance();
       }
