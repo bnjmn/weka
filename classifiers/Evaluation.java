@@ -111,7 +111,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.29 $
+ * @version  $Revision: 1.30 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1607,6 +1607,27 @@ public class Evaluation implements Summarizable {
   }
 
   /**
+   * Calculate the number of true positives with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * correctly classified positives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the true positive rate
+   */
+  public double numTruePositives(int classIndex) {
+
+    double correct = 0;
+    for (int j = 0; j < m_NumClasses; j++) {
+      if (j == classIndex) {
+	correct += m_ConfusionMatrix[classIndex][j];
+      }
+    }
+    return correct;
+  }
+
+  /**
    * Calculate the true positive rate with respect to a particular class. 
    * This is defined as<p>
    * <pre>
@@ -1634,6 +1655,87 @@ public class Evaluation implements Summarizable {
   }
 
   /**
+   * Calculate the number of true negatives with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * correctly classified negatives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the true positive rate
+   */
+  public double numTrueNegatives(int classIndex) {
+
+    double correct = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      if (i != classIndex) {
+	for (int j = 0; j < m_NumClasses; j++) {
+	  if (j != classIndex) {
+	    correct += m_ConfusionMatrix[i][j];
+	  }
+	}
+      }
+    }
+    return correct;
+  }
+
+  /**
+   * Calculate the true negative rate with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * correctly classified negatives
+   * ------------------------------
+   *       total negatives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the true positive rate
+   */
+  public double trueNegativeRate(int classIndex) {
+
+    double correct = 0, total = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      if (i != classIndex) {
+	for (int j = 0; j < m_NumClasses; j++) {
+	  if (j != classIndex) {
+	    correct += m_ConfusionMatrix[i][j];
+	  }
+	  total += m_ConfusionMatrix[i][j];
+	}
+      }
+    }
+    if (total == 0) {
+      return 0;
+    }
+    return correct / total;
+  }
+
+  /**
+   * Calculate number of false positives with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * incorrectly classified negatives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the false positive rate
+   */
+  public double numFalsePositives(int classIndex) {
+
+    double incorrect = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      if (i != classIndex) {
+	for (int j = 0; j < m_NumClasses; j++) {
+	  if (j == classIndex) {
+	    incorrect += m_ConfusionMatrix[i][j];
+	  }
+	}
+      }
+    }
+    return incorrect;
+  }
+
+  /**
    * Calculate the false positive rate with respect to a particular class. 
    * This is defined as<p>
    * <pre>
@@ -1652,6 +1754,62 @@ public class Evaluation implements Summarizable {
       if (i != classIndex) {
 	for (int j = 0; j < m_NumClasses; j++) {
 	  if (j == classIndex) {
+	    incorrect += m_ConfusionMatrix[i][j];
+	  }
+	  total += m_ConfusionMatrix[i][j];
+	}
+      }
+    }
+    if (total == 0) {
+      return 0;
+    }
+    return incorrect / total;
+  }
+
+  /**
+   * Calculate number of false negatives with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * incorrectly classified positives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the false positive rate
+   */
+  public double numFalseNegatives(int classIndex) {
+
+    double incorrect = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      if (i == classIndex) {
+	for (int j = 0; j < m_NumClasses; j++) {
+	  if (j != classIndex) {
+	    incorrect += m_ConfusionMatrix[i][j];
+	  }
+	}
+      }
+    }
+    return incorrect;
+  }
+
+  /**
+   * Calculate the false negative rate with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * incorrectly classified positives
+   * --------------------------------
+   *        total positives
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the false positive rate
+   */
+  public double falseNegativeRate(int classIndex) {
+
+    double incorrect = 0, total = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      if (i == classIndex) {
+	for (int j = 0; j < m_NumClasses; j++) {
+	  if (j != classIndex) {
 	    incorrect += m_ConfusionMatrix[i][j];
 	  }
 	  total += m_ConfusionMatrix[i][j];
