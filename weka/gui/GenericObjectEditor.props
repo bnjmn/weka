@@ -36,7 +36,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions.Winnow,\
  weka.classifiers.lazy.IB1,\
  weka.classifiers.lazy.IBk,\
- weka.classifiers.lazy.KernelDensity,\
  weka.classifiers.lazy.kstar.KStar,\
  weka.classifiers.lazy.LWR,\
  weka.classifiers.meta.AdaBoostM1,\
@@ -44,7 +43,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.AttributeSelectedClassifier,\
  weka.classifiers.meta.Bagging, \
  weka.classifiers.meta.ClassificationViaRegression,\
- weka.classifiers.meta.Cleanser,\
  weka.classifiers.meta.CostSensitiveClassifier,\
  weka.classifiers.meta.CVParameterSelection,\
  weka.classifiers.meta.DistributionMetaClassifier,\
@@ -87,13 +85,11 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.functions.SMO,\
  weka.classifiers.functions.VotedPerceptron,\
  weka.classifiers.lazy.IBk,\
- weka.classifiers.lazy.KernelDensity,\
  weka.classifiers.lazy.kstar.KStar,\
  weka.classifiers.meta.AdaBoostM1,\
  weka.classifiers.meta.AttributeSelectedClassifier,\
  weka.classifiers.meta.Bagging, \
  weka.classifiers.meta.ClassificationViaRegression,\
- weka.classifiers.meta.Cleanser,\
  weka.classifiers.meta.DistributionMetaClassifier,\
  weka.classifiers.meta.FilteredClassifier,\
  weka.classifiers.meta.LogitBoost,\
