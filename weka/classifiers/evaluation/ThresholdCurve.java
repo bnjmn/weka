@@ -22,12 +22,24 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ThresholdCurve {
 
   /** The name of the relation used in threshold curve datasets */
   public final static String RELATION_NAME = "ThresholdCurve";
+
+  public final static String TRUE_POS_NAME  = "True Positives";
+  public final static String FALSE_NEG_NAME = "False Negatives";
+  public final static String FALSE_POS_NAME = "False Positives";
+  public final static String TRUE_NEG_NAME  = "True Negatives";
+  public final static String FP_RATE_NAME   = "False Positive Rate";
+  public final static String TP_RATE_NAME   = "True Positive Rate";
+  public final static String PRECISION_NAME = "Precision";
+  public final static String RECALL_NAME    = "Recall";
+  public final static String FALLOUT_NAME   = "Fallout";
+  public final static String FMEASURE_NAME  = "FMeasure";
+  public final static String THRESHOLD_NAME = "Threshold";
 
   /**
    * Calculates the performance stats for the default class and return 
@@ -232,17 +244,17 @@ public class ThresholdCurve {
   private Instances makeHeader() {
 
     FastVector fv = new FastVector();
-    fv.addElement(new Attribute("True Positives"));
-    fv.addElement(new Attribute("False Negatives"));
-    fv.addElement(new Attribute("False Positives"));
-    fv.addElement(new Attribute("True Negatives"));
-    fv.addElement(new Attribute("False Positive Rate"));
-    fv.addElement(new Attribute("True Positive Rate"));
-    fv.addElement(new Attribute("Precision"));
-    fv.addElement(new Attribute("Recall"));
-    fv.addElement(new Attribute("Fallout"));
-    fv.addElement(new Attribute("FMeasure"));
-    fv.addElement(new Attribute("Threshold"));      
+    fv.addElement(new Attribute(TRUE_POS_NAME));
+    fv.addElement(new Attribute(FALSE_NEG_NAME));
+    fv.addElement(new Attribute(FALSE_POS_NAME));
+    fv.addElement(new Attribute(TRUE_NEG_NAME));
+    fv.addElement(new Attribute(FP_RATE_NAME));
+    fv.addElement(new Attribute(TP_RATE_NAME));
+    fv.addElement(new Attribute(PRECISION_NAME));
+    fv.addElement(new Attribute(RECALL_NAME));
+    fv.addElement(new Attribute(FALLOUT_NAME));
+    fv.addElement(new Attribute(FMEASURE_NAME));
+    fv.addElement(new Attribute(THRESHOLD_NAME));      
     return new Instances(RELATION_NAME, fv, 100);
   }
   
