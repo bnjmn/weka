@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public final class Utils {
 
@@ -849,7 +849,8 @@ public final class Utils {
    * Sorts a given array of doubles in ascending order and returns an 
    * array of integers with the positions of the elements of the original 
    * array in the sorted array. The sort is stable. (Equal elements remain
-   * in their original order.)
+   * in their original order.) Safe floating-point comparisons are
+   * used throughout.
    *
    * @param array this array is not changed by the method!
    * @return an array of integers with the positions in the sorted
@@ -941,6 +942,27 @@ public final class Utils {
       }
     }
     return newIndex;
+  }
+
+  /**
+   * Sorts a given array of doubles in ascending order and returns an 
+   * array of integers with the positions of the elements of the original 
+   * array in the sorted array. The sort is not stable. Doesn't use
+   * safe floating-point comparisons.
+   *
+   * @param array this array is not changed by the method!
+   * @return an array of integers with the positions in the sorted
+   * array.
+   */
+  public static int[] sortUnsafe(double [] array) {
+
+    int [] index = new int[array.length];
+    
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+    }
+    quickSortUnsafe(array, index, 0, array.length - 1);
+    return index;
   }
 
   /**
@@ -1134,6 +1156,68 @@ public final class Utils {
       // must now sort the right partition.
       if (lo < hi0) {
 	quickSort(array, index, lo, hi0);
+      }
+    }
+  }
+
+  /**
+   * Implements unsafe quicksort for an array of indices.
+   *
+   * @param array the array of doubles to be sorted
+   * @param index the index which should contain the positions in the
+   * sorted array
+   * @param lo0 the first index of the subset to be sorted
+   * @param hi0 the last index of the subset to be sorted
+   */
+  private static void quickSortUnsafe(double [] array, int [] index,
+				      int lo0, int hi0) {
+
+    int lo = lo0;
+    int hi = hi0;
+    double mid;
+    int help;
+    
+    if (hi0 > lo0) {
+      
+      // Arbitrarily establishing partition element as the midpoint of
+      // the array.
+      mid = array[index[(lo0 + hi0) / 2]];
+
+      // loop through the array until indices cross
+      while (lo <= hi) {
+	
+	// find the first element that is greater than or equal to  
+	// the partition element starting from the left Index.
+	while ((array[index[lo]] < mid) && (lo < hi0)) {
+	  ++lo;
+	}
+	
+	// find an element that is smaller than or equal to 
+	// the partition element starting from the right Index.
+	while ((array[index[hi]] > mid) && (hi > lo0)) {
+	  --hi;
+	}
+	
+	// if the indexes have not crossed, swap
+	if (lo <= hi) {
+	  help = index[lo];
+	  index[lo] = index[hi];
+	  index[hi] = help;
+	  ++lo;
+	  --hi;
+	}
+      }
+      
+      // If the right index has not reached the left side of array
+      // must now sort the left partition.
+      if (lo0 < hi) {
+	quickSortUnsafe(array, index, lo0, hi);
+      }
+      
+      // If the left index has not reached the right side of array
+      // must now sort the right partition.
+      if (lo < hi0) {
+	quickSortUnsafe(array, index, lo, hi0);
       }
     }
   }
