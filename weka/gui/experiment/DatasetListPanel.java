@@ -24,6 +24,7 @@ import weka.experiment.Experiment;
 
 import weka.gui.ExtensionFileFilter;
 import java.io.File;
+import java.util.Vector;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -54,7 +55,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -99,7 +100,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     // Multiselection isn't handled by the current implementation of the
     // swing look and feels.
     // m_FileChooser.setMultiSelectionEnabled(true);
-    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     m_DeleteBut.setEnabled(false);
     m_DeleteBut.addActionListener(this);
     m_AddBut.setEnabled(false);
@@ -140,6 +141,24 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   }
   
   /**
+   * Gets all the files in the given directory
+   * that match the currently selected extension.
+   */
+  protected void getFilesRecursively(File directory, Vector files) {
+
+    File[] currentDirFiles = directory.listFiles();
+    for (int i = 0; i < currentDirFiles.length; i++) {
+      if (m_FileChooser.getFileFilter().accept(currentDirFiles[i])) {
+	if (currentDirFiles[i].isDirectory()) {
+	  getFilesRecursively(currentDirFiles[i], files);
+	} else {
+	  files.addElement(currentDirFiles[i]);
+	}
+      }
+    }
+  }
+  
+  /**
    * Handle actions when buttons get pressed.
    *
    * @param e a value of type 'ActionEvent'
@@ -153,11 +172,27 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	if (m_FileChooser.isMultiSelectionEnabled()) {
 	  File [] selected = m_FileChooser.getSelectedFiles();
 	  for (int i = 0; i < selected.length; i++) {
-	    m_Exp.getDatasets().addElement(selected[i]);
+	    if (selected[i].isDirectory()) {
+	      Vector files = new Vector();
+	      getFilesRecursively(selected[i], files);
+	      for (int j = 0; j < files.size(); j++) {
+		m_Exp.getDatasets().addElement(files.elementAt(j));
+	      }
+	    } else {
+	      m_Exp.getDatasets().addElement(selected[i]);
+	    }
 	  }
 	  m_DeleteBut.setEnabled(true);
 	} else {
-	  m_Exp.getDatasets().addElement(m_FileChooser.getSelectedFile());
+	  if (m_FileChooser.getSelectedFile().isDirectory()) {
+	    Vector files = new Vector();
+	    getFilesRecursively(m_FileChooser.getSelectedFile(), files);
+	    for (int j = 0; j < files.size(); j++) {
+	      m_Exp.getDatasets().addElement(files.elementAt(j));
+	    }
+	  } else {
+	    m_Exp.getDatasets().addElement(m_FileChooser.getSelectedFile());
+	  }
 	  m_DeleteBut.setEnabled(true);
 	}
       }
@@ -180,7 +215,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
       }
     }
   }
-  
+
   /**
    * Tests out the dataset list panel from the command line.
    *
