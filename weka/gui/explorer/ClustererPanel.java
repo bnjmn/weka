@@ -51,6 +51,13 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -82,7 +89,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -142,6 +149,9 @@ public class ClustererPanel extends JPanel {
 
   /** Click to visualize the current clusterer's predictions */
   protected JButton m_VisualizeBut = new JButton("Visualize");
+
+  /** Click to save the output associated with the currently selected result */
+  protected JButton m_SaveOutBut = new JButton("Save Output");
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -202,7 +212,8 @@ public class ClustererPanel extends JPanel {
       }
     });
 
-    m_VisualizeBut.setToolTipText("Visualize the current classifier");
+    m_VisualizeBut.setToolTipText("Visualize the selected clusterer output");
+    m_SaveOutBut.setToolTipText("Save the selected clusterer output to a file");
     m_TrainBut.setToolTipText("Cluster the same set that the clusterer"
 			      + " is trained on");
     m_PercentBut.setToolTipText("Train on a percentage of the data and"
@@ -233,6 +244,7 @@ public class ClustererPanel extends JPanel {
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_VisualizeBut.setEnabled(false);
+    m_SaveOutBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startClusterer();
@@ -248,6 +260,11 @@ public class ClustererPanel extends JPanel {
 	visualizeClusterer();
       }
     });
+    m_SaveOutBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer();
+	}
+      });
     
     m_History.getSelectionModel()
       .addListSelectionListener(new ListSelectionListener() {
@@ -337,8 +354,9 @@ public class ClustererPanel extends JPanel {
     buttons.add(ssButs);
     JPanel vPl = new JPanel();
     vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    vPl.setLayout(new GridLayout(1,1,5,5));
+    vPl.setLayout(new GridLayout(1,2,5,5));
     vPl.add(m_VisualizeBut);
+    vPl.add(m_SaveOutBut);
     buttons.add(vPl);
     
     JPanel p3 = new JPanel();
@@ -626,6 +644,7 @@ public class ClustererPanel extends JPanel {
 	      m_Log.logMessage("Interrupted " + cname);
 	      m_Log.statusMessage("See error log");
 	    }
+	    m_SaveOutBut.setEnabled(true);
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -711,6 +730,31 @@ public class ClustererPanel extends JPanel {
     sp.setPredictionsNumeric(false);*/
   }
 
+  /**
+   * Save the currently selected classifier output to a file.
+   */
+  protected void saveBuffer() {
+    StringBuffer sb = m_History.getSelectedBuffer();
+    if (sb != null) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      int returnVal = fileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File sFile = fileChooser.getSelectedFile();
+	try {
+	  m_Log.statusMessage("Saving to file...");
+	  PrintWriter out
+	    = new PrintWriter(new BufferedWriter(new FileWriter(sFile)));
+	  out.write(sb.toString(),0,sb.toString().length());
+	  out.close();
+	  m_Log.statusMessage("OK");
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  m_Log.logMessage(ex.getMessage());
+	}
+      }
+    }
+  }
   
   /**
    * Tests out the clusterer panel from the command line.
