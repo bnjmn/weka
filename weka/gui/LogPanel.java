@@ -39,9 +39,9 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class LogPanel extends JPanel implements Logger {
+public class LogPanel extends JPanel implements Logger, TaskLogger {
 
   /** Displays the current status */
   protected JLabel m_StatusLab = new JLabel("OK");
@@ -51,18 +51,19 @@ public class LogPanel extends JPanel implements Logger {
 
   /** An indicator for whether text has been output yet */
   protected boolean m_First = true;
+
+  /** The panel for monitoring the number of running tasks (if supplied)*/
+  protected WekaTaskMonitor m_TaskMonitor=null;
   
   /**
    * Creates the log panel
    */
   public LogPanel() {
-
     m_LogText.setEditable(false);
     m_LogText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_StatusLab.setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createTitledBorder("Status"),
-			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));
-    
+			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));    
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createTitledBorder("Log"));
     p1.setLayout(new BorderLayout());
@@ -85,6 +86,62 @@ public class LogPanel extends JPanel implements Logger {
     add(m_StatusLab, BorderLayout.SOUTH);
   }
 
+  /**
+   * Creates the log panel
+   */
+  public LogPanel(WekaTaskMonitor tm) {
+    /*    if (!(tm instanceof java.awt.Component)) {
+      throw new Exception("TaskLogger must be a graphical component");
+      } */
+    m_TaskMonitor = tm;
+    m_LogText.setEditable(false);
+    m_LogText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    m_StatusLab.setBorder(BorderFactory.createCompoundBorder(
+			  BorderFactory.createTitledBorder("Status"),
+			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));    
+    JPanel p1 = new JPanel();
+    p1.setBorder(BorderFactory.createTitledBorder("Log"));
+    p1.setLayout(new BorderLayout());
+    final JScrollPane js = new JScrollPane(m_LogText);
+    p1.add(js, BorderLayout.CENTER);
+    js.getViewport().addChangeListener(new ChangeListener() {
+      private int lastHeight;
+      public void stateChanged(ChangeEvent e) {
+	JViewport vp = (JViewport)e.getSource();
+	int h = vp.getViewSize().height; 
+	if (h != lastHeight) { // i.e. an addition not just a user scrolling
+	  lastHeight = h;
+	  int x = h - vp.getExtentSize().height;
+	  vp.setViewPosition(new Point(0, x));
+	}
+      }
+    });
+    setLayout(new BorderLayout());
+    add(p1, BorderLayout.CENTER);
+    JPanel p2 = new JPanel();
+    p2.setLayout(new BorderLayout());
+    p2.add(m_StatusLab,BorderLayout.CENTER);
+    p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
+    add(p2, BorderLayout.SOUTH);
+  }
+
+  /**
+   * Record the starting of a new task
+   */
+  public void taskStarted() {
+    if (m_TaskMonitor != null) {
+      m_TaskMonitor.taskStarted();
+    }
+  }
+
+  /**
+   * Record a task ending
+   */
+  public void taskFinished() {
+    if (m_TaskMonitor != null) {
+      m_TaskMonitor.taskFinished();
+    }
+  }
     
   /**
    * Gets a string containing current date and time.

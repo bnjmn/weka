@@ -21,6 +21,7 @@ package weka.gui.explorer;
 
 import weka.core.Utils;
 import weka.gui.LogPanel;
+import weka.gui.WekaTaskMonitor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +55,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Explorer extends JPanel {
 
@@ -82,13 +83,19 @@ public class Explorer extends JPanel {
   protected JTabbedPane m_TabbedPane = new JTabbedPane();
   
   /** The panel for log and status messages */
-  protected LogPanel m_LogPanel = new LogPanel();
+  protected LogPanel m_LogPanel = new LogPanel(new WekaTaskMonitor());
+
 
   /**
    * Creates the experiment environment gui with no initial experiment
    */
   public Explorer() {
-
+    
+    /* try {
+      m_logPanel = new LogPanel(new WekaTaskMonitor());
+    } catch (Exception ex) {
+      System.exit(1);
+      } */
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
     m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg, Mark Hall and Eibe Frank");
@@ -147,10 +154,12 @@ public class Explorer extends JPanel {
 	m_TabbedPane.setEnabledAt(5, true);
       }
     });
-    
+
     setLayout(new BorderLayout());
     add(m_TabbedPane, BorderLayout.CENTER);
+   
     add(m_LogPanel, BorderLayout.SOUTH);
+    //add(p1, BorderLayout.SOUTH);
   }
 
   /**
