@@ -16,10 +16,10 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package weka.core;
+package weka.classifiers;
 
 /** 
- * Interface to something that can be converted to Java source
+ * Interface for classifiers that can be converted to Java source.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision: 1.1 $
@@ -27,12 +27,22 @@ package weka.core;
 public interface Sourcable {
 
   /**
-   * Returns a string that describes the object as source.
+   * Returns a string that describes the classifier as source. The
+   * classifier will be contained in a class with the given name (there may
+   * be auxiliary classes),
+   * and will contain a method with the signature:
+   * <pre><code>
+   * public static double classify(Object [] i);
+   * </code></pre>
+   * where the array <code>i</code> contains elements that are either
+   * Double, String, with missing values represented as null. The generated
+   * code is public domain and comes with no warranty.
    *
+   * @param className the name that should be given to the source class.
    * @return the object source described by a string
    * @exception Exception if the souce can't be computed
    */
-  public String toSource() throws Exception;
+  public String toSource(String className) throws Exception;
 }
 
 

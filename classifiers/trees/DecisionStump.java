@@ -31,10 +31,10 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DecisionStump extends DistributionClassifier 
-  implements WeightedInstancesHandler {
+  implements WeightedInstancesHandler, Sourcable {
 
   /** The attribute used for classification. */
   private int m_AttIndex;
@@ -127,6 +127,48 @@ public class DecisionStump extends DistributionClassifier
   public double[] distributionForInstance(Instance instance) throws Exception {
 
     return m_Distribution[whichSubset(instance)];
+  }
+
+  /**
+   * Returns the decision tree as Java source code.
+   *
+   * @return the tree as Java source code
+   * @exception Exception if something goes wrong
+   */
+  public String toSource(String className) throws Exception {
+
+    StringBuffer text = new StringBuffer("class ");
+    Attribute c = m_Instances.classAttribute();
+    text.append(className)
+      .append(" {\n"
+	      +"  public static double classify(Object [] i) {\n");
+    text.append("    if (i[").append(m_AttIndex);
+    text.append("] == null) { return ");
+    text.append(sourceClass(c, m_Distribution[2])).append(";");
+    if (m_Instances.attribute(m_AttIndex).isNominal()) {
+      text.append(" } else if (((String)i[").append(m_AttIndex);
+      text.append("]).equals(\"");
+      text.append(m_Instances.attribute(m_AttIndex).value((int)m_SplitPoint));
+      text.append("\")");
+    } else {
+      text.append(" } else if (((Double)i[").append(m_AttIndex);
+      text.append("]).doubleValue() <= ").append(m_SplitPoint);
+    }
+    text.append(") { return ");
+    text.append(sourceClass(c, m_Distribution[0])).append(";");
+    text.append(" } else { return ");
+    text.append(sourceClass(c, m_Distribution[1])).append(";");
+    text.append(" }\n  }\n}\n");
+    return text.toString();
+  }
+
+  private String sourceClass(Attribute c, double []dist) {
+
+    if (c.isNominal()) {
+      return Integer.toString(Utils.maxIndex(dist));
+    } else {
+      return Double.toString(dist[0]);
+    }
   }
 
   /**

@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.11 $
+ * @version  $Revision: 1.12 $
   */
 public class Evaluation implements Summarizable {
 
@@ -774,7 +774,7 @@ public class Evaluation implements Summarizable {
     // Output the classifier as equivalent source
     if ((classifier instanceof Sourcable)
 	&& (printSource)){
-      return ((Sourcable)classifier).toSource();
+      return wekaStaticWrapper((Sourcable) classifier);
     }
 
     // Output test instance predictions only
@@ -996,6 +996,45 @@ public class Evaluation implements Summarizable {
     } else {
       updateStatsForPredictor(prediction, instance);
     }
+  }
+
+
+  /**
+   * Wraps a static classifier in enough source to test using the weka
+   * class libraries.
+   *
+   * @param classifier a Sourcable Classifier
+   * @return the source for a static classifier that can be tested with
+   * weka libraries.
+   */
+  protected static String wekaStaticWrapper(Sourcable classifier) 
+    throws Exception {
+    
+    String className = "StaticClassifier";
+    String staticClassifier = classifier.toSource(className);
+    return "package weka.classifiers;\n"
+    +"import weka.core.Attribute;\n"
+    +"import weka.core.Instance;\n"
+    +"import weka.core.Instances;\n"
+    +"import weka.classifiers.Classifier;\n\n"
+    +"public class WekaWrapper extends Classifier {\n\n"
+    +"  public void buildClassifier(Instances i) throws Exception {\n"
+    +"  }\n\n"
+    +"  public double classifyInstance(Instance i) throws Exception {\n\n"
+    +"    Object [] s = new Object [i.numAttributes()];\n"
+    +"    for (int j = 0; j < s.length; j++) {\n"
+    +"      if (!i.isMissing(j)) {\n"
+    +"        if (i.attribute(j).type() == Attribute.NOMINAL) {\n"
+    +"          s[j] = i.attribute(j).value((int) i.value(j));\n"
+    +"        } else if (i.attribute(j).type() == Attribute.NUMERIC) {\n"
+    +"          s[j] = new Double(i.value(j));\n"
+    +"        }\n"
+    +"      }\n"
+    +"    }\n"
+    +"    return " + className + ".classify(s);\n"
+    +"  }\n\n"
+    +"}\n\n"
+    +staticClassifier; // The static classifer class
   }
 
   /**
