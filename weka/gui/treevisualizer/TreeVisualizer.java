@@ -59,7 +59,7 @@ import weka.gui.visualize.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class TreeVisualizer extends JPanel implements MouseMotionListener,
 			       MouseListener,ActionListener,ItemListener {
@@ -1027,7 +1027,8 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
    */  
   public void mousePressed(MouseEvent e) {
     m_frameLimiter.setRepeats(true);
-    if ((e.getModifiers() & e.BUTTON1_MASK) != 0 && m_mouseState == 0 
+    if ((e.getModifiers() & e.BUTTON1_MASK) != 0 && !e.isAltDown() && 
+	m_mouseState == 0 
 	&& m_scaling == 0) {
       //then the left mouse button has been pressed
       //check for modifiers
@@ -1077,7 +1078,6 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
    * @param e the mouse event.
    */
   public void mouseReleased(MouseEvent e) {
-    
     if (m_mouseState == 1) {
       //this is used by mouseClicked to determine if it is alright to do 
       //something
