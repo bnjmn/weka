@@ -16,7 +16,6 @@ import weka.core.Option;
 import weka.core.Attribute;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
 import weka.filters.MakeIndicatorFilter;
 
@@ -32,10 +31,10 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler {
 
   /** The classifiers. (One for each class.) */
   private Classifier [] m_Classifiers;
@@ -65,11 +64,6 @@ public class MultiClassClassifier extends DistributionClassifier
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }
-    if (m_Classifier instanceof WeightedInstancesHandler) {
-      insts = new Instances(insts);
-    } else {
-      insts = insts.resampleWithWeights(new Random(42));
-    }     
     m_ZeroR = new ZeroR();
     m_ZeroR.buildClassifier(insts);
 

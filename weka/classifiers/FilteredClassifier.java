@@ -6,10 +6,15 @@
 
 package weka.classifiers;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Vector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
+import weka.core.Attribute;
 
 
 /**
@@ -29,7 +34,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -240,12 +245,17 @@ public class FilteredClassifier extends DistributionClassifier
     if (m_Classifier == null) {
       throw new Exception("No base classifiers have been set!");
     }
-    Instances newData = new Instances(data);
-    newData.deleteWithMissingClass();
-    m_Filter.inputFormat(newData);
-    newData = Filter.useFilter(newData, m_Filter);
-    m_FilteredInstances = newData.stringFreeStructure();
-    m_Classifier.buildClassifier(newData);
+    /*
+    String fname = m_Filter.getClass().getName();
+    fname = fname.substring(fname.lastIndexOf('.') + 1);
+    util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
+    t.start();
+    */
+    m_Filter.inputFormat(data);
+    data = Filter.useFilter(data, m_Filter);
+    //t.stop();
+    m_FilteredInstances = data.stringFreeStructure();
+    m_Classifier.buildClassifier(data);
   }
 
   /**
@@ -266,12 +276,19 @@ public class FilteredClassifier extends DistributionClassifier
     if (m_Filter.numPendingOutput() > 0) {
       throw new Exception("Filter output queue not empty!");
     }
+    /*
+    String fname = m_Filter.getClass().getName();
+    fname = fname.substring(fname.lastIndexOf('.') + 1);
+    util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
+    t.start();
+    */
     if (!m_Filter.input(instance)) {
       throw new Exception("Filter didn't make the test instance"
 			  + " immediately available!");
     }
     m_Filter.batchFinished();
     Instance newInstance = m_Filter.output();
+    //t.stop();
     /*
     System.err.println("FilteredClassifier:: " 
                        + m_Filter.getClass().getName()

@@ -40,10 +40,10 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RegressionByDiscretization extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler {
 
   /** The subclassifier. */
   protected DistributionClassifier m_Classifier = new weka.classifiers.ZeroR();
@@ -74,12 +74,6 @@ public class RegressionByDiscretization extends Classifier
     if (!instances.classAttribute().isNumeric()) {
       throw new Exception ("Class attribute has to be numeric");
     }
-    if (m_Classifier instanceof WeightedInstancesHandler) {
-      instances = new Instances(instances);
-    } else {
-      instances = instances.resampleWithWeights(new Random(42));
-    }
-    instances.deleteWithMissingClass();
 
     // Discretize the training data
     m_Discretizer = new DiscretizeFilter();
