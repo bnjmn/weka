@@ -31,6 +31,7 @@ import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.IOException;
 
 
@@ -40,7 +41,7 @@ import java.io.IOException;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -82,60 +83,15 @@ public class BeanVisual extends JPanel implements Serializable {
   /**
    * Container for the icon
    */
-  protected IconHolder m_visualHolder;
+  //  protected IconHolder m_visualHolder;
 
   //  protected JLabel m_textLabel;
   private boolean m_stationary = true;
 
   private PropertyChangeSupport m_pcs = new PropertyChangeSupport(this);
   
-
-  /**
-   * Helper class that encapsulates the icon. Provides visual 
-   * "connector" points
-   */
-  protected class IconHolder extends JPanel implements Serializable {
-
-    private JLabel m_icon;
-    private boolean m_displayConnectors = false;
-
-    public IconHolder(JLabel iconLabel) {
-      this.setLayout(new BorderLayout());
-      m_icon = iconLabel;
-      this.add(m_icon, BorderLayout.CENTER);
-     
-      Dimension d = m_icon.getPreferredSize();
-      //      this.setSize((int)d.getWidth()+50, (int)d.getHeight()+50);
-      Dimension d2 = new Dimension((int)d.getWidth() + 10, 
-				   (int)d.getHeight() + 10);
-      this.setMinimumSize(d2);
-      this.setPreferredSize(d2);
-      this.setMaximumSize(d2);
-    }
-
-    public void setDisplayConnectors(boolean dc) {
-      m_displayConnectors = dc;
-      this.repaint();
-    }
-
-    public boolean getDisplayConnectors() {
-      return m_displayConnectors;
-    }
-
-    public void paintComponent(Graphics gx) {
-      super.paintComponent(gx);
-      if (m_displayConnectors) {
-	gx.setColor(Color.blue);
-
-	int midx = (int)(this.getWidth() / 2.0);
-	int midy = (int)(this.getHeight() / 2.0);
-	gx.fillOval(midx-2, 0, 5, 5);
-	gx.fillOval(midx-2, this.getHeight()-5, 5, 5);
-	gx.fillOval(0, midy-2, 5, 5);
-	gx.fillOval(this.getWidth()-5, midy-2, 5, 5);
-      }
-    }
-  }
+  private boolean m_displayConnectors = false;
+  
 
   /**
    * Constructor
@@ -153,15 +109,17 @@ public class BeanVisual extends JPanel implements Serializable {
     m_visualLabel = new JLabel(m_icon);
 
     setLayout(new BorderLayout());
-    //    add(m_textLabel, BorderLayout.SOUTH);
-    m_visualHolder = new IconHolder(m_visualLabel);
-    //    m_visualHolder.setDisplayConnectors(true);
-    //    add(m_visualLabel, BorderLayout.CENTER);
-    add(m_visualHolder, BorderLayout.CENTER);
-//      Dimension d = m_textLabel.getPreferredSize();
-//      m_textLabel.setMinimumSize(d);
-//      m_textLabel.setMaximumSize(d);
-//      m_textLabel.setPreferredSize(d);
+   
+    //    m_visualHolder = new IconHolder(m_visualLabel);
+    
+    add(m_visualLabel, BorderLayout.CENTER);
+    Dimension d = m_visualLabel.getPreferredSize();
+    //      this.setSize((int)d.getWidth()+50, (int)d.getHeight()+50);
+    Dimension d2 = new Dimension((int)d.getWidth() + 10, 
+				 (int)d.getHeight() + 10);
+    setMinimumSize(d2);
+    setPreferredSize(d2);
+    setMaximumSize(d2);
   }
 
   /**
@@ -318,7 +276,9 @@ public class BeanVisual extends JPanel implements Serializable {
    * @param dc a <code>boolean</code> value
    */
   public void setDisplayConnectors(boolean dc) {
-    m_visualHolder.setDisplayConnectors(dc);
+    //    m_visualHolder.setDisplayConnectors(dc);
+    m_displayConnectors = dc;
+    repaint();
   }
 
   /**
@@ -337,6 +297,20 @@ public class BeanVisual extends JPanel implements Serializable {
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcs.removePropertyChangeListener(pcl);
+  }
+
+  public void paintComponent(Graphics gx) {
+    super.paintComponent(gx);
+    if (m_displayConnectors) {
+      gx.setColor(Color.blue);
+      
+      int midx = (int)(this.getWidth() / 2.0);
+      int midy = (int)(this.getHeight() / 2.0);
+      gx.fillOval(midx-2, 0, 5, 5);
+      gx.fillOval(midx-2, this.getHeight()-5, 5, 5);
+      gx.fillOval(0, midy-2, 5, 5);
+      gx.fillOval(this.getWidth()-5, midy-2, 5, 5);
+    }
   }
 
   /**

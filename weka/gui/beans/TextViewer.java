@@ -47,7 +47,7 @@ import java.util.Date;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TextViewer 
   extends JPanel
@@ -67,20 +67,28 @@ public class TextViewer
   /**
    * Output area for a piece of text
    */
-  private JTextArea m_outText = new JTextArea(20, 80);
+  private transient JTextArea m_outText = new JTextArea(20, 80);
 
   /**
    * List of text revieved so far
    */
-  protected ResultHistoryPanel m_history = new ResultHistoryPanel(m_outText);
+  protected transient ResultHistoryPanel m_history = new ResultHistoryPanel(m_outText);
   
   public TextViewer() {
+    setUpResultHistory();
+    setLayout(new BorderLayout());
+    add(m_visual, BorderLayout.CENTER);
+  }
+
+  private void setUpResultHistory() {
+    if (m_outText == null) {
+      m_outText = new JTextArea(20, 80);
+      m_history = new ResultHistoryPanel(m_outText);
+    }
     m_outText.setEditable(false);
     m_outText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_outText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
-    setLayout(new BorderLayout());
-    add(m_visual, BorderLayout.CENTER);
   }
 
 //    public synchronized void acceptClassifier(BatchClassifierEvent e) {
@@ -139,6 +147,9 @@ public class TextViewer
    * @param e a <code>TextEvent</code> value
    */
   public synchronized void acceptText(TextEvent e) {
+    if (m_outText == null) {
+      setUpResultHistory();
+    }
     StringBuffer result = new StringBuffer();
     result.append(e.getText());
     //    m_resultsString.append(e.getText());
@@ -179,6 +190,9 @@ public class TextViewer
    */
   public void showResults() {
     if (m_resultsFrame == null) {
+      if (m_outText == null) {
+	setUpResultHistory();
+      }
       m_resultsFrame = new JFrame("Text Viewer");
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       final JScrollPane js = new JScrollPane(m_outText);
