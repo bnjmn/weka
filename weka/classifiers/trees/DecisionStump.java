@@ -38,7 +38,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class DecisionStump extends Classifier 
   implements WeightedInstancesHandler, Sourcable {
@@ -54,6 +54,19 @@ public class DecisionStump extends Classifier
 
   /** The instances used for training. */
   private Instances m_Instances;
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for building and using a decision stump. Usually used in "
+      + "conjunction with a boosting algorithm. Does regression (based on "
+      + "mean-squared error) or classification (based on entropy). Missing "
+      + "is treated as a separate value.";
+  }
 
   /**
    * Generates the classifier.

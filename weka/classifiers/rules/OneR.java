@@ -41,9 +41,24 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Class for building and using a 1R classifier; in other words, uses "
+      + "the minimum-error attribute for prediction, discretizing numeric "
+      + "attributes. For more information, see\n\n:"
+      + "R.C. Holte (1993). \"Very simple classification rules "
+      + "perform well on most commonly used datasets\". Machine Learning, "
+      + "Vol. 11, pp. 63-91.";
+  }
 
   /**
    * Class for storing store a 1R rule.
@@ -415,6 +430,16 @@ public class OneR extends Classifier implements OptionHandler {
       return "OneR: No model built yet.";
     }
     return m_rule.toString();
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minBucketSizeTipText() {
+    return "The minimum bucket size used for discretizing numeric "
+      + "attributes.";
   }
   
   /**

@@ -15,7 +15,7 @@
  */
 
 /*
- *    Nnge.java
+ *    NNge.java
  *    Copyright (C) 2002 Brent Martin
  *
  */
@@ -31,7 +31,7 @@ import weka.core.*;
 
 
 /**
- * Nnge classifier. 
+ * NNge classifier. 
  *
  * Nearest neighbor like algorithm using non-nested generalized exemplars.
  *
@@ -59,12 +59,27 @@ import weka.core.*;
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
  * @version $$ 
  */
-public class Nnge extends Classifier implements UpdateableClassifier, OptionHandler {
-
-
+public class NNge extends Classifier implements UpdateableClassifier, OptionHandler {
 
   /**
-   * Implements Exemplar as used by Nnge : parallel axis hyperrectangle.
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Nearest-neighbor-like algorithm using non-nested generalized exemplars "
+      + "(which are hyperrectangles that can be viewed as if-then rules). For more "
+      + "information, see \n\n"
+      + "Brent Martin, (1995) \"Instance-Based learning : Nearest Neighbor With "
+      + "Generalization\", Master Thesis, University of Waikato, Hamilton, New "
+      + "Zealand\n\n"
+      + "Sylvain Roy (2002) \"Nearest Neighbor With Generalization\","
+      + "Unpublished, University of Canterbury, Christchurch, New Zealand\n\n";
+  }
+
+  /**
+   * Implements Exemplar as used by NNge : parallel axis hyperrectangle.
    */
   private class Exemplar extends Instances {
     
@@ -76,8 +91,8 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
     private Exemplar previousWithClass = null;
     private Exemplar nextWithClass = null;
 
-    /** The Nnge which owns this Exemplar */
-    private Nnge m_Nnge;
+    /** The NNge which owns this Exemplar */
+    private NNge m_NNge;
 
     /** class of the Exemplar */
     private double m_ClassValue;
@@ -112,10 +127,10 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
      * @param size the capacity of the Exemplar
      * @param classV the class of the Exemplar
      */
-    private Exemplar (Nnge nnge, Instances inst, int size, double classV){
+    private Exemplar (NNge nnge, Instances inst, int size, double classV){
 
       super(inst, size);
-      m_Nnge = nnge;
+      m_NNge = nnge;
       m_ClassValue = classV;
       m_MinBorder = new double[numAttributes()];
       m_MaxBorder = new double[numAttributes()];
@@ -348,7 +363,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
       /* numeric attribute */
       if(attribute(attrIndex).isNumeric()){
 
-	double norm = m_Nnge.m_MaxArray[attrIndex] - m_Nnge.m_MinArray[attrIndex];
+	double norm = m_NNge.m_MaxArray[attrIndex] - m_NNge.m_MinArray[attrIndex];
 	if(norm <= 0)
 	  norm = 1;
 
@@ -386,7 +401,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 	if(i == classIndex())
 	  continue;
 	    
-	term = m_Nnge.attrWeight(i) * attrDistance(inst, i);
+	term = m_NNge.attrWeight(i) * attrDistance(inst, i);
 	term = term * term;
 	sum += term;
 
@@ -754,12 +769,12 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 
     /* check the instance */
     if (m_Train.equalHeaders(instance.dataset()) == false){
-      throw new Exception("Nnge.classifyInstance : Incompatible instance types !");
+      throw new Exception("NNge.classifyInstance : Incompatible instance types !");
     }
 	
     Exemplar matched = nearestExemplar(instance); 
     if(matched == null){
-      throw new Exception("Nnge.classifyInstance : Nnge hasn't been trained !");
+      throw new Exception("NNge.classifyInstance : NNge hasn't been trained !");
     }
     return matched.classValue();
   }
@@ -876,7 +891,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
     
   /**
    * Generalise an Exemplar (not necessarily predictedExemplar) to match instance.
-   * predictedExemplar must be in Nnge's lists
+   * predictedExemplar must be in NNge's lists
    *
    * @param newInst the new instance
    * @param predictedExemplar the Exemplar that matches newInst
@@ -902,7 +917,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 	}
       }
 
-      /* remove the Examplar from Nnge's lists */
+      /* remove the Examplar from NNge's lists */
       if(closest == first)
 	first = first.nextWithClass;
       removeExemplar(closest); 
@@ -931,7 +946,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 
 
   /**
-   * Adjust the Nnge.
+   * Adjust the NNge.
    *
    * @param newInst the instance to classify
    * @param predictedExemplar the Exemplar that matches newInst
@@ -1123,10 +1138,10 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 
 
   /**
-   * Returns true if ex overlaps any of the Exemplars in Nnge's lists
+   * Returns true if ex overlaps any of the Exemplars in NNge's lists
    *
    * @param ex an Exemplars
-   * @return true if ex overlaps any of the Exemplars in Nnge's lists
+   * @return true if ex overlaps any of the Exemplars in NNge's lists
    */
   private boolean detectOverlapping(Exemplar ex){
     Exemplar cur = m_Exemplars;
@@ -1169,7 +1184,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
   private void updateMI(Instance inst) throws Exception {
 
     if(m_NumFoldersMI < 1){
-      throw new Exception("Nnge.updateMI : incorrect number of folders ! Option I must be greater than 1.");
+      throw new Exception("NNge.updateMI : incorrect number of folders ! Option I must be greater than 1.");
     }
 
     m_MI_NumClass[(int) inst.classValue()]++;
@@ -1279,7 +1294,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 
 	/* not a nominal attribute, not a numeric attribute */
       } else {
-	throw new Exception("Nnge.updateMI : Cannot deal with 'string attribute'.");
+	throw new Exception("NNge.updateMI : Cannot deal with 'string attribute'.");
       }
     }	
   }
@@ -1287,7 +1302,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 
   /**
    * Init the weight of ex
-   * Watch out ! ex shouldn't be in Nnge's lists when initialized
+   * Watch out ! ex shouldn't be in NNge's lists when initialized
    *
    * @param ex the Exemplar to initialise
    */
@@ -1311,7 +1326,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 
 
   /**
-   * Adds an Exemplar in Nnge's lists
+   * Adds an Exemplar in NNge's lists
    * Ensure that the exemplar is not already in a list : the links would be broken...
    *
    * @param ex a new Exemplar to add
@@ -1335,8 +1350,8 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
 
 
   /**
-   * Removes an Exemplar from Nnge's lists
-   * Ensure that the Exemplar is actually in Nnge's lists. 
+   * Removes an Exemplar from NNge's lists
+   * Ensure that the Exemplar is actually in NNge's lists. 
    *   Likely to do something wrong if this condition is not respected.
    * Due to the list implementation, the Exemplar can appear only once in the lists : 
    *   once removed, the exemplar is not in the lists anymore.
@@ -1495,7 +1510,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
     if(str.length() != 0){
       m_NumAttemptsOfGene = Integer.parseInt(str);
       if(m_NumAttemptsOfGene < 1)
-	throw new Exception("Nnge.setOptions : G option's value must be greater than 1.");
+	throw new Exception("NNge.setOptions : G option's value must be greater than 1.");
     } else {
       m_NumAttemptsOfGene = 5;
     }
@@ -1505,7 +1520,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
     if(str.length() != 0){
       m_NumFoldersMI = Integer.parseInt(str);
       if(m_NumFoldersMI < 1)
-	throw new Exception("Nnge.setOptions : I option's value must be greater than 1.");
+	throw new Exception("NNge.setOptions : I option's value must be greater than 1.");
     } else {
       m_NumFoldersMI = 5;
     }
@@ -1531,6 +1546,14 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
     return options;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numAttemptsOfGeneOptionTipText() {
+    return "Sets the number of attempts for generalization.";
+  }
 
   /**
    * Gets the number of attempts for generalisation.
@@ -1551,6 +1574,14 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
     m_NumAttemptsOfGene = newIntParameter;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldersMIOptionTipText() {
+    return "Sets the number of folder for mutual information.";
+  }
 
   /**
    * Gets the number of folder for mutual information.
@@ -1585,7 +1616,7 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
   public static void main(String [] argv) {
 
     try {
-      System.out.println(Evaluation.evaluateModel(new Nnge(), argv));
+      System.out.println(Evaluation.evaluateModel(new NNge(), argv));
     } catch (Exception e) {
       System.err.println(e.getMessage());
       e.printStackTrace();

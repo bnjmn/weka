@@ -29,7 +29,7 @@ import java.io.*;
 
 /**
  * Fast decision tree learner. Builds a decision/regression tree using
- * information gain/variance and prunes it using reduced-error pruning
+ * information gain/variance reduction and prunes it using reduced-error pruning
  * (with backfitting).  Only sorts values for numeric attributes
  * once. Missing values are dealt with by splitting the corresponding
  * instances into pieces (i.e. as in C4.5).
@@ -56,11 +56,25 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
 	     AdditionalMeasureProducer, Sourcable {
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Fast decision tree learner. Builds a decision/regression tree using "
+      + "information gain/variance and prunes it using reduced-error pruning "
+      + "(with backfitting).  Only sorts values for numeric attributes "
+      + "once. Missing values are dealt with by splitting the corresponding "
+      + "instances into pieces (i.e. as in C4.5).";
+  }
 
   /** An inner class for building and storing the tree structure */
   protected class Tree implements Serializable {
@@ -1202,6 +1216,15 @@ public class REPTree extends Classifier
   protected int m_MaxDepth = -1;
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String noPruningTipText() {
+    return "Whether pruning is performed.";
+  }
+  
+  /**
    * Get the value of NoPruning.
    *
    * @return Value of NoPruning.
@@ -1222,6 +1245,15 @@ public class REPTree extends Classifier
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minNumTipText() {
+    return "The minimum total weight of the instances in a leaf.";
+  }
+
+  /**
    * Get the value of MinNum.
    *
    * @return Value of MinNum.
@@ -1239,6 +1271,17 @@ public class REPTree extends Classifier
   public void setMinNum(double newMinNum) {
     
     m_MinNum = newMinNum;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minVariancePropTipText() {
+    return "The minimum proportion of the variance on all the data " +
+      "that needs to be present at a node in order for splitting to " +
+      "be performed in regression trees.";
   }
 
   /**
@@ -1262,6 +1305,15 @@ public class REPTree extends Classifier
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data.";
+  }
+
+  /**
    * Get the value of Seed.
    *
    * @return Value of Seed.
@@ -1279,6 +1331,16 @@ public class REPTree extends Classifier
   public void setSeed(int newSeed) {
     
     m_Seed = newSeed;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "Determines the amount of data used for pruning. One fold is used for "
+      + "pruning, the rest for growing the rules.";
   }
   
   /**
@@ -1301,6 +1363,15 @@ public class REPTree extends Classifier
     m_NumFolds = newNumFolds;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String maxDepthTipText() {
+    return "The maximum tree depth (-1 for no restriction).";
+  }
+
   /**
    * Get the value of MaxDepth.
    *

@@ -24,19 +24,50 @@ import weka.core.*;
 import weka.classifiers.trees.m5.*;
 
 /**
- * M5 Rules. Implements routines
- * for generating a decision list using M5 Model trees and the approach
- * used by the PART algorithm. <p>
+ * Generates a decision list for regression problems using 
+ * separate-and-conquer. In each iteration it builds an 
+ * model tree using M5 and makes the "best" 
+ * leaf into a rule. Reference:\n\n"
+ * M. Hall, G. Holmes, E. Frank (1999).  "Generating Rule Sets 
+ * from Model Trees". Proceedings of the Twelfth Australian Joint 
+ * Conference on Artificial Intelligence, Sydney, Australia. 
+ * Springer-Verlag, pp. 1-12.<p>
  *
  * Valid options are:<p>
  * 
  * -U <br>
  * Use unsmoothed predictions. <p>
  *
+ * -R <br>
+ * Build regression tree/rule rather than model tree/rule
+ *
+ * -M <num> <br>
+ * Minimum number of objects per leaf. <p>
+ *
+ * -N  <br>
+ * Turns pruning off. <p>
+ *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class M5Rules extends M5Base {
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Generates a decision list for regression problems using " 
+      + "separate-and-conquer. In each iteration it builds a "
+      + "model tree using M5 and makes the \"best\" "
+      + "leaf into a rule. Reference:\n\n"
+      + "M. Hall, G. Holmes, E. Frank (1999).  \"Generating Rule Sets "
+      + "from Model Trees\". Proceedings of the Twelfth Australian Joint "
+      + "Conference on Artificial Intelligence, Sydney, Australia. "
+      + "Springer-Verlag, pp. 1-12.";
+  }
 
   public M5Rules() {
     super();
@@ -59,3 +90,4 @@ public class M5Rules extends M5Base {
     } 
   } 
 }
+

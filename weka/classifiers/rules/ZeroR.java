@@ -33,7 +33,7 @@ import weka.core.*;
  * (for a numeric class) or the mode (for a nominal class).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ZeroR extends Classifier implements WeightedInstancesHandler {
 
@@ -45,6 +45,16 @@ public class ZeroR extends Classifier implements WeightedInstancesHandler {
   
   /** The class attribute. */
   private Attribute m_Class;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class for building and using a 0-R classifier. Predicts the mean " 
+      + "(for a numeric class) or the mode (for a nominal class).";	    
+  }
 
   /**
    * Generates the classifier.

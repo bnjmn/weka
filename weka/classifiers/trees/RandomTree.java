@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -71,6 +71,26 @@ public class RandomTree extends Classifier
   protected int m_randomSeed = 1;
 
   /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for constructing a tree that considers K randomly " +
+      " chosen attributes at each node. Performs no pruning.";
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minNumTipText() {
+    return "The minimum total weight of the instances in a leaf.";
+  }
+
+  /**
    * Get the value of MinNum.
    *
    * @return Value of MinNum.
@@ -88,6 +108,15 @@ public class RandomTree extends Classifier
   public void setMinNum(double newMinNum) {
     
     m_MinNum = newMinNum;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String KValueTipText() {
+    return "Sets the number of randomly chosen attributes.";
   }
   
   /**
@@ -109,6 +138,15 @@ public class RandomTree extends Classifier
     
     m_KValue = k;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Whether debug information is output to the console.";
+  }
 
   /**
    * Get the value of Debug.
@@ -128,6 +166,15 @@ public class RandomTree extends Classifier
   public void setDebug(boolean newDebug) {
     
     m_Debug = newDebug;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The random number seed used for selecting attributes.";
   }
 
   /**

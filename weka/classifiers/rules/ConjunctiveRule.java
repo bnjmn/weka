@@ -51,7 +51,7 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 
 public class ConjunctiveRule extends Classifier 
@@ -92,6 +92,33 @@ public class ConjunctiveRule extends Classifier
     
   /** The number of antecedents in pre-pruning */
   private int m_NumAntds = -1;
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "This class implements a single conjunctive rule learner that can predict "
+      + "for numeric and nominal class labels.\n\n"
+      + "A rule consists of antecedents \"AND\"ed together and the consequent (class value) "
+      + "for the classification/regression.  In this case, the consequent is the "
+      + "distribution of the available classes (or mean for a numeric value) in the dataset. " 
+      + "If the test instance is not covered by this rule, then it's predicted "
+      + "using the default class distributions/value of the data not covered by the "
+      + "rule in the training data."
+      + "This learner selects an antecedent by computing the Information Gain of each "
+      + "antecendent and prunes the generated rule using Reduced Error Prunning (REP) "
+      + "or simple pre-pruning based on the number of antecedents.\n\n"
+      + "For classification, the Information of one antecedent is the weighted average of "
+      + "the entropies of both the data covered and not covered by the rule.\n"
+      + "For regression, the Information is the weighted average of the mean-squared errors "
+      + "of both the data covered and not covered by the rule.\n\n"
+      + "In pruning, weighted average of the accuracy rates on the pruning data is used "
+      + "for classification while the weighted average of the mean-squared errors "
+      + "on the pruning data is used for regression.\n\n";
+  }
 
   /** 
    * The single antecedent in the rule, which is composed of an attribute and 
@@ -811,14 +838,69 @@ public class ConjunctiveRule extends Classifier
   }
     
   /** The access functions for parameters */
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String foldsTipText() {
+    return "Determines the amount of data used for pruning. One fold is used for "
+      + "pruning, the rest for growing the rules.";
+  }
+
   public void setFolds(int folds){  m_Folds = folds; }
   public int getFolds(){ return m_Folds; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data.";
+  }
+
   public void setSeed(long s){ m_Seed = s; }
   public long getSeed(){ return m_Seed; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String exclusiveTipText() {
+    return "Set whether to consider exclusive expressions for nominal "
+      + "attribute splits.";
+  }
+
   public boolean getExclusive(){ return m_IsExclude;}
   public void setExclusive(boolean e){ m_IsExclude = e;}
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minNoTipText() {
+    return "The minimum total weight of the instances in a rule.";
+  }
+
   public void setMinNo(double m){  m_MinNo = m; }
   public double getMinNo(){ return m_MinNo; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numAntdsTipText() {
+    return "Set the number of antecedents allowed in the rule if "
+      + "pre-pruning is used.  If this value is other than -1, then "
+      + "pre-pruning will be used, otherwise the rule uses reduced-error "
+      + "pruning.";
+  }
+
   public void setNumAntds(int n){  m_NumAntds = n; }
   public int getNumAntds(){ return m_NumAntds; }
     

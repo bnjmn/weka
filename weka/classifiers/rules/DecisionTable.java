@@ -57,7 +57,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
  */
 public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
@@ -113,6 +113,19 @@ public class DecisionTable extends Classifier
 
   /** Holds the majority class */
   private double m_majority;
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for building and using a simple decision table majority "
+      + "classifier. For more information see: \n\n"
+      + "Kohavi R. (1995). \"The Power of Decision Tables.\" In Proc "
+      + "European Conference on Machine Learning.";
+  }
 
   /**
    * Class for a node in a linked list. Used in best first search.
@@ -905,6 +918,15 @@ public class DecisionTable extends Classifier
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String crossValTipText() {
+    return "Sets the number of folds for cross validation (1 = leave one out).";
+  }
+
+  /**
    * Sets the number of folds for cross validation (1 = leave one out)
    *
    * @param folds the number of folds
@@ -922,6 +944,16 @@ public class DecisionTable extends Classifier
   public int getCrossVal() {
 
     return m_CVFolds;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String maxStaleTipText() {
+    return "Sets the number of non improving decision tables to consider " 
+      + "before abandoning the search.";
   }
 
   /**
@@ -946,6 +978,15 @@ public class DecisionTable extends Classifier
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useIBkTipText() {
+    return "Sets whether IBk should be used instead of the majority class.";
+  }
+
+  /**
    * Sets whether IBk should be used instead of the majority class
    *
    * @param ibk true if IBk is to be used
@@ -963,6 +1004,15 @@ public class DecisionTable extends Classifier
   public boolean getUseIBk() {
 
     return m_useIBk;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String displayRulesTipText() {
+    return "Sets whether rules are to be printed.";
   }
 
   /**
