@@ -32,7 +32,7 @@ import java.util.*;
  * in BIFF format.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FromFile extends SearchAlgorithm {
 	/** name of file to read structure from **/
@@ -44,10 +44,18 @@ public class FromFile extends SearchAlgorithm {
 		bifReader.processFile(m_sBIFFile);
 		// copy parent sets
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-        	ParentSet parentSet = bifReader.getParentSet(iAttribute);
-        	bayesNet.getParentSet(iAttribute);
-        	for (int iParent = 0; iParent < parentSet.getNrOfParents(); iParent++) {
-        		bayesNet.getParentSet(iAttribute).addParent(parentSet.getParent(iParent), instances);
+            int iBIFAttribute = bifReader.getNode(bayesNet.getNodeName(iAttribute));
+            ParentSet bifParentSet = bifReader.getParentSet(iBIFAttribute);
+        	for (int iBIFParent = 0; iBIFParent < bifParentSet.getNrOfParents(); iBIFParent++) {
+        	    String sParent = bifReader.getNodeName(bifParentSet.getParent(iBIFParent));
+        	    int iParent = 0;
+        	    while (iParent < instances.numAttributes() && !bayesNet.getNodeName(iParent).equals(sParent)) {
+        	        iParent++;
+        	    }
+        	    if (iParent >= instances.numAttributes()) {
+        	        throw new Exception("Could not find attribute " + sParent + " from BIF file in data");
+        	    }
+        		bayesNet.getParentSet(iAttribute).addParent(iParent, instances);
         	}
         }
 	} // buildStructure
@@ -86,8 +94,6 @@ public class FromFile extends SearchAlgorithm {
 	 *
 	 * -B
 	 * Set the random order to true (default false). <p>
-	 *
-	 * For other options see search algorithm.
 	 *
 	 * @param options the list of options as an array of strings
 	 * @exception Exception if an option is not supported
