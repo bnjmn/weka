@@ -64,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -180,6 +180,10 @@ public class CVParameterSelection extends Classifier
 
   /** The set of all classifier options as determined by cross-validation */
   protected String [] m_BestClassifierOptions;
+
+  /** The set of all options at initialization time. So that getOptions
+      can return this. */
+  protected String [] m_InitOptions;
 
   /** The cross-validated performance of the best options */
   protected double m_BestPerformance;
@@ -453,7 +457,11 @@ public class CVParameterSelection extends Classifier
     String [] classifierOptions = new String [0];
     if ((m_Classifier != null) && 
 	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
+      if (m_InitOptions == null) {
+	classifierOptions = ((OptionHandler)m_Classifier).getOptions();
+      } else {
+	classifierOptions = m_InitOptions;
+      }
     }
 
     int current = 0;
@@ -500,11 +508,17 @@ public class CVParameterSelection extends Classifier
     Instances trainData = new Instances(instances);
     trainData.deleteWithMissingClass();
     if (trainData.numInstances() == 0) {
-      throw new Exception("No training instances without missing class.");
+      throw new IllegalArgumentException("No training instances without " +
+					 "missing class.");
     }
     if (trainData.numInstances() < m_NumFolds) {
-      throw new Exception("Number of training instances smaller than number of folds.");
+      throw new IllegalArgumentException("Number of training instances " +
+					 "smaller than number of folds.");
     }
+    if (!(m_Classifier instanceof OptionHandler)) {
+      throw new IllegalArgumentException("Base classifier should be OptionHandler.");
+    }
+    m_InitOptions = ((OptionHandler)m_Classifier).getOptions();
 
     // Check whether there are any parameters to optimize
     if (m_CVParams.size() == 0) {
