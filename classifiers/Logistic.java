@@ -32,9 +32,9 @@ import weka.filters.*;
  * with a ridge estimator.  <p>
  * 
  * This class utilizes globally convergent Newtons Method adapted from
- * Numerical Recipies in C.
+ * Numerical Recipies in C. <p>
  *
- * Reference: le Cessie, S. and van Houwelingen, J.C. (1997). <i>
+ * Reference: le Cessie, S. and van Houwelingen, J.C. (1992). <i>
  * Ridge Estimators in Logistic Regression.</i> Applied Statistics,
  * Vol. 41, No. 1, pp. 191-201. <p>
  *
@@ -50,7 +50,7 @@ import weka.filters.*;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Tony Voyle (tv6@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
 
@@ -82,8 +82,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
   protected boolean m_Debug;
   
   private double m_f;
-  
-  private double[] fvec;
 
   private int m_nn;
   
@@ -230,7 +228,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
      
     indx = new int[n];
     Matrix fjac = new Matrix(n,n);
-    fvec = new double[n];
+    double[] fvec = new double[n];
     g = new double[n];
     p = new double[n];
     xold = new double[n];
@@ -589,9 +587,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     double LLp = 2e+10;             // Log-likelihood on previous iteration
     m_LL  = 1e+10;                  // Log-likelihood of current iteration
     m_LLn = 0;                      // Log-likelihood of null hypothesis
-
-    double [] deltas = new double [nR + 1];
-    Matrix jacobian = new Matrix(nR + 1, nR + 1);
 
     // Set up parameters for null model
     m_Par[0] = Math.log((sY1+1) / (sY0+1));
