@@ -41,7 +41,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -256,16 +256,7 @@ public class FilteredClassifier extends DistributionClassifier
     newData.deleteWithMissingClass();
     m_Filter.inputFormat(newData);
     newData = Filter.useFilter(newData, m_Filter);
-    // Create a copy of the structure, but "cleanse" string types
-    FastVector atts = new FastVector();
-    for (int i = 0 ; i < newData.numAttributes(); i++) {
-      Attribute att = newData.attribute(i);
-      if (att.type() == Attribute.STRING) {
-        att = new Attribute(att.name(), null);
-      }
-      atts.addElement(att);
-    }
-    m_FilteredInstances = new Instances(newData.relationName(), atts, 0);
+    m_FilteredInstances = cleanStringCopy(newData);
     m_Classifier.buildClassifier(newData);
   }
 
@@ -328,6 +319,27 @@ public class FilteredClassifier extends DistributionClassifier
       + m_Classifier.toString();
     return result;
   }
+
+  /**
+   * Create a copy of the structure, but "cleanse" string types (i.e.
+   * doesn't contain references to the strings seen in the past).
+   *
+   * @param data the set of Instances to copy the structure of
+   * @return a copy of the instance structure.
+   */
+  private Instances cleanStringCopy(Instances data) {
+
+    FastVector atts = new FastVector();
+    for (int i = 0 ; i < data.numAttributes(); i++) {
+      Attribute att = data.attribute(i);
+      if (att.type() == Attribute.STRING) {
+        att = new Attribute(att.name(), null);
+      }
+      atts.addElement(att);
+    }
+    return new Instances(data.relationName(), atts, 0);
+  }
+
 
   /**
    * Main method for testing this class.
