@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -1128,6 +1128,7 @@ public class ClustererPanel extends JPanel {
       });
     
     jf.setVisible(true);
+    tv.fitToScreen();
   }
 
   /**
