@@ -13,7 +13,7 @@ import junit.framework.TestSuite;
  * java weka.filters.AddFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AddFilterTest extends AbstractFilterTest {
   
@@ -43,12 +43,7 @@ public class AddFilterTest extends AbstractFilterTest {
 
   public void testAddNominal() {
     m_Filter = getFilter();
-    try {
-      ((AddFilter)m_Filter).setNominalLabels("hello,there,bob");
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      fail("Couldn't set list of nominal labels for AddFilter");
-    }
+    ((AddFilter)m_Filter).setNominalLabels("hello,there,bob");
     testBuffered();
   }
 

@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.AttributeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeFilterTest extends AbstractFilterTest {
   
@@ -29,16 +29,9 @@ public class AttributeFilterTest extends AbstractFilterTest {
   /** Creates a specialized AttributeFilter */
   public Filter getFilter(String rangelist) {
     
-    try {
-      AttributeFilter af = new AttributeFilter();
-      af.setAttributeIndices(rangelist);
-      return af;
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      fail("Exception setting attribute range: " + rangelist 
-           + "\n" + ex.getMessage()); 
-    }
-    return null;
+    AttributeFilter af = new AttributeFilter();
+    af.setAttributeIndices(rangelist);
+    return af;
   }
 
   public void testTypical() {

@@ -10,7 +10,7 @@ import junit.framework.TestSuite;
  * java weka.filters.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AllTests extends TestSuite {
 
@@ -41,14 +41,12 @@ public class AllTests extends TestSuite {
     suite.addTest(ResampleFilterTest.suite());
     suite.addTest(SparseToNonSparseFilterTest.suite());
     suite.addTest(SplitDatasetFilterTest.suite());
-    /*
-      suite.addTest(SpreadSubsampleFilterTest.suite());
-      suite.addTest(StringToNominalFilterTest.suite());
-      suite.addTest(StringToWordVectorFilterTest.suite());
-      suite.addTest(SwapAttributeValuesFilterTest.suite());
-      suite.addTest(TimeSeriesDeltaFilterTest.suite());
-      suite.addTest(TimeSeriesTranslateFilterTest.suite());
-    */
+    suite.addTest(SpreadSubsampleFilterTest.suite());
+    suite.addTest(StringToNominalFilterTest.suite());
+    suite.addTest(StringToWordVectorFilterTest.suite());
+    suite.addTest(SwapAttributeValuesFilterTest.suite());
+    suite.addTest(TimeSeriesDeltaFilterTest.suite());
+    suite.addTest(TimeSeriesTranslateFilterTest.suite());
     return suite;
   }
 
