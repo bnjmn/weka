@@ -22,12 +22,17 @@ import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.filters.*;
+
 /** 
  * Consistency attribute subset evaluator. <p>
+ *
  * For more information see: <br>
- * 
+ * Liu, H., and Setiono, R., (1996). A probabilistic approach to feature 
+ * selection - A filter solution. In 13th International Conference on 
+ * Machine Learning (ICML'96), July 1996, pp. 319-327. Bari, Italy. 
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ConsistencySubsetEval extends SubsetEvaluator {
   
@@ -209,6 +214,22 @@ public class ConsistencySubsetEval extends SubsetEvaluator {
       
       System.out.println("Hash val: "+hashCode());
     }
+  }
+
+  /**
+   * Returns a string describing this search method
+   * @return a description of the search suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "ConsistencySubsetEval :\n\nEvaluates the worth of a subset of "
+      +"attributes by the level of consistency in the class values when the "
+      +"training instances are projected onto the subset of attributes. "
+      +"\n\nConsistency of any subset can never be lower than that of the "
+      +"full set of attributes, hence the usual practice is to use this "
+      +"subset evaluator in conjunction with a Random or Exhaustive search "
+      +"which looks for the smallest subset with consistency equal to that "
+      +"of the full set of attributes.\n";
   }
 
   /**

@@ -36,7 +36,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -68,11 +68,63 @@ public class Ranker extends ASSearch
    */
   private double m_threshold;
 
+  private int m_numToSelect = -1;
+
+  /**
+   * Returns a string describing this search method
+   * @return a description of the search suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Ranker : \n\nRanks attributes by their individual evaluations. "
+      +"Use in conjunction with attribute evaluators (ReliefF, GainRatio, "
+      +"Entropy etc).\n";
+  }
+
   /**
    * Constructor
    */
   public Ranker () {
     resetOptions();
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numToSelectTipText() {
+    return "Specify the number of attributes to retain. The default value "
+      +"(-1) indicates that all attributes are to be retained. Use either "
+      +"this option or a threshold to reduce the attribute set.";
+  }
+
+  /**
+   * Specify the number of attributes to select from the ranked list. -1
+   * indicates that all attributes are to be retained.
+   * @param n the number of attributes to retain
+   */
+  public void setNumToSelect(int n) {
+    m_numToSelect = n;
+  }
+
+  /**
+   * Gets the number of attributes to be retained.
+   * @return the number of attributes to retain
+   */
+  public int getNumToSelect() {
+    return m_numToSelect;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String thresholdTipText() {
+    return "Set threshold by which attributes can be discarded. Default value "
+      + "results in no attributes being discarded. Use either this option or "
+      +"numToSelect to reduce the attribute set.";
   }
 
   /**
@@ -91,6 +143,16 @@ public class Ranker extends ASSearch
   public double getThreshold() {
     return m_threshold;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String generateRankingTipText() {
+    return "A constant option. Ranker is only capable of generating "
+      +" attribute rankings.";
+  }
 
   /**
    * This is a dummy set method---Ranker is ONLY capable of producing
@@ -108,6 +170,20 @@ public class Ranker extends ASSearch
    */
   public boolean getGenerateRanking() {
     return true;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String startSetTipText() {
+    return "Specify a set of attributes to ignore. "
+      +" When generating the ranking, Ranker will not evaluate the attributes "
+      +" in this list. "
+      +"This is specified as a comma " 
+      +"seperated list off attribute indexes starting at 1. It can include "
+      +"ranges. Eg. 1,2,5-9,17.";
   }
 
   /**
@@ -135,7 +211,7 @@ public class Ranker extends ASSearch
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(3);
 
     newVector
       .addElement(new Option("\tSpecify a starting set of attributes." 
@@ -148,6 +224,11 @@ public class Ranker extends ASSearch
       .addElement(new Option("\tSpecify a theshold by which attributes" 
 			     + "\tmay be discarded from the ranking.","T",1
 			     , "-T <threshold>"));
+
+    newVector
+      .addElement(new Option("\tSpecify number of attributes to select" 
+			     ,"N",1
+			     , "-N <num to select>"));
 
     return newVector.elements();
 
@@ -186,6 +267,11 @@ public class Ranker extends ASSearch
       temp = Double.valueOf(optionString);
       setThreshold(temp.doubleValue());
     }
+
+    optionString = Utils.getOption('N', options);
+    if (optionString.length() != 0) {
+      setNumToSelect(Integer.parseInt(optionString));
+    }
   }
 
   /**
@@ -194,7 +280,7 @@ public class Ranker extends ASSearch
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[4];
+    String[] options = new String[6];
     int current = 0;
 
     if (!(getStartSet().equals(""))) {
@@ -204,6 +290,9 @@ public class Ranker extends ASSearch
 
     options[current++] = "-T";
     options[current++] = "" + getThreshold();
+
+    options[current++] = "-N";
+    options[current++] = ""+getNumToSelect();
 
     while (current < options.length) {
       options[current++] = "";
@@ -368,9 +457,26 @@ public class Ranker extends ASSearch
       bestToWorst[i][1] = m_attributeMerit[temp];
     }
 
+    if (m_numToSelect > 0) {
+      determineThreshFromNumToSelect(bestToWorst);
+    }
+
     return  bestToWorst;
   }
 
+  private void determineThreshFromNumToSelect(double [][] ranking) 
+    throws Exception {
+    if (m_numToSelect > ranking.length) {
+      throw new Exception("More attributes requested than exist in the data");
+    }
+
+    if (m_numToSelect == ranking.length) {
+      return;
+    }
+
+    m_threshold = (ranking[m_numToSelect-1][1] + 
+		   ranking[m_numToSelect][1]) / 2.0;
+  }
 
   /**
    * returns a description of the search as a String

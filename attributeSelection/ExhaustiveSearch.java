@@ -34,7 +34,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ExhaustiveSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -73,6 +73,20 @@ public class ExhaustiveSearch extends ASSearch
   
   /** the number of subsets evaluated during the search */
   private int m_evaluations;
+
+  /**
+   * Returns a string describing this search method
+   * @return a description of the search suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "ExhaustiveSearch : \n\nPerforms an exhaustive search through "
+      +"the space of attribute subsets starting from the empty set of "
+      +"attrubutes. Reports the best subset found. If a start set is "
+      +"supplied, the algorithm searches backward from the start point "
+      +"and reports the smallest subset with as good or better evaluation "
+      +"as the start point.\n";
+  }
 
   /**
    * Constructor
@@ -134,6 +148,17 @@ public class ExhaustiveSearch extends ASSearch
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String startSetTipText() {
+    return "Set the start point for the search. This is specified as a comma "
+      +"seperated list off attribute indexes starting at 1. It can include "
+      +"ranges. Eg. 1,2,5-9,17.";
+  }
+
+  /**
    * Sets a starting set of attributes for the search. It is the
    * search method's responsibility to report this start set (if any)
    * in its toString() method.
@@ -155,6 +180,16 @@ public class ExhaustiveSearch extends ASSearch
    */
   public String getStartSet () {
     return m_startRange.getRanges();
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String verboseTipText() {
+    return "Print progress information. Sends progress info to the terminal "
+      +"as the search progresses.";
   }
 
   /**
@@ -257,7 +292,7 @@ public class ExhaustiveSearch extends ASSearch
   }
 
   /**
-   * Searches the attribute subset space using a genetic algorithm.
+   * Searches the attribute subset space using an exhaustive search.
    *
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.

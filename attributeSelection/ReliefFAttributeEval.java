@@ -39,7 +39,7 @@ import  weka.core.*;
  * Marko Robnik Sikonja, Igor Kononenko: An adaptation of Relief for attribute
  * estimation on regression. In D.Fisher (ed.): <i> Machine Learning, 
  * Proceedings of 14th International Conference on Machine Learning ICML'97, 
- * </i> Nashville, TN, 1997. 
+ * </i> Nashville, TN, 1997. <p>
  *
  *
  * Valid options are:
@@ -64,7 +64,7 @@ import  weka.core.*;
  * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -142,6 +142,7 @@ public class ReliefFAttributeEval
  
   /** Random number seed used for sampling instances */
   private int m_seed;
+
   /**
    *  used to (optionally) weight nearest neighbours by their distance
    *  from the instance in question. Each entry holds 
@@ -155,6 +156,17 @@ public class ReliefFAttributeEval
   /** Weight by distance rather than equal weights */
   private boolean m_weightByDistance;
 
+  /**
+   * Returns a string describing this attribute evaluator
+   * @return a description of the evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "ReliefFAttributeEval :\n\nEvaluates the worth of an attribute by "
+      +"repeatedly sampling an instance and considering the value of the "
+      +"given attribute for the nearest instance of the same and different "
+      +"class. Can operate on both discrete and continuous class data.\n";
+  }
 
   /**
    * Constructor
@@ -260,6 +272,17 @@ public class ReliefFAttributeEval
     }
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String sigmaTipText() {
+    return "Set influence of nearest neighbours. Used in an exp function to "
+      +"control how quickly weights decrease for more distant instances. "
+      +"Use in conjunction with weightByDistance. Sensible values = 1/5 to "
+      +"1/10 the number of nearest neighbours.";
+  }
 
   /**
    * Sets the sigma value.
@@ -287,6 +310,14 @@ public class ReliefFAttributeEval
     return  m_sigma;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numNeighboursTipText() {
+    return "Number of nearest neighbours for attribute estimation.";
+  }
 
   /**
    * Set the number of nearest neighbours
@@ -307,6 +338,14 @@ public class ReliefFAttributeEval
     return  m_Knn;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Random seed for sampling instances.";
+  }
 
   /**
    * Set the random number seed for randomly sampling instances.
@@ -327,6 +366,15 @@ public class ReliefFAttributeEval
     return  m_seed;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String sampleSizeTipText() {
+    return "Number of instances to sample. Default (-1) indicates that all "
+      +"instances will be used for attribute estimation.";
+  }
 
   /**
    * Set the number of instances to sample for attribute estimation
@@ -347,6 +395,14 @@ public class ReliefFAttributeEval
     return  m_sampleM;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String weightByDistanceTipText() {
+    return "Weight nearest neighbours by their distance.";
+  }
 
   /**
    * Set the nearest neighbour weighting method

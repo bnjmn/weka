@@ -38,7 +38,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -239,13 +239,13 @@ public class BestFirst extends ASSearch
    */
   public String globalInfo() {
     return "BestFirst:\n\n"
-      +"Searches the space of attribute subsets by greedy hillclimbing\n"
-      +"augmented with a backtracking facility. Setting the number of\n"
-      +"consecutive non-improving nodes allowed controls the level of\n"
-      +"backtracking done. Best first may start with the empty set of\n"
-      +"attributes and search forward, or start with the full set of\n"
-      +"attributes and search backward, or start at any point and search\n"
-      +"in both directions (by considering all possible single attribute\n"
+      +"Searches the space of attribute subsets by greedy hillclimbing "
+      +"augmented with a backtracking facility. Setting the number of "
+      +"consecutive non-improving nodes allowed controls the level of "
+      +"backtracking done. Best first may start with the empty set of "
+      +"attributes and search forward, or start with the full set of "
+      +"attributes and search backward, or start at any point and search "
+      +"in both directions (by considering all possible single attribute "
       +"additions and deletions at a given point).\n";
   }
 
@@ -332,7 +332,9 @@ public class BestFirst extends ASSearch
    * displaying in the explorer/experimenter gui
    */
   public String startSetTipText() {
-    return "Set the start point for the search.";
+    return "Set the start point for the search. This is specified as a comma "
+      +"seperated list off attribute indexes starting at 1. It can include "
+      +"ranges. Eg. 1,2,5-9,17.";
   }
 
   /**
@@ -361,7 +363,7 @@ public class BestFirst extends ASSearch
    * displaying in the explorer/experimenter gui
    */
   public String searchTerminationTipText() {
-    return "Set the amount of backtracking.";
+    return "Set the amount of backtracking. Specify the number of ";
   }
 
   /**
