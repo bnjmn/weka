@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Plot2D extends JPanel {
 
@@ -399,6 +399,7 @@ public class Plot2D extends JPanel {
     m_masterPlot = null;
     m_plotInstances = null;
     m_plots = new FastVector();
+    m_xIndex = 0; m_yIndex = 0; m_cIndex = 0;
   }
 
   /**
@@ -1458,9 +1459,7 @@ public class Plot2D extends JPanel {
 	PlotData2D pd1 = new PlotData2D(i);
 	pd1.setPlotName("Master plot");
 
-	p2.setXindex(2);
-	p2.setYindex(3);
-	p2.setCindex(i.classIndex());
+	
 	if (args.length > 1) {
 	  System.err.println("Building classifier");
 	  weka.classifiers.Classifier cl;
@@ -1479,14 +1478,17 @@ public class Plot2D extends JPanel {
 	  }
 	  pd1.setPredictions(preds);
 	}
-	p2.addPlot(pd1);
+	p2.setMasterPlot(pd1);
+	p2.setXindex(2);
+	p2.setYindex(3);
+	p2.setCindex(i.classIndex());
 
 	if (args.length == 3) {
 	  System.err.println("Loading instances from " + args[2]);
 	  java.io.Reader rr = new java.io.BufferedReader(
 				 new java.io.FileReader(args[2]));
 	  Instances ii = new Instances(rr);
-	  ii.setClassIndex(i.numAttributes()-1);
+	  ii.setClassIndex(ii.numAttributes()-1);
 	  PlotData2D pd = new PlotData2D(ii);
 	  pd.setPlotName("2nd plot");
 	  pd.m_useCustomColour = true;

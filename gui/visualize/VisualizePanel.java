@@ -90,7 +90,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1049,6 +1049,7 @@ public class VisualizePanel extends JPanel {
 	//	m_preds = newPlot.m_preds;
 	m_plot2D.addPlot(newPlot);
 	m_attrib.setInstances(newPlot.m_plotInstances);
+	m_attrib.setX(0); m_attrib.setY(0);
 	m_classPanel.setInstances(newPlot.m_plotInstances);
 
 	// if the master plot is for clusterer predictions
@@ -2123,14 +2124,14 @@ public class VisualizePanel extends JPanel {
 	  }
 	  pd1.setPredictions(preds);
 	}
-	sp.addPlot(pd1);
+	sp.setMasterPlot(pd1);
 
 	if (args.length == 3) {
 	  System.err.println("Loading instances from " + args[2]);
 	  java.io.Reader rr = new java.io.BufferedReader(
 				 new java.io.FileReader(args[2]));
 	  Instances ii = new Instances(rr);
-	  ii.setClassIndex(i.numAttributes()-1);
+	  ii.setClassIndex(ii.numAttributes()-1);
 	  PlotData2D pd = new PlotData2D(ii);
 	  pd.setPlotName("2nd plot");
 	 
