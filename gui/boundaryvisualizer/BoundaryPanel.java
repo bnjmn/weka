@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.0
  * @see JPanel
  */
@@ -162,7 +162,16 @@ public class BoundaryPanel extends JPanel {
   // Stop the plotting thread
   private boolean m_stopPlotting = false;
 
+  // Stop any replotting threads
   private boolean m_stopReplotting = false;
+
+  // Used by replotting threads to pause and resume the main plot thread
+  private Double m_dummy = new Double(1.0);
+  private boolean m_pausePlotting = false;
+  // what size of tile is currently being plotted
+  private int m_size;
+  // is the main plot thread performing the initial coarse tiling
+  private boolean m_initialTiling;
 
   // A random number generator 
   private Random m_random = null;
@@ -293,7 +302,7 @@ public class BoundaryPanel extends JPanel {
   }
 
   /**
-   * Return the x attribute value that corresponds to the middle of
+   * Return a random x attribute value contained within
    * the pix'th horizontal pixel
    *
    * @param pix the horizontal pixel number
@@ -307,7 +316,7 @@ public class BoundaryPanel extends JPanel {
   }
 
   /**
-   * Return the y attribute value that corresponds to the middle of
+   * Return a random y attribute value contained within
    * the pix'th vertical pixel
    *
    * @param pix the vertical pixel number
@@ -354,6 +363,7 @@ public class BoundaryPanel extends JPanel {
     }
   }
   
+  // Thread for main plotting operation
   protected class PlotThread extends Thread {
     double [] m_weightingAttsValues;
     boolean [] m_attsToWeightOn;
@@ -385,36 +395,66 @@ public class BoundaryPanel extends JPanel {
         m_predInst = new Instance(1.0, m_vals);
         m_predInst.setDataset(m_trainingData);
 
-        int size = 1 << 4;  // Current sample region size
+        m_size = 1 << 4;  // Current sample region size
 
+	m_initialTiling = true;
         // Display the initial coarse image tiling.
-        for (int i = 0; i <= m_panelHeight; i += size) {   
-          for (int j = 0; j <= m_panelWidth; j += size) {   
-            plotPoint(j, i, size, size, calculateRegionProbs(j, i), true);
+      abortInitial:
+        for (int i = 0; i <= m_panelHeight; i += m_size) {   
+          for (int j = 0; j <= m_panelWidth; j += m_size) {   
+	    if (m_stopPlotting) {
+	      break abortInitial;
+	    }
+	    if (m_pausePlotting) {
+	      synchronized (m_dummy) {
+		try {
+		  m_dummy.wait();
+		} catch (InterruptedException ex) {
+		  m_pausePlotting = false;
+		}
+	      }
+	    }
+            plotPoint(j, i, m_size, m_size, 
+		      calculateRegionProbs(j, i), (j == 0));
           }
         }
+	if (!m_stopPlotting) {
+	  m_initialTiling = false;
+	}
         
         // Sampling and gridding loop
-        int size2 = size / 2;
+        int size2 = m_size / 2;
         abortPlot: 
-        while (size > 1) { // Subdivide down to the pixel level
-          for (int i = 0; i <= m_panelHeight; i += size) {
-            for (int j = 0; j <= m_panelWidth; j += size) {
+        while (m_size > 1) { // Subdivide down to the pixel level
+          for (int i = 0; i <= m_panelHeight; i += m_size) {
+            for (int j = 0; j <= m_panelWidth; j += m_size) {
               if (m_stopPlotting) {
                 break abortPlot;
               }
-              boolean update = (j == 0);
+	      if (m_pausePlotting) {
+		synchronized (m_dummy) {
+		  try {
+		    m_dummy.wait();
+		  } catch (InterruptedException ex) {
+		    m_pausePlotting = false;
+		  }
+		}
+	      }
+              boolean update = (j == 0 && i % 2 == 0);
               // Draw the three new subpixel regions
-              plotPoint(j, i + size2, size2, size2, calculateRegionProbs(j, i + size2), update);
-              plotPoint(j + size2, i + size2, size2, size2, calculateRegionProbs(j + size2, i + size2), update);
-              plotPoint(j + size2, i, size2, size2, calculateRegionProbs(j + size2, i), update);
+              plotPoint(j, i + size2, size2, size2, 
+			calculateRegionProbs(j, i + size2), update);
+              plotPoint(j + size2, i + size2, size2, size2, 
+			calculateRegionProbs(j + size2, i + size2), update);
+              plotPoint(j + size2, i, size2, size2, 
+			calculateRegionProbs(j + size2, i), update);
             }
           }
           // The new region edge length is half the old edge length
-          size = size2;
+          m_size = size2;
           size2 = size2 / 2;
         }
-
+	update();
 
         /* 
         // Old method without sampling.
@@ -452,10 +492,13 @@ public class BoundaryPanel extends JPanel {
     }
     
     private double [] calculateRegionProbs(int j, int i) throws Exception {
-      double [] sumOfProbsForRegion = new double [m_trainingData.classAttribute().numValues()];		
+      double [] sumOfProbsForRegion = 
+	new double [m_trainingData.classAttribute().numValues()];
+
       for (int u = 0; u < m_numOfSamplesPerRegion; u++) {
       
-        double [] sumOfProbsForLocation = new double [m_trainingData.classAttribute().numValues()];
+        double [] sumOfProbsForLocation = 
+	  new double [m_trainingData.classAttribute().numValues()];
       
         m_weightingAttsValues[m_xAttribute] = getRandomX(j);
         m_weightingAttsValues[m_yAttribute] = getRandomY(m_panelHeight-i-1);
@@ -513,7 +556,8 @@ public class BoundaryPanel extends JPanel {
       // cache
       if ((i < m_panelHeight) && (j < m_panelWidth)) {
         m_probabilityCache[i][j] = new double[sumOfProbsForRegion.length];
-        System.arraycopy(sumOfProbsForRegion, 0, m_probabilityCache[i][j], 0, sumOfProbsForRegion.length);
+        System.arraycopy(sumOfProbsForRegion, 0, m_probabilityCache[i][j], 
+			 0, sumOfProbsForRegion.length);
       }
 		
       return sumOfProbsForRegion;
@@ -523,9 +567,6 @@ public class BoundaryPanel extends JPanel {
   private void plotTrainingData() {
     Graphics2D osg = (Graphics2D)m_osi.getGraphics();
     Graphics g = m_plotPanel.getGraphics();
-    //    AlphaComposite ac =  AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-    //    						    0.5f);
-    //    osg.setComposite(ac);
     osg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                          RenderingHints.VALUE_ANTIALIAS_ON);
     double xval = 0; double yval = 0;
@@ -540,7 +581,7 @@ public class BoundaryPanel extends JPanel {
         int panelY = convertToPanelY(yval);
         Color ColorToPlotWith = 
           ((Color)m_Colors.elementAt((int)m_trainingData.instance(i).
-                                     value(m_classIndex)));
+                                     value(m_classIndex) % m_Colors.size()));
 
         if (ColorToPlotWith.equals(Color.white)) {
           osg.setColor(Color.black);
@@ -590,15 +631,25 @@ public class BoundaryPanel extends JPanel {
     plotPoint(x, y, 1, 1, probs, update);
   }
   
-  private void plotPoint(int x, int y, int width, int height, double [] probs, boolean update) {
-    // plot the point
+  private void plotPoint(int x, int y, int width, int height, 
+			 double [] probs, boolean update) {
+
+    // draw a progress line
     Graphics osg = m_osi.getGraphics();
-    Graphics g = m_plotPanel.getGraphics();
+    if (update) {
+      osg.setXORMode(Color.white);
+      osg.drawLine(0, y, m_panelWidth-1, y);
+      update();
+      osg.drawLine(0, y, m_panelWidth-1, y);
+    }
+
+    // plot the point
+    osg.setPaintMode();
     float [] colVal = new float[3];
     
     float [] tempCols = new float[3];
     for (int k = 0; k < probs.length; k++) {
-      Color curr = (Color)m_Colors.elementAt(k);
+      Color curr = (Color)m_Colors.elementAt(k % m_Colors.size());
 
       curr.getRGBColorComponents(tempCols);
       for (int z = 0 ; z < 3; z++) {
@@ -610,10 +661,11 @@ public class BoundaryPanel extends JPanel {
                            colVal[1], 
                            colVal[2]));
     osg.fillRect(x, y, width, height);
-
-    if (update) {
-      g.drawImage(m_osi, 0, 0, m_plotPanel);
-    }
+  }
+  
+  private void update() {
+    Graphics g = m_plotPanel.getGraphics();
+    g.drawImage(m_osi, 0, 0, m_plotPanel);
   }
 
   /**
@@ -765,6 +817,7 @@ public class BoundaryPanel extends JPanel {
       return;
     }
     m_stopReplotting = true;
+    m_pausePlotting = true;
     // wait 300 ms to give any other replot threads a chance to halt
     try {
       Thread.sleep(300);
@@ -773,17 +826,52 @@ public class BoundaryPanel extends JPanel {
     final Thread replotThread = new Thread() {
         public void run() {
           m_stopReplotting = false;
-          finishedReplot: for (int i = 0; i < m_panelHeight; i++) {
-            for (int j = 0; j < m_panelWidth; j++) {
+	  int size2 = m_size / 2;
+          finishedReplot: for (int i = 0; i < m_panelHeight; i += m_size) {
+            for (int j = 0; j < m_panelWidth; j += m_size) {
               if (m_probabilityCache[i][j] == null || m_stopReplotting) {
                 break finishedReplot;
               }
-              plotPoint(j, i, m_probabilityCache[i][j], i == 0);
-            }
+
+	      boolean update = (j == 0 && i % 2 == 0);
+	      if (i < m_panelHeight && j < m_panelWidth) {
+		// Draw the three new subpixel regions or single course tiling
+		if (m_initialTiling || m_size == 1) {
+		  if (m_probabilityCache[i][j] == null) {
+		    break finishedReplot;
+		  }
+		  plotPoint(j, i, m_size, m_size, 
+			    m_probabilityCache[i][j], update);
+		} else {
+		  if (m_probabilityCache[i+size2][j] == null) {
+		    break finishedReplot;
+		  }
+		  plotPoint(j, i + size2, size2, size2, 
+			    m_probabilityCache[i + size2][j], update);
+		  if (m_probabilityCache[i+size2][j+size2] == null) {
+		    break finishedReplot;
+		  }
+		  plotPoint(j + size2, i + size2, size2, size2, 
+			    m_probabilityCache[i + size2][j + size2], update);
+		  if (m_probabilityCache[i][j+size2] == null) {
+		    break finishedReplot;
+		  }
+		  plotPoint(j + size2, i, size2, size2, 
+			    m_probabilityCache[i + size2][j], update);
+		}
+	      }
+	    }
           }
+	  update();
           if (m_plotTrainingData) {
             plotTrainingData();
           }
+	  m_pausePlotting = false;
+	  if (!m_stopPlotting) {
+	    synchronized (m_dummy) {
+	      m_dummy.notifyAll();
+	    }
+	  }
         }
       };
     
@@ -820,55 +908,56 @@ public class BoundaryPanel extends JPanel {
    */
   public static void main (String [] args) {
     try {
-      if (args.length < 7) {
-        System.err.println("Usage : BoundaryPanel <dataset> "
-                           +"<class col> <xAtt> <yAtt> <display width> "
-                           +"<display height> <classifier "
-                           +"[classifier options]>");
-        System.exit(1);
+      if (args.length < 8) {
+	System.err.println("Usage : BoundaryPanel <dataset> "
+			   +"<class col> <xAtt> <yAtt> "
+			   +"<base> <# loc/pixel> <kernel bandwidth> "
+			   +"<display width> "
+			   +"<display height> <classifier "
+			   +"[classifier options]>");
+	System.exit(1);
       }
       final javax.swing.JFrame jf = 
-        new javax.swing.JFrame("Weka classification boundary visualizer");
+	new javax.swing.JFrame("Weka classification boundary visualizer");
       jf.getContentPane().setLayout(new BorderLayout());
 
       System.err.println("Loading instances from : "+args[0]);
       java.io.Reader r = new java.io.BufferedReader(
-                                                    new java.io.FileReader(args[0]));
+			 new java.io.FileReader(args[0]));
       final Instances i = new Instances(r);
       i.setClassIndex(Integer.parseInt(args[1]));
 
       //      bv.setClassifier(new Logistic());
       final int xatt = Integer.parseInt(args[2]);
       final int yatt = Integer.parseInt(args[3]);
-      int panelWidth = Integer.parseInt(args[4]);
-      int panelHeight = Integer.parseInt(args[5]);
+      int base = Integer.parseInt(args[4]);
+      int loc = Integer.parseInt(args[5]);
 
-      final String classifierName = args[6];
+      int bandWidth = Integer.parseInt(args[6]);
+      int panelWidth = Integer.parseInt(args[7]);
+      int panelHeight = Integer.parseInt(args[8]);
+
+      final String classifierName = args[9];
       final BoundaryPanel bv = new BoundaryPanel(panelWidth,panelHeight);
       bv.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            String classifierNameNew = 
-              classifierName.substring(classifierName.lastIndexOf('.')+1, 
-                                       classifierName.length());
-            bv.saveImage(classifierNameNew+"_"+i.relationName()
-                         +"_X"+xatt+"_Y"+yatt+".jpg");
-          }
-        });
-
-      bv.setDataGenerator(new KDDataGenerator());
-      bv.setTrainingData(i);
-      bv.setXAttribute(xatt);
-      bv.setYAttribute(yatt);
+	  public void actionPerformed(ActionEvent e) {
+	    String classifierNameNew = 
+	      classifierName.substring(classifierName.lastIndexOf('.')+1, 
+				       classifierName.length());
+	    bv.saveImage(classifierNameNew+"_"+i.relationName()
+			 +"_X"+xatt+"_Y"+yatt+".jpg");
+	  }
+	});
 
       jf.getContentPane().add(bv, BorderLayout.CENTER);
       jf.setSize(bv.getMinimumSize());
       //      jf.setSize(200,200);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
-          public void windowClosing(java.awt.event.WindowEvent e) {
-            jf.dispose();
-            System.exit(0);
-          }
-        });
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    jf.dispose();
+	    System.exit(0);
+	  }
+	});
 
       jf.pack();
       jf.setVisible(true);
@@ -877,14 +966,32 @@ public class BoundaryPanel extends JPanel {
       
 
       String [] argsR = null;
-      if (args.length > 7) {
-        argsR = new String [args.length-7];
-        for (int j = 7; j < args.length; j++) {
-          argsR[j-7] = args[j];
-        }
+      if (args.length > 10) {
+	argsR = new String [args.length-10];
+	for (int j = 9; j < args.length; j++) {
+	  argsR[j-10] = args[j];
+	}
       }
-      Classifier c = Classifier.forName(args[6], argsR);
+      Classifier c = Classifier.forName(args[9], argsR);
+      KDDataGenerator dataGen = new KDDataGenerator();
+      dataGen.setKernelBandwidth(bandWidth);
+      bv.setDataGenerator(dataGen);
+      bv.setNumSamplesPerRegion(loc);
+      bv.setGeneratorSamplesBase(base);
       bv.setClassifier((DistributionClassifier)c);
+      bv.setTrainingData(i);
+      bv.setXAttribute(xatt);
+      bv.setYAttribute(yatt);
+
+      try {
+	// try and load a color map if one exists
+	FileInputStream fis = new FileInputStream("colors.ser");
+	ObjectInputStream ois = new ObjectInputStream(fis);
+	FastVector colors = (FastVector)ois.readObject();
+	bv.setColors(colors);	
+      } catch (Exception ex) {
+	System.err.println("No color map file");
+      }
       bv.start();
     } catch (Exception ex) {
       ex.printStackTrace();
