@@ -70,7 +70,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -428,9 +428,15 @@ public class EM
 	}
 	else {
 	  double delta_init = m_maxValues[j]-m_minValues[j];
-	  m_modelNormal[i][j][0] = m_minValues[j]+delta_init*m_rr.nextDouble();
-	  m_modelNormal[i][j][1] = delta_init/(2*m_num_clusters);
-	  m_modelNormal[i][j][2] = 1.0;
+	  if (delta_init <= 0) {
+	    m_modelNormal[i][j][0] = m_minValues[j];
+	    m_modelNormal[i][j][1] = m_minStdDev;
+	    m_modelNormal[i][j][2] = 1.0;
+	  } else {
+	    m_modelNormal[i][j][0] = m_minValues[j]+delta_init*m_rr.nextDouble();
+	    m_modelNormal[i][j][1] = delta_init/(2*m_num_clusters);
+	    m_modelNormal[i][j][2] = 1.0;
+	  }
 	}
       }
     }
