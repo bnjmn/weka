@@ -136,6 +136,7 @@ weka.filters.Filter = \
  weka.filters.unsupervised.instance.NonSparseToSparse, \
  weka.filters.unsupervised.instance.Randomize, \
  weka.filters.unsupervised.instance.RemoveFolds, \
+ weka.filters.unsupervised.instance.RemoveFrequentValues, \
  weka.filters.unsupervised.instance.RemoveMisclassified, \
  weka.filters.unsupervised.instance.RemovePercentage, \
  weka.filters.unsupervised.instance.RemoveRange, \
