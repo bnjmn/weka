@@ -24,6 +24,7 @@ package weka.clusterers;
 
 import weka.core.*;
 import weka.estimators.*;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -36,7 +37,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
@@ -55,6 +56,8 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
   private double m_minStdDev = 1e-6;
   /** The clusterer being wrapped */
   private Clusterer m_wrappedClusterer = new weka.clusterers.SimpleKMeans();
+  /** globally replace missing values */
+  private ReplaceMissingValues m_replaceMissing;
 
   /**
    * Default constructor.
@@ -101,6 +104,10 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
    * @exception Exception if the clusterer hasn't been set or something goes wrong
    */  
   public void buildClusterer(Instances data) throws Exception {
+    m_replaceMissing = new ReplaceMissingValues();
+    m_replaceMissing.setInputFormat(data);
+    data = weka.filters.Filter.useFilter(data, m_replaceMissing);
+
     m_theInstances = new Instances(data, 0);
     if (m_wrappedClusterer == null) {
       throw new Exception("No clusterer has been set");
@@ -212,6 +219,9 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
     int i, j;
     double logprob;
     double[] wghts = new double[m_wrappedClusterer.numberOfClusters()];
+    
+    m_replaceMissing.input(inst);
+    inst = m_replaceMissing.output();
 
     for (i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
       logprob = 0;
