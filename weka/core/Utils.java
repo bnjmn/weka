@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public final class Utils {
 
@@ -857,56 +857,6 @@ public final class Utils {
   }
 
   /**
-   * Sorts a given array of doubles in ascending order and returns an 
-   * array of integers with the positions of the elements of the original 
-   * array in the sorted array. The sort is stable. (Equal elements remain
-   * in their original order.) Safe floating-point comparisons are
-   * used throughout.
-   *
-   * @param array this array is not changed by the method!
-   * @return an array of integers with the positions in the sorted
-   * array.
-   */
-  public static int[] sort(double [] array) {
-
-    int [] index = new int[array.length];
-    int [] newIndex = new int[array.length];
-    int [] helpIndex;
-    int numEqual;
-    
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-    }
-    quickSort(array, index, 0, array.length - 1);
-
-    // Make sort stable
-    int i = 0;
-    while (i < index.length) {
-      numEqual = 1;
-      for (int j = i + 1; ((j < index.length)
-			   && Utils.eq(array[index[i]], array[index[j]]));
-	   j++) {
-	numEqual++;
-      }
-      if (numEqual > 1) {
-	helpIndex = new int[numEqual];
-	for (int j = 0; j < numEqual; j++) {
-	  helpIndex[j] = i + j;
-	}
-	quickSort(index, helpIndex, 0, numEqual - 1);
-	for (int j = 0; j < numEqual; j++) {
-	  newIndex[i + j] = index[helpIndex[j]];
-	}
-	i += numEqual;
-      } else {
-	newIndex[i] = index[i];
-	i++;
-      }
-    }
-    return newIndex;
-  }
-
-  /**
    * Sorts a given array of integers in ascending order and returns an 
    * array of integers with the positions of the elements of the original 
    * array in the sorted array. The sort is stable. (Equal elements remain
@@ -956,23 +906,24 @@ public final class Utils {
   }
 
   /**
-   * Sorts a given array of doubles in ascending order and returns an 
-   * array of integers with the positions of the elements of the original 
-   * array in the sorted array. The sort is not stable. Doesn't use
-   * safe floating-point comparisons.
+   * Sorts a given array of doubles in ascending order and returns an
+   * array of integers with the positions of the elements of the
+   * original array in the sorted array. NOTE THESE CHANGES: the sort
+   * is no longer stable and it doesn't use safe floating-point
+   * comparisons anymore.
    *
    * @param array this array is not changed by the method!
    * @return an array of integers with the positions in the sorted
-   * array.
+   * array.  
    */
-  public static int[] sortUnsafe(double [] array) {
+  public static int[] sort(double [] array) {
 
     int [] index = new int[array.length];
     
     for (int i = 0; i < index.length; i++) {
       index[i] = i;
     }
-    quickSortUnsafe(array, index, 0, array.length - 1);
+    quickSort(array, index, 0, array.length - 1);
     return index;
   }
 
@@ -1046,72 +997,6 @@ public final class Utils {
   /**
    * Implements quicksort for an array of indices.
    *
-   * @param array the array of doubles to be sorted
-   * @param index the index which should contain the positions in the
-   * sorted array
-   * @param lo0 the first index of the subset to be sorted
-   * @param hi0 the last index of the subset to be sorted
-   */
-  private static void quickSort(double [] array, int [] index,
-				int lo0, int hi0) {
-
-    int lo = lo0;
-    int hi = hi0;
-    double mid;
-    double midPlus;
-    double midMinus;
-    int help;
-    
-    if (hi0 > lo0) {
-      
-      // Arbitrarily establishing partition element as the midpoint of
-      // the array.
-      mid = array[index[(lo0 + hi0) / 2]];
-      midPlus = mid + SMALL;
-      midMinus = mid - SMALL;
-
-      // loop through the array until indices cross
-      while (lo <= hi) {
-	
-	// find the first element that is greater than or equal to  
-	// the partition element starting from the left Index.
-	while ((array[index[lo]] < midMinus) && (lo < hi0)) {
-	  ++lo;
-	}
-	
-	// find an element that is smaller than or equal to 
-	// the partition element starting from the right Index.
-	while ((array[index[hi]] > midPlus) && (hi > lo0)) {
-	  --hi;
-	}
-	
-	// if the indexes have not crossed, swap
-	if (lo <= hi) {
-	  help = index[lo];
-	  index[lo] = index[hi];
-	  index[hi] = help;
-	  ++lo;
-	  --hi;
-	}
-      }
-      
-      // If the right index has not reached the left side of array
-      // must now sort the left partition.
-      if (lo0 < hi) {
-	quickSort(array, index, lo0, hi);
-      }
-      
-      // If the left index has not reached the right side of array
-      // must now sort the right partition.
-      if (lo < hi0) {
-	quickSort(array, index, lo, hi0);
-      }
-    }
-  }
-
-  /**
-   * Implements quicksort for an array of indices.
-   *
    * @param array the array of integers to be sorted
    * @param index the index which should contain the positions in the
    * sorted array
@@ -1180,8 +1065,7 @@ public final class Utils {
    * @param lo0 the first index of the subset to be sorted
    * @param hi0 the last index of the subset to be sorted
    */
-  private static void quickSortUnsafe(double [] array, int [] index,
-				      int lo0, int hi0) {
+  private static void quickSort(double [] array, int [] index, int lo0, int hi0) {
 
     int lo = lo0;
     int hi = hi0;
@@ -1222,13 +1106,13 @@ public final class Utils {
       // If the right index has not reached the left side of array
       // must now sort the left partition.
       if (lo0 < hi) {
-	quickSortUnsafe(array, index, lo0, hi);
+	quickSort(array, index, lo0, hi);
       }
       
       // If the left index has not reached the right side of array
       // must now sort the right partition.
       if (lo < hi0) {
-	quickSortUnsafe(array, index, lo, hi0);
+	quickSort(array, index, lo, hi0);
       }
     }
   }
