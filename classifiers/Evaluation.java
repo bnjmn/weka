@@ -90,7 +90,7 @@ import weka.estimators.*;
  *     System.err.println(e.getMessage());
  *   }
  * }
- * </code> </pre>
+ * </pre> </code> 
  * <p>
  *
  * ------------------------------------------------------------------ <p>
@@ -104,12 +104,12 @@ import weka.estimators.*;
  * Evaluation evaluation = new Evaluation(trainInstances);
  * evaluation.evaluateModel(scheme, testInstances);
  * System.out.println(evaluation.toSummaryString());
- * </code> </pre>
+ * </pre> </code> 
  *
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.18 $
+ * @version  $Revision: 1.19 $
   */
 public class Evaluation implements Summarizable {
 

@@ -44,10 +44,10 @@ import java.sql.ResultSetMetaData;
  * <code><pre>
  * jdbcDriver=jdbc.idbDriver
  * jdbcURL=jdbc:idb=experiments.prp
- * </code></pre><p>
+ * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DatabaseUtils implements Serializable {
 
