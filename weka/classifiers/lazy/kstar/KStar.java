@@ -188,7 +188,11 @@ public class KStar extends DistributionClassifier
 	}
     }
     if (m_ClassType == Attribute.NOMINAL) {
-      Utils.normalize(classProbability);
+      double sum = Utils.sum(classProbability);
+      if (sum <= 0.0)
+	for (int i=0; i<classProbability.length; i++)
+	  classProbability[i] = 1/m_NumClasses;
+      else Utils.normalize(classProbability, sum);
       return classProbability;
     }
     else {
