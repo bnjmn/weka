@@ -16,14 +16,20 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SelectedTag;
 import weka.test.Regression;
 import weka.core.UnsupportedClassTypeException;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.NoSupportForMissingValuesException;
+import weka.filters.AttributeTypeFilter;
+import weka.filters.ReplaceMissingValuesFilter;
+import weka.filters.Filter;
 
 /**
  * Abstract Test class for Classifiers.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractClassifierTest extends TestCase {
 
@@ -112,7 +118,51 @@ public abstract class AbstractClassifierTest extends TestCase {
       ex.printStackTrace();
       fail("Problem setting up to use classifier: " + ex);
     }
-    return m_Evaluation.getTrainTestPredictions(dc, train, test);
+    int counter = 0;
+    do {
+      try {
+	return m_Evaluation.getTrainTestPredictions(dc, train, test);
+      } catch (UnsupportedAttributeTypeException ex) {
+	SelectedTag tag = null;
+	boolean invert = false;
+	String msg = ex.getMessage();
+	if ((msg.indexOf("string") != -1) && 
+	    (msg.indexOf("attributes") != -1)) {
+	  System.err.println("\nDeleting string attributes.");
+	  tag = new SelectedTag(Attribute.STRING,
+				AttributeTypeFilter.TAGS_ATTRIBUTETYPE);
+	} else if ((msg.indexOf("only") != -1) && 
+		   (msg.indexOf("nominal") != -1)) {
+	  System.err.println("\nDeleting non-nominal attributes.");
+	  tag = new SelectedTag(Attribute.NOMINAL,
+				AttributeTypeFilter.TAGS_ATTRIBUTETYPE);
+	  invert = true;
+	} else {
+	  throw ex;
+	}
+	AttributeTypeFilter attFilter = new AttributeTypeFilter();
+	attFilter.setAttributeType(tag);
+	attFilter.setInvertSelection(invert);
+	attFilter.setInputFormat(train);
+	train = Filter.useFilter(train, attFilter);
+	attFilter.batchFinished();
+	test = Filter.useFilter(test, attFilter);
+	if (invert == true) {
+	  System.err.println(train);
+	}
+	counter++;
+	if (counter > 2) {
+	  throw ex;
+	}
+      } catch (NoSupportForMissingValuesException ex2) {
+	System.err.println("\nReplacing missing values.");
+	ReplaceMissingValuesFilter rmFilter = new ReplaceMissingValuesFilter();
+	rmFilter.setInputFormat(train);
+	train = Filter.useFilter(train, rmFilter);
+	rmFilter.batchFinished();
+	test = Filter.useFilter(test, rmFilter);
+      }
+    } while (true);
   }
 
   /**
