@@ -26,6 +26,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.DecisionStump;
 import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.SingleClassifierEnhancer;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -61,16 +62,13 @@ import weka.core.*;
  *
  * -B classname <br>
  * Specify the full class name of a base classifier (which needs
- * to be a WeightedInstancesHandler) (required).<p>
+ * to be a WeightedInstancesHandler).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ */
-public class LWL extends Classifier 
-  implements OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
-
-  // To maintain the same version number after fixing bug
-  static final long serialVersionUID = 7858523588073370243L;
+ * @version $Revision: 1.9 $ */
+public class LWL extends SingleClassifierEnhancer 
+  implements UpdateableClassifier, WeightedInstancesHandler {
   
   /** The training instances used for classification. */
   protected Instances m_Train;
@@ -80,9 +78,6 @@ public class LWL extends Classifier
 
   /** The maximum values for numeric attributes. */
   protected double [] m_Max;
-    
-  /** True if debugging output should be printed */
-  protected boolean m_Debug;
 
   /** The number of neighbours used to select the kernel bandwidth */
   protected int m_kNN = -1;
@@ -97,9 +92,39 @@ public class LWL extends Classifier
   protected static final int LINEAR  = 0;
   protected static final int INVERSE = 1;
   protected static final int GAUSS   = 2;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
 
-  /** The classifier object */
-  protected Classifier m_classifier = new DecisionStump();
+    return "Class for performing locally weighted learning. Can do "
+      + "classification (e.g. using naive Bayes) or regression (e.g. using "
+      + "linear regression). The base learner needs to implement "
+      + "WeightedInstancesHandler. For more info, see\n\n"
+      + "Eibe Frank, Mark Hall, and Bernhard Pfahringer (2003). \"Locally "
+      + "Weighted Naive Bayes\". Conference on Uncertainty in AI.\n\n"
+      + "Atkeson, C., A. Moore, and S. Schaal (1996) \"Locally weighted "
+      + "learning\" AI Reviews.";
+  }
+    
+  /**
+   * Constructor.
+   */
+  public LWL() {
+    
+    m_Classifier = new weka.classifiers.trees.DecisionStump();
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.DecisionStump";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -108,14 +133,7 @@ public class LWL extends Classifier
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(4);
-    newVector.addElement(new Option(
-				    "\tClassifier to wrap. (required)\n",
-				    "B", 1,"-B <classifier name>"));
-
-    newVector.addElement(new Option("\tProduce debugging output.\n"
-				    + "\t(default no debugging output)",
-				    "D", 0, "-D"));
+    Vector newVector = new Vector(2);
     newVector.addElement(new Option("\tSet the number of neighbors used to set"
 				    + " the kernel bandwidth.\n"
 				    + "\t(default all)",
@@ -124,17 +142,10 @@ public class LWL extends Classifier
 				    + " 1 = Inverse, 2 = Gaussian.\n"
 				    + "\t(default 0 = Linear)",
 				    "W", 1,"-W <number of weighting method>"));
-    
-    if ((m_classifier != null) &&
-	(m_classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option(
-	     "",
-	     "", 0, "\nOptions specific to classifier "
-	     + m_classifier.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
-      }
+
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
     }
 
     return newVector.elements();
@@ -156,7 +167,7 @@ public class LWL extends Classifier
    *
    * -B classname <br>
    * Specify the full class name of a base classifier (which needs
-   * to be a WeightedInstancesHandler) (required).<p>
+   * to be a WeightedInstancesHandler).<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -176,16 +187,7 @@ public class LWL extends Classifier
     } else {
       setWeightingKernel(LINEAR);
     }
-
-    String classifierName = Utils.getOption('B', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -B option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
-
-    setDebug(Utils.getFlag('D', options));
+    super.setOptions(options);
   }
 
   /**
@@ -195,81 +197,28 @@ public class LWL extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_classifier != null) && 
-	(m_classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_classifier).getOptions();
-    }
-    String [] options = new String [classifierOptions.length + 8];
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 4];
+
     int current = 0;
 
-    if (getClassifier() != null) {
-      options[current++] = "-B";
-      options[current++] = getClassifier().getClass().getName();
-    }
-  
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
     options[current++] = "-W"; options[current++] = "" + getWeightingKernel();
-    if (!m_UseAllK) {
-      options[current++] = "-K"; options[current++] = "" + getKNN();
-    }
+    options[current++] = "-K"; options[current++] = "" + getKNN();
+    
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    options[current++] = "--";
-
-    System.arraycopy(classifierOptions, 0, options, current,
-                     classifierOptions.length);
-    current += classifierOptions.length;
-
-    while (current < options.length) {
-      options[current++] = "";
-    }
     return options;
   }
-
+  
   /**
-   * Set the classifier for locally weighted learning. 
-   *
-   * @param newClassifier the Classifier to use.
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public void setClassifier(Classifier newClassifier) {
-
-    if (newClassifier instanceof WeightedInstancesHandler) {
-      m_classifier = newClassifier;
-    } else {
-      throw new IllegalArgumentException("Classifier must be a WeightedInstancesHandler!");
-    }
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_classifier;
-  }
-
-
-  /**
-   * Sets whether debugging output should be produced
-   *
-   * @param debug true if debugging output should be printed
-   */
-  public void setDebug(boolean debug) {
-
-    m_Debug = debug;
-  }
-  /**
-   * SGts whether debugging output should be produced
-   *
-   * @return true if debugging output should be printed
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
+  public String KNNTipText() {
+    return "How many neighbours are used to determine the width of the "
+      + "weighting function (<= 0 means all neighbours).";
   }
 
   /**
@@ -300,6 +249,16 @@ public class LWL extends Classifier
   public int getKNN() {
 
     return m_kNN;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String weightingKernelTipText() {
+    return "Determines weighting function (0: linear, 1: inverse distance, 2: "
+      + "Gaussian).";
   }
 
   /**
@@ -359,6 +318,11 @@ public class LWL extends Classifier
    * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
+
+    if (!(m_Classifier instanceof WeightedInstancesHandler)) {
+      throw new IllegalArgumentException("Classifier must be a "
+					 + "WeightedInstancesHandler!");
+    }
 
     if (instances.classIndex() < 0) {
       throw new Exception("No class attribute assigned to instances");
@@ -503,16 +467,16 @@ public class LWL extends Classifier
     }
 
     // Create a weighted classifier
-    m_classifier.buildClassifier(weightedTrain);
+    m_Classifier.buildClassifier(weightedTrain);
 
     if (m_Debug) {
       System.out.println("Classifying test instance: " + instance);
       System.out.println("Built base classifier:\n" 
-			 + m_classifier.toString());
+			 + m_Classifier.toString());
     }
 
     // Return the classifier's predictions
-    return m_classifier.distributionForInstance(instance);
+    return m_Classifier.distributionForInstance(instance);
   }
  
   /**
@@ -528,7 +492,7 @@ public class LWL extends Classifier
     String result = "Locally weighted learning\n"
       + "===========================\n";
 
-    result += "Using classifier: " + m_classifier.getClass().getName() + "\n";
+    result += "Using classifier: " + m_Classifier.getClass().getName() + "\n";
 
     switch (m_WeightKernel) {
     case LINEAR:

@@ -31,7 +31,7 @@ import weka.core.*;
 
 
 /**
- * <i>K</i>-nearest neighbour classifier. For more information, see <p>
+ * <i>K</i>-nearest neighbours classifier. For more information, see <p>
  * 
  * Aha, D., and D. Kibler (1991) "Instance-based learning algorithms",
  * <i>Machine Learning</i>, vol.6, pp. 37-66.<p>
@@ -48,7 +48,7 @@ import weka.core.*;
  * to maintain the number of training instances at this size.
  * (default no window) <p>
  *
- * -D <br>
+ * -I <br>
  * Neighbors will be weighted by the inverse of their distance
  * when voting. (default equal weighting) <p>
  *
@@ -57,10 +57,10 @@ import weka.core.*;
  * (default equal weighting) <p>
  *
  * -X <br>
- * Selects the number of neighbors to use by hold-one-out cross
+ * Select the number of neighbors to use by hold-one-out cross
  * validation, with an upper limit given by the -K option. <p>
  *
- * -S <br>
+ * -E <br>
  * When k is selected by cross-validation for numeric class attributes,
  * minimize mean-squared error. (default mean absolute error) <p>
  *
@@ -70,10 +70,24 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class IBk extends Classifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "K-nearest neighbours classifier. Normalizes attributes by default. Can "
+      + "select appropriate value of K based on cross-validation. Can also do "
+      + "distance weighting. For more information, see\n\n"
+      + "Aha, D., and D. Kibler (1991) \"Instance-based learning algorithms\", "
+      + "Machine Learning, vol.6, pp. 37-66.";
+  }
 
   /*
    * A class for storing data about a neighboring instance
@@ -306,9 +320,6 @@ public class IBk extends Classifier implements
    */
   protected boolean m_MeanSquared;
 
-  /** True if debugging output should be printed */
-  boolean m_Debug;
-
   /** True if normalization is turned off */
   protected boolean m_DontNormalize;
 
@@ -347,25 +358,13 @@ public class IBk extends Classifier implements
     init();
   }
 
-  
   /**
-   * Get the value of Debug.
-   *
-   * @return Value of Debug.
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public boolean getDebug() {
-    
-    return m_Debug;
-  }
-  
-  /**
-   * Set the value of Debug.
-   *
-   * @param newDebug Value to assign to Debug.
-   */
-  public void setDebug(boolean newDebug) {
-    
-    m_Debug = newDebug;
+  public String KNNTipText() {
+    return "The number of neighbours to use.";
   }
   
   /**
@@ -388,6 +387,18 @@ public class IBk extends Classifier implements
   public int getKNN() {
 
     return m_kNN;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String windowSizeTipText() {
+    return "Gets the maximum number of instances allowed in the training " +
+      "pool. The addition of new instances above this value will result " +
+      "in old instances being removed. A value of 0 signifies no limit " +
+      "to the number of training instances.";
   }
   
   /**
@@ -416,6 +427,15 @@ public class IBk extends Classifier implements
     m_WindowSize = newWindowSize;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String distanceWeightingTipText() {
+
+    return "Gets the distance weighting method used.";
+  }
   
   /**
    * Gets the distance weighting method used. Will be one of
@@ -440,6 +460,17 @@ public class IBk extends Classifier implements
       m_DistanceWeighting = newMethod.getSelectedTag().getID();
     }
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String meanSquaredTipText() {
+
+    return "Whether the mean squared error is used rather than mean "
+      + "absolute error when doing cross-validation for regression problems.";
+  }
 
   /**
    * Gets whether the mean squared error is used rather than mean
@@ -461,6 +492,17 @@ public class IBk extends Classifier implements
   public void setMeanSquared(boolean newMeanSquared) {
     
     m_MeanSquared = newMeanSquared;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String crossValidateTipText() {
+
+    return "Whether hold-one-out cross-validation will be used " +
+      "to select the best k value.";
   }
   
   /**
@@ -513,6 +555,16 @@ public class IBk extends Classifier implements
       throw new Exception("Maximum value for attribute not available!");
     }
     return m_Max[index];
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String noNormalizationTipText() {
+
+    return "Whether attribute normalization is turned off.";
   }
   
   /**
@@ -668,7 +720,7 @@ public class IBk extends Classifier implements
     newVector.addElement(new Option(
 	      "\tWeight neighbours by the inverse of their distance\n"
 	      +"\t(use when k > 1)",
-	      "D", 0, "-D"));
+	      "I", 0, "-I"));
     newVector.addElement(new Option(
 	      "\tWeight neighbours by 1 - their distance\n"
 	      +"\t(use when k > 1)",
@@ -680,7 +732,7 @@ public class IBk extends Classifier implements
     newVector.addElement(new Option(
               "\tMinimise mean squared error rather than mean absolute\n"
 	      +"\terror when using -X option with numeric prediction.",
-	      "S", 0,"-S"));
+	      "E", 0,"-E"));
     newVector.addElement(new Option(
               "\tMaximum number of training instances maintained.\n"
 	      +"\tTraining instances are dropped FIFO. (Default = no window)",
@@ -709,7 +761,7 @@ public class IBk extends Classifier implements
    * to maintain the number of training instances at this size.
    * (default no window) <p>
    *
-   * -D <br>
+   * -I <br>
    * Neighbors will be weighted by the inverse of their distance
    * when voting. (default equal weighting) <p>
    *
@@ -721,7 +773,7 @@ public class IBk extends Classifier implements
    * Select the number of neighbors to use by hold-one-out cross
    * validation, with an upper limit given by the -K option. <p>
    *
-   * -S <br>
+   * -E <br>
    * When k is selected by cross-validation for numeric class attributes,
    * minimize mean-squared error. (default mean absolute error) <p>
    *
@@ -742,7 +794,7 @@ public class IBk extends Classifier implements
     } else {
       setWindowSize(0);
     }
-    if (Utils.getFlag('D', options)) {
+    if (Utils.getFlag('I', options)) {
       setDistanceWeighting(new SelectedTag(WEIGHT_INVERSE, TAGS_WEIGHTING));
     } else if (Utils.getFlag('F', options)) {
       setDistanceWeighting(new SelectedTag(WEIGHT_SIMILARITY, TAGS_WEIGHTING));
@@ -750,7 +802,7 @@ public class IBk extends Classifier implements
       setDistanceWeighting(new SelectedTag(WEIGHT_NONE, TAGS_WEIGHTING));
     }
     setCrossValidate(Utils.getFlag('X', options));
-    setMeanSquared(Utils.getFlag('S', options));
+    setMeanSquared(Utils.getFlag('E', options));
     setNoNormalization(Utils.getFlag('N', options));
 
     Utils.checkForRemainingOptions(options);
@@ -771,10 +823,10 @@ public class IBk extends Classifier implements
       options[current++] = "-X";
     }
     if (getMeanSquared()) {
-      options[current++] = "-S";
+      options[current++] = "-E";
     }
     if (m_DistanceWeighting == WEIGHT_INVERSE) {
-      options[current++] = "-D";
+      options[current++] = "-I";
     } else if (m_DistanceWeighting == WEIGHT_SIMILARITY) {
       options[current++] = "-F";
     }

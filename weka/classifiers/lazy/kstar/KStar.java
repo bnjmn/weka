@@ -53,7 +53,7 @@ import weka.classifiers.*;
  */
 
 public class KStar extends Classifier
-  implements KStarConstants, OptionHandler, UpdateableClassifier {
+  implements KStarConstants, UpdateableClassifier {
 
   /** The training instances used for classification. */
   protected Instances m_Train; 
@@ -96,11 +96,29 @@ public class KStar extends Classifier
 
   /** Define possible missing value handling methods */
   public static final Tag [] TAGS_MISSING = {
-    new Tag(M_DELETE, "Ignore the instance with the missing value"),
+    new Tag(M_DELETE, "Ignore the instances with missing values"),
     new Tag(M_MAXDIFF, "Treat missing values as maximally different"),
-    new Tag(M_NORMAL, "Normilize over the attributes"),
+    new Tag(M_NORMAL, "Normalize over the attributes"),
     new Tag(M_AVERAGE, "Average column entropy curves")
       };
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "K* is an instance-based classifier, that is the class of a test "
+      + "instance is based upon the class of those training instances "
+      + "similar to it, as determined by some similarity function.  It differs "
+      + "from other instance-based learners in that it uses an entropy-based "
+      + "distance function. For more information on K*, see\n\n"
+      + "John, G. Cleary and Leonard, E. Trigg (1995) \"K*: An Instance- "
+      + "based Learner Using an Entropic Distance Measure\", "
+      + "Proceedings of the 12th International Conference on Machine "
+      + "learning, pp. 108-114.";
+  }
 
   /**
    * Generates the classifier.
@@ -202,7 +220,6 @@ public class KStar extends Classifier
     }
   }
 
-
   /**
    * Calculate the probability of the first instance transforming into the 
    * second instance:
@@ -240,7 +257,6 @@ public class KStar extends Classifier
      return transProb / m_NumInstances;
   }
 
-
   /**
    * Calculates the transformation probability of the indexed test attribute 
    * to the indexed train attribute.
@@ -250,7 +266,6 @@ public class KStar extends Classifier
    * @param col the index of the attribute in the instance.
    * @return the value of the transformation probability.
    */
-
   private double attrTransProb(Instance first, Instance second, int col) {
     String debug = "(KStar.attrTransProb)";
     double transProb = 0.0;
@@ -277,6 +292,15 @@ public class KStar extends Classifier
 	break;
       }
     return transProb;
+  }
+   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String missingModeTipText() {
+    return "Determines how missing attribute values are treated.";
   }
 
   /**
@@ -323,6 +347,15 @@ public class KStar extends Classifier
 	      "M", 1,"-M <char>"));
     return optVector.elements();
   }
+   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalBlendTipText() {
+    return "The parameter for global blending. Values are restricted to [0,100].";
+  }
 
   /**
    * Set the global blend parameter
@@ -344,6 +377,15 @@ public class KStar extends Classifier
    */
   public int getGlobalBlend() {
     return m_GlobalBlend;
+  }
+   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String entropicAutoBlendTipText() {
+    return "Whether entropy-based blending is to be used.";
   }
 
   /**
@@ -475,7 +517,6 @@ public class KStar extends Classifier
       e.printStackTrace();
     }
   }
-
 
   /**
    * Initializes the m_Attributes of the class.

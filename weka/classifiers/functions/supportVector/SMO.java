@@ -104,7 +104,7 @@ import weka.core.*;
  * Fit logistic models to SVM outputs.<p>
  *
  * -V num <br>
- * Number of runs for cross-validation used to generate data
+ * Number of folds for cross-validation used to generate data
  * for logistic models. (default -1, use training data)
  *
  * -W num <br>
@@ -113,9 +113,40 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.5 $ */
-public class SMO extends Classifier implements OptionHandler, 
-  WeightedInstancesHandler {
+ * @version $Revision: 1.6 $ */
+public class SMO extends Classifier implements WeightedInstancesHandler {
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Implements John Platt's sequential minimal optimization "
+      + "algorithm for training a support vector classifier.\n\n"
+      + "This implementation globally replaces all missing values and "
+      + "transforms nominal attributes into binary ones. It also "
+      + "normalizes all attributes by default. (In that case the coefficients "
+      + "in the output are based on the normalized data, not the "
+      + "original data --- this is important for interpreting the classifier.)\n\n"
+      + "Multi-class problems are solved using pairwise classification.\n\n"
+      + "To obtain proper probability estimates, use the option that fits "
+      + "logistic regression models to the outputs of the support vector "
+      + "machine. In the multi-class case the predicted probabilities "
+      + "are coupled using Hastie and Tibshirani's pairwise coupling "
+      + "method.\n\n"
+      + "Note: for improved speed normalization should be turned off when "
+      + "operating on SparseInstances.\n\n"
+      + "For more information on the SMO algorithm, see\n\n"
+      + "J. Platt (1998). \"Fast Training of Support Vector "
+      + "Machines using Sequential Minimal Optimization\". Advances in Kernel "
+      + "Methods - Support Vector Learning, B. Schölkopf, C. Burges, and "
+      + "A. Smola, eds., MIT Press. \n\n"
+      + "S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy,  "
+      + "\"Improvements to Platt's SMO Algorithm for SVM Classifier Design\".  "
+      + "Neural Computation, 13(3), pp 637-649, 2001.";
+  }
 
   /**
    * Class for building a binary support vector machine.
@@ -329,7 +360,8 @@ public class SMO extends Classifier implements OptionHandler,
 	m_kernel = new RBFKernel(m_data, m_cacheSize, m_gamma);
       } else {
 	if (m_featureSpaceNormalization) {
-	  m_kernel = new NormalizedPolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
+	  m_kernel = new NormalizedPolyKernel(m_data, m_cacheSize, m_exponent, 
+					      m_lowerOrder);
 	} else {
 	  m_kernel = new PolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
 	}
@@ -1035,7 +1067,8 @@ public class SMO extends Classifier implements OptionHandler,
 	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
       }
       if (insts.classAttribute().isNumeric()) {
-	throw new UnsupportedClassTypeException("SMO can't handle a numeric class! Use SMOreg for performing regression.");
+	throw new UnsupportedClassTypeException("SMO can't handle a numeric class! Use"
+						+ "SMOreg for performing regression.");
       }
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
@@ -1313,7 +1346,6 @@ public class SMO extends Classifier implements OptionHandler,
   /**
    * Returns the weights in sparse format.
    */
-  
   public double [][][] sparseWeights() {
     
     int numValues = m_classAttribute.numValues();
@@ -1331,7 +1363,6 @@ public class SMO extends Classifier implements OptionHandler,
   /**
    * Returns the indices in sparse format.
    */
-  
   public int [][][] sparseIndices() {
     
     int numValues = m_classAttribute.numValues();
@@ -1349,7 +1380,6 @@ public class SMO extends Classifier implements OptionHandler,
   /**
    * Returns the bias of each binary SMO.
    */
-  
   public double [][] bias() {
     
     int numValues = m_classAttribute.numValues();
@@ -1367,7 +1397,6 @@ public class SMO extends Classifier implements OptionHandler,
   /*
    * Returns the number of values of the class attribute.
    */
-  
   public int numClassAttributeValues() {
 
     return m_classAttribute.numValues();
@@ -1376,7 +1405,6 @@ public class SMO extends Classifier implements OptionHandler,
   /*
    * Returns the names of the class attributes.
    */
-  
   public String [] classAttributeNames() {
 
     int numValues = m_classAttribute.numValues();
@@ -1393,7 +1421,6 @@ public class SMO extends Classifier implements OptionHandler,
   /**
    * Returns the attribute names.
    */
-  
   public String [][][] attributeNames() {
     
     int numValues = m_classAttribute.numValues();
@@ -1426,15 +1453,16 @@ public class SMO extends Classifier implements OptionHandler,
     newVector.addElement(new Option("\tThe exponent for the "
 				    + "polynomial kernel. (default 1)",
 				    "E", 1, "-E <double>"));
-    newVector.addElement(new Option("\tGamma for the "
-				    + "RBF kernel. (default 0.01)",
+    newVector.addElement(new Option("\tGamma for the RBF kernel. (default 0.01)",
 				    "G", 1, "-G <double>"));
     newVector.addElement(new Option("\tWhether to 0=normalize/1=standardize/2=neither. " +
 				    "(default 0=normalize)",
 				    "N", 1, "-N"));
-    newVector.addElement(new Option("\tFeature-space normalization (only for non-linear polynomial kernels).",
+    newVector.addElement(new Option("\tFeature-space normalization (only for\n" +
+				    "\tnon-linear polynomial kernels).",
 				    "F", 0, "-F"));
-    newVector.addElement(new Option("\tUse lower-order terms (only for non-linear polynomial kernels).",
+    newVector.addElement(new Option("\tUse lower-order terms (only for non-linear\n" +
+				    "\tpolynomial kernels).",
 				    "O", 0, "-O"));
     newVector.addElement(new Option("\tUse RBF kernel. " +
     				    "(default poly)",
@@ -1450,7 +1478,8 @@ public class SMO extends Classifier implements OptionHandler,
 				    "P", 1, "-P <double>"));
     newVector.addElement(new Option("\tFit logistic models to SVM outputs. ",
 				    "M", 0, "-M"));
-    newVector.addElement(new Option("\tThe number of folds for the internal cross-validation. " +
+    newVector.addElement(new Option("\tThe number of folds for the internal\n" +
+				    "\tcross-validation. " +
 				    "(default -1, use training data)",
 				    "V", 1, "-V <double>"));
     newVector.addElement(new Option("\tThe random number seed. " +
@@ -1497,7 +1526,7 @@ public class SMO extends Classifier implements OptionHandler,
    * Fit logistic models to SVM outputs.<p>
    *
    * -V num <br>
-   * Number of runs for cross-validation used to generate data
+   * Number of folds for cross-validation used to generate data
    * for logistic models. (default -1, use training data)
    *
    * -W num <br>
@@ -1617,6 +1646,15 @@ public class SMO extends Classifier implements OptionHandler,
     }
     return options;
   }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String exponentTipText() {
+    return "The exponent for the polynomial kernel.";
+  }
   
   /**
    * Get the value of exponent. 
@@ -1643,6 +1681,15 @@ public class SMO extends Classifier implements OptionHandler,
     }
     m_exponent = v;
   }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String gammaTipText() {
+    return "The value of the gamma parameter for RBF kernels.";
+  }
   
   /**
    * Get the value of gamma. 
@@ -1662,6 +1709,15 @@ public class SMO extends Classifier implements OptionHandler,
   public void setGamma(double v) {
     
     m_gamma = v;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String cTipText() {
+    return "The complexity parameter C.";
   }
   
   /**
@@ -1683,6 +1739,15 @@ public class SMO extends Classifier implements OptionHandler,
     
     m_C = v;
   }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String toleranceParameterTipText() {
+    return "The tolerance parameter (shouldn't be changed).";
+  }
   
   /**
    * Get the value of tolerance parameter.
@@ -1700,6 +1765,15 @@ public class SMO extends Classifier implements OptionHandler,
   public void setToleranceParameter(double v) {
     
     m_tol = v;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String epsilonTipText() {
+    return "The epsilon for round-off error (shouldn't be changed).";
   }
   
   /**
@@ -1719,6 +1793,15 @@ public class SMO extends Classifier implements OptionHandler,
     
     m_eps = v;
   }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String cacheSizeTipText() {
+    return "The size of the kernel cache (should be a prime number).";
+  }
   
   /**
    * Get the size of the kernel cache
@@ -1736,6 +1819,15 @@ public class SMO extends Classifier implements OptionHandler,
   public void setCacheSize(int v) {
     
     m_cacheSize = v;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String filterTypeTipText() {
+    return "Determines how the training data will be transformed.";
   }
   
   /**
@@ -1761,6 +1853,15 @@ public class SMO extends Classifier implements OptionHandler,
       m_filterType = newType.getSelectedTag().getID();
     }
   }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useRBFTipText() {
+    return "Whether to use an RBF kernel instead of a polynomial one.";
+  }
 
   /**
    * Check if the RBF kernel is to be used.
@@ -1783,6 +1884,16 @@ public class SMO extends Classifier implements OptionHandler,
     }
     m_useRBF = v;
   }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String featureSpaceNormalizationTipText() {
+    return "Whether feature-space normalization is performed (only "
+      + "available for non-linear polynomial kernels).";
+  }
   
   /**
    * Check whether feature spaces is being normalized.
@@ -1804,6 +1915,16 @@ public class SMO extends Classifier implements OptionHandler,
     } else {
       m_featureSpaceNormalization = v;
     }
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String lowerOrderTermsTipText() {
+    return "Whether lower order polyomials are also used (only "
+      + "available for non-linear polynomial kernels).";
   }
   
   /**
@@ -1828,7 +1949,17 @@ public class SMO extends Classifier implements OptionHandler,
       m_lowerOrder = v;
     }
   }
-  
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String buildLogisticModelsTipText() {
+    return "Whether to fit logistic models to the outputs (for proper "
+      + "probability estimates).";
+  }
+
   /**
    * Get the value of buildLogisticModels.
    *
@@ -1847,6 +1978,16 @@ public class SMO extends Classifier implements OptionHandler,
   public void setBuildLogisticModels(boolean newbuildLogisticModels) {
     
     m_fitLogisticModels = newbuildLogisticModels;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "The number of folds for cross-validation used to generate "
+      + "training data for logistic models (-1 means use training data).";
   }
   
   /**
@@ -1867,6 +2008,15 @@ public class SMO extends Classifier implements OptionHandler,
   public void setNumFolds(int newnumFolds) {
     
     m_numFolds = newnumFolds;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String randomSeedTipText() {
+    return "Random number seed for the cross-validation.";
   }
   
   /**
