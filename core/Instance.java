@@ -46,7 +46,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -119,13 +119,13 @@ public class Instance implements Copyable, Serializable {
    *
    * @param index the attribute's index
    * @return the attribute at the given position
-   * @exception Exception if instance doesn't have access to a
+   * @exception UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
-  public Attribute attribute(int index) throws Exception {
+  public Attribute attribute(int index) {
    
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.attribute(index);
   }
@@ -136,13 +136,13 @@ public class Instance implements Copyable, Serializable {
    *
    * @param indexOfIndex the index of the attribute's index 
    * @return the attribute at the given position
-   * @exception Exception if instance doesn't have access to a
+   * @exception UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
-  public Attribute attributeSparse(int indexOfIndex) throws Exception {
+  public Attribute attributeSparse(int indexOfIndex) {
    
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.attribute(indexOfIndex);
   }
@@ -151,13 +151,13 @@ public class Instance implements Copyable, Serializable {
    * Returns class attribute.
    *
    * @return the class attribute
-   * @exception Exception if the class is not set or the
+   * @exception UnassignedDatasetException if the class is not set or the
    * instance doesn't have access to a dataset
    */
-  public Attribute classAttribute() throws Exception {
+  public Attribute classAttribute() {
 
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.classAttribute();
   }
@@ -166,12 +166,12 @@ public class Instance implements Copyable, Serializable {
    * Returns the class attribute's index.
    *
    * @return the class index as an integer 
-   * @exception Exception if instance doesn't have access to a dataset 
+   * @exception UnassignedDatasetException if instance doesn't have access to a dataset 
    */
-  public int classIndex() throws Exception {
+  public int classIndex() {
     
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.classIndex();
   }
@@ -180,13 +180,13 @@ public class Instance implements Copyable, Serializable {
    * Tests if an instance's class is missing.
    *
    * @return true if the instance's class is missing
-   * @exception Exception if the class is not set or the instance doesn't
+   * @exception UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset
    */
-  public boolean classIsMissing() throws Exception {
+  public boolean classIsMissing() {
 
     if (classIndex() < 0) {
-      throw new Exception("Class is not set!");
+      throw new UnassignedClassException("Class is not set!");
     }
     return isMissing(classIndex());
   }
@@ -198,13 +198,13 @@ public class Instance implements Copyable, Serializable {
    * @return the corresponding value as a double (If the 
    * corresponding attribute is nominal (or a string) then it returns the 
    * value's index as a double).
-   * @exception Exception if the class is not set or the instance doesn't
+   * @exception UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset 
    */
-  public double classValue() throws Exception {
+  public double classValue() {
     
     if (classIndex() < 0) {
-      throw new Exception("Class is not set!");
+      throw new UnassignedClassException("Class is not set!");
     }
     return value(classIndex());
   }
@@ -243,14 +243,13 @@ public class Instance implements Copyable, Serializable {
    * could be introduced.
    *
    * @param pos the attribute's position
-   * @exception Exception if the instance has access to a
+   * @exception RuntimeException if the instance has access to a
    * dataset 
    */
-  public void deleteAttributeAt(int position) 
-       throws Exception {
+  public void deleteAttributeAt(int position) {
 
     if (m_Dataset != null) {
-      throw new Exception("Instance has access to a dataset!");
+      throw new RuntimeException("Instance has access to a dataset!");
     }
     forceDeleteAttributeAt(position);
   }
@@ -259,13 +258,13 @@ public class Instance implements Copyable, Serializable {
    * Returns an enumeration of all the attributes.
    *
    * @return enumeration of all the attributes
-   * @exception Exception if the instance doesn't
+   * @exception UnassignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
-  public Enumeration enumerateAttributes() throws Exception {
+  public Enumeration enumerateAttributes() {
 
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.enumerateAttributes();
   }
@@ -276,14 +275,13 @@ public class Instance implements Copyable, Serializable {
    * @param instance another instance
    * @return true if the header of the given instance is 
    * equivalent to this instance's header
-   * @exception Exception if instance doesn't have access to any
+   * @exception UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
-  public boolean equalHeaders(Instance inst) 
-       throws Exception {
+  public boolean equalHeaders(Instance inst) {
 
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.equalHeaders(inst.m_Dataset);
   }
@@ -307,15 +305,14 @@ public class Instance implements Copyable, Serializable {
    * could be introduced.
    *
    * @param pos the attribute's position
-   * @exception Exception if the instance has accesss to a
+   * @exception RuntimeException if the instance has accesss to a
    * dataset
    * @exception IllegalArgumentException if the position is out of range
    */
-  public void insertAttributeAt(int position) 
-       throws Exception {
+  public void insertAttributeAt(int position) {
 
     if (m_Dataset != null) {
-      throw new Exception("Instance has accesss to a dataset!");
+      throw new RuntimeException("Instance has accesss to a dataset!");
     }
     if ((position < 0) ||
 	(position > numAttributes())) {
@@ -419,13 +416,13 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the number of class labels as an integer if the 
    * class attribute is nominal, 1 otherwise.
-   * @exception Exception if instance doesn't have access to any
+   * @exception UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
-  public int numClasses() throws Exception {
+  public int numClasses() {
     
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.numClasses();
   }
@@ -468,13 +465,14 @@ public class Instance implements Copyable, Serializable {
    * the vector of attribute values is performed before the
    * value is set to be missing.
    *
-   * @exception Exception if the class is not set or the instance doesn't
+   * @exception UnassignedClassException if the class is not set
+   * @exception UnassignedDatasetException if the instance doesn't
    * have access to a dataset
    */
-  public void setClassMissing() throws Exception {
+  public void setClassMissing() {
 
     if (classIndex() < 0) {
-      throw new Exception("Class is not set!");
+      throw new UnassignedClassException("Class is not set!");
     }
     setMissing(classIndex());
   }
@@ -487,13 +485,14 @@ public class Instance implements Copyable, Serializable {
    * @param value the new attribute value (If the corresponding
    * attribute is nominal (or a string) then this is the new value's
    * index as a double).  
-   * @exception Exception if the class is not set or the instance doesn't
+   * @exception UnassignedClassException if the class is not set
+   * @exception UnaddignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
-  public void setClassValue(double value) throws Exception {
+  public void setClassValue(double value) {
 
     if (classIndex() < 0) {
-      throw new Exception("Class is not set!");
+      throw new UnassignedClassException("Class is not set!");
     }
     setValue(classIndex(), value);
   }
@@ -506,14 +505,16 @@ public class Instance implements Copyable, Serializable {
    * @param value the new class value (If the class
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @exception Exception if the dataset or the class is not set, or the 
-   * attribute is not nominal or a string, or the value couldn't 
-   * be found for a nominal attribute 
+   * @exception UnassignedClassException if the class is not set
+   * @exception UnassignedDatasetException if the dataset is not set
+   * @exception IllegalArgumentException if the attribute is not
+   * nominal or a string, or the value couldn't be found for a nominal
+   * attribute 
    */
-  public final void setClassValue(String value) throws Exception {
+  public final void setClassValue(String value) {
 
     if (classIndex() < 0) {
-      throw new Exception("Class is not set!");
+      throw new UnassignedClassException("Class is not set!");
     }
     setValue(classIndex(), value);
   }
@@ -597,17 +598,17 @@ public class Instance implements Copyable, Serializable {
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @exception Exception if the dataset is not set
+   * @exception UnassignedDatasetException if the dataset is not set
    * @exception IllegalArgumentException if the selected
    * attribute is not nominal or a string, or the supplied value couldn't 
    * be found for a nominal attribute 
    */
-  public final void setValue(int attIndex, String value) throws Exception {
+  public final void setValue(int attIndex, String value) {
     
     int valIndex;
 
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     if (!attribute(attIndex).isNominal() &&
 	!attribute(attIndex).isString()) {
@@ -694,13 +695,13 @@ public class Instance implements Copyable, Serializable {
    * @return the value as a string
    * @exception IllegalArgumentException if the attribute is not a nominal
    * (or string) attribute.
-   * @exception Exception if the instance doesn't belong
+   * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
-  public final String stringValue(int attIndex) throws Exception {
+  public final String stringValue(int attIndex) {
 
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     } 
     if (!m_Dataset.attribute(attIndex).isNominal() &&
 	!m_Dataset.attribute(attIndex).isString()) {
@@ -716,11 +717,12 @@ public class Instance implements Copyable, Serializable {
    *
    * @param att the attribute
    * @return the value as a string
-   * @exception Exception if the attribute is not a nominal
-   * (or string) attribute, or the instance doesn't belong
+   * @exception IllegalArgumentException if the attribute is not a nominal
+   * (or string) attribute.
+   * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
-  public final String stringValue(Attribute att) throws Exception {
+  public final String stringValue(Attribute att) {
 
     return stringValue(att.index());
   }
@@ -780,14 +782,7 @@ public class Instance implements Copyable, Serializable {
      } else {
        if (m_Dataset.attribute(attIndex).isNominal() || 
 	   m_Dataset.attribute(attIndex).isString()) {
-	 try {
-	   text.append(Utils.quote(stringValue(attIndex)));
-	 } catch (Exception e) {
-           e.printStackTrace();
-           System.err.println(new Instances(m_Dataset, 0));
-           System.err.println("Att:" + attIndex + " Val:" + value(attIndex));
-	   throw new Error("This should never happen!");
-	 }
+         text.append(Utils.quote(stringValue(attIndex)));
        } else {
 	 text.append(Utils.doubleToString(value(attIndex),6));
        }

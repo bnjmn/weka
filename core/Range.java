@@ -23,7 +23,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Range implements Serializable {
 
@@ -388,7 +388,7 @@ public class Range implements Serializable {
 	return true;
       }
       return false;
-    } catch (Exception ex) {
+    } catch (NumberFormatException ex) {
       return false;
     }
   }

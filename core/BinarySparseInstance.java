@@ -281,13 +281,9 @@ public class BinarySparseInstance extends SparseInstance {
       } else {
         if (m_Dataset.attribute(m_Indices[i]).isNominal() || 
             m_Dataset.attribute(m_Indices[i]).isString()) {
-          try {
-            text.append(m_Indices[i] + " " +
-                        Utils.quote(m_Dataset.attribute(m_Indices[i]).
-                                    value(1)));
-          } catch (Exception e) {
-            throw new Error("This should never happen!");
-          }
+          text.append(m_Indices[i] + " " +
+                      Utils.quote(m_Dataset.attribute(m_Indices[i]).
+                                  value(1)));
         } else {
           text.append(m_Indices[i] + " 1");
         }

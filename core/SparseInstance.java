@@ -176,13 +176,13 @@ public class SparseInstance extends Instance {
    *
    * @param indexOfIndex the index of the attribute's index 
    * @return the attribute at the given position
-   * @exception Exception if instance doesn't have access to a
+   * @exception UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
-  public Attribute attributeSparse(int indexOfIndex) throws Exception {
+  public Attribute attributeSparse(int indexOfIndex) {
    
     if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.attribute(m_Indices[indexOfIndex]);
   }
