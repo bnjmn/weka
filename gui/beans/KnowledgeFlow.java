@@ -41,6 +41,7 @@ import java.util.Properties;
 import java.util.Enumeration;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import javax.swing.UIManager;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JButton;
@@ -95,7 +96,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.9 $
+ * @version  $Revision: 1.10 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -230,7 +231,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.9 $
+   * @version $Revision: 1.10 $
    * @since 1.0
    * @see JPanel
    */
@@ -1201,6 +1202,10 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * @param args a <code>String[]</code> value
    */
   public static void main(String [] args) {
+
+    try { // use system look & feel
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {}
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
