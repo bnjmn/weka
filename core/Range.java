@@ -23,7 +23,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Range implements Serializable {
 
@@ -48,9 +48,9 @@ public class Range implements Serializable {
    * Constructor to set initial range.
    *
    * @param rangeList the initial range
-   * @exception Exception if the range list is invalid
+   * @exception IllegalArgumentException if the range list is invalid
    */
-  public Range(String rangeList) throws Exception {
+  public Range(String rangeList) {
 
     setRanges(rangeList);
   }
@@ -114,9 +114,9 @@ public class Range implements Serializable {
    *
    * @param rangeList the comma separated list of ranges. The empty
    * string sets the range to empty.
-   * @exception Exception if the rangeList was not well formed
+   * @exception IllegalArgumentException if the rangeList was not well formed
    */
-  public void setRanges(String rangeList) throws Exception {
+  public void setRanges(String rangeList) {
 
     Vector ranges = new Vector (10);
 
@@ -134,8 +134,8 @@ public class Range implements Serializable {
 	if (isValidRange(range)) {
 	  ranges.addElement(range);
 	} else {
-	  throw new Exception("Invalid range list at " + range
-			      + rangeList);
+	  throw new IllegalArgumentException("Invalid range list at " + range
+                                             + rangeList);
 	}
       }
     }
@@ -152,12 +152,12 @@ public class Range implements Serializable {
    *
    * @param index the number of interest
    * @return true if index is in the current range
-   * @exception Exception if the upper limit of the range hasn't been defined
+   * @exception RuntimeException if the upper limit of the range hasn't been defined
    */
-  public boolean isInRange(int index) throws Exception {
+  public boolean isInRange(int index) {
 
     if (m_Upper == -1) {
-      throw new Exception("No upper limit has been specified for range");
+      throw new RuntimeException("No upper limit has been specified for range");
     }
     if (m_Invert) {
       return !m_SelectFlags[index];
@@ -214,12 +214,12 @@ public class Range implements Serializable {
    * that they were selected (or ascending order if range inversion is on)
    *
    * @return the array of selected values
-   * @exception Exception if the upper limit of the range hasn't been defined
+   * @exception RuntimeException if the upper limit of the range hasn't been defined
    */
-  public int [] getSelection() throws Exception {
+  public int [] getSelection() {
 
     if (m_Upper == -1) {
-      throw new Exception("No upper limit has been specified for range");
+      throw new RuntimeException("No upper limit has been specified for range");
     }
     int [] selectIndices = new int [m_Upper + 1];
     int numSelected = 0;
