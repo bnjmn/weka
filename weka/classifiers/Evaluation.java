@@ -111,7 +111,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.30 $
+ * @version  $Revision: 1.31 $
   */
 public class Evaluation implements Summarizable {
 
@@ -664,24 +664,26 @@ public class Evaluation implements Summarizable {
       
       // If a model file is given, we can't process 
       // scheme-specific options
-      if (objectInputFileName.length() != 0)
+      if (objectInputFileName.length() != 0) {
 	Utils.checkForRemainingOptions(options);
+      } else {
 
-      // Set options for classifier
-      if (classifier instanceof OptionHandler) {
-	for (int i = 0; i < options.length; i++) {
-	  if (options[i].length() != 0) {
-	    if (schemeOptionsText == null) {
-	      schemeOptionsText = new StringBuffer();
-	    }
-	    if (options[i].indexOf(' ') != -1) {
-	      schemeOptionsText.append('"' + options[i] + "\" ");
-	    } else {
-	      schemeOptionsText.append(options[i] + " ");
+	// Set options for classifier
+	if (classifier instanceof OptionHandler) {
+	  for (int i = 0; i < options.length; i++) {
+	    if (options[i].length() != 0) {
+	      if (schemeOptionsText == null) {
+		schemeOptionsText = new StringBuffer();
+	      }
+	      if (options[i].indexOf(' ') != -1) {
+		schemeOptionsText.append('"' + options[i] + "\" ");
+	      } else {
+		schemeOptionsText.append(options[i] + " ");
+	      }
 	    }
 	  }
+	  ((OptionHandler)classifier).setOptions(options);
 	}
-	((OptionHandler)classifier).setOptions(options);
       }
       Utils.checkForRemainingOptions(options);
     } catch (Exception e) {
