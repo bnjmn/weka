@@ -64,7 +64,7 @@ import  weka.core.*;
  * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -822,7 +822,7 @@ public class ReliefFAttributeEval
 	distNorm += m_weightsByRank[j];
       }
 
-      tempSorted = Utils.sort(tempDist);
+      tempSorted = Utils.sortUnsafe(tempDist);
     }
 
     for (i = 0; i < m_stored[0]; i++) {
@@ -909,7 +909,7 @@ public class ReliefFAttributeEval
 	distNormClass += m_weightsByRank[j];
       }
 
-      tempSortedClass = Utils.sort(tempDistClass);
+      tempSortedClass = Utils.sortUnsafe(tempDistClass);
       // do misses (other classes)
       tempSortedAtt = new int[m_numClasses][1];
       distNormAtt = new double[m_numClasses];
@@ -927,7 +927,7 @@ public class ReliefFAttributeEval
 	      distNormAtt[k] += m_weightsByRank[j];
 	    }
 
-	    tempSortedAtt[k] = Utils.sort(tempDistAtt);
+	    tempSortedAtt[k] = Utils.sortUnsafe(tempDistAtt);
 	  }
       }
     }
