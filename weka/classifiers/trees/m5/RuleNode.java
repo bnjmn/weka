@@ -29,7 +29,7 @@ import weka.filters.*;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RuleNode extends Classifier {
 
@@ -173,6 +173,11 @@ public class RuleNode extends Classifier {
    * Explorer's treevisualizer.
    */
   private boolean m_saveInstances = false;
+
+  /**
+   * Make a regression tree instead of a model tree
+   */
+  private boolean m_regressionTree;
 
   /**
    * Creates a new <code>RuleNode</code> instance.
@@ -361,41 +366,48 @@ public class RuleNode extends Classifier {
 	// build left and right nodes
 	m_left = new RuleNode(m_globalDeviation, m_globalAbsDeviation, this);
 
+	m_left.setRegressionTree(m_regressionTree);
 	m_left.setSmoothing(m_smoothPredictions);
 	m_left.setSaveInstances(m_saveInstances);
 	m_left.buildClassifier(leftSubset);
 
 	m_right = new RuleNode(m_globalDeviation, m_globalAbsDeviation, this);
-
+	
+	m_right.setRegressionTree(m_regressionTree);
 	m_right.setSmoothing(m_smoothPredictions);
 	m_right.setSaveInstances(m_saveInstances);
 	m_right.buildClassifier(rightSubset);
 
 	// now find out what attributes are tested in the left and right
 	// subtrees and use them to learn a linear model for this node
-	attsBelow = attsTestedBelow();
-	attsBelow[m_classIndex] = true;
+	if (!m_regressionTree) {
+	  attsBelow = attsTestedBelow();
+	  attsBelow[m_classIndex] = true;
+	  int count = 0, j;
 
-	int count = 0, j;
-
-	for (j = 0; j < m_numAttributes; j++) {
-	  if (attsBelow[j]) {
-	    count++;
+	  for (j = 0; j < m_numAttributes; j++) {
+	    if (attsBelow[j]) {
+	      count++;
+	    } 
 	  } 
-	} 
+	  
+	  int[] indices = new int[count];
 
-	int[] indices = new int[count];
-
-	count = 0;
-
-	for (j = 0; j < m_numAttributes; j++) {
-	  if (attsBelow[j] && (j != m_classIndex)) {
-	    indices[count++] = j;
+	  count = 0;
+	  
+	  for (j = 0; j < m_numAttributes; j++) {
+	    if (attsBelow[j] && (j != m_classIndex)) {
+	      indices[count++] = j;
+	    } 
 	  } 
-	} 
-
-	indices[count] = m_classIndex;
-	m_indices = indices;
+	  
+	  indices[count] = m_classIndex;
+	  m_indices = indices;
+	} else {
+	  m_indices = new int [1];
+	  m_indices[0] = m_classIndex;
+	  m_numParameters = 1;
+	}
       } 
     } 
 
@@ -911,6 +923,28 @@ public class RuleNode extends Classifier {
   public boolean getSmoothing() {
     return m_smoothPredictions;
   } 
+
+  
+  /**
+   * Get the value of regressionTree.
+   *
+   * @return Value of regressionTree.
+   */
+  public boolean getRegressionTree() {
+    
+    return m_regressionTree;
+  }
+  
+  /**
+   * Set the value of regressionTree.
+   *
+   * @param newregressionTree Value to assign to regressionTree.
+   */
+  public void setRegressionTree(boolean newregressionTree) {
+    
+    m_regressionTree = newregressionTree;
+  }
+  
 
 
   /**

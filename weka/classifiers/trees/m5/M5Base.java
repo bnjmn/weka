@@ -33,7 +33,10 @@ import weka.filters.*;
  * -U <br>
  * Use unsmoothed predictions. <p>
  *
- * @version $Revision: 1.1 $
+ * -R <br>
+ * Build regression tree/rule rather than model tree/rule
+ *
+ * @version $Revision: 1.2 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -90,6 +93,11 @@ public abstract class M5Base extends Classifier
   protected boolean m_saveInstances = false;
 
   /**
+   * Make a regression tree/rule instead of a model tree/rule
+   */
+  protected boolean m_regressionTree;
+
+  /**
    * Constructor
    */
   public M5Base() {
@@ -103,11 +111,14 @@ public abstract class M5Base extends Classifier
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option("\tUse unsmoothed predictions\n", 
 				    "U", 0, "-U"));
 
+    newVector.addElement(new Option("\tBuild regression tree/rule rather "
+				    +"than a model tree/rule\n", 
+				    "R", 0, "-R"));
     return newVector.elements();
   } 
 
@@ -124,6 +135,7 @@ public abstract class M5Base extends Classifier
    */
   public void setOptions(String[] options) throws Exception {
     setUseUnsmoothed(Utils.getFlag('U', options));
+    setBuildRegressionTree(Utils.getFlag('R', options));
     
     Utils.checkForRemainingOptions(options);
   } 
@@ -134,12 +146,16 @@ public abstract class M5Base extends Classifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[1];
+    String[] options = new String[2];
     int      current = 0;
 
     if (getUseUnsmoothed()) {
       options[current++] = "-U";
     } 
+
+    if (getBuildRegressionTree()) {
+      options[current++] = "-R";
+    }
 
     while (current < options.length) {
       options[current++] = "";
@@ -184,6 +200,26 @@ public abstract class M5Base extends Classifier
   } 
 
   /**
+   * Get the value of regressionTree.
+   *
+   * @return Value of regressionTree.
+   */
+  public boolean getBuildRegressionTree() {
+    
+    return m_regressionTree;
+  }
+  
+  /**
+   * Set the value of regressionTree.
+   *
+   * @param newregressionTree Value to assign to regressionTree.
+   */
+  public void setBuildRegressionTree(boolean newregressionTree) {
+    
+    m_regressionTree = newregressionTree;
+  }
+
+  /**
    * Generates the classifier.
    * 
    * @param data set of instances serving as training data
@@ -226,6 +262,7 @@ public abstract class M5Base extends Classifier
       do {
 	tempRule = new Rule();
 	tempRule.setSmoothing(!m_unsmoothedPredictions);
+	tempRule.setRegressionTree(m_regressionTree);
 
 	tempRule.buildClassifier(tempInst);
 	m_ruleSet.addElement(tempRule);
@@ -240,6 +277,7 @@ public abstract class M5Base extends Classifier
       tempRule.setGrowFullTree(true);
       tempRule.setSmoothing(!m_unsmoothedPredictions);
       tempRule.setSaveInstances(m_saveInstances);
+      tempRule.setRegressionTree(m_regressionTree);
 
       Instances temp_train;
 
