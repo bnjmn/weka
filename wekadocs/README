@@ -4,12 +4,12 @@
                               README                                   
                               ======                                   
                                                                        
-                             WEKA 3.4.3
-                         29 September 2004
+                             WEKA 3.4.4
+                            7 March 2005
                                                                        
                  Java Programs for Machine Learning 
 
-           Copyright (C) 1998-2004  University of Waikato
+           Copyright (C) 1998-2005  University of Waikato
 
                 web: http://www.cs.waikato.ac.nz/~ml            
                                                                        
@@ -80,25 +80,13 @@ README file.
 The Weka user interfaces provide extensive built-in help facilities
 (tool tips, etc.). Documentation for the Explorer can be found in
 ExplorerGuide.pdf (also in the same directory as this
-README). However, this guide is unfortunately not quite up to date
-(it's based on Weka 3.3.4).
+README).
 
 You can also start the GUIChooser from within weka.jar:
 
 java -classpath weka.jar:$CLASSPATH weka.gui.GUIChooser
 or if you are using Windows use
 javaw -classpath weka.jar;$CLASSPATH weka.gui.GUIChooser
-
-NOTE FOR PEOPLE WHO WRITE LEARNING SCHEMES WITH WEKA: In case you want
-to use your own learning scheme from within one of the graphical user
-interfaces (GUIs): one of the components of the GUIs is a generic
-object editor that requires a configuration file called
-"GenericObjectEditor.props". There is an example file in
-weka/gui. This file will be used unless it is overidden by one in your
-home directory or the current directory (in that order).  It simply
-specifies for each superclass which subclasses to offer as
-choices. For example, which Classifiers are available/wanted to be
-used when an object requires a property of type Classifier.
 
 ----------------------------------------------------------------------
 
