@@ -113,7 +113,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.7 $ */
+ * @version $Revision: 1.8 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -289,8 +289,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
       m_bUp = -1; m_bLow = 1; m_b = 0; 
       m_alpha = null; m_data = null; m_weights = null; m_errors = null;
       m_logistic = null; m_I0 = null; m_I1 = null; m_I2 = null;
-      m_I3 = null; m_I4 = null;
-						     
+      m_I3 = null; m_I4 = null;	m_sparseWeights = null; m_sparseIndices = null;
 
       // Store the sum of weights
       m_sumOfWeights = insts.sumOfWeights();
@@ -307,17 +306,26 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
 	  throw new Exception ("This should never happen!");
 	}
       }
+
+      // Check whether one or both classes are missing
       if ((m_iUp == -1) || (m_iLow == -1)) {
-	if (m_iUp == -1) {
+	if (m_iUp != -1) {
+	  m_b = -1;
+	} else if (m_iLow != -1) {
 	  m_b = 1;
 	} else {
-	  m_b = -1;
+	  m_class = null;
+	  return;
 	}
 	if (!m_useRBF && m_exponent == 1.0) {
 	  m_sparseWeights = new double[0];
 	  m_sparseIndices = new int[0];
+	  m_class = null;
+	} else {
+	  m_supportVectors = new SMOset(0);
+	  m_alpha = new double[0];
+	  m_class = new double[0];
 	}
-	m_class = null;
 
 	// Fit sigmoid if requested
 	if (fitLogistic) {
@@ -537,7 +545,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
       int printed = 0;
 
       if ((m_alpha == null) && (m_sparseWeights == null)) {
-	return "BinarySMO: No model built yet.";
+	return "BinarySMO: No model built yet.\n";
       }
       try {
 	text.append("BinarySMO\n\n");
@@ -1199,11 +1207,14 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
       double[] result = new double[inst.numClasses()];
       for (int i = 0; i < inst.numClasses(); i++) {
 	for (int j = i + 1; j < inst.numClasses(); j++) {
-	  double output = m_classifiers[i][j].SVMOutput(-1, inst);
-	  if (output > 0) {
-	    result[j] += 1;
-	  } else {
-	    result[i] += 1;
+	  if ((m_classifiers[i][j].m_alpha != null) || 
+	      (m_classifiers[i][j].m_sparseWeights != null)) {
+	    double output = m_classifiers[i][j].SVMOutput(-1, inst);
+	    if (output > 0) {
+	      result[j] += 1;
+	    } else {
+	      result[i] += 1;
+	    }
 	  }
 	} 
       }
@@ -1224,12 +1235,15 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
       double[][] n = new double[inst.numClasses()][inst.numClasses()];
       for (int i = 0; i < inst.numClasses(); i++) {
 	for (int j = i + 1; j < inst.numClasses(); j++) {
-	  double[] newInst = new double[2];
-	  newInst[0] = m_classifiers[i][j].SVMOutput(-1, inst);
-	  newInst[1] = Instance.missingValue();
-	  r[i][j] = m_classifiers[i][j].m_logistic.
-	    distributionForInstance(new Instance(1, newInst))[0];
-	  n[i][j] = m_classifiers[i][j].m_sumOfWeights;
+	  if ((m_classifiers[i][j].m_alpha != null) || 
+	      (m_classifiers[i][j].m_sparseWeights != null)) {
+	    double[] newInst = new double[2];
+	    newInst[0] = m_classifiers[i][j].SVMOutput(-1, inst);
+	    newInst[1] = Instance.missingValue();
+	    r[i][j] = m_classifiers[i][j].m_logistic.
+	      distributionForInstance(new Instance(1, newInst))[0];
+	    n[i][j] = m_classifiers[i][j].m_sumOfWeights;
+	  }
 	}
       }
       return pairwiseCoupling(n, r);
@@ -2061,7 +2075,12 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
 		      m_classAttribute.value(j) + "\n\n");
 	  text.append(m_classifiers[i][j]);
 	  if (m_fitLogisticModels) {
-	    text.append("\n\n" + m_classifiers[i][j].m_logistic);
+	    text.append("\n\n");
+	    if ( m_classifiers[i][j].m_logistic == null) {
+	      text.append("No logistic model has been fit.\n");
+	    } else {
+	      text.append(m_classifiers[i][j].m_logistic);
+	    }
 	  }
 	  text.append("\n\n");
 	}
