@@ -82,7 +82,7 @@ import weka.core.*;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.3 $ */
 public class PaceRegression extends Classifier implements OptionHandler,
 					       WeightedInstancesHandler {
 
@@ -481,9 +481,40 @@ public class PaceRegression extends Classifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [1];
+    String [] options = new String [6];
     int current = 0;
 
+    if (getDebug()) {
+      options[current++] = "-D";
+    }
+
+    options[current++] = "-E";
+    switch (paceEstimator) {
+    case olsEstimator: options[current++] = "ols";
+      break;
+    case olscEstimator: options[current++] = "olsc";
+      options[current++] = "-S";
+      options[current++] = "" + olscThreshold;
+      break;
+    case ebEstimator: options[current++] = "eb";
+      break;
+    case nestedEstimator: options[current++] = "nested";
+      break;
+    case subsetEstimator: options[current++] = "subset";
+      break;
+    case pace2Estimator: options[current++] = "pace2";
+      break; 
+    case pace4Estimator: options[current++] = "pace4";
+      break;
+    case pace6Estimator: options[current++] = "pace6";
+      break;
+    case aicEstimator: options[current++] = "aic";
+      break;
+    case bicEstimator: options[current++] = "bic";
+      break;
+    case ricEstimator: options[current++] = "ric";
+      break;
+    }
 
     while (current < options.length) {
       options[current++] = "";
