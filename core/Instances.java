@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
  */
 public class Instances implements Serializable {
  
@@ -197,13 +197,12 @@ public class Instances implements Serializable {
    */
   public Instances stringFreeStructure() {
 
-    FastVector atts = new FastVector();
-    for (int i = 0 ; i < numAttributes(); i++) {
-      Attribute att = attribute(i);
+    FastVector atts = (FastVector)m_Attributes.copy();
+    for (int i = 0 ; i < atts.size(); i++) {
+      Attribute att = (Attribute)atts.elementAt(i);
       if (att.type() == Attribute.STRING) {
-        att = new Attribute(att.name(), null);
+        atts.setElementAt(new Attribute(att.name(), null), i);
       }
-      atts.addElement(att);
     }
     Instances result = new Instances(relationName(), atts, 0);
     result.m_ClassIndex = m_ClassIndex;
