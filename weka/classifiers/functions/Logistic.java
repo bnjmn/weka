@@ -100,7 +100,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Tony Voyle (tv6@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
     
@@ -357,8 +357,8 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 	     */
 	    if (m_Debug) 
 		System.out.println("\nSolving the linear equation J*p = -F ..."); 
-	    fjac.lubksb(fjac.ludcmp(),p);
-	    
+	    fjac.solve(p);
+
 	    /** One step:try to use line search to calculate new x and m_f for one class*/
 	    lnsrch(n,k,xold,fold,g,p,x,stpmax,X,Y);  
 	    
