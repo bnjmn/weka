@@ -47,7 +47,7 @@ import java.beans.beancontext.*;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AttributeSummarizer extends DataVisualizer {
 
@@ -192,7 +192,7 @@ public class AttributeSummarizer extends DataVisualizer {
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
-    if (m_visualizeDataSet != null && !m_framePoppedUp) {
+    if (m_visualizeDataSet != null) {
       newVector.addElement("Show summaries");
     }
     return newVector.elements();
@@ -295,6 +295,9 @@ public class AttributeSummarizer extends DataVisualizer {
 	      }
 	    });
 	  jf.setVisible(true);
+	  m_popupFrame = jf;
+	} else {
+	  m_popupFrame.toFront();
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();

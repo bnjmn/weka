@@ -34,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.SwingConstants;
 import java.awt.*;
 import java.beans.*;
@@ -43,7 +44,7 @@ import java.beans.beancontext.*;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -53,6 +54,8 @@ public class DataVisualizer extends JPanel
   protected BeanVisual m_visual;
 
   protected transient Instances m_visualizeDataSet;
+
+  protected transient JFrame m_popupFrame;
 
   protected boolean m_framePoppedUp = false;
 
@@ -187,7 +190,7 @@ public class DataVisualizer extends JPanel
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
-    if (m_visualizeDataSet != null && !m_framePoppedUp) {
+    if (m_visualizeDataSet != null) {
       newVector.addElement("Show plot");
     }
     return newVector.elements();
@@ -309,8 +312,7 @@ public class DataVisualizer extends JPanel
 			       +"visualization (DataVisualizer)");
 	    ex.printStackTrace();
 	  }
-	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame("Visualize");
+	  final JFrame jf = new JFrame("Visualize");
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(vis, BorderLayout.CENTER);
@@ -321,6 +323,9 @@ public class DataVisualizer extends JPanel
 	      }
 	    });
 	  jf.setVisible(true);
+	  m_popupFrame = jf;
+	} else {
+	  m_popupFrame.toFront();
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();
