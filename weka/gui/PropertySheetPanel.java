@@ -63,6 +63,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
 import java.awt.FlowLayout;
 
 
@@ -71,7 +72,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -500,13 +501,41 @@ public class PropertySheetPanel extends JPanel
 	  } catch (InvocationTargetException ex) {
 	    if (ex.getTargetException()
 		instanceof PropertyVetoException) {
-	      System.err.println("WARNING: Vetoed; reason is: " 
-				 + ex.getTargetException().getMessage());
-	    } else {
-	      System.err.println(ex.getTargetException().getClass().getName() + 
-				 " while updating " + property.getName() + ": " +
+              String message = "WARNING: Vetoed; reason is: " 
+                               + ex.getTargetException().getMessage();
+	      System.err.println(message);
+              
+              Component jf;
+              if(evt.getSource() instanceof JPanel)
+                  jf = ((JPanel)evt.getSource()).getParent();
+              else
+                  jf = new JFrame();
+              JOptionPane.showMessageDialog(jf, message, 
+                                            "error", 
+                                            JOptionPane.WARNING_MESSAGE);
+              if(jf instanceof JFrame)
+                  ((JFrame)jf).dispose();
+
+            } else {
+	      System.err.println(ex.getTargetException().getClass().getName()+ 
+				 " while updating "+ property.getName() +": "+
 				 ex.getTargetException().getMessage());
-	    }
+              Component jf;
+              if(evt.getSource() instanceof JPanel)
+                  jf = ((JPanel)evt.getSource()).getParent();
+              else
+                  jf = new JFrame();
+              JOptionPane.showMessageDialog(jf,
+                                            ex.getTargetException().getClass().getName()+ 
+                                            " while updating "+ property.getName()+
+                                            ":\n"+
+                                            ex.getTargetException().getMessage(), 
+                                            "error", 
+                                            JOptionPane.WARNING_MESSAGE);
+              if(jf instanceof JFrame)
+                  ((JFrame)jf).dispose();
+
+            }
 	  } catch (Exception ex) {
 	    System.err.println("Unexpected exception while updating " 
 		  + property.getName());
