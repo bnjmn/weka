@@ -30,6 +30,8 @@ import weka.gui.SysErrLog;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.TaskLogger;
 import weka.gui.FileEditor;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyDialog;
 import weka.experiment.InstanceQuery;
 
 import java.io.Reader;
@@ -75,7 +77,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -95,6 +97,9 @@ public class PreprocessPanel extends JPanel {
 
   /** Click to load base instances from a Database */
   protected JButton m_OpenDBBut = new JButton("Open DB...");
+
+  protected GenericObjectEditor m_DatabaseQueryEditor = 
+    new GenericObjectEditor();
 
   /** Click to apply filters and replace the working dataset */
   protected JButton m_ApplyBut = new JButton("Apply Filters");
@@ -165,6 +170,9 @@ public class PreprocessPanel extends JPanel {
      java.beans.PropertyEditorManager
       .registerEditor(weka.attributeSelection.ASEvaluation.class,
 		      weka.gui.GenericObjectEditor.class);
+     java.beans.PropertyEditorManager
+      .registerEditor(weka.experiment.InstanceQuery.class,
+		      weka.gui.GenericObjectEditor.class);
   }
   
   /**
@@ -173,6 +181,17 @@ public class PreprocessPanel extends JPanel {
   public PreprocessPanel() {
 
     // Create/Configure/Connect components
+    try {
+    m_DatabaseQueryEditor.setClassType(weka.experiment.InstanceQuery.class);
+    m_DatabaseQueryEditor.setValue(new weka.experiment.InstanceQuery());
+    ((GenericObjectEditor.GOEPanel)m_DatabaseQueryEditor.getCustomEditor())
+      .addOkListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    setBaseInstancesFromDBQ();
+	  }
+	});
+    } catch (Exception ex) {
+    }
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_OpenDBBut.setToolTipText("Open a set of instances from a database");
@@ -190,7 +209,8 @@ public class PreprocessPanel extends JPanel {
     });
     m_OpenDBBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	setBaseInstancesFromDBQ();
+	PropertyDialog pd = new PropertyDialog(m_DatabaseQueryEditor,100,100);
+	//setBaseInstancesFromDBQ();
       }
     });
     m_OpenFileBut.addActionListener(new ActionListener() {
@@ -561,35 +581,15 @@ public class PreprocessPanel extends JPanel {
   public void setBaseInstancesFromDBQ() {
     if (m_IOThread == null) {
       try {
-	InstanceQuery InstQ = new InstanceQuery();
-	String dbaseURL = InstQ.getDatabaseURL();
-	dbaseURL = (String) JOptionPane.showInputDialog(this,
-					     "Enter the database URL",
-					     "Query Database",
-					     JOptionPane.QUESTION_MESSAGE,
-					     null,
-					     null,
-					     dbaseURL);
-	if (dbaseURL == null) {
-	  return;
-	}
-	InstQ.setDatabaseURL(dbaseURL);
+	InstanceQuery InstQ = 
+	  (InstanceQuery)m_DatabaseQueryEditor.getValue();
+	
 	InstQ.connectToDatabase();      
-	m_SQLQ = (String) JOptionPane.showInputDialog(this,
-					       "Enter an SQL query",
-					       "Query Database",
-					       JOptionPane.QUESTION_MESSAGE,
-					       null,
-					       null,
-					       m_SQLQ);
-	if (m_SQLQ == null) {
-	  m_SQLQ = new String("SELECT * FROM ?");
-	} else {
-	  setBaseInstancesFromDB(InstQ);
-	}
+
+	setBaseInstancesFromDB(InstQ);
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
-				      "Problem with database URL:\n"
+				      "Problem connecting to database:\n"
 				      + ex.getMessage(),
 				      "Load Instances",
 				      JOptionPane.ERROR_MESSAGE);
@@ -736,7 +736,7 @@ public class PreprocessPanel extends JPanel {
 	  
 	  try {
 	    m_Log.statusMessage("Reading from database...");
-	    final Instances i = iq.getInstances(m_SQLQ);
+	    final Instances i = iq.retrieveInstances();
 	    SwingUtilities.invokeAndWait(new Runnable() {
 	      public void run() {
 		setBaseInstances(new Instances(i));
@@ -747,7 +747,6 @@ public class PreprocessPanel extends JPanel {
 	    m_Log.statusMessage("Probelm executing DB query "+m_SQLQ);
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
 					  "Couldn't read from database:\n"
-					  + m_SQLQ + "\n"
 					  + ex.getMessage(),
 					  "Load Instances",
 					  JOptionPane.ERROR_MESSAGE);
