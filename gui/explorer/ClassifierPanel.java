@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.60 $
+ * @version $Revision: 1.61 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -445,10 +445,8 @@ public class ClassifierPanel extends JPanel {
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
 	public void mouseClicked(MouseEvent e) {
-	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	      == InputEvent.BUTTON1_MASK) {
-	    
-	  } else {
+	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
 	    int index = m_History.getList().locationToIndex(e.getPoint());
 	    if (index != -1) {
 	      String name = m_History.getNameAtIndex(index);
