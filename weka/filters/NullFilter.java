@@ -28,13 +28,9 @@ import weka.core.*;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 
+ * @version $Revision: 1.2 $
  */
 public class NullFilter extends Filter {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Sets the format of the input instances.
@@ -48,7 +44,7 @@ public class NullFilter extends Filter {
 
     m_InputFormat = new Instances(instanceInfo, 0);
     setOutputFormat(m_InputFormat);
-    b_NewBatch = true;
+    m_NewBatch = true;
     return true;
   }
 
@@ -71,11 +67,6 @@ public class NullFilter extends Filter {
     return false;
   }
 
-
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
@@ -85,9 +76,9 @@ public class NullFilter extends Filter {
 
     try {
       if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new NullFilter(),argv);
+	Filter.batchFilterFile(new NullFilter(), argv);
       } else {
-	Filter.filterFile(new NullFilter(),argv);
+	Filter.filterFile(new NullFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

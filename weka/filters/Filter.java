@@ -28,19 +28,35 @@ import java.io.*;
  * as input, carry out some transformation on the instance and then
  * output the instance. The method implementations in this class
  * assume that most of the work will be done in the methods overridden
- * by subclasses.
+ * by subclasses.<p>
+ *
+ * A simple example of filter use. This example doesn't remove
+ * instances from the output queue until all instances have been
+ * input, so has higher memory consumption than an approach that
+ * uses output instances as they are made available:<p>
+ *
+ * <code> <pre>
+ *  Filter filter = ..some type of filter..
+ *  Instances instances = ..some instances..
+ *  for (int i = 0; i < data.numInstances(); i++) {
+ *    filter.input(data.instance(i));
+ *  }
+ *  filter.batchFinished();
+ *  Instances newData = filter.outputFormat();
+ *  Instance processed;
+ *  while ((processed = filter.output()) != null) {
+ *    newData.add(processed);
+ *  }
+ *  ..do something with newData..
+ * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 
+ * @version $Revision: 1.2 $
  */
 public abstract class Filter implements Serializable {
 
-  // ===============
-  // Private members
-  // ===============
-
   /** Debugging mode */
-  private boolean b_Debug = false;
+  private boolean m_Debug = false;
 
   /** The output format for instances */
   private Instances m_OutputFormat = null;
@@ -48,20 +64,12 @@ public abstract class Filter implements Serializable {
   /** The output instance queue */
   private Queue m_OutputQueue = null;
 
-  // =================
-  // Protected members
-  // =================
-
   /** The input format for instances */
   protected Instances m_InputFormat = null;
 
   /** Record whether the filter is at the start of a batch */
-  protected boolean b_NewBatch = true;
+  protected boolean m_NewBatch = true;
 
-  // =================
-  // Protected methods
-  // =================
-  
   /**
    * Sets the format of output instances. The derived class should use this
    * method once it has determined the outputformat. The 
@@ -107,10 +115,6 @@ public abstract class Filter implements Serializable {
     m_OutputQueue = new Queue();
   }
 
-  // ==============
-  // Public methods
-  // ==============
-
   /**
    * Sets the format of the input instances. If the filter is able to
    * determine the output format before seeing any input instances, it
@@ -128,7 +132,7 @@ public abstract class Filter implements Serializable {
     m_InputFormat = new Instances(instanceInfo, 0);
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
-    b_NewBatch = true;
+    m_NewBatch = true;
     return false;
   }
 
@@ -181,9 +185,9 @@ public abstract class Filter implements Serializable {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       m_OutputQueue = new Queue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
     m_InputFormat.add(instance);
     return false;
@@ -208,7 +212,7 @@ public abstract class Filter implements Serializable {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    b_NewBatch = true;
+    m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
 
@@ -243,10 +247,12 @@ public abstract class Filter implements Serializable {
    */
   public Instance outputPeek() throws Exception {
 
-    if (m_OutputFormat == null)
+    if (m_OutputFormat == null) {
       throw new Exception("No output instance format defined");
-    if (m_OutputQueue.empty())
+    }
+    if (m_OutputQueue.empty()) {
       return null;
+    }
     Instance result = (Instance)m_OutputQueue.peek();
     result.setDataset(m_OutputFormat);
     return result;
@@ -288,14 +294,15 @@ public abstract class Filter implements Serializable {
   public static Instances useFilter(Instances data,
 				    Filter filter) throws Exception {
 
-    for (int i = 0; i < data.numInstances(); i++)
+    for (int i = 0; i < data.numInstances(); i++) {
       filter.input(data.instance(i));
+    }
     filter.batchFinished();
     Instances newData = filter.outputFormat();
     Instance processed;
-    while ((processed = filter.output()) != null) 
+    while ((processed = filter.output()) != null) {
       newData.add(processed);
-  
+    }
     return newData;
   }
 
@@ -312,7 +319,7 @@ public abstract class Filter implements Serializable {
   public static void filterFile(Filter filter, String [] options) 
     throws Exception {
 
-    boolean bDebug = false;
+    boolean debug = false;
     Instances data = null;
     Reader input = null;
     PrintWriter output = null;
@@ -322,7 +329,7 @@ public abstract class Filter implements Serializable {
        helpRequest = Utils.getFlag('h', options);
 
       if (Utils.getFlag('d', options)) {
-	bDebug = true;
+	debug = true;
       }
       String infileName = Utils.getOption('i', options);
       String outfileName = Utils.getOption('o', options); 
@@ -332,9 +339,9 @@ public abstract class Filter implements Serializable {
       }
 
       Utils.checkForRemainingOptions(options);
-      if (helpRequest)
+      if (helpRequest) {
 	throw new Exception("Help requested.\n");
-
+      }
       if (infileName.length() != 0) {
 	input = new BufferedReader(new FileReader(infileName));
       } else {
@@ -356,41 +363,47 @@ public abstract class Filter implements Serializable {
 	Enumeration enum = ((OptionHandler)filter).listOptions();
 	while (enum.hasMoreElements()) {
 	  Option option = (Option) enum.nextElement();
-	  filterOptions += option.synopsis()+'\n'+option.description()+"\n";
+	  filterOptions += option.synopsis() + '\n'
+	    + option.description() + "\n";
 	}
       }
 
       String genericOptions = "\nGeneral options:\n\n"
-      +"-h\n"
-      +"\tGet help on available options. (use -b -h for help on batch mode.)\n"
-      +"-i <file>\n"
-      +"\tThe name of the file containing input instances. If not supplied\n"
-      +"\tthen input instances will be read from stdin.\n"
-      +"-o <file>\n"
-      +"\tThe name of the file output instances will be written to.\n"
-      +"\tIf not supplied then output instances will be written to stdout.\n";
+	+ "-h\n"
+	+ "\tGet help on available options. "
+	+ "(use -b -h for help on batch mode.)\n"
+	+ "-i <file>\n"
+	+ "\tThe name of the file containing input instances. "
+	+ "If not supplied\n"
+	+ "\tthen input instances will be read from stdin.\n"
+	+ "-o <file>\n"
+	+ "\tThe name of the file output instances will be written to.\n"
+	+ "\tIf not supplied then output instances will be "
+	+ "written to stdout.\n";
 
-      throw new Exception('\n'+ex.getMessage()+filterOptions+genericOptions);
+      throw new Exception('\n' + ex.getMessage()
+			  + filterOptions+genericOptions);
     }
     
-    if (bDebug) {
+    if (debug) {
       System.err.println("Setting input format");
     }
     boolean printedHeader = false;
     if (filter.inputFormat(data)) {
-      if (bDebug) {
+      if (debug) {
 	System.err.println("Getting output format");
       }
       output.println(filter.outputFormat().toString());
       printedHeader = true;
     }
+    
     // Pass all the instances to the filter
     while (data.readInstance(input)) {
-      if (bDebug) {
+      if (debug) {
 	System.err.println("Input instance to filter");
       }
       if (filter.input(data.instance(0))) {
-	if (bDebug) {
+	if (debug) {
 	  System.err.println("Filter said collect immediately");
 	}
 	if (!printedHeader) {
@@ -398,38 +411,39 @@ public abstract class Filter implements Serializable {
 			     "earlier!");
 	  System.exit(0);
 	}
-	if (bDebug) {
+	if (debug) {
 	  System.err.println("Getting output instance");
 	}
 	output.println(filter.output().toString());
       }
       data.delete(0);
     }
+    
     // Say that input has finished, and print any pending output instances
-    if (bDebug) {
+    if (debug) {
       System.err.println("Setting end of batch");
     }
     if (filter.batchFinished()) {
-      if (bDebug) {
+      if (debug) {
 	System.err.println("Filter said collect output");
       }
       if (!printedHeader) {
-	if (bDebug) {
+	if (debug) {
 	  System.err.println("Getting output format");
 	}
 	output.println(filter.outputFormat().toString());
       }
-      if (bDebug) {
+      if (debug) {
 	System.err.println("Getting output instance");
       }
       while (filter.numPendingOutput() > 0) {
 	output.println(filter.output().toString());
-	if (bDebug){
+	if (debug){
 	  System.err.println("Getting output instance");
 	}
       }
     }
-    if (bDebug) {
+    if (debug) {
       System.err.println("Done");
     }
     
@@ -495,9 +509,9 @@ public abstract class Filter implements Serializable {
       }
       Utils.checkForRemainingOptions(options);
       
-      if (helpRequest)
+      if (helpRequest) {
 	throw new Exception("Help requested.\n");
-
+      }
       firstData = new Instances(firstInput, 1);
       firstData.setClassIndex(firstData.numAttributes() - 1);
       secondData = new Instances(secondInput, 1);
@@ -513,23 +527,25 @@ public abstract class Filter implements Serializable {
 	Enumeration enum = ((OptionHandler)filter).listOptions();
 	while (enum.hasMoreElements()) {
 	  Option option = (Option) enum.nextElement();
-	  filterOptions += option.synopsis()+'\n'+option.description()+"\n";
+	  filterOptions += option.synopsis() + '\n'
+	    + option.description() + "\n";
 	}
       }
 
       String genericOptions = "\nGeneral options:\n\n"
-      +"-h\n"
-      +"\tGet help on available options.\n"
-      +"-i <file>\n"
-      +"\tThe name of the file containing first input instances.\n"
-      +"-o <file>\n"
-      +"\tThe name of the file first output instances will be written to.\n"
-      +"-r <file>\n"
-      +"\tThe name of the file containing second input instances.\n"
-      +"-s <file>\n"
-      +"\tThe name of the file second output instances will be written to.\n";
+	+"-h\n"
+	+"\tGet help on available options.\n"
+	+"-i <file>\n"
+	+"\tThe name of the file containing first input instances.\n"
+	+"-o <file>\n"
+	+"\tThe name of the file first output instances will be written to.\n"
+	+"-r <file>\n"
+	+"\tThe name of the file containing second input instances.\n"
+	+"-s <file>\n"
+	+"\tThe name of the file second output instances will be written to.\n";
 
-      throw new Exception('\n'+ex.getMessage()+filterOptions+genericOptions);
+      throw new Exception('\n' + ex.getMessage()
+			  + filterOptions+genericOptions);
     }
     boolean printedHeader = false;
     if (filter.inputFormat(firstData)) {
@@ -541,8 +557,8 @@ public abstract class Filter implements Serializable {
     while (firstData.readInstance(firstInput)) {
       if (filter.input(firstData.instance(0))) {
 	if (!printedHeader) {
-	  System.err.println("Filter didn't return true from inputFormat() "+
-			     "earlier!");
+	  System.err.println("Filter didn't return true from inputFormat() "
+			     + "earlier!");
 	  System.exit(0);
 	}
 	firstOutput.println(filter.output().toString());

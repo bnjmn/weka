@@ -36,20 +36,12 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class DeleteFilter extends Filter implements OptionHandler {
 
-  // =================
-  // Protected members
-  // =================
-
   /** Stores which columns to delete */
   protected Range m_DeleteCols = new Range();
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -132,18 +124,18 @@ public class DeleteFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    b_NewBatch = true;
+    m_NewBatch = true;
     
-    m_DeleteCols.setUpper(m_InputFormat.numAttributes()-1);
+    m_DeleteCols.setUpper(m_InputFormat.numAttributes() - 1);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
 
     try {
-      for(int i = m_InputFormat.numAttributes()-1; i >= 0; i--) {
+      for(int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
 	if (m_DeleteCols.isInRange(i)) {
 	  // If they want the class column deleted, re-assign it
 	  if (i == outputFormat.classIndex()) {
-	    outputFormat.setClassIndex(0);
+	    outputFormat.setClassIndex(-1);
 	  }
 	  outputFormat.deleteAttributeAt(i);
 	}
@@ -151,8 +143,6 @@ public class DeleteFilter extends Filter implements OptionHandler {
       setOutputFormat(outputFormat);
     } catch (Exception ex) {
       System.err.println("Exception: " + ex.getMessage());
-      System.err.println("Weka currently doesn't allow deleting all " +
-			 "columns of Instances");
       System.exit(0);
     }
     return true;
@@ -175,9 +165,9 @@ public class DeleteFilter extends Filter implements OptionHandler {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
 
     Instances outputFormat = outputFormatPeek();
@@ -254,17 +244,13 @@ public class DeleteFilter extends Filter implements OptionHandler {
     String rangeList = "";
     for(int i = 0; i < attributes.length; i++) {
       if (i == 0) {
-	rangeList = ""+(attributes[i]+1);
+	rangeList = "" + (attributes[i] + 1);
       } else {
-	rangeList += ","+(attributes[i]+1);
+	rangeList += "," + (attributes[i] + 1);
       }
     }
     setAttributeIndices(rangeList);
   }
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.
@@ -275,9 +261,9 @@ public class DeleteFilter extends Filter implements OptionHandler {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new DeleteFilter(),argv); 
+ 	Filter.batchFilterFile(new DeleteFilter(), argv); 
       } else {
-	Filter.filterFile(new DeleteFilter(),argv);
+	Filter.filterFile(new DeleteFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

@@ -46,24 +46,12 @@ import weka.core.*;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
-  // =================
-  // Protected members
-  // =================
-
-  /**
-   * Stores which columns to take differences between
-   */
+  /** Stores which columns to take differences between */
   protected Range m_DeltaCols = new Range();
-
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -96,12 +84,13 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-
   public void setOptions(String[] options) throws Exception {
 
     String deltaList = Utils.getOption('R', options);
     if (deltaList.length() != 0) {
       setAttributeIndices(deltaList);
+    } else {
+      setAttributeIndices("");
     }
     
     if (m_InputFormat != null)
@@ -139,13 +128,12 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
    * @exception Exception if any of the selected attributes are
    * not numeric
    */
-  
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    b_NewBatch = true;
+    m_NewBatch = true;
 
-    m_DeltaCols.setUpper(m_InputFormat.numAttributes()-1);
+    m_DeltaCols.setUpper(m_InputFormat.numAttributes() - 1);
 
     for (int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
       if (m_DeltaCols.isInRange(i) 
@@ -161,13 +149,13 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
       boolean inRange = false;
       for (int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
 	if (m_DeltaCols.isInRange(i)) {
-	  // If they want the class column modified, re-assign it
+	  // If they want the class column modified, unassign it
 	  if (i == outputFormat.classIndex()) {
-	    outputFormat.setClassIndex(0);
+	    outputFormat.setClassIndex(-1);
 	  }
 
 	  String foName = outputFormat.attribute(i).name();
-	  foName = "'FO " + foName.replace('\'',' ').trim() + '\'';
+	  foName = "'FO " + foName.replace('\'', ' ').trim() + '\'';
 	  outputFormat.deleteAttributeAt(i);
 	  // Create the new attribute
 	  if (inRange) {
@@ -179,9 +167,7 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
       }
       setOutputFormat(outputFormat);
     } catch (Exception ex) {
-      System.err.println("Exception: "+ex.getMessage());
-      System.err.println("Weka currently doesn't allow deleting"
-			 + " all columns of Instances");
+      System.err.println("Exception: " + ex.getMessage());
       System.exit(0);
     }
     return true;
@@ -204,9 +190,9 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
 
     Instances outputFormat = outputFormatPeek();
@@ -282,10 +268,6 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     setAttributeIndices(rangeList);
   }
 
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
@@ -295,9 +277,9 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new FirstOrderFilter(),argv);
+ 	Filter.batchFilterFile(new FirstOrderFilter(), argv);
       } else {
-	Filter.filterFile(new FirstOrderFilter(),argv);
+	Filter.filterFile(new FirstOrderFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

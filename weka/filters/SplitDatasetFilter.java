@@ -29,26 +29,28 @@ import java.util.*;
  *
  * -R inst1,inst2-inst4,... <br>
  * Specifies list of instances to select. First
- * and last are valid indexes.<p>
+ * and last are valid indexes. (default fold-based splitting)<p>
  *
  * -V <br>
  * Specifies if inverse of selection is to be output.<p>
  *
  * -N number of folds <br>
- * Specifies number of folds dataset is split into. <p>
+ * Specifies number of folds dataset is split into (default 10). <p>
  *
  * -F fold <br>
- * Specifies which fold is selected. (Default: 1)<p>
+ * Specifies which fold is selected. (default 1)<p>
  *
  * -S seed <br>
- * Specifies a random number seed for shuffling the dataset. ( > 0)<p>
+ * Specifies a random number seed for shuffling the dataset.
+ * (default 0, don't randomize)<p>
  *
- * -C attribute index <br> Specifies the attribute to be used for
+ * -C attribute index <br>
+ * Specifies the attribute to be used for
  * stratification. Attribute will be class in new dataset. Doesn't
- * stratify if attribute is not nominal.<p>
+ * stratify if attribute is not nominal. (default last)<p>
  *  
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0 
+ * @version $Revision: 1.2 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -59,7 +61,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   private boolean m_Inverse = false;
 
   /** Number of folds to split dataset into */
-  private int m_NumFolds = 0;
+  private int m_NumFolds = 10;
 
   /** Fold to output */
   private int m_Fold = 1;
@@ -68,7 +70,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   private long m_Seed = 0;
 
   /** Attribute to be used for stratification */
-  private int m_AttributeIndex = 0;
+  private int m_AttributeIndex = -1;
 
   /**
    * Gets an enumeration describing the available options.
@@ -81,29 +83,30 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
 
     newVector.addElement(new Option(
               "\tSpecifies list of instances to select. First and last\n"
-	      +"\tare valid indexes.\n",
+	      +"\tare valid indexes. (default fold-based splitting)\n",
               "R", 1, "-R <inst1,inst2-inst4,...>"));
 
     newVector.addElement(new Option(
 	      "\tSpecifies if inverse of selection is to be output.\n",
-	      "V", 0, "V"));
+	      "V", 0, "-V"));
 
     newVector.addElement(new Option(
-              "\tSpecifies number of folds dataset is split into.\n",
+              "\tSpecifies number of folds dataset is split into. \n"
+	      + "\t(default 10)\n",
               "N", 1, "-N <number of folds>"));
 
     newVector.addElement(new Option(
-	      "\tSpecifies which fold is selected. (Default: 1)\n",
+	      "\tSpecifies which fold is selected. (default 1)\n",
 	      "F", 1, "-F <fold>"));
 
     newVector.addElement(new Option(
-	      "\tSpecifies random number seed.\n",
+	      "\tSpecifies random number seed. (default 0, no randomizing)\n",
 	      "S", 1, "-S <seed>"));
 
     newVector.addElement(new Option(
 	      "\tIndex of attribute used for stratification. Attribute\n"+
 	      "\twill be class in new dataset. Doesn't stratify if\n"+
-	      "\tattribute is not nominal.",
+	      "\tattribute is not nominal. (default last)",
 	      "C", 1, "-C <attribute index>"));
 
     return newVector.elements();
@@ -114,27 +117,29 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    *
    * -R inst1,inst2-inst4,... <br>
    * Specifies list of instances to select. First
-   * and last are valid indexes.<p>
+   * and last are valid indexes. (default fold-based splitting)<p>
    *
    * -V <br>
    * Specifies if inverse of selection is to be output.<p>
    *
    * -N number of folds <br>
-   * Specifies number of folds dataset is split into. <p>
+   * Specifies number of folds dataset is split into (default 10). <p>
    *
    * -F fold <br>
-   * Specifies which fold is selected. (Default: 1)<p>
+   * Specifies which fold is selected. (default 1)<p>
    *
    * -S seed <br>
-   * Specifies a random number seed for shuffling the dataset. ( > 0)<p>
+   * Specifies a random number seed for shuffling the dataset.
+   * (default 0, no randomizing)<p>
    *
    * -C attribute index <br> 
    * Specifies the attribute to be used for
    * stratification. Attribute will be class in new dataset. Doesn't
-   * stratify if attribute is not nominal.<p>
+   * stratify if attribute is not nominal. (default last)<p>
    *  
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported */
+   * @exception Exception if an option is not supported
+   */
   public void setOptions(String[] options) throws Exception {
 
     setInstancesIndices(Utils.getOption('R', options));
@@ -143,7 +148,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     if (numFolds.length() != 0) {
       setNumFolds(Integer.parseInt(numFolds));
     } else {
-      setNumFolds(0);
+      setNumFolds(10);
     }
     String fold = Utils.getOption('F', options);
     if (fold.length() != 0) {
@@ -160,14 +165,14 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     String attIndex = Utils.getOption('C', options);
     if (attIndex.length() != 0) {
       if (attIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(0);
+	setAttributeIndex(-1);
       } else if (attIndex.toLowerCase().equals("first")) {
-	setAttributeIndex(1);
+	setAttributeIndex(0);
       } else {
-	setAttributeIndex(Integer.parseInt(attIndex));
+	setAttributeIndex(Integer.parseInt(attIndex) - 1);
       }
     } else {
-      setAttributeIndex(0);
+      setAttributeIndex(-1);
     }
     if (m_InputFormat != null) {
       inputFormat(m_InputFormat);
@@ -184,17 +189,18 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     String [] options = new String [11];
     int current = 0;
 
-    if (getInvertSelection()) {
-      options[current++] = "-V";
-    }
+    options[current++] = "-S"; options[current++] = "" + getSeed();
     if (!getInstancesIndices().equals("")) {
       options[current++] = "-R"; options[current++] = getInstancesIndices();
+      if (getInvertSelection()) {
+	options[current++] = "-V";
+      }
+    } else {
+      options[current++] = "-C";
+      options[current++] = "" + (getAttributeIndex() + 1);
+      options[current++] = "-N"; options[current++] = "" + getNumFolds();
+      options[current++] = "-F"; options[current++] = "" + getFold();
     }
-    options[current++] = "-C"; options[current++] = "" + getAttributeIndex();
-    options[current++] = "-N"; options[current++] = "" + getNumFolds();
-    options[current++] = "-F"; options[current++] = "" + getFold();
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-
     while (current < options.length) {
       options[current++] = "";
     }
@@ -258,7 +264,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * 
    * @return the number of folds the dataset is to be split into.
    */
-  public double getNumFolds() {
+  public int getNumFolds() {
 
     return m_NumFolds;
   }
@@ -353,29 +359,24 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * structure is required).
    * @return true because outputFormat can be collected immediately
    * @exception Exception if the input format can't be set successfully
-   */
-  
+   */  
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    // Check if there are any conflicting options.
-    if (((m_Range != null) && (m_NumFolds > 0)) ||
-	((m_Range != null) && (m_AttributeIndex > 0)) ||
-	((m_Range != null) && (m_Seed > 0))) {
-      throw new Exception("Conflicting options.");
-    }
     if ((m_NumFolds > 0) && (m_NumFolds < m_Fold)) {
       throw new Exception("Fold has to be smaller or equal to "+
 			  "number of folds.");
     }
     m_InputFormat = new Instances(instanceInfo, 0);
-    if (m_AttributeIndex > 0) {
-      if (m_AttributeIndex > m_InputFormat.numAttributes()) {
-	throw new Exception("Invalid attribute index.");
+    if (m_Range != null) {
+      if (m_AttributeIndex >= 0) {
+	if (m_AttributeIndex >= m_InputFormat.numAttributes()) {
+	  throw new Exception("Invalid attribute index.");
+	}
+	m_InputFormat.setClassIndex(m_AttributeIndex);
       }
-      m_InputFormat.setClassIndex(m_AttributeIndex - 1);
     }
     setOutputFormat(m_InputFormat);
-    b_NewBatch = true;
+    m_NewBatch = true;
     return true;
   }
 
@@ -396,22 +397,21 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
       // User has provided a random number seed.
       m_InputFormat.randomize(new Random(m_Seed));
     }
-    if (m_AttributeIndex > 0) {
-      // User has provided an attribute for stratification.
-      m_InputFormat.stratify(m_NumFolds);
-    }
     // Push instances for output into output queue
     if (m_Range != null) {
       // User has provided a range
       m_Range.setInvert(m_Inverse);
-      m_Range.setUpper(m_InputFormat.numInstances());
+      m_Range.setUpper(m_InputFormat.numInstances() - 1);
       for (int i = 0; i < m_InputFormat.numInstances(); i++) {
 	if (m_Range.isInRange(i)) {
 	  push(m_InputFormat.instance(i));
 	}
       }
-    } else if (m_NumFolds > 0) {
-      // User has provided a number of folds.
+    } else {
+      // Select out a fold
+      if (m_InputFormat.classIndex() >= 0) {
+	m_InputFormat.stratify(m_NumFolds);
+      }
       Instances instances;
       if (!m_Inverse) {
 	instances = m_InputFormat.testCV(m_NumFolds, m_Fold - 1);
@@ -422,25 +422,24 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
 	push(instances.instance(i));
       }
     }
-    b_NewBatch = true;
+    m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
 
   /**
    * Main method for testing this class.
+   *
    * @param argv should contain arguments to the filter: use -h for help
    */
-
   public static void main(String [] argv) {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new SplitDatasetFilter(),argv);
+ 	Filter.batchFilterFile(new SplitDatasetFilter(), argv);
       } else {
-	Filter.filterFile(new SplitDatasetFilter(),argv);
+	Filter.filterFile(new SplitDatasetFilter(), argv);
       }
     } catch (Exception ex) {
-      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }

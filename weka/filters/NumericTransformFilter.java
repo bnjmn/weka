@@ -44,13 +44,9 @@ import weka.core.*;
  * Name of the method used for the transformation.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
-
-  // =================
-  // Private variables
-  // =================
 
   /** Stores which columns to transform. */
   private Range m_Cols = new Range();
@@ -63,10 +59,6 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
 
   /** Parameter types. */
   private static Class[] PARAM = new Class[] {Double.TYPE};
-
-  // ==============
-  // Public methods
-  // ==============
 
   /**
    * Sets the format of the input instances.
@@ -88,9 +80,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
       throw new Exception("No method has been set.");
     }
     m_InputFormat = new Instances(instanceInfo, 0);
-    m_Cols.setUpper(m_InputFormat.numAttributes()-1);
+    m_Cols.setUpper(m_InputFormat.numAttributes() - 1);
     setOutputFormat(m_InputFormat);
-    b_NewBatch = true;
+    m_NewBatch = true;
     return true;
   }
 
@@ -113,9 +105,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
 
     double[] vals = new double[instance.numAttributes()];
@@ -221,8 +213,12 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     if (!getAttributeIndices().equals("")) {
       options[current++] = "-R"; options[current++] = getAttributeIndices();
     }
-    options[current++] = "-C"; options[current++] = getClassName();
-    options[current++] = "-M"; options[current++] = getMethodName();
+    if (m_Class != null) {
+      options[current++] = "-C"; options[current++] = getClassName();
+    }
+    if (m_Method != null) {
+      options[current++] = "-M"; options[current++] = getMethodName();
+    }
 
     while (current < options.length) {
       options[current++] = "";
@@ -330,16 +326,12 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     String rangeList = "";
     for(int i = 0; i < attributes.length; i++)
       if (i == 0)
-	rangeList = ""+(attributes[i]+1);
+	rangeList = "" + (attributes[i] + 1);
       else
-	rangeList += ","+(attributes[i]+1);
+	rangeList += "," + (attributes[i] + 1);
     setAttributeIndices(rangeList);
   }
   
-  // ============
-  // Test method.
-  // ============
-
 
   /**
    * Main method for testing this class.
@@ -350,9 +342,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
 
     try {
       if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new NumericTransformFilter(),argv);
+	Filter.batchFilterFile(new NumericTransformFilter(), argv);
       } else {
-	Filter.filterFile(new NumericTransformFilter(),argv);
+	Filter.filterFile(new NumericTransformFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

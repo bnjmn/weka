@@ -29,36 +29,36 @@ import weka.core.*;
  * Valid scheme-specific options are: <p>
  *
  * -C col <br>
- * Determine cuts using Fayyad & Irani method using this column
- * for the class.<p>
+ * The column containing the values to be merged. (default last)<p>
  *
  * -F index <br>
- * Index of the first value.<p>
+ * Index of the first value (default first).<p>
  *
  * -S index <br>
- * Index of the second value.<p>
+ * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class MergeTwoValuesFilter extends Filter implements OptionHandler {
 
-  // =================
-  // Private variables
-  // =================
+  /** The attribute's index setting. */
+  private int m_AttIndexSet = -1; 
+
+  /** The first value's index setting. */
+  private int m_FirstIndexSet = 0;
+
+  /** The second value's index setting. */
+  private int m_SecondIndexSet = -1;
 
   /** The attribute's index. */
-  private int theAttIndex = -1; 
+  private int m_AttIndex; 
 
   /** The first value's index. */
-  private int theFirstIndex = -1;
+  private int m_FirstIndex;
 
   /** The second value's index. */
-  private int theSecondIndex = -1;
-
-  // ==============
-  // Public methods
-  // ==============
+  private int m_SecondIndex;
 
   /**
    * Sets the format of the input instances.
@@ -70,31 +70,33 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    if (theAttIndex < 0) {
-      throw new Exception("No attribute chosen.");
+    m_AttIndex = m_AttIndexSet;
+    if (m_AttIndex < 0) {
+      m_AttIndex = m_InputFormat.numAttributes() - 1;
     }
-    if (!m_InputFormat.attribute(theAttIndex).isNominal()) {
+    m_FirstIndex = m_FirstIndexSet;
+    if (m_FirstIndex < 0) {
+      m_FirstIndex = m_InputFormat.attribute(m_AttIndex).numValues() - 1;
+    }
+    m_SecondIndex = m_SecondIndexSet;
+    if (m_SecondIndex < 0) {
+      m_SecondIndex = m_InputFormat.attribute(m_AttIndex).numValues() - 1;
+    }
+    if (!m_InputFormat.attribute(m_AttIndex).isNominal()) {
       throw new Exception("Chosen attribute not nominal.");
     }
-    if (m_InputFormat.attribute(theAttIndex).numValues() < 2) {
+    if (m_InputFormat.attribute(m_AttIndex).numValues() < 2) {
       throw new Exception("Chosen attribute has less than two values.");
     }
-    if (theFirstIndex < 0) {
-      throw new Exception("First value undefined.");
-    }
-    if (theSecondIndex < 0) {
-      throw new Exception("Second value undefined.");
-    }
-    if (theSecondIndex <= theFirstIndex) {
+    if (m_SecondIndex <= m_FirstIndex) {
       throw new Exception("The second index has to be greater "+
 			  "than the first.");
     }
-    b_NewBatch = true;
+    m_NewBatch = true;
     setOutputFormat();
     return true;
   }
@@ -114,17 +116,17 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
     Instance newInstance = (Instance)instance.copy();
-    if ((int)newInstance.value(theAttIndex) == theSecondIndex) {
-      newInstance.setValue(theAttIndex, (double)theFirstIndex);
+    if ((int)newInstance.value(m_AttIndex) == m_SecondIndex) {
+      newInstance.setValue(m_AttIndex, (double)m_FirstIndex);
     }
-    else if ((int)newInstance.value(theAttIndex) > theSecondIndex) {
-      newInstance.setValue(theAttIndex,
-			   newInstance.value(theAttIndex) - 1);
+    else if ((int)newInstance.value(m_AttIndex) > m_SecondIndex) {
+      newInstance.setValue(m_AttIndex,
+			   newInstance.value(m_AttIndex) - 1);
     }
     push(newInstance);
     return true;
@@ -140,16 +142,16 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
     Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
-              "\tSets the attribute index.",
+              "\tSets the attribute index (default last).",
               "C", 1, "-C <col>"));
 
     newVector.addElement(new Option(
-              "\tSets the first value's index.",
-              "F", 1, "-F <col>"));
+              "\tSets the first value's index (default first).",
+              "F", 1, "-F <value index>"));
 
     newVector.addElement(new Option(
-              "\tSets the second value's index.",
-              "S", 1, "-S <col>"));
+              "\tSets the second value's index (default last).",
+              "S", 1, "-S <value index>"));
 
     return newVector.elements();
   }
@@ -159,14 +161,13 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
    * Parses the options for this object. Valid options are: <p>
    *
    * -C col <br>
-   * Determine cuts using Fayyad & Irani method using this column
-   * for the class.<p>
+   * The column containing the values to be merged. (default last)<p>
    *
    * -F index <br>
-   * Index of the first value.<p>
+   * Index of the first value (default first).<p>
    *
    * -S index <br>
-   * Index of the second value.<p>
+   * Index of the second value (default last).<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -176,24 +177,24 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
     String attIndex = Utils.getOption('C', options);
     if (attIndex.length() != 0) {
       if (attIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(0);
+	setAttributeIndex(-1);
       } else if (attIndex.toLowerCase().equals("first")) {
-	setAttributeIndex(1);
+	setAttributeIndex(0);
       } else {
-	setAttributeIndex(Integer.parseInt(attIndex));
+	setAttributeIndex(Integer.parseInt(attIndex) - 1);
       }
     } else {
-      setAttributeIndex(0);
+      setAttributeIndex(-1);
     }
     
     String firstIndex = Utils.getOption('F', options);
     if (firstIndex.length() != 0) {
       if (firstIndex.toLowerCase().equals("last")) {
-	setFirstValueIndex(0);
+	setFirstValueIndex(-1);
       } else if (firstIndex.toLowerCase().equals("first")) {
-	setFirstValueIndex(1);
+	setFirstValueIndex(0);
       } else {
-	setFirstValueIndex(Integer.parseInt(firstIndex));
+	setFirstValueIndex(Integer.parseInt(firstIndex) - 1);
       }
     } else {
       setFirstValueIndex(0);
@@ -202,14 +203,14 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
     String secondIndex = Utils.getOption('S', options);
     if (secondIndex.length() != 0) {
       if (secondIndex.toLowerCase().equals("last")) {
-	setSecondValueIndex(0);
+	setSecondValueIndex(-1);
       } else if (secondIndex.toLowerCase().equals("first")) {
-	setSecondValueIndex(1);
+	setSecondValueIndex(0);
       } else {
-	setSecondValueIndex(Integer.parseInt(secondIndex));
+	setSecondValueIndex(Integer.parseInt(secondIndex) - 1);
       }
     } else {
-      setSecondValueIndex(0);
+      setSecondValueIndex(-1);
     }
    
     if (m_InputFormat != null) {
@@ -227,11 +228,12 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
     String [] options = new String [6];
     int current = 0;
 
-    options[current++] = "-C"; options[current++] = "" + getAttributeIndex();
+    options[current++] = "-C";
+    options[current++] = "" + (getAttributeIndex() + 1);
     options[current++] = "-F"; 
-    options[current++] = "" + getFirstValueIndex();
+    options[current++] = "" + (getFirstValueIndex() + 1);
     options[current++] = "-S"; 
-    options[current++] = "" + getSecondValueIndex();
+    options[current++] = "" + (getSecondValueIndex() + 1);
     while (current < options.length) {
       options[current++] = "";
     }
@@ -239,68 +241,64 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Get the index (starting from 1) of the attribute used.
+   * Get the index of the attribute used.
    *
    * @return the index of the attribute
    */
   public int getAttributeIndex() {
 
-    return theAttIndex + 1;
+    return m_AttIndexSet;
   }
 
   /**
-   * Sets index of (starting from 1) of the attribute used.
+   * Sets index of the attribute used.
    *
    * @param index the index of the attribute
    */
   public void setAttributeIndex(int attIndex) {
     
-    theAttIndex = attIndex - 1;
+    m_AttIndexSet = attIndex;
   }
 
   /**
-   * Get the index (starting from 1) of the first value used.
+   * Get the index of the first value used.
    *
    * @return the index of the first value
    */
   public int getFirstValueIndex() {
 
-    return theFirstIndex + 1;
+    return m_FirstIndexSet;
   }
 
   /**
-   * Sets index of (starting from 1) of the first value used.
+   * Sets index of the first value used.
    *
    * @param index the index of the first value
    */
   public void setFirstValueIndex(int firstIndex) {
     
-    theFirstIndex = firstIndex - 1;
+    m_FirstIndexSet = firstIndex;
   }
 
   /**
-   * Get the index (starting from 1) of the second value used.
+   * Get the index of the second value used.
    *
    * @return the index of the second value
    */
   public int getSecondValueIndex() {
 
-    return theSecondIndex + 1;
+    return m_SecondIndexSet;
   }
 
   /**
-   * Sets index of (starting from 1) of the second value used.
+   * Sets index of the second value used.
    *
    * @param index the index of the second value
    */
   public void setSecondValueIndex(int secondIndex) {
     
-    theSecondIndex = secondIndex - 1;
+    m_SecondIndexSet = secondIndex;
   }
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Set the output format. Takes the current average class values
@@ -322,42 +320,49 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
       newAtts = new FastVector(m_InputFormat.numAttributes());
       for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
 	Attribute att = m_InputFormat.attribute(j);
-	if (j != theAttIndex) 
+	if (j != m_AttIndex) {
 	  newAtts.addElement(att.copy());
-	else {
+	} else {
 	  
 	  // Compute new value
 	  
-	  if (att.value(theFirstIndex).endsWith("'")) 
+	  if (att.value(m_FirstIndex).endsWith("'")) {
 	    firstEndsWithPrime = true;
-	  if (att.value(theSecondIndex).endsWith("'"))
+	  }
+	  if (att.value(m_SecondIndex).endsWith("'")) {
 	    secondEndsWithPrime = true;
-	  if (firstEndsWithPrime || secondEndsWithPrime)
+	  }
+	  if (firstEndsWithPrime || secondEndsWithPrime) {
 	    text.append("'");
-	  if (firstEndsWithPrime)
-	    text.append(((String)att.value(theFirstIndex)).
-			substring(1,((String)att.value(theFirstIndex)).
-				  length()-1));
-	  else 
-	    text.append((String)att.value(theFirstIndex));
+	  }
+	  if (firstEndsWithPrime) {
+	    text.append(((String)att.value(m_FirstIndex)).
+			substring(1, ((String)att.value(m_FirstIndex)).
+				  length() - 1));
+	  } else {
+	    text.append((String)att.value(m_FirstIndex));
+	  }
 	  text.append('_');
-	  if (secondEndsWithPrime)
-	    text.append(((String)att.value(theSecondIndex)).
-			substring(1,((String)att.value(theSecondIndex)).
-				  length()-1));
-	  else
-	    text.append((String)att.value(theSecondIndex));
-	  if (firstEndsWithPrime || secondEndsWithPrime)
+	  if (secondEndsWithPrime) {
+	    text.append(((String)att.value(m_SecondIndex)).
+			substring(1, ((String)att.value(m_SecondIndex)).
+				  length() - 1));
+	  } else {
+	    text.append((String)att.value(m_SecondIndex));
+	  }
+	  if (firstEndsWithPrime || secondEndsWithPrime) {
 	    text.append("'");
+	  }
 	  
 	  // Compute list of attribute values
 	  
 	  newVals = new FastVector(att.numValues() - 1);
 	  for (int i = 0; i < att.numValues(); i++) {
-	    if (i == theFirstIndex)
+	    if (i == m_FirstIndex) {
 	      newVals.addElement(text.toString());
-	    else if (i != theSecondIndex)
+	    } else if (i != m_SecondIndex) {
 	      newVals.addElement(att.value(i));
+	    }
 	  }
 	  newAtts.addElement(new Attribute(att.name(), newVals));
 	}
@@ -375,10 +380,6 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
     }
   }
   
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
@@ -389,9 +390,9 @@ public class MergeTwoValuesFilter extends Filter implements OptionHandler {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new MergeTwoValuesFilter(),argv);
+ 	Filter.batchFilterFile(new MergeTwoValuesFilter(), argv);
       } else {
-	Filter.filterFile(new MergeTwoValuesFilter(),argv);
+	Filter.filterFile(new MergeTwoValuesFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

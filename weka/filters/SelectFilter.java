@@ -28,14 +28,14 @@ import weka.core.*;
  *
  * Valid scheme-specific options are:<p>
  *
- * -C <num><br>
- * Choose attribute to be used for selection.<p>
+ * -C num<br>
+ * Choose attribute to be used for selection (default last).<p>
  *
- * -S <num><br>
+ * -S num<br>
  * Numeric value to be used for selection on numeric attribute.
  * (Instances with values smaller than given value.) <p>
  *
- * -L <index1,index2-index4,...><br>
+ * -L index1,index2-index4,...<br>
  * Range of label indices to be used for selection on nominal attribute.
  * (First and last are valid indexes.)<p>
  *
@@ -43,18 +43,16 @@ import weka.core.*;
  * Invert matching sense.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class SelectFilter extends Filter implements OptionHandler {
 
-  // =================
-  // Protected members
-  // =================
+  /** Stores the attribute setting */
+  protected int m_AttributeSet = -1;
 
   /** Stores which attribute to be used for filtering */
-  protected int m_Attribute = -1;
-
+  protected int m_Attribute;
+  
   /** Stores which values of nominal attribute are to be used for filtering.*/
   protected Range m_Values = new Range();
 
@@ -63,10 +61,6 @@ public class SelectFilter extends Filter implements OptionHandler {
 
   /** Inverse of test to be used? */
   protected boolean m_Inverse = false;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -102,14 +96,14 @@ public class SelectFilter extends Filter implements OptionHandler {
    * Parses a given list of options.
    * Valid options are:<p>
    *
-   * -C <num><br>
-   * Choose attribute to be used for selection.<p>
+   * -C num<br>
+   * Choose attribute to be used for selection (default last).<p>
    *
-   * -S <num><br>
+   * -S num<br>
    * Numeric value to be used for selection on numeric attribute.
    * (Instances with values smaller than given value.) <p>
    *
-   * -L <index1,index2-index4,...><br>
+   * -L index1,index2-index4,...<br>
    * Range of label indices to be used for selection on nominal attribute.
    * (First and last are valid indexes.)<p>
    *
@@ -124,11 +118,11 @@ public class SelectFilter extends Filter implements OptionHandler {
     String attIndex = Utils.getOption('C', options);
     if (attIndex.length() != 0) {
       if (attIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(0);
+	setAttributeIndex(-1);
       } else if (attIndex.toLowerCase().equals("first")) {
-        setAttributeIndex(1);
+        setAttributeIndex(0);
       } else {
-	setAttributeIndex(Integer.parseInt(attIndex));
+	setAttributeIndex(Integer.parseInt(attIndex) - 1);
       }
     } else {
       setAttributeIndex(-1);
@@ -144,6 +138,8 @@ public class SelectFilter extends Filter implements OptionHandler {
     String convertList = Utils.getOption('L', options);
     if (convertList.length() != 0) {
       setNominalIndices(convertList);
+    } else {
+      setNominalIndices("");
     }
     setInvertSelection(Utils.getFlag('V', options));
 
@@ -165,7 +161,8 @@ public class SelectFilter extends Filter implements OptionHandler {
     int current = 0;
 
     options[current++] = "-S"; options[current++] = "" + getSplitPoint();
-    options[current++] = "-C"; options[current++] = "" + getAttributeIndex();
+    options[current++] = "-C";
+    options[current++] = "" + (getAttributeIndex() + 1);
     if (!getNominalIndices().equals("")) {
       options[current++] = "-L"; options[current++] = getNominalIndices();
     }
@@ -189,8 +186,10 @@ public class SelectFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    if (m_Attribute == -1) {
-      setAttributeIndex(m_InputFormat.numAttributes());
+    if (m_AttributeSet == -1) {
+      m_Attribute = m_InputFormat.numAttributes() - 1;
+    } else {
+      m_Attribute = m_AttributeSet;
     }
     if (!isNumeric() && !isNominal()) {
       throw new Exception("Can only handle numeric or nominal "+ 
@@ -198,7 +197,7 @@ public class SelectFilter extends Filter implements OptionHandler {
     }
     m_Values.setUpper(m_InputFormat.attribute(m_Attribute).numValues() - 1);
     setOutputFormat(m_InputFormat);
-    b_NewBatch = true;
+    m_NewBatch = true;
     return true;
   }
 
@@ -218,9 +217,9 @@ public class SelectFilter extends Filter implements OptionHandler {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
     if (instance.isMissing(m_Attribute)) {
       return false;
@@ -276,23 +275,23 @@ public class SelectFilter extends Filter implements OptionHandler {
   }
   
   /**
-   * Get the attribute to be used for selection
+   * Get the attribute to be used for selection (-1 for last)
    *
    * @return the attribute index
    */
   public int getAttributeIndex() {
 
-    return m_Attribute + 1;
+    return m_AttributeSet;
   }
 
   /**
    * Sets attribute to be used for selection
    *
-   * @param attribute the attribute's index (starting from 1, or 0 for last);
+   * @param attribute the attribute's index (-1 for last);
    */
   public void setAttributeIndex(int attribute) {
 
-    m_Attribute = attribute - 1;
+    m_AttributeSet = attribute;
   }
 
   /**
@@ -372,17 +371,13 @@ public class SelectFilter extends Filter implements OptionHandler {
     String rangeList = "";
     for(int i = 0; i < values.length; i++) {
       if (i == 0) {
-	rangeList = ""+(values[i]+1);
+	rangeList = "" + (values[i] + 1);
       } else {
-	rangeList += ","+(values[i]+1);
+	rangeList += "," + (values[i] + 1);
       }
     }
     setNominalIndices(rangeList);
   }
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.
@@ -394,9 +389,9 @@ public class SelectFilter extends Filter implements OptionHandler {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new SelectFilter(),argv);
+ 	Filter.batchFilterFile(new SelectFilter(), argv);
       } else {
-	Filter.filterFile(new SelectFilter(),argv);
+	Filter.filterFile(new SelectFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

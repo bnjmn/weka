@@ -514,10 +514,10 @@ public class AttributeSelectionFilter
     if (m_InputFormat == null)
       throw new Exception("No input instance format defined");
 
-    if (b_NewBatch)
+    if (m_NewBatch)
     {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
 
     if (m_selectedAttributes[0] != null)
@@ -565,7 +565,7 @@ public class AttributeSelectionFilter
 	m_InputFormat = new Instances(m_InputFormat, 0);
       }
 
-    b_NewBatch = true;
+    m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
 
