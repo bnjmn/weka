@@ -1,5 +1,5 @@
 #
-# $Revision: 1.5 $
+# $Revision: 1.6 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -63,8 +63,10 @@ doc :
 	weka.experiment \
 	weka.gui \
 	weka.gui.experiment \
-	weka.gui.streams \
-	)
+	weka.gui.streams; \
+	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
+	< doc/packages.html > packages_temp.html; \
+	mv packages_temp.html doc/packages.html)
 
 # Assumes any auxiliary classfiles are in the parent directory
 # One of these must be SimpleCLI.class
@@ -116,7 +118,9 @@ install : all
 	weka.experiment \
 	weka.gui \
 	weka.gui.experiment \
-	weka.gui.streams
+	weka.gui.streams;
+	< $$JAWSHOME/doc/packages.html > $$JAWSHOME/packages_temp.html; \
+	mv $$JAWSHOME/packages_temp.html $$JAWSHOME/doc/packages.html
 
 archive :
 	(cd ..; \
