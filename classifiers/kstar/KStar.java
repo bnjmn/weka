@@ -111,8 +111,6 @@ public class KStar extends DistributionClassifier
     if (instances.checkForStringAttributes())
       throw new Exception("Can't handle string attributes!");
     m_Train = new Instances(instances, 0, instances.numInstances());
-    Enumeration enum = m_Train.enumerateInstances();
-
     // Throw away training instances with missing class
     m_Train.deleteWithMissingClass();
     // initializes class attributes ** java-speaking! :-) **
@@ -166,7 +164,7 @@ public class KStar extends DistributionClassifier
 	m_Cache[i] = new KStarCache();
       }
       m_InitFlag = OFF;
-      System.err.println("Computing, please wait...");
+      System.out.println("Computing...");
     }
     // init done.
     Instance trainInstance;
@@ -222,7 +220,6 @@ public class KStar extends DistributionClassifier
       transProb *= attrTransProb(first, second, i);
       // normilize for missing values
       if (numMissAttr != m_NumAttributes) {
-	// I don't know where this comes from!!!
 	transProb = Math.pow(transProb, (double)m_NumAttributes / 
 			     (m_NumAttributes - numMissAttr));
       }
@@ -495,6 +492,7 @@ public class KStar extends DistributionClassifier
    */
   private void update_m_Attributes() {
     m_NumInstances = m_Train.numInstances();
+    m_InitFlag = ON;
   }
 
   /**
