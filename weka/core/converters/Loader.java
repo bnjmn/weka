@@ -34,7 +34,7 @@ import weka.core.Instance;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface Loader extends Serializable {
 
@@ -69,7 +69,7 @@ public interface Loader extends Serializable {
    *    signals: (IOException);
    * </jml></pre>
    */
-  public void setSource(File file) throws IOException;
+  void setSource(File file) throws IOException;
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
@@ -79,7 +79,7 @@ public interface Loader extends Serializable {
    * @exception IOException if this Loader doesn't
    * support loading from a File.
    */
-  public void setSource(InputStream input) throws IOException;
+  void setSource(InputStream input) throws IOException;
 
   /**
    * Determines and returns (if possible) the structure (internally the 
@@ -104,7 +104,7 @@ public interface Loader extends Serializable {
    *      signals: (IOException);
    * </jml></pre>
    */
-  public Instances getStructure() throws IOException;
+  Instances getStructure() throws IOException;
 
   /**
    * Return the full data set. If the structure hasn't yet been determined
@@ -131,7 +131,7 @@ public interface Loader extends Serializable {
    *      signals: (IOException);
    * </jml></pre>
    */
-  public Instances getDataSet() throws IOException;
+  Instances getDataSet() throws IOException;
 
   /**
    * Read the data set incrementally---get the next instance in the data 
@@ -177,7 +177,7 @@ public interface Loader extends Serializable {
    *    |}
    * </jml></pre>
    */
-  public Instance getNextInstance() throws IOException;
+  Instance getNextInstance() throws IOException;
 }
 
 

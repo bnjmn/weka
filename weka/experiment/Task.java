@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Interface to something that can be remotely executed as a task.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface Task extends Serializable {
   
@@ -38,6 +38,6 @@ public interface Task extends Serializable {
    * @return a TaskStatusInfo object holding info and result from executing
    * this task
    */
-  public TaskStatusInfo execute();
+  TaskStatusInfo execute();
 
 }

@@ -28,7 +28,7 @@ package weka.core;
  * produce a "deep" copy.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface Copyable {
 
@@ -37,5 +37,5 @@ public interface Copyable {
    * It does the same as the clone() method in Object, which also produces
    * a shallow copy.
    */
-  public Object copy();
+  Object copy();
 }

@@ -30,7 +30,7 @@ import weka.core.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public interface IterativeClassifier {
@@ -41,7 +41,7 @@ public interface IterativeClassifier {
    * @param instances the instances to be used in induction
    * @exception Exception if the model cannot be initialized
    */
-  public void initClassifier(Instances instances) throws Exception;
+  void initClassifier(Instances instances) throws Exception;
 
   /**
    * Performs one iteration.
@@ -49,14 +49,14 @@ public interface IterativeClassifier {
    * @param iteration the index of the current iteration (0-based)
    * @exception Exception if this iteration fails 
    */  
-  public void next(int iteration) throws Exception;
+  void next(int iteration) throws Exception;
 
   /**
    * Signal end of iterating, useful for any house-keeping/cleanup
    * 
    * @exception Exception if cleanup fails 
    */  
-  public void done() throws Exception;
+  void done() throws Exception;
 
   /**
     * Performs a deep copy of the classifier, and a reference copy
@@ -64,6 +64,6 @@ public interface IterativeClassifier {
     *
     * @return a clone of the classifier
     */
-  public Object clone() throws CloneNotSupportedException;
+  Object clone() throws CloneNotSupportedException;
 
 }

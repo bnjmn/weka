@@ -31,7 +31,7 @@ import java.awt.Graphics;
  * etc.)
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface Plot2DCompanion {
 
@@ -39,5 +39,5 @@ public interface Plot2DCompanion {
    * Something to be drawn before the plot itself
    * @param gx the graphics context to render to
    */
-  public abstract void prePlot(Graphics gx);
+  void prePlot(Graphics gx);
 }

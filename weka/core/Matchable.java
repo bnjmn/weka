@@ -27,7 +27,7 @@ package weka.core;
  * algorithms.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface Matchable {
 
@@ -38,7 +38,7 @@ public interface Matchable {
    * @return the tree described as a string
    * @exception Exception if the tree can't be computed
    */
-  public String prefix() throws Exception;
+  String prefix() throws Exception;
 }
 
 

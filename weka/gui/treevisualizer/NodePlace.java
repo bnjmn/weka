@@ -27,7 +27,7 @@ package weka.gui.treevisualizer;
  * arrange them
  *
  * @author Malcolm F Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface NodePlace {
  
@@ -36,6 +36,6 @@ public interface NodePlace {
    *
    * @param r The top of the tree.
    */
-   public void place(Node r);
+   void place(Node r);
   
 } 

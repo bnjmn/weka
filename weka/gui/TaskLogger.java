@@ -27,17 +27,17 @@ package weka.gui;
  * running tasks.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface TaskLogger {
   
   /**
    * Tells the task logger that a new task has been started
    */
-  public void taskStarted();
+  void taskStarted();
 
   /**
    * Tells the task logger that a task has completed
    */
-  public void taskFinished();
+  void taskFinished();
 }

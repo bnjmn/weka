@@ -40,7 +40,7 @@ import java.io.Serializable;
  * </ul>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface SplitEvaluator extends Serializable {
   
@@ -49,7 +49,7 @@ public interface SplitEvaluator extends Serializable {
    * in SplitEvaluators.
    * @param additionalMeasures a list of method names
    */
-  public void setAdditionalMeasures(String [] additionalMeasures);
+  void setAdditionalMeasures(String [] additionalMeasures);
 
   /**
    * Gets the names of each of the key columns produced for a single run.
@@ -59,7 +59,7 @@ public interface SplitEvaluator extends Serializable {
    *
    * @return an array containing the name of each key column
    */
-  public String [] getKeyNames();
+  String [] getKeyNames();
 
   /**
    * Gets the data types of each of the key columns produced for a single run.
@@ -69,7 +69,7 @@ public interface SplitEvaluator extends Serializable {
    * @return an array containing objects of the type of each key column. The 
    * objects should be Strings, or Doubles.
    */
-  public Object [] getKeyTypes();
+  Object [] getKeyTypes();
 
   /**
    * Gets the names of each of the result columns produced for a single run.
@@ -79,7 +79,7 @@ public interface SplitEvaluator extends Serializable {
    *
    * @return an array containing the name of each result column
    */
-  public String [] getResultNames();
+  String [] getResultNames();
 
   /**
    * Gets the data types of each of the result columns produced for a 
@@ -89,7 +89,7 @@ public interface SplitEvaluator extends Serializable {
    * @return an array containing objects of the type of each result column. 
    * The objects should be Strings, or Doubles.
    */
-  public Object [] getResultTypes();
+  Object [] getResultTypes();
 
   /**
    * Gets the key describing the current SplitEvaluator. For example
@@ -99,7 +99,7 @@ public interface SplitEvaluator extends Serializable {
    *
    * @return a value of type 'Object'
    */
-  public Object [] getKey();
+  Object [] getKey();
 
   /**
    * Gets the results for the supplied train and test datasets.
@@ -110,7 +110,7 @@ public interface SplitEvaluator extends Serializable {
    * the array may be Strings, Doubles, or null (for the missing value).
    * @exception Exception if a problem occurs while getting the results
    */
-  public Object [] getResult(Instances train, Instances test) throws Exception;
+  Object [] getResult(Instances train, Instances test) throws Exception;
 
   /**
    * Returns the raw output for the most recent call to getResult. Useful
@@ -119,7 +119,7 @@ public interface SplitEvaluator extends Serializable {
    * @return the raw output corresponding to the most recent call
    * to getResut
    */
-  public String getRawResultOutput();
+  String getRawResultOutput();
 
 } // SplitEvaluator
 

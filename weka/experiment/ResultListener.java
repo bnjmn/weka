@@ -29,7 +29,7 @@ import java.io.Serializable;
  * by a ResultProducer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public interface ResultListener extends Serializable {
@@ -45,7 +45,7 @@ public interface ResultListener extends Serializable {
    * additional results will be restricted.
    * @exception Exception if an error occurs
    */
-  public String [] determineColumnConstraints(ResultProducer rp) 
+  String [] determineColumnConstraints(ResultProducer rp) 
     throws Exception;
 
   /**
@@ -54,7 +54,7 @@ public interface ResultListener extends Serializable {
    * @param rp the ResultProducer that will generate the results
    * @exception Exception if an error occurs during preprocessing.
    */
-  public void preProcess(ResultProducer rp) throws Exception;
+  void preProcess(ResultProducer rp) throws Exception;
   
   /**
    * Perform any postprocessing. When this method is called, it indicates
@@ -64,7 +64,7 @@ public interface ResultListener extends Serializable {
    * @param rp the ResultProducer that generated the results
    * @exception Exception if an error occurs
    */
-  public void postProcess(ResultProducer rp) throws Exception;
+  void postProcess(ResultProducer rp) throws Exception;
   
   /**
    * Accepts results from a ResultProducer.
@@ -76,7 +76,7 @@ public interface ResultListener extends Serializable {
    * the array may be Strings, Doubles, or null (for the missing value).
    * @exception Exception if the result could not be accepted.
    */
-  public void acceptResult(ResultProducer rp, Object [] key, Object [] result)
+  void acceptResult(ResultProducer rp, Object [] key, Object [] result)
     throws Exception;
 
   /**
@@ -90,7 +90,7 @@ public interface ResultListener extends Serializable {
    * @exception Exception if it could not be determined if the result 
    * is needed.
    */
-  public boolean isResultRequired(ResultProducer rp, Object [] key) 
+  boolean isResultRequired(ResultProducer rp, Object [] key) 
     throws Exception;
 
 }

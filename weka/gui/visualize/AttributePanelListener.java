@@ -28,7 +28,7 @@ package weka.gui.visualize;
  * changes in the attribute panel
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface AttributePanelListener {
 
@@ -36,6 +36,6 @@ public interface AttributePanelListener {
    * Called when the user clicks on an attribute bar
    * @param e the event encapsulating what happened
    */
-  public void attributeSelectionChange(AttributePanelEvent e);
+  void attributeSelectionChange(AttributePanelEvent e);
 
 }

@@ -43,7 +43,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;;
+import javax.swing.BorderFactory;
 
 
 /** 
@@ -52,7 +52,7 @@ import javax.swing.BorderFactory;;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class GUIChooser extends Frame {
 

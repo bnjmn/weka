@@ -27,7 +27,7 @@ package weka.gui.visualize;
  * Interface implemented by a class that is interested in receiving
  * submited shapes from a visualize panel.
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface VisualizePanelListener {
 
@@ -37,7 +37,7 @@ public interface VisualizePanelListener {
    * created in.
    * @param e The Event containing the data.
    */
-  public void userDataEvent(VisualizePanelEvent e);
+  void userDataEvent(VisualizePanelEvent e);
 
 
 }

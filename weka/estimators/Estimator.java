@@ -45,7 +45,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface Estimator extends Serializable {
 
@@ -55,7 +55,7 @@ public interface Estimator extends Serializable {
    * @param data the new data value 
    * @param weight the weight assigned to the data value 
    */
-  public void addValue(double data, double weight);
+  void addValue(double data, double weight);
 
   /**
    * Get a probability estimate for a value.
@@ -63,7 +63,7 @@ public interface Estimator extends Serializable {
    * @param data the value to estimate the probability of
    * @return the estimated probability of the supplied value
    */
-  public double getProbability(double data);
+  double getProbability(double data);
 }
 
 

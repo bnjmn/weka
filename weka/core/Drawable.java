@@ -26,7 +26,7 @@ package weka.core;
  * Interface to something that can be drawn as a graph.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface Drawable {
 
@@ -37,7 +37,7 @@ public interface Drawable {
    * @return the graph described by a string
    * @exception Exception if the graph can't be computed
    */
-  public String graph() throws Exception;
+  String graph() throws Exception;
 }
 
 
