@@ -100,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.13 $
+ * @version  $Revision: 1.14 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -235,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.14 $
    * @since 1.0
    * @see JPanel
    */
@@ -1191,6 +1191,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	ois.close();
 	java.awt.Color bckC = getBackground();
 	m_bcSupport = new BeanContextSupport();
+	m_bcSupport.setDesignTime(true);
 
 	// register this panel as a property change listener with each
 	// bean
