@@ -49,7 +49,8 @@ public interface RankedOutputSearch {
    * ranking. This threshold is used by the AttributeSelection module
    * which does the actual discarding of attributes---the implementer
    * of this method needs only to provide a variable in which to store the
-   * supplied threshold.
+   * supplied threshold. -Double.MAX_VALUE is reserved to mean no threshold,
+   * ie, retain all attributes.
    * @param threshold the threshold.
    */
   public abstract void setThreshold(double threshold);
@@ -62,6 +63,21 @@ public interface RankedOutputSearch {
    */
   public abstract double getThreshold();
 
+  /**
+   * Specify the number of attributes to select from the ranked list. -1
+   * indicates that all attributes are to be retained. NumToSelect has
+   * precedence over threshold, ie. if there is a non -1 value for NumToSelect
+   * then this will take precedence over any threshold value.
+   * @param numToSelect the number of attributes to retain
+   */
+  public abstract void setNumToSelect(int numToSelect);
+
+  /**
+   * Gets the number of attributes to be retained.
+   * @return the number of attributes to retain
+   */
+  public abstract int getNumToSelect();
+  
   /**
    * Sets whether or not ranking is to be performed.
    * When a search method is capable of producing a ranked list

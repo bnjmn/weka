@@ -36,7 +36,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -68,6 +68,8 @@ public class Ranker extends ASSearch
    */
   private double m_threshold;
 
+  /** The number of attributes to select. -1 indicates that all attributes
+      are to be retained. Has precedence over m_threshold */
   private int m_numToSelect = -1;
 
   /**
@@ -243,8 +245,12 @@ public class Ranker extends ASSearch
    * Specify a starting set of attributes. Eg 1,4,7-9. <p>
    *
    * -T <threshold> <br>
-   * Specify a threshold by which the AttributeSelection module can. <br>
+   * Specify a threshold by which the AttributeSelection module can <br>
    * discard attributes. <p>
+   *
+   * -N <number to retain> <br>
+   * Specify the number of attributes to retain. Overides any threshold. <br>
+   * <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -448,7 +454,7 @@ public class Ranker extends ASSearch
 			   + "attribute list can be obtained");
     }
 
-    int[] ranked = Utils.sort(m_attributeMerit);
+    int[] ranked = Utils.sortUnsafe(m_attributeMerit);
     // reverse the order of the ranked indexes
     double[][] bestToWorst = new double[ranked.length][2];
 
@@ -462,12 +468,33 @@ public class Ranker extends ASSearch
       bestToWorst[i][0] = m_attributeList[temp];
       bestToWorst[i][1] = m_attributeMerit[temp];
     }
-
-    if (m_numToSelect > 0) {
-      determineThreshFromNumToSelect(bestToWorst);
+    
+    if (m_numToSelect > bestToWorst.length) {
+      throw new Exception("More attributes requested than exist in the data");
     }
 
+    if (m_numToSelect <= 0) {
+      if (m_threshold == -Double.MAX_VALUE) {
+	m_numToSelect = bestToWorst.length;
+      } else {
+	determineNumToSelectFromThreshold(bestToWorst);
+      }
+    }
+    /*    if (m_numToSelect > 0) {
+      determineThreshFromNumToSelect(bestToWorst);
+      } */
+
     return  bestToWorst;
+  }
+
+  private void determineNumToSelectFromThreshold(double [][] ranking) {
+    int count = 0;
+    for (int i = 0; i < ranking.length; i++) {
+      if (ranking[i][1] > m_threshold) {
+	count++;
+      }
+    }
+    m_numToSelect = count;
   }
 
   private void determineThreshFromNumToSelect(double [][] ranking) 

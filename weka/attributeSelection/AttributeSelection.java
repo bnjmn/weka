@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.16 $
+ * @version  $Revision: 1.17 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -96,6 +96,9 @@ public class AttributeSelection implements Serializable {
 
   /** cutoff value by which to select attributes for ranked results */
   private double m_threshold;
+
+  /** number of attributes requested from ranked results */
+  private int m_numToSelect;
   
   /** the selected attributes */
   private int [] m_selectedAttributeSet;
@@ -324,7 +327,7 @@ public class AttributeSelection implements Serializable {
       }
 
       // now sort them by mean rank
-      int[] s = Utils.sort(m_rankResults[1]);
+      int[] s = Utils.sortUnsafe(m_rankResults[1]);
       for (int i=0; i<s.length; i++) {
 	CvString.append(Utils.doubleToString(Math.abs(m_rankResults[0][s[i]]),
 					     6, 3) 
@@ -546,106 +549,83 @@ public class AttributeSelection implements Serializable {
       m_attributeRanking = 
 	((RankedOutputSearch)m_searchMethod).rankedAttributes();
       m_selectionResults.append(printSelectionResults(m_ASEvaluator, 
-						       m_searchMethod, 
-						       m_trainInstances));
+						      m_searchMethod, 
+						      m_trainInstances));
       m_selectionResults.append("Ranked attributes:\n");
 
-      // retrieve the threshold by which to select attributes
-      m_threshold = ((RankedOutputSearch)m_searchMethod).getThreshold();
+      // retrieve the number of attributes to retain
+      m_numToSelect = ((RankedOutputSearch)m_searchMethod).getNumToSelect();
 
       // determine fieldwidth for merit
       int f_p=0;
       int w_p=0;
-      for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
-	  double precision = (Math.abs(m_attributeRanking[i][1]) - 
-	      (int)(Math.abs(m_attributeRanking[i][1])));
+     
+      for (int i = 0; i < m_numToSelect; i++) {
+	double precision = (Math.abs(m_attributeRanking[i][1]) - 
+			    (int)(Math.abs(m_attributeRanking[i][1])));
 
-	  if (precision > 0) {
-	    precision = Math.abs((Math.log(Math.abs(precision)) / 
-				  Math.log(10)))+3;
-	  }
-	  if (precision > f_p) {
-	    f_p = (int)precision;
-	  }
-	  if ((Math.abs((Math.log(Math.abs(m_attributeRanking[i][1])) 
-		/ Math.log(10)))+1) > w_p) {
-	    if (m_attributeRanking[i][1] > 0) {
+	if (precision > 0) {
+	  precision = Math.abs((Math.log(Math.abs(precision)) / 
+				Math.log(10)))+3;
+	}
+	if (precision > f_p) {
+	  f_p = (int)precision;
+	}
+	if ((Math.abs((Math.log(Math.abs(m_attributeRanking[i][1])) 
+		       / Math.log(10)))+1) > w_p) {
+	  if (m_attributeRanking[i][1] > 0) {
 	    w_p = (int)Math.abs((Math.log(Math.abs(m_attributeRanking[i][1]))
 				 / Math.log(10)))+1;
-	    }
 	  }
-	}
-      }
-
-      for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (m_attributeRanking[i][1] > m_threshold) {
-
-	  m_selectionResults.
-	    append(Utils.doubleToString(m_attributeRanking[i][1],
-					f_p+w_p+1,f_p) 
-		   + Utils.doubleToString((m_attributeRanking[i][0] + 1),
-					  fieldWidth+1,0) 
-		   + " " 
-		   + m_trainInstances.
-		   attribute((int)m_attributeRanking[i][0]).name() 
-		   + "\n");
-	}
-      }
-
-      int count = 0;
-
-      for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (m_attributeRanking[i][1] > m_threshold) {
-	  count++;
 	}
       }
       
+      for (int i = 0; i < m_numToSelect; i++) {
+	m_selectionResults.
+	  append(Utils.doubleToString(m_attributeRanking[i][1],
+				      f_p+w_p+1,f_p) 
+		 + Utils.doubleToString((m_attributeRanking[i][0] + 1),
+					fieldWidth+1,0) 
+		 + " " 
+		 + m_trainInstances.
+		 attribute((int)m_attributeRanking[i][0]).name() 
+		 + "\n");
+      }
+       
       // set up the selected attributes array - usable by a filter or
       // whatever
       if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
 	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
 	// one more for the class
 	{
-	  m_selectedAttributeSet = new int[count + 1];
-	  m_selectedAttributeSet[count] = m_trainInstances.classIndex();
+	  m_selectedAttributeSet = new int[m_numToSelect + 1];
+	  m_selectedAttributeSet[m_numToSelect] = 
+	    m_trainInstances.classIndex();
 	}
       else {
-	m_selectedAttributeSet = new int[count];
+	m_selectedAttributeSet = new int[m_numToSelect];
       }
 
       m_selectionResults.append("\nSelected attributes: ");
 
-      for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (m_attributeRanking[i][1] > m_threshold) {
-	  m_selectedAttributeSet[i] = (int)m_attributeRanking[i][0];
-	}
-
-	if (i == (m_attributeRanking.length - 1)) {
-	  if (m_attributeRanking[i][1] > m_threshold) {
-	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1) 
-				      + " : " 
-				      + (i + 1) 
-				      + "\n");
-	  }
+      for (int i = 0; i < m_numToSelect; i++) {
+	m_selectedAttributeSet[i] = (int)m_attributeRanking[i][0];
+	 
+	if (i == m_numToSelect - 1) {
+	  m_selectionResults.append(((int)m_attributeRanking[i][0] + 1) 
+				    + " : " 
+				    + (i + 1) 
+				    + "\n");
 	}
 	else {
-	  if (m_attributeRanking[i][1] > m_threshold) {
-	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1));
-
-	    if (m_attributeRanking[i + 1][1] > m_threshold) {
-	      m_selectionResults.append(",");
-	    }
-	    else {
-	      m_selectionResults.append(" : " + (i + 1) + "\n");
-	    }
-	  }
+	  m_selectionResults.append(((int)m_attributeRanking[i][0] + 1));
+	  m_selectionResults.append(",");
 	}
       }
     } else {
-       // set up the selected attributes array - usable by a filter or
-       // whatever
-       if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
+      // set up the selected attributes array - usable by a filter or
+      // whatever
+      if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
 	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) 
 	// one more for the class
 	{
@@ -666,9 +646,9 @@ public class AttributeSelection implements Serializable {
       for (int i = 0; i < attributeSet.length; i++) {
 	if (i == (attributeSet.length - 1)) {
 	  m_selectionResults.append((attributeSet[i] + 1) 
-		      + " : " 
-		      + attributeSet.length 
-		      + "\n");
+				    + " : " 
+				    + attributeSet.length 
+				    + "\n");
 	}
 	else {
 	  m_selectionResults.append((attributeSet[i] + 1) + ",");
