@@ -28,7 +28,7 @@ import weka.core.*;
 import java.util.*;
 
 /**
- * This filter takes a dataset and outputs a subset of it.
+ * This filter takes a dataset and removes a subset of it.
  *
  * Valid options are: <p>
  *
@@ -40,16 +40,13 @@ import java.util.*;
  * Specifies if inverse of selection is to be output.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
 */
 public class RemoveRange extends Filter
   implements UnsupervisedFilter, OptionHandler {
 
   /** Range of instances provided by user. */
-  private Range m_Range = new Range();
-
-  /** Indicates if inverse of selection is to be output. */
-  private boolean m_Inverse = false;
+  private Range m_Range = new Range("first-last");
 
   /**
    * Gets an enumeration describing the available options..
@@ -87,7 +84,12 @@ public class RemoveRange extends Filter
    */
   public void setOptions(String[] options) throws Exception {
 
-    setInstancesIndices(Utils.getOption('R', options));
+    String str = Utils.getOption('R', options);
+    if (str.length() != 0) {
+      setInstancesIndices(str);
+    } else {
+      setInstancesIndices("first-last");
+    }
     setInvertSelection(Utils.getFlag('V', options));
 
     if (getInputFormat() != null) {
@@ -123,7 +125,7 @@ public class RemoveRange extends Filter
    */
   public String globalInfo() {
 
-    return "A filter that outputs a given range of instances of a dataset.";
+    return "A filter that removes a given range of instances of a dataset.";
   }
 
   /**
@@ -178,7 +180,7 @@ public class RemoveRange extends Filter
    */
   public boolean getInvertSelection() {
 
-    return m_Inverse;
+    return m_Range.getInvert();
   }
 
   /**
@@ -188,7 +190,7 @@ public class RemoveRange extends Filter
    */
   public void setInvertSelection(boolean inverse) {
     
-    m_Inverse = inverse;
+    m_Range.setInvert(inverse);
   }
 
   /**
@@ -221,10 +223,9 @@ public class RemoveRange extends Filter
       throw new IllegalStateException("No input instance format defined");
     }
     // Push instances for output into output queue
-    m_Range.setInvert(m_Inverse);
     m_Range.setUpper(getInputFormat().numInstances() - 1);
     for (int i = 0; i < getInputFormat().numInstances(); i++) {
-      if (m_Range.isInRange(i)) {
+      if (!m_Range.isInRange(i)) {
 	push(getInputFormat().instance(i));
       }
     }

@@ -36,6 +36,7 @@ import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.UnsupportedAttributeTypeException;
+import weka.core.SingleIndex;
 
 /** 
  * Filters instances according to the value of an attribute.<p>
@@ -66,25 +67,19 @@ import weka.core.UnsupportedAttributeTypeException;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** Stores the attribute setting */
-  protected int m_AttributeSet = -1;
-
-  /** Stores which attribute to be used for filtering */
-  protected int m_Attribute;
+  /** The attribute's index setting. */
+  private SingleIndex m_AttIndex = new SingleIndex("last"); 
   
   /** Stores which values of nominal attribute are to be used for filtering.*/
   protected Range m_Values;
 
   /** Stores which value of a numeric attribute is to be used for filtering.*/
   protected double m_Value = 0;
-
-  /** Inverse of test to be used? */
-  protected boolean m_Inverse = false;
 
   /** True if missing values should count as a match */
   protected boolean m_MatchMissingValues = false;
@@ -99,6 +94,7 @@ public class RemoveWithValues extends Filter
   public RemoveWithValues() {
 
       m_Values = new Range("first-last");
+      m_Values.setInvert(true);
   }
 
   /**
@@ -175,17 +171,11 @@ public class RemoveWithValues extends Filter
 
     String attIndex = Utils.getOption('C', options);
     if (attIndex.length() != 0) {
-      if (attIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(-1);
-      } else if (attIndex.toLowerCase().equals("first")) {
-        setAttributeIndex(0);
-      } else {
-	setAttributeIndex(Integer.parseInt(attIndex) - 1);
-      }
+      setAttributeIndex(attIndex);
     } else {
-      setAttributeIndex(-1);
+      setAttributeIndex("last");
     }
-
+    
     String splitPoint = Utils.getOption('S', options);
     if (splitPoint.length() != 0) {
       setSplitPoint((new Double(splitPoint)).doubleValue());
@@ -221,7 +211,7 @@ public class RemoveWithValues extends Filter
 
     options[current++] = "-S"; options[current++] = "" + getSplitPoint();
     options[current++] = "-C";
-    options[current++] = "" + (getAttributeIndex() + 1);
+    options[current++] = "" + (getAttributeIndex());
     if (!getNominalIndices().equals("")) {
       options[current++] = "-L"; options[current++] = getNominalIndices();
     }
@@ -249,26 +239,24 @@ public class RemoveWithValues extends Filter
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
-    if (m_AttributeSet == -1) {
-      m_Attribute = instanceInfo.numAttributes() - 1;
-    } else {
-      m_Attribute = m_AttributeSet;
-    }
+
+    m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
     if (!isNumeric() && !isNominal()) {
-      throw new UnsupportedAttributeTypeException("Can only handle numeric or nominal attributes.");
+      throw new UnsupportedAttributeTypeException("Can only handle numeric " +
+						  "or nominal attributes.");
     }
-    m_Values.setUpper(instanceInfo.attribute(m_Attribute).numValues() - 1);
+    m_Values.setUpper(instanceInfo.attribute(m_AttIndex.getIndex()).numValues() - 1);
     if (isNominal() && m_ModifyHeader) {
       instanceInfo = new Instances(instanceInfo, 0); // copy before modifying
-      Attribute oldAtt = instanceInfo.attribute(m_Attribute);
+      Attribute oldAtt = instanceInfo.attribute(m_AttIndex.getIndex());
       int [] selection = m_Values.getSelection();
       FastVector newVals = new FastVector();
       for (int i = 0; i < selection.length; i++) {
 	newVals.addElement(oldAtt.value(selection[i]));
       }
-      instanceInfo.deleteAttributeAt(m_Attribute);
+      instanceInfo.deleteAttributeAt(m_AttIndex.getIndex());
       instanceInfo.insertAttributeAt(new Attribute(oldAtt.name(), newVals),
-				      m_Attribute);
+				      m_AttIndex.getIndex());
       m_NominalMapping = new int [oldAtt.numValues()];
       for (int i = 0; i < m_NominalMapping.length; i++) {
 	boolean found = false;
@@ -307,7 +295,7 @@ public class RemoveWithValues extends Filter
       resetQueue();
       m_NewBatch = false;
     }
-    if (instance.isMissing(m_Attribute)) {
+    if (instance.isMissing(m_AttIndex.getIndex())) {
       if (getMatchMissingValues()) {
         push((Instance)instance.copy());
         return true;
@@ -316,24 +304,24 @@ public class RemoveWithValues extends Filter
       }
     }
     if (isNumeric()) {
-      if (!m_Inverse) {
-	if (Utils.sm(instance.value(m_Attribute), m_Value)) {
+      if (!m_Values.getInvert()) {
+	if (Utils.sm(instance.value(m_AttIndex.getIndex()), m_Value)) {
 	  push((Instance)instance.copy());
 	  return true;
 	} 
       } else {
-	if (Utils.grOrEq(instance.value(m_Attribute), m_Value)) {
+	if (Utils.grOrEq(instance.value(m_AttIndex.getIndex()), m_Value)) {
 	  push((Instance)instance.copy());
 	  return true;
 	} 
       }
     }
     if (isNominal()) {
-      if (m_Values.isInRange((int)instance.value(m_Attribute))) {
+      if (m_Values.isInRange((int)instance.value(m_AttIndex.getIndex()))) {
 	Instance temp = (Instance)instance.copy();
 	if (getModifyHeader()) {
-	  temp.setValue(m_Attribute,
-			m_NominalMapping[(int)instance.value(m_Attribute)]);
+	  temp.setValue(m_AttIndex.getIndex(),
+			m_NominalMapping[(int)instance.value(m_AttIndex.getIndex())]);
 	}
 	push(temp);
 	return true;
@@ -352,7 +340,7 @@ public class RemoveWithValues extends Filter
     if (getInputFormat() == null) {
       return false;
     } else {
-      return getInputFormat().attribute(m_Attribute).isNominal();
+      return getInputFormat().attribute(m_AttIndex.getIndex()).isNominal();
     }
   }
 
@@ -366,7 +354,7 @@ public class RemoveWithValues extends Filter
     if (getInputFormat() == null) {
       return false;
     } else {
-      return getInputFormat().attribute(m_Attribute).isNumeric();
+      return getInputFormat().attribute(m_AttIndex.getIndex()).isNumeric();
     }
   }
   
@@ -391,25 +379,25 @@ public class RemoveWithValues extends Filter
     
     m_ModifyHeader = newModifyHeader;
   }
-  
-  /**
-   * Get the attribute to be used for selection (-1 for last)
-   *
-   * @return the attribute index
-   */
-  public int getAttributeIndex() {
 
-    return m_AttributeSet;
+  /**
+   * Get the index of the attribute used.
+   *
+   * @return the index of the attribute
+   */
+  public String getAttributeIndex() {
+
+    return m_AttIndex.getSingleIndex();
   }
 
   /**
-   * Sets attribute to be used for selection
+   * Sets index of the attribute used.
    *
-   * @param attribute the attribute's index (-1 for last);
+   * @param index the index of the attribute
    */
-  public void setAttributeIndex(int attribute) {
-
-    m_AttributeSet = attribute;
+  public void setAttributeIndex(String attIndex) {
+    
+    m_AttIndex.setSingleIndex(attIndex);
   }
 
   /**
@@ -459,7 +447,7 @@ public class RemoveWithValues extends Filter
    */
   public boolean getInvertSelection() {
 
-    return m_Values.getInvert();
+    return !m_Values.getInvert();
   }
 
   /**
@@ -470,8 +458,7 @@ public class RemoveWithValues extends Filter
    */
   public void setInvertSelection(boolean invert) {
 
-    m_Inverse = invert;
-    m_Values.setInvert(invert);
+    m_Values.setInvert(!invert);
   }
 
   /**
@@ -532,6 +519,7 @@ public class RemoveWithValues extends Filter
 	Filter.filterFile(new RemoveWithValues(), argv);
       }
     } catch (Exception ex) {
+      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }

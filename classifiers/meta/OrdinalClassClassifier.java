@@ -118,7 +118,7 @@ implements OptionHandler {
 
       for (int i = 0; i < m_Classifiers.length; i++) {
 	m_ClassFilters[i] = new MakeIndicator();
-	m_ClassFilters[i].setAttributeIndex(insts.classIndex());
+	m_ClassFilters[i].setAttributeIndex("" + (insts.classIndex() + 1));
 	m_ClassFilters[i].setValueIndices(""+(i+2)+"-last");
 	m_ClassFilters[i].setNumeric(false);
 	m_ClassFilters[i].setInputFormat(insts);

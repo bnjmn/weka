@@ -28,7 +28,7 @@ import weka.core.*;
 import java.util.*;
 
 /**
- * This filter outputs a given percentage of a dataset.
+ * This filter removes a given percentage of a dataset.
  *
  * Valid options are: <p>
  *
@@ -40,7 +40,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (eibe@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
 */
 public class RemovePercentage extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -127,7 +127,7 @@ public class RemovePercentage extends Filter
    */
   public String globalInfo() {
 
-    return "A filter that outputs a given percentage of a dataset.";
+    return "A filter that removes a given percentage of a dataset.";
   }
 
   /**
@@ -230,7 +230,7 @@ public class RemovePercentage extends Filter
     Instances toFilter = getInputFormat();
     int cutOff = toFilter.numInstances() * m_Percentage / 100;
 
-    if (!m_Inverse) {
+    if (m_Inverse) {
       for (int i = 0; i < cutOff; i++) {
 	push(toFilter.instance(i));
       }

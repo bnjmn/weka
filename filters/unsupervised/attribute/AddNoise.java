@@ -28,6 +28,7 @@ import weka.core.Attribute;
 import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.Utils;
+import weka.core.SingleIndex;
 
 import java.util.Random;
 import java.util.Enumeration;
@@ -53,13 +54,13 @@ import java.util.Vector;
  * and for choosing the value it is changed to (default 1). <p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  **/
 public class AddNoise extends Filter implements UnsupervisedFilter,
 						OptionHandler {
 
-  /** The index of the attribute to be changed. */
-  private int m_AttIndexSet = -1;
+  /** The attribute's index setting. */
+  private SingleIndex m_AttIndex = new SingleIndex("last"); 
 
   /** Flag if missing values are taken as value. */
   private boolean m_UseMissing = false;
@@ -69,12 +70,6 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   
   /** The random number generator seed */
   private int m_RandomSeed = 1;
-  
-  /** The attribute's index */
-  private int m_AttIndex;
-
-  /** True if the first batch has been done */
-  private boolean m_FirstBatchDone = false; 
 
   /**
    * Returns a string describing this filter
@@ -96,7 +91,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
               "\tIndex of the attribute to be changed \n"
@@ -138,9 +133,9 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
 
     String indexString = Utils.getOption('C', options);
     if (indexString.length() != 0) {
-      setAttIndexSet((int)Double.valueOf(indexString).doubleValue());
+      setAttributeIndex(indexString);
     } else {
-      setAttIndexSet(-1);
+      setAttributeIndex("last");
     }
 
     if (Utils.getFlag('M', options)) {
@@ -170,10 +165,10 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    */
   public String [] getOptions() {
 
-    String [] options = new String [8];
+    String [] options = new String [7];
     int current = 0;
 
-    options[current++] = "-C"; options[current++] = "" + getAttIndexSet();
+    options[current++] = "-C"; options[current++] = "" + getAttributeIndex();
 
     if (getUseMissing()) {
       options[current++] = "-M";
@@ -292,24 +287,25 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
 
     return "Index of the attribute that is to changed.";
   }
-  /**
-   * Gets the Index of the Attribute that is to be changed.
-   *
-   * @return the attribute index that is to be changed
-   */
-  public int getAttIndexSet() {
 
-    return m_AttIndexSet;
+  /**
+   * Get the index of the attribute used.
+   *
+   * @return the index of the attribute
+   */
+  public String getAttributeIndex() {
+
+    return m_AttIndex.getSingleIndex();
   }
-  
-  /**
-   * Sets the Index of the Attribute to be changed.
-   *
-   * @param newAttIndexSet index of the attribute to be changed.
-   */
-  public void setAttIndexSet(int newAttIndexSet) {
 
-    m_AttIndexSet = newAttIndexSet; 
+  /**
+   * Sets index of the attribute used.
+   *
+   * @param index the index of the attribute
+   */
+  public void setAttributeIndex(String attIndex) {
+    
+    m_AttIndex.setSingleIndex(attIndex);
   }
 
  /**
@@ -328,25 +324,17 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     super.setInputFormat(instanceInfo);
     // set input format
     //m_InputFormat = new Instances(instanceInfo, 0);
-
+    m_AttIndex.setUpper(getInputFormat().numAttributes() - 1);
     // set index of attribute to be changed
-    if (m_AttIndexSet > getInputFormat().numAttributes() - 1) {
-      throw new Exception("Adding noise is not possible:"
-                          + "No attribute with index" 
-                          + m_AttIndexSet + ".");
-    }
-    m_AttIndex = m_AttIndexSet;
-    if (m_AttIndex < 0) 
-      m_AttIndex = getInputFormat().numAttributes() - 1;
 
     // test if nominal 
-    if (!getInputFormat().attribute(m_AttIndex).isNominal()) {
+    if (!getInputFormat().attribute(m_AttIndex.getIndex()).isNominal()) {
       throw new Exception("Adding noise is not possible:"
                           + "Chosen attribute is numeric.");
       }
 
     // test if two values are given
-    if ((getInputFormat().attribute(m_AttIndex).numValues() < 2)
+    if ((getInputFormat().attribute(m_AttIndex.getIndex()).numValues() < 2)
         && (!m_UseMissing)) {
       throw new Exception("Adding noise is not possible:"
                           + "Chosen attribute has less than two values.");
@@ -354,7 +342,6 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
  
     setOutputFormat(getInputFormat());
     m_NewBatch = true; 
-    m_FirstBatchDone = false; 
     return false;
   }
 
@@ -401,7 +388,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     }
 
     // Do the subsample, and clear the input instances.
-    addNoise (getInputFormat(), m_RandomSeed, m_Percent, m_AttIndex, 
+    addNoise (getInputFormat(), m_RandomSeed, m_Percent, m_AttIndex.getIndex(), 
               m_UseMissing);
 
     for(int i=0; i<getInputFormat().numInstances(); i++) {
@@ -409,7 +396,6 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     }
 
     m_NewBatch = true;
-    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 
@@ -608,3 +594,5 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     }
   }
 }
+
+
