@@ -60,7 +60,7 @@ import weka.filters.Filter;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -101,9 +101,13 @@ public class RegressionByDiscretization extends Classifier
     if (m_OptimizeBins) {
       m_Discretizer.setFindNumBins(true);
     }
-    m_Discretizer.setAttributeIndices(""+ (instances.classIndex() + 1));
+    int classIndex = instances.classIndex();
+    instances.setClassIndex(-1);
+    m_Discretizer.setAttributeIndices(""+ (classIndex + 1));
     m_Discretizer.setInputFormat(instances);
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
+    newTrain.setClassIndex(classIndex);
+    instances.setClassIndex(classIndex);
     int numClasses = newTrain.numClasses();
 
     // Calculate the mean value for each bin of the new class attribute

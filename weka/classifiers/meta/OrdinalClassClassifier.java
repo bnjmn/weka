@@ -135,7 +135,7 @@ implements OptionHandler {
   public double [] distributionForInstance(Instance inst) throws Exception {
     
     if (m_Classifiers.length == 1) {
-      m_Classifiers[0].distributionForInstance(inst);
+      return m_Classifiers[0].distributionForInstance(inst);
     }
 
     double [] probs = new double[inst.numClasses()];
