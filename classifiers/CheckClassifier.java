@@ -83,7 +83,7 @@ import weka.core.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class CheckClassifier implements OptionHandler {
 
@@ -876,6 +876,7 @@ public class CheckClassifier implements OptionHandler {
       for (int i = 0; i < test.numInstances(); i++) {
 	Instance testInst = test.instance(i);
 	Instance classMissingInst = new Instance(testInst);
+        classMissingInst.setDataset(test);
 	classMissingInst.setClassMissing();
 	if (classifiers[0] instanceof DistributionClassifier) {
 	  double [] dist0 = ((DistributionClassifier)classifiers[0]).
