@@ -72,7 +72,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -113,6 +113,10 @@ public class PropertySheetPanel extends JPanel
   /** A count of the number of properties we have an editor for */
   private int m_NumEditable = 0;
 
+  /** The panel holding global info and help, if provided by
+      the object being editied */
+  private JPanel m_aboutPanel;
+
   /**
    * Creates the property sheet panel.
    */
@@ -120,6 +124,17 @@ public class PropertySheetPanel extends JPanel
 
     //    setBorder(BorderFactory.createLineBorder(Color.red));
     setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+  }
+
+  /**
+   * Return the panel containing global info and help for
+   * the object being edited. May return null if the edited
+   * object provides no global info or tip text.
+   *
+   * @return the about panel.
+   */
+  public JPanel getAboutPanel() {
+    return m_aboutPanel;
   }
 
   /** A support object for handling property change listeners */ 
@@ -243,7 +258,8 @@ public class PropertySheetPanel extends JPanel
 	    gbConstraints.gridwidth = 2;
 	    gbConstraints.insets = new Insets(0,5,0,5);
 	    gbLayout.setConstraints(jp, gbConstraints);
-	    add(jp);
+	    m_aboutPanel = jp;
+	    add(m_aboutPanel);
 	    componentOffset = 1;
 	    break;
 	  } catch (Exception ex) {
@@ -459,9 +475,9 @@ public class PropertySheetPanel extends JPanel
     jf.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
     jf.pack();
     jf.setSize(400, 350);
-    jf.setLocation(getTopLevelAncestor().getLocationOnScreen().x 
-                   + getTopLevelAncestor().getSize().width,
-                   getTopLevelAncestor().getLocationOnScreen().y);
+    jf.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x 
+                   + m_aboutPanel.getTopLevelAncestor().getSize().width,
+                   m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().y);
     jf.setVisible(true);
     m_HelpFrame = jf;
   }
