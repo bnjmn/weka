@@ -24,6 +24,9 @@ import weka.core.Instances;
 import weka.core.Matrix;
 
 import java.io.Reader;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 import java.util.Random;
 
@@ -33,7 +36,7 @@ import java.util.Random;
  * having class i.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CostMatrix extends Matrix {
 
@@ -70,6 +73,54 @@ public class CostMatrix extends Matrix {
     if (numColumns() != numRows()) {
       throw new Exception("Cost matrix is not square");
     }
+  }
+
+
+  /**
+   * Creates a cost matrix for the class attribute of the supplied instances, 
+   * where the misclassification costs are higher for misclassifying a rare
+   * class as a frequent one. The cost of classifying an instance of class i 
+   * as class j is weight * Pj / Pi. (Pi and Pj are laplace estimates)
+   *
+   * @param instances a value of type 'Instances'
+   * @param weight a value of type 'double'
+   * @return a value of type CostMatrix
+   * @exception Exception if no class attribute is assigned, or the class
+   * attribute is not nominal
+   */
+  public static CostMatrix makeFrequencyDependentMatrix(Instances instances,
+                                                        double weight) 
+    throws Exception {
+
+    if (!instances.classAttribute().isNominal()) {
+      throw new Exception("Class attribute is not nominal!");
+    }
+    int numClasses = instances.numClasses();
+
+    // Collect class probabilities
+    double probs [] = new double [numClasses];
+    for (int i = 0; i < probs.length; i++) {
+      probs[i]++;
+    }
+    for (int i = 0; i < instances.numInstances(); i++) {
+      Instance current = instances.instance(i);
+      if (!current.classIsMissing()) {
+        probs[(int)current.classValue()]++;
+      }
+    }
+    Utils.normalize(probs);
+
+    // Create and populate the cost matrix
+    CostMatrix newMatrix = new CostMatrix(numClasses);
+    for (int i = 0; i < numClasses; i++) {
+      for (int j = 0; j < numClasses; j++) {
+        if (i != j) {
+          newMatrix.setElement(i, j, weight * probs[j] / probs[i]);
+        }
+      }
+    }
+    
+    return newMatrix;
   }
 
   /**
@@ -305,4 +356,32 @@ public class CostMatrix extends Matrix {
     return m_Elements[actualClass][Utils.maxIndex(m_Elements[actualClass])];
   }
 
+  /**
+   * Tests out creation of a frequency dependent cost matrix from the command
+   * line. Either pipe a set of instances into system.in or give the name of
+   * a dataset as an argument. The last column will be treated as the class
+   * attribute and a cost matrix with weight 1000 output.
+   *
+   * @param []args a value of type 'String'
+   */
+  public static void main(String []args) {
+
+    try {
+      Reader r = null;
+      if (args.length > 1) {
+	throw (new Exception("Usage: Instances <filename>"));
+      } else if (args.length == 0) {
+        r = new BufferedReader(new InputStreamReader(System.in));
+      } else {
+        r = new BufferedReader(new FileReader(args[0]));
+      }
+      Instances i = new Instances(r);
+      i.setClassIndex(i.numAttributes() - 1);
+      CostMatrix.makeFrequencyDependentMatrix(i, 1000)
+        .write(new java.io.PrintWriter(System.out));
+
+    } catch (Exception ex) {
+      System.err.println(ex);
+    }
+  }
 } // CostMatrix
