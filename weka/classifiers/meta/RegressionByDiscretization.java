@@ -49,7 +49,7 @@ import weka.filters.Filter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class RegressionByDiscretization extends SingleClassifierEnhancer {
   
@@ -106,7 +106,7 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
 
     // Discretize the training data
     m_Discretizer.setIgnoreClass(true);
-    m_Discretizer.setAttributeIndices("" + instances.classIndex() + 1);
+    m_Discretizer.setAttributeIndices("" + (instances.classIndex() + 1));
     m_Discretizer.setBins(getNumBins());
     m_Discretizer.setInputFormat(instances);
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
