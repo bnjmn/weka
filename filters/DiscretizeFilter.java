@@ -44,7 +44,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -621,15 +621,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
 
-    String rangeList = "";
-    for(int i = 0; i < attributes.length; i++) {
-      if (i == 0) {
-	rangeList = "" + (attributes[i] + 1);
-      } else {
-	rangeList += "," + (attributes[i] + 1);
-      }
-    }
-    setAttributeIndices(rangeList);
+    setAttributeIndices(Range.indicesToRangeList(attributes));
   }
 
   /**
