@@ -45,6 +45,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.VotedPerceptron,\
  weka.classifiers.VFI,\
  weka.classifiers.AdaBoostM1,\
+ weka.classifiers.AdditiveRegression,\
  weka.classifiers.AttributeSelectedClassifier,\
  weka.classifiers.Bagging, \
  weka.classifiers.ClassificationViaRegression,\
