@@ -41,9 +41,9 @@ import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.FastVector;
 import weka.core.Range;
+import weka.filters.unsupervised.attribute.MakeIndicator;
+import weka.filters.unsupervised.instance.RemoveWithValues;
 import weka.filters.Filter;
-import weka.filters.MakeIndicatorFilter;
-import weka.filters.InstanceFilter;
 
 /**
  * Class for handling multi-class datasets with 2-class distribution
@@ -68,7 +68,7 @@ import weka.filters.InstanceFilter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -297,7 +297,7 @@ public class MultiClassClassifier extends DistributionClassifier
 
       // generate the classifiers
       for (int i=0; i<numClassifiers; i++) {
-	InstanceFilter classFilter = new InstanceFilter();
+	RemoveWithValues classFilter = new RemoveWithValues();
 	classFilter.setAttributeIndex(insts.classIndex());
 	classFilter.setModifyHeader(true);
 	classFilter.setInvertSelection(false);
@@ -342,15 +342,15 @@ public class MultiClassClassifier extends DistributionClassifier
       }
       numClassifiers = code.size();
       m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
-      m_ClassFilters = new MakeIndicatorFilter[numClassifiers];
+      m_ClassFilters = new MakeIndicator[numClassifiers];
       AttributeStats classStats = insts.attributeStats(insts.classIndex());
       for (int i = 0; i < m_Classifiers.length; i++) {
         if ((m_Method == METHOD_1_AGAINST_ALL) && 
             (classStats.nominalCounts[i] == 0)) {
           m_Classifiers[i] = null;
         } else {
-          m_ClassFilters[i] = new MakeIndicatorFilter();
-	  MakeIndicatorFilter classFilter = (MakeIndicatorFilter) m_ClassFilters[i];
+          m_ClassFilters[i] = new MakeIndicator();
+	  MakeIndicator classFilter = (MakeIndicator) m_ClassFilters[i];
           classFilter.setAttributeIndex(insts.classIndex());
           classFilter.setValueIndices(code.getIndices(i));
           classFilter.setNumeric(false);
@@ -421,7 +421,7 @@ public class MultiClassClassifier extends DistributionClassifier
 	  tempInst.setDataset(m_TwoClassDataset);
 	  double [] current = ((DistributionClassifier)m_Classifiers[i])
 	    .distributionForInstance(tempInst);  
-	  Range range = new Range(((InstanceFilter)m_ClassFilters[i])
+	  Range range = new Range(((RemoveWithValues)m_ClassFilters[i])
 				  .getNominalIndices());
 	  range.setUpper(m_ClassAttribute.numValues());
 	  int[] pair = range.getSelection();
@@ -438,7 +438,7 @@ public class MultiClassClassifier extends DistributionClassifier
 	  double [] current = ((DistributionClassifier)m_Classifiers[i])
 	    .distributionForInstance(m_ClassFilters[i].output());
 	  for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
-	    if (((MakeIndicatorFilter)m_ClassFilters[i]).getValueRange().isInRange(j)) {
+	    if (((MakeIndicator)m_ClassFilters[i]).getValueRange().isInRange(j)) {
 	      probs[j] += current[1];
 	    } else {
 	      probs[j] += current[0];
@@ -470,15 +470,15 @@ public class MultiClassClassifier extends DistributionClassifier
       text.append("Classifier ").append(i + 1);
       if (m_Classifiers[i] != null) {
         if ((m_ClassFilters != null) && (m_ClassFilters[i] != null)) {
-	  if (m_ClassFilters[i] instanceof InstanceFilter) {
-	    Range range = new Range(((InstanceFilter)m_ClassFilters[i])
+	  if (m_ClassFilters[i] instanceof RemoveWithValues) {
+	    Range range = new Range(((RemoveWithValues)m_ClassFilters[i])
 				    .getNominalIndices());
 	    range.setUpper(m_ClassAttribute.numValues());
 	    int[] pair = range.getSelection();
 	    text.append(", " + (pair[0]+1) + " vs " + (pair[1]+1));
-	  } else if (m_ClassFilters[i] instanceof MakeIndicatorFilter) {
+	  } else if (m_ClassFilters[i] instanceof MakeIndicator) {
 	    text.append(", using indicator values: ");
-	    text.append(((MakeIndicatorFilter)m_ClassFilters[i]).getValueRange());
+	    text.append(((MakeIndicator)m_ClassFilters[i]).getValueRange());
 	  }
         }
         text.append('\n');

@@ -81,7 +81,7 @@ import weka.core.UnassignedClassException;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -425,12 +425,12 @@ public class PreprocessPanel extends JPanel {
     if (extras == null) {
       extras = new Filter [0];
     }
-    weka.filters.AttributeFilter af = null;
+    weka.filters.unsupervised.attribute.Remove af = null;
     try {
       // Configure the attributeFilter from the current attribute panel
       int [] selectedAttributes = m_AttPanel.getSelectedAttributes();
       if (selectedAttributes.length < m_BaseInstances.numAttributes()) {
-	af = new weka.filters.AttributeFilter();
+	af = new weka.filters.unsupervised.attribute.Remove();
 	af.setInvertSelection(true);
 	af.setAttributeIndicesArray(selectedAttributes);
       }

@@ -39,7 +39,7 @@ import weka.core.AdditionalMeasureProducer;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.UnsupportedClassTypeException;
 
-import weka.filters.ClassOrderFilter;
+import weka.filters.supervised.instance.ClassOrder;
 import weka.filters.Filter;
 
 import weka.classifiers.DistributionClassifier;
@@ -133,7 +133,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class JRip extends DistributionClassifier 
   implements OptionHandler, 
@@ -1065,13 +1065,13 @@ public class JRip extends DistributionClassifier
 	  System.err.println("Number of all possible conditions = "+m_Total);
       
       Instances data = null;
-      m_Filter = new ClassOrderFilter();
+      m_Filter = new ClassOrder();
       
       // Sth. to make the class order different each time in cross-validations
     Instance inst = 
       instances.instance((int)(m_Random.nextDouble()*(double)instances.numInstances()));
-    ((ClassOrderFilter)m_Filter).setSeed((long)inst.toString().hashCode());	
-    ((ClassOrderFilter)m_Filter).setClassOrder(ClassOrderFilter.FREQ_ASCEND);
+    ((ClassOrder)m_Filter).setSeed((long)inst.toString().hashCode());	
+    ((ClassOrder)m_Filter).setClassOrder(ClassOrder.FREQ_ASCEND);
     m_Filter.setInputFormat(instances);
     data = Filter.useFilter(instances, m_Filter);
 	
@@ -1091,7 +1091,7 @@ public class JRip extends DistributionClassifier
     m_Distributions = new FastVector();
 
     // Sort by classes frequency
-    double[] orderedClasses = ((ClassOrderFilter)m_Filter).getClassCounts();
+    double[] orderedClasses = ((ClassOrder)m_Filter).getClassCounts();
     if(m_Debug){
       System.err.println("Sorted classes:");
       for(int x=0; x < m_Class.numValues(); x++)
@@ -1165,7 +1165,7 @@ public class JRip extends DistributionClassifier
 	    double[] classDist = oneClass.getDistributions(xyz);
 	    Utils.normalize(classDist);
 	    if(classDist != null)
-		m_Distributions.addElement(((ClassOrderFilter)m_Filter).distributionsByOriginalIndex(classDist));
+		m_Distributions.addElement(((ClassOrder)m_Filter).distributionsByOriginalIndex(classDist));
 	}	
     }    
   }

@@ -26,7 +26,7 @@ import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.filters.Filter;
-import  weka.filters.AttributeFilter;
+import  weka.filters.unsupervised.attribute.Remove;
 
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.28 $
+ * @version  $Revision: 1.29 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -126,7 +126,7 @@ public class AttributeSelection implements Serializable {
   
   /** the attribute filter for processing instances with respect to
       the most recent feature selection run */
-  private AttributeFilter m_attributeFilter = null;
+  private Remove m_attributeFilter = null;
 
   /** hold statistics for repeated feature selection, such as
       under cross validation */
@@ -769,7 +769,7 @@ public class AttributeSelection implements Serializable {
 
     // set up the attribute filter with the selected attributes
     if (m_selectedAttributeSet != null && !m_doXval) {
-      m_attributeFilter = new AttributeFilter();
+      m_attributeFilter = new Remove();
       m_attributeFilter.setAttributeIndicesArray(m_selectedAttributeSet);
       m_attributeFilter.setInvertSelection(true);
       m_attributeFilter.setInputFormat(m_trainInstances);  

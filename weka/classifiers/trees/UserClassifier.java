@@ -34,7 +34,8 @@ import java.io.*;
 import javax.swing.*;
 import weka.gui.treevisualizer.*;
 import weka.core.*;
-import weka.filters.*;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.Filter;
 import weka.classifiers.trees.j48.*;
 import weka.gui.visualize.*;
 /*import weka.gui.visualize.VisualizePanel;
@@ -62,7 +63,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -1010,9 +1011,9 @@ TreeDisplayListener, VisualizePanelListener {
 	}
       }
       
-      m_filter = new AttributeFilter();
-      ((AttributeFilter)m_filter).setInvertSelection(true);
-      ((AttributeFilter)m_filter).setAttributeIndicesArray(attributeList2);
+      m_filter = new Remove();
+      ((Remove)m_filter).setInvertSelection(true);
+      ((Remove)m_filter).setAttributeIndicesArray(attributeList2);
       m_filter.setInputFormat(m_training);
       
       Instances temp2 = Filter.useFilter(m_training, m_filter);

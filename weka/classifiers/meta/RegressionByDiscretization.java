@@ -31,7 +31,8 @@ import java.util.*;
 
 import weka.core.*;
 import weka.estimators.*;
-import weka.filters.*;
+import weka.filters.unsupervised.attribute.Discretize;
+import weka.filters.Filter;
 
 /**
  * Class for a regression scheme that employs any distribution
@@ -60,7 +61,7 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -69,7 +70,7 @@ public class RegressionByDiscretization extends Classifier
   protected DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
   
   /** The discretization filter. */
-  protected DiscretizeFilter m_Discretizer;
+  protected Discretize m_Discretizer;
 
   /** The number of classes in the Discretized training data. */
   protected int m_NumBins = 10;
@@ -96,12 +97,11 @@ public class RegressionByDiscretization extends Classifier
     }
 
     // Discretize the training data
-    m_Discretizer = new DiscretizeFilter();
+    m_Discretizer = new Discretize();
     m_Discretizer.setBins(m_NumBins);
     if (m_OptimizeBins) {
       m_Discretizer.setFindNumBins(true);
     }
-    m_Discretizer.setUseMDL(false);
     m_Discretizer.setAttributeIndices(""+ (instances.classIndex() + 1));
     m_Discretizer.setInputFormat(instances);
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
@@ -154,7 +154,7 @@ public class RegressionByDiscretization extends Classifier
 
     // Discretize the test instance
     if (m_Discretizer.numPendingOutput() > 0) {
-      throw new Exception("DiscretizeFilter output queue not empty");
+      throw new Exception("Discretize output queue not empty");
     }
 
     if (m_Discretizer.input(instance)) {
@@ -172,7 +172,7 @@ public class RegressionByDiscretization extends Classifier
       return prediction / probSum;
       
     } else {
-      throw new Exception("DiscretizeFilter didn't make the test instance"
+      throw new Exception("Discretize didn't make the test instance"
 			  + " immediately available");
     }
   }

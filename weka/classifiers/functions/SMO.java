@@ -24,10 +24,13 @@ package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.Filter;
 import java.util.*;
 import java.io.*;
 import weka.core.*;
-import weka.filters.*;
 
 /**
  * Implements John C. Platt's sequential minimal optimization
@@ -88,7 +91,7 @@ import weka.filters.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.33 $ 
+ * @version $Revision: 1.34 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -1090,13 +1093,13 @@ public class SMO extends Classifier implements OptionHandler {
   private int m_cacheSize = 1000003;
 
   /** The filter used to make attributes numeric. */
-  private NominalToBinaryFilter m_NominalToBinary;
+  private NominalToBinary m_NominalToBinary;
 
   /** The filter used to normalize all values. */
-  private NormalizationFilter m_Normalization;
+  private Normalize m_Normalization;
 
   /** The filter used to get rid of missing values. */
-  private ReplaceMissingValuesFilter m_Missing;
+  private ReplaceMissingValues m_Missing;
 
   /** Only numeric attributes in the dataset? */
   private boolean m_onlyNumeric;
@@ -1168,7 +1171,7 @@ public class SMO extends Classifier implements OptionHandler {
     }
 
     if (!m_checksTurnedOff) {
-      m_Missing = new ReplaceMissingValuesFilter();
+      m_Missing = new ReplaceMissingValues();
       m_Missing.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_Missing); 
     } else {
@@ -1176,7 +1179,7 @@ public class SMO extends Classifier implements OptionHandler {
     }
 
     if (m_Normalize) {
-      m_Normalization = new NormalizationFilter();
+      m_Normalization = new Normalize();
       m_Normalization.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_Normalization); 
     } else {
@@ -1184,7 +1187,7 @@ public class SMO extends Classifier implements OptionHandler {
     }
 
     if (!m_onlyNumeric) {
-      m_NominalToBinary = new NominalToBinaryFilter();
+      m_NominalToBinary = new NominalToBinary();
       m_NominalToBinary.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_NominalToBinary);
     } else {

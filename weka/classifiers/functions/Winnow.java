@@ -23,8 +23,10 @@
 
 package weka.classifiers.functions;
 
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.Filter;
 import weka.classifiers.*;
-import weka.filters.*;
 import weka.core.*;
 import java.util.*;
 
@@ -67,7 +69,7 @@ import java.util.*;
  * Random seed to shuffle the input. (default 1), -1 == no shuffling<p>
  *
  * @author J. Lindgren (jtlindgr<at>cs.helsinki.fi)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class Winnow extends Classifier implements OptionHandler,
 						  UpdateableClassifier
@@ -108,10 +110,10 @@ public class Winnow extends Classifier implements OptionHandler,
   private Instances m_Train = null;
 
   /** The filter used to make attributes numeric. */
-  private NominalToBinaryFilter m_NominalToBinary;
+  private NominalToBinary m_NominalToBinary;
 
   /** The filter used to get rid of missing values. */
-  private ReplaceMissingValuesFilter m_ReplaceMissingValues;
+  private ReplaceMissingValues m_ReplaceMissingValues;
 
   /**
    * Returns an enumeration describing the available options
@@ -237,10 +239,10 @@ public class Winnow extends Classifier implements OptionHandler,
     m_Train = new Instances(insts);
     m_Train.deleteWithMissingClass();
     
-    m_ReplaceMissingValues = new ReplaceMissingValuesFilter();
+    m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_ReplaceMissingValues);
-    m_NominalToBinary = new NominalToBinaryFilter();
+    m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_NominalToBinary);
 

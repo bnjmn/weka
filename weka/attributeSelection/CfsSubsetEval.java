@@ -26,7 +26,8 @@ import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.classifiers.*;
-import  weka.filters.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.Filter;
 
 /** 
  * CFS attribute subset evaluator.
@@ -45,7 +46,7 @@ import  weka.filters.*;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -55,7 +56,7 @@ public class CfsSubsetEval
   /** The training instances */
   private Instances m_trainInstances;
   /** Discretise attributes when class in nominal */
-  private DiscretizeFilter m_disTransform;
+  private Discretize m_disTransform;
   /** The class index */
   private int m_classIndex;
   /** Is the class numeric */
@@ -248,7 +249,7 @@ public class CfsSubsetEval
     m_isNumeric = m_trainInstances.attribute(m_classIndex).isNumeric();
 
     if (!m_isNumeric) {
-      m_disTransform = new DiscretizeFilter();
+      m_disTransform = new Discretize();
       m_disTransform.setUseBetterEncoding(true);
       m_disTransform.setInputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_disTransform);

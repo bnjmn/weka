@@ -26,7 +26,9 @@ package weka.classifiers.functions;
 import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
-import weka.filters.*;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.Filter;
 import weka.core.*;
 import java.util.*;
 
@@ -55,7 +57,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   
@@ -87,10 +89,10 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
   private int m_Seed = 1;
 
   /** The filter used to make attributes numeric. */
-  private NominalToBinaryFilter m_NominalToBinary;
+  private NominalToBinary m_NominalToBinary;
 
   /** The filter used to get rid of missing values. */
-  private ReplaceMissingValuesFilter m_ReplaceMissingValues;
+  private ReplaceMissingValues m_ReplaceMissingValues;
 
   /**
    * Returns an enumeration describing the available options.
@@ -203,11 +205,11 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
     // Filter data
     m_Train = new Instances(insts);
     m_Train.deleteWithMissingClass();
-    m_ReplaceMissingValues = new ReplaceMissingValuesFilter();
+    m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_ReplaceMissingValues);
     
-    m_NominalToBinary = new NominalToBinaryFilter();
+    m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_NominalToBinary);
 

@@ -27,7 +27,8 @@ import  java.util.*;
 import  weka.core.*;
 import  weka.classifiers.*;
 import  weka.classifiers.rules.ZeroR;
-import  weka.filters.*;
+import  weka.filters.unsupervised.attribute.Remove;
+import  weka.filters.Filter;
 
 /** 
  * Wrapper attribute subset evaluator. <p>
@@ -53,7 +54,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -406,7 +407,7 @@ public class WrapperSubsetEval
     int numAttributes = 0;
     int i, j;
     Random Rnd = new Random(m_seed);
-    AttributeFilter delTransform = new AttributeFilter();
+    Remove delTransform = new Remove();
     delTransform.setInvertSelection(true);
     // copy the instances
     Instances trainCopy = new Instances(m_trainInstances);

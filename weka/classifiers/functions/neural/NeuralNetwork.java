@@ -28,8 +28,8 @@ import javax.swing.*;
 
 import weka.classifiers.*;
 import weka.core.*;
-import weka.filters.*;
-
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.Filter;
 
 /** 
  * A Classifier that uses backpropagation to classify instances.
@@ -40,7 +40,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -553,7 +553,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.9 $
+   * @version $Revision: 1.10 $
    */
   class ControlPanel extends JPanel {
     
@@ -818,7 +818,7 @@ public class NeuralNetwork extends DistributionClassifier
   private boolean m_useNomToBin;
   
   /** The actual filter. */
-  private NominalToBinaryFilter m_nominalToBinaryFilter;
+  private NominalToBinary m_nominalToBinaryFilter;
 
   /** The string that defines the hidden layers */
   private String m_hiddenLayers;
@@ -891,7 +891,7 @@ public class NeuralNetwork extends DistributionClassifier
     m_accepted = false;
     m_numeric = false;
     m_random = null;
-    m_nominalToBinaryFilter = new NominalToBinaryFilter();
+    m_nominalToBinaryFilter = new NominalToBinary();
     m_sigmoidUnit = new SigmoidUnit();
     m_linearUnit = new LinearUnit();
     //setting all the options to their defaults. To completely change these
@@ -1605,7 +1605,7 @@ public class NeuralNetwork extends DistributionClassifier
     m_instances.randomize(m_random);
 
     if (m_useNomToBin) {
-      m_nominalToBinaryFilter = new NominalToBinaryFilter();
+      m_nominalToBinaryFilter = new NominalToBinary();
       m_nominalToBinaryFilter.setInputFormat(m_instances);
       m_instances = Filter.useFilter(m_instances,
 				     m_nominalToBinaryFilter);

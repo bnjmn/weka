@@ -26,7 +26,8 @@ import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.classifiers.*;
-import  weka.filters.*;
+import  weka.filters.unsupervised.attribute.Remove;
+import  weka.filters.Filter;
 
 /** 
  * Class for Evaluating attributes individually by using the OneR
@@ -35,7 +36,7 @@ import  weka.filters.*;
  * No options. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator
@@ -120,7 +121,7 @@ public class OneRAttributeEval
     int[] featArray = new int[2]; // feat + class
     double errorRate;
     Evaluation o_Evaluation;
-    AttributeFilter delTransform = new AttributeFilter();
+    Remove delTransform = new Remove();
     delTransform.setInvertSelection(true);
     // copy the instances
     Instances trainCopy = new Instances(m_trainInstances);

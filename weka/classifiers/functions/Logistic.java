@@ -36,10 +36,10 @@ import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.Option;
 import weka.core.UnsupportedAttributeTypeException;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.Filter;
-import weka.filters.AttributeFilter;
-import weka.filters.NominalToBinaryFilter;
-import weka.filters.ReplaceMissingValuesFilter;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -48,9 +48,9 @@ import java.util.Vector;
  * Implements linear logistic regression using LogitBoost and
  * LinearRegression.<p>
  *
- * Missing values are replaced using a ReplaceMissingValuesFilter, and
- * nominal attributes are transformed into numeric attributes using a
- * NominalToBinaryFilter.<p>
+ * Missing values are replaced using ReplaceMissingValues, and
+ * nominal attributes are transformed into numeric attributes using
+ * NominalToBinary.<p>
  *
  * -P precision <br>
  * Set the precision of stopping criterion based on average loglikelihood.
@@ -65,7 +65,7 @@ import java.util.Vector;
  * (default 200)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class Logistic extends DistributionClassifier 
   implements OptionHandler {
@@ -77,16 +77,16 @@ public class Logistic extends DistributionClassifier
   private int m_ClassIndex = -1;
 
   /* An attribute filter */
-  private AttributeFilter m_AttFilter = null;
+  private Remove m_AttFilter = null;
 
   /* The header info */
   private Instances m_Header = null;
     
   /** The filter used to make attributes numeric. */
-  private NominalToBinaryFilter m_NominalToBinary = null;
+  private NominalToBinary m_NominalToBinary = null;
   
   /** The filter used to get rid of missing values. */
-  private ReplaceMissingValuesFilter m_ReplaceMissingValues = null;
+  private ReplaceMissingValues m_ReplaceMissingValues = null;
     
   /** The ridge parameter. */
   private double m_Ridge = 1e-8;
@@ -192,10 +192,10 @@ public class Logistic extends DistributionClassifier
     if (data.numInstances() == 0) {
       throw new Exception("No train instances without missing class value!");
     }
-    m_ReplaceMissingValues = new ReplaceMissingValuesFilter();
+    m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(data);
     data = Filter.useFilter(data, m_ReplaceMissingValues);
-    m_NominalToBinary = new NominalToBinaryFilter();
+    m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(data);
     data = Filter.useFilter(data, m_NominalToBinary);
 
@@ -216,7 +216,7 @@ public class Logistic extends DistributionClassifier
     indices = temp;
 
     // Remove useless attributes
-    m_AttFilter = new AttributeFilter();
+    m_AttFilter = new Remove();
     m_AttFilter.setAttributeIndicesArray(indices);
     m_AttFilter.setInvertSelection(false);
     m_AttFilter.setInputFormat(data);

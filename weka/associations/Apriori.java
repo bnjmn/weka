@@ -26,7 +26,7 @@ import java.io.*;
 import java.util.*;
 import weka.core.*;
 import weka.filters.Filter;
-import weka.filters.AttributeFilter;
+import weka.filters.unsupervised.attribute.Remove;
 
 /**
  * Class implementing an Apriori-type algorithm. Iteratively reduces the minimum
@@ -73,7 +73,7 @@ import weka.filters.AttributeFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ */
+ * @version $Revision: 1.13 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -216,7 +216,7 @@ public class Apriori extends Associator implements OptionHandler {
     }
 
     if (deleteString.toString().length() > 0) {
-      AttributeFilter af = new AttributeFilter();
+      Remove af = new Remove();
       af.setAttributeIndices(deleteString.toString());
       af.setInvertSelection(false);
       af.setInputFormat(instances);

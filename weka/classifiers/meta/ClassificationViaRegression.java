@@ -28,7 +28,8 @@ import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import java.util.*;
 import weka.core.*;
-import weka.filters.*;
+import weka.filters.unsupervised.attribute.MakeIndicator;
+import weka.filters.Filter;
 
 /**
  * Class for doing classification using regression methods. For more
@@ -46,7 +47,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -55,7 +56,7 @@ public class ClassificationViaRegression extends DistributionClassifier
   private Classifier[] m_Classifiers;
 
   /** The filters used to transform the class. */
-  private MakeIndicatorFilter[] m_ClassFilters;
+  private MakeIndicator[] m_ClassFilters;
 
   /** The class name of the base classifier. */
   private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -75,9 +76,9 @@ public class ClassificationViaRegression extends DistributionClassifier
       throw new UnsupportedClassTypeException("ClassificationViaRegression can't handle a numeric class!");
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, insts.numClasses());
-    m_ClassFilters = new MakeIndicatorFilter[insts.numClasses()];
+    m_ClassFilters = new MakeIndicator[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
-      m_ClassFilters[i] = new MakeIndicatorFilter();
+      m_ClassFilters[i] = new MakeIndicator();
       m_ClassFilters[i].setAttributeIndex(insts.classIndex());
       m_ClassFilters[i].setValueIndex(i);
       m_ClassFilters[i].setNumeric(true);

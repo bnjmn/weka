@@ -25,7 +25,9 @@ package  weka.attributeSelection;
 import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
-import  weka.filters.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.unsupervised.attribute.NumericToBinary;
+import  weka.filters.Filter;
 
 /** 
  * Class for Evaluating attributes individually by measuring information gain 
@@ -40,7 +42,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator
@@ -216,12 +218,12 @@ public class InfoGainAttributeEval
     int numInstances = data.numInstances();
     
     if (!m_Binarize) {
-      DiscretizeFilter disTransform = new DiscretizeFilter();
+      Discretize disTransform = new Discretize();
       disTransform.setUseBetterEncoding(true);
       disTransform.setInputFormat(data);
       data = Filter.useFilter(data, disTransform);
     } else {
-      NumericToBinaryFilter binTransform = new NumericToBinaryFilter();
+      NumericToBinary binTransform = new NumericToBinary();
       binTransform.setInputFormat(data);
       data = Filter.useFilter(data, binTransform);
     }      
