@@ -35,7 +35,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Range implements Serializable {
 
@@ -48,8 +48,9 @@ public class Range implements Serializable {
   /** The array of flags for whether an column is selected */
   boolean [] m_SelectFlags;
 
-  /** Store the maximum value permitted in the range */
-  int m_Upper;
+  /** Store the maximum value permitted in the range. -1 indicates that
+      no upper value has been set */
+  int m_Upper = -1;
 
   /**
    * Sets the value of "last".
@@ -58,7 +59,7 @@ public class Range implements Serializable {
    */
   public void setUpper(int newUpper) {
 
-    if (newUpper > 0) {
+    if (newUpper >= 0) {
       m_Upper = newUpper;
       setFlags();
     }
@@ -137,7 +138,7 @@ public class Range implements Serializable {
     }
     m_RangeStrings = ranges;
     
-    if (m_Upper > 0) {
+    if (m_Upper >= 0) {
       setFlags();
     }
   }
@@ -152,7 +153,7 @@ public class Range implements Serializable {
    */
   public boolean isInRange(int index) throws Exception {
 
-    if (m_Upper == 0) {
+    if (m_Upper == -1) {
       throw new Exception("No upper limit has been specified for range");
     }
     if (m_Invert) {
@@ -183,7 +184,7 @@ public class Range implements Serializable {
     result += "Invert: " + m_Invert + "\n";
 
     try {
-      if (m_Upper == 0) {
+      if (m_Upper == -1) {
 	throw new Exception ("Upper limit has not been specified");
       }
       String cols = null;
@@ -214,7 +215,7 @@ public class Range implements Serializable {
    */
   public int [] getSelection() throws Exception {
 
-    if (m_Upper == 0) {
+    if (m_Upper == -1) {
       throw new Exception("No upper limit has been specified for range");
     }
     int [] selectIndices = new int [m_Upper + 1];
@@ -223,7 +224,7 @@ public class Range implements Serializable {
     {
       for (int i = 0; i <= m_Upper; i++) {
 	if (!m_SelectFlags[i]) {
-	selectIndices[numSelected++] = i;
+	  selectIndices[numSelected++] = i;
 	}
       }
     }
