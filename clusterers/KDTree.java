@@ -10,7 +10,7 @@ import  weka.core.*;
  * This is a KD-Tree structure used to contain and break instances based on
  * their attributes.
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class KDTree {
 
@@ -109,7 +109,7 @@ public class KDTree {
 
     // set ranges and split parameter
     m_Ranges = XMeans.initializeRanges(m_Instances, instList);
-    if (m_Universe == null) (m_Universe = m_Ranges);
+    if (m_Universe == null) m_Universe = m_Ranges;
 
     m_SplitDim = widestDim();
     if (m_SplitDim > 0) {
