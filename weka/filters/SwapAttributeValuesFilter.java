@@ -27,7 +27,7 @@ import weka.core.*;
 /** 
  * Swaps two values of a nominal attribute.<p>
  *
- * Valid scheme-specific options are: <p>
+ * Valid filter-specific options are: <p>
  *
  * -C col <br>
  * Index of the attribute to be changed. (default last)<p>
@@ -39,7 +39,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {

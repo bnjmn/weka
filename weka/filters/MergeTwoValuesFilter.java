@@ -26,7 +26,7 @@ import weka.core.*;
 /** 
  * Merges two values of a nominal attribute.<p>
  * 
- * Valid scheme-specific options are: <p>
+ * Valid filter-specific options are: <p>
  *
  * -C col <br>
  * The column containing the values to be merged. (default last)<p>
@@ -38,7 +38,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class MergeTwoValuesFilter extends Filter implements OptionHandler {
 

@@ -27,7 +27,7 @@ import weka.core.*;
  * An instance filter that adds a new attribute to the dataset. 
  * The new attribute contains all missing values.<p>
  *
- * Valid scheme-specific options are:<p>
+ * Valid filter-specific options are:<p>
  *
  * -C index <br>
  * Specify where to insert the column. First and last are valid indexes.
@@ -41,7 +41,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 

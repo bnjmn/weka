@@ -51,7 +51,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class Filter implements Serializable {
 
@@ -380,10 +380,10 @@ public abstract class Filter implements Serializable {
 
       String genericOptions = "\nGeneral options:\n\n"
 	+ "-h\n"
-	+ "\tGet help on available options. "
-	+ "(use -b -h for help on batch mode.)\n"
+	+ "\tGet help on available options.\n"
+	+ "\t(use -b -h for help on batch mode.)\n"
 	+ "-i <file>\n"
-	+ "\tThe name of the file containing input instances. "
+	+ "\tThe name of the file containing input instances.\n"
 	+ "\tIf not supplied then instances will be read from stdin.\n"
 	+ "-o <file>\n"
 	+ "\tThe name of the file output instances will be written to.\n"

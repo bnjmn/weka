@@ -10,12 +10,12 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 
 # New Filters Done:
 # CopyAttributesFilter.java      -- create a copy of selected attributes
-
-# Filters To Do:
 # TimeSeriesTranslateFilter.java -- replace attribute values with values from
 #                                   historic instances 
 # TimeSeriesDeltaFilter.java     -- replace attribute values with first order
 #                                   difference from historic instances
+
+# Filters To Do:
 # TimeSeriesSmoothFilter.java    -- replace attribute values with values
 #                                   smoothed over historic instances 
 #                                   (average / decay)

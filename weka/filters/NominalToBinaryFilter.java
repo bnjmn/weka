@@ -30,13 +30,13 @@ import weka.core.*;
  * numeric class is assigned). Currently requires that a class attribute
  * be set (but this should be changed).<p>
  *
- * Valid scheme-specific options are: <p>
+ * Valid filter-specific options are: <p>
  *
  * -N <br>
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 

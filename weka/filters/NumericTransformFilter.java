@@ -28,7 +28,7 @@ import weka.core.*;
  * Transforms numeric attributes using a
  * given transformation method.<p>
  *
- * Valid scheme-specific options are: <p>
+ * Valid filter-specific options are: <p>
  *
  * -R index1,index2-index4,...<br>
  * Specify list of columns to transform. First and last are valid indexes.
@@ -44,7 +44,7 @@ import weka.core.*;
  * Name of the method used for the transformation.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
