@@ -35,7 +35,8 @@ import java.util.Vector;
  * dataset may be specified. If the dataset has a (nominal) class
  * attribute, the filter can be made to maintain the class
  * distribution in the subsample, or to bias the class distribution toward
- * a uniform distribution.
+ * a uniform distribution. When used in batch mode, subsequent batches are
+ * <b>not</b> resampled.
  *
  * Valid options are:<p>
  *
@@ -51,7 +52,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -63,6 +64,9 @@ public class ResampleFilter extends Filter implements OptionHandler {
   
   /** The degree of bias towards uniform (nominal) class distribution */
   private double m_BiasToUniformClass = 0;
+
+  /** True if the first batch has been done */
+  private boolean m_FirstBatchDone = false;
 
   /**
    * Returns an enumeration describing the available options
@@ -239,6 +243,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
     m_InputFormat = new Instances(instanceInfo, 0);
     setOutputFormat(m_InputFormat);
     m_NewBatch = true;
+    m_FirstBatchDone = false;
     return true;
   }
 
@@ -261,8 +266,13 @@ public class ResampleFilter extends Filter implements OptionHandler {
       resetQueue();
       m_NewBatch = false;
     }
-    m_InputFormat.add(instance);
-    return false;
+    if (m_FirstBatchDone) {
+      push(instance);
+      return true;
+    } else {
+      m_InputFormat.add(instance);
+      return false;
+    }
   }
 
   /**
@@ -286,6 +296,7 @@ public class ResampleFilter extends Filter implements OptionHandler {
     m_InputFormat = new Instances(m_InputFormat, 0);
 
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 
