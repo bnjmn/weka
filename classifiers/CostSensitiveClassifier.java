@@ -58,7 +58,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler {
@@ -184,8 +184,14 @@ public class CostSensitiveClassifier extends Classifier
 
     String costFile = Utils.getOption('C', options);
     if (costFile.length() != 0) {
-      setCostMatrix(new CostMatrix(new BufferedReader(
-                                   new FileReader(costFile))));
+      try {
+	setCostMatrix(new CostMatrix(new BufferedReader(
+				     new FileReader(costFile))));
+      } catch (Exception ex) {
+	// now flag as possible old format cost matrix. Delay cost matrix
+	// loading until buildClassifer is called
+	setCostMatrix(null);
+      }
       setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED,
                                           TAGS_MATRIX_SOURCE));
       m_CostFile = costFile;
@@ -428,6 +434,11 @@ public class CostSensitiveClassifier extends Classifier
       }
       setCostMatrix(new CostMatrix(new BufferedReader(
                                    new FileReader(costFile))));
+    } else if (m_CostMatrix == null) {
+      // try loading an old format cost file
+      m_CostMatrix = new CostMatrix(data.numClasses());
+      m_CostMatrix.readOldFormat(new BufferedReader(
+			       new FileReader(m_CostFile)));
     }
 
     if (!m_MinimizeExpectedCost) {
