@@ -22,7 +22,7 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ThresholdCurve {
 
@@ -141,8 +141,8 @@ public class ThresholdCurve {
         || (tcurve.numInstances() == 0)) {
       return Double.NaN;
     }
-    int recallInd = tcurve.attribute("Recall").index();
-    int precisInd = tcurve.attribute("Precision").index();
+    int recallInd = tcurve.attribute(RECALL_NAME).index();
+    int precisInd = tcurve.attribute(PRECISION_NAME).index();
     double [] recallVals = tcurve.attributeToDoubleArray(recallInd);
     int [] sorted = Utils.sort(recallVals);
     double isize = 1.0 / (n - 1);
@@ -181,6 +181,58 @@ public class ThresholdCurve {
     return psum / n;
   }
 
+  /**
+   * Calculates the area under the ROC curve.  This is normalised so
+   * that 0.5 is random, 1.0 is perfect and 0.0 is bizarre.
+   *
+   * @param tcurve a previously extracted threshold curve Instances.
+   * @return the ROC area, or Double.NaN if you don't pass in 
+   * a ThresholdCurve generated Instances. 
+   */
+  public static double getROCArea(Instances tcurve) {
+
+    final int n = tcurve.numInstances();
+    if (!RELATION_NAME.equals(tcurve.relationName()) 
+        || (n == 0)) {
+      return Double.NaN;
+    }
+    final int tpInd = tcurve.attribute(TRUE_POS_NAME).index();
+    final int fpInd = tcurve.attribute(FALSE_POS_NAME).index();
+    final double [] tpVals = tcurve.attributeToDoubleArray(tpInd);
+    final double [] fpVals = tcurve.attributeToDoubleArray(fpInd);
+    final double tp0 = tpVals[0];
+    final double fp0 = fpVals[0];
+    double area = 0.0;
+    //starts at high values and goes down
+    double xlast = 1.0;
+    double ylast = 1.0;
+    for (int i = 1; i < n; i++) {
+      final double x = fpVals[i] / fp0;
+      final double y = tpVals[i] / tp0;
+      final double areaDelta = (y + ylast) * (xlast - x) / 2.0;
+      /*
+      System.err.println("[" + i + "]"
+                         + " x=" + x
+                         + " y'=" + y
+                         + " xl=" + xlast
+                         + " yl=" + ylast
+                         + " a'=" + areaDelta);
+      */
+
+      area += areaDelta;
+      xlast = x;
+      ylast = y;
+    }
+
+    //make sure ends at 0,0
+    if (xlast > 0.0) {
+      final double areaDelta = ylast * xlast / 2.0;
+      //System.err.println(" a'=" + areaDelta);
+      area += areaDelta;
+    }
+    //System.err.println(" area'=" + area);
+    return area;
+  }
 
   /**
    * Gets the index of the instance with the closest threshold value to the
