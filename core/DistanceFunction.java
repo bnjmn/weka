@@ -27,9 +27,9 @@ import java.io.*;
 /**
  * Abstract class to implement a distance function.
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public abstract class DistanceFunction {
+public abstract class DistanceFunction implements Serializable {
 
   /** the data model */
   protected Instances m_Model;
