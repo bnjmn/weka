@@ -16,35 +16,36 @@
 
 /*
  *    WekaException.java
- *    Copyright (C) 2001 Webmind Corp.
+ *    Copyright (C) 2002 Richard Kirkby
+ *
  */
 
 package weka.core;
 
 /**
- * <code>WekaException</code> is used when some Weka-specific
- * checked exception must be raised.
+ * Class for Weka-specific exceptions.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class WekaException extends Exception {
 
   /**
-   * Creates a new <code>WekaException</code> instance
-   * with no detail message.
+   * Creates a new WekaException with no message.
+   *
    */
-  public WekaException() { 
-    super(); 
+  public WekaException() {
+
+    super();
   }
 
   /**
-   * Creates a new <code>WekaException</code> instance
-   * with a specified message.
+   * Creates a new WekaException.
    *
-   * @param messagae a <code>String</code> containing the message.
+   * @param message the reason for raising an exception.
    */
-  public WekaException(String message) { 
-    super(message); 
+  public WekaException(String message) {
+
+    super(message);
   }
 }

@@ -16,38 +16,37 @@
 
 /*
  *    UnassignedDatasetException.java
- *    Copyright (C) 2001 Webmind Corp.
+ *    Copyright (C) 2002 Richard Kirkby
+ *
  */
 
 package weka.core;
 
 /**
- * <code>UnassignedDatasetException</code> is used when
- * a method of an Instance is called that requires access to
- * the Instance structure, but that the Instance does not contain
- * a reference to any Instances (as set by Instance.setDataset(), or when
- * an Instance is added to a set of Instances)).
+ * Exception that is raised when trying to use something that has no
+ * reference to a dataset, when one is required.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class UnassignedDatasetException extends RuntimeException {
 
   /**
-   * Creates a new <code>UnassignedDatasetException</code> instance
-   * with no detail message.
+   * Creates a new UnassignedDatasetException with no message.
+   *
    */
-  public UnassignedDatasetException() { 
-    super(); 
+  public UnassignedDatasetException() {
+
+    super();
   }
 
   /**
-   * Creates a new <code>UnassignedDatasetException</code> instance
-   * with a specified message.
+   * Creates a new UnassignedDatasetException.
    *
-   * @param messagae a <code>String</code> containing the message.
+   * @param message the reason for raising an exception.
    */
-  public UnassignedDatasetException(String message) { 
-    super(message); 
+  public UnassignedDatasetException(String message) {
+
+    super(message);
   }
 }
