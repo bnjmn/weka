@@ -121,7 +121,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -983,6 +983,9 @@ public class ClassifierPanel extends JPanel {
 	  // will hold the prediction objects if the class is nominal
 	  FastVector predictions = null;
 	 
+	  // for timing
+	  long trainTimeStart = 0, trainTimeElapsed = 0;
+
 	  if (m_TestInstances != null) {
 	    userTest = new Instances(m_TestInstancesCopy);
 	  }
@@ -1104,12 +1107,18 @@ public class ClassifierPanel extends JPanel {
 	    // Build the model and output it.
 	    if (outputModel || (testMode == 3) || (testMode == 4)) {
 	      m_Log.statusMessage("Building model on training data...");
+
+	      trainTimeStart = System.currentTimeMillis();
 	      classifier.buildClassifier(inst);
+	      trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
 	    }
 
 	    if (outputModel) {
 	      outBuff.append("=== Classifier model (full training set) ===\n\n");
-	      outBuff.append(classifier.toString() + "\n\n");
+	      outBuff.append(classifier.toString() + "\n");
+	      outBuff.append("\nTime taken to build model: " +
+			     Utils.doubleToString(trainTimeElapsed / 1000.0,2)
+			     + " seconds\n\n");
 	      m_History.updateResult(name);
 	      if (classifier instanceof Drawable) {
 		grph = null;
