@@ -77,7 +77,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -499,21 +499,35 @@ public class PreprocessPanel extends JPanel {
    */
   public void setWorkingInstancesFromFilters() {
     if (m_IOThread == null) {
-      m_IOThread = new Thread() {
-	public void run() {
-	  Instances f = filterInstances(m_BaseInstances);
-	  if (f != null) {
-	    if ((f == m_BaseInstances) && (f == m_WorkingInstances)) {
-	      m_Log.logMessage("No changes from base relation");
-	    } else {
-	      setWorkingInstances(f);
+      int res = 0;
+      if (m_AttPanel.getSelectedAttributes().length == 0) {
+	Object[] options = { "OK", "CANCEL" };
+	res = JOptionPane.showOptionDialog(null, 
+				     "Unselecting all attributes will result "
+				     +"in an empty dataset.\nDo you want to "
+				     +"continue?", "Warning", 
+				     JOptionPane.DEFAULT_OPTION, 
+				     JOptionPane.WARNING_MESSAGE,
+				     null, options, options[1]);
+	
+      }
+      if (res == 0) {
+	m_IOThread = new Thread() {
+	    public void run() {
+	      Instances f = filterInstances(m_BaseInstances);
+	      if (f != null) {
+		if ((f == m_BaseInstances) && (f == m_WorkingInstances)) {
+		  m_Log.logMessage("No changes from base relation");
+		} else {
+		  setWorkingInstances(f);
+		}
+	      }
+	      m_IOThread = null;
 	    }
-	  }
-	  m_IOThread = null;
-	}
-      };
-      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-      m_IOThread.start();
+	  };
+	m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+	m_IOThread.start();
+      }
     } else {
       JOptionPane.showMessageDialog(this,
 				    "Can't apply filters at this time,\n"
