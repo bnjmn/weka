@@ -1,5 +1,5 @@
 #
-# $Revision: 1.13 $
+# $Revision: 1.14 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -66,7 +66,7 @@ doc :
 	weka.gui.explorer \
 	weka.gui.streams; \
 	for page in `ls doc/*.html`; \
-	do cat $$page | sed "s/<\/pre>/  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
+	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
 	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
 	< doc/packages.html > packages_temp.html; \
 	mv packages_temp.html doc/packages.html)
@@ -127,7 +127,7 @@ install : all
 	weka.gui.explorer \
 	weka.gui.streams; \
 	for page in `ls $$JAWSHOME/doc/*.html`; \
-	do cat $$page | sed "s/<\/pre>/  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
+	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
 	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
 	< $$JAWSHOME/doc/packages.html > $$JAWSHOME/packages_temp.html; \
 	mv $$JAWSHOME/packages_temp.html $$JAWSHOME/doc/packages.html
