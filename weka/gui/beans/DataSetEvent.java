@@ -29,16 +29,20 @@ import weka.core.Instances;
  * Event encapsulating a data set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see EventObject
  */
 public class DataSetEvent extends EventObject {
 
   private Instances m_dataSet;
+  private boolean m_structureOnly;
 
   public DataSetEvent(Object source, Instances dataSet) {
     super(source);
     m_dataSet = dataSet;
+    if (m_dataSet != null && m_dataSet.numInstances() == 0) {
+      m_structureOnly = true;
+    }
   }
   
   /**
@@ -48,5 +52,16 @@ public class DataSetEvent extends EventObject {
    */
   public Instances getDataSet() {
     return m_dataSet;
+  }
+
+  /**
+   * Returns true if the encapsulated instances
+   * contain just header information
+   *
+   * @return true if only header information is
+   * available in this DataSetEvent
+   */
+  public boolean isStructureOnly() {
+    return m_structureOnly;
   }
 }

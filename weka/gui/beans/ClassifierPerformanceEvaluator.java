@@ -44,7 +44,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -63,7 +63,8 @@ public class ClassifierPerformanceEvaluator
 
   private transient Thread m_evaluateThread = null;
   
-  private Vector m_listeners = new Vector();
+  private Vector m_textListeners = new Vector();
+  private Vector m_rocListeners = new Vector();
 
   public ClassifierPerformanceEvaluator() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -232,7 +233,7 @@ public class ClassifierPerformanceEvaluator
    * @param cl a <code>TextListener</code> value
    */
   public synchronized void addTextListener(TextListener cl) {
-    m_listeners.addElement(cl);
+    m_textListeners.addElement(cl);
   }
 
   /**
@@ -241,7 +242,7 @@ public class ClassifierPerformanceEvaluator
    * @param cl a <code>TextListener</code> value
    */
   public synchronized void removeTextListener(TextListener cl) {
-    m_listeners.remove(cl);
+    m_textListeners.remove(cl);
   }
 
   /**
@@ -252,7 +253,7 @@ public class ClassifierPerformanceEvaluator
   private void notifyTextListeners(TextEvent te) {
     Vector l;
     synchronized (this) {
-      l = (Vector)m_listeners.clone();
+      l = (Vector)m_textListeners.clone();
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {

@@ -11,6 +11,7 @@ weka.gui.beans.KnowledgeFlow.Evaluation=weka.gui.beans.TrainingSetMaker,\
  weka.gui.beans.CrossValidationFoldMaker,\
  weka.gui.beans.TrainTestSplitMaker,\
  weka.gui.beans.ClassAssigner,\
+ weka.gui.beans.ClassValuePicker,\
  weka.gui.beans.ClassifierPerformanceEvaluator,\
  weka.gui.beans.IncrementalClassifierEvaluator,\
  weka.gui.beans.PredictionAppender

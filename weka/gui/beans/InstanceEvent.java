@@ -23,13 +23,14 @@
 package weka.gui.beans;
 
 import java.util.EventObject;
+import weka.core.Instances;
 import weka.core.Instance;
 
 /**
- * Event that encapsulates a single instance
+ * Event that encapsulates a single instance or header information only
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see EventObject
  */
 public class InstanceEvent extends EventObject {
@@ -37,20 +38,35 @@ public class InstanceEvent extends EventObject {
   public static final int INSTANCE_AVAILABLE = 1;
   public static final int BATCH_FINISHED = 2;
   
+  private Instances m_structure;
   private Instance m_instance;
   private int m_status;
 
   /**
-   * Creates a new <code>InstanceEvent</code> instance.
+   * Creates a new <code>InstanceEvent</code> instance that encapsulates
+   * a single instance only.
    *
    * @param source the source of the event
    * @param instance the instance
-   * @param status status code
+   * @param status status code (either INSTANCE_AVAILABLE or BATCH_FINISHED)
    */
   public InstanceEvent(Object source, Instance instance, int status) {
     super(source);
     m_instance = instance;
     m_status = status;
+  }
+
+  /**
+   * Creates a new <code>InstanceEvent</code> instance which encapsulates
+   * header information only.
+   *
+   * @param source an <code>Object</code> value
+   * @param structure an <code>Instances</code> value
+   */
+  public InstanceEvent(Object source, Instances structure) {
+    super(source);
+    m_structure = structure;
+    m_status = FORMAT_AVAILABLE;
   }
 
   public InstanceEvent(Object source) {
@@ -91,5 +107,26 @@ public class InstanceEvent extends EventObject {
    */
   public void setStatus(int s) {
     m_status = s;
+  }
+
+  /**
+   * Set the instances structure
+   *
+   * @param structure an <code>Instances</code> value
+   */
+  public void setStructure(Instances structure) {
+    m_structure = structure;
+    m_instance = null;
+    m_status = FORMAT_AVAILABLE;
+  }
+
+  /**
+   * Get the instances structure (may be null if this is not
+   * a FORMAT_AVAILABLE event)
+   *
+   * @return an <code>Instances</code> value
+   */
+  public Instances getStructure() {
+    return m_structure;
   }
 }

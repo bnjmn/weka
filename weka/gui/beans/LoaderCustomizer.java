@@ -99,6 +99,7 @@ public class LoaderCustomizer extends JPanel
 	      public void propertyChange(PropertyChangeEvent e) {
 		repaint();
 		if (m_dsLoader != null) {
+		  System.err.println("Property change!!");
 		  m_dsLoader.setLoader((weka.core.converters.Loader)m_LoaderEditor.
 				       getValue());
 		}

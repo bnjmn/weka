@@ -41,6 +41,7 @@ public class IncrementalClassifierEvent extends EventObject {
   public static final int NEW_BATCH = 1;
   public static final int BATCH_FINISHED = 2;
 
+  private Instances m_structure;
   private int m_status;
   protected Classifier m_classifier;
   protected Instance m_currentInstance;
@@ -59,6 +60,22 @@ public class IncrementalClassifierEvent extends EventObject {
     m_classifier = scheme;
     m_currentInstance = currentI;
     m_status = status;
+  }
+
+  /**
+   * Creates a new incremental classifier event that encapsulates
+   * header information and classifier.
+   *
+   * @param source an <code>Object</code> value
+   * @param scheme a <code>Classifier</code> value
+   * @param structure an <code>Instances</code> value
+   */
+  public IncrementalClassifierEvent(Object source, Classifier scheme,
+				    Instances structure) {
+    super(source);
+    m_structure = structure;
+    m_status = NEW_BATCH;
+    m_classifier = scheme;
   }
 
   public IncrementalClassifierEvent(Object source) {
@@ -112,6 +129,27 @@ public class IncrementalClassifierEvent extends EventObject {
    */
   public void setStatus(int s) {
     m_status = s;
+  }
+
+  /**
+   * Set the instances structure
+   *
+   * @param structure an <code>Instances</code> value
+   */
+  public void setStructure(Instances structure) {
+    m_structure = structure;
+    m_currentInstance = null;
+    m_status = NEW_BATCH;
+  }
+
+  /**
+   * Get the instances structure (may be null if this is not
+   * a NEW_BATCH event)
+   *
+   * @return an <code>Instances</code> value
+   */
+  public Instances getStructure() {
+    return m_structure;
   }
 }
 
