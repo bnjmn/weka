@@ -48,7 +48,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class Matrix implements Cloneable, Serializable {
 
@@ -642,7 +642,7 @@ public class Matrix implements Cloneable, Serializable {
   
   /**
    * Solve A*X = B using backward substitution.
-   * A is current object (this) 
+   * A is current object (this). Note that this matrix will be changed! 
    * B parameter bb
    * X returned in parameter bb
    *

@@ -65,7 +65,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -148,7 +148,7 @@ public class AttributeVisualizationPanel extends JPanel {
       m_colorAttrib.removeAllItems();
       for(int i=0; i<m_data.numAttributes(); i++) {
 	m_colorAttrib.addItem(new String("Colour: "+m_data.attribute(i).name()+" "+
-					 ((m_data.attribute(i).isNominal()) ? "(Nom)":"(Num)")));
+					 ((m_data.attribute(i).isNominal()) ? "(Nom)":"")));
       }
       m_colorAttrib.setSelectedIndex(m_data.numAttributes()-1);  
       //if (m_data.classIndex() >= 0) {
@@ -221,8 +221,12 @@ public class AttributeVisualizationPanel extends JPanel {
 	hc = new HistCalc();
 	hc.setPriority(hc.MIN_PRIORITY);
 	hc.start();
+      } else { 
+	histBarCounts = null;
+	histBarClassCounts = null;
+	this.repaint();
+	threadRun = false;
       }
-      //this.repaint();
     }
   }
 
@@ -752,6 +756,12 @@ public class AttributeVisualizationPanel extends JPanel {
 	    //System.out.println("barWidth:"+barWidth+" histBarCount:"+histBarCounts.length);
 		    
 	  }
+	} else {
+	  g.clearRect(0, 0, this.getWidth(), this.getHeight()); 
+	  g.drawString("Attribute is neither numeric nor nominal.", 
+		     this.getWidth()/2 - fm.
+		       stringWidth("Attribute is neither numeric nor nominal.")/2,
+		     this.getHeight()/2-fm.getHeight()/2);
 	}
       }
       else {   //if still calculating the plot
