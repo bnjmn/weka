@@ -66,7 +66,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -434,15 +434,9 @@ public class ThresholdSelector extends DistributionClassifier
       throw new Exception("Only works for two-class datasets!");
     }
     AttributeStats stats = instances.attributeStats(instances.classIndex());
-    if (stats.distinctCount <= 1) {
-      throw new Exception("Need two class values occuring in training data!");
-    }
     if (stats.missingCount > 0) {
       instances = new Instances(instances);
       instances.deleteWithMissingClass();
-    }
-    if (instances.numInstances() < m_NumXValFolds) {
-      throw new Exception("Number of training instances smaller than number of folds.");
     }
 
     // Determine which class value to look for
@@ -488,7 +482,12 @@ public class ThresholdSelector extends DistributionClassifier
 
     // If data contains only one instance of positive data
     // optimize on training data
-    if (stats.nominalCounts[m_DesignatedClass] == 1) {
+    if (stats.distinctCount != 2) {
+      System.err.println("Couldn't find examples of both classes. No adjustment.");
+      m_BestThreshold = 0.5;
+      m_BestValue = MIN_VALUE;
+      m_Classifier.buildClassifier(instances);
+    } else if (stats.nominalCounts[m_DesignatedClass] == 1) {
       System.err.println("Only 1 positive found: optimizing on training data");
       findThreshold(getPredictions(instances, EVAL_TRAINING_SET, 0));
     } else {
