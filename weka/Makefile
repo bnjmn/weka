@@ -1,5 +1,5 @@
 #
-# $Revision: 1.10 $
+# $Revision: 1.11 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -86,7 +86,9 @@ install : all
 	weka/clusterers/*.class \
 	weka/attributeSelection/*.class \
 	weka/experiment/*.class \
+	weka/experiment/*.props \
 	weka/gui/*.class \
+	weka/gui/*.props \
 	weka/gui/experiment/*.class \
 	weka/gui/explorer/*.class \
 	weka/gui/streams/*.class \

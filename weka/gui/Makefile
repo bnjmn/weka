@@ -63,6 +63,7 @@ classjar :  all
 	(cd $(TOPDIR) ;\
 	jar cvf archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar \
 	$(PACKAGEDIR)/*.class \
+	$(PACKAGEDIR)/*.props \
 	$(PACKAGEDIR)/experiment/*.class \
 	$(PACKAGEDIR)/explorer/*.class \
 	$(PACKAGEDIR)/streams/*.class; \
