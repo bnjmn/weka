@@ -59,7 +59,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class Explorer extends JPanel {
 
@@ -101,7 +101,6 @@ public class Explorer extends JPanel {
     m_LogPanel.logMessage("(c) 2003 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
-    m_LogPanel.logMessage("email: wekasupport@cs.waikato.ac.nz");
     m_LogPanel.logMessage("Started on " + date);
     m_LogPanel.statusMessage("Welcome to the Weka Knowledge Explorer");
     m_PreprocessPanel.setLog(m_LogPanel);
