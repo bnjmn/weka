@@ -64,7 +64,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -99,6 +99,12 @@ public class GenericObjectEditor implements PropertyEditor {
     // Allow a properties file in the current directory to override
     try {
       EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+      java.util.Enumeration keys = 
+	(java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+      if (!keys.hasMoreElements()) {
+	throw new Exception("Failed to read a property file for the "
+			    +"generic object editor");
+      }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
           "Could not read a configuration file for the generic object\n"
