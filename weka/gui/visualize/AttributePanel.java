@@ -53,17 +53,11 @@ import java.awt.Graphics;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributePanel extends JScrollPane {
   /** The instances to be plotted */
   protected Instances m_plotInstances=null;
-
-  /** True if colouring for clusterer */
-  protected boolean m_colourUsingPreds=false;
-    
-  /** The predictions. */
-  protected double[] m_preds= null;
     
   /** Holds the min and max values of the colouring attributes */
   protected double m_maxC;
@@ -250,8 +244,7 @@ public class AttributePanel extends JScrollPane {
 	  m_oldWidth = h;
 	}
 	  
-	if (m_plotInstances.attribute(m_cIndex).isNominal() 
-	    || m_colourUsingPreds) {
+	if (m_plotInstances.attribute(m_cIndex).isNominal()) {
 	  for (int noa = 0; noa < m_plotInstances.numInstances(); noa++) {
 	      
 	    if (m_cached[noa] != -9000) {
@@ -261,9 +254,7 @@ public class AttributePanel extends JScrollPane {
 		  isNominal()) {
 		xp += (int)(Math.random() * 5) - 2;
 	      }
-	      int ci = (!m_colourUsingPreds)
-		? (int)m_plotInstances.instance(noa).value(m_cIndex)
-		: (int)m_preds[noa];
+	      int ci = (int)m_plotInstances.instance(noa).value(m_cIndex);
 
 	      gx.setColor((Color)m_colorList.elementAt
 			  (ci % m_colorList.size()));
@@ -324,25 +315,6 @@ public class AttributePanel extends JScrollPane {
   public void addAttributePanelListener(AttributePanelListener a) {
     m_Listeners.addElement(a);
   }
-
-  /**
-   * Set an array of classifier predictions to be plotted. The predictions
-   * need to correspond one to one with the Instances provided for plotting.
-   * @param preds an array of classifier predictions
-   */
-  public void setPredictions(double [] preds) {
-    m_preds = preds;
-  }
-
-  /**
-   * Specify that colours are to be displayed on the basis of an auxilliary
-   * array (predictions)
-   * auxiliary array.
-   * @param c true if labels are to be determined from the array (predictions)
-   */
-  protected void setColourUsingPreds(boolean c) {
-    m_colourUsingPreds = c;
-  }
   
   /**
    * Set the index of the attribute by which to colour the data. Updates
@@ -381,16 +353,15 @@ public class AttributePanel extends JScrollPane {
       double min=Double.POSITIVE_INFINITY;
       double max=Double.NEGATIVE_INFINITY;
       double value;
-      if (!m_colourUsingPreds) {
-	for (int i=0;i<m_plotInstances.numInstances();i++) {
-	  if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
-	    value = m_plotInstances.instance(i).value(m_cIndex);
-	    if (value < min) {
-	      min = value;
-	    }
-	    if (value > max) {
-	      max = value;
-	    }
+
+      for (int i=0;i<m_plotInstances.numInstances();i++) {
+	if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
+	  value = m_plotInstances.instance(i).value(m_cIndex);
+	  if (value < min) {
+	    min = value;
+	  }
+	  if (value > max) {
+	    max = value;
 	  }
 	}
       }

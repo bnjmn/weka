@@ -27,6 +27,10 @@ import weka.core.FastVector;
 import weka.core.Utils;
 
 import java.util.Random;
+import java.io.File;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
@@ -66,6 +70,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
 import javax.swing.JSlider;
+import javax.swing.JFileChooser;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -90,7 +95,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -112,11 +117,7 @@ public class VisualizePanel extends JPanel {
     protected int m_yIndex=0;
     protected int m_cIndex=0;
     protected int m_sIndex=0;
-
-    /** Set to true if colouring for the master plot is to be done solely 
-	using predictions. Used when visualizing a clusterer's output */
-    protected boolean m_colourUsingPreds = false;
-    
+ 
     /** Axis padding */
     private final int m_axisPad = 5;
 
@@ -383,7 +384,7 @@ public class VisualizePanel extends JPanel {
 		  Double(m_plot2D.convertToAttribY(e.getY())));
 		m_newMousePos.width = e.getX();      //the temp mouse point
 		m_newMousePos.height = e.getY();
-		//		Graphics g = PlotPanel.this.getGraphics();
+
 		Graphics g = m_plot2D.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
@@ -414,7 +415,6 @@ public class VisualizePanel extends JPanel {
 	    if (m_createShape) {
 	      if (((Double)m_shapePoints.elementAt(0)).intValue() == 1) {
 		m_createShape = false;
-		//		Graphics g = PlotPanel.this.getGraphics();
 		Graphics g = m_plot2D.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
@@ -484,7 +484,6 @@ public class VisualizePanel extends JPanel {
 	    //check if the user is dragging a box
 	    if (m_createShape) {
 	      if (((Double)m_shapePoints.elementAt(0)).intValue() == 1) {
-		//		Graphics g = PlotPanel.this.getGraphics();
 		Graphics g = m_plot2D.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
@@ -513,7 +512,6 @@ public class VisualizePanel extends JPanel {
 	    if (m_createShape) {
 	      if (((Double)m_shapePoints.elementAt(0)).intValue() == 2 || 
 		  ((Double)m_shapePoints.elementAt(0)).intValue() == 3) {
-		//		Graphics g = PlotPanel.this.getGraphics();
 		Graphics g = m_plot2D.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
@@ -599,21 +597,21 @@ public class VisualizePanel extends JPanel {
 		  }
 		  
 		}
-   		double [] nPreds = null;
+
+		int [] nSizes = null;
+		int [] nTypes = null;
 		int x = m_xIndex;
 		int y = m_yIndex;
-		//boolean p = m_predsNumeric;
+
 		if (m_originalPlot == null) {
-		    //this sets these instances as the instances 
-		    //to go back to.
-		  //		    m_origInstances = m_plotInstances;
+		  //this sets these instances as the instances 
+		  //to go back to.
 		  m_originalPlot = m_plot2D.getMasterPlot();
 		}
 
-		if (m_plot2D.getMasterPlot().m_preds != null && count > 0) {
-
-		  nPreds = new double[m_plot2D.getMasterPlot().
-				     m_plotInstances.numInstances()];
+		if (count > 0) {
+		  nTypes = new int[count];
+		  nSizes = new int[count];
 		  count = 0;
 		  for (int noa = 0; noa < m_plot2D.getMasterPlot().
 			 m_plotInstances.numInstances(); 
@@ -621,7 +619,10 @@ public class VisualizePanel extends JPanel {
 		    if (inSplit(m_plot2D.getMasterPlot().
 				m_plotInstances.instance(noa))) {
 
-		      nPreds[count] = m_plot2D.getMasterPlot().m_preds[noa];
+		      nTypes[count] = m_plot2D.getMasterPlot().
+			m_shapeType[noa];
+		      nSizes[count] = m_plot2D.getMasterPlot().
+			m_shapeSize[noa];
 		      count++;
 		    }
 		  }
@@ -629,15 +630,13 @@ public class VisualizePanel extends JPanel {
 		cancelShapes();
 
 		PlotData2D newPlot = new PlotData2D(sub_set1);
-		if (m_plot2D.getMasterPlot().m_preds != null) {
-		  newPlot.setPredictions(nPreds);
-		  if (sub_set1.classIndex() >= 0 && 
-		      sub_set1.attribute(sub_set1.classIndex()).isNumeric()) {
-		    newPlot.setPredictionsNumeric(true);
-		  }
-		}
-		m_plot2D.removeAllPlots();
+
 		try {
+		  newPlot.setShapeSize(nSizes);
+		  newPlot.setShapeType(nTypes);
+		
+		  m_plot2D.removeAllPlots();
+		  
 		  VisualizePanel.this.addPlot(newPlot);
 		} catch (Exception ex) {
 		  System.err.println(ex);
@@ -742,14 +741,11 @@ public class VisualizePanel extends JPanel {
 	    
 	  }
 	}
-  
-      
       }
       else {
 	m_shapes = null;
       }
       this.repaint();
-
     }
     
     /** 
@@ -1049,25 +1045,11 @@ public class VisualizePanel extends JPanel {
      */
     public void addPlot(PlotData2D newPlot) throws Exception {
       if (m_plot2D.getPlots().size() == 0) {
-	//	m_preds = newPlot.m_preds;
 	m_plot2D.addPlot(newPlot);
 	m_attrib.setInstances(newPlot.m_plotInstances);
 	m_attrib.setX(0); m_attrib.setY(0);
 	m_classPanel.setInstances(newPlot.m_plotInstances);
 
-	// if the master plot is for clusterer predictions
-	m_colourUsingPreds = newPlot.m_colourUsingPreds;
-
-	// Ensure the attribute panel and class panel
-	// are set up correctly if there is no class index
-	// set in the data for this plot AND there are predictions
-	if (newPlot.m_plotInstances.classIndex() < 0 &&
-	    newPlot.m_colourUsingPreds == true) {
-	  m_attrib.setPredictions(newPlot.m_preds);
-	  m_attrib.setColourUsingPreds(true);
-	  m_classPanel.setColourUsingPreds(true);
-	  m_classPanel.m_numPreds = newPlot.m_highestPred+1;
-	}
 	plotReset(newPlot.m_plotInstances, newPlot.getCindex());
 	if (newPlot.m_useCustomColour) {
 	  VisualizePanel.this.remove(m_classSurround);
@@ -1106,21 +1088,6 @@ public class VisualizePanel extends JPanel {
 	m_ShapeCombo.setEnabled(false);
       }
     }
-
-    /**
-     * Set the instances to plot
-     * @param inst the instances
-     * @param cIndex the index of the colouring attribute
-     *
-    public void setInstances(Instances inst, int cIndex) {
-      plotReset(inst, cIndex);
-      try {
-	m_plot2D.setInstances(m_plotInstances);
-	m_plot2D.setCindex(m_cIndex);
-      } catch (Exception ex) {
-	ex.printStackTrace();
-      }
-      } */
 
     /**
      * Reset the visualize panel's buttons and the plot panels instances
@@ -1575,6 +1542,13 @@ public class VisualizePanel extends JPanel {
   /** Button for the user to remove all splits. */
   protected JButton m_cancel = new JButton("Clear");
 
+  /** Button for the user to save the visualized set of instances */
+  protected JButton m_saveBut = new JButton("Save");
+
+  /** file chooser for saving instances */
+  protected JFileChooser m_FileChooser 
+    = new JFileChooser(new File(System.getProperty("user.dir")));
+
   /** Label for the jitter slider */
   protected JLabel m_JitterLab= new JLabel("Jitter",SwingConstants.RIGHT);
 
@@ -1700,14 +1674,8 @@ public class VisualizePanel extends JPanel {
 	  if (selected < 0) {
 	    selected = 0;
 	  }
+	  m_plot.setCindex(selected);
 
-	  //	  if (m_ColourCombo.isEnabled()) {
-	    m_plot.setCindex(selected);
-	    //	    m_classPanel.setCindex(selected);
-	    //	  }
-	  //	  m_plot.determineBounds();
-	  //	  m_plot.axisChanged();
-	  // try sending on the event if anyone is listening
 	  if (listener != null) {
 	    listener.actionPerformed(e);
 	  }
@@ -1735,6 +1703,14 @@ public class VisualizePanel extends JPanel {
     m_Jitter.addChangeListener(new ChangeListener() {
 	public void stateChanged(ChangeEvent e) {
 	  m_plot.setJitter(m_Jitter.getValue());
+	}
+      });
+
+    m_saveBut.setEnabled(false);
+    m_saveBut.setToolTipText("Save the visible instances to a file");
+    m_saveBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveVisibleInstances();
 	}
       });
     
@@ -1767,17 +1743,17 @@ public class VisualizePanel extends JPanel {
     combos.add(m_ShapeCombo,constraints);
 
    
-    
+    JPanel mbts = new JPanel();
+    mbts.setLayout(new GridLayout(1,3));
+    mbts.add(m_submit); mbts.add(m_cancel); mbts.add(m_saveBut);
+
     constraints.gridx=0;constraints.gridy=2;constraints.weightx=5;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    combos.add(m_submit, constraints);
-    
-    constraints.gridx=1;constraints.gridy=2;constraints.weightx=5;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    combos.add(m_cancel, constraints);
+    constraints.gridwidth=2;constraints.gridheight=1;
+    combos.add(mbts, constraints);
 
     ////////////////////////////////
     constraints.gridx=2;constraints.gridy=2;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
     constraints.insets = new Insets(10,0,0,5);
     combos.add(m_JitterLab,constraints);
     constraints.gridx=3;constraints.gridy=2;
@@ -1792,8 +1768,6 @@ public class VisualizePanel extends JPanel {
 
     m_classPanel.setBorder(BorderFactory.createEmptyBorder(15,10,10,10));
     m_classSurround.add(m_classPanel, BorderLayout.CENTER);
-
-
 
     GridBagLayout gb2 = new GridBagLayout();
     m_plotSurround.setBorder(BorderFactory.createTitledBorder("Plot"));
@@ -1810,13 +1784,10 @@ public class VisualizePanel extends JPanel {
     constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
     m_plotSurround.add(m_attrib, constraints);
 
-    
-
     setLayout(new BorderLayout());
     add(combos, BorderLayout.NORTH);
     add(m_plotSurround, BorderLayout.CENTER);
     add(m_classSurround, BorderLayout.SOUTH);
-
     
     String [] SNames = new String [4];
     SNames[0] = "Select Instance";
@@ -1826,8 +1797,43 @@ public class VisualizePanel extends JPanel {
 
     m_ShapeCombo.setModel(new DefaultComboBoxModel(SNames));
     m_ShapeCombo.setEnabled(true);
-
   }
+
+  /**
+   * Save the currently visible set of instances to a file
+   */
+  private void saveVisibleInstances() {
+    FastVector plots = m_plot.m_plot2D.getPlots();
+    if (plots != null) {
+      PlotData2D master = (PlotData2D)plots.elementAt(0);
+      Instances saveInsts = new Instances(master.getPlotInstances());
+      for (int i = 1; i < plots.size(); i++) {
+	PlotData2D temp = (PlotData2D)plots.elementAt(i);
+	Instances addInsts = temp.getPlotInstances();
+	for (int j = 0; j < addInsts.numInstances(); j++) {
+	  saveInsts.add(addInsts.instance(j));
+	}
+      }
+      try {
+	int returnVal = m_FileChooser.showSaveDialog(this);
+	if (returnVal == JFileChooser.APPROVE_OPTION) {
+	  File sFile = m_FileChooser.getSelectedFile();
+	  if (!sFile.getName().toLowerCase().
+	      endsWith(Instances.FILE_EXTENSION)) {
+	    sFile = new File(sFile.getParent(), sFile.getName() 
+			     + Instances.FILE_EXTENSION);
+	  }
+	  File selected = sFile;
+	  Writer w = new BufferedWriter(new FileWriter(selected));
+	  w.write(saveInsts.toString());
+	  w.close();
+	}
+      } catch (Exception ex) {
+	ex.printStackTrace();
+      }
+    }
+  }
+
 
   /**
    * Sets the index used for colouring. If this method is called then
@@ -1894,7 +1900,6 @@ public class VisualizePanel extends JPanel {
   public int getCIndex() {
     return m_ColourCombo.getSelectedIndex();
   }
-
 
   /**
    * Get the index of the shape selected for creating splits.
@@ -2041,7 +2046,7 @@ public class VisualizePanel extends JPanel {
     m_XCombo.setEnabled(true);
     m_YCombo.setEnabled(true);
     
-    if (!m_plot.m_colourUsingPreds && m_splitListener == null) {
+    if (m_splitListener == null) {
       m_ColourCombo.setEnabled(true);
       m_ColourCombo.setSelectedIndex(inst.numAttributes()-1);
     }
@@ -2057,6 +2062,7 @@ public class VisualizePanel extends JPanel {
   public void setMasterPlot(PlotData2D newPlot) throws Exception {
     m_plot.setMasterPlot(newPlot);
     setUpComboBoxes(newPlot.m_plotInstances);
+    m_saveBut.setEnabled(true);
   }
 
   /**
@@ -2069,6 +2075,7 @@ public class VisualizePanel extends JPanel {
     if (m_plot.m_plot2D.getMasterPlot() != null) {
       setUpComboBoxes(newPlot.m_plotInstances);
     }
+    m_saveBut.setEnabled(true);
   }
 
   /**
@@ -2078,7 +2085,7 @@ public class VisualizePanel extends JPanel {
     try {
       if (args.length < 1) {
 	System.err.println("Usage : weka.gui.visualize.VisualizePanel "
-			   +"<dataset> [classfier] [dataset2]");
+			   +"<dataset> [<dataset> <dataset>...]");
 	System.exit(1);
       }
 
@@ -2087,11 +2094,7 @@ public class VisualizePanel extends JPanel {
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
-      /*      sp.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  System.err.println("Recieved a combo box change event");
-	}
-	}); */
+      
       jf.getContentPane().add(sp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	public void windowClosing(java.awt.event.WindowEvent e) {
@@ -2099,49 +2102,26 @@ public class VisualizePanel extends JPanel {
 	  System.exit(0);
 	}
       });
-      //      jf.pack();
+
       jf.setVisible(true);
       if (args.length >= 1) {
-	System.err.println("Loading instances from " + args[0]);
-	java.io.Reader r = new java.io.BufferedReader(
-			   new java.io.FileReader(args[0]));
-	Instances i = new Instances(r);
-	i.setClassIndex(i.numAttributes()-1);
-	PlotData2D pd1 = new PlotData2D(i);
-	
-	pd1.setPlotName("1st plot");
-
-
-	if (args.length > 1) {
-	  weka.classifiers.Classifier cl;
-	  cl = weka.classifiers.Classifier.forName(args[1],null);
-	  System.err.println("Building classifier");
-	  cl.buildClassifier(i);
-	  double [] preds = new double [i.numInstances()];
-	  for (int jj=0;jj<i.numInstances();jj++) {
-	    preds[jj] = cl.classifyInstance(i.instance(jj));
-	  }
+	for (int j = 0; j < args.length; j++) {
+	  System.err.println("Loading instances from " + args[j]);
+	  java.io.Reader r = new java.io.BufferedReader(
+			     new java.io.FileReader(args[j]));
+	  Instances i = new Instances(r);
+	  i.setClassIndex(i.numAttributes()-1);
+	  PlotData2D pd1 = new PlotData2D(i);
 	  
-	  if (i.attribute(i.classIndex()).isNumeric()) {
-	    pd1.setPredictionsNumeric(true);
+	  if (j == 0) {
+	    pd1.setPlotName("Master plot");
+	    sp.setMasterPlot(pd1);
 	  } else {
-	    pd1.setPredictionsNumeric(false);
+	    pd1.setPlotName("Plot "+(j+1));
+	    pd1.m_useCustomColour = true;
+	    pd1.m_customColour = (j % 2 == 0) ? Color.red : Color.blue; 
+	    sp.addPlot(pd1);
 	  }
-	  pd1.setPredictions(preds);
-	}
-	sp.setMasterPlot(pd1);
-
-	if (args.length == 3) {
-	  System.err.println("Loading instances from " + args[2]);
-	  java.io.Reader rr = new java.io.BufferedReader(
-				 new java.io.FileReader(args[2]));
-	  Instances ii = new Instances(rr);
-	  ii.setClassIndex(ii.numAttributes()-1);
-	  PlotData2D pd = new PlotData2D(ii);
-	  pd.setPlotName("2nd plot");
-	 
-	  pd.setCustomColour(Color.pink);
-	  sp.addPlot(pd);
 	}
       }
     } catch (Exception ex) {

@@ -33,7 +33,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PlotData2D {
 
@@ -43,26 +43,21 @@ public class PlotData2D {
   /** The name of this plot */
   protected String m_plotName = "new plot";
 
-  /**  The predictions array (if any) associated with this plot */
-  protected double [] m_preds = null;
-
-  /** Colour data using the predictions array (for clusterers) */
-  protected boolean m_colourUsingPreds = false;
-
-  /** Predictions are numeric? */
-  protected boolean m_predsNumeric = false;
-
-  /** When colouring using predictions (ie clusters), this is the
-      highest cluster number */
-  protected int m_highestPred = 0;
-
   /** Custom colour for this plot */
   public boolean m_useCustomColour = false;
-
   public Color m_customColour = null;
 
   /** Panel coordinate cache for data points */
   protected double [][] m_pointLookup;
+
+  /** Additional optional information to control the size of points.
+      The default is shape size 2  */
+  protected int [] m_shapeSize;
+
+  /** Additional optional information to control the point shape for this
+      data. Default is to allow automatic assigning of point shape on the
+      basis of plot number */
+  protected int [] m_shapeType;
 
   /** These are used to determine bounds */
 
@@ -84,10 +79,20 @@ public class PlotData2D {
   protected double m_maxC;
   protected double m_minC;
 
+  /**
+   * Construct a new PlotData2D using the supplied instances
+   * @param insts the instances to use.
+   */
   public PlotData2D(Instances insts) {
     m_plotInstances = insts;
     m_xIndex = m_yIndex = m_cIndex = 0;
-    m_pointLookup = new double [m_plotInstances.numInstances()][5];
+    m_pointLookup = new double [m_plotInstances.numInstances()][4];
+    m_shapeSize = new int [m_plotInstances.numInstances()];
+    m_shapeType = new int [m_plotInstances.numInstances()];
+    for (int i = 0; i < m_plotInstances.numInstances(); i++) {
+      m_shapeSize[i] = 2; //default shape size
+      m_shapeType[i] = -1; // default (automatic shape assignment)
+    }
     determineBounds();
   }
 
@@ -116,71 +121,68 @@ public class PlotData2D {
   }
 
   /**
-   * Set an array of predictions corresponding 1 to 1 with the instances
-   * for this plot
-   * @param preds the predictions
+   * Set the shape type for the plot data
+   * @param st an array of integers corresponding to shape types (see
+   * constants defined in Plot2D)
    */
-  public void setPredictions(double [] preds) {
-    m_preds = preds;
-    if (m_plotInstances.classIndex() < 0) {
-      setPredictionsNumeric(false);
-      setColourUsingPreds(true);
-      m_highestPred = (int)m_preds[Utils.maxIndex(m_preds)];
-    } else {
-      calculateErrors();
+  public void setShapeType(int [] st) throws Exception {
+    m_shapeType = st;
+    if (m_shapeType.length != m_plotInstances.numInstances()) {
+      throw new Exception("PlotData2D: Shape type array must have the same "
+			  +"number of entries as number of data points!");
+    }
+    for (int i = 0; i < st.length; i++) {
+      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
+	m_shapeSize[i] = 3;
+      }
     }
   }
 
   /**
-   * Get the predictions (if any) for this plot
-   * @return the array of predictions or null if there are no predictions
+   * Set the shape type for the plot data
+   * @param st a FastVector of integers corresponding to shape types (see
+   * constants defined in Plot2D)
    */
-  public double [] getPredictions() {
-    if (m_preds != null) {
-      return (double [])m_preds.clone();
-    } else {
-      return null;
+  public void setShapeType(FastVector st) throws Exception {
+    if (st.size() != m_plotInstances.numInstances()) {
+      throw new Exception("PlotData2D: Shape type vector must have the same "
+			  +"number of entries as number of data points!");
+    }
+    m_shapeType = new int [st.size()];
+    for (int i = 0; i < st.size(); i++) {
+      m_shapeType[i] = ((Integer)st.elementAt(i)).intValue();
+      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
+	m_shapeSize[i] = 3;
+      }
     }
   }
 
   /**
-   * Specify that colouring for this plot should be done on the basis
-   * of the predictions array (ie, the predictions are from a clusterer)
-   * @param c true if colouring should be done on the basis of the predictions
-   * array
+   * Set the shape sizes for the plot data
+   * @param st an array of integers specifying the size of data points
    */
-  public void setColourUsingPreds(boolean c) {
-    m_colourUsingPreds = c;
-    determineBounds();
-  }
-
-  /**
-   * Returns true if colouring for this plot should be done on the basis of
-   * the predictions array.
-   * @return true if colouring should be done using the predictions array
-   */
-  public boolean getColourUsingPreds() {
-    return m_colourUsingPreds;
-  }
-
-  /**
-   * Specify whether the predictions array contains numeric predictions
-   * rather than discrete class predictions
-   * @param n true if the prediction array contains numeric predictions
-   */
-  public void setPredictionsNumeric(boolean n) {
-    m_predsNumeric = n;
-    if (m_predsNumeric && m_preds != null) {
-      calculateErrors();
+  public void setShapeSize(int [] ss) throws Exception {
+    m_shapeSize = ss;
+    if (m_shapeType.length != m_plotInstances.numInstances()) {
+      throw new Exception("PlotData2D: Shape size array must have the same "
+			  +"number of entries as number of data points!");
     }
   }
-
+  
   /**
-   * Get whether predictions are numeric or not
-   * @return true if predictions array contaings numeric predictions
+   * Set the shape sizes for the plot data
+   * @param st a FastVector of integers specifying the size of data points
    */
-  public boolean getPredictionsNumeric() {
-    return m_predsNumeric;
+  public void setShapeSize(FastVector ss) throws Exception {
+    if (ss.size() != m_plotInstances.numInstances()) {
+      throw new Exception("PlotData2D: Shape size vector must have the same "
+			  +"number of entries as number of data points!");
+    }
+    System.err.println("Setting shape sizes ");
+    m_shapeSize = new int [ss.size()];
+    for (int i = 0; i < ss.size(); i++) {
+      m_shapeSize[i] = (int)((Double)ss.elementAt(i)).doubleValue();
+    }
   }
 
   /**
@@ -250,50 +252,6 @@ public class PlotData2D {
     return m_cIndex;
   }
 
-
-  /**
-   * Calculate errors (numeric class) from predictions array and store
-   * in the point lookup cache
-   */
-  private void calculateErrors() {
-    int maxpSize = 20;
-    double maxErr = Double.NEGATIVE_INFINITY;
-    double minErr = Double.POSITIVE_INFINITY;
-    
-    int cind = m_plotInstances.classIndex();
-    double err;
-    for (int jj=0;jj<m_plotInstances.numInstances();jj++) {
-      err = Math.abs(m_preds[jj] - 
-		     m_plotInstances.instance(jj).
-		     value(cind));
-
-      if (err < minErr) {
-	minErr = err;
-      }
-      if (err > maxErr) {
-	maxErr = err;
-      }
-    }
-
-    for (int i=0;i<m_plotInstances.numInstances();i++) {
-      if (m_plotInstances.instance(i).isMissing(m_xIndex) ||
-	  m_plotInstances.instance(i).isMissing(m_yIndex) ||
-	  m_plotInstances.instance(i).
-	  isMissing(m_plotInstances.classIndex())) {
-      } else {
-	err = Math.abs((m_preds[i] -
-			m_plotInstances.instance(i).
-			value(m_plotInstances.classIndex())));
-	err = ((err - minErr)/(maxErr - minErr)) * maxpSize;
-	
-	if (err < 1) {
-	  err = 1; // just so the point is visible!
-	}
-	m_pointLookup[i][2] = err;
-      }
-    }
-  }
-
   /**
    * Determine bounds for the current x,y and colouring indexes
    */
@@ -356,20 +314,18 @@ public class PlotData2D {
       // colour bounds
       min=Double.POSITIVE_INFINITY;
       max=Double.NEGATIVE_INFINITY;
-      if (!m_colourUsingPreds) {
-	for (int i=0;i<m_plotInstances.numInstances();i++) {
-	  if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
-	    value = m_plotInstances.instance(i).value(m_cIndex);
-	    if (value < min) {
-	      min = value;
-	    }
-	    if (value > max) {
-	      max = value;
-	    }
+
+      for (int i=0;i<m_plotInstances.numInstances();i++) {
+	if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
+	  value = m_plotInstances.instance(i).value(m_cIndex);
+	  if (value < min) {
+	    min = value;
+	  }
+	  if (value > max) {
+	    max = value;
 	  }
 	}
       }
-     
       m_minC = min; m_maxC = max;
     }
   }

@@ -60,9 +60,19 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Plot2D extends JPanel {
+
+  /* constants for shape types */
+  public static final int MAX_SHAPES = 5;
+  public static final int ERROR_SHAPE = 1000;
+  public static final int CONST_AUTOMATIC_SHAPE = -1;
+  public static final int X_SHAPE = 0;
+  public static final int PLUS_SHAPE = 1;
+  public static final int DIAMOND_SHAPE = 2;
+  public static final int TRIANGLEUP_SHAPE = 3;
+  public static final int TRIANGLEDOWN_SHAPE = 4;
 
   /** The plots to display */
   protected FastVector m_plots = new FastVector();
@@ -108,10 +118,6 @@ public class Plot2D extends JPanel {
   protected int m_cIndex=0;
   protected int m_sIndex=0;
 
-  /** Set to true if colouring is to be done solely using predictions.
-      Used when visualizing a clusterer's output */
-  protected boolean m_colourUsingPreds = false;
-
   /** Holds the min and max values of the x, y and colouring attributes 
    over all plots */
   protected double m_maxX;
@@ -120,12 +126,6 @@ public class Plot2D extends JPanel {
   protected double m_minY;
   protected double m_maxC;
   protected double m_minC;
-
-  /** Holds the predictions of a classifier */
-  private double [] m_preds=null;
-
-  /** True if the predictions are for a numeric class */
-  private boolean m_predsNumeric = false;
     
   /** Axis padding */
   private final int m_axisPad = 5;
@@ -166,19 +166,6 @@ public class Plot2D extends JPanel {
 
   /** lookup table for plotted points */
   private double [][] m_pointLookup=null;
-  private double [][] m_extPointLookup=null;
-
-  /** True if the user is currently dragging a box. */
-  private boolean m_createShape;
-    
-  /** contains all the shapes that have been drawn for these attribs */
-  private FastVector m_shapes;
-
-  /** contains the points of the shape currently being drawn. */
-  private FastVector m_shapePoints;
-
-  /** contains the position of the mouse (used for rubberbanding). */
-  private Dimension m_newMousePos;
 
   /** Constructor */
   public Plot2D() {
@@ -462,17 +449,15 @@ public class Plot2D extends JPanel {
       StringBuffer insts = new StringBuffer(); 
       for (int jj=0;jj<m_plots.size();jj++) {
 	PlotData2D temp_plot = (PlotData2D)(m_plots.elementAt(jj));
-	if (temp_plot.m_preds != null) {
-	  longest = (longest < 9) ? 9 : longest;
-	}
-
+	
 	for (int i=0;i<temp_plot.m_plotInstances.numInstances();i++) {
 	  if (temp_plot.m_pointLookup[i][0] != Double.NEGATIVE_INFINITY) {
 	    double px = temp_plot.m_pointLookup[i][0] + 
-	      temp_plot.m_pointLookup[i][3];
+	      temp_plot.m_pointLookup[i][2];
 	    double py = temp_plot.m_pointLookup[i][1] + 
-	      temp_plot.m_pointLookup[i][4];
-	    double size = temp_plot.m_pointLookup[i][2];
+	      temp_plot.m_pointLookup[i][3];
+	    //	    double size = temp_plot.m_pointLookup[i][2];
+	    double size = temp_plot.m_shapeSize[i];
 	    if ((x >= px-size) && (x <= px+size) &&
 		(y >= py-size) && (y <= py+size)) {
 	      {
@@ -499,34 +484,6 @@ public class Plot2D extends JPanel {
 		    insts.append(temp_plot.m_plotInstances.
 				 instance(i).value(j));
 		  }
-		  insts.append("\n");
-		}
-
-		if (temp_plot.m_preds != null && 
-		    (temp_plot.m_plotInstances.classIndex() < 0 || 
-		     !temp_plot.m_plotInstances.instance(i).
-		     isMissing(m_plotInstances.classIndex()))) {
-		  if (longest > 9) {
-		    for (int k = 0;k < (longest-9); k++) {
-		      insts.append(" ");
-		    }
-		  }
-		   
-		  if (temp_plot.m_plotInstances.classIndex() >=0) {
-		    insts.append("predicted : ");
-		    if (temp_plot.m_plotInstances.attribute(m_cIndex).
-			isNominal()) {
-		      insts.append(temp_plot.m_plotInstances.
-				   attribute(m_plotInstances.classIndex()).
-				   value((int)temp_plot.m_preds[i]));
-		    } else {
-		      insts.append(temp_plot.m_preds[i]);
-		    }
-		  } else {
-		    insts.append("  cluster : ");
-		    insts.append((int)temp_plot.m_preds[i]);
-		  }
-		 
 		  insts.append("\n");
 		}
 	      }
@@ -852,25 +809,27 @@ public class Plot2D extends JPanel {
       size = 1;
     }
 
-    shape = shape % 5;
+    if (shape != ERROR_SHAPE) {
+      shape = shape % 5;
+    }
 
     switch (shape) {
-    case 0:
+    case X_SHAPE:
       drawX(gx, x, y, size);
       break;      
-    case 1:
+    case PLUS_SHAPE:
       drawPlus(gx, x, y, size);
       break;
-    case 2:
+    case DIAMOND_SHAPE:
       drawDiamond(gx, x, y, size);
       break;
-    case 3:
+    case TRIANGLEUP_SHAPE:
       drawTriangleUp(gx, x, y, size);
       break;
-    case 4:
+    case TRIANGLEDOWN_SHAPE:
       drawTriangleDown(gx, x, y, size);
       break;
-    default: // draws the nominal error shape 
+    case ERROR_SHAPE: // draws the nominal error shape 
       gx.drawRect((int)(x-size),(int)(y-size),(size*2),(size*2));
       break;
     }
@@ -893,9 +852,9 @@ public class Plot2D extends JPanel {
 	    xj = m_JRand.nextGaussian();
 	    yj = m_JRand.nextGaussian();
 	  }
-	  temp_plot.m_pointLookup[i][3] = 
+	  temp_plot.m_pointLookup[i][2] = 
 	    pturbX(temp_plot.m_pointLookup[i][0],xj);
-	  temp_plot.m_pointLookup[i][4] = 
+	  temp_plot.m_pointLookup[i][3] = 
 	    pturbY(temp_plot.m_pointLookup[i][1],yj);
 	}
       }
@@ -916,8 +875,6 @@ public class Plot2D extends JPanel {
 	    temp_plot.m_plotInstances.instance(i).isMissing(m_yIndex)) {
 	  temp_plot.m_pointLookup[i][0] = Double.NEGATIVE_INFINITY;
 	  temp_plot.m_pointLookup[i][1] = Double.NEGATIVE_INFINITY;
-	  temp_plot.m_pointLookup[i][2] = Double.NEGATIVE_INFINITY;
-	  
 	} else {
 	  double x = convertToPanelX(temp_plot.m_plotInstances.
 				     instance(i).value(m_xIndex));
@@ -925,11 +882,6 @@ public class Plot2D extends JPanel {
 				     instance(i).value(m_yIndex));
 	  temp_plot.m_pointLookup[i][0] = x;
 	  temp_plot.m_pointLookup[i][1] = y;
-
-	  if (temp_plot.m_plotInstances.attribute(m_cIndex).isNominal() || 
-	      temp_plot.m_preds == null || temp_plot.m_colourUsingPreds) {
-	    temp_plot.m_pointLookup[i][2] = 3;
-	  }
 	}
       }
     }
@@ -950,9 +902,9 @@ public class Plot2D extends JPanel {
 	    temp_plot.m_plotInstances.instance(i).isMissing(m_cIndex)) {
 	} else {
 	  double x = (temp_plot.m_pointLookup[i][0] + 
-		      temp_plot.m_pointLookup[i][3]);
+		      temp_plot.m_pointLookup[i][2]);
 	  double y = (temp_plot.m_pointLookup[i][1] + 
-		      temp_plot.m_pointLookup[i][4]);
+		      temp_plot.m_pointLookup[i][3]);
 
 	  int x_range = (int)x - m_XaxisStart;
 	  int y_range = (int)y - m_YaxisStart;
@@ -961,8 +913,7 @@ public class Plot2D extends JPanel {
 	    if (m_drawnPoints[x_range][y_range] == i 
 		|| m_drawnPoints[x_range][y_range] == 0) {
 	      m_drawnPoints[x_range][y_range] = i;
-	      if (temp_plot.m_plotInstances.attribute(m_cIndex).isNominal() || 
-		  temp_plot.m_colourUsingPreds) {
+	      if (temp_plot.m_plotInstances.attribute(m_cIndex).isNominal()) {
 		if (temp_plot.m_plotInstances.attribute(m_cIndex).numValues() >
 		    m_colorList.size() && 
 		    !temp_plot.m_useCustomColour) {
@@ -970,72 +921,36 @@ public class Plot2D extends JPanel {
 				  attribute(m_cIndex).numValues());
 		}
 
-		if (temp_plot.m_colourUsingPreds && 
-		    temp_plot.m_highestPred > m_colorList.size()) {
-		  extendColourMap(temp_plot.m_highestPred);
-		}
-
-		int ci = (!temp_plot.m_colourUsingPreds)
-		  ? (int)temp_plot.m_plotInstances.instance(i).value(m_cIndex)
-		  : (int)temp_plot.m_preds[i];
+		int ci = (int)temp_plot.m_plotInstances.instance(i).
+		  value(m_cIndex);
 
 		if (!temp_plot.m_useCustomColour) {
 	
 		  gx.setColor((Color)m_colorList.elementAt(ci));	    
 		} else {
-	
 		  gx.setColor(temp_plot.m_customColour);
 		}
 
-		drawDataPoint(x,y,2,j,gx);
-		if (temp_plot.m_preds != null 
-		    && !temp_plot.m_predsNumeric 
-		    && (temp_plot.m_plotInstances.classIndex() >= 0)
-		    && (!temp_plot.m_colourUsingPreds)
-		    && (m_cIndex == temp_plot.m_plotInstances.classIndex())) {
-
-		  if (temp_plot.m_preds[i] != 
-		      temp_plot.m_plotInstances.instance(i).
-		      value(temp_plot.m_plotInstances.classIndex())) {	
-		    
-		    if (!temp_plot.m_useCustomColour) {
-		      gx.setColor((Color)m_colorList.
-				  elementAt((int)temp_plot.m_preds[i]));
-		    } else {
-	
-		      gx.setColor(temp_plot.m_customColour);
-		    }
-		    drawDataPoint(x,y,(int)temp_plot.m_pointLookup[i][2],
-				  -1,gx);
-		  }
+		if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
+		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		} else {
+		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],
+				temp_plot.m_shapeType[i],gx);
 		}
 	      } else {
-		int maxpSize = 20;
-		if (temp_plot.m_preds != null 
-		    && temp_plot.m_plotInstances.classIndex() >= 0 
-		    && temp_plot.m_predsNumeric
-		    && m_cIndex == temp_plot.m_plotInstances.classIndex()) {
-
-		  double r = (temp_plot.m_plotInstances.instance(i).
-			      value(m_cIndex) - m_minC) /
-		    (m_maxC - m_minC);
-		  r = (r * 240) + 15;
-		  if (!temp_plot.m_useCustomColour) {
-		    gx.setColor(new Color((int)r,150,(int)(255-r)));
-		  } else {
-		    gx.setColor(temp_plot.m_customColour);
-		  }
-		  drawDataPoint(x,y,(int)temp_plot.m_pointLookup[i][2],j,gx);
+		double r = (temp_plot.m_plotInstances.instance(i).
+			    value(m_cIndex) - m_minC) / (m_maxC - m_minC);
+		r = (r * 240) + 15;
+		if (!temp_plot.m_useCustomColour) {
+		  gx.setColor(new Color((int)r,150,(int)(255-r)));
 		} else {
-		  double r = (temp_plot.m_plotInstances.instance(i).
-			      value(m_cIndex) - m_minC) / (m_maxC - m_minC);
-		  r = (r * 240) + 15;
-		  if (!temp_plot.m_useCustomColour) {
-		    gx.setColor(new Color((int)r,150,(int)(255-r)));
-		  } else {
-		    gx.setColor(temp_plot.m_customColour);
-		  }
-		  drawDataPoint(x,y,2,j,gx);
+		  gx.setColor(temp_plot.m_customColour);
+		}
+		if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
+		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		} else {
+		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],
+				temp_plot.m_shapeType[i],gx);
 		}
 	      }
 	    }
@@ -1158,22 +1073,6 @@ public class Plot2D extends JPanel {
     m_XaxisEnd = w-m_axisPad-(mswx/2);
       
     m_YaxisEnd = h-m_axisPad-(2 * hf)-m_tickSize;
-
-    //I'm putting my draw shapes here because they rely 
-    //on the m_axis values but also need to be painted first
-    //    drawShapes(gx);
-
-    // draw the class legend
-    //    m_attrib.setColor(m_cIndex, m_maxC, m_minC);
-    if ((!m_colourUsingPreds) && 
-	m_plotInstances.attribute(m_cIndex).isNumeric()) {
-
-      //      m_classPanel.setNumeric(m_maxC, m_minC);
-    } else { //if ((!m_colourUsingPreds) && 
-      //m_plotInstances.attribute(m_cIndex).isNominal()) {
-      //      m_classPanel.setNominal(m_plotInstances, m_cIndex);
-      //      newColorAttribute(m_cIndex, m_plotInstances);
-    }
 
     // draw axis
     gx.setColor(Color.green);
@@ -1420,7 +1319,7 @@ public class Plot2D extends JPanel {
     try {
       if (args.length < 1) {
 	System.err.println("Usage : weka.gui.visualize.Plot2D "
-			   +"<dataset> [classfier] [dataset2]");
+			   +"<dataset> [<dataset> <dataset>...]");
 	System.exit(1);
       }
 
@@ -1450,51 +1349,26 @@ public class Plot2D extends JPanel {
 
       jf.setVisible(true);
       if (args.length >= 1) {
-	System.err.println("Loading instances from " + args[0]);
-	java.io.Reader r = new java.io.BufferedReader(
-				new java.io.FileReader(args[0]));
-	Instances i = new Instances(r);
-	i.setClassIndex(i.numAttributes()-1);
-	PlotData2D pd1 = new PlotData2D(i);
-	pd1.setPlotName("Master plot");
+	for (int j = 0; j < args.length; j++) {
+	  System.err.println("Loading instances from " + args[j]);
+	  java.io.Reader r = new java.io.BufferedReader(
+			     new java.io.FileReader(args[j]));
+	  Instances i = new Instances(r);
+	  i.setClassIndex(i.numAttributes()-1);
+	  PlotData2D pd1 = new PlotData2D(i);
 
-	
-	if (args.length > 1) {
-	  System.err.println("Building classifier");
-	  weka.classifiers.Classifier cl;
-
-	  cl = weka.classifiers.Classifier.forName(args[1],null);
-	  cl.buildClassifier(i);
-	  double [] preds = new double [i.numInstances()];
-	  for (int jj=0;jj<i.numInstances();jj++) {
-	    preds[jj] = cl.classifyInstance(i.instance(jj));
-	  }
-	  
-	  if (i.attribute(i.classIndex()).isNumeric()) {
-	    pd1.setPredictionsNumeric(true);
+	  if (j == 0) {
+	    pd1.setPlotName("Master plot");
+	    p2.setMasterPlot(pd1);
+	    p2.setXindex(2);
+	    p2.setYindex(3);
+	    p2.setCindex(i.classIndex());
 	  } else {
-	    pd1.setPredictionsNumeric(false);
+	    pd1.setPlotName("Plot "+(j+1));
+	    pd1.m_useCustomColour = true;
+	    pd1.m_customColour = (j % 2 == 0) ? Color.red : Color.blue; 
+	    p2.addPlot(pd1);
 	  }
-	  pd1.setPredictions(preds);
-	}
-	p2.setMasterPlot(pd1);
-	p2.setXindex(2);
-	p2.setYindex(3);
-	p2.setCindex(i.classIndex());
-
-	if (args.length == 3) {
-	  System.err.println("Loading instances from " + args[2]);
-	  java.io.Reader rr = new java.io.BufferedReader(
-				 new java.io.FileReader(args[2]));
-	  Instances ii = new Instances(rr);
-	  ii.setClassIndex(ii.numAttributes()-1);
-	  PlotData2D pd = new PlotData2D(ii);
-	  pd.setPlotName("2nd plot");
-	  pd.m_useCustomColour = true;
-	  /*FastVector cl = new FastVector();
-	    cl.addElement(Color.pink); */
-	  pd.m_customColour = Color.pink;
-	  p2.addPlot(pd);
 	}
       }
     } catch (Exception ex) {

@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassPanel extends JPanel {
     
@@ -63,12 +63,6 @@ public class ClassPanel extends JPanel {
   /** The height of the spectrum for numeric class */
   private final int m_spectrumHeight = 5;
 
-  /** True if using an array (of predictions) for colouring. */
-  protected boolean m_colourUsingPreds = false;
-    
-  /** The number of different pred types. */
-  protected int m_numPreds;
-       
   /**  The maximum value for the colouring attribute */
   private double m_maxC;
     
@@ -224,16 +218,14 @@ public class ClassPanel extends JPanel {
    * @param cIndex the index of the attribute to display coloured labels for
    */
   protected void setCindex(int cIndex) {
-    if (!m_colourUsingPreds) {
-      m_cIndex = cIndex;
-      if (m_Instances.attribute(m_cIndex).isNumeric()) {
-	setNumeric();
-      } else {
-	if (m_Instances.attribute(m_cIndex).numValues() > m_colorList.size()) {
-	  extendColourMap();
-	}
-	setNominal();
+    m_cIndex = cIndex;
+    if (m_Instances.attribute(m_cIndex).isNumeric()) {
+      setNumeric();
+    } else {
+      if (m_Instances.attribute(m_cIndex).numValues() > m_colorList.size()) {
+	extendColourMap();
       }
+      setNominal();
     }
   }
 
@@ -256,16 +248,6 @@ public class ClassPanel extends JPanel {
 	m_colorList.addElement(pc);
       }
     }
-  }
-
-  /**
-   * Set that labels and their colours are to be determined from the
-   * auxiliary array.
-   * @param c true if labels are to be determined from the array (predictions)
-   */
-  protected void setColourUsingPreds(boolean c) {
-    m_colourUsingPreds = c;
-    setNominal();
   }
 
   /**
@@ -303,16 +285,15 @@ public class ClassPanel extends JPanel {
     double min=Double.POSITIVE_INFINITY;
     double max=Double.NEGATIVE_INFINITY;
     double value;
-    if (!m_colourUsingPreds) {
-      for (int i=0;i<m_Instances.numInstances();i++) {
-	if (!m_Instances.instance(i).isMissing(m_cIndex)) {
-	  value = m_Instances.instance(i).value(m_cIndex);
-	  if (value < min) {
-	    min = value;
-	  }
-	  if (value > max) {
-	    max = value;
-	  }
+
+    for (int i=0;i<m_Instances.numInstances();i++) {
+      if (!m_Instances.instance(i).isMissing(m_cIndex)) {
+	value = m_Instances.instance(i).value(m_cIndex);
+	if (value < min) {
+	  min = value;
+	}
+	if (value > max) {
+	  max = value;
 	}
       }
     }
@@ -344,35 +325,27 @@ public class ClassPanel extends JPanel {
     setFonts(gx);
     int numClasses;
 
-    if (m_colourUsingPreds) {
-      numClasses = m_numPreds;
-    }
-    else {
-      numClasses = m_Instances.attribute(m_cIndex).numValues();
-    }
+    numClasses = m_Instances.attribute(m_cIndex).numValues();
 
     int maxLabelLen = 0;
     int idx=0;
     int legendHeight;
     int w = this.getWidth();
     int hf = m_labelMetrics.getAscent();
-    //System.out.println("not good");
-    if (m_colourUsingPreds) {
-      maxLabelLen = m_labelMetrics.stringWidth("88"); //if there
-    } //are more than 99 clusters then it's outa hand anyway
-    else {
-      for (int i=0;i<numClasses;i++) {
-	if (m_Instances.attribute(m_cIndex).value(i).length() > 
-	    maxLabelLen) {
-	  maxLabelLen = m_Instances.
-	    attribute(m_cIndex).value(i).length();
-	  idx = i;
-	}
+
+
+    for (int i=0;i<numClasses;i++) {
+      if (m_Instances.attribute(m_cIndex).value(i).length() > 
+	  maxLabelLen) {
+	maxLabelLen = m_Instances.
+	  attribute(m_cIndex).value(i).length();
+	idx = i;
       }
-      
-      maxLabelLen = m_labelMetrics.stringWidth
-	(m_Instances.attribute(m_cIndex).value(idx));
     }
+      
+    maxLabelLen = m_labelMetrics.stringWidth(m_Instances.
+					     attribute(m_cIndex).value(idx));
+    
 
     if (((w-(2*m_HorizontalPad))/(maxLabelLen+5)) >= numClasses) {
       legendHeight = 1;
@@ -393,12 +366,8 @@ public class ClassPanel extends JPanel {
       // can we fit the full label or will each need to be trimmed?
       if ((numToDo * maxLabelLen) > (w-(m_HorizontalPad*2))) {
 	String val;
-	if (m_colourUsingPreds) {
-	  val = String.valueOf(i);
-	}
-	else {
-	  val = m_Instances.attribute(m_cIndex).value(i);
-	}
+	val = m_Instances.attribute(m_cIndex).value(i);
+
 	int sw = m_labelMetrics.stringWidth(val);
 	int rm=0;
 	// truncate string if necessary
@@ -425,12 +394,8 @@ public class ClassPanel extends JPanel {
       } else {
 	
 	NomLabel jj;
-	if (m_colourUsingPreds) {
-	  jj = new NomLabel(String.valueOf(i), i);
-	}
-	else {
-	  jj = new NomLabel(m_Instances.attribute(m_cIndex).value(i), i);
-	}
+	jj = new NomLabel(m_Instances.attribute(m_cIndex).value(i), i);
+
 	jj.setFont(gx.getFont());
 
 	jj.setSize(m_labelMetrics.stringWidth(jj.getText()),
@@ -454,12 +419,8 @@ public class ClassPanel extends JPanel {
       if (((numClasses-numToDo+1) * maxLabelLen) > 
 	  (w - (m_HorizontalPad*2))) {
 	String val;
-	if (m_colourUsingPreds) {
-	  val = String.valueOf(i);
-	}
-	else {
-	  val = m_Instances.attribute(m_cIndex).value(i);
-	}
+	val = m_Instances.attribute(m_cIndex).value(i);
+
 	int sw = m_labelMetrics.stringWidth(val);
 	int rm=0;
 	// truncate string if necessary
@@ -489,12 +450,8 @@ public class ClassPanel extends JPanel {
       } else {
 	//this is the full string
 	NomLabel jj;
-	if (m_colourUsingPreds) {
-	  jj = new NomLabel(String.valueOf(i), i);
-	}
-	else {
-	  jj = new NomLabel(m_Instances.attribute(m_cIndex).value(i), i);
-	}
+	jj = new NomLabel(m_Instances.attribute(m_cIndex).value(i), i);
+
 	jj.setFont(gx.getFont());
 
 	jj.setSize(m_labelMetrics.stringWidth(jj.getText()),
@@ -591,9 +548,6 @@ public class ClassPanel extends JPanel {
    * @param gx the graphics context
    */
   public void paintComponent(Graphics gx) {
-    if (m_colourUsingPreds) {
-      setNominal();
-    }
     super.paintComponent(gx);
     if (m_isEnabled) {
       if (m_isNumeric) {
