@@ -58,14 +58,14 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * -L <br>
- * Do not clean up after the tree has been built.
+ * Do not clean up after the tree has been built. <p>
  *
  * -A <br>
  * If set, Laplace smoothing is used for predicted probabilites. <p>
  *
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
