@@ -41,6 +41,8 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.TreeMap;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.Date;
@@ -108,7 +110,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.25 $
+ * @version  $Revision: 1.26 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -144,7 +146,98 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
          + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
          + "or the directory that java was started from\n");
       }
-     
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(null,
+				    ex.getMessage(),
+				    "KnowledgeFlow",
+				    JOptionPane.ERROR_MESSAGE);
+    }
+
+    try {
+      TreeMap wrapList = new TreeMap();
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+      creator.execute(false);
+      /* now process the keys in the GenericObjectEditor.props. For each
+       key that has an entry in the Beans.props associating it with a
+      bean component a button tool bar will be created */
+      Properties GEOProps = 
+	//Utils.readProperties("weka/gui/GenericObjectEditor.props");
+      creator.getOutputProperties();
+      Enumeration en = GEOProps.propertyNames();
+      while (en.hasMoreElements()) {
+	String geoKey = (String)en.nextElement();
+
+	// try to match this key with one in the Beans.props file
+	String beanCompName = BEAN_PROPERTIES.getProperty(geoKey);
+	if (beanCompName != null) {
+	  // add details necessary to construct a button bar for this class
+	  // of algorithms
+	  Vector newV = new Vector();
+	  // check for a naming alias for this toolbar
+	  String toolBarNameAlias = 
+	    BEAN_PROPERTIES.getProperty(geoKey+".alias");
+	  String toolBarName = (toolBarNameAlias != null) ?
+	    toolBarNameAlias :
+	    geoKey.substring(geoKey.lastIndexOf('.')+1, geoKey.length());
+
+          // look for toolbar ordering information for this wrapper type
+          String order = 
+            BEAN_PROPERTIES.getProperty(geoKey+".order");
+          Integer intOrder = (order != null) ?
+            new Integer(order) :
+            new Integer(0);
+            
+	  // Name for the toolbar (name of weka algorithm class)
+	  newV.addElement(toolBarName);
+	  // Name of bean capable of handling this class of algorithm
+	  newV.addElement(beanCompName);
+
+	  // add the root package for this key
+	  String rootPackage = geoKey.substring(0, geoKey.lastIndexOf('.'));
+
+	  newV.addElement(rootPackage);
+
+	  // All the weka algorithms of this class of algorithm
+	  String wekaAlgs = GEOProps.getProperty(geoKey);
+
+	  //------ test the HierarchyPropertyParser
+	  weka.gui.HierarchyPropertyParser hpp = 
+	    new weka.gui.HierarchyPropertyParser();
+	  hpp.build(wekaAlgs, ", ");
+	  // 	  System.err.println(hpp.showTree());
+	  // ----- end test the HierarchyPropertyParser
+	  newV.addElement(hpp); // add the hierarchical property parser
+
+	  StringTokenizer st = new StringTokenizer(wekaAlgs, ", ");
+	  while (st.hasMoreTokens()) {
+	    String current = st.nextToken().trim();
+	    newV.addElement(current);
+	  }
+          wrapList.put(intOrder, newV);
+          //	  TOOLBARS.addElement(newV);
+	}
+      }
+      Iterator keysetIt = wrapList.keySet().iterator();
+      while (keysetIt.hasNext()) {
+        Integer key = (Integer)keysetIt.next();
+        Vector newV = (Vector)wrapList.get(key);
+        if (newV != null) {
+          TOOLBARS.addElement(newV);
+        }
+      }
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(null,
+          "Could not read a configuration file for the generic objecte editor"
+         +". An example file is included with the Weka distribution.\n"
+         +"This file should be named \"GenericObjectEditor.props\" and\n"
+         +"should be placed either in your user home (which is set\n"
+         + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+         + "or the directory that java was started from\n",
+         "KnowledgeFlow",
+         JOptionPane.ERROR_MESSAGE);
+    }
+
+    try {
       String standardToolBarNames = 
 	BEAN_PROPERTIES.
 	getProperty("weka.gui.beans.KnowledgeFlow.standardToolBars");
@@ -174,72 +267,6 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 				    "KnowledgeFlow",
 				    JOptionPane.ERROR_MESSAGE);
     }
-
-    try {
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
-      creator.execute(false);
-      /* now process the keys in the GenericObjectEditor.props. For each
-       key that has an entry in the Beans.props associating it with a
-      bean component a button tool bar will be created */
-      Properties GEOProps = 
-	//Utils.readProperties("weka/gui/GenericObjectEditor.props");
-      creator.getOutputProperties();
-      Enumeration en = GEOProps.propertyNames();
-      while (en.hasMoreElements()) {
-	String geoKey = (String)en.nextElement();
-
-	// try to match this key with one in the Beans.props file
-	String beanCompName = BEAN_PROPERTIES.getProperty(geoKey);
-	if (beanCompName != null) {
-	  // add details necessary to construct a button bar for this class
-	  // of algorithms
-	  Vector newV = new Vector();
-	  // check for a naming alias for this toolbar
-	  String toolBarNameAlias = 
-	    BEAN_PROPERTIES.getProperty(geoKey+".alias");
-	  String toolBarName = (toolBarNameAlias != null) ?
-	    toolBarNameAlias :
-	    geoKey.substring(geoKey.lastIndexOf('.')+1, geoKey.length());
-	  // Name for the toolbar (name of weka algorithm class)
-	  newV.addElement(toolBarName);
-	  // Name of bean capable of handling this class of algorithm
-	  newV.addElement(beanCompName);
-
-	  // add the root package for this key
-	  String rootPackage = geoKey.substring(0, geoKey.lastIndexOf('.'));
-
-	  newV.addElement(rootPackage);
-
-	  // All the weka algorithms of this class of algorithm
-	  String wekaAlgs = GEOProps.getProperty(geoKey);
-
-	  //------ test the HierarchyPropertyParser
-	  weka.gui.HierarchyPropertyParser hpp = 
-	    new weka.gui.HierarchyPropertyParser();
-	  hpp.build(wekaAlgs, ", ");
-	  // 	  System.err.println(hpp.showTree());
-	  // ----- end test the HierarchyPropertyParser
-	  newV.addElement(hpp); // add the hierarchical property parser
-
-	  StringTokenizer st = new StringTokenizer(wekaAlgs, ", ");
-	  while (st.hasMoreTokens()) {
-	    String current = st.nextToken().trim();
-	    newV.addElement(current);
-	  }
-	  TOOLBARS.addElement(newV);
-	}
-      }      
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(null,
-          "Could not read a configuration file for the generic objecte editor"
-         +". An example file is included with the Weka distribution.\n"
-         +"This file should be named \"GenericObjectEditor.props\" and\n"
-         +"should be placed either in your user home (which is set\n"
-         + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-         + "or the directory that java was started from\n",
-         "KnowledgeFlow",
-         JOptionPane.ERROR_MESSAGE);
-    }
   } 
   
   /**
@@ -247,7 +274,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.25 $
+   * @version $Revision: 1.26 $
    * @since 1.0
    * @see PrintablePanel
    */
