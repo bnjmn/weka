@@ -1,0 +1,41 @@
+# Lists the components to choose from
+
+# list of all bean components
+weka.gui.beans.KnowledgeFlow.components=\
+ weka.gui.beans.Loader,\
+ weka.gui.beans.TrainingSetMaker,\
+ weka.gui.beans.TestSetMaker,\
+ weka.gui.beans.Classifier
+
+# list of standard toolbars (containing bean tools that do not wrap weka
+# base class types)
+weka.gui.beans.KnowledgeFlow.standardToolBars=\
+ Tools
+#Visualize
+
+# Specifies the tools for each standard toolbar
+weka.gui.beans.KnowledgeFlow.Tools=weka.gui.beans.TrainingSetMaker,\
+ weka.gui.beans.TestSetMaker,\
+ weka.gui.beans.CrossValidationFoldMaker,\
+ weka.gui.beans.TrainTestSplitMaker,\
+ weka.gui.beans.ClassAssigner,\
+ weka.gui.beans.ClassifierPerformanceEvaluator,\
+ weka.gui.beans.IncrementalClassifierEvaluator,\
+ weka.gui.beans.DataVisualizer,\
+ weka.gui.beans.TextViewer,\
+ weka.gui.beans.GraphViewer,\
+ weka.gui.beans.StripChart
+
+# the bean panel processes keys in the generic object editor properties file.
+# If there is a corresponding entry here, then a toolbar is constructed using
+# the specified wrapper bean
+weka.core.converters.Loader=weka.gui.beans.Loader
+weka.classifiers.Classifier=weka.gui.beans.Classifier
+weka.filters.Filter=weka.gui.beans.Filter
+# weka.clusterers.Clusterer=weka.gui.beans.Clusterer
+# weka.attributeSelection.ASEvaluation=weka.gui.beans.AttributeSelector
+
+# toolbar naming aliases for weka algorithm classes
+weka.core.converters.Loader.alias=DataSources
+weka.classifiers.Classifier.alias=Classifiers
+weka.filters.Filters.alias=Filters
