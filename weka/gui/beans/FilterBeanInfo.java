@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the Filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @versio $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FilterBeanInfo extends SimpleBeanInfo {
    
