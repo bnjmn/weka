@@ -19,13 +19,14 @@
 
 package weka.experiment;
 
+import java.io.Serializable;
 /**
  * Class encapsulating information on progress of a remote experiment
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class RemoteExperimentEvent {
+public class RemoteExperimentEvent implements Serializable {
 
   /** A status type message */
   public boolean m_statusMessage;
