@@ -68,7 +68,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public abstract class Filter implements Serializable {
 
@@ -158,7 +158,7 @@ public abstract class Filter implements Serializable {
    * Adds an output instance to the queue. The derived class should use this
    * method for each output instance it makes available. 
    *
-   * @param instance the instance to be added to the queue
+   * @param instance the instance to be added to the queue.
    */
   protected void push(Instance instance) {
 
@@ -180,7 +180,8 @@ public abstract class Filter implements Serializable {
   /**
    * Adds the supplied input instance to the inputformat dataset for
    * later processing.  Use this method rather than
-   * getInputFormat().add(instance). Or else.
+   * getInputFormat().add(instance). Or else. Note that the provided
+   * instance gets copied when buffered. 
    *
    * @param instance the <code>Instance</code> to buffer.  
    */
@@ -188,7 +189,6 @@ public abstract class Filter implements Serializable {
 
     if (instance != null) {
       copyStringValues(instance, m_InputFormat, m_InputStringAtts);
-      instance.setDataset(m_InputFormat);
       m_InputFormat.add(instance);
     }
   }
