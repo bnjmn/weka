@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.16 $
+ * @version  $Revision: 1.17 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1872,6 +1872,7 @@ public class Evaluation implements Summarizable {
   public boolean equals(Object obj) {
 
     if ((obj == null) || !(obj instanceof Evaluation)) return false;
+    Evaluation cmp = (Evaluation) obj;
     if (m_ClassIsNominal != cmp.m_ClassIsNominal) return false;
     if (m_NumClasses != cmp.m_NumClasses) return false;
 
