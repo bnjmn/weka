@@ -63,7 +63,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -942,6 +942,17 @@ public class Experiment implements Serializable, OptionHandler {
 			       new BufferedInputStream(fi));
 	exp = (Experiment)oi.readObject();
 	oi.close();
+
+	// allow extra datasets to be added to pre-loaded experiment from command line
+	String dataName;
+	do {
+	  dataName = Utils.getOption('T', args);
+	  if (dataName.length() != 0) {
+	    File dataset = new File(dataName);
+	    exp.getDatasets().addElement(dataset);
+	  }
+	} while (dataName.length() != 0);
+	
       }
       System.err.println("Experiment:\n" + exp.toString());
 
