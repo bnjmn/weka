@@ -53,8 +53,12 @@ import  weka.filters.Filter;
  * Threshold by which to execute another cross validation (standard deviation
  * ---expressed as a percentage of the mean). <p>
  *
+ * -R <seed> <br>
+ * Seed for cross validation accuracy estimation.
+ * (default = 1) <p>
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -120,7 +124,7 @@ public class WrapperSubsetEval
 				    + "\n\t(default=5)", "F", 1, "-F <num>"));
     newVector.addElement(new Option("\tSeed for cross validation accuracy "
 				    +"\n\testimation."
-				    +"\n\t(default = 1)", "S", 1,"-S <seed>"));
+				    +"\n\t(default = 1)", "R", 1,"-R <seed>"));
     newVector.addElement(new Option("\tthreshold by which to execute " 
 				    + "another cross validation" 
 				    + "\n\t(standard deviation---" 
@@ -163,6 +167,10 @@ public class WrapperSubsetEval
    * Threshold by which to execute another cross validation (standard deviation
    * ---expressed as a percentage of the mean). <p>
    *
+   * -R <seed> <br>
+   * Seed for cross validation accuracy estimation.
+   * (default = 1) <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    *
@@ -186,7 +194,7 @@ public class WrapperSubsetEval
       setFolds(Integer.parseInt(optionString));
     }
 
-    optionString = Utils.getOption('S', options);
+    optionString = Utils.getOption('R', options);
     if (optionString.length() != 0) {
       setSeed(Integer.parseInt(optionString));
     }
@@ -343,7 +351,7 @@ public class WrapperSubsetEval
     options[current++] = "" + getFolds();
     options[current++] = "-T";
     options[current++] = "" + getThreshold();
-    options[current++] = "-S";
+    options[current++] = "-R";
     options[current++] = "" + getSeed();
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
