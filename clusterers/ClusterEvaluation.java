@@ -49,7 +49,7 @@ import  weka.core.*;
  * be performed if the test file is missing.
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.9 $
+ * @version  $Revision: 1.10 $
  */
 public class ClusterEvaluation {
 
@@ -70,6 +70,9 @@ public class ClusterEvaluation {
 
   /** holds a string describing the results of clustering the training data */
   private StringBuffer m_clusteringResults;
+
+  /** holds the number of clusters found by the clusterer */
+  private int m_numClusters;
 
   /** holds the assigments of instances to clusters for a particular testing
       dataset */
@@ -116,6 +119,15 @@ public class ClusterEvaluation {
   }
 
   /**
+   * Return the number of clusters found for the most recent call to
+   * evaluateClusterer
+   * @return the number of clusters found
+   */
+  public int getNumClusters() {
+    return m_numClusters;
+  }
+
+  /**
    * Return an array of cluster assignments corresponding to the most
    * recent set of instances clustered.
    * @return an array of cluster assignments
@@ -152,6 +164,7 @@ public class ClusterEvaluation {
     double[] dist;
     double temp;
     int cc = m_Clusterer.numberOfClusters();
+    m_numClusters = cc;
     int numInstFieldWidth = (int)((Math.log(test.numInstances())/
 				   Math.log(10))+1);
     double[] instanceStats = new double[cc];
