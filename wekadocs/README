@@ -256,12 +256,14 @@ java weka.filters.supervised.attribute.Discretize -i
 In terms of database connectivity, you should be able to use any
 database with a Java JDBC driver. When using classes that access a
 database (e.g. the Explorer), you will probably want to create a
-properties file that specifies which JDBC drivers to use, and where to
-find the database. This file should reside in your home directory or
-the current directory and be called "DatabaseUtils.props". An example
-is provided in weka/experiment (you need to expand wek.jar to be able
-to look a this file). This file is used unless it is overidden by one
-in your home directory or the current directory (in that order).
+properties file that specifies which JDBC drivers to use, where to
+find the database, and specify a mapping for the data types. This file
+should reside in your home directory or the current directory and be
+called "DatabaseUtils.props". An example is provided in
+weka/experiment (you need to expand wek.jar to be able to look a this
+file). Note that the settings in this file are used unless they are
+overidden by settings in the DatabaseUtils.props file in your home
+directory or the current directory (in that order).
 
 ----------------------------------------------------------------------
 
