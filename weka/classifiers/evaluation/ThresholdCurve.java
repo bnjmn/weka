@@ -34,7 +34,7 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ThresholdCurve {
 
@@ -115,8 +115,9 @@ public class ThresholdCurve {
       System.out.println(tc + " " + probs[sorted[i]] 
                          + " " + (pred.actual() == classIndex));
       */
-      if ((i == 0) || (i == (sorted.length - 1)) || 
-          (probs[sorted[i]] != probs[sorted[i - 1]])) {
+      if ((i != (sorted.length - 1)) &&
+          ((i == 0) ||  
+          (probs[sorted[i]] != probs[sorted[i - 1]]))) {
         insts.add(makeInstance(tc, probs[sorted[i]]));
       }
     }
