@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.61 $
+ * @version $Revision: 1.62 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1891,6 +1891,7 @@ public class ClassifierPanel extends JPanel {
     boolean outputSummary = true;
     boolean outputEntropy = m_OutputEntropyBut.isSelected();
     boolean saveVis = m_StorePredictionsBut.isSelected();
+    boolean outputPredictionsText = m_OutputPredictionsTextBut.isSelected();
     String grph = null;    
     
     try {
@@ -1926,16 +1927,6 @@ public class ClassifierPanel extends JPanel {
 	predictions = new FastVector();
       }
       
-      for (int jj=0;jj<userTest.numInstances();jj++) {
-	processClassifierPrediction(userTest.instance(jj), classifier,
-				    eval, predictions,
-				    predInstances, plotShape,
-				    plotSize);
-	if ((jj % 100) == 0) {
-	  m_Log.statusMessage("Evaluating on test data. Processed "
-			      +jj+" instances...");
-	}
-      }
       outBuff.append("\n=== Re-evaluation on test set ===\n\n");
       outBuff.append("User supplied test set\n");  
       outBuff.append("Relation:     " + userTest.relationName() + '\n');
@@ -1944,6 +1935,34 @@ public class ClassifierPanel extends JPanel {
       if (trainHeader == null)
 	outBuff.append("NOTE - if test set is not compatible then results are "
 		       + "unpredictable\n\n");
+
+      if (outputPredictionsText) {
+	outBuff.append("=== Predictions on test set ===\n\n");
+	outBuff.append(" inst#,    actual, predicted, error");
+	if (userTest.classAttribute().isNominal()
+	    && classifier instanceof DistributionClassifier) {
+	  outBuff.append(", probability distribution");
+	}
+	outBuff.append("\n");
+      }
+
+      for (int jj=0;jj<userTest.numInstances();jj++) {
+	processClassifierPrediction(userTest.instance(jj), classifier,
+				    eval, predictions,
+				    predInstances, plotShape,
+				    plotSize);
+	if (outputPredictionsText) { 
+	  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
+	}
+	if ((jj % 100) == 0) {
+	  m_Log.statusMessage("Evaluating on test data. Processed "
+			      +jj+" instances...");
+	}
+      }
+
+      if (outputPredictionsText) {
+	outBuff.append("\n");
+      } 
       
       if (outputSummary) {
 	outBuff.append(eval.toSummaryString(outputEntropy) + "\n");
