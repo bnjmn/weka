@@ -54,6 +54,22 @@ import weka.filters.unsupervised.attribute.Add;
 
 public class BoundaryPanel extends JPanel {
 
+  // default colours for classes
+  protected Color [] m_Colors = {
+    Color.green,
+    Color.blue,
+    Color.red,
+    Color.yellow,
+    Color.cyan,
+    Color.magenta,
+    Color.orange,
+    Color.pink,
+    Color.black,
+    Color.gray,
+    Color.darkGray,
+    Color.lightGray,
+    Color.white};
+
   // training data
   private Instances m_trainingData;
 
@@ -65,10 +81,6 @@ public class BoundaryPanel extends JPanel {
 
   // index of the class attribute
   private int m_classIndex = -1;
-
-  // indexes of class values (any other classes are grouped together
-  // and correspond to the colour black
-  private int [] m_rgbClassValues = new int [3];
 
   // attributes for visualizing on
   private int m_xAttribute;
@@ -138,10 +150,27 @@ public class BoundaryPanel extends JPanel {
     setPreferredSize(m_plotPanel.getPreferredSize());
     setMaximumSize(m_plotPanel.getMaximumSize());
     setMinimumSize(m_plotPanel.getMinimumSize());
-    for (int i = 0; i < 3; i++) {
-      m_rgbClassValues[i] = -1;
-    }
+
     m_random = new Random(1);
+  }
+
+  /**
+   * Set the number of points to uniformly sample from a region (fixed
+   * dimensions).
+   *
+   * @param num an <code>int</code> value
+   */
+  public void setNumSamplesPerRegion(int num) {
+    m_numOfSamplesPerRegion = num;
+  }
+
+  /**
+   * Get the number of points to sample from a region (fixed dimensions).
+   *
+   * @return an <code>int</code> value
+   */
+  public int getNumSamplesPerRegion() {
+    return m_numOfSamplesPerRegion;
   }
 
   /**
@@ -353,18 +382,13 @@ public class BoundaryPanel extends JPanel {
 		Graphics osg = m_osi.getGraphics();
 		Graphics g = m_plotPanel.getGraphics();
 		float [] colVal = new float[3];
-		for (int k = 0; k < 3; k++) {
-		  if (k < sumOfProbsForRegion.length) {
-		    if (m_rgbClassValues[k] != -1) {
-		      colVal[k] = 
-			(float)sumOfProbsForRegion[m_rgbClassValues[k]];
-		    }
-		  }
-		  if (colVal[k] < 0) {
-		    colVal[k] = 0;
-		  }
-		  if (colVal[k] > 1) {
-		    colVal[k] = 1;
+		
+		float [] tempCols = new float[3];
+		for (int k = 0; k < sumOfProbsForRegion.length; k++) {
+		  Color curr = m_Colors[k];
+		  curr.getRGBColorComponents(tempCols);
+		  for (int z = 0 ; z < 3; z++) {
+		    colVal[z] += sumOfProbsForRegion[k] * tempCols[z];
 		  }
 		}
 		
@@ -450,55 +474,7 @@ public class BoundaryPanel extends JPanel {
   public void setDataGenerator(DataGenerator dataGenerator) {
     m_dataGenerator = dataGenerator;
   }
-  
-  /**
-   * Set the class value index for the red colour
-   *
-   * @param classVal an <code>int</code> value
-   * @exception Exception if an error occurs
-   */
-  public void setRedClassValue(int classVal) throws Exception {
-    setClassValue(0, classVal);
-  }
-
-  /**
-   * Set the class value index for the green colour
-   *
-   * @param classVal an <code>int</code> value
-   * @exception Exception if an error occurs
-   */
-  public void setGreenClassValue(int classVal) throws Exception {
-    setClassValue(1, classVal);
-  }
-
-  /**
-   * Set the class value index for the blue colour
-   *
-   * @param classVal an <code>int</code> value
-   * @exception Exception if an error occurs
-   */
-  public void setBlueClassValue(int classVal) throws Exception {
-    setClassValue(2, classVal);
-  }
-
-  /**
-   * Set a class value for a particular colour (RGB)
-   *
-   * @param index the colour - 0 = red, 1 = green, 2 = blue
-   * @param classVal the class value index to associate with the colour
-   * @exception Exception if an error occurs
-   */
-  private void setClassValue(int index, int classVal) throws Exception {
-    if (m_trainingData == null) {
-      throw new Exception("No training data set (BoundaryPanel)");
-    }
-    if (classVal < 0 || 
-	classVal > m_trainingData.classAttribute().numValues()) {
-      throw new Exception("Class value out of range (BoundaryPanel)");
-    }
-    m_rgbClassValues[index] = classVal;
-  }
-  
+    
   /**
    * Set the x attribute index
    *
@@ -548,6 +524,13 @@ public class BoundaryPanel extends JPanel {
     }
     m_yAttribute = yatt;
   }
+  
+  public void setColors(FastVector colors) {
+    m_Colors = new Color [colors.size()];
+    for (int i = 0; i < colors.size(); i++) {
+      m_Colors[i] = (Color)colors.elementAt(i);
+    }
+  }
 
   /**
    * Main method for testing this class
@@ -556,11 +539,9 @@ public class BoundaryPanel extends JPanel {
    */
   public static void main (String [] args) {
     try {
-      if (args.length < 7) {
+      if (args.length < 4) {
 	System.err.println("Usage : BoundaryPanel <dataset> "
-			   +"<class col> <Red classVal(index)> "
-			   +"<Green classVal(index)> "
-			   +"<Blue classVal(index)> <xAtt> <yAtt>");
+			   +"<class col> <xAtt> <yAtt>");
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
@@ -590,11 +571,8 @@ public class BoundaryPanel extends JPanel {
       bv.setTrainingData(i);
       bv.setClassifier(new Logistic());
       bv.setDataGenerator(new KDDataGenerator());
-      bv.setRedClassValue(Integer.parseInt(args[2]));
-      bv.setGreenClassValue(Integer.parseInt(args[3]));
-      bv.setBlueClassValue(Integer.parseInt(args[4]));
-      bv.setXAttribute(Integer.parseInt(args[5]));
-      bv.setYAttribute(Integer.parseInt(args[6]));
+      bv.setXAttribute(Integer.parseInt(args[2]));
+      bv.setYAttribute(Integer.parseInt(args[3]));
       bv.start();
     } catch (Exception ex) {
       ex.printStackTrace();

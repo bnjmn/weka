@@ -36,6 +36,7 @@ import java.util.Vector;
 import weka.core.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
+import weka.gui.visualize.ClassPanel;
 
 /**
  * BoundaryVisualizer. Allows the visualization of classifier decision
@@ -52,7 +53,7 @@ import weka.classifiers.DistributionClassifier;
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see JPanel
  */
@@ -207,27 +208,26 @@ public class BoundaryVisualizer extends JPanel {
   private DistributionClassifier m_classifier;
 
   // plot area dimensions
-  private int m_plotAreaWidth = 512;
-  private int m_plotAreaHeight = 384;
+  protected int m_plotAreaWidth = 512;
+  protected int m_plotAreaHeight = 384;
 
   // the plotting panel
-  private BoundaryPanel m_boundaryPanel;
+  protected BoundaryPanel m_boundaryPanel;
 
   // combo boxes for selecting the class attribute, class values (for
   // colouring pixels), and visualization attributes
-  private JComboBox m_classAttBox = new JComboBox();
-  private JComboBox m_redClassValueBox = new JComboBox();
-  private JComboBox m_greenClassValueBox = new JComboBox();
-  private JComboBox m_blueClassValueBox = new JComboBox();
-  private JComboBox m_xAttBox = new JComboBox();
-  private JComboBox m_yAttBox = new JComboBox();
+  protected JComboBox m_classAttBox = new JComboBox();
+  protected JComboBox m_xAttBox = new JComboBox();
+  protected JComboBox m_yAttBox = new JComboBox();
 
-  private Dimension COMBO_SIZE = 
+  protected Dimension COMBO_SIZE = 
     new Dimension(m_plotAreaWidth / 2,
 		  m_classAttBox.getPreferredSize().height);
 
-  private JButton m_startBut = new JButton("Start");
-  private JPanel m_controlPanel;
+  protected JButton m_startBut = new JButton("Start");
+  protected JPanel m_controlPanel;
+
+  protected ClassPanel m_classPanel = new ClassPanel();
 
   // separate panels for rendering axis information
   private AxisPanel m_xAxisPanel;
@@ -242,11 +242,11 @@ public class BoundaryVisualizer extends JPanel {
   private int m_xIndex;
   private int m_yIndex;
 
-  // the number of samples to use from each kernel when plotting pixels
-  private int m_numberOfSamplesFromEachGeneratingModel = 2;
+  // number of samples per pixel (fixed dimensions only)
+  private int m_numberOfSamplesFromEachRegion;
   
   private JTextField m_samplesText = 
-    new JTextField(""+m_numberOfSamplesFromEachGeneratingModel);
+    new JTextField(""+0);
 
   /**
    * Creates a new <code>BoundaryVisualizer</code> instance.
@@ -257,18 +257,12 @@ public class BoundaryVisualizer extends JPanel {
     m_classAttBox.setMinimumSize(COMBO_SIZE);
     m_classAttBox.setPreferredSize(COMBO_SIZE);
     m_classAttBox.setMaximumSize(COMBO_SIZE);
-
-    m_redClassValueBox.setMinimumSize(COMBO_SIZE);
-    m_redClassValueBox.setPreferredSize(COMBO_SIZE);
-    m_redClassValueBox.setMaximumSize(COMBO_SIZE);
-
-    m_greenClassValueBox.setMinimumSize(COMBO_SIZE);
-    m_greenClassValueBox.setPreferredSize(COMBO_SIZE);
-    m_greenClassValueBox.setMaximumSize(COMBO_SIZE);
-
-    m_blueClassValueBox.setMinimumSize(COMBO_SIZE);
-    m_blueClassValueBox.setPreferredSize(COMBO_SIZE);
-    m_blueClassValueBox.setMaximumSize(COMBO_SIZE);
+    m_classAttBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_classPanel.setCindex(m_classAttBox.getSelectedIndex());
+      }
+      });
+				    
 
     m_xAttBox.setMinimumSize(COMBO_SIZE);
     m_xAttBox.setPreferredSize(COMBO_SIZE);
@@ -278,18 +272,26 @@ public class BoundaryVisualizer extends JPanel {
     m_yAttBox.setPreferredSize(COMBO_SIZE);
     m_yAttBox.setMaximumSize(COMBO_SIZE);
 
+    m_classPanel.setMinimumSize(new 
+      Dimension((int)COMBO_SIZE.getWidth()*2, 
+		(int)COMBO_SIZE.getHeight()*2));
+    m_classPanel.setPreferredSize(new 
+      Dimension((int)COMBO_SIZE.getWidth()*2, 
+		(int)COMBO_SIZE.getHeight()*2));
+
+
     m_controlPanel = new JPanel();
     m_controlPanel.setLayout(new BorderLayout());
 
     JPanel cHolder = new JPanel();
     cHolder.setBorder(BorderFactory.createTitledBorder("Class Attribute"));
     cHolder.add(m_classAttBox);
-    JPanel cValHolder = new JPanel();
+    /*    JPanel cValHolder = new JPanel();
     cValHolder.setLayout(new GridLayout(3,1));
     cValHolder.setBorder(BorderFactory.createTitledBorder("Class Values"));
     cValHolder.add(m_redClassValueBox);
     cValHolder.add(m_greenClassValueBox);
-    cValHolder.add(m_blueClassValueBox);
+    cValHolder.add(m_blueClassValueBox); */
     JPanel vAttHolder = new JPanel();
     vAttHolder.setLayout(new GridLayout(2,1));
     vAttHolder.setBorder(BorderFactory.
@@ -303,24 +305,33 @@ public class BoundaryVisualizer extends JPanel {
     colOne.add(vAttHolder, BorderLayout.CENTER);
     //    JPanel samplesHolder = new JPanel();
     m_samplesText.setBorder(BorderFactory.
-			    createTitledBorder("Num. samples per generator"));
+			    createTitledBorder("Num. samples per region"));
     m_samplesText.setBackground(colOne.getBackground());
     //    samplesHolder.add(m_samplesText);
-    colOne.add(m_samplesText, BorderLayout.SOUTH);
+    //    colOne.add(m_samplesText, BorderLayout.SOUTH);
 
     JPanel colTwo = new JPanel();
     colTwo.setLayout(new BorderLayout());
-    colTwo.add(cValHolder, BorderLayout.NORTH);
+    //    colTwo.add(cValHolder, BorderLayout.NORTH);
 
     JPanel startPanel = new JPanel();
     startPanel.setBorder(BorderFactory.
 			 createTitledBorder("Start/Stop"));
     startPanel.setLayout(new BorderLayout());
     startPanel.add(m_startBut, BorderLayout.CENTER);
-    colTwo.add(startPanel, BorderLayout.SOUTH);
+    JPanel tempPanel = new JPanel();
+    tempPanel.setLayout(new BorderLayout());
+    tempPanel.add(m_samplesText, BorderLayout.NORTH);
+    tempPanel.add(startPanel, BorderLayout.SOUTH);
+    //    colTwo.add(startPanel, BorderLayout.SOUTH);
+    colTwo.add(tempPanel, BorderLayout.SOUTH);
 
     m_controlPanel.add(colOne, BorderLayout.WEST);
     m_controlPanel.add(colTwo, BorderLayout.CENTER);
+    JPanel classHolder = new JPanel();
+    classHolder.setBorder(BorderFactory.createTitledBorder("Class color"));
+    classHolder.add(m_classPanel);
+    m_controlPanel.add(classHolder, BorderLayout.SOUTH);
     /*    m_controlPanel.add(cHolder);
     m_controlPanel.add(cValHolder);
     m_controlPanel.add(vAttHolder);
@@ -329,6 +340,8 @@ public class BoundaryVisualizer extends JPanel {
     add(m_controlPanel, BorderLayout.NORTH);
 
     m_boundaryPanel = new BoundaryPanel(m_plotAreaWidth, m_plotAreaHeight);
+    m_numberOfSamplesFromEachRegion = m_boundaryPanel.getNumSamplesPerRegion();
+    m_samplesText.setText(""+m_numberOfSamplesFromEachRegion);
     m_boundaryPanel.setDataGenerator(new KDDataGenerator());
     add(m_boundaryPanel, BorderLayout.CENTER);
 
@@ -343,26 +356,20 @@ public class BoundaryVisualizer extends JPanel {
 	  if (m_startBut.getText().equals("Start")) {
 	    if (m_trainingInstances != null && m_classifier != null) {
 	      try {
-		int tempSamples = m_numberOfSamplesFromEachGeneratingModel;
+		int tempSamples = m_numberOfSamplesFromEachRegion;
 		try {
 		  tempSamples = 
 		    Integer.parseInt(m_samplesText.getText().trim());
 		} catch (Exception ex) {
 		  m_samplesText.setText(""+tempSamples);
 		}
-		m_numberOfSamplesFromEachGeneratingModel = tempSamples;
+		m_numberOfSamplesFromEachRegion = tempSamples;
 		m_boundaryPanel.
-		  setNumberOfSamplesFromEachGeneratingModel(tempSamples);
+		  setNumSamplesPerRegion(tempSamples);
 		m_trainingInstances.
 		  setClassIndex(m_classAttBox.getSelectedIndex());
 		m_boundaryPanel.setClassifier(m_classifier);
 		m_boundaryPanel.setTrainingData(m_trainingInstances);
-		m_boundaryPanel.
-		  setRedClassValue(m_redClassValueBox.getSelectedIndex());
-		m_boundaryPanel.
-		  setGreenClassValue(m_greenClassValueBox.getSelectedIndex());
-		m_boundaryPanel.
-		  setBlueClassValue(m_blueClassValueBox.getSelectedIndex());
 		m_boundaryPanel.setXAttribute(m_xIndex);
 		m_boundaryPanel.setYAttribute(m_yIndex);
 		m_boundaryPanel.start();
@@ -395,9 +402,6 @@ public class BoundaryVisualizer extends JPanel {
    */
   private void setControlEnabledStatus(boolean status) {
     m_classAttBox.setEnabled(status);
-    m_redClassValueBox.setEnabled(status);
-    m_greenClassValueBox.setEnabled(status);
-    m_blueClassValueBox.setEnabled(status);
     m_xAttBox.setEnabled(status);
     m_yAttBox.setEnabled(status);
     m_samplesText.setEnabled(status);
@@ -488,7 +492,7 @@ public class BoundaryVisualizer extends JPanel {
       throw new Exception("Not enough attributes in the data to visualize!");
     }
     m_trainingInstances = inst;
-
+    m_classPanel.setInstances(m_trainingInstances);
     // setup combo boxes
     String [] classAttNames = new String [m_trainingInstances.numAttributes()];
     Vector xAttNames = new Vector();
@@ -549,39 +553,10 @@ public class BoundaryVisualizer extends JPanel {
     int classIndex = m_classAttBox.getSelectedIndex();
     if (classIndex >= 0) {
       // see if this is a nominal attribute
-      if (m_trainingInstances.attribute(classIndex).isNominal()) {
-	Vector rNames = new Vector();
-	Vector gNames = new Vector();
-	Vector bNames = new Vector();
-	for (int i = 0; 
-	     i < m_trainingInstances.attribute(classIndex).numValues(); i++) {
-	  String name = m_trainingInstances.attribute(classIndex).value(i);
-	  rNames.addElement("Red: "+name);
-	  gNames.addElement("Green: "+name);
-	  bNames.addElement("Blue: "+name);
-	}
-	m_redClassValueBox.setModel(new DefaultComboBoxModel(rNames));
-	m_greenClassValueBox.setModel(new DefaultComboBoxModel(gNames));
-	m_blueClassValueBox.setModel(new DefaultComboBoxModel(bNames));
-	if (gNames.size() > 1) {
-	  m_greenClassValueBox.setSelectedIndex(1);
-	  m_blueClassValueBox.setSelectedIndex(1);
-	}
-	if (bNames.size() > 2) {
-	  m_blueClassValueBox.setSelectedIndex(2);
-	}
-	if (m_xAttBox.getSelectedIndex() >= 0 &&
-	    m_yAttBox.getSelectedIndex() >= 0) {
-	  m_startBut.setEnabled(true);
-	}
-      } else {
-	((DefaultComboBoxModel)m_redClassValueBox.getModel())
-	  .removeAllElements();
-	((DefaultComboBoxModel)m_greenClassValueBox.getModel())
-	  .removeAllElements();
-	((DefaultComboBoxModel)m_blueClassValueBox.getModel())
-	  .removeAllElements();
+      if (!m_trainingInstances.attribute(classIndex).isNominal()) {
 	m_startBut.setEnabled(false);
+      } else {
+	m_startBut.setEnabled(true);
       }
     }
   }
