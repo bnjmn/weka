@@ -1,6 +1,6 @@
 /*
  *    AttributeExpressionFilter.java
- *    Copyright (C) 2000 MarkHall
+ *    Copyright (C) 2000 Mark Hall
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeExpressionFilter extends Filter 
   implements OptionHandler {
