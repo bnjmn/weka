@@ -70,12 +70,11 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class EM
   extends DistributionClusterer
-  implements OptionHandler
-{
+  implements OptionHandler, WeightedInstancesHandler {
 
   /** hold the discrete estimators for each cluster */
   private Estimator m_model[][];
@@ -451,13 +450,14 @@ public class EM
    **/
   private void estimate_priors (Instances inst)
     throws Exception {
+
     for (int i = 0; i < m_num_clusters; i++) {
       m_priors[i] = 0.0;
     }
 
     for (int i = 0; i < inst.numInstances(); i++) {
       for (int j = 0; j < m_num_clusters; j++) {
-        m_priors[j] += m_weights[i][j];
+        m_priors[j] += inst.instance(i).weight() * m_weights[i][j];
       }
     }
 
@@ -509,23 +509,26 @@ public class EM
    */
   private void M (Instances inst)
     throws Exception {
+
     int i, j, l;
+
     new_estimators();
 
     for (i = 0; i < m_num_clusters; i++) {
       for (j = 0; j < m_num_attribs; j++) {
         for (l = 0; l < inst.numInstances(); l++) {
-          if (!inst.instance(l).isMissing(j)) {
+	  Instance in = inst.instance(l);
+          if (!in.isMissing(j)) {
             if (inst.attribute(j).isNominal()) {
-              m_model[i][j].addValue(inst.instance(l).value(j), 
-				     m_weights[l][i]);
+              m_model[i][j].addValue(in.value(j), 
+				     in.weight() * m_weights[l][i]);
             }
             else {
-              m_modelNormal[i][j][0] += (inst.instance(l).value(j) * 
+              m_modelNormal[i][j][0] += (in.value(j) * in.weight() *
 					 m_weights[l][i]);
-              m_modelNormal[i][j][2] += m_weights[l][i];
-              m_modelNormal[i][j][1] += (inst.instance(l).value(j) * 
-					 inst.instance(l).value(j)*m_weights[l][i]);
+              m_modelNormal[i][j][2] += in.weight() * m_weights[l][i];
+              m_modelNormal[i][j][1] += (in.value(j) * 
+					 in.value(j) * in.weight() * m_weights[l][i]);
             }
           }
         }
@@ -536,36 +539,40 @@ public class EM
     for (j = 0; j < m_num_attribs; j++) {
       if (!inst.attribute(j).isNominal()) {
         for (i = 0; i < m_num_clusters; i++) {
-          if (m_modelNormal[i][j][2] < 0) {
-            m_modelNormal[i][j][1] = 0;
+          if (m_modelNormal[i][j][2] <= 0) {
+            m_modelNormal[i][j][1] = Double.MAX_VALUE;
+	    m_modelNormal[i][j][0] = 0;
           } else {
+	    if (m_modelNormal[i][j][2] > 0) {
+	      
+	      // variance
+	      m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - 
+					(m_modelNormal[i][j][0] * 
+					 m_modelNormal[i][j][0] / 
+					 m_modelNormal[i][j][2])) / 
+		(m_modelNormal[i][j][2]);
 
-	  // variance
-	    m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - 
-				      (m_modelNormal[i][j][0] * 
-				       m_modelNormal[i][j][0] / 
-				       m_modelNormal[i][j][2])) / 
-	      m_modelNormal[i][j][2];
+	      if (m_modelNormal[i][j][1] < 0) {
+		m_modelNormal[i][j][1] = 0;
+	      }
+	      
+	      // std dev      
+	      m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]); 
 
-	    // std dev      
-	    m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]); 
-
-	    if (m_modelNormal[i][j][1] <= m_minStdDev 
-		|| Double.isNaN(m_modelNormal[i][j][1])) {
-	      m_modelNormal[i][j][1] = 
-		m_minStdDev;
+	      if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
+		m_modelNormal[i][j][1] = m_minStdDev;
+	      }
+	    } else {
+	      m_modelNormal[i][j][1] = m_minStdDev;
 	    }
 	    
 	    // mean
-	    if (m_modelNormal[i][j][2] > 0.0) {
-	      m_modelNormal[i][j][0] /= m_modelNormal[i][j][2];
-	    }
-	  }        
+	    m_modelNormal[i][j][0] /= m_modelNormal[i][j][2];
+	  }
         }
       }
     }
   }
-
 
   /**
    * The E step of the EM algorithm. Estimate cluster membership 
@@ -577,15 +584,13 @@ public class EM
   private double E (Instances inst, boolean change_weights)
     throws Exception {
 
-    double loglk = 0.0;
+    double loglk = 0.0, sOW = 0.0;
 
     for (int l = 0; l < inst.numInstances(); l++) {
 
-      double[] logWeights = logOfWeightsForInstance(inst.instance(l));
+      Instance in = inst.instance(l);
 
-      if (change_weights) {
-	m_weights[l] = Utils.logs2probs(logWeights);
-      }
+      double[] logWeights = logOfWeightsForInstance(in);
 
       double max = logWeights[Utils.maxIndex(logWeights)];
       double sum = 0.0;
@@ -594,14 +599,19 @@ public class EM
 	sum += Math.exp(logWeights[i] - max);
       }
 
-      loglk += max + Math.log(sum);
+      loglk += in.weight() * (max + Math.log(sum));
+      sOW += in.weight();
+
+      if (change_weights) {
+	m_weights[l] = Utils.logs2probs(logWeights);
+      }
     }
     
     // reestimate priors
     if (change_weights) {
       estimate_priors(inst);
     }
-    return  loglk / inst.numInstances();
+    return  loglk / sOW;
   }
   
   
@@ -763,7 +773,6 @@ public class EM
 	  System.out.println("# clust: " + m_num_clusters + " Fold: " + i 
 			     + " Loglikely: " + tll);
 	}
-
 	templl += tll;
       }
 
