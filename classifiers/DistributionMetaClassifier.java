@@ -30,13 +30,28 @@ import weka.core.WeightedInstancesHandler;
  * Specify the full class name of a sub-classifier (required).<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DistributionMetaClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
 
   /** The classifier. */
   private Classifier m_Classifier = new weka.classifiers.ZeroR();
+
+  /** Default constructor */
+  public DistributionMetaClassifier() { }
+
+  /**
+   * Creates a new <code>DistributionMetaClassifier</code> instance,
+   * specifying the Classifier to wrap around.
+   *
+   * @param subClassifier a <code>Classifier</code>.
+   */
+  public DistributionMetaClassifier(Classifier subClassifier) {
+
+    setClassifier(subClassifier);
+  }
+
 
   /**
    * Builds the classifier.
