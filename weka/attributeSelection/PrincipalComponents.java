@@ -32,7 +32,7 @@ import  weka.filters.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class PrincipalComponents extends AttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -698,7 +698,7 @@ public class PrincipalComponents extends AttributeEvaluator
 	tempval += (m_eigenvectors[j][m_sortedEigens[i]] * 
 		    tempInst.value(j));
        }
-      newVals[m_numAttribs - i] = tempval;
+      newVals[m_numAttribs - i - 1] = tempval;
       cumulative+=m_eigenvalues[m_sortedEigens[i]];
       if ((cumulative / m_sumOfEigenValues) >= m_coverVariance) {
 	break;
