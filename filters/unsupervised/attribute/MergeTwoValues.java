@@ -43,7 +43,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MergeTwoValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -56,6 +56,17 @@ public class MergeTwoValues extends Filter
 
   /** The second value's index setting. */
   private SingleIndex m_SecondIndex = new SingleIndex("last");
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Merges two values of a nominal attribute into one value.";
+  }
 
   /**
    * Sets the format of the input instances.
@@ -213,6 +224,16 @@ public class MergeTwoValues extends Filter
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndexTipText() {
+
+    return "Sets which attribute to process. This "
+      + "attribute must be nominal (\"first\" and \"last\" are valid values)";
+  }
+
+  /**
    * Get the index of the attribute used.
    *
    * @return the index of the attribute
@@ -233,6 +254,16 @@ public class MergeTwoValues extends Filter
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String firstValueTipText() {
+
+    return "Sets the first value to be merged. "
+      + "(\"first\" and \"last\" are valid values)";
+  }
+
+  /**
    * Get the index of the first value used.
    *
    * @return the index of the first value
@@ -250,6 +281,16 @@ public class MergeTwoValues extends Filter
   public void setFirstValueIndex(String firstIndex) {
     
     m_FirstIndex.setSingleIndex(firstIndex);
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String secondValueTipText() {
+
+    return "Sets the second value to be merged. "
+      + "(\"first\" and \"last\" are valid values)";
   }
 
   /**

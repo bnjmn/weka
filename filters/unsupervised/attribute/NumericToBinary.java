@@ -36,10 +36,26 @@ import weka.core.*;
  * attribute will be one. The new attributes will nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class NumericToBinary extends PotentialClassIgnorer
   implements UnsupervisedFilter, StreamableFilter {
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Converts all numeric attributes into binary attributes (apart from "
+      + "the class attribute, if set): if the value of the numeric attribute is "
+      + "exactly zero, the value of the new attribute will be zero. If the "
+      + "value of the numeric attribute is missing, the value of the new "
+      + "attribute will be missing. Otherwise, the value of the new "
+      + "attribute will be one. The new attributes will nominal.";
+  }
 
   /**
    * Sets the format of the input instances.

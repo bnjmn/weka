@@ -60,13 +60,33 @@ import weka.core.UnsupportedAttributeTypeException;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FirstOrder extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
   /** Stores which columns to take differences between */
   protected Range m_DeltaCols = new Range();
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "This instance filter takes a range of N numeric attributes and replaces "
+      + "them with N-1 numeric attributes, the values of which are the difference "
+      + "between consecutive attribute values from the original instance. eg: \n\n"
+      + "Original attribute values\n\n"
+      + "   0.1, 0.2, 0.3, 0.1, 0.3\n\n"
+      + "New attribute values\n\n"
+      + "   0.1, 0.1, 0.1, -0.2, -0.2\n\n"
+      + "The range of attributes used is taken in numeric order. That is, a range "
+      + "spec of 7-11,3-5 will use the attribute ordering 3,4,5,7,8,9,10,11 for the "
+      + "differences, NOT 7,8,9,10,11,3,4,5.";
+  }
 
   /**
    * Returns an enumeration describing the available options.

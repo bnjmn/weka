@@ -33,13 +33,25 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ReplaceMissingValues extends PotentialClassIgnorer
   implements UnsupervisedFilter {
 
   /** The modes and means */
   private double[] m_ModesAndMeans = null;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Replaces all missing values for nominal and numeric attributes in a "
+      + "dataset with the modes and means from the training data.";
+  }
 
   /**
    * Sets the format of the input instances.

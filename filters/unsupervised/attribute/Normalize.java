@@ -33,7 +33,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Normalize extends PotentialClassIgnorer implements UnsupervisedFilter {
 
@@ -42,6 +42,19 @@ public class Normalize extends PotentialClassIgnorer implements UnsupervisedFilt
   
   /** The maximum values for numeric attributes. */
   private double [] m_MaxArray;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Normalizes all numeric values in the given dataset (apart from the "
+      + "class attribute, if set). The resulting values "
+      + "are in [0,1] for the data used to compute the normalization intervals. ";
+  }
 
   /**
    * Sets the format of the input instances.

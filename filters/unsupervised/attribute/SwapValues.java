@@ -44,7 +44,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SwapValues extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -57,6 +57,17 @@ public class SwapValues extends Filter
 
   /** The second value's index setting. */
   private SingleIndex m_SecondIndex = new SingleIndex("last");
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Swaps two values of a nominal attribute.";
+  }
 
   /**
    * Sets the format of the input instances.
@@ -212,6 +223,16 @@ public class SwapValues extends Filter
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndexTipText() {
+
+    return "Sets which attribute to process. This "
+      + "attribute must be nominal (\"first\" and \"last\" are valid values)";
+  }
+
+  /**
    * Get the index of the attribute used.
    *
    * @return the index of the attribute
@@ -232,6 +253,16 @@ public class SwapValues extends Filter
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String firstValueTipText() {
+
+    return "The index of the first value."
+      + "(\"first\" and \"last\" are valid values)";
+  }
+
+  /**
    * Get the index of the first value used.
    *
    * @return the index of the first value
@@ -249,6 +280,16 @@ public class SwapValues extends Filter
   public void setFirstValueIndex(String firstIndex) {
     
     m_FirstIndex.setSingleIndex(firstIndex);
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String secondValueTipText() {
+
+    return "The index of the second value."
+      + "(\"first\" and \"last\" are valid values)";
   }
 
   /**

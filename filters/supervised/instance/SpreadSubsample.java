@@ -65,7 +65,7 @@ import weka.core.UnsupportedClassTypeException;
  *  <p>
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  **/
 public class SpreadSubsample extends Filter implements SupervisedFilter,
 						       OptionHandler {
@@ -87,6 +87,33 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
    * total weight per class.
    */
   private boolean m_AdjustWeights = false;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Produces a random subsample of a dataset. The original dataset must "
+      + "fit entirely in memory. This filter allows you to specify the maximum "
+      + "\"spread\" between the rarest and most common class. For example, you may "
+      + "specify that there be at most a 2:1 difference in class frequencies. "
+      + "When used in batch mode, subsequent batches are NOT resampled.";
+
+  }
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String adjustWeightsTipText() {
+    return "Wether instance weights will be adjusted to maintain total weight per "
+      + "class.";
+  }
   
   /**
    * Returns true if instance  weights will be adjusted to maintain
@@ -224,7 +251,18 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
     }
     return options;
   }
-  
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String distributionSpreadTipText() {
+    return "The maximum class distribution spread. "
+      + "(0 = no maximum spread, 1 = uniform distribution, 10 = allow at most a "
+      + "10:1 ratio between the classes).";
+  }
   
   /**
    * Sets the value for the distribution spread
@@ -245,6 +283,16 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
 
     return m_DistributionSpread;
   }
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String maxCountTipText() {
+    return "The maximum count for any class value (0 = unlimited).";
+  }
   
   /**
    * Sets the value for the max count
@@ -264,6 +312,16 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
   public double getMaxCount() {
 
     return m_MaxCount;
+  }
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String randomSeedTipText() {
+    return "Sets the random number seed for subsampling.";
   }
   
   /**
