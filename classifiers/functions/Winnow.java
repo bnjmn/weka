@@ -37,6 +37,12 @@ import java.util.*;
  * attributes are abound: A new linear threshold algorithm</i>.
  * Machine Learning 2, pp. 285-318.<p>
  *
+ * and
+ * 
+ * N. Littlestone (1989). <i> Mistake bounds and logarithmic 
+ * linear-threshold learning algorithms</i>. Technical report
+ * UCSC-CRL-89-11, University of California, Santa Cruz.<p>
+ *
  * Valid options are:<p>
  *
  * -L <br>
@@ -61,7 +67,7 @@ import java.util.*;
  * Random seed to shuffle the input. (default 1), -1 == no shuffling<p>
  *
  * @author J. Lindgren (jtlindgr<at>cs.helsinki.fi)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class Winnow extends Classifier implements OptionHandler,
 						  UpdateableClassifier
@@ -211,19 +217,19 @@ public class Winnow extends Classifier implements OptionHandler,
   public void buildClassifier(Instances insts) throws Exception {
 
     if (insts.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+      throw new Exception("Can't handle string attributes!");
     }
     if (insts.numClasses() > 2) {
       throw new Exception("Can only handle two-class datasets!");
     }
     if (insts.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Can't handle a numeric class!");
+      throw new Exception("Can't handle a numeric class!");
     }
     Enumeration enum = insts.enumerateAttributes();
     while (enum.hasMoreElements()) {
       Attribute attr = (Attribute) enum.nextElement();
       if (!attr.isNominal()) {
-        throw new UnsupportedAttributeTypeException("Winnow: only nominal attributes, please.");
+        throw new Exception("Winnow: only nominal attributes, please.");
       }
     }
 
@@ -243,17 +249,17 @@ public class Winnow extends Classifier implements OptionHandler,
       m_Train.randomize(new Random(m_Seed));
 
     /** Make space to store weights */
-    m_predPosVector = new double[m_Train.numAttributes()-1];
+    m_predPosVector = new double[m_Train.numAttributes()];
 
     if(m_Balanced)
-      m_predNegVector = new double[m_Train.numAttributes()-1];
+      m_predNegVector = new double[m_Train.numAttributes()];
 
     /** Initialize the weights to starting values **/
-    for(int i=0;i<m_Train.numAttributes()-1;i++)
+    for(int i=0;i<m_Train.numAttributes();i++)
       m_predPosVector[i]=m_defaultWeight;
 
     if(m_Balanced)
-      for(int i=0;i<m_Train.numAttributes()-1;i++)
+      for(int i=0;i<m_Train.numAttributes();i++)
 	m_predNegVector[i]=m_defaultWeight;
 	
     /** Set actual prediction threshold **/
@@ -453,23 +459,28 @@ public class Winnow extends Classifier implements OptionHandler,
       return("Winnow: No model built yet.");
 	   
     String result = "Winnow\n\nAttribute weights\n\n";
+	
+    int classIndex = m_Train.classIndex();
 
     if(!m_Balanced)
       {
-	for( int i = 0 ; i < m_Train.numAttributes()-1; i++) {
-	  result += "w" + i + " " + m_predPosVector[i] + "\n";
+	for( int i = 0 ; i < m_Train.numAttributes(); i++) {
+	  if(i!=classIndex)
+    	    result += "w" + i + " " + m_predPosVector[i] + "\n";
 	}
       }
     else
       {
-        for( int i = 0 ; i < m_Train.numAttributes()-1; i++) {
-	  result += "w" + i + " p " + m_predPosVector[i];
-	  result += " n " + m_predNegVector[i];
+        for( int i = 0 ; i < m_Train.numAttributes(); i++) {
+	  if(i!=classIndex) {
+	    result += "w" + i + " p " + m_predPosVector[i];
+	    result += " n " + m_predNegVector[i];
 			
-	  double wdiff=m_predPosVector[i]-m_predNegVector[i];
+	    double wdiff=m_predPosVector[i]-m_predNegVector[i];
 
-	  result += " d " + wdiff + "\n";
-        }
+	    result += " d " + wdiff + "\n";
+          }
+	}
       }
     result += "\nCumulated mistake count: " + m_Mistakes + "\n\n";
 	
