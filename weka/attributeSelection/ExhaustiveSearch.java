@@ -38,7 +38,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class ExhaustiveSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -382,14 +382,12 @@ public class ExhaustiveSearch extends ASSearch
      }
 
      int i,j;
-     int subset;
      if (!done) {
        enumerateSizes: for (setSize = 1;setSize<=m_numAttribs;setSize++) {
 	 // set up and evaluate initial subset of this size
-	 subset = 0;
+         //	 subset = 0;
 	 tempGroup = new BitSet(m_numAttribs);
 	 for (i=0;i<setSize;i++) {
-	   subset = (subset ^ (1<<i));
 	   tempGroup.set(i);
 	   if (m_hasClass && i == m_classIndex) {
 	     tempGroup.clear(i);
@@ -417,9 +415,9 @@ public class ExhaustiveSearch extends ASSearch
 	   }
 	 }
 	 // generate all the other subsets of this size
-	 while (subset > 0) {
-	   subset = generateNextSubset(subset, setSize, tempGroup);
-	   if (subset > 0) {
+         while (tempGroup.cardinality() > 0) {
+           generateNextSubset(setSize, tempGroup);
+           if (tempGroup.cardinality() > 0) {
 	     tempMerit = ASEvaluator.evaluateSubset(tempGroup);
 	     m_evaluations++;
 	     if (tempMerit >= best_merit) {
@@ -510,36 +508,51 @@ public class ExhaustiveSearch extends ASSearch
   }
 
   /**
-   * generates the next subset of size "size" given the subset "set"
-   * coded as an integer. The next subset is returned (as an Integer) 
-   * and temp contains this subset as a BitSet.
-   * @param set the current subset coded as an integer
+   * generates the next subset of size "size" given the subset "temp".
    * @param size the size of the feature subset (eg. 2 means that the 
    * current subset contains two features and the next generated subset
    * should also contain 2 features).
    * @param temp will hold the generated subset as a BitSet
    */
-  private int generateNextSubset(int set, int size, BitSet temp) {
+  private void generateNextSubset(int size, BitSet temp) {
     int i,j;
     int counter = 0;
     boolean done = false;
+    BitSet temp2 = (BitSet)temp.clone();
 
     for (i=0;i<m_numAttribs;i++) {
-      temp.clear(i);
+      temp2.clear(i);
     }
 
     while ((!done) && (counter < size)) {
       for (i=m_numAttribs-1-counter;i>=0;i--) {
-	if ((set & (1<<i)) !=0) {
-	  // erase and move
-	  set = (set ^ (1<<i));
+        if (temp.get(i)) {
 
+          temp.clear(i);
+
+          int newP;
 	  if (i != (m_numAttribs-1-counter)) {
-	    set = (set ^ (1<<i+1));
-	    for (j=0;j<counter;j++) {
-	      set = (set ^ (1<<(i+2+j)));
-	    }
-	    done = true;
+            newP = i+1;
+            if (newP == m_classIndex) {
+              newP++;
+            }
+
+            if (newP < m_numAttribs) {
+              temp.set(newP);
+
+              for (j=0;j<counter;j++) {
+                if (newP+1+j == m_classIndex) {
+                  newP++;
+                }
+
+                if (newP+1+j < m_numAttribs) {
+                  temp.set(newP+1+j);
+                }
+              }
+              done = true;
+            } else {
+              counter++;
+            }
 	    break;
 	  } else {
 	    counter++;
@@ -549,14 +562,10 @@ public class ExhaustiveSearch extends ASSearch
       }
     }
 
-    for (i=m_numAttribs-1;i>=0;i--) {
-      if ((set & (1<<i)) != 0) {
-	if (i != m_classIndex) {
-	  temp.set(i);
-	}
-      }
+    if (temp.cardinality() < size) {
+      temp.clear();
     }
-    return set;
+    //    System.err.println(printSubset(temp).toString());
   }
       
   /**
