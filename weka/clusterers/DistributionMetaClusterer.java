@@ -23,21 +23,34 @@
 package weka.clusterers;
 
 import weka.core.*;
+import weka.estimators.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for wrapping a Clusterer to make it return a distribution. Simply
- * outputs a probabiltry of 1 for the chosen cluster and 0 for the others.
+ * Class for wrapping a Clusterer to make it return a distribution and density. Fits
+ * normal distributions and discrete distributions within each cluster produced by
+ * the wrapped clusterer.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 1.7 $
  */
-public class DistributionMetaClusterer extends DistributionClusterer 
+public class DistributionMetaClusterer extends Clusterer 
   implements OptionHandler {
 
+  /** holds training instances header information */
+  private Instances m_theInstances;
+  /** prior probabilities for the fitted clusters */
+  private double [] m_priors;
+  /** normal distributions fitted to each numeric attribute in each cluster */
+  private double [][][] m_modelNormal;
+  /** discrete distributions fitted to each discrete attribute in each cluster */
+  private DiscreteEstimator [][] m_model;
+  /** default minimum standard deviation */
+  private double m_minStdDev = 1e-6;
   /** The clusterer being wrapped */
-  private Clusterer m_wrappedClusterer = new weka.clusterers.EM();
+  private Clusterer m_wrappedClusterer = new weka.clusterers.SimpleKMeans();
 
   /**
    * Default constructor.
@@ -64,11 +77,71 @@ public class DistributionMetaClusterer extends DistributionClusterer
    * @exception Exception if the clusterer hasn't been set or something goes wrong
    */  
   public void buildClusterer(Instances data) throws Exception {
-
+    m_theInstances = new Instances(data, 0);
     if (m_wrappedClusterer == null) {
       throw new Exception("No clusterer has been set");
     }
     m_wrappedClusterer.buildClusterer(data);
+    m_model = 
+       new DiscreteEstimator[m_wrappedClusterer.numberOfClusters()][data.numAttributes()];
+    m_modelNormal = 
+      new double[m_wrappedClusterer.numberOfClusters()][data.numAttributes()][2];
+    m_priors = new double[m_wrappedClusterer.numberOfClusters()]; 
+     for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
+       for (int j = 0; j < data.numAttributes(); j++) {
+	 if (data.attribute(j).isNominal()) {
+	   m_model[i][j] = new DiscreteEstimator(data.attribute(j).numValues(),
+						 true);
+	 }
+       }
+     }
+     
+     Instance inst = null;
+     // process data
+     for (int i = 0; i < data.numInstances(); i++) {
+       inst = data.instance(i);
+       int cluster = m_wrappedClusterer.clusterInstance(inst);
+       m_priors[cluster]++;
+       for (int j = 0; j < data.numAttributes(); j++) {
+	 if (!inst.isMissing(j)) {
+	   if (data.attribute(j).isNominal()) {
+	     m_model[cluster][j].addValue(inst.value(j),1.0);
+	   } else {
+	     m_modelNormal[cluster][j][0] += inst.value(j);
+	     m_modelNormal[cluster][j][1] += (inst.value(j) * inst.value(j));
+	   }
+	 }
+       }
+     }
+     
+     // calculate mean and std deviation for numeric attributes
+     for (int j = 0; j < data.numAttributes(); j++) {
+       if (data.attribute(j).isNumeric()) {
+	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
+	   if (m_priors[i] > 0) {
+	     // variance
+	     m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - 
+				       (m_modelNormal[i][j][0] *
+					m_modelNormal[i][j][0] /
+					m_priors[i])) /
+	       m_priors[i];
+	     
+	     // std dev
+	     m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]);
+	     if (m_modelNormal[i][j][1] <= m_minStdDev 
+		 || Double.isNaN(m_modelNormal[i][j][1])) {
+	       m_modelNormal[i][j][1] = 
+		 m_minStdDev;
+	     }
+	     
+	     // mean
+	     m_modelNormal[i][j][0] /= m_priors[i];
+	   }
+	 }
+       }
+     }
+     
+     Utils.normalize(m_priors);
   }
   
   /**
@@ -80,7 +153,7 @@ public class DistributionMetaClusterer extends DistributionClusterer
    */
   public double densityForInstance(Instance instance) throws Exception {
 
-    return Utils.sum(distributionForInstance(instance));
+    return Utils.sum(weightsForInstance(instance));
   }
 
   /**
@@ -92,9 +165,62 @@ public class DistributionMetaClusterer extends DistributionClusterer
    */  
   public double[] distributionForInstance(Instance instance) throws Exception {
     
-    double[] distribution = new double[m_wrappedClusterer.numberOfClusters()];
-    distribution[m_wrappedClusterer.clusterInstance(instance)] = 1.0;
+    double[] distribution = weightsForInstance(instance);
+    Utils.normalize(distribution);
     return distribution;
+  }
+
+  /**
+   * Returns the weights (indicating cluster membership) for a given instance
+   * 
+   * @param inst the instance to be assigned a cluster
+   * @return an array of weights
+   * @exception Exception if weights could not be computed
+   */
+  protected double[] weightsForInstance(Instance inst)
+    throws Exception {
+
+    int i, j;
+    double prob;
+    double[] wghts = new double[m_wrappedClusterer.numberOfClusters()];
+
+    for (i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
+      if (m_priors[i] > 0) {
+	prob = 1.0;
+	
+	for (j = 0; j < inst.numAttributes(); j++) {
+	  if (!inst.isMissing(j)) {
+	    if (inst.attribute(j).isNominal()) {
+	    prob *= m_model[i][j].getProbability(inst.value(j));
+	    }
+	    else { // numeric attribute
+	      prob *= normalDens(inst.value(j), 
+				 m_modelNormal[i][j][0], 
+				 m_modelNormal[i][j][1]);
+	    }
+	  }
+	}
+
+	wghts[i] = (prob * m_priors[i]);
+      }
+    }
+
+    return  wghts;
+  }
+
+  /** Constant for normal distribution. */
+  private static double m_normConst = Math.sqrt(2*Math.PI);
+
+  /**
+   * Density function of normal distribution.
+   * @param x input value
+   * @param mean mean of distribution
+   * @param stdDev standard deviation of distribution
+   */
+  private double normalDens (double x, double mean, double stdDev) {
+    double diff = x - mean;
+    
+    return  (1/(m_normConst*stdDev))*Math.exp(-(diff*diff/(2*stdDev*stdDev)));
   }
   
   /**
@@ -114,8 +240,35 @@ public class DistributionMetaClusterer extends DistributionClusterer
    * @return a string containing a description of the clusterer
    */
   public String toString() {
+    StringBuffer text = new StringBuffer();
+    text.append("DistributionMetaClusterer: \n\nWrapped clusterer: " 
+		+ m_wrappedClusterer.toString());
 
-    return "DistributionMetaClusterer: " + m_wrappedClusterer.toString();
+    text.append("\nFitted estimators: \n");
+    
+    for (int j = 0; j < m_priors.length; j++) {
+      text.append("\nCluster: " + j + " Prior probability: " 
+		  + Utils.doubleToString(m_priors[j], 4) + "\n\n");
+      
+      for (int i = 0; i < m_model[0].length; i++) {
+        text.append("Attribute: " + m_theInstances.attribute(i).name() + "\n");
+	
+        if (m_theInstances.attribute(i).isNominal()) {
+          if (m_model[j][i] != null) {
+            text.append(m_model[j][i].toString());
+          }
+        }
+        else {
+          text.append("Normal Distribution. Mean = " 
+		      + Utils.doubleToString(m_modelNormal[j][i][0], 4) 
+		      + " StdDev = " 
+		      + Utils.doubleToString(m_modelNormal[j][i][1], 4) 
+		      + "\n");
+        }
+      }
+    }
+
+    return  text.toString();
   }
 
   /**
