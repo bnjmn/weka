@@ -29,7 +29,7 @@
  * Cutoff. <p>
  *
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 package weka.clusterers;
 
@@ -42,7 +42,7 @@ public class Cobweb extends Clusterer implements OptionHandler{
   static final double norm = 1/Math.sqrt(2*Math.PI);
 
   // Inner Class
-  class CTree {
+  class CTree implements Serializable {
     public CTree siblings = null, children = null;
     public int size; // number of leaves under this node
     public int nchildren; // number of direct children of this node
