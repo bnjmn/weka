@@ -60,7 +60,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class Explorer extends JPanel {
 
@@ -129,22 +129,18 @@ public class Explorer extends JPanel {
     m_TabbedPane.setEnabledAt(5, false);
     m_PreprocessPanel.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
-	m_ClassifierPanel.setInstances(m_PreprocessPanel
-       				       .getInstances());
-	m_AssociationPanel.setInstances(m_PreprocessPanel
-				       .getInstances());
-	m_ClustererPanel.setInstances(m_PreprocessPanel
-				      .getInstances());
-	m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
-					       .getInstances());
-	m_VisualizePanel.setInstances(m_PreprocessPanel
-					       .getInstances());
-
-	m_TabbedPane.setEnabledAt(1, true);
-	m_TabbedPane.setEnabledAt(2, true);
-	m_TabbedPane.setEnabledAt(3, true);
-	m_TabbedPane.setEnabledAt(4, true);
-	m_TabbedPane.setEnabledAt(5, true);
+        m_ClassifierPanel.setInstances(m_PreprocessPanel.getInstances());
+        m_AssociationPanel.setInstances(m_PreprocessPanel.getInstances());
+        m_ClustererPanel.setInstances(m_PreprocessPanel.getInstances());
+        m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
+                                               .getInstances());
+        m_VisualizePanel.setInstances(m_PreprocessPanel.getInstances());
+        
+        m_TabbedPane.setEnabledAt(1, true);
+        m_TabbedPane.setEnabledAt(2, true);
+        m_TabbedPane.setEnabledAt(3, true);
+        m_TabbedPane.setEnabledAt(4, true);
+        m_TabbedPane.setEnabledAt(5, true);
       }
     });
 
@@ -153,7 +149,18 @@ public class Explorer extends JPanel {
    
     add(m_LogPanel, BorderLayout.SOUTH);
   }
-
+  
+  /** variable for the Explorer class which would be set to null by the memory 
+      monitoring thread to free up some memory if we running out of memory
+   */
+  private static Explorer m_explorer;
+  /** 
+   * The size in bytes of the java virtual machine at the start. This 
+   * represents the critical amount of memory that is necessary for the  
+   * program to run. If our free memory falls below (or is very close) to this 
+   * critical amount then the virtual machine throws an OutOfMemoryError.
+   */
+  private static long m_initialJVMSize;
   /**
    * Tests out the explorer environment.
    *
@@ -165,28 +172,90 @@ public class Explorer extends JPanel {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {}
     try {
-      Explorer explorer = new Explorer();
+      m_initialJVMSize = Runtime.getRuntime().totalMemory();
+      m_explorer = new Explorer();
       final JFrame jf = new JFrame("Weka Explorer");
       jf.getContentPane().setLayout(new BorderLayout());
-      jf.getContentPane().add(explorer, BorderLayout.CENTER);
+      jf.getContentPane().add(m_explorer, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
-	public void windowClosing(WindowEvent e) {
-	  jf.dispose();
-	  System.exit(0);
-	}
+        public void windowClosing(WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
       });
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
       Image icon = Toolkit.getDefaultToolkit().
-	getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
+      getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
       jf.setIconImage(icon);
 
       if (args.length == 1) {
-	System.err.println("Loading instances from " + args[0]);
-	explorer.m_PreprocessPanel.setInstancesFromFile(new File(args[0]));
+        System.err.println("Loading instances from " + args[0]);
+        m_explorer.m_PreprocessPanel.setInstancesFromFile(new File(args[0]));
       }
 
+      Thread memMonitor = new Thread() {
+        public void run() {
+          while(true) {
+            try {
+              //System.out.println("Before sleeping.");
+              this.sleep(4000);
+
+              System.gc();
+              if((Runtime.getRuntime().maxMemory() - 
+                  Runtime.getRuntime().totalMemory())  <  
+                                    m_initialJVMSize+200000) {
+
+                jf.dispose();
+                m_explorer = null;
+                System.gc();
+
+                Thread [] thGroup = new Thread[Thread.activeCount()];
+                Thread.enumerate(thGroup);
+                //System.out.println("No of threads in the ThreadGroup:"+
+                //                   thGroup.length);
+                for(int i=0; i<thGroup.length; i++) {
+                  Thread t = thGroup[i];
+                  if(t!=null) {
+                    //System.out.println("Thread "+(i+1)+": "+t.getName());
+                    if(t!=Thread.currentThread()) {
+                      if(t.getName().startsWith("Thread")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                      else if(t.getName().startsWith("AWT-EventQueue")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                    }
+                  }
+                  //else
+                  //  System.out.println("Thread "+(i+1)+" is null.");
+                }
+                thGroup=null;
+                //System.gc();
+
+                JOptionPane.showMessageDialog(null,
+                                              "Not enough memory. Please load "+
+                                              "a smaller dataset or use "+
+                                              "larger heap size.", 
+                                              "OutOfMemory",
+                                              JOptionPane.WARNING_MESSAGE);
+                System.err.println("displayed message");
+                System.err.println("Not enough memory. Please load a smaller "+
+                                   "dataset or use larger heap size.");
+                System.err.println("exiting");
+                System.exit(-1);
+              }
+
+            } catch(InterruptedException ex) { ex.printStackTrace(); }
+          }
+        }
+      };
+
+      memMonitor.setPriority(Thread.MAX_PRIORITY);
+      memMonitor.start();
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
