@@ -40,7 +40,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class NominalToBinary extends Filter implements UnsupervisedFilter,
 						       OptionHandler {
@@ -236,7 +236,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 
     for(int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
-      if (!att.isNominal()) {
+      if (!att.isNominal() || (j == getInputFormat().classIndex())) {
 	vals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
