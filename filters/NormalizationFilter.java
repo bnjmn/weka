@@ -17,7 +17,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class NormalizationFilter extends Filter {
 
@@ -37,10 +37,10 @@ public class NormalizationFilter extends Filter {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     m_MinArray = m_MaxArray = null;
     return true;

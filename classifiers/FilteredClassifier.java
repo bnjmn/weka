@@ -34,7 +34,7 @@ import weka.core.Attribute;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -251,7 +251,7 @@ public class FilteredClassifier extends DistributionClassifier
     util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
     t.start();
     */
-    m_Filter.inputFormat(data);
+    m_Filter.setInputFormat(data);
     data = Filter.useFilter(data, m_Filter);
     //t.stop();
     m_FilteredInstances = data.stringFreeStructure();

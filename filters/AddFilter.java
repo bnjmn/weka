@@ -29,7 +29,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -117,7 +117,7 @@ public class AddFilter extends Filter implements OptionHandler {
     setAttributeName(Utils.getOption('N', options));
 
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -153,9 +153,9 @@ public class AddFilter extends Filter implements OptionHandler {
    * @return true if the outputFormat may be collected immediately
    * @exception Exception if the format couldn't be set successfully
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
 
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute = null;
@@ -208,7 +208,7 @@ public class AddFilter extends Filter implements OptionHandler {
     // Insert the new attribute and reassign to output
     inst.setDataset(null);
     inst.insertAttributeAt(m_Insert);
-    inst.setDataset(outputFormat());
+    inst.setDataset(getOutputFormat());
     push(inst);
     return true;
   }

@@ -24,7 +24,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -86,7 +86,7 @@ public class AttributeFilter extends Filter implements OptionHandler {
     setInvertSelection(Utils.getFlag('V', options));
     
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -122,9 +122,9 @@ public class AttributeFilter extends Filter implements OptionHandler {
    * @return true if the outputFormat may be collected immediately
    * @exception Exception if the format couldn't be set successfully
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     
     m_SelectCols.setUpper(instanceInfo.numAttributes() - 1);
 

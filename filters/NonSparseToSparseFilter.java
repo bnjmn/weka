@@ -15,7 +15,7 @@ import weka.core.*;
  * A filter that converts all incoming instances into sparse format.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class NonSparseToSparseFilter extends Filter {
 
@@ -38,9 +38,9 @@ public class NonSparseToSparseFilter extends Filter {
    * structure is required).
    * @return true if the outputFormat may be collected immediately
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     return true;
   }

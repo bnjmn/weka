@@ -23,7 +23,7 @@ import  weka.filters.ReplaceMissingValuesFilter;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -93,7 +93,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
     }
 
     m_ReplaceMissingFilter = new ReplaceMissingValuesFilter();
-    m_ReplaceMissingFilter.inputFormat(data);
+    m_ReplaceMissingFilter.setInputFormat(data);
     m_instances = Filter.useFilter(data, m_ReplaceMissingFilter);
 
     m_Min = new double [m_instances.numAttributes()];

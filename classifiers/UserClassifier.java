@@ -33,7 +33,7 @@ import java.beans.PropertyChangeSupport;
  *
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -984,7 +984,7 @@ TreeDisplayListener, VisualizePanelListener {
       m_filter = new AttributeFilter();
       ((AttributeFilter)m_filter).setInvertSelection(true);
       ((AttributeFilter)m_filter).setAttributeIndicesArray(attributeList2);
-      m_filter.inputFormat(m_training);
+      m_filter.setInputFormat(m_training);
       
       Instances temp2 = Filter.useFilter(m_training, m_filter);
       temp2.setClassIndex(classind);

@@ -36,7 +36,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler,
  AdditionalMeasureProducer {
@@ -101,10 +101,10 @@ public final class  M5Prime extends Classifier implements OptionHandler,
     inst = new Instances(inst);
     inst.deleteWithMissingClass();
     m_ReplaceMissingValuesFilter = new ReplaceMissingValuesFilter();
-    m_ReplaceMissingValuesFilter.inputFormat(inst);
+    m_ReplaceMissingValuesFilter.setInputFormat(inst);
     inst = Filter.useFilter(inst, m_ReplaceMissingValuesFilter);
     m_NominalToBinaryFilter = new NominalToBinaryFilter();
-    m_NominalToBinaryFilter.inputFormat(inst);
+    m_NominalToBinaryFilter.setInputFormat(inst);
     inst = Filter.useFilter(inst, m_NominalToBinaryFilter);
     
     m_root = new Node[2];

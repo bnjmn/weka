@@ -24,7 +24,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -532,7 +532,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   class ControlPanel extends JPanel {
     
@@ -1582,7 +1582,7 @@ public class NeuralNetwork extends DistributionClassifier
 
     if (m_useNomToBin) {
       m_nominalToBinaryFilter = new NominalToBinaryFilter();
-      m_nominalToBinaryFilter.inputFormat(m_instances);
+      m_nominalToBinaryFilter.setInputFormat(m_instances);
       m_instances = Filter.useFilter(m_instances,
 				     m_nominalToBinaryFilter);
     }

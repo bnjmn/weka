@@ -43,7 +43,7 @@ import  weka.filters.AttributeFilter;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.14 $
+ * @version  $Revision: 1.15 $
  */
 public class ClusterEvaluation {
 
@@ -188,7 +188,7 @@ public class ClusterEvaluation {
       AttributeFilter removeClass = new AttributeFilter();
       removeClass.setAttributeIndices(""+(testCopy.classIndex()+1));
       removeClass.setInvertSelection(false);
-      removeClass.inputFormat(testCopy);
+      removeClass.setInputFormat(testCopy);
       testCopy = Filter.useFilter(testCopy, removeClass);
     }
 
@@ -606,7 +606,7 @@ public class ClusterEvaluation {
 	AttributeFilter removeClass = new AttributeFilter();
 	removeClass.setAttributeIndices(""+theClass);
 	removeClass.setInvertSelection(false);
-	removeClass.inputFormat(train);
+	removeClass.setInputFormat(train);
 	Instances clusterTrain = Filter.useFilter(train, removeClass);
 	clusterer.buildClusterer(clusterTrain);
 	ClusterEvaluation ce = new ClusterEvaluation();

@@ -14,7 +14,7 @@ import weka.core.*;
 /** 
  * This filter randomly shuffles the order of instances passed through it.
  * The random number generator is reset with the seed value whenever
- * inputFormat() is called. <p>
+ * setInputFormat() is called. <p>
  *
  * Valid filter-specific options are:<p>
  *
@@ -22,7 +22,7 @@ import weka.core.*;
  * Specify the random number seed (default 42).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RandomizeFilter extends Filter implements OptionHandler {
 
@@ -68,7 +68,7 @@ public class RandomizeFilter extends Filter implements OptionHandler {
     }
 
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -120,9 +120,9 @@ public class RandomizeFilter extends Filter implements OptionHandler {
    * structure is required).
    * @return true if the outputFormat may be collected immediately
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     m_Random = new Random(m_Seed);
     return true;
@@ -133,7 +133,7 @@ public class RandomizeFilter extends Filter implements OptionHandler {
    * the filter requires all instances prior to filtering, output()
    * may now be called to retrieve the filtered instances. Any
    * subsequent instances filtered should be filtered based on setting
-   * obtained from the first batch (unless the inputFormat has been
+   * obtained from the first batch (unless the setInputFormat has been
    * re-assigned or new options have been set). This 
    * implementation randomizes all the instances received in the batch.
    *

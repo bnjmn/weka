@@ -26,7 +26,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -62,7 +62,7 @@ public class ClassificationViaRegression extends DistributionClassifier
       m_ClassFilters[i].setAttributeIndex(insts.classIndex());
       m_ClassFilters[i].setValueIndex(i);
       m_ClassFilters[i].setNumeric(true);
-      m_ClassFilters[i].inputFormat(insts);
+      m_ClassFilters[i].setInputFormat(insts);
       newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
       m_Classifiers[i].buildClassifier(newInsts);
     }

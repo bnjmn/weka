@@ -64,7 +64,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -448,7 +448,7 @@ public class PreprocessPanel extends JPanel {
       for (int i = 0; i < filters.length; i++) {
 	m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
 			    + filters[i].getClass().getName());
-	filters[i].inputFormat(temp);
+	filters[i].setInputFormat(temp);
 	temp = Filter.useFilter(temp, filters[i]);
       }
       if (m_Log instanceof TaskLogger) {

@@ -34,7 +34,7 @@ import weka.core.*;
  * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -75,7 +75,7 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
     if (m_Class == null) {
@@ -84,7 +84,7 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     if (m_Method == null) {
       throw new IllegalStateException("No method has been set.");
     }
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     m_Cols.setUpper(instanceInfo.numAttributes() - 1);
     setOutputFormat(instanceInfo);
     return true;
@@ -204,7 +204,7 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     setMethodName(Utils.getOption('M', options));
 
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 

@@ -105,7 +105,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -731,7 +731,7 @@ public class ClassifierPanel extends JPanel {
 	    for (int i = 0; i < filters.length; i++) {
 	      m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
 				  + filters[i].getClass().getName());
-	      filters[i].inputFormat(m_TestInstancesCopy);
+	      filters[i].setInputFormat(m_TestInstancesCopy);
 	      m_TestInstancesCopy = Filter.useFilter(m_TestInstancesCopy, 
 						     filters[i]);
 	    }

@@ -24,7 +24,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class ChiSquaredAttributeEval
   extends AttributeEvaluator
@@ -202,11 +202,11 @@ public class ChiSquaredAttributeEval
     if (!m_Binarize) {
       DiscretizeFilter disTransform = new DiscretizeFilter();
       disTransform.setUseBetterEncoding(true);
-      disTransform.inputFormat(data);
+      disTransform.setInputFormat(data);
       data = Filter.useFilter(data, disTransform);
     } else {
       NumericToBinaryFilter binTransform = new NumericToBinaryFilter();
-      binTransform.inputFormat(data);
+      binTransform.setInputFormat(data);
       data = Filter.useFilter(data, binTransform);
     }      
     int numClasses = data.attribute(classIndex).numValues();

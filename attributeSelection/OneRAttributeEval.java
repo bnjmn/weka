@@ -19,7 +19,7 @@ import  weka.filters.*;
  * No options. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator
@@ -111,7 +111,7 @@ public class OneRAttributeEval
     featArray[0] = attribute;
     featArray[1] = trainCopy.classIndex();
     delTransform.setAttributeIndicesArray(featArray);
-    delTransform.inputFormat(trainCopy);
+    delTransform.setInputFormat(trainCopy);
     trainCopy = Filter.useFilter(trainCopy, delTransform);
     o_Evaluation = new Evaluation(trainCopy);
     o_Evaluation.crossValidateModel("weka.classifiers.OneR", trainCopy, 10, null);

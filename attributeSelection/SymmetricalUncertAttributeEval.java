@@ -21,7 +21,7 @@ import  weka.filters.*;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class SymmetricalUncertAttributeEval
   extends AttributeEvaluator
@@ -170,7 +170,7 @@ public class SymmetricalUncertAttributeEval
 
     DiscretizeFilter disTransform = new DiscretizeFilter();
     disTransform.setUseBetterEncoding(true);
-    disTransform.inputFormat(m_trainInstances);
+    disTransform.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, disTransform);
     m_numClasses = m_trainInstances.attribute(m_classIndex).numValues();
   }

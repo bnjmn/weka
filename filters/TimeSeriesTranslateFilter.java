@@ -39,7 +39,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class TimeSeriesTranslateFilter extends AbstractTimeSeriesFilter {
 
@@ -53,9 +53,9 @@ public class TimeSeriesTranslateFilter extends AbstractTimeSeriesFilter {
    * @exception UnsupportedAttributeTypeException if selected
    * attributes are not numeric or nominal.
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
     for(int i = 0; i < instanceInfo.numAttributes(); i++) {

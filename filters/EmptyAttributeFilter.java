@@ -20,7 +20,7 @@ import weka.core.Utils;
  * missing values, this is still taken as being empty.
  *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class EmptyAttributeFilter extends Filter {
 
@@ -43,10 +43,10 @@ public class EmptyAttributeFilter extends Filter {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     m_MinArray = m_MaxArray = null;
     return false;
   }

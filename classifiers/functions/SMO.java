@@ -64,7 +64,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
@@ -294,12 +294,12 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
 
     m_Missing = new ReplaceMissingValuesFilter();
-    m_Missing.inputFormat(m_data);
+    m_Missing.setInputFormat(m_data);
     m_data = Filter.useFilter(m_data, m_Missing); 
 
     if (m_Normalize) {
       m_Normalization = new NormalizationFilter();
-      m_Normalization.inputFormat(m_data);
+      m_Normalization.setInputFormat(m_data);
       m_data = Filter.useFilter(m_data, m_Normalization); 
     } else {
       m_Normalization = null;
@@ -307,7 +307,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
     if (!m_onlyNumeric) {
       m_NominalToBinary = new NominalToBinaryFilter();
-      m_NominalToBinary.inputFormat(m_data);
+      m_NominalToBinary.setInputFormat(m_data);
       m_data = Filter.useFilter(m_data, m_NominalToBinary);
     } else {
       m_NominalToBinary = null;

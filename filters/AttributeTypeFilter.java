@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and "string". (default "string")<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
@@ -91,7 +91,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
     }
     
     if (getInputFormat() != null) {
-      inputFormat(getInputFormat());
+      setInputFormat(getInputFormat());
     }
   }
 
@@ -155,9 +155,9 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    * @return true if the outputFormat may be collected immediately
    * @exception Exception if the format couldn't be set successfully
    */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     
     // Create the output buffer
     FastVector attributes = new FastVector();

@@ -29,7 +29,7 @@ import  weka.filters.*;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -234,7 +234,7 @@ public class CfsSubsetEval
     if (!m_isNumeric) {
       m_disTransform = new DiscretizeFilter();
       m_disTransform.setUseBetterEncoding(true);
-      m_disTransform.inputFormat(m_trainInstances);
+      m_disTransform.setInputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_disTransform);
     }
 

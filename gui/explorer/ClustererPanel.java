@@ -96,7 +96,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -582,7 +582,7 @@ public class ClustererPanel extends JPanel {
 	    for (int i = 0; i < filters.length; i++) {
 	      m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
 				  + filters[i].getClass().getName());
-	      filters[i].inputFormat(m_TestInstancesCopy);
+	      filters[i].setInputFormat(m_TestInstancesCopy);
 	      m_TestInstancesCopy = Filter.useFilter(m_TestInstancesCopy, 
 						     filters[i]);
 	    }
@@ -961,7 +961,7 @@ public class ClustererPanel extends JPanel {
       } else {
 	af.setAttributeIndices(""+(inst.classIndex()+1));
 	af.setInvertSelection(false);
-	af.inputFormat(inst);
+	af.setInputFormat(inst);
 	retI = Filter.useFilter(inst, af);
       }
     } catch (Exception e) {
@@ -988,7 +988,7 @@ public class ClustererPanel extends JPanel {
     try {
       af.setAttributeIndicesArray(selected);
       af.setInvertSelection(false);
-      af.inputFormat(inst);
+      af.setInputFormat(inst);
       retI = Filter.useFilter(inst, af);
     } catch (Exception e) {
       e.printStackTrace();

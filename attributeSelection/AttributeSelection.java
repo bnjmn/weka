@@ -65,7 +65,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.25 $
+ * @version  $Revision: 1.26 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -756,7 +756,7 @@ public class AttributeSelection implements Serializable {
       m_attributeFilter = new AttributeFilter();
       m_attributeFilter.setAttributeIndicesArray(m_selectedAttributeSet);
       m_attributeFilter.setInvertSelection(true);
-      m_attributeFilter.inputFormat(m_trainInstances);  
+      m_attributeFilter.setInputFormat(m_trainInstances);  
     }
 
     // Save space

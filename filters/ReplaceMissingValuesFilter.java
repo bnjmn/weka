@@ -16,7 +16,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
@@ -33,10 +33,10 @@ public class ReplaceMissingValuesFilter extends Filter {
    * @exception Exception if the input format can't be set 
    * successfully
    */
-  public boolean inputFormat(Instances instanceInfo) 
+  public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
-    super.inputFormat(instanceInfo);
+    super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     m_ModesAndMeans = null;
     return true;
