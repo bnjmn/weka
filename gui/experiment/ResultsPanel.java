@@ -84,7 +84,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -114,10 +114,6 @@ public class ResultsPanel extends JPanel {
   protected DefaultComboBoxModel m_DatasetModel =
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
   
-  /** The model embedded in m_RunCombo */
-  protected DefaultComboBoxModel m_RunModel =
-    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
-  
   /** The model embedded in m_CompareCombo */
   protected DefaultComboBoxModel m_CompareModel = 
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
@@ -137,9 +133,6 @@ public class ResultsPanel extends JPanel {
 
   /** Displays the list of selected columns determining the scheme */
   protected JList m_DatasetKeyList = new JList(m_DatasetKeyModel);
-
-  /** Lets the user select which column contains the run number */
-  protected JComboBox m_RunCombo = new JComboBox(m_RunModel);
 
   /** Displays the currently selected column names for the scheme & options */
   protected JLabel m_ResultKeyLabel = new JLabel("Column key fields",
@@ -208,14 +201,6 @@ public class ResultsPanel extends JPanel {
   
   /** An experiment (used for identifying a result source) -- optional */
   protected Experiment m_Exp;
-
-  /** An actionlisteners that updates ttest settings */
-  protected ActionListener m_ConfigureListener = new ActionListener() {
-    public void actionPerformed(ActionEvent e) {
-      m_TTester.setRunColumn(m_RunCombo.getSelectedIndex());
-      setTTester();
-    }
-  };
   
   private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut
 					       .getPreferredSize().height);
@@ -280,8 +265,6 @@ public class ResultsPanel extends JPanel {
     });
     m_DatasetKeyList.setSelectionMode(ListSelectionModel
 				      .MULTIPLE_INTERVAL_SELECTION);
-    m_RunCombo.setEnabled(false);
-    m_RunCombo.addActionListener(m_ConfigureListener);
     m_ResultKeyBut.setEnabled(false);
     m_ResultKeyBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -362,19 +345,6 @@ public class ResultsPanel extends JPanel {
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_DatasetKeyBut, gbC);
     p3.add(m_DatasetKeyBut);
-
-    JLabel lab = new JLabel("Run field", SwingConstants.RIGHT);
-    gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = 1;     gbC.gridx = 0;
-    gbC.insets = new Insets(2, 10, 2, 10);
-    gbL.setConstraints(lab, gbC);
-    p3.add(lab);
-    gbC = new GridBagConstraints();
-    gbC.gridy = 1;     gbC.gridx = 1;  gbC.weightx = 100;
-    gbC.insets = new Insets(5,0,5,0);
-    gbL.setConstraints(m_RunCombo, gbC);
-    p3.add(m_RunCombo);
     
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
@@ -388,7 +358,7 @@ public class ResultsPanel extends JPanel {
     gbL.setConstraints(m_ResultKeyBut, gbC);
     p3.add(m_ResultKeyBut);
     
-    lab = new JLabel("Comparison field", SwingConstants.RIGHT);
+    JLabel lab = new JLabel("Comparison field", SwingConstants.RIGHT);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = 3;     gbC.gridx = 0;
@@ -501,19 +471,16 @@ public class ResultsPanel extends JPanel {
   protected void setComboSizes() {
     
     m_DatasetKeyBut.setPreferredSize(COMBO_SIZE);
-    m_RunCombo.setPreferredSize(COMBO_SIZE);
     m_ResultKeyBut.setPreferredSize(COMBO_SIZE);
     m_CompareCombo.setPreferredSize(COMBO_SIZE);
     m_SigTex.setPreferredSize(COMBO_SIZE);
 
     m_DatasetKeyBut.setMaximumSize(COMBO_SIZE);
-    m_RunCombo.setMaximumSize(COMBO_SIZE);
     m_ResultKeyBut.setMaximumSize(COMBO_SIZE);
     m_CompareCombo.setMaximumSize(COMBO_SIZE);
     m_SigTex.setMaximumSize(COMBO_SIZE);
 
     m_DatasetKeyBut.setMinimumSize(COMBO_SIZE);
-    m_RunCombo.setMinimumSize(COMBO_SIZE);
     m_ResultKeyBut.setMinimumSize(COMBO_SIZE);
     m_CompareCombo.setMinimumSize(COMBO_SIZE);
     m_SigTex.setMinimumSize(COMBO_SIZE);
@@ -710,33 +677,25 @@ public class ResultsPanel extends JPanel {
     m_Instances = newInstances;
     m_TTester.setInstances(m_Instances);
     m_FromLab.setText("Got " + m_Instances.numInstances() + " results");
-
-    // Temporarily remove the configuration listener
-    m_RunCombo.removeActionListener(m_ConfigureListener);
     
     // Do other stuff
     m_DatasetKeyModel.removeAllElements();
-    m_RunModel.removeAllElements();
     m_ResultKeyModel.removeAllElements();
     m_CompareModel.removeAllElements();
     int datasetCol = -1;
-    int runCol = -1;
     String selectedList = "";
     String selectedListDataset = "";
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
       m_DatasetKeyModel.addElement(name);
-      m_RunModel.addElement(name);
       m_ResultKeyModel.addElement(name);
       m_CompareModel.addElement(name);
 
       if (name.toLowerCase().equals("key_dataset")) {
 	m_DatasetKeyList.addSelectionInterval(i, i);
 	selectedListDataset += "," + (i + 1);
-      } else if ((runCol == -1)
-		 && (name.toLowerCase().equals("key_run"))) {
-	m_RunCombo.setSelectedIndex(i);
-	runCol = i;
+      } else if (name.toLowerCase().equals("key_run")) {
+	m_TTester.setRunColumn(i);
       } else if (name.toLowerCase().equals("key_fold")) {
 	m_TTester.setFoldColumn(i);
       } else if (name.toLowerCase().equals("key_scheme") ||
@@ -752,19 +711,10 @@ public class ResultsPanel extends JPanel {
 	m_CompareCombo.setSelectedIndex(i);
       }
     }
-    if (runCol == -1) {
-      runCol = 0;
-    }
     m_DatasetKeyBut.setEnabled(true);
-    m_RunCombo.setEnabled(true);
     m_ResultKeyBut.setEnabled(true);
     m_CompareCombo.setEnabled(true);
     
-    // Reconnect the configuration listener
-    m_RunCombo.addActionListener(m_ConfigureListener);
-    
-    // Set up the TTester with the new data
-    m_TTester.setRunColumn(runCol);
     Range generatorRange = new Range();
     if (selectedList.length() != 0) {
       try {
