@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.57 $
+ * @version $Revision: 1.58 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -261,9 +261,6 @@ public class ClassifierPanel extends JPanel {
 
   /** The user-supplied test set (if any) */
   protected Instances m_TestInstances;
-
-  /** The user supplied test set after preprocess filters have been applied */
-  protected Instances m_TestInstancesCopy;
   
   /** A thread that classification runs in */
   protected Thread m_RunThread;
@@ -763,8 +760,8 @@ public class ClassifierPanel extends JPanel {
     if (m_SetTestFrame == null) {
       final SetInstancesPanel sp = new SetInstancesPanel();
       m_Summary = sp.getSummary();
-      if (m_TestInstancesCopy != null) {
-	sp.setInstances(m_TestInstancesCopy);
+      if (m_TestInstances != null) {
+	sp.setInstances(m_TestInstances);
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
@@ -978,7 +975,7 @@ public class ClassifierPanel extends JPanel {
 	  long trainTimeStart = 0, trainTimeElapsed = 0;
 
 	  if (m_TestInstances != null) {
-	    userTest = new Instances(m_TestInstancesCopy);
+	    userTest = new Instances(m_TestInstances);
 	  }
 	  if (m_EvalWRTCostsBut.isSelected()) {
 	    costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
@@ -1896,7 +1893,7 @@ public class ClassifierPanel extends JPanel {
     try {
 
       if (m_TestInstances != null) {
-	userTest = new Instances(m_TestInstancesCopy);
+	userTest = new Instances(m_TestInstances);
       }
       // Check the test instance compatibility
       if (userTest == null) {
