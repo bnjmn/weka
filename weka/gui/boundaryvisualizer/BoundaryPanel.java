@@ -102,9 +102,13 @@ public class BoundaryPanel extends JPanel {
   private int m_panelWidth;
   private int m_panelHeight;
 
+  // number of samples to take from each region in the fixed dimensions
   private int m_numOfSamplesPerRegion = 2;
-  private int m_numOfSamplesPerGenerator = 2;
-  
+
+  // number of samples per kernel = base ^ (# non-fixed dimensions)
+  private int m_numOfSamplesPerGenerator;
+  private double m_samplesBase = 2.0;
+
   // listeners to be notified when plot is complete
   private Vector m_listeners = new Vector();
 
@@ -127,9 +131,12 @@ public class BoundaryPanel extends JPanel {
   // Stop the plotting thread
   private boolean m_stopPlotting = false;
 
+  private boolean m_stopReplotting = false;
+
   // A random number generator 
   private Random m_random = null;
 
+  // cache of probabilities for fast replotting
   private double [][][] m_probabilityCache;
 
   /**
@@ -176,6 +183,26 @@ public class BoundaryPanel extends JPanel {
    */
   public int getNumSamplesPerRegion() {
     return m_numOfSamplesPerRegion;
+  }
+
+  /**
+   * Set the base for computing the number of samples to obtain from each
+   * generator. number of samples = base ^ (# non fixed dimensions)
+   *
+   * @param ksb a <code>double</code> value
+   */
+  public void setGeneratorSamplesBase(double ksb) {
+    m_samplesBase = ksb;
+  }
+
+  /**
+   * Get the base used for computing the number of samples to obtain from
+   * each generator
+   *
+   * @return a <code>double</code> value
+   */
+  public double getGeneratorSamplesBase() {
+    return m_samplesBase;
   }
 
   /**
@@ -264,7 +291,10 @@ public class BoundaryPanel extends JPanel {
    * @exception Exception if an error occurs
    */
   public void start() throws Exception {
+    m_numOfSamplesPerGenerator = 
+      (int)Math.pow(m_samplesBase, m_trainingData.numAttributes()-3);
 
+    m_stopReplotting = true;
     if (m_trainingData == null) {
       throw new Exception("No training data set (BoundaryPanel)");
     }
@@ -287,21 +317,16 @@ public class BoundaryPanel extends JPanel {
 	  public void run() {
 	    m_stopPlotting = false;
 	    try {
-	      /*  if (m_osi == null) {
-		  initialize();
-		  repaint();
-		  } */
 	      initialize();
 	      repaint();
 	      
 	      // train the classifier
-	      //	      System.err.println("Building classifier...");
 	      m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
 	      m_classifier.buildClassifier(m_trainingData);
 	      
 	      // build DataGenerator
-	      //	      System.err.println("Building data generator...");
-	      boolean [] attsToWeightOn = new boolean[m_trainingData.numAttributes()];
+	      boolean [] attsToWeightOn = 
+		new boolean[m_trainingData.numAttributes()];
 	      attsToWeightOn[m_xAttribute] = true;
 	      attsToWeightOn[m_yAttribute] = true;
 	      
@@ -344,7 +369,8 @@ public class BoundaryPanel extends JPanel {
 		  
 		  // Prune 1% of weight mass
 		  int [] newIndices = new int[indices.length];
-		  double sumSoFar = 0; double criticalMass = 0.99 * sumOfWeights;
+		  double sumSoFar = 0; 
+		  double criticalMass = 0.99 * sumOfWeights;
 		  int index = weights.length - 1; int counter = 0;
 		  for (int z = weights.length - 1; z >= 0; z--) {
 		    newIndices[index--] = indices[z];
@@ -360,7 +386,9 @@ public class BoundaryPanel extends JPanel {
 		  for (int z = 0; z < m_numOfSamplesPerGenerator; z++) {
 		    
 		    m_dataGenerator.setWeightingValues(weightingAttsValues);
-		    double [][] values = m_dataGenerator.generateInstances(indices);
+		    double [][] values = 
+		      m_dataGenerator.generateInstances(indices);
+
 		    for (int q = 0; q < values.length; q++) {
 		      if (values[q] != null) {
 			System.arraycopy(values[q], 0, vals, 0, vals.length);
@@ -369,7 +397,8 @@ public class BoundaryPanel extends JPanel {
 			
 			// classify the instance
 			dist = m_classifier.distributionForInstance(predInst);
-			for (int k = 0; k < sumOfProbsForLocation.length; k++) {
+			for (int k = 0; 
+			     k < sumOfProbsForLocation.length; k++) {
 			  sumOfProbsForLocation[k] += (dist[k] * weights[q]); 
 			}
 		      }
@@ -377,7 +406,8 @@ public class BoundaryPanel extends JPanel {
 		  }
 		  
 		  for (int k = 0; k < sumOfProbsForRegion.length; k++) {
-		    sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] * sumOfWeights); 
+		    sumOfProbsForRegion[k] += 
+		      (sumOfProbsForLocation[k] * sumOfWeights); 
 		  }
 		}
 		
@@ -390,29 +420,6 @@ public class BoundaryPanel extends JPanel {
 				 m_probabilityCache[i][j], 0, 
 				 sumOfProbsForRegion.length);
 		
-		// plot the point
-		/*
-		Graphics osg = m_osi.getGraphics();
-		Graphics g = m_plotPanel.getGraphics();
-		float [] colVal = new float[3];
-		
-		float [] tempCols = new float[3];
-		for (int k = 0; k < sumOfProbsForRegion.length; k++) {
-		  Color curr = m_Colors[k];
-		  curr.getRGBColorComponents(tempCols);
-		  for (int z = 0 ; z < 3; z++) {
-		    colVal[z] += sumOfProbsForRegion[k] * tempCols[z];
-		  }
-		}
-		
-		osg.setColor(new Color(colVal[0], 
-				       colVal[1], 
-				       colVal[2]));
-		osg.drawLine(j,i,j,i);
-		if (j == 0) {
-		  g.drawImage(m_osi,0,0,m_plotPanel);
-		} 
-		*/
 		plotPoint(j, i, sumOfProbsForRegion);
 	      }
 	    }
@@ -446,14 +453,8 @@ public class BoundaryPanel extends JPanel {
     
     float [] tempCols = new float[3];
     for (int k = 0; k < probs.length; k++) {
-      Color curr = null;
-      if (m_plotThread != null) {
-	synchronized (m_Colors) {
-	  curr = (Color)m_Colors.elementAt(k);
-	}
-      } else {
-	curr = (Color)m_Colors.elementAt(k);
-      }
+      Color curr = (Color)m_Colors.elementAt(k);
+
       curr.getRGBColorComponents(tempCols);
       for (int z = 0 ; z < 3; z++) {
 	colVal[z] += probs[k] * tempCols[z];
@@ -478,7 +479,6 @@ public class BoundaryPanel extends JPanel {
   public void setTrainingData(Instances trainingData) throws Exception {
 
     m_trainingData = trainingData;
-    m_numOfSamplesPerGenerator = (int)Math.pow(2.0, m_trainingData.numAttributes()-3);
     if (m_trainingData.classIndex() < 0) {
       throw new Exception("No class attribute set (BoundaryPanel)");
     }
@@ -571,6 +571,11 @@ public class BoundaryPanel extends JPanel {
     m_yAttribute = yatt;
   }
   
+  /**
+   * Set a vector of Color objects for the classes
+   *
+   * @param colors a <code>FastVector</code> value
+   */
   public void setColors(FastVector colors) {
     synchronized (m_Colors) {
       m_Colors = colors;
@@ -578,22 +583,43 @@ public class BoundaryPanel extends JPanel {
     replot();
   }
 
+  /**
+   * Get the current vector of Color objects used for the classes
+   *
+   * @return a <code>FastVector</code> value
+   */
   public FastVector getColors() {
     return m_Colors;
   }
 
-  public synchronized void replot() {
+  /**
+   * Quickly replot the display using cached probability estimates
+   */
+  public void replot() {
     if (m_probabilityCache[0][0] == null) {
       return;
     }
-    for (int i = 0; i < m_panelHeight; i++) {
-      for (int j = 0; j < m_panelWidth; j++) {
-	if (m_probabilityCache[i][j] == null) {
-	  return;
+    m_stopReplotting = true;
+    // wait 300 ms to give any other replot threads a chance to halt
+    try {
+      Thread.sleep(300);
+    } catch (Exception ex) {}
+
+    final Thread replotThread = new Thread() {
+	public void run() {
+	  m_stopReplotting = false;
+	finishedReplot: for (int i = 0; i < m_panelHeight; i++) {
+	  for (int j = 0; j < m_panelWidth; j++) {
+	    if (m_probabilityCache[i][j] == null || m_stopReplotting) {
+	      break finishedReplot;
+	    }
+	    plotPoint(j, i, m_probabilityCache[i][j]);
+	  }
 	}
-	plotPoint(j, i, m_probabilityCache[i][j]);
-      }
-    }
+	}
+      };
+    
+    replotThread.start();      
   }
 
   /**
