@@ -59,6 +59,7 @@ import javax.swing.filechooser.FileFilter;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.converters.Loader;
+import weka.core.converters.CSVLoader;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
@@ -85,7 +86,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -131,7 +132,9 @@ public class PreprocessPanel extends JPanel {
 
   /** Filter to ensure only arff files are selected */  
   protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
+    new ExtensionFileFilter(new String [] {Instances.FILE_EXTENSION, 
+					   CSVLoader.FILE_EXTENSION}, 
+			    "Arff or CSV data files");
 
   /** The file chooser for selecting arff files */
   protected JFileChooser m_FileChooser 
