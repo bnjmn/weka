@@ -23,7 +23,13 @@ SOURCES = \
 	SplitEvaluator.java \
 	Stats.java
 #	LearningRateResultProducer.java \
-#	TreeMatchingEvaluator.java
+#	TreeMatchingEvaluator.java \
+#	RemoteEngine.java \
+#	Compute.java \
+#	Task.java \
+#	RemoteExperiment.java \
+#	RemoteExperimentListener.java \
+#	RemoteExperimentEvent.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
@@ -39,6 +45,8 @@ PACKAGE = weka.experiment
 #-----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
+# generate the _Stub.class and _Skel.class for remote engine
+#	rmic weka.experiment.RemoteEngine
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
