@@ -35,7 +35,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public final class Utils {
 
@@ -953,14 +953,15 @@ public final class Utils {
     double max = a[maxIndex(a)];
     double sum = 0.0;
 
+    double[] result = new double[a.length];
     for(int i = 0; i < a.length; i++) {
-      a[i] = Math.exp(a[i] - max);
-      sum += a[i];
+      result[i] = Math.exp(a[i] - max);
+      sum += result[i];
     }
 
-    normalize(a, sum);
+    normalize(result, sum);
 
-    return a;
+    return result;
   } 
 
   /**
