@@ -31,7 +31,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -49,12 +49,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
   private boolean m_Numeric = true;
 
   public MakeIndicatorFilter() {
-    try{
+
       m_ValIndex = new Range("last");
-    } catch (Exception ex) {
-      System.err.println("This should never happen - panic, schnell");
-      ex.printStackTrace();
-    }
   }
 
   /**

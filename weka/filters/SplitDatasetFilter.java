@@ -38,7 +38,7 @@ import java.util.*;
  * If set, data is not being stratified even if class index is set. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -201,9 +201,9 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    *
    * @param rangeList a string representing the list of instances. 
    * eg: first-3,5,6-last
-   * @exception Exception if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
-  public void setInstancesIndices(String rangeList) throws Exception {
+  public void setInstancesIndices(String rangeList) {
 
     if ((rangeList == null) || (rangeList.length() == 0)) {
       m_Range = null;
@@ -248,14 +248,15 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * of folds is zero, it won't split it into folds. 
    *
    * @param numFolds number of folds dataset is to be split into
-   * @exception Exception if number of folds is negative
+   * @exception IllegalArgumentException if number of folds is negative
    */
-  public void setNumFolds(int numFolds) throws Exception {
+  public void setNumFolds(int numFolds) {
 
     if (numFolds < 0) {
-      throw new Exception("Number of folds has to be positive or zero.");
+      throw new IllegalArgumentException("Number of folds has to be positive or zero.");
     }
     m_NumFolds = numFolds;
+    m_Range = null;
   }
 
   /**
@@ -272,14 +273,15 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * Selects a fold.
    *
    * @param fold the fold to be selected.
-   * @exception Exception if fold's index is smaller than 1
+   * @exception IllegalArgumentException if fold's index is smaller than 1
    */
-  public void setFold(int fold) throws Exception {
+  public void setFold(int fold) {
 
     if (fold < 1) {
-      throw new Exception("Fold's index has to be greater than 0.");
+      throw new IllegalArgumentException("Fold's index has to be greater than 0.");
     }
     m_Fold = fold;
+    m_Range = null;
   }
 
   /**
