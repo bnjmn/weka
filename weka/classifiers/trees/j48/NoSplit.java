@@ -24,7 +24,7 @@ import weka.core.*;
  * Class implementing a "no-split"-split.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public final class NoSplit extends ClassifierSplitModel{
 
@@ -80,6 +80,20 @@ public final class NoSplit extends ClassifierSplitModel{
 
     return "";
   }
+
+  /**
+   * Returns a string containing java source code equivalent to the test
+   * made at this node. The instance being tested is called "i".
+   *
+   * @param index index of the nominal value tested
+   * @param data the data containing instance structure info
+   * @return a value of type 'String'
+   */
+  public final String sourceExpression(int index, Instances data) {
+
+    return "true";  // or should this be false??
+  }  
+
 }
 
 

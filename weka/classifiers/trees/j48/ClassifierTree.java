@@ -27,7 +27,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -252,6 +252,69 @@ public class ClassifierTree implements Drawable, Serializable {
     return text.toString();
   }
 
+  /**
+   * Returns source code for the tree as an if-then statement. The 
+   * class is assigned to variable "p", and assumes the tested 
+   * instance is named "i". The results are returned as two stringbuffers: 
+   * a section of code for assignment of the class, and a section of
+   * code containing support code (eg: other support methods).
+   *
+   * @param indent the current source indentation string
+   * @return an array containing two stringbuffers, the first string containing
+   * assignment code, and the second containing source for support code.
+   * @exception Exception if something goes wrong
+   */
+  public StringBuffer [] toSource(String indent) throws Exception {
+    
+    StringBuffer [] result = new StringBuffer [2];
+    if (m_isLeaf) {
+      result[0] = new StringBuffer(indent + "p = " 
+	+ m_localModel.distribution().maxClass(0) + ";\n");
+      result[1] = new StringBuffer("");
+    } else {
+      StringBuffer text = new StringBuffer();
+      String nextIndent = indent + "  ";
+      StringBuffer atEnd = new StringBuffer();
+
+      text.append("  double N") 
+	.append(Integer.toHexString(m_localModel.hashCode()))
+	.append("(Object []i) {\n")
+	.append(indent).append("double p = Double.NaN;\n");
+
+      text.append(indent).append("if (")
+	.append(m_localModel.sourceExpression(-1, m_train))
+	.append(") {\n");
+      text.append(nextIndent).append("p = ")
+	.append(m_localModel.distribution().maxClass(0))
+	.append(";\n");
+      text.append(indent).append("} ");
+      for (int i = 0; i < m_sons.length; i++) {
+	text.append("else if (" + m_localModel.sourceExpression(i, m_train) 
+		    + ") {\n");
+	if (m_sons[i].m_isLeaf) {
+	  text.append(nextIndent + "p = " 
+		      + m_localModel.distribution().maxClass(i) + ";\n");
+	} else {
+	  StringBuffer [] sub = m_sons[i].toSource(indent);
+	  text.append(sub[0]);
+	  atEnd.append(sub[1]);
+	}
+	text.append(indent + "} ");
+	if (i == m_sons.length - 1) {
+	  text.append('\n');
+	}
+      }
+
+      text.append(indent).append("return p;\n  }\n");
+
+      result[0] = new StringBuffer(nextIndent);
+      result[0].append("p = N")
+	.append(Integer.toHexString(m_localModel.hashCode()))
+	.append("(i);\n");
+      result[1] = text.append(atEnd);
+    }
+    return result;
+  }
 
   /**
    * Returns number of leaves in tree structure.
