@@ -44,7 +44,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -89,6 +89,9 @@ public class ClassifierPerformanceEvaluator
    * @param ce a <code>BatchClassifierEvent</code> value
    */
   public void acceptClassifier(final BatchClassifierEvent ce) {
+    if (ce.getTestSet().isStructureOnly()) {
+      return; // cant evaluate empty instances
+    }
     try {
       if (m_evaluateThread == null) {
 	m_evaluateThread = new Thread() {
@@ -97,7 +100,7 @@ public class ClassifierPerformanceEvaluator
 	      try {
 		if (ce.getSetNumber() == 1 || 
 		    ce.getClassifier() != m_classifier) {
-		  m_eval = new Evaluation(ce.getTestSet());
+		  m_eval = new Evaluation(ce.getTestSet().getDataSet());
 		  m_classifier = ce.getClassifier();
 		}
 		
@@ -109,7 +112,8 @@ public class ClassifierPerformanceEvaluator
 					   +")...");
 		  }
 		  m_visual.setAnimated();
-		  m_eval.evaluateModel(ce.getClassifier(), ce.getTestSet());
+		  m_eval.evaluateModel(ce.getClassifier(), 
+				       ce.getTestSet().getDataSet());
 		}
 		
 		if (ce.getSetNumber() == ce.getMaxSetNumber()) {

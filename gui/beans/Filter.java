@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -280,6 +280,17 @@ public class Filter extends JPanel
   }
 
   private void processTrainingOrDataSourceEvents(final EventObject e) {
+    boolean structureOnly = false;
+    if (e instanceof DataSetEvent) {
+      structureOnly = ((DataSetEvent)e).isStructureOnly();
+    }
+    if (e instanceof TrainingSetEvent) {
+      structureOnly = ((TrainingSetEvent)e).isStructureOnly();
+    }
+    if (structureOnly && !(m_Filter instanceof StreamableFilter)) {
+      return; // nothing can be done
+    }
+      
     if (m_filterThread == null) {
       try {
 	if (m_state == IDLE) {

@@ -43,7 +43,7 @@ import java.beans.beancontext.*;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -139,6 +139,10 @@ public class DataVisualizer extends JPanel
    * @param e a <code>DataSetEvent</code> value
    */
   public synchronized void acceptDataSet(DataSetEvent e) {
+    // ignore structure only events
+    if (e.isStructureOnly()) {
+      return;
+    }
     m_visualizeDataSet = new Instances(e.getDataSet());
     if (m_visualizeDataSet.classIndex() < 0) {
       m_visualizeDataSet.setClassIndex(m_visualizeDataSet.numAttributes()-1);

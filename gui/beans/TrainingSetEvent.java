@@ -29,7 +29,7 @@ import weka.core.Instances;
  * Event encapsulating a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TrainingSetEvent extends EventObject {
   
@@ -37,6 +37,7 @@ public class TrainingSetEvent extends EventObject {
    * The training instances
    */
   protected Instances m_trainingSet;
+  private boolean m_structureOnly;
 
   /**
    * what number is this training set (ie fold 2 of 10 folds)
@@ -57,6 +58,9 @@ public class TrainingSetEvent extends EventObject {
   public TrainingSetEvent(Object source, Instances trainSet) {
     super(source);
     m_trainingSet = trainSet;
+    if (m_trainingSet != null && m_trainingSet.numInstances() == 0) {
+      m_structureOnly = true;
+    }
   }
 
   /**
@@ -84,5 +88,16 @@ public class TrainingSetEvent extends EventObject {
    */
   public int getMaxSetNumber() {
     return m_maxSetNumber;
+  }
+
+  /**
+   * Returns true if the encapsulated instances
+   * contain just header information
+   *
+   * @return true if only header information is
+   * available in this DataSetEvent
+   */
+  public boolean isStructureOnly() {
+    return m_structureOnly;
   }
 }
