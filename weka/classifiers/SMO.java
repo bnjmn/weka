@@ -29,10 +29,9 @@ import weka.filters.*;
  * kernels. Transforms output of SVM into probabilities by applying a
  * standard sigmoid function that is not fitted to the data.
  *
- * This implementation globally replaces all missing values,
- * transforms nominal attributes into binary ones, and normalizes all
- * numeric attributes. For more information on the SMO algorithm,
- * see<p>
+ * This implementation globally replaces all missing values and
+ * transforms nominal attributes into binary ones. For more
+ * information on the SMO algorithm, see<p>
  *
  * J. Platt (1998). <i>Fast Training of Support Vector
  * Machines using Sequential Minimal Optimization</i>. Advances in Kernel
@@ -47,13 +46,13 @@ import weka.filters.*;
  * Valid options are:<p>
  *
  * -C num <br>
- * The complexity constant C. (default 1)<p>
+ * The complexity constant C. (default 1000)<p>
  *
  * -E num <br>
  * The exponent for the polynomial kernel. (default 1)<p>
  *
- * -N <br>
- * Don't normalize the training instances. <p>
+ * -R <br>
+ * Normalize the training instances. <p>
  *
  * -L <br>
  * Rescale kernel. <p>
@@ -74,8 +73,8 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.15 $ 
-*/
+ * @version $Revision: 1.16 $ 
+ */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
   /**
@@ -201,7 +200,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   private double m_exponent = 1.0;
 
   /** The complexity parameter. */
-  private double m_C = 1.0;
+  private double m_C = 1000.0;
 
   /** Epsilon for rounding. */
   private double m_eps = 1.0e-12;
@@ -260,7 +259,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   private int m_cacheSize = 1000003;
 
   /** True if we don't want to normalize */
-  private boolean m_dontNormalize = false;
+  private boolean m_dontNormalize = true;
 
   /** Rescale? */
   private boolean m_rescale = false;
@@ -513,13 +512,13 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
     Vector newVector = new Vector(8);
 
-    newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
+    newVector.addElement(new Option("\tThe complexity constant C. (default 1000)",
 				    "C", 1, "-C <double>"));
     newVector.addElement(new Option("\tThe exponent for the "
 				    + "polynomial kernel. (default 1)",
 				    "E", 1, "-E <double>"));
-    newVector.addElement(new Option("\tDon't normalize the data.",
-				    "N", 0, "-N"));
+    newVector.addElement(new Option("\tNormalize the data.",
+				    "R", 0, "-R"));
     newVector.addElement(new Option("\tRescale the kernel.",
 				    "L", 0, "-L"));
     newVector.addElement(new Option("\tUse lower-order terms.",
@@ -542,13 +541,13 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    * Parses a given list of options. Valid options are:<p>
    *
    * -C num <br>
-   * The complexity constant C <p>
+   * The complexity constant C. (default 1000)<p>
    *
    * -E num <br>
-   * The exponent for the polynomial kernel <p>
+   * The exponent for the polynomial kernel. (default 1) <p>
    *
-   * -N <br>
-   * Don't normalize the training instances. <p>
+   * -R <br>
+   * Normalize the training instances. <p>
    *
    * -L <br>
    * Rescale kernel. <p>
@@ -574,7 +573,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     if (complexityString.length() != 0) {
       m_C = (new Double(complexityString)).doubleValue();
     } else {
-      m_C = 1.0;
+      m_C = 1000.0;
     }
     String exponentsString = Utils.getOption('E', options);
     if (exponentsString.length() != 0) {
@@ -600,7 +599,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     } else {
       m_eps = 1.0e-12;
     }
-    m_dontNormalize = Utils.getFlag('N', options);
+    m_dontNormalize = !Utils.getFlag('R', options);
     m_rescale = Utils.getFlag('L', options);
     if ((m_exponent == 1.0) && (m_rescale)) {
       throw new Exception("Can't use rescaling with linear machine.");
@@ -626,8 +625,8 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
     options[current++] = "-T"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
-    if (m_dontNormalize) {
-      options[current++] = "-N";
+    if (!m_dontNormalize) {
+      options[current++] = "-R";
     }
     if (m_rescale) {
       options[current++] = "-L";
@@ -799,20 +798,20 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   
   /**
    * Check whether data is to be normalized.
-   * @return Value of dontNormalize.
+   * @return true if data is to be normalized
    */
-  public boolean getDontNormalizeData() {
+  public boolean getNormalizeData() {
     
-    return m_dontNormalize;
+    return !m_dontNormalize;
   }
   
   /**
    * Set whether data is to be normalized.
-   * @param v  Value to assign to dontNormalize.
+   * @param v  true if data is to be normalized
    */
-  public void setDontNormalizeData(boolean v) {
+  public void setNormalizeData(boolean v) {
     
-    m_dontNormalize = v;
+    m_dontNormalize = !v;
   }
   
   /**
