@@ -69,7 +69,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -595,7 +595,8 @@ public class PreprocessPanel extends JPanel {
       m_Log.statusMessage("Problem reading " + f.getName());
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from file:\n"
-				    + f.getName(),
+				    + f.getName() + "\n"
+				    + ex.getMessage(),
 				    "Load Instances",
 				    JOptionPane.ERROR_MESSAGE);
     }
@@ -617,7 +618,8 @@ public class PreprocessPanel extends JPanel {
       m_Log.statusMessage("Problem reading " + u);
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from URL:\n"
-				    + u,
+				    + u + "\n"
+				    + ex.getMessage(),
 				    "Load Instances",
 				    JOptionPane.ERROR_MESSAGE);
     }
