@@ -39,13 +39,14 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 
 public class BIFReader extends BayesNet {
     private int [] m_nPositionX;
     private int [] m_nPositionY;
+    private int [] m_order;
 
 	/** processFile reads a BIFXML file and initializes a Bayes Net
 	 * @param sFile: name of the file to parse
@@ -116,12 +117,30 @@ public class BIFReader extends BayesNet {
 			for (int i = 0; i < nCardinality; i++) {
 				DiscreteEstimatorBayes d = (DiscreteEstimatorBayes) m_Distributions[iNode][i];
 				for (int iValue = 0; iValue < nValues; iValue++) {
-					String sWeight = st.nextToken();
+ 					String sWeight = st.nextToken();
 					d.addValue(iValue, new Double(sWeight).doubleValue());
 				}
 			}
          }
     } // buildStructure
+
+    
+    /** synchronizes the node ordering of this Bayes network with
+     * those in the other network (if possible).
+     * @param other: Bayes network to synchronize with
+     * @throws Exception if nr of attributes differs or not all of the variables have the same name.
+     */
+    private void Sync(BayesNet other) throws Exception {
+    	int nAtts = m_Instances.numAttributes();
+    	if (nAtts != other.m_Instances.numAttributes()) {
+    		throw new Exception ("Cannot synchronize networks: different number of attributes.");
+    	}
+        m_order = new int[nAtts];
+        for (int iNode = 0; iNode < nAtts; iNode++) {
+        	String sName = other.getNodeName(iNode);
+        	m_order[getNode(sName)] = iNode;
+        }
+    } // Sync
 
 	/** getNode finds the index of the node with name sNodeName
 	 * and throws an exception if no such node can be found.
@@ -232,16 +251,22 @@ public class BIFReader extends BayesNet {
 	 * @return nr of missing arcs
 	 */
 	public int missingArcs(BayesNet other) {
-		int nMissing = 0;
-		for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
-				int nParent = m_ParentSets[iAttribute].getParent(iParent);
-				if (!other.getParentSet(iAttribute).contains(nParent) && !other.getParentSet(nParent).contains(iAttribute)) {
-					nMissing++;
+		try {
+			Sync(other);
+			int nMissing = 0;
+			for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+				for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
+					int nParent = m_ParentSets[iAttribute].getParent(iParent);
+					if (!other.getParentSet(m_order[iAttribute]).contains(m_order[nParent]) && !other.getParentSet(m_order[nParent]).contains(m_order[iAttribute])) {
+						nMissing++;
+					}
 				}
 			}
+			return nMissing;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			return 0;
 		}
-		return nMissing;
 	} // missingArcs
 
 	/** Count nr of exta arcs  from other network compared to current network
@@ -250,16 +275,22 @@ public class BIFReader extends BayesNet {
 	 * @return nr of missing arcs
 	 */
 	public int extraArcs(BayesNet other) {
-		int nExtra = 0;
-		for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < other.getParentSet(iAttribute).getNrOfParents(); iParent++) {
-				int nParent = other.getParentSet(iAttribute).getParent(iParent);
-				if (!m_ParentSets[iAttribute].contains(nParent) && !m_ParentSets[nParent].contains(iAttribute)) {
-					nExtra++;
+		try {
+			Sync(other);
+			int nExtra = 0;
+			for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+				for (int iParent = 0; iParent < other.getParentSet(m_order[iAttribute]).getNrOfParents(); iParent++) {
+					int nParent = m_order[other.getParentSet(m_order[iAttribute]).getParent(iParent)];
+					if (!m_ParentSets[iAttribute].contains(nParent) && !m_ParentSets[nParent].contains(iAttribute)) {
+						nExtra++;
+					}
 				}
 			}
+			return nExtra;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			return 0;
 		}
-		return nExtra;
 	} // extraArcs
 
 
@@ -273,57 +304,63 @@ public class BIFReader extends BayesNet {
 	 * @return divergence between this and other Bayes Network
 	 */
 	public double divergence(BayesNet other) {
-		// D: divergence
-		double D = 0.0;
-		int nNodes = m_Instances.numAttributes();
-		int [] nCard = new int[nNodes];
-		for (int iNode = 0; iNode < nNodes; iNode++) {
-			nCard[iNode] = m_Instances.attribute(iNode).numValues();
-		}
-		// x: holds current configuration of nodes
-		int [] x = new int[nNodes];
-		// simply sum over all configurations to calc divergence D
-		int i = 0;
-		while (i < nNodes) {
-			// update configuration
-			x[i]++;
-			while (i < nNodes && x[i] == m_Instances.attribute(i).numValues()) {
-				x[i] = 0;
-				i++;
-				if (i < nNodes){
-					x[i]++;
+		try {
+			Sync(other);
+			// D: divergence
+			double D = 0.0;
+			int nNodes = m_Instances.numAttributes();
+			int [] nCard = new int[nNodes];
+			for (int iNode = 0; iNode < nNodes; iNode++) {
+				nCard[iNode] = m_Instances.attribute(iNode).numValues();
+			}
+			// x: holds current configuration of nodes
+			int [] x = new int[nNodes];
+			// simply sum over all configurations to calc divergence D
+			int i = 0;
+			while (i < nNodes) {
+				// update configuration
+				x[i]++;
+				while (i < nNodes && x[i] == m_Instances.attribute(i).numValues()) {
+					x[i] = 0;
+					i++;
+					if (i < nNodes){
+						x[i]++;
+					}
+				}
+				if (i < nNodes) {
+					i = 0;
+					// calc P(x) and Q(x)
+					double P = 1.0;
+					for (int iNode = 0; iNode < nNodes; iNode++) {
+						int iCPT = 0;
+						for (int iParent = 0; iParent < m_ParentSets[iNode].getNrOfParents(); iParent++) {
+					    	int nParent = m_ParentSets[iNode].getParent(iParent);
+						    iCPT = iCPT * nCard[nParent] + x[nParent];
+						} 
+						P = P * m_Distributions[iNode][iCPT].getProbability(x[iNode]);
+					}
+	
+					double Q = 1.0;
+					for (int iNode = 0; iNode < nNodes; iNode++) {
+						int iCPT = 0;
+						for (int iParent = 0; iParent < other.getParentSet(m_order[iNode]).getNrOfParents(); iParent++) {
+					    	int nParent = m_order[other.getParentSet(m_order[iNode]).getParent(iParent)];
+						    iCPT = iCPT * nCard[nParent] + x[nParent];
+						} 
+						Q = Q * other.m_Distributions[m_order[iNode]][iCPT].getProbability(x[iNode]);
+					}
+	
+					// update divergence if probabilities are positive
+					if (P > 0.0 && Q > 0.0) {
+						D = D + P * Math.log(Q / P);
+					}
 				}
 			}
-			if (i < nNodes) {
-				i = 0;
-				// calc P(x) and Q(x)
-				double P = 1.0;
-				for (int iNode = 0; iNode < nNodes; iNode++) {
-					int iCPT = 0;
-					for (int iParent = 0; iParent < m_ParentSets[iNode].getNrOfParents(); iParent++) {
-				    	int nParent = m_ParentSets[iNode].getParent(iParent);
-					    iCPT = iCPT * nCard[nParent] + x[nParent];
-					} 
-					P = P * m_Distributions[iNode][iCPT].getProbability(x[iNode]);
-				}
-
-				double Q = 1.0;
-				for (int iNode = 0; iNode < nNodes; iNode++) {
-					int iCPT = 0;
-					for (int iParent = 0; iParent < other.getParentSet(iNode).getNrOfParents(); iParent++) {
-				    	int nParent = other.getParentSet(iNode).getParent(iParent);
-					    iCPT = iCPT * nCard[nParent] + x[nParent];
-					} 
-					Q = Q * other.m_Distributions[iNode][iCPT].getProbability(x[iNode]);
-				}
-
-				// update divergence if probabilities are positive
-				if (P > 0.0 && Q > 0.0) {
-					D = D + P * Math.log(Q / P);
-				}
-			}
+			return D;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			return 0;
 		}
-		return D;
 	} // divergence
 
 	/** Count nr of reversed arcs from other network compared to current network
@@ -331,16 +368,22 @@ public class BIFReader extends BayesNet {
 	 * @return nr of missing arcs
 	 */
 	public int reversedArcs(BayesNet other) {
-		int nReversed = 0;
-	    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
-				int nParent = m_ParentSets[iAttribute].getParent(iParent);
-				if (!other.getParentSet(iAttribute).contains(nParent) && other.getParentSet(nParent).contains(iAttribute)) {
-					nReversed++;
+		try {
+			Sync(other);
+			int nReversed = 0;
+		    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+				for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
+					int nParent = m_ParentSets[iAttribute].getParent(iParent);
+					if (!other.getParentSet(m_order[iAttribute]).contains(m_order[nParent]) && other.getParentSet(m_order[nParent]).contains(m_order[iAttribute])) {
+						nReversed++;
+					}
 				}
 			}
+			return nReversed;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			return 0;
 		}
-		return nReversed;
 	} // reversedArcs
 
 	public BIFReader() {}
@@ -349,7 +392,8 @@ public class BIFReader extends BayesNet {
         try {
             BIFReader br = new BIFReader();
             br.processFile(args[0]);
-			System.out.println(br.toString());
+	    System.out.println(br.toString());
+        
         }
         catch (Throwable t) {
             t.printStackTrace();
