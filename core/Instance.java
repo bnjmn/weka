@@ -46,7 +46,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -780,6 +780,9 @@ public class Instance implements Copyable, Serializable {
 	 try {
 	   text.append(Utils.quote(stringValue(attIndex)));
 	 } catch (Exception e) {
+           e.printStackTrace();
+           System.err.println(new Instances(m_Dataset, 0));
+           System.err.println("Att:" + attIndex + " Val:" + value(attIndex));
 	   throw new Error("This should never happen!");
 	 }
        } else {
