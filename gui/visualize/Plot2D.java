@@ -64,7 +64,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class Plot2D extends JPanel {
 
@@ -81,10 +81,10 @@ public class Plot2D extends JPanel {
   public static final int DEFAULT_SHAPE_SIZE = 2;
 
   /** Default colour for the axis */
-  private Color m_axisColour = Color.green;
+  protected Color m_axisColour = Color.green;
 
   /** Default colour for the plot background */
-  private Color m_backgroundColour = Color.black;
+  protected Color m_backgroundColour = Color.black;
 
   /** The plots to display */
   protected FastVector m_plots = new FastVector();
@@ -105,8 +105,8 @@ public class Plot2D extends JPanel {
   protected Plot2DCompanion m_plotCompanion=null;
 
   /** For popping up text info on data points */
-  private JFrame m_InstanceInfo = null;
-  private JTextArea m_InstanceInfoText = new JTextArea();
+  protected JFrame m_InstanceInfo = null;
+  protected JTextArea m_InstanceInfoText = new JTextArea();
 
   /** The list of the colors used */
   protected FastVector m_colorList;
@@ -140,21 +140,21 @@ public class Plot2D extends JPanel {
   protected double m_minC;
     
   /** Axis padding */
-  private final int m_axisPad = 5;
+  protected final int m_axisPad = 5;
 
   /** Tick size */
-  private final int m_tickSize = 5;
+  protected final int m_tickSize = 5;
 
   /**the offsets of the axes once label metrics are calculated */
-  private int m_XaxisStart=0;
-  private int m_YaxisStart=0;
-  private int m_XaxisEnd=0;
-  private int m_YaxisEnd=0;
+  protected int m_XaxisStart=0;
+  protected int m_YaxisStart=0;
+  protected int m_XaxisEnd=0;
+  protected int m_YaxisEnd=0;
 
   /** if the user resizes the window, or the attributes selected for
       the attributes change, then the lookup table for points needs
       to be recalculated */
-  private boolean m_plotResize = true;
+  protected boolean m_plotResize = true;
   
   /** if the user changes attribute assigned to an axis */
   protected boolean m_axisChanged = false;
@@ -164,20 +164,20 @@ public class Plot2D extends JPanel {
    * although I am not sure how much performance this grants over
    * not having it.
    */
-  private int[][] m_drawnPoints;
+  protected int[][] m_drawnPoints;
 
   /** Font for labels */
-  private Font m_labelFont;
+  protected Font m_labelFont;
   protected FontMetrics m_labelMetrics=null; 
 
   /** the level of jitter */
-  private int m_JitterVal=0;
+  protected int m_JitterVal=0;
 
   /** random values for perterbing the data points */
-  private Random m_JRand = new Random(0);
+  protected Random m_JRand = new Random(0);
 
   /** lookup table for plotted points */
-  private double [][] m_pointLookup=null;
+  protected double [][] m_pointLookup=null;
 
   /** Constructor */
   public Plot2D() {
