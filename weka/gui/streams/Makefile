@@ -1,5 +1,5 @@
-JAVA = javac
-JAVADOC = javadoc
+JAVAC = javac
+JAVACDOC = javadoc
 SOURCES = \
 	InstanceEvent.java \
 	InstanceProducer.java \
@@ -36,7 +36,7 @@ PACKAGEDIR = weka/gui/streams
 PACKAGE = weka.gui.streams
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: doc
 
@@ -45,10 +45,10 @@ PACKAGE = weka.gui.streams
 all :	$(CLASSFILES)
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
+	$(JAVAC) -g $(SOURCES)
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
+	$(JAVAC) -O $(SOURCES)
 
 manifest:
 	(cd $(TOPDIR) ;\
@@ -88,7 +88,7 @@ classjar : manifest all
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
 
 doc : all
-	$(JAVADOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
+	$(JAVACDOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
 
 clean : 
 	$(RM) *.class *~

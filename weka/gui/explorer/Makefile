@@ -1,5 +1,5 @@
-JAVA = javac
-JAVADOC = javadoc
+JAVAC = javac
+JAVACDOC = javadoc
 SOURCES = \
 	ClassifierPanel.java \
 	Explorer.java \
@@ -16,22 +16,22 @@ PACKAGEDIR = weka/gui/explorer
 PACKAGE = weka.gui.explorer
 
 %.class : %.java
-	$(JAVA) $< 
+	$(JAVAC) $< 
 
 .PHONY: doc
 
 #----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
-	(cd treevisualizer; make all JAVA=$(JAVA))
+	(cd treevisualizer; make all JAVAC=$(JAVAC))
 
 debug : clean
-	$(JAVA) -g $(SOURCES)
-	(cd treevisualizer; make debug JAVA=$(JAVA))
+	$(JAVAC) -g $(SOURCES)
+	(cd treevisualizer; make debug JAVAC=$(JAVAC))
 
 optimized : clean
-	$(JAVA) -O $(SOURCES)
-	(cd treevisualizer; make optimized JAVA=$(JAVA))
+	$(JAVAC) -O $(SOURCES)
+	(cd treevisualizer; make optimized JAVAC=$(JAVAC))
 
 fulljar : all
 	(cd $(TOPDIR) ; \
@@ -48,7 +48,7 @@ classjar : all
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
 
 doc : all
-	$(JAVADOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
+	$(JAVACDOC) -public -author -version -d $(DOCDIR) $(PACKAGEDIR)
 
 clean : 
 	$(RM) *.class *~

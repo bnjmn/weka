@@ -1,43 +1,43 @@
 #
-# $Revision: 1.19 $
+# $Revision: 1.20 $
 #
 
-JAVA = javac
+JAVAC = javac
 
 .PHONY: all optimized debug clean install archive doc
 
 all : 
-	(cd core; make all JAVA=$(JAVA))
-	(cd classifiers; make all JAVA=$(JAVA))
-	(cd filters; make all JAVA=$(JAVA))
-	(cd estimators; make all JAVA=$(JAVA))
-	(cd associations; make all JAVA=$(JAVA))
-	(cd clusterers; make all JAVA=$(JAVA))
-	(cd attributeSelection; make all JAVA=$(JAVA))
-	(cd experiment; make all JAVA=$(JAVA))
-	(cd gui; make all JAVA=$(JAVA))
+	(cd core; make all JAVAC=$(JAVAC))
+	(cd classifiers; make all JAVAC=$(JAVAC))
+	(cd filters; make all JAVAC=$(JAVAC))
+	(cd estimators; make all JAVAC=$(JAVAC))
+	(cd associations; make all JAVAC=$(JAVAC))
+	(cd clusterers; make all JAVAC=$(JAVAC))
+	(cd attributeSelection; make all JAVAC=$(JAVAC))
+	(cd experiment; make all JAVAC=$(JAVAC))
+	(cd gui; make all JAVAC=$(JAVAC))
 
 optimized : 
-	(cd core; make optimized JAVA=$(JAVA))
-	(cd classifiers; make optimized JAVA=$(JAVA))
-	(cd filters; make optimized JAVA=$(JAVA))
-	(cd estimators; make optimized JAVA=$(JAVA))
-	(cd associations; make optimized JAVA=$(JAVA))
-	(cd clusterers; make optimized JAVA=$(JAVA))
-	(cd attributeSelection; make optimized JAVA=$(JAVA))
-	(cd experiment; make optimized JAVA=$(JAVA))
-	(cd gui; make optimized JAVA=$(JAVA))
+	(cd core; make optimized JAVAC=$(JAVAC))
+	(cd classifiers; make optimized JAVAC=$(JAVAC))
+	(cd filters; make optimized JAVAC=$(JAVAC))
+	(cd estimators; make optimized JAVAC=$(JAVAC))
+	(cd associations; make optimized JAVAC=$(JAVAC))
+	(cd clusterers; make optimized JAVAC=$(JAVAC))
+	(cd attributeSelection; make optimized JAVAC=$(JAVAC))
+	(cd experiment; make optimized JAVAC=$(JAVAC))
+	(cd gui; make optimized JAVAC=$(JAVAC))
 
 debug :
-	(cd core; make debug JAVA=$(JAVA))
-	(cd classifiers; make debug JAVA=$(JAVA))
-	(cd filters; make debug JAVA=$(JAVA))
-	(cd estimators; make debug JAVA=$(JAVA))
-	(cd associations; make debug JAVA=$(JAVA))
-	(cd clusterers; make debug JAVA=$(JAVA))
-	(cd attributeSelection; make debug JAVA=$(JAVA))
-	(cd experiment; make debug JAVA=$(JAVA))
-	(cd gui; make debug JAVA=$(JAVA))
+	(cd core; make debug JAVAC=$(JAVAC))
+	(cd classifiers; make debug JAVAC=$(JAVAC))
+	(cd filters; make debug JAVAC=$(JAVAC))
+	(cd estimators; make debug JAVAC=$(JAVAC))
+	(cd associations; make debug JAVAC=$(JAVAC))
+	(cd clusterers; make debug JAVAC=$(JAVAC))
+	(cd attributeSelection; make debug JAVAC=$(JAVAC))
+	(cd experiment; make debug JAVAC=$(JAVAC))
+	(cd gui; make debug JAVAC=$(JAVAC))
 
 clean : 
 	(cd core; make clean)
@@ -68,12 +68,14 @@ doc :
 	weka.gui.experiment \
 	weka.gui.explorer \
 	weka.gui.explorer.treevisualizer \
-	weka.gui.streams; \
-	for page in `ls doc/*.html`; \
-	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
-	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
-	< doc/packages.html > packages_temp.html; \
-	mv packages_temp.html doc/packages.html)
+	weka.gui.streams;)
+
+# \
+#	for page in `ls doc/*.html`; \
+#	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
+#	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
+#	< doc/packages.html > packages_temp.html; \
+#	mv packages_temp.html doc/packages.html)
 
 # Assumes any auxiliary classfiles are in the parent directory
 # One of these must be SimpleCLI.class
