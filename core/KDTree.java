@@ -58,7 +58,7 @@ import  weka.core.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class KDTree implements OptionHandler {
 
