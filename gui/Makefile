@@ -24,10 +24,7 @@ SOURCES = \
 	SysErrLog.java \
 	TaskLogger.java \
 	WekaTaskMonitor.java \
-	SaveBuffer.java \
-	VisualizePanelEvent.java \
-	VisualizePanelListener.java \
-	VisualizePanel.java
+	SaveBuffer.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
@@ -46,6 +43,7 @@ all :	$(CLASSFILES)
 	(cd experiment; make all JAVAC=$(JAVAC))
 	(cd explorer; make all JAVAC=$(JAVAC))
 	(cd streams; make all JAVAC=$(JAVAC))
+	(cd visualize; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make all JAVAC=$(JAVAC))
 
 debug : clean
@@ -53,6 +51,7 @@ debug : clean
 	(cd experiment; make debug JAVAC=$(JAVAC))
 	(cd explorer; make debug JAVAC=$(JAVAC))
 	(cd streams; make debug JAVAC=$(JAVAC))
+	(cd visualize; make debug JAVAC=$(JAVAC))	
 	(cd treevisualizer; make debug JAVAC=$(JAVAC))
 
 optimized : clean
@@ -60,6 +59,7 @@ optimized : clean
 	(cd experiment; make optimized JAVAC=$(JAVAC))
 	(cd explorer; make optimized JAVAC=$(JAVAC))
 	(cd streams; make optimized JAVAC=$(JAVAC))
+	(cd visualize; make optimized JAVAC=$(JAVAC))
 	(cd treevisualizer; make optimized JAVAC=$(JAVAC))	
 
 fulljar : all
@@ -76,6 +76,7 @@ classjar :  all
 	$(PACKAGEDIR)/*.props \
 	$(PACKAGEDIR)/experiment/*.class \
 	$(PACKAGEDIR)/explorer/*.class \
+	$(PACKAGEDIR)/visualize/*.class \
 	$(PACKAGEDIR)/treevisualizer/*.class \
 	$(PACKAGEDIR)/streams/*.class; \
 	rm -f $(PACKAGE).jar; \
@@ -88,6 +89,7 @@ clean :
 	$(RM) *.class *~
 	(cd explorer; make clean)
 	(cd experiment; make clean)
+	(cd visualize; make clean)
 	(cd streams; make clean)
 	(cd treevisualizer; make clean)
 
