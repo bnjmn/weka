@@ -57,7 +57,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler {
@@ -165,7 +165,10 @@ public class CVParameterSelection extends Classifier
   /** The generated base classifier */
   protected Classifier m_Classifier;
 
-  /** The base classifier options (not including those being set by cross-validation) */
+  /**
+   * The base classifier options (not including those being set
+   * by cross-validation)
+   */
   protected String [] m_ClassifierOptions;
 
   /** The set of all classifier options as determined by cross-validation */
@@ -303,10 +306,10 @@ public class CVParameterSelection extends Classifier
     newVector.addElement(new Option(
 	      "\tFull name of learner to perform parameter selection on.\n"
 	      + "\teg: weka.classifiers.NaiveBayes",
-	      "W", 1, "-W"));
+	      "W", 1, "-W <learner class name>"));
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation (default 10).",
-	      "X", 1, "-X"));
+	      "X", 1, "-X <number of folds>"));
     newVector.addElement(new Option(
 	      "\tLearner parameter options.\n"
 	      + "\teg: \"N 1 5 10\" Sets an optimisation parameter for the\n"
@@ -314,12 +317,13 @@ public class CVParameterSelection extends Classifier
 	      + "\tand 10 optimisation steps. The upper bound may be the\n"
 	      + "\tcharacter 'A' or 'I' to substitute the number of\n"
 	      + "\tattributes or instances in the training data,\n"
-	      + "\trespectively. This parameter may be supplied more than once to\n"
-	      + "\toptimise over several learner options simultaneously.",
-	      "P", 1, "-P"));
+	      + "\trespectively. This parameter may be supplied more than\n"
+	      + "\tonce to optimise over several learner options\n"
+	      + "\tsimultaneously.",
+	      "P", 1, "-P <learner parameter>"));
     newVector.addElement(new Option(
 	      "\tSets the random number seed (default 1).",
-	      "S", 1, "-S"));
+	      "S", 1, "-S <random number seed>"));
 
     if ((m_Classifier != null) &&
 	(m_Classifier instanceof OptionHandler)) {
