@@ -32,6 +32,8 @@ import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
+import java.io.LineNumberReader;
+import java.io.InputStreamReader;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -61,6 +63,7 @@ import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.JFileChooser;
+import javax.swing.JTextArea;
 
 
 import java.awt.BorderLayout;
@@ -96,7 +99,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.10 $
+ * @version  $Revision: 1.11 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -231,7 +234,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.10 $
+   * @version $Revision: 1.11 $
    * @since 1.0
    * @see JPanel
    */
@@ -289,6 +292,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
   private JButton m_saveB;
   private JButton m_loadB;
   private JButton m_stopB;
+  private JButton m_helpB;
 
   /**
    * Reference to bean being manipulated
@@ -521,8 +525,11 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 						  +"Open24.gif")));
     m_stopB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
 						  +"Stop24.gif")));
+    m_helpB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+						  +"Help24.gif")));
     m_stopB.setToolTipText("Stop all execution");
     m_loadB.setToolTipText("Load layout");
+    m_helpB.setToolTipText("Display help");
     Image tempI = loadImage(BeanVisual.ICON_PATH+"Pointer.gif");
     m_pointerB = new JToggleButton(new ImageIcon(tempI));
     m_pointerB.addActionListener(new ActionListener() {
@@ -545,6 +552,14 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     m_pointerB.setPreferredSize(dP);
     m_pointerB.setMaximumSize(dM);
     toolBarPanel.add(fixedTools, BorderLayout.WEST);
+    
+    JToolBar fixedTools2 = new JToolBar();
+    fixedTools2.setOrientation(JToolBar.VERTICAL);
+    fixedTools2.setFloatable(false);
+    fixedTools2.add(m_helpB);
+    m_helpB.setPreferredSize(dP);
+    m_helpB.setMaximumSize(dP);
+    toolBarPanel.add(fixedTools2, BorderLayout.EAST);
 
     m_saveB.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -567,6 +582,12 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	      ((BeanCommon)temp).stop();
 	    }
 	  }
+	}
+      });
+
+    m_helpB.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent ae) {
+	  popupHelp();
 	}
       });
 
@@ -807,6 +828,46 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     return tempP;
   }
 
+  /**
+   * Pop up a help window
+   */
+  private void popupHelp() {
+    final JButton tempB = m_helpB;
+    try {
+      tempB.setEnabled(false);
+      InputStream inR = 
+	ClassLoader.getSystemResourceAsStream("weka/gui/beans/README_KnowledgeFlow");
+      StringBuffer helpHolder = new StringBuffer();
+      LineNumberReader lnr = new LineNumberReader(new InputStreamReader(inR));
+      
+      String line;
+      
+      while ((line = lnr.readLine()) != null) {
+	helpHolder.append(line+"\n");
+      }
+      
+      lnr.close();
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
+      final JTextArea ta = new JTextArea(helpHolder.toString());
+      ta.setFont(new Font("Monospaced", Font.PLAIN, 12));
+      ta.setEditable(false);
+      final JScrollPane sp = new JScrollPane(ta);
+      jf.getContentPane().add(sp, java.awt.BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        public void windowClosing(java.awt.event.WindowEvent e) {
+	  tempB.setEnabled(true);
+          jf.dispose();
+        }
+      });
+      jf.setSize(600,600);
+      jf.setVisible(true);
+      
+    } catch (Exception ex) {
+      tempB.setEnabled(true);
+    }
+  }
+  
   /**
    * Popup a context sensitive menu for the bean component
    *
