@@ -2,7 +2,7 @@ JAVAC = javac
 
 SOURCES = Prediction.java NominalPrediction.java NumericPrediction.java \
 	TwoClassStats.java EvaluationUtils.java \
-	ThresholdCurve.java MarginCurve.java
+	ThresholdCurve.java MarginCurve.java ConfusionMatrix.java
 
 
 CLASSFILES = $(SOURCES:.java=.class)
