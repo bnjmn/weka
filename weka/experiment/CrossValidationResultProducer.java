@@ -39,7 +39,7 @@ import weka.core.Utils;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler {
@@ -202,7 +202,7 @@ public class CrossValidationResultProducer
       // Add in some fields to the key like run and fold number, dataset name
       Object [] seKey = m_SplitEvaluator.getKey();
       Object [] key = new Object [seKey.length + 3];
-      key[0] = m_Instances.relationName();
+      key[0] = Utils.backQuoteChars(m_Instances.relationName());
       key[1] = "" + run;
       key[2] = "" + (fold + 1);
       System.arraycopy(seKey, 0, key, 3, seKey.length);
@@ -247,7 +247,7 @@ public class CrossValidationResultProducer
       // Add in some fields to the key like run and fold number, dataset name
       Object [] seKey = m_SplitEvaluator.getKey();
       Object [] key = new Object [seKey.length + 3];
-      key[0] = m_Instances.relationName();
+      key[0] =  Utils.backQuoteChars(m_Instances.relationName());
       key[1] = "" + run;
       key[2] = "" + (fold + 1);
       System.arraycopy(seKey, 0, key, 3, seKey.length);
@@ -262,7 +262,7 @@ public class CrossValidationResultProducer
 			   seResults.length);
 	  if (m_debugOutput) {
 	    String resultName = (""+run+"."+(fold+1)+"."
-	      +runInstances.relationName()+"."+m_SplitEvaluator.toString()).replace(' ','_');
+	      + Utils.backQuoteChars(runInstances.relationName())+"."+m_SplitEvaluator.toString()).replace(' ','_');
 	    m_ZipDest.zipit(m_SplitEvaluator.getRawResultOutput(), resultName);
 	  }
 	  m_ResultListener.acceptResult(this, key, results);
@@ -646,7 +646,7 @@ public class CrossValidationResultProducer
     if (m_Instances == null) {
       result += ": <null Instances>";
     } else {
-      result += ": " + m_Instances.relationName();
+      result += ": " +  Utils.backQuoteChars(m_Instances.relationName());
     }
     return result;
   }
