@@ -90,7 +90,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1011,6 +1011,7 @@ public class VisualizePanel extends JPanel {
       m_cIndex = c;
       m_plot2D.setCindex(c);
       m_attrib.setCindex(c, m_plot2D.getMaxC(), m_plot2D.getMinC());
+      m_classPanel.setCindex(c);
       this.repaint();
     }
 
@@ -1700,7 +1701,7 @@ public class VisualizePanel extends JPanel {
 
 	  //	  if (m_ColourCombo.isEnabled()) {
 	    m_plot.setCindex(selected);
-	    m_classPanel.setCindex(selected);
+	    //	    m_classPanel.setCindex(selected);
 	    //	  }
 	  //	  m_plot.determineBounds();
 	  //	  m_plot.axisChanged();
@@ -2063,7 +2064,9 @@ public class VisualizePanel extends JPanel {
    */
   public void addPlot(PlotData2D newPlot) throws Exception {
     m_plot.addPlot(newPlot);
-    setUpComboBoxes(newPlot.m_plotInstances);
+    if (m_plot.m_plot2D.getMasterPlot() != null) {
+      setUpComboBoxes(newPlot.m_plotInstances);
+    }
   }
 
   /**
@@ -2082,11 +2085,11 @@ public class VisualizePanel extends JPanel {
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
-      sp.addActionListener(new ActionListener() {
+      /*      sp.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  System.err.println("Recieved a combo box change event");
 	}
-      });
+	}); */
       jf.getContentPane().add(sp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	public void windowClosing(java.awt.event.WindowEvent e) {
