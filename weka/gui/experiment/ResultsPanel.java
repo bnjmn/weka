@@ -83,7 +83,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -729,7 +729,7 @@ public class ResultsPanel extends JPanel {
 	m_CompareCombo.setSelectedIndex(i);
 	//	break;
       } else if ((name.toLowerCase().indexOf("root_relative_squared_error") != -1) &&
-		 (m_CompareCombo.getSelectedIndex() > 0)) {
+		 (m_CompareCombo.getSelectedIndex() < 0)) {
 	m_CompareCombo.setSelectedIndex(i);
       }
     }
