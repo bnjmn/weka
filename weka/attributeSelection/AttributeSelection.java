@@ -75,15 +75,12 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.8 $
+ * @version  $Revision: 1.9 $
  */
 public class AttributeSelection implements Serializable {
 
   /** the instances to select attributes from */
   private Instances m_trainInstances;
-
-  /** a starting set of attributes */
-  private Range m_startSet;
 
   /** the attribute/subset evaluator */
   private ASEvaluation m_ASEvaluator;
@@ -157,16 +154,6 @@ public class AttributeSelection implements Serializable {
   }
 
   /**
-   * set a starting set
-   * @param startSet a Range object giving a range of attributes to use
-   * as a starting set
-   */
-  public void setStartSet(Range startSet) {
-    m_startSet = startSet;
-  }
-  
-
-  /**
    * set the number of folds for cross validation
    * @param folds the number of folds
    */
@@ -221,16 +208,13 @@ public class AttributeSelection implements Serializable {
    * BestFirst.
    */
   public AttributeSelection () {
-    Range r = new Range();
-    r.setInvert(false);
-    setStartSet(r);
     setFolds(10);
     setRanking(false);
     setXval(false);
     setSeed(1);
     //    m_threshold = -Double.MAX_VALUE;
     setEvaluator(new CfsSubsetEval());
-    setSearch(new BestFirst());
+    setSearch(new ForwardSelection());
     m_selectionResults = new StringBuffer();
     m_selectedAttributeSet = null;
     m_attributeRanking = null;
@@ -298,14 +282,8 @@ public class AttributeSelection implements Serializable {
     double[][] rankResults;
     double[] subsetResults;
     double[][] attributeRanking = null;
-    int [] initialSet;
 
     cvData.randomize(new Random(m_seed));
-
-    initialSet = m_startSet.getSelection();
-    if (initialSet.length == 0) {
-      initialSet = null;
-    }
 
     if (m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
       subsetResults = new double[cvData.numAttributes()];
@@ -330,8 +308,7 @@ public class AttributeSelection implements Serializable {
       train = cvData.trainCV(m_numFolds, i);
       m_ASEvaluator.buildEvaluator(train);
       // Do the search
-      int[] attributeSet = m_searchMethod.search(initialSet, 
-						 m_ASEvaluator, 
+      int[] attributeSet = m_searchMethod.search(m_ASEvaluator, 
 						 train);
       // Do any postprocessing that a attribute selection method might 
       // require
@@ -370,10 +347,11 @@ public class AttributeSelection implements Serializable {
     if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
 	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator) &&
 	(cvData.classAttribute().isNominal())) {
-	CvString.append("(stratified) ===\n\n");
+	CvString.append("(stratified), seed: ");
+	CvString.append(m_seed+" ===\n\n");
     }
     else {
-      CvString.append("===\n\n");
+      CvString.append("seed: "+m_seed+" ===\n\n");
     }
 
     if ((m_searchMethod instanceof RankedOutputSearch) && (m_doRank == true)) {
@@ -451,7 +429,6 @@ public class AttributeSelection implements Serializable {
    * @exception Exception if there is a problem during selection
    */
   public void SelectAttributes (Instances data) throws Exception {
-    int [] initialSet;
     int [] attributeSet;
 
     m_trainInstances = data;
@@ -467,15 +444,14 @@ public class AttributeSelection implements Serializable {
       //      System.err.println("AttributeEvaluators must use a Ranker search "
       //			 +"method. Switching to Ranker...");
       //      m_searchMethod = new Ranker();
-      throw new Exception("AttributeEvaluators must use a Ranker search "
+      throw new Exception("AttributeEvaluators must use the Ranker search "
 			  + "method");
     }
 
-    if (m_doRank && !(m_searchMethod instanceof RankedOutputSearch)) {
-      throw new Exception(m_searchMethod.getClass().getName()
-			  +"is not capable of ranking attributes");
+    if (m_searchMethod instanceof RankedOutputSearch) {
+      m_doRank = ((RankedOutputSearch)m_searchMethod).getGenerateRanking();
     }
-    
+
     if (m_ASEvaluator instanceof UnsupervisedAttributeEvaluator ||
 	m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
       // unset the class index
@@ -487,17 +463,10 @@ public class AttributeSelection implements Serializable {
       }
     }
 
-    m_startSet.setUpper(m_trainInstances.numAttributes() - 1);
-    initialSet = m_startSet.getSelection();
-    if (initialSet.length == 0) {
-      initialSet = null;
-    }
-
     // Initialize the attribute evaluator
     m_ASEvaluator.buildEvaluator(m_trainInstances);
     // Do the search
-    attributeSet = m_searchMethod.search(initialSet, 
-					 m_ASEvaluator, 
+    attributeSet = m_searchMethod.search(m_ASEvaluator, 
 					 m_trainInstances);
     // Do any postprocessing that a attribute selection method might require
     attributeSet = m_ASEvaluator.postProcess(attributeSet);
@@ -605,11 +574,18 @@ public class AttributeSelection implements Serializable {
 	  m_selectionResults.append((attributeSet[i] + 1) 
 		      + " : " 
 		      + attributeSet.length 
-		      + "\n\t");
+		      + "\n");
 	}
 	else {
 	  m_selectionResults.append((attributeSet[i] + 1) + ",");
 	}
+      }
+
+      for (int i=0;i<attributeSet.length;i++) {
+	m_selectionResults.append("                     "
+				  +m_trainInstances
+				  .attribute(attributeSet[i]).name()
+				  +"\n");
       }
     }
 
@@ -639,16 +615,14 @@ public class AttributeSelection implements Serializable {
     throws Exception
   {
     int seed = 1, folds = 10;
-    String cutString, foldsString, seedString, searchName, rangeString;
+    String cutString, foldsString, seedString, searchName;
     String classString;
     String searchClassName;
     String[] searchOptions = null; //new String [1];
     Random random;
     ASSearch searchMethod = null;
-    boolean ranking = false;
     boolean doCrossVal = false;
     Range initialRange;
-    int[] initialSet = null;
     int classIndex = -1;
     int[] selectedAttributes;
     double cutoff = -Double.MAX_VALUE;
@@ -706,15 +680,6 @@ public class AttributeSelection implements Serializable {
 
       trainSelector.setSeed(seed);
 
-      ranking = Utils.getFlag('R', options);
-
-      // Attribute Evaluators always result in a ranked list of attributes
-      if (ASEvaluator instanceof AttributeEvaluator) {
-	ranking = true;
-      }
-      
-      trainSelector.setRanking(ranking);
-
       searchName = Utils.getOption('S', options);
 
       if ((searchName.length() == 0) && 
@@ -752,22 +717,8 @@ public class AttributeSelection implements Serializable {
 	searchMethod = ASSearch.forName(searchClassName, searchOptions);
       }
 
-      if (ranking && !(searchMethod instanceof RankedOutputSearch)) {
-	throw new Exception(searchName + " is not capable of ranking " 
-			     + "attributes.");
-      }
-
       // set the search method
       trainSelector.setSearch(searchMethod);
-
-      rangeString = Utils.getOption('P', options);
-
-      if (rangeString.length() != 0) {
-	initialRange.setUpper(train.numAttributes() - 1);
-	initialRange.setRanges(rangeString);
-	initialSet = initialRange.getSelection();
-	trainSelector.setStartSet(initialRange);
-      }
     }
     catch (Exception e) {
       throw  new Exception('\n' + e.getMessage() 
@@ -894,9 +845,6 @@ public class AttributeSelection implements Serializable {
     optionsText.append("-P <range>\n");
     optionsText.append("\tSpecify a (optional) set of attributes to start\n");
     optionsText.append("\tthe search from, eg 1,2,5-9.\n");
-    optionsText.append("-R\n");
-    optionsText.append("\tProduce a attribute ranking if the specified\n");
-    optionsText.append("\tsearch method is capable of doing so.\n");
     optionsText.append("-X <number of folds>\n");
     optionsText.append("\tPerform a cross validation.\n");
     optionsText.append("-N <random number seed>\n");
