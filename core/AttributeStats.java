@@ -64,4 +64,54 @@ public class AttributeStats {
     }
     distinctCount++;
   }
+
+  /**
+   * Returns a human readable representation of this AttributeStats instance.
+   *
+   * @return a String represtinging these AttributeStats.
+   */
+  public String toString() {
+
+    StringBuffer sb = new StringBuffer();
+    sb.append(Utils.padLeft("Type", 4)).append(Utils.padLeft("Nom", 5));
+    sb.append(Utils.padLeft("Int", 5)).append(Utils.padLeft("Real", 5));
+    sb.append(Utils.padLeft("Missing", 12));
+    sb.append(Utils.padLeft("Unique", 12));
+    sb.append(Utils.padLeft("Dist", 6));
+    if (nominalCounts != null) {
+      sb.append(' ');
+      for (int i = 0; i < nominalCounts.length; i++) {
+        sb.append(Utils.padLeft("C[" + i + "]", 5));
+      }
+    }
+    sb.append('\n');
+
+    long percent;
+    percent = Math.round(100.0 * intCount / totalCount);
+    if (nominalCounts != null) {
+      sb.append(Utils.padLeft("Nom", 4)).append(' ');
+      sb.append(Utils.padLeft("" + percent, 3)).append("% ");
+      sb.append(Utils.padLeft("" + 0, 3)).append("% ");
+    } else {
+      sb.append(Utils.padLeft("Num", 4)).append(' ');
+      sb.append(Utils.padLeft("" + 0, 3)).append("% ");
+      sb.append(Utils.padLeft("" + percent, 3)).append("% ");
+    }
+    percent = Math.round(100.0 * realCount / totalCount);
+    sb.append(Utils.padLeft("" + percent, 3)).append("% ");
+    sb.append(Utils.padLeft("" + missingCount, 5)).append(" /");
+    percent = Math.round(100.0 * missingCount / totalCount);
+    sb.append(Utils.padLeft("" + percent, 3)).append("% ");
+    sb.append(Utils.padLeft("" + uniqueCount, 5)).append(" /");
+    percent = Math.round(100.0 * uniqueCount / totalCount);
+    sb.append(Utils.padLeft("" + percent, 3)).append("% ");
+    sb.append(Utils.padLeft("" + distinctCount, 5)).append(' ');
+    if (nominalCounts != null) {
+      for (int i = 0; i < nominalCounts.length; i++) {
+        sb.append(Utils.padLeft("" + nominalCounts[i], 5));
+      }
+    }
+    sb.append('\n');
+    return sb.toString();
+  }
 }
