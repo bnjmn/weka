@@ -29,40 +29,40 @@ package weka.gui.graphvisualizer;
  * @version 1.0 - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class GraphEdge extends Object {
-
-    /** The index of source node in Nodes vector */
-    protected int src;
-    /** The index of target node in Nodes vector */
-    protected int dest;
-    /** The type of Edge */
-    protected int type;
-    /** Label of source node */
-    protected String srcLbl;
-    /** Label of target node */
-    protected String destLbl;
-    
-    public GraphEdge(int s, int d, int t) {
-	src=s; dest=d; type=t;
-	srcLbl = null; destLbl = null;
-    }
-    
-    public GraphEdge(int s, int d, int t, String sLbl, String dLbl) {
-	src=s; dest=d; type=t;
-	srcLbl = sLbl; destLbl = dLbl;
-    }
-    
-    public String toString() {
-	return ("("+src+","+dest+","+type+")");
-    }
-
-    public boolean equals(Object e) {
-	if( e instanceof GraphEdge && 
-	    ((GraphEdge)e).src==this.src &&
-	    ((GraphEdge)e).dest==this.dest &&
-	    ((GraphEdge)e).type==this.type)
-	    return true;
-	else
-	    return false;
-    }
-    
+  
+  /** The index of source node in Nodes vector */
+  protected int src;
+  /** The index of target node in Nodes vector */
+  protected int dest;
+  /** The type of Edge */
+  protected int type;
+  /** Label of source node */
+  protected String srcLbl;
+  /** Label of target node */
+  protected String destLbl;
+  
+  public GraphEdge(int s, int d, int t) {
+    src=s; dest=d; type=t;
+    srcLbl = null; destLbl = null;
+  }
+  
+  public GraphEdge(int s, int d, int t, String sLbl, String dLbl) {
+    src=s; dest=d; type=t;
+    srcLbl = sLbl; destLbl = dLbl;
+  }
+  
+  public String toString() {
+    return ("("+src+","+dest+","+type+")");
+  }
+  
+  public boolean equals(Object e) {
+    if( e instanceof GraphEdge &&
+    ((GraphEdge)e).src==this.src &&
+    ((GraphEdge)e).dest==this.dest &&
+    ((GraphEdge)e).type==this.type)
+      return true;
+    else
+      return false;
+  }
+  
 } // GraphEdge
