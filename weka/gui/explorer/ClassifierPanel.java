@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.52 $
+ * @version $Revision: 1.53 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1706,7 +1706,7 @@ public class ClassifierPanel extends JPanel {
       m_RunThread.interrupt();
       
       // This is deprecated (and theoretically the interrupt should do).
-      //m_RunThread.stop();
+      m_RunThread.stop();
     }
   }
 
