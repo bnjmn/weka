@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -221,12 +221,6 @@ public class ClustererPanel extends JPanel {
 
   /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
-
-  /** default x index for visualizing */
-  protected int m_visXIndex;
-  
-  /** default y index for visualizing */
-  protected int m_visYIndex;
 
   /** Check to save the predictions in the results list for visualizing
       later on */
@@ -535,17 +529,6 @@ public class ClustererPanel extends JPanel {
 
     m_Log = newLog;
   }
-  
-  /**
-   * Set the default attributes to use on the x and y axis
-   * of a new visualization object.
-   * @param x the index of the attribute to use on the x axis
-   * @param y the index of the attribute to use on the y axis
-   */
-  public void setXY_VisualizeIndexes(int x, int y) {
-    m_visXIndex = x;
-    m_visYIndex = y;
-  }
 
   /**
    * Tells the panel to use a new set of instances.
@@ -553,8 +536,6 @@ public class ClustererPanel extends JPanel {
    * @param inst a set of Instances
    */
   public void setInstances(Instances inst) {
-    
-    setXY_VisualizeIndexes(0,0);
 
     m_Instances = inst;
    
@@ -939,21 +920,9 @@ public class ClustererPanel extends JPanel {
 	      
 	      try {
 		m_CurrentVis.addPlot(predData);
-		m_CurrentVis.setXIndex(m_visXIndex); 
-		m_CurrentVis.setYIndex(m_visYIndex);
 	      } catch (Exception ex) {
 		System.err.println(ex);
 	      }
-	      m_CurrentVis.addActionListener(new ActionListener() {
-		  public void actionPerformed(ActionEvent e) {
-		    if (m_CurrentVis.getInstances().
-			relationName().
-			compareTo(m_Instances.relationName()) == 0) {
-		      setXY_VisualizeIndexes(m_CurrentVis.getXIndex(), 
-					     m_CurrentVis.getYIndex());
-		    }
-		  }
-		});
 
 	      FastVector vv = new FastVector();
 	      vv.addElement(fullClusterer);
@@ -1515,22 +1484,9 @@ public class ClustererPanel extends JPanel {
 	
 	try {
 	  m_CurrentVis.addPlot(predData);
-	  m_CurrentVis.setXIndex(m_visXIndex); 
-	  m_CurrentVis.setYIndex(m_visYIndex);
 	} catch (Exception ex) {
 	  System.err.println(ex);
 	}
-	m_CurrentVis.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      if (m_Instances != null &&
-		  m_CurrentVis.getInstances().
-		  relationName().
-		  compareTo(m_Instances.relationName()) == 0) {
-		setXY_VisualizeIndexes(m_CurrentVis.getXIndex(), 
-				       m_CurrentVis.getYIndex());
-	      }
-	    }
-	  });
 	
 	FastVector vv = new FastVector();
 	vv.addElement(clusterer);

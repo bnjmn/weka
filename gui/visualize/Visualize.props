@@ -27,9 +27,9 @@ weka.gui.visualize.AttributePanel.barColour=black
 # escape characters (java 1.2), eg. my\ first\ relation\ name
 
 # Defaults for threshold curve plots
-weka.gui.visualize.VisualizePanel.ThresholdCurve.XDimension=Recall
-weka.gui.visualize.VisualizePanel.ThresholdCurve.YDimension=Precision
-weka.gui.visualize.VisualizePanel.ThresholdCurve.ColourDimension=Threshold
+weka.gui.visualize.ThresholdVisualizePanel.ThresholdCurve.XDimension=False\ Positive\ Rate
+weka.gui.visualize.ThresholdVisualizePanel.ThresholdCurve.YDimension=True\ Positive\ Rate
+weka.gui.visualize.ThresholdVisualizePanel.ThresholdCurve.ColourDimension=Threshold
 
 #Defaults for cost curve plots
 weka.gui.visualize.VisualizePanel.CostCurve.XDimension=Probability\ Cost\ Function
