@@ -58,7 +58,7 @@ import weka.clusterers.MakeDensityBasedClusterer;
  * (default 1). <p>
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
@@ -103,6 +103,13 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
+
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    if (instances.numInstances() == 0) {
+      throw new Exception("No training instances without a missing class!");
+    }
+    
     SimpleKMeans sk = new SimpleKMeans();
     sk.setNumClusters(m_numClusters);
     sk.setSeed(m_clusteringSeed);
@@ -150,6 +157,11 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    * @return a description of this classifier
    */
   public String toString() {
+
+    if (m_basisFilter == null) {
+      return "No classifier built yet!";
+    }
+
     StringBuffer sb = new StringBuffer();
     sb.append("Radial basis function network\n");
     sb.append((m_linear == null) 
