@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.15 $
+ * @version  $Revision: 1.16 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -579,10 +579,10 @@ public class AttributeSelection implements Serializable {
       }
 
       for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
+	if (m_attributeRanking[i][1] > m_threshold) {
 
 	  m_selectionResults.
-	    append(Utils.doubleToString(Math.abs(m_attributeRanking[i][1]),
+	    append(Utils.doubleToString(m_attributeRanking[i][1],
 					f_p+w_p+1,f_p) 
 		   + Utils.doubleToString((m_attributeRanking[i][0] + 1),
 					  fieldWidth+1,0) 
@@ -596,7 +596,7 @@ public class AttributeSelection implements Serializable {
       int count = 0;
 
       for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
+	if (m_attributeRanking[i][1] > m_threshold) {
 	  count++;
 	}
       }
@@ -617,12 +617,12 @@ public class AttributeSelection implements Serializable {
       m_selectionResults.append("\nSelected attributes: ");
 
       for (int i = 0; i < m_attributeRanking.length; i++) {
-	if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
+	if (m_attributeRanking[i][1] > m_threshold) {
 	  m_selectedAttributeSet[i] = (int)m_attributeRanking[i][0];
 	}
 
 	if (i == (m_attributeRanking.length - 1)) {
-	  if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
+	  if (m_attributeRanking[i][1] > m_threshold) {
 	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1) 
 				      + " : " 
 				      + (i + 1) 
@@ -630,10 +630,10 @@ public class AttributeSelection implements Serializable {
 	  }
 	}
 	else {
-	  if (Math.abs(m_attributeRanking[i][1]) > m_threshold) {
+	  if (m_attributeRanking[i][1] > m_threshold) {
 	    m_selectionResults.append(((int)m_attributeRanking[i][0] + 1));
 
-	    if (Math.abs(m_attributeRanking[i + 1][1]) > m_threshold) {
+	    if (m_attributeRanking[i + 1][1] > m_threshold) {
 	      m_selectionResults.append(",");
 	    }
 	    else {
