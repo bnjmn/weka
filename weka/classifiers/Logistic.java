@@ -1,12 +1,13 @@
 /*
- *    Logistic.java
- *    Copyright (C) 1999 Len Trigg, Eibe Frank
+ *    Logisticf.java
+ *    Copyright (C) 1999 Len Trigg, Eibe Frank, Tony Voyle
  *
  */
 
 package weka.classifiers;
 
 import java.util.*;
+import java.io.*;
 import weka.core.*;
 import weka.filters.*;
 
@@ -14,6 +15,9 @@ import weka.filters.*;
  * Class for building and using a two-class logistic regression model
  * with a ridge estimator.  <p>
  * 
+ * This class utilizes globally convergent Newtons Method adapted from
+ * Numerical Recipies in C.
+ *
  * Reference: le Cessie, S. and van Houwelingen, J.C. (1997). <i>
  * Ridge Estimators in Logistic Regression.</i> Applied Statistics,
  * Vol. 41, No. 1, pp. 191-201. <p>
@@ -29,7 +33,8 @@ import weka.filters.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @author Tony Voyle (tv6@cs.waikato.ac.nz)
+ * @version $Revision: 1.11 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
 
@@ -59,6 +64,214 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 
   /** Debugging output */
   protected boolean m_Debug;
+  
+  private double m_f;
+  
+  private double[] fvec;
+
+  private int m_nn;
+  
+  private int m_check;
+  
+  private double m_ALF = 1.0e-4;
+
+  private double m_TOLX = 1.0e-7;
+  
+  private double m_TOLMIN = 1.0e-6;
+
+  private double m_STPMX = 100.0;
+
+  private int m_MAXITS = 200;
+  
+  /**
+   * Finds a new point x in the direction p from
+   * a point xold at which the value of the function
+   * has decreased sufficiently.
+   *
+   * @param n number of variables
+   * @param xold old point
+   * @param fold value at that point
+   * @param g gtradient at that point
+   * @param p direction
+   * @param x new value along direction p from xold
+   * @param stpmax maximum step length
+   * @param X instance data
+   * @param Y class values
+   * @exception Exception if an error occurs
+   */
+  public void lnsrch(int n, double[] xold, double fold, double[] g, double[] p, 
+		     double[] x, double stpmax, double[][] X, double[] Y)
+    throws Exception {
+    
+    
+    int i, j, k, outl=0, outx = 0;
+    double a,alam,alam2 = 0,alamin,b,disc,f2 = 0,fold2 = 0,rhs1,
+      rhs2,slope,sum,temp,test,tmplam;
+    m_check = 0;
+    for (sum=0.0,i=0;i<=n-1;i++)sum += p[i]*p[i];
+    sum = Math.sqrt(sum);
+    if (m_Debug)
+      System.out.print("fold:   " + Utils.doubleToString(fold,10,7)+ "\n");
+    if (sum > stpmax)
+      for (i=0;i<=n-1;i++) p[i] *= stpmax/sum;
+    for (slope=0.0,i=0;i<=n-1;i++)
+      slope += g[i]*p[i];
+    if (m_Debug)
+      System.out.print("slope:  " + Utils.doubleToString(slope,10,7)+ "\n");
+    test=0.0;
+    for (i=0;i<=n-1;i++) {
+      temp=Math.abs(p[i])/Math.max(Math.abs(xold[i]),1.0);
+      if (temp > test) test=temp;
+    }
+    alamin = m_TOLX/test;
+    if (m_Debug)
+      System.out.print("alamin: " + Utils.doubleToString(alamin,10,7)+ "\n");
+    
+    alam=1.0;
+    for (k=0;;k++) {
+      if (m_Debug)
+	System.out.print("itteration: " + k + "\n");
+      for (i=0;i<=n-1;i++) {
+	x[i]=xold[i]+alam*p[i];
+      }
+      m_f = fmin(x,X,Y);
+      if (m_Debug) {
+	System.out.print("m_f:    " + 
+			 Utils.doubleToString(m_f, 10, 7)+ "\n");
+	System.out.print("cLL:    " + 
+			 Utils.doubleToString(cLL(X,Y,x), 10, 7)+ "\n");
+      
+	System.out.print("alam:   " + alam + "\n");
+	System.out.print("max:    " + 
+			 Utils.doubleToString(fold-m_ALF*alam*slope,10,7)+ "\n");
+      }
+      if (Double.isInfinite(m_f)){
+	if(m_Debug)
+	  for (i=0;i<=n-1;i++) {
+	    System.out.println("x[" + i + "] = " + 
+			       Utils.doubleToString(x[i], 10, 4));
+	  }
+	System.err.println("Infinite");
+	if(Double.isNaN(alam))
+	  return;
+      }
+      if (Double.isInfinite(f2)){
+	m_check = 2;
+	return;
+      }
+      if (alam < alamin) {
+	for (i=0;i<=n-1;i++) x[i]=xold[i];
+	m_check=1;
+	return;
+      } else if (m_f <= fold-m_ALF*alam*slope) return;
+      else {
+	if (alam == 1.0)
+	  tmplam = -1*slope/(2.0*(m_f-fold-slope));
+	else {
+	  rhs1 = m_f-fold-alam*slope;
+	  rhs2 = f2-fold2-alam2*slope;
+	  a=(rhs1/(alam*alam)-rhs2/(alam*alam2))/(alam-alam2);
+	  b=(-1*alam2*rhs1/(alam*alam)+alam*rhs2/(alam2*alam2))/(alam-alam2);
+	  if (a == 0.0) tmplam = -1*slope/(2.0*b);
+	  else {
+	    disc=b*b-3.0*a*slope;
+	    if (disc < 0.0) disc = disc*-1;
+	    tmplam=(-1*b+Math.sqrt(disc))/(3.0*a);
+	  }
+	  if (m_Debug)
+	    System.out.print("newstuff: \n" + 
+			     "a:   " + Utils.doubleToString(alam,10,7)+ "\n" +
+			     "b:   " + Utils.doubleToString(alam,10,7)+ "\n" +
+			     "disc:   " + Utils.doubleToString(alam,10,7)+ "\n" +
+			     "tmplam:   " + alam + "\n" +
+			     "alam:   " + Utils.doubleToString(alam,10,7)+ "\n");
+	  if (tmplam>0.5*alam)
+	    tmplam=0.5*alam;
+	}
+      }
+      alam2=alam;
+      f2=m_f;
+      fold2=fold;
+      alam=Math.max(tmplam,0.1*alam);
+    }
+  }
+    
+  /**
+   * Globaly convergent Newtons method utilising 
+   * line search and backtracking
+   *
+   * @param x initial point
+   * @param n dimension of point
+   * @param X instance data
+   * @param Y class values
+   * @exception Exception if an error occurs
+   */
+  private void newtn(double[] x, int n, double[][] X, double[] Y ) 
+    throws Exception{
+    
+    int i,its,j,indx[],startnum;;
+    double pLL,d,den,f,fold,stpmax,sum,temp,test,g[],p[],xold[];
+     
+    indx = new int[n];
+    Matrix fjac = new Matrix(n,n);
+    fvec = new double[n];
+    g = new double[n];
+    p = new double[n];
+    xold = new double[n];
+
+    m_nn = n;
+    m_f = fmin(x, X,Y);
+    
+    for (sum=0.0,i=0;i<=n-1;i++) sum+=x[i]*x[i];
+    stpmax=m_STPMX*Math.max(Math.sqrt(sum),(float)n);
+
+    m_LL=calculateLogLikelihood(X,Y,fjac,fvec);
+    
+    for (its=1,startnum=0;its<=m_MAXITS;its++) {
+      pLL=m_LL;
+      if (m_Debug) {
+	System.out.println("\n-2 Log Likelihood = " 
+			   + Utils.doubleToString(m_LL, 10, 5)
+			   + ((m_LLn == m_LL) ? " (Null Model)" : ""));
+	System.err.println("-2 Log Likelihood = " 
+			   + Utils.doubleToString(m_LL, 10, 5)
+			   + ((m_LLn == m_LL) ? " (Null Model)" : ""));
+      }
+      for (i=1;i<=n-1;i++) {
+	for (sum=0.0,j=0;j<=n-1;j++) sum+=fjac.getElement(j,i)*fvec[i];
+	g[i]=sum;
+      }
+      for (i=0;i<=n-1;i++) xold[i]=x[i];
+      fold=m_f;
+      for (i=0;i<=n-1;i++) p[i] = fvec[i];
+      fjac.lubksb(fjac.ludcmp(),p);
+      lnsrch(n,xold,fold,g,p,x,stpmax,X,Y);
+      for (j = 0; j < x.length; j++) { 
+	m_Par[j] = x[j];
+      }
+      m_LL = calculateLogLikelihood(X, Y, fjac, fvec);
+      if(Math.abs(pLL-m_LL) < 0.00001)
+	return;
+      
+    }
+    throw new Exception("MAXITS exceeded in newtn");
+  }
+
+  /**
+   * returns 1/2*cLL^2 at x
+   *
+   * @param x a point
+   * @param X instance data
+   * @param Y class values
+   * @return function value
+   */
+  private double fmin( double[] x, double[][] X, double[] Y){
+    int i;
+    double sum;
+    sum=cLL(X,Y,x);
+    return sum * sum * 0.5;
+  }
+   
 
   /**
    * Returns probability.
@@ -83,6 +296,37 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     return v;
   }
 
+
+  /**
+   * Returns the -2 Log likelihood with parameters in x
+   *
+   * @param X instance data
+   * @param Y class values
+   * @param x a point
+   * @return function value
+   */
+  private double cLL(double[][] X, double[] Y, double[] x) {
+  
+    double LL = 0;
+    for (int i=0; i < X.length; i++) {
+      
+
+      double v = x[0];
+      for(int k = 1; k <= m_NumPredictors; k++)
+	v += x[k] * X[i][k];
+      v = 1 / (1 + Math.exp(-v));
+      if ( v == 1.0 || v == 0.0 ) continue; 
+      // Update the log-likelihood of this set of coefficients
+      if( Y[i]==1 ) {
+	LL = LL - 2 * Math.log(v);
+      } else {
+	LL = LL - 2 * Math.log(1 - v);
+      }
+    }
+    return LL;
+  }
+
+
   /**
    * Calculates the log likelihood of the current set of
    * coefficients (stored in m_Par), given the data.
@@ -97,23 +341,23 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
    */
   protected double calculateLogLikelihood(double [][] X, double [] Y, 
 					  Matrix jacobian, double [] deltas) {
-
+    
     double LL = 0;
     double [][] Arr = new double [jacobian.numRows()][jacobian.numRows()];
-
+   
     for (int j = 0; j < Arr.length; j++) {
       for (int k = 0; k < Arr.length; k++) {
 	Arr[j][k] = 0;
       }
+
       deltas[j] = 0;
     }
-
     // For each data point
     for (int i = 0; i < X.length; i++) {	
 
       // Evaluate the probability for this point using the current coefficients
       double p = evaluateProbability(X[i]);
-
+      if (p == 1.0 || p == 0.0) continue;
       // Update the log-likelihood of this set of coefficients
       if( Y[i]==1 ) {
 	LL = LL - 2 * Math.log(p);
@@ -153,13 +397,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     for (int j = 0; j < Arr.length; j++) {
       jacobian.setRow(j, Arr[j]);
     }
-    /*
-    System.out.println("Jacobian:\n"+jacobian.toString());
-    System.out.print("Deltas: ");
-    for(int j = 0; j < deltas.length; j++)
-      System.out.print(" "+Utils.doubleToString(deltas[j],10,3));
-    System.out.println("");
-    */
     return LL;
   }
 
@@ -284,9 +521,6 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
       for (int k = 0; k <= nR; k++) {
 	if (k != m_ClassIndex) {
 	  double x = current.value(k);
-	  /*if ((i == j) && (i <= nR)) {
-	    x += 1e-8;
-	    }*/
 	  X[i][j] = x;
 	  xMean[j] = xMean[j] + x;
 	  xSD[j] = xSD[j] + x*x;
@@ -349,26 +583,11 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
       m_Par[j] = 0;
     }
     
-    // While the log-likelihood is changing (i.e. no maxima found)
-    while(Math.abs(LLp-m_LL) > 0.00001) {
-      LLp = m_LL;
-      m_LL = calculateLogLikelihood(X, Y, jacobian, deltas);
-      if (LLp == 1e+10) {
-	m_LLn = m_LL; 
-      }
-      if (m_Debug) {
-	System.out.println("-2 Log Likelihood = " 
-			   + Utils.doubleToString(m_LL, 10, 5)
-			   + ((m_LLn == m_LL) ? " (Null Model)" : ""));
-      }
-      
-      jacobian.lubksb(jacobian.ludcmp(), deltas);
+    double x[] = new double[m_Par.length];
+    for (int q=0; q < x.length;q++) x[q] = 0;
 
-      // Adjust the coefficients
-      for (int j = 0; j < deltas.length; j++) {
-	m_Par[j] += deltas[j];
-      }
-    }
+    newtn(x,x.length,X,Y);
+
     if (m_Debug) {
       System.out.println(" (Converged)");
     }
@@ -381,7 +600,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
       }
     }
   }		
-
+  
   /**
    * Computes the distribution for a given instance
    *
@@ -393,11 +612,8 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     throws Exception {
 
     m_ReplaceMissingValues.input(instance);
-    m_ReplaceMissingValues.batchFinished();
     instance = m_ReplaceMissingValues.output();
-
     m_NominalToBinary.input(instance);
-    m_NominalToBinary.batchFinished();
     instance = m_NominalToBinary.output();
 
     // Extract the predictor columns into an array
@@ -472,3 +688,12 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     }
   }
 }
+
+
+
+
+
+
+
+
+
