@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.58 $
+ * @version $Revision: 1.59 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1269,7 +1269,12 @@ public class ClassifierPanel extends JPanel {
 	  } catch (Exception ex) {
 	    ex.printStackTrace();
 	    m_Log.logMessage(ex.getMessage());
-	    m_Log.statusMessage("See error log");
+	    JOptionPane.showMessageDialog(ClassifierPanel.this,
+					  "Problem evaluating classifier:\n"
+					  + ex.getMessage(),
+					  "Evaluate classifier",
+					  JOptionPane.ERROR_MESSAGE);
+	    m_Log.statusMessage("Problem evaluating classifier");
 	  } finally {
 	    try {
 	      if (predInstances != null && predInstances.numInstances() > 0) {
@@ -1335,7 +1340,7 @@ public class ClassifierPanel extends JPanel {
 	    
 	    if (isInterrupted()) {
 	      m_Log.logMessage("Interrupted " + cname);
-	      m_Log.statusMessage("See error log");
+	      m_Log.statusMessage("Interrupted");
 	    }
 
 	    synchronized (this) {
@@ -1964,6 +1969,15 @@ public class ClassifierPanel extends JPanel {
       ex.printStackTrace();
       m_Log.logMessage(ex.getMessage());
       m_Log.statusMessage("See error log");
+
+      ex.printStackTrace();
+      m_Log.logMessage(ex.getMessage());
+      JOptionPane.showMessageDialog(this,
+				    "Problem evaluationg classifier:\n"
+				    + ex.getMessage(),
+				    "Evaluate classifier",
+				    JOptionPane.ERROR_MESSAGE);
+      m_Log.statusMessage("Problem evaluating classifier");
     } finally {
       try {
 	if (predInstances != null && predInstances.numInstances() > 0) {
