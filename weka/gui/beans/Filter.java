@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -105,7 +105,7 @@ public class Filter extends JPanel
 
   private weka.filters.Filter m_Filter = new AllFilter();
 
-  private Logger m_log = null;
+  private transient Logger m_log = null;
 
   public Filter() {
     setLayout(new BorderLayout());

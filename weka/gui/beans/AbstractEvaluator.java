@@ -39,7 +39,7 @@ import weka.gui.Logger;
  * classifier, clusterers etc.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see Visible
@@ -58,7 +58,7 @@ public abstract class AbstractEvaluator extends JPanel
 
   protected Object m_listenee = null;
 
-  protected Logger m_logger = null;
+  protected transient Logger m_logger = null;
 
   /**
    * Constructor

@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -120,7 +120,7 @@ public class Classifier extends JPanel
   private IncrementalClassifierEvent m_ie = 
     new IncrementalClassifierEvent(this);
 
-  private Logger m_log = null;
+  private transient Logger m_log = null;
 
   /**
    * Event to handle when processing incremental updates
