@@ -52,7 +52,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public abstract class Filter implements Serializable {
 
@@ -66,7 +66,10 @@ public abstract class Filter implements Serializable {
   private Queue m_OutputQueue = null;
 
   /** Indices of string attributes in the output format */
-  private int [] m_OutputStringAtts;
+  private int [] m_OutputStringAtts = null;
+
+  /** Indices of string attributes in the input format */
+  private int [] m_InputStringAtts = null;
 
   /** The input format for instances */
   private Instances m_InputFormat = null;
@@ -85,17 +88,7 @@ public abstract class Filter implements Serializable {
 
     if (outputFormat != null) {
       m_OutputFormat = outputFormat.stringFreeStructure();
-
-      // Scan through getting the indices of String attributes
-      int [] index = new int [m_OutputFormat.numAttributes()];
-      int indexSize = 0;
-      for (int i = 0; i < m_OutputFormat.numAttributes(); i++) {
-        if (m_OutputFormat.attribute(i).type() == Attribute.STRING) {
-          index[indexSize++] = i;
-        }
-      }
-      m_OutputStringAtts = new int [indexSize];
-      System.arraycopy(index, 0, m_OutputStringAtts, 0, indexSize);
+      m_OutputStringAtts = getStringIndices(m_OutputFormat);
 
       // Rename the attribute
       String relationName = outputFormat.relationName() 
@@ -144,18 +137,7 @@ public abstract class Filter implements Serializable {
   protected void push(Instance instance) {
 
     if (instance != null) {
-      // Copy any string values across
-      Instances origDataset = instance.dataset();
-      for (int i = 0; i < m_OutputStringAtts.length; i++) {
-        int attIndex = m_OutputStringAtts[i];
-        Attribute dest = m_OutputFormat.attribute(attIndex);
-        Attribute src = origDataset.attribute(attIndex);
-        int valIndex = dest.addStringValue(src, (int)instance.value(attIndex));
-        instance.setValue(attIndex, (double)valIndex);
-      }
-      // Point the instance at the outputformat dataset
-      instance.setDataset(m_OutputFormat);
-      // Queue up for later retrieval
+      reassignWithStrings(instance, m_OutputFormat, m_OutputStringAtts);
       m_OutputQueue.push(instance);
     }
   }
@@ -183,22 +165,8 @@ public abstract class Filter implements Serializable {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    // TODO. Make m_InputFormat safe for string attributes 
-
-    // The current implementation will break if we had a filter that
-    // couldn't process instances in non-first batches incrementally,
-    // because of the reassignment of dataset that happens when
-    // buffering the data.  For the first batch this is OK, since
-    // strings aren't removed when we copy the inputformat structure.
-
-    // inputFormat() would use stringFreeStructure
-    // inputFormat() would create an index of string atts
-    // all overriders of inputFormat must call super.inputFormat() or
-    // otherwise ensure inputFormat was created stringFree
-    // all buffering should be done by bufferInput()
-    // bufferInput() would copy string values between the headers
-
-    m_InputFormat = new Instances(instanceInfo, 0);
+    m_InputFormat = instanceInfo.stringFreeStructure();
+    m_InputStringAtts = getStringIndices(instanceInfo);
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
     m_NewBatch = true;
@@ -253,16 +221,45 @@ public abstract class Filter implements Serializable {
   }
 
   /**
-   * Adds the supplied input to the inputformat dataset for later processing.
-   * Use this method rather than getInputFormat().add(instance). Or else.
+   * Adds the supplied input instance to the inputformat dataset for
+   * later processing.  Use this method rather than
+   * getInputFormat().add(instance). Or else.
    *
-   * @param instance the <code>Instance</code> to buffer.
+   * @param instance the <code>Instance</code> to buffer.  
    */
   protected void bufferInput(Instance instance) {
 
-    // This will most likely change to do special string attribute 
-    // manipulation stuff. See the comments in inputFormat()
-    m_InputFormat.add(instance);
+    if (instance != null) {
+      reassignWithStrings(instance, m_InputFormat, m_InputStringAtts);
+      m_InputFormat.add(instance);
+    }
+  }
+
+  /**
+   * Assigns a new dataset to an instance, ensuring that any string values
+   * contained in the instance are copied to the new dataset if need be. The
+   * Instance must already be assigned to a dataset. This dataset and the
+   * destination dataset must have the same structure.
+   *
+   * @param instance the Instance to reassign.
+   * @param destDataset the destination set of Instances
+   * @param stringAtts an array containing the indices of any string attributes
+   * in the dataset.
+   */
+  private void reassignWithStrings(Instance instance, Instances destDataset, 
+                                   int []stringAtts) {
+
+    Instances origDataset = instance.dataset();
+    for (int i = 0; i < stringAtts.length; i++) {
+      int attIndex = stringAtts[i];
+      Attribute dest = destDataset.attribute(attIndex);
+      Attribute src = origDataset.attribute(attIndex);
+      if (!instance.isMissing(attIndex)) {
+        int valIndex = dest.addStringValue(src, (int)instance.value(attIndex));
+        instance.setValue(attIndex, (double)valIndex);
+      }
+    }
+    instance.setDataset(destDataset);
   }
 
   /**
@@ -271,7 +268,12 @@ public abstract class Filter implements Serializable {
    */
   protected void flushInput() {
 
-    m_InputFormat = m_InputFormat.stringFreeStructure();
+    if (m_InputStringAtts.length > 0) {
+      m_InputFormat = m_InputFormat.stringFreeStructure();
+    } else {
+      // This more efficient than new Instances(m_InputFormat, 0);
+      m_InputFormat.delete();
+    }
   }
 
   /**
@@ -314,14 +316,18 @@ public abstract class Filter implements Serializable {
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    //util.Timer t = util.Timer.getTimer("Filter::output"); t.start();
+    util.Timer t = util.Timer.getTimer("Filter::output"); t.start();
     // Clear out references to old strings occasionally
     if (m_OutputQueue.empty() && m_NewBatch && 
-        (m_OutputStringAtts.length > 0) &&
-        (m_OutputFormat.numInstances() >= 10)) {
-      m_OutputFormat = m_OutputFormat.stringFreeStructure();
+        (m_OutputFormat.numInstances() >= 20)) {
+      if (m_OutputStringAtts.length > 0) {
+        m_OutputFormat = m_OutputFormat.stringFreeStructure();
+      } else {
+        // m_OutputFormat.delete() isn't safe here
+        m_OutputFormat = new Instances(m_OutputFormat, 0);
+      }
     }
-    //t.stop();
+    t.stop();
     return result;
   }
   
@@ -367,6 +373,29 @@ public abstract class Filter implements Serializable {
   public boolean isOutputFormatDefined() {
 
     return (m_OutputFormat != null);
+  }
+
+  /**
+   * Gets an array containing the indices of all string attributes.
+   *
+   * @param insts the Instances to scan for string attributes. 
+   * @return an array containing the indices of string attributes in
+   * the input structure. Will be zero-length if there are no
+   * string attributes
+   */
+  protected int [] getStringIndices(Instances insts) {
+    
+    // Scan through getting the indices of String attributes
+    int [] index = new int [insts.numAttributes()];
+    int indexSize = 0;
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      if (insts.attribute(i).type() == Attribute.STRING) {
+        index[indexSize++] = i;
+      }
+    }
+    int [] result = new int [indexSize];
+    System.arraycopy(index, 0, result, 0, indexSize);
+    return result;
   }
   
   /**
