@@ -81,7 +81,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.29 $ 
+ * @version $Revision: 1.30 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -231,7 +231,7 @@ public class SMO extends Classifier implements OptionHandler {
 
     /** Kernel function cache */
     private double[] m_storage;
-    private int[] m_keys;
+    private long[] m_keys;
 
     /** The transformed class values. */
     private double[] m_class;
@@ -325,7 +325,7 @@ public class SMO extends Classifier implements OptionHandler {
       
       // The kernel calculations are cached
       m_storage = new double[m_cacheSize];
-      m_keys = new int[m_cacheSize];
+      m_keys = new long[m_cacheSize];
       
       // Build up I1 and I4
       for (int i = 0; i < m_class.length; i++ ) {
@@ -555,19 +555,20 @@ public class SMO extends Classifier implements OptionHandler {
     private double kernel(int id1, int id2, Instance inst1) throws Exception {
 
       double result = 0;
-      int key = -1, location = -1;
+      long key = -1;
+      int location = -1;
 
       // we can only cache if we know the indexes
       if (id1 >= 0) {
 	if (id1 > id2) {
-	  key = id1 * m_alpha.length + id2;
+	  key = (long)id1 * m_alpha.length + id2;
 	} else {
-	  key = id2 * m_alpha.length + id1;
+	  key = (long)id2 * m_alpha.length + id1;
 	}
 	if (key < 0) {
-	  key = -key;
+	  throw new Exception("Cache overflow detected!");
 	}
-	location = key % m_keys.length;
+	location = (int)(key % m_keys.length);
 	if (m_keys[location] == (key + 1)) {
 	  return m_storage[location];
 	}
