@@ -11,7 +11,9 @@ SOURCES = ASEvaluation.java ASSearch.java AttributeEvaluator.java \
 	  ReliefFAttributeEval.java ForwardSelection.java \
 	  GeneticSearch.java RandomSearch.java \
 	  ConsistencySubsetEval.java StartSetHandler.java \
-	  RankSearch.java PrincipalComponents.java
+	  RankSearch.java PrincipalComponents.java \
+	  ErrorBasedMeritEvaluator.java HoldOutSubsetEvaluator.java \
+	  RaceSearch.java ClassifierSubsetEval.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
