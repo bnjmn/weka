@@ -53,7 +53,7 @@ public class ClassValuePickerCustomizer extends JPanel
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
     
     setLayout(new BorderLayout());
-    add(new javax.swing.JLabel("ClassAssignerCustomizer"), 
+    add(new javax.swing.JLabel("ClassValuePickerCustomizer"), 
 	BorderLayout.NORTH);
     m_holderP.setLayout(new BorderLayout());
     m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class value"));
