@@ -25,6 +25,7 @@ package weka.gui.beans;
 import weka.core.Utils;
 import weka.gui.ListSelectorDialog;
 import weka.gui.LogPanel;
+import weka.gui.GenericPropertiesCreator;
 import weka.gui.visualize.PrintablePanel;
 
 import java.io.OutputStream;
@@ -107,7 +108,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.23.2.1 $
+ * @version  $Revision: 1.23.2.2 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -175,14 +176,18 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     }
 
     try {
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+      creator.execute(false);
       /* now process the keys in the GenericObjectEditor.props. For each
        key that has an entry in the Beans.props associating it with a
       bean component a button tool bar will be created */
       Properties GEOProps = 
-	Utils.readProperties("weka/gui/GenericObjectEditor.props");
+	//Utils.readProperties("weka/gui/GenericObjectEditor.props");
+      creator.getOutputProperties();
       Enumeration en = GEOProps.propertyNames();
       while (en.hasMoreElements()) {
 	String geoKey = (String)en.nextElement();
+
 	// try to match this key with one in the Beans.props file
 	String beanCompName = BEAN_PROPERTIES.getProperty(geoKey);
 	if (beanCompName != null) {
@@ -202,6 +207,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 
 	  // add the root package for this key
 	  String rootPackage = geoKey.substring(0, geoKey.lastIndexOf('.'));
+
 	  newV.addElement(rootPackage);
 
 	  // All the weka algorithms of this class of algorithm
@@ -211,7 +217,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  weka.gui.HierarchyPropertyParser hpp = 
 	    new weka.gui.HierarchyPropertyParser();
 	  hpp.build(wekaAlgs, ", ");
-	  //	  System.err.println(hpp.showTree());
+	  // 	  System.err.println(hpp.showTree());
 	  // ----- end test the HierarchyPropertyParser
 	  newV.addElement(hpp); // add the hierarchical property parser
 
@@ -241,7 +247,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.23.2.1 $
+   * @version $Revision: 1.23.2.2 $
    * @since 1.0
    * @see PrintablePanel
    */

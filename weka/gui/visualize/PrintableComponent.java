@@ -45,7 +45,7 @@ import weka.gui.ExtensionFileFilter;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class PrintableComponent implements PrintableHandler {
   /** the parent component of this print dialog */
@@ -64,7 +64,7 @@ public class PrintableComponent implements PrintableHandler {
   protected double m_yScale = 1.0;
   
   /** whether to print some debug information */
-  private final static boolean DEBUG = false;
+  private static final boolean DEBUG = false;
   
   /** output if we're in debug mode */
   static {
@@ -82,7 +82,7 @@ public class PrintableComponent implements PrintableHandler {
     
     m_Component = component;
     getComponent().addMouseListener(new PrintMouseListener(this));
-    getComponent().setToolTipText("Click left mouse button while holding <ctrl> and <shift> to display a save dialog.");
+    getComponent().setToolTipText("Click left mouse button while holding <alt> and <shift> to display a save dialog.");
     initFileChooser();
   }
   
@@ -290,9 +290,8 @@ public class PrintableComponent implements PrintableHandler {
      */
     public void mouseClicked(MouseEvent e) {
       int modifiers = e.getModifiers();
-
       if (((modifiers & MouseEvent.SHIFT_MASK) == MouseEvent.SHIFT_MASK) && 
-          ((modifiers & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK) &&
+          ((modifiers & MouseEvent.ALT_MASK) == MouseEvent.ALT_MASK) &&
           ((modifiers & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK)) {
         e.consume();
         m_Component.saveComponent();

@@ -55,7 +55,7 @@ import java.util.Vector;
  *
  * @author <a href="mailto:daniel@satlive.org">Daniel Le Berre</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class RTSI {
   /** whether to output some debug information */
@@ -159,15 +159,30 @@ public class RTSI {
     Class[]       intfs;
     int           i;
     boolean       result;
+    Class         currentclass;
     
-    result = false;
-    intfs  = cls.getInterfaces();
-    for (i = 0; i < intfs.length; i++) {
-      if (intfs[i].equals(intf)) {
-        result = true;
-        break;
+    result       = false;
+    currentclass = cls;
+    do {
+      // check all the interfaces, this class implements
+      intfs = currentclass.getInterfaces();
+      for (i = 0; i < intfs.length; i++) {
+        if (intfs[i].equals(intf)) {
+          result = true;
+          break;
+        }
       }
-    }
+
+      // get parent class
+      if (!result) {
+        currentclass = currentclass.getSuperclass();
+        
+        // topmost class reached?
+        if (currentclass.equals(Object.class))
+          break;
+      }
+    } 
+    while (!result);
       
     return result;
   }
