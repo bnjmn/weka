@@ -64,7 +64,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class Plot2D extends JPanel {
 
@@ -214,22 +214,24 @@ public class Plot2D extends JPanel {
       String axisColour = VisualizeUtils.VISUALIZE_PROPERTIES.
 	getProperty(axisKey);
       if (axisColour == null) {
+	/*
 	System.err.println("Warning: no configuration property found in "
 			   +VisualizeUtils.PROPERTY_FILE
-			   +" for "+axisKey);
+			   +" for "+axisKey);*/
       } else {
-	System.err.println("Setting axis colour to: "+axisColour);
+	//System.err.println("Setting axis colour to: "+axisColour);
 	m_axisColour = VisualizeUtils.processColour(axisColour, m_axisColour);
       }
 
       String backgroundColour = 
 	VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(backgroundKey);
       if (backgroundColour == null) {
+	/*
 	System.err.println("Warning: no configuration property found in "
 			   +VisualizeUtils.PROPERTY_FILE
-			   +" for "+backgroundKey);
+			   +" for "+backgroundKey);*/
       } else {
-	System.err.println("Setting background colour to: "+backgroundColour);
+	//System.err.println("Setting background colour to: "+backgroundColour);
 	m_backgroundColour = VisualizeUtils.processColour(backgroundColour, 
 							  m_backgroundColour);
       }
@@ -408,7 +410,7 @@ public class Plot2D extends JPanel {
    * @exception exception Exception if instances could not be set
    */
   public void setInstances(Instances inst) throws Exception {
-    System.err.println("Setting Instances");
+    //System.err.println("Setting Instances");
     PlotData2D tempPlot = new PlotData2D(inst);
     tempPlot.setPlotName("master plot");
     setMasterPlot(tempPlot);
@@ -1478,17 +1480,17 @@ public class Plot2D extends JPanel {
    * Add more colours to the colour map
    */
   private void extendColourMap(int highest) {
-    System.err.println("Extending colour map");
-      for (int i = m_colorList.size(); i < highest; i++) {
-	Color pc = m_DefaultColors[i % 10];
-	int ija =  i / 10;
-	ija *= 2; 
-	for (int j=0;j<ija;j++) {
-	  pc = pc.brighter();
-	}
-	
-	m_colorList.addElement(pc);
+    //System.err.println("Extending colour map");
+    for (int i = m_colorList.size(); i < highest; i++) {
+      Color pc = m_DefaultColors[i % 10];
+      int ija =  i / 10;
+      ija *= 2; 
+      for (int j=0;j<ija;j++) {
+	pc = pc.brighter();
       }
+      
+      m_colorList.addElement(pc);
+    }
   }
 
   /**

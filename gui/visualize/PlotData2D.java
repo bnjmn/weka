@@ -39,7 +39,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class PlotData2D {
 
@@ -217,7 +217,7 @@ public class PlotData2D {
       throw new Exception("PlotData2D: Shape size vector must have the same "
 			  +"number of entries as number of data points!");
     }
-    System.err.println("Setting connect points ");
+    //System.err.println("Setting connect points ");
     m_shapeSize = new int [ss.size()];
     for (int i = 0; i < ss.size(); i++) {
       m_shapeSize[i] = ((Integer)ss.elementAt(i)).intValue();
@@ -248,7 +248,7 @@ public class PlotData2D {
       throw new Exception("PlotData2D: connect points array must have the "
 			  +"same number of entries as number of data points!");
     }
-    System.err.println("Setting connect points ");
+    //System.err.println("Setting connect points ");
     m_shapeSize = new int [cp.size()];
     for (int i = 0; i < cp.size(); i++) {
       m_connectPoints[i] = ((Boolean)cp.elementAt(i)).booleanValue();

@@ -57,7 +57,7 @@ import java.awt.Graphics;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AttributePanel extends JScrollPane {
   /** The instances to be plotted */
@@ -310,11 +310,13 @@ public class AttributePanel extends JScrollPane {
       String barC = VisualizeUtils.VISUALIZE_PROPERTIES.
 	      getProperty(barKey);
       if (barC == null) {
+	/*
 	System.err.println("Warning: no configuration property found in "
 			   +VisualizeUtils.PROPERTY_FILE
 			   +" for "+barKey);
+	*/
       } else {
-	System.err.println("Setting attribute bar colour to: "+barC);
+	//System.err.println("Setting attribute bar colour to: "+barC);
 	m_barColour = VisualizeUtils.processColour(barC, m_barColour);
       }
     }
