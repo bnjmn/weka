@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	
@@ -271,6 +271,7 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 				Instance instance = instances.instance(iInstance);
 				instance.setWeight(-instance.weight());
 				fAccuracy += accuracyIncrease(instance);
+				instance.setWeight(-instance.weight());
 				fWeight += instance.weight();
 			}
 

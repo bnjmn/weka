@@ -39,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 
@@ -390,6 +390,7 @@ public class BIFReader extends BayesNet {
 		
     public static void main(String[] args) {
         try {
+	    System.err.println("okidoki");
             BIFReader br = new BIFReader();
             br.processFile(args[0]);
 	    System.out.println(br.toString());
