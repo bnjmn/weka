@@ -41,11 +41,12 @@ import weka.experiment.Stats;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Clusterer
  * @see OptionHandler
  */
-public class SimpleKMeans extends Clusterer implements OptionHandler {
+public class SimpleKMeans extends Clusterer implements OptionHandler, 
+						       WeightedInstancesHandler {
 
   /**
    * training instances
@@ -278,7 +279,8 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
       distance += diff * diff;
     }
     
-    return Math.sqrt(distance / m_instances.numAttributes());
+    //return Math.sqrt(distance / m_instances.numAttributes());
+    return distance;
   }
 
   /**
