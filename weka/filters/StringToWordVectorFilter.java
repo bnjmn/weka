@@ -30,7 +30,7 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@intelligenesis.net)
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  **/
 public class StringToWordVectorFilter extends Filter {
 
@@ -145,31 +145,11 @@ public class StringToWordVectorFilter extends Filter {
     for(int i = 0; i < m_InputFormat.numInstances(); i++) {
       convertInstance(m_InputFormat.instance(i));
     }
-    m_InputFormat = cleanStringCopy(m_InputFormat);
+    m_InputFormat = m_InputFormat.stringFreeStructure();
 
     m_NewBatch = true;
     m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
-  }
-
-  /**
-   * Create a copy of the structure, but "cleanse" string types (i.e.
-   * doesn't contain references to the strings seen in the past).
-   *
-   * @param data the set of Instances to copy the structure of
-   * @return a copy of the instance structure.
-   */
-  private Instances cleanStringCopy(Instances data) {
-
-    FastVector atts = new FastVector();
-    for (int i = 0 ; i < data.numAttributes(); i++) {
-      Attribute att = data.attribute(i);
-      if (att.type() == Attribute.STRING) {
-        att = new Attribute(att.name(), null);
-      }
-      atts.addElement(att);
-    }
-    return new Instances(data.relationName(), atts, 0);
   }
 
   /**

@@ -29,7 +29,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -244,7 +244,7 @@ public class FilteredClassifier extends DistributionClassifier
     newData.deleteWithMissingClass();
     m_Filter.inputFormat(newData);
     newData = Filter.useFilter(newData, m_Filter);
-    m_FilteredInstances = cleanStringCopy(newData);
+    m_FilteredInstances = newData.stringFreeStructure();
     m_Classifier.buildClassifier(newData);
   }
 
@@ -305,32 +305,6 @@ public class FilteredClassifier extends DistributionClassifier
       + m_FilteredInstances.toString()
       + "\n\nClassifier Model\n"
       + m_Classifier.toString();
-    return result;
-  }
-
-  /**
-   * Create a copy of the structure, but "cleanse" string types (i.e.
-   * doesn't contain references to the strings seen in the past).
-   *
-   * @param data the set of Instances to copy the structure of
-   * @return a copy of the instance structure.
-   */
-  private Instances cleanStringCopy(Instances data) {
-
-    FastVector atts = new FastVector();
-    for (int i = 0 ; i < data.numAttributes(); i++) {
-      Attribute att = data.attribute(i);
-      if (att.type() == Attribute.STRING) {
-        att = new Attribute(att.name(), null);
-      }
-      atts.addElement(att);
-    }
-    Instances result = new Instances(data.relationName(), atts, 0);
-    try {
-      result.setClassIndex(data.classIndex());
-    } catch (Exception ex) {
-      // Ignore, we only want to set the class index if there was one already
-    }
     return result;
   }
 
