@@ -54,7 +54,7 @@ import weka.filters.UnsupervisedFilter;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -436,7 +436,6 @@ public class StringToWordVector extends Filter
       }
       m_SelectedRange = new Range(fields.toString());
     }
-    
     m_SelectedRange.setUpper(inputFormat.numAttributes() - 1);
     
     // Prevent the user from converting non-string fields
@@ -447,7 +446,8 @@ public class StringToWordVector extends Filter
 	fields.append((j + 1) + ",");
     }
     m_SelectedRange.setRanges(fields.toString());
-    
+    m_SelectedRange.setUpper(inputFormat.numAttributes() - 1);
+
     // System.err.println("Selected Range: " + getSelectedRange().getRanges()); 
   }
   
