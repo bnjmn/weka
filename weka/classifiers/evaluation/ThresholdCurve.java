@@ -34,7 +34,7 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ThresholdCurve {
 
@@ -96,8 +96,10 @@ public class ThresholdCurve {
         tc.setFalsePositive(tc.getFalsePositive() - pred.weight());
         tc.setTrueNegative(tc.getTrueNegative() + pred.weight());
       }
+      /*
       System.out.println(tc + " " + probs[sorted[i]] 
                          + " " + (pred.actual() == classIndex));
+      */
       if ((i == 0) || (i == (sorted.length - 1)) || 
           (probs[sorted[i]] != probs[sorted[i - 1]])) {
         insts.add(makeInstance(tc, probs[sorted[i]]));
@@ -164,13 +166,13 @@ public class ThresholdCurve {
       EvaluationUtils eu = new EvaluationUtils();
       DistributionClassifier classifier = new weka.classifiers.SMO();
       FastVector predictions = new FastVector();
-      for (int i = 0; i < 2; i++) {
+      for (int i = 0; i < 2; i++) { // Do two runs.
         eu.setSeed(i);
         predictions.appendElements(eu.getCVPredictions(classifier, inst, 10));
-        Instances result = tc.getCurve(predictions);
-        System.out.println("\n\n\n");
-        //System.out.println(result);
+        //System.out.println("\n\n\n");
       }
+      Instances result = tc.getCurve(predictions);
+      System.out.println(result);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
