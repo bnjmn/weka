@@ -59,7 +59,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -151,7 +151,7 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     for (int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
       if (m_DeltaCols.isInRange(i)) {
         selectedCount++;
-        if (getInputFormat().attribute(i).type() != Attribute.NUMERIC) {
+        if (!getInputFormat().attribute(i).isNumeric()) {
           throw new UnsupportedAttributeTypeException("Selected attributes must be all numeric");
         }
       }
