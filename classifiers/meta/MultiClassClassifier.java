@@ -41,7 +41,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -288,8 +288,10 @@ public class MultiClassClassifier extends DistributionClassifier
     double[] probs = new double[inst.numClasses()];
     for(int i = 0; i < m_ClassFilters.length; i++) {
       if (m_Classifiers[i] != null) {
+        m_ClassFilters[i].input(inst);
+        m_ClassFilters[i].batchFinished();
         double [] current = ((DistributionClassifier)m_Classifiers[i])
-          .distributionForInstance(inst);
+          .distributionForInstance(m_ClassFilters[i].output());
         for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
           if (m_ClassFilters[i].getValueRange().isInRange(j)) {
             probs[j] += current[1];
