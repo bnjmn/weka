@@ -25,6 +25,9 @@ import weka.core.Attribute;
 import weka.core.Utils;
 import weka.gui.Logger;
 import weka.gui.SysErrLog;
+
+import java.util.Random;
+
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -32,8 +35,12 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -52,13 +59,15 @@ import javax.swing.JFrame;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
+import javax.swing.JSlider;
+
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
 /** 
  * This panel allows the user to visualize a dataset (and if provided) a
- * classifier's predictions in two dimensions.
+ * classifier's/clusterer's predictions in two dimensions.
  *
  * If the user selects a nominal attribute as the colouring attribute then
  * each point is drawn in a colour that corresponds to the discrete value
@@ -66,7 +75,7 @@ import java.awt.Graphics;
  * attribute to colour on, then the points are coloured using a spectrum
  * ranging from blue to red (low values to high).
  *
- * When a classifiers predictions are supplied they are plotted in one
+ * When a classifier's predictions are supplied they are plotted in one
  * of two ways (depending on whether the class is nominal or numeric).<br>
  * For nominal class: an error made by a classifier is plotted as a square
  * in the colour corresponding to the class it predicted.<br>
@@ -74,7 +83,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -118,14 +127,28 @@ public class VisualizePanel extends JPanel {
     private final int m_spectrumHeight = 5;
 
     /**the offsets of the axes once label metrics are calculated */
-    private int m_XaxisStart;
-    private int m_YaxisStart;
-    private int m_XaxisEnd;
-    private int m_YaxisEnd;
+    private int m_XaxisStart=0;
+    private int m_YaxisStart=0;
+    private int m_XaxisEnd=0;
+    private int m_YaxisEnd=0;
+
+    /** if the user resizes the window, or the attributes selected for
+	the attributes change, then the lookup table for points needs
+	to be recalculated */
+    private boolean m_axisChanged = true;
 
     /** Font for labels */
     private Font m_labelFont;
     private FontMetrics m_labelMetrics=null; 
+
+    /** the level of jitter */
+    private int m_JitterVal=0;
+
+    /** random values for perterbing the data points */
+    private Random m_JRand = new Random(0);
+
+    /** lookup table for plotted points */
+    private double [][] m_pointLookup=null;
 
     /** default colours for colouring discrete class */
     protected Color [] m_DefaultColors = {Color.blue,
@@ -143,6 +166,26 @@ public class VisualizePanel extends JPanel {
     /** Constructor */
     public PlotPanel() {
       setBackground(Color.white);
+      addMouseListener(new MouseAdapter() {
+	  public void mouseClicked(MouseEvent e) {
+	    searchPoints(e.getX(),e.getY());
+	  }
+	});
+    }
+
+    /**
+     * Set level of jitter and repaint the plot using the new jitter value
+     * @param j the level of jitter
+     */
+    public void setJitter(int j) {
+      if (j >= 0) {
+	m_JitterVal = j;
+	m_JRand = new Random(m_JitterVal);
+	if (m_pointLookup != null) {
+	  updatePturb();
+	}
+	repaint();
+      }
     }
 
     /**
@@ -180,6 +223,9 @@ public class VisualizePanel extends JPanel {
       m_plotInstances=inst;
       m_xIndex=0;
       m_yIndex=0;
+      m_cIndex=0;
+      m_pointLookup = new double [m_plotInstances.numInstances()][5];
+      determineBounds();
     }
 
     /**
@@ -211,50 +257,88 @@ public class VisualizePanel extends JPanel {
     }
 
     /**
+     * When the user clicks in the plot window this function pops
+     * up a window displaying attribute information on any instances
+     * corresponding to the points under the clicked point
+     * @param x the x value of the clicked point
+     * @param y the y value of the clicked point
+     */
+    private void searchPoints(int x, int y) {
+      if (m_pointLookup != null) {
+	int longest=0;
+	for (int j=0;j<m_plotInstances.numAttributes();j++) {
+	  if (m_plotInstances.attribute(j).name().length() > longest) {
+	    longest = m_plotInstances.attribute(j).name().length();
+	  }
+	}
+	StringBuffer insts = new StringBuffer(); 
+	for (int i=0;i<m_plotInstances.numInstances();i++) {
+	  if (m_pointLookup[i][0] != Double.NEGATIVE_INFINITY) {
+	    double px = m_pointLookup[i][0]+m_pointLookup[i][3];
+	    double py = m_pointLookup[i][1]+m_pointLookup[i][4];
+	    double size = m_pointLookup[i][2];
+	    if ((x >= px-size) && (x <= px+size) &&
+		(y >= py-size) && (y <= py+size)) {
+	      {
+		insts.append("\nInstance: "+i+"\n");
+		for (int j=0;j<m_plotInstances.numAttributes();j++) {
+		  for (int k = 0;k < 
+			 (longest-m_plotInstances.
+			  attribute(j).name().length()); k++) {
+		    insts.append(" ");
+		  }
+		  insts.append(m_plotInstances.attribute(j).name());  
+		  insts.append(" : ");
+		  
+		  if (m_plotInstances.instance(i).isMissing(j)) {
+		    insts.append("Missing");
+		  } else if (m_plotInstances.attribute(j).isNominal()) {
+		    insts.append(m_plotInstances.
+				 attribute(j).
+				 value((int)m_plotInstances.
+				       instance(i).value(j)));
+		  } else {
+		    insts.append(m_plotInstances.instance(i).value(j));
+		  }
+		  insts.append("\n");
+		}		
+	      }
+	    }
+	  }
+	}
+	if (insts.length() > 0) {
+	  JTextArea jt = new JTextArea();
+	  jt.setFont(new Font("Dialoginput", Font.PLAIN,10));
+	  jt.setEditable(false);
+	  jt.setText(insts.toString());
+	  final JFrame jf = new JFrame("Weka: Instance info");
+	  jf.addWindowListener(new WindowAdapter() {
+	    public void windowClosing(WindowEvent e) {
+	      jf.dispose();
+	    }
+	  });
+	  jf.getContentPane().setLayout(new BorderLayout());
+	  jf.getContentPane().add(new JScrollPane(jt), BorderLayout.CENTER);
+	  jf.pack();
+	  jf.setSize(320, 400);
+	  jf.setVisible(true);
+	}
+      }
+    }
+
+    /**
      * Determine the min and max values for axis and colouring attributes
      */
     private void determineBounds() {
       double value,min,max;
       
-      // x bounds
-      min=Double.POSITIVE_INFINITY;
-      max=Double.NEGATIVE_INFINITY;
-      for (int i=0;i<m_plotInstances.numInstances();i++) {
-	if (!m_plotInstances.instance(i).isMissing(m_xIndex)) {
-	  value = m_plotInstances.instance(i).value(m_xIndex);
-	  if (value < min) {
-	    min = value;
-	  }
-	  if (value > max) {
-	    max = value;
-	  }
-	}
-      }
-      m_minX = min; m_maxX = max;
-
-      // y bounds
-      min=Double.POSITIVE_INFINITY;
-      max=Double.NEGATIVE_INFINITY;
-      for (int i=0;i<m_plotInstances.numInstances();i++) {
-	if (!m_plotInstances.instance(i).isMissing(m_yIndex)) {
-	  value = m_plotInstances.instance(i).value(m_yIndex);
-	  if (value < min) {
-	    min = value;
-	  }
-	  if (value > max) {
-	    max = value;
-	  }
-	}
-      }
-      m_minY = min; m_maxY = max;
-      
-      // colour bounds
-      min=Double.POSITIVE_INFINITY;
-      max=Double.NEGATIVE_INFINITY;
-      if (!m_colourUsingPreds) {
+      if (m_plotInstances != null) {
+	// x bounds
+	min=Double.POSITIVE_INFINITY;
+	max=Double.NEGATIVE_INFINITY;
 	for (int i=0;i<m_plotInstances.numInstances();i++) {
-	  if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
-	    value = m_plotInstances.instance(i).value(m_cIndex);
+	  if (!m_plotInstances.instance(i).isMissing(m_xIndex)) {
+	    value = m_plotInstances.instance(i).value(m_xIndex);
 	    if (value < min) {
 	      min = value;
 	    }
@@ -263,8 +347,66 @@ public class VisualizePanel extends JPanel {
 	    }
 	  }
 	}
+	m_minX = min; m_maxX = max;
+
+	// y bounds
+	min=Double.POSITIVE_INFINITY;
+	max=Double.NEGATIVE_INFINITY;
+	for (int i=0;i<m_plotInstances.numInstances();i++) {
+	  if (!m_plotInstances.instance(i).isMissing(m_yIndex)) {
+	    value = m_plotInstances.instance(i).value(m_yIndex);
+	    if (value < min) {
+	      min = value;
+	    }
+	    if (value > max) {
+	      max = value;
+	    }
+	  }
+	}
+	m_minY = min; m_maxY = max;
+      
+	// colour bounds
+	min=Double.POSITIVE_INFINITY;
+	max=Double.NEGATIVE_INFINITY;
+	if (!m_colourUsingPreds) {
+	  for (int i=0;i<m_plotInstances.numInstances();i++) {
+	    if (!m_plotInstances.instance(i).isMissing(m_cIndex)) {
+	      value = m_plotInstances.instance(i).value(m_cIndex);
+	      if (value < min) {
+		min = value;
+	      }
+	      if (value > max) {
+		max = value;
+	      }
+	    }
+	  }
+	}
+	m_minC = min; m_maxC = max;
+	if (m_pointLookup != null) {
+	  fillLookup();
+	  setJitter(m_JitterVal);
+	  repaint();
+	}
       }
-      m_minC = min; m_maxC = max;
+    }
+
+    /**
+     * returns a value by which an x value can be peturbed. Makes sure
+     * that the x value+pturb stays within the plot bounds
+     * @param xvalP the x coordinate to be peturbed
+     * @param xj a random number to use in calculating a peturb value
+     * @return a peturb value
+     */
+    int pturbX(double xvalP, double xj) {
+      int xpturb = 0;
+      if (m_JitterVal > 0) {
+	xpturb = (int)((double)m_JitterVal * xj);
+	if (((xvalP + xpturb) < m_XaxisStart) || 
+	    ((xvalP + xpturb) > m_XaxisEnd)) {
+	  xpturb *= -1;
+	}
+      }
+      return xpturb;
     }
 
     /**
@@ -276,7 +418,28 @@ public class VisualizePanel extends JPanel {
       double temp = (xval - m_minX)/(m_maxX - m_minX);
       double temp2 = temp * (m_XaxisEnd - m_XaxisStart);
       
-      return (temp2 + m_XaxisStart);
+      temp2 = temp2 + m_XaxisStart;
+	
+      return temp2;
+    }
+
+    /**
+     * returns a value by which a y value can be peturbed. Makes sure
+     * that the y value+pturb stays within the plot bounds
+     * @param yvalP the y coordinate to be peturbed
+     * @param yj a random number to use in calculating a peturb value
+     * @return a peturb value
+     */
+    int pturbY(double yvalP, double yj) {
+      int ypturb = 0;
+      if (m_JitterVal > 0) {
+	ypturb = (int)((double)m_JitterVal * yj);
+	if (((yvalP + ypturb) < m_YaxisStart) || 
+	    ((yvalP + ypturb) > m_YaxisEnd)) {
+	  ypturb *= -1;
+	}
+      }
+      return ypturb;
     }
 
     /**
@@ -288,7 +451,9 @@ public class VisualizePanel extends JPanel {
       double temp = (yval - m_minY)/(m_maxY - m_minY);
       double temp2 = temp * (m_YaxisEnd - m_YaxisStart);
       
-      return (m_YaxisEnd - temp2);
+      temp2 = m_YaxisEnd - temp2;
+
+      return temp2;
     }
 
     /**
@@ -302,23 +467,44 @@ public class VisualizePanel extends JPanel {
     private void drawDataPoint(double x, 
 			       double y,
 			       int size,
+			       int type,
 			       Graphics gx) {
       if (size == 0) {
 	size = 1;
       }
-
-      gx.drawLine((int)(x-size),(int)(y-size),
-	       (int)(x+size),(int)(y+size));
-      gx.drawLine((int)(x+size),(int)(y-size),
-	       (int)(x-size),(int)(y+size));
       
+      switch (type) {
+      case 0:
+	gx.drawLine((int)(x-size),(int)(y-size),
+		    (int)(x+size),(int)(y+size));
+	gx.drawLine((int)(x+size),(int)(y-size),
+		    (int)(x-size),(int)(y+size));
+	break;
+      case 1: 
+	gx.drawRect((int)(x-size),(int)(y-size),(size*2),(size*2));
+	break;
+      }
     }
 
-    /**
-     * Draws the data points and predictions (if provided).
-     * @param gx the graphics context
-     */
-    private void paintData(Graphics gx) {
+    private void updatePturb() {
+      double xj=0;
+      double yj=0;
+      for (int i=0;i<m_plotInstances.numInstances();i++) {
+	if (m_plotInstances.instance(i).isMissing(m_xIndex) ||
+	    m_plotInstances.instance(i).isMissing(m_yIndex)) {
+	} else {
+	  if (m_JitterVal > 0) {
+	    xj = m_JRand.nextDouble();
+	    yj = m_JRand.nextDouble();
+	  }
+	  m_pointLookup[i][3] = pturbX(m_pointLookup[i][0],xj);
+	  m_pointLookup[i][4] = pturbY(m_pointLookup[i][1],yj);
+	}
+      }
+    }
+
+    private void fillLookup() {
+      int maxpSize = 20;
       double maxErr = Double.NEGATIVE_INFINITY;
       double minErr = Double.POSITIVE_INFINITY;
 
@@ -338,15 +524,82 @@ public class VisualizePanel extends JPanel {
 	  }
 	}
       }
-
+      
       for (int i=0;i<m_plotInstances.numInstances();i++) {
 	if (m_plotInstances.instance(i).isMissing(m_xIndex) ||
 	    m_plotInstances.instance(i).isMissing(m_yIndex)) {
+	  m_pointLookup[i][0] = Double.NEGATIVE_INFINITY;
+	  m_pointLookup[i][1] = Double.NEGATIVE_INFINITY;
+	  m_pointLookup[i][2] = Double.NEGATIVE_INFINITY;
+	  
 	} else {
 	  double x = convertToPanelX(m_plotInstances.
 				     instance(i).value(m_xIndex));
 	  double y = convertToPanelY(m_plotInstances.
 				     instance(i).value(m_yIndex));
+	  m_pointLookup[i][0] = x;
+	  m_pointLookup[i][1] = y;
+
+	  if (m_plotInstances.attribute(m_cIndex).isNominal() || 
+	      m_preds == null || m_colourUsingPreds) {
+	    m_pointLookup[i][2] = 3;
+	  } else {
+	    double err = Math.abs((m_preds[i] -
+				   m_plotInstances.instance(i).
+				   value(m_plotInstances.classIndex())));
+	    err = ((err - minErr)/(maxErr - minErr)) * maxpSize;
+
+	    if (err < 1) {
+	      err = 1; // just so the point is visible!
+	    }
+	    m_pointLookup[i][2] = err;
+	  }
+	}
+      }
+    }
+
+    /**
+     * Draws the data points and predictions (if provided).
+     * @param gx the graphics context
+     */
+    private void paintData(Graphics gx) {
+      double maxErr = Double.NEGATIVE_INFINITY;
+      double minErr = Double.POSITIVE_INFINITY;
+      double xj=0;
+      double yj=0;
+
+      /*      // determine range of error for numeric predictions if necessary
+      if (m_preds != null 
+	  && m_predsNumeric 
+	  && (m_plotInstances.classIndex() >= 0)) {
+	int cind = m_plotInstances.classIndex();
+	double err;
+	for (int jj=0;jj<m_plotInstances.numInstances();jj++) {
+	  err = Math.abs(m_preds[jj] - m_plotInstances.instance(jj).value(cind));
+	  if (err < minErr) {
+	    minErr = err;
+	  }
+	  if (err > maxErr) {
+	    maxErr = err;
+	  }
+	}
+	} */
+
+      for (int i=0;i<m_plotInstances.numInstances();i++) {
+	if (m_plotInstances.instance(i).isMissing(m_xIndex) ||
+	    m_plotInstances.instance(i).isMissing(m_yIndex)) {
+	} else {
+	  if (m_JitterVal > 0) {
+	    xj = m_JRand.nextDouble();
+	    yj = m_JRand.nextDouble();
+	  }
+	  /*	  double x = convertToPanelX(m_plotInstances.
+				     instance(i).value(m_xIndex),xj);
+	  double y = convertToPanelY(m_plotInstances.
+	  instance(i).value(m_yIndex),yj); */
+	  double x = (m_pointLookup[i][0] + m_pointLookup[i][3]);
+	  double y = (m_pointLookup[i][1] + m_pointLookup[i][4]);
+
 	  if (m_plotInstances.attribute(m_cIndex).isNominal() || 
 	      m_colourUsingPreds) {
 
@@ -368,7 +621,7 @@ public class VisualizePanel extends JPanel {
 	    }
 	    
 	    gx.setColor(pc);	    
-	    drawDataPoint(x,y,2,gx);
+	    drawDataPoint(x,y,2,0,gx);
 	    if (m_preds != null 
 		&& !m_predsNumeric 
 		&& (m_plotInstances.classIndex() >= 0)) {
@@ -384,8 +637,9 @@ public class VisualizePanel extends JPanel {
 		}
 		
 		gx.setColor(pc);
-		gx.drawRect((int)(x-3),(int)(y-3),6,6);
-		ci = (int)(m_plotInstances.instance(i).value(m_plotInstances.classIndex()) % 10);
+		drawDataPoint(x,y,(int)m_pointLookup[i][2],1,gx);
+		//		gx.drawRect((int)(x-3),(int)(y-3),6,6);
+		//ci = (int)(m_plotInstances.instance(i).value(m_plotInstances.classIndex()) % 10);
 	      }
 	    }    
 	  } else {
@@ -393,24 +647,22 @@ public class VisualizePanel extends JPanel {
 	    if (m_preds != null 
 		&& m_plotInstances.classIndex() >= 0 
 		&& m_predsNumeric) {
-	      double err = Math.abs((m_preds[i] -
+	      /*	      double err = Math.abs((m_preds[i] -
 				     m_plotInstances.instance(i).
 				     value(m_plotInstances.classIndex())));
-	      err = ((err - minErr)/(maxErr - minErr)) * maxpSize;
+				     err = ((err - minErr)/(maxErr - minErr)) * maxpSize; */
 	      double r = (m_plotInstances.instance(i).
 			  value(m_cIndex) - m_minC) /
 		          (m_maxC - m_minC);
 	      r = (r * 240) + 15;
 	      gx.setColor(new Color((int)r,0,(int)(255-r)));
-	      drawDataPoint(x,y,(int)err,gx);
-	    } else if (m_preds != null) {
-	      
+	      drawDataPoint(x,y,(int)m_pointLookup[i][2],0,gx);
 	    } else {
 	      double r = (m_plotInstances.instance(i).value(m_cIndex) - m_minC) /
 		(m_maxC - m_minC);
 	      r = (r * 240) + 15;
 	      gx.setColor(new Color((int)r,0,(int)(255-r)));
-	      drawDataPoint(x,y,2,gx);
+	      drawDataPoint(x,y,2,0,gx);
 	    }
 	  }
 	}
@@ -424,22 +676,45 @@ public class VisualizePanel extends JPanel {
     private void paintAxis(Graphics gx) {
       setFonts(gx);
 
+      int mxs = m_XaxisStart;
+      int mxe = m_XaxisEnd;
+      int mys = m_YaxisStart;
+      int mye = m_YaxisEnd;
+      m_axisChanged = false;
+
       int h = getHeight();
       int w = getWidth();
       int hf = m_labelMetrics.getAscent();
       int mswx=0;
       int mswy=0;
 
-      determineBounds();
+      //      determineBounds();
       int fieldWidthX = (int)((Math.log(m_maxX)/Math.log(10)))+1;
-      String maxStringX = Utils.doubleToString(m_maxX,fieldWidthX+2,1);
+      int precisionX = 1;
+      if ((Math.abs(m_maxX-m_minX) < 1) && ((m_maxY-m_minX) != 0)) {
+	precisionX = (int)Math.abs(((Math.log(Math.abs(m_maxX-m_minX)) / 
+				     Math.log(10))))+1;
+      }
+      String maxStringX = Utils.doubleToString(m_maxX,
+					       fieldWidthX+1+precisionX
+					       ,precisionX);
       mswx = m_labelMetrics.stringWidth(maxStringX);
       int fieldWidthY = (int)((Math.log(m_maxY)/Math.log(10)))+1;
-      String maxStringY = Utils.doubleToString(m_maxY,fieldWidthY+2,1);
+      int precisionY = 1;
+      if (Math.abs((m_maxY-m_minY)) < 1 && ((m_maxY-m_minY) != 0)) {
+	precisionY = (int)Math.abs(((Math.log(Math.abs(m_maxY-m_minY)) / 
+				     Math.log(10))))+1;
+      }
+      String maxStringY = Utils.doubleToString(m_maxY,
+					       fieldWidthY+1+precisionY
+					       ,precisionY);
       mswy = m_labelMetrics.stringWidth(maxStringY);
+
       m_YaxisStart = m_axisPad;
       m_XaxisStart = 0+m_axisPad+m_tickSize+mswy;
+
       m_XaxisEnd = w-m_axisPad-(mswx/2);
+      
       m_YaxisEnd = h-m_axisPad-hf-m_tickSize;
 
       if ((!m_colourUsingPreds) && 
@@ -458,7 +733,15 @@ public class VisualizePanel extends JPanel {
 	}
 
 	int fieldWidthC = (int)((Math.log(m_maxC)/Math.log(10)))+1;
-	String maxStringC = Utils.doubleToString(m_maxC,fieldWidthC+2,1);
+	int precisionC = 1;
+	if ((Math.abs(m_maxC-m_minC) < 1) && ((m_maxC-m_minC) != 0)) {
+	  precisionC = (int)Math.abs(((Math.log(Math.abs(m_maxC-m_minC)) / 
+				       Math.log(10))))+1;
+	}
+	String maxStringC = Utils.doubleToString(m_maxC,
+						 fieldWidthC+1+precisionC,
+						 precisionC);
+	
 	int mswc = m_labelMetrics.stringWidth(maxStringC);
 	int tmsc = mswc;
 	if (w > (2 * tmsc)) {
@@ -483,7 +766,9 @@ public class VisualizePanel extends JPanel {
 		      m_XaxisStart,
 		      (m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5+m_tickSize));
 	  fieldWidthC = (int)((Math.log(m_minC)/Math.log(10)))+1;
-	  maxStringC = Utils.doubleToString(m_minC,fieldWidthC+2,1);
+	  maxStringC = Utils.doubleToString(m_minC,
+					    fieldWidthC+1+precisionC,
+					    precisionC);
 	  mswc = m_labelMetrics.stringWidth(maxStringC);
 	  gx.drawString(maxStringC, 
 			m_XaxisStart-(mswc/2),
@@ -498,7 +783,9 @@ public class VisualizePanel extends JPanel {
 			m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2),
 			(m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5+m_tickSize));
 	    fieldWidthC = (int)((Math.log(mid)/Math.log(10)))+1;
-	    maxStringC = Utils.doubleToString(mid,fieldWidthC+2,1);
+	    maxStringC = Utils.doubleToString(mid,
+					      fieldWidthC+1+precisionC,
+					      precisionC);
 	    mswc = m_labelMetrics.stringWidth(maxStringC);
 	    gx.drawString(maxStringC,
 			  m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2)-(mswc/2),
@@ -510,60 +797,68 @@ public class VisualizePanel extends JPanel {
 
       // draw axis
       gx.setColor(Color.black);
-      if (m_plotInstances.attribute(m_xIndex).isNumeric()) {
+      //      if (m_plotInstances.attribute(m_xIndex).isNumeric()) {
 	if (w > (2 * mswx)) {
 	  gx.drawString(maxStringX, 
 			m_XaxisEnd-(mswx/2),
 			m_YaxisEnd+hf+m_tickSize);
 
 	  fieldWidthX = (int)((Math.log(m_minX)/Math.log(10)))+1;
-	  maxStringX = Utils.doubleToString(m_minX,fieldWidthX+2,1);
+	  maxStringX = Utils.doubleToString(m_minX,
+					    fieldWidthX+1+precisionX,
+					    precisionX);
 	  mswx = m_labelMetrics.stringWidth(maxStringX);
 	  gx.drawString(maxStringX,
 			(m_XaxisStart-(mswx/2)),
 			m_YaxisEnd+hf+m_tickSize);
 
 	  // draw the middle value
-	  if (w > (3 * mswx)) {
+	  if (w > (3 * mswx) && 
+	      (m_plotInstances.attribute(m_xIndex).isNumeric())) {
 	    double mid = m_minX+((m_maxX-m_minX)/2.0);
 	    int fieldWidth = (int)((Math.log(mid)/Math.log(10)))+1;
-	    String maxString = Utils.doubleToString(mid,fieldWidth+2,1);
+	    String maxString = Utils.doubleToString(mid,
+						    fieldWidth+1+precisionX,
+						    precisionX);
 	    int sw = m_labelMetrics.stringWidth(maxString);
 	    double mx = m_XaxisStart+((double)(m_XaxisEnd-m_XaxisStart)/2.0);
-	    gx.drawString(Utils.doubleToString(mid,
-					       fieldWidth+2,1),
+	    gx.drawString(maxString,
 			  (int)(mx-(((double)sw)/2.0)),
 			  m_YaxisEnd+hf+m_tickSize);
 	    gx.drawLine((int)mx,m_YaxisEnd,(int)mx,m_YaxisEnd+m_tickSize);
 	  }
 	}
-      }
+	//}
 
-      if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
+	//      if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
 	if (h > (2 * hf)) {
 	  gx.drawString(maxStringY, 
 			m_XaxisStart-mswy-m_tickSize,
 			m_YaxisStart+(hf));
 
-	  gx.drawString(Utils.doubleToString(m_minY,fieldWidthY+2,1),
+	  gx.drawString(Utils.doubleToString(m_minY,
+					     fieldWidthY+1+precisionY,
+					     precisionY),
 			(m_XaxisStart-mswy-m_tickSize),
 			m_YaxisEnd);
 
 	  // draw the middle value
-	  if (w > (3 * hf)) {
+	  if (w > (3 * hf) && 
+	      (m_plotInstances.attribute(m_yIndex).isNumeric())) {
 	    double mid = m_minY+((m_maxY-m_minY)/2.0);
 	    int fieldWidth = (int)((Math.log(mid)/Math.log(10)))+1;
-	    String maxString = Utils.doubleToString(mid,fieldWidth+2,1);
+	    String maxString = Utils.doubleToString(mid,
+						    fieldWidth+1+precisionY,
+						    precisionY);
 	    int sw = m_labelMetrics.stringWidth(maxString);
 	    double mx = m_YaxisStart+((double)(m_YaxisEnd-m_YaxisStart)/2.0);
-	    gx.drawString(Utils.doubleToString(mid,
-					       fieldWidth+2,1),
+	    gx.drawString(maxString,
 			  m_XaxisStart-sw-m_tickSize-1,
 			  (int)(mx+(((double)hf)/2.0)));
 	    gx.drawLine(m_XaxisStart-m_tickSize,(int)mx,m_XaxisStart,(int)mx);
 	  }
 	}
-      }
+	//      }
 
       gx.drawLine(m_XaxisStart,
 		  m_YaxisStart,
@@ -573,6 +868,11 @@ public class VisualizePanel extends JPanel {
 		  m_YaxisEnd,
 		  m_XaxisEnd,
 		  m_YaxisEnd);
+
+      if (m_XaxisStart != mxs || m_XaxisEnd != mxe ||
+	  m_YaxisStart != mys || m_YaxisEnd != mye) {
+	m_axisChanged = true;
+      }
     }
 
     /**
@@ -582,7 +882,11 @@ public class VisualizePanel extends JPanel {
     public void paintComponent(Graphics gx) {
       super.paintComponent(gx);
       if (m_plotInstances != null) {
+	m_JRand = new Random(m_JitterVal);
 	paintAxis(gx);
+	if (m_axisChanged) {
+	  fillLookup();
+	}
 	paintData(gx);
       }
     }
@@ -597,8 +901,22 @@ public class VisualizePanel extends JPanel {
   /** Lets the user select the attribute to use for colouring */
   protected JComboBox m_ColourCombo = new JComboBox();
 
+  /** Label for the jitter slider */
+  protected JLabel m_JitterLab= new JLabel("Jitter",SwingConstants.RIGHT);
+
+  /** The jitter slider */
+  protected JSlider m_Jitter = new JSlider(0,50,0);
+
   /** The panel that displays the plot */
   protected PlotPanel m_plot = new PlotPanel();
+
+  /** An optional listener that we will inform when ComboBox selections
+      change */
+  protected ActionListener listener = null;
+
+  /** The name of the plot (not currently displayed, but can be used
+      in the containing Frame or Panel) */
+  protected String m_plotName = "";
   
   /**
    * Constructor
@@ -614,31 +932,78 @@ public class VisualizePanel extends JPanel {
     m_XCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  int selected = m_XCombo.getSelectedIndex();
+	  if (selected < 0) {
+	    selected = 0;
+	  }
 	  m_plot.setXindex(selected);
+	  m_plot.determineBounds();
+	  // try sending on the event if anyone is listening
+	  if (listener != null) {
+	    listener.actionPerformed(e);
+	  }
 	}
       });
 
     m_YCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  int selected = m_YCombo.getSelectedIndex();
+	  if (selected < 0) {
+	    selected = 0;
+	  }
 	  m_plot.setYindex(selected);
+	  m_plot.determineBounds();
+	  // try sending on the event if anyone is listening
+	  if (listener != null) {
+	    listener.actionPerformed(e);
+	  }
 	}
       });
 
     m_ColourCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  int selected = m_ColourCombo.getSelectedIndex();
+	  if (selected < 0) {
+	    selected = 0;
+	  }
 	  m_plot.setCindex(selected);
+	  m_plot.determineBounds();
+	  // try sending on the event if anyone is listening
+	  if (listener != null) {
+	    listener.actionPerformed(e);
+	  }
+	}
+      });
+
+    m_Jitter.addChangeListener(new ChangeListener() {
+	public void stateChanged(ChangeEvent e) {
+	  m_plot.setJitter(m_Jitter.getValue());
 	}
       });
     
     JPanel combos = new JPanel();
+    GridBagLayout gb = new GridBagLayout();
+    GridBagConstraints constraints = new GridBagConstraints();
     combos.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-    combos.setLayout(new GridLayout(1,3,5,5));
-    combos.add(m_XCombo);
-    combos.add(m_YCombo);
-    combos.add(m_ColourCombo);
-    
+    //    combos.setLayout(new GridLayout(1,3,5,5));
+    combos.setLayout(gb);
+    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    combos.add(m_XCombo,constraints);
+    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    combos.add(m_YCombo,constraints);
+    constraints.gridx=2;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    combos.add(m_ColourCombo,constraints);
+    constraints.gridx=0;constraints.gridy=1;constraints.weightx=5;
+    constraints.insets = new Insets(10,0,0,5);
+    combos.add(m_JitterLab,constraints);
+    constraints.gridx=1;constraints.gridy=1;
+    constraints.gridwidth=2;constraints.weightx=5;
+    constraints.insets = new Insets(10,0,0,0);
+    combos.add(m_Jitter,constraints);
 
     setLayout(new BorderLayout());
     add(combos, BorderLayout.NORTH);
@@ -657,10 +1022,58 @@ public class VisualizePanel extends JPanel {
     if (index >= 0) {
       m_ColourCombo.setSelectedIndex(index);
     } else {
-      m_ColourCombo.setSelectedIndex(0);
+      // m_ColourCombo.setSelectedIndex(0);
       m_plot.m_colourUsingPreds = true;
     }
     m_ColourCombo.setEnabled(false);
+  }
+
+  /**
+   * Set the index of the attribute for the x axis 
+   * @param index the index for the x axis
+   */
+  public void setXIndex(int index) throws Exception {
+    if (index >= 0 && index < m_XCombo.getItemCount()) {
+      m_XCombo.setSelectedIndex(index);
+    } else {
+      throw new Exception("x index is out of range!");
+    }
+  }
+
+  /**
+   * Get the index of the attribute on the x axis
+   * @return the index of the attribute on the x axis
+   */
+  public int getXIndex() {
+    return m_XCombo.getSelectedIndex();
+  }
+
+  /**
+   * Set the index of the attribute for the y axis 
+   * @param index the index for the y axis
+   */
+  public void setYIndex(int index) throws Exception {
+    if (index >= 0 && index < m_YCombo.getItemCount()) {
+      m_YCombo.setSelectedIndex(index);
+    } else {
+      throw new Exception("y index is out of range!");
+    }
+  }
+  
+  /**
+   * Get the index of the attribute on the y axis
+   * @return the index of the attribute on the x axis
+   */
+  public int getYIndex() {
+    return m_YCombo.getSelectedIndex();
+  }
+
+  /**
+   * Get the index of the attribute selected for coloring
+   * @return the index of the attribute on the x axis
+   */
+  public int getCIndex() {
+    return m_ColourCombo.getSelectedIndex();
   }
 
   /**
@@ -678,6 +1091,39 @@ public class VisualizePanel extends JPanel {
    */
   public void setPredictionsNumeric(boolean n) {
     m_plot.setPredictionsNumeric(n);
+  }
+
+  /**
+   * Add a listener for this visualize panel
+   * @param act an ActionListener
+   */
+  public void addActionListener(ActionListener act) {
+    listener = act;
+  }
+
+  /**
+   * Set a name for this plot
+   * @param plotName the name for the plot
+   */
+  public void setName(String plotName) {
+    m_plotName = plotName;
+  }
+
+  /**
+   * Returns the name associated with this plot. "" is returned if no
+   * name is set.
+   * @return the name of the plot
+   */
+  public String getName() {
+    return m_plotName;
+  }
+
+  /**
+   * Get the instances being plotted
+   * @return the instances being plotted
+   */
+  public Instances getInstances() {
+    return m_plot.m_plotInstances;
   }
 
   /**
@@ -714,7 +1160,9 @@ public class VisualizePanel extends JPanel {
     m_ColourCombo.setModel(new DefaultComboBoxModel(CNames));
     m_XCombo.setEnabled(true);
     m_YCombo.setEnabled(true);
-    m_ColourCombo.setEnabled(true);
+    if (!m_plot.m_colourUsingPreds) {
+      m_ColourCombo.setEnabled(true);
+    }
   }
 
   /**
@@ -727,6 +1175,11 @@ public class VisualizePanel extends JPanel {
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
+      sp.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  System.err.println("Recieved a combo box change event");
+	}
+      });
       jf.getContentPane().add(sp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	public void windowClosing(java.awt.event.WindowEvent e) {
