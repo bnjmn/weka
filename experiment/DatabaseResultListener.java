@@ -35,7 +35,7 @@ import weka.core.FastVector;
  * and submits them to a central database.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DatabaseResultListener extends DatabaseUtils
   implements ResultListener  {
@@ -60,6 +60,7 @@ public class DatabaseResultListener extends DatabaseUtils
 
   /** Stores the cached values */
   protected FastVector m_Cache = new FastVector();
+
 
   /**
    * Returns a string describing this result listener
@@ -129,16 +130,20 @@ public class DatabaseResultListener extends DatabaseUtils
     FastVector cNames = new FastVector();
     updateResultsTableName(rp);
     DatabaseMetaData dbmd = m_Connection.getMetaData();
-
+    ResultSet rs;
     // gets a result set where each row is info on a column
-    ResultSet rs = dbmd.getColumns(null, null, m_ResultsTableName, null);
+    if (m_checkForUpperCaseNames) {
+      rs = dbmd.getColumns(null, null, m_ResultsTableName.toUpperCase(), null);
+    } else {
+      rs = dbmd.getColumns(null, null, m_ResultsTableName, null);
+    }
     boolean tableExists=false;
     int numColumns = 0;
-
+   
     while (rs.next()) {
       tableExists = true;
       // column four contains the column name
-      if (rs.getString(4).startsWith("measure")) {
+      if (rs.getString(4).toLowerCase().startsWith("measure")) {
 	numColumns++;
 	cNames.addElement(rs.getString(4));
       }
@@ -269,6 +274,7 @@ public class DatabaseResultListener extends DatabaseUtils
     
     return m_CacheKeyName;
   }
+
   
   /**
    * Set the value of CacheKeyName.
@@ -279,7 +285,9 @@ public class DatabaseResultListener extends DatabaseUtils
     
     m_CacheKeyName = newCacheKeyName;
   }
+
   
+
   /**
    * Checks whether the current cache contents are valid for the supplied
    * key.
