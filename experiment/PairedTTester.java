@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -265,12 +265,40 @@ public class PairedTTester implements OptionHandler {
     protected String templateString() {
 
       String result = "";
+      String tempResult = "";
       for (int i = 0; i < m_ResultsetKeyColumns.length; i++) {
-	result += m_Template.toString(m_ResultsetKeyColumns[i]) + ' ';
+	tempResult = m_Template.toString(m_ResultsetKeyColumns[i]) + ' ';
+
+	// compact the string
+	while (tempResult.indexOf("weka.classifiers.") != -1) {
+	  int ind = tempResult.indexOf("weka.classifiers.");
+	  String tt = tempResult.substring(0, ind);
+	  tempResult = tt + tempResult.
+	    substring(ind + ("weka.classifiers.".length()), 
+		      tempResult.length());
+	}
+
+	while (tempResult.indexOf("weka.filters.") != -1) {
+	  int ind = tempResult.indexOf("weka.filters.");
+	  String tt = tempResult.substring(0, ind);
+	  tempResult = tt + tempResult.
+	    substring(ind + ("weka.filters.".length()), 
+		      tempResult.length());
+	}
+
+	while (tempResult.indexOf("weka.attributeSelection.") != -1) {
+	  int ind = tempResult.indexOf("weka.attributeSelection.");
+	  String tt = tempResult.substring(0, ind);
+	  tempResult = tt + tempResult.
+	    substring(ind + ("weka.attributeSelection.".length()), 
+		      tempResult.length());
+	}
+	
+	result += tempResult;
       }
-      if (result.startsWith("weka.classifiers.")) {
+      /* if (result.startsWith("weka.classifiers.")) {
 	result = result.substring("weka.classifiers.".length());
-      }
+	} */
       return result.trim();
     }
     
@@ -777,6 +805,7 @@ public class PairedTTester implements OptionHandler {
 					   + ") "
 					   + getResultsetName(baseResultset),
 					   resultsetLength + 3));
+
     titles.append(label);
     StringBuffer separator = new StringBuffer(Utils.padRight("",
 							     datasetLength));
@@ -891,6 +920,14 @@ public class PairedTTester implements OptionHandler {
     result.append('\n');
     if (!skipped.equals("")) {
       result.append("Skipped: ").append(skipped).append('\n');
+    }
+
+    // append a key so that we can tell the difference between long
+    // scheme+option names
+    result.append("\nKey:\n\n");
+    for (int j = 0; j < getNumResultsets(); j++) {
+      result.append("("+(j+1)+") ");
+      result.append(getResultsetName(j)+"\n");
     }
     return result.toString();
   }
