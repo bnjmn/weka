@@ -57,7 +57,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -381,8 +381,8 @@ public class ThresholdSelector extends DistributionClassifier
       boolean found = false;
       for (int i = 0; i < cAtt.numValues() && !found; i++) {
         String name = cAtt.value(i).toLowerCase();
-        if (name.equals("yes") || name.equals("1") || 
-            name.equals("pos") || name.equals("positive")) {
+        if (name.startsWith("yes") || name.equals("1") || 
+            name.startsWith("pos")) {
           found = true;
           m_DesignatedClass = i;
         }
