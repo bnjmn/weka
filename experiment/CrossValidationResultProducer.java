@@ -39,7 +39,7 @@ import weka.core.Utils;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler {
@@ -66,6 +66,9 @@ public class CrossValidationResultProducer
 
   /** The SplitEvaluator used to generate results */
   protected SplitEvaluator m_SplitEvaluator = new ClassifierSplitEvaluator();
+
+  /** The names of any additional measures to look for in SplitEvaluators */
+  protected String [] m_AdditionalMeasures = null;
 
   /* The name of the key field containing the dataset name */
   public static String DATASET_FIELD_NAME = "Dataset";
@@ -107,6 +110,22 @@ public class CrossValidationResultProducer
   public void setResultListener(ResultListener listener) {
 
     m_ResultListener = listener;
+  }
+
+  /**
+   * Set a list of method names for additional measures to look for
+   * in SplitEvaluators.
+   * @param additionalMeasures an array of measure names, null if none
+   */
+  public void setAdditionalMeasures(String [] additionalMeasures) {
+    m_AdditionalMeasures = additionalMeasures;
+
+    if (m_SplitEvaluator != null) {
+      System.err.println("CrossValidationResultProducer: setting additional "
+			 +"measures for "
+			 +"split evaluator");
+      m_SplitEvaluator.setAdditionalMeasures(m_AdditionalMeasures);
+    }
   }
 
   /**
@@ -467,6 +486,7 @@ public class CrossValidationResultProducer
   public void setSplitEvaluator(SplitEvaluator newSplitEvaluator) {
     
     m_SplitEvaluator = newSplitEvaluator;
+    m_SplitEvaluator.setAdditionalMeasures(m_AdditionalMeasures);
   }
 
   /**

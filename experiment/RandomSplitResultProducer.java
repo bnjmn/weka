@@ -37,7 +37,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class RandomSplitResultProducer 
@@ -54,6 +54,9 @@ public class RandomSplitResultProducer
 
   /** The SplitEvaluator used to generate results */
   protected SplitEvaluator m_SplitEvaluator = new ClassifierSplitEvaluator();
+
+  /** The names of any additional measures to look for in SplitEvaluators */
+  protected String [] m_AdditionalMeasures = null;
 
   /** Save raw output of split evaluators --- for debugging purposes */
   protected boolean m_debugOutput = false;
@@ -93,6 +96,22 @@ public class RandomSplitResultProducer
   public void setInstances(Instances instances) {
     
     m_Instances = instances;
+  }
+
+  /**
+   * Set a list of method names for additional measures to look for
+   * in SplitEvaluators.
+   * @param additionalMeasures an array of measure names, null if none
+   */
+  public void setAdditionalMeasures(String [] additionalMeasures) {
+    m_AdditionalMeasures = additionalMeasures;
+
+    if (m_SplitEvaluator != null) {
+      System.err.println("RandomSplitResultProducer: setting additional "
+			 +"measures for "
+			 +"split evaluator");
+      m_SplitEvaluator.setAdditionalMeasures(m_AdditionalMeasures);
+    }
   }
 
   /**
@@ -449,6 +468,7 @@ public class RandomSplitResultProducer
   public void setSplitEvaluator(SplitEvaluator newSplitEvaluator) {
     
     m_SplitEvaluator = newSplitEvaluator;
+    m_SplitEvaluator.setAdditionalMeasures(m_AdditionalMeasures);
   }
 
   /**

@@ -36,10 +36,17 @@ import java.io.Serializable;
  * </ul>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface SplitEvaluator extends Serializable {
   
+  /**
+   * Sets a list of method names for additional measures to look for
+   * in SplitEvaluators.
+   * @param additionalMeasures a list of method names
+   */
+  public void setAdditionalMeasures(String [] additionalMeasures);
+
   /**
    * Gets the names of each of the key columns produced for a single run.
    * The names should not contain spaces (use '_' instead for easy 

@@ -35,7 +35,7 @@ import java.io.Serializable;
 * </ul>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public interface ResultProducer extends Serializable {
@@ -53,6 +53,13 @@ public interface ResultProducer extends Serializable {
    * @param listener a value of type 'ResultListener'
    */
   public void setResultListener(ResultListener listener);
+
+  /**
+   * Sets a list of method names for additional measures to look for
+   * in SplitEvaluators.
+   * @param additionalMeasures a list of method names
+   */
+  public void setAdditionalMeasures(String [] additionalMeasures);
 
   /**
    * Prepare to generate results. The ResultProducer should call
