@@ -119,7 +119,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.38.2.2 $
+ * @version $Revision: 1.38.2.3 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -1215,12 +1215,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       java.beans.PropertyEditorManager
 	.registerEditor(weka.classifiers.Classifier.class,
 			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-        .registerEditor(weka.core.NearestNeighbourSearch.class,
-		      weka.gui.GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-        .registerEditor(weka.core.DistanceFunction.class,
-		      weka.gui.GenericObjectEditor.class);
       java.beans.PropertyEditorManager
 	.registerEditor(weka.attributeSelection.ASEvaluation.class,
 			GenericObjectEditor.class);
