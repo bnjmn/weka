@@ -26,6 +26,7 @@ import weka.core.Utils;
 import weka.clusterers.Clusterer;
 import weka.clusterers.ClusterEvaluation;
 import weka.gui.Logger;
+import weka.gui.TaskLogger;
 import weka.gui.SysErrLog;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
@@ -94,7 +95,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -623,6 +624,9 @@ public class ClustererPanel extends JPanel {
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskStarted();
+	    }
 	    outBuff.append("=== Run information ===\n\n");
 	    outBuff.append("Scheme:       " + cname);
 	    if (clusterer instanceof OptionHandler) {
@@ -752,6 +756,9 @@ public class ClustererPanel extends JPanel {
 	      } else {
 		m_VisualizeBut.setEnabled(false);
 	      }
+	    }
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskFinished();
 	    }
 	  }
 	}

@@ -26,6 +26,7 @@ import weka.core.Utils;
 import weka.associations.Associator;
 import weka.filters.Filter;
 import weka.gui.Logger;
+import weka.gui.TaskLogger;
 import weka.gui.SysErrLog;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
@@ -82,7 +83,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -323,6 +324,9 @@ public class AssociationsPanel extends JPanel {
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskStarted();
+	    }
 	    outBuff.append("=== Run information ===\n\n");
 	    outBuff.append("Scheme:       " + cname);
 	    if (associator instanceof OptionHandler) {
@@ -364,6 +368,9 @@ public class AssociationsPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskFinished();
+	    }
 	  }
 	}
       };

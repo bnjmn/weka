@@ -29,6 +29,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.CostMatrix;
 import weka.filters.Filter;
 import weka.gui.Logger;
+import weka.gui.TaskLogger;
 import weka.gui.SysErrLog;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
@@ -100,7 +101,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -866,6 +867,9 @@ public class ClassifierPanel extends JPanel {
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskStarted();
+	    }
 	    outBuff.append("=== Run information ===\n\n");
 	    outBuff.append("Scheme:       " + cname);
 	    if (classifier instanceof OptionHandler) {
@@ -1087,6 +1091,9 @@ public class ClassifierPanel extends JPanel {
 		m_VisualizeBut.setEnabled(true);
 	      } else {
 		m_VisualizeBut.setEnabled(false);
+	      }
+	      if (m_Log instanceof TaskLogger) {
+		((TaskLogger)m_Log).taskFinished();
 	      }
 	    }
 	  }

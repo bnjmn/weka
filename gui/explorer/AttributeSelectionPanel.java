@@ -29,6 +29,7 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import weka.filters.Filter;
 import weka.gui.Logger;
+import weka.gui.TaskLogger;
 import weka.gui.SysErrLog;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
@@ -91,7 +92,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -515,6 +516,9 @@ public class AttributeSelectionPanel extends JPanel {
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + ename);
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskStarted();
+	    }
 	    outBuff.append("=== Run information ===\n\n");
 	    outBuff.append("Evaluator:    " + ename);
 	    if (evaluator instanceof OptionHandler) {
@@ -613,6 +617,9 @@ public class AttributeSelectionPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskFinished();
+	    }
 	  }
 	}
       };
