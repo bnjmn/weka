@@ -44,6 +44,17 @@ import weka.core.*;
  * in the output are based on the standardized data, not the original
  * data.)
  *
+ * Multi-class problems are solved using pairwise classification.
+ *
+ * To obtain proper probability estimates, use the option that fits
+ * logistic regression models to the outputs of the support vector
+ * machine. In the multi-class case the predicted probabilities
+ * will be coupled using Hastie and Tibshirani's pairwise coupling
+ * method.
+ *
+ * Note: for improved speed standardization should be turned off when
+ * operating on SparseInstances.<p>
+ *
  * For more information on the SMO algorithm, see<p>
  *
  * J. Platt (1998). <i>Fast Training of Support Vector
@@ -51,13 +62,9 @@ import weka.core.*;
  * Methods - Support Vector Learning, B. Schölkopf, C. Burges, and
  * A. Smola, eds., MIT Press. <p>
  *
- * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (1999).
- * <i> Improvements to Platt's SMO Algorithm for SVM Classifier Design</i>.
- * Technical Report CD-99-14. Control Division, Dept of Mechanical and
- * Production Engineering, National University of Singapore. <p>
- *
- * Note: for improved speed standardization should be turned off when
- * operating on SparseInstances.<p>
+ * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy, 
+ * <i>Improvements to Platt's SMO Algorithm for SVM Classifier Design</i>. 
+ * Neural Computation, 13(3), pp 637-649, 2001. <p>
  *
  * Valid options are:<p>
  *
@@ -92,12 +99,22 @@ import weka.core.*;
  * -P num <br>
  * Sets the epsilon for round-off error. (default 1.0e-12)<p>
  *
+ * -M <br>
+ * Fit logistic models to SVM outputs.<p>
+ *
+ * -V num <br>
+ * Number of runs for cross-validation used to generate data
+ * for logistic models. (default -1, use training data)
+ *
+ * -W num <br>
+ * Random number seed for cross-validation. (default 1)
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.37 $ */
-public class SMO extends Classifier implements OptionHandler, 
+ * @version $Revision: 1.38 $ */
+public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
   /**
@@ -107,7 +124,6 @@ public class SMO extends Classifier implements OptionHandler,
 
     /**
      * Calculates a dot product between two instances
-     *
      */
     private double dotProd(Instance inst1, Instance inst2) 
       throws Exception {
@@ -136,7 +152,6 @@ public class SMO extends Classifier implements OptionHandler,
 
     /**
      * Abstract kernel. 
-     *
      */
     private abstract class Kernel implements Serializable {
     
@@ -453,21 +468,107 @@ public class SMO extends Classifier implements OptionHandler,
     /** Counts the number of kernel evaluations. */
     private int m_kernelEvals;
 
+    /** Stores logistic regression model for probability estimate */
+    private Logistic m_logistic = null;
+
+    /** Stores the weight of the training instances */
+    private double m_sumOfWeights = 0;
+
+    /**
+     * Fits logistic regression model to SVM outputs analogue
+     * to John Platt's method.  
+     *
+     * @param insts the set of training instances
+     * @param cl1 the first class' index
+     * @param cl2 the second class' index
+     * @exception Exception if the sigmoid can't be fit successfully
+     */
+    private void fitLogistic(Instances insts, int cl1, int cl2,
+			     int numFolds, Random random) 
+      throws Exception {
+
+      // Create header of instances object
+      FastVector atts = new FastVector(2);
+      atts.addElement(new Attribute("pred"));
+      FastVector attVals = new FastVector(2);
+      attVals.addElement(insts.classAttribute().value(cl1));
+      attVals.addElement(insts.classAttribute().value(cl2));
+      atts.addElement(new Attribute("class", attVals));
+      Instances data = new Instances("data", atts, insts.numInstances());
+      data.setClassIndex(1);
+
+      // Collect data for fitting the logistic model
+      if (numFolds <= 0) {
+
+	// Use training data
+	for (int j = 0; j < insts.numInstances(); j++) {
+	  Instance inst = insts.instance(j);
+	  double[] vals = new double[2];
+	  vals[0] = SVMOutput(-1, inst);
+	  if (inst.classValue() == cl2) {
+	    vals[1] = 1;
+	  }
+	  data.add(new Instance(inst.weight(), vals));
+	}
+      } else {
+
+	// Check whether number of folds too large
+	if (numFolds > insts.numInstances()) {
+	  numFolds = insts.numInstances();
+	}
+
+	// Make copy of instances because we will shuffle them around
+	insts = new Instances(insts);
+	
+	// Perform three-fold cross-validation to collect
+	// unbiased predictions
+	insts.randomize(random);
+	insts.stratify(numFolds);
+	for (int i = 0; i < numFolds; i++) {
+	  Instances train = insts.trainCV(numFolds, i);
+	  SerializedObject so = new SerializedObject(this);
+	  BinarySMO smo = (BinarySMO)so.getObject();
+	  smo.buildClassifier(train, cl1, cl2, false, -1, -1);
+	  Instances test = insts.testCV(numFolds, i);
+	  for (int j = 0; j < test.numInstances(); j++) {
+	    double[] vals = new double[2];
+	    vals[0] = smo.SVMOutput(-1, test.instance(j));
+	    if (test.instance(j).classValue() == cl2) {
+	      vals[1] = 1;
+	    }
+	    data.add(new Instance(test.instance(j).weight(), vals));
+	  }
+	}
+      }
+
+      // Build logistic regression model
+      m_logistic = new Logistic();
+      m_logistic.buildClassifier(data);
+    }
+
     /**
      * Method for building the binary classifier.
      *
      * @param insts the set of training instances
      * @param cl1 the first class' index
      * @param cl2 the second class' index
+     * @param fitLogistic true if logistic model is to be fit
+     * @param numFolds number of folds for internal cross-validation
+     * @param random random number generator for cross-validation
      * @exception Exception if the classifier can't be built successfully
      */
-    private void buildClassifier(Instances insts, int cl1, int cl2) throws Exception {
+    private void buildClassifier(Instances insts, int cl1, int cl2,
+				 boolean fitLogistic, int numFolds,
+				 int randomSeed) throws Exception {
       
       // Initialize the number of kernel evaluations
       int m_kernelEvals = 0;
       
       // Initialize thresholds
       m_bUp = -1; m_bLow = 1; m_b = 0;
+
+      // Store the sum of weights
+      m_sumOfWeights = insts.sumOfWeights();
       
       // Set class values
       m_class = new double[insts.numInstances()];
@@ -492,6 +593,11 @@ public class SMO extends Classifier implements OptionHandler,
 	  m_sparseIndices = new int[0];
 	}
 	m_class = null;
+
+	// Fit sigmoid if requested
+	if (fitLogistic) {
+	  fitLogistic(insts, cl1, cl2, numFolds, new Random(randomSeed));
+	}
 	return;
       }
       
@@ -637,6 +743,11 @@ public class SMO extends Classifier implements OptionHandler,
 	
 	// We don't need the alphas in the linear case
 	m_alpha = null;
+      }
+      
+      // Fit sigmoid if requested
+      if (fitLogistic) {
+	fitLogistic(insts, cl1, cl2, numFolds, new Random(randomSeed));
       }
     }
     
@@ -1162,6 +1273,15 @@ public class SMO extends Classifier implements OptionHandler,
   /** Precision constant for updating sets */
   private static double m_Del = 1000 * Double.MIN_VALUE;
 
+  /** Whether logistic models are to be fit */
+  private boolean m_fitLogisticModels = false;
+
+  /** The number of folds for the internal cross-validation */
+  private int m_numFolds = -1;
+
+  /** The random number seed for the internal cross-validation */
+  private int m_randomSeed = 1;
+
   /**
    * Turns off checks for missing values, etc. Use with caution.
    */
@@ -1266,9 +1386,141 @@ public class SMO extends Classifier implements OptionHandler,
 	  data.add(subsets[j].instance(k));
 	}
 	data.compactify();
-	m_classifiers[i][j].buildClassifier(data, i, j);
+	m_classifiers[i][j].buildClassifier(data, i, j, 
+					    m_fitLogisticModels,
+					    m_numFolds, m_randomSeed);
       }
     }
+  }
+
+  /**
+   * Estimates class probabilities for given instance.
+   */
+  public double[] distributionForInstance(Instance inst) throws Exception {
+
+    // Filter instance
+    if (!m_checksTurnedOff) {
+      m_Missing.input(inst);
+      m_Missing.batchFinished();
+      inst = m_Missing.output();
+    }
+
+    if (!m_onlyNumeric) {
+      m_NominalToBinary.input(inst);
+      m_NominalToBinary.batchFinished();
+      inst = m_NominalToBinary.output();
+    }
+    
+    if (m_standardize) {
+      m_Standardization.input(inst);
+      m_Standardization.batchFinished();
+      inst = m_Standardization.output();
+    }
+    
+    if (!m_fitLogisticModels) {
+      double[] result = new double[inst.numClasses()];
+      for (int i = 0; i < inst.numClasses(); i++) {
+	for (int j = i + 1; j < inst.numClasses(); j++) {
+	  double output = m_classifiers[i][j].SVMOutput(-1, inst);
+	  if (output > 0) {
+	    result[j] += 1;
+	  } else {
+	    result[i] += 1;
+	  }
+	} 
+      }
+      Utils.normalize(result);
+      return result;
+    } else {
+
+      // We only need to do pairwise coupling if there are more
+      // then two classes.
+      if (inst.numClasses() == 2) {
+	double[] newInst = new double[2];
+	newInst[0] = m_classifiers[0][1].SVMOutput(-1, inst);
+	newInst[1] = Instance.missingValue();
+	return m_classifiers[0][1].m_logistic.
+	  distributionForInstance(new Instance(1, newInst));
+      }
+      double[][] r = new double[inst.numClasses()][inst.numClasses()];
+      double[][] n = new double[inst.numClasses()][inst.numClasses()];
+      for (int i = 0; i < inst.numClasses(); i++) {
+	for (int j = i + 1; j < inst.numClasses(); j++) {
+	  double[] newInst = new double[2];
+	  newInst[0] = m_classifiers[i][j].SVMOutput(-1, inst);
+	  newInst[1] = Instance.missingValue();
+	  r[i][j] = m_classifiers[i][j].m_logistic.
+	    distributionForInstance(new Instance(1, newInst))[0];
+	  n[i][j] = m_classifiers[i][j].m_sumOfWeights;
+	}
+      }
+      return pairwiseCoupling(n, r);
+    }
+  }
+
+  /**
+   * Implements pairwise coupling.
+   *
+   * @param n the sum of weights used to train each model
+   * @param r the probability estimate from each model
+   * @return the coupled estimates
+   */
+  public double[] pairwiseCoupling(double[][] n, double[][] r) {
+
+    // Initialize p and u array
+    double[] p = new double[r.length];
+    for (int i =0; i < p.length; i++) {
+      p[i] = 1.0 / (double)p.length;
+    }
+    double[][] u = new double[r.length][r.length];
+    for (int i = 0; i < r.length; i++) {
+      for (int j = i + 1; j < r.length; j++) {
+	u[i][j] = 0.5;
+      }
+    }
+
+    // firstSum doesn't change
+    double[] firstSum = new double[p.length];
+    for (int i = 0; i < p.length; i++) {
+      for (int j = i + 1; j < p.length; j++) {
+	firstSum[i] += n[i][j] * r[i][j];
+	firstSum[j] += n[i][j] * (1 - r[i][j]);
+      }
+    }
+
+    // Iterate until convergence
+    boolean changed;
+    do {
+      changed = false;
+      double[] secondSum = new double[p.length];
+      for (int i = 0; i < p.length; i++) {
+	for (int j = i + 1; j < p.length; j++) {
+	  secondSum[i] += n[i][j] * u[i][j];
+	  secondSum[j] += n[i][j] * (1 - u[i][j]);
+	}
+      }
+      for (int i = 0; i < p.length; i++) {
+	if (firstSum[i] == 0) {
+	  if (p[i] > 0) {
+	    changed = true;
+	  }
+	  p[i] = 0;
+	} else {
+	  double factor = firstSum[i] / secondSum[i];
+	  p[i] *= factor;
+	  if (Math.abs(factor - 1.0) > 1.0e-2) {
+	    changed = true;
+	  }
+	}
+      }
+      Utils.normalize(p);
+      for (int i = 0; i < r.length; i++) {
+	for (int j = i + 1; j < r.length; j++) {
+	  u[i][j] = p[i] / (p[i] + p[j]);
+	}
+      }
+    } while (changed);
+    return p;
   }
 
   /**
@@ -1334,24 +1586,13 @@ public class SMO extends Classifier implements OptionHandler,
   }
 
   /**
-   * Classifies a given instance
-   * @param inst the instance
-   * @return the classification in internal format
-   * @exception Exception if something goes wrong
-   */
-  public double classifyInstance(Instance inst) throws Exception {
-
-    return (double)Utils.maxIndex(obtainVotes(inst));
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(10);
+    Vector newVector = new Vector(13);
 
     newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
 				    "C", 1, "-C <double>"));
@@ -1379,7 +1620,14 @@ public class SMO extends Classifier implements OptionHandler,
     newVector.addElement(new Option("\tThe epsilon for round-off error. " +
 				    "(default 1.0e-12)",
 				    "P", 1, "-P <double>"));
-    
+    newVector.addElement(new Option("\tFit logistic models to SVM outputs. ",
+				    "M", 0, "-M"));
+    newVector.addElement(new Option("\tThe number of folds for the internal cross-validation. " +
+				    "(default -1, use training data)",
+				    "V", 1, "-V <double>"));
+    newVector.addElement(new Option("\tThe random number seed for the internal cross-validation. " +
+				    "(default 1)",
+				    "W", 1, "-W <double>"));
 
     return newVector.elements();
   }
@@ -1414,11 +1662,21 @@ public class SMO extends Classifier implements OptionHandler,
    * -T num <br>
    * Sets the tolerance parameter. (default 1.0e-3)<p>
    *
-   * -P num <br>
+   * -P num <br> 
    * Sets the epsilon for round-off error. (default 1.0e-12)<p>
    *
+   * -M <br>
+   * Fit logistic models to SVM outputs.<p>
+   *
+   * -V num <br>
+   * Number of runs for cross-validation used to generate data
+   * for logistic models. (default -1, use training data)
+   *
+   * -W num <br>
+   * Random number seed for cross-validation. (default 1)
+   *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @exception Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -1474,6 +1732,19 @@ public class SMO extends Classifier implements OptionHandler,
     if ((m_exponent == 1.0) && (m_lowerOrder)) {
       throw new Exception("Can't use lower-order terms with linear machine.");
     }
+    m_fitLogisticModels = Utils.getFlag('M', options);
+    String foldsString = Utils.getOption('V', options);
+    if (foldsString.length() != 0) {
+      m_numFolds = Integer.parseInt(foldsString);
+    } else {
+      m_numFolds = -1;
+    }
+    String randomSeedString = Utils.getOption('W', options);
+    if (randomSeedString.length() != 0) {
+      m_randomSeed = Integer.parseInt(randomSeedString);
+    } else {
+      m_randomSeed = 1;
+    }
   }
 
   /**
@@ -1483,7 +1754,7 @@ public class SMO extends Classifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [16];
+    String [] options = new String [21];
     int current = 0;
 
     options[current++] = "-C"; options[current++] = "" + m_C;
@@ -1504,6 +1775,11 @@ public class SMO extends Classifier implements OptionHandler,
     if (m_useRBF) {
       options[current++] = "-R";
     }
+    if (m_fitLogisticModels) {
+      options[current++] = "-M";
+    }
+    options[current++] = "-V"; options[current++] = "" + m_numFolds;
+    options[current++] = "-W"; options[current++] = "" + m_randomSeed;    
 
     while (current < options.length) {
       options[current++] = "";
@@ -1715,7 +1991,67 @@ public class SMO extends Classifier implements OptionHandler,
       m_lowerOrder = v;
     }
   }
-
+  
+  /**
+   * Get the value of buildLogisticModels.
+   *
+   * @return Value of buildLogisticModels.
+   */
+  public boolean getBuildLogisticModels() {
+    
+    return m_fitLogisticModels;
+  }
+  
+  /**
+   * Set the value of buildLogisticModels.
+   *
+   * @param newbuildLogisticModels Value to assign to buildLogisticModels.
+   */
+  public void setBuildLogisticModels(boolean newbuildLogisticModels) {
+    
+    m_fitLogisticModels = newbuildLogisticModels;
+  }
+  
+  /**
+   * Get the value of numFolds.
+   *
+   * @return Value of numFolds.
+   */
+  public int getNumFolds() {
+    
+    return m_numFolds;
+  }
+  
+  /**
+   * Set the value of numFolds.
+   *
+   * @param newnumFolds Value to assign to numFolds.
+   */
+  public void setNumFolds(int newnumFolds) {
+    
+    m_numFolds = newnumFolds;
+  }
+  
+  /**
+   * Get the value of randomSeed.
+   *
+   * @return Value of randomSeed.
+   */
+  public int getRandomSeed() {
+    
+    return m_randomSeed;
+  }
+  
+  /**
+   * Set the value of randomSeed.
+   *
+   * @param newrandomSeed Value to assign to randomSeed.
+   */
+  public void setRandomSeed(int newrandomSeed) {
+    
+    m_randomSeed = newrandomSeed;
+  }
+  
   /**
    * Prints out the classifier.
    *
@@ -1736,7 +2072,11 @@ public class SMO extends Classifier implements OptionHandler,
 	  text.append("Classifier for classes: " + 
 		      m_classAttribute.value(i) + ", " +
 		      m_classAttribute.value(j) + "\n\n");
-	  text.append(m_classifiers[i][j] + "\n\n");
+	  text.append(m_classifiers[i][j]);
+	  if (m_fitLogisticModels) {
+	    text.append("\n\n" + m_classifiers[i][j].m_logistic);
+	  }
+	  text.append("\n\n");
 	}
       }
     } catch (Exception e) {
