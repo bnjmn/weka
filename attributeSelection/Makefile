@@ -9,7 +9,8 @@ SOURCES = ASEvaluation.java ASSearch.java AttributeEvaluator.java \
 	  UnsupervisedAttributeEvaluator.java \
 	  UnsupervisedSubsetEvaluator.java WrapperSubsetEval.java \
 	  ReliefFAttributeEval.java ForwardSelection.java \
-	  GeneticSearch.java RandomSearch.java
+	  GeneticSearch.java RandomSearch.java \
+	  ConsistencySubsetEval.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
