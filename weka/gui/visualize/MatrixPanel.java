@@ -47,10 +47,13 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
+import java.awt.event.ComponentAdapter;
 
 import javax.swing.JPanel;
 import javax.swing.JDialog;
+import javax.swing.JSplitPane;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JButton;
@@ -81,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 
@@ -93,6 +96,12 @@ public class MatrixPanel extends JPanel{
   /** The panel that displays the legend of the colouring attribute */
   protected final ClassPanel m_cp = new ClassPanel();
 
+  /** The panel that contains all the buttons and tools, i.e. resize, jitter bars and sub-sampling buttons etc
+      on the bottom of the panel */
+  protected JPanel optionsPanel;
+
+  /** Split pane for splitting the matrix and the buttons and bars */
+  protected JSplitPane jp;
   /** The button that updates the display to reflect the changes made by the user. 
       E.g. changed attribute set for the matrix    */
   protected JButton m_updateBt = new JButton("Update");
@@ -259,7 +268,7 @@ public class MatrixPanel extends JPanel{
 					a.setPreferredSize(d);
 					a.setSize( a.getPreferredSize() );
 					a.setJitter( m_jitter.getValue() );
-
+					
 					m_js.revalidate();
 					m_cp.setColours(m_colorList);
 					m_cp.setCindex(m_classIndex);
@@ -343,7 +352,7 @@ public class MatrixPanel extends JPanel{
 				   }
 	                          });
 
-      final JPanel p1 = new JPanel( new GridBagLayout() ); //all the rest of the panels are in here.
+      optionsPanel = new JPanel( new GridBagLayout() ); //all the rest of the panels are in here.
       final JPanel p2 = new JPanel( new BorderLayout() );  //this has class colour panel
       final JPanel p3 = new JPanel( new GridBagLayout() ); //this has update and select buttons
       final JPanel p4 = new JPanel( new GridBagLayout() ); //this has the slider bars and combobox
@@ -383,14 +392,26 @@ public class MatrixPanel extends JPanel{
       gbc.insets = new Insets(8,5,2,5);
       gbc.anchor = gbc.NORTHWEST; gbc.fill = gbc.HORIZONTAL; gbc.weightx=1;
       gbc.gridwidth = gbc.RELATIVE;
-      p1.add(p4, gbc);
+      optionsPanel.add(p4, gbc);
       gbc.gridwidth = gbc.REMAINDER;
-      p1.add(p3, gbc);
-      p1.add(p2, gbc);
+      optionsPanel.add(p3, gbc);
+      optionsPanel.add(p2, gbc);
 
-      this.setLayout(new BorderLayout());
-      this.add(m_js, BorderLayout.CENTER);
-      this.add(p1, BorderLayout.SOUTH);
+      this.addComponentListener( new ComponentAdapter() {
+      	                          public void componentResized(ComponentEvent cv) {
+      			      m_js.setMinimumSize( new Dimension(MatrixPanel.this.getWidth(),
+      								 MatrixPanel.this.getHeight()
+      								 -optionsPanel.getPreferredSize().height-10));
+	                      jp.setDividerLocation( MatrixPanel.this.getHeight()-optionsPanel.getPreferredSize().height-10 );
+				  }
+	                      });
+
+     optionsPanel.setMinimumSize( new Dimension(0,0) );
+     jp = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_js, optionsPanel);
+     jp.setOneTouchExpandable(true);
+     jp.setResizeWeight(1);
+     this.setLayout( new BorderLayout() );
+     this.add(jp, BorderLayout.CENTER);
 
       /** Setting up the initial color list **/
       for(int i=0; i<m_defaultColors.length-1; i++)
@@ -423,12 +444,9 @@ public class MatrixPanel extends JPanel{
       if(Double.parseDouble(m_resamplePercent.getText())<100) {
 	  try {
 	      if( m_data.attribute(m_classIndex).isNominal() ) {
-		  System.out.print("Resampling nominal, class is "+m_classIndex);
 		  weka.filters.supervised.instance.Resample r = new weka.filters.supervised.instance.Resample();
 		  
-		  System.out.println("rseed: "+Integer.parseInt(m_rseed.getText()));
 		  r.setRandomSeed( Integer.parseInt(m_rseed.getText()) );
-		  System.out.println("Percent: "+Double.parseDouble(m_resamplePercent.getText()) );
 		  r.setSampleSizePercent( Double.parseDouble(m_resamplePercent.getText()) );
 		  
 		  if(origDist.isSelected())
@@ -437,19 +455,14 @@ public class MatrixPanel extends JPanel{
 		      r.setBiasToUniformClass(1);
 		  r.setInputFormat(m_data);
 		  inst = weka.filters.Filter.useFilter(m_data, r);
-		  System.out.println("New no: "+inst.numInstances());
 	      }
 	      else {
-		  System.out.print("Resampling numeric, class is "+m_classIndex);
 		  weka.filters.unsupervised.instance.Resample r = new weka.filters.unsupervised.instance.Resample();
 		  
-		  System.out.println("rseed: "+Integer.parseInt(m_rseed.getText()));
 		  r.setRandomSeed( Integer.parseInt(m_rseed.getText()) );
-		  System.out.println("Percent: "+Double.parseDouble(m_resamplePercent.getText()) );
 		  r.setSampleSizePercent( Double.parseDouble(m_resamplePercent.getText()) );
 		  r.setInputFormat(m_data);
 		  inst = weka.filters.Filter.useFilter(m_data, r);
-		  System.out.println("New no:"+inst.numInstances());
 	      }
 	  }
 	  catch(Exception ex) { System.out.println("Error occurred while sampling"); ex.printStackTrace();  }
