@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.47 $
+ * @version  $Revision: 1.48 $
   */
 public class Evaluation implements Summarizable {
 
@@ -955,21 +955,12 @@ public class Evaluation implements Summarizable {
     classMissing.setDataset(instance.dataset());
     classMissing.setClassMissing();
     if (m_ClassIsNominal) {
-      if (classifier instanceof DistributionClassifier) {
-	double [] dist = ((DistributionClassifier)classifier).
-				 distributionForInstance(classMissing);
+	double [] dist = classifier.distributionForInstance(classMissing);
 	pred = Utils.maxIndex(dist);
-	updateStatsForClassifier(dist,
-				 instance);
-      } else {
-	pred = classifier.classifyInstance(classMissing);
-	updateStatsForClassifier(makeDistribution(pred),
-				 instance);
-      }
+	updateStatsForClassifier(dist, instance);
     } else {
       pred = classifier.classifyInstance(classMissing);
-      updateStatsForPredictor(pred,
-			      instance);
+      updateStatsForPredictor(pred, instance);
     }
     return pred;
   }
@@ -2158,16 +2149,13 @@ public class Evaluation implements Summarizable {
 	    text.append(i + " missing ");
 	  } else {
 	    text.append(i + " "
-	      	  + test.classAttribute().value((int)predValue) + " ");
+			+ test.classAttribute().value((int)predValue) + " ");
 	  }
-	  if (classifier instanceof DistributionClassifier) {
-	    if (Instance.isMissingValue(predValue)) {
-	      text.append("missing ");
-	    } else {
-	      text.append(((DistributionClassifier)classifier).
-	      	    distributionForInstance(withMissing)
-	      	    [(int)predValue]+" ");
-	    }
+	  if (Instance.isMissingValue(predValue)) {
+	    text.append("missing ");
+	  } else {
+	    text.append(classifier.distributionForInstance(withMissing)
+			[(int)predValue] + " ");
 	  }
 	  text.append(instance.toString(instance.classIndex()) + " "
 		      + attributeValuesString(withMissing, attributesToOutput) + "\n");

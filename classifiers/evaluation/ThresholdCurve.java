@@ -28,7 +28,7 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Classifier;
 
 /**
  * Generates points illustrating prediction tradeoffs that can be obtained
@@ -39,7 +39,7 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ThresholdCurve {
 
@@ -382,7 +382,7 @@ public class ThresholdCurve {
         inst.setClassIndex(inst.numAttributes() - 1);
         ThresholdCurve tc = new ThresholdCurve();
         EvaluationUtils eu = new EvaluationUtils();
-        DistributionClassifier classifier = new weka.classifiers.functions.VotedPerceptron();
+        Classifier classifier = new weka.classifiers.functions.Logistic();
         FastVector predictions = new FastVector();
         for (int i = 0; i < 2; i++) { // Do two runs.
           eu.setSeed(i);

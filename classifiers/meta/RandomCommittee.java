@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomTree;
 import java.util.Enumeration;
@@ -59,9 +58,9 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class RandomCommittee extends DistributionClassifier 
+public class RandomCommittee extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
 
   /** The model base classifier to use */
@@ -293,13 +292,10 @@ public class RandomCommittee extends DistributionClassifier
     for (int i = 0; i < m_NumIterations; i++) {
       if (instance.classAttribute().isNumeric() == true) {
 	sums[0] += m_Classifiers[i].classifyInstance(instance);
-      } else if (m_Classifiers[i] instanceof DistributionClassifier) {
-	newProbs = ((DistributionClassifier)m_Classifiers[i]).
-	  distributionForInstance(instance);
+      } else {
+	newProbs = m_Classifiers[i].distributionForInstance(instance);
 	for (int j = 0; j < newProbs.length; j++)
 	  sums[j] += newProbs[j];
-      } else {
-	sums[(int)m_Classifiers[i].classifyInstance(instance)]++;
       }
     }
     if (instance.classAttribute().isNumeric() == true) {

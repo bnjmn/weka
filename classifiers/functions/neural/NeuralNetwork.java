@@ -40,9 +40,9 @@ import weka.filters.Filter;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class NeuralNetwork extends DistributionClassifier 
+public class NeuralNetwork extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
   
   /**
@@ -553,7 +553,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.10 $
+   * @version $Revision: 1.11 $
    */
   class ControlPanel extends JPanel {
     

@@ -35,7 +35,6 @@ import java.io.*;
 
 import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.bayes.NaiveBayesSimple;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.trees.j48.J48;
@@ -52,7 +51,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  * @since 1.0
  * @see JPanel
  */
@@ -75,7 +74,7 @@ public class BoundaryPanel extends JPanel {
   protected Instances m_trainingData;
 
   // distribution classifier to use
-  protected DistributionClassifier m_classifier;
+  protected Classifier m_classifier;
 
   // data generator to use
   protected DataGenerator m_dataGenerator;
@@ -718,7 +717,7 @@ public class BoundaryPanel extends JPanel {
    *
    * @param classifier the classifier to use
    */
-  public void setClassifier(DistributionClassifier classifier) {
+  public void setClassifier(Classifier classifier) {
     m_classifier = classifier;
   }
   
@@ -990,7 +989,7 @@ public class BoundaryPanel extends JPanel {
       bv.setDataGenerator(dataGen);
       bv.setNumSamplesPerRegion(loc);
       bv.setGeneratorSamplesBase(base);
-      bv.setClassifier((DistributionClassifier)c);
+      bv.setClassifier(c);
       bv.setTrainingData(i);
       bv.setXAttribute(xatt);
       bv.setYAttribute(yatt);

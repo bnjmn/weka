@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
@@ -54,11 +53,11 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
-public class Stacking extends DistributionClassifier implements OptionHandler {
+public class Stacking extends Classifier implements OptionHandler {
 
-  /** The meta classifier (really a DistributionClassifier -- ugly). */
+  /** The meta classifier */
   protected Classifier m_MetaClassifier = new weka.classifiers.rules.ZeroR();
 
   /** The base classifiers. */
@@ -360,11 +359,6 @@ public class Stacking extends DistributionClassifier implements OptionHandler {
    
     // Build meta classifier
     m_MetaClassifier.buildClassifier(metaData);
-    if (!(m_MetaClassifier instanceof DistributionClassifier)) {
-      Classifier temp = m_MetaClassifier;
-      m_MetaClassifier = new DistributionMetaClassifier();
-      ((DistributionMetaClassifier)m_MetaClassifier).setClassifier(temp);
-    }
   }
 
   /**
@@ -376,8 +370,7 @@ public class Stacking extends DistributionClassifier implements OptionHandler {
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
-    return ((DistributionClassifier)m_MetaClassifier).
-      distributionForInstance(metaInstance(instance));
+    return m_MetaClassifier.distributionForInstance(metaInstance(instance));
   }
 
   /**
@@ -439,18 +432,10 @@ public class Stacking extends DistributionClassifier implements OptionHandler {
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	attributes.addElement(new Attribute(name));
       } else {
-	if (classifier instanceof DistributionClassifier) {
-	  for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
-	    attributes.addElement(new Attribute(name + ":" + 
-						m_BaseFormat
-						.classAttribute().value(j)));
-	  }
-	} else {
-	  FastVector values = new FastVector();
-	  for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
-	    values.addElement(m_BaseFormat.classAttribute().value(j));
-	  }
-	  attributes.addElement(new Attribute(name, values));
+	for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
+	  attributes.addElement(new Attribute(name + ":" + 
+					      m_BaseFormat
+					      .classAttribute().value(j)));
 	}
       }
     }
@@ -508,14 +493,9 @@ public class Stacking extends DistributionClassifier implements OptionHandler {
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	values[i++] = classifier.classifyInstance(instance);
       } else {
-	if (classifier instanceof DistributionClassifier) {
-	  double[] dist = ((DistributionClassifier)classifier).
-	    distributionForInstance(instance);
-	  for (int j = 0; j < dist.length; j++) {
-	    values[i++] = dist[j];
-	  }
-	} else {
-	  values[i++] = classifier.classifyInstance(instance);
+	double[] dist = classifier.distributionForInstance(instance);
+	for (int j = 0; j < dist.length; j++) {
+	  values[i++] = dist[j];
 	}
       }
     }

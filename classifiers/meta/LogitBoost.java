@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.trees.DecisionStump;
 import java.io.*;
@@ -83,9 +82,9 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
  */
-public class LogitBoost extends DistributionClassifier 
+public class LogitBoost extends Classifier 
   implements OptionHandler, Sourcable, WeightedInstancesHandler {
 
   // To maintain the same version number after adding m_ClassAttribute

@@ -25,7 +25,6 @@ package weka.gui.beans;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import java.util.EventObject;
 
 /**

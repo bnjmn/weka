@@ -24,7 +24,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -57,9 +56,9 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
 */
-public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
+public class VotedPerceptron extends Classifier implements OptionHandler {
   
   /** The maximum number of alterations to the perceptron */
   private int m_MaxK = 10000;

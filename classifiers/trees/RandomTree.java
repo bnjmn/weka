@@ -32,9 +32,9 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class RandomTree extends DistributionClassifier 
+public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
 
   /** The subtrees appended to this tree. */ 

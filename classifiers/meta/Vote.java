@@ -27,7 +27,6 @@ import java.util.*;
 import weka.core.*;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 
 /**
@@ -47,10 +46,10 @@ import weka.classifiers.rules.ZeroR;
  * (required, option should be used once for each classifier).<p>
  *
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
-public class Vote extends DistributionClassifier implements OptionHandler {
+public class Vote extends Classifier implements OptionHandler {
 
   /** The list of classifiers */
   protected Classifier [] m_Classifiers = {
@@ -319,15 +318,9 @@ public class Vote extends DistributionClassifier implements OptionHandler {
     for (int i=0; i < numClassifiers; i++) {
       Classifier currentClassifier = getClassifier(i);
 
-      if (currentClassifier instanceof DistributionClassifier) {
-        double[] dist = ((DistributionClassifier)currentClassifier).
-          distributionForInstance(instance);
-        for (int j=0; j < dist.length; j++)
-          probs[j] += ((double)dist[j])/((double)numClassifiers);
-      } else {
-        probs[(int)currentClassifier.classifyInstance(instance)] += 
-	  1 / ((double)numClassifiers);
-      }
+      double[] dist = currentClassifier.distributionForInstance(instance);
+      for (int j=0; j < dist.length; j++)
+	probs[j] += ((double)dist[j])/((double)numClassifiers);
     }
 
     return probs;

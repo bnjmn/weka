@@ -58,12 +58,12 @@ import weka.filters.supervised.attribute.NominalToBinary;
  *
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 
-public class LMT extends DistributionClassifier implements OptionHandler, AdditionalMeasureProducer,
-							   Drawable{
+public class LMT extends Classifier implements OptionHandler, AdditionalMeasureProducer,
+					       Drawable{
     
   //format of serial: 1**date## (** = algorithm id, ##= version)
   //static final long serialVersionUID = 1010506200300L;

@@ -36,7 +36,6 @@ import java.io.*;
 
 import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.bayes.NaiveBayesSimple;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.trees.j48.J48;
@@ -58,7 +57,7 @@ import weka.experiment.TaskStatusInfo;
  * processed row by row using the available remote computers.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see BoundaryPanel
  */
@@ -644,7 +643,7 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
       bv.setDataGenerator(dataGen);
       bv.setNumSamplesPerRegion(loc);
       bv.setGeneratorSamplesBase(base);
-      bv.setClassifier((DistributionClassifier)c);
+      bv.setClassifier(c);
       bv.setTrainingData(i);
       bv.setXAttribute(xatt);
       bv.setYAttribute(yatt);

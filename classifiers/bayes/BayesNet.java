@@ -34,9 +34,9 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class BayesNet extends DistributionClassifier implements OptionHandler, 
+public class BayesNet extends Classifier implements OptionHandler, 
 	WeightedInstancesHandler, Drawable {
 
   /**

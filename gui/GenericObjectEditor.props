@@ -53,7 +53,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.ClassificationViaRegression,\
  weka.classifiers.meta.CostSensitiveClassifier,\
  weka.classifiers.meta.CVParameterSelection,\
- weka.classifiers.meta.DistributionMetaClassifier,\
  weka.classifiers.meta.FilteredClassifier,\
  weka.classifiers.meta.Grading,\
  weka.classifiers.meta.LogitBoost,\
@@ -89,57 +88,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules.M5Rules,\
  weka.classifiers.rules.Prism,\
  weka.classifiers.rules.Ridor,\
- weka.classifiers.rules.JRip,\
- weka.classifiers.rules.ZeroR
-
-# Lists the DistributionClassifiers I want to choose from
-weka.classifiers.DistributionClassifier=\
- weka.classifiers.bayes.AODE,\
- weka.classifiers.bayes.BayesNetK2,\
- weka.classifiers.bayes.BayesNetB,\
- weka.classifiers.bayes.NaiveBayes,\
- weka.classifiers.bayes.NaiveBayesMultinomial,\
- weka.classifiers.bayes.NaiveBayesSimple,\
- weka.classifiers.bayes.NaiveBayesUpdateable,\
- weka.classifiers.functions.Logistic,\
- weka.classifiers.functions.neural.NeuralNetwork,\
- weka.classifiers.functions.supportVector.SMO,\
- weka.classifiers.functions.supportVector.SMOreg,\
- weka.classifiers.functions.SimpleLogistic,\
- weka.classifiers.functions.VotedPerceptron,\
- weka.classifiers.lazy.IBk,\
- weka.classifiers.lazy.kstar.KStar,\
- weka.classifiers.lazy.LBR,\
- weka.classifiers.lazy.LWL,\
- weka.classifiers.meta.AdaBoostM1,\
- weka.classifiers.meta.AttributeSelectedClassifier,\
- weka.classifiers.meta.Bagging, \
- weka.classifiers.meta.ClassificationViaRegression,\
- weka.classifiers.meta.DistributionMetaClassifier,\
- weka.classifiers.meta.FilteredClassifier,\
- weka.classifiers.meta.LogitBoost,\
- weka.classifiers.meta.MultiBoostAB,\
- weka.classifiers.meta.MultiClassClassifier,\
- weka.classifiers.meta.OrdinalClassClassifier,\
- weka.classifiers.meta.RacedIncrementalLogitBoost,\
- weka.classifiers.meta.RandomCommittee,\
- weka.classifiers.meta.StackingC,\
- weka.classifiers.meta.ThresholdSelector,\
- weka.classifiers.meta.Vote,\
- weka.classifiers.misc.HyperPipes,\
- weka.classifiers.misc.VFI,\
- weka.classifiers.trees.adtree.ADTree,\
- weka.classifiers.trees.DecisionStump,\
- weka.classifiers.trees.Id3,\
- weka.classifiers.trees.j48.J48,\
- weka.classifiers.trees.lmt.LMT,\
- weka.classifiers.trees.RandomForest,\
- weka.classifiers.trees.RandomTree,\
- weka.classifiers.trees.REPTree,\
- weka.classifiers.trees.UserClassifier,\
- weka.classifiers.rules.ConjunctiveRule,\
- weka.classifiers.rules.DecisionTable,\
- weka.classifiers.rules.part.PART,\
  weka.classifiers.rules.JRip,\
  weka.classifiers.rules.ZeroR
 

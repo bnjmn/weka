@@ -22,7 +22,6 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
@@ -69,9 +68,9 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
-public class MultiClassClassifier extends DistributionClassifier 
+public class MultiClassClassifier extends Classifier 
   implements OptionHandler {
 
   /** The classifiers. */
@@ -81,7 +80,7 @@ public class MultiClassClassifier extends DistributionClassifier
   private Filter[] m_ClassFilters;
 
   /** The class name of the base classifier. */
-  private DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
+  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
@@ -383,8 +382,7 @@ public class MultiClassClassifier extends DistributionClassifier
 
     if (m_Classifiers.length == 1) {
       result = new double[1];
-      result[0] = ((DistributionClassifier)m_Classifiers[0])
-        .distributionForInstance(inst)[1];
+      result[0] = m_Classifiers[0].distributionForInstance(inst)[1];
     } else {
       result = new double[m_ClassFilters.length];
       for(int i = 0; i < m_ClassFilters.length; i++) {
@@ -392,13 +390,12 @@ public class MultiClassClassifier extends DistributionClassifier
 	  if (m_Method == METHOD_1_AGAINST_1) {    
 	    Instance tempInst = new Instance(inst); 
 	    tempInst.setDataset(m_TwoClassDataset);
-	    result[i] = ((DistributionClassifier)m_Classifiers[i])
-	      .distributionForInstance(tempInst)[1];  
+	    result[i] = m_Classifiers[i].distributionForInstance(tempInst)[1];  
 	  } else {
 	    m_ClassFilters[i].input(inst);
 	    m_ClassFilters[i].batchFinished();
-	    result[i] = ((DistributionClassifier)m_Classifiers[i])
-	      .distributionForInstance(m_ClassFilters[i].output())[1];
+	    result[i] = m_Classifiers[i].
+	      distributionForInstance(m_ClassFilters[i].output())[1];
 	  }
 	}
       }
@@ -414,8 +411,7 @@ public class MultiClassClassifier extends DistributionClassifier
   public double[] distributionForInstance(Instance inst) throws Exception {
     
     if (m_Classifiers.length == 1) {
-      return ((DistributionClassifier)m_Classifiers[0])
-        .distributionForInstance(inst);
+      return m_Classifiers[0].distributionForInstance(inst);
     }
     
     double[] probs = new double[inst.numClasses()];
@@ -425,8 +421,7 @@ public class MultiClassClassifier extends DistributionClassifier
 	if (m_Classifiers[i] != null) {
 	  Instance tempInst = new Instance(inst); 
 	  tempInst.setDataset(m_TwoClassDataset);
-	  double [] current = ((DistributionClassifier)m_Classifiers[i])
-	    .distributionForInstance(tempInst);  
+	  double [] current = m_Classifiers[i].distributionForInstance(tempInst);  
 	  Range range = new Range(((RemoveWithValues)m_ClassFilters[i])
 				  .getNominalIndices());
 	  range.setUpper(m_ClassAttribute.numValues());
@@ -441,8 +436,8 @@ public class MultiClassClassifier extends DistributionClassifier
 	if (m_Classifiers[i] != null) {
 	  m_ClassFilters[i].input(inst);
 	  m_ClassFilters[i].batchFinished();
-	  double [] current = ((DistributionClassifier)m_Classifiers[i])
-	    .distributionForInstance(m_ClassFilters[i].output());
+	  double [] current = m_Classifiers[i].
+	    distributionForInstance(m_ClassFilters[i].output());
 	  for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
 	    if (((MakeIndicator)m_ClassFilters[i]).getValueRange().isInRange(j)) {
 	      probs[j] += current[1];
@@ -584,9 +579,8 @@ public class MultiClassClassifier extends DistributionClassifier
       throw new Exception("A classifier must be specified with"
 			  + " the -W option.");
     }
-    setDistributionClassifier((DistributionClassifier)
-                              Classifier.forName(classifierName,
-                                                 Utils.partitionOptions(options)));
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -612,9 +606,9 @@ public class MultiClassClassifier extends DistributionClassifier
 
     options[current++] = "-Q"; options[current++] = "" + getSeed();
     
-    if (getDistributionClassifier() != null) {
+    if (getClassifier() != null) {
       options[current++] = "-W";
-      options[current++] = getDistributionClassifier().getClass().getName();
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
 
@@ -634,7 +628,7 @@ public class MultiClassClassifier extends DistributionClassifier
   public String globalInfo() {
 
     return "A metaclassifier for handling multi-class datasets with 2-class "
-      + "distribution classifiers. This classifier is also capable of "
+      + "classifiers. This classifier is also capable of "
       + "applying error correcting output codes for increased accuracy.";
   }
 
@@ -708,8 +702,8 @@ public class MultiClassClassifier extends DistributionClassifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String distributionClassifierTipText() {
-    return "Sets the DistributionClassifier used as the basis for "
+  public String classifierTipText() {
+    return "Sets the Classifier used as the basis for "
       + "the multi-class classifier.";
   }
 
@@ -718,7 +712,7 @@ public class MultiClassClassifier extends DistributionClassifier
    *
    * @param newClassifier the Classifier to use.
    */
-  public void setDistributionClassifier(DistributionClassifier newClassifier) {
+  public void setClassifier(Classifier newClassifier) {
 
     m_Classifier = newClassifier;
   }
@@ -728,7 +722,7 @@ public class MultiClassClassifier extends DistributionClassifier
    *
    * @return the classifier used as the classifier
    */
-  public DistributionClassifier getDistributionClassifier() {
+  public Classifier getClassifier() {
 
     return m_Classifier;
   }
@@ -761,7 +755,7 @@ public class MultiClassClassifier extends DistributionClassifier
    */
   public static void main(String [] argv) {
 
-    DistributionClassifier scheme;
+    Classifier scheme;
 
     try {
       scheme = new MultiClassClassifier();

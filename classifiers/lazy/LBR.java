@@ -41,7 +41,6 @@
 
 package weka.classifiers.lazy;
 
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import java.io.*;
@@ -64,9 +63,9 @@ import weka.core.*;
  * Zijian Zheng & G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class LBR extends DistributionClassifier {
+public class LBR extends Classifier {
 
   /**
    * Class for handling instances and the associated attributes. <p>

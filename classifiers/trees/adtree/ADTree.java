@@ -54,13 +54,13 @@ import java.util.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ADTree
-  extends DistributionClassifier implements OptionHandler, Drawable,
-					    AdditionalMeasureProducer,
-					    WeightedInstancesHandler,
-					    IterativeClassifier
+  extends Classifier implements OptionHandler, Drawable,
+				AdditionalMeasureProducer,
+				WeightedInstancesHandler,
+				IterativeClassifier
 {
 
   /** The search modes */

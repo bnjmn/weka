@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
 import weka.classifiers.rules.ZeroR;
@@ -66,9 +65,9 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
-public class AdaBoostM1 extends DistributionClassifier 
+public class AdaBoostM1 extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Sourcable {
 
   /** Max num iterations tried to find classifier with non-zero error. */ 
@@ -658,20 +657,10 @@ public class AdaBoostM1 extends DistributionClassifier
     double [] sums = new double [instance.numClasses()]; 
     
     if (m_NumIterations == 1) {
-      if (m_Classifiers[0] instanceof DistributionClassifier) {
-	return ((DistributionClassifier)m_Classifiers[0]).
-	distributionForInstance(instance);
-      } else {
-	sums[(int)m_Classifiers[0].classifyInstance(instance)] = 1;
-	return sums;
-      }
+      return m_Classifiers[0].distributionForInstance(instance);
     } else {
       for (int i = 0; i < m_NumIterations; i++) {
-	sums[(int)m_Classifiers[i].classifyInstance(instance)] += 
-	m_Betas[i];
-      }
-      for (int i = 0; i < instance.numClasses(); i++) {
-	sums[i] = sums[i];
+	sums[(int)m_Classifiers[i].classifyInstance(instance)] += m_Betas[i];
       }
       return Utils.logs2probs(sums);
     }

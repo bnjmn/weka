@@ -35,7 +35,6 @@ import java.beans.EventSetDescriptor;
 
 import weka.core.Instances;
 import weka.core.Instance;
-import weka.classifiers.DistributionClassifier;
 
 /**
  * Bean that can can accept batch or incremental classifier events
@@ -43,7 +42,7 @@ import weka.classifiers.DistributionClassifier;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
@@ -210,8 +209,7 @@ public class PredictionAppender extends JPanel
       String relationNameModifier = oldStructure.relationName()
 	+"_with predictions";
        if (!m_appendProbabilities 
-	   || oldStructure.classAttribute().isNumeric() ||
-	   !(classifier instanceof DistributionClassifier)) {
+	   || oldStructure.classAttribute().isNumeric()) {
 	 try {
 	   m_incrementalStructure = makeDataSetClass(oldStructure, classifier,
 						     relationNameModifier);
@@ -220,8 +218,7 @@ public class PredictionAppender extends JPanel
 	   ex.printStackTrace();
 	   return;
 	 }
-       } else if (m_appendProbabilities && 
-		  classifier instanceof DistributionClassifier) {
+       } else if (m_appendProbabilities) {
 	 try {
 	   m_incrementalStructure = 
 	     makeDataSetProbabilities(oldStructure, classifier,
@@ -241,15 +238,12 @@ public class PredictionAppender extends JPanel
 	m_instanceVals[i] = currentI.value(i);
       }
       if (!m_appendProbabilities 
-	  || currentI.dataset().classAttribute().isNumeric() ||
-	  !(classifier instanceof DistributionClassifier)) {
+	  || currentI.dataset().classAttribute().isNumeric()) {
 	double predClass = 
 	  classifier.classifyInstance(currentI);
 	m_instanceVals[m_instanceVals.length - 1] = predClass;
-      } else if (m_appendProbabilities && 
-		 classifier instanceof DistributionClassifier) {
-	double [] preds = ((DistributionClassifier)classifier).
-	  distributionForInstance(currentI);
+      } else if (m_appendProbabilities) {
+	double [] preds = classifier.distributionForInstance(currentI);
 	for (int i = oldNumAtts; i < m_instanceVals.length; i++) {
 	  m_instanceVals[i] = preds[i-oldNumAtts];
 	}      
@@ -286,8 +280,7 @@ public class PredictionAppender extends JPanel
       String relationNameModifier = "_set_"+e.getSetNumber()+"_of_"
 	+e.getMaxSetNumber();
       
-      if (!m_appendProbabilities || testSet.classAttribute().isNumeric() ||
-	  !(classifier instanceof DistributionClassifier)) {
+      if (!m_appendProbabilities || testSet.classAttribute().isNumeric()) {
 	try {
 	  Instances newInstances = makeDataSetClass(testSet, classifier,
 						    relationNameModifier);
@@ -306,32 +299,23 @@ public class PredictionAppender extends JPanel
 	}
       }
       if (m_appendProbabilities) {
-	if (classifier instanceof DistributionClassifier) {
-	  try {
-	    Instances newInstances = 
-	      makeDataSetProbabilities(testSet,
-				       classifier,relationNameModifier);
-	    // fill in predicted probabilities
-	    for (int i = 0; i < testSet.numInstances(); i++) {
-	      double [] preds = 
-		((DistributionClassifier)classifier).
-		distributionForInstance(testSet.instance(i));
-	      for (int j = 0; j < testSet.classAttribute().numValues(); j++) {
-		newInstances.instance(i).setValue(testSet.numAttributes()+j,
-						  preds[j]);
-	      }
+	try {
+	  Instances newInstances = 
+	    makeDataSetProbabilities(testSet,
+				     classifier,relationNameModifier);
+	  // fill in predicted probabilities
+	  for (int i = 0; i < testSet.numInstances(); i++) {
+	    double [] preds = classifier.
+	      distributionForInstance(testSet.instance(i));
+	    for (int j = 0; j < testSet.classAttribute().numValues(); j++) {
+	      newInstances.instance(i).setValue(testSet.numAttributes()+j,
+						preds[j]);
 	    }
-	    // notify listeners
-	    notifyDataSetAvailable(new DataSetEvent(this, newInstances));
-	  } catch (Exception ex) {
-	    ex.printStackTrace();
 	  }
-	} else {
-	  if (m_logger != null) {
-	    m_logger.logMessage("Can't append predicted probabilities "
-				+"because classifier is not a "
-				+"DistributionClassifier (PredictionAppender)");
-	  } 
+	  // notify listeners
+	  notifyDataSetAvailable(new DataSetEvent(this, newInstances));
+	} catch (Exception ex) {
+	  ex.printStackTrace();
 	}
       }
     }

@@ -62,9 +62,9 @@ import weka.classifiers.*;
  * Generate unpruned decision list. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
-public class PART extends DistributionClassifier implements OptionHandler,
+public class PART extends Classifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
 
   /** The decision list */

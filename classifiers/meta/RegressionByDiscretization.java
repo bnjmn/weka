@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
@@ -61,13 +60,13 @@ import weka.filters.Filter;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
 
   /** The subclassifier. */
-  protected DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
   
   /** The discretization filter. */
   protected Discretize m_Discretizer;
@@ -151,8 +150,7 @@ public class RegressionByDiscretization extends Classifier
    * @return predicted class value
    * @exception Exception if the prediction couldn't be made
    */
-  public double classifyInstance(Instance instance) 
-       throws Exception {  
+  public double classifyInstance(Instance instance) throws Exception {  
 
     // Discretize the test instance
     if (m_Discretizer.numPendingOutput() > 0) {
@@ -171,7 +169,7 @@ public class RegressionByDiscretization extends Classifier
 	probSum += probs[j];
       }
       
-      return prediction / probSum;
+      return prediction /  probSum;
       
     } else {
       throw new Exception("Discretize didn't make the test instance"
@@ -294,7 +292,7 @@ public class RegressionByDiscretization extends Classifier
    */
   public void setClassifier(Classifier newClassifier) {
 
-    m_Classifier = (DistributionClassifier)newClassifier;
+    m_Classifier = newClassifier;
   }
 
   /**

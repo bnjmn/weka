@@ -47,9 +47,9 @@ import java.util.*;
  * Random number seed (default 1). <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class RandomForest extends DistributionClassifier 
+public class RandomForest extends Classifier 
   implements OptionHandler, Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer {
 
   /** Number of trees in forest. */

@@ -22,11 +22,9 @@
 
 package weka.classifiers.lazy;
 
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.DecisionStump;
-import weka.classifiers.meta.DistributionMetaClassifier;
 import weka.classifiers.UpdateableClassifier;
 import java.io.*;
 import java.util.*;
@@ -67,10 +65,9 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ */
-public class LWL extends DistributionClassifier 
-  implements OptionHandler, UpdateableClassifier, 
-  WeightedInstancesHandler {
+ * @version $Revision: 1.8 $ */
+public class LWL extends Classifier 
+  implements OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
 
   // To maintain the same version number after fixing bug
   static final long serialVersionUID = 7858523588073370243L;
@@ -102,7 +99,7 @@ public class LWL extends DistributionClassifier
   protected static final int GAUSS   = 2;
 
   /** The classifier object */
-  protected DistributionClassifier m_classifier = new DecisionStump();
+  protected Classifier m_classifier = new DecisionStump();
 
   /**
    * Returns an enumeration describing the available options.
@@ -239,12 +236,7 @@ public class LWL extends DistributionClassifier
   public void setClassifier(Classifier newClassifier) {
 
     if (newClassifier instanceof WeightedInstancesHandler) {
-      if (newClassifier instanceof DistributionClassifier) {
-	m_classifier = (DistributionClassifier)newClassifier;
-      } else {
-	m_classifier = new DistributionMetaClassifier();
-	((DistributionMetaClassifier)m_classifier).setClassifier(newClassifier);
-      }
+      m_classifier = newClassifier;
     } else {
       throw new IllegalArgumentException("Classifier must be a WeightedInstancesHandler!");
     }

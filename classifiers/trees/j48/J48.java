@@ -65,9 +65,9 @@ import weka.classifiers.*;
  *
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
-public class J48 extends DistributionClassifier implements OptionHandler, 
+public class J48 extends Classifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
   AdditionalMeasureProducer {
 

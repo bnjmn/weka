@@ -25,7 +25,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import weka.classifiers.functions.LinearRegression;
 import weka.filters.unsupervised.attribute.Remove;
@@ -63,9 +62,9 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
-public class StackingC extends DistributionClassifier implements OptionHandler {
+public class StackingC extends Classifier implements OptionHandler {
 
   /** The meta classifier. */
   protected Classifier m_MetaClassifier = null;
@@ -510,14 +509,10 @@ public class StackingC extends DistributionClassifier implements OptionHandler {
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	attributes.addElement(new Attribute(name));
       } else {
-	if (classifier instanceof DistributionClassifier) {
-	  for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
-	    attributes.addElement(new Attribute(name + ":" + 
-						m_BaseFormat
-						.classAttribute().value(j)));
-	  }
-	} else {
-            throw new Exception(name + " does not return class probability distributions (= is not instance of DistributionClassifier) and therefore cannot be used with StackingC");
+	for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
+	  attributes.addElement(new Attribute(name + ":" + 
+					      m_BaseFormat
+					      .classAttribute().value(j)));
 	}
       }
     }
@@ -575,14 +570,9 @@ public class StackingC extends DistributionClassifier implements OptionHandler {
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	values[i++] = classifier.classifyInstance(instance);
       } else {
-	if (classifier instanceof DistributionClassifier) {
-	  double[] dist = ((DistributionClassifier)classifier).
-	    distributionForInstance(instance);
-	  for (int j = 0; j < dist.length; j++) {
-	    values[i++] = dist[j];
-	  }
-	} else {
-	  values[i++] = classifier.classifyInstance(instance);
+	double[] dist = classifier.distributionForInstance(instance);
+	for (int j = 0; j < dist.length; j++) {
+	  values[i++] = dist[j];
 	}
       }
     }

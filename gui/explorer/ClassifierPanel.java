@@ -32,7 +32,6 @@ import weka.core.Utils;
 import weka.core.Drawable;
 import weka.core.SerializedObject;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.evaluation.NominalPrediction;
@@ -136,7 +135,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.66 $
+ * @version $Revision: 1.67 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -305,9 +304,6 @@ public class ClassifierPanel extends JPanel {
     java.beans.PropertyEditorManager
       .registerEditor(Object [].class,
 		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.DistributionClassifier.class,
-		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);
@@ -816,8 +812,7 @@ public class ClassifierPanel extends JPanel {
 	Instance classMissing = (Instance)toPredict.copy();
 	classMissing.setDataset(toPredict.dataset());
 	classMissing.setClassMissing();
-	DistributionClassifier dc = 
-	  (DistributionClassifier)classifier;
+	Classifier dc = classifier;
 	double [] dist = 
 	  dc.distributionForInstance(classMissing);
 	pred = eval.evaluateModelOnce(dist, toPredict);
@@ -1047,8 +1042,7 @@ public class ClassifierPanel extends JPanel {
 	    predInstances = setUpVisualizableInstances(inst);
 	    predInstances.setClassIndex(inst.classIndex()+1);
 	    
-	    if (inst.classAttribute().isNominal() && 
-		classifier instanceof DistributionClassifier) {
+	    if (inst.classAttribute().isNominal()) {
 	      predictions = new FastVector();
 	    }
 
@@ -1229,8 +1223,7 @@ public class ClassifierPanel extends JPanel {
 	      if (outputPredictionsText) {
 		outBuff.append("=== Predictions on test set ===\n\n");
 		outBuff.append(" inst#,    actual, predicted, error");
-		if (inst.classAttribute().isNominal()
-		    && classifier instanceof DistributionClassifier) {
+		if (inst.classAttribute().isNominal()) {
 		  outBuff.append(", probability distribution");
 		}
 		outBuff.append("\n");
@@ -1387,8 +1380,8 @@ public class ClassifierPanel extends JPanel {
       // predicted
       double[] probdist = null;
       double pred;
-      if (classifier instanceof DistributionClassifier) {
-	probdist = ((DistributionClassifier)classifier).distributionForInstance(inst);
+      if (inst.classAttribute().isNominal()) {
+	probdist = classifier.distributionForInstance(inst);
 	pred = (double) Utils.maxIndex(probdist);
 	if (probdist[(int) pred] <= 0.0) pred = Instance.missingValue();
       } else {
@@ -1402,7 +1395,7 @@ public class ClassifierPanel extends JPanel {
       else text.append(Utils.padLeft("+", 6) + " ");
 
       // prob dist
-      if (classifier instanceof DistributionClassifier) {
+      if (inst.classAttribute().type() == Attribute.NOMINAL) {
 	for (int i=0; i<probdist.length; i++) {
 	  if (i == (int) pred) text.append(" *");
 	  else text.append("  ");
@@ -1982,8 +1975,7 @@ public class ClassifierPanel extends JPanel {
       predInstances = setUpVisualizableInstances(userTest);
       predInstances.setClassIndex(userTest.classIndex()+1);
       
-      if (userTest.classAttribute().isNominal() && 
-	  classifier instanceof DistributionClassifier) {
+      if (userTest.classAttribute().isNominal()) {
 	predictions = new FastVector();
       }
       
@@ -1999,8 +1991,7 @@ public class ClassifierPanel extends JPanel {
       if (outputPredictionsText) {
 	outBuff.append("=== Predictions on test set ===\n\n");
 	outBuff.append(" inst#,    actual, predicted, error");
-	if (userTest.classAttribute().isNominal()
-	    && classifier instanceof DistributionClassifier) {
+	if (userTest.classAttribute().isNominal()) {
 	  outBuff.append(", probability distribution");
 	}
 	outBuff.append("\n");

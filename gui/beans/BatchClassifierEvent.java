@@ -24,7 +24,6 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import java.util.EventObject;
 
 /**
@@ -32,7 +31,7 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see EventObject
  */
