@@ -64,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -185,7 +185,7 @@ public class CVParameterSelection extends Classifier
   protected double m_BestPerformance;
 
   /** The set of parameters to cross-validate over */
-  protected FastVector m_CVParams;
+  protected FastVector m_CVParams = new FastVector();
 
   /** The number of attributes in the data */
   protected int m_NumAttributes;
@@ -304,6 +304,20 @@ public class CVParameterSelection extends Classifier
 	m_BestClassifierOptions = createOptions();
       }
     }
+  }
+
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return  "Class for performing parameter selection by cross-validation "+
+	    "for any classifier. For more information, see:\n"+
+	    "R. Kohavi (1995). Wrappers for Performance "+
+	    "Enhancement and Oblivious Decision Graphs. PhD "+
+	    "Thesis. Department of Computer Science, Stanford University.";
   }
 
   /**
@@ -554,6 +568,15 @@ public class CVParameterSelection extends Classifier
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Sets the seed for random number generation.";
+  }
+
+  /**
    * Adds a scheme parameter to the list of parameters to be set
    * by cross-validation
    *
@@ -582,6 +605,46 @@ public class CVParameterSelection extends Classifier
     return ((CVParameter)m_CVParams.elementAt(index)).toString();
   }
 
+  public Object[] getCVParameters() {
+      
+      Object[] CVParams = m_CVParams.toArray();
+      
+      String params[] = new String[CVParams.length];
+      
+      for(int i=0; i<CVParams.length; i++) 
+          params[i] = CVParams[i].toString();
+      
+      return params;
+      
+  }
+  
+  public void setCVParameters(Object[] params) throws Exception {
+      
+      FastVector backup = m_CVParams;
+      m_CVParams = new FastVector();
+      
+      for(int i=0; i<params.length; i++) {
+          try{
+          addCVParameter((String)params[i]);
+          }
+          catch(Exception ex) { m_CVParams = backup; throw ex; }
+      }
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String CVParametersTipText() {
+    return "Sets the scheme parameters which are to be set "+
+	   "by cross-validation.\n"+
+	   "The format for each string should be:\n"+
+	   "param_char lower_bound upper_bound increment\n"+
+	   "eg to search a parameter -P from 1 to 10 by increments of 2:\n"+
+	   "    \"P 1 10 2\" ";
+  }
+
   /**
    * Sets debugging mode
    *
@@ -600,6 +663,15 @@ public class CVParameterSelection extends Classifier
   public boolean getDebug() {
 
     return m_Debug;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Sets debugging mode";
   }
 
   /**
@@ -623,6 +695,15 @@ public class CVParameterSelection extends Classifier
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "Get the number of folds used for cross-validation.";
+  }
+
+  /**
    * Set the classifier for boosting. 
    *
    * @param newClassifier the Classifier to use.
@@ -642,6 +723,14 @@ public class CVParameterSelection extends Classifier
     return m_Classifier;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifierTipText() {
+    return "Sets the classifier for boosting.";
+  }
  
   /**
    * Returns description of the cross-validated classifier.
