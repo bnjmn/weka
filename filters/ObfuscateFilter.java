@@ -1,5 +1,5 @@
 /*
- *    ObsfucateFilter.java
+ *    ObfuscateFilter.java
  *    Copyright (C) 2000 Intelligenesis Corp.
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@ import weka.core.*;
  * @author Len Trigg (len@intelligenesis.net)
  * @version $Revision: 1.1 $
  */
-public class ObsfucateFilter extends Filter {
+public class ObfuscateFilter extends Filter {
 
   /**
    * Returns a string describing this filter
@@ -40,7 +40,7 @@ public class ObsfucateFilter extends Filter {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "An instance filter that obsfucates all strings in the data";
+    return "An instance filter that obfuscates all strings in the data";
   }
 
   /**
@@ -55,7 +55,7 @@ public class ObsfucateFilter extends Filter {
 
     m_InputFormat = new Instances(instanceInfo, 0);
     
-    // Make the obsfucated header
+    // Make the obfuscated header
     FastVector v = new FastVector();
     for (int i = 0; i < instanceInfo.numAttributes(); i++) {
       Attribute oldAtt = instanceInfo.attribute(i);
@@ -120,9 +120,9 @@ public class ObsfucateFilter extends Filter {
     
     try {
       if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new ObsfucateFilter(), argv);
+	Filter.batchFilterFile(new ObfuscateFilter(), argv);
       } else {
-	Filter.filterFile(new ObsfucateFilter(), argv);
+	Filter.filterFile(new ObfuscateFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());
