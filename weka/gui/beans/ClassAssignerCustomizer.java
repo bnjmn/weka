@@ -39,7 +39,7 @@ import weka.core.Attribute;
  * GUI customizer for the class assigner bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassAssignerCustomizer extends JPanel
   implements Customizer, CustomizerClosingListener, DataFormatListener {
@@ -154,6 +154,7 @@ public class ClassAssignerCustomizer extends JPanel
 
   public void newDataFormat(DataSetEvent dse) {
     if (dse.getDataSet() != null) {
+      //      System.err.println("Setting up column selection.........");
       setUpColumnSelection(m_classAssigner.getConnectedFormat());
     } else {
       setUpStandardSelection();

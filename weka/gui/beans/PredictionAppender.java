@@ -42,7 +42,7 @@ import weka.core.Instance;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
@@ -63,6 +63,11 @@ public class PredictionAppender extends JPanel
    * Non null if this object is a target for any events.
    */
   protected Object m_listenee = null;
+
+  /**
+   * Format of instances to be produced.
+   */
+  protected Instances m_format;
 
   protected BeanVisual m_visual = 
     new BeanVisual("PredictionAppender", 
@@ -132,6 +137,11 @@ public class PredictionAppender extends JPanel
    */
   public synchronized void addDataSourceListener(DataSourceListener dsl) {
     m_dataSourceListeners.addElement(dsl);
+    // pass on any format that we might have determined so far
+    if (m_format != null) {
+      DataSetEvent e = new DataSetEvent(this, m_format);
+      dsl.acceptDataSet(e);
+    }
   }
   
   /**
@@ -150,6 +160,11 @@ public class PredictionAppender extends JPanel
    */
   public synchronized void addInstanceListener(InstanceListener dsl) {
     m_instanceListeners.addElement(dsl);
+    // pass on any format that we might have determined so far
+    if (m_format != null) {
+      InstanceEvent e = new InstanceEvent(this, m_format);
+      dsl.acceptInstance(e);
+    }
   }
   
   /**
@@ -187,7 +202,6 @@ public class PredictionAppender extends JPanel
 		       BeanVisual.ICON_PATH+"PredictionAppender_animated.gif");
   }
 
-  protected Instances m_incrementalStructure;
   protected InstanceEvent m_instanceEvent;
   protected double [] m_instanceVals;
 
@@ -211,24 +225,25 @@ public class PredictionAppender extends JPanel
        if (!m_appendProbabilities 
 	   || oldStructure.classAttribute().isNumeric()) {
 	 try {
-	   m_incrementalStructure = makeDataSetClass(oldStructure, classifier,
+	   m_format = makeDataSetClass(oldStructure, classifier,
 						     relationNameModifier);
-	   m_instanceVals = new double [m_incrementalStructure.numAttributes()];
+	   m_instanceVals = new double [m_format.numAttributes()];
 	 } catch (Exception ex) {
 	   ex.printStackTrace();
 	   return;
 	 }
        } else if (m_appendProbabilities) {
 	 try {
-	   m_incrementalStructure = 
+	   m_format = 
 	     makeDataSetProbabilities(oldStructure, classifier,
 				      relationNameModifier);
-	   m_instanceVals = new double [m_incrementalStructure.numAttributes()];
+	   m_instanceVals = new double [m_format.numAttributes()];
 	 } catch (Exception ex) {
 	   ex.printStackTrace();
 	   return;
 	 }
        }
+       return;
     }
 
     Instance newInst;
@@ -253,7 +268,7 @@ public class PredictionAppender extends JPanel
       return;
     } finally {
       newInst = new Instance(currentI.weight(), m_instanceVals);
-      newInst.setDataset(m_incrementalStructure);
+      newInst.setDataset(m_format);
       m_instanceEvent.setInstance(newInst);
       m_instanceEvent.setStatus(status);
       // notify listeners
@@ -262,7 +277,7 @@ public class PredictionAppender extends JPanel
 
     if (status == IncrementalClassifierEvent.BATCH_FINISHED) {
       // clean up
-      m_incrementalStructure = null;
+      //      m_incrementalStructure = null;
       m_instanceVals = null;
       m_instanceEvent = null;
     }
@@ -275,7 +290,8 @@ public class PredictionAppender extends JPanel
    */
   public void acceptClassifier(BatchClassifierEvent e) {
     if (m_dataSourceListeners.size() > 0) {
-      Instances testSet = e.getTestSet();
+      Instances testSet = e.getTestSet().getDataSet();
+
       weka.classifiers.Classifier classifier = e.getClassifier();
       String relationNameModifier = "_set_"+e.getSetNumber()+"_of_"
 	+e.getMaxSetNumber();
@@ -284,6 +300,9 @@ public class PredictionAppender extends JPanel
 	try {
 	  Instances newInstances = makeDataSetClass(testSet, classifier,
 						    relationNameModifier);
+	  if (e.getTestSet().isStructureOnly()) {
+	    m_format = newInstances;
+	  }
 	  // fill in predicted values
 	  for (int i = 0; i < testSet.numInstances(); i++) {
 	    double predClass = 
@@ -303,6 +322,9 @@ public class PredictionAppender extends JPanel
 	  Instances newInstances = 
 	    makeDataSetProbabilities(testSet,
 				     classifier,relationNameModifier);
+	  if (e.getTestSet().isStructureOnly()) {
+	    m_format = newInstances;
+	  }
 	  // fill in predicted probabilities
 	  for (int i = 0; i < testSet.numInstances(); i++) {
 	    double [] preds = classifier.
@@ -458,6 +480,7 @@ public class PredictionAppender extends JPanel
 						     Object source) {
     if (m_listenee == source) {
       m_listenee = null;
+      m_format = null; // assume any calculated instance format if now invalid
     }
   }
 

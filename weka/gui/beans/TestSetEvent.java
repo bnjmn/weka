@@ -29,7 +29,7 @@ import weka.core.Instances;
  * Event encapsulating a test set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TestSetEvent extends EventObject {
   
@@ -37,6 +37,7 @@ public class TestSetEvent extends EventObject {
    * The test set instances
    */
   protected Instances m_testSet;
+  private boolean m_structureOnly;
 
   /**
    * what number is this test set (ie fold 2 of 10 folds)
@@ -51,6 +52,9 @@ public class TestSetEvent extends EventObject {
   public TestSetEvent(Object source, Instances testSet) {
     super(source);
     m_testSet = testSet;
+    if (m_testSet != null && m_testSet.numInstances() == 0) {
+      m_structureOnly = true;
+    }
   }
 
   /**
@@ -78,5 +82,16 @@ public class TestSetEvent extends EventObject {
    */
   public int getMaxSetNumber() {
     return m_maxSetNumber;
+  }
+
+  /**
+   * Returns true if the encapsulated instances
+   * contain just header information
+   *
+   * @return true if only header information is
+   * available in this DataSetEvent
+   */
+  public boolean isStructureOnly() {
+    return m_structureOnly;
   }
 }

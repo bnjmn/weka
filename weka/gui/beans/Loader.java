@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -238,6 +238,7 @@ public class Loader extends AbstractDataSource
     // try to load structure (if possible) and notify any listeners
     try {
       m_dataFormat = m_Loader.getStructure();
+      //      System.err.println(m_dataFormat);
       System.err.println("Notifying listeners of instance structure avail. (Loader).");
       notifyStructureAvailable(m_dataFormat);
     } catch (Exception ex) {

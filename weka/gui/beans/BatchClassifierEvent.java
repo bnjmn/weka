@@ -31,7 +31,7 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see EventObject
  */
@@ -46,7 +46,8 @@ public class BatchClassifierEvent extends EventObject {
   /**
    * Instances that can be used for testing the classifier
    */
-  protected Instances m_testSet;
+  //  protected Instances m_testSet;
+  protected DataSetEvent m_testSet;
 
   /**
    * The set number for the test set
@@ -69,7 +70,7 @@ public class BatchClassifierEvent extends EventObject {
    * @param maxSetNum the last set number in the series
    */
   public BatchClassifierEvent(Object source, Classifier scheme,
-			 Instances tstI, int setNum,
+			 DataSetEvent tstI, int setNum,
 			 int maxSetNum) {
     super(source);
     //    m_trainingSet = trnI;
@@ -102,7 +103,7 @@ public class BatchClassifierEvent extends EventObject {
    *
    * @return the testing instances
    */
-  public Instances getTestSet() {
+  public DataSetEvent getTestSet() {
     return m_testSet;
   }
 

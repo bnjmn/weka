@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -96,6 +96,14 @@ public class CrossValidationFoldMaker
    * @param e a <code>DataSetEvent</code> value
    */
   public void acceptDataSet(DataSetEvent e) {
+    if (e.isStructureOnly()) {
+      // Pass on structure to training and test set listeners
+      TrainingSetEvent tse = new TrainingSetEvent(this, e.getDataSet());
+      TestSetEvent tsee = new TestSetEvent(this, e.getDataSet());
+      notifyTrainingSetProduced(tse);
+      notifyTestSetProduced(tsee);
+      return;
+    }
     if (m_foldThread == null) {
       final Instances dataSet = new Instances(e.getDataSet());
       m_foldThread = new Thread() {

@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -457,7 +457,19 @@ public class Classifier extends JPanel
    * @param e a <code>TrainingSetEvent</code> value
    */
   public void acceptTrainingSet(final TrainingSetEvent e) {
-
+    if (e.isStructureOnly()) {
+      // no need to build a classifier, instead just generate a dummy
+      // BatchClassifierEvent in order to pass on instance structure to
+      // any listeners - eg. PredictionAppender can use it to determine
+      // the final structure of instances with predictions appended
+      BatchClassifierEvent ce = 
+	new BatchClassifierEvent(this, m_Classifier, 
+				 new DataSetEvent(this, e.getTrainingSet()),
+				 e.getSetNumber(), e.getMaxSetNumber());
+      
+      notifyBatchClassifierListeners(ce);
+      return;
+    }
     if (m_buildThread == null) {
       try {
 	if (m_state == IDLE) {
@@ -579,7 +591,8 @@ public class Classifier extends JPanel
 	  }
 	  if (m_trainingSet.equalHeaders(m_testingSet)) {
 	    BatchClassifierEvent ce = 
-	      new BatchClassifierEvent(this, m_Classifier, e.getTestSet(),
+	      new BatchClassifierEvent(this, m_Classifier, 
+				       new DataSetEvent(this, e.getTestSet()),
 				  e.getSetNumber(), e.getMaxSetNumber());
 
 	    //	    System.err.println("Just before notify classifier listeners");
