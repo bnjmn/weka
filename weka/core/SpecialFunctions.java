@@ -28,15 +28,12 @@ import java.lang.Math;
  * Class implementing some mathematical functions.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public final class SpecialFunctions {
 
   /** Some constants */
   private static double log2 = Math.log(2);
-  private static double[] cofLogGamma = {76.18009172947146,-86.50532032941677,
-					 24.01409824083091,-1.231739572450155,
-					 0.1208650973866179e-2,-0.5395239384953e-5};
 
   /**
    * Returns natural logarithm of factorial using gamma function.
@@ -46,29 +43,7 @@ public final class SpecialFunctions {
    */
   public static double lnFactorial(double x){
 
-    return lnGamma(x+1);
-  }
-
-  /**
-   * Returns natural logarithm of gamma function. Converted to java
-   * from Numerical Recipes in C.
-   *
-   * @param x the value
-   * @return natural logarithm of gamma function
-   */
-  public static double lnGamma(double x){
-    
-    double y,tmp,ser;
-    int j;
-    
-    y=x;
-    tmp=x+5.5;
-    tmp -= (x+0.5)*Math.log(tmp);
-    ser=1.000000000190015;
-    for (j=0;j<=5;j++) {
-      ser += cofLogGamma[j]/++y;
-    }
-    return -tmp+Math.log(2.5066282746310005*ser/x);
+    return Statistics.lnGamma(x+1);
   }
 
   /**
@@ -118,7 +93,6 @@ public final class SpecialFunctions {
     double[] doubles = {1, 2, 3};
 
     System.out.println("6!: " + Math.exp(SpecialFunctions.lnFactorial(6)));
-    System.out.println("lnGamma(6): "+ SpecialFunctions.lnGamma(6));
     System.out.println("Binomial 6 over 2: " +
 		       Math.pow(2, SpecialFunctions.log2Binomial(6, 2)));
     System.out.println("Multinomial 6 over 1, 2, 3: " +
