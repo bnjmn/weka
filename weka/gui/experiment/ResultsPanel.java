@@ -75,7 +75,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -622,7 +622,6 @@ public class ResultsPanel extends JPanel {
 	m_RunCombo.setSelectedIndex(i);
 	runCol = i;
       }
-      m_ResultKeyModel.addElement(name);
       if (name.toLowerCase().startsWith("key_")) {
 	if ((i != datasetCol) && (i != runCol)) {
 	  m_ResultKeyList.addSelectionInterval(i, i);
