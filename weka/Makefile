@@ -1,5 +1,5 @@
 #
-# $Revision: 1.34 $
+# $Revision: 1.35 $
 #
 
 # Java Compiler to use
@@ -70,12 +70,20 @@ doc :
 	weka.core \
 	weka.core.converters \
 	weka.classifiers \
-	weka.classifiers.j48 \
-	weka.classifiers.m5 \
-	weka.classifiers.kstar \
-	weka.classifiers.neural \
+	weka.classifiers.bayes \
 	weka.classifiers.evaluation \
-	weka.classifiers.adtree \
+	weka.classifiers.functions \
+	weka.classifiers.lazy \
+	weka.classifiers.meta \
+	weka.classifiers.misc \
+	weka.classifiers.rules \
+	weka.classifiers.trees \
+	weka.classifiers.trees.j48 \
+	weka.classifiers.trees.m5 \
+	weka.classifiers.lazy.kstar \
+	weka.classifiers.functions.neural \
+	weka.classifiers.trees.adtree \
+	weka.classifiers.rules.part \
 	weka.filters \
 	weka.estimators \
 	weka.associations \
@@ -104,12 +112,20 @@ install : all
 	weka/core/*.class \
 	weka/core/converters/*.class \
 	weka/classifiers/*.class \
-	weka/classifiers/j48/*.class \
-	weka/classifiers/m5/*.class \
-	weka/classifiers/kstar/*.class \
-	weka/classifiers/neural/*.class \
+	weka/classifiers/bayes/*.class \
 	weka/classifiers/evaluation/*.class \
-	weka/classifiers/adtree/*.class \
+	weka/classifiers/functions/*.class \
+	weka/classifiers/lazy/*.class \
+	weka/classifiers/meta/*.class \
+	weka/classifiers/misc/*.class \
+	weka/classifiers/rules/*.class \
+	weka/classifiers/trees/*.class \
+	weka/classifiers/trees/j48/*.class \
+	weka/classifiers/trees/m5/*.class \
+	weka/classifiers/lazy/kstar/*.class \
+	weka/classifiers/functions/neural/*.class \
+	weka/classifiers/trees/adtree/*.class \
+	weka.classifiers/rules/part/*.class \
 	weka/filters/*.class \
 	weka/estimators/*class \
 	weka/associations/*.class \
@@ -134,12 +150,20 @@ install : all
 	weka/core/*.java \
 	weka/core/converters/*.java \
 	weka/classifiers/*.java \
-	weka/classifiers/j48/*.java \
-	weka/classifiers/m5/*.java \
-	weka/classifiers/kstar/*.java \
-	weka/classifiers/neural/*.java \
+	weka/classifiers/bayes/*.java \
 	weka/classifiers/evaluation/*.java \
-	weka/classifiers/adtree/*.java \
+	weka/classifiers/functions/*.java \
+	weka/classifiers/lazy/*.java \
+	weka/classifiers/meta/*.java \
+	weka/classifiers/misc/*.java \
+	weka/classifiers/rules/*.java \
+	weka/classifiers/trees/*.java \
+	weka/classifiers/trees/j48/*.java \
+	weka/classifiers/trees/m5/*.java \
+	weka/classifiers/lazy/kstar/*.java \
+	weka/classifiers/functions/neural/*.java \
+	weka/classifiers/trees/adtree/*.java \
+	weka/classifiers/rules/part/*.java \
 	weka/filters/*.java \
 	weka/estimators/*java \
 	weka/associations/*.java \
@@ -182,12 +206,20 @@ install : all
 	weka.core \
 	weka.core.converters \
 	weka.classifiers \
-	weka.classifiers.j48 \
-	weka.classifiers.m5 \
-	weka.classifiers.kstar \
-	weka.classifiers.neural \
+	weka.classifiers.bayes \
 	weka.classifiers.evaluation \
-	weka.classifiers.adtree \
+	weka.classifiers.functions \
+	weka.classifiers.lazy \
+	weka.classifiers.meta \
+	weka.classifiers.misc \
+	weka.classifiers.rules \
+	weka.classifiers.trees \
+	weka.classifiers.trees.j48 \
+	weka.classifiers.trees.m5 \
+	weka.classifiers.lazy.kstar \
+	weka.classifiers.functions.neural \
+	weka.classifiers.trees.adtree \
+	weka.classifiers.rules.part \
 	weka.filters \
 	weka.estimators \
 	weka.associations \

@@ -15,7 +15,7 @@
  */
 
 /*
- *    HierachyPropertyParser.java
+ *    HierarchyPropertyParser.java
  *    Copyright (C) 2001 Xin Xu
  *
  */
@@ -44,7 +44,7 @@ import java.io.*;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @version $Revision: 1.1 $
  */
-public class HierachyPropertyParser implements Serializable{
+public class HierarchyPropertyParser implements Serializable{
 
     /** Keep track of the root of the tree */
     private TreeNode m_Root;
@@ -81,7 +81,7 @@ public class HierachyPropertyParser implements Serializable{
     }
     
     /** Default constructor */
-    public HierachyPropertyParser(){
+    public HierarchyPropertyParser(){
 	m_Root = new TreeNode();
 	m_Root.parent = null;
 	m_Root.children = new Vector();
@@ -95,7 +95,7 @@ public class HierachyPropertyParser implements Serializable{
      * @param p the given property string
      * @param delim the given dilimitor
      */
-    public HierachyPropertyParser(String p, String delim) throws Exception{
+    public HierarchyPropertyParser(String p, String delim) throws Exception{
 	this();		
 	build(p, delim);
     }
@@ -212,7 +212,7 @@ public class HierachyPropertyParser implements Serializable{
     }
     
     /**
-     * Whether the HierachyPropertyParser contains the given
+     * Whether the HierarchyPropertyParser contains the given
      * string
      *
      * @param string the given string
@@ -590,7 +590,7 @@ public class HierachyPropertyParser implements Serializable{
 
 	String p = sb.toString();
 	try{
-	    HierachyPropertyParser hpp = new HierachyPropertyParser(p, ", ");
+	    HierarchyPropertyParser hpp = new HierarchyPropertyParser(p, ", ");
 	    System.out.println("seperator: "+hpp.getSeperator());
 	    System.out.println("depth: "+hpp.depth());
 	    System.out.println("The tree:\n\n"+hpp.showTree());

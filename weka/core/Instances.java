@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $ 
+ * @version $Revision: 1.36 $ 
  */
 public class Instances implements Serializable {
  
@@ -716,7 +716,7 @@ public class Instances implements Serializable {
   public final void randomize(Random random) {
 
     for (int j = numInstances() - 1; j > 0; j--)
-      swap(j,(int)(random.nextDouble()*(double)j));
+      swap(j, random.nextInt(j+1));
   }
 
   /**
