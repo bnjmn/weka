@@ -24,10 +24,13 @@ import weka.core.Attribute;
 
 /**
  * Class for selecting a threshold on a probability output by a
- * distribution classifier. The treshold is set so that a given
+ * distribution classifier. The threshold is set so that a given
  * performance measure is optimized. Currently this is the
- * F-measure. Performance is measured on the training data, a hold-out
- * set or using cross-validation.<p>
+ * F-measure. Performance is measured either on the training data, a hold-out
+ * set or using cross-validation. In addition, the probabilities returned
+ * by the base learner can have their range expanded so that the output
+ * probabilities will reside between 0 and 1 (this is useful if the scheme
+ * normally produces probabilities in a very narrow range).<p>
  *
  * Valid options are:<p>
  *
@@ -46,6 +49,12 @@ import weka.core.Attribute;
  * hold-out set is used, this determines the size of the hold-out set
  * (default 3).<p>
  *
+ * -R integer <br>
+ * Sets whether confidence range correction is applied. This can be used
+ * to ensure the confidences range from 0 to 1. Use 0 for no range correction,
+ * 1 for correction based on the min/max values seen during threshold selection
+ * (default 0).<p>
+ *
  * -S seed <br>
  * Random number seed (default 1).<p>
  *
@@ -57,12 +66,20 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
 
-  /** The evaluation modes */
+  /* Type of correction applied to threshold range */ 
+  public final static int RANGE_NONE = 0;
+  public final static int RANGE_BOUNDS = 1;
+  public static final Tag [] TAGS_RANGE = {
+    new Tag(RANGE_NONE, "No range correction"),
+    new Tag(RANGE_BOUNDS, "Correct based on min/max observed")
+  };
+
+  /* The evaluation modes */
   public final static int EVAL_TRAINING_SET = 2;
   public final static int EVAL_TUNED_SPLIT = 1;
   public final static int EVAL_CROSS_VALIDATION = 0;
@@ -90,6 +107,12 @@ public class ThresholdSelector extends DistributionClassifier
   protected DistributionClassifier m_Classifier = 
     new weka.classifiers.ZeroR();
 
+  /** The upper threshold used as the basis of correction */
+  protected double m_HighThreshold = 1;
+
+  /** The lower threshold used as the basis of correction */
+  protected double m_LowThreshold = 0;
+
   /** The threshold that lead to the best performance */
   protected double m_BestThreshold = -Double.MAX_VALUE;
 
@@ -110,6 +133,9 @@ public class ThresholdSelector extends DistributionClassifier
 
   /** The evaluation mode */
   protected int m_EvalMode = EVAL_TUNED_SPLIT;
+
+  /** The range correction mode */
+  protected int m_RangeMode = RANGE_NONE;
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
@@ -162,6 +188,8 @@ public class ThresholdSelector extends DistributionClassifier
     
     m_BestThreshold = 0.5;
     m_BestValue = MIN_VALUE;
+    double low = 1.0;
+    double high = 0.0;
     if (curve.numInstances() > 0) {
       Instance maxFM = curve.instance(0);
       int indexFM = curve.attribute(ThresholdCurve.FMEASURE_NAME).index();
@@ -171,11 +199,25 @@ public class ThresholdSelector extends DistributionClassifier
         if (current.value(indexFM) > maxFM.value(indexFM)) {
           maxFM = current;
         }
+        if (m_RangeMode == RANGE_BOUNDS) {
+          double thresh = current.value(indexThreshold);
+          if (thresh < low) {
+            low = thresh;
+          }
+          if (thresh > high) {
+            high = thresh;
+          }
+        }
       }
       if (maxFM.value(indexFM) > MIN_VALUE) {
         m_BestThreshold = maxFM.value(indexThreshold);
         m_BestValue = maxFM.value(indexFM);
         //System.err.println("maxFM: " + maxFM);
+      }
+      if (m_RangeMode == RANGE_BOUNDS) {
+        m_LowThreshold = low;
+        m_HighThreshold = high;
+        //System.err.println("Threshold range: " + low + " - " + high);
       }
     }
   }
@@ -187,7 +229,7 @@ public class ThresholdSelector extends DistributionClassifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(6);
 
     newVector.addElement(new Option(
               "\tThe class for which threshold is determined. Valid values are:\n" +
@@ -205,6 +247,13 @@ public class ThresholdSelector extends DistributionClassifier
 	      "\thold-out set is used, this determines the size of the hold-out set\n" +
 	      "\t(default 3).",
 	      "X", 1, "-X <number of folds>"));
+    newVector.addElement(new Option(
+	      "\tSets whether confidence range correction is applied. This\n" +
+              "\tcan be used to ensure the confidences range from 0 to 1.\n" +
+              "\tUse 0 for no range correction, 1 for correction based on\n" +
+              "\tthe min/max values seen during threshold selection\n"+
+              "\t(default 0).",
+	      "R", 1, "-R <integer>"));
     newVector.addElement(new Option(
 	      "\tSets the random number seed (default 1).",
 	      "S", 1, "-S <random number seed>"));
@@ -250,6 +299,12 @@ public class ThresholdSelector extends DistributionClassifier
    * hold-out set is used, this determines the size of the hold-out set
    * (default 3).<p>
    *
+   * -R integer <br>
+   * Sets whether confidence range correction is applied. This can be used
+   * to ensure the confidences range from 0 to 1. Use 0 for no range correction,
+   * 1 for correction based on the min/max values seen during threshold 
+   * selection (default 0).<p>
+   *
    * -S seed <br>
    * Random number seed (default 1).<p>
    *
@@ -270,8 +325,23 @@ public class ThresholdSelector extends DistributionClassifier
       setDesignatedClass(new SelectedTag(Integer.parseInt(classString) - 1, 
                                          TAGS_OPTIMIZE));
     } else {
-      setDesignatedClass(new SelectedTag(OPTIMIZE_LFREQ, 
-                                         TAGS_OPTIMIZE));
+      setDesignatedClass(new SelectedTag(OPTIMIZE_LFREQ, TAGS_OPTIMIZE));
+    }
+
+    String modeString = Utils.getOption('E', options);
+    if (modeString.length() != 0) {
+      setEvaluationMode(new SelectedTag(Integer.parseInt(modeString), 
+                                         TAGS_EVAL));
+    } else {
+      setEvaluationMode(new SelectedTag(EVAL_TUNED_SPLIT, TAGS_EVAL));
+    }
+
+    String rangeString = Utils.getOption('R', options);
+    if (rangeString.length() != 0) {
+      setRangeCorrection(new SelectedTag(Integer.parseInt(rangeString) - 1, 
+                                         TAGS_RANGE));
+    } else {
+      setRangeCorrection(new SelectedTag(RANGE_NONE, TAGS_RANGE));
     }
 
     String foldsString = Utils.getOption('X', options);
@@ -292,13 +362,6 @@ public class ThresholdSelector extends DistributionClassifier
     if (classifierName.length() == 0) {
       throw new Exception("A classifier must be specified with"
 			  + " the -W option.");
-    }
-
-    String modeString = Utils.getOption('E', options);
-    if (modeString.length() != 0) {
-      m_EvalMode = Integer.parseInt(modeString);
-    } else {
-      m_EvalMode = EVAL_TUNED_SPLIT;
     }
 
     setDistributionClassifier((DistributionClassifier)Classifier.
@@ -323,7 +386,7 @@ public class ThresholdSelector extends DistributionClassifier
     }
 
     int current = 0;
-    String [] options = new String [classifierOptions.length + 11];
+    String [] options = new String [classifierOptions.length + 13];
 
     options[current++] = "-C"; options[current++] = "" + (m_DesignatedClass + 1);
     options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
@@ -334,6 +397,7 @@ public class ThresholdSelector extends DistributionClassifier
       options[current++] = getDistributionClassifier().getClass().getName();
     }
     options[current++] = "-E"; options[current++] = "" + m_EvalMode;
+    options[current++] = "-R"; options[current++] = "" + m_RangeMode;
     options[current++] = "--";
 
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -457,9 +521,16 @@ public class ThresholdSelector extends DistributionClassifier
 
     // Warp probability
     if (prob > m_BestThreshold) {
-      prob = 0.5 + (prob - m_BestThreshold) / ((1 - m_BestThreshold) * 2);
+      prob = 0.5 + (prob - m_BestThreshold) / 
+        ((m_HighThreshold - m_BestThreshold) * 2);
     } else {
-      prob = prob / (m_BestThreshold * 2);
+      prob = (prob - m_LowThreshold) / 
+        ((m_BestThreshold - m_LowThreshold) * 2);
+    }
+    if (prob < 0) {
+      prob = 0.0;
+    } else if (prob > 1) {
+      prob = 1.0;
     }
 
     // Alter the distribution
@@ -467,7 +538,37 @@ public class ThresholdSelector extends DistributionClassifier
     pred[(m_DesignatedClass + 1) % 2] = 1.0 - prob;
     return pred;
   }
+
+  /**
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "A metaclassifier that selecting a mid-point threshold on the "
+      + "probability output by a DistributionClassifier. The midpoint "
+      + "threshold is set so that a given performance measure is optimized. "
+      + "Currently this is the F-measure. Performance is measured either on "
+      + "the training data, a hold-out set or using cross-validation. In "
+      + "addition, the probabilities returned by the base learner can "
+      + "have their range expanded so that the output probabilities will "
+      + "reside between 0 and 1 (this is useful if the scheme normally "
+      + "produces probabilities in a very narrow range).";
+  }
     
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String designatedClassTipText() {
+
+    return "Sets the class value for which the optimization is performed. "
+      + "The options are: pick the first class value; pick the second "
+      + "class value; pick whichever class is least frequent; pick whichever "
+      + "class value is most frequent; pick the first class named any of "
+      + "\"yes\",\"pos(itive)\", \"1\", or the least frequent if no matches).";
+  }
+
   /**
    * Gets the method to determine which class value to optimize. Will
    * be one of OPTIMIZE_0, OPTIMIZE_1, OPTIMIZE_LFREQ, OPTIMIZE_MFREQ,
@@ -499,6 +600,19 @@ public class ThresholdSelector extends DistributionClassifier
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String evaluationModeTipText() {
+
+    return "Sets the method used to determine the threshold/performance "
+      + "curve. The options are: perform optimization based on the entire "
+      + "training set (may result in overfitting); perform an n-fold "
+      + "cross-validation (may be time consuming); perform one fold of "
+      + "an n-fold cross-validation (faster but likely less accurate).";
+  }
+
+  /**
    * Sets the evaluation mode used. Will be one of
    * EVAL_TRAINING, EVAL_TUNED_SPLIT, or EVAL_CROSS_VALIDATION
    *
@@ -525,7 +639,58 @@ public class ThresholdSelector extends DistributionClassifier
       return null;
     }
   }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String rangeCorrectionTipText() {
+
+    return "Sets the type of prediction range correction performed. "
+      + "The options are: do not do any range correction; "
+      + "expand predicted probabilities so that the minimum probability "
+      + "observed during the optimization maps to 0, and the maximum "
+      + "maps to 1 (values outside this range are clipped to 0 and 1).";
+  }
+
+  /**
+   * Sets the confidence range correction mode used. Will be one of
+   * RANGE_NONE, or RANGE_BOUNDS
+   *
+   * @param newMethod the new correciton mode.
+   */
+  public void setRangeCorrection(SelectedTag newMethod) {
+    
+    if (newMethod.getTags() == TAGS_RANGE) {
+      m_RangeMode = newMethod.getSelectedTag().getID();
+    }
+  }
+
+  /**
+   * Gets the confidence range correction mode used. Will be one of
+   * RANGE_NONE, or RANGE_BOUNDS
+   *
+   * @return the confidence correction mode.
+   */
+  public SelectedTag getRangeCorrection() {
+
+    try {
+      return new SelectedTag(m_RangeMode, TAGS_RANGE);
+    } catch (Exception ex) {
+      return null;
+    }
+  }
   
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+
+    return "Sets the seed used for randomization. This is used when "
+      + "randomizing the data during optimization.";
+  }
+
   /**
    * Sets the seed for random number generation.
    *
@@ -547,6 +712,17 @@ public class ThresholdSelector extends DistributionClassifier
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numXValFoldsTipText() {
+
+    return "Sets the number of folds used during full cross-validation "
+      + "and tuned fold evaluation. This number will be automatically "
+      + "reduced if there are insufficient positive examples.";
+  }
+
+  /**
    * Get the number of folds used for cross-validation.
    *
    * @return the number of folds used for cross-validation.
@@ -564,6 +740,16 @@ public class ThresholdSelector extends DistributionClassifier
   public void setNumXValFolds(int newNumFolds) {
     
     m_NumXValFolds = newNumFolds;
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String distributionClassifierTipText() {
+
+    return "Sets the base DistributionClassifier to which the optimization "
+      + "will be made.";
   }
 
   /**
@@ -618,7 +804,10 @@ public class ThresholdSelector extends DistributionClassifier
 
     result += "Threshold: " + m_BestThreshold + "\n";
     result += "Best value: " + m_BestValue + "\n";
-
+    if (m_RangeMode == RANGE_BOUNDS) {
+      result += "Expanding range [" + m_LowThreshold + "," + m_HighThreshold
+        + "] to [0, 1]\n";
+    }
     result += m_Classifier.toString();
     return result;
   }
