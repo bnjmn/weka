@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -72,6 +72,11 @@ public class Loader extends AbstractDataSource
    * Holds the format of the last loaded data set
    */
   private transient Instances m_dataFormat;
+
+  /**
+   * Global info for the wrapped loader (if it exists).
+   */
+  protected String m_globalInfo;
 
   /**
    * Thread for doing IO in
@@ -172,6 +177,15 @@ public class Loader extends AbstractDataSource
     }
   }
 
+  /**
+   * Global info (if it exists) for the wrapped loader
+   *
+   * @return the global info
+   */
+  public String globalInfo() {
+    return m_globalInfo;
+  }
+
   public Loader() {
     super();
     setLoader(m_Loader);
@@ -243,6 +257,9 @@ public class Loader extends AbstractDataSource
       notifyStructureAvailable(m_dataFormat);
     } catch (Exception ex) {
     }
+    
+    // get global info
+    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Loader);
   }
 
   /**
