@@ -85,7 +85,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -416,6 +416,7 @@ public class PreprocessPanel extends JPanel {
 				    + ex.getMessage(),
 				    "Instances",
 				    JOptionPane.ERROR_MESSAGE);
+      ex.printStackTrace();  //Added temporarily please remove later on.
     }
   }
 
@@ -465,12 +466,16 @@ public class PreprocessPanel extends JPanel {
 	      if (m_Log instanceof TaskLogger) {
 		((TaskLogger)m_Log).taskStarted();
 	      }
-	      m_Log.statusMessage("Saving undo information");
-	      addUndoPoint();
 	      m_Log.statusMessage("Passing dataset through filter "
 				  + filter.getClass().getName());
 	      filter.setInputFormat(m_Instances);
-	      m_Instances = filter.useFilter(m_Instances, filter);
+	      Instances newInstances = filter.useFilter(m_Instances, filter);
+	      if (newInstances == null || newInstances.numAttributes() < 1) {
+		throw new Exception("Dataset is empty.");
+	      }
+	      m_Log.statusMessage("Saving undo information");
+	      addUndoPoint();
+	      m_Instances = newInstances;
 	      setInstances(m_Instances);
 	      if (m_Log instanceof TaskLogger) {
 		((TaskLogger)m_Log).taskFinished();
@@ -488,8 +493,8 @@ public class PreprocessPanel extends JPanel {
 					  + ex.getMessage(),
 					  "Apply Filter",
 					  JOptionPane.ERROR_MESSAGE);
-	    ex.printStackTrace();
 	    m_Log.logMessage("Problem filtering instances: " + ex.getMessage());
+	    m_Log.statusMessage("Problem filtering instances");
 	  }
 	  m_IOThread = null;
 	}
