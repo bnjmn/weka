@@ -18,7 +18,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public final class Utils {
 
@@ -56,8 +56,10 @@ public final class Utils {
       // jdk1.1/docs/guide/misc/resources.html
       defaultProps.load(ClassLoader.getSystemResourceAsStream(resourceName));
     } catch (Exception ex) {
-      throw new Exception("Problem reading default properties: "
-			 + ex.getMessage());
+/*      throw new Exception("Problem reading default properties: "
+	+ ex.getMessage()); */
+      System.err.println("Warning, unable to load properties file from "
+			 +"system resource (Utils.java)");
     }
 
     // Hardcoded slash is OK here

@@ -36,7 +36,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -72,27 +72,29 @@ public class DatabaseUtils implements Serializable {
 
     try {
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+   
+      // Register the drivers in jdbc DriverManager
+      String drivers = PROPERTIES.getProperty("jdbcDriver",
+					    "jdbc.idbDriver");
+
+      if (drivers == null) {
+	throw new Exception("No jdbc drivers specified");
+      }
+      // The call to newInstance() is necessary on some platforms
+      // (with some java VM implementations)
+      StringTokenizer st = new StringTokenizer(drivers, ", ");
+      while (st.hasMoreTokens()) {
+	String driver = st.nextToken();
+	try {
+	  DRIVERS.addElement(Class.forName(driver).newInstance());
+	  System.err.println("Loaded driver: " + driver);
+	} catch (Exception ex) {
+	  // Drop through
+	}
+      }
     } catch (Exception ex) {
       System.err.println("Problem reading properties. Fix before continuing.");
       System.err.println(ex);
-    }
-
-    // Register the drivers in jdbc DriverManager
-    String drivers = PROPERTIES.getProperty("jdbcDriver",
-					    "jdbc.idbDriver");
-
-
-    // The call to newInstance() is necessary on some platforms
-    // (with some java VM implementations)
-    StringTokenizer st = new StringTokenizer(drivers, ", ");
-    while (st.hasMoreTokens()) {
-      String driver = st.nextToken();
-      try {
-	DRIVERS.addElement(Class.forName(driver).newInstance());
-	System.err.println("Loaded driver: " + driver);
-      } catch (Exception ex) {
-	// Drop through
-      }
     }
   }
   
