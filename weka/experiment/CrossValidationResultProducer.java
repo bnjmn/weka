@@ -39,7 +39,7 @@ import weka.core.Utils;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler {
@@ -262,7 +262,15 @@ public class CrossValidationResultProducer
 			   seResults.length);
 	  if (m_debugOutput) {
 	    String resultName = (""+run+"."+(fold+1)+"."
-	      + Utils.backQuoteChars(runInstances.relationName())+"."+m_SplitEvaluator.toString()).replace(' ','_');
+	      + Utils.backQuoteChars(runInstances.relationName())
+	      +"."
+	      +m_SplitEvaluator.toString()).replace(' ','_');
+	    resultName = Utils.removeSubstring(resultName, 
+					       "weka.classifiers.");
+	    resultName = Utils.removeSubstring(resultName, 
+					       "weka.filters.");
+	    resultName = Utils.removeSubstring(resultName, 
+					       "weka.attributeSelection.");
 	    m_ZipDest.zipit(m_SplitEvaluator.getRawResultOutput(), resultName);
 	  }
 	  m_ResultListener.acceptResult(this, key, results);
