@@ -67,7 +67,7 @@ import weka.core.SingleIndex;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -196,7 +196,7 @@ public class RemoveWithValues extends Filter
     if (convertList.length() != 0) {
       setNominalIndices(convertList);
     } else {
-      setNominalIndices("");
+      setNominalIndices("first-last");
     }
     setInvertSelection(Utils.getFlag('V', options));
     setMatchMissingValues(Utils.getFlag('M', options));
