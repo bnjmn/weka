@@ -41,7 +41,7 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Loader
  */
 public class C45Loader extends AbstractLoader {
@@ -200,6 +200,7 @@ public class C45Loader extends AbstractLoader {
     }
     StreamTokenizer st = new StreamTokenizer(m_dataReader);
     initTokenizer(st);
+    //    st.ordinaryChar('.');
     Instances result = new Instances(m_structure);
     Instance current = getInstance(st);
 
@@ -237,6 +238,7 @@ public class C45Loader extends AbstractLoader {
 
     StreamTokenizer st = new StreamTokenizer(m_dataReader);
     initTokenizer(st);
+    //    st.ordinaryChar('.');
     Instance nextI = getInstance(st);
     if (nextI != null) {
       nextI.setDataset(m_structure);
@@ -274,7 +276,7 @@ public class C45Loader extends AbstractLoader {
 	  String val = tokenizer.sval;
 
 	  if (i == m_numAttribs - 1) {
-	    // remove trailing period
+	    // remove trailing period	    
 	    if (val.charAt(val.length()-1) == '.') {
 	      val = val.substring(0,val.length()-1);
 	    }
@@ -283,7 +285,7 @@ public class C45Loader extends AbstractLoader {
 	    int index = m_structure.attribute(counter).indexOfValue(val);
 	    if (index == -1) {
 	      ConverterUtils.errms(tokenizer, "nominal value not declared in "
-				   +"header");
+				   +"header :"+val+" column "+i);
 	    }
 	    instance[counter++] = (double)index;
 	  } else if (m_structure.attribute(counter).isNumeric()) {
@@ -301,6 +303,14 @@ public class C45Loader extends AbstractLoader {
     }
 
     return new Instance(1.0, instance);
+  }
+
+  private String removeTrailingPeriod(String val) {
+    // remove trailing period
+    if (val.charAt(val.length()-1) == '.') {
+      val = val.substring(0,val.length()-1);
+    }
+    return val;
   }
 
   /**
@@ -323,8 +333,9 @@ public class C45Loader extends AbstractLoader {
     FastVector classVals = new FastVector();
     while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
       String val = tokenizer.sval.trim();
-
+      
       if (val.length() > 0) {
+	val = removeTrailingPeriod(val);
 	classVals.addElement(val);
       }
       ConverterUtils.getToken(tokenizer);
@@ -359,6 +370,7 @@ public class C45Loader extends AbstractLoader {
 	    String val = tokenizer.sval.trim();
 
 	    if (val.length() > 0) {
+	      val = removeTrailingPeriod(val);
 	      attribVals.addElement(val);
 	    }
 	    ConverterUtils.getToken(tokenizer);
@@ -416,7 +428,7 @@ public class C45Loader extends AbstractLoader {
     tokenizer.wordChars(' ','\u00FF');
     tokenizer.whitespaceChars(',',',');
     tokenizer.whitespaceChars(':',':');
-    tokenizer.whitespaceChars('.','.');
+    //    tokenizer.whitespaceChars('.','.');
     tokenizer.commentChar('|');
     tokenizer.whitespaceChars('\t','\t');
     tokenizer.quoteChar('"');
