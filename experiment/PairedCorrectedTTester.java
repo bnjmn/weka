@@ -39,7 +39,7 @@ import java.util.Enumeration;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -130,6 +130,13 @@ public class PairedCorrectedTTester extends PairedTTester {
 	System.err.println("Run numbers do not match!\n"
 			    + current1 + current2);
       }
+      if (m_FoldColumn != -1) {
+	if (current1.value(m_FoldColumn) != current2.value(m_FoldColumn)) {
+	  System.err.println("Fold numbers do not match!\n"
+			     + current1 + current2);
+	}
+      }
+
       double value1 = current1.value(comparisonColumn);
       double value2 = current2.value(comparisonColumn);
       pairedStats.add(value1, value2);

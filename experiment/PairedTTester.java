@@ -66,7 +66,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -588,6 +588,12 @@ public class PairedTTester implements OptionHandler {
       if (current1.value(m_RunColumn) != current2.value(m_RunColumn)) {
 	System.err.println("Run numbers do not match!\n"
 			    + current1 + current2);
+      }
+      if (m_FoldColumn != -1) {
+	if (current1.value(m_FoldColumn) != current2.value(m_FoldColumn)) {
+	  System.err.println("Fold numbers do not match!\n"
+			     + current1 + current2);
+	}
       }
       double value1 = current1.value(comparisonColumn);
       double value2 = current2.value(comparisonColumn);
