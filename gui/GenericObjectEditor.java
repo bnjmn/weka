@@ -76,7 +76,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -170,6 +170,7 @@ public class GenericObjectEditor implements PropertyEditor {
       });
 
       m_OpenBut = new JButton("Open...");
+      m_OpenBut.setToolTipText("Load a configured object");
       m_OpenBut.setEnabled(true);
       m_OpenBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -187,6 +188,7 @@ public class GenericObjectEditor implements PropertyEditor {
       });
 
       m_SaveBut = new JButton("Save...");
+      m_SaveBut.setToolTipText("Save the current configured object");
       m_SaveBut.setEnabled(true);
       m_SaveBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
