@@ -13,7 +13,7 @@ import weka.core.*;
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class BinC45Split extends ClassifierSplitModel{
@@ -88,28 +88,6 @@ public class BinC45Split extends ClassifierSplitModel{
 
     return m_attIndex;
   }
-
-  /**
-   * Gets class probability for instance.
-   *
-   * @exception Exception if something goes wrong
-   */
-  public final double classProb(int classIndex,Instance instance) 
-       throws Exception {
-
-    int theSubset = whichSubset(instance);
-    
-    if (theSubset <= -1)
-      return m_distribution.prob(classIndex);
-    else
-      if (Utils.gr(m_distribution.perBag(theSubset),0))
-	return m_distribution.prob(classIndex,theSubset);
-      else
-	if (m_distribution.maxClass() == classIndex)
-	  return 1;
-	else
-	  return 0;
-  }
   
   /**
    * Returns (C4.5-type) gain ratio for the generated split.
@@ -118,6 +96,40 @@ public class BinC45Split extends ClassifierSplitModel{
     return m_gainRatio;
   }
 
+  /**
+   * Gets class probability for instance.
+   *
+   * @exception Exception if something goes wrong
+   */
+  public final double classProb(int classIndex,Instance instance,
+				int theSubset) throws Exception {
+
+    if (theSubset <= -1) {
+      double [] weights = weights(instance);
+      if (weights == null) {
+	return m_distribution.prob(classIndex);
+      } else {
+	double prob = 0;
+	for (int i = 0; i < weights.length; i++) {
+	  prob += weights[i] * m_distribution.prob(classIndex, i);
+	}
+	return prob;
+      }
+    } else {
+      if (Utils.gr(m_distribution.perBag(theSubset), 0)) {
+	return m_distribution.prob(classIndex, theSubset);
+      } else {
+	
+	// This doesn't make much sense to me but it
+	// appears to be what C4.5 does.
+	if (m_distribution.maxClass() == classIndex)
+	  return 1;
+	else
+	  return 0;
+      }
+    }
+  }
+ 
   /**
    * Creates split on enumerated attribute.
    *
@@ -379,6 +391,22 @@ public class BinC45Split extends ClassifierSplitModel{
       }
       m_splitPoint = newSplitPoint;
     }
+  }
+  
+  /**
+   * Sets distribution associated with model.
+   */
+  public void resetDistribution(Instances data) throws Exception {
+
+    Instances insts = new Instances(data, data.numInstances());
+    for (int i = 0; i < data.numInstances(); i++) {
+      if (whichSubset(data.instance(i)) > -1) {
+	insts.add(data.instance(i));
+      }
+    }
+    Distribution newD = new Distribution(insts, this);
+    newD.addInstWithUnknown(data, m_attIndex);
+    m_distribution = newD;
   }
 
   /**
