@@ -47,7 +47,7 @@ import weka.core.*;
  * Invert matching sense.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class NominalToBinary extends Filter implements UnsupervisedFilter,
 						       OptionHandler {
@@ -60,6 +60,12 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 
   /** Are the new attributes going to be nominal or numeric ones? */
   private boolean m_Numeric = true;
+
+  /** Constructor - initialises the filter */
+  public NominalToBinary() {
+
+    setAttributeIndices("first-last");
+  }
 
   /**
    * Returns a string describing this filter
