@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -367,6 +367,7 @@ public class RandomTree extends Classifier
     buildTree(sortedIndices, weights, train, classProbs,
 	      new Instances(train, 0), m_MinNum, m_Debug,
 	      attIndicesWindow, data.getRandomNumberGenerator(m_randomSeed));
+
   }
   
   /**
@@ -564,7 +565,8 @@ public class RandomTree extends Classifier
     m_MinNum = minNum;
 
     // Make leaf if there are no training instances
-    if (sortedIndices[0].length == 0) {
+    if (((data.classIndex() > 0) && (sortedIndices[0].length == 0)) ||
+	(sortedIndices[1].length == 0)) {
       m_Distribution = new double[1][data.numClasses()];
       m_ClassProbs = null;
       return;
