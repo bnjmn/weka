@@ -37,7 +37,7 @@ import  weka.filters.Filter;
  * Machine Learning (ICML'96), July 1996, pp. 319-327. Bari, Italy. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ConsistencySubsetEval extends SubsetEvaluator {
   
@@ -62,7 +62,7 @@ public class ConsistencySubsetEval extends SubsetEvaluator {
   /**
    * Class providing keys to the hash table.
    */
-  public class hashKey {
+  public class hashKey implements Serializable {
     
     /** Array of attribute values for an instance */
     private double [] attributes;
