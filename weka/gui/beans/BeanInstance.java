@@ -38,7 +38,7 @@ import java.io.Serializable;
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.2 $
+ * @version  $Revision: 1.3 $
  * @since 1.0
  */
 public class BeanInstance implements Serializable {
@@ -164,35 +164,35 @@ public class BeanInstance implements Serializable {
 	gx.drawString(label, (cx+(width/2)) - (labelwidth / 2), cy+height+hf+2);
       } else {
 	// split label
-	int hM = 1;
-	boolean foundOne = false;
-	while (labelwidth > width) {
-	  foundOne = false;
-	  String tempL = label;
-	  for (int z = 1; z < tempL.length(); z++) {
-	    if (fm.stringWidth(tempL.substring(0,z)) >= width) {
-	      if (tempL.charAt(z) < 'a') {
-		String cut = tempL.substring(0, z);
-		label = tempL.substring(z, tempL.length());
-		gx.drawString(cut, (cx+(width/2)) - (fm.stringWidth(cut) / 2), 
-			      cy+height+(hf * hM)+2);
-		hM++;
-		labelwidth = fm.stringWidth(label);
-		foundOne = true;
-		break;
-	      }
+
+	// find mid point
+	int mid = label.length() / 2;
+	// look for split point closest to the mid
+	int closest = label.length();
+	int closestI = -1;
+	for (int z = 0; z < label.length(); z++) {
+	  if (label.charAt(z) < 'a') {
+	    if (Math.abs(mid - z) < closest) {
+	      closest = Math.abs(mid - z);
+	      closestI = z;
 	    }
 	  }
-	  if (!foundOne) {
-	    gx.drawString(tempL, (cx+(width/2)) - (labelwidth / 2), 
-			  cy+height+(hf * hM)+2);
-	    break;
-	  }
 	}
-	if (foundOne) {
-	  // do the leftover bit
-	  gx.drawString(label, (cx+(width/2)) - (labelwidth / 2), 
-			cy+height+(hf * hM)+2);
+	if (closestI != -1) {
+	  String left = label.substring(0, closestI);
+	  String right = label.substring(closestI, label.length());
+	  if (left.length() > 1 && right.length() > 1) {
+	    gx.drawString(left, (cx+(width/2)) - (fm.stringWidth(left) / 2), 
+			  cy+height+(hf * 1)+2);
+	    gx.drawString(right, (cx+(width/2)) - (fm.stringWidth(right) / 2), 
+			  cy+height+(hf * 2)+2);
+	  } else {
+	    gx.drawString(label, (cx+(width/2)) - (fm.stringWidth(label) / 2), 
+			  cy+height+(hf * 1)+2);
+	  }
+	} else {
+	  gx.drawString(label, (cx+(width/2)) - (fm.stringWidth(label) / 2), 
+			cy+height+(hf * 1)+2);
 	}
       }
     }
