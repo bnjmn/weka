@@ -27,7 +27,7 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PrincipalComponents extends AttributeTransformer 
   implements OptionHandler {
@@ -62,6 +62,9 @@ public class PrincipalComponents extends AttributeTransformer
 
   /** Sorted eigenvalues */
   private int [] m_sortedEigens;
+
+  /** sum of the eigenvalues */
+  private double m_sumOfEigenValues = 0.0;
   
   /** Filters for original data */
   private ReplaceMissingValuesFilter m_replaceMissingFilter;
@@ -78,6 +81,14 @@ public class PrincipalComponents extends AttributeTransformer
   /** normalize the input data? */
   private boolean m_normalize = true;
 
+  /** the amount of varaince to cover in the original data when
+      retaining the best n PC's */
+  private double m_coverVariance = 0.95;
+
+  /** transform the data through the pc space and back to the original
+      space ? */
+  private boolean m_transBackToOriginal = false;
+
   /**
    * Returns a string describing this attribute transformer
    * @return a description of the evaluator suitable for
@@ -86,11 +97,11 @@ public class PrincipalComponents extends AttributeTransformer
   public String globalInfo() {
     return "Performs a principal components analysis and transformation of "
       +"the data. Use in conjunction with a Ranker search. Dimensionality "
-      +"reduction can be accomplished by setting an appropriate threshold "
-      +"in Ranker. One heuristic is to choose enough eigenvectors ("
-      +"transformed attributes) to account for around 95% of the variance "
-      +"in the original data. This can be done by setting a threshold of "
-      +"0.04 for the Ranker search.";
+      +"reduction is accomplished by choosing enough eigenvectors to "
+      +"account for some percentage of the variance in the original data---"
+      +"default 0.95 (95%). Attribute noise can be filtered by transforming "
+      +"to the PC space, eliminating some of the worst eigenvectors, and "
+      +"then transforming back to the original space.";
   }
 
   /**
@@ -102,10 +113,18 @@ public class PrincipalComponents extends AttributeTransformer
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(3);
     newVector.addElement(new Option("\tDon't normalize input data." 
-				    , "N", 0, "-N <classifier>"));
+				    , "D", 0, "-D"));
+
+    newVector.addElement(new Option("\tRetain enough PC attributes to account "
+				    +"\n\tfor this proportion of variance in "
+				    +"the original data. (default = 0.95)",
+				    "R",1,"-R"));
     
+    newVector.addElement(new Option("\tTransform through the PC space and "
+				    +"\n\tback to the original space."
+				    , "O", 0, "-O"));
     return  newVector.elements();
   }
 
@@ -122,8 +141,28 @@ public class PrincipalComponents extends AttributeTransformer
   public void setOptions (String[] options)
     throws Exception
   {
-    setNormalize(!Utils.getFlag('N', options));
+    resetOptions();
+    String optionString;
 
+    optionString = Utils.getOption('R', options);
+    if (optionString.length() != 0) {
+      Double temp;
+      temp = Double.valueOf(optionString);
+      setVarianceCovered(temp.doubleValue());
+    }
+    setNormalize(!Utils.getFlag('D', options));
+
+    setTransformBackToOriginal(Utils.getFlag('O', options));
+  }
+
+  /**
+   * Reset to defaults
+   */
+  private void resetOptions() {
+    m_coverVariance = 0.95;
+    m_normalize = true;
+    m_sumOfEigenValues = 0.0;
+    m_transBackToOriginal = false;
   }
 
   /**
@@ -151,20 +190,54 @@ public class PrincipalComponents extends AttributeTransformer
     return m_normalize;
   }
 
-    /**
+  public String varianceCoveredTipText() {
+    return "Retain enough PC attributes to account for this proportion of "
+      +"variance.";
+  }
+
+  public void setVarianceCovered(double vc) {
+    m_coverVariance = vc;
+  }
+
+  public double getVarianceCovered() {
+    return m_coverVariance;
+  }
+
+  public String transformBackToOriginalTipText() {
+    return "Transform through the PC space and back to the original space. "
+      +"If only the best n PCs are retained (by setting varianceCovered < 1) "
+      +"then this option will give a dataset in the original space but with "
+      +"less attribute noise.";
+  }
+
+  public void setTransformBackToOriginal(boolean b) {
+    m_transBackToOriginal = b;
+  }
+
+  public boolean getTransformBackToOriginal() {
+    return m_transBackToOriginal;
+  }
+
+  /**
    * Gets the current settings of ClassifierSubsetEval
    *
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
 
-    String[] options = new String[1];
+    String[] options = new String[4];
     int current = 0;
 
     if (!getNormalize()) {
-      options[current++] = "-N";
+      options[current++] = "-D";
     }
 
+    options[current++] = "-R"; options[current++] = ""+getVarianceCovered();
+
+    if (getTransformBackToOriginal()) {
+      options[current++] = "-O";
+    }
+    
     while (current < options.length) {
       options[current++] = "";
     }
@@ -186,6 +259,7 @@ public class PrincipalComponents extends AttributeTransformer
     m_outputNumAtts = -1;
     m_attributeFilter = null;
     m_nominalToBinFilter = null;
+    m_sumOfEigenValues = 0.0;
 
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
@@ -198,7 +272,8 @@ public class PrincipalComponents extends AttributeTransformer
     
     m_replaceMissingFilter = new ReplaceMissingValuesFilter();
     m_replaceMissingFilter.inputFormat(m_trainInstances);
-    m_trainInstances = Filter.useFilter(m_trainInstances, m_replaceMissingFilter);
+    m_trainInstances = Filter.useFilter(m_trainInstances, 
+					m_replaceMissingFilter);
 
     if (m_normalize) {
       m_normalizeFilter = new NormalizationFilter();
@@ -263,6 +338,29 @@ public class PrincipalComponents extends AttributeTransformer
       }
     }
     m_sortedEigens = Utils.sort(m_eigenvalues);
+    m_sumOfEigenValues = Utils.sum(m_eigenvalues);
+  }
+
+  /**
+   * Returns just the header for the transformed data (ie. an empty
+   * set of instances. This is so that AttributeSelection can
+   * determine the structure of the transformed data without actually
+   * having to get all the transformed data through getTransformedData().
+   * @return the header of the transformed data.
+   * @exception Exception if the header of the transformed data can't
+   * be determined.
+   */
+  public Instances transformedHeader() throws Exception {
+    if (m_eigenvalues == null) {
+      throw new Exception("Principal components hasn't been built yet");
+    }
+    Instances output;
+    if (m_transBackToOriginal) {
+      output = setOutputFormatOriginal();
+    } else {
+      output = setOutputFormat();
+    }
+    return output;
   }
 
   /**
@@ -270,7 +368,7 @@ public class PrincipalComponents extends AttributeTransformer
    * @return the transformed training data
    * @exception Exception if transformed data can't be returned
    */
-  public Instances getTransformedData() throws Exception {
+  public Instances transformedData() throws Exception {
     if (m_eigenvalues == null) {
       throw new Exception("Principal components hasn't been built yet");
     }
@@ -280,8 +378,57 @@ public class PrincipalComponents extends AttributeTransformer
       Instance converted = convertInstance(m_trainCopy.instance(i));
       output.add(converted);
     }
-    
+
+
+    if (m_transBackToOriginal) {
+      // new ordered eigenvector matrix
+      int numVectors = (output.classIndex() < 0) 
+	? output.numAttributes()
+	: output.numAttributes()-1;
+
+      double [][] orderedVectors = 
+	new double [m_eigenvectors.length][numVectors+1];
+            
+      // try converting back to the original space
+      for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
+	for (int j=1;j<=m_numAttribs;j++) {
+	  orderedVectors[j][m_numAttribs-i+1] = 
+	    m_eigenvectors[j][m_sortedEigens[i]];
+	}
+      }
+      
+      // transpose the matrix
+      int nr = orderedVectors.length;
+      int nc = orderedVectors[0].length;
+      double [][] transpose = 
+	new double [nc][nr];
+      for (int i=0;i<nc;i++) {
+	for (int j=0;j<nr;j++) {
+	  transpose[i][j] = orderedVectors[j][i];
+	}
+      }
+      
+      return mapToOriginal(output, transpose);
+    }
+
     return output;
+  }
+
+  /**
+   * Map the PC transformed data back to the original space
+   */
+  private Instances mapToOriginal(Instances transformed, 
+			     double [][]e_valuesTransposed) 
+    throws Exception {
+
+    Instances originalSpace = setOutputFormatOriginal();
+    for (int i=0;i<transformed.numInstances();i++) {
+      
+      Instance converted = convertInstanceToOriginal(transformed.instance(i),
+					   e_valuesTransposed);
+      originalSpace.add(converted);
+    }
+    return originalSpace;
   }
 
   /**
@@ -296,14 +443,17 @@ public class PrincipalComponents extends AttributeTransformer
       throw new Exception("Principal components hasn't been built yet!");
     }
 
+    if (m_transBackToOriginal) {
+      return 1.0; // can't evaluate back in the original space!
+    }
+
     // return 1-cumulative variance explained for this transformed att
-    double sum = Utils.sum(m_eigenvalues);
     double cumulative = 0.0;
     for (int i=m_numAttribs;i>=m_numAttribs-att;i--) {
       cumulative += m_eigenvalues[m_sortedEigens[i]];
     }
 
-    return 1.0-cumulative/sum;
+    return 1.0-cumulative/m_sumOfEigenValues;
   }
 
   /**
@@ -338,41 +488,52 @@ public class PrincipalComponents extends AttributeTransformer
    */
   private String principalComponentsSummary() {
     StringBuffer result = new StringBuffer();
-    double sum = Utils.sum(m_eigenvalues);
     double cumulative = 0.0;
     Instances output = null;
+    int numVectors=0;
 
     try {
       output = setOutputFormat();
+      numVectors = (output.classIndex() < 0) 
+	? output.numAttributes()
+	: output.numAttributes()-1;
     } catch (Exception ex) {
     }
 
     result.append("Correlation matrix\n"+matrixToString(m_correlation)
 		  +"\n\n");
     result.append("eigenvalue\tproportion\tcumulative\n");
-    for (int i=m_numAttribs;i>=1;i--) {
+    for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
       cumulative+=m_eigenvalues[m_sortedEigens[i]];
       result.append(Utils.doubleToString(m_eigenvalues[m_sortedEigens[i]],9,5)
 		    +"\t"+Utils.
-		    doubleToString((m_eigenvalues[m_sortedEigens[i]]/sum),
+		    doubleToString((m_eigenvalues[m_sortedEigens[i]] / 
+				    m_sumOfEigenValues),
 				     9,5)
-		    +"\t"+Utils.doubleToString((cumulative/sum),9,5)
+		    +"\t"+Utils.doubleToString((cumulative / 
+						m_sumOfEigenValues),9,5)
 		    +"\t"+output.attribute(m_numAttribs-i).name()+"\n");
     }
 
     result.append("\nEigenvectors\n");
-    for (int j=1;j<=m_numAttribs;j++) {
+    for (int j=1;j<=numVectors;j++) {
       result.append(" V"+j+'\t');
     }
     result.append("\n");
     for (int j=1;j<=m_numAttribs;j++) {
 
-      for (int i=m_numAttribs;i>=1;i--) {
+      for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
 	result.append(Utils.
 		      doubleToString(m_eigenvectors[j][m_sortedEigens[i]],7,4)
 		      +"\t");
       }
       result.append(m_trainInstances.attribute(j-1).name()+'\n');
+    }
+
+    if (m_transBackToOriginal) {
+      result.append("\nPC space transformed back to original space.\n"
+		    +"(Note: can't evaluate attributes in the original "
+		    +"space)\n");
     }
     return result.toString();
   }
@@ -407,6 +568,35 @@ public class PrincipalComponents extends AttributeTransformer
       }
     }
     return result.toString();
+  }
+
+  /**
+   * Convert a pc transformed instance back to the original space
+   */
+  private Instance convertInstanceToOriginal(Instance inst,
+				   double [][] e_transposed) 
+    throws Exception {
+    double[] newVals = new double[m_outputNumAtts];
+    //    Instance newInstance = new Instance(numAtts);
+
+    if (m_hasClass) {
+      newVals[m_outputNumAtts - 1] = inst.value(inst.classIndex());
+    }
+
+    for (int i=1;i<e_transposed[0].length;i++) {
+      double tempval = 0.0;
+      for (int j=1;j<e_transposed.length;j++) {
+	tempval += (e_transposed[j][i] * 
+		    inst.value(j - 1));
+       }
+      newVals[i - 1] = tempval;
+    }
+    
+    if (inst instanceof SparseInstance) {
+      return new SparseInstance(inst.weight(), newVals);
+    } else {
+      return new Instance(inst.weight(), newVals);
+    }      
   }
 
   /**
@@ -447,21 +637,54 @@ public class PrincipalComponents extends AttributeTransformer
        newVals[m_outputNumAtts - 1] = instance.value(instance.classIndex());
     }
     //    System.out.println("normalized etc: "+tempInst);
-
+    double cumulative = 0;
     for (int i = m_numAttribs; i >= 1; i--) {
       double tempval = 0.0;
       for (int j = 1; j <= m_numAttribs; j++) {
 	tempval += (m_eigenvectors[j][m_sortedEigens[i]] * 
 		    tempInst.value(j - 1));
-      }
+       }
       newVals[m_numAttribs - i] = tempval;
+      cumulative+=m_eigenvalues[m_sortedEigens[i]];
+      if ((cumulative / m_sumOfEigenValues) >= m_coverVariance) {
+	break;
+      }
+      //      newInstance.setValue(m_numAttribs-i,tempval);
     }
-    
+
     if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
     } else {
       return new Instance(instance.weight(), newVals);
     }      
+  }
+
+  /**
+   * Set up the header for the PC->original space dataset
+   */
+  private Instances setOutputFormatOriginal() throws Exception {
+    FastVector attributes = new FastVector();
+    
+    for (int i=0;i<m_numAttribs;i++) {
+      String att = m_trainInstances.attribute(i).name();
+      attributes.addElement(new Attribute(att));
+    }
+    
+    if (m_hasClass) {
+      attributes.addElement(m_trainCopy.classAttribute().copy());
+    }
+
+    Instances outputFormat = 
+      new Instances(m_trainCopy.relationName()+"->PC->original space",
+		    attributes, 0);
+    
+    // set the class to be the last attribute if necessary
+    if (m_hasClass) {
+      outputFormat.setClassIndex(outputFormat.numAttributes()-1);
+    }
+
+    m_outputNumAtts = outputFormat.numAttributes();
+    return outputFormat;
   }
 
   /**
@@ -474,6 +697,7 @@ public class PrincipalComponents extends AttributeTransformer
       return null;
     }
 
+    double cumulative = 0.0;
     FastVector attributes = new FastVector();
      for (int i=m_numAttribs;i>=1;i--) {
        StringBuffer attName = new StringBuffer();
@@ -489,6 +713,11 @@ public class PrincipalComponents extends AttributeTransformer
 	 }
        }
        attributes.addElement(new Attribute(attName.toString()));
+       cumulative+=m_eigenvalues[m_sortedEigens[i]];
+
+       if ((cumulative / m_sumOfEigenValues) >= m_coverVariance) {
+	 break;
+       }
      }
      
      if (m_hasClass) {
