@@ -50,7 +50,7 @@ import weka.core.*;
  * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NumericTransform extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -66,6 +66,17 @@ public class NumericTransform extends Filter
 
   /** Parameter types. */
   private static Class[] PARAM = new Class[] {Double.TYPE};
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Transforms numeric attributes using a given transformation method.";
+  }
 
   /**
    * Default constructor -- sets the default transform method
@@ -255,6 +266,16 @@ public class NumericTransform extends Filter
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classNameTipText() {
+    return "Name of the class containing the method used for the transformation.";
+  }
+
+  /**
    * Get the class containing the transformation method.
    *
    * @return string describing the class
@@ -273,6 +294,16 @@ public class NumericTransform extends Filter
   public void setClassName(String name) throws ClassNotFoundException {
   
     m_Class = Class.forName(name);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String methodNameTipText() {
+    return "Name of the method used for the transformation.";
   }
  
   /**
@@ -294,6 +325,16 @@ public class NumericTransform extends Filter
   public void setMethodName(String name) throws NoSuchMethodException {
 
     m_Method = m_Class.getMethod(name, PARAM);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+    return "Whether to process the inverse of the given attribute ranges.";
   }
 
   /**

@@ -42,7 +42,7 @@ import weka.attributeSelection.*;
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributeSelection extends Filter
   implements SupervisedFilter, OptionHandler {
@@ -61,6 +61,19 @@ public class AttributeSelection extends Filter
 
   /** holds the selected attributes  */
   private int [] m_SelectedAttributes;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "A supervised attribute filter that can be used to select " 
+      + "attributes. It is very flexible and allows various search " 
+      + "and evaluation methods to be combined.";
+  }
 
   /**
    * Constructor
@@ -207,12 +220,34 @@ public class AttributeSelection extends Filter
     
     return setOptions;
   }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String evaluatorTipText() {
+
+    return "Determines how attributes/attribute subsets are evaluated.";
+  }
 
   /**
    * set a string holding the name of a attribute/subset evaluator
    */
   public void setEvaluator(ASEvaluation evaluator) {
     m_ASEvaluator = evaluator;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String searchTipText() {
+
+    return "Determines the search method.";
   }
 
   /**

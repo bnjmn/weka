@@ -50,7 +50,7 @@ import weka.core.FastVector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClassOrder extends Filter implements SupervisedFilter,
 						  OptionHandler {
@@ -85,6 +85,24 @@ public class ClassOrder extends Filter implements SupervisedFilter,
   /** This class can provide the class distribution in the sorted order 
    *  as side effect */
   private double[] m_ClassCounts = null;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Changes the order of the classes so that the class values are " 
+      + "no longer of in the order specified in the header. "
+      + "The values will be in the order specified by the user "
+      + "-- it could be either in ascending/descending order by the class "
+      + "frequency or in random order. Note that this filter currently does not "
+      + "change the header, only the class values of the instances, "
+      + "so there is not much point in using it in conjunction with the "
+      + "FilteredClassifier.";
+  }
     
   /**
    * Returns an enumeration describing the available options.

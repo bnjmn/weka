@@ -40,7 +40,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class NominalToBinary extends Filter implements UnsupervisedFilter,
 						       OptionHandler {
@@ -50,6 +50,22 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 
   /** Are the new attributes going to be nominal or numeric ones? */
   private boolean m_Numeric = true;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Converts all nominal attributes into binary numeric attributes. An "
+      + "attribute with k values is transformed into k binary attributes if "
+      + "the class is nominal (using the one-attribute-per-value approach). "
+      + "Binary attributes are left binary."
+      + "If the class is numeric, you might want to use the supervised version of "
+      + "this filter.";
+  }
 
   /**
    * Sets the format of the input instances.
@@ -145,6 +161,16 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
       options[current++] = "";
     }
     return options;
+  }
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String binaryAttributesNominalTipText() {
+    return "Whether resulting binary attributes will be nominal.";
   }
 
   /**

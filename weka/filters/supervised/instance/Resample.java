@@ -57,7 +57,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  **/
 public class Resample extends Filter implements SupervisedFilter,
 						OptionHandler {
@@ -73,6 +73,23 @@ public class Resample extends Filter implements SupervisedFilter,
 
   /** True if the first batch has been done */
   private boolean m_FirstBatchDone = false;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Produces a random subsample of a dataset. The original dataset must "
+      + "fit entirely in memory. The number of instances in the generated "
+      + "dataset may be specified. The dataset must have a nominal class "
+      + "attribute. If not, use the unsupervised version. The filter can be "
+      + "made to maintain the class distribution in the subsample, or to bias "
+      + "the class distribution toward a uniform distribution. When used in batch "
+      + "mode (i.e. in the FilteredClassifier), subsequent batches are NOTE resampled.";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -167,8 +184,19 @@ public class Resample extends Filter implements SupervisedFilter,
     }
     return options;
   }
-  
-  
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String biasToUniformClassTipText() {
+    return "Whether to use bias towards a uniform class. A value of 0 leaves the class "
+      + "distribution as-is, a value of 1 ensures the class distribution is "
+      + "uniform in the output data.";
+  }
+    
   /**
    * Gets the bias towards a uniform class. A value of 0 leaves the class
    * distribution as-is, a value of 1 ensures the class distributions are
@@ -192,6 +220,16 @@ public class Resample extends Filter implements SupervisedFilter,
 
     m_BiasToUniformClass = newBiasToUniformClass;
   }
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String randomSeedTipText() {
+    return "Sets the random number seed for subsampling.";
+  }
   
   /**
    * Gets the random number seed.
@@ -211,6 +249,16 @@ public class Resample extends Filter implements SupervisedFilter,
   public void setRandomSeed(int newSeed) {
 
     m_RandomSeed = newSeed;
+  }
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String sampeSizePercentTipText() {
+    return "The subsample size as a percentage of the original set.";
   }
   
   /**

@@ -47,13 +47,26 @@ import weka.core.SingleIndex;
  * Index of the attribute to be changed. (default last)<p>
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class StringToNominal extends Filter 
   implements UnsupervisedFilter, OptionHandler {
 
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Converts a string attribute (i.e. unspecified number of values) to nominal "
+      + "(i.e. set number of values). You should ensure that all string values that "
+      + "will appear are represented in the first batch of the data.";
+  }
 
   /**
    * Sets the format of the input instances.
@@ -195,6 +208,16 @@ public class StringToNominal extends Filter
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndexTipText() {
+
+    return "Sets which attribute to process. This attribute "
+      + "must be a string attribute (\"first\" and \"last\" are valid values)";
   }
 
   /**

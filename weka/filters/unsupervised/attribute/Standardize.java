@@ -33,7 +33,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Standardize extends PotentialClassIgnorer implements UnsupervisedFilter {
 
@@ -42,6 +42,18 @@ public class Standardize extends PotentialClassIgnorer implements UnsupervisedFi
   
   /** The variances */
   private double [] m_StdDevs;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Standardizes all numeric attributes in the given dataset "
+      + "to have zero mean and unit variance (apart from the class attribute, if set).";
+  }
 
   /**
    * Sets the format of the input instances.
