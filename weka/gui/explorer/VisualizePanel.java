@@ -92,7 +92,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -3613,7 +3613,7 @@ public class VisualizePanel extends JPanel {
   /**
    * Set the index of the attribute for the x axis 
    * @param index the index for the x axis
-   * @exception if index is out of range.
+   * @exception Exception if index is out of range.
    */
   public void setXIndex(int index) throws Exception {
     if (index >= 0 && index < m_XCombo.getItemCount()) {
@@ -3634,7 +3634,7 @@ public class VisualizePanel extends JPanel {
   /**
    * Set the index of the attribute for the y axis 
    * @param index the index for the y axis
-   * @exception if index is out of range.
+   * @exception Exception if index is out of range.
    */
   public void setYIndex(int index) throws Exception {
     if (index >= 0 && index < m_YCombo.getItemCount()) {
@@ -3672,7 +3672,7 @@ public class VisualizePanel extends JPanel {
   /** 
    * Set the shape for creating splits.
    * @param index The index of the shape.
-   * @exception If s index is out of range.
+   * @exception Exception if index is out of range.
    */
   public void setSIndex(int index) throws Exception {
     if (index >= 0 && index < m_ShapeCombo.getItemCount()) {
