@@ -91,7 +91,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -489,18 +489,18 @@ public class AttributeSelectionPanel extends JPanel {
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
 	  .format(new Date());
-	  String ename = evaluator.getClass().getName();
-	  if (ename.startsWith("weka.attributeSelection.")) {
-	    name += ename.substring("weka.attributeSelection.".length());
-	  } else {
-	    name += ename;
-	  }
 	  String sname = search.getClass().getName();
 	  if (sname.startsWith("weka.attributeSelection.")) {
-	    name += (" + "
-		     +sname.substring("weka.attributeSelection.".length()));
+	    name += sname.substring("weka.attributeSelection.".length());
 	  } else {
-	    name += (" + "+sname);
+	    name += sname;
+	  }
+	  String ename = evaluator.getClass().getName();
+	  if (ename.startsWith("weka.attributeSelection.")) {
+	    name += (" + "
+		     +ename.substring("weka.attributeSelection.".length()));
+	  } else {
+	    name += (" + "+ename);
 	  }
 	  try {
 	    if (m_CVBut.isSelected()) {
