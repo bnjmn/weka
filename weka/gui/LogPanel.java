@@ -55,7 +55,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -192,6 +192,33 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
   }
 
   /**
+   * adds thousand's-separators to the number
+   * @param l       the number to print
+   * @return        the number as string with separators
+   */
+  private String printLong(long l) {
+    String        result;
+    String        str;
+    int           i;
+    int           count;
+
+    str    = Long.toString(l);
+    result = "";
+    count  = 0;
+
+    for (i = str.length() - 1; i >= 0; i--) {
+      count++;
+      result = str.charAt(i) + result;
+      if ( (count == 3) && (i > 0) ) {
+        result = "," + result;
+        count = 0;
+      }
+    }
+    
+    return result;
+  }
+
+  /**
    * Add a popup menu for displaying the amount of free memory
    * and running the garbage collector
    */
@@ -201,14 +228,16 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
 	    JPopupMenu gcMenu = new JPopupMenu();
-	    JMenuItem availMem = new JMenuItem("Available memory");
+	    JMenuItem availMem = new JMenuItem("Memory information");
 	    availMem.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent ee) {
 		  System.gc();
 		  Runtime currR = Runtime.getRuntime();
 		  long freeM = currR.freeMemory();
-		  logMessage("Available memory : "+freeM+" bytes");
-		  statusMessage(freeM + " bytes free");
+		  long totalM = currR.totalMemory();
+		  long maxM = currR.maxMemory();
+		  logMessage("Memory (free/total/max.) in bytes: " + printLong(freeM) + " / " + printLong(totalM) + " / " + printLong(maxM));
+		  statusMessage("Memory (free/total/max.) in bytes: " + printLong(freeM) + " / " + printLong(totalM) + " / " + printLong(maxM));
 		}
 	      });
 	    gcMenu.add(availMem);
