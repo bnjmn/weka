@@ -42,7 +42,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -304,9 +304,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
 	    newAtts.addElement(new Attribute(att.name()));
 	  } else {
 	    newVals = new FastVector(2);
-	    newVals.addElement("'not_"+removeQuotes(att.value(m_ValIndex))+
-			       "'");
-	    newVals.addElement("'"+removeQuotes(att.value(m_ValIndex))+"'");
+	    newVals.addElement("not_" + att.value(m_ValIndex));
+	    newVals.addElement(att.value(m_ValIndex));
 	    newAtts.addElement(new Attribute(att.name(), newVals));
 	  }
 	}
@@ -321,15 +320,6 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
       System.err.println("Problem setting new output format");
       System.exit(0);
     }
-  }
- 
-  /** Removes quotes from a string. */
-  private static final String removeQuotes(String string) {
-
-    if (string.endsWith("'") || string.endsWith("\"")) {
-      return string.substring(1, string.length() - 1);
-    }
-    return string;
   }
  
   /**

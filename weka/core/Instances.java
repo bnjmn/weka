@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 */
 public class Instances implements Serializable {
  
@@ -1201,7 +1201,9 @@ public class Instances implements Serializable {
   }
  
   /**
-   * Returns the dataset as a string in ARFF format.
+   * Returns the dataset as a string in ARFF format. Strings
+   * are quoted if they contain whitespace characters, or if they
+   * are a question mark.
    *
    * @return the dataset in ARFF format as a string
    */
@@ -1209,15 +1211,16 @@ public class Instances implements Serializable {
     
     StringBuffer text = new StringBuffer();
     
-    text.append("@relation " + m_RelationName + "\n\n");
+    text.append("@relation " + Utils.quote(m_RelationName) + "\n\n");
     for (int i = 0; i < numAttributes(); i++) {
       text.append(attribute(i) + "\n");
     }
     text.append("\n@data\n");
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i));
-      if (i < numInstances() - 1)
+      if (i < numInstances() - 1) {
 	text.append('\n');
+      }
     }
     return text.toString();
   }
@@ -1343,16 +1346,16 @@ public class Instances implements Serializable {
       } else {
 	getNextToken(tokenizer);
       }
-      
-      // Check if token is valid.
-      if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
-	errms(tokenizer,"not a valid value");
-      }
-      
+            
       // Check if value is missing.
-      if  (tokenizer.sval.equals("?")) {
+      if  (tokenizer.ttype == '?') {
 	instance[i] = Instance.missingValue();
       } else {
+
+	// Check if token is valid.
+	if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
+	  errms(tokenizer,"not a valid value");
+	}
 	if (attribute(i).isNominal()) {
 	  
 	  // Check if value appears in header.
@@ -1460,9 +1463,6 @@ public class Instances implements Serializable {
 	  if (tokenizer.ttype == StreamTokenizer.TT_EOL) {
 	    errms(tokenizer,"} expected at end of enumeration");
 	  } else {
-	    if (tokenizer.ttype == '\'') {
-	      tokenizer.sval = quote(tokenizer.sval);
-	    }
 	    attributeValues.addElement(tokenizer.sval);
 	  }
 	}
@@ -1529,22 +1529,24 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Gets next token and quotes it if necessary, skipping empty 
-   * lines.
+   * Gets next token, skipping empty lines.
    *
    * @param tokenizer the stream tokenizer
    * @exception IOException if reading the next token fails
    */
   private void getFirstToken(StreamTokenizer tokenizer) 
-       throws IOException{
-
+    throws IOException{
+    
     while (tokenizer.nextToken() == StreamTokenizer.TT_EOL){};
-    if (tokenizer.ttype == '\''){
-      tokenizer.sval = quote(tokenizer.sval);
+    if ((tokenizer.ttype == '\'') ||
+	(tokenizer.ttype == '"')) {
       tokenizer.ttype = StreamTokenizer.TT_WORD;
+    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
+	       (tokenizer.sval.equals("?"))){
+      tokenizer.ttype = '?';
     }
   }
-	
+  
   /**
    * Gets token and checks if its end of line.
    *
@@ -1560,8 +1562,7 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Gets next token and quotes it if necessary, checking
-   * for a premature and of line.
+   * Gets next token, checking for a premature and of line.
    *
    * @param tokenizer the stream tokenizer
    * @exception IOException if it finds a premature end of line
@@ -1574,10 +1575,12 @@ public class Instances implements Serializable {
     }
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       errms(tokenizer,"premature end of file");
-    }
-    else if (tokenizer.ttype == '\'') {
-      tokenizer.sval = quote(tokenizer.sval);
+    } else if ((tokenizer.ttype == '\'') ||
+	       (tokenizer.ttype == '"')) {
       tokenizer.ttype = StreamTokenizer.TT_WORD;
+    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
+	       (tokenizer.sval.equals("?"))){
+      tokenizer.ttype = '?';
     }
   }
 	
@@ -1593,6 +1596,7 @@ public class Instances implements Serializable {
     tokenizer.wordChars(' '+1,'\u00FF');
     tokenizer.whitespaceChars(',',',');
     tokenizer.commentChar('%');
+    tokenizer.quoteChar('"');
     tokenizer.quoteChar('\'');
     tokenizer.ordinaryChar('{');
     tokenizer.ordinaryChar('}');
@@ -1675,17 +1679,6 @@ public class Instances implements Serializable {
 	quickSort(attIndex,lo,hi0);
       }
     }
-  }
-
-  /**
-   * Quotes a string using single quotes.
-   *
-   * @param toQuote the string to be quoted
-   * @return the quoted string
-   */
-  private String quote(String toQuote){
-
-    return ("'".concat(toQuote)).concat("'");
   }
 
   /**
@@ -1809,8 +1802,9 @@ public class Instances implements Serializable {
       }
       System.out.println("\nClass values and labels of instances:\n");
       for (i = 0; i < instances.numInstances(); i++) {
-	System.out.print(instances.instance(i).classValue() + "\t");
-	System.out.print(instances.instance(i).classLabel());
+	Instance inst = instances.instance(i);
+	System.out.print(inst.classValue() + "\t");
+	System.out.print(inst.toString(inst.classIndex()));
 	if (instances.instance(i).classIsMissing()) {
 	  System.out.println("\tis missing");
 	} else {
