@@ -28,11 +28,11 @@ weka.classifiers.Classifier=\
  weka.classifiers.HyperPipes,\
  weka.classifiers.IB1,\
  weka.classifiers.IBk,\
- weka.classifiers.kstar.KStar,\
  weka.classifiers.Id3,\
  weka.classifiers.j48.J48,\
  weka.classifiers.j48.PART,\
  weka.classifiers.KernelDensity,\
+ weka.classifiers.kstar.KStar,\
  weka.classifiers.LinearRegression,\
  weka.classifiers.Logistic,\
  weka.classifiers.LWR,\
@@ -45,6 +45,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.VotedPerceptron,\
  weka.classifiers.VFI,\
  weka.classifiers.AdaBoostM1,\
+ weka.classifiers.AttributeSelectedClassifier,\
  weka.classifiers.Bagging, \
  weka.classifiers.ClassificationViaRegression,\
  weka.classifiers.CostSensitiveClassifier,\
@@ -56,9 +57,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.MultiScheme,\
  weka.classifiers.RegressionByDiscretization,\
  weka.classifiers.Stacking,\
- weka.classifiers.UserClassifier,\
  weka.classifiers.ThresholdSelector,\
- weka.classifiers.AttributeSelectedClassifier
+ weka.classifiers.UserClassifier
 
 # Lists the DistributionClassifiers I want to choose from
 weka.classifiers.DistributionClassifier=\
@@ -91,6 +91,7 @@ weka.classifiers.DistributionClassifier=\
 weka.filters.Filter = \
  weka.filters.AddFilter, \
  weka.filters.AllFilter, \
+ weka.filters.AttributeExpressionFilter, \
  weka.filters.AttributeFilter, \
  weka.filters.AttributeSelectionFilter, \
  weka.filters.AttributeTypeFilter, \
@@ -102,8 +103,10 @@ weka.filters.Filter = \
  weka.filters.MakeIndicatorFilter, \
  weka.filters.MergeTwoValuesFilter, \
  weka.filters.NominalToBinaryFilter, \
+ weka.filters.NonSparseToSparseFilter, \
  weka.filters.NormalizationFilter, \
  weka.filters.NullFilter, \
+ weka.filters.NumericToBinaryFilter, \
  weka.filters.NumericTransformFilter, \
  weka.filters.ObfuscateFilter, \
  weka.filters.RandomizeFilter, \
@@ -115,10 +118,7 @@ weka.filters.Filter = \
  weka.filters.StringToNominalFilter, \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
- weka.filters.TimeSeriesTranslateFilter, \
- weka.filters.NonSparseToSparseFilter, \
- weka.filters.NumericToBinaryFilter, \
- weka.filters.AttributeExpressionFilter
+ weka.filters.TimeSeriesTranslateFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
