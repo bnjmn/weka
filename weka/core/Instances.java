@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
 */
 public class Instances implements Serializable {
  
@@ -1909,6 +1909,54 @@ public class Instances implements Serializable {
     m_Instances.swap(i, j);
   }
 
+  /**
+   * Merges two sets of Instances together. The resulting set will have
+   * all the attributes of the first set plus all the attributes of the 
+   * second set. The number of instances in both sets must be the same.
+   *
+   * @param first the first set of Instances
+   * @param second the second set of Instances
+   * @return the merged set of Instances
+   * @exception Exception if an error occurs
+   */
+  public static Instances mergeInstances(Instances first, Instances second)
+    throws Exception {
+
+    if (first.numInstances() != second.numInstances()) {
+      throw new Exception("Instance sets must be of the same size");
+    }
+
+    // Create the vector of merged attributes
+    FastVector newAttributes = new FastVector();
+    for (int i = 0; i < first.numAttributes(); i++) {
+      newAttributes.addElement(first.attribute(i));
+    }
+    for (int i = 0; i < second.numAttributes(); i++) {
+      newAttributes.addElement(second.attribute(i));
+    }
+    
+    // Create the set of Instances
+    Instances merged = new Instances(first.relationName() + '_'
+				     + second.relationName(), 
+				     newAttributes, 
+				     first.numInstances());
+    // Merge each instance
+    for (int i = 0; i < first.numInstances(); i++) {
+      Instance mergedInst = new Instance(merged.numAttributes());
+      Instance firstInst = first.instance(i);
+      Instance secondInst = second.instance(i);
+      
+      int m = 0;
+      for (int j = 0; j < first.numAttributes(); j++, m++) {
+	mergedInst.setValue(m, firstInst.value(j));
+      }
+      for (int j = 0; j < second.numAttributes(); j++, m++) {
+	mergedInst.setValue(m, secondInst.value(j));
+      }
+      merged.add(mergedInst);
+    }
+    return merged;
+  }
 
   /**
    * Method for testing this class.
