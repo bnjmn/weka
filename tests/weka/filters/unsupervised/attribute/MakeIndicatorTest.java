@@ -18,7 +18,7 @@ import weka.filters.AbstractFilterTest;
  * java weka.filters.MakeIndicatorTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MakeIndicatorTest extends AbstractFilterTest {
   
@@ -28,7 +28,7 @@ public class MakeIndicatorTest extends AbstractFilterTest {
   public Filter getFilter() {
     MakeIndicator f = new MakeIndicator();
     // Ensure the filter we return can run on the test dataset
-    f.setAttributeIndex(1); 
+    f.setAttributeIndex("2"); 
     return f;
   }
 
@@ -36,14 +36,14 @@ public class MakeIndicatorTest extends AbstractFilterTest {
   public void testInvalidAttributeTypes() {
     Instances icopy = new Instances(m_Instances);
     try {
-      ((MakeIndicator)m_Filter).setAttributeIndex(0);
+      ((MakeIndicator)m_Filter).setAttributeIndex("1");
       m_Filter.setInputFormat(icopy);
       fail("Should have thrown an exception selecting a STRING attribute!");
     } catch (Exception ex) {
       // OK
     }
     try {
-      ((MakeIndicator)m_Filter).setAttributeIndex(2);
+      ((MakeIndicator)m_Filter).setAttributeIndex("3");
       m_Filter.setInputFormat(icopy);
       fail("Should have thrown an exception indicating a NUMERIC attribute!");
     } catch (Exception ex) {
@@ -52,7 +52,7 @@ public class MakeIndicatorTest extends AbstractFilterTest {
   }
 
   public void testDefault() {
-    ((MakeIndicator)m_Filter).setAttributeIndex(1);
+    ((MakeIndicator)m_Filter).setAttributeIndex("2");
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(m_Instances.numInstances(),  result.numInstances());
@@ -68,7 +68,7 @@ public class MakeIndicatorTest extends AbstractFilterTest {
   }
 
   public void testNominalEncoding() {
-    ((MakeIndicator)m_Filter).setAttributeIndex(1);
+    ((MakeIndicator)m_Filter).setAttributeIndex("2");
     ((MakeIndicator)m_Filter).setNumeric(false);    
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
@@ -85,7 +85,7 @@ public class MakeIndicatorTest extends AbstractFilterTest {
   }
 
   public void testMultiValueIndication() {
-    ((MakeIndicator)m_Filter).setAttributeIndex(1);
+    ((MakeIndicator)m_Filter).setAttributeIndex("2");
     try {
       ((MakeIndicator)m_Filter).setValueIndices("1,3");
     } catch (Exception ex) {

@@ -17,7 +17,7 @@ import weka.filters.AbstractFilterTest;
  * java weka.filters.RemoveWithValuesTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoveWithValuesTest extends AbstractFilterTest {
   
@@ -26,14 +26,14 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
   /** Creates a default RemoveWithValues */
   public Filter getFilter() {
     RemoveWithValues f = new RemoveWithValues();
-    f.setAttributeIndex(2);
+    f.setAttributeIndex("3");
     return f;
   }
 
   public void testString() {
     Instances icopy = new Instances(m_Instances);
     try {
-      ((RemoveWithValues)m_Filter).setAttributeIndex(0);
+      ((RemoveWithValues)m_Filter).setAttributeIndex("1");
       m_Filter.setInputFormat(icopy);
       fail("Should have thrown an exception selecting on a STRING attribute!");
     } catch (Exception ex) {
@@ -42,7 +42,7 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
   }
 
   public void testNominal() {
-    ((RemoveWithValues)m_Filter).setAttributeIndex(1);
+    ((RemoveWithValues)m_Filter).setAttributeIndex("2");
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals("Default nominal selection matches all values",
@@ -74,7 +74,7 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
   }
 
   public void testNumeric() {
-    ((RemoveWithValues)m_Filter).setAttributeIndex(2);
+    ((RemoveWithValues)m_Filter).setAttributeIndex("3");
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals("Default split point matches values less than 0",
@@ -94,7 +94,7 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
   }
 
   public void testMatchMissingValues() {
-    ((RemoveWithValues)m_Filter).setAttributeIndex(4);
+    ((RemoveWithValues)m_Filter).setAttributeIndex("5");
     ((RemoveWithValues)m_Filter).setInvertSelection(true);
     ((RemoveWithValues)m_Filter).setMatchMissingValues(true);
     Instances result = useFilter();

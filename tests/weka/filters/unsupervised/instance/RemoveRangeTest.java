@@ -17,7 +17,7 @@ import weka.filters.AbstractFilterTest;
  * java weka.filters.RemoveRangeTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoveRangeTest extends AbstractFilterTest {
   
@@ -32,6 +32,7 @@ public class RemoveRangeTest extends AbstractFilterTest {
   public void testSpecifiedRange() {
     
     ((RemoveRange)m_Filter).setInstancesIndices("1-10");
+    ((RemoveRange)m_Filter).setInvertSelection(true);
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(10,  result.numInstances());

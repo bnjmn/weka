@@ -20,11 +20,11 @@ import weka.classifiers.evaluation.NominalPrediction;
  * java weka.classifiers.ThresholdSelectorTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ThresholdSelectorTest extends AbstractClassifierTest {
 
-  private class DummyClassifier extends DistributionClassifier {
+  private class DummyClassifier extends Classifier {
     
     double [] m_Preds;
     int m_Pos;
@@ -77,13 +77,13 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
   /**
    * Creates a ThresholdSelector with the given subclassifier.
    *
-   * @param classifier a <code>DistributionClassifier</code> to use as the
+   * @param classifier a <code>Classifier</code> to use as the
    * subclassifier
    * @return a new <code>ThresholdSelector</code>
    */
-  public Classifier getClassifier(DistributionClassifier classifier) {
+  public Classifier getClassifier(Classifier classifier) {
     ThresholdSelector t = new ThresholdSelector();
-    t.setDistributionClassifier(classifier);
+    t.setClassifier(classifier);
     return t;
   }
 

@@ -25,7 +25,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AllTests extends TestSuite {
 
@@ -57,7 +57,6 @@ public class AllTests extends TestSuite {
     suite.addTest(CVParameterSelectionTest.suite());
     suite.addTest(ClassificationViaRegressionTest.suite());
     suite.addTest(CostSensitiveClassifierTest.suite());
-    suite.addTest(DistributionMetaClassifierTest.suite());
     suite.addTest(FilteredClassifierTest.suite());
     suite.addTest(LogitBoostTest.suite());
     suite.addTest(MetaCostTest.suite());

@@ -4,7 +4,6 @@
 
 package weka.classifiers;
 
-import weka.classifiers.meta.DistributionMetaClassifier;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -29,7 +28,7 @@ import weka.filters.Filter;
  * Abstract Test class for Classifiers.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class AbstractClassifierTest extends TestCase {
 
@@ -101,7 +100,7 @@ public abstract class AbstractClassifierTest extends TestCase {
    */
   protected FastVector useClassifier() throws Exception {
 
-    DistributionClassifier dc = null;
+    Classifier dc = null;
     int tot = m_Instances.numInstances();
     int mid = tot / 2;
     Instances train = null;
@@ -109,11 +108,7 @@ public abstract class AbstractClassifierTest extends TestCase {
     try {
       train = new Instances(m_Instances, 0, mid);
       test = new Instances(m_Instances, mid, tot - mid);
-      if (m_Classifier instanceof DistributionClassifier) {
-        dc = (DistributionClassifier)m_Classifier;
-      } else {
-        dc = new DistributionMetaClassifier(m_Classifier);
-      }
+      dc = m_Classifier;
     } catch (Exception ex) {
       ex.printStackTrace();
       fail("Problem setting up to use classifier: " + ex);

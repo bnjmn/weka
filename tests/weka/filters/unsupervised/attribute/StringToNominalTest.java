@@ -18,7 +18,7 @@ import weka.filters.AbstractFilterTest;
  * java weka.filters.StringToNominalTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class StringToNominalTest extends AbstractFilterTest {
   
@@ -27,7 +27,7 @@ public class StringToNominalTest extends AbstractFilterTest {
   /** Creates an example StringToNominal */
   public Filter getFilter() {
     StringToNominal f = new StringToNominal();
-    f.setAttributeIndex(0);
+    f.setAttributeIndex("1");
     return f;
   }
 
@@ -43,7 +43,7 @@ public class StringToNominalTest extends AbstractFilterTest {
   }
 
   public void testMissing() {
-    ((StringToNominal)m_Filter).setAttributeIndex(3);
+    ((StringToNominal)m_Filter).setAttributeIndex("4");
     Instances result = useFilter();
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
