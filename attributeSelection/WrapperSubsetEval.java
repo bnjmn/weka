@@ -58,7 +58,7 @@ import  weka.filters.Filter;
  * (default = 1) <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -456,6 +456,7 @@ public class WrapperSubsetEval
     }
 
     errorRate /= (double)i;
+    m_Evaluation = null;
     return  -errorRate;
   }
 
