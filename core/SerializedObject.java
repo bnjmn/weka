@@ -31,7 +31,7 @@ import java.util.zip.*;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class SerializedObject implements Serializable {
 
@@ -75,6 +75,34 @@ public class SerializedObject implements Serializable {
     m_storedObjectArray = ostream.toByteArray();
 
     m_isCompressed = compress;
+  }
+
+  /*
+   * Checks to see whether this object is equal to another.
+   *
+   * @param compareTo the object to compare to
+   * @return whether or not the objects are equal
+   */
+  public final boolean equals(Object compareTo) {
+
+    if (compareTo == null) return false;
+    if (!compareTo.getClass().equals(this.getClass())) return false;
+    byte[] compareArray = ((SerializedObject)compareTo).m_storedObjectArray;
+    if (compareArray.length != m_storedObjectArray.length) return false;
+    for (int i=0; i<compareArray.length; i++) {
+      if (compareArray[i] != m_storedObjectArray[i]) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Returns a hashcode for this object.
+   *
+   * @return the hashcode
+   */
+  public int hashCode() {
+
+    return m_storedObjectArray.length;
   }
 
   /**
