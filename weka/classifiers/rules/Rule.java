@@ -26,15 +26,17 @@ import weka.core.Instances;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Copyable;
 
+import java.io.Serializable;
+
 /**
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public abstract class Rule 
-    implements WeightedInstancesHandler, Copyable{
+    implements WeightedInstancesHandler, Copyable, Serializable {
     
     /**
      * Get a shallow copy of this rule
