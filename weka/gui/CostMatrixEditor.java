@@ -16,511 +16,467 @@
 
 /*
  *    CostMatrixEditor.java
- *    Copyright (C) 1999 Intelligenesis Corp.
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
-
 
 package weka.gui;
 
 import weka.classifiers.CostMatrix;
 import weka.core.Matrix;
+import java.beans.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.table.*;
+import java.io.*;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
-import java.io.File;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.awt.FontMetrics;
-import java.awt.Rectangle;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JButton;
-import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableColumnModel;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TableModelEvent;
-
-
-/** 
- * A PropertyEditor for CostMatrices. Allows editing of individual elements
- * of the cost matrix, as well as simple operations like loading, saving.
+/**
+ * Class for editing CostMatrix objects. Brings up a custom editing panel
+ * with which the user can edit the matrix interactively, as well as save
+ * load cost matrices from files.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.6 $
  */
 public class CostMatrixEditor implements PropertyEditor {
 
-  /** The current cost matrix */
-  private CostMatrix m_CostMatrix = new CostMatrix(2);
+  /** The cost matrix being edited */
+  private CostMatrix m_matrix;
 
-  /** Handles property change notification */
-  private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
+  /** A helper class for notifying listeners */
+  private PropertyChangeSupport m_propSupport;
 
-  /** The instantiated custom property editor */
-  private CostMatrixEditorPanel m_EditorPanel = null;
+  /** An instance of the custom editor */
+  private CustomEditor m_customEditor;
 
+  /** The file chooser for the user to select cost files to save and load */
+  private JFileChooser m_fileChooser
+    = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  /** Class that wraps a TableModel around a CostMatrix */
-  class CostMatrixTableModel extends AbstractTableModel {
-    
-    /** The CostMatrix providing data for the table model */
-    private CostMatrix m_Matrix;
-
-    /**
-     * Constructs the table model with a given CostMatrix
-     *
-     * @param m theCostMatrix
-     */
-    public CostMatrixTableModel(CostMatrix m) {
-
-      m_Matrix = m;
-    }
+  /**
+   * This class wraps around the cost matrix presenting it as a TableModel
+   * so that it can be displayed and edited in a JTable.
+   */
+  private class CostMatrixTableModel extends AbstractTableModel {
 
     /**
-     * Updates the table model to use a new CostMatrix
+     * Gets the number of rows in the matrix. Cost matrices are square so it is the
+     * same as the column count, i.e. the size of the matrix.
      *
-     * @param m theCostMatrix
+     * @return the row count
      */
-    public void setMatrix(CostMatrix m) {
-
-      m_Matrix = m;
-      fireTableStructureChanged();
-    }
-
-    /** Gets the number of rows in the table */
     public int getRowCount() {
 
-      return m_Matrix.numRows();
-    }
-
-    /** Gets the number of columns in the table */
-    public int getColumnCount() {
-
-      return m_Matrix.numColumns();
+      return m_matrix.size();
     }
 
     /**
-     * Gets an element from the table.
+     * Gets the number of columns in the matrix. Cost matrices are square so it is
+     * the same as the row count, i.e. the size of the matrix.
      *
-     * @param row the row index
-     * @param column the column index
-     * @return the element at row, column
+     * @return the row count
+     */
+    public int getColumnCount() {
+
+      return m_matrix.size();
+    }
+
+    /**
+     * Returns a value at the specified position in the cost matrix.
+     *
+     * @param row the row position
+     * @param column the column position
+     * @return the value
      */
     public Object getValueAt(int row, int column) {
 
-      return new Double(m_Matrix.getElement(row, column));
+      return new Double(m_matrix.getElement(row, column));
     }
 
     /**
-     * Sets an element in the table
+     * Sets a value at a specified position in the cost matrix.
      *
-     * @param value the object to place in the table
-     * @param row the row index
-     * @param column the column index
+     * @param aValue the new value (should be of type Double).
+     * @param rowIndex the row position
+     * @param columnIndex the column position
      */
-    public void setValueAt(Object value, int row, int column) {
+    public void setValueAt(Object aValue,
+			   int rowIndex,
+			   int columnIndex) {
 
-      double newVal = 0;
-
-      if (value instanceof String) {
-	try {
-	  newVal = Double.valueOf((String)value).doubleValue();
-	} catch (Exception ex) {
-	  return;
-	}
-      } else if (value instanceof Double) {
-	newVal = ((Double)value).doubleValue();
-      } else {
-	return;
-      }
-
-      m_Matrix.setElement(row, column, newVal);
-      fireTableCellUpdated(row, column);
+      double value = ((Double) aValue).doubleValue();
+      m_matrix.setElement(rowIndex, columnIndex, value);
+      fireTableCellUpdated(rowIndex, columnIndex);
     }
 
     /**
-     * Determines if a cell is editable. For our purposes, all
-     * cells may be edited.
+     * Indicates whether a cell in the table is editable. In this case all cells
+     * are editable so true is always returned.
      *
-     * @param row the row index
-     * @param column the column index
-     * @return true if the cell is editable
-     */
-    public boolean isCellEditable(int row, int column) {
+     * @param rowIndex the row position
+     * @param columnIndex the column position
+     * @return true
+     */    
+    public boolean isCellEditable(int rowIndex,
+				  int columnIndex) {
 
       return true;
     }
 
-    /** Resets the CostMatrix to default values */
-    public void defaults() {
+    /**
+     * Indicates the class of the objects within a column of the table. In this
+     * case all columns in the cost matrix consist of double values so Double.class
+     * is always returned.
+     *
+     * @param columnIndex the column position
+     * @return Double.class
+     */    
+    public Class getColumnClass(int columnIndex) {
 
-      m_Matrix.initialize();
-      fireTableDataChanged();
+      return Double.class;
     }
   }
 
+  /**
+   * This class presents a GUI for editing the cost matrix, and saving and 
+   * loading from files.
+   */
+  private class CustomEditor extends JPanel implements ActionListener,
+						       TableModelListener {
 
-  /** The custom editing component */
-  class CostMatrixEditorPanel extends JPanel {
+    /** The table model of the cost matrix being edited */
+    private CostMatrixTableModel m_tableModel;
 
-    /** The TableModel containing the cost matrix */
-    private CostMatrixTableModel m_Model = 
-      new CostMatrixTableModel(m_CostMatrix);
+    /** The button for setting default matrix values */
+    private JButton m_defaultButton;
 
-    /** The table component */
-    private JTable m_Table = new JTable(m_Model);
+    /** The button for opening a cost matrix from a file */
+    private JButton m_openButton;
 
-    /** Click to reset cells to default values */
-    private JButton m_DefaultBut = new JButton("Defaults");
+    /** The button for saving a cost matrix to a file */
+    private JButton m_saveButton;
 
-    /** Click to open a cost file from disk */
-    private JButton m_OpenBut = new JButton("Open...");
+    /** The field for changing the size of the cost matrix */
+    private JTextField m_classesField;
 
-    /** Click to save the current cost matrix to disk */
-    private JButton m_SaveBut = new JButton("Save...");
+    /**
+     * Constructs a new CustomEditor.
+     *
+     */
+    public CustomEditor() {
 
-    /** A text field for entering new cost matrix size */
-    private JTextField m_NumClasses = new JTextField("2");
+      // set up the file chooser
+      m_fileChooser.setFileFilter(
+	     new ExtensionFileFilter(CostMatrix.FILE_EXTENSION, 
+				     "Cost files")
+	       );
+      m_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    /** A filter to only show cost files in the filechooser */
-    protected FileFilter m_CostFilter =
-      new ExtensionFileFilter(CostMatrix.FILE_EXTENSION, 
-                              "Misclassification cost files");
+      // create the buttons + field
+      m_defaultButton = new JButton("Defaults");
+      m_openButton = new JButton("Open...");
+      m_saveButton = new JButton("Save...");
+      m_classesField = new JTextField("" + m_matrix.size());
 
-    /** The filechooser for opening and saving cost files */
-    private JFileChooser m_FileChooser
-      = new JFileChooser(new File(System.getProperty("user.dir")));
+      m_defaultButton.addActionListener(this);
+      m_openButton.addActionListener(this);
+      m_saveButton.addActionListener(this);
+      m_classesField.addActionListener(this);
 
-    /** Sets up the cost matrix editor panel */
-    public CostMatrixEditorPanel() {
+      // lay out the GUI
+      JPanel classesPanel = new JPanel();
+      classesPanel.setLayout(new GridLayout(1, 2, 0, 0));
+      classesPanel.add(new JLabel("Classes:", SwingConstants.RIGHT));
+      classesPanel.add(m_classesField);
 
-      m_Model.addTableModelListener(new TableModelListener() {
-	public void tableChanged(TableModelEvent e) {
-	  m_Support.firePropertyChange("", null, null);
-	}
-      });
-
-      m_DefaultBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_Model.defaults();
-	}
-      });
-
-      m_NumClasses.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  try {
-	    int numClasses = Integer.parseInt(m_NumClasses.getText());
-	    if (numClasses > 0) {
-	      setValue(new CostMatrix(numClasses));
-	    }
-	  } catch (Exception ex) {
-	  }
-	}
-      });
+      JPanel rightPanel = new JPanel();
       
-      m_OpenBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  openMatrix();
-	}
-      });
+      GridBagLayout gridBag = new GridBagLayout();
+      GridBagConstraints gbc = new GridBagConstraints();
+      rightPanel.setLayout(gridBag);
+      gbc.gridx = 0; gbc.gridy = GridBagConstraints.RELATIVE;
+      gbc.insets = new Insets(2, 10, 2, 10);
+      gbc.fill = GridBagConstraints.HORIZONTAL;
+      gridBag.setConstraints(m_defaultButton, gbc);
+      rightPanel.add(m_defaultButton);
 
-      m_SaveBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveMatrix();
-	}
-      });
+      gridBag.setConstraints(m_openButton, gbc);
+      rightPanel.add(m_openButton);
+      
+      gridBag.setConstraints(m_saveButton, gbc);
+      rightPanel.add(m_saveButton);
 
-      m_FileChooser.setFileFilter(m_CostFilter);
-      m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      gridBag.setConstraints(classesPanel, gbc);
+      rightPanel.add(classesPanel);
 
-      setVisibleMatrix(m_CostMatrix);
+      JPanel fill = new JPanel();
+      gbc.weightx = 1.0; gbc.weighty = 1.0;
+      gbc.fill = GridBagConstraints.BOTH;
+      
+      gridBag.setConstraints(fill, gbc);
+      rightPanel.add(fill);
 
-
-      // Lay out the GUI
-      JPanel classes = new JPanel();
-      classes.setLayout(new GridLayout(1, 2, 5, 5));
-      classes.add(new JLabel("Classes:", SwingConstants.RIGHT));
-      classes.add(m_NumClasses);
-      JPanel buttons = new JPanel();
-      buttons.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      buttons.setLayout(new GridLayout(4, 1, 5, 5));
-      buttons.add(m_DefaultBut);
-      buttons.add(m_OpenBut);
-      buttons.add(m_SaveBut);
-      buttons.add(classes);
-      JPanel right = new JPanel();
-      right.setLayout(new BorderLayout());
-      right.add(buttons, BorderLayout.NORTH);
-      right.add(Box.createVerticalGlue(), BorderLayout.CENTER);
-
-      JPanel table = new JPanel();
-      table.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      table.setLayout(new BorderLayout());
-      table.add(new JScrollPane(m_Table), BorderLayout.CENTER);
-
+      m_tableModel = new CostMatrixTableModel();
+      m_tableModel.addTableModelListener(this);
+      JTable matrixTable = new JTable(m_tableModel);
+      
       setLayout(new BorderLayout());
-      add(table, BorderLayout.CENTER);
-      add(right, BorderLayout.EAST);
+      add(matrixTable, BorderLayout.CENTER);
+      add(rightPanel, BorderLayout.EAST);
     }
 
-    /** Opens a cost file selected from a filechooser */
+    /**
+     * Responds to the user perfoming an action.
+     *
+     * @param e the action event that occured
+     */
+    public void actionPerformed(ActionEvent e) {
+      
+      if (e.getSource() == m_defaultButton) {
+	m_matrix.initialize();
+	matrixChanged();
+      } else if (e.getSource() == m_openButton) {
+	openMatrix();
+      } else if (e.getSource() == m_saveButton) {
+	saveMatrix();
+      } else if (e.getSource() == m_classesField) {
+	try {
+	  int newNumClasses = Integer.parseInt(m_classesField.getText());
+	  if (newNumClasses > 0 && newNumClasses != m_matrix.size()) {
+	    setValue(new CostMatrix(newNumClasses));
+	  }
+	} catch (Exception ex) {}
+      }
+    }
+
+    /**
+     * Responds to a change in the cost matrix table.
+     *
+     * @param e the tabel model event that occured
+     */
+    public void tableChanged(TableModelEvent e) {
+
+      m_propSupport.firePropertyChange(null, null, null);
+    }
+
+    /**
+     * Responds to a change in structure of the matrix being edited.
+     *
+     */
+    public void matrixChanged() {
+
+      m_tableModel.fireTableStructureChanged();
+      m_classesField.setText("" + m_matrix.size());
+    }
+
+    /**
+     * Prompts the user to open a matrix, and attemps to load it.
+     *
+     */
     private void openMatrix() {
 
-      int returnVal = m_FileChooser.showOpenDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File selected = m_FileChooser.getSelectedFile();
-	Reader r = null;
+      int returnVal = m_fileChooser.showOpenDialog(this);
+      if(returnVal == JFileChooser.APPROVE_OPTION) {
+	File selectedFile = m_fileChooser.getSelectedFile();
+	Reader reader = null;
 	try {
-	  r = new BufferedReader(new FileReader(selected));
-	  CostMatrix c = new CostMatrix(r);
-	  r.close();
-	  setValue(c);
+	  reader = new BufferedReader(new FileReader(selectedFile));
+	  m_matrix = 
+	    new CostMatrix(reader);
+	  reader.close();
+	  matrixChanged();
 	} catch (Exception ex) {
-	  JOptionPane.showMessageDialog(this,
-					"Couldn't read from file: "
-					+ selected.getName() 
-					+ "\n" + ex.getMessage(),
-					"Open cost file",
+	  JOptionPane.showMessageDialog(this, 
+					"Error reading file '"
+					+ selectedFile.getName()
+					+ "':\n" + ex.getMessage(),
+					"Load failed",
 					JOptionPane.ERROR_MESSAGE);
+	  System.out.println(ex.getMessage());
 	}
       }
     }
 
-    /** Saves to a cost file selected from a filechooser */
-    private void saveMatrix() {
-
-      int returnVal = m_FileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File sFile = m_FileChooser.getSelectedFile();
-	if (!sFile.getName().toLowerCase()
-            .endsWith(CostMatrix.FILE_EXTENSION)) {
-	  sFile = new File(sFile.getParent(), sFile.getName() 
-                           + CostMatrix.FILE_EXTENSION);
-	}
-	Writer w = null;
-	try {
-	  w = new BufferedWriter(new FileWriter(sFile));
-	  m_CostMatrix.write(w);
-	  w.close();
-	} catch (Exception ex) {
-	  JOptionPane.showMessageDialog(this,
-					"Couldn't write to file: "
-					+ sFile.getName() 
-					+ "\n" + ex.getMessage(),
-					"Save cost file",
-					JOptionPane.ERROR_MESSAGE);
-	}
-      }
-    }
-
-    /** 
-     * Updates the GUI components when the cost matrix changes 
+    /**
+     * Prompts the user to save a matrix, and attemps to save it.
      *
-     * @param c the new cost matrix to display
      */
-    private void setVisibleMatrix(CostMatrix c) {
+    private void saveMatrix() {
+      
+      int returnVal = m_fileChooser.showSaveDialog(this);
+      if(returnVal == JFileChooser.APPROVE_OPTION) {
+	File selectedFile = m_fileChooser.getSelectedFile();
 
-      m_NumClasses.setText("" + c.size());
-      m_Model.setMatrix(c);
+	// append extension if not already present
+	if (!selectedFile.getName().toLowerCase()
+            .endsWith(CostMatrix.FILE_EXTENSION)) {
+	  selectedFile = new File(selectedFile.getParent(), 
+				  selectedFile.getName() 
+				  + CostMatrix.FILE_EXTENSION);
+	}
+
+	Writer writer = null;
+	try {
+	  writer = new BufferedWriter(new FileWriter(selectedFile));
+	  m_matrix.write(writer);
+	  writer.close();
+	} catch (Exception ex) {
+	  JOptionPane.showMessageDialog(this, 
+					"Error writing file '"
+					+ selectedFile.getName()
+					+ "':\n" + ex.getMessage(),
+					"Save failed",
+					JOptionPane.ERROR_MESSAGE);
+	  System.out.println(ex.getMessage());
+	}
+      }
     }
   }
 
   /**
-   * Sets the current object array.
+   * Constructs a new CostMatrixEditor.
    *
-   * @param o an object that must be an array.
    */
-  public void setValue(Object o) {
+  public CostMatrixEditor() {
 
-    m_CostMatrix = (CostMatrix) o;
-    if (m_EditorPanel != null) {
-      m_EditorPanel.setVisibleMatrix(m_CostMatrix);
-    }
+    m_matrix = new CostMatrix(2);
+    m_propSupport = new PropertyChangeSupport(this);
+    m_customEditor = new CustomEditor();
   }
 
   /**
-   * Gets the current object array.
+   * Sets the value of the CostMatrix to be edited.
    *
-   * @return the current object array
+   * @param value a CostMatrix object to be edited
    */
+  public void setValue(Object value) {
+    
+    m_matrix = (CostMatrix) value;
+    m_customEditor.matrixChanged();
+  }
+
+  /**
+   * Gets the cost matrix that is being edited.
+   *
+   * @return the edited CostMatrix object
+   */  
   public Object getValue() {
 
-    return m_CostMatrix;
+    return m_matrix;
   }
-  
+
   /**
-   * Supposedly returns an initialization string to create a classifier
-   * identical to the current one, including it's state, but this doesn't
-   * appear possible given that the initialization string isn't supposed to
-   * contain multiple statements.
+   * Indicates whether the object can be represented graphically. In this case
+   * it can.
    *
-   * @return the java source code initialisation string
-   */
+   * @return true
+   */  
+  public boolean isPaintable() {
+
+    return true;
+  }
+
+  /**
+   * Paints a graphical representation of the object. For the cost matrix it
+   * prints out the text "X x X matrix", where X is the size of the matrix.
+   *
+   * @param gfx the graphics context to draw the representation to
+   * @param box the bounds within which the representation should fit.
+   */    
+  public void paintValue(Graphics gfx,
+			 Rectangle box) {
+
+    gfx.drawString(m_matrix.size() + " x " + m_matrix.size() + " cost matrix",
+		   box.x, box.y + box.height);
+  }
+
+  /**
+   * Returns the Java code that generates an object the same as the one being edited.
+   * Unfortunately this can't be done in a single line of code, so the code returned
+   * will only build a default cost matrix of the same size.
+   *
+   * @return the initialization string
+   */   
   public String getJavaInitializationString() {
 
-    return "null";
+    return ("new CostMatrix(" + m_matrix.size() + ")");
   }
 
   /**
-   * Returns true to indicate that we can paint a representation of the
-   * string array
-   *
-   * @return true
-   */
-  public boolean isPaintable() {
-    return true;
-  }
-
-  /**
-   * Paints a representation of the current classifier.
-   *
-   * @param gfx the graphics context to use
-   * @param box the area we are allowed to paint into
-   */
-  public void paintValue(Graphics gfx, Rectangle box) {
-    
-    FontMetrics fm = gfx.getFontMetrics();
-    int vpad = (box.height - fm.getAscent()) / 2 - 1;
-    String rep = "" + m_CostMatrix.size() + "x" + m_CostMatrix.size()
-      + " cost matrix";
-    gfx.drawString(rep, 2, fm.getHeight() + vpad);
-  }
-
-  /**
-   * Returns null as we don't support getting/setting values as text.
+   * Some objects can be represented as text, but a cost matrix cannot.
    *
    * @return null
-   */
+   */   
   public String getAsText() {
+
     return null;
   }
 
   /**
-   * Returns null as we don't support getting/setting values as text. 
+   * Some objects can be represented as text, but a cost matrix cannot.
    *
-   * @param text the text value
-   * @exception IllegalArgumentException as we don't support
-   * getting/setting values as text.
-   */
-  public void setAsText(String text) throws IllegalArgumentException {
-    throw new IllegalArgumentException(text);
+   * @param text ignored
+   * @exception always throws an IllegalArgumentException
+   */   
+  public void setAsText(String text)
+    throws IllegalArgumentException {
+
+    throw new IllegalArgumentException("CostMatrixEditor: "
+				       + "CostMatrix properties cannot be "
+				       + "expressed as text");
   }
 
   /**
-   * Returns null as we don't support getting values as tags.
+   * Some objects can return tags, but a cost matrix cannot.
    *
    * @return null
-   */
+   */  
   public String[] getTags() {
+
     return null;
   }
 
   /**
-   * Returns true because we do support a custom editor.
+   * Gets a GUI component with which the user can edit the cost matrix.
+   *
+   * @return an editor GUI component
+   */    
+  public Component getCustomEditor() {
+
+    return m_customEditor;
+  }
+
+  /**
+   * Indicates whether the cost matrix can be edited in a GUI, which it can.
    *
    * @return true
-   */
+   */     
   public boolean supportsCustomEditor() {
+
     return true;
   }
-  
-  /**
-   * Returns the array editing component.
-   *
-   * @return a value of type 'java.awt.Component'
-   */
-  public java.awt.Component getCustomEditor() {
 
-    if (m_EditorPanel == null) {
-      m_EditorPanel = new CostMatrixEditorPanel();
-    }
-    return m_EditorPanel;
+  /**
+   * Adds an object to the list of those that wish to be informed when the
+   * cost matrix changes.
+   *
+   * @param listener a new listener to add to the list
+   */   
+  public void addPropertyChangeListener(PropertyChangeListener listener) {
+
+    m_propSupport.addPropertyChangeListener(listener);
   }
 
   /**
-   * Adds a PropertyChangeListener who will be notified of value changes.
+   * Removes an object from the list of those that wish to be informed when the
+   * cost matrix changes.
    *
-   * @param l a value of type 'PropertyChangeListener'
-   */
-  public void addPropertyChangeListener(PropertyChangeListener l) {
-    m_Support.addPropertyChangeListener(l);
+   * @param listener the listener to remove from the list
+   */  
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+
+    m_propSupport.removePropertyChangeListener(listener);
   }
-
-  /**
-   * Removes a PropertyChangeListener.
-   *
-   * @param l a value of type 'PropertyChangeListener'
-   */
-  public void removePropertyChangeListener(PropertyChangeListener l) {
-    m_Support.removePropertyChangeListener(l);
-  }
-
-  /**
-   * Tests out the array editor from the command line.
-   *
-   * @param args ignored
-   */
-  public static void main(String [] args) {
-
-    try {
-      System.err.println("---Registering Weka Editors---");
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.classifiers.Classifier.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.core.SelectedTag.class,
-			SelectedTagEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.filters.Filter.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(CostMatrix.class,
-			CostMatrixEditor.class);
-      final CostMatrixEditor ce = new CostMatrixEditor();
-      CostMatrix c = new CostMatrix(3);
-      ce.addPropertyChangeListener(new PropertyChangeListener() {
-	public void propertyChange(PropertyChangeEvent e) {
-	  System.err.println("PropertyChange");
-	}
-      });
-      PropertyDialog pd = new PropertyDialog(ce, 100, 100);
-      pd.setSize(250,150);
-      pd.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  System.exit(0);
-	}
-      });
-      ce.setValue(c);
-      //ce.validate();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      System.err.println(ex.getMessage());
-    }
-  }
-
 }
-
