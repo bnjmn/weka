@@ -26,7 +26,7 @@ package weka.filters.unsupervised.attribute;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.clusterers.DistributionClusterer;
+import weka.clusterers.DensityBasedClusterer;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Instance;
@@ -52,13 +52,13 @@ import java.util.Vector;
  * the class attribute (if set) is automatically ignored during clustering.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClusterMembership extends Filter implements UnsupervisedFilter, 
 							 OptionHandler {
 
   /** The clusterer */
-  protected DistributionClusterer m_clusterer = new weka.clusterers.EM();
+  protected DensityBasedClusterer m_clusterer = new weka.clusterers.EM();
 
   /** Range of attributes to ignore */
   protected Range m_ignoreAttributesRange = null;
@@ -96,7 +96,6 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
     }
 
     if (outputFormatPeek() == null) {
-
       Instances toFilter = getInputFormat();
       Instances toFilterIgnoringAttributes = toFilter;
       
@@ -193,6 +192,19 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
   }
 
   /**
+   * Converts logs back to density values.
+   */
+  protected double[] logs2densities(Instance in) throws Exception {
+
+    double[] logs = m_clusterer.logDensityPerClusterForInstance(in);
+
+    for (int i = 0; i < logs.length; i++) {
+      logs[i] = Math.exp(logs[i]);
+    }
+    return logs;
+  }
+
+  /**
    * Convert a single instance over. The converted instance is added to 
    * the end of the output queue.
    *
@@ -203,9 +215,9 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
     double [] probs;
     if (m_removeAttributes != null) {
       m_removeAttributes.input(instance);
-      probs = m_clusterer.distributionForInstance(m_removeAttributes.output());
+      probs = logs2densities(m_removeAttributes.output());
     } else {
-      probs = m_clusterer.distributionForInstance(instance);
+      probs = logs2densities(instance);
     }
     
     // set up values
@@ -263,8 +275,8 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
       throw new Exception("A clusterer must be specified"
 			  + " with the -W option.");
     }
-    setDistributionClusterer((DistributionClusterer)Utils.
-			     forName(DistributionClusterer.class, clustererString,
+    setDensityBasedClusterer((DensityBasedClusterer)Utils.
+			     forName(DensityBasedClusterer.class, clustererString,
 				     Utils.partitionOptions(options)));
 
     setIgnoredAttributeIndices(Utils.getOption('I', options));
@@ -293,7 +305,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
     
     if (m_clusterer != null) {
       options[current++] = "-W"; 
-      options[current++] = getDistributionClusterer().getClass().getName();
+      options[current++] = getDensityBasedClusterer().getClass().getName();
     }
 
     options[current++] = "--";
@@ -337,7 +349,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    *
    * @param newClusterer the clusterer to use
    */
-  public void setDistributionClusterer(DistributionClusterer newClusterer) {
+  public void setDensityBasedClusterer(DensityBasedClusterer newClusterer) {
     m_clusterer = newClusterer;
   }
 
@@ -346,7 +358,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    *
    * @return the clusterer used
    */
-  public DistributionClusterer getDistributionClusterer() {
+  public DensityBasedClusterer getDensityBasedClusterer() {
     return m_clusterer;
   }
 
