@@ -32,14 +32,22 @@ import java.util.Random;
 
 /**
  * Class for a misclassification cost matrix. The element in the i'th column
- * of the j'th row is the cost for misclassifying an instance of class j as 
+ * of the j'th row is the cost for (mis)classifying an instance of class j as 
  * having class i.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CostMatrix extends Matrix {
 
+  /** The filename extension that should be used for cost files */
+  public static String FILE_EXTENSION = ".cost";
+
+  /**
+   * Creates a cost matrix identical to an existing matrix.
+   *
+   * @param toCopy the matrix to copy.
+   */
   public CostMatrix(CostMatrix toCopy) {
 
     this(toCopy.size());
@@ -185,9 +193,6 @@ public class CostMatrix extends Matrix {
       if ((int)secondIndex >= size()) {
 	throw new Exception("Class index out of range!");
       }
-      if ((int)secondIndex == (int)firstIndex) {
-	throw new Exception("Diagonal elements not allowed!");
-      }
 
       // Get cost factor.
       if (StreamTokenizer.TT_EOF == 
@@ -202,9 +207,6 @@ public class CostMatrix extends Matrix {
 			    "in cost file!");
       }
       double weight = tokenizer.nval;
-      if (!Utils.gr(weight, 0)) {
-	throw new Exception("Only positive weights allowed!");
-      }
       setElement((int)firstIndex, (int)secondIndex, weight);
     }
   }
@@ -236,6 +238,34 @@ public class CostMatrix extends Matrix {
     return numColumns();
   }
 
+  
+  /**
+   * Normalizes the cost matrix so that diagonal elements are zero. The value
+   * of non-zero diagonal elements is subtracted from the row containing the
+   * value. For example: <p>
+   *
+   * <pre><code>
+   * 2  5
+   * 3 -1
+   * </code></pre>
+   * 
+   * <p> becomes <p>
+   *
+   * <pre><code>
+   * 0  3
+   * 4  0
+   * </code></pre>
+   */
+  public void normalize() {
+
+    for (int i = 0; i < size(); i++) {
+      double diag = getElement(i, i);
+      for (int j = 0; j < size(); j++) {
+        setElement(i, j, getElement(i, j) - diag);
+      }
+    }
+  }
+
   /** 
    * Changes the dataset to reflect a given set of costs.
    * Sets the weights of instances according to the misclassification
@@ -259,6 +289,17 @@ public class CostMatrix extends Matrix {
 			  + " size!");
     }
 
+    // If this cost matrix hasn't been normalized, apply a normalized
+    // version instead.
+    for (int i = 0; i < size(); i++) {
+      if (!Utils.eq(m_Elements[i][i], 0)) {
+        CostMatrix cm = new CostMatrix(this);
+        cm.normalize();
+        return cm.applyCostMatrix(instances, random);
+      }
+    }
+      
+    // Determine the prior weights of all instances in each class
     double [] weightOfInstancesInClass = new double [size()];
     for (int j = 0; j < instances.numInstances(); j++) {
       Instance current = instances.instance(j);
@@ -270,10 +311,6 @@ public class CostMatrix extends Matrix {
     double [] weightFactor = new double [size()];
     double sumOfWeightFactors = 0;
     for (int i = 0; i < size(); i++) {
-      if (!Utils.eq(m_Elements[i][i], 0)) {
-	throw new Exception("Diagonal of misclassification cost "+
-			    "matrix not zero!");
-      }
 
       // Using Kai Ming Ting's formula for deriving weights for 
       // the classes and Breiman's heuristic for multiclass 
