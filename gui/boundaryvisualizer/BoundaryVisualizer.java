@@ -42,25 +42,30 @@ import weka.gui.visualize.ClassPanel;
 
 /**
  * BoundaryVisualizer. Allows the visualization of classifier decision
- * boundaries in two dimensions. A supplied classifier is first trained on
- * supplied training data, then a data generator (currently using
- * kernels) is used to generate new instances at points fixed in the two
- * visualization dimensions but random in the other dimensions. These
- * instances are classified by the classifier and plotted as points with
- * colour corresponding to the probability distribution predicted by the
- * classifier. At present, 2 * 2^(# non-fixed dimensions) points are generated 
- * from each kernel per pixel in the display. In practice, fewer points than
- * this are actually classified because kernels are weighted (on a per-pixel
- * basis) according to the fixexd dimensions and kernels corresponding 
- * to the lowest 1% of the weight mass are discarded. Predicted probability 
- * distributions are weighted (acording to the fixed visualization dimensions)
- * and averaged to produce an RGB value for the pixel.
+ * boundaries in two dimensions. A supplied classifier is first
+ * trained on supplied training data, then a data generator (currently
+ * using kernels) is used to generate new instances at points fixed in
+ * the two visualization dimensions but random in the other
+ * dimensions. These instances are classified by the classifier and
+ * plotted as points with colour corresponding to the probability
+ * distribution predicted by the classifier. At present, 2 * 2^(#
+ * non-fixed dimensions) points are generated from each kernel per
+ * pixel in the display. In practice, fewer points than this are
+ * actually classified because kernels are weighted (on a per-pixel
+ * basis) according to the fixexd dimensions and kernels corresponding
+ * to the lowest 1% of the weight mass are discarded. Predicted
+ * probability distributions are weighted (acording to the fixed
+ * visualization dimensions) and averaged to produce an RGB value for
+ * the pixel. For more information, see<p>
  * 
+ * Eibe Frank and Mark Hall (2003). Visualizing Class Probability
+ * Estimators. Working Paper 03/03, Department of Computer Science,
+ * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
- * @see JPanel
+ * @see JPanel 
  */
 public class BoundaryVisualizer extends JPanel {
 
