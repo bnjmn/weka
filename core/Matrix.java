@@ -31,9 +31,9 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public class Matrix implements Serializable {
+public class Matrix implements Cloneable, Serializable {
 
   /** The data in the matrix. */
   protected double [][] m_Elements;
@@ -109,6 +109,24 @@ public class Matrix implements Serializable {
       throw new Exception("Line " + lnr.getLineNumber() 
 			  + ": too few rows provided");
     }
+  }
+
+  /**
+   * Creates and returns a clone of this object.
+   *
+   * @return a clone of this instance.
+   * @exception CloneNotSupportedException if an error occurs
+   */
+  public Object clone() throws CloneNotSupportedException {
+
+    Matrix m = (Matrix)super.clone();
+    m.m_Elements = new double[numRows()][numColumns()];
+    for (int r = 0; r < numRows(); r++) {
+      for (int c = 0; c < numColumns(); c++) {
+        m.m_Elements[r][c] = m_Elements[r][c];
+      }
+    }
+    return m;
   }
 
   /**
@@ -269,14 +287,42 @@ public class Matrix implements Serializable {
   } 
     
   /**
-   * Returns the transpose of a matrix 
+   * Returns the sum of this matrix with another.
    *
-   * @return the transposed matrix
+   * @return the sum.
+   */
+  public final Matrix add(Matrix other) {
+
+    int nr = m_Elements.length, nc = m_Elements[0].length;
+    Matrix b;
+    try {
+      b = (Matrix)clone();
+    } catch (CloneNotSupportedException ex) {
+      b = new Matrix(nr, nc);
+    }
+    
+    for(int i = 0;i < nc; i++) {
+      for(int j = 0; j < nr; j++) {
+        b.m_Elements[i][j] = m_Elements[j][i] + other.m_Elements[j][i];
+      }
+    }
+    return b;
+  }
+  
+  /**
+   * Returns the transpose of a matrix.
+   *
+   * @return the transposition of this instance).
    */
   public final Matrix transpose() {
 
     int nr = m_Elements.length, nc = m_Elements[0].length;
-    Matrix b = new Matrix(nc, nr);
+    Matrix b;
+    try {
+      b = (Matrix)clone();
+    } catch (CloneNotSupportedException ex) {
+      b = new Matrix(nr, nc);
+    }
 
     for(int i = 0;i < nc; i++) {
       for(int j = 0; j < nr; j++) {
