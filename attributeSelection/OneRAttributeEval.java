@@ -36,7 +36,7 @@ import  weka.filters.Filter;
  * No options. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator
@@ -129,7 +129,7 @@ public class OneRAttributeEval
     delTransform.setInputFormat(trainCopy);
     trainCopy = Filter.useFilter(trainCopy, delTransform);
     o_Evaluation = new Evaluation(trainCopy);
-    o_Evaluation.crossValidateModel("weka.classifiers.OneR", trainCopy, 10, null);
+    o_Evaluation.crossValidateModel("weka.classifiers.rules.OneR", trainCopy, 10, null);
     errorRate = o_Evaluation.errorRate();
     return  (1 - errorRate)*100.0;
   }
