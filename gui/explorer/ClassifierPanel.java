@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.73 $
+ * @version $Revision: 1.74 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -817,9 +817,8 @@ public class ClassifierPanel extends JPanel {
 	double [] dist = 
 	  dc.distributionForInstance(classMissing);
 	pred = eval.evaluateModelOnce(dist, toPredict);
-	int actual = (int)toPredict.classValue();
 	predictions.addElement(new 
-	  NominalPrediction(actual, dist, toPredict.weight()));
+	  NominalPrediction(toPredict.classValue(), dist, toPredict.weight()));
       } else {
 	pred = eval.evaluateModelOnce(classifier, 
 				      toPredict);
@@ -845,7 +844,8 @@ public class ClassifierPanel extends JPanel {
 
       plotInstances.add(new Instance(1.0, values));
       if (toPredict.classAttribute().isNominal()) {
-	if (toPredict.isMissing(toPredict.classIndex())) {
+	if (toPredict.isMissing(toPredict.classIndex()) 
+	    || Instance.isMissingValue(pred)) {
 	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
 	} else if (pred != toPredict.classValue()) {
 	  // set to default error point shape
@@ -858,11 +858,12 @@ public class ClassifierPanel extends JPanel {
       } else {
 	// store the error (to be converted to a point size later)
 	Double errd = null;
-	if (!toPredict.isMissing(toPredict.classIndex())) {
+	if (!toPredict.isMissing(toPredict.classIndex()) && 
+	    !Instance.isMissingValue(pred)) {
 	  errd = new Double(pred - toPredict.classValue());
 	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
 	} else {
-	  // missing shape if actual class not present
+	  // missing shape if actual class not present or prediction is missing
 	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
 	}
 	plotSize.addElement(errd);
