@@ -28,7 +28,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public final class Utils {
 
@@ -181,6 +181,10 @@ public final class Utils {
     char[] result;
     int dotPosition;
 
+    if (afterDecimalPoint >= width) {
+      return tempString;
+    }
+
     // Initialize result
     result = new char[width];
     for (int i = 0; i < result.length; i++) {
@@ -199,21 +203,24 @@ public final class Utils {
       dotPosition = tempString.length();
     }
     
+
+    int offset = width - afterDecimalPoint - dotPosition;
+    if (afterDecimalPoint > 0) {
+      offset--;
+    }
     // Not enough room to decimal align within the supplied width
-    if (width - afterDecimalPoint - dotPosition - 1 < 0) {
+    if (offset < 0) {
       return tempString;
     }
 
     // Copy characters before decimal point
     for (int i = 0; i < dotPosition; i++) {
-      result[width - afterDecimalPoint - dotPosition - 1 + i] = 
-	  tempString.charAt(i);
+      result[offset + i] = tempString.charAt(i);
     }
 
     // Copy characters after decimal point
     for (int i = dotPosition + 1; i < tempString.length(); i++) {
-      result[width - afterDecimalPoint - 1 + i - dotPosition] = 
-	  tempString.charAt(i);
+      result[offset + i] = tempString.charAt(i);
     }
 
     return new String(result);
