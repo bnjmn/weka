@@ -77,7 +77,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -532,7 +532,7 @@ public class ResultsPanel extends JPanel {
 	return;
       }
       m_FromLab.setText("Getting experiment index");
-      Instances index = m_InstanceQuery.getInstances("SELECT * FROM "
+      Instances index = m_InstanceQuery.retrieveInstances("SELECT * FROM "
 				       + InstanceQuery.EXP_INDEX_TABLE);
       if (index.numInstances() == 0) {
 	m_FromLab.setText("No experiments available");
@@ -609,7 +609,7 @@ public class ResultsPanel extends JPanel {
 
     try {
       m_FromLab.setText("Reading from database, please wait...");
-      final Instances i = m_InstanceQuery.getInstances("SELECT * FROM "
+      final Instances i = m_InstanceQuery.retrieveInstances("SELECT * FROM "
 						      + tableName);
       SwingUtilities.invokeAndWait(new Runnable() {
 	public void run() {
