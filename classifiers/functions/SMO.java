@@ -81,7 +81,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -392,6 +392,9 @@ public class SMO extends Classifier implements OptionHandler {
 	
 	// We don't need to store the set of support vectors
 	m_supportVectors = null;
+
+	// We don't need to store the class values either
+	m_class = null;
 	
 	// Clean out training data
 	if (!m_checksTurnedOff) {
