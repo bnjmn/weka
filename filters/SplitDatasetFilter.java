@@ -38,7 +38,7 @@ import java.util.*;
  * If set, data is not being stratified even if class index is set. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -299,9 +299,8 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * is negative, shuffling won't be performed.
    *
    * @param seed the random number seed
-   * @exception Exception if the seed is smaller than 0
    */
-  public void setSeed(long seed) throws Exception {
+  public void setSeed(long seed) {
     
     m_Seed = seed;
   }
@@ -334,8 +333,8 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
     if ((m_NumFolds > 0) && (m_NumFolds < m_Fold)) {
-      throw new Exception("Fold has to be smaller or equal to "+
-			  "number of folds.");
+      throw new IllegalArgumentException("Fold has to be smaller or equal to "+
+                                         "number of folds.");
     }
     super.inputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
@@ -348,12 +347,12 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_Seed > 0) {
       // User has provided a random number seed.

@@ -31,7 +31,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -60,8 +60,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
-   * successfully
+   * @exception UnsupportedAttributeTypeException the selecte attribute is not nominal
+   * @exception UnsupportedAttributeTypeException the selecte attribute has fewer than two values.
    */
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
@@ -74,10 +74,10 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     
     m_ValIndex.setUpper(instanceInfo.attribute(m_AttIndex).numValues() - 1);
     if (!instanceInfo.attribute(m_AttIndex).isNominal()) {
-      throw new Exception("Chosen attribute not nominal.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
     }
     if (instanceInfo.attribute(m_AttIndex).numValues() < 2) {
-      throw new Exception("Chosen attribute has less than two values.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute has less than two values.");
     }
     setOutputFormat();
     return true;
@@ -90,13 +90,12 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been set.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -289,12 +288,7 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    */
   public void setValueIndices(String range) {
     
-    try {
-      m_ValIndex.setRanges(range);
-    } catch (Exception ex) {
-      System.err.println("This should never happen - panic");
-      ex.printStackTrace();
-    }
+    m_ValIndex.setRanges(range);
   }
 
   /**
@@ -313,9 +307,9 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @exception Exception if an invalid set of ranges is supplied
+   * @exception InvalidArgumentException if an invalid set of ranges is supplied
    */
-  public void setValueIndicesArray(int [] indices) throws Exception {
+  public void setValueIndicesArray(int [] indices) {
     
     setValueIndices(Range.indicesToRangeList(indices));
   }
@@ -352,10 +346,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
 
   /**
    * Set the output format.
-   *
-   * @exception Exception if a problem occurs setting the output format
    */
-  private void setOutputFormat() throws Exception {
+  private void setOutputFormat() {
     
     Instances newData;
     FastVector newAtts, newVals;

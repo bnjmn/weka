@@ -17,7 +17,7 @@ import weka.core.Utils;
  * non-sparse format.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class SparseToNonSparseFilter extends Filter {
 
@@ -56,13 +56,12 @@ public class SparseToNonSparseFilter extends Filter {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the correct 
-   * format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();

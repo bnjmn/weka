@@ -7,16 +7,17 @@
 
 package weka.filters;
 
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Attribute;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.FastVector;
 
 import java.util.Enumeration;
 import java.util.Vector;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.UnsupportedAttributeTypeException;
 
 
 /** 
@@ -30,7 +31,7 @@ import java.util.Vector;
  * Index of the attribute to be changed. (default last)<p>
  *
  * @author Len Trigg (len@intelligenesis.net) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class StringToNominalFilter extends Filter 
   implements OptionHandler {
@@ -47,9 +48,11 @@ public class StringToNominalFilter extends Filter
    * @param instanceInfo an Instances object containing the input 
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
-   * @return true if the outputFormat may be collected immediately
+   * @return true if the outputFormat may be collected immediately.
+   * @exception UnsupportedAttributeTypeException if the selected attribute
+   * a string attribute.
    * @exception Exception if the input format can't be set 
-   * successfully
+   * successfully.
    */
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
@@ -60,7 +63,7 @@ public class StringToNominalFilter extends Filter
       m_AttIndex = instanceInfo.numAttributes() - 1;
     }
     if (!instanceInfo.attribute(m_AttIndex).isString()) {
-      throw new Exception("Chosen attribute is not of type string.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute is not of type string.");
     }
     return false;
   }
@@ -69,16 +72,15 @@ public class StringToNominalFilter extends Filter
    * Input an instance for filtering. The instance is processed
    * and made available for output immediately.
    *
-   * @param instance the input instance
+   * @param instance the input instance.
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input structure has been defined.
    */
-  public boolean input(Instance instance) throws Exception {
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -101,13 +103,13 @@ public class StringToNominalFilter extends Filter
    * filter requires all instances prior to filtering, output() may now 
    * be called to retrieve the filtered instances.
    *
-   * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @return true if there are instances pending output.
+   * @exception IllegalStateException if no input structure has been defined.
    */
-  public boolean batchFinished() throws Exception {
+  public boolean batchFinished() {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (!isOutputFormatDefined()) {
 
@@ -126,9 +128,9 @@ public class StringToNominalFilter extends Filter
 
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options
+   * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
@@ -214,10 +216,8 @@ public class StringToNominalFilter extends Filter
    * Set the output format. Takes the current average class values
    * and m_InputFormat and calls setOutputFormat(Instances) 
    * appropriately.
-   *
-   * @exception Exception if a problem occurs when setting the output format
    */
-  private void setOutputFormat() throws Exception {
+  private void setOutputFormat() {
     
     Instances newData;
     FastVector newAtts, newVals;

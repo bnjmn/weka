@@ -41,7 +41,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AttributeExpressionFilter extends Filter 
   implements OptionHandler {
@@ -108,9 +108,9 @@ public class AttributeExpressionFilter extends Filter
     /** the operator */
     protected char m_operator;
 
-    public Operator(char opp) throws Exception {
+    public Operator(char opp) throws IllegalArgumentException {
       if (!isOperator(opp)) {
-	throw new Exception("Unrecognized operator!");
+	throw new IllegalArgumentException("Unrecognized operator:" + opp);
       }
       m_operator = opp;
     }
@@ -426,7 +426,7 @@ public class AttributeExpressionFilter extends Filter
    * @param char the operator
    * @return the infix priority
    */
-  private int infixPriority(char opp) throws Exception {
+  private int infixPriority(char opp) throws IllegalArgumentException {
     switch (opp) {
     case 'l' : 
     case 'b' :
@@ -454,7 +454,7 @@ public class AttributeExpressionFilter extends Filter
     case ')' :
       return 0;
     default :
-      throw new Exception("Unrecognized operator");
+      throw new IllegalArgumentException("Unrecognized operator:" + opp);
     }
   }
 
@@ -463,7 +463,7 @@ public class AttributeExpressionFilter extends Filter
    * @param char the operator
    * @return the stack priority
    */
-  private int stackPriority(char opp) throws Exception {
+  private int stackPriority(char opp) throws IllegalArgumentException {
      switch (opp) {
      case 'l' :
      case 'b' :
@@ -491,7 +491,7 @@ public class AttributeExpressionFilter extends Filter
     case ')' :
       return -1;
     default :
-      throw new Exception("Unrecognized operator");
+      throw new IllegalArgumentException("Unrecognized operator:" + opp);
     }
   }
 
@@ -697,13 +697,13 @@ public class AttributeExpressionFilter extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the correct 
-   * format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been defined.
+   * @exception Exception if there was a problem during the filtering.
    */
   public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();

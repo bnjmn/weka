@@ -34,7 +34,7 @@ import weka.core.*;
  * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -59,7 +59,7 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     try {
       m_Class = Math.class;
       m_Method = Math.class.getMethod("abs", PARAM);
-    } catch (Exception ex) {
+    } catch (NoSuchMethodException ex) {
       System.err.println("One of those errors that you should never see");
       ex.printStackTrace();
     }
@@ -79,10 +79,10 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
        throws Exception {
 
     if (m_Class == null) {
-      throw new Exception("No class has been set.");
+      throw new IllegalStateException("No class has been set.");
     }
     if (m_Method == null) {
-      throw new Exception("No method has been set.");
+      throw new IllegalStateException("No method has been set.");
     }
     super.inputFormat(instanceInfo);
     m_Cols.setUpper(instanceInfo.numAttributes() - 1);
@@ -97,13 +97,14 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the 
-   * correct format or if there was a problem with the filtering.
+   * @exception IllegalStateException if no input format has been set.
+   * @exception InvocationTargetException if there is a problem applying
+   * the configured transform method.
    */
   public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
-      throw new Exception("No input instance format defined");
+      throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
@@ -250,9 +251,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    * Sets the class containing the transformation method.
    *
    * @param name the name of the class
-   * @exception Exception if class can't be found
+   * @exception ClassNotFoundException if class can't be found
    */
-  public void setClassName(String name) throws Exception {
+  public void setClassName(String name) throws ClassNotFoundException {
   
     m_Class = Class.forName(name);
   }
@@ -271,9 +272,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    * Set the transformation method.
    *
    * @param name the name of the method
-   * @exception Exception if method can't be found in class
+   * @exception NoSuchMethodException if method can't be found in class
    */
-  public void setMethodName(String name) throws Exception {
+  public void setMethodName(String name) throws NoSuchMethodException {
 
     m_Method = m_Class.getMethod(name, PARAM);
   }
@@ -328,10 +329,10 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    * the string will typically come from a user, attributes are indexed from
    * 1. <br> eg: 
    * first-3,5,6-last
-   * @exception Exception if an invalid range list is supplied
+   * @exception InvalidArgumentException if an invalid range list is supplied
    */
 
-  public void setAttributeIndices(String rangeList) throws Exception {
+  public void setAttributeIndices(String rangeList) {
 
     m_Cols.setRanges(rangeList);
   }
@@ -342,9 +343,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @exception Exception if an invalid set of ranges is supplied
+   * @exception InvalidArgumentException if an invalid set of ranges is supplied
    */
-  public void setAttributeIndicesArray(int [] attributes) throws Exception {
+  public void setAttributeIndicesArray(int [] attributes) {
 
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
