@@ -109,7 +109,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -237,7 +237,7 @@ public class AttributeSelectionPanel extends JPanel {
 	}
       }
     });
-    m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
+    m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
     m_AttributeEvaluatorEditor.setClassType(ASEvaluation.class);
     m_AttributeEvaluatorEditor.setValue(new weka.attributeSelection.
 					CfsSubsetEval());
@@ -305,6 +305,8 @@ public class AttributeSelectionPanel extends JPanel {
 	    if (index != -1) {
 	      String name = m_History.getNameAtIndex(index);
 	      visualize(name, e.getX(), e.getY());
+	    } else {
+	      visualize(null, e.getX(), e.getY());
 	    }
 	  }
 	}
@@ -767,56 +769,73 @@ public class AttributeSelectionPanel extends JPanel {
     JPopupMenu resultListMenu = new JPopupMenu();
 
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
-    visMainBuffer.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.setSingle(selectedName);
-	}
-      });
+    if (selectedName != null) {
+      visMainBuffer.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    m_History.setSingle(selectedName);
+	  }
+	});
+    } else {
+      visMainBuffer.setEnabled(false);
+    }
     resultListMenu.add(visMainBuffer);
 
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    if (selectedName != null) {
     visSepBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  m_History.openFrame(selectedName);
 	}
       });
+    } else {
+      visSepBuffer.setEnabled(false);
+    }
     resultListMenu.add(visSepBuffer);
 
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    if (selectedName != null) {
     saveOutput.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  saveBuffer(selectedName);
 	}
       });
-
+    } else {
+      saveOutput.setEnabled(false);
+    }
     resultListMenu.add(saveOutput);
+    
     resultListMenu.addSeparator();
 
-    FastVector o = (FastVector)m_History.getNamedObject(selectedName);
-    
-    if (o != null) {
-      VisualizePanel temp_vp = null;
-      String temp_grph = null;
+    FastVector o = null;
+    if (selectedName != null) {
+      o = (FastVector)m_History.getNamedObject(selectedName);
+    }    
+
+    VisualizePanel temp_vp = null;
      
+    if (o != null) {
       for (int i = 0; i < o.size(); i++) {
 	Object temp = o.elementAt(i);
 	if (temp instanceof VisualizePanel) {
 	  temp_vp = (VisualizePanel)temp;
 	} 
       }
-
-      final VisualizePanel vp = temp_vp;
-
-      JMenuItem visTrans = new JMenuItem("Visualize transformed data");
-      if (vp != null) {
-	visTrans.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      visualizeTransformedData(vp);
-	    }
-	  });
-	resultListMenu.add(visTrans);
-      }
     }
+    
+    final VisualizePanel vp = temp_vp;
+    
+    JMenuItem visTrans = new JMenuItem("Visualize transformed data");
+    if (vp != null) {
+      visTrans.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    visualizeTransformedData(vp);
+	  }
+	});
+    } else {
+      visTrans.setEnabled(false);
+    }
+    resultListMenu.add(visTrans);
+    
     resultListMenu.show(m_History.getList(), x, y);
   }
 
