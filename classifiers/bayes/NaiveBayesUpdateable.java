@@ -46,11 +46,28 @@ import weka.classifiers.Evaluation;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NaiveBayesUpdateable extends NaiveBayes 
   implements UpdateableClassifier {
  
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class for a Naive Bayes classifier using estimator classes. This is the "
+      +"updateable version of NaiveBayes."
+      +"This classifier will use a default precision of 0.1 for numeric attributes "
+      +"when buildClassifier is called with zero training instances.\n\n"
+      +"For more information on Naive Bayes classifiers, see\n\n"
+      +"George H. John and Pat Langley (1995). Estimating "
+      +"Continuous Distributions in Bayesian Classifiers. Proceedings "
+      +"of the Eleventh Conference on Uncertainty in Artificial "
+      +"Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.\n\n";
+  }
+
   /**
    * Set whether supervised discretization is to be used.
    *

@@ -35,9 +35,9 @@ import weka.core.*;
  *
  * Richard Duda and Peter Hart (1973).<i>Pattern
  * Classification and Scene Analysis</i>. Wiley, New York.
-
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
 */
 public class NaiveBayesSimple extends Classifier {
 
@@ -58,6 +58,19 @@ public class NaiveBayesSimple extends Classifier {
 
   /** Constant for normal distribution. */
   private static double NORM_CONST = Math.sqrt(2 * Math.PI);
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class for building and using a simple Naive Bayes classifier."
+      +"Numeric attributes are modelled by a normal distribution. For more "
+      +"information, see\n\n"
+      +"Richard Duda and Peter Hart (1973). Pattern "
+      +"Classification and Scene Analysis. Wiley, New York.";
+  }
 
   /**
    * Generates the classifier.
