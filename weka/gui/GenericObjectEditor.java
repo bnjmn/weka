@@ -53,6 +53,14 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 
 
 /** 
@@ -67,7 +75,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -137,7 +145,7 @@ public class GenericObjectEditor implements PropertyEditor {
 
     /** Creates the GUI editor component */
     public GOEPanel() {
-
+      m_Backup = copyObject(m_Object);
       //System.err.println("GOE()");
       m_ObjectNames = new DefaultComboBoxModel(new String [0]);
       m_ObjectChooser = new JComboBox(m_ObjectNames);
@@ -155,7 +163,7 @@ public class GenericObjectEditor implements PropertyEditor {
       m_okBut.setEnabled(true);
       m_okBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  m_Backup = m_Object;
+	  m_Backup = copyObject(m_Object);
 	  if ((getTopLevelAncestor() != null)
 	      && (getTopLevelAncestor() instanceof Window)) {
 	    Window w = (Window) getTopLevelAncestor();
@@ -169,8 +177,8 @@ public class GenericObjectEditor implements PropertyEditor {
       m_cancelBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  if (m_Backup != null) {
-	    setObject(m_Backup);
-	    m_Backup=null;
+	    m_Object = copyObject(m_Backup);
+	    setObject(m_Object);
 	    updateClassType();
 	    updateChooser();
 	    updateChildPropertySheet();
@@ -201,7 +209,32 @@ public class GenericObjectEditor implements PropertyEditor {
       }
       m_ObjectChooser.addItemListener(this);
     }
-   
+
+    /**
+     * Makes a copy of an object using serialization
+     * @param source the object to copy
+     * @return a copy of the source object
+     */
+    protected Object copyObject(Object source) {
+      Object result = null;
+      try {
+	ByteArrayOutputStream bo = new ByteArrayOutputStream();
+	BufferedOutputStream bbo = new BufferedOutputStream(bo);
+	ObjectOutputStream oo = new ObjectOutputStream(bbo);
+	oo.writeObject(source);
+	oo.close();
+	
+	ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
+	BufferedInputStream bbi = new BufferedInputStream(bi);
+	ObjectInputStream oi = new ObjectInputStream(bbi);
+	result = oi.readObject();
+	oi.close();
+      } catch (Exception ex) {
+	System.err.println("GenericObjectEditor: Problem making backup object");
+	System.err.print(ex);
+      }
+      return result;
+    }
 
     /** 
      * This is used to hook an action listener to the ok button
