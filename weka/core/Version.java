@@ -31,7 +31,7 @@ package weka.core;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 public class Version implements Comparable {
   /** the major version */
@@ -41,7 +41,7 @@ public class Version implements Comparable {
   public final static int MINOR = 4; 
   
   /** the revision */
-  public final static int REVISION = 3;
+  public final static int REVISION = 4;
   
   /** the complete version */
   public final static String VERSION = MAJOR + "." + MINOR + "." + REVISION;

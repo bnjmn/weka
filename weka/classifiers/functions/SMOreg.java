@@ -58,7 +58,8 @@ import weka.core.*;
  *
  *
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $$ 
+ * @version 1.01 $$ 
+ *
  */
 public class SMOreg extends Classifier implements OptionHandler, 
   WeightedInstancesHandler {
@@ -71,7 +72,7 @@ public class SMOreg extends Classifier implements OptionHandler,
   protected boolean m_useRBF = false;
     
   /** The size of the cache (a prime number) */
-  protected int m_cacheSize = 1000003;
+  protected int m_cacheSize = 250007;
     
   /** Kernel to use **/
   protected Kernel m_kernel;
@@ -379,7 +380,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     m_b = (m_bLow + m_bUp) / 2.0;
 	
     // Save memory
-    m_kernel.clean(); m_fcache = null;
+    m_kernel.clean(); m_fcache = null; 
     m_I0 = m_I1 = m_I2 = m_I3 = null;
 	
     // If machine is linear, delete training data
@@ -416,9 +417,9 @@ public class SMOreg extends Classifier implements OptionHandler,
 
       // Clean out training data
       if (!m_checksTurnedOff) {
-	m_data = new Instances(m_data, 0);
+      	m_data = new Instances(m_data, 0);
       } else {
-	m_data = null;
+      	m_data = null;
       }
 	    
       // Clean out weight vector
@@ -429,7 +430,6 @@ public class SMOreg extends Classifier implements OptionHandler,
       m_alpha_ = null;
     }
   }
-
 
   /**
    * Examines instance. (As defined in Shevade's paper.)
@@ -1022,7 +1022,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 				    "(default poly)",
 				    "R", 0, "-R"));
     newVector.addElement(new Option("\tThe size of the kernel cache. " +
-				    "(default 1000003)",
+				    "(default 250007, use 0 for full cache)",
 				    "A", 1, "-A <int>"));
     newVector.addElement(new Option("\tThe tolerance parameter. " +
 				    "(default 1.0e-3)",
@@ -1063,7 +1063,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Use RBF kernel (default poly). <p>
    * 
    * -A num <br>
-   * Sets the size of the kernel cache. Should be a prime number. (default 1000003) <p>
+   * Sets the size of the kernel cache. Should be a prime number. (default 250007, use 0 for full cache) <p>
    *
    * -T num <br>
    * Sets the tolerance parameter. (default 1.0e-3)<p>
@@ -1104,7 +1104,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     if (cacheString.length() != 0) {
       m_cacheSize = Integer.parseInt(cacheString);
     } else {
-      m_cacheSize = 1000003;
+      m_cacheSize = 250007;
     }
     String toleranceString = Utils.getOption('T', options);
     if (toleranceString.length() != 0) {
@@ -1639,7 +1639,19 @@ public class SMOreg extends Classifier implements OptionHandler,
       if (m_useRBF || m_exponent != 1.0) {
 	text.append("\n\nNumber of support vectors: " + printed);
       }
-      text.append("\n\nNumber of kernel evaluations: " + m_kernel.numEvals()+ "\n");
+      int numEval = 0;
+      int numCacheHits = -1;
+      if(m_kernel != null)
+	{
+	  numEval = m_kernel.numEvals();
+	  numCacheHits = m_kernel.numCacheHits();
+	}
+      text.append("\n\nNumber of kernel evaluations: " + numEval);
+      if (numCacheHits >= 0 && numEval > 0)
+	{
+	  double hitRatio = 1 - numEval/(numCacheHits+numEval);
+	  text.append(" (" + Utils.doubleToString(hitRatio*100, 7, 3) + "% cached)");
+	}
     } catch (Exception e) {
       return "Can't print the classifier.";
     }
