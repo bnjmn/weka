@@ -76,7 +76,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -376,7 +376,7 @@ public class ResultsPanel extends JPanel {
     gbL.setConstraints(m_TestsCombo, gbC);
     p3.add(m_TestsCombo);
 
-    lab = new JLabel("Show standard deviations", SwingConstants.RIGHT);
+    lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = 6;     gbC.gridx = 0;
