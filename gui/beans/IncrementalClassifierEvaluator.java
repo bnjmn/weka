@@ -44,7 +44,7 @@ import java.awt.*;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -62,6 +62,9 @@ public class IncrementalClassifierEvaluator
   private ChartEvent m_ce = new ChartEvent(this);
   private double [] m_dataPoint = new double[1];
   private boolean m_reset = false;
+
+  private double m_min = Double.MAX_VALUE;
+  private double m_max = Double.MIN_VALUE;
 
   public IncrementalClassifierEvaluator() {
     super();
@@ -99,16 +102,25 @@ public class IncrementalClassifierEvaluator
 	}
       } else {
 	Instance inst = ce.getCurrentInstance();
-	if (inst.attribute(inst.classIndex()).isNominal()) {
+	//	if (inst.attribute(inst.classIndex()).isNominal()) {
 	  double [] dist = null;
+	  double pred = 0;
 	  if (ce.getClassifier() instanceof DistributionClassifier) {
 	    dist = ((DistributionClassifier)ce.getClassifier())
 	      .distributionForInstance(inst);
 	  }
 	  if (dist == null) {
-	    m_eval.evaluateModelOnce(ce.getClassifier(), inst);
+	    if (!inst.isMissing(inst.classIndex())) {
+	      m_eval.evaluateModelOnce(ce.getClassifier(), inst);
+	    } else {
+	      pred = ce.getClassifier().classifyInstance(inst);
+	    }
 	  } else {
-	  m_eval.evaluateModelOnce(dist, inst);
+	    if (!inst.isMissing(inst.classIndex())) {
+	      m_eval.evaluateModelOnce(dist, inst);
+	    } else {
+	      pred = ce.getClassifier().classifyInstance(inst);
+	    }
 	  }
 	  if (inst.classIndex() >= 0) {
 	    // need to check that the class is not missing
@@ -132,6 +144,9 @@ public class IncrementalClassifierEvaluator
 		primaryMeasure = 1.0 - m_eval.errorRate();
 	      } else if (dist != null) {
 		// record confidence as the primary measure
+		// (another possibility would be entropy of
+		// the distribution, or perhaps average
+		// confidence)
 		primaryMeasure = dist[Utils.maxIndex(dist)];
 	      } else {
 		// need something for non distribution classifiers when the
@@ -150,10 +165,35 @@ public class IncrementalClassifierEvaluator
 	      m_reset = false;
 	    } else {
 	      // numeric class
+	      if (dist != null && !inst.isMissing(inst.classIndex())) {
+		double update;
+		if (!inst.isMissing(inst.classIndex())) {
+		  update = m_eval.rootRelativeSquaredError();
+		} else {
+		  update = pred;
+		}
+		m_dataPoint[0] = update;
+		if (update > m_max) {
+		  m_max = update;
+		}
+		if (update < m_min) {
+		  m_min = update;
+		}
+	      }
+
+
+	      m_ce.setLegendText(m_dataLegend);
+	      m_ce.setMin((inst.isMissing(inst.classIndex()) 
+			   ? m_min
+			   : 0)); 
+	      m_ce.setMax(m_max);
+	      m_ce.setDataPoint(m_dataPoint);
+	      m_ce.setReset(m_reset);
+	      m_reset = false;
 	    }
 	    notifyChartListeners(m_ce);
 	  }
-	}	
+	  //	}
       }
     } catch (Exception ex) {
       ex.printStackTrace();
