@@ -52,7 +52,7 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeSummaryPanel extends JPanel {
 
@@ -196,6 +196,7 @@ public class AttributeSummaryPanel extends JPanel {
     m_MissingLab.setText(NO_SOURCE);
     m_UniqueLab.setText(NO_SOURCE);
     m_DistinctLab.setText(NO_SOURCE);
+    m_StatsTable.setModel(new DefaultTableModel());
   }
 
   /**
