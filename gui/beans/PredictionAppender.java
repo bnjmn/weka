@@ -42,7 +42,7 @@ import weka.core.Instance;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
@@ -331,7 +331,7 @@ public class PredictionAppender extends JPanel
     for (int i = 0; i < format.classAttribute().numValues(); i++) {
       weka.filters.unsupervised.attribute.Add addF = new
 	weka.filters.unsupervised.attribute.Add();
-      addF.setAttributeIndex(-1);
+      addF.setAttributeIndex("last");
       addF.setAttributeName("prob_"+format.classAttribute().value(i));
       addF.setInputFormat(newInstances);
       newInstances = weka.filters.Filter.useFilter(newInstances, addF);
@@ -347,7 +347,7 @@ public class PredictionAppender extends JPanel
     
     weka.filters.unsupervised.attribute.Add addF = new
       weka.filters.unsupervised.attribute.Add();
-    addF.setAttributeIndex(-1);
+    addF.setAttributeIndex("last");
     String classifierName = classifier.getClass().getName();
     classifierName = classifierName.
       substring(classifierName.lastIndexOf('.')+1, classifierName.length());
