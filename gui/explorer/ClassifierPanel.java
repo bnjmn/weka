@@ -137,7 +137,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.80 $
+ * @version $Revision: 1.81 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -302,6 +302,12 @@ public class ClassifierPanel extends JPanel {
 		      weka.gui.GenericArrayEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.NearestNeighbourSearch.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.DistanceFunction.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.associations.CARuleMiner.class,
