@@ -1,6 +1,6 @@
 JAVAC = javac
 
-SOURCES = AbstractTimeSeries.java Add.java AddCluster.java \
+SOURCES = AbstractTimeSeries.java Add.java\
 	AddExpression.java AddNoise.java Copy.java Discretize.java \
 	FirstOrder.java MakeIndicator.java MergeTwoValues.java \
 	NominalToBinary.java Normalize.java NumericToBinary.java \
