@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -1550,7 +1550,7 @@ public class ClustererPanel extends JPanel {
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Knowledge Explorer: Cluster");
+	new javax.swing.JFrame("Weka Explorer: Cluster");
       jf.getContentPane().setLayout(new BorderLayout());
       final ClustererPanel sp = new ClustererPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);

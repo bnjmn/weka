@@ -135,7 +135,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.69 $
+ * @version $Revision: 1.70 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -2125,7 +2125,7 @@ public class ClassifierPanel extends JPanel {
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Knowledge Explorer: Classifier");
+	new javax.swing.JFrame("Weka Explorer: Classifier");
       jf.getContentPane().setLayout(new BorderLayout());
       final ClassifierPanel sp = new ClassifierPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);

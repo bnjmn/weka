@@ -55,7 +55,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ClassPanel extends JPanel {
     
@@ -699,7 +699,7 @@ public class ClassPanel extends JPanel {
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Knowledge Explorer: Class");
+	new javax.swing.JFrame("Weka Explorer: Class");
       jf.setSize(500,100);
       jf.getContentPane().setLayout(new BorderLayout());
       final ClassPanel p2 = new ClassPanel();

@@ -108,7 +108,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -862,7 +862,7 @@ public class AttributeSelectionPanel extends JPanel {
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Knowledge Explorer: Select attributes");
+	new javax.swing.JFrame("Weka Explorer: Select attributes");
       jf.getContentPane().setLayout(new BorderLayout());
       final AttributeSelectionPanel sp = new AttributeSelectionPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);

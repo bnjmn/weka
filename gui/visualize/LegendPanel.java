@@ -56,7 +56,7 @@ import java.awt.Component;
  * be changed.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LegendPanel extends JScrollPane {
 
@@ -242,7 +242,7 @@ public class LegendPanel extends JScrollPane {
       }
 
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Knowledge Explorer: Legend");
+	new javax.swing.JFrame("Weka Explorer: Legend");
       jf.setSize(100,100);
       jf.getContentPane().setLayout(new BorderLayout());
       final LegendPanel p2 = new LegendPanel();
