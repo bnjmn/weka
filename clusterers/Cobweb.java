@@ -29,7 +29,7 @@
  * Cutoff. <p>
  *
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 package weka.clusterers;
 
@@ -314,6 +314,8 @@ public class Cobweb extends Clusterer implements OptionHandler{
       throw new Exception("Can't handle string attributes!");
     }
 
+    tree = null;
+    numClusters = -1;
     makeweb(data);
   }
 
