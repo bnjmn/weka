@@ -29,7 +29,7 @@ import weka.filters.*;
  *
  * @author Mark Hall
  * @author Dale Fletcher
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Rule implements Serializable {
 
@@ -182,8 +182,9 @@ public class Rule implements Serializable {
     m_topOfTree.setSmoothing(m_smoothPredictions);
     m_topOfTree.setSaveInstances(m_saveInstances);
     m_topOfTree.setRegressionTree(m_regressionTree);
-    m_topOfTree.buildClassifier(m_instances);
     m_topOfTree.setMinNumInstances(m_minNumInstances);
+    m_topOfTree.buildClassifier(m_instances);
+
 
 
     if (!m_useUnpruned) {
