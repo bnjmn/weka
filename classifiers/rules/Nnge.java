@@ -659,6 +659,9 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
       throw new UnsupportedAttributeTypeException("Class type must be nominal!");
     }	
 
+    // Make a copy of the instances
+    data = new Instances(data);
+
     /* initialize the classifier */
 
     m_Train = new Instances(data, 0);
@@ -1395,7 +1398,10 @@ public class Nnge extends Classifier implements UpdateableClassifier, OptionHand
     Exemplar cur = m_Exemplars;
     int i;	
 
-    int[] nbHypClass = new int[m_Train.numClasses()];
+   if (m_MinArray == null) {
+      return "No classifier built";
+    }
+     int[] nbHypClass = new int[m_Train.numClasses()];
     int[] nbSingleClass = new int[m_Train.numClasses()];
     for(i = 0; i<nbHypClass.length; i++){
       nbHypClass[i] = 0;
