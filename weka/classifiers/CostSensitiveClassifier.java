@@ -43,7 +43,14 @@ import weka.filters.Filter;
  * Specify the full class name of a classifier (required).<p>
  *
  * -C cost file <br>
- * File name of a cost matrix to use (required).<p>
+ * File name of a cost matrix to use. If this is not supplied, a cost
+ * matrix will be loaded on demand. The name of the on-demand file
+ * is the relation name of the training data plus ".cost", and the
+ * path to the on-demand file is specified with the -D option.<p>
+ *
+ * -D directory <br>
+ * Name of a directory to search for cost files when loading costs on demand
+ * (default current directory). <p>
  *
  * -S seed <br>
  * Random number seed used when reweighting by resampling (default 1).<p>
@@ -51,19 +58,36 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler {
 
-  /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  /* Specify possible sources of the cost matrix */
+  public static final int MATRIX_ON_DEMAND = 1;
+  public static final int MATRIX_SUPPLIED = 2;
+  public static final Tag [] TAGS_MATRIX_SOURCE = {
+    new Tag(MATRIX_ON_DEMAND, "Load cost matrix on demand"),
+    new Tag(MATRIX_SUPPLIED, "Use explicit cost matrix")
+  };
+
+  /** Indicates the current cost matrix source */
+  protected int m_MatrixSource = MATRIX_ON_DEMAND;
+
+  /** 
+   * The directory used when loading cost files on demand, null indicates
+   * current directory 
+   */
+  protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
+
+  /** The name of the cost file, for command line options */
+  protected String m_CostFile;
 
   /** The cost matrix */
   protected CostMatrix m_CostMatrix = new CostMatrix(1);
 
-  /** The name of the cost file (if read from a file) */
-  protected String m_CostFile = "default";
+  /** The classifier */
+  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
 
   /** Seed for reweighting using resampling. */
   protected int m_Seed = 1;
@@ -81,7 +105,7 @@ public class CostSensitiveClassifier extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
 	      "\tMinimize expected misclassification cost. The\n"
@@ -94,8 +118,16 @@ public class CostSensitiveClassifier extends Classifier
 	      + "\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W <class name>"));
     newVector.addElement(new Option(
-	      "\tFile name of a cost matrix to use (required)",
+	      "\tFile name of a cost matrix to use. If this is not supplied,\n"
+              +"\ta cost matrix will be loaded on demand. The name of the\n"
+              +"\ton-demand file is the relation name of the training data\n"
+              +"\tplus \".cost\", and the path to the on-demand file is\n"
+              +"\tspecified with the -D option.",
 	      "C", 1, "-C <cost file name>"));
+    newVector.addElement(new Option(
+              "\tName of a directory to search for cost files when loading\n"
+              +"\tcosts on demand (default current directory).",
+              "D", 1, "-D <directory>"));
     newVector.addElement(new Option(
 	      "\tSeed used when reweighting via resampling. (Default 1)",
 	      "S", 1, "-S <num>"));
@@ -114,7 +146,14 @@ public class CostSensitiveClassifier extends Classifier
    * Specify the full class name of a classifier (required).<p>
    *
    * -C cost file <br>
-   * File name of a cost matrix to use (required).<p>
+   * File name of a cost matrix to use. If this is not supplied, a cost
+   * matrix will be loaded on demand. The name of the on-demand file
+   * is the relation name of the training data plus ".cost", and the
+   * path to the on-demand file is specified with the -D option.<p>
+   *
+   * -D directory <br>
+   * Name of a directory to search for cost files when loading costs on demand
+   * (default current directory). <p>
    *
    * -S seed <br>
    * Random number seed used when reweighting by resampling (default 1).<p>
@@ -144,13 +183,21 @@ public class CostSensitiveClassifier extends Classifier
 				     Utils.partitionOptions(options)));
 
     String costFile = Utils.getOption('C', options);
-    if (costFile.length() == 0) {
-      throw new Exception("A cost file must be specified"
-			  + " with the -C option.");
+    if (costFile.length() != 0) {
+      setCostMatrix(new CostMatrix(new BufferedReader(
+                                   new FileReader(costFile))));
+      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED,
+                                          TAGS_MATRIX_SOURCE));
+      m_CostFile = costFile;
+    } else {
+      setCostMatrixSource(new SelectedTag(MATRIX_ON_DEMAND, 
+                                          TAGS_MATRIX_SOURCE));
     }
-    setCostMatrix(new CostMatrix(new BufferedReader(
-				 new FileReader(costFile))));
-    m_CostFile = costFile;
+    
+    String demandDir = Utils.getOption('D', options);
+    if (demandDir.length() != 0) {
+      setOnDemandDirectory(new File(demandDir));
+    }
   }
 
 
@@ -170,8 +217,15 @@ public class CostSensitiveClassifier extends Classifier
     String [] options = new String [classifierOptions.length + 9];
     int current = 0;
 
-    options[current++] = "-C";
-    options[current++] = "" + m_CostFile;
+    if (m_MatrixSource == MATRIX_SUPPLIED) {
+      if (m_CostFile != null) {
+        options[current++] = "-C";
+        options[current++] = "" + m_CostFile;
+      }
+    } else {
+      options[current++] = "-D";
+      options[current++] = "" + getOnDemandDirectory();
+    }
     options[current++] = "-S"; options[current++] = "" + getSeed();
     if (getMinimizeExpectedCost()) {
       options[current++] = "-M";
@@ -192,6 +246,60 @@ public class CostSensitiveClassifier extends Classifier
     return options;
   }
 
+
+  /**
+   * Gets the source location method of the cost matrix. Will be one of
+   * MATRIX_ON_DEMAND or MATRIX_SUPPLIED.
+   *
+   * @return the cost matrix source.
+   */
+  public SelectedTag getCostMatrixSource() {
+
+    try {
+      return new SelectedTag(m_MatrixSource, TAGS_MATRIX_SOURCE);
+    } catch (Exception ex) {
+      return null;
+    }
+  }
+  
+  /**
+   * Sets the source location of the cost matrix. Values other than
+   * MATRIX_ON_DEMAND or MATRIX_SUPPLIED will be ignored.
+   *
+   * @param newMethod the cost matrix location method.
+   */
+  public void setCostMatrixSource(SelectedTag newMethod) {
+    
+    if (newMethod.getTags() == TAGS_MATRIX_SOURCE) {
+      m_MatrixSource = newMethod.getSelectedTag().getID();
+    }
+  }
+
+  /**
+   * Returns the directory that will be searched for cost files when
+   * loading on demand.
+   *
+   * @return The cost file search directory.
+   */
+  public File getOnDemandDirectory() {
+
+    return m_OnDemandDirectory;
+  }
+
+  /**
+   * Sets the directory that will be searched for cost files when
+   * loading on demand.
+   *
+   * @param newDir The cost file search directory.
+   */
+  public void setOnDemandDirectory(File newDir) {
+
+    if (newDir.isDirectory()) {
+      m_OnDemandDirectory = newDir;
+    } else {
+      m_OnDemandDirectory = new File(newDir.getParent());
+    }
+  }
 
   /**
    * Gets the value of MinimizeExpectedCost.
@@ -311,6 +419,15 @@ public class CostSensitiveClassifier extends Classifier
     }
     if (!data.classAttribute().isNominal()) {
       throw new Exception("Class attribute must be nominal!");
+    }
+    if (m_MatrixSource == MATRIX_ON_DEMAND) {
+      String costName = data.relationName() + ".cost";
+      File costFile = new File(getOnDemandDirectory(), costName);
+      if (!costFile.exists()) {
+        throw new Exception("On-demand cost file doesn't exist: " + costFile);
+      }
+      setCostMatrix(new CostMatrix(new BufferedReader(
+                                   new FileReader(costFile))));
     }
 
     if (!m_MinimizeExpectedCost) {

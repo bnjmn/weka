@@ -50,7 +50,14 @@ import weka.filters.Filter;
  * Specify the full class name of a classifier (required).<p>
  *
  * -C cost file <br>
- * File name of a cost matrix to use (required).<p>
+ * File name of a cost matrix to use. If this is not supplied, a cost
+ * matrix will be loaded on demand. The name of the on-demand file
+ * is the relation name of the training data plus ".cost", and the
+ * path to the on-demand file is specified with the -D option.<p>
+ *
+ * -D directory <br>
+ * Name of a directory to search for cost files when loading costs on demand
+ * (default current directory). <p>
  *
  * -I num <br>
  * Set the number of bagging iterations (default 10). <p>
@@ -64,10 +71,30 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MetaCost extends Classifier
   implements OptionHandler {
+
+  /* Specify possible sources of the cost matrix */
+  public static final int MATRIX_ON_DEMAND = 1;
+  public static final int MATRIX_SUPPLIED = 2;
+  public static final Tag [] TAGS_MATRIX_SOURCE = {
+    new Tag(MATRIX_ON_DEMAND, "Load cost matrix on demand"),
+    new Tag(MATRIX_SUPPLIED, "Use explicit cost matrix")
+  };
+
+  /** Indicates the current cost matrix source */
+  protected int m_MatrixSource = MATRIX_ON_DEMAND;
+
+  /** 
+   * The directory used when loading cost files on demand, null indicates
+   * current directory 
+   */
+  protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
+
+  /** The name of the cost file, for command line options */
+  protected String m_CostFile;
 
   /** The classifier */
   protected Classifier m_Classifier = new weka.classifiers.ZeroR();
@@ -75,9 +102,6 @@ public class MetaCost extends Classifier
   /** The cost matrix */
   protected CostMatrix m_CostMatrix = new CostMatrix(1);
 
-  /** The name of the cost file (if read from a file) */
-  protected String m_CostFile = "default";
-  
   /** The number of iterations. */
   protected int m_NumIterations = 10;
 
@@ -94,7 +118,7 @@ public class MetaCost extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(6);
 
     newVector.addElement(new Option(
 	      "\tNumber of bagging iterations.\n"
@@ -105,8 +129,16 @@ public class MetaCost extends Classifier
 	      + "\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W <class name>"));
     newVector.addElement(new Option(
-	      "\tFile name of a cost matrix to use (required)",
+	      "\tFile name of a cost matrix to use. If this is not supplied,\n"
+              +"\ta cost matrix will be loaded on demand. The name of the\n"
+              +"\ton-demand file is the relation name of the training data\n"
+              +"\tplus \".cost\", and the path to the on-demand file is\n"
+              +"\tspecified with the -D option.",
 	      "C", 1, "-C <cost file name>"));
+    newVector.addElement(new Option(
+              "\tName of a directory to search for cost files when loading\n"
+              +"\tcosts on demand (default current directory).",
+              "D", 1, "-D <directory>"));
     newVector.addElement(new Option(
 	      "\tSeed used when reweighting via resampling. (Default 1)",
 	      "S", 1, "-S <num>"));
@@ -124,7 +156,14 @@ public class MetaCost extends Classifier
    * Specify the full class name of a classifier (required).<p>
    *
    * -C cost file <br>
-   * File name of a cost matrix to use (required).<p>
+   * File name of a cost matrix to use. If this is not supplied, a cost
+   * matrix will be loaded on demand. The name of the on-demand file
+   * is the relation name of the training data plus ".cost", and the
+   * path to the on-demand file is specified with the -D option.<p>
+   *
+   * -D directory <br>
+   * Name of a directory to search for cost files when loading costs on demand
+   * (default current directory). <p>
    *
    * -I num <br>
    * Set the number of bagging iterations (default 10). <p>
@@ -172,13 +211,21 @@ public class MetaCost extends Classifier
 				     Utils.partitionOptions(options)));
 
     String costFile = Utils.getOption('C', options);
-    if (costFile.length() == 0) {
-      throw new Exception("A cost file must be specified"
-			  + " with the -C option.");
+    if (costFile.length() != 0) {
+      setCostMatrix(new CostMatrix(new BufferedReader(
+                                   new FileReader(costFile))));
+      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED,
+                                          TAGS_MATRIX_SOURCE));
+      m_CostFile = costFile;
+    } else {
+      setCostMatrixSource(new SelectedTag(MATRIX_ON_DEMAND, 
+                                          TAGS_MATRIX_SOURCE));
     }
-    setCostMatrix(new CostMatrix(new BufferedReader(
-				 new FileReader(costFile))));
-    m_CostFile = costFile;
+    
+    String demandDir = Utils.getOption('D', options);
+    if (demandDir.length() != 0) {
+      setOnDemandDirectory(new File(demandDir));
+    }
   }
 
 
@@ -198,8 +245,15 @@ public class MetaCost extends Classifier
     String [] options = new String [classifierOptions.length + 12];
     int current = 0;
 
-    options[current++] = "-C";
-    options[current++] = "" + m_CostFile;
+    if (m_MatrixSource == MATRIX_SUPPLIED) {
+      if (m_CostFile != null) {
+        options[current++] = "-C";
+        options[current++] = "" + m_CostFile;
+      }
+    } else {
+      options[current++] = "-D";
+      options[current++] = "" + getOnDemandDirectory();
+    }
     options[current++] = "-I"; options[current++] = "" + getNumIterations();
     options[current++] = "-S"; options[current++] = "" + getSeed();
     options[current++] = "-P"; options[current++] = "" + getBagSizePercent();
@@ -217,6 +271,60 @@ public class MetaCost extends Classifier
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Gets the source location method of the cost matrix. Will be one of
+   * MATRIX_ON_DEMAND or MATRIX_SUPPLIED.
+   *
+   * @return the cost matrix source.
+   */
+  public SelectedTag getCostMatrixSource() {
+
+    try {
+      return new SelectedTag(m_MatrixSource, TAGS_MATRIX_SOURCE);
+    } catch (Exception ex) {
+      return null;
+    }
+  }
+  
+  /**
+   * Sets the source location of the cost matrix. Values other than
+   * MATRIX_ON_DEMAND or MATRIX_SUPPLIED will be ignored.
+   *
+   * @param newMethod the cost matrix location method.
+   */
+  public void setCostMatrixSource(SelectedTag newMethod) {
+    
+    if (newMethod.getTags() == TAGS_MATRIX_SOURCE) {
+      m_MatrixSource = newMethod.getSelectedTag().getID();
+    }
+  }
+
+  /**
+   * Returns the directory that will be searched for cost files when
+   * loading on demand.
+   *
+   * @return The cost file search directory.
+   */
+  public File getOnDemandDirectory() {
+
+    return m_OnDemandDirectory;
+  }
+
+  /**
+   * Sets the directory that will be searched for cost files when
+   * loading on demand.
+   *
+   * @param newDir The cost file search directory.
+   */
+  public void setOnDemandDirectory(File newDir) {
+
+    if (newDir.isDirectory()) {
+      m_OnDemandDirectory = newDir;
+    } else {
+      m_OnDemandDirectory = new File(newDir.getParent());
+    }
   }
 
   
@@ -352,6 +460,15 @@ public class MetaCost extends Classifier
     if (!data.classAttribute().isNominal()) {
       throw new Exception("Class attribute must be nominal!");
     }
+    if (m_MatrixSource == MATRIX_ON_DEMAND) {
+      String costName = data.relationName() + ".cost";
+      File costFile = new File(getOnDemandDirectory(), costName);
+      if (!costFile.exists()) {
+        throw new Exception("On-demand cost file doesn't exist: " + costFile);
+      }
+      setCostMatrix(new CostMatrix(new BufferedReader(
+                                   new FileReader(costFile))));
+    }
 
     // Set up the bagger
     Bagging bagger = new Bagging();
@@ -396,7 +513,8 @@ public class MetaCost extends Classifier
       return "MetaCost: No model built yet.";
     }
 
-    String result = "MetaCost using " + getNumIterations();
+    String result = "MetaCost cost sensitive classifier induction";
+    result += "\nOptions: " + Utils.joinOptions(getOptions());
     result += "\nBase learner: " + getClassifierSpec()
       + "\n\nClassifier Model\n"
       + m_Classifier.toString()
