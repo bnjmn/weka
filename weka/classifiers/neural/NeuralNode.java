@@ -27,7 +27,7 @@ import java.util.Random;
 /**
  * This class is used to represent a node in the neuralnet.
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NeuralNode extends NeuralConnection {
     
@@ -69,6 +69,10 @@ public class NeuralNode extends NeuralConnection {
   public void setMethod(NeuralMethod m) {
     m_methods = m;
   } 
+
+  public NeuralMethod getMethod() {
+    return m_methods;
+  }
 
   /**
    * Call this to get the output value of this unit. 
