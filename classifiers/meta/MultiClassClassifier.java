@@ -41,7 +41,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -322,8 +322,11 @@ public class MultiClassClassifier extends DistributionClassifier
     for (int i = 0; i < m_Classifiers.length; i++) {
       text.append("Classifier ").append(i + 1);
       if (m_Classifiers[i] != null) {
-        text.append(", using indicator values: ");
-        text.append(m_ClassFilters[i].getValueRange()).append('\n');
+        if ((m_ClassFilters != null) && (m_ClassFilters[i] != null)) {
+          text.append(", using indicator values: ");
+          text.append(m_ClassFilters[i].getValueRange());
+        }
+        text.append('\n');
         text.append(m_Classifiers[i].toString() + "\n");
       } else {
         text.append(" Skipped (no training examples)\n");
