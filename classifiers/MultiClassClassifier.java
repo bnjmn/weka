@@ -32,7 +32,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -87,19 +87,29 @@ public class MultiClassClassifier extends DistributionClassifier
     }
     m_ZeroR = new ZeroR();
     m_ZeroR.buildClassifier(insts);
-    m_Classifiers = Classifier.makeCopies(m_Classifier, insts.numClasses());
-    m_ClassFilters = new MakeIndicatorFilter[insts.numClasses()];
-    for (int i = 0; i < insts.numClasses(); i++) {
-      if (classStats.nominalCounts[i] != 0) {
-        m_ClassFilters[i] = new MakeIndicatorFilter();
-        m_ClassFilters[i].setAttributeIndex(insts.classIndex());
-        m_ClassFilters[i].setValueIndex(i);
-        m_ClassFilters[i].setNumeric(false);
-        m_ClassFilters[i].inputFormat(insts);
-        newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
-        m_Classifiers[i].buildClassifier(newInsts);
-      } else {
-        m_Classifiers[i] = null;
+
+    int numClassifiers = insts.numClasses();
+    if (numClassifiers == 2) {
+
+      m_Classifiers = Classifier.makeCopies(m_Classifier, 1);
+      m_Classifiers[0].buildClassifier(insts);
+
+    } else {
+
+      m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
+      m_ClassFilters = new MakeIndicatorFilter[insts.numClasses()];
+      for (int i = 0; i < insts.numClasses(); i++) {
+        if (classStats.nominalCounts[i] != 0) {
+          m_ClassFilters[i] = new MakeIndicatorFilter();
+          m_ClassFilters[i].setAttributeIndex(insts.classIndex());
+          m_ClassFilters[i].setValueIndex(i);
+          m_ClassFilters[i].setNumeric(false);
+          m_ClassFilters[i].inputFormat(insts);
+          newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
+          m_Classifiers[i].buildClassifier(newInsts);
+        } else {
+          m_Classifiers[i] = null;
+        }
       }
     }
   }
@@ -114,6 +124,11 @@ public class MultiClassClassifier extends DistributionClassifier
     double[] probs = new double[inst.numClasses()];
     Instance newInst;
 
+    if (m_Classifiers.length == 1) {
+      return ((DistributionClassifier)m_Classifiers[0])
+        .distributionForInstance(inst);
+    }
+      
     for (int i = 0; i < inst.numClasses(); i++) {
       if (m_Classifiers[i] != null) {
         m_ClassFilters[i].input(inst);
@@ -142,7 +157,7 @@ public class MultiClassClassifier extends DistributionClassifier
     text.append("MultiClassClassifier\n\n");
     for (int i = 0; i < m_Classifiers.length; i++) {
       text.append("Classifier for class " + m_ClassAttribute.value(i) 
-                  + " (" + (i+1) + ")\n");
+                  + " (" + (i + 1) + ")\n");
       if (m_Classifiers[i] != null) {
         text.append(m_Classifiers[i].toString() + "\n");
       } else {
