@@ -25,12 +25,19 @@ import weka.core.*;
 
 
 /**
- * IB1-type classifier class. 
+ * IB1-type classifier. Uses a simple distance measure to find the training
+ * instance closest to the given test instance, and predicts the same class
+ * as this training instance. If multiple instances are
+ * the same (smallest) distance to the test instance, the first one found is
+ * used. See <p>
+ * 
+ * Aha, D., and D. Kibler (1991) "Instance-based learning algorithms",
+ * <i>Machine Learning</i>, vol.6, pp. 37-66.<p>
  *
- * @version 1.0
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
   
@@ -54,7 +61,7 @@ public class IB1 extends Classifier implements UpdateableClassifier {
   /**
    * Generates the classifier.
    *
-   * @param train set of instances serving as training data 
+   * @param instances set of instances serving as training data 
    * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception{
@@ -224,8 +231,8 @@ public class IB1 extends Classifier implements UpdateableClassifier {
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv should contain command line arguments for evaluation
+   * (see Evaluation).
    */
   public static void main(String [] argv) {
 
