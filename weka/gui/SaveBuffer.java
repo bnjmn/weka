@@ -81,9 +81,9 @@ public class SaveBuffer {
       int returnVal = fileChooser.showSaveDialog(m_parentComponent);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
 	File sFile = fileChooser.getSelectedFile();
+	m_lastvisitedDirectory = sFile.getPath();
 
 	if (sFile.exists()) {
-	  m_lastvisitedDirectory = sFile.getPath();
 	  Object [] options = new String[4];
 	  options[0] = "Append";
 	  options[1] = "Overwrite";
@@ -141,20 +141,26 @@ public class SaveBuffer {
 
     try {
       String path = sFile.getPath();
-      if (append) {
-	m_Log.statusMessage("Appending to file...");
-      } else {
-	m_Log.statusMessage("Saving to file...");
+      if (m_Log != null) {
+	if (append) {
+	  m_Log.statusMessage("Appending to file...");
+	} else {
+	  m_Log.statusMessage("Saving to file...");
+	}
       }
       PrintWriter out
 	= new PrintWriter(new BufferedWriter(
 			  new FileWriter(path, append)));
       out.write(buf.toString(),0,buf.toString().length());
       out.close();
-      m_Log.statusMessage("OK");
+      if (m_Log != null) {
+	m_Log.statusMessage("OK");
+      }
     } catch (Exception ex) {
       ex.printStackTrace();
-      m_Log.logMessage(ex.getMessage());
+      if (m_Log != null) {
+	m_Log.logMessage(ex.getMessage());
+      }
       return false;
     }
 
