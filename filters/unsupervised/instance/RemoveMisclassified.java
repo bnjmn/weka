@@ -58,7 +58,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RemoveMisclassified extends Filter implements UnsupervisedFilter, OptionHandler {
 
@@ -80,6 +80,9 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
   /** Whether to invert the match so the correctly classified instances are discarded */
   protected boolean m_invertMatching = false;
 
+  /** Have we processed the first batch (i.e. training data)? */
+  protected boolean m_firstBatchFinished = false;
+
   /**
    * Sets the format of the input instances.
    *
@@ -93,6 +96,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
     
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
+    m_firstBatchFinished = false;
     return true;
   }
 
@@ -235,7 +239,37 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
     }
 
   }
-  
+ 
+  /**
+   * Input an instance for filtering.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @exception NullPointerException if the input format has not been
+   * defined.
+   * @exception Exception if the input instance was not of the correct 
+   * format or if there was a problem with the filtering.  
+   */
+  public boolean input(Instance instance) throws Exception {
+
+    if (inputFormatPeek() == null) {
+      throw new NullPointerException("No input instance format defined");
+    }
+
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    if (m_firstBatchFinished) {
+      push(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
+  }
+ 
   /**
    * Signify that this batch of input to the filter is finished.
    *
@@ -248,18 +282,23 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
       throw new IllegalStateException("No input instance format defined");
     }
 
-    Instances filtered;
+    if (!m_firstBatchFinished) {
 
-    if (m_numOfCrossValidationFolds < 2) {
-      filtered = cleanseTrain(getInputFormat());
-    } else {
-      filtered = cleanseCross(getInputFormat());
+      Instances filtered;
+      if (m_numOfCrossValidationFolds < 2) {
+	filtered = cleanseTrain(getInputFormat());
+      } else {
+	filtered = cleanseCross(getInputFormat());
+      }
+      
+      for (int i=0; i<filtered.numInstances(); i++) {
+	push(filtered.instance(i));
+      }
+      
+      m_firstBatchFinished = true;
+      flushInput();
     }
-
-    for (int i=0; i<filtered.numInstances(); i++) {
-      push(filtered.instance(i));
-    }
-
+    m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
 
