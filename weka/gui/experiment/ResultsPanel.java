@@ -87,7 +87,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.28.2.1 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -125,11 +125,11 @@ public class ResultsPanel extends JPanel {
   protected DefaultListModel m_TestsModel = new DefaultListModel();
 
   /** Displays the currently selected column names for the scheme & options */
-  protected JLabel m_DatasetKeyLabel = new JLabel("Row key fields",
+  protected JLabel m_DatasetKeyLabel = new JLabel("Row",
 						 SwingConstants.RIGHT);
 
   /** Click to edit the columns used to determine the scheme */
-  protected JButton m_DatasetKeyBut = new JButton("Select keys...");
+  protected JButton m_DatasetKeyBut = new JButton("Select");
 
   /** Stores the list of attributes for selecting the scheme columns */
   protected DefaultListModel m_DatasetKeyModel = new DefaultListModel();
@@ -138,11 +138,11 @@ public class ResultsPanel extends JPanel {
   protected JList m_DatasetKeyList = new JList(m_DatasetKeyModel);
 
   /** Displays the currently selected column names for the scheme & options */
-  protected JLabel m_ResultKeyLabel = new JLabel("Column key fields",
+  protected JLabel m_ResultKeyLabel = new JLabel("Column",
 						 SwingConstants.RIGHT);
 
   /** Click to edit the columns used to determine the scheme */
-  protected JButton m_ResultKeyBut = new JButton("Select keys...");
+  protected JButton m_ResultKeyBut = new JButton("Select");
 
   /** Stores the list of attributes for selecting the scheme columns */
   protected DefaultListModel m_ResultKeyModel = new DefaultListModel();
@@ -711,9 +711,15 @@ public class ResultsPanel extends JPanel {
     String selectedListDataset = "";
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
-      m_DatasetKeyModel.addElement(name);
-      m_ResultKeyModel.addElement(name);
-      m_CompareModel.addElement(name);
+      if (name.toLowerCase().startsWith("key_", 0)) {
+	m_DatasetKeyModel.addElement(name.substring(4));
+	m_ResultKeyModel.addElement(name.substring(4));
+	m_CompareModel.addElement(name.substring(4));
+      } else {
+	m_DatasetKeyModel.addElement(name);
+	m_ResultKeyModel.addElement(name);
+	m_CompareModel.addElement(name);
+      }
 
       if (name.toLowerCase().equals("key_dataset")) {
 	m_DatasetKeyList.addSelectionInterval(i, i);
