@@ -17,7 +17,7 @@ import weka.filters.AbstractFilterTest;
  * java weka.filters.RemoveWithValuesTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RemoveWithValuesTest extends AbstractFilterTest {
   
@@ -27,6 +27,7 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
   public Filter getFilter() {
     RemoveWithValues f = new RemoveWithValues();
     f.setAttributeIndex("3");
+    f.setInvertSelection(true);
     return f;
   }
 
@@ -67,7 +68,7 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
     assertTrue(m_Instances.numInstances() > result2.numInstances());
     assertEquals(m_Instances.numInstances(), result.numInstances() + result2.numInstances());
 
-    ((RemoveWithValues)m_Filter).setInvertSelection(true);
+    ((RemoveWithValues)m_Filter).setInvertSelection(false);
     result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(m_Instances.numInstances(), result.numInstances() + result2.numInstances());
@@ -86,7 +87,7 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
     assertTrue(m_Instances.numInstances() > result.numInstances());
 
     // Test inversion is working.
-    ((RemoveWithValues)m_Filter).setInvertSelection(true);
+    ((RemoveWithValues)m_Filter).setInvertSelection(false);
     Instances result2 = useFilter();
     assertEquals(m_Instances.numAttributes(), result2.numAttributes());
     assertTrue(m_Instances.numInstances() > result2.numInstances());
@@ -95,8 +96,8 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
 
   public void testMatchMissingValues() {
     ((RemoveWithValues)m_Filter).setAttributeIndex("5");
-    ((RemoveWithValues)m_Filter).setInvertSelection(true);
-    ((RemoveWithValues)m_Filter).setMatchMissingValues(true);
+    ((RemoveWithValues)m_Filter).setInvertSelection(false);
+    ((RemoveWithValues)m_Filter).setMatchMissingValues(false);
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertTrue(result.numInstances() > 0);
