@@ -30,12 +30,12 @@ import java.awt.*;
  * dotty standard and what color (in RGB) they represent
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Colors {
   
   /** The array with all the colors input */
-  NamedColor[] m_cols = {
+  public NamedColor[] m_cols = {
 		       new NamedColor("snow",255, 250, 250),
 		       new NamedColor("ghostwhite",248, 248, 255),
 		       new NamedColor("whitesmoke",245, 245, 245),
