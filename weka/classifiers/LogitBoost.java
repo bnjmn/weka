@@ -58,7 +58,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
@@ -651,7 +651,15 @@ public class LogitBoost extends DistributionClassifier
 		"    return Math.exp(R[j]) / Rsum;\n"+
 		"  }\n\n");
 
-    text.append("  public static double classify(Object [] i) {\n");
+    text.append("  public static double classify(Object [] i) {\n" +
+                "    double [] d = distribution(i);\n" +
+                "    double maxV = d[0];\n" +
+		"    int maxI = 0;\n"+
+		"    for (int j = 1; j < " + m_NumClasses + "; j++) {\n"+
+		"      if (d[j] > maxV) { maxV = d[j]; maxI = j; }\n"+
+		"    }\n    return (double) maxI;\n  }\n\n");
+
+    text.append("  public static double [] distribution(Object [] i) {\n");
     text.append("    double [] Fs = new double [" + m_NumClasses + "];\n");
     text.append("    double [] Fi = new double [" + m_NumClasses + "];\n");
     text.append("    double Fsum;\n");
@@ -667,12 +675,10 @@ public class LogitBoost extends DistributionClassifier
 		  + (m_NumClasses - 1) + " / " + m_NumClasses + "; }\n");
     }
     
-    text.append("    double maxV = RtoP(Fs, 0);\n" +
-		"    int maxI = 0;\n"+
-		"    for (int j = 1; j < " + m_NumClasses + "; j++) {\n"+
-		"      double c = RtoP(Fs, j);\n"+
-		"      if (c > maxV) { maxV = c; maxI = j; }\n"+
-		"    }\n    return (double) maxI;\n");
+    text.append("    double [] dist = new double [" + m_NumClasses + "];\n" +
+		"    for (int j = 0; j < " + m_NumClasses + "; j++) {\n"+
+		"      dist[j] = RtoP(Fs, j);\n"+
+		"    }\n    return dist;\n");
     text.append("  }\n}\n");
 
     for (int i = 0; i < m_Classifiers.length; i++) {
