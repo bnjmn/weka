@@ -58,7 +58,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -129,8 +129,13 @@ public class RunPanel extends JPanel implements ActionListener {
 	    String current = "Iteration:";
 	    if (m_ExpCopy.getUsePropertyIterator()) {
 	      int cnum = m_ExpCopy.getCurrentPropertyNumber();
-	      String cname = " Custom="
-		+ (cnum + 1)
+              String ctype = m_ExpCopy.getPropertyArray().getClass().getComponentType().getName();
+              int lastDot = ctype.lastIndexOf('.');
+              if (lastDot != -1) {
+                ctype = ctype.substring(lastDot + 1);
+              }
+	      String cname = " " + ctype + "="
+		+ (cnum + 1) + ":"
 		+ m_ExpCopy.getPropertyArrayValue(cnum).getClass().getName();
 	      current += cname;
 	    }
