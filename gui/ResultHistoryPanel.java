@@ -52,6 +52,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.BorderFactory;
 import java.io.Serializable;
 
+import weka.gui.visualize.PrintableComponent;
+
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
  * box. When a name is right-clicked, a frame is popped up that contains
@@ -60,7 +62,7 @@ import java.io.Serializable;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -89,6 +91,9 @@ public class ResultHistoryPanel extends JPanel {
       manner---ie, pop up a window displaying the buffer */
   protected boolean m_HandleRightClicks = true;
 
+  /** for printing the output to files */
+  protected PrintableComponent m_Printer = null;
+  
   /**
    * Extension of MouseAdapter that implements Serializable.
    */
@@ -108,16 +113,19 @@ public class ResultHistoryPanel extends JPanel {
    * @param text the optional text component for single-click display
    */
   public ResultHistoryPanel(JTextComponent text) {
-    
     m_SingleText = text;
+    m_Printer = new PrintableComponent(m_SingleText);
     m_List.addMouseListener(new RMouseAdapter() {
       public void mouseClicked(MouseEvent e) {
 	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	    == InputEvent.BUTTON1_MASK) {
-	  int index = m_List.locationToIndex(e.getPoint());
-	  if ((index != -1) && (m_SingleText != null)) {
-	    setSingle((String)m_Model.elementAt(index));
-	  }
+            if (    ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) == 0)
+                 && ((e.getModifiers() & InputEvent.CTRL_DOWN_MASK) == 0) ) {
+              int index = m_List.locationToIndex(e.getPoint());
+              if ((index != -1) && (m_SingleText != null)) {
+                setSingle((String)m_Model.elementAt(index));
+            }
+          }
 	} else {
 	  // if there are stored objects then assume that the storer
 	  // will handle popping up the text in a seperate frame

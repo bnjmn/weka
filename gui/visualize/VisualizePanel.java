@@ -100,9 +100,9 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
-public class VisualizePanel extends JPanel {
+public class VisualizePanel extends PrintablePanel {
 
   /** Inner class to handle plotting */
   protected class PlotPanel extends JPanel implements Plot2DCompanion {
@@ -1749,6 +1749,7 @@ public class VisualizePanel extends JPanel {
    * Constructor
    */
   public VisualizePanel() {
+    super();
     setProperties(null);
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);

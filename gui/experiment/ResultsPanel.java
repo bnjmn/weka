@@ -87,7 +87,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -176,11 +176,8 @@ public class ResultsPanel extends JPanel {
   protected JCheckBox m_ShowStdDevs = 
     new JCheckBox("");
   
-  /** the different types for outputting the comparison tables */
-  protected final static String[] m_OutputFormats = {"Plain Text", "LaTeX", "CSV"};
-  
   /** lets the user choose the format for the output */
-  protected JComboBox m_OutputFormat = new JComboBox(m_OutputFormats);
+  protected JButton m_OutputFormatButton = new JButton("Select");
 
   /** Click to start the test */
   protected JButton m_PerformBut = new JButton("Perform test");
@@ -226,6 +223,19 @@ public class ResultsPanel extends JPanel {
   
   private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut
 					       .getPreferredSize().height);
+
+  /** Produce tables in latex format */
+  protected boolean m_latexOutput = false;
+  
+  /** Produce tables in csv format */
+  protected boolean m_csvOutput = false;
+  
+  /** the number of digits after the period (= precision) for printing the mean */
+  protected int m_MeanPrec = 2;
+  
+  /** the number of digits after the period (= precision) for printing the std. deviation */
+  protected int m_StdDevPrec = 2;
+
   /**
    * Creates the results panel with no initial experiment.
    */
@@ -318,7 +328,12 @@ public class ResultsPanel extends JPanel {
       });
 
     m_ShowStdDevs.setEnabled(false);
-    m_OutputFormat.setEnabled(false);
+    m_OutputFormatButton.setEnabled(false);
+    m_OutputFormatButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setOutputFormatFromDialog();
+      }
+      });
     
     m_PerformBut.setEnabled(false);
     m_PerformBut.addActionListener(new ActionListener() {
@@ -474,8 +489,8 @@ public class ResultsPanel extends JPanel {
     gbC.anchor = GridBagConstraints.WEST;
     gbC.gridy = 8;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
-    gbL.setConstraints(m_OutputFormat, gbC);
-    p3.add(m_OutputFormat);
+    gbL.setConstraints(m_OutputFormatButton, gbC);
+    p3.add(m_OutputFormatButton);
     
     JPanel output = new JPanel();
     output.setLayout(new BorderLayout());
@@ -868,7 +883,7 @@ public class ResultsPanel extends JPanel {
     m_TestsButton.setEnabled(true);
     m_DisplayedButton.setEnabled(true);
     m_ShowStdDevs.setEnabled(true);
-    m_OutputFormat.setEnabled(true);
+    m_OutputFormatButton.setEnabled(true);
     m_PerformBut.setEnabled(true);
     
   }
@@ -901,8 +916,10 @@ public class ResultsPanel extends JPanel {
     m_History.addResult(name, outBuff);
     m_History.setSingle(name);
     m_TTester.setDisplayedResultsets(m_DisplayedList.getSelectedIndices());
-    m_TTester.setProduceLatex(m_OutputFormat.getSelectedIndex() == 1);
-    m_TTester.setProduceCSV(m_OutputFormat.getSelectedIndex() == 2);
+    m_TTester.setMeanPrec(m_MeanPrec);
+    m_TTester.setStdDevPrec(m_StdDevPrec);
+    m_TTester.setProduceLatex(m_latexOutput);
+    m_TTester.setProduceCSV(m_csvOutput);
     try {
       if (tType < m_TTester.getNumResultsets()) {
 	outBuff.append(m_TTester.multiResultsetFull(tType, compareCol));
@@ -987,6 +1004,26 @@ public class ResultsPanel extends JPanel {
 
     // Open the dialog
     jd.showDialog();
+  }
+  
+  /**
+   * displays the Dialog for the output format and sets the chosen settings, 
+   * if the user approves
+   */
+  public void setOutputFormatFromDialog() {
+    OutputFormatDialog dialog = new OutputFormatDialog(null);
+    
+    dialog.setProduceLatex(m_latexOutput);
+    dialog.setProduceCSV(m_csvOutput);
+    dialog.setMeanPrec(m_MeanPrec);
+    dialog.setStdDevPrec(m_StdDevPrec);
+    
+    if (dialog.showDialog() == OutputFormatDialog.APPROVE_OPTION) {
+      m_latexOutput = dialog.getProduceLatex();
+      m_csvOutput   = dialog.getProduceCSV();
+      m_MeanPrec    = dialog.getMeanPrec();
+      m_StdDevPrec  = dialog.getStdDevPrec();
+    }
   }
 
   /**

@@ -71,6 +71,7 @@ import javax.swing.table.AbstractTableModel;
 
 import weka.core.FastVector;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.visualize.PrintablePanel;
 
 /**
  * This class displays the graph we want to visualize. It should
@@ -607,6 +608,8 @@ LayoutCompleteEventListener  {
   protected void setAppropriateSize() {
     int maxX=0, maxY=0;
     
+    m_gp.setScale(scale, scale);
+    
     for(int i=0; i<m_nodes.size(); i++) {
       GraphNode n = (GraphNode)m_nodes.elementAt(i);
       if(maxX<n.x)
@@ -725,9 +728,10 @@ LayoutCompleteEventListener  {
    * The panel which contains the actual  graph.
    *
    */
-  private class GraphPanel extends JPanel {
+  private class GraphPanel extends PrintablePanel {
     //Image buf;
     public GraphPanel() {
+      super();
       this.addMouseListener( new GraphVisualizerMouseListener() );
       this.addMouseMotionListener( new GraphVisualizerMouseMotionListener() );
       this.setToolTipText("");

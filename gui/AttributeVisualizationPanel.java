@@ -50,6 +50,7 @@ import weka.core.Instances;
 import weka.core.AttributeStats;
 import weka.core.Utils;
 import weka.core.FastVector;
+import weka.gui.visualize.PrintablePanel;
 
 /**
  * Creates a panel that shows a visualization of an
@@ -66,10 +67,10 @@ import weka.core.FastVector;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 
-public class AttributeVisualizationPanel extends JPanel {
+public class AttributeVisualizationPanel extends PrintablePanel {
   
   /** This holds the current set of instances */
   protected Instances m_data;
@@ -886,7 +887,7 @@ public class AttributeVisualizationPanel extends JPanel {
         }
       }
     }
-    return "";
+    return "Click left mouse button while holding <ctrl> and <shift> to display a save dialog.";
   }
   
   

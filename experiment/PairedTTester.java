@@ -72,7 +72,7 @@ import weka.core.Option;
  * Produce comparison tables in csv format <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -130,6 +130,12 @@ public class PairedTTester implements OptionHandler {
   
   /** Produce tables in csv format */
   protected boolean m_csvOutput = false;
+  
+  /** the number of digits after the period (= precision) for printing the mean */
+  protected int m_MeanPrec = 2;
+  
+  /** the number of digits after the period (= precision) for printing the std. deviation */
+  protected int m_StdDevPrec = 2;
   
   /* A list of unique "dataset" specifiers that have been observed */
   protected class DatasetSpecifiers {
@@ -368,6 +374,38 @@ public class PairedTTester implements OptionHandler {
       result = result.substring("weka.classifiers.".length());
     }
     return result.trim();
+  }
+
+  /**
+   * Sets the precision of the mean output
+   * @param precision the number of digits used in printing the mean
+   */
+  public void setMeanPrec(int precision) {
+    m_MeanPrec = precision;
+  }
+
+  /**
+   * Gets the precision used for printing the mean
+   * @return the number of digits used in printing the mean
+   */
+  public int getMeanPrec() {
+    return m_MeanPrec;
+  }
+
+  /**
+   * Sets the precision of the std. deviation output
+   * @param precision the number of digits used in printing the std. deviation
+   */
+  public void setStdDevPrec(int precision) {
+    m_StdDevPrec = precision;
+  }
+
+  /**
+   * Gets the precision used for printing the std. deviation
+   * @return the number of digits used in printing the std. deviation
+   */
+  public int getStdDevPrec() {
+    return m_StdDevPrec;
   }
 
   /**
@@ -937,6 +975,7 @@ public class PairedTTester implements OptionHandler {
 					 int maxWidthStdDev) {
 
     StringBuffer result = new StringBuffer(1000);
+    String tmpStr = "";
     int numcols = getNumDisplayedResultsets() * 2;
     if (m_ShowStdDevs) {
       numcols += getNumDisplayedResultsets();
@@ -992,9 +1031,9 @@ public class PairedTTester implements OptionHandler {
     result.append("\\\\\n\\hline\n");
     
     int datasetLength = 25;
-    int resultsetLength = maxWidthMean + 7;
+    int resultsetLength = maxWidthMean + 5 + m_MeanPrec;
     if (m_ShowStdDevs) {
-      resultsetLength += (maxWidthStdDev + 5);
+      resultsetLength += (maxWidthStdDev + 8 + m_StdDevPrec);
     }
 
     for (int i = 0; i < getNumDatasets(); i++) {
@@ -1011,19 +1050,19 @@ public class PairedTTester implements OptionHandler {
 
 	
 	if (!m_ShowStdDevs) {
-	  result.append("& "+padIt(pairedStats.xStats.mean,
-				   resultsetLength - 2, 2));
+	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
 	} else {
-	  result.append("& "+padIt(pairedStats.xStats.mean,
-				   (maxWidthMean+5), 2)+"$\\pm$");
+	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec) + "$\\pm$";
 	  if (Double.isNaN(pairedStats.xStats.stdDev)) {
-	    result.append("&"+Utils.doubleToString(0.0,
-						  (maxWidthStdDev+3),2)+" ");
+	    tmpStr += "&" + Utils.doubleToString(0.0, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 	  } else {
-	    result.append("&"+padIt(pairedStats.xStats.stdDev,
-				    (maxWidthStdDev+3),2)+" ");
+	    tmpStr += "&" + padIt(pairedStats.xStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 	  }
 	}
+	if (tmpStr.length() < resultsetLength - 2)
+	  tmpStr = Utils.padLeft(tmpStr, resultsetLength - 2);
+	result.append("& ")
+	      .append(tmpStr);
 	// Iterate over the resultsets
 	for (int j = 0; j < getNumResultsets(); j++) {
           if (!displayResultset(j))
@@ -1033,30 +1072,28 @@ public class PairedTTester implements OptionHandler {
 	      pairedStats = 
 		calculateStatistics(m_DatasetSpecifiers.specifier(i), 
 				    baseResultset, j, comparisonColumn);
-	      String sigString = "";
+	      String sigString = "         ";
 	      if (pairedStats.differencesSignificance < 0) {
-		sigString = "$\\circ$";
+		sigString = "$\\circ$  ";
 	      } else if (pairedStats.differencesSignificance > 0) {
 		sigString = "$\\bullet$";
 	      } 
 	      if (!m_ShowStdDevs) {
-		result.append(" & "+padIt(pairedStats.yStats.mean,
-					  resultsetLength - 2,
-					  2)).append(" & "+sigString);
+		tmpStr = padIt(pairedStats.yStats.mean, maxWidthMean + 5, m_MeanPrec);
 	      } else {
-		result.append(" & "
-			      +padIt(pairedStats.yStats.mean,
-				     (maxWidthMean+5),
-				     2)+"$\\pm$");
+		tmpStr = padIt(pairedStats.yStats.mean, maxWidthMean + 5, m_MeanPrec) + "$\\pm$";
 		if (Double.isNaN(pairedStats.yStats.stdDev)) {
-		  result.append("&"+Utils.doubleToString(0.0, 
-				(maxWidthStdDev+3),2)+" ");
+		  tmpStr += "&" + Utils.doubleToString(0.0, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 		} else {
-		  result.append("&"+padIt(pairedStats.
-					  yStats.stdDev, (maxWidthStdDev+3),2)+" ");
+		  tmpStr += "&" + padIt(pairedStats.yStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + " ";
 		}
-		result.append(" & ").append(sigString);
 	      }
+	      if (tmpStr.length() < resultsetLength - 2)
+	        tmpStr = Utils.padLeft(tmpStr, resultsetLength - 2);
+	      result.append(" & ")
+	            .append(tmpStr)
+	            .append(" & ")
+	            .append(sigString);
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	      result.append(Utils.padLeft("", resultsetLength + 1));
@@ -1083,22 +1120,39 @@ public class PairedTTester implements OptionHandler {
     return result.toString();
   }
 
+  /**
+   * pads the given double on the left side with blanks and returns the string
+   * 
+   * @param value the value to print as string
+   * @param a the width of the double
+   * @param b the precision of the double (digits after period)
+   * @return the double as left-padded string
+   */
   private String padIt(double value, int a, int b) {
     String res = Utils.doubleToString(value,
 				      a, b);
+    int precision = 0;  
     int width = res.length();
+
     res = res.trim();
+    
+    // how many "0" to add? -> determine current precision digits
     if (res.indexOf(".") == -1) {
-      res += ".00";
-    } else if (res.indexOf(".") == res.length()-2) {
-      res += "0";
+      res += ".";
+      precision = 0;
     }
+    else {
+      precision = res.substring(res.indexOf(".") + 1).length();
+    }
+    for (int i = precision; i < b; i++)
+      res += "0";
+
     while (res.length() < width) {
       res = " " + res;
     }
     return res;
   }
-
+  
   /**
    * Generates a comparison table in latex table format
    *
@@ -1114,12 +1168,13 @@ public class PairedTTester implements OptionHandler {
                                              int maxWidthStdDev) {
 
     StringBuffer result = new StringBuffer(1000);
+    String tmpStr = "";
     int datasetLength = 25;
     //    int resultsetLength = 9;
     //    int resultsetLength = 16;
-    int resultsetLength = maxWidthMean + 7;
+    int resultsetLength = maxWidthMean + 5 + m_MeanPrec;
     if (m_ShowStdDevs) {
-      resultsetLength += (maxWidthStdDev + 5);
+      resultsetLength += (maxWidthStdDev + 3 + m_StdDevPrec);
     }
 
     // Set up the titles
@@ -1171,27 +1226,19 @@ public class PairedTTester implements OptionHandler {
                               comparisonColumn);
         datasetName = Utils.padRight(datasetName, datasetLength);
         result.append(datasetName);
-        result.append(Utils.padLeft('('
-                                    + Utils.doubleToString(pairedStats.count,
-                                                           0)
-                                    + ')', 5)).append(' ');
+        result.append(Utils.padLeft('(' + Utils.doubleToString(pairedStats.count, 0) + ')', 5))
+              .append(' ');
         if (!m_ShowStdDevs) {
-
-	  result.append(padIt(pairedStats.xStats.mean,
-			      resultsetLength - 2, 2)).
-	    append(" | ");
+	  tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
         } else {
-          result.append(padIt(pairedStats.xStats.mean,
-			      (maxWidthMean+5), 2));
+          tmpStr = padIt(pairedStats.xStats.mean, maxWidthMean + 5, m_MeanPrec);
           if (Double.isInfinite(pairedStats.xStats.stdDev)) {
-            result.append('(' + Utils.padRight("Inf", maxWidthStdDev + 3)
-                          +')').append(" | ");
+            tmpStr += '(' + Utils.padRight("Inf", maxWidthStdDev + 3) +')';
           } else {
-            result.append('('+padIt(pairedStats.xStats.stdDev,
-				    (maxWidthStdDev+3),2)
-                          +')').append(" | ");
+            tmpStr += '(' + padIt(pairedStats.xStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + ')';
           }
         }
+        result.append(Utils.padLeft(tmpStr, resultsetLength - 2)).append(" | ");
         // Iterate over the resultsets
         for (int j = 0; j < getNumResultsets(); j++) {
           if (!displayResultset(j))
@@ -1212,26 +1259,19 @@ public class PairedTTester implements OptionHandler {
                 tie[j]++;
               }
               if (!m_ShowStdDevs) {
-                result.append(padIt(pairedStats.yStats.mean,
-				    resultsetLength - 2,
-				    2)).append(' ')
-                  .append(sigChar).append(' ');
+                tmpStr = padIt(pairedStats.yStats.mean, resultsetLength - 2, m_MeanPrec);
               } else {
-                result.append(padIt(pairedStats.yStats.mean,
-				    (maxWidthMean+5),
-				    2));
+                tmpStr = padIt(pairedStats.yStats.mean, maxWidthMean + 5, m_MeanPrec);
                 if (Double.isInfinite(pairedStats.yStats.stdDev)) {
-                  result.append('(' 
-                                + Utils.padRight("Inf", maxWidthStdDev + 3)
-                                +')');
+                  tmpStr += '(' + Utils.padRight("Inf", maxWidthStdDev + 3) + ')';
                 } else {
-                  result.append('('+padIt(pairedStats.
-					  yStats.stdDev, 
-					  (maxWidthStdDev+3),
-					  2)+')');
+                  tmpStr += '(' + padIt(pairedStats.yStats.stdDev, maxWidthStdDev + 3, m_StdDevPrec) + ')';
                 }
-                result.append(' ').append(sigChar).append(' ');
               }
+              result.append(Utils.padLeft(tmpStr, resultsetLength - 2))
+                    .append(' ')
+                    .append(sigChar)
+                    .append(' ');
             } catch (Exception ex) {
               ex.printStackTrace();
               result.append(Utils.padLeft("", resultsetLength + 1));
@@ -1326,18 +1366,18 @@ public class PairedTTester implements OptionHandler {
         result.append(Utils.quote(datasetName + Utils.doubleToString(pairedStats.count, 0)));
         if (!m_ShowStdDevs) {
           result.append(',')
-                .append(padIt(pairedStats.xStats.mean, resultsetLength - 2, 2).trim());
+                .append(padIt(pairedStats.xStats.mean, resultsetLength - 2, m_MeanPrec).trim());
         } 
         else {
           result.append(',')
-                .append(padIt(pairedStats.xStats.mean, (maxWidthMean+5), 2).trim());
+                .append(padIt(pairedStats.xStats.mean, (maxWidthMean+5), m_MeanPrec).trim());
           if (Double.isInfinite(pairedStats.xStats.stdDev)) {
             result.append(',')
                   .append("Inf");
           } 
           else {
             result.append(',')
-                  .append(padIt(pairedStats.xStats.stdDev, (maxWidthStdDev+3),2));
+                  .append(padIt(pairedStats.xStats.stdDev, (maxWidthStdDev+3), m_StdDevPrec));
           }
         }
         // Iterate over the resultsets
@@ -1364,20 +1404,20 @@ public class PairedTTester implements OptionHandler {
                 }
               if (!m_ShowStdDevs) {
                 result.append(',')
-                      .append(padIt(pairedStats.yStats.mean, resultsetLength - 2, 2).trim())
+                      .append(padIt(pairedStats.yStats.mean, resultsetLength - 2, m_MeanPrec).trim())
                       .append(',')
                       .append(sigChar);
               } 
               else {
                 result.append(',')
-                      .append(padIt(pairedStats.yStats.mean, (maxWidthMean+5), 2).trim());
+                      .append(padIt(pairedStats.yStats.mean, (maxWidthMean+5), m_MeanPrec).trim());
                 if (Double.isInfinite(pairedStats.yStats.stdDev)) {
                   result.append(',')
                         .append("Inf");
                 } 
                 else {
                   result.append(',')
-                        .append(padIt(pairedStats.yStats.stdDev, (maxWidthStdDev+3), 2).trim());
+                        .append(padIt(pairedStats.yStats.stdDev, (maxWidthStdDev+3), m_StdDevPrec).trim());
                 }
                 result.append(',')
                       .append(sigChar);
