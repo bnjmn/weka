@@ -53,7 +53,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassPanel extends JPanel {
     
@@ -205,7 +205,7 @@ public class ClassPanel extends JPanel {
    * Enables the panel
    * @param e true to enable the panel
    */
-  protected void setOn(boolean e) {
+  public void setOn(boolean e) {
     m_isEnabled = e;
   }
 
@@ -213,7 +213,7 @@ public class ClassPanel extends JPanel {
    * Set the instances.
    * @param insts the instances
    */
-  protected void setInstances(Instances insts) {
+  public void setInstances(Instances insts) {
     m_Instances = insts;
   }
 
@@ -221,7 +221,7 @@ public class ClassPanel extends JPanel {
    * Set the index of the attribute to display coloured labels for
    * @param cIndex the index of the attribute to display coloured labels for
    */
-  protected void setCindex(int cIndex) {
+  public void setCindex(int cIndex) {
     if (m_Instances.numAttributes() > 0) {
       m_cIndex = cIndex;
       if (m_Instances.attribute(m_cIndex).isNumeric()) {
