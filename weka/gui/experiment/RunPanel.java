@@ -25,6 +25,7 @@ import weka.experiment.RemoteExperiment;
 import weka.experiment.RemoteExperimentListener;
 import weka.experiment.RemoteExperimentEvent;
 import weka.core.Utils;
+import weka.core.SerializedObject;
 
 import java.io.Serializable;
 import java.awt.BorderLayout;
@@ -48,10 +49,7 @@ import javax.swing.SwingConstants;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.io.File;
@@ -62,7 +60,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -99,19 +97,10 @@ public class RunPanel extends JPanel implements ActionListener {
       } else {
 	System.err.println("Running experiment: " + exp.toString());
       }
-      ByteArrayOutputStream bo = new ByteArrayOutputStream();
-      BufferedOutputStream bbo = new BufferedOutputStream(bo);
-      ObjectOutputStream oo = new ObjectOutputStream(bbo);
       System.err.println("Writing experiment copy");
-      oo.writeObject(exp);
-      oo.close();
-      
+      SerializedObject so = new SerializedObject(exp);
       System.err.println("Reading experiment copy");
-      ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
-      BufferedInputStream bbi = new BufferedInputStream(bi);
-      ObjectInputStream oi = new ObjectInputStream(bbi);
-      m_ExpCopy = (Experiment) oi.readObject();
-      oi.close();
+      m_ExpCopy = (Experiment) so.getObject();
       System.err.println("Made experiment copy");
     }
 

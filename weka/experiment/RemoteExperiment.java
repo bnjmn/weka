@@ -19,6 +19,7 @@
 
 package weka.experiment;
 
+import weka.core.SerializedObject;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.Option;
@@ -43,9 +44,7 @@ import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 
 /**
  * Holds all the necessary configuration information for a distributed
@@ -85,7 +84,7 @@ import java.io.ByteArrayInputStream;
  * </pre>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RemoteExperiment extends Experiment {
 
@@ -331,19 +330,10 @@ public class RemoteExperiment extends Experiment {
     int numExps = getRunUpper() - getRunLower() + 1;
     m_subExperiments = new Experiment[numExps];
     m_subExpComplete = new int[numExps];
+    // create copy of base experiment
+    SerializedObject so = new SerializedObject(m_baseExperiment);
     for (int i = getRunLower(); i <= getRunUpper(); i++) {
-      // create copy of base experiment using serialization
-      ByteArrayOutputStream bo = new ByteArrayOutputStream();
-      BufferedOutputStream bbo = new BufferedOutputStream(bo);
-      ObjectOutputStream oo = new ObjectOutputStream(bbo);
-      oo.writeObject(m_baseExperiment);
-      oo.close();
-      
-      ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
-      BufferedInputStream bbi = new BufferedInputStream(bi);
-      ObjectInputStream oi = new ObjectInputStream(bbi);
-      m_subExperiments[i-getRunLower()] = (Experiment)oi.readObject();
-      oi.close();
+      m_subExperiments[i-getRunLower()] = (Experiment)so.getObject();
       // one run for each sub experiment
       m_subExperiments[i-getRunLower()].setRunLower(i);
       m_subExperiments[i-getRunLower()].setRunUpper(i);

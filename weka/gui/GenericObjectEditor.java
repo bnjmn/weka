@@ -23,6 +23,7 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.Tag;
 import weka.core.SelectedTag;
+import weka.core.SerializedObject;
 import weka.core.Utils;
 
 import java.awt.BorderLayout;
@@ -43,11 +44,10 @@ import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Properties;
@@ -62,8 +62,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import java.io.File;
-import java.io.FileOutputStream;
 
 
 /** 
@@ -78,7 +76,7 @@ import java.io.FileOutputStream;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -324,17 +322,8 @@ public class GenericObjectEditor implements PropertyEditor {
     protected Object copyObject(Object source) {
       Object result = null;
       try {
-	ByteArrayOutputStream bo = new ByteArrayOutputStream();
-	BufferedOutputStream bbo = new BufferedOutputStream(bo);
-	ObjectOutputStream oo = new ObjectOutputStream(bbo);
-	oo.writeObject(source);
-	oo.close();
-	
-	ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
-	BufferedInputStream bbi = new BufferedInputStream(bi);
-	ObjectInputStream oi = new ObjectInputStream(bbi);
-	result = oi.readObject();
-	oi.close();
+        SerializedObject so = new SerializedObject(source);
+	result = so.getObject();
       } catch (Exception ex) {
 	System.err.println("GenericObjectEditor: Problem making backup object");
 	System.err.print(ex);

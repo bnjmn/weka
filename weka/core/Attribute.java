@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -74,6 +74,10 @@ public class Attribute implements Copyable, Serializable {
 
   /** Constant set for attributes with string values. */
   public final static int STRING = 2;
+
+  /** Strings longer than this will be stored compressed. */
+  //private final static int STRING_COMPRESS_THRESHOLD = 200;
+  private final static int STRING_COMPRESS_THRESHOLD = Integer.MAX_VALUE;
 
   /** The attribute's name. */
   private String m_Name;
@@ -149,8 +153,22 @@ public class Attribute implements Copyable, Serializable {
    */
   public final Enumeration enumerateValues() {
 
-    if (isNominal() || isString())
-      return m_Values.elements();
+    if (isNominal() || isString()) {
+      final Enumeration ee = m_Values.elements();
+      return new Enumeration () {
+          public boolean hasMoreElements() {
+            return ee.hasMoreElements();
+          }
+          public Object nextElement() {
+            Object oo = ee.nextElement();
+            if (oo instanceof SerializedObject) {
+              return ((SerializedObject)oo).getObject();
+            } else {
+              return oo;
+            }
+          }
+        };
+    }
     return null;
   }
 
@@ -166,18 +184,23 @@ public class Attribute implements Copyable, Serializable {
       return false;
     }
     Attribute att = (Attribute) other;
-    if (!m_Name.equals(att.m_Name))
+    if (!m_Name.equals(att.m_Name)) {
       return false;
-    if (isNumeric() && att.isNumeric())
+    }
+    if (isNumeric() && att.isNumeric()) {
       return true;
-    if (isNumeric() || att.isNumeric())
+    }
+    if (isNumeric() || att.isNumeric()) {
       return false;
-    if (m_Values.size() != att.m_Values.size())
+    }
+    if (m_Values.size() != att.m_Values.size()) {
       return false;
-    for (int i = 0; i < m_Values.size(); i++)
-      if (!((String) m_Values.elementAt(i)).equals
-	  ((String) att.m_Values.elementAt(i)))
+    }
+    for (int i = 0; i < m_Values.size(); i++) {
+      if (!m_Values.elementAt(i).equals(att.m_Values.elementAt(i))) {
 	return false;
+      }
+    }
     return true;
   }
 
@@ -204,7 +227,16 @@ public class Attribute implements Copyable, Serializable {
 
     if (!isNominal() && !isString())
       return -1;
-    return m_Values.indexOf(value);
+    Object store = value;
+    if (value.length() > STRING_COMPRESS_THRESHOLD) {
+      try {
+        store = new SerializedObject(value, true);
+      } catch (Exception ex) {
+        System.err.println("Couldn't compress string attribute value -"
+                           + " searching uncompressed.");
+      }
+    }
+    return m_Values.indexOf(store);
   }
 
   /**
@@ -313,10 +345,17 @@ public class Attribute implements Copyable, Serializable {
    */
   public final String value(int valIndex) {
     
-    if (!isNominal() && !isString())
+    if (!isNominal() && !isString()) {
       return "";
-    else
-      return (String) m_Values.elementAt(valIndex);
+    } else {
+      Object val = m_Values.elementAt(valIndex);
+      
+      // If we're storing strings compressed, uncompress it.
+      if (val instanceof SerializedObject) {
+        val = ((SerializedObject)val).getObject();
+      }
+      return (String) val;
+    }
   }
 
   /**
@@ -366,10 +405,19 @@ public class Attribute implements Copyable, Serializable {
     if (!isString()) {
       return -1;
     }
-    int existing = m_Values.indexOf(value);
+    Object store = value;
+    if (value.length() > STRING_COMPRESS_THRESHOLD) {
+      try {
+        store = new SerializedObject(value, true);
+      } catch (Exception ex) {
+        System.err.println("Couldn't compress string attribute value -"
+                           + " storing uncompressed.");
+      }
+    }
+    int existing = m_Values.indexOf(store);
     if (existing == -1) {
-      forceAddValue(value);
-      existing = m_Values.indexOf(value);
+      existing = m_Values.size();
+      m_Values.addElement(store);
     }
     return existing;
   }
@@ -383,7 +431,7 @@ public class Attribute implements Copyable, Serializable {
   final void addValue(String value) {
 
     freshAttributeValues();
-    m_Values.addElement(value);
+    forceAddValue(value);
   }
 
   /**
@@ -430,7 +478,16 @@ public class Attribute implements Copyable, Serializable {
    */
   final void forceAddValue(String value) {
 
-    m_Values.addElement(value);
+    Object store = value;
+    if (value.length() > STRING_COMPRESS_THRESHOLD) {
+      try {
+        store = new SerializedObject(value, true);
+      } catch (Exception ex) {
+        System.err.println("Couldn't compress string attribute value -"
+                           + " storing uncompressed.");
+      }
+    }
+    m_Values.addElement(store);
   }
 
   /**
@@ -459,7 +516,16 @@ public class Attribute implements Copyable, Serializable {
 			  "or string attribute!");
     } else {
       freshAttributeValues();
-      m_Values.setElementAt(string, index);
+      Object store = string;
+      if (string.length() > STRING_COMPRESS_THRESHOLD) {
+        try {
+          store = new SerializedObject(string, true);
+        } catch (Exception ex) {
+          System.err.println("Couldn't compress string attribute value -"
+                             + " storing uncompressed.");
+        }
+      }
+      m_Values.setElementAt(store, index);
     }
   }
 
