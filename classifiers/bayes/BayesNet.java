@@ -44,7 +44,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -673,7 +673,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
         StringBuffer text = new StringBuffer();
 
-        text.append("<?xml version='0.1'?>\n");
+        text.append("<?xml version='1.0'?>\n");
         text.append("<!-- DTD for the XMLBIF 0.3 format -->\n");
         text.append("<!DOCTYPE BIF [\n");
         text.append("	<!ELEMENT BIF ( NETWORK )*>\n");
