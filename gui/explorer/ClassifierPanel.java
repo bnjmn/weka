@@ -22,6 +22,7 @@ import weka.classifiers.CostMatrix;
 import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.classifiers.evaluation.CostCurve;
 import weka.filters.Filter;
 import weka.gui.Logger;
 import weka.gui.TaskLogger;
@@ -104,7 +105,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1423,6 +1424,41 @@ public class ClassifierPanel extends JPanel {
 	  visThreshold.add(clv);
 	}
 	resultListMenu.add(visThreshold);
+      }
+      JMenu visCost = new JMenu("Visualize cost curve");
+      if (preds != null && classAtt != null) {
+	for (int i = 0; i < classAtt.numValues(); i++) {
+	  JMenuItem clv = new JMenuItem(classAtt.value(i));
+	  final int classValue = i;
+	  clv.addActionListener(new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+		try {
+		  CostCurve cc = new CostCurve();
+		  Instances result = cc.getCurve(preds, classValue);
+		  VisualizePanel vmc = new VisualizePanel();
+		  vmc.setLog(m_Log);
+		  vmc.setName(result.relationName()+". Class value "+
+			      classAtt.value(classValue)+")");
+		  PlotData2D tempd = new PlotData2D(result);
+		  tempd.m_displayAllPoints = true;
+		  tempd.setPlotName(result.relationName());
+		  boolean [] connectPoints = 
+		    new boolean [result.numInstances()];
+		  for (int jj = 1; jj < connectPoints.length; jj+=2) {
+		    connectPoints[jj] = true;
+		  }
+		  tempd.setConnectPoints(connectPoints);
+		  //		  tempd.addInstanceNumberAttribute();
+		  vmc.addPlot(tempd);
+		  visualizeClassifierErrors(vmc);
+		} catch (Exception ex) {
+		  ex.printStackTrace();
+		}
+	      }
+	    });
+	  visCost.add(clv);
+	}
+	resultListMenu.add(visCost);
       }
     }
     resultListMenu.show(m_History.getList(), x, y);
