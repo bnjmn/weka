@@ -24,7 +24,6 @@ package weka.classifiers.rules.part;
 
 import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.Distribution;
-import weka.classifiers.trees.j48.EntropySplitCrit;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
 import weka.core.*;
@@ -34,15 +33,9 @@ import weka.core.*;
  * can be pruned using a pruning set.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PruneableDecList extends ClassifierDecList{
-
-  /** Minimum number of objects */
-  private int m_MinNumObj;
- 
-  /** To compute the entropy. */
-  private static EntropySplitCrit m_splitCrit = new EntropySplitCrit();
   
   /**
    * Constructor for pruneable partial tree structure. 
@@ -53,9 +46,7 @@ public class PruneableDecList extends ClassifierDecList{
   public PruneableDecList(ModelSelection toSelectLocModel,
 			  int minNum) {
 			       
-    super(toSelectLocModel);
-
-    m_MinNumObj = minNum;
+    super(toSelectLocModel, minNum);
   }
   
   /**
@@ -70,63 +61,76 @@ public class PruneableDecList extends ClassifierDecList{
 
     cleanup(new Instances(train, 0));
   }
-  
-  /**
-   * Method for choosing a subset to expand.
-   */
-  public final int chooseIndex() {
-    
-    int minIndex = -1;
-    double estimated, min = Double.MAX_VALUE;
-    int i, j;
 
-    for (i = 0; i < m_sons.length; i++)
-      if (son(i) == null){
-	if (Utils.sm(localModel().distribution().perBag(i),
-		     (double)m_MinNumObj))
-	  estimated = Double.MAX_VALUE;
-	else{
-	  estimated = 0;
-	  for (j = 0; j < localModel().distribution().numClasses(); j++) 
-	    estimated -= m_splitCrit.logFunc(localModel().distribution().
-				     perClassPerBag(i,j));
-	  estimated += m_splitCrit.logFunc(localModel().distribution().
-				   perBag(i));
-	  estimated /= localModel().distribution().perBag(i);
-	}
-	if (Utils.smOrEq(estimated,0)) // This is certainly a good one.
-	  return i;
-	if (Utils.sm(estimated,min)){
-	  min = estimated;
-	  minIndex = i;
-	}
-      }
-
-    return minIndex;
-  }
-  
   /**
-   * Choose last index (ie. choose rule).
+   * Builds the partial tree with hold out set
+   *
+   * @exception Exception if something goes wrong
    */
-  public final int chooseLastIndex() {
+  public void buildDecList(Instances train, Instances test, 
+			   boolean leaf) throws Exception {
     
-    int minIndex = 0;
-    double estimated, min = Double.MAX_VALUE;
+    Instances [] localTrain,localTest;
+    int index,ind;
+    int i,j;
+    double sumOfWeights;
+    NoSplit noSplit;
     
-    if (!m_isLeaf) 
-      for (int i = 0; i < m_sons.length; i++)
-	if (son(i) != null){
-	  if (Utils.grOrEq(localModel().distribution().perBag(i),
-			   (double)m_MinNumObj)) {
-	    estimated = son(i).getSizeOfBranch();
-	    if (Utils.sm(estimated,min)){
-	      min = estimated;
-	      minIndex = i;
-	    }
+    m_train = null;
+    m_isLeaf = false;
+    m_isEmpty = false;
+    m_sons = null;
+    indeX = 0;
+    sumOfWeights = train.sumOfWeights();
+    noSplit = new NoSplit (new Distribution((Instances)train));
+    if (leaf)
+      m_localModel = noSplit;
+    else
+      m_localModel = m_toSelectModel.selectModel(train, test);
+    m_test = new Distribution(test, m_localModel);
+    if (m_localModel.numSubsets() > 1) {
+      localTrain = m_localModel.split(train);
+      localTest = m_localModel.split(test);
+      train = null;
+      test = null;
+      m_sons = new ClassifierDecList [m_localModel.numSubsets()];
+      i = 0;
+      do {
+	i++;
+	ind = chooseIndex();
+	if (ind == -1) {
+	  for (j = 0; j < m_sons.length; j++) 
+	    if (m_sons[j] == null)
+	      m_sons[j] = getNewDecList(localTrain[j],localTest[j],true);
+	  if (i < 2) {
+	    m_localModel = noSplit;
+	    m_isLeaf = true;
+	    m_sons = null;
+	    if (Utils.eq(sumOfWeights,0))
+	      m_isEmpty = true;
+	    return;
 	  }
-	}
-
-    return minIndex;
+	  ind = 0;
+	  break;
+	} else 
+	  m_sons[ind] = getNewDecList(localTrain[ind],localTest[ind],false);
+      } while ((i < m_sons.length) && (m_sons[ind].m_isLeaf));
+      
+      // Check if all successors are leaves
+      for (j = 0; j < m_sons.length; j++) 
+	if ((m_sons[j] == null) || (!m_sons[j].m_isLeaf))
+	  break;
+      if (j == m_sons.length) {
+	pruneEnd();
+	if (!m_isLeaf) 
+	  indeX = chooseLastIndex();
+      }else 
+	indeX = chooseLastIndex();
+    }else{
+      m_isLeaf = true;
+      if (Utils.eq(sumOfWeights, 0))
+	m_isEmpty = true;
+    }
   }
   
   /**
@@ -139,7 +143,7 @@ public class PruneableDecList extends ClassifierDecList{
 					    boolean leaf) throws Exception {
 	 
     PruneableDecList newDecList = 
-      new PruneableDecList(m_toSelectModel, m_MinNumObj);
+      new PruneableDecList(m_toSelectModel, m_minNumObj);
     
     newDecList.buildDecList((Instances)train, test, leaf);
     
@@ -179,7 +183,7 @@ public class PruneableDecList extends ClassifierDecList{
 	    m_test.perClassPerBag(i,localModel().distribution().
 				maxClass());
 	} else
-	  error += son(i).errorsForTree();
+	  error += ((PruneableDecList)son(i)).errorsForTree();
 
       return error;
     }
@@ -192,33 +196,6 @@ public class PruneableDecList extends ClassifierDecList{
 
     return m_test.total()-
 	    m_test.perClass(localModel().distribution().maxClass());
-  }
- 
-  /**
-   * Returns the number of instances covered by a branch
-   */
-  private double getSizeOfBranch() {
-    
-    if (m_isLeaf) {
-      return -localModel().distribution().total();
-    } else
-      return son(indeX).getSizeOfBranch();
-  }
-
-  /**
-   * Method just exists to make program easier to read.
-   */
-  private ClassifierSplitModel localModel() {
-    
-    return (ClassifierSplitModel)m_localModel;
-  }
-  
-  /**
-   * Method just exists to make program easier to read.
-   */
-  private PruneableDecList son(int index) {
-    
-    return (PruneableDecList)m_sons[index];
   }
 }
 
