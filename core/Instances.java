@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.54 $ 
+ * @version $Revision: 1.55 $ 
  */
 public class Instances implements Serializable {
  
@@ -75,8 +75,8 @@ public class Instances implements Serializable {
   protected /*@non_null@*/ String m_RelationName;         
 
   /** The attribute information. */
-  protected /*@non_null@*/ FastVector m_Attributes;
-  /*@ protected invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
+  protected /*@spec_public non_null@*/ FastVector m_Attributes;
+  /*@ public invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
                     m_Attributes.elementAt(i) != null);
   */
 
@@ -668,6 +668,7 @@ public class Instances implements Serializable {
    *
    * @return the number of attributes as an integer
    */
+  //@ ensures \result == m_Attributes.size();
   public /*@pure@*/ int numAttributes() {
 
     return m_Attributes.size();
