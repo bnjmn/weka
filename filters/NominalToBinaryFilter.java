@@ -28,11 +28,15 @@ import java.util.*;
 import weka.core.*;
 
 /** 
- * Converts all nominal attributes into binary numeric 
- * attributes. An attribute with k values is transformed into
- * k-1 new binary attributes (in a similar manner to CART if a
- * numeric class is assigned). Currently requires that a class attribute
- * be set (but this should be changed).<p>
+ * Converts all nominal attributes into binary numeric attributes. An
+ * attribute with k values is transformed into k binary attributes if
+ * the class is nominal (using the one-attribute-per-value approach).
+ * Binary attributes are left binary.
+ *
+ * If the class is numeric, k - 1 new binary attributes are generated
+ * (in the manner described in "Classification and Regression
+ * Trees"). Currently requires that a class attribute be set (but this
+ * should be changed).<p>
  *
  * Valid filter-specific options are: <p>
  *
@@ -40,7 +44,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $ 
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
