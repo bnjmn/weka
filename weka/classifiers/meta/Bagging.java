@@ -63,7 +63,7 @@ import weka.core.UnsupportedAttributeTypeException;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -305,30 +305,16 @@ public class Bagging extends DistributionClassifier
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
 
+    int bagSize = data.numInstances() * m_BagSizePercent / 100;
     Random random = new Random(m_Seed);
-    if (m_Classifier instanceof WeightedInstancesHandler) {
-      double targetWeight = data.sumOfWeights() * m_BagSizePercent / 100;
-      for (int j = 0; j < m_Classifiers.length; j++) {
-	Instances bagData = new Instances(data, data.numInstances());
-	double currentBagWeight = 0;
-	while (currentBagWeight < targetWeight) {
-	  Instance inst = data.instance(random.nextInt(data.numInstances()));
-	  bagData.add(inst);
-	  currentBagWeight += inst.weight();
-	}
-	bagData.compactify();
-	m_Classifiers[j].buildClassifier(bagData);
+    for (int j = 0; j < m_Classifiers.length; j++) {
+      Instances bagData = data.resampleWithWeights(random);
+      if (bagSize < data.numInstances()) {
+	bagData.randomize(random);
+	Instances newBagData = new Instances(bagData, 0, bagSize);
+	bagData = newBagData;
       }
-    } else {
-      int bagSize = data.numInstances() * m_BagSizePercent / 100;
-      for (int j = 0; j < m_Classifiers.length; j++) {
-	Instances bagData = data.resampleWithWeights(random);
-	if (bagSize < data.numInstances()) {
-	  Instances newBagData = new Instances(bagData, 0, bagSize);
-	  bagData = newBagData;
-	}
-	m_Classifiers[j].buildClassifier(bagData);
-      }
+      m_Classifiers[j].buildClassifier(bagData);
     }
   }
 
