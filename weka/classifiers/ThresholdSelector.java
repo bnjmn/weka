@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Vector;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.AttributeStats;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -19,7 +20,7 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
-import weka.core.AttributeStats;
+import weka.core.Attribute;
 
 /**
  * Class for selecting a threshold on a probability output by a
@@ -33,8 +34,9 @@ import weka.core.AttributeStats;
  * -C num <br>
  * The class for which threshold is determined. Valid values are:
  * 1, 2 (for first and second classes, respectively), 3 (for whichever
- * class is least frequent), and 4 (for whichever class value is most frequent).
- * (default 3). <p>
+ * class is least frequent), 4 (for whichever class value is most 
+ * frequent), and 5 (for the first class named any of "yes","pos(itive)",
+ * "1", or method 3 if no matches). (default 5). <p>
  *
  * -W classname <br>
  * Specify the full class name of the base classifier. <p>
@@ -55,7 +57,7 @@ import weka.core.AttributeStats;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -75,11 +77,13 @@ public class ThresholdSelector extends DistributionClassifier
   public final static int OPTIMIZE_1     = 1;
   public final static int OPTIMIZE_LFREQ = 2;
   public final static int OPTIMIZE_MFREQ = 3;
+  public final static int OPTIMIZE_POS_NAME = 4;
   public static final Tag [] TAGS_OPTIMIZE = {
     new Tag(OPTIMIZE_0, "First class value"),
     new Tag(OPTIMIZE_1, "Second class value"),
     new Tag(OPTIMIZE_LFREQ, "Least frequent class value"),
-    new Tag(OPTIMIZE_MFREQ, "Most frequent class value")
+    new Tag(OPTIMIZE_MFREQ, "Most frequent class value"),
+    new Tag(OPTIMIZE_POS_NAME, "Class value named: \"yes\", \"pos(itive)\",\"1\"")
   };
 
   /** The generated base classifier */
@@ -102,7 +106,7 @@ public class ThresholdSelector extends DistributionClassifier
   protected int m_DesignatedClass = 0;
 
   /** Method to determine which class to optimize for */
-  protected int m_ClassMode = OPTIMIZE_LFREQ;
+  protected int m_ClassMode = OPTIMIZE_POS_NAME;
 
   /** The evaluation mode */
   protected int m_EvalMode = EVAL_TUNED_SPLIT;
@@ -186,7 +190,8 @@ public class ThresholdSelector extends DistributionClassifier
               "\tThe class for which threshold is determined. Valid values are:\n" +
               "\t1, 2 (for first and second classes, respectively), 3 (for whichever\n" +
               "\tclass is least frequent), and 4 (for whichever class value is most\n" +
-              "\tfrequent). (default 3).",
+              "\tfrequent), and 5 (for the first class named any of \"yes\",\"pos(itive)\"\n" +
+              "\t\"1\", or method 3 if no matches). (default 5).",
 	      "C", 1, "-C <integer>"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to perform parameter selection on.\n"
@@ -229,8 +234,9 @@ public class ThresholdSelector extends DistributionClassifier
    * -C num <br>
    * The class for which threshold is determined. Valid values are:
    * 1, 2 (for first and second classes, respectively), 3 (for whichever
-   * class is least frequent), and 4 (for whichever class value is most 
-   * frequent). (default 3). <p>
+   * class is least frequent), 4 (for whichever class value is most 
+   * frequent), and 5 (for the first class named any of "yes","pos(itive)",
+   * "1", or method 3 if no matches). (default 3). <p>
    *
    * -W classname <br>
    * Specify the full class name of classifier to perform cross-validation
@@ -370,6 +376,21 @@ public class ThresholdSelector extends DistributionClassifier
     case OPTIMIZE_1:
       m_DesignatedClass = 1;
       break;
+    case OPTIMIZE_POS_NAME:
+      Attribute cAtt = instances.classAttribute();
+      boolean found = false;
+      for (int i = 0; i < cAtt.numValues() && !found; i++) {
+        String name = cAtt.value(i).toLowerCase();
+        if (name.equals("yes") || name.equals("1") || 
+            name.equals("pos") || name.equals("positive")) {
+          found = true;
+          m_DesignatedClass = i;
+        }
+      }
+      if (found) {
+        break;
+      }
+      // No named class found, so fall through to default of least frequent
     case OPTIMIZE_LFREQ:
       m_DesignatedClass = (stats.nominalCounts[0] > stats.nominalCounts[1]) ? 1 : 0;
       break;
@@ -436,7 +457,8 @@ public class ThresholdSelector extends DistributionClassifier
     
   /**
    * Gets the method to determine which class value to optimize. Will
-   * be one of OPTIMIZE_0, OPTIMIZE_1, OPTIMIZE_LFREQ, OPTIMIZE_MFREQ.
+   * be one of OPTIMIZE_0, OPTIMIZE_1, OPTIMIZE_LFREQ, OPTIMIZE_MFREQ,
+   * OPTIMIZE_POS_NAME.
    *
    * @return the class selection mode.
    */
@@ -451,7 +473,8 @@ public class ThresholdSelector extends DistributionClassifier
   
   /**
    * Sets the method to determine which class value to optimize. Will
-   * be one of OPTIMIZE_0, OPTIMIZE_1, OPTIMIZE_LFREQ, OPTIMIZE_MFREQ.
+   * be one of OPTIMIZE_0, OPTIMIZE_1, OPTIMIZE_LFREQ, OPTIMIZE_MFREQ,
+   * OPTIMIZE_POS_NAME.
    *
    * @param newMethod the new class selection mode.
    */
