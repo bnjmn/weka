@@ -71,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -1095,7 +1095,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
       ((AttributeEvaluator)m_ASEval).buildEvaluator(data);
       m_Ranking = ranker.search((AttributeEvaluator)m_ASEval,data);
     } else {
-      ForwardSelection fs = new ForwardSelection();
+      GreedyStepwise fs = new GreedyStepwise();
       double [][]rankres; 
       fs.setGenerateRanking(true);
       ((SubsetEvaluator)m_ASEval).buildEvaluator(data);
