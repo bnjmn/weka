@@ -68,48 +68,48 @@ import java.io.*;
  * ENDLOOP<p>
  *
  * A typical usage of this class is to create your own subclass of this class
- * and provide the objective function and gradients as follows:
+ * and provide the objective function and gradients as follows:<p>
  * <code>
  * class MyOpt extends Optimization{ <br>
  *   // Provide the objective function <br>
- *   protected double objectiveFunction(double[] x){ <br>
- *       // How to calculate your objective function... <br>
- *       // ... <br>
- *   } <br>
- * <br>
- *   // Provide the first derivatives <br>
- *   protected double[] evaluateGradient(double[] x){ <br>
- *       // How to calculate the gradient of the objective function... <br>
- *       // ... <br>
- *   }  <br>
- * <br>
- *   // If possible, provide the index^{th} row of the Hessian matrix <br>
- *   protected double[] evaluateHessian(double[] x, int index){ <br>
- *      // How to calculate the index^th variable's second derivative <br>
+ *   protected double objectiveFunction(double[] x){<br>
+ *       // How to calculate your objective function...<br>
+ *       // ...<br>
+ *   }<p>
+ *
+ *   // Provide the first derivatives<br>
+ *   protected double[] evaluateGradient(double[] x){<br>
+ *       // How to calculate the gradient of the objective function...<br>
+ *       // ...<br>
+ *   } <p>
+ *
+ *   // If possible, provide the index^{th} row of the Hessian matrix<br>
+ *   protected double[] evaluateHessian(double[] x, int index){<br>
+ *      // How to calculate the index^th variable's second derivative<br>
  *      // ... <br>
- *   } <br>
- * }  <br>
- * <br>
- * // When it's the time to use it, in some routine(s) of other class... <br>
- * MyOpt opt = new MyOpt(); <br>
- *  <br>
- * // Set up initial variable values and bound constraints <br>
- * double[] x = new double[numVariables]; <br>
- * // Lower and upper bounds: 1st row is lower bounds, 2nd is upper <br>
- * double[] constraints = new double[2][numVariables]; <br>
- * ... <br>
- * <br>
- * // Find the minimum, 200 iterations as default <br>
- * x = opt.findArgmin(x, constraints);  <br>
- * while(x == null){  // 200 iterations are not enough <br>
- *    x = opt.getVarbValues();  // Try another 200 iterations <br>
- *    x = opt.findArgmin(x, constraints); <br>
- * } <br>
- * <br>
- * // The minimal function value <br>
- * double minFunction = opt.getMinFunction(); <br>
- * ... <br>
- * </code>   
+ *   }<br>
+ * } <p>
+ *
+ * // When it's the time to use it, in some routine(s) of other class...<br>
+ * MyOpt opt = new MyOpt();<p>
+ * 
+ * // Set up initial variable values and bound constraints<br>
+ * double[] x = new double[numVariables];<br>
+ * // Lower and upper bounds: 1st row is lower bounds, 2nd is upper<br>
+ * double[] constraints = new double[2][numVariables];<br>
+ * ...<p>
+ *
+ * // Find the minimum, 200 iterations as default<br>
+ * x = opt.findArgmin(x, constraints); <br>
+ * while(x == null){  // 200 iterations are not enough<br>
+ *    x = opt.getVarbValues();  // Try another 200 iterations<br>
+ *    x = opt.findArgmin(x, constraints);<br>
+ * }<p>
+ *
+ * // The minimal function value<br>
+ * double minFunction = opt.getMinFunction();<br>
+ * ...<p>
+ * </code>  
  * It is recommended that Hessian values be provided so that the second-order 
  * Lagrangian multiplier estimate can be calcluated.  However, if it is not provided, 
  * there is no need to override the <code>evaluateHessian()</code> function.<p>
@@ -136,7 +136,7 @@ import java.io.*;
  * <p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public abstract class Optimization{
     
@@ -724,13 +724,12 @@ public abstract class Optimization{
 	double[] grad=evaluateGradient(initX), oldGrad, oldX,
 	    deltaGrad=new double[l], deltaX=new double[l],
 	    direct = new double[l], x = new double[l];
-	Matrix L = new Matrix(l, l),// Lower triangle of Cholesky factor 
-	    D = new Matrix(l, l);   // Diagonal of Cholesky factor
+	Matrix L = new Matrix(l, l);  // Lower triangle of Cholesky factor 
+	double[] D = new double[l];   // Diagonal of Cholesky factor
 	for(int i=0; i<l; i++){
 	    L.setRow(i, new double[l]);
 	    L.setElement(i,i,1.0);
-	    D.setRow(i, new double[l]);
-	    D.setElement(i,i,1.0);
+	    D[i] = 1.0;
 	    direct[i] = -grad[i];
 	    sum += grad[i]*grad[i];
 	    x[i] = initX[i];
@@ -763,7 +762,7 @@ public abstract class Optimization{
 		    int idx=((Integer)wsBdsIndx.elementAt(f)).intValue();
 		    L.setRow(idx, new double[l]);
 		    L.setColumn(idx, new double[l]);
-		    D.setElement(idx, idx, 0.0);
+		    D[idx] = 0.0;
 		}		
 		grad = evaluateGradient(x);
 		step--;
@@ -903,7 +902,7 @@ public abstract class Optimization{
 						   nwsBounds[1][freeIndx]);
 			}			
 			L.setElement(freeIndx, freeIndx, 1.0);
-			D.setElement(freeIndx, freeIndx, 1.0);
+			D[freeIndx] = 1.0;
 			isUpdate = false;			
 		    }			
 		}
@@ -915,20 +914,14 @@ public abstract class Optimization{
 		}		
 		// If Hessian will be positive definite, update it
 		if(isUpdate){
-		    double[] v= new double[l];  
-		    Matrix[] result;
-	    
+		    
 		    // modify once: dg*dg'/(dg'*dx)	
 		    double coeff = 1.0/denom; // 1/(dg'*dx)	
-		    result = updateCholeskyFactor(L,D,deltaGrad,coeff,isFixed);
+		    updateCholeskyFactor(L,D,deltaGrad,coeff,isFixed);
 		    
 		    // modify twice: g*g'/(g'*p)	
 		    coeff = 1.0/m_Slope; // 1/(g'*p)
-		    result=updateCholeskyFactor
-			(result[0],result[1],oldGrad,coeff,isFixed);  
-		    
-		    L = result[0];
-		    D = result[1];
+		    updateCholeskyFactor(L,D,oldGrad,coeff,isFixed);  		    
 		}
 	    }
 	    
@@ -942,18 +935,19 @@ public abstract class Optimization{
 		
 		for(int j=k; j<l; j++){ // Lower triangle	
 		    if(!isFixed[j] && !isFixed[k])
-			LD.setElement(j, k, L.getElement(j,k)*D.getElement(k,k));
+			LD.setElement(j, k, L.getElement(j,k)*D[k]);
 		}		
 	    }	    	
 	    
 	    // Solve (LD)*y = -g, where y=L'*direct
-	    double[] LDIR = solveTriangle(LD, b, true, isFixed);
+	    double[] LDIR = solveTriangle(LD, b, true, isFixed);	    
+	    LD = null;
 	    
 	    for(int m=0; m<LDIR.length; m++){
 		if(Double.isNaN(LDIR[m]))
 		    throw new Exception("L*direct["+m+"] is NaN!"
 					+"|-g="+b[m]+"|"+isFixed[m]
-					+"|diag="+D.getElement(m,m));
+					+"|diag="+D[m]);
 	    }
 	    
 	    // Solve L'*direct = y
@@ -1045,16 +1039,14 @@ public abstract class Optimization{
      * @param v the update vector v
      * @param coeff the coeffcient of update
      * @param isFixed which variables are not to be updated
-     * @return the updated L and D
      */    
-    protected Matrix[] updateCholeskyFactor(Matrix L, Matrix D, 
-					    double[] v, double coeff,
-					    boolean[] isFixed)
+    protected void updateCholeskyFactor(Matrix L, double[] D, 
+					double[] v, double coeff,
+					boolean[] isFixed)
 	throws Exception{
 	double t, p, b;
 	int n = v.length;
-	double[] vp =  new double[n];
-	Matrix dBar = new Matrix(n, n), lBar = new Matrix(n, n);	
+	double[] vp =  new double[n];	
 	for (int i=0; i<v.length; i++)
 	    if(!isFixed[i])
 		vp[i]=v[i];
@@ -1064,13 +1056,11 @@ public abstract class Optimization{
 	if(coeff>0.0){
 	    t = coeff;	    
 	    for(int j=0; j<n; j++){		
-		if(isFixed[j]) continue;
-		
-		lBar.setElement(j, j, 1.0); // Unit triangle
+		if(isFixed[j]) continue;		
 		
 		p = vp[j];
-		double d=D.getElement(j,j), dbarj=d+t*p*p;
-		dBar.setElement(j, j, dbarj);
+		double d=D[j], dbarj=d+t*p*p;
+		D[j] = dbarj;
 		
 		b = p*t/dbarj;
 		t *= d/dbarj;
@@ -1078,10 +1068,10 @@ public abstract class Optimization{
 		    if(!isFixed[r]){
 			double l=L.getElement(r, j);
 			vp[r] -= p*l;
-			lBar.setElement(r, j, l+b*vp[r]);
+			L.setElement(r, j, l+b*vp[r]);
 		    }
 		    else
-		    	lBar.setElement(r, j, 0.0);
+		    	L.setElement(r, j, 0.0);
 		}
 	    }
 	}
@@ -1090,7 +1080,7 @@ public abstract class Optimization{
 	    t = 0.0;
 	    for(int i=0; i<n; i++)
 		if(!isFixed[i])
-		    t += P[i]*P[i]/D.getElement(i,i);	    	
+		    t += P[i]*P[i]/D[i];	    	
 	    
 	    double sqrt=1.0+coeff*t;
 	    sqrt = (sqrt<0.0)? 0.0 : Math.sqrt(sqrt);
@@ -1100,9 +1090,7 @@ public abstract class Optimization{
 	    for(int j=0; j<n; j++){
 		if(isFixed[j]) continue;
 		
-		lBar.setElement(j, j, 1.0); // Unit triangle
-		
-		double d=D.getElement(j,j);
+		double d=D[j];
 		p = P[j]*P[j]/d;
 		theta = 1.0+sigma*p;
 		t -= p; 
@@ -1112,9 +1100,9 @@ public abstract class Optimization{
 		if((j<n-1) && (plus <= m_Zero)) 
 		    plus=m_Zero; // Avoid rounding error
 		rho = theta*theta + plus;		
-		dBar.setElement(j, j, rho*d);
+		D[j] = rho*d;
 		
-		if(Double.isNaN(dBar.getElement(j,j))){
+		if(Double.isNaN(D[j])){
 		    throw new Exception("d["+j+"] NaN! P="+P[j]+",d="+d+
 					",t="+t+",p="+p+",sigma="+sigma+
 					",sclar="+coeff);
@@ -1136,19 +1124,15 @@ public abstract class Optimization{
 		    if(!isFixed[r]){
 			double l=L.getElement(r, j);
 			vp[r] -= P[j]*l;
-			lBar.setElement(r, j, l+b*vp[r]);
+			L.setElement(r, j, l+b*vp[r]);
 		    }
 		    else
-		    	lBar.setElement(r, j, 0.0);
+		    	L.setElement(r, j, 0.0);
 		}
 	    }
-	}
-	
-	Matrix[] rt = new Matrix[2];
-	rt[0] = lBar; rt[1] = dBar;
-	return rt;
+	}	
     }
-
+    
     /**
      * Check whether the two integer vectors equal to each other
      * Two integer vectors are equal if all the elements are the 
