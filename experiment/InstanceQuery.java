@@ -47,7 +47,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -206,27 +206,31 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     ResultSet rs = getResultSet();
     System.err.println("Getting metadata...");
     ResultSetMetaData md = rs.getMetaData();
-
+    System.err.println("Completed getting metadata...");
     // Determine structure of the instances
     int numAttributes = md.getColumnCount();
     int [] attributeTypes = new int [numAttributes];
     Hashtable [] nominalIndexes = new Hashtable [numAttributes];
     FastVector [] nominalStrings = new FastVector [numAttributes];
     for (int i = 1; i <= numAttributes; i++) {
-      switch (md.getColumnType(i)) {
+      /* switch (md.getColumnType(i)) {
       case Types.CHAR:
       case Types.VARCHAR:
       case Types.LONGVARCHAR:
       case Types.BINARY:
       case Types.VARBINARY:
-      case Types.LONGVARBINARY:
+      case Types.LONGVARBINARY:*/
+      
+      switch (translateDBColumnType(md.getColumnTypeName(i))) {
+	
+      case STRING :
 	//System.err.println("String --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
 	nominalIndexes[i - 1] = new Hashtable();
 	nominalStrings[i - 1] = new FastVector();
 	break;
-      case Types.BIT:
-	////System.err.println("boolean --> nominal");
+      case BOOL:
+	//System.err.println("boolean --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
 	nominalIndexes[i - 1] = new Hashtable();
 	nominalIndexes[i - 1].put("false", new Double(0));
@@ -235,45 +239,31 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	nominalStrings[i - 1].addElement("false");
 	nominalStrings[i - 1].addElement("true");
 	break;
-      case Types.NUMERIC:
-      case Types.DECIMAL:
+      case DOUBLE:
 	//System.err.println("BigDecimal --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case Types.TINYINT:
+      case BYTE:
 	//System.err.println("byte --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case Types.SMALLINT:
+      case SHORT:
 	//System.err.println("short --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case Types.INTEGER:
+      case INTEGER:
 	//System.err.println("int --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case Types.BIGINT:
+      case LONG:
 	//System.err.println("long --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case Types.REAL:
+      case FLOAT:
 	//System.err.println("float --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case Types.FLOAT:
-      case Types.DOUBLE:
-	//System.err.println("double --> numeric");
-	attributeTypes[i - 1] = Attribute.NUMERIC;
-	break;
-	/*case Types.BINARY:
-      case Types.VARBINARY:
-      case Types.LONGVARBINARY:
-	//System.err.println("byte[] --> unsupported");
-	attributeTypes[i - 1] = Attribute.STRING;
-	break; */
-      case Types.DATE:
-      case Types.TIME:
-      case Types.TIMESTAMP:
+      case DATE:
 	attributeTypes[i - 1] = Attribute.DATE;
 	break;
       default:
@@ -293,13 +283,15 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
       }
       double[] vals = new double[numAttributes];
       for(int i = 1; i <= numAttributes; i++) {
-	switch (md.getColumnType(i)) {
+	/*switch (md.getColumnType(i)) {
 	case Types.CHAR:
 	case Types.VARCHAR:
 	case Types.LONGVARCHAR:
 	case Types.BINARY:
 	case Types.VARBINARY:
-	case Types.LONGVARBINARY:
+	case Types.LONGVARBINARY:*/
+	switch (translateDBColumnType(md.getColumnTypeName(i))) {
+	case STRING :
 	  String str = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
@@ -314,7 +306,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = index.doubleValue();
 	  }
 	  break;
-	case Types.BIT:
+	case BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -322,8 +314,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
 	  break;
-	case Types.NUMERIC:
-	case Types.DECIMAL:
+	case DOUBLE:
 	  //	  BigDecimal bd = rs.getBigDecimal(i, 4); 
 	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
@@ -334,7 +325,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] =  dd;
 	  }
 	  break;
-	case Types.TINYINT:
+	case BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -342,7 +333,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = (double)by;
 	  }
 	  break;
-	case Types.SMALLINT:
+	case SHORT:
 	  short sh = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -350,7 +341,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = (double)sh;
 	  }
 	  break;
-	case Types.INTEGER:
+	case INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -358,7 +349,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = (double)in;
 	  }
 	  break;
-	case Types.BIGINT:
+	case LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -366,7 +357,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = (double)lo;
 	  }
 	  break;
-	case Types.REAL:
+	case FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -374,21 +365,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	    vals[i - 1] = (double)fl;
 	  }
 	  break;
-	case Types.FLOAT:
-	case Types.DOUBLE:
-	  double dou = rs.getDouble(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] = (double)dou;
-	  }
-	  break;
-	  /*case Types.BINARY:
-	case Types.VARBINARY:
-	case Types.LONGVARBINARY: */
-	case Types.DATE:
-	case Types.TIME:
-	case Types.TIMESTAMP:
+	case DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -416,7 +393,8 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     System.err.println("Creating header...");
     FastVector attribInfo = new FastVector();
     for (int i = 0; i < numAttributes; i++) {
-      String attribName = md.getColumnName(i + 1);
+      /* Fix for databases that uppercase column names */
+      String attribName = attributeCaseFix(md.getColumnName(i + 1));
       switch (attributeTypes[i]) {
       case Attribute.NOMINAL:
 	attribInfo.addElement(new Attribute(attribName, nominalStrings[i]));
@@ -440,6 +418,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
       result.add((Instance)instances.elementAt(i));
     }
     rs.close();
+   
     return result;
   }
 
