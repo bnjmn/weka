@@ -1,5 +1,5 @@
 #
-# $Revision: 1.9 $
+# $Revision: 1.10 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -50,7 +50,7 @@ clean :
 
 doc :
 	(cd ..; \
-	javadoc -Jmx100m -public -author -version -d doc \
+	javadoc -J-mx100m -public -author -version -d doc \
 	weka.core \
 	weka.classifiers \
 	weka.classifiers.j48 \
@@ -88,6 +88,7 @@ install : all
 	weka/experiment/*.class \
 	weka/gui/*.class \
 	weka/gui/experiment/*.class \
+	weka/gui/explorer/*.class \
 	weka/gui/streams/*.class \
 	; \
 	jar cvf $$JAWSHOME/weka-src.jar \
@@ -103,10 +104,11 @@ install : all
 	weka/experiment/*.java \
 	weka/gui/*.java \
 	weka/gui/experiment/*.java \
+	weka/gui/explorer/*.java \
 	weka/gui/streams/*.java \
 	;\
 	rm manifest.tmp )
-	javadoc -Jmx100m -public -author -version -d $$JAWSHOME/doc \
+	javadoc -J-mx100m -public -author -version -d $$JAWSHOME/doc \
 	weka.core \
 	weka.classifiers \
 	weka.classifiers.j48 \
