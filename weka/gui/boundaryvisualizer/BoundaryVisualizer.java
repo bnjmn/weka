@@ -27,6 +27,7 @@ import java.awt.event.*;
 import javax.swing.JPanel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
+import javax.swing.JTextField;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -51,7 +52,7 @@ import weka.classifiers.DistributionClassifier;
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  */
@@ -241,6 +242,12 @@ public class BoundaryVisualizer extends JPanel {
   private int m_xIndex;
   private int m_yIndex;
 
+  // the number of samples to use from each kernel when plotting pixels
+  private int m_numberOfSamplesFromEachGeneratingModel = 2;
+  
+  private JTextField m_samplesText = 
+    new JTextField(""+m_numberOfSamplesFromEachGeneratingModel);
+
   /**
    * Creates a new <code>BoundaryVisualizer</code> instance.
    */
@@ -293,7 +300,13 @@ public class BoundaryVisualizer extends JPanel {
     JPanel colOne = new JPanel();
     colOne.setLayout(new BorderLayout());
     colOne.add(cHolder, BorderLayout.NORTH);
-    colOne.add(vAttHolder, BorderLayout.SOUTH);
+    colOne.add(vAttHolder, BorderLayout.CENTER);
+    //    JPanel samplesHolder = new JPanel();
+    m_samplesText.setBorder(BorderFactory.
+			    createTitledBorder("Num. samples per generator"));
+    m_samplesText.setBackground(colOne.getBackground());
+    //    samplesHolder.add(m_samplesText);
+    colOne.add(m_samplesText, BorderLayout.SOUTH);
 
     JPanel colTwo = new JPanel();
     colTwo.setLayout(new BorderLayout());
@@ -330,6 +343,16 @@ public class BoundaryVisualizer extends JPanel {
 	  if (m_startBut.getText().equals("Start")) {
 	    if (m_trainingInstances != null && m_classifier != null) {
 	      try {
+		int tempSamples = m_numberOfSamplesFromEachGeneratingModel;
+		try {
+		  tempSamples = 
+		    Integer.parseInt(m_samplesText.getText().trim());
+		} catch (Exception ex) {
+		  m_samplesText.setText(""+tempSamples);
+		}
+		m_numberOfSamplesFromEachGeneratingModel = tempSamples;
+		m_boundaryPanel.
+		  setNumberOfSamplesFromEachGeneratingModel(tempSamples);
 		m_trainingInstances.
 		  setClassIndex(m_classAttBox.getSelectedIndex());
 		m_boundaryPanel.setClassifier(m_classifier);
@@ -377,6 +400,7 @@ public class BoundaryVisualizer extends JPanel {
     m_blueClassValueBox.setEnabled(status);
     m_xAttBox.setEnabled(status);
     m_yAttBox.setEnabled(status);
+    m_samplesText.setEnabled(status);
   }
 
   /**
@@ -459,7 +483,10 @@ public class BoundaryVisualizer extends JPanel {
    *
    * @param inst the instances to use
    */
-  public void setInstances(Instances inst) {
+  public void setInstances(Instances inst) throws Exception {
+    if (inst.numAttributes() < 3) {
+      throw new Exception("Not enough attributes in the data to visualize!");
+    }
     m_trainingInstances = inst;
 
     // setup combo boxes
@@ -483,6 +510,7 @@ public class BoundaryVisualizer extends JPanel {
     m_classAttBox.setModel(new DefaultComboBoxModel(classAttNames));
     m_xAttBox.setModel(new DefaultComboBoxModel(xAttNames));
     m_yAttBox.setModel(new DefaultComboBoxModel(yAttNames));
+    m_yAttBox.setSelectedIndex(1);
 
     m_classAttBox.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -533,6 +561,13 @@ public class BoundaryVisualizer extends JPanel {
 	m_redClassValueBox.setModel(new DefaultComboBoxModel(rNames));
 	m_greenClassValueBox.setModel(new DefaultComboBoxModel(gNames));
 	m_blueClassValueBox.setModel(new DefaultComboBoxModel(bNames));
+	if (gNames.size() > 1) {
+	  m_greenClassValueBox.setSelectedIndex(1);
+	  m_blueClassValueBox.setSelectedIndex(1);
+	}
+	if (bNames.size() > 2) {
+	  m_blueClassValueBox.setSelectedIndex(2);
+	}
 	if (m_xAttBox.getSelectedIndex() >= 0 &&
 	    m_yAttBox.getSelectedIndex() >= 0) {
 	  m_startBut.setEnabled(true);
