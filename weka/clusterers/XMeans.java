@@ -80,7 +80,7 @@ import  weka.clusterers.KDTree;
  * @author Gabi Schmidberger <gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware <mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -2125,7 +2125,7 @@ public class XMeans extends Clusterer implements OptionHandler {
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[9];
+    String[] options = new String[15];
     int current = 0;
     
     options[current++] = "-L";
