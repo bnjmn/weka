@@ -30,15 +30,11 @@ import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
 
 /**
- * Class for combining classifiers using unweighted average (i.e. Voting)
+ * Class for combining classifiers using unweighted average of
+ * probability estimates (classification) or numeric predictions 
+ * (regression).
  *
  * Valid options from the command line are:<p>
- *
- * -D <br>
- * Turn on debugging output.<p>
- *
- * -S seed <br>
- * Random number seed (default 1).<p>
  *
  * -B classifierstring <br>
  * Classifierstring should contain the full class name of a scheme
@@ -46,7 +42,8 @@ import weka.classifiers.rules.ZeroR;
  * (required, option should be used once for each classifier).<p>
  *
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.3 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.4 $
  */
 
 public class Vote extends Classifier implements OptionHandler {
@@ -55,15 +52,18 @@ public class Vote extends Classifier implements OptionHandler {
   protected Classifier [] m_Classifiers = {
     new weka.classifiers.rules.ZeroR()
   };
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
 
-  /** Debugging mode, gives extra output if true */
-  protected boolean m_Debug;
-
-  /** Random number seed */
-  protected int m_Seed = 1;
-
-  /** The number of classes */
-  protected int m_NumClasses;
+    return "Class for combining classifiers using unweighted average of "
+      + "probability estimates (classification) or numeric predictions "
+      + "(regression).";
+  }
 
   /**
    * Returns an enumeration describing the available options
@@ -72,32 +72,20 @@ public class Vote extends Classifier implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(1);
 
-    newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to include, followed\n"
 	      + "\tby scheme options. May be specified multiple times,\n"
 	      + "\trequired at least twice.\n"
 	      + "\teg: \"weka.classifiers.NaiveBayes -K\"",
 	      "B", 1, "-B <classifier specification>"));
-    newVector.addElement(new Option(
-	      "\tSets the random number seed (default 1).",
-	      "S", 1, "-S <random number seed>"));
 
     return newVector.elements();
   }
 
   /**
    * Parses a given list of options. Valid options are:<p>
-   *
-   * -D <br>
-   * Turn on debugging output.<p>
-   *
-   * -S seed <br>
-   * Random number seed (default 1).<p>
    *
    * -B classifierstring <br>
    * Classifierstring should contain the full class name of a scheme
@@ -108,15 +96,6 @@ public class Vote extends Classifier implements OptionHandler {
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    setDebug(Utils.getFlag('D', options));
-        
-    String randomString = Utils.getOption('S', options);
-    if (randomString.length() != 0) {
-      setSeed(Integer.parseInt(randomString));
-    } else {
-      setSeed(1);
-    }
 
     // Iterate through the schemes
     FastVector classifiers = new FastVector();
@@ -154,25 +133,30 @@ public class Vote extends Classifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [128];
+    String [] options = new String [0];
     int current = 0;
 
     if (m_Classifiers.length != 0) {
-      options = new String [m_Classifiers.length * 2 + 5];
+      options = new String [m_Classifiers.length * 2];
       for (int i = 0; i < m_Classifiers.length; i++) {
 	options[current++] = "-B";
 	options[current++] = "" + getClassifierSpec(i);
       }
-    }
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-    if (getDebug()) {
-      options[current++] = "-D";
     }
 
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifiersTipText() {
+    return "The base classifiers to be used.";
   }
 
   /**
@@ -229,45 +213,6 @@ public class Vote extends Classifier implements OptionHandler {
   }
 
   /**
-   * Sets the seed for random number generation.
-   *
-   * @param seed the random number seed
-   */
-  public void setSeed(int seed) {
-    m_Seed = seed;
-  }
-
-  /**
-   * Gets the random number seed.
-   * 
-   * @return the random number seed
-   */
-  public int getSeed() {
-
-    return m_Seed;
-  }
-
-  /**
-   * Set debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-
-    m_Debug = debug;
-  }
-
-  /**
-   * Get whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
-  }
-
-  /**
    * Buildclassifier selects a classifier from the set of classifiers
    * by minimising error on the training data.
    *
@@ -278,7 +223,7 @@ public class Vote extends Classifier implements OptionHandler {
   public void buildClassifier(Instances data) throws Exception {
 
     if (m_Classifiers.length == 0) {
-      throw new Exception("No base classifiers have been set!");
+      throw new Exception("Vote: No base classifiers have been set!");
     }
 
     // Check for non-nominal classes
@@ -287,17 +232,10 @@ public class Vote extends Classifier implements OptionHandler {
     }
 
     Instances newData = new Instances(data);
-    m_NumClasses=data.numClasses();
     newData.deleteWithMissingClass();
-    newData.randomize(new Random(m_Seed));
 
-    Instances train = newData;               // train on all data by default
-
-    int numClassifiers = m_Classifiers.length;
-    for (int i = 0; i < numClassifiers; i++) {
-      Classifier currentClassifier = getClassifier(i);
-
-      currentClassifier.buildClassifier(data);
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      getClassifier(i).buildClassifier(data);
     }
   }
 
@@ -310,19 +248,16 @@ public class Vote extends Classifier implements OptionHandler {
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
-    double [] probs = new double[m_NumClasses];
-    for (int j=0; j < m_NumClasses; j++)
-      probs[j]=0;
-
-    int numClassifiers = m_Classifiers.length;
-    for (int i=0; i < numClassifiers; i++) {
-      Classifier currentClassifier = getClassifier(i);
-
-      double[] dist = currentClassifier.distributionForInstance(instance);
-      for (int j=0; j < dist.length; j++)
-	probs[j] += ((double)dist[j])/((double)numClassifiers);
+    double[] probs = getClassifier(0).distributionForInstance(instance);
+    for (int i = 1; i < m_Classifiers.length; i++) {
+      double[] dist = getClassifier(i).distributionForInstance(instance);
+      for (int j = 0; j < dist.length; j++) {
+	probs[j] += dist[j];
+      }
     }
-
+    for (int j = 0; j < probs.length; j++) {
+      probs[j] /= (double)m_Classifiers.length;
+    }
     return probs;
   }
 

@@ -32,7 +32,9 @@ import weka.core.*;
 
 /**
  * Class for selecting a classifier from among several using cross 
- * validation on the training data.<p>
+ * validation on the training data or the performance on the
+ * training data. Performance is measured based on percent correct
+ * (classification) or mean-squared error (regression).<p>
  *
  * Valid options from the command line are:<p>
  *
@@ -52,7 +54,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -78,6 +80,19 @@ public class MultiScheme extends Classifier implements OptionHandler {
 
   /** Random number seed */
   protected int m_Seed = 1;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for selecting a classifier from among several using cross "
+      + "validation on the training data or the performance on the "
+      + "training data. Performance is measured based on percent correct "
+      + "(classification) or mean-squared error (regression).";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -206,6 +221,15 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
     return options;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifiersTipText() {
+    return "The classifiers to be chosen from.";
+  }
 
   /**
    * Sets the list of possible classifers to choose from.
@@ -259,6 +283,16 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
     return c.getClass().getName();
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data " +
+      "for cross-validation.";
+  }
 
   /**
    * Sets the seed for random number generation.
@@ -278,6 +312,16 @@ public class MultiScheme extends Classifier implements OptionHandler {
   public int getSeed() {
 
     return m_Seed;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "The number of folds used for cross-validation (if 0, " +
+      "performance on training data will be used).";
   }
 
   /** 
@@ -300,6 +344,15 @@ public class MultiScheme extends Classifier implements OptionHandler {
   public void setNumFolds(int numFolds) {
     
     m_NumXValFolds = numFolds;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Whether debug information is output to console.";
   }
 
   /**
@@ -339,8 +392,9 @@ public class MultiScheme extends Classifier implements OptionHandler {
     newData.deleteWithMissingClass();
     Random random = new Random(m_Seed);
     newData.randomize(random);
-    if (newData.classAttribute().isNominal() && (m_NumXValFolds > 1))
+    if (newData.classAttribute().isNominal() && (m_NumXValFolds > 1)) {
       newData.stratify(m_NumXValFolds);
+    }
     Instances train = newData;               // train on all data by default
     Instances test = newData;               // test on training data by default
     Classifier bestClassifier = null;

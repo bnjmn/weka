@@ -53,7 +53,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class Stacking extends Classifier implements OptionHandler {
 
@@ -76,14 +76,29 @@ public class Stacking extends Classifier implements OptionHandler {
 
   /** Random number seed */
   protected int m_Seed = 1;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
 
+    return "Combines several classifiers using the stacking method. "
+      + "Can do classification or regression. "
+      + "For more information, see\n\n"
+      + "David H. Wolpert (1992). \"Stacked "
+      + "generalization\". Neural Networks, 5:241-259, Pergamon Press.";
+  }
+
+  
   /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-
+    
     Vector newVector = new Vector(4);
     newVector.addElement(new Option(
 	      "\tFull class name of base classifiers to include, followed "
@@ -92,7 +107,7 @@ public class Stacking extends Classifier implements OptionHandler {
 	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -K\"",
 	      "B", 1, "-B <scheme specification>"));
     newVector.addElement(new Option(
-	      "\tFull name of meta classifier, followed by options.",
+	      metaOption(),
 	      "M", 0, "-M <scheme specification>"));
     newVector.addElement(new Option(
 	      "\tSets the number of cross-validation folds.",
@@ -102,6 +117,14 @@ public class Stacking extends Classifier implements OptionHandler {
 	      "S", 1, "-S <random number seed>"));
 
     return newVector.elements();
+  }
+
+  /**
+   * String describing option for setting meta classifier
+   */
+  protected String metaOption() {
+
+    return "\tFull name of meta classifier, followed by options.";
   }
 
   /**
@@ -166,6 +189,13 @@ public class Stacking extends Classifier implements OptionHandler {
       }
       setBaseClassifiers(classifiersArray);
     }
+    processMetaOptions(options);
+  }
+
+  /**
+   * Process options setting meta classifier.
+   */
+  protected void processMetaOptions(String[] options) throws Exception {
 
     String classifierString = Utils.getOption('M', options);
     String [] classifierSpec = Utils.splitOptions(classifierString);
@@ -206,6 +236,16 @@ public class Stacking extends Classifier implements OptionHandler {
     }
     return options;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data " +
+      "for cross-validation.";
+  }
 
   /**
    * Sets the seed for random number generation.
@@ -225,6 +265,15 @@ public class Stacking extends Classifier implements OptionHandler {
   public int getSeed() {
 
     return m_Seed;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "The number of folds used for cross-validation.";
   }
 
   /** 
@@ -250,6 +299,15 @@ public class Stacking extends Classifier implements OptionHandler {
 			  "folds must be positive.");
     }
     m_NumFolds = numFolds;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String baseClassifiersTipText() {
+    return "The base classifiers to be used.";
   }
 
   /**
@@ -282,7 +340,15 @@ public class Stacking extends Classifier implements OptionHandler {
     
     return m_BaseClassifiers[index];
   }
-
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String metaClassifierTipText() {
+    return "The meta classifiers to be used.";
+  }
 
   /**
    * Adds meta classifier
@@ -315,20 +381,20 @@ public class Stacking extends Classifier implements OptionHandler {
   public void buildClassifier(Instances data) throws Exception {
 
     if (m_BaseClassifiers.length == 0) {
-      throw new Exception("No base classifiers have been set");
+      throw new IllegalArgumentException("No base classifiers have been set");
     }
     if (m_MetaClassifier == null) {
-      throw new Exception("No meta classifier has been set");
+      throw new IllegalArgumentException("No meta classifier has been set");
     }
     if (!(data.classAttribute().isNominal() ||
 	  data.classAttribute().isNumeric())) {
-      throw new Exception("Class attribute has to be nominal or numeric!");
+      throw new UnsupportedClassTypeException("Class attribute has to be nominal or numeric!");
     }
     Instances newData = new Instances(data);
     m_BaseFormat = new Instances(data, 0);
     newData.deleteWithMissingClass();
     if (newData.numInstances() == 0) {
-      throw new Exception("No training instances without missing class!");
+      throw new IllegalArgumentException("No training instances without missing class!");
     }
     Random random = new Random(m_Seed);
     newData.randomize(random);
@@ -359,6 +425,14 @@ public class Stacking extends Classifier implements OptionHandler {
     }
    
     // Build meta classifier
+    buildMetaLevel(metaData);
+  }
+
+  /**
+   * Method that builds meta level.
+   */
+  protected void buildMetaLevel(Instances metaData) throws Exception {
+
     m_MetaClassifier.buildClassifier(metaData);
   }
 
