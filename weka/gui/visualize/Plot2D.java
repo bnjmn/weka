@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Plot2D extends JPanel {
 
@@ -74,7 +74,7 @@ public class Plot2D extends JPanel {
   public static final int DIAMOND_SHAPE = 2;
   public static final int TRIANGLEUP_SHAPE = 3;
   public static final int TRIANGLEDOWN_SHAPE = 4;
-  public static final int DEFAULT_SHAPE_SIZE = 2;
+  public static final double DEFAULT_SHAPE_SIZE = 2;
 
   /** The plots to display */
   protected FastVector m_plots = new FastVector();
