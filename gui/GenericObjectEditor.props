@@ -55,10 +55,11 @@ weka.classifiers.Classifier=\
 
 # Lists the Filters I want to choose from
 weka.filters.Filter = \
- weka.filters.AllFilter, \
  weka.filters.AddFilter, \
+ weka.filters.AllFilter, \
  weka.filters.AttributeFilter, \
  weka.filters.AttributeSelectionFilter, \
+ weka.filters.AttributeTypeFilter, \
  weka.filters.CopyAttributesFilter, \
  weka.filters.DiscretizeFilter, \
  weka.filters.FirstOrderFilter, \
@@ -66,15 +67,17 @@ weka.filters.Filter = \
  weka.filters.MakeIndicatorFilter, \
  weka.filters.MergeTwoValuesFilter, \
  weka.filters.NominalToBinaryFilter, \
+ weka.filters.NormalizationFilter, \
  weka.filters.NullFilter, \
  weka.filters.NumericTransformFilter, \
  weka.filters.RandomizeFilter, \
  weka.filters.ReplaceMissingValuesFilter, \
+ weka.filters.ResampleFilter.java, \
  weka.filters.SplitDatasetFilter, \
+ weka.filters.StringToNominalFilter, \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
- weka.filters.TimeSeriesTranslateFilter, \
- weka.filters.NormalizationFilter
+ weka.filters.TimeSeriesTranslateFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
