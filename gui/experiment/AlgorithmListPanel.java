@@ -60,6 +60,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JButton;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.filechooser.FileFilter;
 
@@ -74,7 +76,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -213,6 +215,12 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     m_SaveOptionsBut.setEnabled(false);
     m_SaveOptionsBut.addActionListener(this);
     
+    m_List.addListSelectionListener(new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          setButtons(e);
+        }
+      });
+    
     m_FileChooser.addChoosableFileFilter(m_XMLFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -296,6 +304,20 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     m_Exp.setPropertyArray(cArray); 
     m_Editing = false;
   }
+  
+  /**
+   * sets the state of the buttons according to the selection state of the
+   * JList
+   */
+  private void setButtons(ListSelectionEvent e) {
+    if (e.getSource() == m_List) {
+      m_DeleteBut.setEnabled(m_List.getSelectedIndex() > -1);
+      m_AddBut.setEnabled(true);
+      m_EditBut.setEnabled(m_List.getSelectedIndex() > -1);
+      m_LoadOptionsBut.setEnabled(m_List.getSelectedIndex() > -1);
+      m_SaveOptionsBut.setEnabled(m_List.getSelectedIndex() > -1);
+    }
+  }
 
   /**
    * Handle actions when buttons get pressed.
@@ -305,7 +327,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   public void actionPerformed(ActionEvent e) {
 
     if (e.getSource() == m_AddBut) {
-
+      m_Editing = false;
       if (m_PD == null) {
 	int x = getLocationOnScreen().x;
 	int y = getLocationOnScreen().y;
@@ -313,11 +335,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
       } else {
 	m_PD.setVisible(true);
       }
-      m_EditBut.setEnabled(true);
-      m_DeleteBut.setEnabled(true);
-      m_LoadOptionsBut.setEnabled(true);
-      m_SaveOptionsBut.setEnabled(true);
-     
+      
     } else if (e.getSource() == m_EditBut) {
       if (m_List.getSelectedValue() != null) {
          m_Editing = true;
@@ -359,30 +377,36 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
       m_Exp.setPropertyArray(cArray); 
     } else if (e.getSource() == m_LoadOptionsBut) {
       if (m_List.getSelectedValue() != null) {
-         int returnVal = m_FileChooser.showOpenDialog(this);
-         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-               XMLClassifier xmlcls = new XMLClassifier();
-               Classifier c = (Classifier) xmlcls.read(m_FileChooser.getSelectedFile());
-               m_AlgorithmListModel.setElementAt(c, m_List.getSelectedIndex());
-            }
-            catch (Exception ex) {
-               ex.printStackTrace();
-            }
-         }
+        int returnVal = m_FileChooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          try {
+            File file = m_FileChooser.getSelectedFile();
+            if (!file.getAbsolutePath().toLowerCase().endsWith(".xml"))
+              file = new File(file.getAbsolutePath() + ".xml");
+            XMLClassifier xmlcls = new XMLClassifier();
+            Classifier c = (Classifier) xmlcls.read(file);
+            m_AlgorithmListModel.setElementAt(c, m_List.getSelectedIndex());
+          }
+          catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
       }
    } else if (e.getSource() == m_SaveOptionsBut) {
       if (m_List.getSelectedValue() != null) {
-         int returnVal = m_FileChooser.showSaveDialog(this);
-         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-               XMLClassifier xmlcls = new XMLClassifier();
-               xmlcls.write(m_FileChooser.getSelectedFile(), m_List.getSelectedValue());
-            }
-            catch (Exception ex) {
-               ex.printStackTrace();
-            }
-         }
+        int returnVal = m_FileChooser.showSaveDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          try {
+            File file = m_FileChooser.getSelectedFile();
+            if (!file.getAbsolutePath().toLowerCase().endsWith(".xml"))
+              file = new File(file.getAbsolutePath() + ".xml");
+            XMLClassifier xmlcls = new XMLClassifier();
+            xmlcls.write(file, m_List.getSelectedValue());
+          }
+          catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
       }
     }
   }
