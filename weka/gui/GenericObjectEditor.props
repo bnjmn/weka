@@ -28,6 +28,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.HyperPipes,\
  weka.classifiers.IB1,\
  weka.classifiers.IBk,\
+ weka.classifiers.kstar.KStar,\
  weka.classifiers.Id3,\
  weka.classifiers.j48.J48,\
  weka.classifiers.j48.PART,\
@@ -55,8 +56,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.RegressionByDiscretization,\
  weka.classifiers.Stacking,\
  weka.classifiers.UserClassifier,\
- weka.classifiers.kstar.KStar,\
- weka.classifiers.ThresholdSelector
+ weka.classifiers.ThresholdSelector,\
+ weka.classifiers.AttributeSelectedClassifier
 
 # Lists the DistributionClassifiers I want to choose from
 weka.classifiers.DistributionClassifier=\
@@ -65,6 +66,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.DecisionTable,\
  weka.classifiers.HyperPipes,\
  weka.classifiers.IBk,\
+ weka.classifiers.kstar.KStar,\
  weka.classifiers.Id3,\
  weka.classifiers.j48.J48,\
  weka.classifiers.j48.PART,\
@@ -81,7 +83,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.LogitBoost,\
  weka.classifiers.MultiClassClassifier,\
  weka.classifiers.UserClassifier,\
- weka.classifiers.kstar.KStar
+ weka.classifiers.AttributeSelectedClassifier
 
 # Lists the Filters I want to choose from
 weka.filters.Filter = \
