@@ -1,5 +1,5 @@
 #
-# $Revision: 1.18 $
+# $Revision: 1.19 $
 #
 
 JAVA = javac
@@ -67,6 +67,7 @@ doc :
 	weka.gui \
 	weka.gui.experiment \
 	weka.gui.explorer \
+	weka.gui.explorer.treevisualizer \
 	weka.gui.streams; \
 	for page in `ls doc/*.html`; \
 	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
@@ -84,6 +85,7 @@ install : all
 	weka/classifiers/*.class \
 	weka/classifiers/j48/*.class \
 	weka/classifiers/m5/*.class \
+	weka/classifiers/kstar/*.class \
 	weka/filters/*.class \
 	weka/estimators/*class \
 	weka/associations/*.class \
@@ -97,6 +99,7 @@ install : all
 	weka/gui/*.gif \
 	weka/gui/experiment/*.class \
 	weka/gui/explorer/*.class \
+	weka/gui/explorer/treevisualizer/*.class \
 	weka/gui/streams/*.class \
 	; \
 	jar cvf $$JAWSHOME/weka-src.jar \
@@ -104,6 +107,7 @@ install : all
 	weka/classifiers/*.java \
 	weka/classifiers/j48/*.java \
 	weka/classifiers/m5/*.java \
+	weka/classifiers/kstar/*.java \
 	weka/filters/*.java \
 	weka/estimators/*java \
 	weka/associations/*.java \
@@ -113,6 +117,7 @@ install : all
 	weka/gui/*.java \
 	weka/gui/experiment/*.java \
 	weka/gui/explorer/*.java \
+	weka/gui.explorer/treevisualizer/*.java \
 	weka/gui/streams/*.java \
 	;\
 	rm manifest.tmp )
@@ -131,6 +136,7 @@ install : all
 	weka.gui \
 	weka.gui.experiment \
 	weka.gui.explorer \
+	weka.gui.explorer.treevisualizer \
 	weka.gui.streams; \
 	for page in `ls $$JAWSHOME/doc/*.html`; \
 	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
