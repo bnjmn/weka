@@ -88,7 +88,7 @@ import weka.core.WeightedInstancesHandler;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -683,7 +683,8 @@ public class IBk extends DistributionClassifier implements
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       while (m_Train.numInstances() > m_WindowSize) {
 	m_Train.delete(0);
-	m_KDTree.setValid(false);
+	if (m_KDTree != null)
+	  m_KDTree.setValid(false);
       }
     }
   }
