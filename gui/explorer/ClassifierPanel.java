@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.55 $
+ * @version $Revision: 1.56 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -191,6 +191,10 @@ public class ClassifierPanel extends JPanel {
   /** Check to output entropy statistics */
   protected JCheckBox m_OutputEntropyBut =
     new JCheckBox("Output entropy evaluation measures");
+
+  /** Check to output text predictions */
+  protected JCheckBox m_OutputPredictionsTextBut =
+    new JCheckBox("Output text predictions on test set");
 
   /** Check to evaluate w.r.t a cost matrix */
   protected JCheckBox m_EvalWRTCostsBut =
@@ -358,6 +362,8 @@ public class ClassifierPanel extends JPanel {
       .setToolTipText("Output entropy-based evaluation measures");
     m_EvalWRTCostsBut
       .setToolTipText("Evaluate errors with respect to a cost matrix");
+    m_OutputPredictionsTextBut
+      .setToolTipText("Include the predictions on the test set in the output buffer");
 
     m_FileChooser.setFileFilter(m_ModelFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -466,12 +472,13 @@ public class ClassifierPanel extends JPanel {
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-	moreOptionsPanel.setLayout(new GridLayout(7, 1));
+	moreOptionsPanel.setLayout(new GridLayout(8, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputPerClassBut);	  
 	moreOptionsPanel.add(m_OutputEntropyBut);	  
 	moreOptionsPanel.add(m_OutputConfusionBut);	  
 	moreOptionsPanel.add(m_StorePredictionsBut);
+	moreOptionsPanel.add(m_OutputPredictionsTextBut);
 	JPanel costMatrixOption = new JPanel();
 	costMatrixOption.setLayout(new BorderLayout());
 	costMatrixOption.add(m_EvalWRTCostsBut, BorderLayout.WEST);
@@ -679,6 +686,7 @@ public class ClassifierPanel extends JPanel {
   protected void updateRadioLinks() {
     
     m_SetTestBut.setEnabled(m_TestSplitBut.isSelected());
+    m_OutputPredictionsTextBut.setEnabled(m_TestSplitBut.isSelected());
     if ((m_SetTestFrame != null) && (!m_TestSplitBut.isSelected())) {
       m_SetTestFrame.setVisible(false);
     }
@@ -1041,6 +1049,7 @@ public class ClassifierPanel extends JPanel {
 	  boolean outputSummary = true;
           boolean outputEntropy = m_OutputEntropyBut.isSelected();
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
+	  boolean outputPredictionsText = m_OutputPredictionsTextBut.isSelected();
 
 	  String grph = null;
 
@@ -1268,16 +1277,32 @@ public class ClassifierPanel extends JPanel {
 	      m_Log.statusMessage("Evaluating on test data...");
 	      eval = new Evaluation(inst, costMatrix);
 	      
+	      if (outputPredictionsText) {
+		outBuff.append("=== Predictions on test set ===\n\n");
+		outBuff.append(" inst#,    actual, predicted, error");
+		if (inst.classAttribute().isNominal()
+		    && classifier instanceof DistributionClassifier) {
+		  outBuff.append(", probability distribution");
+		}
+		outBuff.append("\n");
+	      }
+
 	      for (int jj=0;jj<userTest.numInstances();jj++) {
 		processClassifierPrediction(userTest.instance(jj), classifier,
 					    eval, predictions,
 					    predInstances, plotShape,
 					    plotSize);
+		if (outputPredictionsText) { 
+		  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
+		}
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test data. Processed "
 				      +jj+" instances...");
 		}
 	      }
+	      if (outputPredictionsText) {
+		outBuff.append("\n");
+	      } 
 	      outBuff.append("=== Evaluation on test set ===\n");
 	      break;
 
@@ -1389,6 +1414,64 @@ public class ClassifierPanel extends JPanel {
       m_RunThread.setPriority(Thread.MIN_PRIORITY);
       m_RunThread.start();
     }
+  }
+
+  protected String predictionText(Classifier classifier, Instance inst, int instNum) throws Exception {
+
+    //> inst#   actual   predicted   error  probability distribution
+
+    StringBuffer text = new StringBuffer();
+    // inst #
+    text.append(Utils.padLeft("" + instNum, 6) + " ");
+    if (inst.classAttribute().isNominal()) {
+
+      // actual
+      if (inst.classIsMissing()) text.append(Utils.padLeft("?", 10) + " ");
+      else text.append(Utils.padLeft("" + ((int) inst.classValue()+1) + ":"
+				+ inst.stringValue(inst.classAttribute()), 10) + " ");
+
+      // predicted
+      double[] probdist = null;
+      double pred;
+      if (classifier instanceof DistributionClassifier) {
+	probdist = ((DistributionClassifier)classifier).distributionForInstance(inst);
+	pred = (double) Utils.maxIndex(probdist);
+	if (probdist[(int) pred] <= 0.0) pred = Instance.missingValue();
+      } else {
+	pred = classifier.classifyInstance(inst);
+      }
+      text.append(Utils.padLeft((Instance.isMissingValue(pred) ? "?" :
+				 (((int) pred+1) + ":"
+				 + inst.classAttribute().value((int) pred))), 10) + " ");
+      // error
+      if (pred == inst.classValue()) text.append(Utils.padLeft(" ", 6) + " ");
+      else text.append(Utils.padLeft("+", 6) + " ");
+
+      // prob dist
+      if (classifier instanceof DistributionClassifier) {
+	for (int i=0; i<probdist.length; i++) {
+	  if (i == (int) pred) text.append(" *");
+	  else text.append("  ");
+	  text.append(Utils.doubleToString(probdist[i], 5, 3));
+	}
+      }
+    } else {
+
+      // actual
+      if (inst.classIsMissing()) text.append(Utils.padLeft("?", 10) + " ");
+      else text.append(Utils.doubleToString(inst.classValue(), 10, 3) + " ");
+
+      // predicted
+      double pred = classifier.classifyInstance(inst);
+      if (Instance.isMissingValue(pred)) text.append(Utils.padLeft("?", 10) + " ");
+      else text.append(Utils.doubleToString(pred, 10, 3) + " ");
+
+      // err
+      if (!inst.classIsMissing() && !Instance.isMissingValue(pred))
+	text.append(Utils.doubleToString(pred - inst.classValue(), 10, 3));
+    }
+    text.append("\n");
+    return text.toString();
   }
 
   /**
