@@ -157,8 +157,10 @@ weka.clusterers.Clusterer=\
  weka.clusterers.SimpleKMeans, \
  weka.clusterers.Cobweb
 
-# Lists the Converters I want to choose from
-weka.converters.Converter =\
- weka.converters.CsvToArff, \
- weka.converters.C45ToArff
+# Lists the Loaders I want to choose from
+weka.core.converters.Loader =\
+ weka.core.converters.ArffLoader, \
+ weka.core.converters.CSVLoader, \
+ weka.core.converters.C45Loader, \
+ weka.core.converters.SerializedInstancesLoader
  

@@ -1,24 +1,31 @@
 /*
- *    ArffToArff.java
+ *    ArffLoader.java
  *    Copyright (C) 2000 Mark Hall
  *
  */
 
-package weka.converters;
+package weka.core.converters;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import weka.core.Instance;
 import weka.core.Instances;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
 /**
- * Reads a text file that is in arff format.
+ * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
- * @see Converter
- * @see Serializable
+ * @version $Revision: 1.1 $
+ * @see Loader
  */
-public class ArffToArff implements Converter, Serializable {
+public class ArffLoader extends AbstractLoader {
 
   /**
    * Holds the determined structure (header) of the data set.
@@ -28,49 +35,53 @@ public class ArffToArff implements Converter, Serializable {
   protected Instances m_structure = null;
 
   /**
-   * Used for reading instances incrementally.
-   */
-  private Instances m_tempHeader = null;
-
-  /**
-   * Holds the source of the data set.
-   */
-  //@ protected depends: model_sourceSupplied -> m_sourceFile;
-  //@ protected represents: model_sourceSupplied <- (m_sourceFile != null);
-  protected File m_sourceFile = null;
-
-  /**
    * The reader for the source file.
    */
   private transient Reader m_sourceReader = null;
 
   /**
-   * Resets the converter ready to read a new data set
+   * Resets the Loader ready to read a new data set
    */
   public void reset() {
+
     m_structure = null;
+    m_sourceReader = null;
+    setRetrieval(NONE);
   }
 
   /**
-   * Resets the Converter object and sets the source of the data set to be 
+   * Resets the Loader object and sets the source of the data set to be 
    * the supplied File object.
    *
    * @param file the source file.
    * @exception IOException if an error occurs
    */
   public void setSource(File file) throws IOException {
+
     reset();
 
     if (file == null) {
       throw new IOException("Source file object is null!");
     }
 
-    m_sourceFile = file;
     try {
-      m_sourceReader = new BufferedReader(new FileReader(file));
+      setSource(new FileInputStream(file));
     } catch (FileNotFoundException ex) {
       throw new IOException("File not found");
     }
+  }
+
+  /**
+   * Resets the Loader object and sets the source of the data set to be 
+   * the supplied InputStream.
+   *
+   * @param in the source InputStream.
+   * @exception UnsupportedOperationException always thrown.
+   */
+  public void setSource(InputStream in) throws IOException, 
+  UnsupportedOperationException {
+
+    m_sourceReader = new BufferedReader(new InputStreamReader(in));
   }
 
   /**
@@ -81,20 +92,20 @@ public class ArffToArff implements Converter, Serializable {
    * @exception IOException if an error occurs
    */
   public Instances getStructure() throws IOException {
+
     if (m_sourceReader == null) {
-      throw new IOException("No source file specified");
+      throw new IOException("No source has been specified");
     }
 
     if (m_structure == null) {
       try {
-	m_tempHeader = new Instances(m_sourceReader, 1);
-	m_structure = new Instances(m_tempHeader);
+	m_structure = new Instances(m_sourceReader, 1);
       } catch (Exception ex) {
 	throw new IOException("Unable to determine structure as arff.");
       }
     }
 
-    return m_structure;
+    return new Instances(m_structure, 0);
   }
 
   /**
@@ -106,21 +117,23 @@ public class ArffToArff implements Converter, Serializable {
    * @exception IOException if there is no source or parsing fails
    */
   public Instances getDataSet() throws IOException {
+
     if (m_sourceReader == null) {
-      throw new IOException("No source file specified");
+      throw new IOException("No source has been specified");
     }
-    m_sourceReader.close();
-    setSource(m_sourceFile);
-    Instances result = null;
-
-    try {
-      result = new Instances(m_sourceReader);
-      m_structure = new Instances(result, 0);
-    } catch (Exception ex) {
-      throw new IOException(ex.toString());
+    if (getRetrieval() == INCREMENTAL) {
+      throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
+    setRetrieval(BATCH);
+    
 
-    return result;
+    // Read all instances
+    // XXX This is inefficient because readInstance creates a new 
+    // StringTokenizer each time: This will be fixed once all arff reading
+    // is moved out of Instances and into this Loader.
+    while (m_structure.readInstance(m_sourceReader));
+    
+    return m_structure;
   }
 
   /**
@@ -139,13 +152,17 @@ public class ArffToArff implements Converter, Serializable {
     if (m_structure == null) {
       getStructure();
     }
+    if (getRetrieval() == BATCH) {
+      throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
+    }
+    setRetrieval(INCREMENTAL);
 
-    if (!m_tempHeader.readInstance(m_sourceReader)) {
+    if (!m_structure.readInstance(m_sourceReader)) {
       return null;
     }
    
-    Instance current = m_tempHeader.instance(0);
-    m_tempHeader.delete(0);
+    Instance current = m_structure.instance(0);
+    m_structure.delete(0);
     return current;
   }
 
@@ -159,7 +176,7 @@ public class ArffToArff implements Converter, Serializable {
       File inputfile;
       inputfile = new File(args[0]);
       try {
-	ArffToArff atf = new ArffToArff();
+	ArffLoader atf = new ArffLoader();
 	atf.setSource(inputfile);
 	System.out.println(atf.getStructure());
 	Instance temp;
@@ -173,7 +190,7 @@ public class ArffToArff implements Converter, Serializable {
 	ex.printStackTrace();
 	}
     } else {
-      System.err.println("Usage:\n\tArffToArff <file.arff>\n");
+      System.err.println("Usage:\n\tArffLoader <file.arff>\n");
     }
   }
 }

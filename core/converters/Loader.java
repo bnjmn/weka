@@ -1,24 +1,28 @@
 /*
- *    Converter.java
+ *    Loader.java
  *    Copyright (C) 2000 Mark Hall
  *
  */
 
-package weka.converters;
+package weka.core.converters;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.Serializable;
 import weka.core.Instances;
 import weka.core.Instance;
 
 /** 
- * Interface to something that can read and convert a text file (of some
- * format) to arff format (Instances)
+ * Interface to something that can load Instances from an input source in some
+ * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
-public interface Converter {
-  
+public interface Loader extends Serializable {
+
+
   /*@ public model instance boolean model_structureDetermined
     @   initially: model_structureDetermined == false;
     @*/
@@ -28,22 +32,13 @@ public interface Converter {
     @*/
 
   /**
-   * Resets the Converter object, ready to read a new data set.
-   *
-   * <pre><jml>
-   *    public_normal_behavior
-   *      modifiable: model_structureDetermined;
-   *      ensures: model_structureDetermined == false;
-   * </jml></pre>
-   */
-  public void reset();
-
-  /**
-   * Resets the Converter object and sets the source of the data set to be 
+   * Resets the Loader object and sets the source of the data set to be 
    * the supplied File object.
    *
    * @param file the File
    * @exception IOException if an error occurs
+   * @exception UnsupportedOperationException if this Loader doesn't
+   * support loading from a File.
    *
    * <pre><jml>
    *    public_normal_behavior
@@ -59,7 +54,20 @@ public interface Converter {
    *    signals: (IOException);
    * </jml></pre>
    */
-  public void setSource(File file) throws IOException;
+  public void setSource(File file) throws IOException, 
+  UnsupportedOperationException;
+
+  /**
+   * Resets the Loader object and sets the source of the data set to be 
+   * the supplied InputStream.
+   *
+   * @param input the source InputStream
+   * @exception IOException if an error occurs
+   * @exception UnsupportedOperationException if this Loader doesn't
+   * support loading from a File.
+   */
+  public void setSource(InputStream input) throws IOException, 
+  UnsupportedOperationException;
 
   /**
    * Determines and returns (if possible) the structure (internally the 
@@ -88,11 +96,13 @@ public interface Converter {
 
   /**
    * Return the full data set. If the structure hasn't yet been determined
-   * by a call to getStructure then method should do so before processing
+   * by a call to getStructure then the method should do so before processing
    * the rest of the data set.
    *
    * @return the full data set as an Instances object
-   * @exception IOException if there is an error during parsing
+   * @exception IOException if there is an error during parsing or if 
+   * getNextInstance has been called on this source (either incremental
+   * or batch loading can be used, not both).
    *
    * <pre><jml>
    *    public_normal_behavior
@@ -124,7 +134,9 @@ public interface Converter {
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @exception IOException if there is an error during parsing
+   * @exception IOException if there is an error during parsing or if
+   * getDataSet has been called on this source (either incremental
+   * or batch loading can be used, not both).
    *
    * <pre><jml>
    *    public_normal_behavior

@@ -19,13 +19,17 @@ CLASSFILES = $(SOURCES:.java=.class)
 #--------------------------------------------------------------------
 
 all :   $(CLASSFILES)
+	(cd converters; make all JAVAC=$(JAVAC))
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
+	(cd converters; make debug JAVAC=$(JAVAC))
 
 optimized : clean
 	$(JAVAC) -O $(SOURCES)
+	(cd converters; make optimized JAVAC=$(JAVAC))
 
 clean : 
 	$(RM) *.class *~
+	(cd converters; make clean)
 

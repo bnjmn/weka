@@ -4,26 +4,30 @@
  *
  */
 
-package weka.converters;
+package weka.core.converters;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Hashtable;
 import java.util.Enumeration;
-
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.Attribute;
+import java.io.StreamTokenizer;
 
 /**
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
- * @see Converter
- * @see Serializable
+ * @version $Revision: 1.1 $
+ * @see Loader
  */
-public class CsvToArff implements Converter, Serializable {
+public class CSVLoader extends AbstractLoader {
 
   /**
    * Holds the determined structure (header) of the data set.
@@ -60,20 +64,20 @@ public class CsvToArff implements Converter, Serializable {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Reads a file that is in comma separated or tab separated format. "
+    return "Reads a source that is in comma separated or tab separated format. "
       +"Assumes that the first row in the file determines the number of "
       +"and names of the attributes.";
   }
   
   /**
-   * Resets the converter ready to read a new data set
+   * Resets the loader ready to read a new data set
    */
   public void reset() {
     m_structure = null;
   }
 
   /**
-   * Resets the Converter object and sets the source of the data set to be 
+   * Resets the Loader object and sets the source of the data set to be 
    * the supplied File object.
    *
    * @param file the source file.
@@ -104,7 +108,7 @@ public class CsvToArff implements Converter, Serializable {
    */
   public Instances getStructure() throws IOException {
     if (m_sourceFile == null) {
-      throw new IOException("No source file specified");
+      throw new IOException("No source has been specified");
     }
 
     if (m_structure == null) {
@@ -139,7 +143,7 @@ public class CsvToArff implements Converter, Serializable {
    */
   public Instances getDataSet() throws IOException {
     if (m_sourceFile == null) {
-      throw new IOException("No source file specified");
+      throw new IOException("No source has been specified");
     }
     //    m_sourceReader.close();
     setSource(m_sourceFile);
@@ -230,14 +234,14 @@ public class CsvToArff implements Converter, Serializable {
   }
 
   /**
-   * CsvToArff is unable to process a data set incrementally.
+   * CSVLoader is unable to process a data set incrementally.
    *
    * @return never returns without throwing an exception
-   * @exception IOException always. CsvToArff is unable to process a data
+   * @exception IOException always. CSVLoader is unable to process a data
    * set incrementally.
    */
   public Instance getNextInstance() throws IOException {
-    throw new IOException("CsvToArff can't read data sets incrementally.");
+    throw new IOException("CSVLoader can't read data sets incrementally.");
   }
 
   /**
@@ -456,14 +460,14 @@ public class CsvToArff implements Converter, Serializable {
       File inputfile;
       inputfile = new File(args[0]);
       try {
-	CsvToArff atf = new CsvToArff();
+	CSVLoader atf = new CSVLoader();
 	atf.setSource(inputfile);
 	System.out.println(atf.getDataSet());
       } catch (Exception ex) {
 	ex.printStackTrace();
 	}
     } else {
-      System.err.println("Usage:\n\tArffToArff <file.arff>\n");
+      System.err.println("Usage:\n\tCSVLoader <file.csv>\n");
     }
   }
 }
