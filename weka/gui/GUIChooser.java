@@ -41,7 +41,7 @@ import javax.swing.JPanel;
  * which GUI they want to run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class GUIChooser extends Frame {
 
@@ -141,7 +141,7 @@ public class GUIChooser extends Frame {
 	  m_ExperimenterFrame = new JFrame("Weka Experiment Environment");
 	  m_ExperimenterFrame.getContentPane().setLayout(new BorderLayout());
 	  m_ExperimenterFrame.getContentPane()
-	    .add(new Experimenter(), BorderLayout.CENTER);
+	    .add(new Experimenter(false), BorderLayout.CENTER);
 	  m_ExperimenterFrame.addWindowListener(new WindowAdapter() {
 	    public void windowClosing(WindowEvent w) {
 	      m_ExperimenterFrame.dispose();
