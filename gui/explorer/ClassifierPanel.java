@@ -19,7 +19,6 @@
 
 package weka.gui.explorer;
 
-import weka.filters.*;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.FastVector;
@@ -27,6 +26,7 @@ import weka.core.OptionHandler;
 import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.Drawable;
+import weka.core.SerializedObject;
 import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
@@ -79,10 +79,6 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
-import java.io.ByteArrayInputStream;
-import java.io.BufferedInputStream;
-import java.io.ObjectInputStream;
-
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -120,7 +116,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -728,15 +724,11 @@ public class ClassifierPanel extends JPanel {
 
     if (m_Preprocess != null && m_TestInstances != null) {
       m_TestInstancesCopy = new Instances(m_TestInstances);
-      byte [] sf = m_Preprocess.getMostRecentFilters();
+      SerializedObject sf = m_Preprocess.getMostRecentFilters();
       if (sf != null) {
 	Filter [] filters = null;
 	try {
-	  ByteArrayInputStream bi = new ByteArrayInputStream(sf);
-	  BufferedInputStream bbi = new BufferedInputStream(bi);
-	  ObjectInputStream oi = new ObjectInputStream(bbi);
-	  filters = (Filter [])oi.readObject();
-	  oi.close();
+	  filters = (Filter [])sf.getObject();
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this,
 					"Could not deserialize filters",

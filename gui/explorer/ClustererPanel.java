@@ -25,6 +25,7 @@ import weka.core.OptionHandler;
 import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.FastVector;
+import weka.core.SerializedObject;
 import weka.clusterers.Clusterer;
 import weka.clusterers.ClusterEvaluation;
 import weka.gui.Logger;
@@ -69,9 +70,6 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
-import java.io.ByteArrayInputStream;
-import java.io.BufferedInputStream;
-import java.io.ObjectInputStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -110,7 +108,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -578,15 +576,11 @@ public class ClustererPanel extends JPanel {
 
     if (m_Preprocess != null && m_TestInstances != null) {
       m_TestInstancesCopy = new Instances(m_TestInstances);
-      byte [] sf = m_Preprocess.getMostRecentFilters();
+      SerializedObject sf = m_Preprocess.getMostRecentFilters();
       if (sf != null) {
 	Filter [] filters = null;
 	try {
-	  ByteArrayInputStream bi = new ByteArrayInputStream(sf);
-	  BufferedInputStream bbi = new BufferedInputStream(bi);
-	  ObjectInputStream oi = new ObjectInputStream(bbi);
-	  filters = (Filter [])oi.readObject();
-	  oi.close();
+	  filters = (Filter [])sf.getObject();
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this,
 					"Could not deserialize filters",

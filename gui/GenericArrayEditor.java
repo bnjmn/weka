@@ -20,6 +20,7 @@
 package weka.gui;
 
 import weka.core.SelectedTag;
+import weka.core.SerializedObject;
 import weka.classifiers.Classifier;
 
 import java.lang.reflect.Array;
@@ -56,12 +57,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.JOptionPane;
-import java.io.ByteArrayOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.BufferedInputStream;
-import java.io.ObjectInputStream;
 
 
 /** 
@@ -69,7 +64,7 @@ import java.io.ObjectInputStream;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -125,17 +120,8 @@ public class GenericArrayEditor extends JPanel
 	
 	// Make a full copy of the object using serialization
 	try {
-	  ByteArrayOutputStream bo = new ByteArrayOutputStream();
-	  BufferedOutputStream bbo = new BufferedOutputStream(bo);
-	  ObjectOutputStream oo = new ObjectOutputStream(bbo);
-	  oo.writeObject(addObj);
-	  oo.close();
-	  
-	  ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
-	  BufferedInputStream bbi = new BufferedInputStream(bi);
-	  ObjectInputStream oi = new ObjectInputStream(bbi);
-	  addObj = oi.readObject();
-	  oi.close();
+          SerializedObject so = new SerializedObject(addObj);
+	  addObj = so.getObject();
 	  if (selected != -1) {
 	    m_ListModel.insertElementAt(addObj, selected);
 	  } else {

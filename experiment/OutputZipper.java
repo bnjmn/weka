@@ -21,7 +21,6 @@ package weka.experiment;
 
 import java.io.File;
 import java.io.DataOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
@@ -37,7 +36,7 @@ import java.util.zip.ZipEntry;
  * finished() is called to close the file.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class OutputZipper {
   

@@ -20,6 +20,7 @@
 package weka.gui.explorer;
 
 import weka.core.Instances;
+import weka.core.SerializedObject;
 import weka.filters.Filter;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.AttributeSelectionPanel;
@@ -42,9 +43,6 @@ import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
-import java.io.ByteArrayOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -77,7 +75,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -152,7 +150,7 @@ public class PreprocessPanel extends JPanel {
   protected Logger m_Log = new SysErrLog();
 
   /** A copy of the most recently applied filters */
-  protected byte [] m_FiltersCopy = null;
+  protected SerializedObject m_FiltersCopy = null;
   
   static {
     java.beans.PropertyEditorManager
@@ -300,7 +298,7 @@ public class PreprocessPanel extends JPanel {
    * gets a copy of the most recently applied filters.
    * @return a serialized array of the most recently applied filters
    */
-  protected synchronized byte [] getMostRecentFilters() {
+  protected synchronized SerializedObject getMostRecentFilters() {
     return m_FiltersCopy;
   }
 
@@ -466,12 +464,7 @@ public class PreprocessPanel extends JPanel {
       }
       // try to save a copy of the filters using serialization
       try {
-	ByteArrayOutputStream bo = new ByteArrayOutputStream();
-	BufferedOutputStream bbo = new BufferedOutputStream(bo);
-	ObjectOutputStream oo = new ObjectOutputStream(bbo);
-	oo.writeObject(filters);
-	oo.close();
-	m_FiltersCopy = bo.toByteArray();
+	m_FiltersCopy = new SerializedObject(filters);
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
 				      "Could not create copy of filters",
