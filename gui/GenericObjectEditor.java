@@ -93,7 +93,7 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class GenericObjectEditor implements PropertyEditor {
     
@@ -199,18 +199,21 @@ public class GenericObjectEditor implements PropertyEditor {
 	    public CascadedComboBox(){
 		label = new JMenu();
 		label.addMouseListener(new MouseInputAdapter(){	  
-		// Re-define mouse listener so that drag is not available
-			public void mousePressed(MouseEvent e){
-			    if((JMenu)e.getSource() == label)
-				label.setPopupMenuVisible(false);
-			}
-			
-			public void mouseReleased(MouseEvent e){
-			    if((JMenu)e.getSource() == label){ 
-				label.setPopupMenuVisible(true);
-			    }
-			}			
-		    });
+		    // Re-define mouse listener so that drag is not available
+		    public void mousePressed(MouseEvent e){
+		      if((JMenu)e.getSource() == label)
+			label.setPopupMenuVisible(false);
+		    }
+		    
+		    public void mouseReleased(MouseEvent e){
+		      label.setPopupMenuVisible(false);
+		      if((JMenu)e.getSource() == label){
+			if(label.isSelected())
+			  label.setPopupMenuVisible(true);
+		      }
+		    }	
+		    
+		  });
 		
 		if(m_ObjectNames.depth() > 0){
 		    try{
