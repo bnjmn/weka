@@ -16,7 +16,7 @@ import weka.core.Attribute;
  * java weka.filters.DiscretizeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DiscretizeFilterTest extends AbstractFilterTest {
   
@@ -77,7 +77,7 @@ public class DiscretizeFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     for (int i = 0; i < result.numAttributes(); i++) {
-      if ((i < 2) || (m_Instances.attribute(i).type() != Attribute.NUMERIC)) {
+      if ((i < 2) || !m_Instances.attribute(i).isNumeric()) {
         assertEquals(m_Instances.attribute(i).type(), result.attribute(i).type());
         assertEquals(m_Instances.attribute(i).name(), result.attribute(i).name());
       } else {
@@ -93,7 +93,7 @@ public class DiscretizeFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     for (int i = 0; i < result.numAttributes(); i++) {
-      if ((i < 3) || (m_Instances.attribute(i).type() != Attribute.NUMERIC)) {
+      if ((i < 3) || !m_Instances.attribute(i).isNumeric()) {
         assertEquals(m_Instances.attribute(i).type(), result.attribute(i).type());
         assertEquals(m_Instances.attribute(i).name(), result.attribute(i).name());
       } else {

@@ -19,7 +19,7 @@ import weka.core.SelectedTag;
  * java weka.filters.AttributeTypeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AttributeTypeFilterTest extends AbstractFilterTest {
   
@@ -65,6 +65,14 @@ public class AttributeTypeFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     for (int i = 0; i < result.numAttributes(); i++) {
       assertTrue(result.attribute(i).type() != Attribute.NUMERIC);
+    }
+  }
+
+  public void testDateFiltering() {
+    m_Filter = getFilter(Attribute.DATE);
+    Instances result = useFilter();
+    for (int i = 0; i < result.numAttributes(); i++) {
+      assertTrue(result.attribute(i).type() != Attribute.DATE);
     }
   }
 

@@ -15,7 +15,7 @@ import weka.core.Attribute;
  * java weka.filters.ObfuscateFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ObfuscateFilterTest extends AbstractFilterTest {
   
@@ -36,7 +36,7 @@ public class ObfuscateFilterTest extends AbstractFilterTest {
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       Attribute inatt = m_Instances.attribute(i);
       Attribute outatt = result.attribute(i);
-      if (!inatt.isString()) {
+      if (!inatt.isString() && !inatt.isDate()) {
         assertTrue("Attribute names should be changed",
                !inatt.name().equals(outatt.name()));
         if (inatt.isNominal()) {

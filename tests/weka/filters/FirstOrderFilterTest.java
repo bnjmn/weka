@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.FirstOrderFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FirstOrderFilterTest extends AbstractFilterTest {
   
@@ -51,10 +51,10 @@ public class FirstOrderFilterTest extends AbstractFilterTest {
       Instance orig = m_Instances.instance(i);
       if (orig.isMissing(5) || orig.isMissing(2)) {
         assertTrue("Instance " + (i + 1) + " should have been ?" , 
-               result.instance(i).isMissing(result.numAttributes() - 1));
+               result.instance(i).isMissing(4));
       } else {
         assertEquals(orig.value(5) - orig.value(2), 
-                     result.instance(i).value(result.numAttributes() - 1), 
+                     result.instance(i).value(4), 
                      EXPR_DELTA);
       }
     }
@@ -68,10 +68,10 @@ public class FirstOrderFilterTest extends AbstractFilterTest {
       Instance orig = m_Instances.instance(i);
       if (orig.isMissing(5) || orig.isMissing(2)) {
         assertTrue("Instance " + (i + 1) + " should have been ?" , 
-               result.instance(i).isMissing(result.numAttributes() - 1));
+               result.instance(i).isMissing(4));
       } else {
         assertEquals(orig.value(5) - orig.value(2), 
-                     result.instance(i).value(result.numAttributes() - 1), 
+                     result.instance(i).value(4), 
                      EXPR_DELTA);
       }
     }

@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.TimeSeriesDeltaFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class TimeSeriesDeltaFilterTest extends AbstractTimeSeriesFilterTest {
 
@@ -35,7 +35,7 @@ public class TimeSeriesDeltaFilterTest extends AbstractTimeSeriesFilterTest {
   }
 
   public void testInverted() {
-    m_Filter = getFilter("1,2,3,4,5");
+    m_Filter = getFilter("1,2,3,4,5,6");
     ((TimeSeriesTranslateFilter)m_Filter).setInvertSelection(true);
     Instances result = useFilter();
     // Number of attributes shouldn't change
@@ -46,7 +46,7 @@ public class TimeSeriesDeltaFilterTest extends AbstractTimeSeriesFilterTest {
       Instance in = m_Instances.instance(i + 1);
       Instance out = result.instance(i);
       for (int j = 0; j < result.numAttributes(); j++) {
-        if ((j != 4) && (j != 5)) {
+        if ((j != 4) && (j != 5) && (j != 6)) {
           if (in.isMissing(j)) {
             assertTrue("Nonselected missing values should pass through",
                    out.isMissing(j));
