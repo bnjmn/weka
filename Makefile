@@ -1,5 +1,5 @@
 #
-# $Revision: 1.26 $
+# $Revision: 1.27 $
 #
 
 # Java Compiler to use
@@ -112,6 +112,7 @@ install : all
 	weka/gui/experiment/*.class \
 	weka/gui/explorer/*.class \
 	weka/gui/visualize/*.class \
+	weka/gui/visualize/*.props \
 	weka/gui/treevisualizer/*.class \
 	weka/gui/streams/*.class \
 	; \
@@ -136,6 +137,7 @@ install : all
 	weka/gui/experiment/*.java \
 	weka/gui/explorer/*.java \
 	weka/gui/visualize/*.java \
+	weka/gui/visualize/*.props \
 	weka/gui/treevisualizer/*.java \
 	weka/gui/streams/*.java \
 	;\
