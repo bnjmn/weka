@@ -1,5 +1,5 @@
 #
-# $Revision: 1.11 $
+# $Revision: 1.12 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -73,9 +73,8 @@ doc :
 # One of these must be SimpleCLI.class
 install : all
 	(cd ..; \
-	echo "Main-Class: SimpleCLI" > manifest.tmp ;\
+	echo "Main-Class: weka.gui.GUIChooser" > manifest.tmp ;\
 	jar cvfm $$JAWSHOME/weka.jar manifest.tmp \
-	*.class \
 	weka/core/*.class \
 	weka/classifiers/*.class \
 	weka/classifiers/j48/*.class \

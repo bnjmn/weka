@@ -7,6 +7,7 @@ SOURCES = \
 	FileEditor.java \
 	GenericArrayEditor.java \
 	GenericObjectEditor.java \
+	GUIChooser.java \
 	InstancesSummaryPanel.java \
 	ListSelectorDialog.java \
 	LogPanel.java \
