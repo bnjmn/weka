@@ -48,7 +48,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler {
   
@@ -192,34 +192,35 @@ public final class  M5Prime extends Classifier implements OptionHandler {
     String modelString = Utils.getOption('O', options);
     if (modelString.length() != 0) {
       if (modelString.equals("l"))
-	m_Model = Node.LINEAR_REGRESSION;
+	setModelType(Node.LINEAR_REGRESSION);
       else if (modelString.equals("r"))
-	m_Model = Node.REGRESSION_TREE;
+	setModelType(Node.REGRESSION_TREE);
       else if (modelString.equals("m"))
-	m_Model = Node.MODEL_TREE;
+	setModelType(Node.MODEL_TREE);
       else
-	throw new Exception("Don't know model type "+modelString);
+	throw new Exception("Don't know model type " + modelString);
     } else {
-      m_Model = Node.MODEL_TREE;
+      setModelType(Node.MODEL_TREE);
     }
-
-    m_UseUnsmoothed = Utils.getFlag('U', options);
+    
+    setUseUnsmoothed(Utils.getFlag('U', options));
     if (m_Model != Node.MODEL_TREE) {
-      m_UseUnsmoothed = true;
+      setUseUnsmoothed(true);
     }
 
     String pruningString = Utils.getOption('F', options);
     if (pruningString.length() != 0) {
-      m_PruningFactor = (new Double(pruningString)).doubleValue();
+      setPruningFactor((new Double(pruningString)).doubleValue());
     } else {
-      m_PruningFactor = 2;
+      setPruningFactor(2);
     }
     
     String verbosityString = Utils.getOption('V', options);
-    if (verbosityString.length() != 0) 
-      m_Verbosity = Integer.parseInt(verbosityString);
-    else
-      m_Verbosity = 0;
+    if (verbosityString.length() != 0) {
+      setVerbosity(Integer.parseInt(verbosityString));
+    } else {
+      setVerbosity(0);
+    }
   }
 
   /**
@@ -370,7 +371,7 @@ public final class  M5Prime extends Classifier implements OptionHandler {
    *
    * @return Value of Model.
    */
-  public int getModel() {
+  public int getModelType() {
     
     return m_Model;
   }
@@ -380,7 +381,7 @@ public final class  M5Prime extends Classifier implements OptionHandler {
    *
    * @param v  Value to assign to Model.
    */
-  public void setModel(int v) {
+  public void setModelType(int v) {
     
     m_Model = v;
   }
