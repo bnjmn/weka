@@ -28,7 +28,7 @@ import weka.core.Utils;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Stats {
   
@@ -90,10 +90,19 @@ public class Stats {
    * @param value the observed value
    */
   public void subtract(double value) {
+    subtract(value, 1);
+  }
 
-    sum -= value;
-    sumSq -= value * value;
-    count --;
+  /**
+   * Subtracts a value that has been seen n times from the observed values
+   *
+   * @param value the observed value
+   * @param n the number of times to subtract value
+   */
+  public void subtract(double value, double n) {
+    sum -= value * n;
+    sumSq -= value * value * n;
+    count -= n;
   }
 
   /**
@@ -112,8 +121,8 @@ public class Stats {
 	stdDev = sumSq - (sum * sum) / count;
 	stdDev /= (count - 1);
         if (stdDev < 0) {
-          System.err.println("Warning: stdDev value = " + stdDev 
-                             + " -- rounded to zero.");
+	  //          System.err.println("Warning: stdDev value = " + stdDev 
+	  //                             + " -- rounded to zero.");
           stdDev = 0;
         }
 	stdDev = Math.sqrt(stdDev);
