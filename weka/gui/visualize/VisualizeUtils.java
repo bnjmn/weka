@@ -34,7 +34,7 @@ import javax.swing.JOptionPane;
  * This class contains utility routines for visualization
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class VisualizeUtils {
@@ -56,13 +56,14 @@ public class VisualizeUtils {
       String precision = 
 	VISUALIZE_PROPERTIES.getProperty("weka.gui.visualize.precision");
       if (precision == null) {
+	/*
 	System.err.println("Warning: no configuration property found in"
 			   +PROPERTY_FILE
 			   +" for weka.gui.visualize.precision. Using"
-			   +" default instead.");
+			   +" default instead.");*/
       } else {
 	MAX_PRECISION = Integer.parseInt(precision);
-	System.err.println("Setting numeric precision to: "+precision);
+	// System.err.println("Setting numeric precision to: "+precision);
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
@@ -96,7 +97,7 @@ public class VisualizeUtils {
 	int G = Integer.parseInt(colourDef.substring(0,index));
 	colourDef = colourDef.substring(index+1,colourDef.length());
 	int B = Integer.parseInt(colourDef);
-	System.err.println(R+" "+G+" "+B);
+	//System.err.println(R+" "+G+" "+B);
 	retC = new Color(R,G,B);
       } catch (Exception ex) {
 	System.err.println("VisualizeUtils: Problem parsing colour property "

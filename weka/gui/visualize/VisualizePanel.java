@@ -100,7 +100,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1689,25 +1689,28 @@ public class VisualizePanel extends JPanel {
 	String val = VisualizeUtils.VISUALIZE_PROPERTIES.
 	  getProperty(showAttBars);
 	if (val == null) {
-	  System.err.println("Displaying attribute bars ");
+	  //System.err.println("Displaying attribute bars ");
 	  m_showAttBars = true;
 	} else {
 	  if (val.compareTo("true") == 0 || val.compareTo("on") == 0) {
-	    System.err.println("Displaying attribute bars ");
+	    //System.err.println("Displaying attribute bars ");
 	    m_showAttBars = true;
 	  } else {
 	    m_showAttBars = false;
 	  }
 	}
       } else {
+	/*
 	System.err.println("Looking for preferred visualization dimensions for "
 			   +relationName);
+	*/
 	String xcolKey = thisClass+"."+relationName+".XDimension";
 	String ycolKey = thisClass+"."+relationName+".YDimension";
 	String ccolKey = thisClass+"."+relationName+".ColourDimension";
       
 	m_preferredXDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
 	  getProperty(xcolKey);
+	/*
 	if (m_preferredXDimension == null) {
 	  System.err.println("No preferred X dimension found in "
 			     +VisualizeUtils.PROPERTY_FILE
@@ -1715,9 +1718,10 @@ public class VisualizePanel extends JPanel {
 	} else {
 	  System.err.println("Setting preferred X dimension to "
 			     +m_preferredXDimension);
-	}
+			     }*/
 	m_preferredYDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
 	  getProperty(ycolKey);
+	/*
 	if (m_preferredYDimension == null) {
 	  System.err.println("No preferred Y dimension found in "
 			     +VisualizeUtils.PROPERTY_FILE
@@ -1725,9 +1729,10 @@ public class VisualizePanel extends JPanel {
 	} else {
 	  System.err.println("Setting preferred dimension Y to "
 			     +m_preferredYDimension);
-	}
+			     }*/
 	m_preferredColourDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
 	  getProperty(ccolKey);
+	/*
 	if (m_preferredColourDimension == null) {
 	  System.err.println("No preferred Colour dimension found in "
 			     +VisualizeUtils.PROPERTY_FILE
@@ -1735,7 +1740,7 @@ public class VisualizePanel extends JPanel {
 	} else {
 	  System.err.println("Setting preferred Colour dimension to "
 			     +m_preferredColourDimension);
-	}
+			     }*/
       }
     }
   }
@@ -2211,20 +2216,20 @@ public class VisualizePanel extends JPanel {
       if (m_preferredXDimension != null) {
 	if (m_preferredXDimension.compareTo(inst.attribute(i).name()) == 0) {
 	  prefX = i;
-	  System.err.println("Found preferred X dimension");
+	  //System.err.println("Found preferred X dimension");
 	}
       }
       if (m_preferredYDimension != null) {
 	if (m_preferredYDimension.compareTo(inst.attribute(i).name()) == 0) {
 	  prefY = i;
-	  System.err.println("Found preferred Y dimension");
+	  //System.err.println("Found preferred Y dimension");
 	}
       }
       if (m_preferredColourDimension != null) {
 	if (m_preferredColourDimension.
 	    compareTo(inst.attribute(i).name()) == 0) {
 	  prefC = i;
-	  System.err.println("Found preferred Colour dimension");
+	  //System.err.println("Found preferred Colour dimension");
 	}
       }
     }
