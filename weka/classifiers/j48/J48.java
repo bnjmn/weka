@@ -23,9 +23,9 @@ import weka.core.*;
 import weka.classifiers.*;
 
 /**
- * Class for generating an unpruned or a pruned C4.5 decision tree. <p>
+ * Class for generating an unpruned or a pruned C4.5 decision tree.
+ * For more information, see<p>
  *
- * Reference:
  * Ross Quinlan (1993). <i>C4.5: Programs for Machine Learning</i>, 
  * Morgan Kaufmann Publishers, San Mateo, CA. </p>
  *
@@ -54,7 +54,7 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, WeightedInstancesHandler {

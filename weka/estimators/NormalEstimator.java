@@ -26,49 +26,27 @@ import weka.core.*;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class NormalEstimator implements Estimator {
 
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * The sum of the weights
-   */
+  /** The sum of the weights */
   private double m_SumOfWeights;
 
-  /**
-   * The sum of the values seen
-   */
+  /** The sum of the values seen */
   private double m_SumOfValues;
 
-  /**
-   * The sum of the values squared
-   */
+  /** The sum of the values squared */
   private double m_SumOfValuesSq;
 
-  /** 
-   * The current mean
-   */
+  /** The current mean */
   private double m_Mean;
 
-  /**
-   * The current standard deviation
-   */
+  /** The current standard deviation */
   private double m_StandardDev;
 
-  /**
-   * The precision of numeric values ( = minimum std dev permitted)
-   */
+  /** The precision of numeric values ( = minimum std dev permitted) */
   private double m_Precision;
-
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Round a data value using the defined precision for this estimator
@@ -96,8 +74,9 @@ public class NormalEstimator implements Estimator {
   public NormalEstimator(double precision) {
 
     m_Precision = precision;
-    //    m_StandardDev = 1e10 * m_Precision; // Set the standard deviation initially very wide
-    m_StandardDev = m_Precision / (2 * 3); // Allow at most 3 sd's within one interval
+
+    // Allow at most 3 sd's within one interval
+    m_StandardDev = m_Precision / (2 * 3);
   }
 
   /**
@@ -154,9 +133,9 @@ public class NormalEstimator implements Estimator {
   public String toString() {
 
     return "Normal Distribution. Mean = " + Utils.doubleToString(m_Mean, 4)
-    + " StandardDev = " + Utils.doubleToString(m_StandardDev, 4)
-    + " WeightSum = " + Utils.doubleToString(m_SumOfWeights, 4)
-    + " Precision = " + m_Precision + "\n";
+      + " StandardDev = " + Utils.doubleToString(m_StandardDev, 4)
+      + " WeightSum = " + Utils.doubleToString(m_SumOfWeights, 4)
+      + " Precision = " + m_Precision + "\n";
   }
 
   /**

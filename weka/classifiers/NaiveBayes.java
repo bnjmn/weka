@@ -27,12 +27,12 @@ import weka.estimators.*;
  * Class for a Naive Bayes classifier using estimator classes. Numeric 
  * estimator precision values are chosen based on analysis of the 
  * training data (for this reason, the classifier is not an 
- * UpdateableClassifier).<p>
+ * UpdateableClassifier). For more information, see<p>
  *
- * Reference: George H. John and Pat Langley (1995). <i>Estimating
+ * George H. John and Pat Langley (1995). <i>Estimating
  * Continuous Distributions in Bayesian Classifiers</i>. Proceedings
  * of the Eleventh Conference on Uncertainty in Artificial
- * Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.
+ * Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.<p>
  *
  * Valid options are:<p>
  *
@@ -42,7 +42,8 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $
+ */
 public class NaiveBayes extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
 

@@ -24,7 +24,8 @@ import weka.core.*;
 
 /**
  * Locally-weighted regression. Uses an instance-based algorithm to assign
- * instance weights which are then used by a linear regression model. See <p>
+ * instance weights which are then used by a linear regression model.  For
+ * more information, see<p>
  *
  * Atkeson, C., A. Moore, and S. Schaal (1996) <i>Locally weighted
  * learning</i>
@@ -45,7 +46,7 @@ import weka.core.*;
  * (default 0 = Linear) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 

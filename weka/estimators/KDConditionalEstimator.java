@@ -25,25 +25,15 @@ import weka.core.*;
  * Conditional probability estimator for a numeric domain conditional upon
  * a discrete domain (utilises separate kernel estimators for each discrete
  * conditioning value).
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class KDConditionalEstimator implements ConditionalEstimator {
 
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * Hold the sub-estimators
-   */
+  /** Hold the sub-estimators */
   private KernelEstimator [] m_Estimators;
 
-  // ===============
-  // Public methods.
-  // ===============
-  
   /**
    * Constructor
    *
@@ -96,9 +86,7 @@ public class KDConditionalEstimator implements ConditionalEstimator {
     return getEstimator(given).getProbability(data);
   }
 
-  /**
-   * Display a representation of this estimator
-   */
+  /** Display a representation of this estimator */
   public String toString() {
 
     String result = "KD Conditional Estimator. " 
@@ -107,6 +95,49 @@ public class KDConditionalEstimator implements ConditionalEstimator {
       result += "Sub-estimator " + i + ": " + m_Estimators[i];
     }
     return result;
+  }
+
+  /**
+   * Main method for testing this class.
+   *
+   * @param argv should contain a sequence of pairs of integers which
+   * will be treated as numeric, symbolic.
+   */
+  public static void main(String [] argv) {
+    
+    try {
+      if (argv.length == 0) {
+	System.out.println("Please specify a set of instances.");
+	return;
+      }
+      int currentA = Integer.parseInt(argv[0]);
+      int maxA = currentA;
+      int currentB = Integer.parseInt(argv[1]);
+      int maxB = currentB;
+      for(int i = 2; i < argv.length - 1; i += 2) {
+	currentA = Integer.parseInt(argv[i]);
+	currentB = Integer.parseInt(argv[i + 1]);
+	if (currentA > maxA) {
+	  maxA = currentA;
+	}
+	if (currentB > maxB) {
+	  maxB = currentB;
+	}
+      }
+      KDConditionalEstimator newEst = new KDConditionalEstimator(maxB + 1,
+								 1);
+      for(int i = 0; i < argv.length - 1; i += 2) {
+	currentA = Integer.parseInt(argv[i]);
+	currentB = Integer.parseInt(argv[i + 1]);
+	System.out.println(newEst);
+	System.out.println("Prediction for " + currentA + '|' + currentB 
+			   + " = "
+			   + newEst.getProbability(currentA, currentB));
+	newEst.addValue(currentA, currentB, 1);
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
   }
 }
 

@@ -24,24 +24,17 @@ import weka.core.*;
 /** 
  * Simple probability estimator that places a single Poisson distribution
  * over the observed values.
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 public class PoissonEstimator implements Estimator {
 
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * The number of values seen
-   */
+  /** The number of values seen */
   private double m_NumValues;
 
-  /**
-   * The sum of the values seen
-   */
+  /** The sum of the values seen */
   private double m_SumOfValues;
 
   /** 
@@ -50,94 +43,79 @@ public class PoissonEstimator implements Estimator {
    */
   private double m_Lambda;
 
-  // ===============
-  // Private methods
-  // ===============
 
+  /**
+   * Calculates the log factorial of a number.
+   *
+   * @param x input number.
+   * @return log factorial of x.
+   */
   private double logFac(double x) {
 
     double result = 0;
-
-    for (double i = 2; i <= x; i++)
+    for (double i = 2; i <= x; i++) {
       result += Math.log(i);
+    }
     return result;
   }
 
   /**
    * Returns value for Poisson distribution
+   *
    * @param x the argument to the kernel function
    * @return the value for a Poisson kernel
    */
-
-  private double Poisson(double x) 
-  {
+  private double Poisson(double x) {
+    
     return Math.exp(-m_Lambda + (x * Math.log(m_Lambda)) - logFac(x));
   }
   
-  // ===============
-  // Public methods.
-  // ===============
-  
-  /**
-   * Constructor
-   * @param the number of possible symbols
-   */
-  public PoissonEstimator()
-  {
-    m_NumValues = 0;
-    m_SumOfValues = 0;
-    m_Lambda = 0;
-  }
-
   /**
    * Add a new data value to the current estimator.
+   *
    * @param data the new data value 
    * @param weight the weight assigned to the data value 
    */
-  public void addValue(double data, double weight)
-  {
+  public void addValue(double data, double weight) {
+    
     m_NumValues += weight;
-    m_SumOfValues += data*weight;
-    if (m_NumValues != 0){
+    m_SumOfValues += data * weight;
+    if (m_NumValues != 0) {
       m_Lambda = m_SumOfValues / m_NumValues;
     }
   }
 
   /**
    * Get a probability estimate for a value
+   *
    * @param data the value to estimate the probability of
    * @return the estimated probability of the supplied value
    */
-  public double getProbability(double data)
-  {
+  public double getProbability(double data) {
+    
     return Poisson(data);
   }
 
-  /**
-   * Display a representation of this estimator
-   */
-  public String toString()
-  {
-    return "Poisson Lambda = " + Utils.doubleToString(m_Lambda,4,2) + "\n";
+  /** Display a representation of this estimator */
+  public String toString() {
+    
+    return "Poisson Lambda = " + Utils.doubleToString(m_Lambda, 4, 2) + "\n";
   }
 
   /**
    * Main method for testing this class.
+   *
    * @param argv should contain a sequence of numeric values
    */
-
-  public static void main(String [] argv)
-  {
-    try
-    {
-      if (argv.length == 0)
-      {
+  public static void main(String [] argv) {
+    
+    try {
+      if (argv.length == 0) {
 	System.out.println("Please specify a set of instances.");
 	return;
       }
       PoissonEstimator newEst = new PoissonEstimator();
-      for(int i = 0; i < argv.length; i++)
-      {
+      for(int i = 0; i < argv.length; i++) {
 	double current = Double.valueOf(argv[i]).doubleValue();
 	System.out.println(newEst);
 	System.out.println("Prediction for " + current 
@@ -145,9 +123,7 @@ public class PoissonEstimator implements Estimator {
 	newEst.addValue(current, 1);
       }
 
-    }
-    catch (Exception e)
-    {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
     }
   }

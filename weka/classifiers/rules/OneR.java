@@ -23,9 +23,9 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for building and using a 1R classifier.<p>
+ * Class for building and using a 1R classifier. For more information, see<p>
  *
- * Reference: R.C. Holte (1993). <i>Very simple classification rules
+ * R.C. Holte (1993). <i>Very simple classification rules
  * perform well on most commonly used datasets</i>. Machine Learning,
  * Vol. 11, pp. 63-91.<p>
  *
@@ -35,7 +35,7 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 public class OneR extends Classifier implements OptionHandler {
 
   /**

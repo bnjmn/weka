@@ -23,14 +23,15 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Class implementing an Id3 decision tree classifier.<p>
+ * Class implementing an Id3 decision tree classifier. For more
+ * information, see<p>
  *
- * Reference: R. Quinlan (1986). <i>Induction of decision
+ * R. Quinlan (1986). <i>Induction of decision
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
-*/
+ * @version $Revision: 1.3 $ 
+ */
 public class Id3 extends DistributionClassifier {
 
   /** The node's successors. */ 

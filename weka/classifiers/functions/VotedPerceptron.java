@@ -26,12 +26,12 @@ import java.util.*;
 /**
  * Implements the voted perceptron algorithm by Freund and
  * Schapire. Globally replaces all missing values, and transforms
- * nominal attributes into binary ones. <p>
+ * nominal attributes into binary ones. For more information, see<p>
  *
- * Reference: Y. Freund and R. E. Schapire (1998). <i> Large margin
- * classification using the perceptron algorithm<\i>.  Proc. 11th
+ * Y. Freund and R. E. Schapire (1998). <i> Large margin
+ * classification using the perceptron algorithm</i>.  Proc. 11th
  * Annu. Conf. on Comput. Learning Theory, pp. 209-217, ACM Press, New
- * York, NY.
+ * York, NY. <p>
  *
  * Valid options are:<p>
  *
@@ -48,7 +48,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   

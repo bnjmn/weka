@@ -24,9 +24,9 @@ import weka.core.*;
 
 /**
  * Class for performing parameter selection by cross-validation for any
- * classifier.<p>
+ * classifier. For more information, see<p>
  *
- * Reference: R. Kohavi (1995). <i>Wrappers for Performance
+ * R. Kohavi (1995). <i>Wrappers for Performance
  * Enhancement and Oblivious Decision Graphs</i>. PhD
  * Thesis. Department of Computer Science, Stanford University. <p>
  *
@@ -57,7 +57,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler {

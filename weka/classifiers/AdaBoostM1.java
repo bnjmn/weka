@@ -24,12 +24,12 @@ import weka.core.*;
 
 /**
  * Class for boosting a classifier using Freund & Schapire's Adaboost 
- * M1 method.<p>
+ * M1 method. For more information, see<p>
  *
- * Reference: Yoav Freund and Robert E. Schapire
+ * Yoav Freund and Robert E. Schapire
  * (1996). <i>Experiments with a new boosting algorithm</i>.  Proc
  * International Conference on Machine Learning, pages 148-156, Morgan
- * Kaufmann, San Francisco. <p>
+ * Kaufmann, San Francisco.<p>
  *
  * Valid options are:<p>
  *
@@ -57,7 +57,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {

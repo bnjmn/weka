@@ -26,60 +26,34 @@ import weka.core.*;
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
+public class KernelEstimator implements Estimator {
 
-public class KernelEstimator implements Estimator 
-{
-
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * Vector containing all of the values seen
-   */
+  /** Vector containing all of the values seen */
   private double [] m_Values;
 
-  /**
-   * Vector containing the associated weights
-   */
+  /** Vector containing the associated weights */
   private double [] m_Weights;
 
-  /**
-   * Number of values stored in m_Weights and m_Values so far
-   */
+  /** Number of values stored in m_Weights and m_Values so far */
   private int m_NumValues;
 
-  /**
-   * The sum of the weights so far
-   */
+  /** The sum of the weights so far */
   private double m_SumOfWeights;
 
-  /**
-   * Current standard deviation
-   */
+  /** The standard deviation */
   private double m_StandardDev;
 
-  /**
-   * The precision of data values
-   */
+  /** The precision of data values */
   private double m_Precision;
 
-  /**
-   * Whether we can optimise the kernel summation
-   */
+  /** Whether we can optimise the kernel summation */
   private boolean m_AllWeightsOne;
 
-  /**
-   * Maximum percentage error permitted in probability calculations
-   */
-  private static double k_MaxError = 0.01;
+  /** Maximum percentage error permitted in probability calculations */
+  private static double MAX_ERROR = 0.01;
 
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Execute a binary search to locate the nearest data value
@@ -229,7 +203,7 @@ public class KernelEstimator implements Estimator
       System.out.println("total: " + (currentProb * m_Weights[i]) + " ");
       */
       weightSum += m_Weights[i];
-      if (currentProb * (m_SumOfWeights - weightSum) < sum * k_MaxError) {
+      if (currentProb * (m_SumOfWeights - weightSum) < sum * MAX_ERROR) {
 	break;
       }
     }
@@ -241,21 +215,19 @@ public class KernelEstimator implements Estimator
 		     - Statistics.normalProbability(zLower));
       sum += currentProb * m_Weights[i];
       weightSum += m_Weights[i];
-      if (currentProb * (m_SumOfWeights - weightSum) < sum * k_MaxError) {
+      if (currentProb * (m_SumOfWeights - weightSum) < sum * MAX_ERROR) {
 	break;
       }
     }
     return sum / m_SumOfWeights;
   }
 
-  /**
-   * Display a representation of this estimator
-   */
+  /** Display a representation of this estimator */
   public String toString() {
 
     String result = m_NumValues + " Normal Kernels. \nStandardDev = " 
-    + Utils.doubleToString(m_StandardDev,6,4)
-    + " Precision = " + m_Precision;
+      + Utils.doubleToString(m_StandardDev,6,4)
+      + " Precision = " + m_Precision;
     if (m_NumValues == 0) {
       result += "  \nMean = 0";
     } else {

@@ -26,28 +26,17 @@ import weka.core.*;
  * a numeric domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class KKConditionalEstimator implements ConditionalEstimator {
 
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * Vector containing all of the values seen
-   */
+  /** Vector containing all of the values seen */
   private double [] m_Values;
 
-  /**
-   * Vector containing all of the conditioning values seen
-   */
+  /** Vector containing all of the conditioning values seen */
   private double [] m_CondValues;
 
-  /**
-   * Vector containing the associated weights
-   */
+  /** Vector containing the associated weights */
   private double [] m_Weights;
 
   /**
@@ -55,29 +44,17 @@ public class KKConditionalEstimator implements ConditionalEstimator {
    */
   private int m_NumValues;
 
-  /**
-   * The sum of the weights so far
-   */
+  /** The sum of the weights so far */
   private double m_SumOfWeights;
 
-  /**
-   * Current standard dev
-   */
+  /** Current standard dev */
   private double m_StandardDev;
 
-  /**
-   * Whether we can optimise the kernel summation
-   */
+  /** Whether we can optimise the kernel summation */
   private boolean m_AllWeightsOne;
 
-  /**
-   * The numeric precision
-   */
+  /** The numeric precision */
   private double m_Precision;
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Execute a binary search to locate the nearest data value
@@ -125,12 +102,12 @@ public class KKConditionalEstimator implements ConditionalEstimator {
     return Math.rint(data / m_Precision) * m_Precision;
   }
   
-  // ===============
-  // Public methods.
-  // ===============
-  
   /**
    * Constructor
+   *
+   * @param precision the  precision to which numeric values are given. For
+   * example, if the precision is stated to be 0.1, the values in the
+   * interval (0.25,0.35] are all treated as 0.3. 
    */
   public KKConditionalEstimator(double precision) {
 
@@ -252,8 +229,8 @@ public class KKConditionalEstimator implements ConditionalEstimator {
   public String toString() {
 
     String result = "KK Conditional Estimator. " 
-      + m_NumValues + " Normal Kernels:\n";
-    result += "StandardDev = " + Utils.doubleToString(m_StandardDev,4,2) 
+      + m_NumValues + " Normal Kernels:\n"
+      + "StandardDev = " + Utils.doubleToString(m_StandardDev,4,2) 
       + "  \nMeans =";
     for(int i = 0; i < m_NumValues; i++) {
       result += " (" + m_Values[i] + ", " + m_CondValues[i] + ")";
@@ -265,11 +242,12 @@ public class KKConditionalEstimator implements ConditionalEstimator {
   }
 
   /**
-   * Main method for testing this class.
+   * Main method for testing this class. Creates some random points
+   * in the range 0 - 100, 
+   * and prints out a distribution conditional on some value
    *
-   * @param argv should contain a sequence of numeric values
+   * @param argv should contain: seed conditional_value numpoints
    */
-
   public static void main(String [] argv) {
 
     try {
@@ -296,16 +274,15 @@ public class KKConditionalEstimator implements ConditionalEstimator {
       int cond;
       if (argv.length > 1) {
 	cond = Integer.parseInt(argv[1]);
-      } else 
+      } else {
 	cond = Math.abs(r.nextInt()%100);
+      }
       System.out.println("## Conditional = " + cond);
       Estimator result = newEst.getEstimator(cond);
       for(int i = 0; i <= 100; i+= 5) {
 	System.out.println(" " + i + "  " + result.getProbability(i));
       }
-    }
-    catch (Exception e)
-    {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
     }
   }

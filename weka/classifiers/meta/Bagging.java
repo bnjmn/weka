@@ -23,9 +23,9 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for bagging a classifier.<p>
+ * Class for bagging a classifier. For more information, see<p>
  *
- * Reference: Leo Breiman (1996). <i>Bagging predictors</i>. Machine
+ * Leo Breiman (1996). <i>Bagging predictors</i>. Machine
  * Learning, 24(2):123-140. <p>
  *
  * Valid options are:<p>
@@ -43,7 +43,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {

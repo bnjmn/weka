@@ -28,7 +28,7 @@ import weka.core.*;
  * instance closest to the given test instance, and predicts the same class
  * as this training instance. If multiple instances are
  * the same (smallest) distance to the test instance, the first one found is
- * used. See <p>
+ * used.  For more information, see <p>
  * 
  * Aha, D., and D. Kibler (1991) "Instance-based learning algorithms",
  * <i>Machine Learning</i>, vol.6, pp. 37-66.<p>
@@ -36,7 +36,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
 
