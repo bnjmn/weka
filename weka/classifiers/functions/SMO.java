@@ -23,11 +23,17 @@ import weka.core.*;
 import weka.filters.*;
 
 /**
- * Implements John C. Platt's sequential minimal optimization algorithm for 
- * training a support vector classifier. Does not implement speed-up
- * for linear feature space and sparse input data. Globally replaces all 
- * missing values, and transforms nominal attributes into binary ones.
- * For more information, see<p>
+ * Implements John C. Platt's sequential minimal optimization
+ * algorithm for training a support vector classifier using scaled
+ * polynomial kernels. Transforms output of SVM into probabilities
+ * by applying a standard sigmoid function that is not fitted to the
+ * data.
+ *
+ * This implementation does not perform speed-up for linear feature
+ * space and sparse input data. It globally replaces all missing
+ * values, transforms nominal attributes into binary ones, and
+ * normalizes all numeric attributes. For more information on the SMO
+ * algorithm, see<p>
  *
  * J. Platt (1998). <i>Fast Training of Support Vector
  * Machines using Sequential Minimal Optimization</i>. Advances in Kernel
@@ -46,8 +52,7 @@ import weka.filters.*;
  * The seed for the random number generator. (default 1)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
-*/
+ * @version $Revision: 1.6 $ */
 public class SMO extends DistributionClassifier implements OptionHandler {
   
   /** The exponent for the polnomial kernel. */
@@ -86,7 +91,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   /** The current set of errors for all non-bound examples. */
   private double[] m_errors;
 
-  /** A hashtable for all unbound examples. */
+  /** A list of all unbound examples (+ the ones at m_C). */
   private int[] m_nextUnbound;
 
   /** The number of support vectors in the classifier. */
@@ -97,6 +102,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
   /** The filter used to get rid of missing values. */
   private ReplaceMissingValuesFilter m_ReplaceMissingValues;
+
+  /** The filter used to normalize all values. */
+  private NormalizationFilter m_Normalization;
 
   /**
    * Method for building the classifier.
@@ -126,6 +134,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     m_NominalToBinary = new NominalToBinaryFilter();
     m_NominalToBinary.inputFormat(insts);
     insts = Filter.useFilter(insts, m_NominalToBinary);
+    m_Normalization = new NormalizationFilter();
+    m_Normalization.inputFormat(insts);
+    insts = Filter.useFilter(insts, m_Normalization);
 
     // Get support vectors
     m_numSupportVectors = 0;
@@ -208,12 +219,14 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     inst = m_ReplaceMissingValues.output();
     m_NominalToBinary.input(inst);
     inst = m_NominalToBinary.output();
+    m_Normalization.input(inst);
+    inst = m_Normalization.output();
     
     // Get probabilities
     double output = SVMOutput(inst);
     double[] result = new double[2];
-    result[1] = 1 / (1 + Math.exp(-output));
-    result[0] = 1 - result[1];
+    result[1] = 1.0 / (1.0 + Math.exp(-output));
+    result[0] = 1.0 - result[1];
 
     return result;
   }
@@ -321,10 +334,10 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 	    text.append("   ");
 	  }
 	  text.append(((int)m_class[i]) + " * " +
-		      m_alpha[i] + " * X(" + i + ") * X\n");
+		      m_alpha[i] + " * K[X(" + i + ") * X]\n");
 	}
       }
-      text.append(" + " + m_b);
+      text.append(" - " + m_b);
       text.append("\n\nNumber of support vectors: " + m_numSupportVectors);
     } catch (Exception e) {
       return "Can't print SMO classifier.";
@@ -412,6 +425,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     }
     result += 1;
     
+    // Rescale kernel
+    result /= (double)inst1.numAttributes();
+
     if (m_exponent != 1.0) {
       result = Math.pow(result, m_exponent);
     }
@@ -581,12 +597,13 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       f2 = SVMOutput(inst2);
       v1 = f1 + m_b - y1 * alph1 * k11 - y2 * alph2 * k12; 
       v2 = f2 + m_b - y1 * alph1 * k12 - y2 * alph2 * k22; 
-      Lobj = alph1 + L - 0.5 * k11 * alph1 * alph1 - 
-	0.5 * k22 * L * L - s * k12 * alph1 * L - 
-	y1 * alph1 * v1 - y2 * L * v2;
-      Hobj = alph1 + H - 0.5 * k11 * alph1 * alph1 - 
-	0.5 * k22 * H * H - s * k12 * alph1 * H - 
-	y1 * alph1 * v1 - y2 * H * v2;
+      double gamma = alph1 + s * alph2;
+      Lobj = (gamma - s * L) + L - 0.5 * k11 * (gamma - s * L) * (gamma - s * L) - 
+	0.5 * k22 * L * L - s * k12 * (gamma - s * L) * L - 
+	y1 * (gamma - s * L) * v1 - y2 * L * v2;
+      Hobj = (gamma - s * H) + H - 0.5 * k11 * (gamma - s * H) * (gamma - s * H) - 
+	0.5 * k22 * H * H - s * k12 * (gamma - s * H) * H - 
+	y1 * (gamma - s * H) * v1 - y2 * H * v2;
       if (Lobj > Hobj + m_eps) {
 	a2 = L;
       } else if (Lobj < Hobj - m_eps) {
@@ -666,6 +683,39 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     return true;
   }
   
+  /**
+   * Quick and dirty check whether the quadratic programming problem is solved.
+   */
+  private void checkClassifier() throws Exception {
+
+    double sum = 0;
+    for (int i = 0; i < m_alpha.length; i++) {
+      if (m_alpha[i] > 0) {
+	sum += m_class[i] * m_alpha[i];
+      }
+    }
+    System.err.println("Sum of y(i) * alpha(i): " + sum);
+
+    for (int i = 0; i < m_alpha.length; i++) {
+      double output = SVMOutput(m_data.instance(i));
+      if (Utils.eq(m_alpha[i], 0)) {
+	if (Utils.sm(m_class[i] * output, 1)) {
+	  System.err.println("KKT condition 1 violated: " + m_class[i] * output);
+	}
+      } 
+      if (Utils.gr(m_alpha[i], 0) && Utils.sm(m_alpha[i], m_C)) {
+	if (!Utils.eq(m_class[i] * output, 1)) {
+	  System.err.println("KKT condition 2 violated: " + m_class[i] * output);
+	}
+      } 
+      if (Utils.eq(m_alpha[i], m_C)) {
+	if (Utils.gr(m_class[i] * output, 1)) {
+	  System.err.println("KKT condition 3 violated: " + m_class[i] * output);
+	}
+      } 
+    }
+  }  
+
   /**
    * Main method for testing this class.
    */
