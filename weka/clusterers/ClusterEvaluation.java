@@ -55,7 +55,7 @@ import  weka.filters.AttributeFilter;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.11 $
+ * @version  $Revision: 1.12 $
  */
 public class ClusterEvaluation {
 
@@ -189,10 +189,13 @@ public class ClusterEvaluation {
     double[] instanceStats = new double[cc];
     m_clusterAssignments = new double [test.numInstances()];
     Instances testCopy = test;
-    boolean hasClass = (testCopy.classIndex() > 0);
+    boolean hasClass = (testCopy.classIndex() >= 0);
 
     // If class is set then do class based evaluation as well
     if (hasClass) {
+      if (testCopy.classAttribute().isNumeric()) {
+	throw new Exception("ClusterEvaluation: Class must be nominal!");
+      }
       AttributeFilter removeClass = new AttributeFilter();
       removeClass.setAttributeIndices(""+(testCopy.classIndex()+1));
       removeClass.setInvertSelection(false);
