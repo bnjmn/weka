@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -100,6 +100,9 @@ public class PairedTTester implements OptionHandler {
 
   /** Indicates whether the instances have been partitioned */
   protected boolean m_ResultsetsValid;
+
+  /** Indicates whether standard deviations should be displayed */
+  protected boolean m_ShowStdDevs = true;
   
   /* Utility class to store the instances in a resultset */
   private class Resultset {
@@ -204,6 +207,21 @@ public class PairedTTester implements OptionHandler {
   } // Resultset
 
 
+  /**
+   * Set whether standard deviations are displayed or not.
+   * @param s true if standard deviations are to be displayed
+   */
+  public void setShowStdDevs(boolean s) {
+    m_ShowStdDevs = s;
+  }
+
+  /**
+   * Returns true if standard deviations have been requested.
+   * @return true if standard deviations are to be displayed.
+   */
+  public boolean getShowStdDevs() {
+    return m_ShowStdDevs;
+  }
   
   /**
    * Separates the instances into resultsets and by dataset/run.
@@ -573,9 +591,38 @@ public class PairedTTester implements OptionHandler {
   public String multiResultsetFull(int baseResultset,
 				   int comparisonColumn) throws Exception {
 
+    int maxWidthMean = 2;
+    int maxWidthStdDev = 2;
+    // determine max field width
+    for (int i = 0; i < getNumDatasets(); i++) {
+      for (int j = 0; j < getNumResultsets(); j++) {
+	PairedStats pairedStats = calculateStatistics(i, baseResultset,
+						      j,
+						      comparisonColumn);
+	double width = ((Math.log(Math.abs(pairedStats.yStats.mean)) / 
+			 Math.log(10))+1);
+	if (width > maxWidthMean) {
+	  maxWidthMean = (int)width;
+	}
+
+	if (m_ShowStdDevs) {
+	  width = ((Math.log(Math.abs(pairedStats.yStats.stdDev)) / 
+		    Math.log(10))+1);
+	  if (width > maxWidthStdDev) {
+	    maxWidthStdDev = (int)width;
+	  }
+	}
+      }
+    }
+
     StringBuffer result = new StringBuffer(1000);
     int datasetLength = 25;
-    int resultsetLength = 9;
+    //    int resultsetLength = 9;
+    //    int resultsetLength = 16;
+    int resultsetLength = maxWidthMean + 7;
+    if (m_ShowStdDevs) {
+      resultsetLength += (maxWidthStdDev + 5);
+    }
 
     // Set up the titles
     StringBuffer titles = new StringBuffer(Utils.padRight("Dataset",
@@ -625,8 +672,15 @@ public class PairedTTester implements OptionHandler {
 	result.append(Utils.padLeft('('
 				+ Utils.doubleToString(pairedStats.count, 0)
 				+ ')', 5)).append(' ');
-	result.append(Utils.doubleToString(pairedStats.xStats.mean,
-				       resultsetLength - 2, 2)).append(" | ");
+	if (!m_ShowStdDevs) {
+	  result.append(Utils.doubleToString(pairedStats.xStats.mean,
+	       			     resultsetLength - 2, 2)).append(" | ");
+	} else {
+	  result.append(Utils.doubleToString(pairedStats.xStats.mean,
+					     (maxWidthMean+5), 2));
+	  result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
+						 (maxWidthStdDev+3),2)+')').append(" | ");
+	}
 	// Iterate over the resultsets
 	for (int j = 0; j < getNumResultsets(); j++) {
 	  if (j != baseResultset) {
@@ -643,10 +697,19 @@ public class PairedTTester implements OptionHandler {
 	      } else {
 		tie[j]++;
 	      }
-	      result.append(Utils.doubleToString(pairedStats.yStats.mean,
-						 resultsetLength - 2,
-						 2)).append(' ')
-		.append(sigChar).append(' ');
+	      if (!m_ShowStdDevs) {
+		result.append(Utils.doubleToString(pairedStats.yStats.mean,
+						   resultsetLength - 2,
+						   2)).append(' ')
+		  .append(sigChar).append(' ');
+	      } else {
+		result.append(Utils.doubleToString(pairedStats.yStats.mean,
+						    (maxWidthMean+5),
+						   2));
+		result.append('('+Utils.doubleToString(pairedStats.
+				   yStats.stdDev, (maxWidthStdDev+3),2)+')');
+		result.append(' ').append(sigChar).append(' ');
+	      }
 	    } catch (Exception ex) {
 	      result.append(Utils.padLeft("", resultsetLength + 1));
 	    }
