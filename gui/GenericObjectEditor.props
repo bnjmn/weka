@@ -42,7 +42,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.lazy.IBk,\
  weka.classifiers.lazy.kstar.KStar,\
  weka.classifiers.lazy.LBR,\
- weka.classifiers.lazy.LWR,\
  weka.classifiers.lazy.LWL,\
  weka.classifiers.meta.AdaBoostM1,\
  weka.classifiers.meta.AdditiveRegression,\
