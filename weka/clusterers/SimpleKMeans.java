@@ -41,17 +41,12 @@ import weka.experiment.Stats;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Clusterer
  * @see OptionHandler
  */
 public class SimpleKMeans extends Clusterer implements OptionHandler, 
 						       WeightedInstancesHandler {
-
-  /**
-   * training instances
-   */
-  private Instances m_instances;
 
   /**
    * replace missing values in training instances
@@ -72,11 +67,6 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
    * Holds the standard deviations of attributes in each cluster
    */
   private Instances m_ClusterStdDevs;
-
-  /**
-   * temporary variable holding cluster assignments while iterating
-   */
-  private int [] m_ClusterAssignments;
 
   /**
    * random seed
@@ -123,29 +113,29 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
-    m_instances = Filter.useFilter(data, m_ReplaceMissingFilter);
+    Instances instances = Filter.useFilter(data, m_ReplaceMissingFilter);
 
-    m_Min = new double [m_instances.numAttributes()];
-    m_Max = new double [m_instances.numAttributes()];
-    for (int i = 0; i < m_instances.numAttributes(); i++) {
+    m_Min = new double [instances.numAttributes()];
+    m_Max = new double [instances.numAttributes()];
+    for (int i = 0; i < instances.numAttributes(); i++) {
       m_Min[i] = m_Max[i] = Double.NaN;
     }
-
-    for (int i = 0; i < m_instances.numInstances(); i++) {
-      updateMinMax(m_instances.instance(i));
-    }
     
-    m_ClusterCentroids = new Instances(m_instances, m_NumClusters);
-    m_ClusterAssignments = new int [m_instances.numInstances()];
+    m_ClusterCentroids = new Instances(instances, m_NumClusters);
+    int[] clusterAssignments = new int [instances.numInstances()];
+
+    for (int i = 0; i < instances.numInstances(); i++) {
+      updateMinMax(instances.instance(i));
+    }
 
     Random RandomO = new Random(m_Seed);
-    boolean [] selected = new boolean[m_instances.numInstances()];
+    boolean [] selected = new boolean[instances.numInstances()];
     int instIndex;
     for (int i = 0; i < m_NumClusters; i++) {
       do {
-	instIndex = RandomO.nextInt(m_instances.numInstances());
+	instIndex = RandomO.nextInt(instances.numInstances());
       } while (selected[instIndex]);
-      m_ClusterCentroids.add(m_instances.instance(instIndex));
+      m_ClusterCentroids.add(instances.instance(instIndex));
       selected[instIndex] = true;
     }
     selected = null;
@@ -155,37 +145,37 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
     while (!converged) {
       m_Iterations++;
       converged = true;
-      for (int i = 0; i < m_instances.numInstances(); i++) {
-	Instance toCluster = m_instances.instance(i);
+      for (int i = 0; i < instances.numInstances(); i++) {
+	Instance toCluster = instances.instance(i);
 	int newC = clusterProcessedInstance(toCluster);
-	if (newC != m_ClusterAssignments[i]) {
+	if (newC != clusterAssignments[i]) {
 	  converged = false;
 	}
-	m_ClusterAssignments[i] = newC;
+	clusterAssignments[i] = newC;
 	//	System.out.println(newC);
       }
       
       // update centroids
-      m_ClusterCentroids = new Instances(m_instances, m_NumClusters);
+      m_ClusterCentroids = new Instances(instances, m_NumClusters);
       for (int i = 0; i < m_NumClusters; i++) {
-	tempI[i] = new Instances(m_instances, 0);
+	tempI[i] = new Instances(instances, 0);
       }
-      for (int i = 0; i < m_instances.numInstances(); i++) {
-	tempI[m_ClusterAssignments[i]].add(m_instances.instance(i));
+      for (int i = 0; i < instances.numInstances(); i++) {
+	tempI[clusterAssignments[i]].add(instances.instance(i));
       }
       for (int i = 0; i < m_NumClusters; i++) {
-	double [] vals = new double[m_instances.numAttributes()];
-	for (int j = 0; j < m_instances.numAttributes(); j++) {
+	double [] vals = new double[instances.numAttributes()];
+	for (int j = 0; j < instances.numAttributes(); j++) {
 	  vals[j] = tempI[i].meanOrMode(j);
 	}
 	m_ClusterCentroids.add(new Instance(1.0, vals));
       }
     }
-    m_ClusterStdDevs = new Instances(m_instances, m_NumClusters);
+    m_ClusterStdDevs = new Instances(instances, m_NumClusters);
     for (int i = 0; i < m_NumClusters; i++) {
-      double [] vals2 = new double[m_instances.numAttributes()];
-      for (int j = 0; j < m_instances.numAttributes(); j++) {
-	if (m_instances.attribute(j).isNumeric()) {
+      double [] vals2 = new double[instances.numAttributes()];
+      for (int j = 0; j < instances.numAttributes(); j++) {
+	if (instances.attribute(j).isNumeric()) {
 	  vals2[j] = Math.sqrt(tempI[i].variance(j));
 	} else {
 	  vals2[j] = Instance.missingValue();
@@ -246,19 +236,19 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
     for (int p1 = 0, p2 = 0; 
 	 p1 < first.numValues() || p2 < second.numValues();) {
       if (p1 >= first.numValues()) {
-	firstI = m_instances.numAttributes();
+	firstI = m_ClusterCentroids.numAttributes();
       } else {
 	firstI = first.index(p1); 
       }
       if (p2 >= second.numValues()) {
-	secondI = m_instances.numAttributes();
+	secondI = m_ClusterCentroids.numAttributes();
       } else {
 	secondI = second.index(p2);
       }
-      if (firstI == m_instances.classIndex()) {
+      if (firstI == m_ClusterCentroids.classIndex()) {
 	p1++; continue;
       } 
-      if (secondI == m_instances.classIndex()) {
+      if (secondI == m_ClusterCentroids.classIndex()) {
 	p2++; continue;
       } 
       double diff;
@@ -279,7 +269,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
       distance += diff * diff;
     }
     
-    //return Math.sqrt(distance / m_instances.numAttributes());
+    //return Math.sqrt(distance / m_ClusterCentroids.numAttributes());
     return distance;
   }
 
@@ -289,7 +279,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
    */
   private double difference(int index, double val1, double val2) {
 
-    switch (m_instances.attribute(index).type()) {
+    switch (m_ClusterCentroids.attribute(index).type()) {
     case Attribute.NOMINAL:
       
       // If attribute is nominal
@@ -351,7 +341,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
    */
   private void updateMinMax(Instance instance) {  
 
-    for (int j = 0;j < m_instances.numAttributes(); j++) {
+    for (int j = 0;j < m_ClusterCentroids.numAttributes(); j++) {
       if (!instance.isMissing(j)) {
 	if (Double.isNaN(m_Min[j])) {
 	  m_Min[j] = instance.value(j);
