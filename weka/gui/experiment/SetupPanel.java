@@ -85,7 +85,7 @@ import javax.swing.ButtonGroup;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class SetupPanel extends JPanel {
 
@@ -428,6 +428,10 @@ public class SetupPanel extends JPanel {
    */
   public void setExperiment(Experiment exp) {
 
+    boolean iteratorOn = exp.getUsePropertyIterator();
+    Object propArray = exp.getPropertyArray();
+    PropertyNode [] propPath = exp.getPropertyPath();
+
     m_Exp = exp;
     m_SaveBut.setEnabled(true);
     m_RPEditor.setValue(m_Exp.getResultProducer());
@@ -443,6 +447,10 @@ public class SetupPanel extends JPanel {
     m_advanceIteratorFirst.setSelected(!m_Exp.getAdvanceDataSetFirst());
     m_advanceDataSetFirst.setEnabled(true);
     m_advanceIteratorFirst.setEnabled(true);
+
+    exp.setPropertyPath(propPath);
+    exp.setPropertyArray(propArray);
+    exp.setUsePropertyIterator(iteratorOn);
 
     m_GeneratorPropertyPanel.setExperiment(m_Exp);   
     m_RunNumberPanel.setExperiment(m_Exp);
@@ -481,14 +489,7 @@ public class SetupPanel extends JPanel {
 			     new BufferedInputStream(fi));
       Experiment exp = (Experiment)oi.readObject();
       oi.close();
-      boolean iteratorOn = exp.getUsePropertyIterator();
-      Object propArray = exp.getPropertyArray();
-      PropertyNode [] propPath = exp.getPropertyPath();
       setExperiment(exp);
-      exp.setPropertyPath(propPath);
-      exp.setPropertyArray(propArray);
-      exp.setUsePropertyIterator(iteratorOn);
-      m_GeneratorPropertyPanel.setExperiment(m_Exp);
       System.err.println("Opened experiment:\n" + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();
