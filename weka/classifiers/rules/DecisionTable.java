@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -464,8 +464,7 @@ public class DecisionTable
 
       // if this one is not in the table
       if ((tempDist = (double [])m_entries.get(thekey)) == null) {
-	  System.out.println("Shouldnt get here!");
-	  System.exit(1);
+	throw new Error("This should never happen!");
       } else {
 	normDist = new double [tempDist.length];
 	System.arraycopy(tempDist,0,normDist,0,tempDist.length);
@@ -487,7 +486,7 @@ public class DecisionTable
 	  return m_majority;
 	}
       }
-      return Utils.maxIndex(tempDist);
+      //      return Utils.maxIndex(tempDist);
     } else {
 
       // see if this one is already in the table
@@ -502,13 +501,12 @@ public class DecisionTable
 	  return (normDist[0] / normDist[1]);
 	}
       } else {
-	System.out.println("Shouldnt get here");
-	System.exit(1);
+	throw new Error("This should never happen!");
       }
     }
     
     // shouldn't get here 
-    return 0.0;
+    // return 0.0;
   }
 
   /**
@@ -553,8 +551,7 @@ public class DecisionTable
       }
       thekey = new hashKey(instA);
       if ((class_distribs[i] = (double [])m_entries.get(thekey)) == null) {
-	System.out.println("Shouldnt get here!");
-	System.exit(1);
+	throw new Error("This should never happen!");
       } else {
 	if (m_classIsNominal) {
 	  class_distribs[i][(int)inst.classValue()] -= inst.weight();
