@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -799,6 +799,7 @@ public class PairedTTester implements OptionHandler {
 
   /**
    * Generates a comparison table in latex table format
+   *
    * @param baseResultset the index of the base resultset
    * @param comparisonColumn the index of the column to compare over
    * @param maxWidthMean width for the mean
@@ -886,7 +887,7 @@ public class PairedTTester implements OptionHandler {
 	} else {
 	  result.append("& "+Utils.doubleToString(pairedStats.xStats.mean,
 					     (maxWidthMean+5), 2)+"$\\pm$");
-	  if (Utils.eq(pairedStats.xStats.stdDev, Double.NaN)) {
+	  if (Double.isNaN(pairedStats.xStats.stdDev)) {
 	    result.append("&"+Utils.doubleToString(0.0,
 						  (maxWidthStdDev+3),2)+" ");
 	  } else {
@@ -916,7 +917,7 @@ public class PairedTTester implements OptionHandler {
 			      +Utils.doubleToString(pairedStats.yStats.mean,
 						   (maxWidthMean+5),
 						   2)+"$\\pm$");
-		if (Utils.eq(pairedStats.yStats.stdDev, Double.NaN)) {
+		if (Double.isNaN(pairedStats.yStats.stdDev)) {
 		  result.append("&"+Utils.doubleToString(0.0, 
 				(maxWidthStdDev+3),2)+" ");
 		} else {
@@ -951,6 +952,164 @@ public class PairedTTester implements OptionHandler {
     System.out.println(result.toString()+"\n\n");
     return result.toString();
   }
+
+
+  /**
+   * Generates a comparison table in latex table format
+   *
+   * @param baseResultset the index of the base resultset
+   * @param comparisonColumn the index of the column to compare over
+   * @param maxWidthMean width for the mean
+   * @param maxWidthStdDev width for the standard deviation
+   * @return the comparison table string
+   */
+  private String multiResultsetFullPlainText(int baseResultset,
+                                             int comparisonColumn,
+                                             int maxWidthMean,
+                                             int maxWidthStdDev) {
+
+    StringBuffer result = new StringBuffer(1000);
+    int datasetLength = 25;
+    //    int resultsetLength = 9;
+    //    int resultsetLength = 16;
+    int resultsetLength = maxWidthMean + 7;
+    if (m_ShowStdDevs) {
+      resultsetLength += (maxWidthStdDev + 5);
+    }
+
+    // Set up the titles
+    StringBuffer titles = new StringBuffer(Utils.padRight("Dataset",
+                                                          datasetLength));
+    titles.append(' ');
+    StringBuffer label 
+      = new StringBuffer(Utils.padLeft("(" + (baseResultset + 1)
+                                       + ") "
+                                       + getResultsetName(baseResultset),
+                                       resultsetLength + 3));
+
+    titles.append(label);
+    StringBuffer separator = new StringBuffer(Utils.padRight("",
+                                                             datasetLength));
+    while (separator.length() < titles.length()) {
+      separator.append('-');
+    }
+    separator.append("---");
+    titles.append(" | ");
+    for (int j = 0; j < getNumResultsets(); j++) {
+      if (j != baseResultset) {
+        label = new StringBuffer(Utils.padLeft("(" + (j + 1) + ") "
+                                               + getResultsetName(j), resultsetLength));
+        titles.append(label).append(' ');
+        for (int i = 0; i < label.length(); i++) {
+          separator.append('-');
+        }
+        separator.append('-');
+      }
+    }
+    result.append(titles).append('\n').append(separator).append('\n');
+    
+    // Iterate over datasets
+    int [] win = new int [getNumResultsets()];
+    int [] loss = new int [getNumResultsets()];
+    int [] tie = new int [getNumResultsets()];
+    StringBuffer skipped = new StringBuffer("");
+    for (int i = 0; i < getNumDatasets(); i++) {
+      // Print the name of the dataset
+      String datasetName = 
+        templateString(m_DatasetSpecifiers.specifier(i));
+      try {
+        PairedStats pairedStats = 
+          calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+                              baseResultset, baseResultset,
+                              comparisonColumn);
+        datasetName = Utils.padRight(datasetName, datasetLength);
+        result.append(datasetName);
+        result.append(Utils.padLeft('('
+                                    + Utils.doubleToString(pairedStats.count,
+                                                           0)
+                                    + ')', 5)).append(' ');
+        if (!m_ShowStdDevs) {
+          result.append(Utils.doubleToString(pairedStats.xStats.mean,
+                                             resultsetLength - 2, 2)).
+            append(" | ");
+        } else {
+          result.append(Utils.doubleToString(pairedStats.xStats.mean,
+                                             (maxWidthMean+5), 2));
+          if (Double.isInfinite(pairedStats.xStats.stdDev)) {
+            result.append('(' + Utils.padRight("Inf", maxWidthStdDev + 3)
+                          +')').append(" | ");
+          } else {
+            result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
+                                                   (maxWidthStdDev+3),2)
+                          +')').append(" | ");
+          }
+        }
+        // Iterate over the resultsets
+        for (int j = 0; j < getNumResultsets(); j++) {
+          if (j != baseResultset) {
+            try {
+              pairedStats = 
+                calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+                                    baseResultset, j, comparisonColumn);
+              char sigChar = ' ';
+              if (pairedStats.differencesSignificance < 0) {
+                sigChar = 'v';
+                win[j]++;
+              } else if (pairedStats.differencesSignificance > 0) {
+                sigChar = '*';
+                loss[j]++;
+              } else {
+                tie[j]++;
+              }
+              if (!m_ShowStdDevs) {
+                result.append(Utils.doubleToString(pairedStats.yStats.mean,
+                                                   resultsetLength - 2,
+                                                   2)).append(' ')
+                  .append(sigChar).append(' ');
+              } else {
+                result.append(Utils.doubleToString(pairedStats.yStats.mean,
+                                                   (maxWidthMean+5),
+                                                   2));
+                if (Double.isInfinite(pairedStats.yStats.stdDev)) {
+                  result.append('(' 
+                                + Utils.padRight("Inf", maxWidthStdDev + 3)
+                                +')');
+                } else {
+                  result.append('('+Utils.doubleToString(pairedStats.
+                                                         yStats.stdDev, 
+                                                         (maxWidthStdDev+3),
+                                                         2)+')');
+                }
+                result.append(' ').append(sigChar).append(' ');
+              }
+            } catch (Exception ex) {
+              ex.printStackTrace();
+              result.append(Utils.padLeft("", resultsetLength + 1));
+            }
+          }
+        }
+        result.append('\n');
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        skipped.append(datasetName).append(' ');
+      }
+    }
+    result.append(separator).append('\n');
+    result.append(Utils.padLeft("(v/ /*)", datasetLength + 4 +
+                                resultsetLength)).append(" | ");
+    for (int j = 0; j < getNumResultsets(); j++) {
+      if (j != baseResultset) {
+        result.append(Utils.padLeft("(" + win[j] + '/' + tie[j]
+                                    + '/' + loss[j] + ')',
+                                    resultsetLength)).append(' ');
+      }
+    }
+    result.append('\n');
+    if (!skipped.equals("")) {
+      result.append("Skipped: ").append(skipped).append('\n');
+    }
+    return result.toString();
+  }
 				    
   /**
    * Creates a comparison table where a base resultset is compared to the
@@ -973,15 +1132,20 @@ public class PairedTTester implements OptionHandler {
 	  PairedStats pairedStats = 
 	    calculateStatistics(m_DatasetSpecifiers.specifier(i), 
 				baseResultset, j, comparisonColumn);
-	  double width = ((Math.log(Math.abs(pairedStats.yStats.mean)) / 
-			   Math.log(10))+1);
-	  if (width > maxWidthMean) {
-	    maxWidthMean = (int)width;
-	  }
+          if (!Double.isInfinite(pairedStats.yStats.mean) &&
+              !Double.isNaN(pairedStats.yStats.mean)) {
+            double width = ((Math.log(Math.abs(pairedStats.yStats.mean)) / 
+                             Math.log(10))+1);
+            if (width > maxWidthMean) {
+              maxWidthMean = (int)width;
+            }
+          }
 	  
-	  if (m_ShowStdDevs) {
-	    width = ((Math.log(Math.abs(pairedStats.yStats.stdDev)) / 
-		      Math.log(10))+1);
+	  if (m_ShowStdDevs &&
+              !Double.isInfinite(pairedStats.yStats.stdDev) &&
+              !Double.isNaN(pairedStats.yStats.stdDev)) {
+	    double width = ((Math.log(Math.abs(pairedStats.yStats.stdDev)) / 
+                             Math.log(10))+1);
 	    if (width > maxWidthStdDev) {
 	      maxWidthStdDev = (int)width;
 	    }
@@ -1001,149 +1165,11 @@ public class PairedTTester implements OptionHandler {
 							maxWidthStdDev));
 
     } else {
-      int datasetLength = 25;
-      //    int resultsetLength = 9;
-      //    int resultsetLength = 16;
-      int resultsetLength = maxWidthMean + 7;
-      if (m_ShowStdDevs) {
-	resultsetLength += (maxWidthStdDev + 5);
-      }
-
-      // Set up the titles
-      StringBuffer titles = new StringBuffer(Utils.padRight("Dataset",
-							    datasetLength));
-      titles.append(' ');
-      StringBuffer label = new StringBuffer(
-					    Utils.padLeft("("
-							  + (baseResultset + 1)
-							  + ") "
-							  + getResultsetName(baseResultset),
-							  resultsetLength + 3));
-
-      titles.append(label);
-      StringBuffer separator = new StringBuffer(Utils.padRight("",
-							       datasetLength));
-      while (separator.length() < titles.length()) {
-	separator.append('-');
-      }
-      separator.append("---");
-      titles.append(" | ");
-      for (int j = 0; j < getNumResultsets(); j++) {
-	if (j != baseResultset) {
-	  label = new StringBuffer(Utils.padLeft("(" + (j + 1) + ") "
-						 + getResultsetName(j), resultsetLength));
-	  titles.append(label).append(' ');
-	  for (int i = 0; i < label.length(); i++) {
-	    separator.append('-');
-	  }
-	  separator.append('-');
-	}
-      }
-      result.append(titles).append('\n').append(separator).append('\n');
-    
-      // Iterate over datasets
-      int [] win = new int [getNumResultsets()];
-      int [] loss = new int [getNumResultsets()];
-      int [] tie = new int [getNumResultsets()];
-      StringBuffer skipped = new StringBuffer("");
-      for (int i = 0; i < getNumDatasets(); i++) {
-	// Print the name of the dataset
-	String datasetName = 
-	  templateString(m_DatasetSpecifiers.specifier(i));
-	try {
-	  PairedStats pairedStats = 
-	    calculateStatistics(m_DatasetSpecifiers.specifier(i), 
-				baseResultset, baseResultset,
-				comparisonColumn);
-	  datasetName = Utils.padRight(datasetName, datasetLength);
-	  result.append(datasetName);
-	  result.append(Utils.padLeft('('
-				      + Utils.doubleToString(pairedStats.count,
-							     0)
-				      + ')', 5)).append(' ');
-	  if (!m_ShowStdDevs) {
-	    result.append(Utils.doubleToString(pairedStats.xStats.mean,
-					       resultsetLength - 2, 2)).
-	      append(" | ");
-	  } else {
-	    result.append(Utils.doubleToString(pairedStats.xStats.mean,
-					       (maxWidthMean+5), 2));
-	    if (Utils.eq(pairedStats.xStats.stdDev, Double.NaN)) {
-	      result.append('('+Utils.doubleToString(0.0,
-						     (maxWidthStdDev+3),2)
-			    +')').append(" | ");
-	    } else {
-	      result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
-						     (maxWidthStdDev+3),2)
-			    +')').append(" | ");
-	    }
-	  }
-	  // Iterate over the resultsets
-	  for (int j = 0; j < getNumResultsets(); j++) {
-	    if (j != baseResultset) {
-	      try {
-		pairedStats = 
-		  calculateStatistics(m_DatasetSpecifiers.specifier(i), 
-				      baseResultset, j, comparisonColumn);
-		char sigChar = ' ';
-		if (pairedStats.differencesSignificance < 0) {
-		  sigChar = 'v';
-		  win[j]++;
-		} else if (pairedStats.differencesSignificance > 0) {
-		  sigChar = '*';
-		  loss[j]++;
-		} else {
-		  tie[j]++;
-		}
-		if (!m_ShowStdDevs) {
-		  result.append(Utils.doubleToString(pairedStats.yStats.mean,
-						     resultsetLength - 2,
-						     2)).append(' ')
-		    .append(sigChar).append(' ');
-		} else {
-		  result.append(Utils.doubleToString(pairedStats.yStats.mean,
-						     (maxWidthMean+5),
-						     2));
-		  if (Utils.eq(pairedStats.yStats.stdDev, Double.NaN)) {
-		    result.append('('+Utils.doubleToString(0.0, 
-							   (maxWidthStdDev+3),
-							   2)+')');
-		  } else {
-		    result.append('('+Utils.doubleToString(pairedStats.
-							   yStats.stdDev, 
-							   (maxWidthStdDev+3),
-							   2)+')');
-		  }
-		  result.append(' ').append(sigChar).append(' ');
-		}
-	      } catch (Exception ex) {
-		ex.printStackTrace();
-		result.append(Utils.padLeft("", resultsetLength + 1));
-	      }
-	    }
-	  }
-	  result.append('\n');
-	} catch (Exception ex) {
-	  ex.printStackTrace();
-	  skipped.append(datasetName).append(' ');
-	}
-      }
-      result.append(separator).append('\n');
-      result.append(Utils.padLeft("(v/ /*)", datasetLength + 4 +
-				  resultsetLength)).append(" | ");
-      for (int j = 0; j < getNumResultsets(); j++) {
-	if (j != baseResultset) {
-	  result.append(Utils.padLeft("(" + win[j] + '/' + tie[j]
-				      + '/' + loss[j] + ')',
-				      resultsetLength)).append(' ');
-	}
-      }
-      result.append('\n');
-      if (!skipped.equals("")) {
-	result.append("Skipped: ").append(skipped).append('\n');
-      }
+      result = new StringBuffer(multiResultsetFullPlainText(baseResultset, 
+                                                            comparisonColumn, 
+                                                            maxWidthMean,
+                                                            maxWidthStdDev));
     }
-
     // append a key so that we can tell the difference between long
     // scheme+option names
     result.append("\nKey:\n\n");
