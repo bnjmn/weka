@@ -21,6 +21,8 @@ package  weka.clusterers;
 import  java.util.*;
 import  java.io.*;
 import  weka.core.*;
+import  weka.filters.Filter;
+import  weka.filters.AttributeFilter;
 
 /**
  * Class for evaluating clustering models.<p>
@@ -46,10 +48,14 @@ import  weka.core.*;
  * -x <num folds> <br>
  * Set the number of folds for a cross validation of the training data.
  * Cross validation can only be done for distribution clusterers and will
- * be performed if the test file is missing.
+ * be performed if the test file is missing. <p>
+ *
+ * -c <class> <br>
+ * Set the class attribute. If set, then class based evaluation of clustering
+ * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.10 $
+ * @version  $Revision: 1.11 $
  */
 public class ClusterEvaluation {
 
@@ -77,6 +83,10 @@ public class ClusterEvaluation {
   /** holds the assigments of instances to clusters for a particular testing
       dataset */
   private double [] m_clusterAssignments;
+
+  /** will hold the mapping of classes to clusters (for class based 
+      evaluation) */
+  private int [] m_classToCluster = null;
 
   /**
    * set the clusterer
@@ -137,6 +147,15 @@ public class ClusterEvaluation {
   }
 
   /**
+   * Return the array (ordered by cluster number) of minimum error class to
+   * cluster mappings
+   * @return an array of class to cluster mappings
+   */
+  public int [] getClassesToClusters() {
+    return m_classToCluster;
+  }
+
+  /**
    * Constructor. Sets defaults for each member variable. Default Clusterer
    * is EM.
    */
@@ -169,23 +188,34 @@ public class ClusterEvaluation {
 				   Math.log(10))+1);
     double[] instanceStats = new double[cc];
     m_clusterAssignments = new double [test.numInstances()];
+    Instances testCopy = test;
+    boolean hasClass = (testCopy.classIndex() > 0);
 
-    for (i=0;i<test.numInstances();i++) {
+    // If class is set then do class based evaluation as well
+    if (hasClass) {
+      AttributeFilter removeClass = new AttributeFilter();
+      removeClass.setAttributeIndices(""+(testCopy.classIndex()+1));
+      removeClass.setInvertSelection(false);
+      removeClass.inputFormat(testCopy);
+      testCopy = Filter.useFilter(testCopy, removeClass);
+    }
+
+    for (i=0;i<testCopy.numInstances();i++) {
       try {
 	if (m_Clusterer instanceof DistributionClusterer) {
 	  temp = ((DistributionClusterer)m_Clusterer).
-	    densityForInstance(test.instance(i));
+	    densityForInstance(testCopy.instance(i));
 	  //	  temp = Utils.sum(dist);
 	  
 	  if (temp > 0) {
 	    loglk += Math.log(temp);
 	  }
 	  //	  Utils.normalize(dist);
-	  cnum = m_Clusterer.clusterInstance(test.instance(i)); 
+	  cnum = m_Clusterer.clusterInstance(testCopy.instance(i)); 
 	  // Utils.maxIndex(dist);
 	  m_clusterAssignments[i] = (double)cnum;
 	} else {
-	  cnum = m_Clusterer.clusterInstance(test.instance(i));
+	  cnum = m_Clusterer.clusterInstance(testCopy.instance(i));
 	  m_clusterAssignments[i] = (double)cnum;
 	}
       }
@@ -224,7 +254,7 @@ public class ClusterEvaluation {
 
     double sum = Utils.sum(instanceStats);
     loglk /= sum;
-    m_clusteringResults.append("Cluster Instances\n");
+    m_clusteringResults.append("Cluster Instances\n\n");
     int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
     for (i = 0; i < cc; i++) {
       if (instanceStats[i] > 0) {
@@ -244,6 +274,171 @@ public class ClusterEvaluation {
       m_clusteringResults.append("\nLog likelihood: " 
 				 + Utils.doubleToString(loglk, 1, 5) 
 				 + "\n");
+    }
+    
+    if (hasClass) {
+      evaluateClustersWithRespectToClass(test);
+    }
+  }
+
+  /**
+   * Evaluates cluster assignments with respect to actual class labels.
+   * Assumes that m_Clusterer has been trained and tested on 
+   * inst (minus the class).
+   * @param inst the instances (including class) to evaluate with respect to
+   * @exception Exception if something goes wrong
+   */
+  private void evaluateClustersWithRespectToClass(Instances inst)
+    throws Exception {
+    int numClasses = inst.classAttribute().numValues();
+    int [][] counts = new int [m_numClusters][numClasses];
+    int [] clusterTotals = new int[m_numClusters];
+    double [] best = new double[m_numClusters+1];
+    double [] current = new double[m_numClusters+1];
+
+    for (int i = 0; i < inst.numInstances(); i++) {
+      counts[(int)m_clusterAssignments[i]][(int)inst.instance(i).classValue()]++;
+      clusterTotals[(int)m_clusterAssignments[i]]++;
+    }
+    
+    best[m_numClusters] = Double.MAX_VALUE;
+    mapClasses(0, counts, clusterTotals, current, best, 0);
+
+    m_clusteringResults.append("\n\nClass attribute: "
+			+inst.classAttribute().name()
+			+"\n");
+    m_clusteringResults.append("Classes to Clusters:\n");
+    String matrixString = toMatrixString(counts, clusterTotals, inst);
+    m_clusteringResults.append(matrixString).append("\n");
+
+    int Cwidth = 1 + (int)(Math.log(m_numClusters) / Math.log(10));
+    // add the minimum error assignment
+    for (int i = 0; i < m_numClusters; i++) {
+      if (clusterTotals[i] > 0) {
+	m_clusteringResults.append("Cluster "
+				   +Utils.doubleToString((double)i,Cwidth,0));
+	m_clusteringResults.append(" <-- ");
+	
+	if (best[i] < 0) {
+	  m_clusteringResults.append("No class\n");
+	} else {
+	  m_clusteringResults.
+	    append(inst.classAttribute().value((int)best[i])).append("\n");
+	}
+      }
+    }
+    m_clusteringResults.append("\nIncorrectly clustered instances :\t"
+			       +best[m_numClusters]+"\t"
+			       +(Utils.doubleToString((best[m_numClusters] / 
+						       inst.numInstances() * 
+						       100.0), 8, 4))
+			       +" %\n");
+
+    // copy the class assignments
+    m_classToCluster = new int [m_numClusters];
+    for (int i = 0; i < m_numClusters; i++) {
+      m_classToCluster[i] = (int)best[i];
+    }
+  }
+
+  /**
+   * Returns a "confusion" style matrix of classes to clusters assignments
+   * @param counts the counts of classes for each cluster
+   * @param clusterTotals total number of examples in each cluster
+   * @param inst the training instances (with class)
+   * @exception Exception if matrix can't be generated
+   */
+  private String toMatrixString(int [][] counts, int [] clusterTotals,
+				Instances inst) 
+    throws Exception {
+    StringBuffer ms = new StringBuffer();
+
+    int maxval = 0;
+    for (int i = 0; i < m_numClusters; i++) {
+      for (int j = 0; j < counts[i].length; j++) {
+	if (counts[i][j] > maxval) {
+	  maxval = counts[i][j];
+	}
+      }
+    }
+
+    int Cwidth = 1 + Math.max((int)(Math.log(maxval) / Math.log(10)),
+			      (int)(Math.log(m_numClusters) / Math.log(10)));
+
+    ms.append("\n");
+    
+    for (int i = 0; i < m_numClusters; i++) {
+      if (clusterTotals[i] > 0) {
+	ms.append(" ").append(Utils.doubleToString((double)i, Cwidth, 0));
+      }
+    }
+    ms.append("  <-- assigned to cluster\n");
+    
+    for (int i = 0; i< counts[0].length; i++) {
+
+      for (int j = 0; j < m_numClusters; j++) {
+	if (clusterTotals[j] > 0) {
+	  ms.append(" ").append(Utils.doubleToString((double)counts[j][i], 
+						     Cwidth, 0));
+	}
+      }
+      ms.append(" | ").append(inst.classAttribute().value(i)).append("\n");
+    }
+
+    return ms.toString();
+  }
+
+  /**
+   * Finds the minimum error mapping of classes to clusters. Recursively
+   * considers all possible class to cluster assignments.
+   * @param lev the cluster being processed
+   * @param counts the counts of classes in clusters
+   * @param clusterTotals the total number of examples in each cluster
+   * @param current the current path through the class to cluster assignment
+   * tree
+   * @param best the best assignment path seen
+   * @param error accumulates the error for a particular path
+   */
+  private void mapClasses(int lev, int [][] counts, int [] clusterTotals,
+			  double [] current, double [] best, int error) {
+    // leaf
+    if (lev == m_numClusters) {
+      if (error < best[m_numClusters]) {
+	best[m_numClusters] = error;
+	for (int i = 0; i < m_numClusters; i++) {
+	  best[i] = current[i];
+	}
+      }
+    } else {
+      // empty cluster -- ignore
+      if (clusterTotals[lev] == 0) {
+	current[lev] = -1; // cluster ignored
+	mapClasses(lev+1, counts, clusterTotals, current, best,
+		   error);
+      } else {
+	// first try no class assignment to this cluster
+	current[lev] = -1; // cluster assigned no class (ie all errors)
+	mapClasses(lev+1, counts, clusterTotals, current, best,
+		   error+clusterTotals[lev]);
+	// now loop through the classes in this cluster
+	for (int i = 0; i < counts[0].length; i++) {
+	  if (counts[lev][i] > 0) {
+	    boolean ok = true;
+	    // check to see if this class has already been assigned
+	    for (int j = 0; j < lev; j++) {
+	      if ((int)current[j] == i) {
+		ok = false;
+		break;
+	      }
+	    }
+	    if (ok) {
+	      current[lev] = i;
+	      mapClasses(lev+1, counts, clusterTotals, current, best, 
+			 (error + (clusterTotals[lev] - counts[lev][i])));
+	    }
+	  }
+	}
+      }
     }
   }
 
@@ -266,7 +461,8 @@ public class ClusterEvaluation {
    * @exception Exception if model could not be evaluated successfully
    * @return a string describing the results 
    */
-  public static String evaluateClusterer (Clusterer clusterer, String[] options)
+  public static String evaluateClusterer (Clusterer clusterer, 
+					  String[] options)
     throws Exception
   {
     int seed = 1, folds = 10;
@@ -280,6 +476,7 @@ public class ClusterEvaluation {
     ObjectInputStream objectInputStream = null;
     ObjectOutputStream objectOutputStream = null;
     StringBuffer text = new StringBuffer();
+    int theClass = -1; // class based evaluation of clustering
 
     try {
       if (Utils.getFlag('h', options)) {
@@ -332,6 +529,37 @@ public class ClusterEvaluation {
     try {
       if (trainFileName.length() != 0) {
 	train = new Instances(new FileReader(trainFileName));
+
+	String classString = Utils.getOption('c',options);
+	if (classString.length() != 0) {
+	  if (classString.compareTo("last") == 0) {
+	    theClass = train.numAttributes();
+	  } else if (classString.compareTo("first") == 0) {
+	    theClass = 1;
+	  } else {
+	    theClass = Integer.parseInt(classString);
+	  }
+	  if (doXval || testFileName.length() != 0) {
+	    throw new Exception("Can only do class based evaluation on the "
+				+"training data");
+	  }
+	  
+	  if (objectInputFileName.length() != 0) {
+	    throw new Exception("Can't load a clusterer and do class based "
+				+"evaluation");
+	  }
+	}
+
+	if (theClass != -1) {
+	  if (theClass < 1 
+	      || theClass > train.numAttributes()) {
+	    throw new Exception("Class is out of range!");
+	  }
+	  if (!train.attribute(theClass-1).isNominal()) {
+	    throw new Exception("Class must be nominal!");
+	  }
+	  train.setClassIndex(theClass-1);
+	}
       }
 
       if (objectInputFileName.length() != 0) {
@@ -344,7 +572,7 @@ public class ClusterEvaluation {
       }
     }
     catch (Exception e) {
-      throw  new Exception("Can't open file " + e.getMessage() + '.');
+      throw  new Exception("ClusterEvaluation: " + e.getMessage() + '.');
     }
 
     // Save options
@@ -371,7 +599,20 @@ public class ClusterEvaluation {
     }
     else {
       // Build the clusterer if no object file provided
-      clusterer.buildClusterer(train);
+      if (theClass == -1) {
+	clusterer.buildClusterer(train);
+      } else {
+	AttributeFilter removeClass = new AttributeFilter();
+	removeClass.setAttributeIndices(""+theClass);
+	removeClass.setInvertSelection(false);
+	removeClass.inputFormat(train);
+	Instances clusterTrain = Filter.useFilter(train, removeClass);
+	clusterer.buildClusterer(clusterTrain);
+	ClusterEvaluation ce = new ClusterEvaluation();
+	ce.setClusterer(clusterer);
+	ce.evaluateClusterer(train);
+	return ce.clusterResultsToString();
+      }
     }
 
     /* Output cluster predictions only (for the test data if specified,
@@ -698,6 +939,10 @@ public class ClusterEvaluation {
     optionsText.append("\tOnly Distribution Clusterers can be cross " 
 		       + "validated.\n");
     optionsText.append("-s <random number seed>\n");
+    optionsText.append("-c <class index>\n");
+    optionsText.append("\tSet class attribute. If supplied, class is ignored");
+    optionsText.append("\n\tduring clustering but is used in a classes to");
+    optionsText.append("\n\tclusters evaluation.\n");
 
     // Get scheme-specific options
     if (clusterer instanceof OptionHandler) {
