@@ -298,7 +298,7 @@ public class PrincipalComponents extends AttributeTransformer {
    * Transform an instance in original (unormalized) format.
    * @param instance an instance in the original (unormalized) format
    * @return a transformed instance
-   * @exception if instance cant be transformed
+   * @exception Exception if instance cant be transformed
    */
   public Instance convertInstance(Instance instance) throws Exception {
 
