@@ -26,6 +26,8 @@ package weka.experiment;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.net.InetAddress;
+import java.net.URLClassLoader;
+import java.net.URL;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
@@ -35,7 +37,7 @@ import weka.core.Queue;
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RemoteEngine extends UnicastRemoteObject
   implements Compute {
@@ -160,6 +162,7 @@ public class RemoteEngine extends UnicastRemoteObject
    * currently running starts a waiting task.
    */
   private void startTask() {
+
     if (m_TaskRunning == false && m_TaskQueue.size() > 0) {
       Thread activeTaskThread;
       activeTaskThread = new Thread() {
@@ -187,6 +190,7 @@ public class RemoteEngine extends UnicastRemoteObject
 				   +") : task failed.");
 	      System.err.println("Task id " + taskId + "Failed!");
 	    } finally {
+	      purgeClasses();
 	      m_TaskRunning = false;
 	      // start any waiting tasks
 	      startTask();
@@ -195,6 +199,23 @@ public class RemoteEngine extends UnicastRemoteObject
 	};
       activeTaskThread.setPriority(Thread.MIN_PRIORITY);
       activeTaskThread.start();
+    }
+  }
+
+  /**
+   * Attempts to purge class types from the virtual machine. May take some
+   * time as it relies on garbage collection
+   */
+  private void purgeClasses() {
+    try {
+      // see if we can purge classes
+      ClassLoader prevCl = 
+	Thread.currentThread().getContextClassLoader();
+      ClassLoader urlCl = 
+	URLClassLoader.newInstance(new URL[] {new URL("file:.")}, prevCl);
+      Thread.currentThread().setContextClassLoader(urlCl);
+    } catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
   

@@ -7,6 +7,11 @@
 
 grant {
 
+  /* allow the remote engine to replace the context class loader. */
+  /* This enables the unloading of types from the remote engine */
+  permission java.lang.RuntimePermission
+	     "setContextClassLoader";
+
 /* file permission for data sets */
   permission java.io.FilePermission
 	     "/path_to_data_sets/-", "read";
