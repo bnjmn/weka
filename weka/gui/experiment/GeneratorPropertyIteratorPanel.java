@@ -59,7 +59,7 @@ import java.beans.PropertyChangeEvent;
  * resultgenerator property for an experiment to iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class GeneratorPropertyIteratorPanel extends JPanel
   implements ActionListener {
@@ -150,6 +150,7 @@ public class GeneratorPropertyIteratorPanel extends JPanel
     
     final PropertySelectorDialog jd = new PropertySelectorDialog(null,
 					  m_Exp.getResultProducer());
+    jd.setLocationRelativeTo(this);
     int result = jd.showDialog();
     if (result == PropertySelectorDialog.APPROVE_OPTION) {
       System.err.println("Property Selected");

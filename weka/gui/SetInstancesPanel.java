@@ -48,7 +48,7 @@ import javax.swing.BorderFactory;
  * lets the user open a set of instances from either a file or URL.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SetInstancesPanel extends JPanel {
   
@@ -69,7 +69,7 @@ public class SetInstancesPanel extends JPanel {
   protected JFileChooser m_FileChooser = new JFileChooser();
 
   /** Stores the last URL that instances were loaded from */
-  protected String m_LastURL = "";
+  protected String m_LastURL = "http://";
 
   /** The thread we do loading in */
   protected Thread m_IOThread;
@@ -202,8 +202,8 @@ public class SetInstancesPanel extends JPanel {
       r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
-				    "Problem with file:\n"
-				    + ex.getMessage(),
+				    "Couldn't read from file:\n"
+				    + f.getName(),
 				    "Load Instances",
 				    JOptionPane.ERROR_MESSAGE);
     }
@@ -222,8 +222,8 @@ public class SetInstancesPanel extends JPanel {
       r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
-				    "Problem with URL:\n"
-				    + ex.getMessage(),
+				    "Couldn't read from URL:\n"
+				    + u,
 				    "Load Instances",
 				    JOptionPane.ERROR_MESSAGE);
     }

@@ -69,7 +69,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -114,7 +114,7 @@ public class PreprocessPanel extends JPanel {
   protected JFileChooser m_FileChooser = new JFileChooser();
 
   /** Stores the last URL that instances were loaded from */
-  protected String m_LastURL = "";
+  protected String m_LastURL = "http://";
   
   /** The unadulterated instances */
   protected Instances m_BaseInstances;
@@ -154,6 +154,7 @@ public class PreprocessPanel extends JPanel {
       .setToolTipText("Replace the base relation with the working relation");
     m_ApplyBut.setToolTipText("Update working relation with current filters");
     m_SaveBut.setToolTipText("Save the working relation to a file");
+    m_Filters.setToolTipText("Edit a list of filters to transform instances");
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -585,7 +586,12 @@ public class PreprocessPanel extends JPanel {
       setBaseInstances(new Instances(r));
       r.close();
     } catch (Exception ex) {
-      m_Log.logMessage(ex.getMessage());
+      m_Log.statusMessage("Problem reading " + f.getName());
+      JOptionPane.showMessageDialog(this,
+				    "Couldn't read from file:\n"
+				    + f.getName(),
+				    "Load Instances",
+				    JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -602,7 +608,12 @@ public class PreprocessPanel extends JPanel {
       setBaseInstances(new Instances(r));
       r.close();
     } catch (Exception ex) {
-      m_Log.logMessage(ex.getMessage());
+      m_Log.statusMessage("Problem reading " + u);
+      JOptionPane.showMessageDialog(this,
+				    "Couldn't read from URL:\n"
+				    + u,
+				    "Load Instances",
+				    JOptionPane.ERROR_MESSAGE);
     }
   }
   
