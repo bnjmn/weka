@@ -35,13 +35,14 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * Produces a random subsample of a dataset. The original dataset must
- * fit entirely in memory. The number of instances in the generated
- * dataset may be specified. The dataset must have a nominal class
- * attribute. If not, use the unsupervised version. The filter can be
- * made to maintain the class distribution in the subsample, or to bias
- * the class distribution toward a uniform distribution. When used in batch
- * mode, subsequent batches are <b>not</b> resampled.
+ * Produces a random subsample of a dataset using sampling with
+ * replacement. The original dataset must fit entirely in memory. The
+ * number of instances in the generated dataset may be specified. The
+ * dataset must have a nominal class attribute. If not, use the
+ * unsupervised version. The filter can be made to maintain the class
+ * distribution in the subsample, or to bias the class distribution
+ * toward a uniform distribution. When used in batch mode, subsequent
+ * batches are <b>not</b> resampled.
  *
  * Valid options are:<p>
  *
@@ -57,8 +58,9 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.3 $ 
- **/
+ * @version $Revision: 1.4 $ 
+ *
+ */
 public class Resample extends Filter implements SupervisedFilter,
 						OptionHandler {
 
@@ -82,7 +84,8 @@ public class Resample extends Filter implements SupervisedFilter,
    */
   public String globalInfo() {
 
-    return "Produces a random subsample of a dataset. The original dataset must "
+    return "Produces a random subsample of a dataset using sampling with replacement."
+      + "The original dataset must "
       + "fit entirely in memory. The number of instances in the generated "
       + "dataset may be specified. The dataset must have a nominal class "
       + "attribute. If not, use the unsupervised version. The filter can be "
@@ -409,19 +412,18 @@ public class Resample extends Filter implements SupervisedFilter,
       int index = 0;
       if (random.nextDouble() < m_BiasToUniformClass) {
 	// Pick a random class (of those classes that actually appear)
-	int cIndex = Math.abs(random.nextInt()) % actualClasses;
+	int cIndex = random.nextInt(actualClasses);
 	for (int j = 0, k = 0; j < classIndices.length - 1; j++) {
 	  if ((classIndices[j] != classIndices[j + 1]) 
 	      && (k++ >= cIndex)) {
 	    // Pick a random instance of the designated class
 	    index = classIndices[j] 
-	      + (Math.abs(random.nextInt()) % (classIndices[j + 1]
-					       - classIndices[j]));
+	      + random.nextInt(classIndices[j + 1] - classIndices[j]);
 	    break;
 	  }
 	}
       } else {
-	index = (int) (random.nextDouble() * origSize);
+	index = random.nextInt(origSize);
       }
       push((Instance)getInputFormat().instance(index).copy());
     }
