@@ -36,7 +36,7 @@ import weka.core.OptionHandler;
  * and should not be used by itself.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
@@ -331,7 +331,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
             + " is learned. By setting it to a value much larger than the number of nodes"
             + " in the network (the default of 100000 pretty much guarantees this), no"
             + " restriction on the number of parents is enforced";
-    }
+    } // maxNrOfParentsTipText
 
     /**
      * @return a string to describe the InitAsNaiveBayes option.
@@ -341,15 +341,15 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
             + " is a Naive Bayes Network, that is, a network with an arrow from the classifier"
             + " node to each other node. When set to false, an empty network is used as initial"
             + " network structure";
-    }
+    } // initAsNaiveBayesTipText
 
     /**
      * @return a string to describe the MarkovBlanketClassifier option.
      */
-    public String initMarkovBlanketClassifier() {
+    public String markovBlanketClassifierTipText() {
         return "When set to true (default is false), after a network structure is learned"
             + " a Markov Blanket correction is applied to the network structure. This ensures"
             + " that all nodes in the network are part of the Markov blanket of the classifier"
             + " node.";
-    }
+    } // markovBlanketClassifierTipText
 } // class SearchAlgorithm

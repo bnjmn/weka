@@ -19,7 +19,7 @@
  * Copyright (C) 2001 Remco Bouckaert
  * 
  */
-package weka.classifiers.bayes.net.search.cv;
+package weka.classifiers.bayes.net.search.global;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -39,9 +39,9 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
-public class SearchAlgorithmK2 extends CVSearchAlgorithm {
+public class K2 extends GlobalScoreSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
 	boolean m_bRandomOrder = false;
 
@@ -84,7 +84,7 @@ public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 		}
 
 		// determine base scores
-		double fBaseScore = performCV(bayesNet);
+		double fBaseScore = calcScore(bayesNet);
 
 		// K2 algorithm: greedy search restricted by ordering 
 		for (int iOrder = 1; iOrder < instances.numAttributes(); iOrder++) {
@@ -96,7 +96,7 @@ public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 				int nBestAttribute = -1;
 				for (int iOrder2 = 0; iOrder2 < iOrder; iOrder2++) {
 					int iAttribute2 = nOrder[iOrder2];
-					double fScore = performCVWithExtraParent(iAttribute, iAttribute2);
+					double fScore = calcScoreWithExtraParent(iAttribute, iAttribute2);
 					if (fScore > fBestScore) {
 						fBestScore = fScore;
 						nBestAttribute = iAttribute2;

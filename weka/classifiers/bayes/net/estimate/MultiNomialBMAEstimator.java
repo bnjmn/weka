@@ -7,7 +7,7 @@ import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.Statistics;
 import weka.estimators.Estimator;
-import weka.classifiers.bayes.net.search.score.SearchAlgorithmK2;
+import weka.classifiers.bayes.net.search.local.K2;
 
 public class MultiNomialBMAEstimator extends BayesNetEstimator {
 
@@ -58,7 +58,7 @@ public class MultiNomialBMAEstimator extends BayesNetEstimator {
         // now learn the empty and tree network
 
         BayesNet EmptyNet = new BayesNet();
-        SearchAlgorithmK2 oSearchAlgorithm = new SearchAlgorithmK2();
+        K2 oSearchAlgorithm = new K2();
         oSearchAlgorithm.setInitAsNaiveBayes(false);
         oSearchAlgorithm.setMaxNrOfParents(0);
         EmptyNet.setSearchAlgorithm(oSearchAlgorithm);

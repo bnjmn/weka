@@ -20,31 +20,37 @@
  * 
  */
 
-package weka.classifiers.bayes.net.search.cv;
+package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.classifiers.bayes.net.search.*;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Tag;
-import weka.core.SelectedTag;
+import weka.core.*;
+import java.util.Vector;
+import java.util.Enumeration;
 
 /** The CVSearchAlgorithm class supports Bayes net structure search algorithms
  * that are based on cross validation (as opposed to for example
  * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
-public class CVSearchAlgorithm extends SearchAlgorithm {
+public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
+	
+	/** points to Bayes network for which a structure is searched for **/
 	BayesNet m_BayesNet;
-	boolean m_bUseProb = false;
+	
+	/** toggle between scoring using accuracy = 0-1 loss (when false) or class probabilities (when true) **/
+	boolean m_bUseProb = true;
+	
+	/** number of folds for k-fold cross validation **/
 	int m_nNrOfFolds = 10;
 
+	/** constants for score types **/
 	final static int LOOCV = 0;
-	final static int CUMCV = 2;
 	final static int KFOLDCV = 1;
+	final static int CUMCV = 2;
 
 	public static final Tag[] TAGS_CV_TYPE =
 		{
@@ -57,8 +63,6 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 	 */
 	int m_nCVType = LOOCV;
 
-
-
 	/**
 	 * performCV returns the accuracy calculated using cross validation.  
 	 * The dataset used is m_Instances associated with the Bayes Network.
@@ -66,7 +70,7 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 	 * @return accuracy (in interval 0..1) measured using cv.
 	 * @throws Exception whn m_nCVType is invalided + exceptions passed on by updateClassifier
 	 */
-	public double performCV(BayesNet bayesNet) throws Exception {
+	public double calcScore(BayesNet bayesNet) throws Exception {
 		switch (m_nCVType) {
 			case LOOCV: 
 				return leaveOneOutCV(bayesNet);
@@ -77,16 +81,16 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 			default:
 				throw new Exception("Unrecognized cross validation type encountered: " + m_nCVType);
 		}
-	} // performCV
+	} // calcScore
 
 	/**
-	 * Calc Node Score With AddedParent
+	 * Calc Node Score With Added Parent
 	 * 
 	 * @param nNode node for which the score is calculate
 	 * @param nCandidateParent candidate parent to add to the existing parent set
 	 * @return log score
 	 */
-	public double performCVWithExtraParent(int nNode, int nCandidateParent) throws Exception {
+	public double calcScoreWithExtraParent(int nNode, int nCandidateParent) throws Exception {
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
 		Instances instances = m_BayesNet.m_Instances;
 
@@ -107,13 +111,83 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 		oParentSet.addParent(nCandidateParent, instances);
 
 		// calculate the score
-		double fAccuracy = performCV(m_BayesNet);
+		double fAccuracy = calcScore(m_BayesNet);
 
 		// delete temporarily added parent
 		oParentSet.deleteLastParent(instances);
 
 		return fAccuracy;
-	} // performCVWithExtraParent
+	} // calcScoreWithExtraParent
+
+
+	/**
+	 * Calc Node Score With Parent Deleted
+	 * 
+	 * @param nNode node for which the score is calculate
+	 * @param nCandidateParent candidate parent to delete from the existing parent set
+	 * @return log score
+	 */
+	public double calcScoreWithMissingParent(int nNode, int nCandidateParent) throws Exception {
+		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
+		Instances instances = m_BayesNet.m_Instances;
+
+		// sanity check: nCandidateParent should be in parent set already
+		if (!oParentSet.contains( nCandidateParent)) {
+				return -1e100;
+		}
+
+		// set up candidate parent
+		int iParent = oParentSet.deleteParent(nCandidateParent, instances);
+
+		// determine cardinality of parent set & reserve space for frequency counts
+		int nCardinality = oParentSet.getCardinalityOfParents();
+		int numValues = instances.attribute(nNode).numValues();
+		int [][] nCounts = new int[nCardinality][numValues];
+
+		// calculate the score
+		double fAccuracy = calcScore(m_BayesNet);
+
+		// reinsert temporarily deleted parent
+		oParentSet.addParent(nCandidateParent, iParent, instances);
+
+		return fAccuracy;
+	} // calcScoreWithMissingParent
+
+	/**
+	 * Calc Node Score With Arrow reversed
+	 * 
+	 * @param nNode node for which the score is calculate
+	 * @param nCandidateParent candidate parent to delete from the existing parent set
+	 * @return log score
+	 */
+	public double calcScoreWithReversedParent(int nNode, int nCandidateParent) throws Exception {
+		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
+		ParentSet oParentSet2 = m_BayesNet.getParentSet(nCandidateParent);
+		Instances instances = m_BayesNet.m_Instances;
+
+		// sanity check: nCandidateParent should be in parent set already
+		if (!oParentSet.contains( nCandidateParent)) {
+				return -1e100;
+		}
+
+		// set up candidate parent
+		int iParent = oParentSet.deleteParent(nCandidateParent, instances);
+		oParentSet2.addParent(nNode, instances);
+
+		// determine cardinality of parent set & reserve space for frequency counts
+		int nCardinality = oParentSet.getCardinalityOfParents();
+		int numValues = instances.attribute(nNode).numValues();
+		int [][] nCounts = new int[nCardinality][numValues];
+
+		// calculate the score
+		double fAccuracy = calcScore(m_BayesNet);
+
+		// restate temporarily reversed arrow
+		oParentSet2.deleteLastParent(instances);
+		oParentSet.addParent(nCandidateParent, iParent, instances);
+
+		return fAccuracy;
+	} // calcScoreWithReversedParent
 
 	/**
 	 * LeaveOneOutCV returns the accuracy calculated using Leave One Out
@@ -265,6 +339,90 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 	public SelectedTag getCVType() {
 		return new SelectedTag(m_nCVType, TAGS_CV_TYPE);
 	} // getCVType
+
+	/**
+	 * Returns an enumeration describing the available options
+	 * 
+	 * @return an enumeration of all the available options
+	 */
+	public Enumeration listOptions() {
+		Vector newVector = new Vector(2);
+
+		newVector.addElement(
+			new Option(
+				"\tScore type (LOO-CV,k-Fold-CV,Cumulative-CV)\n",
+				"S",
+				1,
+				"-S [LOO-CV|k-Fold-CV|Cumulative-CV]"));
+
+		newVector.addElement(new Option("\tUse probabilistic scoring.\n\t(default true)", "P", 0, "-P"));
+
+		Enumeration enum = super.listOptions();
+		while (enum.hasMoreElements()) {
+			newVector.addElement(enum.nextElement());
+		}
+		return newVector.elements();
+	} // listOptions
+
+	/**
+	 * Parses a given list of options. Valid options are:<p>
+	 *
+	 * For other options see search algorithm.
+	 *
+	 * @param options the list of options as an array of strings
+	 * @exception Exception if an option is not supported
+	 */
+	public void setOptions(String[] options) throws Exception {
+
+		String sScore = Utils.getOption('S', options);
+
+		if (sScore.compareTo("LOO-CV") == 0) {
+			setCVType(new SelectedTag(LOOCV, TAGS_CV_TYPE));
+		}
+		if (sScore.compareTo("k-Fold-CV") == 0) {
+			setCVType(new SelectedTag(KFOLDCV, TAGS_CV_TYPE));
+		}
+		if (sScore.compareTo("Cumulative-CV") == 0) {
+			setCVType(new SelectedTag(CUMCV, TAGS_CV_TYPE));
+		}
+		setUseProb(Utils.getFlag('P', options));		
+		super.setOptions(options);
+	} // setOptions
+
+	/**
+	 * Gets the current settings of the search algorithm.
+	 *
+	 * @return an array of strings suitable for passing to setOptions
+	 */
+	public String[] getOptions() {
+		String[] superOptions = super.getOptions();
+		String[] options = new String[3 + superOptions.length];
+		int current = 0;
+
+		options[current++] = "-S";
+
+		switch (m_nCVType) {
+			case (LOOCV) :
+				options[current++] = "LOO-CV";
+				break;
+			case (KFOLDCV) :
+				options[current++] = "k-Fold-CV";
+				break;
+			case (CUMCV) :
+				options[current++] = "Cumulative-CV";
+				break;
+		}
+		
+		if (getUseProb()) {
+		  options[current++] = "-P";
+		}
+
+		// Fill up rest with empty strings, not nulls!
+		while (current < options.length) {
+			options[current++] = "";
+		}
+		return options;
+	} // getOptions
 
 	/**
 	 * @return a string to describe the CVType option.

@@ -20,7 +20,7 @@
  * 
  */
  
-package weka.classifiers.bayes.net.search.score;
+package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.core.*;
@@ -36,10 +36,10 @@ import java.util.*;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.4 $
+ * Version: $Revision: 1.1 $
  */
 
-public class SimulatedAnnealing extends ScoreSearchAlgorithm {
+public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 
     /** start temperature **/
 	double m_fTStart = 10;
@@ -53,17 +53,18 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 	/** use the arc reversal operator **/
 	boolean m_bUseArcReversal = false;
 
+	/** random number seed **/
+	int m_nSeed = 1;
+
+	/** random number generator **/
+	Random m_random;
+
     public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
         super.buildStructure(bayesNet, instances);
-        Random random = new Random();
-
+		m_random = new Random(m_nSeed);
+		
         // determine base scores
-        double [] fBaseScores = new double [instances.numAttributes()];
-		double fCurrentScore = 0;
-        for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            fBaseScores[iAttribute] = calcNodeScore(iAttribute);
-			fCurrentScore += fBaseScores[iAttribute];
-        }
+		double fCurrentScore = calcScore(bayesNet);
 
 		// keep track of best scoring network
 		double fBestScore = fCurrentScore;
@@ -78,22 +79,21 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
             double fDeltaScore = 0.0;
             while (!bRunSucces) {
 	            // pick two nodes at random
-	            int iTailNode = Math.abs(random.nextInt()) % instances.numAttributes();
-	            int iHeadNode = Math.abs(random.nextInt()) % instances.numAttributes();
+	            int iTailNode = Math.abs(m_random.nextInt()) % instances.numAttributes();
+	            int iHeadNode = Math.abs(m_random.nextInt()) % instances.numAttributes();
 	            while (iTailNode == iHeadNode) {
-		            iHeadNode = Math.abs(random.nextInt()) % instances.numAttributes();
+		            iHeadNode = Math.abs(m_random.nextInt()) % instances.numAttributes();
 	            }
 	            if (isArc(bayesNet, iHeadNode, iTailNode)) {
                     bRunSucces = true;
 	                // either try a delete
                     bayesNet.getParentSet(iHeadNode).deleteParent(iTailNode, instances);
-                    double fScore = calcNodeScore(iHeadNode);
-                    fDeltaScore = fScore - fBaseScores[iHeadNode];
+                    double fScore = calcScore(bayesNet);
+                    fDeltaScore = fScore - fCurrentScore;
 //System.out.println("Try delete " + iTailNode + "->" + iHeadNode + " dScore = " + fDeltaScore);                    
-                    if (fTemp * Math.log((Math.abs(random.nextInt()) % 10000)/10000.0  + 1e-100) < fDeltaScore) {
+                    if (fTemp * Math.log((Math.abs(m_random.nextInt()) % 10000)/10000.0  + 1e-100) < fDeltaScore) {
 //System.out.println("success!!!");                    
-						fCurrentScore += fDeltaScore;
-                        fBaseScores[iHeadNode] = fScore;
+						fCurrentScore = fScore;
                     } else {
                         // roll back
                         bayesNet.getParentSet(iHeadNode).addParent(iTailNode, instances);
@@ -103,13 +103,12 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 	                if (addArcMakesSense(bayesNet, instances, iHeadNode, iTailNode)) {
                         bRunSucces = true;
                         double fScore = calcScoreWithExtraParent(iHeadNode, iTailNode);
-                        fDeltaScore = fScore - fBaseScores[iHeadNode];
+                        fDeltaScore = fScore - fCurrentScore;
 //System.out.println("Try add " + iTailNode + "->" + iHeadNode + " dScore = " + fDeltaScore);                    
-                        if (fTemp * Math.log((Math.abs(random.nextInt()) % 10000)/10000.0  + 1e-100) < fDeltaScore) {
+                        if (fTemp * Math.log((Math.abs(m_random.nextInt()) % 10000)/10000.0  + 1e-100) < fDeltaScore) {
 //System.out.println("success!!!");                    
                             bayesNet.getParentSet(iHeadNode).addParent(iTailNode, instances);
-                            fBaseScores[iHeadNode] = fScore;
-							fCurrentScore += fDeltaScore;
+							fCurrentScore = fScore;
                         }
 	                }
 	            }
@@ -181,6 +180,21 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
     }
 
 	/**
+	* @return random number seed
+	*/
+	public int getSeed() {
+		return m_nSeed;
+	} // getSeed
+
+	/**
+	 * Sets the random number seed
+	 * @param nSeed The number of the seed to set
+	 */
+	public void setSeed(int nSeed) {
+		m_nSeed = nSeed;
+	} // setSeed
+
+	/**
 	 * Returns an enumeration describing the available options.
 	 *
 	 * @return an enumeration of all the available options.
@@ -191,6 +205,7 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 		newVector.addElement(new Option("\tStart temperature\n", "A", 1, "-A <float>"));
 		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
 		newVector.addElement(new Option("\tDelta temperature\n", "D", 1, "-D <float>"));
+		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
 
 		Enumeration enum = super.listOptions();
 		while (enum.hasMoreElements()) {
@@ -220,6 +235,10 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 		if (sDelta.length() != 0) {
 			setDelta(Double.parseDouble(sDelta));
 		}
+		String sSeed = Utils.getOption('R', options);
+		if (sSeed.length() != 0) {
+			setSeed(Integer.parseInt(sSeed));
+		}
 		super.setOptions(options);
 	}
 
@@ -230,7 +249,7 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 	 */
 	public String[] getOptions() {
 		String[] superOptions = super.getOptions();
-		String[] options = new String[6 + superOptions.length];
+		String[] options = new String[8 + superOptions.length];
 		int current = 0;
 		options[current++] = "-A";
 		options[current++] = "" + getTStart();
@@ -240,6 +259,9 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 
 		options[current++] = "-D";
 		options[current++] = "" + getDelta();
+
+		options[current++] = "-R";
+		options[current++] = "" + getSeed();
 
 		// insert options from parent class
 		for (int iOption = 0; iOption < superOptions.length; iOption++) {
@@ -252,6 +274,47 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 		}
 		return options;
 	}
+
+	/**
+	 * This will return a string describing the classifier.
+	 * @return The string.
+	 */
+	public String globalInfo() {
+		return "This Bayes Network learning algorithm uses the general purpose search method " +
+		"of simulated annealing to find a well scoring network structure.";
+	} // globalInfo
+	
+	/**
+	 * @return a string to describe the TStart option.
+	 */
+	public String TStartTipText() {
+	  return "Sets the start temperature of the simulated annealing search. "+
+	  "The start temperature determines the probability that a step in the 'wrong' direction in the " +
+	  "search space is accepted. The higher the temperature, the higher the probability of acceptance.";
+	} // TStartTipText
+
+	/**
+	 * @return a string to describe the Runs option.
+	 */
+	public String runsTipText() {
+	  return "Sets the number of iterations to be performed by the simulated annealing search.";
+	} // runsTipText
+	
+	/**
+	 * @return a string to describe the Delta option.
+	 */
+	public String deltaTipText() {
+	  return "Sets the factor with which the temperature (and thus the acceptance probability of " +
+	  	"steps in the wrong direction in the search space) is decreased in each iteration.";
+	} // deltaTipText
+
+	/**
+	 * @return a string to describe the Seed option.
+	 */
+	public String seedTipText() {
+	  return "Initialization value for random number generator." +
+	  " Setting the seed allows replicability of experiments.";
+	} // seedTipText
 
 } // SimulatedAnnealing
 

@@ -19,7 +19,7 @@
  * Copyright (C) 2001 Remco Bouckaert
  * 
  */
-package weka.classifiers.bayes.net.search.score;
+package weka.classifiers.bayes.net.search.local;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -39,9 +39,9 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
-public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
+public class K2 extends LocalScoreSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
 	boolean m_bRandomOrder = false;
 
@@ -254,6 +254,15 @@ public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 	}
 
 	/**
+	 * This will return a string describing the search algorithm.
+	 * @return The string.
+	 */
+	public String globalInfo() {
+	  return "This Bayes Network learning algorithm uses a hill climbing algorithm" +
+	  " restricted by an order on the variables";
+	}
+
+	/**
 	 * @return a string to describe the RandomOrder option.
 	 */
 	public String randomOrderTipText() {
@@ -264,13 +273,5 @@ public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 	  " class variable is first in the ordering though.";
 	} // randomOrderTipText
 
-	/**
-	 * This will return a string describing the search algorithm.
-	 * @return The string.
-	 */
-	public String globalInfo() {
-	  return "This Bayes Network learning algorithm uses a hill climbing algorithm" +
-	  " restricted by an order on the variables";
-	}
   
 } // class SearchAlgorithmK2 

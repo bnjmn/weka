@@ -20,7 +20,7 @@
  * 
  */
  
-package weka.classifiers.bayes.net.search.score;
+package weka.classifiers.bayes.net.search.local;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
@@ -41,18 +41,20 @@ import java.util.Enumeration;
  * conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
-public class ScoreSearchAlgorithm extends SearchAlgorithm {
+public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
+
+	/** points to Bayes network for which a structure is searched for **/
 	BayesNet m_BayesNet;
-	Instances m_Instances;
+//	Instances m_Instances;
 	
-	public ScoreSearchAlgorithm() {
+	public LocalScoreSearchAlgorithm() {
 	} // c'tor
 	
-	public ScoreSearchAlgorithm(BayesNet bayesNet, Instances instances) {
+	public LocalScoreSearchAlgorithm(BayesNet bayesNet, Instances instances) {
 		m_BayesNet = bayesNet;
-		m_Instances = instances;
+//		m_Instances = instances;
 	} // c'tor
 	
 	/**
@@ -87,8 +89,10 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
         }
 
         double fLogScore = 0.0;
+        
+        Instances instances = m_BayesNet.m_Instances;
 
-        for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+        for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
             for (int iParent = 0; iParent < m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents(); iParent++) {
                 fLogScore += ((Scoreable) m_BayesNet.m_Distributions[iAttribute][iParent]).logScore(nType);
             }
@@ -98,14 +102,14 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
                     {
                         fLogScore -= 0.5
                             * m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents()
-                            * (m_Instances.attribute(iAttribute).numValues() - 1)
-                            * Math.log(m_Instances.numInstances());
+                            * (instances.attribute(iAttribute).numValues() - 1)
+                            * Math.log(instances.numInstances());
                     }
                     break;
                 case (Scoreable.AIC) :
                     {
                         fLogScore -= m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents()
-                            * (m_Instances.attribute(iAttribute).numValues() - 1);
+                            * (instances.attribute(iAttribute).numValues() - 1);
                     }
                     break;
             }
@@ -121,7 +125,6 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	*/
 	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
 		m_BayesNet = bayesNet;
-		m_Instances = instances;
 		super.buildStructure(bayesNet, instances);
 	} // buildStructure
 
@@ -134,9 +137,9 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	 */
 	public double calcNodeScore(int nNode) {
 		if (m_BayesNet.getUseADTree() && m_BayesNet.getADTree() != null) {
-			return calcNodeScoreADTree(nNode, m_Instances);
+			return calcNodeScoreADTree(nNode);
 		} else {
-			return calcNodeScore(nNode, m_Instances);
+			return calcNodeScorePlain(nNode);
 		}
 	}
 
@@ -146,7 +149,8 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	 * @param instances used to calculate score with
 	 * @return log score
 	 */
-	private double calcNodeScoreADTree(int nNode, Instances instances) {
+	private double calcNodeScoreADTree(int nNode) {
+		Instances instances = m_BayesNet.m_Instances;
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
 		// get set of parents, insert iNode
 		int nNrOfParents = oParentSet.getNrOfParents();
@@ -191,7 +195,8 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 		return calcScoreOfCounts(nCounts, nCardinality, numValues, instances);
 	} // CalcNodeScore
 
-	private double calcNodeScore(int nNode, Instances instances) {
+	private double calcNodeScorePlain(int nNode) {
+		Instances instances = m_BayesNet.m_Instances;
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
 
 		// determine cardinality of parent set & reserve space for frequency counts
@@ -447,18 +452,18 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 		}
 
 		// set up candidate parent
-		oParentSet.addParent(nCandidateParent, m_Instances);
+		oParentSet.addParent(nCandidateParent, m_BayesNet.m_Instances);
 
 		// determine cardinality of parent set & reserve space for frequency counts
 		int nCardinality = oParentSet.getCardinalityOfParents();
-		int numValues = m_Instances.attribute(nNode).numValues();
+		int numValues = m_BayesNet.m_Instances.attribute(nNode).numValues();
 		int [][] nCounts = new int[nCardinality][numValues];
 
 		// calculate the score
 		double logScore = calcNodeScore(nNode);
 
 		// delete temporarily added parent
-		oParentSet.deleteLastParent(m_Instances);
+		oParentSet.deleteLastParent(m_BayesNet.m_Instances);
 
 		return logScore;
 	} // CalcScoreWithExtraParent
@@ -480,18 +485,18 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 		}
 
 		// set up candidate parent
-		oParentSet.deleteParent(nCandidateParent, m_Instances);
+		int iParent = oParentSet.deleteParent(nCandidateParent, m_BayesNet.m_Instances);
 
 		// determine cardinality of parent set & reserve space for frequency counts
 		int nCardinality = oParentSet.getCardinalityOfParents();
-		int numValues = m_Instances.attribute(nNode).numValues();
+		int numValues = m_BayesNet.m_Instances.attribute(nNode).numValues();
 		int [][] nCounts = new int[nCardinality][numValues];
 
 		// calculate the score
 		double logScore = calcNodeScore(nNode);
 
-		// delete temporarily added parent
-		oParentSet.addParent(nCandidateParent, m_Instances);
+		// restore temporarily deleted parent
+		oParentSet.addParent(nCandidateParent, iParent, m_BayesNet.m_Instances);
 
 		return logScore;
 	} // CalcScoreWithMissingParent
@@ -597,6 +602,6 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	public String scoreTypeTipText() {
 		return "The score type determines the measure used to judge the quality of a"
 			+ " network structure. It can be one of Bayes, BDeu, Minimum Description Length (MDL),"
-			+ " Akaike Information Criterion (AIC), Entropy, classic and Bayes cross validation.";
+			+ " Akaike Information Criterion (AIC), and Entropy.";
 	}
 } // class ScoreBasedSearchAlgorithm

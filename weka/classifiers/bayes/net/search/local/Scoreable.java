@@ -20,7 +20,7 @@
  * Copyright (C) 2001 Remco Bouckaert
  * 
  */
-package weka.classifiers.bayes.net.search.score;
+package weka.classifiers.bayes.net.search.local;
 
 /**
  * Interface for allowing to score a classifier

@@ -20,9 +20,8 @@
  * 
  */
 
-package weka.classifiers.bayes.net.search.score;
+package weka.classifiers.bayes.net.search.local;
 
-import java.util.Vector;
 import java.util.Enumeration;
 
 import weka.classifiers.bayes.BayesNet;
@@ -34,10 +33,10 @@ import weka.core.Instances;
  *      Machine Learning, 29: 131--163, 1997
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1 $
  */
 
-public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
+public class TAN extends LocalScoreSearchAlgorithm {
 
 	/**
 	 * buildStructure determines the network structure/graph of the network
@@ -162,7 +161,7 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 	 * @return an enumeration of all the available options.
 	 */
 	public Enumeration listOptions() {
-	  return new Vector(1).elements();
+		return super.listOptions();
 	} // listOption
 
 	/**
@@ -188,8 +187,8 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 	 * @return The string.
 	 */
 	public String globalInfo() {
-	  return "This Bayes Network learning algorithm uses a hill climbing algorithm" +
-	  " and returns a Naive Bayes network augmented with a tree.";
-	}
+		return "This Bayes Network learning algorithm determines the maximum weight spanning tree " +
+		" and returns a Naive Bayes network augmented with a tree.";
+	} // globalInfo
 
-} // SearchAlgorithmTAN
+} // TAN

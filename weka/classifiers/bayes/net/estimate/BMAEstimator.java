@@ -23,7 +23,7 @@
  package weka.classifiers.bayes.net.estimate;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.net.search.score.SearchAlgorithmK2;
+import weka.classifiers.bayes.net.search.local.K2;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Statistics;
@@ -34,7 +34,7 @@ import weka.estimators.Estimator;
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class BMAEstimator extends SimpleEstimator {
@@ -55,7 +55,7 @@ public class BMAEstimator extends SimpleEstimator {
         }
 
         BayesNet EmptyNet = new BayesNet();
-        SearchAlgorithmK2 oSearchAlgorithm = new SearchAlgorithmK2();
+        K2 oSearchAlgorithm = new K2();
         oSearchAlgorithm.setInitAsNaiveBayes(false);
         oSearchAlgorithm.setMaxNrOfParents(0);
         EmptyNet.setSearchAlgorithm(oSearchAlgorithm);
