@@ -23,6 +23,7 @@ weka.experiment.SplitEvaluator=\
 
 # Lists the Classifiers I want to choose from
 weka.classifiers.Classifier=\
+ weka.classifiers.bayes.AODE,\
  weka.classifiers.bayes.BayesNetK2,\
  weka.classifiers.bayes.BayesNetB,\
  weka.classifiers.bayes.NaiveBayes,\
@@ -88,6 +89,7 @@ weka.classifiers.Classifier=\
 
 # Lists the DistributionClassifiers I want to choose from
 weka.classifiers.DistributionClassifier=\
+ weka.classifiers.bayes.AODE,\
  weka.classifiers.bayes.BayesNetK2,\
  weka.classifiers.bayes.BayesNetB,\
  weka.classifiers.bayes.NaiveBayes,\
