@@ -24,7 +24,7 @@ import weka.core.Utils;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Stats {
   
@@ -103,9 +103,15 @@ public class Stats {
     stdDev = Double.NaN;
     if (count > 0) {
       mean = sum / count;
+      stdDev = Double.POSITIVE_INFINITY;
       if (count > 1) {
 	stdDev = sumSq - (sum * sum) / count;
 	stdDev /= (count - 1);
+        if (stdDev < 0) {
+          System.err.println("Warning: stdDev value = " + stdDev 
+                             + " -- rounded to zero.");
+          stdDev = 0;
+        }
 	stdDev = Math.sqrt(stdDev);
       }
     }
