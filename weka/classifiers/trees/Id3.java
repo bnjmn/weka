@@ -36,7 +36,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class Id3 extends Classifier {
 
@@ -56,9 +56,8 @@ public class Id3 extends Classifier {
   private Attribute m_ClassAttribute;
 
   /**
-   * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
+   * Returns a string describing the classifier.
+   * @return a description suitable for the GUI.
    */
   public String globalInfo() {
 
@@ -78,21 +77,19 @@ public class Id3 extends Classifier {
    */
   public void buildClassifier(Instances data) throws Exception {
 
-
     if (!data.classAttribute().isNominal()) {
       throw new UnsupportedClassTypeException("Id3: nominal class, please.");
     }
     Enumeration enumAtt = data.enumerateAttributes();
     while (enumAtt.hasMoreElements()) {
-      Attribute attr = (Attribute) enumAtt.nextElement();
-      if (!attr.isNominal()) {
+      if (!((Attribute) enumAtt.nextElement()).isNominal()) {
         throw new UnsupportedAttributeTypeException("Id3: only nominal attributes, please.");
       }
-      Enumeration enum = data.enumerateInstances();
-      while (enum.hasMoreElements()) {
-        if (((Instance) enum.nextElement()).isMissing(attr)) {
-          throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
-        }
+    }
+    Enumeration enum = data.enumerateInstances();
+    while (enum.hasMoreElements()) {
+      if (((Instance) enum.nextElement()).hasMissingValue()) {
+	throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
       }
     }
     data = new Instances(data);
@@ -101,7 +98,7 @@ public class Id3 extends Classifier {
   }
 
   /**
-   * Method building Id3 tree.
+   * Method for building an Id3 tree.
    *
    * @param data the training data
    * @exception Exception if decision tree can't be built successfully
@@ -154,8 +151,12 @@ public class Id3 extends Classifier {
    * @param instance the instance to be classified
    * @return the classification
    */
-  public double classifyInstance(Instance instance) {
+  public double classifyInstance(Instance instance) 
+    throws NoSupportForMissingValuesException {
 
+    if (instance.hasMissingValue()) {
+      throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
+    }
     if (m_Attribute == null) {
       return m_ClassValue;
     } else {
@@ -170,8 +171,12 @@ public class Id3 extends Classifier {
    * @param instance the instance for which distribution is to be computed
    * @return the class distribution for the given instance
    */
-  public double[] distributionForInstance(Instance instance) {
+  public double[] distributionForInstance(Instance instance) 
+    throws NoSupportForMissingValuesException {
 
+    if (instance.hasMissingValue()) {
+      throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
+    }
     if (m_Attribute == null) {
       return m_Distribution;
     } else { 
@@ -273,7 +278,7 @@ public class Id3 extends Classifier {
       if (Instance.isMissingValue(m_ClassValue)) {
         text.append(": null");
       } else {
-        text.append(": "+m_ClassAttribute.value((int) m_ClassValue));
+        text.append(": " + m_ClassAttribute.value((int) m_ClassValue));
       } 
     } else {
       for (int j = 0; j < m_Attribute.numValues(); j++) {
