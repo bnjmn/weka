@@ -75,7 +75,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.6 $
  */
 public class AttributeSelection {
 
@@ -87,6 +87,7 @@ public class AttributeSelection {
    * @param options an array of options, not only for the evaluator
    * but also the search method (if any) and an input data file
    * @return the results of attribute selection as a String
+   * @exception Exception if no training file is set
    */
   public static String SelectAttributes (ASEvaluation ASEvaluator, 
 					 String[] options)
@@ -132,6 +133,7 @@ public class AttributeSelection {
    * @param options an array of options, not only for the evaluator
    * but also the search method (if any) and an input data file
    * @return the results of cross validation as a String
+   * @exception Exception if no class attribute is set for the data
    */
   public static String CrossValidateAttributes (ASEvaluation ASEvaluator, 
 						int[] initialSet, 
@@ -297,6 +299,7 @@ public class AttributeSelection {
    * attribute indices
    * @param train the input instances
    * @return the results of attribute selection as a String
+   * @exception Exception if incorrect options are supplied
    */
   public static String SelectAttributes (ASEvaluation ASEvaluator, 
 					 String[] options, 

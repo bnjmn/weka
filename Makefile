@@ -1,5 +1,5 @@
 #
-# $Revision: 1.3 $
+# $Revision: 1.4 $
 #
 
 .PHONY: all optimized debug clean install archive doc
@@ -57,9 +57,7 @@ doc :
 # One of these must be SimpleCLI.class
 install : all
 	(cd ..; \
-	echo "" > manifest.tmp ; \
-	echo "Main-Class: SimpleCLI.class" >> manifest.tmp ;\
-	echo "" >> manifest.tmp ; \
+	echo "Main-Class: SimpleCLI" > manifest.tmp ;\
 	jar cvfm $$JAWSHOME/weka.jar manifest.tmp \
 	*.class \
 	weka/core/*.class \
