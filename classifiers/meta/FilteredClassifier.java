@@ -41,7 +41,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -219,11 +219,9 @@ public class FilteredClassifier extends DistributionClassifier
   }
 
   /**
-   * Buildclassifier selects a classifier from the set of classifiers
-   * by minimising error on the training data.
+   * Build the classifier on the filtered data.
    *
-   * @param data the training data to be used for generating the
-   * boosted classifier.
+   * @param data the training data
    * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
