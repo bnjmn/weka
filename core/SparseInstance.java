@@ -458,6 +458,9 @@ public class SparseInstance extends Instance {
 			  Utils.quote(m_Dataset.attribute(m_Indices[i]).
 				      value((int)valueSparse(i))));
 	    } catch (Exception e) {
+              e.printStackTrace();
+              System.err.println(new Instances(m_Dataset, 0));
+              System.err.println("Att:" + m_Indices[i] + " Val:" + valueSparse(i));
 	      throw new Error("This should never happen!");
 	    }
 	  } else {
