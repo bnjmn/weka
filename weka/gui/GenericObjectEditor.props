@@ -91,3 +91,8 @@ weka.attributeSelection.ASSearch = \
  weka.attributeSelection.RandomSearch, \
  weka.attributeSelection.ExhaustiveSearch, \
  weka.attributeSelection.Ranker
+
+# Lists the Associators I want to choose from
+weka.associations.Associator=\
+ weka.associations.Apriori
+ 
