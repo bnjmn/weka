@@ -27,6 +27,7 @@ import  weka.core.*;
 import  weka.filters.Filter;
 import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.experiment.Stats;
+import weka.classifiers.rules.DecisionTable;
 
 /**
  * Simple k means clustering class.
@@ -41,7 +42,7 @@ import weka.experiment.Stats;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -107,6 +108,7 @@ public class SimpleKMeans extends Clusterer
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
+
     m_Iterations = 0;
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
@@ -132,21 +134,50 @@ public class SimpleKMeans extends Clusterer
     Random RandomO = new Random(m_Seed);
     boolean [] selected = new boolean[instances.numInstances()];
     int instIndex;
-    for (int i = 0; i < m_NumClusters; i++) {
+    HashMap initC = new HashMap();
+    DecisionTable.hashKey hk = null;
+    //    String hk = null;
+    boolean centroidSearchBailOut = false;
+    int i;
+    for (i = 0; i < m_NumClusters; i++) {
+      int centroidCount = 0;
       do {
 	instIndex = RandomO.nextInt(instances.numInstances());
-      } while (selected[instIndex]);
+		hk = new DecisionTable.hashKey(instances.instance(instIndex), 
+		instances.numAttributes());
+	// hk = instances.instance(instIndex).toString();
+	if (initC.containsKey(hk)) {
+	//	if (initC.containsValue(instances.instance(instIndex))) {
+	  if (!selected[instIndex]) {
+	    centroidCount++;
+	    selected[instIndex] = true;
+	  }
+	}
+      } while (selected[instIndex] && centroidCount < instances.numInstances());
+
+      if (centroidCount >= instances.numInstances()) {
+	// bail out and set the number of requested clusters to i
+	centroidSearchBailOut = true;
+	break;
+      }
       m_ClusterCentroids.add(instances.instance(instIndex));
+      initC.put(hk, null);
       selected[instIndex] = true;
+      centroidCount++;
     }
     selected = null;
+    if (centroidSearchBailOut) {
+      m_NumClusters = i;
+    }
 
     boolean converged = false;
+    int emptyClusterCount;
     Instances [] tempI = new Instances[m_NumClusters];
     while (!converged) {
+      emptyClusterCount = 0;
       m_Iterations++;
       converged = true;
-      for (int i = 0; i < instances.numInstances(); i++) {
+      for (i = 0; i < instances.numInstances(); i++) {
 	Instance toCluster = instances.instance(i);
 	int newC = clusterProcessedInstance(toCluster);
 	if (newC != clusterAssignments[i]) {
@@ -158,22 +189,32 @@ public class SimpleKMeans extends Clusterer
       
       // update centroids
       m_ClusterCentroids = new Instances(instances, m_NumClusters);
-      for (int i = 0; i < m_NumClusters; i++) {
+      for (i = 0; i < m_NumClusters; i++) {
 	tempI[i] = new Instances(instances, 0);
       }
-      for (int i = 0; i < instances.numInstances(); i++) {
+      for (i = 0; i < instances.numInstances(); i++) {
 	tempI[clusterAssignments[i]].add(instances.instance(i));
       }
-      for (int i = 0; i < m_NumClusters; i++) {
+      for (i = 0; i < m_NumClusters; i++) {
 	double [] vals = new double[instances.numAttributes()];
-	for (int j = 0; j < instances.numAttributes(); j++) {
-	  vals[j] = tempI[i].meanOrMode(j);
+	if (tempI[i].numInstances() == 0) {
+	  // empty cluster
+	  emptyClusterCount++;
+	} else {
+	  for (int j = 0; j < instances.numAttributes(); j++) {
+	    vals[j] = tempI[i].meanOrMode(j);
+	  }
+	  m_ClusterCentroids.add(new Instance(1.0, vals));
 	}
-	m_ClusterCentroids.add(new Instance(1.0, vals));
+      }
+
+      if (emptyClusterCount > 0) {
+	m_NumClusters -= emptyClusterCount;
+	tempI = new Instances[m_NumClusters];
       }
     }
     m_ClusterStdDevs = new Instances(instances, m_NumClusters);
-    for (int i = 0; i < m_NumClusters; i++) {
+    for (i = 0; i < m_NumClusters; i++) {
       double [] vals2 = new double[instances.numAttributes()];
       for (int j = 0; j < instances.numAttributes(); j++) {
 	if (instances.attribute(j).isNumeric()) {
