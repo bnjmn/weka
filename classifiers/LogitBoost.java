@@ -45,6 +45,12 @@ import weka.core.*;
  * -I num <br>
  * Set the number of boost iterations (default 10). <p>
  *
+ * -Q <br>
+ * Use resampling instead of reweighting.<p>
+ *
+ * -S seed <br>
+ * Random number seed for resampling (default 1).<p>
+ *
  * -P num <br>
  * Set the percentage of weight mass used to build classifiers
  * (default 100). <p>
@@ -52,7 +58,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
@@ -92,6 +98,12 @@ public class LogitBoost extends DistributionClassifier
 
   /** The actual class attribute (for getting class names) */
   protected Attribute m_ClassAttribute;
+
+  /** Use boosting with reweighting? */
+  protected boolean m_UseResampling;
+  
+  /** Seed for boosting with resampling. */
+  protected int m_Seed = 1;
 
   /**
    * Select only instances with weights that contribute to 
@@ -173,6 +185,12 @@ public class LogitBoost extends DistributionClassifier
 	      +"\t(default 10)",
 	      "I", 1, "-I <num>"));
     newVector.addElement(new Option(
+	      "\tUse resampling for boosting.",
+	      "Q", 0, "-Q"));
+    newVector.addElement(new Option(
+	      "\tSeed for resampling. (Default 1)",
+	      "S", 1, "-S <num>"));
+    newVector.addElement(new Option(
 	      "\tPercentage of weight mass to base training on.\n"
 	      +"\t(default 100, reduce to around 90 speed up)",
 	      "P", 1, "-P <percent>"));
@@ -209,6 +227,11 @@ public class LogitBoost extends DistributionClassifier
    * -I num <br>
    * Set the number of boost iterations (default 10). <p>
    *
+   * -Q <br>
+   * Use resampling instead of reweighting.<p>
+   * -S seed <br>
+   * Random number seed for resampling (default 1).<p>
+   *
    * -P num <br>
    * Set the percentage of weight mass used to build classifiers
    * (default 100). <p>
@@ -236,6 +259,19 @@ public class LogitBoost extends DistributionClassifier
       setWeightThreshold(100);
     }
 
+    setUseResampling(Utils.getFlag('Q', options));
+    if (m_UseResampling && (thresholdString.length() != 0)) {
+      throw new Exception("Weight pruning with resampling"+
+			  "not allowed.");
+    }
+
+    String seedString = Utils.getOption('S', options);
+    if (seedString.length() != 0) {
+      setSeed(Integer.parseInt(seedString));
+    } else {
+      setSeed(1);
+    }
+
     String classifierName = Utils.getOption('W', options);
     if (classifierName.length() == 0) {
       throw new Exception("A classifier must be specified with"
@@ -258,12 +294,18 @@ public class LogitBoost extends DistributionClassifier
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
 
-    String [] options = new String [classifierOptions.length + 8];
+    String [] options = new String [classifierOptions.length + 9];
     int current = 0;
     if (getDebug()) {
       options[current++] = "-D";
     }
-    options[current++] = "-P"; options[current++] = "" + getWeightThreshold();
+    
+    if (getUseResampling()) {
+      options[current++] = "-Q";
+    } else {
+      options[current++] = "-P"; 
+      options[current++] = "" + getWeightThreshold();
+    }
     options[current++] = "-I"; options[current++] = "" + getMaxIterations();
 
     if (getClassifier() != null) {
@@ -279,6 +321,46 @@ public class LogitBoost extends DistributionClassifier
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Set resampling mode
+   *
+   * @param resampling true if resampling should be done
+   */
+  public void setUseResampling(boolean r) {
+    
+    m_UseResampling = r;
+  }
+
+  /**
+   * Get whether resampling is turned on
+   *
+   * @return true if resampling output is on
+   */
+  public boolean getUseResampling() {
+    
+    return m_UseResampling;
+  }
+
+  /**
+   * Set seed for resampling.
+   *
+   * @param seed the seed for resampling
+   */
+  public void setSeed(int seed) {
+
+    m_Seed = seed;
+  }
+
+  /**
+   * Get seed for resampling.
+   *
+   * @return the seed for resampling
+   */
+  public int getSeed() {
+
+    return m_Seed;
   }
 
   /**
@@ -374,6 +456,7 @@ public class LogitBoost extends DistributionClassifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
+    Random randomInstance = new Random(m_Seed);
     Instances boostData, trainData;
     int classIndex = data.classIndex();
 
@@ -383,9 +466,10 @@ public class LogitBoost extends DistributionClassifier
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
-    if (!(m_Classifier instanceof WeightedInstancesHandler)) {
-      throw new Exception("Base classifier can't handle weighted "+
-			  "instances.");
+    
+    if (!(m_Classifier instanceof WeightedInstancesHandler) &&
+	!m_UseResampling) {
+      m_UseResampling = true;
     }
     if (data.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
@@ -470,6 +554,14 @@ public class LogitBoost extends DistributionClassifier
 					   (double)m_WeightThreshold/100);
 	} else {
 	  trainData = new Instances(boostData,0,numInstances);
+	  if (m_UseResampling) {
+	     double[] weights = new double[boostData.numInstances()];
+	     for (int kk = 0; kk < weights.length; kk++) {
+	       weights[kk] = boostData.instance(kk).weight();
+	     }
+	     trainData = boostData.resampleWithWeights(randomInstance, 
+						       weights);
+	  }
 	}
       
 	// Build the classifier
