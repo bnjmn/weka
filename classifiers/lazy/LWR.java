@@ -65,7 +65,7 @@ import weka.core.*;
  * The ridge parameter (default 1.0e-8) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -458,16 +458,16 @@ public class LWR extends Classifier
       k = m_kNN;
     }
     double bandwidth = distance[sortKey[k]];
-    if (bandwidth == distance[sortKey[0]]) {
-      for (int i = k; i < sortKey.length; i++) {
+
+    // Check for bandwidth zero
+    if (bandwidth <= 0) {
+      for (int i = k + 1; i < sortKey.length; i++) {
 	if (distance[sortKey[i]] > bandwidth) {
 	  bandwidth = distance[sortKey[i]];
 	  break;
 	}
       }
-      if (bandwidth == distance[sortKey[0]]) {
-	bandwidth *= 10;  // Include them all
-      }
+      throw new Exception("All training instances coincide with test instance!");
     }
 
     // Rescale the distances by the bandwidth
@@ -563,7 +563,7 @@ public class LWR extends Classifier
   private double distance(Instance first, Instance second) {  
 
     double diff, distance = 0;
-    int numAttribsUsed = 0;
+
     for(int i = 0; i < m_Train.numAttributes(); i++) { 
       if (i == m_Train.classIndex()) {
 	continue;
@@ -571,7 +571,6 @@ public class LWR extends Classifier
       switch (m_Train.attribute(i).type()) {
       case Attribute.NOMINAL:
 	// If attribute is nominal
-	numAttribsUsed++;
 	if (first.isMissing(i) || second.isMissing(i) ||
 	    ((int)first.value(i) != (int)second.value(i))) {
 	  diff = 1;
@@ -581,7 +580,6 @@ public class LWR extends Classifier
 	break;
       case Attribute.NUMERIC:
 	// If attribute is numeric
-	numAttribsUsed++;	
 	if (first.isMissing(i) || second.isMissing(i)) {
 	  if (first.isMissing(i) && second.isMissing(i)) {
 	    diff = 1;
@@ -605,7 +603,7 @@ public class LWR extends Classifier
       }
       distance += diff * diff;
     }
-    return Math.sqrt(distance / numAttribsUsed);
+    return Math.sqrt(distance);
   }
 
   /**
