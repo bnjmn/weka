@@ -8,7 +8,7 @@ SOURCES = Attribute.java Instance.java Instances.java Utils.java \
 	WeightedInstancesHandler.java CheckOptionHandler.java \
 	Drawable.java Matchable.java Summarizable.java AttributeStats.java \
 	SparseInstance.java AdditionalMeasureProducer.java \
-	ProtectedProperties.java
+	ProtectedProperties.java Optimization.java RandomVariates.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
