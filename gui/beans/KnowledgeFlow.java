@@ -100,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.14 $
+ * @version  $Revision: 1.15 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -235,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.14 $
+   * @version $Revision: 1.15 $
    * @since 1.0
    * @see JPanel
    */
@@ -245,6 +245,9 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       BeanInstance.paintLabels(gx);
       BeanConnection.paintConnections(gx);
       //      BeanInstance.paintConnections(gx);
+      if (m_mode == CONNECTING) {
+	gx.drawLine(m_startX, m_startY, m_oldX, m_oldY);
+      }
     }
 
     public void doLayout() {
@@ -387,7 +390,8 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  }
 	
 	  if (m_mode == CONNECTING) {
-	    // undraw rubberbanding line and turn off connecting points
+	    // turn off connecting points and remove connecting line
+	    m_beanLayout.repaint();
 	    Vector beanInstances = BeanInstance.getBeanInstances();
 	    for (int i = 0; i < beanInstances.size(); i++) {
 	      JComponent bean = 
@@ -397,10 +401,6 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 		((Visible)bean).getVisual().setDisplayConnectors(false);
 	      }
 	    }
-	    Graphics2D gx = (Graphics2D)m_beanLayout.getGraphics();
-	    gx.setXORMode(java.awt.Color.white);
-	    // remove the old rubberbanded line
-	    gx.drawLine(m_startX, m_startY, m_oldX, m_oldY);
 
 	    if (bi != null) {
 	      boolean doConnection = false;
@@ -422,7 +422,6 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	      }
 	      m_beanLayout.repaint();
 	    }
-	    gx.dispose();
 	    m_mode = NONE;
 	    m_editElement = null;
 	    m_sourceEventSetDescriptor = null;
@@ -450,16 +449,9 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 
 	 public void mouseMoved(MouseEvent e) {
 	   if (m_mode == CONNECTING) {
-	     Graphics2D gx = (Graphics2D)m_beanLayout.getGraphics();
-	     gx.setXORMode(java.awt.Color.white);
-	     
-	     // remove the old rubberbanded line
-	     gx.drawLine(m_startX, m_startY, m_oldX, m_oldY);
+	     m_beanLayout.repaint();
 	     // note the new coordinates
 	     m_oldX = e.getX(); m_oldY = e.getY();
-	     // draw the new rubberbanded line
-	     gx.drawLine(m_startX, m_startY, m_oldX, m_oldY);
-	     gx.dispose();
 	   }
 	 }
        });
