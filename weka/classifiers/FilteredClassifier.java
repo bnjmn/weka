@@ -41,7 +41,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -55,6 +55,29 @@ public class FilteredClassifier extends DistributionClassifier
   /** The instance structure of the filtered instances */
   protected Instances m_FilteredInstances;
   
+  /**
+   * Default constructor specifying ZeroR as the classifier and
+   * AllFilter as the filter. Both of these are just placeholders
+   * for more useful selections.
+   */
+  public FilteredClassifier() {
+
+    this(new weka.classifiers.ZeroR(), new weka.filters.AllFilter());
+  }
+
+  /**
+   * Constructor that specifies the subclassifier and filter to use.
+   *
+   * @param classifier the Classifier to receive filtered instances.
+   * @param filter the Filter that will process instances before
+   * passing to the Classifier.
+   */
+  public FilteredClassifier(Classifier classifier, Filter filter) {
+
+    m_Classifier = classifier;
+    m_Filter = filter;
+  }
+
   /**
    * Returns an enumeration describing the available options
    *
