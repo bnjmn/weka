@@ -38,10 +38,13 @@ import java.util.Vector;
  * The maximum variance allowed before an attribute will be deleted (default 100).<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RemoveUseless extends Filter implements UnsupervisedFilter,
 						     OptionHandler {
+
+  /** The filter used to remove attributes */
+  protected Remove m_removeFilter = null;
 
   /** The type of attribute to delete */
   protected double m_maxVariancePercentage = 100;
@@ -58,7 +61,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
-
+    m_removeFilter = null;
     return false;
   }
 
@@ -78,7 +81,13 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
       resetQueue();
       m_NewBatch = false;
     }
-
+    if (m_removeFilter != null) {
+      m_removeFilter.input(instance);
+      Instance processed = m_removeFilter.output();
+      processed.setDataset(getOutputFormat());
+      push(processed);
+      return true;
+    }
     bufferInput(instance);
     return false;
   }
@@ -93,54 +102,55 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
+    if (m_removeFilter == null) {
 
-    // do filtering here
-    Instances toFilter = getInputFormat();
-    int[] attsToDelete = new int[toFilter.numAttributes()];
-    int numToDelete = 0;
-    for(int i = 0; i < toFilter.numAttributes(); i++) {
-      AttributeStats stats = toFilter.attributeStats(i);
-      if (stats.distinctCount < 2) {
-	// remove constant attributes
-	attsToDelete[numToDelete++] = i;
-      } else {
-	// remove attributes that vary too much
-	double variancePercent = (double) stats.distinctCount
-	  / (double) stats.totalCount * 100.0;
-	if (variancePercent > m_maxVariancePercentage) attsToDelete[numToDelete++] = i;
+      // establish attributes to remove from first batch
+
+      Instances toFilter = getInputFormat();
+      int[] attsToDelete = new int[toFilter.numAttributes()];
+      int numToDelete = 0;
+      for(int i = 0; i < toFilter.numAttributes(); i++) {
+	AttributeStats stats = toFilter.attributeStats(i);
+	if (stats.distinctCount < 2) {
+	  // remove constant attributes
+	  attsToDelete[numToDelete++] = i;
+	} else {
+	  // remove attributes that vary too much
+	  double variancePercent = (double) stats.distinctCount
+	    / (double) stats.totalCount * 100.0;
+	  if (variancePercent > m_maxVariancePercentage) attsToDelete[numToDelete++] = i;
+	}
+      }
+      
+      int[] finalAttsToDelete = new int[numToDelete];
+      System.arraycopy(attsToDelete, 0, finalAttsToDelete, 0, numToDelete);
+      
+      m_removeFilter = new Remove();
+      m_removeFilter.setAttributeIndicesArray(finalAttsToDelete);
+      m_removeFilter.setInvertSelection(false);
+      m_removeFilter.setInputFormat(toFilter);
+      
+      for (int i = 0; i < toFilter.numInstances(); i++) {
+	m_removeFilter.input(toFilter.instance(i));
+      }
+      m_removeFilter.batchFinished();
+
+      Instance processed;
+      Instances outputDataset = m_removeFilter.getOutputFormat();
+    
+      // restore old relation name to hide attribute filter stamp
+      outputDataset.setRelationName(toFilter.relationName());
+    
+      setOutputFormat(outputDataset);
+      while ((processed = m_removeFilter.output()) != null) {
+	processed.setDataset(outputDataset);
+	push(processed);
       }
     }
-
-    int[] finalAttsToDelete = new int[numToDelete];
-    System.arraycopy(attsToDelete, 0, finalAttsToDelete, 0, numToDelete);
-    
-    Remove attributeFilter = new Remove();
-    attributeFilter.setAttributeIndicesArray(finalAttsToDelete);
-    attributeFilter.setInvertSelection(false);
-    attributeFilter.setInputFormat(toFilter);
-    
-    for (int i = 0; i < toFilter.numInstances(); i++) {
-      attributeFilter.input(toFilter.instance(i));
-    }
-    attributeFilter.batchFinished();
-
-    Instance processed;
-    Instances outputDataset = attributeFilter.getOutputFormat();
-    
-    // restore old relation name to hide attribute filter stamp
-    outputDataset.setRelationName(toFilter.relationName());
-    
-    setOutputFormat(outputDataset);
-    while ((processed = attributeFilter.output()) != null) {
-      processed.setDataset(outputDataset);
-      push(processed);
-    }
-
     flushInput();
-
+    
     m_NewBatch = true;
     return (numPendingOutput() != 0);
-
   }
 
   /**
