@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ */
+ * @version $Revision: 1.15 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -329,22 +329,23 @@ public class Apriori extends Associator implements OptionHandler {
 	  m_allTheRules[5].addElement(sortedRuleSet[5].elementAt(indices[i]));
 	}
       }
-      m_minSupport -= m_delta;
-      m_minSupport = (m_minSupport < m_lowerBoundMinSupport) 
-	? 0 
-	: m_minSupport;
 
-      necSupport = (int)(m_minSupport * 
-			 (double)instances.numInstances()+0.5);
-
-      m_cycles++;
       if (m_verbose) {
 	if (m_Ls.size() > 1) {
 	  System.out.println(toString());
 	}
       }
-    } while ((m_allTheRules[0].size() < m_numRules) && 
-	     (m_minSupport >= m_lowerBoundMinSupport)
+      m_minSupport -= m_delta;
+      /*      m_minSupport = (m_minSupport < m_lowerBoundMinSupport) 
+	? 0 
+	: m_minSupport; */
+
+      necSupport = (int)(m_minSupport * 
+			 (double)instances.numInstances()+0.5);
+
+      m_cycles++;
+    } while ((m_allTheRules[0].size() < m_numRules) &&
+	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport))
 	     /*	     (necSupport >= lowerBoundNumInstancesSupport)*/
 	     /*	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)) */ &&     
 	     (necSupport >= 1));
