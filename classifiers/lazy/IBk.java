@@ -70,7 +70,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class IBk extends Classifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -1149,6 +1149,7 @@ public class IBk extends Classifier implements
 	  double [] distribution = makeDistribution(neighborlist);
 	  double thisPrediction = Utils.maxIndex(distribution);
 	  if (m_Train.classAttribute().isNumeric()) {
+	    thisPrediction = distribution[0];
 	    double err = thisPrediction - instance.classValue();
 	    performanceStatsSq[j] += err * err;   // Squared error
 	    performanceStats[j] += Math.abs(err); // Absolute error
