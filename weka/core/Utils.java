@@ -28,9 +28,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.1 - Jan 1999 - Added partitionOptions, stop option parsing at --
- * (Len) <br>
- *          1.0 - Initial version (Yong and Eibe)
+ * @version $Revision: 1.2 $
  */
 public final class Utils {
 
@@ -39,9 +37,11 @@ public final class Utils {
   // =================
 
   /** The natural logarithm of 2. */
-
   public static double log2 = Math.log(2);
 
+  /** The small deviation allowed in double comparisons */
+  public static double SMALL = 1e-6;
+  
   // ===============
   // Public methods.
   // ===============
@@ -52,22 +52,24 @@ public final class Utils {
    * @param strings an array of strings
    * @exception Exception if there are any non-empty options
    */
-
   public static void checkForRemainingOptions(String [] options) 
     throws Exception {
     
     int illegalOptionsFound = 0;
     StringBuffer text = new StringBuffer();
 
-    if (options == null)
+    if (options == null) {
       return;
-    for (int i = 0; i < options.length; i++) 
+    }
+    for (int i = 0; i < options.length; i++) {
       if (options[i].length() > 0) {
 	illegalOptionsFound++;
-	text.append(options[i]+' ');
+	text.append(options[i] + ' ');
       }
-    if (illegalOptionsFound > 0)
-      throw new Exception("Illegal options: "+text);
+    }
+    if (illegalOptionsFound > 0) {
+      throw new Exception("Illegal options: " + text);
+    }
   }
   
   /**
@@ -78,26 +80,30 @@ public final class Utils {
    * @param n the length of two double vectors
    * @return the correlation coefficient
    */
-
   public final static double correlation(double y1[],double y2[],int n) {
 
     int i;
-    double av1=0.0,av2=0.0,y11=0.0,y22=0.0,y12=0.0,c;
+    double av1 = 0.0, av2 = 0.0, y11 = 0.0, y22 = 0.0, y12 = 0.0, c;
     
-    if(n<=1)return 1.0;
-    for(i=0;i<n;i++){
+    if (n <= 1) {
+      return 1.0;
+    }
+    for (i = 0; i < n; i++) {
       av1 += y1[i];
       av2 += y2[i];
     }
-    av1 /= (double)n;
-    av2 /= (double)n;
-    for(i=0;i<n;i++){
+    av1 /= (double) n;
+    av2 /= (double) n;
+    for (i = 0; i < n; i++) {
       y11 += (y1[i] - av1) * (y1[i] - av1);
       y22 += (y2[i] - av2) * (y2[i] - av2);
       y12 += (y1[i] - av1) * (y2[i] - av2);
     }
-    if(y11*y22 == 0.0) c=1.0;
-    else c = y12 / Math.sqrt(Math.abs(y11*y22));
+    if (y11 * y22 == 0.0) {
+      c=1.0;
+    } else {
+      c = y12 / Math.sqrt(Math.abs(y11 * y22));
+    }
     
     return c;
   }
@@ -106,10 +112,10 @@ public final class Utils {
    * Rounds a double and converts it into String.
    *
    * @param value the double value
-   * @param afterDecimalPoint the number of digits after the decimal point
+   * @param afterDecimalPoint the (maximum) number of digits permitted
+   * after the decimal point
    * @return the double as a formatted string
    */
-  
   public static String doubleToString(double value, int afterDecimalPoint) {
     
     StringBuffer stringBuffer;
@@ -126,8 +132,9 @@ public final class Utils {
       } else {
 	stringBuffer = new StringBuffer(String.valueOf(precisionValue));
       }
-      if (afterDecimalPoint == 0)
+      if (afterDecimalPoint == 0) {
 	return stringBuffer.toString();
+      }
       dotPosition = stringBuffer.length() - afterDecimalPoint;
       while (((precisionValue < 0) && (dotPosition < 1)) ||
 	     (dotPosition < 0)) {
@@ -160,24 +167,19 @@ public final class Utils {
 
   /**
    * Rounds a double and converts it into a formatted decimal-justified String.
+   * Trailing 0's are replaced with spaces.
    *
    * @param value the double value
    * @param width the width of the string
    * @param afterDecimalPoint the number of digits after the decimal point
    * @return the double as a formatted string
    */
-  
   public static String doubleToString(double value, int width,
 				      int afterDecimalPoint) {
     
     String tempString = doubleToString(value, afterDecimalPoint);
     char[] result;
     int dotPosition;
-
-    // Number to large for given width
-    if (tempString.length() >= width) {
-      return tempString;
-    }
 
     // Initialize result
     result = new char[width];
@@ -195,6 +197,11 @@ public final class Utils {
       }
     } else {
       dotPosition = tempString.length();
+    }
+    
+    // Not enough room to decimal align within the supplied width
+    if (width - afterDecimalPoint - dotPosition - 1 < 0) {
+      return tempString;
     }
 
     // Copy characters before decimal point
@@ -218,9 +225,9 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-
-  public static boolean eq(double a,double b){
-    return (a-b < 1e-6) && (b-a < 1e-6); 
+  public static boolean eq(double a, double b){
+    
+    return (a - b < SMALL) && (b - a < SMALL); 
   }
 
   /**
@@ -362,10 +369,12 @@ public final class Utils {
    * when given array [a b c]
    */
   public static double info(int counts[]) {
+    
     int total = 0; int c;
     double x = 0;
     for (int j = 0; j < counts.length; j++) {
-      x -= xlogx(counts[j]); total += counts[j];
+      x -= xlogx(counts[j]);
+      total += counts[j];
     }
     return x + xlogx(total);
   }
@@ -376,8 +385,9 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-  public static boolean smOrEq(double a,double b){
-    return (a-b < 1e-6);
+  public static boolean smOrEq(double a,double b) {
+    
+    return (a-b < SMALL);
   }
 
   /**
@@ -386,8 +396,9 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-  public static boolean grOrEq(double a,double b){
-    return (b-a < 1e-6);
+  public static boolean grOrEq(double a,double b) {
+    
+    return (b-a < SMALL);
   }
   
   /**
@@ -396,8 +407,9 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-  public static boolean sm(double a,double b){
-    return (b-a > 1e-6);
+  public static boolean sm(double a,double b) {
+    
+    return (b-a > SMALL);
   }
 
   /**
@@ -406,8 +418,9 @@ public final class Utils {
    * @param a a double
    * @param b a double 
    */
-  public static boolean gr(double a,double b){
-    return (a-b > 1e-6);
+  public static boolean gr(double a,double b) {
+    
+    return (a-b > SMALL);
   }
 
   /**
@@ -415,8 +428,9 @@ public final class Utils {
    *
    * @param a a double
    */
-  public static double log2(double a){
-    return Math.log(a)/log2;
+  public static double log2(double a) {
+    
+    return Math.log(a) / log2;
   }
 
   /**
@@ -426,16 +440,17 @@ public final class Utils {
    * @param doubles the array of doubles
    * @return the index of the maximum element
    */
-  public static int maxIndex(double [] doubles){
+  public static int maxIndex(double [] doubles) {
 
     double maximum = 0;
     int maxIndex = 0;
 
-    for (int i=0;i<doubles.length;i++)
-      if ((i == 0) || (doubles[i] > maximum)){
+    for (int i = 0; i < doubles.length; i++) {
+      if ((i == 0) || (doubles[i] > maximum)) {
 	maxIndex = i;
 	maximum = doubles[i];
       }
+    }
 
     return maxIndex;
   }
@@ -447,16 +462,17 @@ public final class Utils {
    * @param ints the array of integers
    * @return the index of the maximum element
    */
-  public static int maxIndex(int [] ints){
+  public static int maxIndex(int [] ints) {
 
     int maximum = 0;
     int maxIndex = 0;
 
-    for (int i=0;i<ints.length;i++)
-      if ((i == 0) || (ints[i] > maximum)){
+    for (int i = 0; i < ints.length; i++) {
+      if ((i == 0) || (ints[i] > maximum)) {
 	maxIndex = i;
 	maximum = ints[i];
       }
+    }
 
     return maxIndex;
   }
@@ -471,10 +487,12 @@ public final class Utils {
   
     double sum = 0;
 
-    if (vector.length == 0)
+    if (vector.length == 0) {
       return 0;
-    for (int i = 0; i < vector.length; i++) 
+    }
+    for (int i = 0; i < vector.length; i++) {
       sum += vector[i];
+    }
     return sum / (double) vector.length;
   }
 
@@ -485,16 +503,17 @@ public final class Utils {
    * @param ints the array of integers
    * @return the index of the minimum element
    */
-  public static int minIndex(int [] ints){
+  public static int minIndex(int [] ints) {
 
     int minimum = 0;
     int minIndex = 0;
 
-    for (int i=0;i<ints.length;i++)
-      if ((i == 0) || (ints[i] < minimum)){
+    for (int i = 0; i < ints.length; i++) {
+      if ((i == 0) || (ints[i] < minimum)) {
 	minIndex = i;
 	minimum = ints[i];
       }
+    }
 
     return minIndex;
   }
@@ -506,16 +525,17 @@ public final class Utils {
    * @param doubles the array of doubles
    * @return the index of the minimum element
    */
-  public static int minIndex(double [] doubles){
+  public static int minIndex(double [] doubles) {
 
     double minimum = 0;
     int minIndex = 0;
 
-    for (int i=0;i<doubles.length;i++)
-      if ((i == 0) || (doubles[i] < minimum)){
+    for (int i = 0; i < doubles.length; i++) {
+      if ((i == 0) || (doubles[i] < minimum)) {
 	minIndex = i;
 	minimum = doubles[i];
       }
+    }
 
     return minIndex;
   }
@@ -530,14 +550,17 @@ public final class Utils {
 
     double sum = 0;
 
-    for (int i = 0; i < doubles.length; i++)
+    for (int i = 0; i < doubles.length; i++) {
       sum += doubles[i];
+    }
     if (Double.isNaN(sum)) {
       throw new Exception("Array contains NaN - can't normalize");
     }
-    if (sum != 0)
-      for (int i = 0; i < doubles.length; i++)
+    if (sum != 0) {
+      for (int i = 0; i < doubles.length; i++) {
 	doubles[i] /= sum;
+      }
+    }
   }
 
   /**
@@ -550,10 +573,12 @@ public final class Utils {
   public static void normalize(double[] doubles, double sum) 
        throws Exception {
 
-    if (sum == 0)
+    if (sum == 0) {
       throw new Exception("Can't normalize array. Sum is zero.");
-    for (int i = 0; i < doubles.length; i++)
+    }
+    for (int i = 0; i < doubles.length; i++) {
       doubles[i] /= sum;
+    }
   }
 
   /**
@@ -563,11 +588,11 @@ public final class Utils {
    * @param value the double value
    * @return the resulting integer value
    */
-  public static int round(double value){
+  public static int round(double value) {
 
-    int roundedValue;
-    
-    roundedValue = value>0? (int)(value+0.5) : -(int)(Math.abs(value)+0.5);
+    int roundedValue = value > 0
+      ? (int)(value + 0.5)
+      : -(int)(Math.abs(value) + 0.5);
     
     return roundedValue;
   }
@@ -579,13 +604,11 @@ public final class Utils {
    * @param afterDecimalPoint the number of digits after the decimal point
    * @return the double rounded to the given precision
    */
-  public static double roundDouble(double value,int afterDecimalPoint){
+  public static double roundDouble(double value,int afterDecimalPoint) {
 
-    double mask;
+    double mask = Math.pow(10.0, (double)afterDecimalPoint);
 
-    mask = Math.pow(10.0,(double)afterDecimalPoint);
-
-    return (double)(Math.round(value*mask))/mask;
+    return (double)(Math.round(value * mask)) / mask;
   }
 
   /**
@@ -598,32 +621,37 @@ public final class Utils {
    * @return an array of integers with the positions in the sorted
    * array.
    */
-  public static int[] sort(double [] array){
+  public static int[] sort(double [] array) {
 
     int [] index = new int[array.length];
     int [] newIndex = new int[array.length];
     int [] helpIndex;
     int numEqual;
     
-    for (int i = 0; i < index.length; i++)
+    for (int i = 0; i < index.length; i++) {
       index[i] = i;
-    quickSort(array,index,0,array.length-1);
+    }
+    quickSort(array, index, 0, array.length - 1);
 
     // Make sort stable
 
     int i = 0;
     while (i < index.length) {
       numEqual = 1;
-      for (int j = i+1; ((j < index.length) && Utils.eq(array[index[i]],
-							array[index[j]])); j++)
+      for (int j = i + 1; ((j < index.length)
+			   && Utils.eq(array[index[i]], array[index[j]]));
+	   j++) {
 	numEqual++;
+      }
       if (numEqual > 1) {
 	helpIndex = new int[numEqual];
-	for (int j = 0; j < numEqual; j++)
-	  helpIndex[j] = i+j;
-	quickSort(index, helpIndex, 0, numEqual-1);
-	for (int j = 0; j < numEqual; j++) 
-	  newIndex[i+j] = index[helpIndex[j]];
+	for (int j = 0; j < numEqual; j++) {
+	  helpIndex[j] = i + j;
+	}
+	quickSort(index, helpIndex, 0, numEqual - 1);
+	for (int j = 0; j < numEqual; j++) {
+	  newIndex[i + j] = index[helpIndex[j]];
+	}
 	i += numEqual;
       } else {
 	newIndex[i] = index[i];
@@ -644,8 +672,9 @@ public final class Utils {
   
     double sum = 0, sumSquared = 0;
 
-    if (vector.length <= 1)
+    if (vector.length <= 1) {
       return 0;
+    }
     for (int i = 0; i < vector.length; i++) {
       sum += vector[i];
       sumSquared += (vector[i] * vector[i]);
@@ -664,8 +693,9 @@ public final class Utils {
 
     double sum = 0;
 
-    for (int i = 0; i < doubles.length; i++)
+    for (int i = 0; i < doubles.length; i++) {
       sum += doubles[i];
+    }
     return sum;
   }
 
@@ -679,8 +709,9 @@ public final class Utils {
 
     int sum = 0;
 
-    for (int i = 0; i < ints.length; i++)
+    for (int i = 0; i < ints.length; i++) {
       sum += ints[i];
+    }
     return sum;
   }
 
@@ -691,7 +722,10 @@ public final class Utils {
    * @returns c*log2(c) (but is careful to return 0 if c is 0)
    */
   public static double xlogx(int c) {
-    if (c == 0) return 0.0;
+    
+    if (c == 0) {
+      return 0.0;
+    }
     return c * Utils.log2((double) c);
   }
  
@@ -704,7 +738,8 @@ public final class Utils {
    * @param lo0 the first index of the subset to be sorted
    * @param hi0 the last index of the subset to be sorted
    */
-  private static void quickSort(double [] array,int [] index,int lo0,int hi0){
+  private static void quickSort(double [] array, int [] index,
+				int lo0, int hi0) {
 
     int lo = lo0;
     int hi = hi0;
@@ -713,34 +748,36 @@ public final class Utils {
     double midMinus;
     int help;
     
-    if (hi0 > lo0){
+    if (hi0 > lo0) {
       
       // Arbitrarily establishing partition element as the midpoint of
       // the array.
             
-      mid = array[index[(lo0+hi0)/2]];
-      midPlus = mid+1e-6;
-      midMinus = mid-1e-6;
+      mid = array[index[(lo0 + hi0) / 2]];
+      midPlus = mid + SMALL;
+      midMinus = mid - SMALL;
 
       // loop through the array until indices cross
       
-      while(lo <= hi){
+      while (lo <= hi) {
 	
 	// find the first element that is greater than or equal to  
 	// the partition element starting from the left Index.
 		
-	while ((array[index[lo]] < midMinus) && (lo < hi0))
+	while ((array[index[lo]] < midMinus) && (lo < hi0)) {
 	  ++lo;
+	}
 	
 	// find an element that is smaller than or equal to 
 	// the partition element starting from the right Index.
 	
-	while ((array[index[hi]] > midPlus) && (hi > lo0))
+	while ((array[index[hi]] > midPlus) && (hi > lo0)) {
 	  --hi;
+	}
 	
 	// if the indexes have not crossed, swap
 	
-	if(lo <= hi) {
+	if (lo <= hi) {
 	  help = index[lo];
 	  index[lo] = index[hi];
 	  index[hi] = help;
@@ -752,20 +789,18 @@ public final class Utils {
       // If the right index has not reached the left side of array
       // must now sort the left partition.
       
-      if(lo0 < hi)
-	quickSort(array,index,lo0,hi);
+      if (lo0 < hi) {
+	quickSort(array, index, lo0, hi);
+      }
       
       // If the left index has not reached the right side of array
       // must now sort the right partition.
       
-      if(lo < hi0)
-	quickSort(array,index,lo,hi0);
+      if (lo < hi0) {
+	quickSort(array, index, lo, hi0);
+      }
     }
   }
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Implements quicksort for an array of indices.
@@ -776,39 +811,42 @@ public final class Utils {
    * @param lo0 the first index of the subset to be sorted
    * @param hi0 the last index of the subset to be sorted
    */
-  private static void quickSort(int [] array,int [] index,int lo0,int hi0){
+  private static void quickSort(int [] array, int [] index,
+				int lo0, int hi0) {
 
     int lo = lo0;
     int hi = hi0;
     int mid;
     int help;
     
-    if (hi0 > lo0){
+    if (hi0 > lo0) {
       
       // Arbitrarily establishing partition element as the midpoint of
       // the array.
             
-      mid = array[index[(lo0+hi0)/2]];
+      mid = array[index[(lo0 + hi0) / 2]];
 
       // loop through the array until indices cross
       
-      while(lo <= hi){
+      while (lo <= hi) {
 	
 	// find the first element that is greater than or equal to  
 	// the partition element starting from the left Index.
 		
-	while ((array[index[lo]] < mid) && (lo < hi0))
+	while ((array[index[lo]] < mid) && (lo < hi0)) {
 	  ++lo;
+	}
 	
 	// find an element that is smaller than or equal to 
 	// the partition element starting from the right Index.
 	
-	while ((array[index[hi]] > mid) && (hi > lo0))
+	while ((array[index[hi]] > mid) && (hi > lo0)) {
 	  --hi;
+	}
 	
 	// if the indexes have not crossed, swap
 	
-	if(lo <= hi) {
+	if (lo <= hi) {
 	  help = index[lo];
 	  index[lo] = index[hi];
 	  index[hi] = help;
@@ -820,14 +858,16 @@ public final class Utils {
       // If the right index has not reached the left side of array
       // must now sort the left partition.
       
-      if(lo0 < hi)
-	quickSort(array,index,lo0,hi);
+      if (lo0 < hi) {
+	quickSort(array, index, lo0, hi);
+      }
       
       // If the left index has not reached the right side of array
       // must now sort the right partition.
       
-      if(lo < hi0)
-	quickSort(array,index,lo,hi0);
+      if (lo < hi0) {
+	quickSort(array, index, lo, hi0);
+      }
     }
   }
 }
