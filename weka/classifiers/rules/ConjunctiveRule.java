@@ -51,11 +51,10 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
-public class ConjunctiveRule extends DistributionClassifier
-  implements OptionHandler, WeightedInstancesHandler{
+public class ConjunctiveRule extends DistributionClassifier implements OptionHandler, WeightedInstancesHandler{
     
   /** The number of folds to split data into Grow and Prune for REP*/
   private int m_Folds = 3;
@@ -82,7 +81,7 @@ public class ConjunctiveRule extends DistributionClassifier
   private Random m_Random = null;
 
   /** Whether randomize the data */
-  private boolean m_IsRandomized = false;
+  private boolean m_IsRandomized = true;
     
   /** The predicted classes recorded for each antecedent in the growing data */
   private FastVector m_Targets;
@@ -93,6 +92,9 @@ public class ConjunctiveRule extends DistributionClassifier
   /** The minimal number of instance weights within a split*/
   private double m_MinNo = 2.0;
     
+  /** The number of antecedents in pre-pruning */
+  private int m_NumAntds = -1;
+
   /** 
    * The single antecedent in the rule, which is composed of an attribute and 
    * the corresponding value.  There are two inherited classes, namely NumericAntd
@@ -247,7 +249,7 @@ public class ConjunctiveRule extends DistributionClassifier
       }
       else
 	minSplit = m_MinNo;
-	    
+ 
       double[] fst=null, snd=null, missing=null;
       if(m_ClassAttribute.isNominal()){
 	fst = new double[m_NumClasses];
@@ -703,9 +705,9 @@ public class ConjunctiveRule extends DistributionClassifier
    * used as the pruning set. (Default: 3) <p>
    *
    * -R <br>
-   * Set whether randomize the data before split to growing and 
-   * pruning data. If set, but the seed is not set, this learner
-   * will use the current system time as the seed. (Default: false) <p>
+   * Set if NOT randomize the data before split to growing and 
+   * pruning data. If NOT set, but the seed is not set, this learner
+   * will use the current system time as the seed. (Default: true) <p>
    * 
    * -E <br>
    * Set whether consider the exclusive expressions for nominal
@@ -714,6 +716,11 @@ public class ConjunctiveRule extends DistributionClassifier
    * -M number <br>
    * Set the minimal weights of instances within a split.
    * (Default: 2) <p>
+   *
+   * -P number <br>
+   * Set the number of antecedents allowed in the rule if pre-pruning
+   * is used.  If this value is other than -1, then pre-pruning will be
+   * used, otherwise the rule uses REP. (Default: -1) <p>
    *
    * @return an enumeration of all the available options
    */
@@ -724,16 +731,20 @@ public class ConjunctiveRule extends DistributionClassifier
 				    "\tOne fold is used as pruning set.\n" +
 				    "\t(default 3)","N", 1, "-N <number of folds>"));
 	
-    newVector.addElement(new Option("\tSet whether uses randomization\n" +
-				    "\t(default false)","R", 0, "-R"));
+    newVector.addElement(new Option("\tSet if NOT uses randomization\n" +
+				    "\t(default:use randomization)","R", 0, "-R"));
 
     newVector.addElement(new Option("\tSet whether consider the exclusive\n" +
 				    "\texpressions for nominal attributes\n"+
-				    "(default false)","E", 0, "-E"));
+				    "\t(default false)","E", 0, "-E"));
 	
     newVector.addElement(new Option("\tSet the minimal weights of instances\n" +
 				    "\twithin a split.\n" +
-				    "\t(default 2.0)","M", 1, "-M <min. weights>"));	
+				    "\t(default 2.0)","M", 1, "-M <min. weights>"));
+	
+    newVector.addElement(new Option("\tSet number of antecedents for pre-pruning\n" +
+				    "\tif -1, then REP is used\n" +
+				    "\t(default -1)","P", 1, "-P <number of antecedents>"));
 	
     return newVector.elements();
   }
@@ -764,7 +775,13 @@ public class ConjunctiveRule extends DistributionClassifier
     else 
       m_Seed = -1;
 	
-    m_IsRandomized = Utils.getFlag('R', options);
+    String numAntdsString = Utils.getOption('P', options);
+    if (numAntdsString.length() != 0) 
+      m_NumAntds = Integer.parseInt(numAntdsString);
+    else 
+      m_NumAntds = -1;
+	
+    m_IsRandomized = (!Utils.getFlag('R', options));
     m_IsExclude = Utils.getFlag('E', options);	
   }
     
@@ -775,11 +792,13 @@ public class ConjunctiveRule extends DistributionClassifier
    */
   public String [] getOptions() {
 	
-    String [] options = new String [6];
+    String [] options = new String [8];
     int current = 0;
     options[current++] = "-N"; options[current++] = "" + m_Folds;
     options[current++] = "-M"; options[current++] = "" + m_MinNo;
-    if(m_IsRandomized)
+    options[current++] = "-P"; options[current++] = "" + m_NumAntds;
+
+    if(!m_IsRandomized)
       options[current++] = "-R";
     if(m_IsExclude)
       options[current++] = "-E";
@@ -800,7 +819,9 @@ public class ConjunctiveRule extends DistributionClassifier
   public void setExclusive(boolean e){ m_IsExclude = e;}
   public void setMinNo(double m){  m_MinNo = m; }
   public double getMinNo(){ return m_MinNo; }
-  
+  public void setNumAntds(int n){  m_NumAntds = n; }
+  public int getNumAntds(){ return m_NumAntds; }
+    
   /**
    * Builds a single rule learner with REP dealing with nominal classes or
    * numeric classes.
@@ -833,8 +854,7 @@ public class ConjunctiveRule extends DistributionClassifier
     m_Cnsqt = new double[m_NumClasses];
     m_Targets = new FastVector();	
 	
-    /* Split data into Grow and Prune*/
-    if(m_IsRandomized){
+    if(m_IsRandomized){  // Randomize the data
       if(m_Random == null){		    
 	if(m_Seed == -1)
 	  m_Seed = System.currentTimeMillis();
@@ -842,15 +862,23 @@ public class ConjunctiveRule extends DistributionClassifier
       }
 	    
       data.randomize(m_Random);
-    }	
-    data.stratify(m_Folds);
-    Instances growData=data.trainCV(m_Folds, m_Folds-1);
-    Instances pruneData=data.testCV(m_Folds, m_Folds-1);
+    }		
+
+    if(m_NumAntds != -1){
+      grow(data);
+    }
+    else{
+      // Split data into Grow and Prune	   
+      data.stratify(m_Folds);
 	
-    grow(growData);      // Build this rule  	
-    prune(pruneData);    // Prune this rule	
+      Instances growData=data.trainCV(m_Folds, m_Folds-1);
+      Instances pruneData=data.testCV(m_Folds, m_Folds-1);
+
+      grow(growData);      // Build this rule  
+      prune(pruneData);    // Prune this rule		  	  
+    }
 	
-    if(m_ClassAttribute.isNominal()){		
+    if(m_ClassAttribute.isNominal()){			   
       Utils.normalize(m_Cnsqt);
       if(Utils.gr(Utils.sum(m_DefDstr), 0))
 	Utils.normalize(m_DefDstr);
@@ -912,149 +940,158 @@ public class ConjunctiveRule extends DistributionClassifier
     Instances growData = new Instances(data);	
     double defInfo;	
     double whole = data.sumOfWeights();
-	
-    /* Class distribution for data both covered and not covered by one antecedent */
-    double[][] classDstr = new double[2][m_NumClasses];
-	
-    /* Compute the default accuracy rate of the growing data */
-    for(int j=0; j < m_NumClasses; j++){
-      classDstr[0][j] = 0;
-      classDstr[1][j] = 0;
-    }	
-    if(m_ClassAttribute.isNominal()){	    
-      for(int i=0; i < growData.numInstances(); i++){
-	Instance datum = growData.instance(i);
-	classDstr[0][(int)datum.classValue()] += datum.weight();
-      }
-      defInfo = ContingencyTables.entropy(classDstr[0]);	    
-    }
-    else{
-      for(int i=0; i < growData.numInstances(); i++){
-	Instance datum = growData.instance(i);
-	classDstr[0][0] += datum.weight() * datum.classValue();
-      }
 
-      // No need to be divided by the denomitor because
-      // it's always the same
-      double defMean = (classDstr[0][0] / whole);
-      defInfo = meanSquaredError(growData, defMean) * growData.sumOfWeights();    
-    }
+    if(m_NumAntds != 0){
 	
-    // Store the default class distribution	
-    double[][] tmp = new double[2][m_NumClasses];
-    for(int y=0; y < m_NumClasses; y++){
-      if(m_ClassAttribute.isNominal()){	
-	tmp[0][y] = classDstr[0][y];
-	tmp[1][y] = classDstr[1][y];
+      /* Class distribution for data both covered and not covered by one antecedent */
+      double[][] classDstr = new double[2][m_NumClasses];
+	    
+      /* Compute the default information of the growing data */
+      for(int j=0; j < m_NumClasses; j++){
+	classDstr[0][j] = 0;
+	classDstr[1][j] = 0;
+      }	
+      if(m_ClassAttribute.isNominal()){	    
+	for(int i=0; i < growData.numInstances(); i++){
+	  Instance datum = growData.instance(i);
+	  classDstr[0][(int)datum.classValue()] += datum.weight();
+	}
+	defInfo = ContingencyTables.entropy(classDstr[0]);    
       }
       else{
-	tmp[0][y] = classDstr[0][y]/whole;
-	tmp[1][y] = classDstr[1][y];
-      }
-    }
-    m_Targets.addElement(tmp); 
-	
-    /* Keep the record of which attributes have already been used*/    
-    boolean[] used=new boolean[growData.numAttributes()];
-    for (int k=0; k<used.length; k++)
-      used[k]=false;
-    int numUnused=used.length;	
-    double maxInfoGain, uncoveredWtSq=0, uncoveredWtVl=0, uncoveredWts=0;	
-    boolean isContinue = true; // The stopping criterion of this rule	
-
-    while (isContinue){   
-      maxInfoGain = 0;       // We require that infoGain be positive
-	    
-      /* Build a list of antecedents */
-      Antd oneAntd=null;
-      Instances coverData = null, uncoverData = null;
-      Enumeration enumAttr=growData.enumerateAttributes();	    
-      int index=-1;  
-	 
-      /* Build one condition based on all attributes not used yet*/
-      while (enumAttr.hasMoreElements()){
-	Attribute att= (Attribute)(enumAttr.nextElement());
-	index++;
+	for(int i=0; i < growData.numInstances(); i++){
+	  Instance datum = growData.instance(i);
+	  classDstr[0][0] += datum.weight() * datum.classValue();
+	}
 		
-	Antd antd =null;	
-	if(m_ClassAttribute.isNominal()){		    
-	  if(att.isNumeric())
-	    antd = new NumericAntd(att, classDstr[1]);
-	  else
-	    antd = new NominalAntd(att, classDstr[1]);
-	}
-	else
-	  if(att.isNumeric())
-	    antd = new NumericAntd(att, uncoveredWtSq, uncoveredWtVl, uncoveredWts);
-	  else
-	    antd = new NominalAntd(att, uncoveredWtSq, uncoveredWtVl, uncoveredWts); 
-		
-	if(!used[index]){
-	  /* Compute the best information gain for each attribute,
-	     it's stored in the antecedent formed by this attribute.
-	     This procedure returns the data covered by the antecedent*/
-	  Instances[] coveredData = computeInfoGain(growData, defInfo, antd);	 
-		    
-	  if(coveredData != null){
-	    double infoGain = antd.getMaxInfoGain();			
-	    boolean isUpdate = Utils.gr(infoGain, maxInfoGain);
-			
-	    if(isUpdate){
-	      oneAntd=antd;
-	      coverData = coveredData[0]; 
-	      uncoverData = coveredData[1];  
-	      maxInfoGain = infoGain;		    
-	    }
-	  }
-	}
+	// No need to be divided by the denomitor because
+	// it's always the same
+	double defMean = (classDstr[0][0] / whole);
+	defInfo = meanSquaredError(growData, defMean) * growData.sumOfWeights();    
       }
 	    
-      if(oneAntd == null) 		
-	return;	    
-	    
-      //Numeric attributes can be used more than once
-      if(!oneAntd.getAttr().isNumeric()){ 
-	used[oneAntd.getAttr().index()]=true;
-	numUnused--;
-      }
-	    
-      m_Antds.addElement(oneAntd);
-      growData = coverData;// Grow data size is shrinking 	    
-	    
-      for(int x=0; x < uncoverData.numInstances(); x++){
-	Instance datum = uncoverData.instance(x);
-	if(m_ClassAttribute.isNumeric()){
-	  uncoveredWtSq += datum.weight() * datum.classValue() * datum.classValue();
-	  uncoveredWtVl += datum.weight() * datum.classValue();
-	  uncoveredWts += datum.weight();
-	  classDstr[0][0] -= datum.weight() * datum.classValue();
-	  classDstr[1][0] += datum.weight() * datum.classValue();
-	}
-	else{
-	  classDstr[0][(int)datum.classValue()] -= datum.weight();
-	  classDstr[1][(int)datum.classValue()] += datum.weight();
-	}
-      }	       
-	    
-      // Store class distribution of growing data
-      tmp = new double[2][m_NumClasses];
+      // Store the default class distribution	
+      double[][] tmp = new double[2][m_NumClasses];
       for(int y=0; y < m_NumClasses; y++){
 	if(m_ClassAttribute.isNominal()){	
 	  tmp[0][y] = classDstr[0][y];
 	  tmp[1][y] = classDstr[1][y];
 	}
 	else{
-	  tmp[0][y] = classDstr[0][y]/(whole-uncoveredWts);
-	  tmp[1][y] = classDstr[1][y]/uncoveredWts;
+	  tmp[0][y] = classDstr[0][y]/whole;
+	  tmp[1][y] = classDstr[1][y];
 	}
       }
-      m_Targets.addElement(tmp);  
+      m_Targets.addElement(tmp); 
 	    
-      defInfo = oneAntd.getInfo();
+      /* Keep the record of which attributes have already been used*/    
+      boolean[] used=new boolean[growData.numAttributes()];
+      for (int k=0; k<used.length; k++)
+	used[k]=false;
+      int numUnused=used.length;	
+      double maxInfoGain, uncoveredWtSq=0, uncoveredWtVl=0, uncoveredWts=0;	
+      boolean isContinue = true; // The stopping criterion of this rule	
 	    
-      if(Utils.eq(growData.sumOfWeights(), 0.0) || (numUnused == 0))
-	isContinue = false;
+      while (isContinue){   
+	maxInfoGain = 0;       // We require that infoGain be positive
+		
+	/* Build a list of antecedents */
+	Antd oneAntd=null;
+	Instances coverData = null, uncoverData = null;
+	Enumeration enumAttr=growData.enumerateAttributes();	    
+	int index=-1;  
+		
+	/* Build one condition based on all attributes not used yet*/
+	while (enumAttr.hasMoreElements()){
+	  Attribute att= (Attribute)(enumAttr.nextElement());
+	  index++;
+		    
+	  Antd antd =null;	
+	  if(m_ClassAttribute.isNominal()){		    
+	    if(att.isNumeric())
+	      antd = new NumericAntd(att, classDstr[1]);
+	    else
+	      antd = new NominalAntd(att, classDstr[1]);
+	  }
+	  else
+	    if(att.isNumeric())
+	      antd = new NumericAntd(att, uncoveredWtSq, uncoveredWtVl, uncoveredWts);
+	    else
+	      antd = new NominalAntd(att, uncoveredWtSq, uncoveredWtVl, uncoveredWts); 
+		    
+	  if(!used[index]){
+	    /* Compute the best information gain for each attribute,
+	       it's stored in the antecedent formed by this attribute.
+	       This procedure returns the data covered by the antecedent*/
+	    Instances[] coveredData = computeInfoGain(growData, defInfo, antd);	 
+			
+	    if(coveredData != null){
+	      double infoGain = antd.getMaxInfoGain();			
+	      boolean isUpdate = Utils.gr(infoGain, maxInfoGain);
+			    
+	      if(isUpdate){
+		oneAntd=antd;
+		coverData = coveredData[0]; 
+		uncoverData = coveredData[1];  
+		maxInfoGain = infoGain;		    
+	      }
+	    }
+	  }
+	}
+		
+	if(oneAntd == null) 		
+	  break;	    
+		
+	//Numeric attributes can be used more than once
+	if(!oneAntd.getAttr().isNumeric()){ 
+	  used[oneAntd.getAttr().index()]=true;
+	  numUnused--;
+	}
+		
+	m_Antds.addElement(oneAntd);
+	growData = coverData;// Grow data size is shrinking 	    
+		
+	for(int x=0; x < uncoverData.numInstances(); x++){
+	  Instance datum = uncoverData.instance(x);
+	  if(m_ClassAttribute.isNumeric()){
+	    uncoveredWtSq += datum.weight() * datum.classValue() * datum.classValue();
+	    uncoveredWtVl += datum.weight() * datum.classValue();
+	    uncoveredWts += datum.weight();
+	    classDstr[0][0] -= datum.weight() * datum.classValue();
+	    classDstr[1][0] += datum.weight() * datum.classValue();
+	  }
+	  else{
+	    classDstr[0][(int)datum.classValue()] -= datum.weight();
+	    classDstr[1][(int)datum.classValue()] += datum.weight();
+	  }
+	}	       
+		
+	// Store class distribution of growing data
+	tmp = new double[2][m_NumClasses];
+	for(int y=0; y < m_NumClasses; y++){
+	  if(m_ClassAttribute.isNominal()){	
+	    tmp[0][y] = classDstr[0][y];
+	    tmp[1][y] = classDstr[1][y];
+	  }
+	  else{
+	    tmp[0][y] = classDstr[0][y]/(whole-uncoveredWts);
+	    tmp[1][y] = classDstr[1][y]/uncoveredWts;
+	  }
+	}
+	m_Targets.addElement(tmp);  
+		
+	defInfo = oneAntd.getInfo();
+	int numAntdsThreshold = (m_NumAntds == -1) ? Integer.MAX_VALUE : m_NumAntds;
+
+	if(Utils.eq(growData.sumOfWeights(), 0.0) || 
+	   (numUnused == 0) ||
+	   (m_Antds.size() >= numAntdsThreshold))
+	  isContinue = false;
+      }
     }
+	
+    m_Cnsqt = ((double[][])(m_Targets.lastElement()))[0];
+    m_DefDstr = ((double[][])(m_Targets.lastElement()))[1];	
   }
     
   /** 
@@ -1226,8 +1263,8 @@ public class ConjunctiveRule extends DistributionClassifier
       }
     }
 	
-    m_Cnsqt = ((double[][])m_Targets.lastElement())[0];
-    m_DefDstr = ((double[][])m_Targets.lastElement())[1];
+    m_Cnsqt = ((double[][])(m_Targets.lastElement()))[0];
+    m_DefDstr = ((double[][])(m_Targets.lastElement()))[1];
   }
     
   /**
