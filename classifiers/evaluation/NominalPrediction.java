@@ -25,7 +25,7 @@ import java.io.Serializable;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NominalPrediction implements Prediction, Serializable {
 
@@ -154,6 +154,23 @@ public class NominalPrediction implements Prediction, Serializable {
       return dist;
     }
     dist[(int)predictedClass] = 1.0;
+    return dist;
+  }
+  
+  /**
+   * Creates a uniform probability distribution -- where each of the
+   * possible classes is assigned equal probability.
+   *
+   * @param numClasses the number of possible classes for this nominal
+   * prediction.
+   * @return the probability distribution.  
+   */
+  public static double [] makeUniformDistribution(int numClasses) {
+
+    double [] dist = new double [numClasses];
+    for (int i = 0; i < numClasses; i++) {
+      dist[i] = 1.0 / numClasses;
+    }
     return dist;
   }
  
