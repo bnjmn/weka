@@ -32,14 +32,14 @@ import  weka.filters.ReplaceMissingValuesFilter;
  *
  * Valid options are:<p>
  *
- * -N <number of clusters> <br
+ * -N <number of clusters> <br>
  * Specify the number of clusters to generate. <p>
  *
  * -S <seed> <br>
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -352,7 +352,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
    *
    * Valid options are:<p>
    *
-   * -N <number of clusters> <br
+   * -N <number of clusters> <br>
    * Specify the number of clusters to generate. If omitted,
    * EM will use cross validation to select the number of clusters
    * automatically. <p>

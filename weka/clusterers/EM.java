@@ -40,7 +40,7 @@ import  weka.estimators.*;
  * -V <br>
  * Verbose. <p>
  *
- * -N <number of clusters> <br
+ * -N <number of clusters> <br>
  * Specify the number of clusters to generate. If omitted,
  * EM will use cross validation to select the number of clusters
  * automatically. <p>
@@ -56,7 +56,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class EM
   extends DistributionClusterer
@@ -128,7 +128,7 @@ public class EM
    * -V <br>
    * Verbose. <p>
    *
-   * -N <number of clusters> <br
+   * -N <number of clusters> <br>
    * Specify the number of clusters to generate. If omitted,
    * EM will use cross validation to select the number of clusters
    * automatically. <p>
