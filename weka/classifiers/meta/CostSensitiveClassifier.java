@@ -58,7 +58,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler {
@@ -421,7 +421,7 @@ public class CostSensitiveClassifier extends Classifier
       throw new Exception("Class attribute must be nominal!");
     }
     if (m_MatrixSource == MATRIX_ON_DEMAND) {
-      String costName = data.relationName() + ".cost";
+      String costName = data.relationName() + CostMatrix.FILE_EXTENSION;
       File costFile = new File(getOnDemandDirectory(), costName);
       if (!costFile.exists()) {
         throw new Exception("On-demand cost file doesn't exist: " + costFile);
