@@ -37,21 +37,21 @@ PACKAGE = weka.gui
 #----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
-	(cd experiment; make all)
-	(cd explorer; make all)
-	(cd streams; make all)
+	(cd experiment; make all JAVA=$(JAVA))
+	(cd explorer; make all JAVA=$(JAVA))
+	(cd streams; make all JAVA=$(JAVA))
 
 debug : clean
 	$(JAVA) -g $(SOURCES)
-	(cd experiment; make debug)
-	(cd explorer; make debug)
-	(cd streams; make debug)
+	(cd experiment; make debug JAVA=$(JAVA))
+	(cd explorer; make debug JAVA=$(JAVA))
+	(cd streams; make debug JAVA=$(JAVA))
 
 optimized : clean
 	$(JAVA) -O $(SOURCES)
-	(cd experiment; make optimized)
-	(cd explorer; make optimized)
-	(cd streams; make optimized)
+	(cd experiment; make optimized JAVA=$(JAVA))
+	(cd explorer; make optimized JAVA=$(JAVA))
+	(cd streams; make optimized JAVA=$(JAVA))
 
 fulljar : all
 	(cd $(TOPDIR) ; \
