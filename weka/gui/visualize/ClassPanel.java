@@ -40,6 +40,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -53,7 +55,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClassPanel extends JPanel {
     
@@ -109,6 +111,10 @@ public class ClassPanel extends JPanel {
       be repainted in order to display the change */
   private FastVector m_Repainters = new FastVector();
 
+  /** An optional list of listeners who want to know when a colour
+      changes. Listeners are notified via an ActionEvent */
+  private FastVector m_ColourChangeListeners = new FastVector();
+
   /** default colours for colouring discrete class */
   protected Color [] m_DefaultColors = {Color.blue,
 					Color.red,
@@ -146,13 +152,20 @@ public class ClassPanel extends JPanel {
 		
 	      if (tmp != null) {
 		m_colorList.setElementAt(tmp, m_index);
+		m_oldWidth = -9000;
+		ClassPanel.this.repaint();
 		if (m_Repainters.size() > 0) {
 		  for (int i=0;i<m_Repainters.size();i++) {
 		    ((Component)(m_Repainters.elementAt(i))).repaint();
 		  }
 		}
-		m_oldWidth = -9000;
-		ClassPanel.this.repaint();
+		
+		if (m_ColourChangeListeners.size() > 0) {
+		  for (int i = 0; i < m_ColourChangeListeners.size(); i++) {
+		    ((ActionListener)(m_ColourChangeListeners.elementAt(i))).
+		      actionPerformed(new ActionEvent(this, 0, ""));
+		  }
+		}
 	      }
 	    }
 	  }
@@ -182,6 +195,16 @@ public class ClassPanel extends JPanel {
    */
   public void addRepaintNotify(Component c) {
     m_Repainters.addElement(c);
+  }
+
+  /**
+   * Add an action listener that will be notified if the user changes the
+   * colour of a label
+   *
+   * @param a an <code>ActionListener</code> value
+   */
+  public void addActionListener(ActionListener a) {
+    m_ColourChangeListeners.addElement(a);
   }
 
   /**
