@@ -63,7 +63,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -266,8 +266,8 @@ TreeDisplayListener, VisualizePanelListener {
 	
 	
 	m_propertyDialog = new PropertyDialog(m_classifiers, 
-					    m_mainWin.getLocationOnScreen().x,
-					    m_mainWin.getLocationOnScreen().y);
+					      m_mainWin.getLocationOnScreen().x,
+					      m_mainWin.getLocationOnScreen().y);
 	
 	//note property dialog may change all the time
 	//but the generic editor which has the listeners does not
@@ -463,7 +463,7 @@ TreeDisplayListener, VisualizePanelListener {
     //note that I will display at the bottom of each split how many 
     //fall into each catagory
     
-    m_classifiers = new GenericObjectEditor();
+    m_classifiers = new GenericObjectEditor(true);
     m_classifiers.setClassType(Classifier.class);
     m_classifiers.setValue(new weka.classifiers.rules.ZeroR());
     
