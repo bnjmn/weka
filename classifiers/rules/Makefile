@@ -1,6 +1,7 @@
 JAVAC = javac
 
-SOURCES = DecisionTable.java OneR.java Prism.java ZeroR.java
+SOURCES = DecisionTable.java OneR.java Prism.java ZeroR.java \
+	Ridor.java ConjunctiveRule.java
 
 
 
