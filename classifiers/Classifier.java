@@ -23,12 +23,15 @@
 package weka.classifiers;
 
 import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Attribute;
 import weka.core.SerializedObject;
 import weka.core.Utils;
-
+import weka.core.OptionHandler;
+import weka.core.Option;
 
 /** 
  * Abstract classifier. All schemes for numeric or nominal prediction in
@@ -37,10 +40,14 @@ import weka.core.Utils;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public abstract class Classifier implements Cloneable, Serializable {
+public abstract class Classifier 
+  implements Cloneable, Serializable, OptionHandler {
  
+  /** Whether the classifier is run in debug mode. */
+  protected boolean m_Debug = false;
+
   /**
    * Generates a classifier. Must initialize all fields of the classifier
    * that are not being set via options (ie. multiple calls of buildClassifier
@@ -167,6 +174,84 @@ public abstract class Classifier implements Cloneable, Serializable {
       classifiers[i] = (Classifier) so.getObject();
     }
     return classifiers;
+  }
+
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+
+    Vector newVector = new Vector(1);
+
+    newVector.addElement(new Option(
+	      "\tIf set, classifier is run in debug mode and\n"
+	      + "\tmay output additional info to the console",
+	      "D", 0, "-D"));
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options. Valid options are:<p>
+   *
+   * -D  <br>
+   * If set, classifier is run in debug mode and 
+   * may output additional info to the console.<p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+
+    setDebug(Utils.getFlag('D', options));
+  }
+
+  /**
+   * Gets the current settings of the Classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String [] getOptions() {
+
+    String [] options;
+    if (getDebug()) {
+      options = new String[1];
+      options[0] = "-D";
+    } else {
+      options = new String[0];
+    }
+    return options;
+  }
+
+  /**
+   * Set debugging mode.
+   *
+   * @param debug true if debug output should be printed
+   */
+  public void setDebug(boolean debug) {
+
+    m_Debug = debug;
+  }
+
+  /**
+   * Get whether debugging is turned on.
+   *
+   * @return true if debugging output is on
+   */
+  public boolean getDebug() {
+
+    return m_Debug;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "If set to true, classifier may output additional info to " +
+      "the console.";
   }
 }
 

@@ -100,10 +100,9 @@ import weka.core.*;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 `*/
-public class MultiBoostAB extends AdaBoostM1
-  implements OptionHandler, WeightedInstancesHandler, Sourcable {
+public class MultiBoostAB extends AdaBoostM1 {
 
   /** The number of sub-committees to use */
   protected int m_NumSubCmtys = 3;
