@@ -54,7 +54,7 @@ import java.util.*;
  * If set, data is not being stratified even if class index is set. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -272,7 +272,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
       throw new IllegalArgumentException("Number of folds has to be positive or zero.");
     }
     m_NumFolds = numFolds;
-    m_Range = null;
   }
 
   /**
@@ -297,7 +296,6 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
       throw new IllegalArgumentException("Fold's index has to be greater than 0.");
     }
     m_Fold = fold;
-    m_Range = null;
   }
 
   /**
