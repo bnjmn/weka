@@ -53,7 +53,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributeExpressionFilter extends Filter 
   implements OptionHandler {
@@ -61,7 +61,7 @@ public class AttributeExpressionFilter extends Filter
   /**
    * Inner class handling an attribute index as an operand
    */
-  private class AttributeOperand {
+  private class AttributeOperand implements Serializable {
 
     /** the index of the attribute */
     protected int m_attributeIndex;
@@ -91,7 +91,7 @@ public class AttributeExpressionFilter extends Filter
   /**
    * Inner class for storing numeric constant opperands
    */
-  private class NumericOperand {
+  private class NumericOperand implements Serializable {
 
     /** numeric constant */
     protected double m_numericConst;
@@ -115,7 +115,7 @@ public class AttributeExpressionFilter extends Filter
   /**
    * Inner class for storing operators
    */
-  private class Operator {
+  private class Operator implements Serializable {
 
     /** the operator */
     protected char m_operator;
@@ -190,10 +190,7 @@ public class AttributeExpressionFilter extends Filter
   }
 
   /** The infix expression */
-  private String m_infixExpression;
-
-  /** Tokenizer for spliting up the expression */
-  private StringTokenizer m_tokenizer;
+  private String m_infixExpression = "a1^2";
 
   /** Operator stack */
   private Stack m_operatorStack = new Stack();
@@ -219,6 +216,22 @@ public class AttributeExpressionFilter extends Filter
   /** If true, makes the attribute name equal to the postfix parse of the
       expression */
   private boolean m_Debug = false;
+
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "An instance filter that creates a new attribute by applying a "
+      +"mathematical expression to existing attributes. The expression "
+      +"can contain attribute references and numeric constants. Supported "
+      +"opperators are :  +, -, *, /, ^, log, abs, cos, exp, sqrt, "
+      +"floor, ceil, rint, tan, sin, (, ). Attributes are specified "
+      +"by prefixing with 'a', eg. a7 is attribute number 7 (starting from 1)."
+      +" Example expression : a1^2*a5/log(a7*4.0)."; 
+  }
 
   /**
    * Handles the processing of an infix operand to postfix
@@ -312,11 +325,11 @@ public class AttributeExpressionFilter extends Filter
     infixExp = Utils.replaceSubstring(infixExp,"tan","t");
     infixExp = Utils.replaceSubstring(infixExp,"sin","n");
 
-    m_tokenizer = new StringTokenizer(infixExp, OPERATORS, true);
+    StringTokenizer tokenizer = new StringTokenizer(infixExp, OPERATORS, true);
     m_postFixExpVector = new Vector();
 
-    while (m_tokenizer.hasMoreTokens()) {
-      String tok = m_tokenizer.nextToken();
+    while (tokenizer.hasMoreTokens()) {
+      String tok = tokenizer.nextToken();
       
       if (tok.length() > 1) {
 	handleOperand(tok);
