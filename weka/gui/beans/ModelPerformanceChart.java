@@ -44,7 +44,7 @@ import java.beans.beancontext.*;
  * curves).
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ModelPerformanceChart extends JPanel
   implements ThresholdDataListener, Visible, UserRequestAcceptor,
@@ -131,6 +131,7 @@ public class ModelPerformanceChart extends JPanel
 	m_visPanel.addPlot(e.getDataSet());
 	m_visPanel.validate(); m_visPanel.repaint();
       }
+      m_visPanel.setXIndex(4); m_visPanel.setYIndex(5);
     } catch (Exception ex) {
       System.err.println("Problem setting up visualization (ModelPerformanceChart)");
       ex.printStackTrace();
@@ -265,7 +266,7 @@ public class ModelPerformanceChart extends JPanel
 	    ex.printStackTrace();
 	    } */
 	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame("Visualize Performance Chart");
+	    new javax.swing.JFrame("Model Performance Chart");
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(m_visPanel, BorderLayout.CENTER);
