@@ -22,12 +22,14 @@ package weka.classifiers;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
-import weka.gui.explorer.treevisualizer.*;
+import weka.gui.treevisualizer.*;
 import weka.core.*;
 import weka.filters.*;
 import weka.classifiers.*;
 import weka.classifiers.j48.*;
-import weka.gui.explorer.*;
+import weka.gui.VisualizePanel;
+import weka.gui.VisualizePanelListener;
+import weka.gui.VisualizePanelEvent;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyDialog;
 
@@ -42,7 +44,7 @@ import java.beans.PropertyChangeSupport;
  *
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
