@@ -35,7 +35,7 @@ import weka.filters.Filter;
  * GUI customizer for the filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FilterCustomizer extends JPanel
   implements Customizer {
@@ -75,7 +75,7 @@ public class FilterCustomizer extends JPanel
     try {
       m_filterEditor.
 	setClassType(Filter.class);      
-      m_filterEditor.setValue(new weka.filters.AllFilter());
+      m_filterEditor.setValue(new weka.filters.unsupervised.attribute.Add());
       m_filterEditor.addPropertyChangeListener(new PropertyChangeListener() {
 	  public void propertyChange(PropertyChangeEvent e) {
 	    repaint();
