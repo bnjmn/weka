@@ -35,6 +35,7 @@ import java.beans.EventSetDescriptor;
 
 import weka.core.Instances;
 import weka.core.Instance;
+import weka.clusterers.DensityBasedClusterer;
 
 /**
  * Bean that can can accept batch or incremental classifier events
@@ -42,12 +43,12 @@ import weka.core.Instance;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
 	     EventConstraints, BatchClassifierListener,
-	     IncrementalClassifierListener, Serializable {
+	     IncrementalClassifierListener, BatchClustererListener, Serializable {
 
   /**
    * Objects listenening for dataset events
@@ -352,6 +353,76 @@ public class PredictionAppender extends JPanel
       }
     }
   }
+  
+  
+    /**
+   * Accept and process a batch classifier event
+   *
+   * @param e a <code>BatchClassifierEvent</code> value
+   */
+  public void acceptClusterer(BatchClustererEvent e) {
+    if (m_dataSourceListeners.size() > 0) {
+      if(e.getTestSet().isStructureOnly())
+          return;
+      Instances testSet = e.getTestSet().getDataSet();
+      weka.clusterers.Clusterer clusterer = e.getClusterer();
+      String test;
+      if(e.getTestOrTrain()==0)
+          test = "test";
+      else
+          test = "training";
+      String relationNameModifier = "_"+test+"_"+e.getSetNumber()+"_of_"
+	+e.getMaxSetNumber();
+      if (!m_appendProbabilities || !(clusterer instanceof DensityBasedClusterer)) {
+	if(m_appendProbabilities && !(clusterer instanceof DensityBasedClusterer)){
+            System.err.println("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
+            if (m_logger != null) {
+                m_logger.logMessage("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
+            }
+        }
+        try {
+	  Instances newInstances = makeClusterDataSetClass(testSet, clusterer,
+						    relationNameModifier);
+	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
+          
+	  // fill in predicted values
+	  for (int i = 0; i < testSet.numInstances(); i++) {
+	    double predCluster = 
+	      clusterer.clusterInstance(testSet.instance(i));
+	    newInstances.instance(i).setValue(newInstances.numAttributes()-1,
+					      predCluster);
+	  }
+	  // notify listeners
+	  notifyDataSetAvailable(new DataSetEvent(this, newInstances));
+	  return;
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	}
+      }
+      else{
+	try {
+	  Instances newInstances = 
+	    makeClusterDataSetProbabilities(testSet,
+				     clusterer,relationNameModifier);
+	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
+          
+	  // fill in predicted probabilities
+	  for (int i = 0; i < testSet.numInstances(); i++) {
+	    double [] probs = clusterer.
+	      distributionForInstance(testSet.instance(i));
+	    for (int j = 0; j < clusterer.numberOfClusters(); j++) {
+	      newInstances.instance(i).setValue(testSet.numAttributes()+j,
+						probs[j]);
+	    }
+	  }
+	  // notify listeners
+	  notifyDataSetAvailable(new DataSetEvent(this, newInstances));
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	}
+      }
+    }
+  }
 
   private Instances 
     makeDataSetProbabilities(Instances format,
@@ -393,6 +464,57 @@ public class PredictionAppender extends JPanel
       }
       addF.setNominalLabels(classLabels);
     }
+    addF.setInputFormat(format);
+
+
+    Instances newInstances = 
+      weka.filters.Filter.useFilter(format, addF);
+    newInstances.setRelationName(format.relationName()+relationNameModifier);
+    return newInstances;
+  }
+  
+  private Instances 
+    makeClusterDataSetProbabilities(Instances format,
+			     weka.clusterers.Clusterer clusterer,
+			     String relationNameModifier) 
+  throws Exception {
+    int numOrigAtts = format.numAttributes();
+    Instances newInstances = new Instances(format);
+    for (int i = 0; i < clusterer.numberOfClusters(); i++) {
+      weka.filters.unsupervised.attribute.Add addF = new
+	weka.filters.unsupervised.attribute.Add();
+      addF.setAttributeIndex("last");
+      addF.setAttributeName("prob_cluster"+i);
+      addF.setInputFormat(newInstances);
+      newInstances = weka.filters.Filter.useFilter(newInstances, addF);
+    }
+    newInstances.setRelationName(format.relationName()+relationNameModifier);
+    return newInstances;
+  }
+
+  private Instances makeClusterDataSetClass(Instances format,
+				     weka.clusterers.Clusterer clusterer,
+				     String relationNameModifier) 
+  throws Exception {
+    
+    weka.filters.unsupervised.attribute.Add addF = new
+      weka.filters.unsupervised.attribute.Add();
+    addF.setAttributeIndex("last");
+    String clustererName = clusterer.getClass().getName();
+    clustererName = clustererName.
+      substring(clustererName.lastIndexOf('.')+1, clustererName.length());
+    addF.setAttributeName("assigned_cluster: "+clustererName);
+    //if (format.classAttribute().isNominal()) {
+    String clusterLabels = "0";
+      /*Enumeration enum = format.classAttribute().enumerateValues();
+      clusterLabels += (String)enum.nextElement();
+      while (enum.hasMoreElements()) {
+	clusterLabels += ","+(String)enum.nextElement();
+      }*/
+    for(int i = 1; i <= clusterer.numberOfClusters()-1; i++)
+        clusterLabels += ","+i;
+    addF.setNominalLabels(clusterLabels);
+    //}
     addF.setInputFormat(format);
 
 
@@ -517,7 +639,8 @@ public class PredictionAppender extends JPanel
       }
       if (eventName.equals("dataSet")) {
 	if (!((EventConstraints)m_listenee).
-	    eventGeneratable("batchClassifier")) {
+	    eventGeneratable("batchClassifier") && !((EventConstraints)m_listenee).
+	    eventGeneratable("batchClusterer")) {
 	  return false;
 	}
       }
