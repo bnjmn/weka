@@ -41,7 +41,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -402,6 +402,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	newInst = new Instance(1.0, vals);
       }
       instances.addElement(newInst);
+      rowCount++;
     }
     rs.close();
     //disconnectFromDatabase();  (perhaps other queries might be made)
