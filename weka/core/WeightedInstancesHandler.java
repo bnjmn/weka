@@ -16,20 +16,18 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
-import java.util.*;
-
 /** 
- * Interface for indicating that an algorithm does make
- * use of the information provided by instance weights.
+ * Interface to something that makes use of the information provided
+ * by instance weights.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
- */
-
+ * @version $Revision: 1.2 $ 
+*/
 public interface WeightedInstancesHandler {
+
+  // Nothing in here, because the class is just used as an indicator
 }
 
 

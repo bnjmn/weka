@@ -16,20 +16,15 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 /** 
- * Interface to something that can be drawn.
+ * Interface to something that can be drawn as a graph.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public interface Drawable {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns a string that describes a graph representing
@@ -38,7 +33,7 @@ public interface Drawable {
    * @return the graph described by a string
    * @exception Exception if the graph can't be computed
    */
-  String graph() throws Exception;
+  public String graph() throws Exception;
 }
 
 

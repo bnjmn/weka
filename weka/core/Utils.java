@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 import java.lang.Math;
@@ -28,23 +27,15 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public final class Utils {
-
-  // =================
-  // Public variables.
-  // =================
 
   /** The natural logarithm of 2. */
   public static double log2 = Math.log(2);
 
   /** The small deviation allowed in double comparisons */
   public static double SMALL = 1e-6;
-  
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Checks if the given array contains any non-empty options.
@@ -73,7 +64,7 @@ public final class Utils {
   }
   
   /**
-   * Returns the correlation coefficient of two double vectors
+   * Returns the correlation coefficient of two double vectors.
    *
    * @param y1 double vector 1
    * @param y2 double vector 2
@@ -208,6 +199,7 @@ public final class Utils {
     if (afterDecimalPoint > 0) {
       offset--;
     }
+
     // Not enough room to decimal align within the supplied width
     if (offset < 0) {
       return tempString;
@@ -249,7 +241,7 @@ public final class Utils {
    */
 
   public static boolean getFlag(char flag, String [] options) 
-  throws Exception {
+    throws Exception {
 
     if (options == null) {
       return false;
@@ -285,9 +277,8 @@ public final class Utils {
    * @return the indicated option or an empty string
    * @exception Exception if the option indicated by the flag can't be found
    */
-
   public static String getOption(char flag, String [] options) 
-       throws Exception {
+    throws Exception {
 
     String newString;
 
@@ -297,7 +288,6 @@ public final class Utils {
       if ((options[i].length() > 0) && (options[i].charAt(0) == '-')) {
 	
 	// Check if it is a negative number
-	
 	try {
 	  Double dummy = Double.valueOf(options[i]);
 	} catch (NumberFormatException e) {
@@ -442,7 +432,7 @@ public final class Utils {
 
   /**
    * Returns index of maximum element in a given
-   * array of doubles.
+   * array of doubles. First maximum is returned.
    *
    * @param doubles the array of doubles
    * @return the index of the maximum element
@@ -464,7 +454,7 @@ public final class Utils {
 
   /**
    * Returns index of maximum element in a given
-   * array of integers.
+   * array of integers. First maximum is returned.
    *
    * @param ints the array of integers
    * @return the index of the maximum element
@@ -505,7 +495,7 @@ public final class Utils {
 
   /**
    * Returns index of minimum element in a given
-   * array of integers.
+   * array of integers. First minimum is returned.
    *
    * @param ints the array of integers
    * @return the index of the minimum element
@@ -527,7 +517,7 @@ public final class Utils {
 
   /**
    * Returns index of minimum element in a given
-   * array of doubles.
+   * array of doubles. First minimum is returned.
    *
    * @param doubles the array of doubles
    * @return the index of the minimum element
@@ -621,7 +611,7 @@ public final class Utils {
   /**
    * Sorts a given array of doubles in ascending order and returns an 
    * array of integers with the positions of the elements of the original 
-   * array in the sorted array. The sort is stable (Equal elements remain
+   * array in the sorted array. The sort is stable. (Equal elements remain
    * in their original order.)
    *
    * @param array this array is not changed by the method!
@@ -641,7 +631,6 @@ public final class Utils {
     quickSort(array, index, 0, array.length - 1);
 
     // Make sort stable
-
     int i = 0;
     while (i < index.length) {
       numEqual = 1;
@@ -665,7 +654,55 @@ public final class Utils {
 	i++;
       }
     }
+    return newIndex;
+  }
 
+  /**
+   * Sorts a given array of integers in ascending order and returns an 
+   * array of integers with the positions of the elements of the original 
+   * array in the sorted array. The sort is stable. (Equal elements remain
+   * in their original order.)
+   *
+   * @param array this array is not changed by the method!
+   * @return an array of integers with the positions in the sorted
+   * array.
+   */
+  public static int[] sort(int [] array) {
+
+    int [] index = new int[array.length];
+    int [] newIndex = new int[array.length];
+    int [] helpIndex;
+    int numEqual;
+    
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+    }
+    quickSort(array, index, 0, array.length - 1);
+
+    // Make sort stable
+    int i = 0;
+    while (i < index.length) {
+      numEqual = 1;
+      for (int j = i + 1; ((j < index.length)
+			   && (array[index[i]] == array[index[j]]));
+	   j++) {
+	numEqual++;
+      }
+      if (numEqual > 1) {
+	helpIndex = new int[numEqual];
+	for (int j = 0; j < numEqual; j++) {
+	  helpIndex[j] = i + j;
+	}
+	quickSort(index, helpIndex, 0, numEqual - 1);
+	for (int j = 0; j < numEqual; j++) {
+	  newIndex[i + j] = index[helpIndex[j]];
+	}
+	i += numEqual;
+      } else {
+	newIndex[i] = index[i];
+	i++;
+      }
+    }
     return newIndex;
   }
 
@@ -759,31 +796,26 @@ public final class Utils {
       
       // Arbitrarily establishing partition element as the midpoint of
       // the array.
-            
       mid = array[index[(lo0 + hi0) / 2]];
       midPlus = mid + SMALL;
       midMinus = mid - SMALL;
 
       // loop through the array until indices cross
-      
       while (lo <= hi) {
 	
 	// find the first element that is greater than or equal to  
 	// the partition element starting from the left Index.
-		
 	while ((array[index[lo]] < midMinus) && (lo < hi0)) {
 	  ++lo;
 	}
 	
 	// find an element that is smaller than or equal to 
 	// the partition element starting from the right Index.
-	
 	while ((array[index[hi]] > midPlus) && (hi > lo0)) {
 	  --hi;
 	}
 	
 	// if the indexes have not crossed, swap
-	
 	if (lo <= hi) {
 	  help = index[lo];
 	  index[lo] = index[hi];
@@ -795,14 +827,12 @@ public final class Utils {
       
       // If the right index has not reached the left side of array
       // must now sort the left partition.
-      
       if (lo0 < hi) {
 	quickSort(array, index, lo0, hi);
       }
       
       // If the left index has not reached the right side of array
       // must now sort the right partition.
-      
       if (lo < hi0) {
 	quickSort(array, index, lo, hi0);
       }
@@ -830,29 +860,24 @@ public final class Utils {
       
       // Arbitrarily establishing partition element as the midpoint of
       // the array.
-            
       mid = array[index[(lo0 + hi0) / 2]];
 
       // loop through the array until indices cross
-      
       while (lo <= hi) {
 	
 	// find the first element that is greater than or equal to  
 	// the partition element starting from the left Index.
-		
 	while ((array[index[lo]] < mid) && (lo < hi0)) {
 	  ++lo;
 	}
 	
 	// find an element that is smaller than or equal to 
 	// the partition element starting from the right Index.
-	
 	while ((array[index[hi]] > mid) && (hi > lo0)) {
 	  --hi;
 	}
 	
 	// if the indexes have not crossed, swap
-	
 	if (lo <= hi) {
 	  help = index[lo];
 	  index[lo] = index[hi];
@@ -864,18 +889,111 @@ public final class Utils {
       
       // If the right index has not reached the left side of array
       // must now sort the left partition.
-      
       if (lo0 < hi) {
 	quickSort(array, index, lo0, hi);
       }
       
       // If the left index has not reached the right side of array
       // must now sort the right partition.
-      
       if (lo < hi0) {
 	quickSort(array, index, lo, hi0);
       }
     }
   }
-}
 
+  /**
+   * Main method for testing this class.
+   *
+   * @param ops some dummy options
+   */
+  public static void main(String[] ops) {
+
+    double[] doubles = {4.5, 6.7, 3.4, 4.8, 1.2, 3.4};
+    int[] ints = {12, 6, 2, 18, 16, 6, 7, 5};
+
+    try {
+
+      // Option handling
+      System.out.println("First option split up:");
+      if (ops.length > 0) {
+	String[] firstOptionSplitUp = Utils.splitOptions(ops[0]);
+	for (int i = 0; i < firstOptionSplitUp.length; i ++) {
+	  System.out.println(firstOptionSplitUp[i]);
+	}
+      }					       
+      System.out.println("Partitioned options: ");
+      String[] partitionedOptions = Utils.partitionOptions(ops);
+      for (int i  = 0; i < partitionedOptions.length; i++) {
+	System.out.println(partitionedOptions[i]);
+      }
+      System.out.println("Get flag -f: " + Utils.getFlag('f', ops));
+      System.out.println("Get option -o: " + Utils.getOption('o', ops));
+      System.out.println("Checking for remaining options... ");
+      Utils.checkForRemainingOptions(ops);
+      
+      // Statistics
+      System.out.println("Original array (doubles): ");
+      for (int i = 0; i < doubles.length; i++) {
+	System.out.print(doubles[i] + " ");
+      }
+      System.out.println();
+      System.out.println("Original array (ints): ");
+      for (int i = 0; i < ints.length; i++) {
+	System.out.print(ints[i] + " ");
+      }
+      System.out.println();
+      System.out.println("Correlation: " + Utils.correlation(doubles, doubles, 
+							     doubles.length));
+      System.out.println("Mean: " + Utils.mean(doubles));
+      System.out.println("Variance: " + Utils.variance(doubles));
+      System.out.println("Sum (doubles): " + Utils.sum(doubles));
+      System.out.println("Sum (ints): " + Utils.sum(ints));
+      System.out.println("Max index (doubles): " + Utils.maxIndex(doubles));
+      System.out.println("Max index (ints): " + Utils.maxIndex(ints));
+      System.out.println("Min index (doubles): " + Utils.minIndex(doubles));
+      System.out.println("Min index (ints): " + Utils.minIndex(ints));
+      
+      // Sorting and normalizing
+      System.out.println("Sorted array (doubles): ");
+      int[] sorted = Utils.sort(doubles);
+      for (int i = 0; i < doubles.length; i++) {
+	System.out.print(doubles[sorted[i]] + " ");
+      }
+      System.out.println();
+      System.out.println("Normalized array (doubles): ");
+      Utils.normalize(doubles);
+      for (int i = 0; i < doubles.length; i++) {
+	System.out.print(doubles[i] + " ");
+      }
+      System.out.println();
+      System.out.println("Normalized again (doubles): ");
+      Utils.normalize(doubles, Utils.sum(doubles));
+      for (int i = 0; i < doubles.length; i++) {
+	System.out.print(doubles[i] + " ");
+      }
+      System.out.println();
+      
+      // Pretty-printing
+      System.out.println("-4.58: " + Utils.doubleToString(-4.57826535, 2));
+      System.out.println("-6.78: " + Utils.doubleToString(-6.78214234, 6,2));
+      
+      // Comparisons
+      System.out.println("5.70001 == 5.7 ? " + Utils.eq(5.70001, 5.7));
+      System.out.println("5.70001 > 5.7 ? " + Utils.gr(5.70001, 5.7));
+      System.out.println("5.70001 >= 5.7 ? " + Utils.grOrEq(5.70001, 5.7));
+      System.out.println("5.7 < 5.70001 ? " + Utils.sm(5.7, 5.70001));
+      System.out.println("5.7 <= 5.70001 ? " + Utils.smOrEq(5.7, 5.70001));
+      
+      // Math
+      System.out.println("Info (ints): " + Utils.info(ints));
+      System.out.println("log2(4.6): " + Utils.log2(4.6));
+      System.out.println("5 * log(5): " + Utils.xlogx(5));
+      System.out.println("5.5 rounded: " + Utils.round(5.5));
+      System.out.println("5.55555 rounded to 2 decimal places: " + 
+			 Utils.roundDouble(5.55555, 2));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
+  

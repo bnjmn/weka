@@ -1,6 +1,6 @@
 /*
  *    Matrix.java
- *    Copyright (C) 1999 Yong Wang,modified by Eibe Frank
+ *    Copyright (C) 1999 Yong Wang, Eibe Frank, Len Trigg
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,37 +16,26 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 import java.io.*;
 
 /**
- * Class for handling a matrix of doubles
+ * Class for performing operations on a matrix of floating-point values.
+ * Some of the code is adapted from Numerical Recipes in C.
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @author modified by Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @author Len Trigg (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
  */
-
 public final class Matrix {
 
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * The data in the matrix.
-   */
+  /** The data in the matrix. */
   private double [][] elements;
 
-
-  // ==============
-  // Public methods
-  // ==============
-
   /**
-   * Constructs a matrix
+   * Constructs a matrix.
    *
    * @param nr the number of the rows
    * @param nc the number of the columns
@@ -121,7 +110,7 @@ public final class Matrix {
   public final void setColumn(int index, double[] newColumn) {
 
     for (int i = 0; i < elements.length; i++)
-      elements[i][index] = newColumn[index];
+      elements[i][index] = newColumn[i];
   }
 
   /** 
@@ -185,7 +174,7 @@ public final class Matrix {
   }
 
   /**
-   * Linear regression 
+   * Performs a (ridged) linear regression.
    *
    * @param y the dependent variable vector
    * @return the coefficients 
@@ -229,7 +218,7 @@ public final class Matrix {
   }
 
   /**
-   * Weighted linear regression 
+   * Performs a weighted (ridged) linear regression. 
    *
    * @param y the dependent variable vector
    * @param w the array of data point weights
@@ -253,7 +242,7 @@ public final class Matrix {
   }
 
   /**
-   * LU backward substitution 
+   * Performs LU backward substitution.  Adapted from Numerical Recipes in C.
    *
    * @param indx the indices of the permutation
    * @param b the double vector, storing constant terms in the equation set; 
@@ -288,7 +277,7 @@ public final class Matrix {
   }
   
   /**
-   * LU decomposition 
+   * Performs LU decomposition. Adapted from Numerical Recipes in C.
    *
    * @return the indices of the permutation
    * @exception Exception if the matrix is singular
@@ -346,8 +335,58 @@ public final class Matrix {
 	  elements[i][j] *= dum;
       }
     }
-
     return indx;
+  }
+
+  /**
+   * Main method for testing this class.
+   */
+  public static void main(String[] ops) {
+
+    double[] first = {2.3, 1.2, 5};
+    double[] second = {5.2, 1.4, 9};
+    double[] response = {4, 7, 8};
+    double[] weights = {1, 2, 3};
+
+    try {
+      Matrix a = new Matrix(2, 3);
+      Matrix b = new Matrix(3, 2);
+      System.out.println("Number of columns for a: " + a.numColumns());
+      System.out.println("Number of rows for a: " + a.numRows());
+      a.setRow(0, first);
+      a.setRow(1, second);
+      b.setColumn(0, first);
+      b.setColumn(1, second);
+      System.out.println("a:\n " + a);
+      System.out.println("b:\n " + b);
+      System.out.println("a (0, 0): " + a.getElement(0, 0));
+      System.out.println("a transposed:\n " + a.transpose());
+      System.out.println("a * b:\n " + a.multiply(b));
+      Matrix r = new Matrix(3, 1);
+      r.setColumn(0, response);
+      System.out.println("r:\n " + r);
+      System.out.println("Coefficients of regression of b on r: ");
+      double[] coefficients = b.regression(r);
+      for (int i = 0; i < coefficients.length; i++) {
+	System.out.print(coefficients[i] + " ");
+      }
+      System.out.println();
+      System.out.println("Weights: ");
+      for (int i = 0; i < weights.length; i++) {
+	System.out.print(weights[i] + " ");
+      }
+      System.out.println();
+      System.out.println("Coefficients of weighted regression of b on r: ");
+      coefficients = b.regression(r, weights);
+      for (int i = 0; i < coefficients.length; i++) {
+	System.out.print(coefficients[i] + " ");
+      }
+      System.out.println();
+      a.setElement(0, 0, 6);
+      System.out.println("a with (0, 0) set to 6:\n " + a);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
 

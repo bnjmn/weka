@@ -16,103 +16,86 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 /** 
- * Class to store information about an option.
+ * Class to store information about an option. <p>
+ *
+ * Typical usage: <p>
+ *
+ * <code>Option myOption = new Option("Uses extended mode.", "E", 0, "-E")); </code><p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class Option {
 
-  // =================
-  // Private variables
-  // =================
+  /** What does this option do? */
+  private String m_Description;
 
-  /**
-   * What does this option do?
-   */
+  /** The synopsis. */
+  private String m_Synopsis;
 
-  private String theDescription;
+  /** What's the option's name? */
+  private String m_Name;
 
-  /**
-   * The synopsis.
-   */
-
-  private String theSynopsis;
-
-  /**
-   * What's the option's name?
-   */
-
-  private String theName;
-
-  /**
-   * How many arguments does it take?
-   */
-
-  private int theNumArguments;
-
-  // ===============
-  // Public methods.
-  // ===============
+  /** How many arguments does it take? */
+  private int m_NumArguments;
 
   /**
    * Creates new option with the given parameters.
+   *
    * @String description the option's description
    * @String name the option's name
    * @String numArguments the number of arguments
    */
-
   public Option(String description, String name, 
 		int numArguments, String synopsis) {
   
-    theDescription = description;
-    theName = name;
-    theNumArguments = numArguments;
-    theSynopsis = synopsis;
+    m_Description = description;
+    m_Name = name;
+    m_NumArguments = numArguments;
+    m_Synopsis = synopsis;
   }
 
   /**
    * Returns the option's description.
+   *
    * @return the option's description
    */
-
   public String description() {
   
-    return theDescription;
+    return m_Description;
   }
 
   /**
    * Returns the option's name.
+   *
    * @return the option's name
    */
-
   public String name() {
 
-    return theName;
+    return m_Name;
   }
 
   /**
    * Returns the option's number of arguments.
+   *
    * @return the option's number of arguments
    */
-
   public int numArguments() {
   
-    return theNumArguments;
+    return m_NumArguments;
   }
 
   /**
    * Returns the option's synopsis.
+   *
    * @return the option's synopsis
    */
-
   public String synopsis() {
   
-    return theSynopsis;
+    return m_Synopsis;
   }
 }
 

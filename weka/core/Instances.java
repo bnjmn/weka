@@ -16,51 +16,60 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 import java.io.*;
 import java.util.*;
 
 /**
- * Class for handling an ordered set of weighted instances.
+ * Class for handling an ordered set of weighted instances. <p>
  *
- * All methods that change a set of instances are
- * safe, ie. a change of a set of instances does
- * not affect any other sets of instances. All
- * methods that change a datasets's header 
- * information or structure clone the dataset before
- * it is changed.
+ * Typical usage (code from the main() method of this class): <p>
+ *
+ * <code>
+ * ... <br>
+ * 
+ * // Read all the instances in the file <br>
+ * reader = new FileReader(filename); <br>
+ * instances = new Instances(reader); <br><br>
+ *
+ * // Make the last attribute be the class <br>
+ * instances.setClassIndex(instances.numAttributes() - 1); <br><br>
+ * 
+ * // Print header and instances. <br>
+ * System.out.println("\nDataset:\n"); <br> 
+ * System.out.println(instances); <br><br>
+ *
+ * ... <br>
+ * </code><p>
+ *
+ * All methods that change a set of instances are safe, ie. a change
+ * of a set of instances does not affect any other sets of
+ * instances. All methods that change a datasets's attribute
+ * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.1 September 1998 (Eibe)
- */
+ * @version $Revision: 1.3 $ 
+*/
 public class Instances implements Serializable {
  
-  // =================
-  // Private variables
-  // =================
-
   /** The dataset's name. */
-  private String theRelationName;         
+  private String m_RelationName;         
 
   /** The attribute information. */
-  private FastVector theAttributes;
+  private FastVector m_Attributes;
 
   /** The instances. */
-  private FastVector theInstances;
+  private FastVector m_Instances;
 
   /** The class attribute's index */
-  private int theClassIndex;
-
-  // ===============
-  // Public methods.
-  // ===============
+  private int m_ClassIndex;
 
   /**
-   * Reads an ARFF file from a reader, assigns a weight of
-   * one to each instance and lets the index of the class 
-   * attribute undefined.
+   * Reads an ARFF file from a reader, and assigns a weight of
+   * one to each instance. Lets the index of the class 
+   * attribute be undefined (negative).
+   *
    * @param reader the reader
    * @exception Exception if the ARFF file is not read 
    * successfully
@@ -72,8 +81,8 @@ public class Instances implements Serializable {
     tokenizer = new StreamTokenizer(reader);
     initTokenizer(tokenizer);
     readHeader(tokenizer);
-    theClassIndex = -1;
-    theInstances = new FastVector(1000);
+    m_ClassIndex = -1;
+    m_Instances = new FastVector(1000);
     while (getInstance(tokenizer, true)) {};
     compactify();
   }
@@ -81,7 +90,8 @@ public class Instances implements Serializable {
   /**
    * Reads the header of an ARFF file from a reader and 
    * reserves space for the given number of instances. Lets
-   * the class index undefined.
+   * the class index be undefined (negative).
+   *
    * @param reader the reader
    * @param capacity the capacity
    * @exception Exception if the header is not read successfully
@@ -92,18 +102,20 @@ public class Instances implements Serializable {
 
     StreamTokenizer tokenizer;
 
-    if (capacity < 0) 
+    if (capacity < 0) {
       throw new Exception("Capacity has to be positive!");
+    }
     tokenizer = new StreamTokenizer(reader); 
     initTokenizer(tokenizer);
     readHeader(tokenizer);
-    theClassIndex = -1;
-    theInstances = new FastVector(capacity);
+    m_ClassIndex = -1;
+    m_Instances = new FastVector(capacity);
   }
 
   /**
    * Constructor copying all instances and references to
    * the header information from the given set of instances.
+   *
    * @param instances the set to be copied
    */
   public Instances(Instances dataset) {
@@ -114,11 +126,13 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Constructor creating an empty set of instances. Sets the 
-   * capacity of the set of instances to 0 if its negative.
+   * Constructor creating an empty set of instances. Copies references
+   * to the header information from the given set of instances. Sets
+   * the capacity of the set of instances to 0 if its negative.
+   *
    * @param instances the instances from which the header 
    * information is to be taken
-   * @param capacity the capacity of the new dataset
+   * @param capacity the capacity of the new dataset 
    */
   public Instances(Instances dataset, int capacity) {
     
@@ -128,21 +142,21 @@ public class Instances implements Serializable {
     
     // Strings only have to be "shallow" copied because
     // they can't be modified.
-
-    theClassIndex = dataset.theClassIndex;
-    theRelationName = dataset.theRelationName;
-    theAttributes = dataset.theAttributes;
-    theInstances = new FastVector(capacity);
+    m_ClassIndex = dataset.m_ClassIndex;
+    m_RelationName = dataset.m_RelationName;
+    m_Attributes = dataset.m_Attributes;
+    m_Instances = new FastVector(capacity);
   }
 
   /**
-   * Creates a new ordered set of instances by copying a 
-   * subset of another ordered set. 
+   * Creates a new set of instances by copying a 
+   * subset of another set.
+   *
    * @param source the set of instances from which a subset 
    * is to be created
    * @param first the index of the first instance to be copied
    * @param toCopy the number of instances to be copied
-   * @exception Exception if first and toCopy are not within range
+   * @exception Exception if first and toCopy are out of range
    */
   public Instances(Instances source, int first, int toCopy)
        throws Exception {
@@ -157,30 +171,32 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Creates an empty ordered set of instances. Uses the given
+   * Creates an empty set of instances. Uses the given
    * attribute information. Sets the capacity of the set of 
    * instances to 0 if its negative. Given attribute information
-   * must not be changed after this method has been called.
+   * must not be changed after this constructor has been used.
+   *
    * @param name the name of the relation
    * @param attInfo the attribute information
    * @param capacity the capacity of the set
    */
   public Instances(String name, FastVector attInfo, int capacity) {
 
-    theRelationName = name;
-    theClassIndex = -1;
-    theAttributes = attInfo;
+    m_RelationName = name;
+    m_ClassIndex = -1;
+    m_Attributes = attInfo;
     for (int i = 0; i < numAttributes(); i++) {
       attribute(i).setIndex(i);
     }
-    theInstances = new FastVector(capacity);
+    m_Instances = new FastVector(capacity);
   }
  
   /**
-   * Adds one instance to the end of the ordered set. 
+   * Adds one instance to the end of the set. 
    * Shallow copies instance before it is added. Increases the
    * size of the dataset if it is not large enough. Does not
    * check if the instance is compatible with the dataset.
+   *
    * @param instance the instance to be added
    */
   public final void add(Instance instance) {
@@ -188,19 +204,20 @@ public class Instances implements Serializable {
     Instance newInstance = new Instance(instance);
 
     newInstance.setDataset(this);
-    theInstances.addElement(newInstance);
+    m_Instances.addElement(newInstance);
   }
 
   /** 
+   * Changes the dataset to reflect a given set of costs.
    * Sets the weights of instances according to a misclassification
-   * cost matrix, or does resampling (if a random number generator
-   * is provided). Returns a new dataset.
-   * @param matrix the matrix containing the misclassification 
-   * costs 
-   * @param random a random number generator
+   * cost matrix, or does resampling according to the cost matrix (if
+   * a random number generator is provided). Returns a new dataset.
+   *
+   * @param matrix the matrix containing the misclassification costs
+   * @param random a random number generator 
    * @return the new dataset
-   * @exception Exception if the cost matrix does not have the 
-   * right format
+   * @exception Exception if the cost matrix does not have the right
+   * format 
    */
   public Instances applyCostMatrix(double[][] weights, Random random) 
        throws Exception {
@@ -210,7 +227,7 @@ public class Instances implements Serializable {
     double [] weightOfInstancesInClass, weightFactor, weightOfInstances;
     Instances newData;
 
-    if (theClassIndex < 0) {
+    if (m_ClassIndex < 0) {
       throw new Exception("Class index is negativ (not set)!");
     }
     if (weights.length != numClasses()) {
@@ -233,10 +250,10 @@ public class Instances implements Serializable {
 	throw new Exception("Diagonal of misclassification cost "+
 			    "matrix not zero!");
       }
+
       // Using Kai Ming Ting's formula for deriving weights for 
       // the classes and Breiman's heuristic for multiclass 
       // problems.
-      
       sumOfMissClassWeights = 0;
       for (int j = 0; j < numClasses(); j++) {
 	if (Utils.sm(weights[i][j],0)) {
@@ -274,18 +291,20 @@ public class Instances implements Serializable {
 
   /**
    * Returns an attribute.
+   *
    * @param index the attribute's index
    * @return the attribute at the given position
    */ 
   public final Attribute attribute(int index) {
     
-    return (Attribute) theAttributes.elementAt(index);
+    return (Attribute) m_Attributes.elementAt(index);
   }
 
   /**
    * Returns an attribute given its name. If there is more than
    * one attribute with the same name, it returns the first one.
    * Returns null if the attribute can't be found.
+   *
    * @param name the attribute's name
    * @return the attribute with the given name, null if the
    * attribute can't be found
@@ -302,13 +321,14 @@ public class Instances implements Serializable {
 
   /**
    * Checks for string attributes in the dataset
-   * @returns true if string attributes are present, false otherwise
+   *
+   * @return true if string attributes are present, false otherwise
    */
   public boolean checkForStringAttributes() {
 
     int i = 0;
    
-    while (i < theAttributes.size()) {
+    while (i < m_Attributes.size()) {
       if (attribute(i++).isString()) {
 	return true;
       }
@@ -321,6 +341,8 @@ public class Instances implements Serializable {
    * with this dataset. Only looks at the size of
    * the instance and the ranges of the values for 
    * nominal and string attributes.
+   *
+   * @return true if the instance is compatible with the dataset 
    */
   public final boolean checkInstance(Instance instance) {
 
@@ -346,26 +368,28 @@ public class Instances implements Serializable {
   }
 	
   /**
-   * Returns class attribute.
+   * Returns the class attribute.
+   *
    * @return the class attribute
    * @exception Exception if the class is not set
    */
   public final Attribute classAttribute() throws Exception {
 
-    if (theClassIndex < 0) {
+    if (m_ClassIndex < 0) {
       throw new Exception("Class index is negativ (not set)!");
     }
-    return attribute(theClassIndex);
+    return attribute(m_ClassIndex);
   }
 
   /**
    * Returns the class attribute's index. Returns negative number
-   * if undefined.
+   * if it's undefined.
+   *
    * @return the class index as an integer
    */
   public final int classIndex() {
     
-    return theClassIndex;
+    return m_ClassIndex;
   }
  
   /**
@@ -374,36 +398,93 @@ public class Instances implements Serializable {
    */
   public final void compactify() {
 
-    theInstances.trimToSize();
+    m_Instances.trimToSize();
   }
 
   /**
    * Removes an instance at the given position from the set.
+   *
    * @param index the instance's position
    */
   public final void delete(int index) {
     
-    theInstances.removeElementAt(index);
+    m_Instances.removeElementAt(index);
+  }
+
+  /**
+   * Deletes an attribute at the given position 
+   * (0 to numAttributes() - 1). A deep copy of the attribute
+   * information is performed before the attribute is deleted.
+   *
+   * @param pos the attribute's position
+   * @exception Exception if the given index is out of range or the
+   * class attribute is being deleted
+   */
+  public void deleteAttributeAt(int position) throws Exception {
+	 
+    if ((position < 0) || (position >= m_Attributes.size())) {
+      throw new Exception("Can't delete attribute: index out of "+
+			  "range");
+    }
+    if (position == m_ClassIndex) {
+      throw new Exception("Can't delete class attribute");
+    }
+    freshAttributeInfo();
+    if (m_ClassIndex > position) {
+      m_ClassIndex--;
+    }
+    m_Attributes.removeElementAt(position);
+    for (int i = position; i < m_Attributes.size(); i++) {
+      Attribute current = (Attribute)m_Attributes.elementAt(i);
+      current.setIndex(current.index() - 1);
+    }
+    for (int i = 0; i < numInstances(); i++) {
+      instance(i).forceDeleteAttributeAt(position); 
+    }
+  }
+
+  /**
+   * Deletes all string attributes in the dataset. A deep copy of the attribute
+   * information is performed before an attribute is deleted.
+   *
+   * @exception Exception if string attribute couldn't be 
+   * successfully deleted.
+   */
+  public void deleteStringAttributes() throws Exception {
+
+    int i = 0;
+   
+    while (i < m_Attributes.size()) {
+      if (attribute(i).isString()) {
+	deleteAttributeAt(i);
+      } else {
+	i++;
+      }
+    }
   }
 
   /**
    * Removes all instances with missing values for a particular
-   * attribute from the dataset and returns the resulting dataset.
+   * attribute from the dataset.
+   *
    * @param attIndex the attribute's index
    */
   public final void deleteWithMissing(int attIndex) {
 
     FastVector newInstances = new FastVector(numInstances());
 
-    for (int i = 0; i < numInstances(); i++) 
-      if (!instance(i).isMissing(attIndex)) 
+    for (int i = 0; i < numInstances(); i++) {
+      if (!instance(i).isMissing(attIndex)) {
 	newInstances.addElement(instance(i));
-    theInstances = newInstances;
+      }
+    }
+    m_Instances = newInstances;
   }
 
   /**
    * Removes all instances with missing values for a particular
-   * attribute from the dataset and returns the resulting dataset.
+   * attribute from the dataset.
+   *
    * @param att the attribute
    */
   public final void deleteWithMissing(Attribute att) {
@@ -414,36 +495,40 @@ public class Instances implements Serializable {
   /**
    * Removes all instances with a missing class value
    * from the dataset.
+   *
    * @exception Exception if class is not set
    */
   public final void deleteWithMissingClass() throws Exception {
 
-    if (theClassIndex < 0) {
+    if (m_ClassIndex < 0) {
       throw new Exception("Class index is negativ (not set)!");
     }
-    deleteWithMissing(theClassIndex);
+    deleteWithMissing(m_ClassIndex);
   }
 
   /**
    * Returns an enumeration of all the attributes.
+   *
    * @return enumeration of all the attributes.
    */
   public Enumeration enumerateAttributes() {
 
-    return theAttributes.elements(theClassIndex);
+    return m_Attributes.elements(m_ClassIndex);
   }
 
   /**
    * Returns an enumeration of all instances in the dataset.
+   *
    * @return enumeration of all instances in the dataset
    */
   public final Enumeration enumerateInstances() {
 
-    return theInstances.elements();
+    return m_Instances.elements();
   }
 
   /**
    * Checks if two headers are equivalent.
+   *
    * @param dataset another dataset
    * @return true if the header of the given dataset is equivalent 
    * to this header
@@ -451,62 +536,36 @@ public class Instances implements Serializable {
   public final boolean equalHeaders(Instances dataset){
 
     // Check class and all attributes
-
-    if (theClassIndex != dataset.theClassIndex)
+    if (m_ClassIndex != dataset.m_ClassIndex) {
       return false;
-    if (theAttributes.size() != dataset.theAttributes.size())
+    }
+    if (m_Attributes.size() != dataset.m_Attributes.size()) {
       return false;
-    for (int i = 0; i < theAttributes.size(); i++) 
-      if (!(attribute(i).equals(dataset.attribute(i))))
+    }
+    for (int i = 0; i < m_Attributes.size(); i++) {
+      if (!(attribute(i).equals(dataset.attribute(i)))) {
 	return false;
+      }
+    }
     return true;
   }
-
+ 
   /**
-   * Deletes an attribute at the given position 
-   * (0 to numAttributes() - 1).
-   * @param pos the attribute's position
-   * @exception Exception if the given index is out of range
+   * Returns the first instance in the set.
+   *
+   * @return the first instance in the set
    */
-  public void deleteAttributeAt(int position) throws Exception {
-	 
-    if ((position < 0) || (position >= theAttributes.size()))
-      throw new Exception("Can't delete attribute: index out of "+
-			  "range");
-    if (position == theClassIndex)
-      throw new Exception("Can't delete class attribute");
-    freshAttributeInfo();
-    if (theClassIndex > position)
-      theClassIndex--;
-    theAttributes.removeElementAt(position);
-    for (int i = position; i < theAttributes.size(); i++) {
-      Attribute current = (Attribute)theAttributes.elementAt(i);
-      current.setIndex(current.index() - 1);
-    }
-    for (int i = 0; i < numInstances(); i++) 
-      instance(i).forceDeleteAttributeAt(position);
+  public final Instance firstInstance() {
+    
+    return (Instance)m_Instances.firstElement();
   }
-
-  /**
-   * Deletes all string attributes in the dataset.
-   * @exception Exception if string attribute couldn't be 
-   * successfully deleted.
-   */
-  public void deleteStringAttributes() throws Exception {
-
-    int i = 0;
-   
-    while (i < theAttributes.size()) 
-      if (attribute(i).isString())
-	deleteAttributeAt(i);
-      else
-	i++;
-  }
-  
+ 
   /**
    * Inserts an attribute at the given position (0 to 
    * numAttributes()) and sets all values to be missing.
-   * Clones the attribute before it is inserted.
+   * Shallow copies the attribute before it is inserted, and performs
+   * a deep copy of the existing attribute information.
+   *
    * @param att the attribute to be inserted
    * @param pos the attribute's position
    * @exception Exception if the given index is out of range
@@ -515,46 +574,52 @@ public class Instances implements Serializable {
        throws Exception {
 	 
     if ((position < 0) ||
-	(position > theAttributes.size()))
+	(position > m_Attributes.size())) {
       throw new Exception("Can't insert attribute: index out "+
 			  "of range");
+    }
     att = (Attribute)att.copy();
     freshAttributeInfo();
     att.setIndex(position);
-    theAttributes.insertElementAt(att, position);
-    for (int i = position + 1; i < theAttributes.size(); i++) {
-      Attribute current = (Attribute)theAttributes.elementAt(i);
+    m_Attributes.insertElementAt(att, position);
+    for (int i = position + 1; i < m_Attributes.size(); i++) {
+      Attribute current = (Attribute)m_Attributes.elementAt(i);
       current.setIndex(current.index() + 1);
     }
-    for (int i = 0; i < numInstances(); i++) 
+    for (int i = 0; i < numInstances(); i++) {
       instance(i).forceInsertAttributeAt(position);
-    if (theClassIndex >= position)
-      theClassIndex++;
+    }
+    if (m_ClassIndex >= position) {
+      m_ClassIndex++;
+    }
   }
 
   /**
-   * Returns the instance with the given position.
+   * Returns the instance at the given position.
+   *
    * @param index the instance's index
-   * @returns the instance at the given position
+   * @return the instance at the given position
    */
   public final Instance instance(int index) {
 
-    return (Instance)theInstances.elementAt(index);
+    return (Instance)m_Instances.elementAt(index);
   }
 
   /**
    * Returns the last instance in the set.
+   *
    * @return the last instance in the set
    */
   public final Instance lastInstance() {
     
-    return (Instance)theInstances.lastElement();
+    return (Instance)m_Instances.lastElement();
   }
 
   /**
-   * Returns the mean (mode) for a numeric (nominal) attribute.
-   * Returns 0 if the attribute is neither nominal nor numeric.
-   * If all values are missing it returns zero.
+   * Returns the mean (mode) for a numeric (nominal) attribute as
+   * a floating-point value. Returns 0 if the attribute is neither nominal nor 
+   * numeric. If all values are missing it returns zero.
+   *
    * @param attIndex the attribute's index
    * @return the mean or the mode
    */
@@ -565,31 +630,37 @@ public class Instances implements Serializable {
 
     if (attribute(attIndex).isNumeric()) {
       result = found = 0;
-      for (int j = 0; j < numInstances(); j++) 
+      for (int j = 0; j < numInstances(); j++) {
 	if (!instance(j).isMissing(attIndex)) {
 	  found += instance(j).weight();
 	  result += instance(j).weight()*instance(j).value(attIndex);
 	}
-      if (Utils.eq(found, 0))
+      }
+      if (Utils.eq(found, 0)) {
 	return 0;
-      else
+      } else {
 	return result / found;
+      }
     } else if (attribute(attIndex).isNominal()) {
       counts = new int[attribute(attIndex).numValues()];
-      for (int j = 0; j < numInstances(); j++) 
-	if (!instance(j).isMissing(attIndex)) 
+      for (int j = 0; j < numInstances(); j++) {
+	if (!instance(j).isMissing(attIndex)) {
 	  counts[(int) instance(j).value(attIndex)] += instance(j).weight();
+	}
+      }
       return (double)Utils.maxIndex(counts);
-    } else 
+    } else {
       return 0;
+    }
   }
 
   /**
-   * Returns the mean (mode) for a numeric (nominal) attribute.
-   * Returns 0 if the attribute is neither nominal nor numeric.
-   * If all values are missing it returns zero.
+   * Returns the mean (mode) for a numeric (nominal) attribute as a
+   * floating-point value.  Returns 0 if the attribute is neither
+   * nominal nor numeric.  If all values are missing it returns zero.
+   *
    * @param att the attribute
-   * @return the mean or the mode
+   * @return the mean or the mode 
    */
   public final double meanOrMode(Attribute att) {
 
@@ -598,34 +669,38 @@ public class Instances implements Serializable {
 
   /**
    * Returns the number of attributes.
+   *
    * @return the number of attributes as an integer
    */
-  public final int numAttributes(){
+  public final int numAttributes() {
 
-    return theAttributes.size();
+    return m_Attributes.size();
   }
 
   /**
    * Returns the number of class labels.
+   *
    * @return the number of class labels as an integer if the class 
    * attribute is nominal, 1 otherwise.
    * @exception Exception if the class is not set
    */
   public final int numClasses() throws Exception {
     
-    if (theClassIndex < 0)
+    if (m_ClassIndex < 0) {
       throw new Exception("Class index is negativ (not set)!");
-    if (!classAttribute().isNominal())
+    }
+    if (!classAttribute().isNominal()) {
       return 1;
-    else
+    } else {
       return classAttribute().numValues();
+    }
   }
 
   /**
    * Returns the number of distinct values of a given attribute.
    * Returns the number of instances if the attribute is a
-   * string attribute.
-   * The value 'missing' is not counted.
+   * string attribute. The value 'missing' is not counted.
+   *
    * @param attIndex the attribute
    * @return the number of distinct values of a given attribute
    */
@@ -637,8 +712,9 @@ public class Instances implements Serializable {
     if (attribute(attIndex).isNumeric()) {
       sort(attIndex);
       for (int i = 0; i < numInstances(); i++) {
-	if (instance(i).isMissing(attIndex)) 
+	if (instance(i).isMissing(attIndex)) {
 	  break;
+	}
 	if ((i == 0) || 
 	    Utils.gr(instance(i).value(attIndex), prev)) {
 	  prev = instance(i).value(attIndex);
@@ -646,15 +722,16 @@ public class Instances implements Serializable {
 	}
       }
       return counter;
-    } else
+    } else {
       return attribute(attIndex).numValues();
+    }
   }
 
   /**
    * Returns the number of distinct values of a given attribute.
    * Returns the number of instances if the attribute is a
-   * string attribute.
-   * The value 'missing' is not counted.
+   * string attribute. The value 'missing' is not counted.
+   *
    * @param att the attribute
    * @return the number of distinct values of a given attribute
    */
@@ -665,11 +742,12 @@ public class Instances implements Serializable {
   
   /**
    * Returns the number of instances in the dataset.
+   *
    * @return the number of instances in the dataset as an integer
    */
-  public final int numInstances(){
+  public final int numInstances() {
 
-    return theInstances.size();
+    return m_Instances.size();
   }
 
   /**
@@ -678,12 +756,12 @@ public class Instances implements Serializable {
    * class, the index of the incorrectly assigned class, and the 
    * weight, separated by white space characters. Comments can be 
    * appended to the end of a line by using the '%' character.
+   *
    * @param reader the reader from which the cost 
    * matrix is to be read
    * @return the matrix containing the misclassification costs
    * @exception Exception if the cost matrix does not have the 
-   * right format or
-   * the class is not set
+   * right format or the class is not set
    */
   public final double[][] readCostMatrix(Reader reader) 
        throws Exception {
@@ -695,68 +773,80 @@ public class Instances implements Serializable {
     double firstIndex, secondIndex, weight;
 
     tokenizer = new StreamTokenizer(reader);
-    if (theClassIndex < 0)
+    if (m_ClassIndex < 0) {
       throw new Exception("Class index is negativ (not set)!");
-    for (int i = 0; i < numClasses(); i++)
-      for (int j = 0; j < numClasses(); j++)
+    }
+    for (int i = 0; i < numClasses(); i++) {
+      for (int j = 0; j < numClasses(); j++) {
 	if (i != j) costMatrix[i][j] = 1.0;
+      }
+    }
     tokenizer.commentChar('%');
     tokenizer.eolIsSignificant(true);
     while (StreamTokenizer.TT_EOF != 
 	   (currentToken = tokenizer.nextToken())) {
 
       // Skip empty lines 
-      
-      if (currentToken == StreamTokenizer.TT_EOL)  
+      if (currentToken == StreamTokenizer.TT_EOL) {
 	continue;
+      }
 
       // Get index of first class.
-
-      if (currentToken != StreamTokenizer.TT_NUMBER)
+      if (currentToken != StreamTokenizer.TT_NUMBER) {
 	throw new Exception("Only numbers and comments allowed "+
 			    "in cost file!");
+      }
       firstIndex = tokenizer.nval;
-      if (!Utils.eq((double)(int)firstIndex,firstIndex))
+      if (!Utils.eq((double)(int)firstIndex,firstIndex)) {
 	throw new Exception("First number in line has to be "+
 			    "index of a class!");
-      if ((int)firstIndex >= numClasses())
+      }
+      if ((int)firstIndex >= numClasses()) {
 	throw new Exception("Class index out of range!");
+      }
 
       // Get index of second class.
-
       if (StreamTokenizer.TT_EOF == 
-	  (currentToken = tokenizer.nextToken()))
+	  (currentToken = tokenizer.nextToken())) {
 	throw new Exception("Premature end of file!");
-      if (currentToken == StreamTokenizer.TT_EOL)
+      }
+      if (currentToken == StreamTokenizer.TT_EOL) {
 	throw new Exception("Premature end of line!");
-      if (currentToken != StreamTokenizer.TT_NUMBER)
+      }
+      if (currentToken != StreamTokenizer.TT_NUMBER) {
 	throw new Exception("Only numbers and comments allowed "+
 			    "in cost file!");
+      }
       secondIndex = tokenizer.nval;
-      if (!Utils.eq((double)(int)secondIndex,secondIndex))
+      if (!Utils.eq((double)(int)secondIndex,secondIndex)) {
 	throw new Exception("Second number in line has to be "+
 			    "index of a class!");
-      if ((int)secondIndex >= numClasses())
+      }
+      if ((int)secondIndex >= numClasses()) {
 	throw new Exception("Class index out of range!");
-      if ((int)secondIndex == (int)firstIndex)
+      }
+      if ((int)secondIndex == (int)firstIndex) {
 	throw new Exception("Diagonal of cost matrix non-zero!");
+      }
 
       // Get cost factor.
-
       if (StreamTokenizer.TT_EOF == 
-	  (currentToken = tokenizer.nextToken()))
+	  (currentToken = tokenizer.nextToken())) {
 	throw new Exception("Premature end of file!");
-      if (currentToken == StreamTokenizer.TT_EOL)
+      }
+      if (currentToken == StreamTokenizer.TT_EOL) {
 	throw new Exception("Premature end of line!");
-      if (currentToken != StreamTokenizer.TT_NUMBER)
+      }
+      if (currentToken != StreamTokenizer.TT_NUMBER) {
 	throw new Exception("Only numbers and comments allowed "+
 			    "in cost file!");
+      }
       weight = tokenizer.nval;
-      if (!Utils.gr(weight,0))
+      if (!Utils.gr(weight,0)) {
 	throw new Exception("Only positive weights allowed!");
+      }
       costMatrix[(int)firstIndex][(int)secondIndex] = weight;
     }
-
     return costMatrix;
   }
 
@@ -765,14 +855,14 @@ public class Instances implements Serializable {
    * to the dataset.  Automatically expands the dataset if it
    * is not large enough to hold the instance. This method does
    * not check for carriage return at the end of the line.
+   *
    * @param reader the reader 
    * @return false if end of file has been reached
    * @exception IOException if the information is not read 
    * successfully
    */ 
-
   public final boolean readInstance(Reader reader) 
-       throws IOException{
+       throws IOException {
 
     StreamTokenizer tokenizer = new StreamTokenizer(reader);
     
@@ -783,8 +873,10 @@ public class Instances implements Serializable {
   /**
    * Shuffles the instances in the set so that they are ordered 
    * randomly.
+   *
+   * @param random a random number generator
    */
-  public final void randomize(Random random){
+  public final void randomize(Random random) {
 
     for (int j = numInstances() - 1; j > 0; j--)
       swap(j,(int)(random.nextDouble()*(double)j));
@@ -792,20 +884,22 @@ public class Instances implements Serializable {
 
   /**
    * Returns the relation's name.
+   *
    * @return the relation's name as a string
    */
-  public final String relationName(){
+  public final String relationName() {
 
-    return theRelationName;
+    return m_RelationName;
   }
 
   /**
    * Sets the relation's name.
+   *
    * @param newName the new relation name.
    */
   public final void setRelationName(String newName) {
     
-    theRelationName = newName;
+    m_RelationName = newName;
   }
 
   /**
@@ -877,6 +971,7 @@ public class Instances implements Serializable {
   /** 
    * Sets the class index of the set.
    * If the class index is negative there is assumed to be no class.
+   * (ie. it is undefined)
    *
    * @param classIndex the new class index
    * @exception Exception if the class index is too big
@@ -886,24 +981,23 @@ public class Instances implements Serializable {
     if (classIndex >= numAttributes()) {
       throw new Exception("Class index to large!");
     }
-    theClassIndex = classIndex;
+    m_ClassIndex = classIndex;
   }
 
   /**
    * Sorts the instances based on an attribute. For numeric attributes, 
-   * instances are sorted into ascending order. For nominal attributes, 
+   * instances are sorted in ascending order. For nominal attributes, 
    * instances are sorted based on the attribute label ordering 
    * specified in the header. Instances with missing values for the 
    * attribute are placed at the end of the dataset.
    *
-   * @param attIndex the attribute
+   * @param attIndex the attribute's index
    */
   public final void sort(int attIndex) {
 
     int i,j;
 
     // move all instances with missing values to end
-    
     j = numInstances() - 1;
     i = 0;
     while (i <= j) {
@@ -929,32 +1023,30 @@ public class Instances implements Serializable {
    *
    * @param att the attribute
    */
-  public final void sort(Attribute att){
+  public final void sort(Attribute att) {
 
     sort(att.index());
   }
 
   /**
-   * Stratifies a set of instances according to their class values 
-   * if the class attribute is nominal so that afterwards a 
-   * stratified cross-validation can be performed.
+   * Stratifies a set of instances according to its class values 
+   * if the class attribute is nominal (so that afterwards a 
+   * stratified cross-validation can be performed).
    *
-   * @param numFolds the numer of folds in the cross-validation
+   * @param numFolds the number of folds in the cross-validation
    * @exception Exception if the class is not set
    */
-  
   public final void stratify(int numFolds) throws Exception {
     
     Instance instance1, instance2;
     int j, index;
     
-    if (theClassIndex < 0) {
+    if (m_ClassIndex < 0) {
       throw new Exception("Class index is negative (not set)!");
     }
     if (classAttribute().isNominal()) {
 
       // sort by class
-      
       index = 1;
       while (index < numInstances()) {
 	instance1 = instance(index - 1);
@@ -982,9 +1074,9 @@ public class Instances implements Serializable {
     
     double sum = 0;
 
-    for (int i = 0; i < numInstances(); i++)
+    for (int i = 0; i < numInstances(); i++) {
       sum += instance(i).weight();
-  
+    }
     return sum;
   }
 
@@ -995,7 +1087,7 @@ public class Instances implements Serializable {
    * @param numFolds the number of folds in the cross-validation. Must
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
-   * @return the test set as an ordered set of weighted instances
+   * @return the test set as a set of weighted instances
    * @exception Exception if dataset can't be generated 
    * successfully
    */
@@ -1005,6 +1097,12 @@ public class Instances implements Serializable {
     int numInstForFold, first, offset;
     Instances test;
     
+    if (numFolds < 2) {
+      throw new Exception("Number of folds must be at least 2!");
+    }
+    if (numFolds > numInstances()) {
+      throw new Exception("Can't have more folds than instances!");
+    }
     numInstForFold = numInstances() / numFolds;
     if (numFold < numInstances() % numFolds){
       numInstForFold++;
@@ -1014,38 +1112,39 @@ public class Instances implements Serializable {
     test = new Instances(this, numInstForFold);
     first = numFold * (numInstances() / numFolds) + offset;
     copyInstances(first, test, numInstForFold);
-
     return test;
   }
  
   /**
-   * Returns the dataset in ARFF format.
+   * Returns the dataset as a string in ARFF format.
+   *
    * @return the dataset in ARFF format as a string
    */
   public final String toString() {
     
     StringBuffer text = new StringBuffer();
     
-    text.append("@relation " + theRelationName + "\n\n");
-    for (int i = 0; i < numAttributes(); i++) 
+    text.append("@relation " + m_RelationName + "\n\n");
+    for (int i = 0; i < numAttributes(); i++) {
       text.append(attribute(i) + "\n");
+    }
     text.append("\n@data\n");
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i));
       if (i < numInstances() - 1)
 	text.append('\n');
     }
-        
     return text.toString();
   }
 
   /**
    * Creates the training set for one fold of a cross-validation 
    * on the dataset.
+   *
    * @param numFolds the number of folds in the cross-validation. Must
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
-   * @return the training set as an ordered set of weighted 
+   * @return the training set as a set of weighted 
    * instances
    * @exception Exception if dataset can't be generated 
    * successfully
@@ -1056,6 +1155,12 @@ public class Instances implements Serializable {
     int numInstForFold, first, offset;
     Instances train;
  
+    if (numFolds < 2) {
+      throw new Exception("Number of folds must be at least 2!");
+    }
+    if (numFolds > numInstances()) {
+      throw new Exception("Can't have more folds than instances!");
+    }
     numInstForFold = numInstances() / numFolds;
     if (numFold < numInstances() % numFolds) {
       numInstForFold++;
@@ -1073,6 +1178,7 @@ public class Instances implements Serializable {
 
   /**
    * Computes the variance for a numeric attribute.
+   *
    * @param attIndex the numeric attribute
    * @return the variance if the attribute is numeric
    * @exception Exception if the attribute is not numeric
@@ -1081,9 +1187,10 @@ public class Instances implements Serializable {
   
     double sum = 0, sumSquared = 0, sumOfWeights = 0;
 
-    if (!attribute(attIndex).isNumeric())
-      throw new Exception("Can't compute variance for numeric "
-			  + "attribute!");
+    if (!attribute(attIndex).isNumeric()) {
+      throw new Exception("Can't compute variance because attribute is " +
+			  "not numeric!");
+    }
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
 	sum += instance(i).weight() * 
@@ -1094,14 +1201,16 @@ public class Instances implements Serializable {
 	sumOfWeights += instance(i).weight();
       }
     }
-    if (Utils.smOrEq(sumOfWeights, 1))
+    if (Utils.smOrEq(sumOfWeights, 1)) {
       return 0;
+    }
     return (sumSquared - (sum * sum / sumOfWeights)) / 
       (sumOfWeights - 1);
   }
 
   /**
    * Computes the variance for a numeric attribute.
+   *
    * @param att the numeric attribute
    * @return the variance if the attribute is numeric
    * @exception Exception if the attribute is not numeric
@@ -1110,15 +1219,12 @@ public class Instances implements Serializable {
     
     return variance(att.index());
   }
-
-  // ==================
-  // Protected methods.
-  // ==================
  
   /**
    * Reads a single instance using the tokenizer and appends it
    * to the dataset. Automatically expands the dataset if it
    * is not large enough to hold the instance.
+   *
    * @param tokenizer the tokenizer to be used
    * @param flag if method should test for carriage return after 
    * each instance
@@ -1134,72 +1240,69 @@ public class Instances implements Serializable {
     int index;
     
     // Check if any attributes have been declared.
-    
-    if (theAttributes.size() == 0)
+    if (m_Attributes.size() == 0) {
       errms(tokenizer,"no header information available");
-      
-    // Reserve space for new instance.
+    }
     
+    // Reserve space for new instance.
     instance = new double [numAttributes()];
-      
-      // Get values for all attributes.
-
+    
+    // Get values for all attributes.
     for (int i = 0; i < numAttributes(); i++){
-
-      // Check if end of file reached.
       
-      if (i == 0){
+      // Check if end of file reached.
+      if (i == 0) {
 	getFirstToken(tokenizer);
 	if (tokenizer.ttype == StreamTokenizer.TT_EOF)
 	  return false;
-      }else
+      } else {
 	getNextToken(tokenizer);
-
-      // Check if token is valid.
+      }
       
-      if (tokenizer.ttype != StreamTokenizer.TT_WORD)
+      // Check if token is valid.
+      if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
 	errms(tokenizer,"not a valid value");
+      }
       
       // Check if value is missing.
-      
-      if  (tokenizer.sval.equals("?"))
+      if  (tokenizer.sval.equals("?")) {
 	instance[i] = Instance.missingValue();
-      else
+      } else {
 	if (attribute(i).isNominal()) {
 	  
 	  // Check if value appears in header.
-	  
 	  index = attribute(i).indexOfValue(tokenizer.sval);
-	  if (index == -1)
+	  if (index == -1) {
 	    errms(tokenizer,"nominal value not declared in header");
+	  }
 	  instance[i] = (double)index;
 	} else if (attribute(i).isNumeric()) {
 	  
 	  // Check if value is really a number.
-	  
 	  try{
 	    instance[i] = Double.valueOf(tokenizer.sval).
 	      doubleValue();
-	  }catch (NumberFormatException e){
+	  } catch (NumberFormatException e) {
 	    errms(tokenizer,"number expected");
 	  }
 	} else { 
 	  attribute(i).forceAddValue(tokenizer.sval);
 	  instance[i] = (double)attribute(i).numValues() - 1;
 	}
+      }
     }
-    if (flag)
+    if (flag) {
       getLastToken(tokenizer);
-    
+    }
+      
     // Add instance to dataset
-    
     add(new Instance(1, instance));
-    
     return true;
   }
 
   /**
    * Reads and stores header of an ARFF file.
+   *
    * @param tokenizer the stream tokenizer
    * @exception IOException if the information is not read 
    * successfully
@@ -1212,76 +1315,76 @@ public class Instances implements Serializable {
     int i;
 
     // Get name of relation.
-
     getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF)
+    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       errms(tokenizer,"premature end of file");
-     if (tokenizer.sval.equalsIgnoreCase("@relation")){
+    }
+    if (tokenizer.sval.equalsIgnoreCase("@relation")){
       getNextToken(tokenizer);
-      theRelationName = tokenizer.sval;
+      m_RelationName = tokenizer.sval;
       getLastToken(tokenizer);
-    }else
+    } else {
       errms(tokenizer,"keyword @relation expected");
+    }
 
     // Create vectors to hold information temporarily.
-
-    theAttributes = new FastVector();
+    m_Attributes = new FastVector();
  
     // Get attribute declarations.
-
     getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF)
+    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       errms(tokenizer,"premature end of file");
-    while (tokenizer.sval.equalsIgnoreCase("@attribute")){
+    }
+    while (tokenizer.sval.equalsIgnoreCase("@attribute")) {
 
       // Get attribute name.
-
       getNextToken(tokenizer);
       attributeName = tokenizer.sval;
       getNextToken(tokenizer);
 
       // Check if attribute is nominal.
-
-      if (tokenizer.ttype == StreamTokenizer.TT_WORD){
+      if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
 
 	// Attribute is real, integer, or string.
-
 	if (tokenizer.sval.equalsIgnoreCase("real") ||
 	    tokenizer.sval.equalsIgnoreCase("integer") ||
 	    tokenizer.sval.equalsIgnoreCase("numeric")) {
-	  theAttributes.addElement(new Attribute(attributeName,
+	  m_Attributes.addElement(new Attribute(attributeName,
 						 numAttributes()));
 	  readTillEOL(tokenizer);
 	} else if (tokenizer.sval.equalsIgnoreCase("string")) {
-	  theAttributes.
+	  m_Attributes.
 	    addElement(new Attribute(attributeName, null,
 				     numAttributes()));
 	  readTillEOL(tokenizer);
-	} else
+	} else {
 	  errms(tokenizer,"no valid attribute type or invalid "+
 		"enumeration");
+	}
       } else {
 
 	// Attribute is nominal.
-
 	attributeValues = new FastVector();
 	tokenizer.pushBack();
 	
 	// Get values for nominal attribute.
-
-	if (tokenizer.nextToken() != '{')
+	if (tokenizer.nextToken() != '{') {
 	  errms(tokenizer,"{ expected at beginning of enumeration");
-	while (tokenizer.nextToken() != '}')
-	  if (tokenizer.ttype == StreamTokenizer.TT_EOL)
+	}
+	while (tokenizer.nextToken() != '}') {
+	  if (tokenizer.ttype == StreamTokenizer.TT_EOL) {
 	    errms(tokenizer,"} expected at end of enumeration");
-	  else{
-	    if (tokenizer.ttype == '\'')
+	  } else {
+	    if (tokenizer.ttype == '\'') {
 	      tokenizer.sval = quote(tokenizer.sval);
+	    }
 	    attributeValues.addElement(tokenizer.sval);
 	  }
-	if (attributeValues.size() == 0)
+	}
+	if (attributeValues.size() == 0) {
 	  errms(tokenizer,"no nominal values found");
-	theAttributes.
+	}
+	m_Attributes.
 	  addElement(new Attribute(attributeName, attributeValues,
 				   numAttributes()));
       }
@@ -1292,23 +1395,20 @@ public class Instances implements Serializable {
     }
 
     // Check if data part follows. We can't easily check for EOL.
-    
-    if (!tokenizer.sval.equalsIgnoreCase("@data"))
+    if (!tokenizer.sval.equalsIgnoreCase("@data")) {
       errms(tokenizer,"keyword @data expected");
+    }
     
     // Check if any attributes have been declared.
-    
-    if (theAttributes.size() == 0)
+    if (m_Attributes.size() == 0) {
       errms(tokenizer,"no attributes declared");
+    }
   }
-   
-  // ================
-  // Private methods.
-  // ================
 
   /**
-   * Copies instances from one ordered set to the end of another 
+   * Copies instances from one set to the end of another 
    * one.
+   *
    * @param source the source of the instances
    * @param from the position of the first instance to be copied
    * @param dest the destination for the instances
@@ -1316,13 +1416,14 @@ public class Instances implements Serializable {
    */
   private void copyInstances(int from, Instances dest, int num) {
     
-    
-    for (int i = 0; i < num; i++) 
+    for (int i = 0; i < num; i++) {
       dest.add(instance(from + i));
+    }
   }
   
   /**
    * Throws error message with line number and last token read.
+   *
    * @param theMsg the error message to be thrown
    * @param tokenizer the stream tokenizer
    * @throws IOExcpetion containing the error message
@@ -1339,12 +1440,13 @@ public class Instances implements Serializable {
    */
   private void freshAttributeInfo() {
 
-    theAttributes = (FastVector) theAttributes.copyElements();
+    m_Attributes = (FastVector) m_Attributes.copyElements();
   }
 
   /**
    * Gets next token and quotes it if necessary, skipping empty 
    * lines.
+   *
    * @param tokenizer the stream tokenizer
    * @exception IOException if reading the next token fails
    */
@@ -1360,30 +1462,35 @@ public class Instances implements Serializable {
 	
   /**
    * Gets token and checks if its end of line.
+   *
    * @param tokenizer the stream tokenizer
    * @exception IOException if it doesn't find an end of line
    */
   private void getLastToken(StreamTokenizer tokenizer) 
        throws IOException{
 
-    if (tokenizer.nextToken() != StreamTokenizer.TT_EOL)
+    if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
       errms(tokenizer,"end of line expected");
+    }
   }
 
   /**
    * Gets next token and quotes it if necessary, checking
    * for a premature and of line.
+   *
    * @param tokenizer the stream tokenizer
    * @exception IOException if it finds a premature end of line
    */
   private void getNextToken(StreamTokenizer tokenizer) 
        throws IOException{
     
-    if (tokenizer.nextToken() == StreamTokenizer.TT_EOL)
+    if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
       errms(tokenizer,"premature end of line");
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF)
+    }
+    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       errms(tokenizer,"premature end of file");
-    else if (tokenizer.ttype == '\''){
+    }
+    else if (tokenizer.ttype == '\'') {
       tokenizer.sval = quote(tokenizer.sval);
       tokenizer.ttype = StreamTokenizer.TT_WORD;
     }
@@ -1391,6 +1498,7 @@ public class Instances implements Serializable {
 	
   /**
    * Initializes the StreamTokenizer used for reading the ARFF file.
+   *
    * @param tokenizer the stream tokenizer
    */
   private void initTokenizer(StreamTokenizer tokenizer){
@@ -1409,6 +1517,7 @@ public class Instances implements Serializable {
   /**
    * Returns string including all instances, their weights and
    * their indices in the original dataset.
+   *
    * @return description of instance and its weight as a string
    */
   private String instancesAndWeights(){
@@ -1417,15 +1526,16 @@ public class Instances implements Serializable {
 
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i) + " " + instance(i).weight());
-      if (i < numInstances() - 1)
+      if (i < numInstances() - 1) {
 	text.append("\n");
+      }
     }
-    
     return text.toString();
   }
   
   /**
-   * Implements quicksort for sorting on a numeric attribute.
+   * Implements quicksort.
+   *
    * @param attIndex the attribute's index
    * @param lo0 the first index of the subset to be sorted
    * @param hi0 the last index of the subset to be sorted
@@ -1435,35 +1545,32 @@ public class Instances implements Serializable {
     int lo = lo0, hi = hi0;
     double mid, midPlus, midMinus;
     
-    if (hi0 > lo0){
+    if (hi0 > lo0) {
       
       // Arbitrarily establishing partition element as the 
       // midpoint of the array.
-            
       mid = instance((lo0 + hi0) / 2).value(attIndex);
       midPlus = mid + 1e-6;
       midMinus = mid - 1e-6;
 
       // loop through the array until indices cross
-      
-      while(lo <= hi){
+      while(lo <= hi) {
 	
 	// find the first element that is greater than or equal to 
 	// the partition element starting from the left Index.
-		
 	while ((instance(lo).value(attIndex) < 
-		midMinus) && (lo < hi0))
+		midMinus) && (lo < hi0)) {
 	  ++lo;
+	}
 	
 	// find an element that is smaller than or equal to
 	// the partition element starting from the right Index.
-	
 	while ((instance(hi).value(attIndex)  > 
-		midPlus) && (hi > lo0))
+		midPlus) && (hi > lo0)) {
 	  --hi;
+	}
 	
 	// if the indexes have not crossed, swap
-	
 	if(lo <= hi) {
 	  swap(lo,hi);
 	  ++lo;
@@ -1473,21 +1580,21 @@ public class Instances implements Serializable {
       
       // If the right index has not reached the left side of array
       // must now sort the left partition.
-      
-      if(lo0 < hi)
+      if(lo0 < hi) {
 	quickSort(attIndex,lo0,hi);
+      }
       
       // If the left index has not reached the right side of array
       // must now sort the right partition.
-      
-      if(lo < hi0)
+      if(lo < hi0) {
 	quickSort(attIndex,lo,hi0);
-      
+      }
     }
   }
 
   /**
    * Quotes a string using single quotes.
+   *
    * @param toQuote the string to be quoted
    * @return the quoted string
    */
@@ -1498,6 +1605,7 @@ public class Instances implements Serializable {
 
   /**
    * Reads and skips all tokens before next end of line token.
+   *
    * @param tokenizer the stream tokenizer
    */
   private void readTillEOL(StreamTokenizer tokenizer) 
@@ -1509,14 +1617,15 @@ public class Instances implements Serializable {
 
   /**
    * Help function needed for stratification of set.
+   *
+   * @param numFolds the number of folds for the stratification
    */
   private void stratStep (int numFolds){
     
-    FastVector newVec = new FastVector(theInstances.capacity());
+    FastVector newVec = new FastVector(m_Instances.capacity());
     int start = 0, j;
 
     // create stratified batch
-
     while (newVec.size() < numInstances()) {
       j = start;
       while (j < numInstances()) {
@@ -1525,47 +1634,42 @@ public class Instances implements Serializable {
       }
       start++;
     }
-    theInstances = newVec;
+    m_Instances = newVec;
   }
   
   /**
-   * Swaps two instances in the ordered set.
+   * Swaps two instances in the set.
+   *
    * @param i the first instance's index
    * @param j the second instance's index
    */
-  
   private void swap(int i, int j){
     
-    theInstances.swap(i, j);
+    m_Instances.swap(i, j);
   }
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.
-   * @param argv should contain one element: the name of an ARFF 
-   * file
+   *
+   * @param argv should contain one element: the name of an ARFF file
    */
-  public static void main(String [] argv){
+  public static void main(String [] argv) {
 
-    Instances instances, secondInstances, train, test, transformed,
-      empty;
+    Instances instances, secondInstances, train, test, transformed, empty;
     Instance instance;
     Random random = new Random(2);
     Reader reader;
-    int classIndex, start, num;
+    int start, num;
     double newWeight;
     FastVector testAtts, testVals;
     int i,j;
     
     try{
-      if (argv.length > 2)
-	throw (new Exception("Usage: Instances [<filename>] [<class index>]"));
+      if (argv.length > 1) {
+	throw (new Exception("Usage: Instances [<filename>]"));
+      }
       
       // Creating set of instances from scratch
-      
       testVals = new FastVector(2);
       testVals.addElement("first_value");
       testVals.addElement("second_value");
@@ -1578,37 +1682,34 @@ public class Instances implements Serializable {
       System.out.println("\nSet of instances created from scratch:\n");
       System.out.println(instances);
       
-      if (argv.length >= 1) {
-	reader = new FileReader(argv[0]);
-	if (argv.length == 2)
-	  classIndex = Integer.parseInt(argv[1]);
-	else
-	  classIndex = 0;
+      if (argv.length == 1) {
+	String filename = argv[0];
+	reader = new FileReader(filename);
 	
 	// Read first five instances and print them
-	
 	System.out.println("\nFirst five instances from file:\n");
 	instances = new Instances(reader, 1);
-	instances.setClassIndex(classIndex - 1);
+	instances.setClassIndex(instances.numAttributes() - 1);
 	i = 0;
 	while ((i < 5) && (instances.readInstance(reader))) {
 	  i++;
 	}
 	System.out.println(instances);
-	
-	reader = new FileReader(argv[0]);
+
+	// Read all the instances in the file
+	reader = new FileReader(filename);
 	instances = new Instances(reader);
-	instances.setClassIndex(classIndex - 1);
+
+	// Make the last attribute be the class 
+	instances.setClassIndex(instances.numAttributes() - 1);
 	
-	// Prints header and instances.
-	
+	// Print header and instances.
 	System.out.println("\nDataset:\n");
 	System.out.println(instances);
 	System.out.println("\nClass index: "+instances.classIndex());
       }
       
       // Test basic methods based on class index.
-      
       System.out.println("\nClass name: "+instances.classAttribute().name());
       System.out.println("\nClass index: "+instances.classIndex());
       System.out.println("\nClass is nominal: " +
@@ -1616,33 +1717,33 @@ public class Instances implements Serializable {
       System.out.println("\nClass is numeric: " +
 			 instances.classAttribute().isNumeric());
       System.out.println("\nClasses:\n");
-      for (i = 0; i < instances.numClasses(); i++)
+      for (i = 0; i < instances.numClasses(); i++) {
 	System.out.println(instances.classAttribute().value(i));
+      }
       System.out.println("\nClass values and labels of instances:\n");
       for (i = 0; i < instances.numInstances(); i++) {
 	System.out.print(instances.instance(i).classValue() + "\t");
 	System.out.print(instances.instance(i).classLabel());
-	if (instances.instance(i).classIsMissing())
+	if (instances.instance(i).classIsMissing()) {
 	  System.out.println("\tis missing");
-	else
+	} else {
 	  System.out.println();
+	}
       }
       
-      // Creates random weights.
-      
+      // Create random weights.
       System.out.println("\nCreating random weights for instances.");
-      for (i = 0; i < instances.numInstances(); i++)
+      for (i = 0; i < instances.numInstances(); i++) {
 	instances.instance(i).setWeight(random.nextDouble()); 
+      }
       
-      // Prints all instances and their weights (and the sum of weights).
-      
+      // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
       System.out.println(instances.instancesAndWeights());
       System.out.print("\nSum of weights: ");
       System.out.println(instances.sumOfWeights());
       
-      // Inserts an attribute
-      
+      // Insert an attribute
       secondInstances = new Instances(instances);
       Attribute testAtt = new Attribute("Inserted");
       secondInstances.insertAttributeAt(testAtt, 0);
@@ -1650,39 +1751,36 @@ public class Instances implements Serializable {
       System.out.println(secondInstances);
       System.out.println("\nClass name: "+secondInstances.classAttribute().name());
       
-      // Deletes the attribute
-      
+      // Delete the attribute
       secondInstances.deleteAttributeAt(0);
       System.out.println("\nSet with attribute deleted:\n");
       System.out.println(secondInstances);
       System.out.println("\nClass name: "+secondInstances.classAttribute().name());
       
       // Test if headers are equal
-      
       System.out.println("\nHeaders equal: "+
 			 instances.equalHeaders(secondInstances) + "\n");
       
       // Print data in internal format.
-      
       System.out.println("\nData (internal values):\n");
       for (i = 0; i < instances.numInstances(); i++) {
-	for (j = 0; j < instances.numAttributes(); j++)
-	  if (instances.instance(i).isMissing(j))
+	for (j = 0; j < instances.numAttributes(); j++) {
+	  if (instances.instance(i).isMissing(j)) {
 	    System.out.print("? ");
-	  else
+	  } else {
 	    System.out.print(instances.instance(i).value(j) + " ");
+	  }
+	}
 	System.out.println();
       }
       
       // Just print header
-
       System.out.println("\nEmpty dataset:\n");
       empty = new Instances(instances, 0);
       System.out.println(empty);
       System.out.println("\nClass name: "+empty.classAttribute().name());
 
-      // Creates and prints subset of instances.
-
+      // Create and prints subset of instances.
       start = instances.numInstances() / 4;
       num = instances.numInstances() / 2;
       System.out.print("\nSubset of dataset: ");
@@ -1691,25 +1789,23 @@ public class Instances implements Serializable {
       secondInstances = new Instances(instances, start, num);
       System.out.println("\nClass name: "+secondInstances.classAttribute().name());
 
-      // Prints all instances and their weights (and the sum of weights).
-
+      // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
       System.out.println(secondInstances.instancesAndWeights());
       System.out.print("\nSum of weights: ");
       System.out.println(secondInstances.sumOfWeights());
       
-      // Creates and prints training and test sets for 3-fold
+      // Create and print training and test sets for 3-fold
       // cross-validation.
-
       System.out.println("\nTrain and test folds for 3-fold CV:");
-      if (instances.classAttribute().isNominal())
+      if (instances.classAttribute().isNominal()) {
 	instances.stratify(3);
-      for (j = 0; j < 3; j++){
+      }
+      for (j = 0; j < 3; j++) {
         train = instances.trainCV(3,j);
 	test = instances.testCV(3,j);
                       
-	// Prints all instances and their weights (and the sum of weights).
-
+	// Print all instances and their weights (and the sum of weights).
 	System.out.println("\nTrain: ");
 	System.out.println("\nInstances and their weights:\n");
 	System.out.println(train.instancesAndWeights());
@@ -1724,29 +1820,25 @@ public class Instances implements Serializable {
 	System.out.println("\nClass name: "+test.classAttribute().name());
       }
 
-      // Randomizes instances and prints them.
-
+      // Randomize instances and print them.
       System.out.println("\nRandomized dataset:");
       instances.randomize(random);
       
-      // Prints all instances and their weights (and the sum of weights).
-
+      // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
       System.out.println(instances.instancesAndWeights());
       System.out.print("\nSum of weights: ");
       System.out.println(instances.sumOfWeights());
 
-      // Sorts instances according to first attribute and
-      // prints them.
-
+      // Sort instances according to first attribute and
+      // print them.
       System.out.print("\nInstances sorted according to first attribute:\n ");
       instances.sort(0);
         
-      // Prints all instances and their weights (and the sum of weights).
-      
+      // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
       System.out.println(instances.instancesAndWeights());
-      System.out.print("\nSum of weights:");
+      System.out.print("\nSum of weights: ");
       System.out.println(instances.sumOfWeights());
     } catch (Exception e) {
       e.printStackTrace(); 

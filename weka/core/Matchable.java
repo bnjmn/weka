@@ -16,21 +16,16 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 /** 
- * Interface to something that can be matched with the tree matching
+ * Interface to something that can be matched with tree matching
  * algorithms.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 17 Mar 1999 - Initial version
+ * @version $Revision: 1.2 $
  */
 public interface Matchable {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns a string that describes a tree representing
@@ -39,7 +34,7 @@ public interface Matchable {
    * @return the tree described as a string
    * @exception Exception if the tree can't be computed
    */
-  String prefix() throws Exception;
+  public String prefix() throws Exception;
 }
 
 
