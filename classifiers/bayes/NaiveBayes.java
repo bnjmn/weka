@@ -26,8 +26,21 @@ import weka.estimators.*;
 /**
  * Class for a Naive Bayes classifier using estimator classes. Numeric 
  * estimator precision values are chosen based on analysis of the 
- * training data (for this reason, the classifier is not an 
- * UpdateableClassifier). For more information, see<p>
+ * training data. For this reason, the classifier is not an 
+ * UpdateableClassifier (which in typical usage are initialized with zero 
+ * training instances) -- if you need the UpdateableClassifier functionality,
+ * Create an empty class such as the following: <p>
+ *
+ * <pre><code>
+ * public class NaiveBayesUpdateable extends NaiveBayes 
+ *     implements UpdateableClassifier {
+ *
+ * }
+ * </code></pre>
+ * This classifier will use a default precision of 0.1 for numeric attributes
+ * when buildClassifier is called with zero training instances.
+ * <p>
+ * For more information on Naive Bayes classifiers, see<p>
  *
  * George H. John and Pat Langley (1995). <i>Estimating
  * Continuous Distributions in Bayesian Classifiers</i>. Proceedings
@@ -42,7 +55,7 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class NaiveBayes extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -62,7 +75,9 @@ public class NaiveBayes extends DistributionClassifier
   /** The number of classes (or 1 for numeric class) */
   protected int m_NumClasses;
 
-  /** The dataset header for the purposes of printing out a semi-intelligible model
+  /**
+   * The dataset header for the purposes of printing out a semi-intelligible 
+   * model 
    */
   protected Instances m_Instances;
 
@@ -130,6 +145,7 @@ public class NaiveBayes extends DistributionClassifier
 	}
       }
 
+
       for (int j = 0; j < m_Instances.numClasses(); j++) {
 	switch (attribute.type()) {
 	case Attribute.NUMERIC: 
@@ -153,31 +169,43 @@ public class NaiveBayes extends DistributionClassifier
     }
 
     // Compute counts
-    double sum;
-
     Enumeration enumInsts = m_Instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) {
       Instance instance = 
 	(Instance) enumInsts.nextElement();
-      if (!instance.classIsMissing()) {
-	Enumeration enumAtts = m_Instances.enumerateAttributes();
-	attIndex = 0;
-	while (enumAtts.hasMoreElements()) {
-	  Attribute attribute = (Attribute) enumAtts.nextElement();
-	  if (!instance.isMissing(attribute)) {
-	    m_Distributions[attIndex][(int)instance.classValue()].
-	    addValue(instance.value(attribute), instance.weight());
-	  }
-	  attIndex++;
-	}
-	m_ClassDistribution.addValue(instance.classValue(),
-				     instance.weight());
-      }
+      updateClassifier(instance);
     }
 
     // Save space
     m_Instances = new Instances(m_Instances, 0);
   }
+
+
+  /**
+   * Updates the classifier with the given instance.
+   *
+   * @param instance the new training instance to include in the model 
+   * @exception Exception if the instance could not be incorporated in
+   * the model.
+   */
+  public void updateClassifier(Instance instance) throws Exception {
+
+    if (!instance.classIsMissing()) {
+      Enumeration enumAtts = m_Instances.enumerateAttributes();
+      int attIndex = 0;
+      while (enumAtts.hasMoreElements()) {
+	Attribute attribute = (Attribute) enumAtts.nextElement();
+	if (!instance.isMissing(attribute)) {
+	  m_Distributions[attIndex][(int)instance.classValue()].
+	    addValue(instance.value(attribute), instance.weight());
+	}
+	attIndex++;
+      }
+      m_ClassDistribution.addValue(instance.classValue(),
+				   instance.weight());
+    }
+  }
+
 
   /**
    * Calculates the class membership probabilities for the given test 
@@ -194,7 +222,6 @@ public class NaiveBayes extends DistributionClassifier
     for (int j = 0; j < m_NumClasses; j++) {
       probs[j] = m_ClassDistribution.getProbability(j);
     }
-
     Enumeration enumAtts = instance.enumerateAttributes();
     int attIndex = 0;
     while (enumAtts.hasMoreElements()) {
