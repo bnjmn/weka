@@ -39,7 +39,7 @@ import java.util.*;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SingleIndex implements Serializable {
 
@@ -147,6 +147,8 @@ public class SingleIndex implements Serializable {
    * @exception RuntimeException if the upper limit of the index hasn't been defined
    */
   //@ requires m_Upper >= 0;
+  //@ requires ! m_IndexString.equals("");
+  //@ ensures \result == m_SelectedIndex;
   public /*@pure@*/ int getIndex() {
 
     if (m_IndexString.equals("")) {
