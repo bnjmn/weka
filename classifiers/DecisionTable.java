@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -1236,8 +1236,8 @@ public class DecisionTable
       if (m_displayRules) {
 	text.append("\n\nRules:\n");
 	StringBuffer tm = new StringBuffer();
-	for (int i=0;i<m_decisionFeatures.length;i++) {
-	  if (m_theInstances.classIndex() != m_decisionFeatures[i]) {
+	for (int i=0;i<m_theInstances.numAttributes();i++) {
+	  if (m_theInstances.classIndex() != i) {
 	    tm.append(m_theInstances.attribute(i).name()+"  ");	
 	  }
 	}
