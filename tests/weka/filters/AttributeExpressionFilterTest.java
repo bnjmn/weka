@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.AttributeExpressionFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AttributeExpressionFilterTest extends AbstractFilterTest {
   
@@ -220,6 +220,27 @@ public class AttributeExpressionFilterTest extends AbstractFilterTest {
         assertEquals("Instance " + (i + 1),
                      (inst.value(3) + inst.value(2)) * 
                      ((inst.value(1) - inst.value(0))/5), 
+                     inst.value(inst.numAttributes() - 1), EXPR_DELTA);
+      }
+    }
+  }
+
+  public void testBODMAS() {
+    m_Filter = getFilter("a3+a4*a2-a1/5+a3*a4+a2");
+    Instances result = useFilter();
+    for (int i = 0; i < result.numInstances(); i++) {
+      Instance inst = result.instance(i);
+      if (inst.isMissing(0) || inst.isMissing(1) ||
+          inst.isMissing(2) || inst.isMissing(3)) {
+        assertTrue("Instance " + (i + 1) + " should have been ?" , 
+               inst.isMissing(inst.numAttributes() - 1));
+      } else {
+        assertEquals("Instance " + (i + 1),
+                     inst.value(2) + 
+                     (inst.value(3) * inst.value(1)) 
+                     - (inst.value(0)/5)
+                     + (inst.value(3) * inst.value(2))
+                     + inst.value(1), 
                      inst.value(inst.numAttributes() - 1), EXPR_DELTA);
       }
     }
