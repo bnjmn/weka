@@ -37,6 +37,8 @@ import java.awt.FontMetrics;
 import javax.swing.JLabel;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.EtchedBorder;
 import java.util.LinkedList;
 import java.io.ObjectInputStream;
 import java.io.IOException;
@@ -50,7 +52,7 @@ import weka.core.Queue;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class StripChart 
   extends JPanel 
@@ -352,7 +354,15 @@ public class StripChart
       m_legendPanel.setPreferredSize(new Dimension(100,getHeight()));
       m_scalePanel.setMinimumSize(new Dimension(30, getHeight()));
       m_scalePanel.setPreferredSize(new Dimension(30, getHeight()));
-      m_legendPanel.setBorder(BorderFactory.createTitledBorder("Legend"));
+      Font lf = new Font("Monospaced", Font.PLAIN, 12);
+      m_legendPanel.setBorder(BorderFactory.
+			      createTitledBorder(BorderFactory.
+				    createEtchedBorder(Color.gray,
+						       Color.darkGray),
+				    "Legend" ,
+				    TitledBorder.CENTER,
+				    TitledBorder.DEFAULT_POSITION, lf, 
+				    Color.blue));
       m_outputFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
 	    if (m_updateHandler != null) {
