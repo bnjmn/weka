@@ -25,7 +25,7 @@ import weka.classifiers.*;
  * be output. (default 1) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -59,7 +59,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 21;
+  private static final int RESULT_SIZE = 22;
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 11;
@@ -352,6 +352,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     // IR stats
     resultTypes[current++] = doub;
@@ -402,6 +403,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "Percent_correct";
     resultNames[current++] = "Percent_incorrect";
     resultNames[current++] = "Percent_unclassified";
+    resultNames[current++] = "Kappa_statistic";
 
     // Sensitive stats - certainty of predictions
     resultNames[current++] = "Mean_absolute_error";
@@ -486,6 +488,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.pctCorrect());
     result[current++] = new Double(eval.pctIncorrect());
     result[current++] = new Double(eval.pctUnclassified());
+    result[current++] = new Double(eval.kappa());
 
     result[current++] = new Double(eval.meanAbsoluteError());
     result[current++] = new Double(eval.rootMeanSquaredError());
