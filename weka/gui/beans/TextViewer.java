@@ -41,25 +41,24 @@ import javax.swing.BorderFactory;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.beans.*;
+import java.beans.beancontext.*;
 
 
 /**
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TextViewer 
   extends JPanel
   implements TextListener, DataSourceListener, 
 	     TrainingSetListener, TestSetListener,
 	     Visible, UserRequestAcceptor, 
-	     Serializable {
+	     Serializable, BeanContextChild {
 
-  protected BeanVisual m_visual = 
-    new BeanVisual("TextViewer", 
-		   BeanVisual.ICON_PATH+"DefaultText.gif",
-		   BeanVisual.ICON_PATH+"DefaultText_animated.gif");
+  protected BeanVisual m_visual;
 
 
   private transient JFrame m_resultsFrame = null;
@@ -72,12 +71,59 @@ public class TextViewer
   /**
    * List of text revieved so far
    */
-  protected transient ResultHistoryPanel m_history = new ResultHistoryPanel(m_outText);
+  protected transient ResultHistoryPanel m_history = 
+    new ResultHistoryPanel(m_outText);
+
+  /**
+   * True if this bean's appearance is the design mode appearance
+   */
+  protected boolean m_design;
+  
+  /**
+   * BeanContex that this bean might be contained within
+   */
+  protected transient BeanContext m_beanContext = null;
+
+  /**
+   * BeanContextChild support
+   */
+  protected BeanContextChildSupport m_bcSupport = 
+    new BeanContextChildSupport(this);
+
   
   public TextViewer() {
+    /*    setUpResultHistory();
+    setLayout(new BorderLayout());
+    add(m_visual, BorderLayout.CENTER); */
+    appearanceFinal();
+  }
+
+  protected void appearanceDesign() {
     setUpResultHistory();
+    removeAll();
+    m_visual =  new BeanVisual("TextViewer", 
+			       BeanVisual.ICON_PATH+"DefaultText.gif",
+			       BeanVisual.ICON_PATH+"DefaultText_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  protected void appearanceFinal() {
+    removeAll();
+    setLayout(new BorderLayout());
+    setUpFinal();
+  }
+
+  protected void setUpFinal() {
+    setUpResultHistory();
+    JPanel holder = new JPanel();
+    holder.setLayout(new BorderLayout());
+    JScrollPane js = new JScrollPane(m_outText);
+    js.setBorder(BorderFactory.createTitledBorder("Text"));
+    holder.add(js, BorderLayout.CENTER);
+    holder.add(m_history, BorderLayout.WEST);
+
+    add(holder, BorderLayout.CENTER);
   }
 
   /**
@@ -99,20 +145,6 @@ public class TextViewer
     m_outText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
   }
-
-//    public synchronized void acceptClassifier(BatchClassifierEvent e) {
-//      weka.classifiers.Classifier c = e.getClassifier();
-//      String modelString = c.toString();
-//      String titleString = c.getClass().getName();
-//      titleString = titleString.substring(titleString.lastIndexOf('.')+1,
-//  					titleString.length());
-//      titleString = "Set "+e.getSetNumber()+" ("+e.getTestSet().relationName()
-//        +") "+titleString+" model";
-//      TextEvent nt = new TextEvent(e.getSource(),
-//  				 modelString,
-//  				 titleString);
-//      acceptText(nt);
-//    }
 
   /**
    * Accept a data set for displaying as text
@@ -257,6 +289,97 @@ public class TextViewer
       throw new 
 	IllegalArgumentException(request
 		    + " not supported (TextViewer)");
+    }
+  }
+
+  /**
+   * Add a property change listener to this bean
+   *
+   * @param name the name of the property of interest
+   * @param pcl a <code>PropertyChangeListener</code> value
+   */
+  public void addPropertyChangeListener(String name,
+					PropertyChangeListener pcl) {
+    m_bcSupport.addPropertyChangeListener(name, pcl);
+  }
+
+  /**
+   * Remove a property change listener from this bean
+   *
+   * @param name the name of the property of interest
+   * @param pcl a <code>PropertyChangeListener</code> value
+   */
+  public void removePropertyChangeListener(String name,
+					   PropertyChangeListener pcl) {
+    m_bcSupport.removePropertyChangeListener(name, pcl);
+  }
+
+  /**
+   * Add a vetoable change listener to this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void addVetoableChangeListener(String name,
+				       VetoableChangeListener vcl) {
+    m_bcSupport.addVetoableChangeListener(name, vcl);
+  }
+  
+  /**
+   * Remove a vetoable change listener from this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void removeVetoableChangeListener(String name,
+					   VetoableChangeListener vcl) {
+    m_bcSupport.removeVetoableChangeListener(name, vcl);
+  }
+
+  /**
+   * Set a bean context for this bean
+   *
+   * @param bc a <code>BeanContext</code> value
+   */
+  public void setBeanContext(BeanContext bc) {
+    m_beanContext = bc;
+    m_design = m_beanContext.isDesignTime();
+    if (m_design) {
+      appearanceDesign();
+    } else {
+      appearanceFinal();
+    }
+  }
+
+  /**
+   * Return the bean context (if any) that this bean is embedded in
+   *
+   * @return a <code>BeanContext</code> value
+   */
+  public BeanContext getBeanContext() {
+    return m_beanContext;
+  }
+
+  public static void main(String [] args) {
+    try {
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
+
+      final TextViewer tv = new TextViewer();
+
+      tv.acceptText(new TextEvent(tv, "Here is some test text from the main "
+				  +"method of this class.", "The Title"));
+      jf.getContentPane().add(tv, java.awt.BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
+      });
+      jf.setSize(800,600);
+      jf.setVisible(true);
+    } catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
 }
