@@ -25,15 +25,35 @@ import weka.core.*;
 import weka.estimators.*;
 
 /**
- * Class for evaluating machine learning models.
+ * Class for evaluating machine learning models. Example usage as the
+ * main of a classifier (called FunkyClassifier):
+ * <code> <pre>
+ * public static void main(String [] args) {
+ *   try {
+ *     Classifier scheme = new FunkyClassifier();
+ *     System.out.println(Evaluation.evaluateModel(scheme, args));
+ *   } catch (Exception e) {
+ *     System.err.println(e.getMessage());
+ *   }
+ * }
+ * </code> </pre>
+ * <p>
+ * Example usage from within an application:
+ * <code> <pre>
+ * Instances trainInstances = ... instances got from somewhere
+ * Instances testInstances = ... instances got from somewhere
+ * Classifier scheme = ... scheme got from somewhere
+ *
+ * Evaluation evaluation = new Evaluation(trainInstances);
+ * evaluation.evaluateModel(scheme, testInstances);
+ * System.out.println(evaluation.toSummaryString());
+ * </code> </pre>
+ *
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  1.2 - 31 Jan 1999 - Simplified output stats (Eibe) <br>
- *           1.1 - Sep 1998 - Cleanup, margin distributions, entropy 
- * measures (Len) <br>
- *           1.0 - ?? ??? 1997 - Initial version (Eibe)
- */
+ * @version  $Revision: 1.3 $
+  */
 public class Evaluation implements Summarizable {
 
   // =================
@@ -386,7 +406,10 @@ public class Evaluation implements Summarizable {
   }
   
   /**
-   * A test method for this class
+   * A test method for this class. Just extracts the first command line
+   * argument as a classifier class name and calls evaluateModel.
+   * @param args an array of command line arguments, the first of which
+   * must be the class name of a classifier.
    */
   public static void main(String [] args) {
 
@@ -580,7 +603,11 @@ public class Evaluation implements Summarizable {
 	    if (schemeOptionsText == null) {
 	      schemeOptionsText = new StringBuffer();
 	    }
-	    schemeOptionsText.append(options[i]+" ");
+	    if (options[i].indexOf(' ') != -1) {
+	      schemeOptionsText.append('"' + options[i] + "\" ");
+	    } else {
+	      schemeOptionsText.append(options[i] + " ");
+	    }
 	  }
 	}
 	((OptionHandler)classifier).setOptions(options);
