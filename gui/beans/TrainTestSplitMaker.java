@@ -59,6 +59,24 @@ public class TrainTestSplitMaker
   }
 
   /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Split an incoming data set into separate train and test sets." ;
+  }
+
+  /**
+   * Tip text info for this property
+   *
+   * @return a <code>String</code> value
+   */
+  public String trainPercentTipText() {
+    return "The percentage of data to go into the training set";
+  }
+
+  /**
    * Set the percentage of data to be in the training portion of the split
    *
    * @param newTrainPercent an <code>int</code> value
@@ -75,6 +93,15 @@ public class TrainTestSplitMaker
    */
   public int getTrainPercent() {
     return m_trainPercentage;
+  }
+
+  /**
+   * Tip text for this property
+   *
+   * @return a <code>String</code> value
+   */
+  public String seedTipText() {
+    return "The randomization seed";
   }
 
   /**

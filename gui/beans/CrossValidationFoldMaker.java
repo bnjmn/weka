@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -56,6 +56,16 @@ public class CrossValidationFoldMaker
   public CrossValidationFoldMaker() {
     super();
     m_visual.setText("CrossValidationFoldMaker");
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Split an incoming data set into cross validation folds. "
+      +"Separate train and test sets are produced for each of the k folds.";
   }
 
   /**
@@ -205,6 +215,15 @@ public class CrossValidationFoldMaker
   public int getFolds() {
     return m_numFolds;
   }
+
+  /**
+   * Tip text for this property
+   *
+   * @return a <code>String</code> value
+   */
+  public String foldsTipText() {
+    return "The number of train and test splits to produce";
+  }
     
   /**
    * Set the seed
@@ -222,6 +241,15 @@ public class CrossValidationFoldMaker
    */
   public int getSeed() {
     return m_randomSeed;
+  }
+  
+  /**
+   * Tip text for this property
+   *
+   * @return a <code>String</code> value
+   */
+  public String seedTipText() {
+    return "The randomization seed";
   }
 
   /**
