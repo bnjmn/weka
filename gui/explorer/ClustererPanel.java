@@ -30,6 +30,7 @@ import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.FastVector;
 import weka.core.SerializedObject;
+import weka.core.Drawable;
 import weka.clusterers.Clusterer;
 import weka.clusterers.ClusterEvaluation;
 import weka.gui.Logger;
@@ -112,7 +113,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -736,6 +737,7 @@ public class ClustererPanel extends JPanel {
 	  }
 	  
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
+	  String grph = null;
 
 	  int testMode = 0;
 	  int percent = 66;
@@ -866,6 +868,12 @@ public class ClustererPanel extends JPanel {
 	    outBuff.append("\n=== Clustering model (full training set) ===\n\n");
 	    outBuff.append(clusterer.toString() + '\n');
 	    m_History.updateResult(name);
+	    if (clusterer instanceof Drawable) {
+	      try {
+		grph = ((Drawable)clusterer).graph();
+	      } catch (Exception ex) {
+	      }
+	    }
 	    
 	    ClusterEvaluation eval = new ClusterEvaluation();
 	    eval.setClusterer(clusterer);
@@ -945,6 +953,9 @@ public class ClustererPanel extends JPanel {
 	      if (saveVis) {
 		FastVector vv = new FastVector();
 		vv.addElement(m_CurrentVis);
+		if (grph != null) {
+		  vv.addElement(grph);
+		}
 		m_History.addObject(name, vv);
 	      }
 	    }
