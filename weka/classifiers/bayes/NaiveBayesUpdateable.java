@@ -46,10 +46,25 @@ import weka.classifiers.Evaluation;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NaiveBayesUpdateable extends NaiveBayes 
   implements UpdateableClassifier {
+ 
+  /**
+   * Set whether supervised discretization is to be used.
+   *
+   * @param newblah true if supervised discretization is to be used.
+   */
+  public void setUseSupervisedDiscretization(boolean newblah) {
+
+    if (newblah) {
+      throw new IllegalArgumentException("Can't use discretization " + 
+					 "in NaiveBayesUpdateable!");
+    }
+    m_UseDiscretization = false;
+  }
+  
 
   /**
    * Main method for testing this class.

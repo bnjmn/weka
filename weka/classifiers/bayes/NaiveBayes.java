@@ -54,9 +54,12 @@ import weka.estimators.*;
  * Use kernel estimation for modelling numeric attributes rather than
  * a single normal distribution.<p>
  *
+ * -D <br>
+ * Use supervised discretization to process numeric attributes.<p>
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class NaiveBayes extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -71,7 +74,13 @@ public class NaiveBayes extends DistributionClassifier
    * Whether to use kernel density estimator rather than normal distribution
    * for numeric attributes
    */
-  protected boolean m_UseKernelEstimator;
+  protected boolean m_UseKernelEstimator = false;
+
+  /**
+   * Whether to use discretization than normal distribution
+   * for numeric attributes
+   */
+  protected boolean m_UseDiscretization = false;
 
   /** The number of classes (or 1 for numeric class) */
   protected int m_NumClasses;
@@ -84,6 +93,11 @@ public class NaiveBayes extends DistributionClassifier
 
   /*** The precision parameter used for numeric attributes */
   protected static final double DEFAULT_NUM_PRECISION = 0.01;
+
+  /**
+   * The discretization filter.
+   */
+  protected weka.filters.supervised.attribute.Discretize m_Disc = null;
 
   /**
    * Generates the classifier.
@@ -107,6 +121,15 @@ public class NaiveBayes extends DistributionClassifier
 
     // Copy the instances
     m_Instances = new Instances(instances);
+
+    // Discretize instances if required
+    if (m_UseDiscretization) {
+      m_Disc = new weka.filters.supervised.attribute.Discretize();
+      m_Disc.setInputFormat(m_Instances);
+      m_Instances = weka.filters.Filter.useFilter(m_Instances, m_Disc);
+    } else {
+      m_Disc = null;
+    }
 
     // Reserve space for the distributions
     m_Distributions = new Estimator[m_Instances.numAttributes() - 1]
@@ -219,6 +242,10 @@ public class NaiveBayes extends DistributionClassifier
   public double [] distributionForInstance(Instance instance) 
   throws Exception { 
     
+    if (m_UseDiscretization) {
+      m_Disc.input(instance);
+      instance = m_Disc.output();
+    }
     double [] probs = new double[m_NumClasses];
     for (int j = 0; j < m_NumClasses; j++) {
       probs[j] = m_ClassDistribution.getProbability(j);
@@ -263,12 +290,15 @@ public class NaiveBayes extends DistributionClassifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(
     new Option("\tUse kernel density estimator rather than normal\n"
 	       +"\tdistribution for numeric attributes",
 	       "K", 0,"-K"));
+    newVector.addElement(
+    new Option("\tUse supervised discretization to process numeric attributes\n",
+	       "D", 0,"-D"));
     return newVector.elements();
   }
 
@@ -279,13 +309,22 @@ public class NaiveBayes extends DistributionClassifier
    * Use kernel estimation for modelling numeric attributes rather than
    * a single normal distribution.<p>
    *
+   * -D <br>
+   * Use supervised discretization to process numeric attributes.
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
-    m_UseKernelEstimator = Utils.getFlag('K', options);
-
+    boolean k = Utils.getFlag('K', options);
+    boolean d = Utils.getFlag('D', options);
+    if (k && d) {
+      throw new IllegalArgumentException("Can't use both kernel density " +
+					 "estimation and discretization!");
+    }
+    setUseSupervisedDiscretization(d);
+    setUseKernelEstimator(k);
     Utils.checkForRemainingOptions(options);
   }
 
@@ -296,11 +335,15 @@ public class NaiveBayes extends DistributionClassifier
    */
   public String [] getOptions() {
 
-    String [] options = new String [1];
+    String [] options = new String [2];
     int current = 0;
 
     if (m_UseKernelEstimator) {
       options[current++] = "-K";
+    }
+
+    if (m_UseDiscretization) {
+      options[current++] = "-D";
     }
 
     while (current < options.length) {
@@ -363,8 +406,34 @@ public class NaiveBayes extends DistributionClassifier
   public void setUseKernelEstimator(boolean v) {
     
     m_UseKernelEstimator = v;
+    if (v) {
+      setUseSupervisedDiscretization(false);
+    }
   }
-
+  
+  /**
+   * Get whether supervised discretization is to be used.
+   *
+   * @return true if supervised discretization is to be used.
+   */
+  public boolean getUseSupervisedDiscretization() {
+    
+    return m_UseDiscretization;
+  }
+  
+  /**
+   * Set whether supervised discretization is to be used.
+   *
+   * @param newblah true if supervised discretization is to be used.
+   */
+  public void setUseSupervisedDiscretization(boolean newblah) {
+    
+    m_UseDiscretization = newblah;
+    if (newblah) {
+      setUseKernelEstimator(false);
+    }
+  }
+  
   /**
    * Main method for testing this class.
    *
