@@ -61,7 +61,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class LWL extends DistributionClassifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -228,8 +228,7 @@ public class LWL extends DistributionClassifier
    *
    * @param newClassifier the Classifier to use.
    */
-  public void setClassifier(Classifier newClassifier) 
-    throws IllegalArgumentException {
+  public void setClassifier(Classifier newClassifier) {
 
     if (newClassifier instanceof WeightedInstancesHandler) {
       if (newClassifier instanceof DistributionClassifier) {
