@@ -6,7 +6,6 @@
 
 package weka.experiment;
 
-import weka.core.FastVector;
 import java.io.File;
 
 /**
@@ -14,7 +13,7 @@ import java.io.File;
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RemoteExperimentSubTask implements Task {
 
@@ -40,34 +39,42 @@ public class RemoteExperimentSubTask implements Task {
     /**
      * Run the experiment
      */
-    public Object execute() {
-      FastVector result = new FastVector();
+    public TaskStatusInfo execute() {
+      //      FastVector result = new FastVector();
+      TaskStatusInfo result = new TaskStatusInfo();
+      result.setStatusMessage("Running...");
       String goodResult = "(sub)experiment completed successfully";
-      String subTaskIdentifier;
+      String subTaskType;
       if (m_experiment.getRunLower() != m_experiment.getRunUpper()) {
-	subTaskIdentifier = "(datataset "
+	subTaskType = "(datataset "
 	  + ((File)m_experiment.getDatasets().elementAt(0)).getName();
       } else {
-	subTaskIdentifier = "(exp run # "+
+	subTaskType = "(exp run # "+
 	  m_experiment.getRunLower();
       }
       try {	
-	System.err.println("Initializing " + subTaskIdentifier + ")...");
+	System.err.println("Initializing " + subTaskType + ")...");
 	m_experiment.initialize();
-	System.err.println("Iterating " + subTaskIdentifier + ")...");
+	System.err.println("Iterating " + subTaskType + ")...");
 	m_experiment.runExperiment();
-	System.err.println("Postprocessing " + subTaskIdentifier + ")...");
+	System.err.println("Postprocessing " + subTaskType + ")...");
 	m_experiment.postProcess();
       } catch (Exception ex) {
 	ex.printStackTrace();
-	String badResult =  "(sub)experiment " + subTaskIdentifier 
-	  + ") : "+ex.toString();
-	result.addElement(new Integer(RemoteExperiment.FAILED));
-	result.addElement(badResult);
+	String badResult =  "(sub)experiment " + subTaskType 
+	  + ") failed : "+ex.toString();
+	result.setExecutionStatus(TaskStatusInfo.FAILED);
+	//	result.addElement(new Integer(RemoteExperiment.FAILED));
+	//	result.addElement(badResult);
+	result.setStatusMessage(badResult);
+	result.setTaskResult("Failed");
 	return result;
       }            
-      result.addElement(new Integer(RemoteExperiment.FINISHED));
-      result.addElement(goodResult);
+      //      result.addElement(new Integer(RemoteExperiment.FINISHED));
+      //      result.addElement(goodResult);
+      result.setExecutionStatus(TaskStatusInfo.FINISHED);
+      result.setStatusMessage(goodResult+" "+subTaskType+").");
+      result.setTaskResult("No errors");
       return result;
     }
 }

@@ -14,7 +14,7 @@ import java.rmi.RemoteException;
  * a task.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface Compute extends Remote {
   
@@ -22,6 +22,17 @@ public interface Compute extends Remote {
    * Execute a task
    * @param t Task to be executed
    * @exception RemoteException if something goes wrong.
+   * @return a unique ID for the task
    */
   Object executeTask(Task t) throws RemoteException;
+
+  /**
+   * Check on the status of a <code>Task</code>
+   *
+   * @param taskId the ID for the Task to be checked
+   * @return the status of the Task
+   * @exception Exception if an error occurs
+   */
+  Object checkStatus(Object taskId) throws Exception;
 }
+
