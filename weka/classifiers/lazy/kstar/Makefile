@@ -2,8 +2,7 @@ JAVAC = javac
 
 SOURCES = KStar.java KStarCache.java \
 	KStarConstants.java KStarNominalAttribute.java \
-	KStarNumericAttribute.java KStarWrapper.java \
-	LightHashTable.java 
+	KStarNumericAttribute.java KStarWrapper.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
