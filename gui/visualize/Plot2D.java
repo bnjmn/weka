@@ -60,19 +60,21 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Plot2D extends JPanel {
 
   /* constants for shape types */
   public static final int MAX_SHAPES = 5;
   public static final int ERROR_SHAPE = 1000;
+  public static final int MISSING_SHAPE = 2000;
   public static final int CONST_AUTOMATIC_SHAPE = -1;
   public static final int X_SHAPE = 0;
   public static final int PLUS_SHAPE = 1;
   public static final int DIAMOND_SHAPE = 2;
   public static final int TRIANGLEUP_SHAPE = 3;
   public static final int TRIANGLEDOWN_SHAPE = 4;
+  public static final int DEFAULT_SHAPE_SIZE = 2;
 
   /** The plots to display */
   protected FastVector m_plots = new FastVector();
@@ -774,13 +776,13 @@ public class Plot2D extends JPanel {
    * 4 = triangle (down).
    * @param gx the graphics context
    */
-  protected static void drawDataPoint(double x, 
-				 double y,
-				 double xprev,
-				 double yprev,
-				 int size,
-				 int shape,
-				 Graphics gx) {
+  protected void drawDataPoint(double x, 
+			       double y,
+			       double xprev,
+			       double yprev,
+			       int size,
+			       int shape,
+			       Graphics gx) {
 
     drawDataPoint(x,y,size,shape,gx);
 
@@ -799,17 +801,17 @@ public class Plot2D extends JPanel {
    * 4 = triangle (down).
    * @param gx the graphics context
    */
-  protected static void drawDataPoint(double x, 
+  protected void drawDataPoint(double x, 
 				      double y,
 				      int size,
 				      int shape,
 				      Graphics gx) {
-
+    
     if (size == 0) {
       size = 1;
     }
 
-    if (shape != ERROR_SHAPE) {
+    if (shape != ERROR_SHAPE && shape != MISSING_SHAPE) {
       shape = shape % 5;
     }
 
@@ -831,6 +833,11 @@ public class Plot2D extends JPanel {
       break;
     case ERROR_SHAPE: // draws the nominal error shape 
       gx.drawRect((int)(x-size),(int)(y-size),(size*2),(size*2));
+      break;
+    case MISSING_SHAPE:
+      int hf = m_labelMetrics.getAscent();
+      int width = m_labelMetrics.stringWidth("M");
+      gx.drawString("M",(int)(x-(width / 2)), (int)(y+(hf / 2)));
       break;
     }
   }
@@ -898,8 +905,7 @@ public class Plot2D extends JPanel {
 
       for (int i=0;i<temp_plot.m_plotInstances.numInstances();i++) {
 	if (temp_plot.m_plotInstances.instance(i).isMissing(m_xIndex) ||
-	    temp_plot.m_plotInstances.instance(i).isMissing(m_yIndex) ||
-	    temp_plot.m_plotInstances.instance(i).isMissing(m_cIndex)) {
+	    temp_plot.m_plotInstances.instance(i).isMissing(m_yIndex)) {
 	} else {
 	  double x = (temp_plot.m_pointLookup[i][0] + 
 		      temp_plot.m_pointLookup[i][2]);
@@ -921,36 +927,62 @@ public class Plot2D extends JPanel {
 				  attribute(m_cIndex).numValues());
 		}
 
-		int ci = (int)temp_plot.m_plotInstances.instance(i).
-		  value(m_cIndex);
+		Color ci;
+		if (temp_plot.m_plotInstances.instance(i).
+		    isMissing(m_cIndex)) {
+		  ci = Color.gray;
+		} else {
+		  int ind = (int)temp_plot.m_plotInstances.instance(i).
+		    value(m_cIndex);
+		  ci = (Color)m_colorList.elementAt(ind);
+		}
 
 		if (!temp_plot.m_useCustomColour) {
-	
-		  gx.setColor((Color)m_colorList.elementAt(ci));	    
+		  gx.setColor(ci);	    
 		} else {
 		  gx.setColor(temp_plot.m_customColour);
 		}
 
-		if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
-		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		if (temp_plot.m_plotInstances.instance(i).
+		    isMissing(m_cIndex)) {
+		   drawDataPoint(x,y,temp_plot.m_shapeSize[i],
+				 MISSING_SHAPE,gx);
 		} else {
-		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],
-				temp_plot.m_shapeType[i],gx);
+		  if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
+		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		  } else {
+		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],
+				  temp_plot.m_shapeType[i],gx);
+		  }
 		}
 	      } else {
-		double r = (temp_plot.m_plotInstances.instance(i).
-			    value(m_cIndex) - m_minC) / (m_maxC - m_minC);
-		r = (r * 240) + 15;
+		double r;
+		Color ci = null;
+		if (!temp_plot.m_plotInstances.instance(i).
+		    isMissing(m_cIndex)) {
+		  r = (temp_plot.m_plotInstances.instance(i).
+		       value(m_cIndex) - m_minC) / (m_maxC - m_minC);
+		  r = (r * 240) + 15;
+		  ci = new Color((int)r,150,(int)(255-r));
+		} else {
+		  ci = Color.gray;
+		}
 		if (!temp_plot.m_useCustomColour) {
-		  gx.setColor(new Color((int)r,150,(int)(255-r)));
+		  gx.setColor(ci);
 		} else {
 		  gx.setColor(temp_plot.m_customColour);
 		}
-		if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
-		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		if (temp_plot.m_plotInstances.instance(i).
+		    isMissing(m_cIndex)) {
+		   drawDataPoint(x,y,temp_plot.m_shapeSize[i],
+				 MISSING_SHAPE,gx);
 		} else {
-		  drawDataPoint(x,y,temp_plot.m_shapeSize[i],
-				temp_plot.m_shapeType[i],gx);
+		  if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
+		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		  } else {
+		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],
+				  temp_plot.m_shapeType[i],gx);
+		  }
 		}
 	      }
 	    }
