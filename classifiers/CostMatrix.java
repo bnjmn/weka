@@ -21,10 +21,12 @@ import java.util.Random;
 /**
  * Class for a misclassification cost matrix. The element in the i'th column
  * of the j'th row is the cost for (mis)classifying an instance of class j as 
- * having class i.
+ * having class i. It is valid to have non-zero values down the diagonal 
+ * (these are typically negative to indicate some varying degree of "gain" 
+ * from making a correct prediction).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CostMatrix extends Matrix {
 
@@ -242,7 +244,11 @@ public class CostMatrix extends Matrix {
    * <pre><code>
    * 0  3
    * 4  0
-   * </code></pre>
+   * </code></pre><p>
+   *
+   * This normalization will affect total classification cost during 
+   * evaluation, but will not affect the decision made by applying minimum
+   * expected cost criteria during prediction.
    */
   public void normalize() {
 
