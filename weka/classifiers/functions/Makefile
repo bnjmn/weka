@@ -1,7 +1,7 @@
 JAVAC = javac
 
 SOURCES = LeastMedSq.java LinearRegression.java Logistic.java SMO.java \
-	VotedPerceptron.java
+	VotedPerceptron.java Winnow.java
 
 
 CLASSFILES = $(SOURCES:.java=.class)
