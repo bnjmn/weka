@@ -106,7 +106,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.22 $
+ * @version  $Revision: 1.23 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -240,7 +240,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.22 $
+   * @version $Revision: 1.23 $
    * @since 1.0
    * @see JPanel
    */
@@ -1405,6 +1405,18 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     return gi;
   }
 
+  /** variable for the KnowLedgeFlow class which would be set to null by the 
+      memory monitoring thread to free up some memory if we running out of 
+      memory.
+   */
+  private static KnowledgeFlow m_knowledgeFlow;
+  /** 
+   * The size in bytes of the java virtual machine at the start. This 
+   * represents the critical amount of memory that is necessary for the  
+   * program to run. If our free memory falls below (or is very close) to this 
+   * critical amount then the virtual machine throws an OutOfMemoryError.
+   */
+  private static long m_initialJVMSize;
   /**
    * Main method.
    *
@@ -1418,9 +1430,10 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
-      final KnowledgeFlow tm = new KnowledgeFlow();
+      //final KnowledgeFlow tm = new KnowledgeFlow();
+      m_knowledgeFlow = new KnowledgeFlow();
 
-      jf.getContentPane().add(tm, java.awt.BorderLayout.CENTER);
+      jf.getContentPane().add(m_knowledgeFlow, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         public void windowClosing(java.awt.event.WindowEvent e) {
           jf.dispose();
@@ -1429,6 +1442,67 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       });
       jf.setSize(800,600);
       jf.setVisible(true);
+      
+      Thread memMonitor = new Thread() {
+        public void run() {
+          while(true) {
+            try {
+              //System.out.println("Before sleeping");
+              this.sleep(4000);
+              
+              System.gc();
+              if((Runtime.getRuntime().maxMemory() - 
+                  Runtime.getRuntime().totalMemory())  < 
+                                      m_initialJVMSize+200000) {
+                jf.dispose();
+                m_knowledgeFlow = null;
+                System.gc();
+
+                Thread [] thGroup = new Thread[Thread.activeCount()];
+                Thread.enumerate(thGroup);
+                //System.out.println("No of threads in the ThreadGroup:"+
+                //                   thGroup.length);
+                for(int i=0; i<thGroup.length; i++) {
+                  Thread t = thGroup[i];
+                  if(t!=null) {
+                    //System.out.println("Thread "+(i+1)+": "+t.getName());
+                    if(t!=Thread.currentThread()) {
+                      if(t.getName().startsWith("Thread")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                      else if(t.getName().startsWith("AWT-EventQueue")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                    }
+                  }
+                  //else
+                  //  System.out.println("Thread "+(i+1)+" is null.");
+                }
+                thGroup=null;
+                //System.gc();
+
+                JOptionPane.showMessageDialog(null,
+                                              "Not enough memory. Please load "+
+                                              "a smaller dataset or use "+
+                                              "larger heap size.", 
+                                              "OutOfMemory",
+                                              JOptionPane.WARNING_MESSAGE);
+                System.err.println("displayed message");
+                System.err.println("Not enough memory. Please load a smaller "+
+                                   "dataset or use larger heap size.");
+                System.err.println("exiting");
+                System.exit(-1);
+              }
+
+            } catch(InterruptedException ex) { ex.printStackTrace(); }
+          }
+        }
+      };
+
+      memMonitor.setPriority(Thread.NORM_PRIORITY);
+      memMonitor.start();
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
