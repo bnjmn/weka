@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the class value picker bean
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClassValuePickerBeanInfo 
   extends SimpleBeanInfo {
@@ -41,7 +41,7 @@ public class ClassValuePickerBeanInfo
   public EventSetDescriptor [] getEventSetDescriptors() {
     try {
       EventSetDescriptor [] esds = 
-      { new EventSetDescriptor(DataSource.class, 
+      { new EventSetDescriptor(ClassValuePicker.class, 
 			       "dataSet", 
 			       DataSourceListener.class, 
 			       "acceptDataSet") };

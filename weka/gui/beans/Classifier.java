@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -598,8 +598,8 @@ public class Classifier extends JPanel
 	    //	    System.err.println("Just before notify classifier listeners");
 	    notifyBatchClassifierListeners(ce);
 	    //	    System.err.println("Just after notify classifier listeners");
-	    m_state = IDLE;
 	  }
+	  m_state = IDLE;
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();
