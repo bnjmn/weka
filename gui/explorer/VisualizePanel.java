@@ -92,7 +92,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -164,7 +164,7 @@ public class VisualizePanel extends JPanel {
 	super(name);
 	m_index = id;
 
-	addMouseListener(new MouseAdapter() {
+	this.addMouseListener(new MouseAdapter() {
 	    public void mouseClicked(MouseEvent e) {
 	      
 	      if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
@@ -207,7 +207,7 @@ public class VisualizePanel extends JPanel {
 	m_labelFont = new Font("Monospaced", Font.PLAIN, 12);
 	m_labelMetrics = gx.getFontMetrics(m_labelFont);
 	int hf = m_labelMetrics.getAscent();
-	if (getHeight() < (3*hf)) {
+	if (this.getHeight() < (3*hf)) {
 	  m_labelFont = new Font("Monospaced",Font.PLAIN,11);
 	  m_labelMetrics = gx.getFontMetrics(m_labelFont);
 	}
@@ -257,7 +257,7 @@ public class VisualizePanel extends JPanel {
 	  //System.out.println(jj.getLocation().x);
 
 	  }*/
-      repaint();
+      this.repaint();
     }
 
     /**
@@ -285,7 +285,7 @@ public class VisualizePanel extends JPanel {
       }
 
       setOn(true);
-      repaint();
+      this.repaint();
     }
     
     /**
@@ -306,7 +306,7 @@ public class VisualizePanel extends JPanel {
       int maxLabelLen = 0;
       int idx=0;
       int legendHeight;
-      int w = getWidth();
+      int w = this.getWidth();
       int hf = m_labelMetrics.getAscent();
       //System.out.println("not good");
       if (m_colourUsingPreds) {
@@ -372,7 +372,7 @@ public class VisualizePanel extends JPanel {
 	  //jj.setBackground(Color.black);
 	  jj.setSize(m_labelMetrics.stringWidth(jj.getText()),
 		     m_labelMetrics.getAscent() + 4);
-	  add(jj);
+	  this.add(jj);
 	  jj.setLocation(x, y);
 	  jj.setForeground((Color)m_colorList.
 			   elementAt(i % m_colorList.size()));
@@ -394,7 +394,7 @@ public class VisualizePanel extends JPanel {
 	  //jj.setBackground(Color.black);
 	  jj.setSize(m_labelMetrics.stringWidth(jj.getText()),
 		     m_labelMetrics.getAscent() + 4);
-	  add(jj);
+	  this.add(jj);
 	  jj.setLocation(x, y);
 	  jj.setForeground((Color)m_colorList.
 			   elementAt(i % m_colorList.size()));
@@ -443,7 +443,7 @@ public class VisualizePanel extends JPanel {
 	  jj.setSize(m_labelMetrics.stringWidth(jj.getText()),
 		     m_labelMetrics.getAscent() + 4);
 
-	  add(jj);
+	  this.add(jj);
 	  jj.setLocation(x, y);
 	  jj.setForeground((Color)m_colorList.
 			   elementAt(i % m_colorList.size()));
@@ -463,7 +463,7 @@ public class VisualizePanel extends JPanel {
 	  //jj.setBackground(Color.black);
 	  jj.setSize(m_labelMetrics.stringWidth(jj.getText()),
 		     m_labelMetrics.getAscent() + 4);
-	  add(jj);
+	  this.add(jj);
 	  jj.setLocation(x, y);
 	  jj.setForeground((Color)m_colorList.
 			   elementAt(i % m_colorList.size()));
@@ -479,7 +479,7 @@ public class VisualizePanel extends JPanel {
      */
     protected void paintNumeric(Graphics gx) {
       setFonts(gx);
-      int w = getWidth();
+      int w = this.getWidth();
       double rs = 15;
       double incr = 240.0 / (double)(w-(m_HorizontalPad*2));
       int hf = m_labelMetrics.getAscent();
@@ -563,13 +563,13 @@ public class VisualizePanel extends JPanel {
 	  //System.out.println("numo");
 	  m_oldWidth = -9000;   //done so that if change back to nom, it will
 	  //work
-	  removeAll();
+	  this.removeAll();
 	  paintNumeric(gx);
 	} else {
 	  if (m_Instances != null) {
-	    if (m_oldWidth != getWidth()) {
-	      removeAll();
-	      m_oldWidth = getWidth();
+	    if (m_oldWidth != this.getWidth()) {
+	      this.removeAll();
+	      m_oldWidth = this.getWidth();
 	      paintNominal(gx);
 	    }
 	  }
@@ -649,9 +649,9 @@ public class VisualizePanel extends JPanel {
       public AttributeSpacing(Attribute a, int aind) {
 	m_attrib = a;
 	m_attribIndex = aind;
-	setBackground(Color.black);
-	setPreferredSize(new Dimension(0, 20));
-	setMinimumSize(new Dimension(0, 20));
+	this.setBackground(Color.black);
+	this.setPreferredSize(new Dimension(0, 20));
+	this.setMinimumSize(new Dimension(0, 20));
 	m_cached = new int[m_plotInstances.numInstances()];
 	//m_pointDrawn = new int[getWidth()][20];
 	//setBorder(BorderFactory.createEtchedBorder());
@@ -683,7 +683,7 @@ public class VisualizePanel extends JPanel {
 	  }
 	}
 	
-	addMouseListener(new MouseAdapter() {
+	this.addMouseListener(new MouseAdapter() {
 	    public void mouseClicked(MouseEvent e) {
 	      if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
 		//then put this on the x axis
@@ -709,7 +709,7 @@ public class VisualizePanel extends JPanel {
        */
       private double convertToPanel(double val) {
 	double temp = (val - m_minVal)/(m_maxVal - m_minVal);
-	double temp2 = temp * (getWidth() - 10);
+	double temp2 = temp * (this.getWidth() - 10);
 	
 	return temp2 + 4; 
       }
@@ -722,7 +722,7 @@ public class VisualizePanel extends JPanel {
       public void paintComponent(Graphics gx) {
 	super.paintComponent(gx);
 	int xp, yp, h;
-	h = getWidth();
+	h = this.getWidth();
 	if (m_plotInstances != null) {
 	  if (m_oldWidth != h) {
 	    m_pointDrawn = new boolean[h][20];
@@ -798,7 +798,7 @@ public class VisualizePanel extends JPanel {
      * This constructs an attributePanel.
      */
     public AttributePanel() {
-      setBackground(Color.blue);
+      this.setBackground(Color.blue);
       setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
       //setLayout(null);
     }
@@ -816,7 +816,7 @@ public class VisualizePanel extends JPanel {
       m_cIndex = c;
       m_maxC = h;
       m_minC = l;
-      repaint();
+      this.repaint();
     }
 
     /** 
@@ -1034,16 +1034,16 @@ public class VisualizePanel extends JPanel {
     //////
     /** Constructor */
     public PlotPanel() {
-      setBackground(Color.black);
+      this.setBackground(Color.black);
       m_InstanceInfoText.setFont(new Font("Monospaced", Font.PLAIN,12));
       m_InstanceInfoText.setEditable(false);
       m_createShape = false;        
       m_shapes = null;////
       m_shapePoints = null;
       m_newMousePos = new Dimension();
-      m_drawnPoints = new int[getWidth()][getHeight()];
+      m_drawnPoints = new int[this.getWidth()][this.getHeight()];
 
-      addMouseListener(new MouseAdapter() {
+      this.addMouseListener(new MouseAdapter() {
 	  ///////      
 	  public void mousePressed(MouseEvent e) {
 	    if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
@@ -1059,7 +1059,7 @@ public class VisualizePanel extends JPanel {
 		m_shapePoints.addElement(new Double(e.getY()));
 		m_shapePoints.addElement(new Double(e.getX()));
 		m_shapePoints.addElement(new Double(e.getY()));
-		Graphics g = getGraphics();
+		Graphics g = PlotPanel.this.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
 		g.drawRect(((Double)m_shapePoints.elementAt(1)).intValue(),
@@ -1082,7 +1082,7 @@ public class VisualizePanel extends JPanel {
 		 (e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK)) {
 	      if (m_createShape) {
 		//then it has been started already.
-		Graphics g = getGraphics();
+		Graphics g = PlotPanel.this.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
 		if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
@@ -1233,7 +1233,7 @@ public class VisualizePanel extends JPanel {
 		  }
 		  
 		  m_shapePoints = null;
-		  repaint();
+		  PlotPanel.this.repaint();
 		  
 		}
 		else {
@@ -1253,7 +1253,7 @@ public class VisualizePanel extends JPanel {
 		    m_submit.setEnabled(true);
 		  }
 		  m_shapePoints = null;
-		  repaint();
+		  PlotPanel.this.repaint();
 		}
 		g.dispose();
 		//repaint();
@@ -1269,7 +1269,7 @@ public class VisualizePanel extends JPanel {
 		  Double(convertToAttribY(e.getY())));
 		m_newMousePos.width = e.getX();      //the temp mouse point
 		m_newMousePos.height = e.getY();
-		Graphics g = getGraphics();
+		Graphics g = PlotPanel.this.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
 		g.drawLine((int)Math.ceil
@@ -1299,7 +1299,7 @@ public class VisualizePanel extends JPanel {
 	    if (m_createShape) {
 	      if (((Double)m_shapePoints.elementAt(0)).intValue() == 1) {
 		m_createShape = false;
-		Graphics g = getGraphics();
+		Graphics g = PlotPanel.this.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
 		g.drawRect(((Double)m_shapePoints.elementAt(1)).
@@ -1354,7 +1354,7 @@ public class VisualizePanel extends JPanel {
 		    
 		    m_submit.setEnabled(true);
 
-		    repaint();
+		    PlotPanel.this.repaint();
 		  }
 		}
 		m_shapePoints = null;
@@ -1363,12 +1363,12 @@ public class VisualizePanel extends JPanel {
 	  }
 	});
       
-      addMouseMotionListener(new MouseMotionAdapter() {
+      this.addMouseMotionListener(new MouseMotionAdapter() {
 	  public void mouseDragged(MouseEvent e) {
 	    //check if the user is dragging a box
 	    if (m_createShape) {
 	      if (((Double)m_shapePoints.elementAt(0)).intValue() == 1) {
-		Graphics g = getGraphics();
+		Graphics g = PlotPanel.this.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
 		g.drawRect(((Double)m_shapePoints.elementAt(1)).intValue(), 
@@ -1396,7 +1396,7 @@ public class VisualizePanel extends JPanel {
 	    if (m_createShape) {
 	      if (((Double)m_shapePoints.elementAt(0)).intValue() == 2 || 
 		  ((Double)m_shapePoints.elementAt(0)).intValue() == 3) {
-		Graphics g = getGraphics();
+		Graphics g = PlotPanel.this.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
 		g.drawLine((int)Math.ceil(convertToPanelX
@@ -1532,7 +1532,7 @@ public class VisualizePanel extends JPanel {
       m_cancel.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
 	    cancelShapes();
-	    repaint();
+	    PlotPanel.this.repaint();
 	  }
 	});
       ////////////
@@ -1569,7 +1569,7 @@ public class VisualizePanel extends JPanel {
       m_createShape = false;
       m_shapePoints = null;
       m_shapes = null;
-      repaint();
+      this.repaint();
     }
 
     /**
@@ -1599,7 +1599,7 @@ public class VisualizePanel extends JPanel {
       else {
 	m_shapes = null;
       }
-      repaint();
+      this.repaint();
 
     }
     
@@ -1610,7 +1610,8 @@ public class VisualizePanel extends JPanel {
      * @param y1 The y coord.
      */
     private boolean checkPoints(double x1, double y1) {
-      if (x1 < 0 || x1 > getSize().width || y1 < 0 || y1 > getSize().height) {
+      if (x1 < 0 || x1 > this.getSize().width || y1 < 0 
+	  || y1 > this.getSize().height) {
 	return false;
       }
       return true;
@@ -1879,7 +1880,7 @@ public class VisualizePanel extends JPanel {
 	    [m_YaxisEnd - m_YaxisStart + 1];
 	  updatePturb();
 	}
-	repaint();
+	this.repaint();
       }
     }
 
@@ -1895,7 +1896,7 @@ public class VisualizePanel extends JPanel {
 	cancelShapes();
       }
       m_xIndex = x;
-      repaint();
+      this.repaint();
     }
     
     /**
@@ -1910,7 +1911,7 @@ public class VisualizePanel extends JPanel {
 	cancelShapes();
       }
       m_yIndex = y;
-      repaint();
+      this.repaint();
     }
 
     /**
@@ -1919,7 +1920,7 @@ public class VisualizePanel extends JPanel {
      */
     public void setCindex(int c) {
       m_cIndex = c;
-      repaint();
+      this.repaint();
     }
 
     /**
@@ -1932,7 +1933,7 @@ public class VisualizePanel extends JPanel {
 	m_createShape = false;
       }
       m_sIndex = s;
-      repaint();
+      this.repaint();
     }
     
     /**
@@ -2239,7 +2240,7 @@ public class VisualizePanel extends JPanel {
 	  }
 	  fillLookup();
 	  setJitter(m_JitterVal);
-	  repaint();
+	  this.repaint();
 	}
       }
     }
@@ -2665,52 +2666,52 @@ public class VisualizePanel extends JPanel {
 
       if (x1 < 0) {
 	//test left
-	new_coords = lineIntersect(x1, y1, x2, y2, 0, getHeight(), 0);
+	new_coords = lineIntersect(x1, y1, x2, y2, 0, this.getHeight(), 0);
 	edge1 = 0;
 	if (new_coords[0] < 0) {
 	  //then not left
 	  if (y1 < 0) {
 	    //test top
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 0);
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 0);
 	    edge1 = 1;
 	  }
 	  else {
 	    //test bottom
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 
-				       getHeight());
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 
+				       this.getHeight());
 	    edge1 = 3;
 	  }
 	}
       }
-      else if (x1 > getWidth()) {
+      else if (x1 > this.getWidth()) {
 	//test right
-	new_coords = lineIntersect(x1, y1, x2, y2, 0, getHeight(), 
-				   getWidth());
+	new_coords = lineIntersect(x1, y1, x2, y2, 0, this.getHeight(), 
+				   this.getWidth());
 	edge1 = 2;
 	if (new_coords[0] < 0) {
 	  //then not right
 	  if (y1 < 0) {
 	    //test top
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 0);
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 0);
 	    edge1 = 1;
 	  }
 	  else {
 	    //test bottom
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 
-				       getHeight());
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 
+				       this.getHeight());
 	    edge1 = 3;
 	  }
 	}
       }
       else if (y1 < 0) {
 	//test top
-	new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 0);
+	new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 0);
 	edge1 = 1;
       }
       else {
 	//test bottom
-	new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 
-				   getHeight());
+	new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 
+				   this.getHeight());
 	edge1 = 3;
       }
       
@@ -2724,52 +2725,52 @@ public class VisualizePanel extends JPanel {
       
       if (x1 < 0) {
 	//test left
-	new_coords = lineIntersect(x1, y1, x2, y2, 0, getHeight(), 0);
+	new_coords = lineIntersect(x1, y1, x2, y2, 0, this.getHeight(), 0);
 	edge2 = 0;
 	if (new_coords[0] < 0) {
 	  //then not left
 	  if (y1 < 0) {
 	    //test top
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 0);
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 0);
 	    edge2 = 1;
 	  }
 	  else {
 	    //test bottom
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 
-				       getHeight());
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 
+				       this.getHeight());
 	    edge2 = 3;
 	  }
 	}
       }
-      else if (x1 > getWidth()) {
+      else if (x1 > this.getWidth()) {
 	//test right
-	new_coords = lineIntersect(x1, y1, x2, y2, 0, getHeight(), 
-				   getWidth());
+	new_coords = lineIntersect(x1, y1, x2, y2, 0, this.getHeight(), 
+				   this.getWidth());
 	edge2 = 2;
 	if (new_coords[0] < 0) {
 	  //then not right
 	  if (y1 < 0) {
 	    //test top
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 0);
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 0);
 	    edge2 = 1;
 	  }
 	  else {
 	    //test bottom
-	    new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 
-				       getHeight());
+	    new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 
+				       this.getHeight());
 	    edge2 = 3;
 	  }
 	}
       }
       else if (y1 < 0) {
 	//test top
-	new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 0);
+	new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 0);
 	edge2 = 1;
       }
       else {
 	//test bottom
-	new_coords = lineIntersect(x1, y1, x2, y2, getWidth(), 0, 
-				   getHeight());
+	new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, 
+				   this.getHeight());
 	edge2 = 3;
       }
       
@@ -2783,8 +2784,8 @@ public class VisualizePanel extends JPanel {
       //determine what points on the boundary of the view to add to the polygon
       int xp, yp;
 
-      xp = getWidth() * ((edge2 & 1) ^ ((edge2 & 2) / 2));
-      yp = getHeight() * ((edge2 & 2) / 2);
+      xp = this.getWidth() * ((edge2 & 1) ^ ((edge2 & 2) / 2));
+      yp = this.getHeight() * ((edge2 & 2) / 2);
       //System.out.println(((-1 + 4) % 4) + " hoi");
       
       if (inPolyline(v, convertToAttribX(xp), convertToAttribY(yp))) {
@@ -2792,22 +2793,22 @@ public class VisualizePanel extends JPanel {
 	building.addElement(new Double(convertToAttribX(xp)));
 	building.addElement(new Double(convertToAttribY(yp)));
 	for (int noa = (edge2 + 1) % 4; noa != edge1; noa = (noa + 1) % 4) {
-	  xp = getWidth() * ((noa & 1) ^ ((noa & 2) / 2));
-	  yp = getHeight() * ((noa & 2) / 2);
+	  xp = this.getWidth() * ((noa & 1) ^ ((noa & 2) / 2));
+	  yp = this.getHeight() * ((noa & 2) / 2);
 	  building.addElement(new Double(convertToAttribX(xp)));
 	  building.addElement(new Double(convertToAttribY(yp)));
 	}
       }
       else {
-	xp = getWidth() * ((edge2 & 2) / 2);
-	yp = getHeight() * (1 & ~((edge2 & 1) ^ ((edge2 & 2) / 2)));
+	xp = this.getWidth() * ((edge2 & 2) / 2);
+	yp = this.getHeight() * (1 & ~((edge2 & 1) ^ ((edge2 & 2) / 2)));
 	if (inPolyline(v, convertToAttribX(xp), convertToAttribY(yp))) {
 	  //then add points in anticlockwise direction
 	  building.addElement(new Double(convertToAttribX(xp)));
 	  building.addElement(new Double(convertToAttribY(yp)));
 	  for (int noa = (edge2 + 3) % 4; noa != edge1; noa = (noa + 3) % 4) {
-	    xp = getWidth() * ((noa & 2) / 2);
-	    yp = getHeight() * (1 & ~((noa & 1) ^ ((noa & 2) / 2)));
+	    xp = this.getWidth() * ((noa & 2) / 2);
+	    yp = this.getHeight() * (1 & ~((noa & 1) ^ ((noa & 2) / 2)));
 	    building.addElement(new Double(convertToAttribX(xp)));
 	    building.addElement(new Double(convertToAttribY(yp)));
 	  }
@@ -3024,8 +3025,8 @@ public class VisualizePanel extends JPanel {
       int mye = m_YaxisEnd;
       m_axisChanged = false;
 
-      int h = getHeight();
-      int w = getWidth();
+      int h = this.getHeight();
+      int w = this.getWidth();
       int hf = m_labelMetrics.getAscent();
       int mswx=0;
       int mswy=0;
