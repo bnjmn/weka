@@ -84,7 +84,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -2156,7 +2156,6 @@ public class VisualizePanel extends JPanel {
 
     PlotData2D temp = new PlotData2D(inst);
     temp.setPlotName(inst.relationName());
-    temp.addInstanceNumberAttribute();
     
     try {
       setMasterPlot(temp);
