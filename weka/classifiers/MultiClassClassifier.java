@@ -32,7 +32,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -119,8 +119,8 @@ public class MultiClassClassifier extends DistributionClassifier
     for (int i = 0; i < inst.numClasses(); i++) {
       if (m_Classifiers[i] != null) {
         m_ClassFilters[i].input(inst);
-        newInst = m_ClassFilters[i].output();
         m_ClassFilters[i].batchFinished();
+        newInst = m_ClassFilters[i].output();
         probs[i] = ((DistributionClassifier)m_Classifiers[i])
           .distributionForInstance(newInst)[1];
       }

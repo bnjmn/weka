@@ -27,7 +27,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -122,11 +122,11 @@ public class LinearRegression extends Classifier implements OptionHandler,
     // Transform the input instance
     Instance transformedInstance = instance;
     m_TransformFilter.input(transformedInstance);
-    transformedInstance = m_TransformFilter.output();
     m_TransformFilter.batchFinished();
+    transformedInstance = m_TransformFilter.output();
     m_MissingFilter.input(transformedInstance);
-    transformedInstance = m_MissingFilter.output();
     m_MissingFilter.batchFinished();
+    transformedInstance = m_MissingFilter.output();
 
     // Calculate the dependent variable from the regression model
     return regressionPrediction(transformedInstance,

@@ -15,7 +15,7 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class PrincipalComponents extends AttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -640,23 +640,23 @@ public class PrincipalComponents extends AttributeEvaluator
     }
 
     m_replaceMissingFilter.input(tempInst);
-    tempInst = m_replaceMissingFilter.output();
     m_replaceMissingFilter.batchFinished();
+    tempInst = m_replaceMissingFilter.output();
 
     if (m_normalize) {
       m_normalizeFilter.input(tempInst);
-      tempInst = m_normalizeFilter.output();
       m_normalizeFilter.batchFinished();
+      tempInst = m_normalizeFilter.output();
     }
 
     m_nominalToBinFilter.input(tempInst);
-    tempInst = m_nominalToBinFilter.output();
     m_nominalToBinFilter.batchFinished();
+    tempInst = m_nominalToBinFilter.output();
 
     if (m_attributeFilter != null) {
       m_attributeFilter.input(tempInst);
-      tempInst = m_attributeFilter.output();
       m_attributeFilter.batchFinished();
+      tempInst = m_attributeFilter.output();
     }
 
     if (m_hasClass) {

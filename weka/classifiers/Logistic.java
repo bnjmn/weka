@@ -29,7 +29,7 @@ import weka.filters.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
 
@@ -393,12 +393,12 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     throws Exception {
 
     m_ReplaceMissingValues.input(instance);
-    instance = m_ReplaceMissingValues.output();
     m_ReplaceMissingValues.batchFinished();
+    instance = m_ReplaceMissingValues.output();
 
     m_NominalToBinary.input(instance);
-    instance = m_NominalToBinary.output();
     m_NominalToBinary.batchFinished();
+    instance = m_NominalToBinary.output();
 
     // Extract the predictor columns into an array
     double [] instDat = new double [m_NumPredictors + 1];
