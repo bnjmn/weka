@@ -70,46 +70,46 @@ import java.io.*;
  * A typical usage of this class is to create your own subclass of this class
  * and provide the objective function and gradients as follows:
  * <code>
- * class MyOpt extends Optimization{
- *   // Provide the objective function
- *   protected double objectiveFunction(double[] x){
- *       // How to calculate your objective function...
- *       // ...
- *   }
- *
- *   // Provide the first derivatives
- *   protected double[] evaluateGradient(double[] x){
- *       // How to calculate the gradient of the objective function...
- *       // ...
- *   } 
- *
- *   // If possible, provide the index^{th} row of the Hessian matrix
- *   protected double[] evaluateHessian(double[] x, int index){
- *      // How to calculate the index^th variable's second derivative
- *      // ...
- *   }
- * } 
- *
- * // When it's the time to use it, in some routine(s) of other class...
- * MyOpt opt = new MyOpt();
- * 
- * // Set up initial variable values and bound constraints
- * double[] x = new double[numVariables];
- * // Lower and upper bounds: 1st row is lower bounds, 2nd is upper
- * double[] constraints = new double[2][numVariables];
- * ...
- *
- * // Find the minimum, 200 iterations as default
- * x = opt.findArgmin(x, constraints); 
- * while(x == null){  // 200 iterations are not enough
- *    x = opt.getVarbValues();  // Try another 200 iterations
- *    x = opt.findArgmin(x, constraints);
- * }
- *
- * // The minimal function value
- * double minFunction = opt.getMinFunction();
- * ...
- * </code>  
+ * class MyOpt extends Optimization{ <br>
+ *   // Provide the objective function <br>
+ *   protected double objectiveFunction(double[] x){ <br>
+ *       // How to calculate your objective function... <br>
+ *       // ... <br>
+ *   } <br>
+ * <br>
+ *   // Provide the first derivatives <br>
+ *   protected double[] evaluateGradient(double[] x){ <br>
+ *       // How to calculate the gradient of the objective function... <br>
+ *       // ... <br>
+ *   }  <br>
+ * <br>
+ *   // If possible, provide the index^{th} row of the Hessian matrix <br>
+ *   protected double[] evaluateHessian(double[] x, int index){ <br>
+ *      // How to calculate the index^th variable's second derivative <br>
+ *      // ... <br>
+ *   } <br>
+ * }  <br>
+ * <br>
+ * // When it's the time to use it, in some routine(s) of other class... <br>
+ * MyOpt opt = new MyOpt(); <br>
+ *  <br>
+ * // Set up initial variable values and bound constraints <br>
+ * double[] x = new double[numVariables]; <br>
+ * // Lower and upper bounds: 1st row is lower bounds, 2nd is upper <br>
+ * double[] constraints = new double[2][numVariables]; <br>
+ * ... <br>
+ * <br>
+ * // Find the minimum, 200 iterations as default <br>
+ * x = opt.findArgmin(x, constraints);  <br>
+ * while(x == null){  // 200 iterations are not enough <br>
+ *    x = opt.getVarbValues();  // Try another 200 iterations <br>
+ *    x = opt.findArgmin(x, constraints); <br>
+ * } <br>
+ * <br>
+ * // The minimal function value <br>
+ * double minFunction = opt.getMinFunction(); <br>
+ * ... <br>
+ * </code>   
  * It is recommended that Hessian values be provided so that the second-order 
  * Lagrangian multiplier estimate can be calcluated.  However, if it is not provided, 
  * there is no need to override the <code>evaluateHessian()</code> function.<p>
@@ -136,7 +136,7 @@ import java.io.*;
  * <p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public abstract class Optimization{
     
