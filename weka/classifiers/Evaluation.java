@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.9 $
+ * @version  $Revision: 1.10 $
   */
 public class Evaluation implements Summarizable {
 
@@ -541,7 +541,7 @@ public class Evaluation implements Summarizable {
     boolean IRstatistics = false, noOutput = false,
       printClassifications = false, trainStatistics = true,
       printMargins = false, printComplexityStatistics = false,
-      printGraph = false;
+      printGraph = false, ROCStatistics = false, printSource = false;
     Evaluation trainingEvaluation, testingEvaluation;
     StringBuffer text = new StringBuffer();
     BufferedReader trainReader = null, testReader = null;
@@ -656,6 +656,8 @@ public class Evaluation implements Summarizable {
       printClassifications = Utils.getFlag('p', options);
       printMargins = Utils.getFlag('r', options);
       printGraph = Utils.getFlag('g', options);
+      ROCStatistics = Utils.getFlag('y', options);
+      printSource = Utils.getFlag('z', options);
       
       // If a model file is given, we can't process 
       // scheme-specific options
@@ -769,6 +771,12 @@ public class Evaluation implements Summarizable {
       return ((Drawable)classifier).graph();
     }
 
+    // Output the classifier as equivalent source
+    if ((classifier instanceof Sourcable)
+	&& (printSource)){
+      return ((Sourcable)classifier).toSource();
+    }
+
     // Output test instance predictions only
     if (printClassifications) {
       return printClassifications(classifier, new Instances(template, 0),
@@ -839,6 +847,9 @@ public class Evaluation implements Summarizable {
 		    toSummaryString("\n=== Error on training" + 
 				    " data ===\n", printComplexityStatistics));
 	if (train.classAttribute().isNominal()) {
+	  if (ROCStatistics) {
+	    text.append("\n\n" + trainingEvaluation.toClassDetailsString());
+	  }
 	  text.append("\n\n" + trainingEvaluation.toMatrixString());
 	  if (IRstatistics) {
 	    text.append("\n\n" + trainingEvaluation.
@@ -897,6 +908,9 @@ public class Evaluation implements Summarizable {
       }
     }
     if (template.classAttribute().isNominal()) {
+      if (ROCStatistics) {
+	text.append("\n\n" + testingEvaluation.toClassDetailsString());
+      }
       text.append("\n\n" + testingEvaluation.toMatrixString());
       if (IRstatistics) {
 	text.append("\n\n" + testingEvaluation.
@@ -1527,14 +1541,14 @@ public class Evaluation implements Summarizable {
 					 12, 4) + " %\n");
       }
       text.append("Total Number of Instances          ");
-      text.append(Utils.doubleToString(m_WithClass, 12, 4));
+      text.append(Utils.doubleToString(m_WithClass, 12, 4) + "\n");
       if (m_CostMatrix != null) {
-	text.append("\n" + "Total Number With Cost             ");
-	text.append(Utils.doubleToString(m_WithClassWithCost, 12, 4));
+	text.append("Total Number With Cost             ");
+	text.append(Utils.doubleToString(m_WithClassWithCost, 12, 4) + "\n");
       }    
       if (m_MissingClass > 0) {
-	text.append("\nIgnored Class Unknown Instances            ");
-	text.append(Utils.doubleToString(m_MissingClass, 12, 4));
+	text.append("Ignored Class Unknown Instances            ");
+	text.append(Utils.doubleToString(m_MissingClass, 12, 4) + "\n");
       }
     } catch (Exception ex) {
       // Should never occur since the class is known to be nominal 
@@ -1553,9 +1567,6 @@ public class Evaluation implements Summarizable {
    */
   public String toMatrixString() throws Exception {
 
-    if (!m_ClassIsNominal) {
-      throw new Exception("Evaluation: No confusion matrix possible!");
-    }
     return toMatrixString("=== Confusion Matrix ===\n");
   }
 
@@ -1626,6 +1637,77 @@ public class Evaluation implements Summarizable {
       }
     }
     return text.toString();
+  }
+
+  public String toClassDetailsString() throws Exception {
+
+    return toClassDetailsString("=== Accuracy By Class ===\n");
+  }
+
+  /**
+   * For the following confusion matrix<br>
+   *  <pre>
+   * A B C
+   * 5 1 0  A
+   * 2 7 1  B
+   * 1 1 9  C
+   * </pre>
+   * Will print out a breakdown of the accuracy for each class, eg:<br>
+   * <pre>
+   *   TP    FP  Class
+   * 0.85  0.14   A
+   * 0.70  0.11   B
+   * 0.82  0.06   C
+   * </pre>
+   * Should be useful for ROC curves.
+   */
+  public String toClassDetailsString(String title) throws Exception {
+
+    if (!m_ClassIsNominal) {
+      throw new Exception("Evaluation: No confusion matrix possible!");
+    }
+    StringBuffer text = new StringBuffer(title 
+					 + "\nTruePos  FalsePos  Class\n");
+    for(int i = 0; i < m_NumClasses; i++) {
+      text.append(Utils.doubleToString(truePositives(i), 7, 3)).append("   ");
+      text.append(Utils.doubleToString(falsePositives(i), 7, 3)).append("  ");
+      text.append(m_ClassNames[i]).append('\n');
+    }
+    return text.toString();
+  }
+
+  public double truePositives(int classIndex) {
+
+    double correct = 0, total = 0;
+    for (int j = 0; j < m_NumClasses; j++) {
+      if (j == classIndex) {
+	correct += m_ConfusionMatrix[classIndex][j];
+      }
+      total += m_ConfusionMatrix[classIndex][j];
+    }
+    if (total == 0) {
+      return 0;
+    }
+    return correct / total;
+  }
+
+  public double falsePositives(int classIndex) {
+
+    double incorrect = 0, total = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      if (i != classIndex) {
+	for (int j = 0; j < m_NumClasses; j++) {
+	  if (j == classIndex) {
+	    incorrect += m_ConfusionMatrix[i][j];
+	  }
+	  total += m_ConfusionMatrix[i][j];
+	}
+      }
+    }
+    if (total == 0) {
+      return 0;
+    }
+    return incorrect / total;
   }
 
   /**
@@ -1855,6 +1937,14 @@ public class Evaluation implements Summarizable {
     optionsText.append("\tOnly outputs predictions for test instances.\n");
     optionsText.append("-r\n");
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
+    optionsText.append("-y\n");
+    optionsText.append("\tOutputs detailed class breakdown.\n");
+    optionsText.append("\tyy? y not?\n");
+    if (classifier instanceof Sourcable) {
+      optionsText.append("-z\n");
+      optionsText.append("\tOnly outputs the source representation"
+			 + " of the classifier.\n");
+    }
     if (classifier instanceof Drawable) {
       optionsText.append("-g\n");
       optionsText.append("\tOnly outputs the graph representation"
