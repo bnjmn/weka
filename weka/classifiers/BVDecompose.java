@@ -59,15 +59,15 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class BVDecompose implements OptionHandler {
 
   /** Debugging mode, gives extra output if true */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
   /** An instantiated base classifier used for getting and testing options. */
-  protected Classifier m_Classifier;
+  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
 
   /** The options to be passed to the base classifier. */
   protected String [] m_ClassifierOptions;
@@ -182,13 +182,7 @@ public class BVDecompose implements OptionHandler {
   public void setOptions(String[] options) throws Exception {
 
     setDebug(Utils.getFlag('D', options));
-    
-    String learnerString = Utils.getOption('W', options);
-    if (learnerString.length() == 0) {
-      throw new Exception("A learner must be specified with the -W option.");
-    }
-    setLearner(learnerString);
-
+        
     String classIndex = Utils.getOption('c', options);
     if (classIndex.length() != 0) {
       if (classIndex.toLowerCase().equals("last")) {
@@ -230,14 +224,12 @@ public class BVDecompose implements OptionHandler {
     }
     setDataFileName(dataFile);
 
-    // Check the remaining options are valid for the specified classifier
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      m_ClassifierOptions = Utils.partitionOptions(options);
-      String [] classifierOptions = (String [])m_ClassifierOptions.clone();
-      ((OptionHandler)m_Classifier).setOptions(classifierOptions);
-      Utils.checkForRemainingOptions(classifierOptions);
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A learner must be specified with the -W option.");
     }
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -264,8 +256,9 @@ public class BVDecompose implements OptionHandler {
     if (getDataFileName() != null) {
       options[current++] = "-t"; options[current++] = "" + getDataFileName();
     }
-    if (getLearner() != null) {
-      options[current++] = "-W"; options[current++] = getLearner();
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -289,6 +282,7 @@ public class BVDecompose implements OptionHandler {
   
   /**
    * Set the number of instances in the training pool.
+   *
    * @param numTrain number of instances in the training pool.
    */
   public void setTrainPoolSize(int numTrain) {
@@ -297,33 +291,23 @@ public class BVDecompose implements OptionHandler {
   }
   
   /**
-   * Sets the learner for the decomposition.
+   * Set the classifiers being analysed
    *
-   * @param learnerName the full class name of the learner to analyse
-   * @exception Exception if learnerName is not a valid class name
+   * @param newClassifier the Classifier to use.
    */
-  public void setLearner(String learnerName) throws Exception {
+  public void setClassifier(Classifier newClassifier) {
 
-    m_Classifier = null;
-    try {
-      m_Classifier = (Classifier)Class.forName(learnerName).newInstance();
-    } catch (Exception ex) {
-      throw new Exception("Can't find Classifier with class name: "
-			  + learnerName);
-    }
+    m_Classifier = newClassifier;
   }
 
   /**
-   * Gets the name of the learner
+   * Gets the name of the classifier being analysed
    *
-   * @return the full class name of the learner
+   * @return the classifier being analysed.
    */
-  public String getLearner() {
+  public Classifier getClassifier() {
 
-    if (m_Classifier == null) {
-      return null;
-    }
-    return m_Classifier.getClass().getName();
+    return m_Classifier;
   }
 
   /**
@@ -333,7 +317,7 @@ public class BVDecompose implements OptionHandler {
    */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
 
   /**
@@ -343,7 +327,7 @@ public class BVDecompose implements OptionHandler {
    */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
   /**
@@ -499,7 +483,7 @@ public class BVDecompose implements OptionHandler {
 
     m_Error = 0;
     for (int i = 0; i < m_TrainIterations; i++) {
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("Iteration " + (i + 1));
       }
       trainPool.randomize(random);
@@ -543,7 +527,7 @@ public class BVDecompose implements OptionHandler {
     m_Variance /= (2 * numTest);
     m_Sigma /= (2 * numTest);
 
-    if (b_Debug) {
+    if (m_Debug) {
       System.err.println("Decomposition finished");
     }
   }
@@ -558,18 +542,13 @@ public class BVDecompose implements OptionHandler {
 
     String result = "\nBias-Variance Decomposition\n";
 
-    if (getLearner() == null) {
+    if (getClassifier() == null) {
       return "Invalid setup";
     }
 
-    result += "\nClassifier   : " + getLearner();
-    if (m_ClassifierOptions != null) {
-      for(int i = 0; i < m_ClassifierOptions.length; i++) {
-	if ((m_ClassifierOptions[i] != null) 
-	    && (m_ClassifierOptions[i].length() != 0)) {
-	  result += " " + m_ClassifierOptions[i];
-	}
-      }
+    result += "\nClassifier   : " + getClassifier().getClass().getName();
+    if (getClassifier() instanceof OptionHandler) {
+      result += Utils.joinOptions(((OptionHandler)m_Classifier).getOptions());
     }
     result += "\nData File    : " + getDataFileName();
     result += "\nClass Index  : ";

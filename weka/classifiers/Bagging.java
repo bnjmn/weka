@@ -31,7 +31,7 @@ import weka.core.*;
  * Valid options are:<p>
  *
  * -W classname <br>
- * Specify the full class name of a weak learner as the basis for 
+ * Specify the full class name of a weak classifier as the basis for 
  * boosting (required).<p>
  *
  * -I num <br>
@@ -40,14 +40,17 @@ import weka.core.*;
  * -S seed <br>
  * Random number seed for resampling (default 1). <p>
  *
- * Options after -- are passed to the designated learner.<p>
+ * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
 
+  /** The model base classifier to use */
+  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers;
   
@@ -71,19 +74,20 @@ public class Bagging extends DistributionClassifier
 	      + "\t(default 10)",
 	      "I", 1, "-I"));
     newVector.addElement(new Option(
-	      "\tFull name of scheme to bag.\n"
+	      "\tFull name of classifier to bag.\n"
 	      + "\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W"));
     newVector.addElement(new Option("\tSeed for random number generator.\n" +
 				    "\t(default 1)",
 				    "S", 1, "-S"));
 
-    if ((m_Classifiers != null) &&
-	(m_Classifiers[0] instanceof OptionHandler)) {
-      newVector.
-	addElement(new Option("", "", 0, "\nOptions specific to scheme "
-			      + m_Classifiers[0].getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifiers[0]).listOptions();
+    if ((m_Classifier != null) &&
+	(m_Classifier instanceof OptionHandler)) {
+      newVector.addElement(new Option(
+	     "",
+	     "", 0, "\nOptions specific to classifier "
+	     + m_Classifier.getClass().getName() + ":"));
+      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
       while (enum.hasMoreElements()) {
 	newVector.addElement(enum.nextElement());
       }
@@ -96,7 +100,7 @@ public class Bagging extends DistributionClassifier
    * Parses a given list of options. Valid options are:<p>
    *
    * -W classname <br>
-   * Specify the full class name of a weak learner as the basis for 
+   * Specify the full class name of a weak classifier as the basis for 
    * boosting (required).<p>
    *
    * -I num <br>
@@ -105,19 +109,13 @@ public class Bagging extends DistributionClassifier
    * -S seed <br>
    * Random number seed for resampling (default 1).<p>
    *
-   * Options after -- are passed to the designated learner.<p>
+   * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
-    String learnerString = Utils.getOption('W', options);
-    if (learnerString.length() == 0) {
-      throw new Exception("A scheme must be specified with the -W option.");
-    }
-    setScheme(learnerString);
-
     String bagIterations = Utils.getOption('I', options);
     if (bagIterations.length() != 0) {
       setNumIterations(Integer.parseInt(bagIterations));
@@ -132,16 +130,13 @@ public class Bagging extends DistributionClassifier
       setSeed(1);
     }
 
-    // Set the options for each classifier
-    if ((m_Classifiers != null) &&
-	(m_Classifiers[0] instanceof OptionHandler)) {
-      String [] classifierOptions = Utils.partitionOptions(options);
-      for(int i = 0; i < getNumIterations(); i++) {
-	String [] tempOptions = (String [])classifierOptions.clone();
-	((OptionHandler)m_Classifiers[i]).setOptions(tempOptions);
-	Utils.checkForRemainingOptions(tempOptions);
-      }
-    }	  
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A classifier must be specified with"
+			  + " the -W option.");
+    }
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -152,17 +147,18 @@ public class Bagging extends DistributionClassifier
   public String [] getOptions() {
 
     String [] classifierOptions = new String [0];
-    if ((m_Classifiers != null) && 
-	(m_Classifiers[0] instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifiers[0]).getOptions();
+    if ((m_Classifier != null) && 
+	(m_Classifier instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
     String [] options = new String [classifierOptions.length + 7];
     int current = 0;
     options[current++] = "-S"; options[current++] = "" + getSeed();
     options[current++] = "-I"; options[current++] = "" + getNumIterations();
 
-    if (getScheme() != null) {
-      options[current++] = "-W"; options[current++] = getScheme();
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -175,37 +171,23 @@ public class Bagging extends DistributionClassifier
   }
 
   /**
-   * Sets the scheme to be bagged
+   * Set the classifier for boosting. 
    *
-   * @param learnerName the full class name of the learner to bag
-   * @exception Exception if learnerName is not a valid class name
+   * @param newClassifier the Classifier to use.
    */
-  public void setScheme(String learnerName) throws Exception {
+  public void setClassifier(Classifier newClassifier) {
 
-    m_Classifiers = null;
-    try {
-      m_Classifiers = new Classifier [getNumIterations()];
-      for(int i = 0; i < getNumIterations(); i++) {
-	m_Classifiers[i] = (Classifier)Class.forName(learnerName)
-	  .newInstance();
-      }
-    } catch (Exception ex) {
-      throw new Exception("Can't find Classifier with class name: " +
-			  learnerName);
-    }
+    m_Classifier = newClassifier;
   }
 
   /**
-   * Gets the name of the bagged learner
+   * Get the classifier used as the classifier
    *
-   * @return the full class name of the bagged learner
+   * @return the classifier used as the classifier
    */
-  public String getScheme() {
+  public Classifier getClassifier() {
 
-    if (m_Classifiers == null) {
-      return null;
-    }
-    return m_Classifiers[0].getClass().getName();
+    return m_Classifier;
   }
 
   /**
@@ -258,13 +240,13 @@ public class Bagging extends DistributionClassifier
     Instances baggData;
     int i, j;
 
-    if (m_Classifiers == null) {
-      throw new Exception("A base learner has not been specified!");
+    if (m_Classifier == null) {
+      throw new Exception("A base classifier has not been specified!");
     }
     if (data.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
-
+    m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
     Random random = new Random(m_Seed);
     for (j = 0; j < m_Classifiers.length; j++) {
       baggData = new Instances(data, data.numInstances());

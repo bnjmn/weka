@@ -77,18 +77,18 @@ import weka.core.*;
  * Turn on debugging output.<p>
  *
  * -W classname <br>
- * Specify the full class name of a learner to perform the 
+ * Specify the full class name of a classifier to perform the 
  * tests on (required).<p>
  *
- * Options after -- are passed to the designated learner.<p>
+ * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CheckClassifier implements OptionHandler {
 
   /*** The classifier to be examined */
-  protected Classifier m_Classifier;
+  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
 
   /** The options to be passed to the base classifier. */
   protected String [] m_ClassifierOptions;
@@ -112,14 +112,14 @@ public class CheckClassifier implements OptionHandler {
 	      "\tTurn on debugging output.",
 	      "D", 0, "-D"));
     newVector.addElement(new Option(
-	      "\tFull name of the learner analysed.\n"
+	      "\tFull name of the classifier analysed.\n"
 	      +"\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W"));
 
     if ((m_Classifier != null) 
 	&& (m_Classifier instanceof OptionHandler)) {
       newVector.addElement(new Option("", "", 0, 
-				      "\nOptions specific to learner "
+				      "\nOptions specific to classifier "
 				      + m_Classifier.getClass().getName()
 				      + ":"));
       Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
@@ -136,10 +136,10 @@ public class CheckClassifier implements OptionHandler {
    * Turn on debugging output.<p>
    *
    * -W classname <br>
-   * Specify the full class name of a learner to perform the 
+   * Specify the full class name of a classifier to perform the 
    * tests on (required).<p>
    *
-   * Options after -- are passed to the designated learner 
+   * Options after -- are passed to the designated classifier 
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -148,20 +148,13 @@ public class CheckClassifier implements OptionHandler {
 
     setDebug(Utils.getFlag('D', options));
     
-    String learnerString = Utils.getOption('W', options);
-    if (learnerString.length() == 0) {
-      throw new Exception("A learner must be specified with the -W option.");
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A classifier must be specified with"
+			  + " the -W option.");
     }
-    setLearner(learnerString);
-
-    // Check the remaining options are valid for the specified classifier
-    if ((m_Classifier != null) 
-	&& (m_Classifier instanceof OptionHandler)) {
-      m_ClassifierOptions = Utils.partitionOptions(options);
-      String [] tempOptions = (String [])m_ClassifierOptions.clone();
-      ((OptionHandler)m_Classifier).setOptions(tempOptions);
-      Utils.checkForRemainingOptions(tempOptions);
-    }
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -181,8 +174,9 @@ public class CheckClassifier implements OptionHandler {
     if (getDebug()) {
       options[current++] = "-D";
     }
-    if (getLearner() != null) {
-      options[current++] = "-W"; options[current++] = getLearner();
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -199,11 +193,13 @@ public class CheckClassifier implements OptionHandler {
    */
   public void doTests() {
 
-    if (getLearner() == null) {
+    if (getClassifier() == null) {
       System.out.println("\n=== No classifier set ===");
       return;
     }
-    System.out.println("\n=== Check on Classifier: "+getLearner()+" ===\n");
+    System.out.println("\n=== Check on Classifier: "
+		       + getClassifier().getClass().getName()
+		       + " ===\n");
 
     // Start tests
     canTakeOptions();
@@ -237,34 +233,25 @@ public class CheckClassifier implements OptionHandler {
   }
 
   /**
-   * Set the learner for the decomposition.
+   * Set the classifier for boosting. 
    *
-   * @param learnerName the full class name of the learner to analyse
-   * @exception Exception if learnerName is not a valid class name
+   * @param newClassifier the Classifier to use.
    */
-  public void setLearner(String learnerName) throws Exception {
+  public void setClassifier(Classifier newClassifier) {
 
-    m_Classifier = null;
-    try {
-      m_Classifier = (Classifier)Class.forName(learnerName).newInstance();
-    } catch (Exception ex) {
-      throw new Exception("Can't find Classifier with class name: "
-			  + learnerName);
-    }
+    m_Classifier = newClassifier;
   }
 
   /**
-   * Get the name of the learner
+   * Get the classifier used as the classifier
    *
-   * @return the full class name of the learner
+   * @return the classifier used as the classifier
    */
-  public String getLearner() {
+  public Classifier getClassifier() {
 
-    if (m_Classifier == null) {
-      return null;
-    }
-    return m_Classifier.getClass().getName();
+    return m_Classifier;
   }
+
 
   /**
    * Test method for this class
@@ -572,7 +559,7 @@ public class CheckClassifier implements OptionHandler {
 		   classMissing);
       }
 
-      classifier = makeClassifier();
+      classifier = Classifier.makeCopies(getClassifier(), 1)[0];
       evaluation1A = new Evaluation(train1);
       evaluation1B = new Evaluation(train1);
       evaluation2 = new Evaluation(train2);
@@ -752,8 +739,7 @@ public class CheckClassifier implements OptionHandler {
 
     Instances train = null;
     Instances test = null;
-    Classifier classifierB = null;
-    Classifier classifierI = null;
+    Classifier [] classifiers = null;
     Evaluation evaluationB = null;
     Evaluation evaluationI = null;
     boolean built = false;
@@ -777,23 +763,22 @@ public class CheckClassifier implements OptionHandler {
 	addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
 		   classMissing);
       }
-      classifierB = makeClassifier();
-      classifierI = makeClassifier();
+      classifiers = Classifier.makeCopies(getClassifier(), 2);
       evaluationB = new Evaluation(train);
       evaluationI = new Evaluation(train);
-      classifierB.buildClassifier(train);
-      testWRTZeroR(classifierB, evaluationB, train, test);
+      classifiers[0].buildClassifier(train);
+      testWRTZeroR(classifiers[0], evaluationB, train, test);
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
-      classifierI.buildClassifier(new Instances(train, 0));
+      classifiers[1].buildClassifier(new Instances(train, 0));
       for (int i = 0; i < train.numInstances(); i++) {
-	((UpdateableClassifier)classifierI).updateClassifier(
+	((UpdateableClassifier)classifiers[1]).updateClassifier(
              train.instance(i));
       }
       built = true;
-      testWRTZeroR(classifierI, evaluationI, train, test);
+      testWRTZeroR(classifiers[1], evaluationI, train, test);
       if (!evaluationB.equals(evaluationI)) {
 	System.out.println("no");
 	if (m_Debug) {
@@ -856,8 +841,7 @@ public class CheckClassifier implements OptionHandler {
 
     Instances train = null;
     Instances test = null;
-    Classifier classifierB = null;
-    Classifier classifierI = null;
+    Classifier [] classifiers = null;
     Evaluation evaluationB = null;
     Evaluation evaluationI = null;
     boolean built = false;
@@ -882,12 +866,11 @@ public class CheckClassifier implements OptionHandler {
 	addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
 		   classMissing);
       }
-      classifierB = makeClassifier();
-      classifierI = makeClassifier();
+      classifiers = Classifier.makeCopies(getClassifier(), 2);
       evaluationB = new Evaluation(train);
       evaluationI = new Evaluation(train);
-      classifierB.buildClassifier(train);
-      testWRTZeroR(classifierB, evaluationB, train, test);
+      classifiers[0].buildClassifier(train);
+      testWRTZeroR(classifiers[0], evaluationB, train, test);
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
@@ -903,9 +886,9 @@ public class CheckClassifier implements OptionHandler {
 	int weight = Math.abs(random.nextInt()) % 10 + 1;
 	train.instance(inst).setWeight(weight);
       }
-      classifierI.buildClassifier(train);
+      classifiers[1].buildClassifier(train);
       built = true;
-      testWRTZeroR(classifierI, evaluationI, train, test);
+      testWRTZeroR(classifiers[1], evaluationI, train, test);
       if (evaluationB.equals(evaluationI)) {
 	//	System.out.println("no");
 	evalFail = true;
@@ -1002,7 +985,7 @@ public class CheckClassifier implements OptionHandler {
 	addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
 		   classMissing);
       }
-      classifier = makeClassifier();
+      classifier = Classifier.makeCopies(getClassifier(), 1)[0];
       evaluation = new Evaluation(train);
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
@@ -1078,7 +1061,7 @@ public class CheckClassifier implements OptionHandler {
 	addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
 		   classMissing);
       }
-      classifier = makeClassifier();
+      classifier = Classifier.makeCopies(getClassifier(), 1)[0];
       evaluation = new Evaluation(train);
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
@@ -1222,23 +1205,6 @@ public class CheckClassifier implements OptionHandler {
 	}
       }
     }
-  }
-
-  /**
-   * Make a copy of the classifier with all options set
-   *
-   * @return the new classifier
-   */
-  protected Classifier makeClassifier() throws Exception {
-    
-    Classifier classifier = (Classifier)m_Classifier.getClass().newInstance();
-    if (classifier instanceof OptionHandler) {
-      String [] tempOptions = new String [m_ClassifierOptions.length];
-      System.arraycopy(m_ClassifierOptions, 0, tempOptions, 0, 
-		       m_ClassifierOptions.length);
-      ((OptionHandler)classifier).setOptions(tempOptions);
-    }
-    return classifier;
   }
 
   /**

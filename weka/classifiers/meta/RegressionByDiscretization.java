@@ -38,7 +38,7 @@ import weka.filters.*;
  * Produce debugging output. <p>
  *
  * -W classname <br>
- * Specify the full class name of a weak learner as the basis for 
+ * Specify the full class name of a classifier as the basis for 
  * regression (required).<p>
  *
  * -B num <br>
@@ -49,16 +49,16 @@ import weka.filters.*;
  * Optimize number of bins (values up to and including the -B option will
  * be considered). (default no debugging output) <p>
  *
- * Any options after -- will be passed to the sub-learner. <p>
+ * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
 
   /** The subclassifier. */
-  protected DistributionClassifier m_Classifier;
+  protected DistributionClassifier m_Classifier = new weka.classifiers.ZeroR();
   
   /** The discretization filter. */
   protected DiscretizeFilter m_Discretizer;
@@ -218,7 +218,7 @@ public class RegressionByDiscretization extends Classifier
    * Produce debugging output. <p>
    *
    * -W classname <br>
-   * Specify the full class name of a weak learner as the basis for 
+   * Specify the full class name of a classifier as the basis for 
    * regression (required).<p>
    *
    * -B num <br>
@@ -229,7 +229,7 @@ public class RegressionByDiscretization extends Classifier
    * Optimize number of bins (values up to and including the -B option will
    * be considered). (default no debugging output) <p>
    *
-   * Any options after -- will be passed to the sub-learner. <p>
+   * Any options after -- will be passed to the sub-classifier. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -247,20 +247,14 @@ public class RegressionByDiscretization extends Classifier
 
     setOptimizeBins(Utils.getFlag('O', options));
 
-    String learnerString = Utils.getOption('W', options);
-    if (learnerString.length() == 0) {
-      throw new Exception("A learner must be specified with the -W option.");
-    }
-    setLearner(learnerString);
 
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      String [] classifierOptions = Utils.partitionOptions(options);
-      ((OptionHandler)m_Classifier).setOptions(classifierOptions);
-      Utils.checkForRemainingOptions(classifierOptions);
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A classifier must be specified with"
+			  + " the -W option.");
     }
-      
-    /*    Utils.checkForRemainingOptions(options); */
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -284,8 +278,9 @@ public class RegressionByDiscretization extends Classifier
       options[current++] = "-O";
     }
     options[current++] = "-B"; options[current++] = "" + getNumBins();
-    if (getLearner() != null) {
-      options[current++] = "-W"; options[current++] = getLearner();
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -297,6 +292,26 @@ public class RegressionByDiscretization extends Classifier
     return options;
   }
   
+  /**
+   * Set the classifier for boosting. 
+   *
+   * @param newClassifier the Classifier to use.
+   */
+  public void setClassifier(Classifier newClassifier) {
+
+    m_Classifier = (DistributionClassifier)newClassifier;
+  }
+
+  /**
+   * Get the classifier used as the classifier
+   *
+   * @return the classifier used as the classifier
+   */
+  public Classifier getClassifier() {
+
+    return m_Classifier;
+  }
+
   /**
    * Sets whether the discretizer optimizes the number of bins
    *
@@ -359,36 +374,6 @@ public class RegressionByDiscretization extends Classifier
 
 
   /**
-   * Gets the name of the learner
-   *
-   * @return the full class name of the learner
-   */
-  public String getLearner() {
-
-    if (m_Classifier == null) {
-      return null;
-    }
-    return m_Classifier.getClass().getName();
-  }
-
-  /**
-   * Set the base learner for regression. 
-   * @param learnerName the full class name of the learner to use
-   * @exception Exception if learnerName is not a valid class name
-   */
-  public void setLearner(String learnerName) throws Exception {
-
-    m_Classifier = null;
-    try {
-      m_Classifier = (DistributionClassifier)Class.forName(learnerName).
-      newInstance();
-    } catch (Exception ex) {
-      throw new Exception("Can't find DistributionClassifier with class name: "
-			  + learnerName);
-    }
-  }
-
-  /**
    * Returns a description of the classifier.
    *
    * @return a description of the classifier as a string.
@@ -400,7 +385,7 @@ public class RegressionByDiscretization extends Classifier
 
     text.append("Regression by discretization\n");
     if (m_Classifier == null) {
-      text.append("No subclassifier assigned");
+      text.append("No classifier assigned");
     } else {
       text.append("\nClass attribute discretized into " 
 		  + m_ClassMeans.length + " values\n");

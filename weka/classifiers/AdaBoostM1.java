@@ -37,7 +37,7 @@ import weka.core.*;
  * Turn on debugging output.<p>
  *
  * -W classname <br>
- * Specify the full class name of a weak learner as the basis for 
+ * Specify the full class name of a classifier as the basis for 
  * boosting (required).<p>
  *
  * -I num <br>
@@ -53,18 +53,21 @@ import weka.core.*;
  * -S seed <br>
  * Random number seed for resampling (default 1). <p>
  *
- * Options after -- are passed to the designated learner.<p>
+ * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
 
-  /** Maximum number of iterations tried to find classifier with non-zero error. */ 
+  /** Max num iterations tried to find classifier with non-zero error. */ 
   private static int MAX_NUM_RESAMPLING_ITERATIONS = 10;
 
+  /** The model base classifier to use */
+  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  
   /** Array for storing the generated base classifiers. */
   protected Classifier [] m_Classifiers;
   
@@ -84,10 +87,10 @@ public class AdaBoostM1 extends DistributionClassifier
   protected Instances m_Training;
 
   /** Debugging mode, gives extra output if true */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
   /** Use boosting with reweighting? */
-  protected boolean b_UseResampling;
+  protected boolean m_UseResampling;
 
   /** Seed for boosting with resampling. */
   protected int m_Seed = 1;
@@ -127,7 +130,7 @@ public class AdaBoostM1 extends DistributionClassifier
 	break;
       }
     }
-    if (b_Debug) {
+    if (m_Debug) {
       System.err.println("Selected " + trainData.numInstances()
 			 + " out of " + numInstances);
     }
@@ -155,7 +158,7 @@ public class AdaBoostM1 extends DistributionClassifier
 	      +"\t(default 100, reduce to around 90 speed up)",
 	      "P", 1, "-P <num>"));
     newVector.addElement(new Option(
-	      "\tFull name of 'weak' learner to boost.\n"
+	      "\tFull name of classifier to boost.\n"
 	      +"\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W <class name>"));
     newVector.addElement(new Option(
@@ -166,13 +169,13 @@ public class AdaBoostM1 extends DistributionClassifier
 	      "S", 1, "-S <num>"));
     
 
-    if ((m_Classifiers != null) &&
-	(m_Classifiers[0] instanceof OptionHandler)) {
+    if ((m_Classifier != null) &&
+	(m_Classifier instanceof OptionHandler)) {
       newVector.addElement(new Option(
 	     "",
-	     "", 0, "\nOptions specific to weak learner "
-	     + m_Classifiers[0].getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifiers[0]).listOptions();
+	     "", 0, "\nOptions specific to classifier "
+	     + m_Classifier.getClass().getName() + ":"));
+      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
       while (enum.hasMoreElements()) {
 	newVector.addElement(enum.nextElement());
       }
@@ -188,7 +191,7 @@ public class AdaBoostM1 extends DistributionClassifier
    * Turn on debugging output.<p>
    *
    * -W classname <br>
-   * Specify the full class name of a weak learner as the basis for 
+   * Specify the full class name of a classifier as the basis for 
    * boosting (required).<p>
    *
    * -I num <br>
@@ -204,7 +207,7 @@ public class AdaBoostM1 extends DistributionClassifier
    * -S seed <br>
    * Random number seed for resampling (default 1).<p>
    *
-   * Options after -- are passed to the designated learner.<p>
+   * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -213,12 +216,6 @@ public class AdaBoostM1 extends DistributionClassifier
     
     setDebug(Utils.getFlag('D', options));
     
-    String learnerString = Utils.getOption('W', options);
-    if (learnerString.length() == 0) {
-      throw new Exception("A 'weak' learner must be specified with"
-			  + " the -W option.");
-    }
-
     String boostIterations = Utils.getOption('I', options);
     if (boostIterations.length() != 0) {
       setMaxIterations(Integer.parseInt(boostIterations));
@@ -233,10 +230,8 @@ public class AdaBoostM1 extends DistributionClassifier
       setWeightThreshold(100);
     }
       
-    setWeakLearner(learnerString);
-
     setUseResampling(Utils.getFlag('Q', options));
-    if (b_UseResampling && (thresholdString.length() != 0)) {
+    if (m_UseResampling && (thresholdString.length() != 0)) {
       throw new Exception("Weight pruning with resampling"+
 			  "not allowed.");
     }
@@ -248,16 +243,13 @@ public class AdaBoostM1 extends DistributionClassifier
       setSeed(1);
     }
 
-    // Set the options for each classifier
-    if ((m_Classifiers != null) &&
-	(m_Classifiers[0] instanceof OptionHandler)) {
-      String [] classifierOptions = Utils.partitionOptions(options);
-      for(int i = 0; i < getMaxIterations(); i++) {
-	String [] tempOptions = (String [])classifierOptions.clone();
-	((OptionHandler)m_Classifiers[i]).setOptions(tempOptions);
-	Utils.checkForRemainingOptions(tempOptions);
-      }
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A classifier must be specified with"
+			  + " the -W option.");
     }
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -268,9 +260,9 @@ public class AdaBoostM1 extends DistributionClassifier
   public String [] getOptions() {
 
     String [] classifierOptions = new String [0];
-    if ((m_Classifiers != null) && 
-	(m_Classifiers[0] instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifiers[0]).getOptions();
+    if ((m_Classifier != null) && 
+	(m_Classifier instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
 
     String [] options = new String [classifierOptions.length + 10];
@@ -287,8 +279,9 @@ public class AdaBoostM1 extends DistributionClassifier
     options[current++] = "-I"; options[current++] = "" + getMaxIterations();
     options[current++] = "-S"; options[current++] = "" + getSeed();
 
-    if (getWeakLearner() != null) {
-      options[current++] = "-W"; options[current++] = getWeakLearner();
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
 
@@ -301,38 +294,24 @@ public class AdaBoostM1 extends DistributionClassifier
     return options;
   }
 
-
   /**
-   * Set the 'weak' learner for boosting. 
+   * Set the classifier for boosting. 
    *
-   * @param learnerName the full class name of the learner to boost
-   * @exception Exception if learnerName is not a valid class name
+   * @param newClassifier the Classifier to use.
    */
-  public void setWeakLearner(String learnerName) throws Exception {
+  public void setClassifier(Classifier newClassifier) {
 
-    m_Classifiers = null;
-    try {
-      m_Classifiers = new Classifier [getMaxIterations()];
-      for(int i = 0; i < getMaxIterations(); i++)
-	m_Classifiers[i] = (Classifier)Class.forName(learnerName)
-	  .newInstance();
-    } catch (Exception ex) {
-      throw new Exception("Can't find Classifier with class name: "
-			  + learnerName);
-    }
+    m_Classifier = newClassifier;
   }
 
   /**
-   * Get the name of the 'weak' learner
+   * Get the classifier used as the classifier
    *
-   * @return the full class name of the weak learner
+   * @return the classifier used as the classifier
    */
-  public String getWeakLearner() {
+  public Classifier getClassifier() {
 
-    if (m_Classifiers == null) {
-      return null;
-    }
-    return m_Classifiers[0].getClass().getName();
+    return m_Classifier;
   }
 
 
@@ -401,7 +380,7 @@ public class AdaBoostM1 extends DistributionClassifier
    */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
 
   /**
@@ -411,7 +390,7 @@ public class AdaBoostM1 extends DistributionClassifier
    */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
   /**
@@ -421,7 +400,7 @@ public class AdaBoostM1 extends DistributionClassifier
    */
   public void setUseResampling(boolean r) {
 
-    b_UseResampling = r;
+    m_UseResampling = r;
   }
 
   /**
@@ -431,7 +410,7 @@ public class AdaBoostM1 extends DistributionClassifier
    */
   public boolean getUseResampling() {
 
-    return b_UseResampling;
+    return m_UseResampling;
   }
 
   /**
@@ -455,11 +434,12 @@ public class AdaBoostM1 extends DistributionClassifier
     if (data.classAttribute().isNumeric()) {
       throw new Exception("AdaBoostM1 can't handle a numeric class!");
     }
-    if (m_Classifiers == null) {
-      throw new Exception("A base learner has not been specified!");
+    if (m_Classifier == null) {
+      throw new Exception("A base classifier has not been specified!");
     }
-    if ((!b_UseResampling) && 
-	(m_Classifiers[0] instanceof OptionHandler)) {
+    m_Classifiers = Classifier.makeCopies(m_Classifier, getMaxIterations());
+    if ((!m_UseResampling) && 
+	(m_Classifier instanceof OptionHandler)) {
       buildClassifierWithWeights(data);
     } else {
       buildClassifierUsingResampling(data);
@@ -501,7 +481,7 @@ public class AdaBoostM1 extends DistributionClassifier
     // Do boostrap iterations
     for (m_NumIterations = 0; m_NumIterations < m_Classifiers.length; 
 	 m_NumIterations++) {
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("Training classifier " + (m_NumIterations + 1));
       }
 
@@ -543,7 +523,7 @@ public class AdaBoostM1 extends DistributionClassifier
       // Determine the weight to assign to this model
       m_Betas[m_NumIterations] = beta = Math.log((1 - epsilon) / epsilon);
       reweight = (1 - epsilon) / epsilon;
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("\terror rate = " + epsilon
 			   +"  beta = " + m_Betas[m_NumIterations]);
       }
@@ -596,7 +576,7 @@ public class AdaBoostM1 extends DistributionClassifier
     // Do boostrap iterations
     for (m_NumIterations = 0; m_NumIterations < m_Classifiers.length; 
 	 m_NumIterations++) {
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("Training classifier " + (m_NumIterations + 1));
       }
       // Select instances to train the classifier on
@@ -625,7 +605,7 @@ public class AdaBoostM1 extends DistributionClassifier
       // Determine the weight to assign to this model
       m_Betas[m_NumIterations] = beta = Math.log((1 - epsilon) / epsilon);
       reweight = (1 - epsilon) / epsilon;
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("\terror rate = " + epsilon
 			   +"  beta = " + m_Betas[m_NumIterations]);
       }

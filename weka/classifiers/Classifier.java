@@ -26,7 +26,7 @@ import weka.core.*;
  * Weka extend this class.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class Classifier implements Cloneable, Serializable {
  
@@ -52,5 +52,71 @@ public abstract class Classifier implements Cloneable, Serializable {
    * successfully
    */
   public abstract double classifyInstance(Instance instance) throws Exception; 
+
+
+  
+  /**
+   * Creates a new instance of a classifier given it's class name and
+   * (optional) arguments to pass to it's setOptions method. If the
+   * classifier implements OptionHandler and the options parameter is
+   * non-null, the classifier will have it's options set.
+   *
+   * @param classifierName the fully qualified class name of the classifier
+   * @param options an array of options suitable for passing to setOptions. May
+   * be null.
+   * @return the newly created classifier, ready for use.
+   * @exception Exception if the classifier name is invalid, or the options
+   * supplied are not acceptable to the classifier
+   */
+  public static Classifier forName(String classifierName,
+				   String [] options) throws Exception {
+
+    Classifier c = null;
+    try {
+      c = (Classifier)Class.forName(classifierName).newInstance();
+    } catch (Exception ex) {
+      throw new Exception("Can't set Classifier with class name: "
+			  + classifierName);
+    }
+    if ((c instanceof OptionHandler)
+	&& (options != null)) {
+      String [] classifierOptions = Utils.partitionOptions(options);
+      ((OptionHandler)c).setOptions(classifierOptions);
+      Utils.checkForRemainingOptions(classifierOptions);
+    }
+    return c;
+  }
+
+  /**
+   * Creates copies of the current classifier, which can then
+   * be used for boosting etc.
+   *
+   * @param model an example classifier to copy
+   * @param num the number of classifiers copies to create.
+   * @return an array of classifiers.
+   * @exception Exception if an error occurs
+   */
+  public static Classifier [] makeCopies(Classifier model,
+					 int num) throws Exception {
+
+    if (model == null) {
+      throw new Exception("No model classifier set");
+    }
+    Classifier [] classifiers = new Classifier [num];
+    String [] options = null;
+    if (model instanceof OptionHandler) {
+      options = ((OptionHandler)model).getOptions();
+    }
+    for(int i = 0; i < classifiers.length; i++) {
+      classifiers[i] = (Classifier) model.getClass().newInstance();
+      if (options != null) {
+	String [] tempOptions = (String [])options.clone();
+	((OptionHandler)classifiers[i]).setOptions(tempOptions);
+	Utils.checkForRemainingOptions(tempOptions);
+      }
+    }
+    return classifiers;
+  }
+
 }
 

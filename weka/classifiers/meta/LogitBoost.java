@@ -52,7 +52,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {
@@ -61,10 +61,7 @@ public class LogitBoost extends DistributionClassifier
   protected Classifier [][] m_Classifiers;
 
   /** An instantiated base classifier used for getting and testing options */
-  protected Classifier m_ClassifierExample;
-
-  /** The options to be passed to the base classifiers. */
-  protected String [] m_ClassifierOptions;
+  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
 
   /** The maximum number of boost iterations */
   protected int m_MaxIterations = 10;
@@ -178,13 +175,13 @@ public class LogitBoost extends DistributionClassifier
 	      +"\teg: weka.classifiers.DecisionStump",
 	      "W", 1, "-W <learner class name>"));
 
-    if ((m_ClassifierExample != null) &&
-	(m_ClassifierExample instanceof OptionHandler)) {
+    if ((m_Classifier != null) &&
+	(m_Classifier instanceof OptionHandler)) {
       newVector.addElement(new Option(
 	  "",
 	  "", 0, "\nOptions specific to weak learner "
-	  + m_ClassifierExample.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_ClassifierExample).listOptions();
+	  + m_Classifier.getClass().getName() + ":"));
+      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
       while (enum.hasMoreElements()) {
 	newVector.addElement(enum.nextElement());
       }
@@ -219,12 +216,6 @@ public class LogitBoost extends DistributionClassifier
     
     setDebug(Utils.getFlag('D', options));
     
-    String learnerString = Utils.getOption('W', options);
-    if (learnerString.length() == 0) {
-      throw new Exception("A 'weak' learner must be specified with"
-			  + " the -W option.");
-    }
-
     String boostIterations = Utils.getOption('I', options);
     if (boostIterations.length() != 0) {
       setMaxIterations(Integer.parseInt(boostIterations));
@@ -239,16 +230,13 @@ public class LogitBoost extends DistributionClassifier
       setWeightThreshold(100);
     }
 
-    setWeakLearner(learnerString);
-
-    // Check the remaining options are valid for the specified classifier
-    if ((m_ClassifierExample != null) &&
-	(m_ClassifierExample instanceof OptionHandler)) {
-      m_ClassifierOptions = Utils.partitionOptions(options);
-      String [] tempOptions = (String [])m_ClassifierOptions.clone();
-      ((OptionHandler)m_ClassifierExample).setOptions(tempOptions);
-      Utils.checkForRemainingOptions(tempOptions);
+    String classifierName = Utils.getOption('W', options);
+    if (classifierName.length() == 0) {
+      throw new Exception("A classifier must be specified with"
+			  + " the -W option.");
     }
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -259,9 +247,9 @@ public class LogitBoost extends DistributionClassifier
   public String [] getOptions() {
 
     String [] classifierOptions = new String [0];
-    if ((m_ClassifierExample != null) && 
-	(m_ClassifierExample instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_ClassifierExample).getOptions();
+    if ((m_Classifier != null) && 
+	(m_Classifier instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
 
     String [] options = new String [classifierOptions.length + 8];
@@ -272,8 +260,9 @@ public class LogitBoost extends DistributionClassifier
     options[current++] = "-P"; options[current++] = "" + getWeightThreshold();
     options[current++] = "-I"; options[current++] = "" + getMaxIterations();
 
-    if (getWeakLearner() != null) {
-      options[current++] = "-W"; options[current++] = getWeakLearner();
+    if (getClassifier() != null) {
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
 
@@ -287,40 +276,24 @@ public class LogitBoost extends DistributionClassifier
   }
 
   /**
-   * Set the 'weak' learner for boosting. The learner should be able to
+   * Set the classifier for boosting. The learner should be able to
    * handle numeric class attributes.
    *
-   * @param learnerName the full class name of the learner to boost
-   * @exception Exception if learnerName is not a valid class name
+   * @param newClassifier the Classifier to use.
    */
-  public void setWeakLearner(String learnerName) throws Exception {
+  public void setClassifier(Classifier newClassifier) throws Exception {
 
-    m_Classifiers = null;
-    m_ClassifierExample = null;
-    try {
-      m_ClassifierExample = (Classifier)Class.forName(learnerName)
-	.newInstance();
-    } catch (Exception ex) {
-      throw new Exception("Can't find Classifier with class name: "
-			  + learnerName);
-    }
-    if (!(m_ClassifierExample instanceof WeightedInstancesHandler)) {
-      throw new Exception("Base classifier can't handle weighted "+
-			  "instances.");
-    }
+    m_Classifier = newClassifier;
   }
 
   /**
-   * Get the name of the 'weak' learner
+   * Get the classifier used as the classifier
    *
-   * @return the full class name of the weak learner
+   * @return the classifier used as the classifier
    */
-  public String getWeakLearner() {
+  public Classifier getClassifier() {
 
-    if (m_ClassifierExample == null) {
-      return null;
-    }
-    return m_ClassifierExample.getClass().getName();
+    return m_Classifier;
   }
 
 
@@ -401,8 +374,12 @@ public class LogitBoost extends DistributionClassifier
     if (data.classAttribute().isNumeric()) {
       throw new Exception("LogitBoost can't handle a numeric class!");
     }
-    if (m_ClassifierExample == null) {
-      throw new Exception("A weak learner has not been specified!");
+    if (m_Classifier == null) {
+      throw new Exception("A base classifier has not been specified!");
+    }
+    if (!(m_Classifier instanceof WeightedInstancesHandler)) {
+      throw new Exception("Base classifier can't handle weighted "+
+			  "instances.");
     }
     if (data.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
@@ -437,27 +414,10 @@ public class LogitBoost extends DistributionClassifier
     }
 
     // Create the base classifiers
-    m_Classifiers = new Classifier [m_NumClasses][getMaxIterations()];
-    for (int i = 0; i < getMaxIterations(); i++) {
-      for (int j = 0; j < m_NumClasses; j++) {
-	m_Classifiers[j][i] = (Classifier)m_ClassifierExample.getClass()
-	  .newInstance();
-      }
-    }
-
-    // Set the options for the classifiers
-    if (m_ClassifierExample instanceof OptionHandler) {
-      if (m_Debug) {
-	System.err.println("Setting classifier options");
-      }
-      for (int j = 0; j < m_NumClasses; j++) {
-	for (int i = 0; i < getMaxIterations(); i++) {
-	  String [] tempOptions = new String [m_ClassifierOptions.length];
-	  System.arraycopy(m_ClassifierOptions, 0, tempOptions, 0, 
-			   m_ClassifierOptions.length);
-	  ((OptionHandler)m_Classifiers[j][i]).setOptions(tempOptions);
-	}
-      }
+    m_Classifiers = new Classifier [m_NumClasses][];
+    for (int j = 0; j < m_NumClasses; j++) {
+      m_Classifiers[j] = Classifier.makeCopies(m_Classifier,
+					       getMaxIterations());
     }
 
     // Do boostrap iterations
