@@ -15,7 +15,7 @@
  */
 
 /*
- *    Displayer.java
+ *    TreeVisualizer.java
  *    Copyright (C) 1999 Malcolm Ware
  *
  */
@@ -59,7 +59,7 @@ import weka.gui.visualize.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TreeVisualizer extends JPanel implements MouseMotionListener,
 			       MouseListener,ActionListener,ItemListener {
@@ -682,7 +682,69 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
     m_frameLimiter.start();
   }
 
+  /**
+   * Fits the tree to the current screen size. Call this after
+   * window has been created to get the entrire tree to be in view
+   * upon launch.
+   */
+  public void fitToScreen() {
 
+    getScreenFit(m_viewPos, m_viewSize);
+    repaint();
+  }
+
+  /**
+   * Calculates the dimensions needed to fit the entire tree into view.
+   */
+  private void getScreenFit(Dimension np, Dimension ns) {
+
+    int leftmost = 1000000, rightmost = -1000000;
+    int leftCenter = 1000000, rightCenter = -1000000, rightNode = 0;
+    int highest = -1000000, highTop = -1000000;
+    for (int noa = 0; noa < m_numNodes; noa++) {
+      calcScreenCoords(noa);
+      if (m_nodes[noa].m_center - m_nodes[noa].m_side < leftmost) {
+	leftmost = m_nodes[noa].m_center - m_nodes[noa].m_side;
+      }
+      if (m_nodes[noa].m_center < leftCenter) {
+	leftCenter = m_nodes[noa].m_center;
+      }
+      
+      if (m_nodes[noa].m_center + m_nodes[noa].m_side > rightmost) {
+	rightmost = m_nodes[noa].m_center + m_nodes[noa].m_side;	  
+      }
+      if (m_nodes[noa].m_center > rightCenter) {
+	rightCenter = m_nodes[noa].m_center;
+	rightNode = noa;
+      }
+	if (m_nodes[noa].m_top + m_nodes[noa].m_height > highest) {
+	  highest = m_nodes[noa].m_top + m_nodes[noa].m_height;
+	}
+	if (m_nodes[noa].m_top > highTop) {
+	  highTop = m_nodes[noa].m_top;
+	}
+    }
+    
+    ns.width = getWidth();
+    ns.width -= leftCenter - leftmost + rightmost - rightCenter + 30;
+    ns.height = getHeight() - highest + highTop - 40;
+    
+    if (m_nodes[rightNode].m_node.getCenter() != 0 
+	&& leftCenter != rightCenter) {
+	ns.width /= m_nodes[rightNode].m_node.getCenter();
+    }
+    if (ns.width < 10)
+      {
+	ns.width = 10;
+      }
+    if (ns.height < 10)
+      {
+	ns.height = 10;
+      }
+    
+    np.width = (leftCenter - leftmost + rightmost - rightCenter) / 2 + 15;
+    np.height = (highest - highTop) / 2 + 20;
+  }
 
   /**
    * Performs the action associated with the ActionEvent.
@@ -706,84 +768,8 @@ public class TreeVisualizer extends JPanel implements MouseMotionListener,
       Dimension np = new Dimension();
       Dimension ns = new Dimension();
 
-      int leftmost = 1000000, rightmost = -1000000;
-      int leftCenter = 1000000, rightCenter = -1000000, rightNode = 0;
-      int highest = -1000000, highTop = -1000000;
-      for (int noa = 0; noa < m_numNodes; noa++) {
-	calcScreenCoords(noa);
-	if (m_nodes[noa].m_center - m_nodes[noa].m_side < leftmost) {
-	  leftmost = m_nodes[noa].m_center - m_nodes[noa].m_side;
-	}
-	if (m_nodes[noa].m_center < leftCenter) {
-	  leftCenter = m_nodes[noa].m_center;
-	}
+      getScreenFit(np, ns);
 
-	if (m_nodes[noa].m_center + m_nodes[noa].m_side > rightmost) {
-	  rightmost = m_nodes[noa].m_center + m_nodes[noa].m_side;	  
-	}
-	if (m_nodes[noa].m_center > rightCenter) {
-	  rightCenter = m_nodes[noa].m_center;
-	  rightNode = noa;
-	}
-	if (m_nodes[noa].m_top + m_nodes[noa].m_height > highest) {
-	  highest = m_nodes[noa].m_top + m_nodes[noa].m_height;
-	}
-	if (m_nodes[noa].m_top > highTop) {
-	  highTop = m_nodes[noa].m_top;
-	}
-      }
-      
-      ns.width = getWidth();
-      ns.width -= leftCenter - leftmost + rightmost - rightCenter + 30;
-      ns.height = getHeight() - highest + highTop - 40;
-      
-      if (m_nodes[rightNode].m_node.getCenter() != 0 
-	  && leftCenter != rightCenter) {
-	ns.width /= m_nodes[rightNode].m_node.getCenter();
-      }
-      if (ns.width < 10)
-	{
-	  ns.width = 10;
-	}
-      if (ns.height < 10)
-	{
-	  ns.height = 10;
-	}
-      
-      np.width = (leftCenter - leftmost + rightmost - rightCenter) / 2 + 15;
-      np.height = (highest - highTop) / 2 + 20;
-      /*for (int noa = 0; noa < m_numNodes; noa++) {
-	calcScreenCoords(noa);
-	if (m_nodes[noa].m_center - m_nodes[noa].m_side < leftmost) {
-	  leftmost = m_nodes[noa].m_center - m_nodes[noa].m_side;
-	  left_node = noa;
-	}
-	if (m_nodes[noa].m_center + m_nodes[noa].m_side > rightmost) {
-	  rightmost = m_nodes[noa].m_center + m_nodes[noa].m_side;
-	  System.out.println(rightmost + " " + noa + " " + 
-			     m_nodes[noa].m_side);
-	}
-	
-	m_nodes[noa].m_top = 32000;
-	
-      }
-      
-      ns.width = (int)((getSize().width * .9) / 
-		       (((double)(rightmost - leftmost)) / m_viewSize.width));
-      ns.height = (getSize().height);
-      
-      if (left_node == -1) {
-	np.width = 0;
-      }
-      else {
-	np.width = (int)((getSize().width * .05) - 
-			 (m_nodes[left_node].m_node.getCenter() * 
-			  ns.width - m_nodes[left_node].m_side));
-      }
-      np.height = 0;
-      
-
-      */
       animateScaling(np, ns, 10);
       
     }
