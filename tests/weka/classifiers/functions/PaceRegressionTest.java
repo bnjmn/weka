@@ -2,7 +2,7 @@
  * Copyright 2001 Malcolm Ware. 
  */
 
-package weka.classifiers.functions.neural;
+package weka.classifiers.functions;
 
 import java.util.Random;
 import junit.framework.Test;
@@ -16,24 +16,24 @@ import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.*;
 
 /**
- * Tests NeuralNetwork. Run from the command line with:<p>
- * java weka.classifiers.nn.NeuralNetworkTest
+ * Tests PaceRegression. Run from the command line with:<p>
+ * java weka.classifiers.nn.PaceRegressionTest
  *
  * @author <a href="mailto:mfw4@cs.waikato.ac.nz">Malcolm Ware</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
-public class NeuralNetworkTest extends AbstractClassifierTest {
+public class PaceRegressionTest extends AbstractClassifierTest {
 
 
-  public NeuralNetworkTest(String name) { super(name);  }
+  public PaceRegressionTest(String name) { super(name);  }
 
   /** Creates a default ThresholdSelector */
   public Classifier getClassifier() {
-    return new NeuralNetwork();
+    return new PaceRegression();
   }
 
   public static Test suite() {
-    return new TestSuite(NeuralNetworkTest.class);
+    return new TestSuite(PaceRegressionTest.class);
   }
 
   public static void main(String[] args){

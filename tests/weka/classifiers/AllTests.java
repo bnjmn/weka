@@ -7,13 +7,6 @@ import weka.classifiers.misc.*;
 import weka.classifiers.lazy.*;
 import weka.classifiers.meta.*;
 import weka.classifiers.functions.*;
-import weka.classifiers.functions.supportVector.*;
-import weka.classifiers.trees.j48.*;
-import weka.classifiers.trees.m5.*;
-import weka.classifiers.rules.part.*;
-import weka.classifiers.functions.neural.*;
-import weka.classifiers.lazy.kstar.*;
-import weka.classifiers.trees.adtree.*;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -25,7 +18,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AllTests extends TestSuite {
 
@@ -85,7 +78,7 @@ public class AllTests extends TestSuite {
     suite.addTest(M5PTest.suite());
     suite.addTest(ThresholdSelectorTest.suite());
     suite.addTest(ZeroRTest.suite());
-    suite.addTest(NeuralNetworkTest.suite());
+    suite.addTest(MultilayerPerceptronTest.suite());
 //      suite.addTest(weka.classifiers.evaluation.AllTests.suite());
 //      suite.addTest(weka.classifiers.j48.AllTests.suite());
 //      suite.addTest(weka.classifiers.kstar.AllTests.suite());

@@ -2,7 +2,7 @@
  * Copyright 2002 University of Waikato
  */
 
-package weka.classifiers.functions.supportVector;
+package weka.classifiers.lazy;
 
 import weka.classifiers.*;
 import junit.framework.Test;
@@ -11,23 +11,23 @@ import junit.framework.TestSuite;
 import weka.core.Instances;
 
 /**
- * Tests SMOreg. Run from the command line with:<p>
- * java weka.classifiers.SMOregTest
+ * Tests KStar. Run from the command line with:<p>
+ * java weka.classifiers.KStarTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
  * @version $Revision: 1.1 $
  */
-public class SMOregTest extends AbstractClassifierTest {
+public class KStarTest extends AbstractClassifierTest {
 
-  public SMOregTest(String name) { super(name);  }
+  public KStarTest(String name) { super(name);  }
 
-  /** Creates a default SMOreg */
+  /** Creates a default KStar */
   public Classifier getClassifier() {
-    return new SMOreg();
+    return new KStar();
   }
 
   public static Test suite() {
-    return new TestSuite(SMOregTest.class);
+    return new TestSuite(KStarTest.class);
   }
 
   public static void main(String[] args){
