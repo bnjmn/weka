@@ -15,7 +15,7 @@ import weka.filters.AbstractFilterTest;
  * java weka.filters.AddTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AddTest extends AbstractFilterTest {
   
@@ -29,7 +29,7 @@ public class AddTest extends AbstractFilterTest {
   /** Creates a specialized Add */
   public Filter getFilter(int pos) {
     Add af = new Add();
-    af.setAttributeIndex(pos);
+    af.setAttributeIndex("" + (pos + 1));
     return af;
   }
 
