@@ -88,7 +88,7 @@ import weka.core.WeightedInstancesHandler;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -955,10 +955,12 @@ public class IBk extends DistributionClassifier implements
    */          
   protected double distance(Instance first, Instance second) {  
 
-    if (!Instances.inRanges(first,m_Ranges))
+    if (!m_DontNormalize) {
+      if (!Instances.inRanges(first,m_Ranges))
 	OOPS("Not in ranges");
-    if (!Instances.inRanges(second,m_Ranges))
+      if (!Instances.inRanges(second,m_Ranges))
 	OOPS("Not in ranges");
+    }
     double distance = 0;
     int firstI, secondI;
 
