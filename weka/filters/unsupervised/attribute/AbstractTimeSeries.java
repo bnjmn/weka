@@ -23,10 +23,20 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Vector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Queue;
+import weka.core.Range;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+
+
 
 /** 
  * An abstract instance filter that assumes instances form time-series data and
@@ -56,7 +66,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractTimeSeries extends Filter
   implements UnsupervisedFilter, OptionHandler {
