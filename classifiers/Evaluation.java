@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.20 $
+ * @version  $Revision: 1.21 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1078,6 +1078,17 @@ public class Evaluation implements Summarizable {
   }
 
   /**
+   * Gets the number of instances incorrectly classified (that is, for
+   * which an incorrect prediction was made), including misclassification costs.
+   *
+   * @return the number of incorrectly classified instances 
+   */
+  public final double incorrectWithCost() {
+
+    return m_IncorrectWithCost;
+  }
+
+  /**
    * Gets the percentage of instances incorrectly classified (that is, for
    * which an incorrect prediction was made).
    *
@@ -1087,6 +1098,29 @@ public class Evaluation implements Summarizable {
   public final double pctIncorrect() {
 
     return 100 * m_Incorrect / m_WithClass;
+  }
+
+  /**
+   * Gets the percentage of instances incorrectly classified (that is, for
+   * which an incorrect prediction was made), including misclassification costs.
+   *
+   * @return the percent of incorrectly classified instances 
+   * (between 0 and 100)
+   */
+  public final double pctIncorrectWithCost() {
+
+    return 100 * m_IncorrectWithCost / m_WithClassWithCost;
+  }
+
+  /**
+   * Gets the average cost, that is, total cost of misclassifications
+   * (incorrect plus unclassified) over the total number of instances.
+   *
+   * @return the average cost.  
+   */
+  public final double avgCost() {
+
+    return (m_IncorrectWithCost + m_UnclassifiedWithCost) / m_WithClass;
   }
 
   /**
@@ -1102,6 +1136,17 @@ public class Evaluation implements Summarizable {
   }
 
   /**
+   * Gets the number of instances correctly classified (that is, for
+   * which a correct prediction was made), including misclassification costs.
+   *
+   * @return the number of correctly classified instances
+   */
+  public final double correctWithCost() {
+    
+    return m_CorrectWithCost;
+  }
+
+  /**
    * Gets the percentage of instances correctly classified (that is, for
    * which a correct prediction was made).
    *
@@ -1110,6 +1155,17 @@ public class Evaluation implements Summarizable {
   public final double pctCorrect() {
     
     return 100 * m_Correct / m_WithClass;
+  }
+  
+  /**
+   * Gets the percentage of instances correctly classified (that is, for
+   * which a correct prediction was made), including misclassification costs.
+   *
+   * @return the percent of correctly classified instances (between 0 and 100)
+   */
+  public final double pctCorrectWithCost() {
+
+    return 100.0 * m_CorrectWithCost / m_WithClassWithCost;
   }
 
   /**
@@ -1125,6 +1181,18 @@ public class Evaluation implements Summarizable {
   }
 
   /**
+   * Gets the number of instances not classified (that is, for
+   * which no prediction was made by the classifier), including the 
+   * misclassification costs.
+   *
+   * @return the number of unclassified instances
+   */
+  public final double unclassifiedWithCost() {
+    
+    return m_UnclassifiedWithCost;
+  }
+
+  /**
    * Gets the percentage of instances not classified (that is, for
    * which no prediction was made by the classifier).
    *
@@ -1133,6 +1201,18 @@ public class Evaluation implements Summarizable {
   public final double pctUnclassified() {
     
     return 100 * m_Unclassified / m_WithClass;
+  }
+
+  /**
+   * Gets the percentage of instances not classified (that is, for
+   * which no prediction was made by the classifier), including
+   * misclassification costs.
+   *
+   * @return the percent of unclassified instances (between 0 and 100)
+   */
+  public final double pctUnclassifiedWithCost() {
+    
+    return 100 * m_UnclassifiedWithCost / m_WithClassWithCost;
   }
 
   /**
@@ -1523,23 +1603,23 @@ public class Evaluation implements Summarizable {
 					   12, 4) + " %\n");
 	  if (m_CostMatrix != null) {
 	    text.append("Correctly Classified With Cost     ");
-	    text.append(Utils.doubleToString(m_CorrectWithCost, 12 ,4) + 
+	    text.append(Utils.doubleToString(correctWithCost(), 12 ,4) + 
 			"     " +
-			Utils.doubleToString(100.0*m_CorrectWithCost/
-					     m_WithClassWithCost, 12, 4) 
+			Utils.doubleToString(pctCorrectWithCost(), 12, 4) 
 			+ " %\n");
 	    text.append("Incorrectly Classified With Cost   ");
-	    text.append(Utils.doubleToString(m_IncorrectWithCost, 12, 4) +
+	    text.append(Utils.doubleToString(incorrectWithCost(), 12, 4) +
 			"     " +
-			Utils.doubleToString(100.0*m_IncorrectWithCost/
-					     m_WithClassWithCost, 12, 4) 
+			Utils.doubleToString(pctIncorrectWithCost(), 12, 4) 
 			+ " %\n");
+	    text.append("Average Cost                       ");
+	    text.append(Utils.doubleToString(avgCost(), 12, 4) + "\n");
 	    if (Utils.gr(m_UnclassifiedWithCost, 0)) {
 	      text.append("UnClassified With Cost             ");
-	      text.append(Utils.doubleToString(m_UnclassifiedWithCost, 12, 4) +
+	      text.append(Utils.doubleToString(unclassifiedWithCost(), 12, 4) +
 			  "     " +
-			  Utils.doubleToString(100.0*m_UnclassifiedWithCost/
-					       m_WithClassWithCost, 12, 4) 
+			  Utils.doubleToString(pctUnclassifiedWithCost(), 
+                                               12, 4) 
 			  + " %\n");
 	    }
 	  }
