@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.51 $
+ * @version  $Revision: 1.52 $
   */
 public class Evaluation implements Summarizable {
 
@@ -932,15 +932,16 @@ public class Evaluation implements Summarizable {
    * @exception Exception if model could not be evaluated 
    * successfully 
    */
-  public void evaluateModel(Classifier classifier,
+  public double[] evaluateModel(Classifier classifier,
 			    Instances data) throws Exception {
     
-    double [] predicted;
+    double predictions[] = new double[data.numInstances()];
 
     for (int i = 0; i < data.numInstances(); i++) {
-      evaluateModelOnce((Classifier)classifier, 
-			data.instance(i));
+      predictions[i] = evaluateModelOnce((Classifier)classifier, 
+                                data.instance(i));
     }
+    return predictions;
   }
   
   /**
