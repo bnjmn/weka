@@ -43,7 +43,7 @@ import java.io.ObjectStreamClass;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -72,7 +72,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 13;
+  private static final int RESULT_SIZE = 15;
 
   /**
    * No args constructor.
@@ -330,6 +330,10 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
+    // Timing stats
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+
     resultTypes[current++] = "";
 
     // add any additional measures
@@ -372,6 +376,10 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "SF_mean_scheme_entropy";
     resultNames[current++] = "SF_mean_entropy_gain";
 
+    // Timing stats
+    resultNames[current++] = "Time_training";
+    resultNames[current++] = "Time_testing";
+
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -407,8 +415,12 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
       : 0;
     Object [] result = new Object[RESULT_SIZE+addm];
     Evaluation eval = new Evaluation(train);
+    long trainTimeStart = System.currentTimeMillis();
     m_Classifier.buildClassifier(train);
+    long trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
+    long testTimeStart = System.currentTimeMillis();
     eval.evaluateModel(m_Classifier, test);
+    long testTimeElapsed = System.currentTimeMillis() - testTimeStart;
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
@@ -427,6 +439,10 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.SFMeanPriorEntropy());
     result[current++] = new Double(eval.SFMeanSchemeEntropy());
     result[current++] = new Double(eval.SFMeanEntropyGain());
+
+    // Timing stats
+    result[current++] = new Double(trainTimeElapsed / 1000.0);
+    result[current++] = new Double(testTimeElapsed / 1000.0);
 
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
