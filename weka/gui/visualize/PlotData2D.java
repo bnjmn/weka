@@ -23,7 +23,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PlotData2D {
 
@@ -73,23 +73,8 @@ public class PlotData2D {
    * Construct a new PlotData2D using the supplied instances
    * @param insts the instances to use.
    */
-  public PlotData2D(Instances insts) {
-    String originalRelationName = insts.relationName();
-    try {
-      AddFilter addF = new AddFilter();
-      addF.setAttributeName("Instance_number");
-      addF.setAttributeIndex(0);
-      addF.inputFormat(insts);
-      m_plotInstances = Filter.useFilter(insts, addF);
-      m_plotInstances.setClassIndex(m_plotInstances.numAttributes()-1);
-      for (int i = 0; i < m_plotInstances.numInstances(); i++) {
-	m_plotInstances.instance(i).setValue(0,(double)i);
-      }
-      m_plotInstances.setRelationName(originalRelationName);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    //    m_plotInstances = insts;
+  public PlotData2D(Instances insts) {   
+    m_plotInstances = insts;
     m_xIndex = m_yIndex = m_cIndex = 0;
     m_pointLookup = new double [m_plotInstances.numInstances()][4];
     m_shapeSize = new int [m_plotInstances.numInstances()];
@@ -99,6 +84,27 @@ public class PlotData2D {
       m_shapeType[i] = Plot2D.CONST_AUTOMATIC_SHAPE; // default (automatic shape assignment)
     }
     determineBounds();
+  }
+
+  /**
+   * Adds an instance number attribute to the plottable instances,
+   */
+  public void addInstanceNumberAttribute() {
+    String originalRelationName = m_plotInstances.relationName();
+    try {
+      AddFilter addF = new AddFilter();
+      addF.setAttributeName("Instance_number");
+      addF.setAttributeIndex(0);
+      addF.inputFormat(m_plotInstances);
+      m_plotInstances = Filter.useFilter(m_plotInstances, addF);
+      m_plotInstances.setClassIndex(m_plotInstances.numAttributes()-1);
+      for (int i = 0; i < m_plotInstances.numInstances(); i++) {
+	m_plotInstances.instance(i).setValue(0,(double)i);
+      }
+      m_plotInstances.setRelationName(originalRelationName);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 
   /**
