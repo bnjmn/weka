@@ -26,7 +26,7 @@ import weka.core.*;
 /** 
  * An instance filter that deletes a range of attributes from the dataset.<p>
  *
- * Valid scheme-specific options are:<p>
+ * Valid filter-specific options are:<p>
  *
  * -R index1,index2-index4,...<br>
  * Specify list of columns to delete. First and last are valid indexes.
@@ -36,7 +36,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 

@@ -28,7 +28,7 @@ import weka.core.*;
  * the dataset into nominal attributes. Discretization can be either by 
  * simple binning, or by Fayyad & Irani's MDL method (the default).<p>
  *
- * Valid scheme-specific options are: <p>
+ * Valid filter-specific options are: <p>
  *
  * -B num <br>
  * Specify the (maximum) number of bins to divide numeric attributes into.
@@ -56,7 +56,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {

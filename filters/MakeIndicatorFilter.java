@@ -30,7 +30,7 @@ import weka.core.*;
  * instance that doesn't. The boolean attribute is coded as numeric by
  * default.<p>
  * 
- * Valid scheme-specific options are: <p>
+ * Valid filter-specific options are: <p>
  *
  * -C col <br>
  * Index of the attribute to be changed. (default last)<p>
@@ -42,7 +42,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {

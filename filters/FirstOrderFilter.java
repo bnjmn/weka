@@ -38,7 +38,7 @@ import weka.core.*;
  * spec of 7-11,3-5 will use the attribute ordering 3,4,5,7,8,9,10,11 for the
  * differences, <i>not</i> 7,8,9,10,11,3,4,5.<p>
  *
- * Valid scheme-specific options are:<p>
+ * Valid filter-specific options are:<p>
  *
  * -R index1,index2-index4,...<br>
  * Specify list of columns to take the differences between. 
@@ -46,7 +46,7 @@ import weka.core.*;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 

@@ -26,7 +26,7 @@ import weka.core.*;
 /** 
  * Filters instances according to the value of an attribute.<p>
  *
- * Valid scheme-specific options are:<p>
+ * Valid filter-specific options are:<p>
  *
  * -C num<br>
  * Choose attribute to be used for selection (default last).<p>
@@ -43,7 +43,7 @@ import weka.core.*;
  * Invert matching sense.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class InstanceFilter extends Filter implements OptionHandler {
 
