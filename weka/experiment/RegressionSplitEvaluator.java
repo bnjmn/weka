@@ -38,13 +38,16 @@ import java.io.ObjectStreamClass;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
   
   /** The classifier used for evaluation */
   protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+
+  /** Holds the statistics for the most recent application of the classifier */
+  protected String m_result = null;
 
   /** The classifier options (if any) */
   protected String m_ClassifierOptions = "";
@@ -57,6 +60,16 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
 
   /** The length of a result */
   private static final int RESULT_SIZE = 13;
+
+  /**
+   * Returns a string describing this split evaluator
+   * @return a description of the split evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "A SplitEvaluator that produces results for a classification "
+      +"scheme on a numeric class attribute.";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -291,6 +304,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     Evaluation eval = new Evaluation(train);
     m_Classifier.buildClassifier(train);
     eval.evaluateModel(m_Classifier, test);
+    m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
     int current = 0;
@@ -321,7 +335,15 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     return result;
   }
 
-  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifierTipText() {
+    return "The classifier to use.";
+  }
+
   /**
    * Get the value of Classifier.
    *
@@ -379,6 +401,26 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
       throw new Exception("Can't find Classifier with class name: "
 			  + newClassifierName);
     }
+  }
+
+  /**
+   * Gets the raw output from the classifier
+   * @return the raw output from the classifier
+   */
+  public String getRawResultOutput() {
+    StringBuffer result = new StringBuffer();
+
+    if (m_Classifier == null) {
+      return "<null> classifier";
+    }
+    result.append(toString());
+    result.append("Classifier model: \n"+m_Classifier.toString()+'\n');
+
+    // append the performance statistics
+    if (m_result != null) {
+      result.append(m_result);
+    }
+    return result.toString();
   }
 
   /**

@@ -30,13 +30,14 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.Random;
 import java.util.Vector;
+import java.io.File;
 
 /**
  * Generates a single train/test split and calls the appropriate
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class RandomSplitResultProducer 
@@ -54,6 +55,17 @@ public class RandomSplitResultProducer
   /** The SplitEvaluator used to generate results */
   protected SplitEvaluator m_SplitEvaluator = new ClassifierSplitEvaluator();
 
+  /** Save raw output of split evaluators --- for debugging purposes */
+  protected boolean m_debugOutput = false;
+
+  /** The output zipper to use for saving raw splitEvaluator output */
+  protected OutputZipper m_ZipDest = null;
+
+  /** The destination output file/directory for raw output */
+  protected File m_OutputFile = new File(
+			        new File(System.getProperty("user.dir")), 
+				"splitEvalutorOut.zip");
+
   /* The name of the key field containing the dataset name */
   public static String DATASET_FIELD_NAME = "Dataset";
 
@@ -62,6 +74,16 @@ public class RandomSplitResultProducer
 
   /* The name of the result field containing the timestamp */
   public static String TIMESTAMP_FIELD_NAME = "Date_time";
+
+  /**
+   * Returns a string describing this result producer
+   * @return a description of the result producer suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Performs a random train and test using a supplied "
+      +"evaluator.";
+  }
 
   /**
    * Sets the dataset that results will be obtained for.
@@ -126,6 +148,12 @@ public class RandomSplitResultProducer
   public void postProcess() throws Exception {
 
     m_ResultListener.postProcess(this);
+    if (m_debugOutput) {
+      if (m_ZipDest != null) {
+	m_ZipDest.finished();
+	m_ZipDest = null;
+      }
+    }
   }
 
   /**
@@ -166,6 +194,12 @@ public class RandomSplitResultProducer
    */
   public void doRun(int run) throws Exception {
 
+    if (getRawOutput()) {
+      if (m_ZipDest == null) {
+	m_ZipDest = new OutputZipper(m_OutputFile);
+      }
+    }
+
     if (m_Instances == null) {
       throw new Exception("No Instances set");
     }
@@ -190,6 +224,12 @@ public class RandomSplitResultProducer
 	results[0] = getTimestamp();
 	System.arraycopy(seResults, 0, results, 1,
 			 seResults.length);
+	if (m_debugOutput) {
+	  String resultName = (""+run+"."+runInstances.relationName()
+			       +"."
+			       +m_SplitEvaluator.toString()).replace(' ','_');
+	  m_ZipDest.zipit(m_SplitEvaluator.getRawResultOutput(), resultName);
+	}
 	m_ResultListener.acceptResult(this, key, results);
       } catch (Exception ex) {
 	// Save the train and test datasets for debugging purposes?
@@ -292,6 +332,76 @@ public class RandomSplitResultProducer
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String outputFileTipText() {
+    return "Set the destination for saving raw output. If the rawOutput "
+      +"option is selected, then output from the splitEvaluator for "
+      +"individual train-test splits is saved. If the destination is a "
+      +"directory, "
+      +"then each output is saved to an individual gzip file; if the "
+      +"destination is a file, then each output is saved as an entry "
+      +"in a zip file.";
+  }
+
+  /**
+   * Get the value of OutputFile.
+   *
+   * @return Value of OutputFile.
+   */
+  public File getOutputFile() {
+    
+    return m_OutputFile;
+  }
+  
+  /**
+   * Set the value of OutputFile.
+   *
+   * @param newOutputFile Value to assign to OutputFile.
+   */
+  public void setOutputFile(File newOutputFile) {
+    
+    m_OutputFile = newOutputFile;
+  }  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String rawOutputTipText() {
+    return "Save raw output (useful for debugging). If set, then output is "
+      +"sent to the destination specified by outputFile";
+  }
+
+  /**
+   * Get if raw split evaluator output is to be saved
+   * @return true if raw split evalutor output is to be saved
+   */
+  public boolean getRawOutput() {
+    return m_debugOutput;
+  }
+  
+  /**
+   * Set to true if raw split evaluator output is to be saved
+   * @param d true if output is to be saved
+   */
+  public void setRawOutput(boolean d) {
+    m_debugOutput = d;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String trainPercentTipText() {
+    return "Set the percentage of data to use for training.";
+  }
+
+  /**
    * Get the value of TrainPercent.
    *
    * @return Value of TrainPercent.
@@ -309,6 +419,16 @@ public class RandomSplitResultProducer
   public void setTrainPercent(int newTrainPercent) {
     
     m_TrainPercent = newTrainPercent;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String splitEvaluatorTipText() {
+    return "The evaluator to apply to the cross validation folds. "
+      +"This may be a classifier, regression scheme etc.";
   }
 
   /**
@@ -338,13 +458,27 @@ public class RandomSplitResultProducer
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
 	     "\tThe percentage of instances to use for training.\n"
 	      +"\t(default 66)", 
 	     "P", 1, 
 	     "-P <percent>"));
+
+    newVector.addElement(new Option(
+	     "Save raw split evaluator output.",
+	     "D",0,"-D"));
+
+    newVector.addElement(new Option(
+	     "\tThe filename where raw output will be stored.\n"
+	     +"\tIf a directory name is specified then then individual\n"
+	     +"\toutputs will be gzipped, otherwise all output will be\n"
+	     +"\tzipped to the named file. Use in conjuction with -D."
+	     +"\t(default splitEvalutorOut.zip)", 
+	     "O", 1, 
+	     "-O <file/directory name/path>"));
+
     newVector.addElement(new Option(
 	     "\tThe full class name of a SplitEvaluator.\n"
 	      +"\teg: weka.experiment.ClassifierSplitEvaluator", 
@@ -371,6 +505,15 @@ public class RandomSplitResultProducer
    * -P num <br>
    * The percent of instances used for training. <p>
    *
+   * -D <br>
+   * Specify that raw split evaluator output is to be saved. <p>
+   *
+   * -O file/directory name <br>
+   * Specify the file or directory to which raw split evaluator output
+   * is to be saved. If a directory is specified, then each output string
+   * is saved as an individual gzip file. If a file is specified, then
+   * each output string is saved as an entry in a zip file. <p>
+   *
    * -W classname <br>
    * Specify the full class name of the split evaluator. <p>
    *
@@ -381,6 +524,13 @@ public class RandomSplitResultProducer
    */
   public void setOptions(String[] options) throws Exception {
     
+    setRawOutput(Utils.getFlag('D', options));
+
+    String fName = Utils.getOption('O', options);
+    if (fName.length() != 0) {
+      setOutputFile(new File(fName));
+    }
+
     String trainPct = Utils.getOption('P', options);
     if (trainPct.length() != 0) {
       setTrainPercent(Integer.parseInt(trainPct));
@@ -419,10 +569,18 @@ public class RandomSplitResultProducer
       seOptions = ((OptionHandler)m_SplitEvaluator).getOptions();
     }
     
-    String [] options = new String [seOptions.length + 5];
+    String [] options = new String [seOptions.length + 8];
     int current = 0;
 
     options[current++] = "-P"; options[current++] = "" + getTrainPercent();
+
+        if (getRawOutput()) {
+      options[current++] = "-D";
+    }
+
+    options[current++] = "-O"; 
+    options[current++] = getOutputFile().getName();
+
     if (getSplitEvaluator() != null) {
       options[current++] = "-W";
       options[current++] = getSplitEvaluator().getClass().getName();
