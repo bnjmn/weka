@@ -66,7 +66,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -143,6 +143,14 @@ public class ThresholdSelector extends DistributionClassifier
 
   /**
    * Collects the classifier predictions using the specified evaluation method.
+   *
+   * @param instances the set of <code>Instances</code> to generate
+   * predictions for.
+   * @param mode the evaluation mode.
+   * @param numFolds the number of folds to use if not evaluating on the
+   * full training set.
+   * @return a <code>FastVector</code> containing the predictions.
+   * @exception Exception if an error occurs generating the predictions.
    */
   protected FastVector getPredictions(Instances instances, int mode, int numFolds) 
     throws Exception {
@@ -171,7 +179,7 @@ public class ThresholdSelector extends DistributionClassifier
     case EVAL_CROSS_VALIDATION:
       return eu.getCVPredictions(m_Classifier, instances, numFolds);
     default:
-      throw new Exception("Unrecognized evaluation mode");
+      throw new RuntimeException("Unrecognized evaluation mode");
     }
   }
 
@@ -179,8 +187,10 @@ public class ThresholdSelector extends DistributionClassifier
    * Finds the best threshold, this implementation searches for the
    * highest FMeasure. If no FMeasure higher than MIN_VALUE is found,
    * the default threshold of 0.5 is used.
+   *
+   * @param predictions a <code>FastVector</code> containing the predictions.
    */
-  protected void findThreshold(FastVector predictions) throws Exception {
+  protected void findThreshold(FastVector predictions) {
 
     Instances curve = (new ThresholdCurve()).getCurve(predictions, m_DesignatedClass);
 
