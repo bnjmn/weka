@@ -16,7 +16,7 @@
 
 /*
  *    EvaluationUtils.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -32,8 +32,8 @@ import java.util.Random;
  * Contains utility functions for generating lists of predictions in 
  * various manners.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.6 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.7 $
  */
 public class EvaluationUtils {
 

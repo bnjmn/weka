@@ -16,7 +16,7 @@
 
 /*
  *    StringToNominal.java
- *    Copyright (C) 1999 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -46,8 +46,8 @@ import weka.core.UnsupportedAttributeTypeException;
  * -C col <br>
  * Index of the attribute to be changed. (default last)<p>
  *
- * @author Len Trigg (len@intelligenesis.net) 
- * @version $Revision: 1.1 $
+ * @author Len Trigg (len@reeltwo.com) 
+ * @version $Revision: 1.2 $
  */
 public class StringToNominal extends Filter 
   implements UnsupervisedFilter, OptionHandler {

@@ -16,7 +16,7 @@
 
 /*
  *    CostSensitiveClassifierSplitEvaluator.java
- *    Copyright (C) 1999 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -33,8 +33,8 @@ import weka.classifiers.*;
  * A SplitEvaluator that produces results for a classification scheme
  * on a nominal class attribute, including weighted misclassification costs.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.8 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.9 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 

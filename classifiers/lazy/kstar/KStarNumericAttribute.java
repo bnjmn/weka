@@ -33,7 +33,7 @@ import weka.classifiers.*;
  * transformation probability of a specified test instance numeric
  * attribute to a specified train instance numeric attribute.
  *
- * @author Len Trigg (len@intelligenesis.net)
+ * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $
  */

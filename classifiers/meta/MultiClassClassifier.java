@@ -66,9 +66,9 @@ import weka.filters.Filter;
  * Random number seed (default 1).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @author Len Trigg (len@webmind.com)
+ * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {

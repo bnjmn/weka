@@ -16,7 +16,7 @@
 
 /*
  *    SpreadSubsample.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -64,8 +64,8 @@ import weka.core.UnsupportedClassTypeException;
  *  instance weighting is not preserved. (default no weights adjustment)
  *  <p>
  *
- * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.1 $ 
+ * @author Stuart Inglis (stuart@reeltwo.com)
+ * @version $Revision: 1.2 $ 
  **/
 public class SpreadSubsample extends Filter implements SupervisedFilter,
 						       OptionHandler {

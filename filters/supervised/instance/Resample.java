@@ -16,7 +16,7 @@
 
 /*
  *    Resample.java
- *    Copyright (C) 1999 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -56,8 +56,8 @@ import java.util.Vector;
  * Specify the size of the output dataset, as a percentage of the input
  * dataset (default 100). <p>
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $ 
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.2 $ 
  **/
 public class Resample extends Filter implements SupervisedFilter,
 						OptionHandler {

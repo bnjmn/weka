@@ -31,7 +31,7 @@ import java.util.*;
  * A class representing the caching system used to keep track of each attribute
  * value and its corresponding scale factor or stop parameter.
  *
- * @author Len Trigg (len@intelligenesis.net)
+ * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $
  */

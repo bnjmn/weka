@@ -16,7 +16,7 @@
 
 /*
  *    NumericPrediction.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -28,8 +28,8 @@ import java.io.Serializable;
  * Encapsulates an evaluatable numeric prediction: the predicted class value
  * plus the actual class value.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.6 $
  */
 public class NumericPrediction implements Prediction, Serializable {
 

@@ -25,7 +25,7 @@
 package weka.classifiers.lazy.kstar;
 
 /*
- * @author Len Trigg (len@intelligenesis.net)
+ * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $
  */

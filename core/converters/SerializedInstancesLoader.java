@@ -16,7 +16,7 @@
 
 /*
  *    SerializedInstancesLoader.java
- *    Copyright (C) 2000 Webmind Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -35,8 +35,8 @@ import weka.core.Instances;
 /**
  * Reads a source that contains serialized Instances.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.5 $
  * @see Loader
  */
 public class SerializedInstancesLoader extends AbstractLoader 

@@ -16,7 +16,7 @@
 
 /*
  *    BinarySparseInstance.java
- *    Copyright (C) 2000 Webmind Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 

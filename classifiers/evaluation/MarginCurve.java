@@ -16,7 +16,7 @@
 
 /*
  *    MarginCurve.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -37,8 +37,8 @@ import weka.classifiers.DistributionClassifier;
  * as to the good performance of boosting algorithms is that they increaes the
  * margins on the training data and this gives better performance on test data.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.6 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.7 $
  */
 public class MarginCurve {
 

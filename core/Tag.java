@@ -25,7 +25,7 @@ package weka.core;
 /**
  * A <code>Tag</code> simply associates a numeric ID with a String description.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  */
 public class Tag {
 

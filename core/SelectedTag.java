@@ -28,7 +28,7 @@ package weka.core;
  * used in schemes to select between alternative behaviours,
  * associating names with the alternative behaviours.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a> 
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a> 
  */
 public class SelectedTag {
   

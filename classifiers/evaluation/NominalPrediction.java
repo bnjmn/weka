@@ -16,7 +16,7 @@
 
 /*
  *    NominalPrediction.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -28,8 +28,8 @@ import java.io.Serializable;
  * Encapsulates an evaluatable nominal prediction: the predicted probability
  * distribution plus the actual class value.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.8 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.9 $
  */
 public class NominalPrediction implements Prediction, Serializable {
 

@@ -112,9 +112,9 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
- * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
+ * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.43 $ */
+ * @version $Revision: 1.44 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
