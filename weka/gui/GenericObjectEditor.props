@@ -48,6 +48,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.CVParameterSelection,\
  weka.classifiers.FilteredClassifier,\
  weka.classifiers.LogitBoost,\
+ weka.classifiers.MetaCost,\
  weka.classifiers.MultiClassClassifier,\
  weka.classifiers.MultiScheme,\
  weka.classifiers.RegressionByDiscretization,\
