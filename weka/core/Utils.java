@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public final class Utils {
 
@@ -421,7 +421,8 @@ public final class Utils {
    * be assignable to -- an exception is thrown if this is not the case
    * @param className the fully qualified class name of the object
    * @param options an array of options suitable for passing to setOptions. May
-   * be null.
+   * be null. Any options accepted by the object will be removed from the
+   * array.
    * @return the newly created object, ready for use.
    * @exception Exception if the class name is invalid, or if the
    * class is not assignable to the desired class type, or the options
@@ -444,9 +445,8 @@ public final class Utils {
     Object o = c.newInstance();
     if ((o instanceof OptionHandler)
 	&& (options != null)) {
-      String [] objectOptions = Utils.partitionOptions(options);
-      ((OptionHandler)o).setOptions(objectOptions);
-      Utils.checkForRemainingOptions(objectOptions);
+      ((OptionHandler)o).setOptions(options);
+      Utils.checkForRemainingOptions(options);
     }
     return o;
   }
