@@ -27,7 +27,7 @@ import java.util.Random;
 /**
  * This class is used to represent a node in the neuralnet.
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NeuralNode extends NeuralConnection {
     
@@ -84,7 +84,6 @@ public class NeuralNode extends NeuralConnection {
     
     if (Double.isNaN(m_unitValue) && calculate) {
       //then calculate the output value;
-      m_unitValue = m_weights[0];
       m_unitValue = m_methods.outputValue(this);
     }
     
@@ -102,7 +101,6 @@ public class NeuralNode extends NeuralConnection {
 
     if (!Double.isNaN(m_unitValue) && Double.isNaN(m_unitError) && calculate) {
       //then calculate the error.
-      m_unitError = 0;
       m_unitError = m_methods.errorValue(this);
     }
     return m_unitError;

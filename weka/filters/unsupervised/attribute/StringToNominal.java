@@ -34,7 +34,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.UnsupportedAttributeTypeException;
-
+import weka.core.SingleIndex;
 
 /** 
  * Converts a string attribute (i.e. unspecified number of values) to nominal
@@ -47,16 +47,13 @@ import weka.core.UnsupportedAttributeTypeException;
  * Index of the attribute to be changed. (default last)<p>
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class StringToNominal extends Filter 
   implements UnsupervisedFilter, OptionHandler {
 
-  /** The attribute index setting (allows -1 = last). */
-  private int m_AttIndexSet = -1; 
-
-  /** The attribute index. */
-  private int m_AttIndex; 
+  /** The attribute's index setting. */
+  private SingleIndex m_AttIndex = new SingleIndex("last"); 
 
   /**
    * Sets the format of the input instances.
@@ -74,12 +71,10 @@ public class StringToNominal extends Filter
        throws Exception {
 
     super.setInputFormat(instanceInfo);
-    m_AttIndex = m_AttIndexSet;
-    if (m_AttIndex < 0) {
-      m_AttIndex = instanceInfo.numAttributes() - 1;
-    }
-    if (!instanceInfo.attribute(m_AttIndex).isString()) {
-      throw new UnsupportedAttributeTypeException("Chosen attribute is not of type string.");
+    m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
+    if (!instanceInfo.attribute(m_AttIndex.getIndex()).isString()) {
+      throw new UnsupportedAttributeTypeException("Chosen attribute is not of "
+						  + "type string.");
     }
     return false;
   }
@@ -171,17 +166,11 @@ public class StringToNominal extends Filter
    */
   public void setOptions(String[] options) throws Exception {
     
-    String attributeIndex = Utils.getOption('C', options);
-    if (attributeIndex.length() != 0) {
-      if (attributeIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(-1);
-      } else if (attributeIndex.toLowerCase().equals("first")) {
-	setAttributeIndex(0);
-      } else {
-	setAttributeIndex(Integer.parseInt(attributeIndex) - 1);
-      }
+    String attIndex = Utils.getOption('C', options);
+    if (attIndex.length() != 0) {
+      setAttributeIndex(attIndex);
     } else {
-      setAttributeIndex(-1);
+      setAttributeIndex("last");
     }
        
     if (getInputFormat() != null) {
@@ -200,7 +189,7 @@ public class StringToNominal extends Filter
     int current = 0;
 
     options[current++] = "-C";
-    options[current++] = "" + (getAttributeIndex() + 1);
+    options[current++] = "" + (getAttributeIndex());
 
     while (current < options.length) {
       options[current++] = "";
@@ -213,9 +202,9 @@ public class StringToNominal extends Filter
    *
    * @return the index of the attribute
    */
-  public int getAttributeIndex() {
+  public String getAttributeIndex() {
 
-    return m_AttIndexSet;
+    return m_AttIndex.getSingleIndex();
   }
 
   /**
@@ -223,9 +212,9 @@ public class StringToNominal extends Filter
    *
    * @param index the index of the attribute
    */
-  public void setAttributeIndex(int attIndex) {
+  public void setAttributeIndex(String attIndex) {
     
-    m_AttIndexSet = attIndex;
+    m_AttIndex.setSingleIndex(attIndex);
   }
 
   /**
@@ -243,7 +232,7 @@ public class StringToNominal extends Filter
     newAtts = new FastVector(getInputFormat().numAttributes());
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
-      if (j != m_AttIndex) {
+      if (j != m_AttIndex.getIndex()) {
 
 	// We don't have to copy the attribute because the
 	// attribute index remains unchanged.

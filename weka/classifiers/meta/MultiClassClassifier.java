@@ -69,7 +69,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -304,9 +304,9 @@ public class MultiClassClassifier extends DistributionClassifier
       // generate the classifiers
       for (int i=0; i<numClassifiers; i++) {
 	RemoveWithValues classFilter = new RemoveWithValues();
-	classFilter.setAttributeIndex(insts.classIndex());
+	classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
 	classFilter.setModifyHeader(true);
-	classFilter.setInvertSelection(false);
+	classFilter.setInvertSelection(true);
 	classFilter.setNominalIndicesArr((int[])pairs.elementAt(i));
 	int[] pair = (int[])pairs.elementAt(i);
 	Instances tempInstances = new Instances(insts, 0);
@@ -357,7 +357,7 @@ public class MultiClassClassifier extends DistributionClassifier
         } else {
           m_ClassFilters[i] = new MakeIndicator();
 	  MakeIndicator classFilter = (MakeIndicator) m_ClassFilters[i];
-          classFilter.setAttributeIndex(insts.classIndex());
+          classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
           classFilter.setValueIndices(code.getIndices(i));
           classFilter.setNumeric(false);
           classFilter.setInputFormat(insts);

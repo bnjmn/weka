@@ -66,7 +66,7 @@ import weka.attributeSelection.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {
@@ -591,7 +591,7 @@ public class SVMAttributeEval extends AttributeEvaluator
 
     try {
       MakeIndicator filter = new MakeIndicator();
-      filter.setAttributeIndex(data.classIndex());
+      filter.setAttributeIndex("" + (data.classIndex() + 1));
       filter.setNumeric(false);
       filter.setValueIndex(classInd);
       filter.setInputFormat(data);

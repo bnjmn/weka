@@ -47,17 +47,14 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  */
 public class MakeIndicator extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** The attribute's index option setting. */
-  private int m_AttIndexSet = -1;
-
-  /** The attribute's index */
-  private int m_AttIndex;
+  /** The attribute's index setting. */
+  private SingleIndex m_AttIndex = new SingleIndex("last"); 
 
   /** The value's index */
   private Range m_ValIndex;
@@ -84,17 +81,15 @@ public class MakeIndicator extends Filter
        throws Exception {
 
     super.setInputFormat(instanceInfo);
-    m_AttIndex = m_AttIndexSet;
-    if (m_AttIndex < 0) {
-      m_AttIndex = instanceInfo.numAttributes() - 1;
-    }
-    
-    m_ValIndex.setUpper(instanceInfo.attribute(m_AttIndex).numValues() - 1);
-    if (!instanceInfo.attribute(m_AttIndex).isNominal()) {
+    m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
+    m_ValIndex.setUpper(instanceInfo.attribute(m_AttIndex.
+					       getIndex()).numValues() - 1);
+    if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal()) {
       throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
     }
-    if (instanceInfo.attribute(m_AttIndex).numValues() < 2) {
-      throw new UnsupportedAttributeTypeException("Chosen attribute has less than two values.");
+    if (instanceInfo.attribute(m_AttIndex.getIndex()).numValues() < 2) {
+      throw new UnsupportedAttributeTypeException("Chosen attribute has less " +
+						  "than two values.");
     }
     setOutputFormat();
     return true;
@@ -119,11 +114,11 @@ public class MakeIndicator extends Filter
       m_NewBatch = false;
     }
     Instance newInstance = (Instance)instance.copy();
-    if (!newInstance.isMissing(m_AttIndex)) {
-      if (m_ValIndex.isInRange((int)newInstance.value(m_AttIndex))) {
-	newInstance.setValue(m_AttIndex, 1);
+    if (!newInstance.isMissing(m_AttIndex.getIndex())) {
+      if (m_ValIndex.isInRange((int)newInstance.value(m_AttIndex.getIndex()))) {
+	newInstance.setValue(m_AttIndex.getIndex(), 1);
       } else {
-	newInstance.setValue(m_AttIndex, 0);
+	newInstance.setValue(m_AttIndex.getIndex(), 0);
       }
     }
     push(newInstance);
@@ -175,17 +170,11 @@ public class MakeIndicator extends Filter
     
     String attIndex = Utils.getOption('C', options);
     if (attIndex.length() != 0) {
-      if (attIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(-1);
-      } else if (attIndex.toLowerCase().equals("first")) {
-	setAttributeIndex(0);
-      } else {
-	setAttributeIndex(Integer.parseInt(attIndex) - 1);
-      }
+      setAttributeIndex(attIndex);
     } else {
-      setAttributeIndex(-1);
+      setAttributeIndex("last");
     }
-    
+
     String valIndex = Utils.getOption('V', options);
     if (valIndex.length() != 0) {
       setValueIndices(valIndex);
@@ -211,7 +200,7 @@ public class MakeIndicator extends Filter
     int current = 0;
 
     options[current++] = "-C";
-    options[current++] = "" + (getAttributeIndex() + 1);
+    options[current++] = "" + (getAttributeIndex());
     options[current++] = "-V"; 
     options[current++] = getValueIndices();
     if (!getNumeric()) {
@@ -243,8 +232,7 @@ public class MakeIndicator extends Filter
   public String attributeIndexTipText() {
 
     return "Sets which attribute should be replaced by the indicator. This "
-      + "attribute must be nominal. Give the attribute index (numbered from "
-      + "0). Use -1 to indicate the last attribute.";
+      + "attribute must be nominal.";
   }
 
   /**
@@ -252,19 +240,19 @@ public class MakeIndicator extends Filter
    *
    * @return the index of the attribute
    */
-  public int getAttributeIndex() {
+  public String getAttributeIndex() {
 
-    return m_AttIndexSet;
+    return m_AttIndex.getSingleIndex();
   }
 
   /**
-   * Sets index of of the attribute used.
+   * Sets index of the attribute used.
    *
    * @param index the index of the attribute
    */
-  public void setAttributeIndex(int attIndex) {
+  public void setAttributeIndex(String attIndex) {
     
-    m_AttIndexSet = attIndex;
+    m_AttIndex.setSingleIndex(attIndex);
   }
 
   /**
@@ -273,6 +261,7 @@ public class MakeIndicator extends Filter
    * @return the range containing the indicator values
    */
   public Range getValueRange() {
+
     return m_ValIndex;
   }
 
@@ -294,6 +283,7 @@ public class MakeIndicator extends Filter
    * @return the indices of the indicator values
    */
   public String getValueIndices() {
+
     return m_ValIndex.getRanges();
   }
 
@@ -374,7 +364,7 @@ public class MakeIndicator extends Filter
     newAtts = new FastVector(getInputFormat().numAttributes());
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
-      if (j != m_AttIndex) {
+      if (j != m_AttIndex.getIndex()) {
 
 	// We don't have to copy the attribute because the
 	// attribute index remains unchanged.

@@ -39,7 +39,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Range implements Serializable {
 
@@ -126,7 +126,8 @@ public class Range implements Serializable {
   }
 
   /**
-   * Sets the ranges from a string representation.
+   * Sets the ranges from a string representation. Note that setUpper()
+   * must be called afterwards for ranges to be actually set internally.
    *
    * @param rangeList the comma separated list of ranges. The empty
    * string sets the range to empty.
@@ -147,19 +148,11 @@ public class Range implements Serializable {
 	rangeList = "";
       }
       if (!range.equals("")) {
-	if (isValidRange(range)) {
-	  ranges.addElement(range);
-	} else {
-	  throw new IllegalArgumentException("Invalid range list at " + range
-                                             + rangeList);
-	}
+	ranges.addElement(range);
       }
     }
     m_RangeStrings = ranges;
-    
-    if (m_Upper >= 0) {
-      setFlags();
-    }
+    m_SelectFlags = null;
   }
 
   /**
@@ -305,6 +298,9 @@ public class Range implements Serializable {
     Enumeration enum = m_RangeStrings.elements();
     while (enum.hasMoreElements()) {
       String currentRange = (String)enum.nextElement();
+      if (!isValidRange(currentRange)) {
+	throw new IllegalArgumentException("Invalid range list at " + currentRange);
+      }
       int start = rangeLower(currentRange);
       int end = rangeUpper(currentRange);
       for (int i = start; (i <= m_Upper) && (i <= end); i++) {

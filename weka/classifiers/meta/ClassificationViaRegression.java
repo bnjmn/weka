@@ -47,7 +47,7 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -79,7 +79,7 @@ public class ClassificationViaRegression extends DistributionClassifier
     m_ClassFilters = new MakeIndicator[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
       m_ClassFilters[i] = new MakeIndicator();
-      m_ClassFilters[i].setAttributeIndex(insts.classIndex());
+      m_ClassFilters[i].setAttributeIndex("" + (insts.classIndex() + 1));
       m_ClassFilters[i].setValueIndex(i);
       m_ClassFilters[i].setNumeric(true);
       m_ClassFilters[i].setInputFormat(insts);

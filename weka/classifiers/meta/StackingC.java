@@ -63,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class StackingC extends DistributionClassifier implements OptionHandler {
 
@@ -386,7 +386,7 @@ public class StackingC extends DistributionClassifier implements OptionHandler {
 
     m_makeIndicatorFilter = new weka.filters.unsupervised.attribute.MakeIndicator();
     m_makeIndicatorFilter.setInputFormat(metaData);
-    m_makeIndicatorFilter.setAttributeIndex(metaData.classIndex());
+    m_makeIndicatorFilter.setAttributeIndex("" + (metaData.classIndex() + 1));
     m_makeIndicatorFilter.setNumeric(true);
 
     m_attrFilter = new weka.filters.unsupervised.attribute.Remove();
