@@ -25,10 +25,17 @@ import  weka.core.*;
 /** 
  * Class for performing a forward selection hill climbing search. <p>
  *
+ * Valid options are: <p>
+ *
+ * -T <threshold> <br>
+ * Specify a threshold by which the AttributeSelection module can. <br>
+ * discard attributes. <p>
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class ForwardSelection extends RankedOutputSearch {
+public class ForwardSelection extends ASSearch 
+  implements RankedOutputSearch, OptionHandler {
 
   /** holds a starting set (if one is supplied) */
   private int[] m_starting;
@@ -48,6 +55,14 @@ public class ForwardSelection extends RankedOutputSearch {
    */
   private boolean m_doRank;
 
+  private boolean m_doneRanking;
+
+  /**
+   * A threshold by which to discard attributes---used by the
+   * AttributeSelection module
+   */
+  private double m_threshold;
+
   /** the merit of the best subset found */
   private double m_bestMerit;
 
@@ -62,9 +77,92 @@ public class ForwardSelection extends RankedOutputSearch {
   private Instances m_Instances;
 
   public ForwardSelection () {
+    m_threshold = -Double.MAX_VALUE;
+    m_doneRanking = false;
     resetOptions();
   }
 
+  /**
+   * Set the threshold by which the AttributeSelection module can discard
+   * attributes.
+   * @param threshold the threshold.
+   */
+  public void setThreshold(double threshold) {
+    m_threshold = threshold;
+  }
+
+  /**
+   * Returns the threshold so that the AttributeSelection module can
+   * discard attributes from the ranking.
+   */
+  public double getThreshold() {
+    return m_threshold;
+  }
+
+  /**
+   * Returns an enumeration describing the available options
+   * @return an enumeration of all the available options
+   **/
+  public Enumeration listOptions () {
+    Vector newVector = new Vector(1);
+    newVector
+      .addElement(new Option("\tSpecify a theshold by which attributes" 
+			     + "\tmay be discarded from the ranking.","T",1
+			     , "-T <threshold>"));
+
+    return newVector.elements();
+
+  }
+  
+  /**
+   * Parses a given list of options.
+   *
+   * Valid options are: <p>
+   *
+   * -T <threshold> <br>
+   * Specify a threshold by which the AttributeSelection module can. <br>
+   * discard attributes. <p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   *
+   **/
+  public void setOptions (String[] options)
+    throws Exception
+  {
+    String optionString;
+    resetOptions();
+
+    optionString = Utils.getOption('T', options);
+    if (optionString.length() != 0) {
+      Double temp;
+      temp = Double.valueOf(optionString);
+      setThreshold(temp.doubleValue());
+    }
+  }
+
+  /**
+   * Gets the current settings of ReliefFAttributeEval.
+   *
+   * @return an array of strings suitable for passing to setOptions()
+   */
+  public String[] getOptions () {
+    String[] options = new String[2];
+    int current = 0;
+
+    options[current++] = "-T";
+    options[current++] = "" + getThreshold();
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return  options;
+  }
+
+  /**
+   * returns a description of the search.
+   * @return a description of the search as a String.
+   */
   public String toString() {
     StringBuffer FString = new StringBuffer();
     FString.append("\tForward Selection.\n\tStart set: ");
@@ -94,10 +192,16 @@ public class ForwardSelection extends RankedOutputSearch {
 	}
       }
     }
-    if (!m_doRank) {
+    if (!m_doneRanking) {
       FString.append("\tMerit of best subset found: "
 		     +Utils.doubleToString(Math.abs(m_bestMerit),8,3)+"\n");
     }
+    
+    if ((m_threshold != -Double.MAX_VALUE) && (m_doneRanking)) {
+      FString.append("\tThreshold for discarding attributes: "
+		     + Utils.doubleToString(m_threshold,8,4)+"\n");
+    }
+
     return FString.toString();
   }
 
@@ -124,6 +228,7 @@ public class ForwardSelection extends RankedOutputSearch {
 
     if (m_ASEval == null) {
       m_ASEval = ASEval;
+      m_doneRanking = false;
     }
 
     if (m_Instances == null) {
@@ -245,6 +350,7 @@ public class ForwardSelection extends RankedOutputSearch {
     }
     
     resetOptions();
+    m_doneRanking = true;
     return final_rank;
   }
 

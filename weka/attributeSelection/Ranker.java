@@ -25,25 +25,42 @@ import  weka.core.*;
 
 /** 
  * Class for ranking the attributes evaluated by a AttributeEvaluator
+ *
+ * Valid options are: <p>
+ *
+ * -T <threshold> <br>
+ * Specify a threshold by which the AttributeSelection module can. <br>
+ * discard attributes. <p>
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public class Ranker
-  extends RankedOutputSearch
-{
+public class Ranker extends ASSearch 
+  implements RankedOutputSearch, OptionHandler {
 
   /** Holds the starting set of attributes if specified */
   private int[] m_starting;
+
   /** Holds the ordered list of attributes */
   private int[] m_attributeList;
+
   /** Holds the list of attribute merit scores */
   private double[] m_attributeMerit;
+
   /** Data has class attribute---if unsupervised evaluator then no class */
   private boolean m_hasClass;
+
   /** Class index of the data if supervised evaluator */
   private int m_classIndex;
+
   /** The number of attribtes */
   private int m_numAttribs;
+
+  /** 
+   * A threshold by which to discard attributes---used by the
+   * AttributeSelection module
+   */
+  private double m_threshold;
 
 
   /**
@@ -53,6 +70,82 @@ public class Ranker
     resetOptions();
   }
 
+  /**
+   * Set the threshold by which the AttributeSelection module can discard
+   * attributes.
+   * @param threshold the threshold.
+   */
+  public void setThreshold(double threshold) {
+    m_threshold = threshold;
+  }
+
+  /**
+   * Returns the threshold so that the AttributeSelection module can
+   * discard attributes from the ranking.
+   */
+  public double getThreshold() {
+    return m_threshold;
+  }
+
+  /**
+   * Returns an enumeration describing the available options
+   * @return an enumeration of all the available options
+   **/
+  public Enumeration listOptions () {
+    Vector newVector = new Vector(1);
+    newVector
+      .addElement(new Option("\tSpecify a theshold by which attributes" 
+			     + "\tmay be discarded from the ranking.","T",1
+			     , "-T <threshold>"));
+
+    return newVector.elements();
+
+  }
+  
+  /**
+   * Parses a given list of options.
+   *
+   * Valid options are: <p>
+   *
+   * -T <threshold> <br>
+   * Specify a threshold by which the AttributeSelection module can. <br>
+   * discard attributes. <p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   *
+   **/
+  public void setOptions (String[] options)
+    throws Exception
+  {
+    String optionString;
+    resetOptions();
+
+    optionString = Utils.getOption('T', options);
+    if (optionString.length() != 0) {
+      Double temp;
+      temp = Double.valueOf(optionString);
+      setThreshold(temp.doubleValue());
+    }
+  }
+
+  /**
+   * Gets the current settings of ReliefFAttributeEval.
+   *
+   * @return an array of strings suitable for passing to setOptions()
+   */
+  public String[] getOptions () {
+    String[] options = new String[2];
+    int current = 0;
+
+    options[current++] = "-T";
+    options[current++] = "" + getThreshold();
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return  options;
+  }
 
   /**
    * Kind of a dummy search algorithm. Calls a Attribute evaluator to
@@ -201,7 +294,12 @@ public class Ranker
       }
     }
 
-    return  BfString.toString();
+    if (m_threshold != -Double.MAX_VALUE) {
+      BfString.append("\tThreshold for discarding attributes: "
+		      + Utils.doubleToString(m_threshold,8,4)+"\n");
+    }
+
+    return BfString.toString();
   }
 
 
@@ -212,6 +310,7 @@ public class Ranker
     m_starting = null;
     m_attributeList = null;
     m_attributeMerit = null;
+    m_threshold = -Double.MAX_VALUE;
   }
 
 
