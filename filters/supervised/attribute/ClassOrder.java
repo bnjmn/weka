@@ -48,7 +48,7 @@ import weka.core.Utils;
  * using <code>originalValue(double value)</code> procedure.<p>  
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClassOrder extends Filter implements SupervisedFilter,
 						  OptionHandler {
@@ -235,9 +235,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
 	m_Random = new Random(m_Seed);
 	
 	int numClasses = instanceInfo.numClasses();
-	m_Converter = new double[numClasses];
-	m_ClassCounts = new double[numClasses];
-	
+	m_ClassCounts = new double[numClasses];	
 	return false;
     }    
     
@@ -258,8 +256,23 @@ public class ClassOrder extends Filter implements SupervisedFilter,
     }
     if (m_NewBatch) {
       resetQueue();
-      m_NewBatch = false;
+      m_NewBatch = false;     
     }	
+    
+    // In case some one use this routine in testing, 
+    // although he/she should not do so
+    if(m_Converter != null){
+	Instance datum = new Instance(instance);
+	if((m_ClassAttribute.isNominal())
+	   && (!datum.isMissing(m_ClassAttribute))){
+	    datum.setClassValue(m_Converter[(int)datum.classValue()]);
+	    // Add back the String attributes
+	    copyStringValues(datum, false, getInputFormat(), getOutputFormat());
+	    datum.setDataset(getOutputFormat());
+	}
+	push(datum);
+	return true;
+    }
 
     if((!instance.isMissing(m_ClassAttribute)) 
        && m_ClassAttribute.isNominal())
@@ -293,6 +306,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
 	  throw new Exception(" No instances with a class value!");      
       
       Instances newInsts = new Instances(data, 0);
+      m_Converter = new double[data.numClasses()];
       if(m_ClassAttribute.isNominal()){
 	  switch(m_ClassOrder){
 	  case FREQ_ASCEND:
