@@ -48,7 +48,7 @@ import java.lang.reflect.InvocationTargetException;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -78,6 +78,14 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
 
   /** The length of a result */
   private static final int RESULT_SIZE = 13;
+
+  /**
+   * No args constructor.
+   */
+  public RegressionSplitEvaluator() {
+
+    updateOptions();
+  }
 
   /**
    * Returns a string describing this split evaluator
