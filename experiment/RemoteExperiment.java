@@ -72,7 +72,7 @@ import java.io.BufferedOutputStream;
  * </pre>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RemoteExperiment extends Experiment {
 
@@ -132,6 +132,37 @@ public class RemoteExperiment extends Experiment {
   protected int [] m_subExpComplete;
 
   /**
+   * If true, then sub experiments are created on the basis of data sets
+   * rather than run number.
+   */
+  protected boolean m_splitByDataSet = true;
+
+
+  /**
+   * Returns true if sub experiments are to be created on the basis of
+   * data set..
+   *
+   * @return a <code>boolean</code> value indicating whether sub
+   * experiments are to be created on the basis of data set (true) or
+   * run number (false).
+   */
+  public boolean getSplitByDataSet() {
+    return m_splitByDataSet;
+  }
+
+  /**
+   * Set whether sub experiments are to be created on the basis of
+   * data set.
+   *
+   * @param sd true if sub experiments are to be created on the basis
+   * of data set. Otherwise sub experiments are created on the basis of
+   * run number.
+   */
+  public void setSplitByDataSet(boolean sd) {
+    m_splitByDataSet = sd;
+  }
+    
+  /**
    * Construct a new RemoteExperiment using a base Experiment
    * @param base the base experiment to use
    * @exeception Exception if the base experiment is null
@@ -178,6 +209,7 @@ public class RemoteExperiment extends Experiment {
     setPropertyArray(m_baseExperiment.getPropertyArray());
     setNotes(m_baseExperiment.getNotes());
     m_ClassFirst = m_baseExperiment.m_ClassFirst;
+    m_AdvanceDataSetFirst = m_baseExperiment.m_AdvanceDataSetFirst;
   }
   
   /**
@@ -315,19 +347,36 @@ public class RemoteExperiment extends Experiment {
 
     // set up sub experiments
     m_subExpQueue = new Queue();
-    int numExps = getRunUpper() - getRunLower() + 1;
+    int numExps;
+    if (getSplitByDataSet()) {
+      numExps = m_baseExperiment.getDatasets().size();
+    } else {
+      numExps = getRunUpper() - getRunLower() + 1;
+    }
     m_subExperiments = new Experiment[numExps];
     m_subExpComplete = new int[numExps];
     // create copy of base experiment
     SerializedObject so = new SerializedObject(m_baseExperiment);
-    for (int i = getRunLower(); i <= getRunUpper(); i++) {
-      m_subExperiments[i-getRunLower()] = (Experiment)so.getObject();
-      // one run for each sub experiment
-      m_subExperiments[i-getRunLower()].setRunLower(i);
-      m_subExperiments[i-getRunLower()].setRunUpper(i);
 
-      m_subExpQueue.push(new Integer(i-getRunLower()));
-    }    
+    if (getSplitByDataSet()) {
+      for (int i = 0; i < m_baseExperiment.getDatasets().size(); i++) {
+	m_subExperiments[i] = (Experiment)so.getObject();
+	// one for each data set
+	DefaultListModel temp = new DefaultListModel();
+	temp.addElement(m_baseExperiment.getDatasets().elementAt(i));
+	m_subExperiments[i].setDatasets(temp);
+	m_subExpQueue.push(new Integer(i));
+      }
+    } else {
+      for (int i = getRunLower(); i <= getRunUpper(); i++) {
+	m_subExperiments[i-getRunLower()] = (Experiment)so.getObject();
+	// one run for each sub experiment
+	m_subExperiments[i-getRunLower()].setRunLower(i);
+	m_subExperiments[i-getRunLower()].setRunUpper(i);
+	
+	m_subExpQueue.push(new Integer(i-getRunLower()));
+      }    
+    }
   }
 
   /**
@@ -445,7 +494,10 @@ public class RemoteExperiment extends Experiment {
       return;
     }
 
-    if ((getRunUpper() - getRunLower() + 1) == m_finishedCount) {
+    if ((getSplitByDataSet() && 
+	 (m_baseExperiment.getDatasets().size() == m_finishedCount)) ||
+	(!getSplitByDataSet() && 
+	 ((getRunUpper() - getRunLower() + 1) == m_finishedCount))) {
       notifyListeners(false,true,false,"Experiment completed successfully.");
       notifyListeners(false,true,true,postExperimentInfo());
       return;
@@ -489,14 +541,18 @@ public class RemoteExperiment extends Experiment {
 	  m_subExpComplete[wexp] = PROCESSING;
 	  RemoteExperimentSubTask expSubTsk = new RemoteExperimentSubTask();
 	  expSubTsk.setExperiment(m_subExperiments[wexp]);
+	  String subTaskIdentifier = (getSplitByDataSet())
+	    ? "dataset :" + ((File)m_subExperiments[wexp].getDatasets().
+			     elementAt(0)).getName()
+	    : "run :" + m_subExperiments[wexp].getRunLower();
 	  try {
 	    String name = "//"
 	      +((String)m_remoteHosts.elementAt(ah))
 	      +"/RemoteEngine";
 	    Compute comp = (Compute) Naming.lookup(name);
 	    // assess the status of the sub-exp
-	    notifyListeners(false,true,false,"Starting run : "
-			    +m_subExperiments[wexp].getRunLower()
+	    notifyListeners(false,true,false,"Starting "
+			    +subTaskIdentifier
 			    +" on host "
 			    +((String)m_remoteHosts.elementAt(ah)));
 	    FastVector status = (FastVector)comp.executeTask(expSubTsk);
@@ -510,8 +566,7 @@ public class RemoteExperiment extends Experiment {
 	      // correctly or classifier(s) failed for some reason
 	      m_remoteHostsStatus[ah] = SOME_OTHER_FAILURE;
 	      m_subExpComplete[wexp] = FAILED;
-	      notifyListeners(false,true,false,"Run : "
-			      +m_subExperiments[wexp].getRunLower()
+	      notifyListeners(false,true,false,subTaskIdentifier
 			      +" failed on host "
 			      +((String)m_remoteHosts.elementAt(ah))
 			      +". Scheduling for execution on another host.");
@@ -527,8 +582,7 @@ public class RemoteExperiment extends Experiment {
 	      // however.
 	    availableHost(ah);
 	    } else {
-	      notifyListeners(false,true,false,"Run : "
-			      +m_subExperiments[wexp].getRunLower()
+	      notifyListeners(false,true,false,subTaskIdentifier
 			      +" completed successfully.");
 	      // push host back onto queue and try launching any waiting 
 	      // sub-experiments
@@ -542,8 +596,8 @@ public class RemoteExperiment extends Experiment {
 	    ce.printStackTrace();
 	    notifyListeners(false,true,false,"Connection to "
 			    +((String)m_remoteHosts.elementAt(ah))
-			    +" failed. Scheduling run "
-			    +m_subExperiments[wexp].getRunLower()
+			    +" failed. Scheduling "
+			    +subTaskIdentifier
 			    +" for execution on another host.");
 	    checkForAllFailedHosts();
 	    waitingExperiment(wexp);
