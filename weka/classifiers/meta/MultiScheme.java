@@ -54,18 +54,13 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
-public class MultiScheme extends Classifier implements OptionHandler {
+public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 
   /** The classifier that had the best performance on training data. */
   protected Classifier m_Classifier;
  
-  /** The list of classifiers */
-  protected Classifier [] m_Classifiers = {
-     new weka.classifiers.rules.ZeroR()
-  };
-
   /** The index into the vector for the selected scheme */
   protected int m_ClassifierIndex;
 
@@ -74,12 +69,6 @@ public class MultiScheme extends Classifier implements OptionHandler {
    * error for selection)
    */
   protected int m_NumXValFolds;
-
-  /** Debugging mode, gives extra output if true */
-  protected boolean m_Debug;
-
-  /** Random number seed */
-  protected int m_Seed = 1;
     
   /**
    * Returns a string describing classifier
@@ -101,25 +90,17 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(4);
-
-    newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
-    newVector.addElement(new Option(
-	      "\tFull class name of classifier to include, followed\n"
-	      + "\tby scheme options. May be specified multiple times,\n"
-	      + "\trequired at least twice.\n"
-	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
-	      "B", 1, "-B <classifier specification>"));
-    newVector.addElement(new Option(
-	      "\tSets the random number seed (default 1).",
-	      "S", 1, "-S <random number seed>"));
+    Vector newVector = new Vector(1);
     newVector.addElement(new Option(
 	      "\tUse cross validation for model selection using the\n"
 	      + "\tgiven number of folds. (default 0, is to\n"
 	      + "\tuse training error)",
 	      "X", 1, "-X <number of folds>"));
+
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -145,8 +126,6 @@ public class MultiScheme extends Classifier implements OptionHandler {
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    setDebug(Utils.getFlag('D', options));
     
     String numFoldsString = Utils.getOption('X', options);
     if (numFoldsString.length() != 0) {
@@ -154,41 +133,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     } else {
       setNumFolds(0);
     }
-    
-    String randomString = Utils.getOption('S', options);
-    if (randomString.length() != 0) {
-      setSeed(Integer.parseInt(randomString));
-    } else {
-      setSeed(1);
-    }
-
-    // Iterate through the schemes
-    FastVector classifiers = new FastVector();
-    while (true) {
-      String classifierString = Utils.getOption('B', options);
-      if (classifierString.length() == 0) {
-	break;
-      }
-      String [] classifierSpec = Utils.splitOptions(classifierString);
-      if (classifierSpec.length == 0) {
-	throw new Exception("Invalid classifier specification string");
-      }
-      String classifierName = classifierSpec[0];
-      classifierSpec[0] = "";
-      classifiers.addElement(Classifier.forName(classifierName,
-						classifierSpec));
-    }
-    if (classifiers.size() <= 1) {
-      throw new Exception("At least two classifiers must be specified"
-			  + " with the -B option.");
-    } else {
-      Classifier [] classifiersArray = new Classifier [classifiers.size()];
-      for (int i = 0; i < classifiersArray.length; i++) {
-	classifiersArray[i] = (Classifier) classifiers.elementAt(i);
-      }
-      setClassifiers(classifiersArray);
-    }
-    
+    super.setOptions(options);
   }
 
   /**
@@ -198,27 +143,16 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [5];
+
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
+
     int current = 0;
+    options[current++] = "-X"; options[current++] = "" + getNumFolds();
 
-    if (m_Classifiers.length != 0) {
-      options = new String [m_Classifiers.length * 2 + 5];
-      for (int i = 0; i < m_Classifiers.length; i++) {
-	options[current++] = "-B";
-	options[current++] = "" + getClassifierSpec(i);
-      }
-    }
-    if (getNumFolds() > 1) {
-      options[current++] = "-X"; options[current++] = "" + getNumFolds();
-    }
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
     return options;
   }
   
