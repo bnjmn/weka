@@ -28,11 +28,21 @@ import  weka.core.*;
 import  weka.filters.*;
 
 /**
- * Class for performing principal components analysis/transformation.
+ * Class for performing principal components analysis/transformation. <p>
+ *
+ * Valid options are:<p>
+ * -N <br>
+ * Don't normalize the input data. <p>
+ *
+ * -R <variance> <br>
+ * Retain enough pcs to account for this proportion of the variance. <p>
+ *
+ * -T <br>
+ * Transform through the PC space and back to the original space. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -122,9 +132,6 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   /**
    * Returns an enumeration describing the available options. <p>
    *
-   * -N <classifier>
-   * Don't normalize the input data. <p>
-   *
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
@@ -147,8 +154,14 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * Parses a given list of options.
    *
    * Valid options are:<p>
-   * -N <classifier>
+   * -N <br>
    * Don't normalize the input data. <p>
+   *
+   * -R <variance> <br>
+   * Retain enough pcs to account for this proportion of the variance. <p>
+   *
+   * -T <br>
+   * Transform through the PC space and back to the original space. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
