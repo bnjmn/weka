@@ -50,7 +50,7 @@ import weka.core.*;
  * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NumericTransform extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -146,7 +146,7 @@ public class NumericTransform extends Filter
 	if (m_Cols.isInRange(i) &&
 	    instance.attribute(i).isNumeric()) {
 	  params[0] = new Double(instance.value(i));
-	  newVal = (Double) m.invoke(null, params);
+	  newVal = (Double) m.invoke(null, (Object[])params);
 	  if (newVal.isNaN() || newVal.isInfinite()) {
 	    vals[i] = Instance.missingValue();
 	  } else {

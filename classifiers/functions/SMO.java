@@ -61,7 +61,7 @@ import weka.core.*;
  *
  * J. Platt (1998). <i>Fast Training of Support Vector
  * Machines using Sequential Minimal Optimization</i>. Advances in Kernel
- * Methods - Support Vector Learning, B. Schölkopf, C. Burges, and
+ * Methods - Support Vector Learning, B. Schoelkopf, C. Burges, and
  * A. Smola, eds., MIT Press. <p>
  *
  * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy, 
@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.52 $ */
+ * @version $Revision: 1.53 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -142,7 +142,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
       + "For more information on the SMO algorithm, see\n\n"
       + "J. Platt (1998). \"Fast Training of Support Vector "
       + "Machines using Sequential Minimal Optimization\". Advances in Kernel "
-      + "Methods - Support Vector Learning, B. Schölkopf, C. Burges, and "
+      + "Methods - Support Vector Learning, B. Schoelkopf, C. Burges, and "
       + "A. Smola, eds., MIT Press. \n\n"
       + "S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy,  "
       + "\"Improvements to Platt's SMO Algorithm for SVM Classifier Design\".  "

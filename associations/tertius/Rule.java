@@ -37,7 +37,7 @@ import java.text.DecimalFormat;
 /**
  * Class representing a rule with a body and a head.
  *
- * @author  <a href="mailto:adeltour@netcourrier.com">Amélie Deltour</a>
+ * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
  */
 
 public class Rule implements Serializable, Cloneable {

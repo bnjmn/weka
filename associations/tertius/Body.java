@@ -31,7 +31,7 @@ import java.util.Iterator;
 /**
  * Class representing the body of a rule.
  *
- * @author  <a href="mailto:adeltour@netcourrier.com">Amélie Deltour</a>
+ * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
  */
 
 public class Body extends LiteralSet {
