@@ -36,7 +36,7 @@ import java.io.Serializable;
  * </ul>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface SplitEvaluator extends Serializable {
   
@@ -101,4 +101,18 @@ public interface SplitEvaluator extends Serializable {
    */
   public Object [] getResult(Instances train, Instances test) throws Exception;
 
+  /**
+   * Returns the raw output for the most recent call to getResult. Useful
+   * for debugging splitEvaluators.
+   * 
+   * @return the raw output corresponding to the most recent call
+   * to getResut
+   */
+  public String getRawResultOutput();
+
 } // SplitEvaluator
+
+
+
+
+

@@ -30,7 +30,7 @@ import weka.classifiers.*;
  * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -44,6 +44,17 @@ public class CostSensitiveClassifierSplitEvaluator
 
   /** The length of a result */
   private static final int RESULT_SIZE = 23;
+
+  /**
+   * Returns a string describing this split evaluator
+   * @return a description of the split evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return " SplitEvaluator that produces results for a classification scheme "
+      +"on a nominal class attribute, including weighted misclassification "
+      +"costs.";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -110,6 +121,16 @@ public class CostSensitiveClassifierSplitEvaluator
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String onDemandDirectoryTipText() {
+    return "The directory to look in for cost files. This directory will be "
+      +"searched for cost files when loading on demand.";
   }
 
   /**
@@ -268,6 +289,7 @@ public class CostSensitiveClassifierSplitEvaluator
 
     m_Classifier.buildClassifier(train);
     eval.evaluateModel(m_Classifier, test);
+    m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
     int current = 0;

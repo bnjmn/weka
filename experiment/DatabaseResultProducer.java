@@ -36,7 +36,7 @@ import weka.core.Option;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler {
@@ -50,6 +50,18 @@ public class DatabaseResultProducer extends DatabaseResultListener
   /** The ResultProducer used to generate results */
   protected ResultProducer m_ResultProducer
     = new CrossValidationResultProducer();
+
+  /**
+   * Returns a string describing this result producer
+   * @return a description of the result producer suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Examines a database and extracts out "
+      +"the results produced by the specified ResultProducer "
+      +"and submits them to the specified ResultListener. If a result needs "
+      +"to be generated, the ResultProducer is used to obtain the result.";
+  }
 
   /**
    * Creates the DatabaseResultProducer, letting the parent constructor do
@@ -443,6 +455,17 @@ public class DatabaseResultProducer extends DatabaseResultListener
     m_ResultListener = listener;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String resultProducerTipText() {
+    return "Set the result producer to use. If some results are not found "
+      +"in the source database then this result producer is used to generate "
+      +"them.";
+  }
+  
   /**
    * Get the ResultProducer.
    *

@@ -35,7 +35,7 @@ import weka.core.Option;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler {
@@ -75,6 +75,18 @@ public class AveragingResultProducer
   
   /** Collects the results from a single run */
   protected FastVector m_Results = new FastVector();
+
+  /**
+   * Returns a string describing this result producer
+   * @return a description of the result producer suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Takes the results from a ResultProducer "
+      +"and submits the average to the result listener. Normally used with "
+      +"a CrossValidationResultProducer to perform n x m fold cross "
+      +"validation.";
+  }
 
   /**
    * Scans through the key field names of the result producer to find
@@ -751,6 +763,15 @@ public class AveragingResultProducer
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String calculateStdDevsTipText() {
+    return "Record standard deviations for each run.";
+  }
+
+  /**
    * Get the value of CalculateStdDevs.
    *
    * @return Value of CalculateStdDevs.
@@ -768,6 +789,18 @@ public class AveragingResultProducer
   public void setCalculateStdDevs(boolean newCalculateStdDevs) {
     
     m_CalculateStdDevs = newCalculateStdDevs;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String expectedResultsPerAverageTipText() {
+    return "Set the expected number of results to average per run. "
+      +"For example if a CrossValidationResultProducer is being used "
+      +"(with the number of folds set to 10), then the expected number "
+      +"of results per run is 10.";
   }
 
   /**
@@ -789,6 +822,15 @@ public class AveragingResultProducer
   public void setExpectedResultsPerAverage(int newExpectedResultsPerAverage) {
     
     m_ExpectedResultsPerAverage = newExpectedResultsPerAverage;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String keyFieldNameTipText() {
+    return "Set the field name that will be unique for a run.";
   }
 
   /**
@@ -821,6 +863,15 @@ public class AveragingResultProducer
   public void setResultListener(ResultListener listener) {
 
     m_ResultListener = listener;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String resultProducerTipText() {
+    return "Set the resultProducer for which results are to be averaged.";
   }
 
   /**
