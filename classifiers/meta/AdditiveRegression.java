@@ -29,7 +29,7 @@ import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.classifiers.meta.*;
+import weka.classifiers.*;
 
 /**
  * Meta classifier that enhances the performance of a regression base
@@ -46,36 +46,27 @@ import weka.classifiers.meta.*;
  * Valid options from the command line are: <p>
  * 
  * -W classifierstring <br>
- * Classifierstring should contain the full class name of a classifier
- * followed by options to the classifier.
- * (required).<p>
+ * Classifierstring should contain the full class name of a classifier.<p>
  *
  * -S shrinkage rate <br>
  * Smaller values help prevent overfitting and have a smoothing effect 
  * (but increase learning time).
  * (default = 1.0, ie no shrinkage). <p>
  *
- * -M max models <br>
- * Set the maximum number of models to generate. Values <= 0 indicate 
- * no maximum, ie keep going until the reduction in error threshold is 
- * reached.
+ * -I max models <br>
+ * Set the maximum number of models to generate.
  * (default = 10). <p>
  *
  * -D <br>
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
-public class AdditiveRegression extends Classifier 
+public class AdditiveRegression extends IteratedSingleClassifierEnhancer 
   implements OptionHandler,
 	     AdditionalMeasureProducer,
 	     WeightedInstancesHandler {
-  
-  /**
-   * Base classifier.
-   */
-  protected Classifier m_Classifier = new weka.classifiers.trees.DecisionStump();
 
   /**
    * Class index.
@@ -87,22 +78,11 @@ public class AdditiveRegression extends Classifier
    */
   protected double m_shrinkage = 1.0;
 
-  
-  /**
-   * The list of iteratively generated models.
-   */
-  private FastVector m_additiveModels = new FastVector();
+  /** The number of successfully generated base classifiers. */
+  protected int m_NumIterationsPerformed;
 
-  /**
-   * Produce debugging output.
-   */
-  private boolean m_debug = false;
-
-  /**
-   * Maximum number of models to produce. -1 indicates keep going until the error
-   * threshold is met.
-   */
-  protected int m_maxModels = 10;
+  /** The model for the mean */
+  protected ZeroR m_zeroR;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -140,6 +120,14 @@ public class AdditiveRegression extends Classifier
   }
 
   /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.DecisionStump";
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
@@ -149,26 +137,14 @@ public class AdditiveRegression extends Classifier
     Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
-	      "\tFull class name of classifier to use, followed\n"
-	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
-	      "W", 1, "-W <classifier specification>"));
-
-    newVector.addElement(new Option(
 	      "\tSpecify shrinkage rate. "
-	      +"(default=1.0, ie. no shrinkage)\n", 
+	      +"(default = 1.0, ie. no shrinkage)\n", 
 	      "S", 1, "-S"));
 
-    newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
-
-    newVector.addElement(new Option(
-	      "\tSpecify max models to generate. "
-	      +"(default = 10, ie. no max; keep going until error reduction threshold "
-	      +"is reached)\n", 
-	      "M", 1, "-M"));
-     
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -176,9 +152,7 @@ public class AdditiveRegression extends Classifier
    * Parses a given list of options. Valid options are:<p>
    *
    * -W classifierstring <br>
-   * Classifierstring should contain the full class name of a classifier
-   * followed by options to the classifier.
-   * (required).<p>
+   * Classifierstring should contain the full class name of a classifier.<p>
    *
    * -S shrinkage rate <br>
    * Smaller values help prevent overfitting and have a smoothing effect 
@@ -188,44 +162,21 @@ public class AdditiveRegression extends Classifier
    * -D <br>
    * Debugging output. <p>
    *
-   * -M max models <br>
-   * Set the maximum number of models to generate. Values <= 0 indicate 
-   * no maximum, ie keep going until the reduction in error threshold is 
-   * reached.
-   * (default = 10). <p>
+   * -I max models <br>
+   * Set the maximum number of models to generate. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
-    setDebug(Utils.getFlag('D', options));
-
-    String classifierString = Utils.getOption('W', options);
-    if (classifierString.length() == 0) {
-      throw new Exception("A classifier must be specified"
-			  + " with the -w option.");
-    }
-    String [] classifierSpec = Utils.splitOptions(classifierString);
-    if (classifierSpec.length == 0) {
-      throw new Exception("Invalid classifier specification string");
-    }
-    String classifierName = classifierSpec[0];
-    classifierSpec[0] = "";
-    setClassifier(Classifier.forName(classifierName, classifierSpec));
-
     String optionString = Utils.getOption('S', options);
     if (optionString.length() != 0) {
-      Double temp;
-      temp = Double.valueOf(optionString);
+      Double temp = Double.valueOf(optionString);
       setShrinkage(temp.doubleValue());
     }
 
-    optionString = Utils.getOption('M', options);
-    if (optionString.length() != 0) {
-      setMaxModels(Integer.parseInt(optionString));
-    }
-    Utils.checkForRemainingOptions(options);
+    super.setOptions(options);
   }
 
   /**
@@ -235,121 +186,20 @@ public class AdditiveRegression extends Classifier
    */
   public String [] getOptions() {
     
-    String [] options = new String [7];
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
     int current = 0;
 
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
+    options[current++] = "-S"; options[current++] = "" + getShrinkage();
 
-    options[current++] = "-W";
-    options[current++] = "" + getClassifierSpec();
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    options[current++] = "-S"; options[current++] = ""+getShrinkage();
-    options[current++] = "-M"; options[current++] = ""+getMaxModels();
-
+    current += superOptions.length;
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String debugTipText() {
-    return "Turn on debugging output";
-  }
-
-  /**
-   * Set whether debugging output is produced.
-   *
-   * @param d true if debugging output is to be produced
-   */
-  public void setDebug(boolean d) {
-    m_debug = d;
-  }
-
-  /**
-   * Gets whether debugging has been turned on
-   *
-   * @return true if debugging has been turned on
-   */
-  public boolean getDebug() {
-    return m_debug;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "Classifier to use";
-  }
-
-  /**
-   * Sets the classifier
-   *
-   * @param classifier the classifier with all options set.
-   */
-  public void setClassifier(Classifier classifier) {
-
-    m_Classifier = classifier;
-  }
-
-  /**
-   * Gets the classifier used.
-   *
-   * @return the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-  
-  /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @return the classifier string.
-   */
-  protected String getClassifierSpec() {
-    
-    Classifier c = getClassifier();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String maxModelsTipText() {
-    return "Max models to generate. <= 0 indicates no maximum, ie. continue until "
-      +"error reduction threshold is reached.";
-  }
-
-  /**
-   * Set the maximum number of models to generate
-   * @param maxM the maximum number of models
-   */
-  public void setMaxModels(int maxM) {
-    m_maxModels = maxM;
-  }
-
-  /**
-   * Get the max number of models to generate
-   * @return the max number of models to generate
-   */
-  public int getMaxModels() {
-    return m_maxModels;
   }
 
   /**
@@ -388,11 +238,9 @@ public class AdditiveRegression extends Classifier
    * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-     m_additiveModels = new FastVector();
 
-    if (m_Classifier == null) {
-      throw new Exception("No base classifiers have been set!");
-    }
+    super.buildClassifier(data);
+
     if (data.classAttribute().isNominal()) {
       throw new UnsupportedClassTypeException("Class must be numeric!");
     }
@@ -403,39 +251,37 @@ public class AdditiveRegression extends Classifier
     double sum = 0;
     double temp_sum = 0;
     // Add the model for the mean first
-    ZeroR zr = new ZeroR();
-    zr.buildClassifier(newData);
-    m_additiveModels.addElement(zr);
-    newData = residualReplace(newData, zr, false);
+    m_zeroR = new ZeroR();
+    m_zeroR.buildClassifier(newData);
+    newData = residualReplace(newData, m_zeroR, false);
     for (int i = 0; i < newData.numInstances(); i++) {
       sum += newData.instance(i).weight() *
-	newData.instance(i).classValue() *
-	newData.instance(i).classValue();
+	newData.instance(i).classValue() * newData.instance(i).classValue();
     }
-    if (m_debug) {
+    if (m_Debug) {
       System.err.println("Sum of squared residuals "
-			 +"(predicting the mean) : "+sum);
+			 +"(predicting the mean) : " + sum);
     }
 
-    int modelCount = 0;
+    m_NumIterationsPerformed = 0;
     do {
       temp_sum = sum;
-      Classifier nextC = Classifier.makeCopies(m_Classifier, 1)[0];
-      nextC.buildClassifier(newData);
-      m_additiveModels.addElement(nextC);
-      newData = residualReplace(newData, nextC, true);
+
+      // Build the classifier
+      m_Classifiers[m_NumIterationsPerformed].buildClassifier(newData);
+
+      newData = residualReplace(newData, m_Classifiers[m_NumIterationsPerformed], true);
       sum = 0;
       for (int i = 0; i < newData.numInstances(); i++) {
 	sum += newData.instance(i).weight() *
-	  newData.instance(i).classValue() *
-	  newData.instance(i).classValue();
+	  newData.instance(i).classValue() * newData.instance(i).classValue();
       }
-      if (m_debug) {
+      if (m_Debug) {
 	System.err.println("Sum of squared residuals : "+sum);
       }
-      modelCount++;
+      m_NumIterationsPerformed++;
     } while (((temp_sum - sum) > Utils.SMALL) && 
-	     (m_maxModels > 0 ? (modelCount < m_maxModels) : true));
+	     (m_NumIterationsPerformed < m_Classifiers.length));
   }
 
   /**
@@ -446,14 +292,12 @@ public class AdditiveRegression extends Classifier
    * @exception Exception if an error occurs
    */
   public double classifyInstance(Instance inst) throws Exception {
-    double prediction = 0;
 
-    for (int i = 0; i < m_additiveModels.size(); i++) {
-      Classifier current = (Classifier)m_additiveModels.elementAt(i);
-      double toAdd = current.classifyInstance(inst);
-      if (i > 0) {
-	toAdd *= getShrinkage();
-      }
+    double prediction = m_zeroR.classifyInstance(inst);
+
+    for (int i = 0; i < m_NumIterationsPerformed; i++) {
+      double toAdd = m_Classifiers[i].classifyInstance(inst);
+      toAdd *= getShrinkage();
       prediction += toAdd;
     }
 
@@ -517,7 +361,7 @@ public class AdditiveRegression extends Classifier
    * models)
    */
   public double measureNumIterations() {
-    return m_additiveModels.size();
+    return m_NumIterationsPerformed;
   }
 
   /**
@@ -528,19 +372,22 @@ public class AdditiveRegression extends Classifier
   public String toString() {
     StringBuffer text = new StringBuffer();
 
-    if (m_additiveModels.size() == 0) {
+    if (m_NumIterations == 0) {
       return "Classifier hasn't been built yet!";
     }
 
     text.append("Additive Regression\n\n");
+
+    text.append("ZeroR model\n\n" + m_zeroR + "\n\n");
+
     text.append("Base classifier " 
 		+ getClassifier().getClass().getName()
 		+ "\n\n");
-    text.append(""+m_additiveModels.size()+" models generated.\n");
+    text.append("" + m_NumIterationsPerformed + " models generated.\n");
 
-    for (int i = 0; i < m_additiveModels.size(); i++) {
+    for (int i = 0; i < m_NumIterationsPerformed; i++) {
       text.append("\nModel number " + i + "\n\n" +
-		  m_additiveModels.elementAt(i) + "\n");
+		  m_Classifiers[i] + "\n");
     }
 
     return text.toString();
@@ -558,6 +405,7 @@ public class AdditiveRegression extends Classifier
       System.out.println(Evaluation.evaluateModel(new AdditiveRegression(),
 						  argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
