@@ -29,17 +29,32 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for building and using a PRISM classifier.  For more information,
- * see <p>
+ * Class for building and using a PRISM rule set for classifcation.  
+ * Can only deal with nominal attributes. Can't deal with missing values.
+ * Doesn't do any pruning. For more information, see <p>
  *
  * J. Cendrowska (1987). <i>PRISM: An algorithm for
  * inducing modular rules</i>. International Journal of Man-Machine
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
 */
 public class Prism extends Classifier {
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+  return "Class for building and using a PRISM rule set for classification. "
+    + "Can only deal with nominal attributes. Can't deal with missing values. "
+    + "Doesn't do any pruning. For more information, see \n\n"
+    + "J. Cendrowska (1987). \"PRISM: An algorithm for "
+    + "inducing modular rules\". International Journal of Man-Machine "
+    + "Studies. Vol.27, No.4, pp.349-370.";
+  }
 
   /**
    * Class for storing a PRISM ruleset, i.e. a list of rules

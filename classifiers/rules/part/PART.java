@@ -65,7 +65,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class PART extends Classifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
@@ -93,6 +93,23 @@ public class PART extends Classifier implements OptionHandler,
 
   /** The seed for random number generation. */
   private int m_Seed = 1;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for generating a PART decision list. Uses "
+      + "separate-and-conquer. Builds a partial C4.5 decision tree "
+      + "in each iteration and makes the \"best\" leaf into a rule. "
+      + "For more information, see:\n\n"
+      + "Eibe Frank and Ian H. Witten (1998). \"Generating "
+      + "Accurate Rule Sets Without Global Optimization.\""
+      + "In Shavlik, J., ed., Machine Learning: Proceedings of the "
+      + "Fifteenth International Conference, Morgan Kaufmann Publishers.";
+  }
 
   /**
    * Generates the classifier.
@@ -343,6 +360,16 @@ public class PART extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String confidenceFactorTipText() {
+    return "The confidence factor used for pruning (smaller values incur "
+      + "more pruning).";
+  }
+
+  /**
    * Get the value of CF.
    *
    * @return Value of CF.
@@ -362,6 +389,15 @@ public class PART extends Classifier implements OptionHandler,
     m_CF = v;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minNumObjTipText() {
+    return "The minimum number of instances per rule.";
+  }
+
   /**
    * Get the value of minNumObj.
    *
@@ -383,6 +419,15 @@ public class PART extends Classifier implements OptionHandler,
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String reducedErrorPruningTipText() {
+    return "Whether reduced-error pruning is used instead of C.4.5 pruning.";
+  }
+
+  /**
    * Get the value of reducedErrorPruning.
    *
    * @return Value of reducedErrorPruning.
@@ -402,6 +447,15 @@ public class PART extends Classifier implements OptionHandler,
     m_reducedErrorPruning = v;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String unprunedTipText() {
+    return "Whether pruning is performed.";
+  }
+
   /**
    * Get the value of unpruned.
    *
@@ -423,6 +477,16 @@ public class PART extends Classifier implements OptionHandler,
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "Determines the amount of data used for reduced-error pruning. "
+      + " One fold is used for pruning, the rest for growing the rules.";
+  }
+
+  /**
    * Get the value of numFolds.
    *
    * @return Value of numFolds.
@@ -443,6 +507,16 @@ public class PART extends Classifier implements OptionHandler,
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data " +
+      "when reduced-error pruning is used.";
+  }
+
+  /**
    * Get the value of Seed.
    *
    * @return Value of Seed.
@@ -460,6 +534,16 @@ public class PART extends Classifier implements OptionHandler,
   public void setSeed(int newSeed) {
     
     m_Seed = newSeed;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String binarySplitsTipText() {
+    return "Whether to use binary splits on nominal attributes when "
+      + "building the partial trees.";
   }
   
   /**

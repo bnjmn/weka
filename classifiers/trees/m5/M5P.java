@@ -31,11 +31,21 @@ import weka.core.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class M5P extends M5Base 
   implements Drawable {
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for building M5\' model and regression trees.";
+  }
 
   /**
    * Creates a new <code>M5P</code> instance.
@@ -68,6 +78,16 @@ public class M5P extends M5Base
     temp.m_topOfTree.graph(text);
     text.append("}\n");
     return text.toString();
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String saveInstancesTipText() {
+    return "Whether to save instance data at each node in the "
+      + "tree for visualization purposes.";
   }
 
   /**

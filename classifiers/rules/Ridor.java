@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 
 public class Ridor extends Classifier
@@ -85,6 +85,21 @@ public class Ridor extends Classifier
 
   /** The minimal number of instance weights within a split*/
   private double m_MinNo = 2.0;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "The implementation of a RIpple-DOwn Rule learner. " 
+      + "It generates a default rule first and then the exceptions for the default rule "
+      + "with the least (weighted) error rate.  Then it generates the \"best\" exceptions for "
+      + "each exception and iterates until pure.  Thus it performs a tree-like expansion of "
+      + "exceptions."
+      + "The exceptions are a set of rules that predict classes other than the default. "
+      + "IREP is used to generate the exceptions.";
+  }
     
   /** 
    * Private class implementing the single node of Ridor. 
@@ -1306,16 +1321,79 @@ public class Ridor extends Classifier
   }
     
   /** Set and get members for parameters */
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String foldsTipText() {
+    return "Determines the amount of data used for pruning. One fold is used for "
+      + "pruning, the rest for growing the rules.";
+  }
+
   public void setFolds(int fold){ m_Folds = fold; }
   public int getFolds(){ return m_Folds; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String shuffleTipText() {
+    return "Determines how often the data is shuffled before a rule "
+      + "is chosen. If > 1, a rule is learned multiple times and the "
+      + "most accurate rule is chosen.";
+  }
+
   public void setShuffle(int sh){ m_Shuffle = sh; }
   public int getShuffle(){ return m_Shuffle; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data.";
+  }
+
   public void setSeed(int s){ m_Seed = s; }
   public int getSeed(){ return m_Seed; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String wholeDataErrTipText() {
+    return "Whether worth of rule is computed based on all the data "
+      + "or just based on data covered by rule.";
+  }
+
   public void setWholeDataErr(boolean a){ m_IsAllErr = a; }
   public boolean getWholeDataErr(){ return m_IsAllErr; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String majorityClassTipText() {
+    return "Whether the majority class is used as default.";
+  }
   public void setMajorityClass(boolean m){ m_IsMajority = m; }
   public boolean getMajorityClass(){ return m_IsMajority; }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minNoTipText() {
+    return "The minimum total weight of the instances in a rule.";
+  }
+
   public void setMinNo(double m){  m_MinNo = m; }
   public double getMinNo(){ return m_MinNo; }
     
