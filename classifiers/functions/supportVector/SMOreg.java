@@ -158,6 +158,11 @@ public class SMOreg extends Classifier implements OptionHandler,
 
   /** Precision constant for updating sets */
   private static double m_Del = 1e-10;
+    
+  /** The parameters of the linear transforamtion realized 
+   * by the filter on the class attribute */
+  private double m_Alin;
+  private double m_Blin;
 
   /** Variables to hold weight vector in sparse form.
       (To reduce storage requirements.) */
@@ -232,20 +237,46 @@ public class SMOreg extends Classifier implements OptionHandler,
       m_NominalToBinary = null;
     }
 
+    m_classIndex = insts.classIndex();
     if (m_filterType == FILTER_STANDARDIZE) {
       m_Filter = new Standardize();
+      insts.setClassIndex(-1);
       m_Filter.setInputFormat(insts);
+      insts.setClassIndex(m_classIndex);
       insts = Filter.useFilter(insts, m_Filter); 
+      insts.setClassIndex(m_classIndex);
     } else if (m_filterType == FILTER_NORMALIZE) {
       m_Filter = new Normalize();
+      insts.setClassIndex(-1);
       m_Filter.setInputFormat(insts);
+      insts.setClassIndex(m_classIndex);
       insts = Filter.useFilter(insts, m_Filter); 
+      insts.setClassIndex(m_classIndex);
     } else {
       m_Filter = null;
     }
 
     m_data = insts;
-    m_classIndex = insts.classIndex();
+
+    // determine which linear transformation has been 
+    // applied to the class by the filter
+    if (m_Filter != null) {
+      Instance witness = new Instance(insts.instance(0));
+      witness.setDataset(insts);
+      witness.setValue(m_classIndex, 0);
+      m_Filter.input(witness);
+      m_Filter.batchFinished();
+      Instance res = m_Filter.output();
+      m_Blin = res.value(m_classIndex);
+      witness.setValue(m_classIndex, 1);
+      m_Filter.input(witness);
+      m_Filter.batchFinished();
+      res = m_Filter.output();
+      m_Alin = res.value(m_classIndex) - m_Blin;
+    } else {
+      m_Alin = 1.0;
+      m_Blin = 0.0;
+    }
 
     // Initialize kernel
     if(m_useRBF) {
@@ -932,7 +963,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 
     // apply the inverse transformation 
     // (due to the normalization/standardization)
-    return result;
+    return (result - m_Blin) / m_Alin;
   }
     
 
@@ -1431,9 +1462,15 @@ public class SMOreg extends Classifier implements OptionHandler,
       // display the linear transformation
       String trans = "";
       if (m_filterType == FILTER_STANDARDIZE) {
+	//text.append("LINEAR TRANSFORMATION APPLIED : \n");
 	trans = "(standardized) ";
+	//text.append(trans + m_data.classAttribute().name() + "  = " + 
+	//	    m_Alin + " * " + m_data.classAttribute().name() + " + " + m_Blin + "\n\n");
       } else if (m_filterType == FILTER_NORMALIZE) {
+	//text.append("LINEAR TRANSFORMATION APPLIED : \n");
 	trans = "(normalized) ";
+	//text.append(trans + m_data.classAttribute().name() + "  = " + 
+	//	    m_Alin + " * " + m_data.classAttribute().name() + " + " + m_Blin + "\n\n");
       }
 
       // If machine linear, print weight vector
@@ -1443,7 +1480,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 		
 	// We can assume that the weight vector is stored in sparse
 	// format because the classifier has been built
-	text.append(m_data.classAttribute().name() + " =\n");
+	text.append(trans + m_data.classAttribute().name() + " =\n");
 	for (int i = 0; i < m_sparseWeights.length; i++) {
 	  if (i != (int)m_classIndex) {
 	    if (printed > 0) {
@@ -1469,7 +1506,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 	}
       } else {
 	text.append("Support Vector Expansion :\n");
-	text.append(m_data.classAttribute().name() + " =\n");
+	text.append(trans + m_data.classAttribute().name() + " =\n");
 	printed = 0;
 	for (int i = 0; i < m_alpha.length; i++) {
 	  double val = m_alpha[i] - m_alpha_[i];
