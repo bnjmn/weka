@@ -82,7 +82,7 @@ import javax.swing.filechooser.FileFilter;
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class SetupPanel extends JPanel {
 
@@ -373,6 +373,7 @@ public class SetupPanel extends JPanel {
       setExperiment(exp);
       System.err.println("Opened experiment:\n" + m_Exp);
     } catch (Exception ex) {
+      ex.printStackTrace();
       JOptionPane.showMessageDialog(this, "Couldn't open experiment file:\n"
 				    + expFile
 				    + "\nReason:\n" + ex.getMessage(),
@@ -404,6 +405,7 @@ public class SetupPanel extends JPanel {
       oo.close();
       System.err.println("Saved experiment:\n" + m_Exp);
     } catch (Exception ex) {
+      ex.printStackTrace();
       JOptionPane.showMessageDialog(this, "Couldn't save experiment file:\n"
 				    + expFile
 				    + "\nReason:\n" + ex.getMessage(),
@@ -473,6 +475,7 @@ public class SetupPanel extends JPanel {
 	      oo.writeObject(sp.m_Exp);
 	      oo.close();
 	    } catch (Exception ex) {
+              ex.printStackTrace();
 	      System.err.println("Couldn't write experiment to: " + expFile
 				 + '\n' + ex.getMessage());
 	    }

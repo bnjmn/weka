@@ -58,7 +58,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -247,6 +247,7 @@ public class RunPanel extends JPanel implements ActionListener {
 	  m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
 	  m_RunThread.start();
 	} catch (Exception ex) {
+          ex.printStackTrace();
 	  logMessage("Problem creating experiment copy to run: "
 		     + ex.getMessage());
 	}
