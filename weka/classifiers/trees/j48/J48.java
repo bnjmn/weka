@@ -54,7 +54,7 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, WeightedInstancesHandler, Summarizable {
@@ -346,7 +346,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    *
    * @return Value of CF.
    */
-  public float getCF() {
+  public float getConfidenceFactor() {
     
     return m_CF;
   }
@@ -356,7 +356,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    *
    * @param v  Value to assign to CF.
    */
-  public void setCF(float v) {
+  public void setConfidenceFactor(float v) {
     
     m_CF = v;
   }
