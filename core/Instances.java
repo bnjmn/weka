@@ -50,10 +50,13 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
 */
 public class Instances implements Serializable {
  
+  /** The filename extension that should be used for arff files */
+  public static String FILE_EXTENSION = ".arff";
+
   /** The dataset's name. */
   private String m_RelationName;         
 
