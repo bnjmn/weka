@@ -11,6 +11,7 @@ SOURCES = Classifier.java DistributionClassifier.java \
 	BVDecompose.java RegressionByDiscretization.java \
 	CostSensitiveClassifier.java MetaCost.java \
 	ClassificationViaRegression.java FilteredClassifier.java \
+	UserClassifier.java \
 	Sourcable.java 
 
 CLASSFILES = $(SOURCES:.java=.class)
@@ -25,19 +26,23 @@ CLASSFILES = $(SOURCES:.java=.class)
 all :   $(CLASSFILES) 
 	(cd j48; make all JAVA=$(JAVA))
 	(cd m5; make all JAVA=$(JAVA))
+	(cd kstar; make all JAVA=$(JAVA))
 
 debug : clean
 	$(JAVA) -g $(SOURCES)
 	(cd j48; make debug JAVA=$(JAVA))
 	(cd m5; make debug JAVA=$(JAVA))
+	(cd kstar; make debug JAVA=$(JAVA))
 
 optimized : clean
 	$(JAVA) -O $(SOURCES)
 	(cd j48; make optimized JAVA=$(JAVA))
 	(cd m5; make optimized JAVA=$(JAVA))
+	(cd kstar; make optimized JAVA=$(JAVA))
 
 clean : 
 	$(RM) *.class *~
 	(cd j48; make clean)
 	(cd m5; make clean)
+	(cd kstar; make clean)
 
