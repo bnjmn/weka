@@ -52,17 +52,21 @@ import weka.core.Option;
  * The column number containing the run number.
  * (default last) <p>
  *
+ * -F num <br>
+ * The column number containing the fold number.
+ * (default none) <p>
+ *
  * -S num <br>
  * The significance level for T-Tests.
  * (default 0.05) <p>
  *
- * -R num,num2... <br>
+ * -G num,num2... <br>
  * The column numbers that uniquely specify one result generator (eg:
  * scheme name plus options).
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -74,6 +78,9 @@ public class PairedTTester implements OptionHandler {
 
   /** The option setting for the run number column (-1 means last) */
   protected int m_RunColumnSet = -1;
+
+  /** The option setting for the fold number column (-1 means none) */
+  protected int m_FoldColumn = -1;
 
   /** The significance level for comparisons */
   protected double m_SignificanceLevel = 0.05;
@@ -222,7 +229,7 @@ public class PairedTTester implements OptionHandler {
       for (int j = 0; j < runNums.length; j++) {
 	runNums[j] = ((Instance) m_Dataset.elementAt(j)).value(runColumn);
       }
-      int [] index = Utils.sort(runNums);
+      int [] index = Utils.stableSort(runNums);
       FastVector newDataset = new FastVector(runNums.length);
       for (int j = 0; j < index.length; j++) {
 	newDataset.addElement(m_Dataset.elementAt(index[j]));
@@ -454,6 +461,10 @@ public class PairedTTester implements OptionHandler {
     // Tell each resultset to sort on the run column
     for (int j = 0; j < m_Resultsets.size(); j++) {
       Resultset resultset = (Resultset) m_Resultsets.elementAt(j);
+      if (m_FoldColumn >= 0) {
+	// sort on folds first in case they are out of order
+	resultset.sort(m_FoldColumn);
+      }
       resultset.sort(m_RunColumn);
     }
     m_ResultsetsValid = true;
@@ -1203,6 +1214,9 @@ public class PairedTTester implements OptionHandler {
 	      "\tSet the index of the column containing the run number",
               "R", 1, "-R <index>"));
     newVector.addElement(new Option(
+	      "\tSet the index of the column containing the fold number",
+              "F", 1, "-F <index>"));
+    newVector.addElement(new Option(
               "\tSpecify list of columns that specify a unique\n"
 	      + "\t'result generator' (eg: classifier name and options).\n"
 	      + "\tFirst and last are valid indexes. (default none)",
@@ -1231,11 +1245,15 @@ public class PairedTTester implements OptionHandler {
    * The column number containing the run number.
    * (default last) <p>
    *
+   * -F num <br>
+   * The column number containing the fold number.
+   * (default none) <p>
+   * 
    * -S num <br>
    * The significance level for T-Tests.
    * (default 0.05) <p>
    *
-   * -R num,num2... <br>
+   * -G num,num2... <br>
    * The column numbers that uniquely specify one result generator (eg:
    * scheme name plus options).
    * (default last) <p>
@@ -1272,6 +1290,13 @@ public class PairedTTester implements OptionHandler {
       }    
     } else {
       setRunColumn(-1);
+    }
+
+    String foldStr = Utils.getOption('F', options);
+    if (foldStr.length() != 0) {
+      setFoldColumn(Integer.parseInt(foldStr) - 1);
+    } else {
+      setFoldColumn(-1);
     }
 
     String sigStr = Utils.getOption('S', options);
@@ -1406,6 +1431,26 @@ public class PairedTTester implements OptionHandler {
   public void setRunColumn(int newRunColumn) {
     
     m_RunColumnSet = newRunColumn;
+  }
+
+  /**
+   * Get the value of FoldColumn.
+   *
+   * @return Value of FoldColumn.
+   */
+  public int getFoldColumn() {
+    
+    return m_FoldColumn;
+  }
+  
+  /**
+   * Set the value of FoldColumn.
+   *
+   * @param newFoldColumn Value to assign to FoldColumn.
+   */
+  public void setFoldColumn(int newFoldColumn) {
+    
+    m_FoldColumn = newFoldColumn;
   }
   
   /**
