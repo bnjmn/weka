@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -53,14 +52,10 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 17 Dec 1998 - Initial version (Len)
+ * @version $Revision: 1.3 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
-
-  // =================
-  // Protected variables
-  // =================
 
   /** The subclassifier. */
   protected DistributionClassifier m_Classifier;
@@ -75,15 +70,10 @@ public class RegressionByDiscretization extends Classifier
   protected double [] m_ClassMeans;
 
   /** Whether debugging output will be printed */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
   /** Whether the Discretizer will optimise the number of bins */
-  protected boolean b_OptimizeBins;
-
-
-  // ===============
-  // Public methods.
-  // ===============
+  protected boolean m_OptimizeBins;
 
   /**
    * Generates the classifier.
@@ -96,7 +86,6 @@ public class RegressionByDiscretization extends Classifier
     if (!instances.classAttribute().isNumeric()) {
       throw new Exception ("Class attribute has to be numeric");
     }
-    
     if (m_Classifier instanceof WeightedInstancesHandler) {
       instances = new Instances(instances);
     } else {
@@ -117,7 +106,7 @@ public class RegressionByDiscretization extends Classifier
     // Discretize the training data
     m_Discretizer = new DiscretizeFilter();
     m_Discretizer.setBins(m_NumBins);
-    if (b_OptimizeBins) {
+    if (m_OptimizeBins) {
       m_Discretizer.setOptimizeBinning(true);
     }
     m_Discretizer.setUseMDL(false);
@@ -141,7 +130,7 @@ public class RegressionByDiscretization extends Classifier
       }
     }
 
-    if (b_Debug) {
+    if (m_Debug) {
       System.out.println("Boundaries    Bin Mean");
       System.out.println("======================");
       System.out.println("-infinity");
@@ -286,7 +275,7 @@ public class RegressionByDiscretization extends Classifier
 	(m_Classifier instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
-    String [] options = new String [classifierOptions.length + 14];
+    String [] options = new String [classifierOptions.length + 7];
     int current = 0;
     if (getDebug()) {
       options[current++] = "-D";
@@ -315,7 +304,7 @@ public class RegressionByDiscretization extends Classifier
    */
   public void setOptimizeBins(boolean optimize) {
 
-    b_OptimizeBins = optimize;
+    m_OptimizeBins = optimize;
   }
 
   /**
@@ -325,7 +314,7 @@ public class RegressionByDiscretization extends Classifier
    */
   public boolean getOptimizeBins() {
 
-    return b_OptimizeBins;
+    return m_OptimizeBins;
   }
 
   /**
@@ -335,7 +324,7 @@ public class RegressionByDiscretization extends Classifier
    */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
 
   /**
@@ -345,7 +334,7 @@ public class RegressionByDiscretization extends Classifier
    */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
   /**
@@ -423,16 +412,10 @@ public class RegressionByDiscretization extends Classifier
     return text.toString();
   }
  
-
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 

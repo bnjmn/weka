@@ -34,7 +34,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -108,8 +108,8 @@ public class MultiClassClassifier extends DistributionClassifier
 	((OptionHandler)m_Classifiers[i]).setOptions(copy);
       }
       m_ClassFilters[i] = new MakeIndicatorFilter();
-      m_ClassFilters[i].setAttributeIndex(insts.classIndex() + 1);
-      m_ClassFilters[i].setValueIndex(i + 1);
+      m_ClassFilters[i].setAttributeIndex(insts.classIndex());
+      m_ClassFilters[i].setValueIndex(i);
       m_ClassFilters[i].setNumeric(false);
       m_ClassFilters[i].inputFormat(insts);
       newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
