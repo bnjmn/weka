@@ -46,7 +46,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -147,7 +147,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 	    JPopupMenu gcMenu = new JPopupMenu();
 	    JMenuItem availMem = new JMenuItem("Available memory");
 	    availMem.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent ee) {
 		  Runtime currR = Runtime.getRuntime();
 		  long freeM = currR.freeMemory();
 		  logMessage("Available memory : "+freeM+" bytes");
@@ -156,7 +156,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 	    gcMenu.add(availMem);
 	    JMenuItem runGC = new JMenuItem("Run garabage collector");
 	    runGC.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent ee) {
 		  statusMessage("Running garbage collector");
 		  System.gc();
 		  statusMessage("OK");
