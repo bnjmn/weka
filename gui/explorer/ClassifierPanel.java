@@ -81,7 +81,7 @@ import javax.swing.JCheckBox;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -292,9 +292,6 @@ public class ClassifierPanel extends JPanel {
     });
     m_VisualizeBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	if (!m_StorePredictionsBut.isSelected()) {
-	  m_VisualizeBut.setEnabled(false);
-	}
 	visualizeClassifier();
       }
     });
@@ -308,15 +305,16 @@ public class ClassifierPanel extends JPanel {
 	}
       }
     });
-    m_StorePredictionsBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  if (m_StorePredictionsBut.isSelected()) {
-	    if (m_CurrentVis != null) {
-	      m_VisualizeBut.setEnabled(true);
-	    }
-	  }
+
+    m_History.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+	if (m_History.getSelectedObject() != null) {
+	  m_VisualizeBut.setEnabled(true);
+	} else {
+	  m_VisualizeBut.setEnabled(false);
 	}
-      });
+      }
+    });
     m_MoreOptions.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_MoreOptions.setEnabled(false);
@@ -542,7 +540,7 @@ public class ClassifierPanel extends JPanel {
     m_PercentText.setEnabled(m_PercentBut.isSelected());
     m_PercentLab.setEnabled(m_PercentBut.isSelected());
   }
-  
+
   /**
    * Sets the Logger to receive informational messages
    *
@@ -572,9 +570,6 @@ public class ClassifierPanel extends JPanel {
   public void setInstances(Instances inst) {
     m_Instances = inst;
 
-    if (!m_StorePredictionsBut.isSelected()) {
-      m_VisualizeBut.setEnabled(false);
-    }
     setXY_VisualizeIndexes(0,0); // reset the default x and y indexes
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
@@ -912,10 +907,12 @@ public class ClassifierPanel extends JPanel {
 		    m_CurrentVis.setPredictionsNumeric(false);
 		  }
 	      if (saveVis) {
-		m_History.addVis(name, m_CurrentVis);
+		m_History.addObject(name, m_CurrentVis);
+		m_VisualizeBut.setEnabled(true);
+	      } else {
+		m_VisualizeBut.setEnabled(false);
 	      }
 	    }
-	    m_VisualizeBut.setEnabled(true);
 	  }
 	}
       };
@@ -929,11 +926,12 @@ public class ClassifierPanel extends JPanel {
    */
   protected void visualizeClassifier() {
     final VisualizePanel sp;
-    if (m_StorePredictionsBut.isSelected()) {
+    sp = (VisualizePanel)m_History.getSelectedObject();
+    /*    if (m_StorePredictionsBut.isSelected()) {
       sp = m_History.getSelectedVis();
     } else {
       sp = m_CurrentVis;
-    }
+      } */
 
     if (sp != null) {
       String plotName = sp.getName(); 
@@ -941,7 +939,6 @@ public class ClassifierPanel extends JPanel {
 	new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
 	jf.setSize(500,400);
 	jf.getContentPane().setLayout(new BorderLayout());
-    //    final VisualizePanel sp = new VisualizePanel();
 
 	jf.getContentPane().add(sp, BorderLayout.CENTER);
 	jf.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -949,32 +946,8 @@ public class ClassifierPanel extends JPanel {
 	    jf.dispose();
 	  }
 	});
-    //      jf.pack();
-	/*    sp.setInstances(m_predInstances);
-    sp.setPredictions(m_predictions);
-    sp.setColourIndex(m_predInstances.classIndex()); */
+
     jf.setVisible(true);
-
-    /* 
-    try {
-      sp.setXIndex(m_visXIndex); sp.setYIndex(m_visYIndex);
-    } catch (Exception ex) {
-      System.err.println(ex);
-    }
-    sp.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  if (sp.getInstances().
-	      relationName().compareTo(m_Instances.relationName()) == 0) {
-	    setXY_VisualizeIndexes(sp.getXIndex(), sp.getYIndex());
-	  }
-	}
-      });
-
-    if (m_predInstances.attribute(m_predInstances.classIndex()).isNumeric()) {
-      sp.setPredictionsNumeric(true);
-    } else {
-      sp.setPredictionsNumeric(false);
-      } */
     }
   }
   
