@@ -28,9 +28,10 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @author Dale Fletcher
+ * @version $Revision: 1.6 $
  */
-public class Rule {
+public class Rule implements Serializable {
 
   protected static int LEFT = 0;
   protected static int RIGHT = 1;
