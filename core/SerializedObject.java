@@ -31,7 +31,7 @@ import java.util.zip.*;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class SerializedObject implements Serializable {
 
@@ -63,14 +63,15 @@ public class SerializedObject implements Serializable {
   public SerializedObject(Object toStore, boolean compress) throws Exception {
 
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+    OutputStream os = ostream;
     ObjectOutputStream p;
     if (!compress)
-      p = new ObjectOutputStream(new BufferedOutputStream(ostream));
+      p = new ObjectOutputStream(new BufferedOutputStream(os));
     else
-      p = new ObjectOutputStream(new GZIPOutputStream(new BufferedOutputStream(ostream)));
+      p = new ObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(os)));
     p.writeObject(toStore);
     p.flush();
-    ostream.close();
+    p.close(); // used to be ostream.close() !
     m_storedObjectArray = ostream.toByteArray();
 
     m_isCompressed = compress;
@@ -90,11 +91,12 @@ public class SerializedObject implements Serializable {
       if (!m_isCompressed)
 	p = new ObjectInputStream(new BufferedInputStream(istream));
       else 
-	p = new ObjectInputStream(new GZIPInputStream(new BufferedInputStream(istream)));
+	p = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(istream)));
       Object toReturn = p.readObject();
       istream.close();
       return toReturn;
     } catch (Exception e) {
+      e.printStackTrace();
       return null;
     }
   }
