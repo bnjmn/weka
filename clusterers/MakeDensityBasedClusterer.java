@@ -36,7 +36,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
@@ -173,7 +173,10 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 	     m_modelNormal[i][j][1] = Double.MAX_VALUE;
 	   }
 	   if (m_modelNormal[i][j][1] <= m_minStdDev) {
-	     m_modelNormal[i][j][1] = m_minStdDev;
+	     m_modelNormal[i][j][1] = data.attributeStats(j).numericStats.stdDev;
+	     if (m_modelNormal[i][j][1] <= m_minStdDev) {
+	       m_modelNormal[i][j][1] = m_minStdDev;
+	     }
 	   }
 	 }
        }
