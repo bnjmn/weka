@@ -55,7 +55,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AttributeSelectedClassifier extends DistributionClassifier 
 implements OptionHandler, AdditionalMeasureProducer {
@@ -374,6 +374,10 @@ implements OptionHandler, AdditionalMeasureProducer {
    
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
+    if (newData.numInstances() == 0) {
+      m_Classifier.buildClassifier(newData);
+      return;
+    }
     if (newData.classAttribute().isNominal()) {
       m_numClasses = newData.classAttribute().numValues();
     } else {
@@ -405,10 +409,13 @@ implements OptionHandler, AdditionalMeasureProducer {
   public double [] distributionForInstance(Instance instance)
     throws Exception {
 
+    Instance newInstance;
     if (m_AttributeSelection == null) {
-      throw new Exception("AttributeSelectedClassifier: No model built yet!");
+      //      throw new Exception("AttributeSelectedClassifier: No model built yet!");
+      newInstance = instance;
+    } else {
+      newInstance = m_AttributeSelection.reduceDimensionality(instance);
     }
-    Instance newInstance = m_AttributeSelection.reduceDimensionality(instance);
 
     if (m_Classifier instanceof DistributionClassifier) {
       return ((DistributionClassifier)m_Classifier)
