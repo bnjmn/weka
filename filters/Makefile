@@ -12,7 +12,8 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	ResampleFilter.java AttributeTypeFilter.java \
 	StringToNominalFilter.java ObfuscateFilter.java \
 	NonSparseToSparseFilter.java SparseToNonSparseFilter.java \
-	EmptyAttributeFilter.java SpreadSubsampleFilter.java
+	EmptyAttributeFilter.java SpreadSubsampleFilter.java \
+	AttributeExpressionFilter.java
 
 # Filters To Do:
 # TimeSeriesSmoothFilter.java    -- replace attribute values with values
