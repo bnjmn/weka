@@ -29,7 +29,7 @@ import weka.filters.Filter;
  * Abstract Test class for Classifiers.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractClassifierTest extends TestCase {
 
@@ -147,9 +147,6 @@ public abstract class AbstractClassifierTest extends TestCase {
 	train = Filter.useFilter(train, attFilter);
 	attFilter.batchFinished();
 	test = Filter.useFilter(test, attFilter);
-	if (invert == true) {
-	  System.err.println(train);
-	}
 	counter++;
 	if (counter > 2) {
 	  throw ex;

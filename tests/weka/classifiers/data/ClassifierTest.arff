@@ -1,4 +1,4 @@
-@relation FilterTest
+@relation ClassifierTest
 @attribute StringAtt1 string
 @attribute NominalAtt1 {r, g}
 @attribute NumericAtt1 numeric

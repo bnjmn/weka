@@ -9,13 +9,14 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import weka.core.Instances;
+import java.io.File;
 
 /**
  * Tests CostSensitiveClassifier. Run from the command line with:<p>
  * java weka.classifiers.CostSensitiveClassifierTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CostSensitiveClassifierTest extends AbstractClassifierTest {
 
@@ -23,7 +24,12 @@ public class CostSensitiveClassifierTest extends AbstractClassifierTest {
 
   /** Creates a default CostSensitiveClassifier */
   public Classifier getClassifier() {
-    return new CostSensitiveClassifier();
+
+    CostSensitiveClassifier cl = new CostSensitiveClassifier();
+    String str = ClassLoader.getSystemResource("weka/classifiers/data").toString();
+    str = str.substring(5);
+    cl.setOnDemandDirectory(new File(str));
+    return cl;
   }
 
   public static Test suite() {
