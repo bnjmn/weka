@@ -31,7 +31,7 @@ import weka.classifiers.*;
  * Missing values are not allowed. Can only deal with numeric attributes.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SimpleLinearRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -166,9 +166,6 @@ public class SimpleLinearRegression extends Classifier implements WeightedInstan
 
   public String toString() {
 
-    if (m_attribute == null) {
-      return "No model built yet.";
-    }
     StringBuffer text = new StringBuffer();
     if (m_attribute == null) {
       text.append("Predicting constant " + m_intercept);
