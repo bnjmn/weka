@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 1.0
  * @see JPanel
  */
@@ -72,46 +72,46 @@ public class BoundaryPanel extends JPanel {
   protected FastVector m_Colors = new FastVector();
 
   // training data
-  private Instances m_trainingData;
+  protected Instances m_trainingData;
 
   // distribution classifier to use
-  private DistributionClassifier m_classifier;
+  protected DistributionClassifier m_classifier;
 
   // data generator to use
-  private DataGenerator m_dataGenerator;
+  protected DataGenerator m_dataGenerator;
 
   // index of the class attribute
   private int m_classIndex = -1;
 
   // attributes for visualizing on
-  private int m_xAttribute;
-  private int m_yAttribute;
+  protected int m_xAttribute;
+  protected int m_yAttribute;
 
   // min, max and ranges of these attributes
-  private double m_minX;
-  private double m_minY;
-  private double m_maxX;
-  private double m_maxY;
+  protected double m_minX;
+  protected double m_minY;
+  protected double m_maxX;
+  protected double m_maxY;
   private double m_rangeX;
   private double m_rangeY;
 
   // pixel width and height in terms of attribute values
-  private double m_pixHeight;
-  private double m_pixWidth;
+  protected double m_pixHeight;
+  protected double m_pixWidth;
 
   // used for offscreen drawing
-  private Image m_osi = null;
+  protected Image m_osi = null;
 
   // width and height of the display area
-  private int m_panelWidth;
-  private int m_panelHeight;
+  protected int m_panelWidth;
+  protected int m_panelHeight;
 
   // number of samples to take from each region in the fixed dimensions
-  private int m_numOfSamplesPerRegion = 2;
+  protected int m_numOfSamplesPerRegion = 2;
 
   // number of samples per kernel = base ^ (# non-fixed dimensions)
-  private int m_numOfSamplesPerGenerator;
-  private double m_samplesBase = 2.0;
+  protected int m_numOfSamplesPerGenerator;
+  protected double m_samplesBase = 2.0;
 
   // listeners to be notified when plot is complete
   private Vector m_listeners = new Vector();
@@ -160,16 +160,16 @@ public class BoundaryPanel extends JPanel {
   private Thread m_plotThread = null;
 
   // Stop the plotting thread
-  private boolean m_stopPlotting = false;
+  protected boolean m_stopPlotting = false;
 
   // Stop any replotting threads
-  private boolean m_stopReplotting = false;
+  protected boolean m_stopReplotting = false;
 
   // Used by replotting threads to pause and resume the main plot thread
   private Double m_dummy = new Double(1.0);
   private boolean m_pausePlotting = false;
   // what size of tile is currently being plotted
-  private int m_size;
+  private int m_size = 1;
   // is the main plot thread performing the initial coarse tiling
   private boolean m_initialTiling;
 
@@ -177,10 +177,10 @@ public class BoundaryPanel extends JPanel {
   private Random m_random = null;
 
   // cache of probabilities for fast replotting
-  private double [][][] m_probabilityCache;
+  protected double [][][] m_probabilityCache;
 
   // plot the training data
-  private boolean m_plotTrainingData = true;
+  protected boolean m_plotTrainingData = true;
 
   /**
    * Creates a new <code>BoundaryPanel</code> instance.
@@ -268,7 +268,7 @@ public class BoundaryPanel extends JPanel {
     m_stopPlotting = true;
   }
 
-  private void computeMinMaxAtts() {
+  protected void computeMinMaxAtts() {
     m_minX = Double.MAX_VALUE;
     m_minY = Double.MAX_VALUE;
     m_maxX = Double.MIN_VALUE;
@@ -371,6 +371,7 @@ public class BoundaryPanel extends JPanel {
     double [] m_dist;
     Instance m_predInst;
     public void run() {
+
       m_stopPlotting = false;
       try {
         initialize();
@@ -395,8 +396,9 @@ public class BoundaryPanel extends JPanel {
         m_predInst = new Instance(1.0, m_vals);
         m_predInst.setDataset(m_trainingData);
 
+	
         m_size = 1 << 4;  // Current sample region size
-
+	
 	m_initialTiling = true;
         // Display the initial coarse image tiling.
       abortInitial:
@@ -455,8 +457,9 @@ public class BoundaryPanel extends JPanel {
           size2 = size2 / 2;
         }
 	update();
+	
 
-        /* 
+	/*
         // Old method without sampling.
         abortPlot: 
         for (int i = 0; i < m_panelHeight; i++) {
@@ -546,7 +549,8 @@ public class BoundaryPanel extends JPanel {
         }
       
         for (int k = 0; k < sumOfProbsForRegion.length; k++) {
-          sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] * sumOfWeights); 
+          sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] * 
+				     sumOfWeights); 
         }
       }
     
@@ -564,7 +568,7 @@ public class BoundaryPanel extends JPanel {
     }
   }
 
-  private void plotTrainingData() {
+  protected void plotTrainingData() {
     Graphics2D osg = (Graphics2D)m_osi.getGraphics();
     Graphics g = m_plotPanel.getGraphics();
     osg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -627,7 +631,7 @@ public class BoundaryPanel extends JPanel {
   }
 
 
-  private void plotPoint(int x, int y, double [] probs, boolean update) {
+  protected  void plotPoint(int x, int y, double [] probs, boolean update) {
     plotPoint(x, y, 1, 1, probs, update);
   }
   
@@ -967,7 +971,6 @@ public class BoundaryPanel extends JPanel {
 
       String [] argsR = null;
       if (args.length > 10) {
-	System.err.println(""+(args.length-10));
 	argsR = new String [args.length-10];
 	for (int j = 10; j < args.length; j++) {
 	  argsR[j-10] = args[j];

@@ -31,7 +31,7 @@ import java.io.*;
  * instances based on a supplied set of instances.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see DataGenerator
  * @see Serializable
@@ -297,6 +297,17 @@ public class KDDataGenerator implements DataGenerator, Serializable {
   public int getKernelBandwidth() {
     return m_kernelBandwidth;
   } 
+
+  /**
+   * Initializes a new random number generator using the
+   * supplied seed.
+   *
+   * @param seed an <code>int</code> value
+   */
+  public void setSeed(int seed) {
+    m_seed = seed;
+    m_random = new Random(m_seed);
+  }
 
   /**
    * Calculates the distance between two instances
