@@ -26,9 +26,9 @@ import  weka.core.*;
 /** 
  * Class for ranking the attributes evaluated by a AttributeEvaluator
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-class Ranker
+public class Ranker
   extends RankedOutputSearch
 {
 
