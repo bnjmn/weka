@@ -66,7 +66,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -81,7 +81,6 @@ public class Attribute implements Copyable, Serializable {
 
   /** Strings longer than this will be stored compressed. */
   private final static int STRING_COMPRESS_THRESHOLD = 200;
-  //private final static int STRING_COMPRESS_THRESHOLD = Integer.MAX_VALUE;
 
   /** The attribute's name. */
   private String m_Name;
@@ -131,18 +130,19 @@ public class Attribute implements Copyable, Serializable {
       m_Hashtable = new Hashtable();
       m_Type = STRING;
     } else {
-      m_Values = (FastVector) attributeValues.copy();
-      m_Hashtable = new Hashtable(m_Values.size());
-      for (int i = 0; i < m_Values.size(); i++) {
-	Object store = m_Values.elementAt(i);
+      m_Values = new FastVector(attributeValues.size());
+      m_Hashtable = new Hashtable(attributeValues.size());
+      for (int i = 0; i < attributeValues.size(); i++) {
+	Object store = attributeValues.elementAt(i);
 	if (((String)store).length() > STRING_COMPRESS_THRESHOLD) {
 	  try {
-	    store = new SerializedObject(m_Values.elementAt(i), true);
+	    store = new SerializedObject(attributeValues.elementAt(i), true);
 	  } catch (Exception ex) {
 	    System.err.println("Couldn't compress nominal attribute value -"
 			       + " storing uncompressed.");
 	  }
 	}
+	m_Values.addElement(store);
 	m_Hashtable.put(store, new Integer(i));
       }
       m_Type = NOMINAL;
@@ -524,9 +524,9 @@ public class Attribute implements Copyable, Serializable {
       m_Values = (FastVector)m_Values.copy();
       m_Values.removeElementAt(index);
       Hashtable hash = new Hashtable(m_Hashtable.size());
-      Enumeration enum = hash.keys();
+      Enumeration enum = m_Hashtable.keys();
       while (enum.hasMoreElements()) {
-	String string = (String)enum.nextElement();
+	Object string = enum.nextElement();
 	Integer valIndexObject = (Integer)m_Hashtable.get(string);
 	int valIndex = valIndexObject.intValue();
 	if (valIndex > index) {
