@@ -16,429 +16,616 @@
 
 /*
  *    Logistic.java
- *    Copyright (C) 2002 Eibe Frank
+ *    Copyright (C) 2003 Xin Xu
  *
  */
 
 package weka.classifiers.functions;
 
-import weka.classifiers.meta.LogitBoost;
-import weka.classifiers.functions.LinearRegression;
-import weka.classifiers.Evaluation;
-import weka.classifiers.DistributionClassifier;
-import weka.classifiers.Classifier;
-import weka.core.UnsupportedClassTypeException;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.OptionHandler;
-import weka.core.WeightedInstancesHandler;
-import weka.core.SelectedTag;
-import weka.core.Utils;
-import weka.core.Attribute;
-import weka.core.Option;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.Filter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.classifiers.*;
+import java.util.*;
+import java.io.*;
+import weka.core.*;
+import weka.filters.*;
+import weka.filters.unsupervised.attribute.*;
 
 /**
- * Implements linear logistic regression using LogitBoost and
- * LinearRegression.<p>
+ * Second implementation for building and using a multinomial logistic
+ * regression model with a ridge estimator.  <p>
+ * 
+ * There are some modifications, however, compared to the paper of le
+ * Cessie and van Houwelingen(1992): <br>
  *
- * Missing values are replaced using ReplaceMissingValues, and
- * nominal attributes are transformed into numeric attributes using
- * NominalToBinary.<p>
+ * If there are k classes for n instances with m attributes, the
+ * parameter matrix B to be calculated will be an m*(k-1) matrix.<br>
  *
- * -P precision <br>
- * Set the precision of stopping criterion based on average loglikelihood.
- * (default 1.0e-13) <p>
+ * The probability for class j except the last class is <br>
+ * Pj(Xi) = exp(XiBj)/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br>
+ * The last class has probability <br>
+ * 1-(sum[j=1..(k-1)]Pj(Xi)) = 1/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br>
  *
- * -R ridge <br>
- * Set the ridge parameter for the linear regression models.
- * (default 1.0e-8)<p>
+ * The (negative) multinomial log-likelihood is thus: <br>
+ * L = -sum[i=1..n]{
+ * sum[j=1..(k-1)](Yij * ln(Pj(Xi))) +
+ * (1 - (sum[j=1..(k-1)]Yij)) * ln(1 - sum[j=1..(k-1)]Pj(Xi))
+ * } + ridge * (B^2) <br>
  *
- * -M num <br>
- * Set the maximum number of iterations.
- * (default 200)<p>
+ * In order to find the matrix B for which L is minimised, a
+ * Quasi-Newton Method is used to search for the optimized values of
+ * the m*(k-1) variables.  Note that before we use the optimization
+ * procedure, we "squeeze" the matrix B into a m*(k-1) vector.  For
+ * details of the optimization procedure, please check
+ * weka.core.Optimization class. <p>
  *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
- */
+ * Although original Logistic Regression does not deal with instance
+ * weights, we modify the algorithm a little bit to handle the
+ * instance weights. <p>
+ *
+ * Reference: le Cessie, S. and van Houwelingen, J.C. (1992). <i>
+ * Ridge Estimators in Logistic Regression.</i> Applied Statistics,
+ * Vol. 41, No. 1, pp. 191-201. <p>
+ *
+ * Missing values are replaced using a ReplaceMissingValuesFilter, and
+ * nominal attributes are transformed into numeric attributes using a
+ * NominalToBinaryFilter.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -R <ridge> <br>
+ * Set the ridge parameter for the log-likelihood.<p>
+ * 
+ * -M <number of iterations> <br> Set the maximum number of iterations
+ * (default -1, iterates until convergence).<p>
+ *
+ * @author Xin Xu (xx5@cs.waikato.ac.nz)
+ * @version $Revision: 1.25 $ */
 public class Logistic extends DistributionClassifier 
-  implements OptionHandler, WeightedInstancesHandler {
-
-  /* The coefficients */
-  private double[][] m_Coefficients = null;
-
-  /* The index of the class */
-  private int m_ClassIndex = -1;
-
-  /* An attribute filter */
-  private Remove m_AttFilter = null;
-
-  /* The header info */
-  private Instances m_Header = null;
-    
-  /** The filter used to make attributes numeric. */
-  private NominalToBinary m_NominalToBinary = null;
+    implements OptionHandler, WeightedInstancesHandler {
   
-  /** The filter used to get rid of missing values. */
-  private ReplaceMissingValues m_ReplaceMissingValues = null;
+    /** The coefficients (optimized parameters) of the model */
+    protected double [][] m_Par;
     
-  /** The ridge parameter. */
-  private double m_Ridge = 1e-8;
+    /** The data saved as a matrix */
+    protected double [][] m_Data;
+    
+    /** The number of attributes in the model */
+    protected int m_NumPredictors;
+    
+    /** The index of the class attribute */
+    protected int m_ClassIndex;
+    
+    /** The number of the class labels */
+    protected int m_NumClasses;
+    
+    /** The ridge parameter. */
+    protected double m_Ridge = 1e-8;
+    
+    /* An attribute filter */
+    private RemoveUseless m_AttFilter;
+    
+    /** The filter used to make attributes numeric. */
+    private NominalToBinary m_NominalToBinary;
+    
+    /** The filter used to get rid of missing values. */
+    private ReplaceMissingValues m_ReplaceMissingValues;
+    
+    /** Debugging output */
+    protected boolean m_Debug;
 
-  /** The precision parameter */   
-  private double m_Precision = 1.0e-13;
-  
-  /** The maximum number of iterations. */
-  private int m_MaxIts = 200;
+    /** Log-likelihood of the searched model */
+    protected double m_LL;
     
-  /**
-   * Returns an enumeration describing the available options.
-   *
-   * @return an enumeration of all the available options.
-   */
-  public Enumeration listOptions() {
+    /** The maximum number of iterations. */
+    private int m_MaxIts = -1;
     
-    Vector newVector = new Vector(3);
-    newVector.addElement(new Option("\tSet the precision of stopping criterion based on\n" + 
-				    "\tchange in average loglikelihood (default 1.0e-13).",
-				    "P", 1, "-P <precision>"));
-    newVector.addElement(new Option("\tSet the ridge for the linear regression models (default 1.0e-8).",
-				    "R", 1, "-R <ridge>"));
-    newVector.addElement(new Option("\tSet the maximum number of iterations (default 200).",
-				    "M", 1, "-M <number>"));
-    return newVector.elements();
-  }
-  
-  /**
-   * Parses a given list of options. Valid options are:<p>
-   *
-   * -P precision <br>
-   * Set the precision of stopping criterion based on average loglikelihood.
-   * (default 1.0e-13) <p>
-   *
-   * -R ridge <br>
-   * Set the ridge parameter for the linear regression models.
-   * (default 1.0e-8)<p>
-   *
-   * -M num <br>
-   * Set the maximum number of iterations.
-   * (default 200)<p>
-   *
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   */
-  public void setOptions(String[] options) throws Exception {
-    
-    String precisionString = Utils.getOption('P', options);
-    if (precisionString.length() != 0) 
-      m_Precision = Double.parseDouble(precisionString);
-    else 
-      m_Precision = 1.0e-13;
-      
-    String ridgeString = Utils.getOption('R', options);
-    if (ridgeString.length() != 0) 
-      m_Ridge = Double.parseDouble(ridgeString);
-    else 
-      m_Ridge = 1.0e-8;
-      
-    String maxItsString = Utils.getOption('M', options);
-    if (maxItsString.length() != 0) 
-      m_MaxIts = Integer.parseInt(maxItsString);
-    else 
-      m_MaxIts = 200;
-  }
-  
-  /**
-   * Gets the current settings of the classifier.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
-  public String [] getOptions() {
-    
-    String [] options = new String [6];
-    int current = 0;
-    
-    options[current++] = "-P";
-    options[current++] = ""+m_Precision;
-    options[current++] = "-R";
-    options[current++] = ""+m_Ridge;
-    options[current++] = "-M";
-    options[current++] = ""+m_MaxIts;
-    
-    while (current < options.length) 
-      options[current++] = "";
-    return options;
-  }
-  
-  /**
-   * Builds the model.
-   */
-  public void buildClassifier(Instances data) throws Exception {
-
-    if (data.classAttribute().type() != Attribute.NOMINAL) {
-      throw new UnsupportedClassTypeException("Class attribute must be nominal.");
+    /**
+     * Returns an enumeration describing the available options
+     *
+     * @return an enumeration of all the available options
+     */
+    public Enumeration listOptions() {
+	Vector newVector = new Vector(3);
+	newVector.addElement(new Option("\tTurn on debugging output.",
+					"D", 0, "-D"));
+	newVector.addElement(new Option("\tSet the ridge in the log-likelihood.",
+					"R", 1, "-R <ridge>"));
+	newVector.addElement(new Option("\tSet the maximum number of iterations"+
+					" (default -1, until convergence).",
+					"M", 1, "-M <number>"));
+	return newVector.elements();
     }
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    
+    /**
+     * Parses a given list of options. Valid options are:<p>
+     *
+     * -D <br>
+     * Turn on debugging output.<p>
+     *
+     * -R ridge <br>
+     * Set the ridge parameter for the log-likelihood.<p>
+     * 
+     * -M num <br>
+     * Set the maximum number of iterations.
+     * (default -1, until convergence)<p>
+     *
+     * @param options the list of options as an array of strings
+     * @exception Exception if an option is not supported
+     */
+    public void setOptions(String[] options) throws Exception {
+	setDebug(Utils.getFlag('D', options));
+
+	String ridgeString = Utils.getOption('R', options);
+	if (ridgeString.length() != 0) 
+	    m_Ridge = Double.parseDouble(ridgeString);
+	else 
+	    m_Ridge = 1.0e-8;
+	
+	String maxItsString = Utils.getOption('M', options);
+	if (maxItsString.length() != 0) 
+	    m_MaxIts = Integer.parseInt(maxItsString);
+	else 
+	    m_MaxIts = -1;
     }
-    data = new Instances(data);
-    data.deleteWithMissingClass();
+    
+    /**
+     * Gets the current settings of the classifier.
+     *
+     * @return an array of strings suitable for passing to setOptions
+     */
+    public String [] getOptions() {
+	
+	String [] options = new String [5];
+	int current = 0;
+	
+	if (getDebug()) 
+	    options[current++] = "-D";
+	options[current++] = "-R";
+	options[current++] = ""+m_Ridge;	
+	options[current++] = "-M";
+	options[current++] = ""+m_MaxIts;
+	while (current < options.length) 
+	    options[current++] = "";
+	return options;
+    }
+    
+    /**
+     * Sets whether debugging output will be printed.
+     *
+     * @param debug true if debugging output should be printed
+     */
+    public void setDebug(boolean debug) {
+	m_Debug = debug;
+    }
+    
+    /**
+     * Gets whether debugging output will be printed.
+     *
+     * @return true if debugging output will be printed
+     */
+    public boolean getDebug() {
+	return m_Debug;
+    }      
 
-    m_ReplaceMissingValues = new ReplaceMissingValues();
-    m_ReplaceMissingValues.setInputFormat(data);
-    data = Filter.useFilter(data, m_ReplaceMissingValues);
-    m_NominalToBinary = new NominalToBinary();
-    m_NominalToBinary.setInputFormat(data);
-    data = Filter.useFilter(data, m_NominalToBinary);
+    /**
+     * Sets the ridge in the log-likelihood.
+     *
+     * @param ridge the ridge
+     */
+    public void setRidge(double ridge) {
+	m_Ridge = ridge;
+    }
+    
+    /**
+     * Gets the ridge in the log-likelihood.
+     *
+     * @return the ridge
+     */
+    public double getRidge() {
+	return m_Ridge;
+    }
+    
+    /**
+     * Get the value of MaxIts.
+     *
+     * @return Value of MaxIts.
+     */
+    public int getMaxIts() {
+	
+	return m_MaxIts;
+    }
+    
+    /**
+     * Set the value of MaxIts.
+     *
+     * @param newMaxIts Value to assign to MaxIts.
+     */
+    public void setMaxIts(int newMaxIts) {
+	
+	m_MaxIts = newMaxIts;
+    }    
+    
+    private class OptEng extends Optimization{
+	// Weights of instances in the data
+	private double[] weights;
 
-    // Find attributes that should be deleted because of
-    // zero variance
-    int[] indices = new int[data.numAttributes() - 1];
-    int numDeleted = 0;
-    for (int j = 0; j < data.numAttributes(); j++) {
-      if (j != data.classIndex()) {
-        double var = data.variance(j);
-	if (var == 0) {
-	  indices[numDeleted++] = j;
+	// Class labels of instances
+	private int[] cls;
+	
+	/* Set the weights of instances
+	 * @param d the weights to be set
+	 */ 
+	public void setWeights(double[] w) {
+	    weights = w;
 	}
-      }
-    }
-    int[] temp = new int[numDeleted];
-    System.arraycopy(indices, 0, temp, 0, numDeleted);
-    indices = temp;
-
-    // Remove useless attributes
-    m_AttFilter = new Remove();
-    m_AttFilter.setAttributeIndicesArray(indices);
-    m_AttFilter.setInvertSelection(false);
-    m_AttFilter.setInputFormat(data);
-    data = Filter.useFilter(data, m_AttFilter);
-
-    // Set class index
-    m_ClassIndex = data.classIndex();
-
-    // Standardize data
-    double[][] values = 
-      new double[data.numInstances()][data.numAttributes()];
-    double[] means = new double[data.numAttributes()];
-    double[] stdDevs = new double[data.numAttributes()];
-    for (int j = 0; j < data.numAttributes(); j++) {
-      if (j != data.classIndex()) {
-	means[j] = data.meanOrMode(j);
-	stdDevs[j] = Math.sqrt(data.variance(j));
-	for (int i = 0; i < data.numInstances(); i++) {
-	  values[i][j] = (data.instance(i).value(j) - means[j]) / 
-	    stdDevs[j];
+	
+	/* Set the class labels of instances
+	 * @param d the class labels to be set
+	 */ 
+	public void setClassLabels(int[] c) {
+	    cls = c;
 	}
-      } else {
-	for (int i = 0; i < data.numInstances(); i++) {
-	  values[i][j] = data.instance(i).value(j);
+	
+	/** 
+	 * Evaluate objective function
+	 * @param x the current values of variables
+	 * @return the value of the objective function 
+	 */
+	protected double objectiveFunction(double[] x){
+	    double nll = 0; // -LogLikelihood
+	    int dim = m_NumPredictors+1; // Number of variables per class
+	    
+	    for(int i=0; i<cls.length; i++){ // ith instance
+		double denom = 1, num = 0;   // Denominator and numerator of posterior
+		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
+		    double exp=0.0;		    
+		    for(int j=0; j<dim; j++)
+			exp += m_Data[i][j]*x[offset*dim+j];
+		    denom += Math.exp(exp);
+		    if(cls[i] == offset)     // Class of this instance
+			num = exp;
+		}
+		
+		nll -= weights[i]*(num - Math.log(denom)); // Weighted NLL
+	    }
+	    
+	    // Ridge: note that intercepts NOT included
+	    for(int offset=0; offset<m_NumClasses-1; offset++){
+		for(int r=1; r<dim; r++)
+		    nll += m_Ridge*x[offset*dim+r]*x[offset*dim+r];
+	    }
+	    
+	    return nll;
 	}
-      }
-    }
-    Instances newData = new Instances(data, data.numInstances());
-    for (int i = 0; i < data.numInstances(); i++) {
-      newData.add(new Instance(data.instance(i).weight(), values[i]));
-    }
-
-    // Use LogitBoost to build model
-    LogitBoost boostedModel = new LogitBoost();
-    boostedModel.setLikelihoodThreshold(m_Precision);
-    boostedModel.setMaxIterations(m_MaxIts);
-    LinearRegression lr = new LinearRegression();
-    lr.setEliminateColinearAttributes(false);
-    lr.setAttributeSelectionMethod(new SelectedTag(LinearRegression.
-						   SELECTION_NONE,
-						   LinearRegression.
-						   TAGS_SELECTION));
-    lr.turnChecksOff();
-    lr.setRidge(m_Ridge);
-    boostedModel.setClassifier(lr);
-    boostedModel.buildClassifier(newData);
-
-    // Extract coefficients
-    Classifier[][] models = boostedModel.classifiers();
-    m_Coefficients = new double[newData.numClasses()]
-      [newData.numAttributes() + 1];
-    for (int j = 0; j < newData.numClasses(); j++) {
-      for (int i = 0; i < models[j].length; i++) {
-	double[] locCoefficients = 
-	  ((LinearRegression)models[j][i]).coefficients();
-	for (int k = 0; k <= newData.numAttributes(); k++) {
-	  if (k != newData.classIndex()) {
-	    m_Coefficients[j][k] += locCoefficients[k];
-	  }
+	
+	/** 
+	 * Evaluate Jacobian vector
+	 * @param x the current values of variables
+	 * @return the gradient vector 
+	 */
+	protected double[] evaluateGradient(double[] x){
+	    double[] grad = new double[x.length];
+	    int dim = m_NumPredictors+1; // Number of variables per class
+	    
+	    for(int i=0; i<cls.length; i++){ // ith instance
+		double denom=1; // Denominator of [-log(1+sum(exp))]'
+		double[] num=new double[m_NumClasses-1]; // numerator of [-log(1+sum(exp))]'
+		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
+		    double exp=0.0;		    
+		    for(int j=0; j<dim; j++)
+			exp += m_Data[i][j]*x[offset*dim+j];
+		    denom += Math.exp(exp);
+		    num[offset] = Math.exp(exp);
+		}
+		
+		// Update denominator of the gradient of -log(Posterior)
+		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
+		    for(int q=0; q<dim; q++){
+			grad[offset*dim+q] += weights[i]*num[offset]*m_Data[i][q]/denom;
+		    }
+		}
+		
+		if(cls[i] != m_NumClasses-1){ // Not the last class
+		    for(int p=0; p<dim; p++){
+			grad[cls[i]*dim+p] -= weights[i]*m_Data[i][p]; 
+		    }
+		}
+	    }
+	    
+	    // Ridge: note that intercepts NOT included
+	    for(int offset=0; offset<m_NumClasses-1; offset++){
+		for(int r=1; r<dim; r++)
+		    grad[offset*dim+r] += 2*m_Ridge*x[offset*dim+r];
+	    }
+	    
+	    return grad;
 	}
-      }
     }
-	   
-    // Convert coefficients into original scale
-    for(int j = 0; j < data.numClasses(); j++){
-      for(int i = 0; i < data.numAttributes(); i++) {
-	if ((i != newData.classIndex()) &&
-	    (stdDevs[i] > 0)) {
-	  m_Coefficients[j][i] /= stdDevs[i];
-	  m_Coefficients[j][data.numAttributes()] -= 
-	    m_Coefficients[j][i] * means[i];
+    
+    /**
+     * Builds the classifier
+     *
+     * @param train the training data to be used for generating the
+     * boosted classifier.
+     * @exception Exception if the classifier could not be built successfully
+     */
+    public void buildClassifier(Instances train) throws Exception {
+	if (train.classAttribute().type() != Attribute.NOMINAL) {
+	    throw new Exception("Class attribute must be nominal.");
 	}
-      }
-    }
-    m_Header = new Instances(data, 0);
-  }
-
-  /**
-   * Classifies an instance.
-   */
-  public double[] distributionForInstance(Instance inst) 
-    throws Exception {
-
-    // Filter instance
-    m_ReplaceMissingValues.input(inst);
-    inst = m_ReplaceMissingValues.output();
-    m_NominalToBinary.input(inst);
-    inst = m_NominalToBinary.output();
-    m_AttFilter.input(inst);
-    m_AttFilter.batchFinished();
-    inst = m_AttFilter.output();
-
-    // Compute prediction
-    double[] preds = new double[m_Coefficients.length];
-    for (int j = 0; j < inst.numClasses(); j++) {
-      for (int i = 0; i < inst.numAttributes(); i++) {
-	if (i != inst.classIndex()) {
-	  preds[j] += inst.value(i) * m_Coefficients[j][i];
+	if (train.checkForStringAttributes()) {
+	    throw new Exception("Can't handle string attributes!");
 	}
-      }
-      preds[j] += m_Coefficients[j][inst.numAttributes()];
+	train = new Instances(train);
+	train.deleteWithMissingClass();
+	if (train.numInstances() == 0) {
+	    throw new Exception("No train instances without missing class value!");
+	}
+
+	// Replace missing values	
+	m_ReplaceMissingValues = new ReplaceMissingValues();
+	m_ReplaceMissingValues.setInputFormat(train);
+	train = Filter.useFilter(train, m_ReplaceMissingValues);
+
+	// Remove useless attributes
+	m_AttFilter = new RemoveUseless();
+	m_AttFilter.setInputFormat(train);
+	train = Filter.useFilter(train, m_AttFilter);
+	
+	// Transform attributes
+	m_NominalToBinary = new NominalToBinary();
+	m_NominalToBinary.setInputFormat(train);
+	train = Filter.useFilter(train, m_NominalToBinary);
+	
+	// Extract data
+	m_ClassIndex = train.classIndex();
+	m_NumClasses = train.numClasses();
+
+	int nK = m_NumClasses - 1;                     // Only K-1 class labels needed 
+	int nR = m_NumPredictors = train.numAttributes() - 1;
+	int nC = train.numInstances();
+	
+	m_Data = new double[nC][nR + 1];               // Data values
+	int [] Y  = new int[nC];                       // Class labels
+	double [] xMean= new double[nR + 1];           // Attribute means
+	double [] xSD  = new double[nR + 1];           // Attribute stddev's
+	double [] sY = new double[nK + 1];             // Number of classes
+	double [] weights = new double[nC];            // Weights of instances
+	double totWeights = 0;                         // Total weights of the instances
+	m_Par = new double[nR + 1][nK];                // Optimized parameter values
+	
+	if (m_Debug) {
+	    System.out.println("Extracting data...");
+	}
+	
+	for (int i = 0; i < nC; i++) {
+	    // initialize X[][]
+	    Instance current = train.instance(i);
+	    Y[i] = (int)current.classValue();  // Class value starts from 0
+	    weights[i] = current.weight();     // Dealing with weights
+	    totWeights += weights[i];
+	    
+	    m_Data[i][0] = 1;
+	    int j = 1;
+	    for (int k = 0; k <= nR; k++) {
+		if (k != m_ClassIndex) {
+		    double x = current.value(k);
+		    m_Data[i][j] = x;
+		    xMean[j] += weights[i]*x;
+		    xSD[j] += weights[i]*x*x;
+		    j++;
+		}
+	    }
+	    
+	    // Class count
+	    sY[Y[i]]++;	
+	}
+	
+	if((totWeights <= 1) && (nC > 1))
+	    throw new Exception("Sum of weights of instances less than 1, please reweight!");
+
+	xMean[0] = 0; xSD[0] = 1;
+	for (int j = 1; j <= nR; j++) {
+	    xMean[j] = xMean[j] / totWeights;
+	    if(totWeights > 1)
+		xSD[j] = Math.sqrt(Math.abs(xSD[j] - totWeights*xMean[j]*xMean[j])/(totWeights-1));
+	    else
+		xSD[j] = 0;
+	}
+
+	if (m_Debug) {	    
+	    // Output stats about input data
+	    System.out.println("Descriptives...");
+	    for (int m = 0; m <= nK; m++)
+		System.out.println(sY[m] + " cases have class " + m);
+	    System.out.println("\n Variable     Avg       SD    ");
+	    for (int j = 1; j <= nR; j++) 
+		System.out.println(Utils.doubleToString(j,8,4) 
+				   + Utils.doubleToString(xMean[j], 10, 4) 
+				   + Utils.doubleToString(xSD[j], 10, 4)
+				   );
+	}
+	
+	// Normalise input data and remove ignored attributes
+	for (int i = 0; i < nC; i++) {
+	    for (int j = 0; j <= nR; j++) {
+		if (xSD[j] != 0) {
+		    m_Data[i][j] = (m_Data[i][j] - xMean[j]) / xSD[j];
+		}
+	    }
+	}
+	
+	if (m_Debug) {
+	    System.out.println("\nIteration History..." );
+	}
+	
+	double x[] = new double[(nR+1)*nK];
+	double[][] b = new double[2][x.length]; // Boundary constraints, N/A here
+
+	// Initialize
+	for(int p=0; p<nK; p++){
+	    int offset=p*(nR+1);	 
+	    x[offset] =  Math.log(sY[p]+1.0) - Math.log(sY[nK]+1.0); // Null model
+	    b[0][offset] = Double.NaN;
+	    b[1][offset] = Double.NaN;   
+	    for (int q=1; q <= nR; q++){
+		x[offset+q] = 0.0;		
+		b[0][offset+q] = Double.NaN;
+		b[1][offset+q] = Double.NaN;
+	    }	
+	}
+	
+	OptEng opt = new OptEng();	
+	opt.setDebug(m_Debug);
+	opt.setWeights(weights);
+	opt.setClassLabels(Y);
+
+	if(m_MaxIts == -1){  // Search until convergence
+	    x = opt.findArgmin(x, b);
+	    while(x==null){
+		x = opt.getVarbValues();
+		if (m_Debug)
+		    System.out.println("200 iterations finished, not enough!");
+	    x = opt.findArgmin(x, b);
+	    }
+	    if (m_Debug)
+		System.out.println(" -------------<Converged>--------------");
+	}
+	else{
+	    opt.setMaxIteration(m_MaxIts);
+	    x = opt.findArgmin(x, b);
+	}
+	
+	m_LL = -opt.getMinFunction(); // Log-likelihood
+	    
+	// Convert coefficients back to non-normalized attribute units
+	for(int i=0; i < nK; i++){
+	    m_Par[0][i] = x[i*(nR+1)];
+	    for(int j = 1; j <= nR; j++) {
+		m_Par[j][i] = x[i*(nR+1)+j];
+		if (xSD[j] != 0) {
+		    m_Par[j][i] /= xSD[j];
+		    m_Par[0][i] -= m_Par[j][i] * xMean[j];
+		}
+	    }
+	}
+    }		
+    
+    /**
+     * Computes the distribution for a given instance
+     *
+     * @param instance the instance for which distribution is computed
+     * @return the distribution
+     * @exception Exception if the distribution can't be computed successfully
+     */
+    public double [] distributionForInstance(Instance instance) 
+	throws Exception {
+	
+	m_ReplaceMissingValues.input(instance);
+	instance = m_ReplaceMissingValues.output();
+	m_AttFilter.input(instance);
+	instance = m_AttFilter.output();
+	m_NominalToBinary.input(instance);
+	instance = m_NominalToBinary.output();
+	
+	// Extract the predictor columns into an array
+	double [] instDat = new double [m_NumPredictors + 1];
+	int j = 1;
+	instDat[0] = 1;
+	for (int k = 0; k <= m_NumPredictors; k++) {
+	    if (k != m_ClassIndex) {
+		instDat[j++] = instance.value(k);
+	    }
+	}
+	
+	double [] distribution = evaluateProbability(instDat);
+	return distribution;
     }
-    return probs(preds);
-  }
 
-  /**
-   * Computes probabilities from F scores
-   */
-  private double[] probs(double[] Fs) {
+    /**
+     * Compute the posterior distribution using optimized parameter values
+     * and the testing instance.
+     * @param data the testing instance
+     * @return the posterior probability distribution
+     */ 
+    private double[] evaluateProbability(double[] data){
+	double[] prob = new double[m_NumClasses],
+	    v = new double[m_NumClasses];
 
-    double maxF = -Double.MAX_VALUE;
-    for (int i = 0; i < Fs.length; i++) {
-      if (Fs[i] > maxF) {
-	maxF = Fs[i];
-      }
-    }
-    double sum = 0;
-    double[] probs = new double[Fs.length];
-    for (int i = 0; i < Fs.length; i++) {
-      probs[i] = Math.exp(Fs[i] - maxF);
-      sum += probs[i];
-    }
-    Utils.normalize(probs, sum);
-    return probs;
-  }
-
-  /**
-   * Prints the model.
-   */
-  public String toString() {
-
-    if (m_Coefficients == null) {
-      return "No model has been built yet!";
+	// Log-posterior before normalizing
+	for(int j = 0; j < m_NumClasses-1; j++){
+	    for(int k = 0; k <= m_NumPredictors; k++){
+		v[j] += m_Par[k][j] * data[k];
+	    }
+	}
+	v[m_NumClasses-1] = 0;
+	
+	// Do so to avoid scaling problems
+	for(int m=0; m < m_NumClasses; m++){
+	    double sum = 0;
+	    for(int n=0; n < m_NumClasses-1; n++)
+		sum += Math.exp(v[n] - v[m]);
+	    prob[m] = 1 / (sum + Math.exp(-v[m]));
+	}
+	
+	return prob;
     } 
-    StringBuffer text = new StringBuffer();
-    for (int j = 0; j < m_Coefficients.length; j++) {
-      text.append("\nModel for class: " + 
-		  m_Header.classAttribute().value(j) + "\n\n");
-      for (int i = 0; i < m_Coefficients[j].length; i++) {
-	if (i != m_ClassIndex) {
-	  if (i > 0) {
-	    text.append(" + ");
-	  } else {
-	    text.append("   ");
-	  }
-	  text.append(Utils.doubleToString(m_Coefficients[j][i], 12, 4));
-	  if (i < m_Coefficients[j].length - 1) {
-	    text.append(" * " 
-			+ m_Header.attribute(i).name() + "\n");
-	  }
+    
+    /**
+     * Gets a string describing the classifier.
+     *
+     * @return a string describing the classifer built.
+     */
+    public String toString() {
+	
+	double CSq;
+	int df = m_NumPredictors;
+	String result = "Logistic Regression with ridge parameter of "+m_Ridge;
+	if (m_Par == null) {
+	    return result + ": No model built yet.";
 	}
-      }
-      text.append("\n");
+	
+	result += "\nCoefficients...\n"
+	    + "Variable      Coeff.\n";
+	for (int j = 1; j <= m_NumPredictors; j++) {
+	    result += Utils.doubleToString(j, 8, 0);
+	    for (int k = 0; k < m_NumClasses-1; k++)
+		result += " "+Utils.doubleToString(m_Par[j][k], 12, 4); 
+	    result += "\n";
+	}
+	
+	result += "Intercept ";
+	for (int k = 0; k < m_NumClasses-1; k++)
+	    result += " "+Utils.doubleToString(m_Par[0][k], 10, 4); 
+	result += "\n";
+	
+	result += "\nOdds Ratios...\n"
+	    + "Variable         O.R.\n";
+	for (int j = 1; j <= m_NumPredictors; j++) {
+	    result += Utils.doubleToString(j, 8, 0); 
+	    for (int k = 0; k < m_NumClasses-1; k++){
+		double ORc = Math.exp(m_Par[j][k]);
+		result += " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
+	    }
+	    result += "\n";
+	}
+	return result;
     }
-    return text.toString();
-  }
-  
-  /**
-   * Get the value of MaxIts.
-   *
-   * @return Value of MaxIts.
-   */
-  public int getMaxIts() {
     
-    return m_MaxIts;
-  }
-  
-  /**
-   * Set the value of MaxIts.
-   *
-   * @param newMaxIts Value to assign to MaxIts.
-   */
-  public void setMaxIts(int newMaxIts) {
-    
-    m_MaxIts = newMaxIts;
-  }
-  
-  /**
-   * Sets the precision of stopping criterion in Newton method.
-   *
-   * @param precision the precision
-   */
-  public void setPrecision(double precision) {
-    m_Precision = precision;
-  }
-    
-  /**
-   * Gets the precision of stopping criterion in Newton method.
-   *
-   * @return the precision
-   */
-  public double getPrecision() {
-    return m_Precision;
-  }
-
-  /**
-   * Sets the ridge parameter.
-   *
-   * @param ridge the ridge
-   */
-  public void setRidge(double ridge) {
-    m_Ridge = ridge;
-  }
-    
-  /**
-   * Gets the ridge parameter.
-   *
-   * @return the ridge
-   */
-  public double getRidge() {
-    return m_Ridge;
-  }
-
-  /**
-   * Main method for testing this class.
-   */
-  public static void main(String[] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new Logistic(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
+    /**
+     * Main method for testing this class.
+     *
+     * @param argv should contain the command line arguments to the
+     * scheme (see Evaluation)
+     */
+    public static void main(String [] argv) {
+	try {
+	    System.out.println(Evaluation.evaluateModel(new Logistic(), argv));
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    System.err.println(e.getMessage());
+	}
     }
-  }
 }
