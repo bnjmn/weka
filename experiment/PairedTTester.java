@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -688,21 +688,57 @@ public class PairedTTester implements OptionHandler {
 					     Math.log(10)));
     String result = "";
     String titles = "";
+
+    if (m_latexOutput) {
+      result += "\\begin{table}[thb]\n\\caption{\\label{labelname}"
+		  +"Table Caption}\n";
+      result += "\\footnotesize\n";
+      result += "{\\centering \\begin{tabular}{l";
+    }
+
     for (int i = 0; i < numResultsets; i++) {
+      if (m_latexOutput) {
+	titles += " &";
+	result += "c";
+      }
       titles += ' ' + Utils.padLeft("" + (char)((int)'a' + i % 26),
 				    resultsetLength);
     }
-    result += titles + "  (No. of datasets where [col] >> [row])\n";
+    if (m_latexOutput) {
+      result += "}}\\\\\n\\hline\n";
+      result += titles + " \\\\\n\\hline\n";
+    } else {
+      result += titles + "  (No. of datasets where [col] >> [row])\n";
+    }
     for (int i = 0; i < numResultsets; i++) {
       for (int j = 0; j < numResultsets; j++) {
+	if (m_latexOutput && j == 0) {
+	  result +=  (char)((int)'a' + i % 26);
+	}
 	if (j == i) {
-	  result += ' ' + Utils.padLeft("-", resultsetLength);
+	  if (m_latexOutput) {
+	    result += " & - ";
+	  } else {
+	    result += ' ' + Utils.padLeft("-", resultsetLength);
+	  }
 	} else {
-	  result += ' ' + Utils.padLeft("" + win[i][j], resultsetLength);
+	  if (m_latexOutput) {
+	    result += "& " + win[i][j] + ' ';
+	  } else {
+	    result += ' ' + Utils.padLeft("" + win[i][j], resultsetLength);
+	  }
 	}
       }
-      result += " | " + (char)((int)'a' + i % 26)
-	+ " = " + getResultsetName(i) + '\n';
+      if (!m_latexOutput) {
+	result += " | " + (char)((int)'a' + i % 26)
+	  + " = " + getResultsetName(i) + '\n';
+      } else {
+	result += "\\\\\n";
+      }
+    }
+
+    if (m_latexOutput) {
+      result += "\\hline\n\\end{tabular} \\footnotesize \\par}\n\\end{table}";
     }
     return result;
   }
@@ -727,16 +763,36 @@ public class PairedTTester implements OptionHandler {
 			   losses[Utils.maxIndex(losses)]);
     int width = Math.max(2 + (int)(Math.log(biggest) / Math.log(10)),
 			 ">-<".length());
-    String result = Utils.padLeft(">-<", width) + ' '
-      + Utils.padLeft(">", width) + ' '
-      + Utils.padLeft("<", width) + " Resultset\n";
+    String result;
+    if (m_latexOutput) {
+      result = "\\begin{table}[thb]\n\\caption{\\label{labelname}Table Caption"
+	+"}\n\\footnotesize\n{\\centering \\begin{tabular}{rlll}\\\\\n\\hline\n";
+      result += "Resultset & Wins$-$ & Wins & Losses \\\\\n& Losses & & "
+	+"\\\\\n\\hline\n";
+    } else {
+      result = Utils.padLeft(">-<", width) + ' '
+	+ Utils.padLeft(">", width) + ' '
+	+ Utils.padLeft("<", width) + " Resultset\n";
+    }
     int [] ranking = Utils.sort(diff);
     for (int i = numResultsets - 1; i >= 0; i--) {
       int curr = ranking[i];
-      result += Utils.padLeft("" + diff[curr], width) + ' '
-	+ Utils.padLeft("" + wins[curr], width) + ' '
-	+ Utils.padLeft("" + losses[curr], width) + ' '
-	+ getResultsetName(curr) + '\n';
+      if (m_latexOutput) {
+	result += "(" + (curr+1) + ") & " 
+	  + Utils.padLeft("" + diff[curr], width) 
+	  +" & " + Utils.padLeft("" + wins[curr], width)
+	  +" & " + Utils.padLeft("" + losses[curr], width)
+	  +"\\\\\n";
+      } else {
+	result += Utils.padLeft("" + diff[curr], width) + ' '
+	  + Utils.padLeft("" + wins[curr], width) + ' '
+	  + Utils.padLeft("" + losses[curr], width) + ' '
+	  + getResultsetName(curr) + '\n';
+      }
+    }
+
+    if (m_latexOutput) {
+      result += "\\hline\n\\end{tabular} \\footnotesize \\par}\n\\end{table}";
     }
     return result;
   }
