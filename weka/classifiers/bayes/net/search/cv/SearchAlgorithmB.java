@@ -37,7 +37,7 @@ import weka.core.Option;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SearchAlgorithmB extends CVSearchAlgorithm {
 
@@ -184,6 +184,7 @@ public class SearchAlgorithmB extends CVSearchAlgorithm {
         } else {
             setMaxNrOfParents(100000);
         }
+        super.setOptions(options);
     }
 
     /**
@@ -192,7 +193,8 @@ public class SearchAlgorithmB extends CVSearchAlgorithm {
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-        String[] options = new String[3];
+    	String[] superOptions = super.getOptions();
+        String[] options = new String[3 + superOptions.length];
         int current = 0;
         if (m_nMaxNrOfParents != 10000) {
             options[current++] = "-P";
@@ -201,6 +203,11 @@ public class SearchAlgorithmB extends CVSearchAlgorithm {
         if (!m_bInitAsNaiveBayes) {
             options[current++] = "-N";
         }
+        // insert options from parent class
+		for (int iOption = 0; iOption < superOptions.length; iOption++) {
+			options[current++] = superOptions[iOption];
+		}
+
         // Fill up rest with empty strings, not nulls!
         while (current < options.length) {
             options[current++] = "";

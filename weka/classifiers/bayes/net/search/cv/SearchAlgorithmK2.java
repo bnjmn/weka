@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
@@ -221,6 +221,7 @@ public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 	  } else {
 		setMaxNrOfParents(100000);
 	  } 
+	  super.setOptions(options);	  
 	}
 
 	/**
@@ -229,24 +230,29 @@ public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 	 * @return an array of strings suitable for passing to setOptions
 	 */
 	public String [] getOptions() {
-	  String [] options  = new String [4];
-	  int current = 0;
-	  if (m_nMaxNrOfParents != 10000) {
-		options[current++] = "-P";
-		options[current++] = "" + m_nMaxNrOfParents;
-	  } 
-	  if (!m_bInitAsNaiveBayes) {
-		options[current++] = "-N";
-	  } 
-	  if (getRandomOrder()) {
-		options[current++] = "-R";
-	  }
-
-	  while (current < options.length) {
-		options[current++] = "";
-	  }
-	  // Fill up rest with empty strings, not nulls!
-	  return options;
+		String[] superOptions = super.getOptions();
+		String[] options = new String[4 + superOptions.length];
+		int current = 0;
+ 	    if (m_nMaxNrOfParents != 10000) {
+		  options[current++] = "-P";
+		  options[current++] = "" + m_nMaxNrOfParents;
+	   } 
+	    if (!m_bInitAsNaiveBayes) {
+		  options[current++] = "-N";
+	    } 
+	    if (getRandomOrder()) {
+		  options[current++] = "-R";
+	    }
+	    // insert options from parent class
+	    for (int iOption = 0; iOption < superOptions.length; iOption++) {
+		  options[current++] = superOptions[iOption];
+	    }
+	    // Fill up rest with empty strings, not nulls!
+	    while (current < options.length) {
+		  options[current++] = "";
+	    }
+	    // Fill up rest with empty strings, not nulls!
+	    return options;
 	}
 
 	/**

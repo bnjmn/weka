@@ -37,7 +37,7 @@ import weka.core.Option;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SearchAlgorithmB extends ScoreSearchAlgorithm {
 
@@ -222,6 +222,7 @@ public class SearchAlgorithmB extends ScoreSearchAlgorithm {
 	  } else {
 		setMaxNrOfParents(100000);
 	  } 
+	  super.setOptions(options);
 	}
 
 	/**

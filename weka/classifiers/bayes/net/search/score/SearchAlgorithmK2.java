@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
@@ -224,7 +224,8 @@ public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 		setMaxNrOfParents(Integer.parseInt(sMaxNrOfParents));
 	  } else {
 		setMaxNrOfParents(100000);
-	  } 
+	  }
+	  super.setOptions(options);
 	}
 
 	/**

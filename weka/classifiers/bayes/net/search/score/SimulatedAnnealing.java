@@ -23,8 +23,8 @@
 package weka.classifiers.bayes.net.search.score;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.core.Instances;
-import java.util.Random;
+import weka.core.*;
+import java.util.*;
 
 /** SimulatedAnnealing uses simulated annealing for learning Bayesian network
  * structures. For details, see for example 
@@ -36,7 +36,7 @@ import java.util.Random;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.1 $
+ * Version: $Revision: 1.2 $
  */
 
 public class SimulatedAnnealing extends ScoreSearchAlgorithm {
@@ -153,6 +153,75 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
     public void setRuns(int nRuns) {
         m_nRuns = nRuns;
     }
+
+	/**
+	 * Returns an enumeration describing the available options.
+	 *
+	 * @return an enumeration of all the available options.
+	 */
+	public Enumeration listOptions() {
+		Vector newVector = new Vector(3);
+
+		newVector.addElement(new Option("\tStart temperature\n", "A", 1, "-A <float>"));
+		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
+		newVector.addElement(new Option("\tDelta temperature\n", "D", 1, "-D <float>"));
+
+		return newVector.elements();
+	}
+
+	/**
+	 * Parses a given list of options. Valid options are:<p>
+	 *
+	 * For other options see search algorithm.
+	 *
+	 * @param options the list of options as an array of strings
+	 * @exception Exception if an option is not supported
+	 */
+	public void setOptions(String[] options) throws Exception {
+		String sTStart = Utils.getOption('A', options);
+		if (sTStart.length() != 0) {
+			setTStart(Double.parseDouble(sTStart));
+		}
+		String sRuns = Utils.getOption('U', options);
+		if (sRuns.length() != 0) {
+			setRuns(Integer.parseInt(sRuns));
+		}
+		String sDelta = Utils.getOption('D', options);
+		if (sDelta.length() != 0) {
+			setDelta(Double.parseDouble(sDelta));
+		}
+		super.setOptions(options);
+	}
+
+	/**
+	 * Gets the current settings of the search algorithm.
+	 *
+	 * @return an array of strings suitable for passing to setOptions
+	 */
+	public String[] getOptions() {
+		String[] superOptions = super.getOptions();
+		String[] options = new String[6 + superOptions.length];
+		int current = 0;
+		options[current++] = "-A";
+		options[current++] = "" + getTStart();
+
+		options[current++] = "-U";
+		options[current++] = "" + getRuns();
+
+		options[current++] = "-D";
+		options[current++] = "" + getDelta();
+
+		// insert options from parent class
+		for (int iOption = 0; iOption < superOptions.length; iOption++) {
+			options[current++] = superOptions[iOption];
+		}
+
+		// Fill up rest with empty strings, not nulls!
+		while (current < options.length) {
+			options[current++] = "";
+		}
+		return options;
+	}
 
 } // SimulatedAnnealing
 

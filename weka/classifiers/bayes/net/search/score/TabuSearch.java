@@ -23,8 +23,8 @@
 package weka.classifiers.bayes.net.search.score;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.core.Instances;
-import java.util.Random;
+import weka.core.*;
+import java.util.*;
 import java.io.Serializable;
 
 /** TabuSearch implements tabu search for learning Bayesian network
@@ -37,7 +37,7 @@ import java.io.Serializable;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.1 $
+ * Version: $Revision: 1.2 $
  */
 public class TabuSearch extends ScoreSearchAlgorithm {
 
@@ -48,6 +48,8 @@ public class TabuSearch extends ScoreSearchAlgorithm {
     int m_nTabuList = 100;
 
     class Operation implements Serializable {
+    	final static int OPERATION_ADD = 0;
+    	final static int OPERATION_DEL = 0;
         public Operation() {
         }
         public int m_nTail;
@@ -158,11 +160,24 @@ public class TabuSearch extends ScoreSearchAlgorithm {
         }
     } // initBaseScores
 
+	boolean isNotTabu(int iAttributeTail, int iAttributeHead, int eOperation) {
+		for (int iTabu = 0; iTabu < m_nTabuList; iTabu++) {
+			Operation oOperation = m_oTabuList[iTabu];
+			if ((oOperation.m_nOperation == eOperation) &&
+				(oOperation.m_nHead == iAttributeHead) &&
+				(oOperation.m_nTail == iAttributeTail)) {
+					return true;
+				}
+		}
+		return true;
+	} // isNotTabu
+
     Operation getOptimalOperation(BayesNet bayesNet, Instances instances) {
         Operation oOperation = new Operation();
         int nBestAttributeTail = -1;
         int nBestAttributeHead = -1;
         double fBestDeltaScore = 0.0;
+        int nBestOperation;
         int nNrOfAtts = instances.numAttributes();
 
         // find best arc to add
@@ -173,9 +188,12 @@ public class TabuSearch extends ScoreSearchAlgorithm {
                         // System.out.println("gain " +  iAttributeTail + " -> " + iAttributeHead + ": "+ (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead]));
                         if (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead] > fBestDeltaScore) {
                             if (AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
-                                fBestDeltaScore = fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead];
-                                nBestAttributeTail = iAttributeTail;
-                                nBestAttributeHead = iAttributeHead;
+                            	if (isNotTabu(iAttributeTail, iAttributeHead, Operation.OPERATION_ADD)) {
+	                                fBestDeltaScore = fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead];
+	                                nBestAttributeTail = iAttributeTail;
+	                                nBestAttributeHead = iAttributeHead;
+	                                nBestOperation = Operation.OPERATION_ADD;
+								}
                             } else {
                                 bAddArcMakesSense[iAttributeHead][iAttributeTail] = false;
                             }
@@ -184,6 +202,26 @@ public class TabuSearch extends ScoreSearchAlgorithm {
                 }
             }
         }
+
+		// find best arc to delete
+		// TODO SORT THIS OUT
+		/*
+		for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
+				for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
+						if (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead] > fBestDeltaScore) {
+							if (AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
+								if (isNotTabu(iAttributeTail, iAttributeHead, Operation.OPERATION_DEL)) {
+									fBestDeltaScore = fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead];
+									nBestAttributeTail = iAttributeTail;
+									nBestAttributeHead = iAttributeHead;
+									nBestOperation = Operation.OPERATION_DEL;
+								}
+							} else {
+								bAddArcMakesSense[iAttributeHead][iAttributeTail] = false;
+							}
+						}
+				}
+		*/
 
         if (nBestAttributeHead >= 0) {
 
@@ -242,5 +280,67 @@ public class TabuSearch extends ScoreSearchAlgorithm {
     public void setTabuList(int nTabuList) {
         m_nTabuList = nTabuList;
     }
+
+
+	/**
+	 * Returns an enumeration describing the available options.
+	 *
+	 * @return an enumeration of all the available options.
+	 */
+	public Enumeration listOptions() {
+		Vector newVector = new Vector(2);
+
+		newVector.addElement(new Option("\tTabu list length\n", "L", 1, "-L <integer>"));
+		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
+
+		return newVector.elements();
+	}
+
+	/**
+	 * Parses a given list of options. Valid options are:<p>
+	 *
+	 * For other options see search algorithm.
+	 *
+	 * @param options the list of options as an array of strings
+	 * @exception Exception if an option is not supported
+	 */
+	public void setOptions(String[] options) throws Exception {
+		String sTabuList = Utils.getOption('L', options);
+		if (sTabuList.length() != 0) {
+			setTabuList(Integer.parseInt(sTabuList));
+		}
+		String sRuns = Utils.getOption('U', options);
+		if (sRuns.length() != 0) {
+			setRuns(Integer.parseInt(sRuns));
+		}
+		super.setOptions(options);
+	}
+
+	/**
+	 * Gets the current settings of the search algorithm.
+	 *
+	 * @return an array of strings suitable for passing to setOptions
+	 */
+	public String[] getOptions() {
+		String[] superOptions = super.getOptions();
+		String[] options = new String[4 + superOptions.length];
+		int current = 0;
+		options[current++] = "-L";
+		options[current++] = "" + getTabuList();
+
+		options[current++] = "-U";
+		options[current++] = "" + getRuns();
+
+		// insert options from parent class
+		for (int iOption = 0; iOption < superOptions.length; iOption++) {
+			options[current++] = superOptions[iOption];
+		}
+
+		// Fill up rest with empty strings, not nulls!
+		while (current < options.length) {
+			options[current++] = "";
+		}
+		return options;
+	}
 
 } // SimulatedAnnealing
