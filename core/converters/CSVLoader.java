@@ -40,11 +40,13 @@ import java.io.StreamTokenizer;
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Loader
  */
 public class CSVLoader extends AbstractLoader 
   implements BatchLoader {
+
+  public static String FILE_EXTENSION = ".csv";
 
   /**
    * Holds the determined structure (header) of the data set.
