@@ -25,6 +25,7 @@ package weka.gui.experiment;
 import javax.swing.JPanel;
 import weka.experiment.Experiment;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.DatabaseConnectionDialog;
 
 import weka.classifiers.Classifier;
 import weka.experiment.CrossValidationResultProducer;
@@ -90,7 +91,7 @@ import javax.swing.event.DocumentEvent;
  * This panel controls the configuration of an experiment.
  *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -283,7 +284,12 @@ public class SimpleSetupPanel extends JPanel {
 
     m_BrowseDestinationButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  chooseDestinationFile();
+	  //using this button for both browsing file & setting username/password
+	  if (m_ResultsDestinationCBox.getSelectedItem() == DEST_DATABASE_TEXT){
+	    chooseURLUsername();
+	  } else {
+	    chooseDestinationFile();
+	  }
 	}
       });
 
@@ -538,7 +544,7 @@ public class SimpleSetupPanel extends JPanel {
       m_ResultsDestinationPathLabel.setText("URL:");
       m_destinationDatabaseURL = ((DatabaseResultListener)exp.getResultListener()).getDatabaseURL();
       m_ResultsDestinationPathTField.setText(m_destinationDatabaseURL);
-      m_BrowseDestinationButton.setEnabled(false);
+      m_BrowseDestinationButton.setEnabled(true);
     } else if (exp.getResultListener() instanceof InstancesResultListener) {
       m_ResultsDestinationCBox.setSelectedItem(DEST_ARFF_TEXT);
       m_ResultsDestinationPathLabel.setText("Filename:");
@@ -789,11 +795,13 @@ public class SimpleSetupPanel extends JPanel {
     if (m_ResultsDestinationCBox.getSelectedItem() == DEST_DATABASE_TEXT) {
       m_ResultsDestinationPathLabel.setText("URL:");
       m_ResultsDestinationPathTField.setText(m_destinationDatabaseURL);
-      m_BrowseDestinationButton.setEnabled(false);
+      m_BrowseDestinationButton.setEnabled(true); //!!!
+      m_BrowseDestinationButton.setText("User...");
     } else {
       m_ResultsDestinationPathLabel.setText("Filename:");
       m_ResultsDestinationPathTField.setText(m_destinationFilename);
       m_BrowseDestinationButton.setEnabled(true);
+      m_BrowseDestinationButton.setText("Browse...");
     }
 
     if (m_ResultsDestinationCBox.getSelectedItem() == DEST_DATABASE_TEXT) {
@@ -996,6 +1004,25 @@ public class SimpleSetupPanel extends JPanel {
     m_Support.firePropertyChange("", null, null);
   }
 
+  /**
+   * Lets user enter username/password/URL.
+   */
+  private void chooseURLUsername() {
+    String dbaseURL=((DatabaseResultListener)m_Exp.getResultListener()).getDatabaseURL();
+    String username=((DatabaseResultListener)m_Exp.getResultListener()).getUsername();
+    DatabaseConnectionDialog dbd= new DatabaseConnectionDialog(null,dbaseURL,username);
+    dbd.setVisible(true);
+      
+    //if (dbaseURL == null) {
+    if (dbd.getReturnValue()==JOptionPane.CLOSED_OPTION) {
+      return;
+    }
+
+    ((DatabaseResultListener)m_Exp.getResultListener()).setUsername(dbd.getUsername());
+    ((DatabaseResultListener)m_Exp.getResultListener()).setPassword(dbd.getPassword());
+    ((DatabaseResultListener)m_Exp.getResultListener()).setDatabaseURL(dbd.getURL());
+   
+  }
   /**
    * Lets user browse for a destination file..
    */
