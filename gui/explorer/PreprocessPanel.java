@@ -82,7 +82,7 @@ import weka.core.UnassignedClassException;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -482,20 +482,11 @@ public class PreprocessPanel extends JPanel {
 				      JOptionPane.ERROR_MESSAGE);
       }
       return temp;
-    } catch (UnassignedClassException ex) {
-      // Pop up an error optionpane
-      JOptionPane.showMessageDialog(this,
-				    "Problem filtering instances:\n"
-				    + ex.getMessage() + "\n\n"
-                                    +"You should not use filters that require "
-                                    +"a class attribute during preprocessing,\n"
-                                    +"as this will bias any classification "
-                                    +"results you obtain. Consider using a\n"
-                                    +"FilteredClassifier instead.",
-				    "Instance Filter",
-				    JOptionPane.ERROR_MESSAGE);
-      return null;
     } catch (Exception ex) {
+      // the the weka sleep
+      if (m_Log instanceof TaskLogger) {
+	((TaskLogger)m_Log).taskFinished();
+      }
       // Pop up an error optionpane
       JOptionPane.showMessageDialog(this,
 				    "Problem filtering instances:\n"
