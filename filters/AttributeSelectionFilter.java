@@ -63,11 +63,6 @@ public class AttributeSelectionFilter
   /** holds a copy of the full set of valid  options passed to the filter */
   private String [] m_filterOptions;
 
-  /** hold the options that will be passed on to SelectAttributes in
-   * AttributeSelection
-   *
-   private String [] m_optionsCopy; */
-
   /** holds the selected attributes  */
   private int [][] m_selectedAttributes;
 
@@ -191,11 +186,15 @@ public class AttributeSelectionFilter
 
     optionString = Utils.getOption('C',options);
     if (optionString.length()!=0)
-      setClassIndex(Integer.parseInt(optionString));
+      {
+	setClassIndex(Integer.parseInt(optionString));
+      }
 
     optionString = Utils.getOption('P',options);
     if (optionString.length() != 0)
-      setStartSet(optionString);
+      {
+	setStartSet(optionString);
+      }
 
     optionString = Utils.getOption('T',options);
     if (optionString.length() != 0)
@@ -205,20 +204,17 @@ public class AttributeSelectionFilter
 	setThreshold(temp.doubleValue());
       }
     
-    /* save the options of the filter
-    if (options != null) 
-      {
-	m_optionsFilter = new String[options.length];
-	System.arraycopy(options, 0, m_optionsFilter, 0, options.length);
-	} */
-
     optionString = Utils.getOption('E',options);
     if (optionString.length() != 0)
-      setEvaluator(optionString);
+      {
+	setEvaluator(optionString);
+      }
 
     optionString = Utils.getOption('S',options);
     if (optionString.length() != 0)
-      setSearch(optionString);
+      {
+	setSearch(optionString);
+      }
 
     makeOptions();
     Utils.checkForRemainingOptions(options);
@@ -262,7 +258,6 @@ public class AttributeSelectionFilter
     if (m_evaluatorString==null)
       {
 	noEvaluator = true;
-	//	throw new Exception("No attribute/subset evaluator given.");
       }
     else
       {
@@ -272,11 +267,12 @@ public class AttributeSelectionFilter
 	breakLoc = optionString.indexOf(' ');
 	String evalClassName = optionString;
 	String evalOptionsString = "";
-	if (breakLoc != -1) {
-	  evalClassName = optionString.substring(0, breakLoc);
-	  evalOptionsString = optionString.substring(breakLoc).trim();
-	  evalOptions = Utils.splitOptions(evalOptionsString);
-	}
+	if (breakLoc != -1) 
+	  {
+	    evalClassName = optionString.substring(0, breakLoc);
+	    evalOptionsString = optionString.substring(breakLoc).trim();
+	    evalOptions = Utils.splitOptions(evalOptionsString);
+	  }
 
 	m_ASEvaluator = 
 	  (ASEvaluation)Class.forName(evalClassName).newInstance();
@@ -296,15 +292,9 @@ public class AttributeSelectionFilter
 		//m_filterOptions[current++]=""+evalOptionsString;
 	      }
 	  }
-	 
-	// append to the filter options
-	// m_filterOptions[current++]="-E";
-	// m_filterOptions[current++]=""+m_evaluatorString;
       }
   
-
     // set up a dummy search object (if necessary) so help can be printed
-    
     if ((m_searchString == null) &&
 	(!(m_ASEvaluator instanceof 
 	   AttributeEvaluator)))
@@ -352,14 +342,20 @@ public class AttributeSelectionFilter
        }
 
      if (noEvaluator)
-       throw new Exception("No attribute/subset evaluator given.");
+       {
+	 throw new Exception("No attribute/subset evaluator given.");
+       }
      
      if (noSearch)
-       throw new Exception("No search method specified.");
+       {
+	 throw new Exception("No search method specified.");
+       }
 
      if (evalOptions != null)
        for (int i=0;i<evalOptions.length;i++)
-	 m_filterOptions[current++] = ""+evalOptions[i];
+	 {
+	   m_filterOptions[current++] = ""+evalOptions[i];
+	 }
 
      while (current < m_filterOptions.length) 
        {
@@ -512,7 +508,9 @@ public class AttributeSelectionFilter
   public boolean input(Instance instance) throws Exception
   {
     if (m_InputFormat == null)
-      throw new Exception("No input instance format defined");
+      {
+	throw new Exception("No input instance format defined");
+      }
 
     if (m_NewBatch)
     {
@@ -540,7 +538,9 @@ public class AttributeSelectionFilter
   public boolean batchFinished() throws Exception
   {
     if (m_InputFormat == null)
-      throw new Exception("No input instance format defined");
+      {
+	throw new Exception("No input instance format defined");
+      }
 
     if (m_selectedAttributes[0] == null)
       {
@@ -551,13 +551,15 @@ public class AttributeSelectionFilter
 					m_selectedAttributes, m_InputFormat);
 
 	if (m_selectedAttributes[0] == null)
-	  throw new Exception("No selected attributes\n");
+	  {
+	    throw new Exception("No selected attributes\n");
+	  }
 
 	setOutputFormat();
 
 	// Convert pending input instances
 	Instance current;
-	for(int i = 0; i < m_InputFormat.numInstances(); i++)
+	for (int i = 0; i < m_InputFormat.numInstances(); i++)
 	  {
 	    current = m_InputFormat.instance(i);
 	    convertInstance(current);
@@ -586,17 +588,20 @@ public class AttributeSelectionFilter
 
     int i;
     for (i=0;i < m_selectedAttributes[0].length;i++)
-      attributes.
-	addElement(m_InputFormat.attribute(m_selectedAttributes[0][i]).copy());
+      {
+	attributes.
+	  addElement(m_InputFormat.attribute(m_selectedAttributes[0][i]).copy());
+      }
 
     Instances outputFormat = 
-    new Instances(m_InputFormat.relationName(), attributes, 0);
+      new Instances(m_InputFormat.relationName(), attributes, 0);
 
     if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) &&
 	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator))
-      try {
-	outputFormat.setClassIndex(m_selectedAttributes[0].length-1);
-      }
+      try 
+	{
+	  outputFormat.setClassIndex(m_selectedAttributes[0].length-1);
+	}
     catch (Exception e)
       {
 	System.err.println(e.toString()+"\nProblem setting new output format");
@@ -628,6 +633,9 @@ public class AttributeSelectionFilter
     push(newInstance);
   }
 
+  /**
+   * set options to their default values
+   */
   protected void resetOptions()
   {
     m_ASEvaluator = null;
@@ -661,7 +669,6 @@ public class AttributeSelectionFilter
       else
 	Filter.filterFile(new AttributeSelectionFilter(),argv);
     }
-
     catch (Exception ex)
     {
       System.out.println(ex.getMessage());
