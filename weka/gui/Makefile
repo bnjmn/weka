@@ -47,6 +47,7 @@ all :	$(CLASSFILES)
 	(cd streams; make all JAVAC=$(JAVAC))
 	(cd visualize; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make all JAVAC=$(JAVAC))
+	(cd beans; make all JAVAC=$(JAVAC))
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
@@ -55,6 +56,7 @@ debug : clean
 	(cd streams; make debug JAVAC=$(JAVAC))
 	(cd visualize; make debug JAVAC=$(JAVAC))	
 	(cd treevisualizer; make debug JAVAC=$(JAVAC))
+	(cd beans; make debug JAVAC=$(JAVAC))
 
 optimized : clean
 	$(JAVAC) -O $(SOURCES)
@@ -62,7 +64,8 @@ optimized : clean
 	(cd explorer; make optimized JAVAC=$(JAVAC))
 	(cd streams; make optimized JAVAC=$(JAVAC))
 	(cd visualize; make optimized JAVAC=$(JAVAC))
-	(cd treevisualizer; make optimized JAVAC=$(JAVAC))	
+	(cd treevisualizer; make optimized JAVAC=$(JAVAC))
+	(cd beans; make optimized JAVAC=$(JAVAC))
 
 fulljar : all
 	(cd $(TOPDIR) ; \
@@ -94,4 +97,5 @@ clean :
 	(cd visualize; make clean)
 	(cd streams; make clean)
 	(cd treevisualizer; make clean)
+	(cd beans; make clean)
 
