@@ -26,6 +26,7 @@ import weka.core.Option;
 import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.Summarizable;
+import weka.core.AdditionalMeasureProducer;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import java.util.Enumeration;
@@ -33,22 +34,12 @@ import java.util.Vector;
 import java.io.Serializable;
 import java.io.ObjectStreamClass;
 
-import java.beans.MethodDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyEditorManager;
-import java.beans.PropertyVetoException;
-import java.beans.Beans;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * A SplitEvaluator that produces results for a classification scheme
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
@@ -197,29 +188,16 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     // determine which (if any) of the additional measures this classifier
     // can produce
     if (m_AdditionalMeasures != null && m_AdditionalMeasures.length > 0) {
-      MethodDescriptor methods[];
       m_doesProduce = new boolean [m_AdditionalMeasures.length];
 
-      try {
-	BeanInfo bi = Introspector.getBeanInfo(m_Classifier.getClass());
-	methods = bi.getMethodDescriptors();
-      } catch (IntrospectionException ex) {
-	System.err.println("ClassifierSplitEvaluator: Couldn't "
-			   +"introspect");
-	return;
-      }
-
-      // look for methods that begin with "measure" indicating that the
-      // method returns auxilliary information related to the object
-      for (int i=0;i<methods.length;i++) {
-	String name = methods[i].getDisplayName();
-	Method meth = methods[i].getMethod();
-	if (name.startsWith("measure")) {
-	  if (meth.getReturnType().equals(double.class)) {
-	    for (int j=0;j<m_AdditionalMeasures.length;j++) {
-	      if (name.compareTo(m_AdditionalMeasures[j]) == 0) {
-		m_doesProduce[j] = true;
-	      }
+      if (m_Classifier instanceof AdditionalMeasureProducer) {
+	Enumeration en = ((AdditionalMeasureProducer)m_Classifier).
+	  enumerateMeasures();
+	while (en.hasMoreElements()) {
+	  String mname = (String)en.nextElement();
+	  for (int j=0;j<m_AdditionalMeasures.length;j++) {
+	    if (mname.compareTo(m_AdditionalMeasures[j]) == 0) {
+	      m_doesProduce[j] = true;
 	    }
 	  }
 	}
@@ -413,17 +391,16 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
       result[current++] = null;
     }
 
-        for (int i=0;i<addm;i++) {
+    for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
 	try {
-	  Class args [] = { };
-	  Method meth = m_Classifier.getClass()
-	    .getDeclaredMethod(m_AdditionalMeasures[i], args);
-	  Double value = (Double)(meth.invoke(m_Classifier, args));
+	  double dv = ((AdditionalMeasureProducer)m_Classifier).
+	    getMeasure(m_AdditionalMeasures[i]);
+	  Double value = new Double(dv);
+
 	  result[current++] = value;
 	} catch (Exception ex) {
-	  System.err.println("Problem with invoking method in "
-			     +"RegressionSplitEvaluator");
+	  System.err.println(ex);
 	}
       } else {
 	result[current++] = null;
@@ -526,14 +503,13 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
       for (int i=0;i<m_doesProduce.length;i++) {
 	if (m_doesProduce[i]) {
 	  try {
-	    Class args [] = { };
-	    Method meth = m_Classifier.getClass()
-	      .getDeclaredMethod(m_AdditionalMeasures[i], args);
-	    Double value = (Double)(meth.invoke(m_Classifier, args));
+	    double dv = ((AdditionalMeasureProducer)m_Classifier).
+	    getMeasure(m_AdditionalMeasures[i]);
+	    Double value = new Double(dv);
+
 	    result.append(m_AdditionalMeasures[i]+" : "+value+'\n');
 	  } catch (Exception ex) {
-	    System.err.println("Problem with invoking method in "
-			       +"ClassifierSplitEvaluator");
+	    System.err.println(ex);
 	  }
 	} 
       }

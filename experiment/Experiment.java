@@ -24,6 +24,7 @@ import weka.core.Utils;
 import weka.core.Option;
 import weka.core.Instances;
 import weka.core.FastVector;
+import weka.core.AdditionalMeasureProducer;
 
 import java.io.Serializable;
 import java.io.File;
@@ -51,14 +52,6 @@ import java.beans.MethodDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
-import java.beans.IntrospectionException;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyEditorManager;
-import java.beans.PropertyVetoException;
-import java.beans.Beans;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Holds all the necessary configuration information for a standard
@@ -66,7 +59,7 @@ import java.lang.reflect.InvocationTargetException;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -287,30 +280,17 @@ public class Experiment implements Serializable, OptionHandler {
   private void determineAdditionalResultMeasures() {
     m_AdditionalMeasures = null;
     FastVector measureNames = new FastVector();
-    MethodDescriptor methods[];
     
     for (int i = 0; i < Array.getLength(m_PropertyArray); i++) {
       Object current = Array.get(m_PropertyArray, i);
-      try {
-	BeanInfo bi = Introspector.getBeanInfo(current.getClass());
-	methods = bi.getMethodDescriptors();
-      } catch (IntrospectionException ex) {
-	System.err.println("determineAdditionalResultMeasures: Couldn't "
-			   +"introspect");
-	return;
-      }
 
-      // look for methods that begin with "measure" indicating that the
-      // method returns auxilliary information related to the object
-      for (int j=0; j<methods.length; j++) {
-	String name = methods[j].getDisplayName();
-	Method meth = methods[j].getMethod();
-	if (name.startsWith("measure")) {
-	
-	  if (meth.getReturnType().equals(double.class)) {
-	    if (measureNames.indexOf(name) == -1) {
-	      measureNames.addElement(name);
-	    }
+      if (current instanceof AdditionalMeasureProducer) {
+	Enumeration am = ((AdditionalMeasureProducer)current).
+	  enumerateMeasures();
+	while (am.hasMoreElements()) {
+	  String mname = (String)am.nextElement();
+	  if (measureNames.indexOf(mname) == -1) {
+	    measureNames.addElement(mname);
 	  }
 	}
       }
