@@ -26,6 +26,7 @@ package weka.gui;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.AttributeStats;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
@@ -56,7 +57,7 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeSummaryPanel extends JPanel {
 
@@ -265,10 +266,10 @@ public class AttributeSummaryPanel extends JPanel {
     } else if (as.numericStats != null) {
       Object [] colNames = {"Statistic", "Value"};
       Object [][] data = new Object [4][2];
-      data[0][0] = "Minimum"; data[0][1] = new Double(as.numericStats.min);
-      data[1][0] = "Maximum"; data[1][1] = new Double(as.numericStats.max);
-      data[2][0] = "Mean";    data[2][1] = new Double(as.numericStats.mean);
-      data[3][0] = "StdDev";  data[3][1] = new Double(as.numericStats.stdDev);
+      data[0][0] = "Minimum"; data[0][1] = Utils.doubleToString(as.numericStats.min, 3);
+      data[1][0] = "Maximum"; data[1][1] = Utils.doubleToString(as.numericStats.max, 3);
+      data[2][0] = "Mean";    data[2][1] = Utils.doubleToString(as.numericStats.mean, 3);
+      data[3][0] = "StdDev";  data[3][1] = Utils.doubleToString(as.numericStats.stdDev, 3);
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
     } else {
       m_StatsTable.setModel(new DefaultTableModel());
