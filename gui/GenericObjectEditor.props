@@ -17,6 +17,7 @@ weka.experiment.ResultListener=\
 # Lists the SplitEvaluators I want to choose from
 weka.experiment.SplitEvaluator=\
  weka.experiment.ClassifierSplitEvaluator, \
+ weka.experiment.CostSensitiveClassifierSplitEvaluator, \
  weka.experiment.RegressionSplitEvaluator
 
 # Lists the Classifiers I want to choose from
