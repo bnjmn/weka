@@ -54,6 +54,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Font;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -109,7 +110,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -141,6 +142,14 @@ public class ClustererPanel extends JPanel {
   /** Click to set test mode to a user-specified test set */
   protected JRadioButton m_TestSplitBut =
     new JRadioButton("Supplied test set");
+
+  /** Click to set test mode to classes to clusters based evaluation */
+  protected JRadioButton m_ClassesToClustersBut = 
+    new JRadioButton("Classes to clusters evaluation");
+
+  /** Lets the user select the class column for classes to clusters based
+      evaluation */
+  protected JComboBox m_ClassCombo = new JComboBox();
 
   /** Label by where the % split is entered */
   protected JLabel m_PercentLab = new JLabel("%", SwingConstants.RIGHT);
@@ -175,6 +184,10 @@ public class ClustererPanel extends JPanel {
 
   /** Click to start running the clusterer */
   protected JButton m_StartBut = new JButton("Start");
+
+  /** Stop the class combo from taking up to much space */
+  private Dimension COMBO_SIZE = new Dimension(250, m_StartBut
+					       .getPreferredSize().height);
 
   /** Click to stop a running clusterer */
   protected JButton m_StopBut = new JButton("Stop");
@@ -253,12 +266,21 @@ public class ClustererPanel extends JPanel {
     m_PercentBut.setToolTipText("Train on a percentage of the data and"
 				+ " cluster the remainder");
     m_TestSplitBut.setToolTipText("Cluster a user-specified dataset");
+    m_ClassesToClustersBut.setToolTipText("Evaluate clusters with respect to a"
+					  +" class");
+    m_ClassCombo.setToolTipText("Select the class attribute for class based"
+				+" evaluation");
     m_StartBut.setToolTipText("Starts the clustering");
     m_StopBut.setToolTipText("Stops a running clusterer");
     m_StorePredictionsBut.
       setToolTipText("Store predictions in the result list for later "
 		     +"visualization");
     m_ignoreBut.setToolTipText("Ignore attributes during clustering");
+
+    m_ClassCombo.setPreferredSize(COMBO_SIZE);
+    m_ClassCombo.setMaximumSize(COMBO_SIZE);
+    m_ClassCombo.setMinimumSize(COMBO_SIZE);
+    m_ClassCombo.setEnabled(false);
 
     m_TrainBut.setSelected(true);
     m_StorePredictionsBut.setSelected(true);
@@ -267,9 +289,11 @@ public class ClustererPanel extends JPanel {
     bg.add(m_TrainBut);
     bg.add(m_PercentBut);
     bg.add(m_TestSplitBut);
+    bg.add(m_ClassesToClustersBut);
     m_TrainBut.addActionListener(m_RadioListener);
     m_PercentBut.addActionListener(m_RadioListener);
     m_TestSplitBut.addActionListener(m_RadioListener);
+    m_ClassesToClustersBut.addActionListener(m_RadioListener);
     m_SetTestBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setTestSet();
@@ -373,6 +397,19 @@ public class ClustererPanel extends JPanel {
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.WEST;
     gbC.gridy = 3;     gbC.gridx = 0;  gbC.gridwidth = 2;
+    gbL.setConstraints(m_ClassesToClustersBut, gbC);
+    p2.add(m_ClassesToClustersBut);
+
+    m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 4;     gbC.gridx = 0;  gbC.gridwidth = 2;
+    gbL.setConstraints(m_ClassCombo, gbC);
+    p2.add(m_ClassCombo);
+
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 5;     gbC.gridx = 0;  gbC.gridwidth = 2;
     gbL.setConstraints(m_StorePredictionsBut, gbC);
     p2.add(m_StorePredictionsBut);
 
@@ -453,6 +490,7 @@ public class ClustererPanel extends JPanel {
     }
     m_PercentText.setEnabled(m_PercentBut.isSelected());
     m_PercentLab.setEnabled(m_PercentBut.isSelected());
+    m_ClassCombo.setEnabled(m_ClassesToClustersBut.isSelected());
   }
 
   /**
@@ -495,17 +533,40 @@ public class ClustererPanel extends JPanel {
     setXY_VisualizeIndexes(0,0);
 
     m_Instances = inst;
-    m_StartBut.setEnabled(m_RunThread == null);
-    m_StopBut.setEnabled(m_RunThread != null);
-
+   
     m_ignoreKeyModel.removeAllElements();
     
+    String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
       m_ignoreKeyModel.addElement(name);
+
+       String type = "";
+      switch (m_Instances.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = "(Nom) ";
+	break;
+      case Attribute.NUMERIC:
+	type = "(Num) ";
+	break;
+      case Attribute.STRING:
+	type = "(Str) ";
+	break;
+      default:
+	type = "(???) ";
+      }
+      String attnm = m_Instances.attribute(i).name();
+     
+      attribNames[i] = type + attnm;
     }
 
+    
+    m_StartBut.setEnabled(m_RunThread == null);
+    m_StopBut.setEnabled(m_RunThread != null);
     m_ignoreBut.setEnabled(true);
+    m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
+    m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+    updateRadioLinks();
   }
 
   /**
@@ -591,12 +652,16 @@ public class ClustererPanel extends JPanel {
    * Sets up the structure for the visualizable instances. This dataset
    * contains the original attributes plus the clusterer's cluster assignments
    * @param testInstancs the instances that the clusterer has clustered
-   * @return a new set of instances containing one more attribute (predicted
+   * @return a PlotData2D object encapsulating the visualizable instances. The    * instances contain one more attribute (predicted
    * cluster) than the testInstances
    */
-  private Instances setUpVisualizableInstances(Instances testInstances,
-					       int numClusters,
-					       double [] clusterAssignments) {
+  private PlotData2D setUpVisualizableInstances(Instances testInstances,
+						ClusterEvaluation eval) 
+    throws Exception {
+
+    int numClusters = eval.getNumClusters();
+    double [] clusterAssignments = eval.getClusterAssignments();
+
     FastVector hv = new FastVector();
     Instances newInsts;
 
@@ -617,15 +682,35 @@ public class ClustererPanel extends JPanel {
 
     double [] values;
     int j;
+    int [] pointShapes = null;
+    int [] classAssignments = null;
+    if (testInstances.classIndex() >= 0) {
+      classAssignments = eval.getClassesToClusters();
+      pointShapes = new int[testInstances.numInstances()];
+      for (int i = 0; i < testInstances.numInstances(); i++) {
+	pointShapes[i] = Plot2D.CONST_AUTOMATIC_SHAPE;
+      }
+    }
+
     for (int i = 0; i < testInstances.numInstances(); i++) {
-       values = new double[newInsts.numAttributes()];
+      values = new double[newInsts.numAttributes()];
       for (j = 0; j < testInstances.numAttributes(); j++) {
 	values[j] = testInstances.instance(i).value(j);
       }
       values[j] = clusterAssignments[i];
       newInsts.add(new Instance(1.0, values));
+      if (pointShapes != null) {
+	if ((int)testInstances.instance(i).classValue() != 
+	    classAssignments[(int)clusterAssignments[i]]) {
+	  pointShapes[i] = Plot2D.ERROR_SHAPE;
+	}
+      }
     }
-    return newInsts;
+    PlotData2D plotData = new PlotData2D(newInsts);
+    if (pointShapes != null) {
+      plotData.setShapeType(pointShapes);
+    }
+    return plotData;
   }
   
   /**
@@ -646,8 +731,7 @@ public class ClustererPanel extends JPanel {
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
 	  Instances userTest = null;
-	  double [] predictions = null;
-	  Instances predInstances = null;
+	  PlotData2D predData = null;
 	  if (m_TestInstances != null) {
 	    userTest = new Instances(m_TestInstancesCopy);
 	  }
@@ -684,14 +768,21 @@ public class ClustererPanel extends JPanel {
 	      if (!inst.equalHeaders(userTest)) {
 		throw new Exception("Train and test set are not compatible");
 	      }
+	    } else if (m_ClassesToClustersBut.isSelected()) {
+	      testMode = 5;
 	    } else {
 	      throw new Exception("Unknown test mode");
 	    }
 
 	    Instances trainInst = new Instances(inst);
+	    if (m_ClassesToClustersBut.isSelected()) {
+	      trainInst.setClassIndex(m_ClassCombo.getSelectedIndex());
+	      inst.setClassIndex(m_ClassCombo.getSelectedIndex());
+	    }
 	    if (!m_ignoreKeyList.isSelectionEmpty()) {
 	      trainInst = removeIgnoreCols(trainInst);
 	    }
+
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
 	    if (m_Log instanceof TaskLogger) {
@@ -718,13 +809,17 @@ public class ClustererPanel extends JPanel {
 		  selected[indices[i]] = false;
 		}
 	      }
+	      if (m_ClassesToClustersBut.isSelected()) {
+		selected[m_ClassCombo.getSelectedIndex()] = false;
+	      }
 	      for (int i = 0; i < inst.numAttributes(); i++) {
 		if (selected[i]) {
 		  outBuff.append("              " + inst.attribute(i).name()
 				 + '\n');
 		}
 	      }
-	      if (!m_ignoreKeyList.isSelectionEmpty()) {
+	      if (!m_ignoreKeyList.isSelectionEmpty() 
+		  || m_ClassesToClustersBut.isSelected()) {
 		outBuff.append("Ingored:\n");
 		for (int i = 0; i < inst.numAttributes(); i++) {
 		  if (!selected[i]) {
@@ -750,6 +845,10 @@ public class ClustererPanel extends JPanel {
 	      outBuff.append("user supplied test set: "
 			     + userTest.numInstances() + " instances\n");
 	      break;
+	    case 5: // Classes to clusters evaluation on training
+	      outBuff.append("Classes to clusters evaluation on training data");
+	      
+	      break;
 	    }
 	    outBuff.append("\n");
 	    m_History.addResult(name, outBuff);
@@ -757,24 +856,22 @@ public class ClustererPanel extends JPanel {
 	    
 	    // Build the model and output it.
 	    m_Log.statusMessage("Building model on training data...");
-	   
-	    clusterer.buildClusterer(trainInst);
-	    outBuff.append("=== Clustering model (full training set) ===\n\n");
+
+	    // remove the class attribute (if set) and build the clusterer
+	    clusterer.buildClusterer(removeClass(trainInst));
+
+	    outBuff.append("\n=== Clustering model (full training set) ===\n\n");
 	    outBuff.append(clusterer.toString() + '\n');
 	    m_History.updateResult(name);
 	    
-	    int numClusters;
 	    ClusterEvaluation eval = new ClusterEvaluation();
 	    eval.setClusterer(clusterer);
 	    switch (testMode) {
-	      case 3: // Test on training
+	      case 3: case 5: // Test on training
 	      m_Log.statusMessage("Clustering training data...");
 	      eval.evaluateClusterer(trainInst);
-	      numClusters = eval.getNumClusters();
-	      predictions = eval.getClusterAssignments();     
-	      predInstances = setUpVisualizableInstances(inst, numClusters,
-							 predictions);
-	      outBuff.append("=== Evaluation on training set ===\n");
+	      predData = setUpVisualizableInstances(inst,eval);
+	      outBuff.append("=== Evaluation on training set ===\n\n");
 	      break;
 
 	      case 2: // Percent split
@@ -790,10 +887,7 @@ public class ClustererPanel extends JPanel {
 	      clusterer.buildClusterer(train);
 	      m_Log.statusMessage("Evaluating on test split...");
 	      eval.evaluateClusterer(test);
-	      numClusters = eval.getNumClusters();
-	      predictions = eval.getClusterAssignments();
-	      predInstances = setUpVisualizableInstances(testVis, numClusters,
-							  predictions);
+	      predData = setUpVisualizableInstances(testVis, eval);
 	      outBuff.append("=== Evaluation on test split ===\n");
 	      break;
 		
@@ -802,13 +896,9 @@ public class ClustererPanel extends JPanel {
 	      Instances userTestT = new Instances(userTest);
 	      if (!m_ignoreKeyList.isSelectionEmpty()) {
 		userTestT = removeIgnoreCols(userTestT);
-		//	      System.out.print(trainInst);
 	      }
 	      eval.evaluateClusterer(userTestT);
-	      numClusters = eval.getNumClusters();
-	      predictions = eval.getClusterAssignments();
-	      predInstances = setUpVisualizableInstances(userTest, numClusters,
-							 predictions);
+	      predData = setUpVisualizableInstances(userTest, eval);
 	      outBuff.append("=== Evaluation on test set ===\n");
 	      break;
 
@@ -825,14 +915,13 @@ public class ClustererPanel extends JPanel {
 	    m_Log.statusMessage("See error log");
 	    ex.printStackTrace();
 	  } finally {
-	    if (predInstances != null) {
+	    if (predData != null) {
 	      m_CurrentVis = new VisualizePanel();
 	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
-	      PlotData2D tempd = new PlotData2D(predInstances);
-	      tempd.setPlotName(name+" ("+inst.relationName()+")");
+	      predData.setPlotName(name+" ("+inst.relationName()+")");
 	      
 	      try {
-		m_CurrentVis.addPlot(tempd);
+		m_CurrentVis.addPlot(predData);
 		m_CurrentVis.setXIndex(m_visXIndex); 
 		m_CurrentVis.setYIndex(m_visYIndex);
 	      } catch (Exception ex) {
@@ -874,7 +963,36 @@ public class ClustererPanel extends JPanel {
     }
   }
 
+  private Instances removeClass(Instances inst) {
+    AttributeFilter af = new AttributeFilter();
+    Instances retI = null;
+    
+    try {
+      if (inst.classIndex() < 0) {
+	retI = inst;
+      } else {
+	af.setAttributeIndices(""+(inst.classIndex()+1));
+	af.setInvertSelection(false);
+	af.inputFormat(inst);
+	retI = Filter.useFilter(inst, af);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return retI;
+  }
+
   private Instances removeIgnoreCols(Instances inst) {
+    
+    // If the user is doing classes to clusters evaluation and
+    // they have opted to ignore the class, then unselect the class in
+    // the ignore list
+    if (m_ClassesToClustersBut.isSelected()) {
+      int classIndex = m_ClassCombo.getSelectedIndex();
+      if (m_ignoreKeyList.isSelectedIndex(classIndex)) {
+	m_ignoreKeyList.removeSelectionInterval(classIndex, classIndex);
+      }
+    }
     int [] selected = m_ignoreKeyList.getSelectedIndices();
     AttributeFilter af = new AttributeFilter();
     Instances retI = null;
