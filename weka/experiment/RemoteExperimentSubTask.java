@@ -7,13 +7,14 @@
 package weka.experiment;
 
 import weka.core.FastVector;
+import java.io.File;
 
 /**
  * Class to encapsulate an experiment as a task that can be executed on
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoteExperimentSubTask implements Task {
 
@@ -42,22 +43,25 @@ public class RemoteExperimentSubTask implements Task {
     public Object execute() {
       FastVector result = new FastVector();
       String goodResult = "(sub)experiment completed successfully";
-      try {
-	System.err.println("Initializing (exp run # "+m_experiment.getRunLower()
-			   +")...");
+      String subTaskIdentifier;
+      if (m_experiment.getRunLower() != m_experiment.getRunUpper()) {
+	subTaskIdentifier = "(datataset "
+	  + ((File)m_experiment.getDatasets().elementAt(0)).getName();
+      } else {
+	subTaskIdentifier = "(exp run # "+
+	  m_experiment.getRunLower();
+      }
+      try {	
+	System.err.println("Initializing " + subTaskIdentifier + ")...");
 	m_experiment.initialize();
-	System.err.println("Iterating (exp run # "+m_experiment.getRunLower()
-			   +")...");
+	System.err.println("Iterating " + subTaskIdentifier + ")...");
 	m_experiment.runExperiment();
-	System.err.println("Postprocessing (exp run # "
-			   +m_experiment.getRunLower()
-			   +")...");
+	System.err.println("Postprocessing " + subTaskIdentifier + ")...");
 	m_experiment.postProcess();
       } catch (Exception ex) {
 	ex.printStackTrace();
-	String badResult =  "(sub)experiment (run # "
-	  +m_experiment.getRunLower()
-	  +") : "+ex.toString();
+	String badResult =  "(sub)experiment " + subTaskIdentifier 
+	  + ") : "+ex.toString();
 	result.addElement(new Integer(RemoteExperiment.FAILED));
 	result.addElement(badResult);
 	return result;
