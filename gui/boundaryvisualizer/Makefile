@@ -2,7 +2,6 @@ JAVAC = javac
 JAVACDOC = javadoc
 SOURCES = \
 	DataGenerator.java \
-	EMDataGenerator.java \
 	KDDataGenerator.java \
 	BoundaryPanel.java \
 	BoundaryVisualizer.java
