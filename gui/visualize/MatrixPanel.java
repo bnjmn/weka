@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 
@@ -122,7 +122,10 @@ public class MatrixPanel extends JPanel{
   protected JComboBox m_classAttrib = new JComboBox();
 
   /** The slider to adjust the size of the cells in the matrix  */  
-  protected JSlider m_cellSize = new JSlider(50, 500, 100);
+  protected JSlider m_plotSize = new JSlider(50, 500, 100);
+
+  /** The slider to adjust the size of the datapoints  */  
+  protected JSlider m_pointSize = new JSlider(1, 10, 1);
 
   /** The slider to add jitter to the plots */  
   protected JSlider m_jitter = new JSlider(0, 20, 0); 
@@ -133,6 +136,9 @@ public class MatrixPanel extends JPanel{
   /** Array containing precalculated jitter values */
   private int jitterVals[][];
  
+  /** This stores the size of the datapoint */
+  private int datapointSize=1;
+
   /** The text area for percentage to resample data */
   protected JTextField m_resamplePercent = new JTextField(5);
 
@@ -152,7 +158,10 @@ public class MatrixPanel extends JPanel{
   private ButtonGroup distGroup = new ButtonGroup();
 
   /** Displays the current size beside the slider bar for cell size */
-  private final JLabel m_sizeLb = new JLabel("Size: [100]");
+  private final JLabel m_plotSizeLb = new JLabel("PlotSize: [100]");
+
+  /** Displays the current size beside the slider bar for point size */
+  private final JLabel m_pointSizeLb = new JLabel("PointSize: [10]");
 
   /** This array contains the indices of the attributes currently selected  */
   private int [] m_selectedAttribs;
@@ -178,8 +187,11 @@ public class MatrixPanel extends JPanel{
       or same as m_type[0][i] for numeric attribute] */
   private int [][] m_type;
 
-  /** Stores the maximum size for Size label to keep it's size constant */
-  private Dimension m_sizeD;
+  /** Stores the maximum size for PlotSize label to keep it's size constant */
+  private Dimension m_plotLBSizeD;
+
+  /** Stores the maximum size for PointSize label to keep it's size constant */
+  private Dimension m_pointLBSizeD;
 
   /** Contains discrete colours for colouring for nominal attributes */
   private FastVector m_colorList = new FastVector();
@@ -208,7 +220,7 @@ public class MatrixPanel extends JPanel{
 
     /** Setting up GUI **/
     m_selAttrib.addActionListener( new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent ae) {
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
 					 "Attribute Selection Panel",
 					 true);
@@ -258,7 +270,7 @@ public class MatrixPanel extends JPanel{
 					
 	  Plot a = m_plotsPanel;
 	  java.awt.FontMetrics fm = a.getFontMetrics(a.getFont());
-	  a.setCellSize( m_cellSize.getValue() );					
+	  a.setCellSize( m_plotSize.getValue() );					
 	  Dimension d = new Dimension((m_selectedAttribs.length)*(a.cellSize+a.extpad)+100, 
 				      (m_selectedAttribs.length)*(a.cellSize+a.extpad)
 				      +2*fm.getHeight()+a.extpad);
@@ -278,11 +290,19 @@ public class MatrixPanel extends JPanel{
       });
     m_updateBt.setPreferredSize( m_selAttrib.getPreferredSize() );
       
-    m_cellSize.addChangeListener( new ChangeListener() {
+    m_plotSize.addChangeListener( new ChangeListener() {
 	public void stateChanged(ChangeEvent ce) {
-	  m_sizeLb.setText("Size: ["+m_cellSize.getValue()+"]");
-	  m_sizeLb.setPreferredSize( m_sizeD );
-	  m_jitter.setMaximum( m_cellSize.getValue()/5 ); //20% of cell Size
+	  m_plotSizeLb.setText("PlotSize: ["+m_plotSize.getValue()+"]");
+	  m_plotSizeLb.setPreferredSize( m_plotLBSizeD );
+	  m_jitter.setMaximum( m_plotSize.getValue()/5 ); //20% of cell Size
+	}
+      });
+ 
+    m_pointSize.addChangeListener( new ChangeListener() {
+	public void stateChanged(ChangeEvent ce) {
+	  m_pointSizeLb.setText("PointSize: ["+m_pointSize.getValue()+"]");
+	  m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
+	  datapointSize = m_pointSize.getValue();
 	}
       });
  
@@ -358,15 +378,22 @@ public class MatrixPanel extends JPanel{
     final JPanel p4 = new JPanel( new GridBagLayout() ); //this has the slider bars and combobox
     GridBagConstraints gbc = new GridBagConstraints();
      
-    m_sizeD = m_sizeLb.getPreferredSize();
+    m_plotLBSizeD = m_plotSizeLb.getPreferredSize();
+    m_pointLBSizeD = m_pointSizeLb.getPreferredSize();
+    m_pointSizeLb.setText("PointSize: [1]");
+    m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
     m_resampleBt.setPreferredSize( m_selAttrib.getPreferredSize() );
 
     gbc.fill = gbc.HORIZONTAL;
     gbc.anchor = gbc.NORTHWEST;
     gbc.insets = new Insets(2,2,2,2);
-    p4.add(m_sizeLb, gbc);
+    p4.add(m_plotSizeLb, gbc);
     gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
-    p4.add(m_cellSize, gbc);
+    p4.add(m_plotSize, gbc);
+    gbc.weightx=0; gbc.gridwidth = gbc.RELATIVE;
+    p4.add(m_pointSizeLb, gbc);
+    gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
+    p4.add(m_pointSize, gbc);
     gbc.weightx=0; gbc.gridwidth = gbc.RELATIVE;
     p4.add( new JLabel("Jitter: "), gbc);
     gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
@@ -390,7 +417,7 @@ public class MatrixPanel extends JPanel{
     p2.add(m_cp, BorderLayout.SOUTH);
 
     gbc.insets = new Insets(8,5,2,5);
-    gbc.anchor = gbc.NORTHWEST; gbc.fill = gbc.HORIZONTAL; gbc.weightx=1;
+    gbc.anchor = gbc.SOUTHWEST; gbc.fill = gbc.HORIZONTAL; gbc.weightx=1;
     gbc.gridwidth = gbc.RELATIVE;
     optionsPanel.add(p4, gbc);
     gbc.gridwidth = gbc.REMAINDER;
@@ -537,7 +564,7 @@ public class MatrixPanel extends JPanel{
     /** Creating local cache of the data values **/
     double min[]=new double[inst.numAttributes()], max=0;
     double ratio[] = new double[inst.numAttributes()];
-    double cellSize = m_cellSize.getValue(), temp1=0, temp2=0;
+    double cellSize = m_plotSize.getValue(), temp1=0, temp2=0;
 
     for(int j=0; j<inst.numAttributes(); j++) {
       int i;
@@ -792,8 +819,8 @@ public class MatrixPanel extends JPanel{
 	pd.setPlotName("Master Plot");
 	vp.setMasterPlot(pd);
 	//System.out.println("x: "+i+" y: "+j);
-	vp.setXIndex(i);
-	vp.setYIndex(j);
+	vp.setXIndex(m_selectedAttribs[i]);
+	vp.setYIndex(m_selectedAttribs[j]);
 	vp.m_ColourCombo.setSelectedIndex( m_classIndex );
       }
       catch(Exception ex) { ex.printStackTrace(); }
@@ -846,7 +873,7 @@ public class MatrixPanel extends JPanel{
     */
     public void paintGraph(Graphics g, int xattrib, int yattrib, int xpos, int ypos) {
       int x, y;
-      g.setColor( this.getBackground().darker() );
+      g.setColor( this.getBackground().darker().darker() );
       g.drawRect(xpos-1, ypos-1, cellSize+1, cellSize+1);
       g.setColor(Color.white);
       g.fillRect(xpos, ypos, cellSize, cellSize);
@@ -858,7 +885,7 @@ public class MatrixPanel extends JPanel{
 	    if(m_missing[i][m_classIndex])
 	      g.setColor(m_defaultColors[m_defaultColors.length-1]);
 	    else
-	      g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])));
+		g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])) );
 	  else 
 	    g.setColor((Color)m_colorList.elementAt(m_pointColors[i]));
 
@@ -883,7 +910,10 @@ public class MatrixPanel extends JPanel{
 	    x=intpad+m_points[i][xattrib]+jitterVals[i][0];
 	    y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
 	  }
-	  g.drawLine(x+xpos, y+ypos, x+xpos, y+ypos);
+	  if(datapointSize==1)
+	      g.drawLine(x+xpos, y+ypos, x+xpos, y+ypos);
+	  else 
+	      g.drawOval(x+xpos-datapointSize/2, y+ypos-datapointSize/2, datapointSize, datapointSize);
 	}
       }
       g.setColor( fontColor );
