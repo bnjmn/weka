@@ -41,7 +41,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -256,7 +256,16 @@ public class FilteredClassifier extends DistributionClassifier
     newData.deleteWithMissingClass();
     m_Filter.inputFormat(newData);
     newData = Filter.useFilter(newData, m_Filter);
-    m_FilteredInstances = new Instances(newData, 0); // Copy structure
+    // Create a copy of the structure, but "cleanse" string types
+    FastVector atts = new FastVector();
+    for (int i = 0 ; i < newData.numAttributes(); i++) {
+      Attribute att = newData.attribute(i);
+      if (att.type() == Attribute.STRING) {
+        att = new Attribute(att.name(), null);
+      }
+      atts.addElement(att);
+    }
+    m_FilteredInstances = new Instances(newData.relationName(), atts, 0);
     m_Classifier.buildClassifier(newData);
   }
 
