@@ -37,7 +37,7 @@ import weka.core.Queue;
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RemoteEngine extends UnicastRemoteObject
   implements Compute {
@@ -129,9 +129,11 @@ public class RemoteEngine extends UnicastRemoteObject
 	inf.getExecutionStatus() == TaskStatusInfo.FAILED) {
       System.err.println("Finished/failed Task id : " 
 			 + taskId + " checked by client. Removing.");
+      inf.setTaskResult(null);
+      inf = null;
       m_TaskStatus.remove(taskId);
     }
-
+    inf = null;
     return result;
   }
 
@@ -142,9 +144,12 @@ public class RemoteEngine extends UnicastRemoteObject
    * @param taskId the id of the task to be added
    */
   private synchronized void addTaskToQueue(Task t, String taskId) {
+    TaskStatusInfo newTask = t.getTaskStatus();
+    if (newTask == null) {
+      newTask = new TaskStatusInfo();
+    }
     m_TaskQueue.push(t);
     m_TaskIdQueue.push(taskId);
-    TaskStatusInfo newTask = new TaskStatusInfo();
     newTask.setStatusMessage("RemoteEngine ("
 			     +m_HostName
 			     +") : task queued at postion: "
@@ -178,11 +183,13 @@ public class RemoteEngine extends UnicastRemoteObject
 	    try {
 	      System.err.println("Launching task id : "
 				 + taskId + "...");
-	      TaskStatusInfo runStatus = (TaskStatusInfo)currentTask.execute();
+	      currentTask.execute();
+	      TaskStatusInfo runStatus = currentTask.getTaskStatus();
 	      tsi.setExecutionStatus(runStatus.getExecutionStatus());
 	      tsi.setStatusMessage("RemoteExperiment ("
 				   +m_HostName+") "
 				   +runStatus.getStatusMessage());
+	      tsi.setTaskResult(runStatus.getTaskResult());
 	    } catch (Exception ex) {
 	      tsi.setExecutionStatus(TaskStatusInfo.FAILED);
 	      tsi.setStatusMessage("RemoteEngine ("
@@ -246,11 +253,14 @@ public class RemoteEngine extends UnicastRemoteObject
 	  System.err.println("\nTask id : " 
 			     + tk + " has gone stale. Removing.");
 	  m_TaskStatus.remove(tk);
+	  tsi.setTaskResult(null);
+	  tsi = null;
 	}
       } else {
 	System.err.println("ok.");
       }
     }
+    purgeClasses();
   }
 
   /**
