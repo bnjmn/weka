@@ -12,6 +12,8 @@ import weka.core.Instance;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.AddFilter;
 
 import java.awt.Color;
 
@@ -21,7 +23,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PlotData2D {
 
@@ -72,7 +74,20 @@ public class PlotData2D {
    * @param insts the instances to use.
    */
   public PlotData2D(Instances insts) {
-    m_plotInstances = insts;
+    try {
+      AddFilter addF = new AddFilter();
+      addF.setAttributeName("Instance_number");
+      addF.setAttributeIndex(0);
+      addF.inputFormat(insts);
+      m_plotInstances = Filter.useFilter(insts, addF);
+      m_plotInstances.setClassIndex(m_plotInstances.numAttributes()-1);
+      for (int i = 0; i < m_plotInstances.numInstances(); i++) {
+	m_plotInstances.instance(i).setValue(0,(double)i);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    //    m_plotInstances = insts;
     m_xIndex = m_yIndex = m_cIndex = 0;
     m_pointLookup = new double [m_plotInstances.numInstances()][4];
     m_shapeSize = new int [m_plotInstances.numInstances()];
