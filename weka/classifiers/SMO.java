@@ -77,14 +77,14 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
   /**
    * Stores a set of a given size.
    */
-  private class SMOset {
+  private class SMOset implements Serializable {
 
     /** The current number of elements in the set */
     private int m_number;
