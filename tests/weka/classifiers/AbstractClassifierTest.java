@@ -29,7 +29,7 @@ import weka.filters.Filter;
  * Abstract Test class for Classifiers.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class AbstractClassifierTest extends TestCase {
 
@@ -137,7 +137,13 @@ public abstract class AbstractClassifierTest extends TestCase {
 	  tag = new SelectedTag(Attribute.NOMINAL,
 				RemoveType.TAGS_ATTRIBUTETYPE);
 	  invert = true;
-	} else {
+	} else if ((msg.indexOf("only") != -1) && 
+		   (msg.indexOf("numeric") != -1)) {
+	  System.err.println("\nDeleting non-numeric attributes.");
+	  tag = new SelectedTag(Attribute.NUMERIC,
+				RemoveType.TAGS_ATTRIBUTETYPE);
+	  invert = true;
+	}  else {
 	  throw ex;
 	}
 	RemoveType attFilter = new RemoveType();
@@ -158,6 +164,18 @@ public abstract class AbstractClassifierTest extends TestCase {
 	train = Filter.useFilter(train, rmFilter);
 	rmFilter.batchFinished();
 	test = Filter.useFilter(test, rmFilter);
+      } catch (IllegalArgumentException ex3) {
+	String msg = ex3.getMessage();
+	if (msg.indexOf("Not enough instances") != -1) {
+	  System.err.println("\nInflating training data.");
+	  Instances trainNew = new Instances(train);
+	  for (int i = 0; i < train.numInstances(); i++) {
+	    trainNew.add(train.instance(i));
+	  }
+	  train = trainNew;
+	} else {
+	  throw ex3;
+	}
       }
     } while (true);
   }
