@@ -91,7 +91,7 @@ import javax.swing.event.DocumentEvent;
  * This panel controls the configuration of an experiment.
  *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -791,14 +791,40 @@ public class SimpleSetupPanel extends JPanel {
 
     if (m_Exp == null) return;
 
+    String str = "";
+
     if (m_ResultsDestinationCBox.getSelectedItem() == DEST_DATABASE_TEXT) {
       m_ResultsDestinationPathLabel.setText("URL:");
-      m_ResultsDestinationPathTField.setText(m_destinationDatabaseURL);
+      str = m_destinationDatabaseURL;
       m_BrowseDestinationButton.setEnabled(true); //!!!
       m_BrowseDestinationButton.setText("User...");
     } else {
       m_ResultsDestinationPathLabel.setText("Filename:");
-      m_ResultsDestinationPathTField.setText(m_destinationFilename);
+      if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
+	int ind = m_destinationFilename.lastIndexOf(".csv");
+	if (ind > -1) {
+	  m_destinationFilename = m_destinationFilename.substring(0, ind) + ".arff";
+	}
+      }
+      if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
+	int ind = m_destinationFilename.lastIndexOf(".arff");
+	if (ind > -1) {
+	  m_destinationFilename = m_destinationFilename.substring(0, ind) + ".csv";
+	}
+      }
+      str = m_destinationFilename;
+      if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
+	int ind = str.lastIndexOf(".csv");
+	if (ind > -1) {
+	  str = str.substring(0, ind) + ".arff";
+	}
+      }
+      if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
+	int ind = str.lastIndexOf(".arff");
+	if (ind > -1) {
+	  str = str.substring(0, ind) + ".csv";
+	}
+      }
       m_BrowseDestinationButton.setEnabled(true);
       m_BrowseDestinationButton.setText("Browse...");
     }
@@ -828,6 +854,8 @@ public class SimpleSetupPanel extends JPanel {
       }
     }
 
+    m_ResultsDestinationPathTField.setText(str);
+
     m_Support.firePropertyChange("", null, null);
   }
 
@@ -845,31 +873,37 @@ public class SimpleSetupPanel extends JPanel {
       }
     } else {
       File resultsFile = null;
+      m_destinationFilename = m_ResultsDestinationPathTField.getText();
 
       // Use temporary file if no file name is provided
       if (m_destinationFilename.equals("")) {
 	try {
-	  resultsFile = File.createTempFile("weka_experiment", null);
+	  if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
+	    resultsFile = File.createTempFile("weka_experiment", ".arff");
+	  }
+	  if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
+	    resultsFile = File.createTempFile("weka_experiment", ".csv");
+	  }
 	  resultsFile.deleteOnExit();
 	} catch (Exception e) {
 	  System.err.println("Cannot create temp file, writing to standard out.");
 	  resultsFile = new File("-");
 	}
       } else {
+	if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
+	  if (!m_destinationFilename.endsWith(".arff")) {
+	    m_destinationFilename += ".arff";
+	  }
+	}
+	if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
+	  if (!m_destinationFilename.endsWith(".csv")) {
+	    m_destinationFilename += ".csv";
+	  }
+	}
 	resultsFile = new File(m_destinationFilename);
       }
-      
-      if (m_ResultsDestinationCBox.getSelectedItem() == DEST_ARFF_TEXT) {
-	m_destinationFilename = m_ResultsDestinationPathTField.getText();
-	if (m_Exp.getResultListener() instanceof InstancesResultListener) {
-	  ((InstancesResultListener)m_Exp.getResultListener()).setOutputFile(resultsFile);
-	}
-      } else if (m_ResultsDestinationCBox.getSelectedItem() == DEST_CSV_TEXT) {
-	m_destinationFilename = m_ResultsDestinationPathTField.getText();
-	if (m_Exp.getResultListener() instanceof CSVResultListener) {
-	  ((CSVResultListener)m_Exp.getResultListener()).setOutputFile(resultsFile);
-	}
-      }
+      ((CSVResultListener)m_Exp.getResultListener()).setOutputFile(resultsFile);
+      ((CSVResultListener)m_Exp.getResultListener()).setOutputFileName(m_destinationFilename);
     }
 
     m_Support.firePropertyChange("", null, null);

@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Experimenter extends JPanel {
 
@@ -69,9 +69,10 @@ public class Experimenter extends JPanel {
   public Experimenter(boolean classFirst) {
 
     m_SetupPanel = new SetupModePanel();
-    m_RunPanel = new RunPanel();
     m_ResultsPanel = new ResultsPanel();
-
+    m_RunPanel = new RunPanel();
+    m_RunPanel.setResultsPanel(m_ResultsPanel);
+    
     m_ClassFirst = classFirst;
 
     m_TabbedPane.addTab("Setup", null, m_SetupPanel, "Set up the experiment");
@@ -82,11 +83,11 @@ public class Experimenter extends JPanel {
     m_TabbedPane.setEnabledAt(1, false);
     m_SetupPanel.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
-	System.err.println("Updated experiment");
+	//System.err.println("Updated experiment");
 	Experiment exp = m_SetupPanel.getExperiment();
 	exp.classFirst(m_ClassFirst);
 	m_RunPanel.setExperiment(exp);
-	m_ResultsPanel.setExperiment(exp);
+	//m_ResultsPanel.setExperiment(exp);
 	m_TabbedPane.setEnabledAt(1, true);
       }
     });

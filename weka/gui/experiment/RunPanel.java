@@ -64,7 +64,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -84,6 +84,9 @@ public class RunPanel extends JPanel implements ActionListener {
 
   /** The thread running the experiment */
   protected Thread m_RunThread = null;
+
+  /** A pointer to the results panel */
+  protected ResultsPanel m_ResultsPanel = null;
 
   /*
    * A class that handles running a copy of the experiment
@@ -124,6 +127,9 @@ public class RunPanel extends JPanel implements ActionListener {
       
       m_StartBut.setEnabled(false);
       m_StopBut.setEnabled(true);
+      if (m_ResultsPanel != null) {
+	m_ResultsPanel.setExperiment(null);
+      }
       try {
 	if (m_ExpCopy instanceof RemoteExperiment) {
 	  // add a listener
@@ -208,6 +214,9 @@ public class RunPanel extends JPanel implements ActionListener {
 	System.err.println(ex.getMessage());
 	statusMessage(ex.getMessage());
       } finally {
+	if (m_ResultsPanel != null) {
+	  m_ResultsPanel.setExperiment(m_ExpCopy);
+	}
 	if (!(m_ExpCopy instanceof RemoteExperiment)) {
 	  m_RunThread = null;
 	  m_StartBut.setEnabled(true);
@@ -218,6 +227,13 @@ public class RunPanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * Sets the pointer to the results panel.
+   */
+  public void setResultsPanel(ResultsPanel rp) {
+
+    m_ResultsPanel = rp;
+  }
   
   /**
    * Creates the run panel with no initial experiment.
