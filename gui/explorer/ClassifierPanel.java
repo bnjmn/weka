@@ -135,7 +135,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.67 $
+ * @version $Revision: 1.68 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1164,10 +1164,11 @@ public class ClassifierPanel extends JPanel {
 		m_Log.statusMessage("Creating splits for fold "
 				    + (fold + 1) + "...");
 		Instances train = inst.trainCV(numFolds, fold);
-		Instances test = inst.testCV(numFolds, fold);
+		eval.setPriors(train);
 		m_Log.statusMessage("Building model for fold "
 				    + (fold + 1) + "...");
 		classifier.buildClassifier(train);
+		Instances test = inst.testCV(numFolds, fold);
 		m_Log.statusMessage("Evaluating model for fold "
 				    + (fold + 1) + "...");
 		for (int jj=0;jj<test.numInstances();jj++) {
