@@ -3,7 +3,8 @@ JAVAC = javac
 SOURCES = BayesNet.java BayesNetB.java BayesNetB2.java \
 	DiscreteEstimatorBayes.java ParentSet.java \
 	Scoreable.java NaiveBayes.java NaiveBayesSimple.java \
-	NaiveBayesUpdateable.java BayesNetK2.java AODE.java
+	NaiveBayesUpdateable.java BayesNetK2.java AODE.java \
+	NaiveBayesMultinomial.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
