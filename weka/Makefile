@@ -1,5 +1,5 @@
 #
-# $Revision: 1.23 $
+# $Revision: 1.24 $
 #
 
 JAVAC = javac
@@ -58,6 +58,7 @@ doc :
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
 	weka.classifiers.kstar \
+	weka.classifiers.evaluation \
 	weka.filters \
 	weka.estimators \
 	weka.associations \
@@ -86,6 +87,7 @@ install : all
 	weka/classifiers/j48/*.class \
 	weka/classifiers/m5/*.class \
 	weka/classifiers/kstar/*.class \
+	weka/classifiers/evaluation/*.class \
 	weka/filters/*.class \
 	weka/estimators/*class \
 	weka/associations/*.class \
@@ -108,6 +110,7 @@ install : all
 	weka/classifiers/j48/*.java \
 	weka/classifiers/m5/*.java \
 	weka/classifiers/kstar/*.java \
+	weka/classifiers/evaluation/*.java \
 	weka/filters/*.java \
 	weka/estimators/*java \
 	weka/associations/*.java \
@@ -127,6 +130,7 @@ install : all
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
 	weka.classifiers.kstar \
+	weka.classifiers.evaluation \
 	weka.filters \
 	weka.estimators \
 	weka.associations \
