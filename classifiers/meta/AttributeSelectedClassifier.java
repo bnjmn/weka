@@ -54,7 +54,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class AttributeSelectedClassifier extends Classifier 
   implements OptionHandler, Drawable, AdditionalMeasureProducer {
@@ -121,7 +121,7 @@ public class AttributeSelectedClassifier extends Classifier
 	      "\tFull class name of search method, followed\n"
 	      + "\tby its options. (required)\n"
 	      + "\teg: \"weka.attributeSelection.BestFirst -D 1\"",
-	      "S", 1, "-S <attribute evaluator specification>"));
+	      "S", 1, "-S <search method specification>"));
     return newVector.elements();
   }
 
