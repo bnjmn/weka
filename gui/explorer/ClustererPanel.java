@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -359,7 +359,7 @@ public class ClustererPanel extends JPanel {
 	      String name = m_History.getNameAtIndex(index);
 	      visualizeClusterer(name, e.getX(), e.getY());
 	    } else {
-	      loadPopup(e.getX(), e.getY());
+	      visualizeClusterer(null, e.getX(), e.getY());
 	    }
 	  }
 	}
@@ -1164,28 +1164,41 @@ public class ClustererPanel extends JPanel {
     JPopupMenu resultListMenu = new JPopupMenu();
 
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
-    visMainBuffer.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.setSingle(selectedName);
-	}
-      });
+    if (selectedName != null) {
+      visMainBuffer.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    m_History.setSingle(selectedName);
+	  }
+	});
+    } else {
+      visMainBuffer.setEnabled(false);
+    }
     resultListMenu.add(visMainBuffer);
 
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    if (selectedName != null) {
     visSepBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  m_History.openFrame(selectedName);
 	}
       });
+    } else {
+      visSepBuffer.setEnabled(false);
+    }
     resultListMenu.add(visSepBuffer);
 
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
-    saveOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveBuffer(selectedName);
-	}
-      });
+    if (selectedName != null) {
+      saveOutput.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    saveBuffer(selectedName);
+	  }
+	});
+    } else {
+      saveOutput.setEnabled(false);
+    }
     resultListMenu.add(saveOutput);
+    
     resultListMenu.addSeparator();
 
     JMenuItem loadModel = new JMenuItem("Load model");
@@ -1196,15 +1209,18 @@ public class ClustererPanel extends JPanel {
       });
     resultListMenu.add(loadModel);
 
-    FastVector o = (FastVector)m_History.getNamedObject(selectedName);
+    FastVector o = null;
+    if (selectedName != null) {
+      o = (FastVector)m_History.getNamedObject(selectedName);
+    }
 
+    VisualizePanel temp_vp = null;
+    String temp_grph = null;
+    Clusterer temp_clusterer = null;
+    Instances temp_trainHeader = null;
+    int[] temp_ignoreAtts = null;
+    
     if (o != null) {
-      VisualizePanel temp_vp = null;
-      String temp_grph = null;
-      Clusterer temp_clusterer = null;
-      Instances temp_trainHeader = null;
-      int[] temp_ignoreAtts = null;
-     
       for (int i = 0; i < o.size(); i++) {
 	Object temp = o.elementAt(i);
 	if (temp instanceof Clusterer) {
@@ -1218,80 +1234,73 @@ public class ClustererPanel extends JPanel {
 	} else if (temp instanceof String) { // graphable output
 	  temp_grph = (String)temp;
 	}
-      }
+      } 
+    }
       
-      final VisualizePanel vp = temp_vp;
-      final String grph = temp_grph;
-      final Clusterer clusterer = temp_clusterer;
-      final Instances trainHeader = temp_trainHeader;
-      final int[] ignoreAtts = temp_ignoreAtts;
-
-      JMenuItem saveModel = new JMenuItem("Save model");
-      JMenuItem reEvaluate = new JMenuItem("Re-evaluate model on current test set");
-      if (clusterer != null) {
-	
-	saveModel.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      saveClusterer(selectedName, clusterer, trainHeader, ignoreAtts);
-	    }
-	  });
-	resultListMenu.add(saveModel);
-	
-	reEvaluate.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      reevaluateModel(selectedName, clusterer, trainHeader, ignoreAtts);
-	    }
-	  });
-	resultListMenu.add(reEvaluate);
-      }
-
-      resultListMenu.addSeparator();
-
-      JMenuItem visClusts = new JMenuItem("Visualize cluster assignments");
-      if (vp != null) {
-	visClusts.addActionListener(new ActionListener() {
+    final VisualizePanel vp = temp_vp;
+    final String grph = temp_grph;
+    final Clusterer clusterer = temp_clusterer;
+    final Instances trainHeader = temp_trainHeader;
+    final int[] ignoreAtts = temp_ignoreAtts;
+    
+    JMenuItem saveModel = new JMenuItem("Save model");
+    if (clusterer != null) {
+      saveModel.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    saveClusterer(selectedName, clusterer, trainHeader, ignoreAtts);
+	  }
+	});
+    } else {
+      saveModel.setEnabled(false);
+    }
+    resultListMenu.add(saveModel);
+    
+    JMenuItem reEvaluate =
+      new JMenuItem("Re-evaluate model on current test set");
+    if (clusterer != null && m_TestInstances != null) {
+      reEvaluate.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    reevaluateModel(selectedName, clusterer, trainHeader, ignoreAtts);
+	  }
+	}); 
+    } else {
+      reEvaluate.setEnabled(false);
+    }
+    resultListMenu.add(reEvaluate);
+    
+    resultListMenu.addSeparator();
+    
+    JMenuItem visClusts = new JMenuItem("Visualize cluster assignments");
+    if (vp != null) {
+      visClusts.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
 	      visualizeClusterAssignments(vp);
 	    }
 	  });
-	resultListMenu.add(visClusts);
-      }
-      JMenuItem visTree = new JMenuItem("Visualize tree");
-      if (grph != null) {
-	visTree.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent e) {
-	      String title;
-	      if (vp != null) title = vp.getName();
-	      else title = selectedName;
-	      visualizeTree(grph, title);
-	    }
-	  });
-	resultListMenu.add(visTree);
-      }
       
+    } else {
+      visClusts.setEnabled(false);
     }
+    resultListMenu.add(visClusts);
+
+    JMenuItem visTree = new JMenuItem("Visualize tree");
+    if (grph != null) {
+      visTree.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    String title;
+	    if (vp != null) title = vp.getName();
+	    else title = selectedName;
+	    visualizeTree(grph, title);
+	  }
+	});
+    } else {
+      visTree.setEnabled(false);
+    }
+    resultListMenu.add(visTree);
+
     resultListMenu.show(m_History.getList(), x, y);
   }
-
-  /**
-   * Handles constructing a popup menu with load option.
-   * @param x the x coordinate for popping up the menu
-   * @param y the y coordinate for popping up the menu
-   */
-  protected void loadPopup(int x, int y) {
-
-    JPopupMenu resultListMenu = new JPopupMenu();
-    
-    JMenuItem loadModel = new JMenuItem("Load model");
-    loadModel.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  loadClusterer();
-	}
-      });
-    resultListMenu.add(loadModel);
-    resultListMenu.show(m_History.getList(), x, y);
-  }
-
+  
   /**
    * Save the currently selected clusterer output to a file.
    * @param name the name of the buffer to save
@@ -1300,7 +1309,7 @@ public class ClustererPanel extends JPanel {
     StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
-	m_Log.logMessage("Save succesful.");
+	m_Log.logMessage("Save successful.");
       }
     }
   }
