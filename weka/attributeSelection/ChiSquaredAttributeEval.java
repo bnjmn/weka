@@ -40,7 +40,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class ChiSquaredAttributeEval
   extends AttributeEvaluator
@@ -205,7 +205,7 @@ public class ChiSquaredAttributeEval
     throws Exception {
     
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
     
     int classIndex = data.classIndex();

@@ -35,7 +35,7 @@ import  weka.filters.*;
  * No options. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator
@@ -86,7 +86,7 @@ public class OneRAttributeEval
     m_trainInstances = data;
 
     if (m_trainInstances.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     m_classIndex = m_trainInstances.classIndex();

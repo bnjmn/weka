@@ -36,7 +36,7 @@ import  weka.filters.*;
  * Machine Learning (ICML'96), July 1996, pp. 319-327. Bari, Italy. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ConsistencySubsetEval extends SubsetEvaluator {
   
@@ -263,7 +263,7 @@ public class ConsistencySubsetEval extends SubsetEvaluator {
    */
   public void buildEvaluator (Instances data) throws Exception {
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     m_trainInstances = data;

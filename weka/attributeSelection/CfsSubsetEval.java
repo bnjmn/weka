@@ -45,7 +45,7 @@ import  weka.filters.*;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -237,7 +237,7 @@ public class CfsSubsetEval
     throws Exception
   {
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     m_trainInstances = data;

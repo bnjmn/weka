@@ -53,7 +53,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -380,7 +380,7 @@ public class WrapperSubsetEval
     throws Exception
   {
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     m_trainInstances = data;
