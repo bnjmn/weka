@@ -24,6 +24,7 @@ package weka.classifiers.rules;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
+import java.io.Serializable;
 
 import weka.core.FastVector;
 import weka.core.Instances;
@@ -133,7 +134,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class JRip extends DistributionClassifier 
   implements OptionHandler, 
@@ -371,7 +372,7 @@ public class JRip extends DistributionClassifier
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */    
   private abstract class Antd 
-    implements WeightedInstancesHandler, Copyable{
+    implements WeightedInstancesHandler, Copyable, Serializable {
 	
     /* The attribute of the antecedent */
     protected Attribute att;

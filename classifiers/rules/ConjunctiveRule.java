@@ -51,7 +51,7 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 
 public class ConjunctiveRule extends DistributionClassifier implements OptionHandler, WeightedInstancesHandler{
@@ -101,7 +101,7 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */
     
-  private abstract class Antd{
+  private abstract class Antd implements Serializable {
     /** The attribute of the antecedent */
     protected Attribute att;
 	
