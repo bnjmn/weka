@@ -58,7 +58,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler {
@@ -101,7 +101,7 @@ public class ThresholdSelector extends Classifier
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
-  protected final static double MIN_VALUE = 0.01;
+  protected final static double MIN_VALUE = 0.05;
 
   /**
    * Collects the predicted probabilities.
@@ -398,33 +398,75 @@ public class ThresholdSelector extends Classifier
     if (instances.numInstances() < m_NumFolds) {
       throw new Exception("Number of training instances smaller than number of folds.");
     }
-    switch (m_Mode) {
-    case CROSS_VALIDATION: 
-      data = new Instances(instances);
-      data.randomize(new Random(m_Seed));
-      data.stratify(m_NumFolds);
-      m_Data = data;
-      m_EvalData = data;
-      findThreshold();
-      m_Classifier.buildClassifier(instances);
-      break;
-    case TUNING_DATA:
-      data = new Instances(instances);
-      data.randomize(new Random(m_Seed));
-      data.stratify(m_NumFolds);
-      m_Data = data.trainCV(m_NumFolds, 0);
-      m_EvalData = data.testCV(m_NumFolds, 0);
-      findThreshold();
-      m_Classifier.buildClassifier(instances);
-      break;
-    default:
+
+    // If data contains only one instance of positive data
+    // optimize on training data
+    int numPosInstances = 0;
+    for (int i = 0; i < instances.numInstances(); i++) {
+       if (((int)instances.instance(i).classValue()) == m_DesignatedClass) {
+	numPosInstances++;
+      }
+    }
+    if (numPosInstances == 0) {
+      System.err.println("NO POSITIVE INSTANCE FOUND");
+      m_BestThreshold = Double.MAX_VALUE;
+      m_BestValue = 0;
+    } else if (numPosInstances == 1) {
+      System.err.println("OPTIMIZING ON TRAINING DATA");
       m_Data = instances;
       m_EvalData = instances;
       findThreshold();
+    } else {    
+      switch (m_Mode) {
+      case CROSS_VALIDATION: 
+	data = new Instances(instances);
+	data.randomize(new Random(m_Seed));
+	data.stratify(m_NumFolds);
+	m_Data = data;
+	m_EvalData = data;
+	findThreshold();
+	m_Classifier.buildClassifier(instances);
+	break;
+      case TUNING_DATA:
+	data = new Instances(instances);
+	data.randomize(new Random(m_Seed));
+	data.stratify(m_NumFolds);
+      
+	// Make sure that both subsets contain at least one positive instance
+	Instances evalData = null;
+	int subsetIndex = 0;
+	while (subsetIndex < m_NumFolds) {
+	  m_Data = data.trainCV(m_NumFolds, subsetIndex);
+	  m_EvalData = data.testCV(m_NumFolds, subsetIndex);
+	  if (checkForInstance(m_Data) && checkForInstance(m_EvalData)) {
+	    break;
+	  }
+	  subsetIndex++;
+	}
+	findThreshold();
+	m_Classifier.buildClassifier(instances);
+	break;
+      default:
+	m_Data = instances;
+	m_EvalData = instances;
+	findThreshold();
+      }
     }
     m_Data = null; m_EvalData = null;
   }
 
+  /**
+   * Checks whether instance of designated class is in subset.
+   */
+  public boolean checkForInstance(Instances data) throws Exception {
+
+    for (int i = 0; i < data.numInstances(); i++) {
+      if (((int)data.instance(i).classValue()) == m_DesignatedClass) {
+	return true;
+      }
+    }
+    return false;
+  }
 
   /**
    * Predicts the class value for the given test instance.
