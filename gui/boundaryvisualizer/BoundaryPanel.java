@@ -469,14 +469,17 @@ public class BoundaryPanel extends JPanel {
        
 	int panelX = convertToPanelX(xval);
 	int panelY = convertToPanelY(yval);
+	Color ColorToPlotWith = 
+	  ((Color)m_Colors.elementAt((int)m_trainingData.instance(i).
+				     value(m_classIndex)));
 
-	osg.setColor(Color.white);	
+	if (ColorToPlotWith.equals(Color.white)) {
+	  osg.setColor(Color.black);
+	} else {
+	  osg.setColor(Color.white);
+	}
 	osg.fillOval(panelX-3, panelY-3, 7, 7);
-       	osg.setColor(((Color)m_Colors.elementAt((int)m_trainingData.instance(i).value(m_classIndex))));
-	//	osg.setPaintMode();
-	//	osg.setXORMode(Color.white);
-	//	osg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-	//			      RenderingHints.VALUE_ANTIALIAS_OFF);
+       	osg.setColor(ColorToPlotWith);
 	osg.fillOval(panelX-2, panelY-2, 5, 5);
       }
     }
