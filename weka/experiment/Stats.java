@@ -24,13 +24,15 @@
 package weka.experiment;
 import weka.core.Utils;
 
+import java.io.Serializable;
+
 /**
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class Stats {
+public class Stats implements Serializable {
   
   /** The number of values seen */
   public double count = 0;

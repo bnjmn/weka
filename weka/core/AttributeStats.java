@@ -22,14 +22,16 @@
 
 package weka.core;
 
+import java.io.Serializable;
+
 /**
  * A Utility class that contains summary information on an
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class AttributeStats {    
+public class AttributeStats implements Serializable {    
   
   /** The number of int-like values */
   public int intCount = 0;
