@@ -33,7 +33,7 @@ import weka.core.Instances;
  * do nearest neighbour search should extend this class. 
  *
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class NearestNeighbourSearch implements Serializable{
   
@@ -126,10 +126,9 @@ public abstract class NearestNeighbourSearch implements Serializable{
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
-    newVector.add(new Option("\tTurns off the normalization of attribute "+
-                             "values in distance calculation.\n",
-                             "D", 0,"-D"));
+    Vector newVector = new Vector();
+    newVector.add(new Option("\tDistance function to use.\n",
+                             "A", 1,"-A"));
     return newVector.elements();
   }
   
@@ -140,7 +139,7 @@ public abstract class NearestNeighbourSearch implements Serializable{
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    String nnSearchClass = Utils.getOption('D', options);
+    String nnSearchClass = Utils.getOption('A', options);
     if(nnSearchClass.length() != 0) {
       String nnSearchClassSpec[] = Utils.splitOptions(nnSearchClass);
       if(nnSearchClassSpec.length == 0) { 
@@ -150,7 +149,7 @@ public abstract class NearestNeighbourSearch implements Serializable{
       nnSearchClassSpec[0] = "";
 
       setDistanceFunction( (DistanceFunction)
-                            Utils.forName( NearestNeighbourSearch.class, 
+                            Utils.forName( DistanceFunction.class, 
                                            className, nnSearchClassSpec) );
     }
     else 
@@ -167,8 +166,8 @@ public abstract class NearestNeighbourSearch implements Serializable{
     String [] options = new String[2];
 
     options[0] = "-A";
-    options[1] = m_DistanceFunction.getClass().getName()+" "+
-                 Utils.joinOptions(m_DistanceFunction.getOptions()); 
+    options[1] =   m_DistanceFunction.getClass().getName() 
+                 + new String(" " + Utils.joinOptions(m_DistanceFunction.getOptions())).trim(); 
     
     return options;
   }
