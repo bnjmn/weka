@@ -28,7 +28,7 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Rule {
 
@@ -131,6 +131,11 @@ public class Rule {
   private boolean m_saveInstances;
 
   /**
+   * Make a regression tree instead of a model tree
+   */
+  private boolean m_regressionTree;
+
+  /**
    * Constructor declaration
    *
    */
@@ -169,7 +174,9 @@ public class Rule {
     m_topOfTree = new RuleNode(m_globalStdDev, m_globalAbsDev, null);
     m_topOfTree.setSmoothing(m_smoothPredictions);
     m_topOfTree.setSaveInstances(m_saveInstances);
+    m_topOfTree.setRegressionTree(m_regressionTree);
     m_topOfTree.buildClassifier(m_instances);
+
 
     // m_topOfTree.numLeaves(0);
     if (m_growFullTree) {
@@ -356,7 +363,11 @@ public class Rule {
       return "Tree/Rule has not been built yet!";
     } 
 
-    text.append("Pruned training model tree:\n");
+    text.append("Pruned training "
+		+ ((m_regressionTree) 
+		   ? "regression "
+		   : "model ")
+		+"tree:\n");
 
     if (m_smoothPredictions == true) {
       text.append("(using smoothed predictions)\n");
@@ -555,6 +566,26 @@ public class Rule {
    */
   protected void setSaveInstances(boolean save) {
     m_saveInstances = save;
+  }
+
+  /**
+   * Get the value of regressionTree.
+   *
+   * @return Value of regressionTree.
+   */
+  public boolean getRegressionTree() {
+    
+    return m_regressionTree;
+  }
+  
+  /**
+   * Set the value of regressionTree.
+   *
+   * @param newregressionTree Value to assign to regressionTree.
+   */
+  public void setRegressionTree(boolean newregressionTree) {
+    
+    m_regressionTree = newregressionTree;
   }
 }
 
