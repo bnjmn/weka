@@ -15,8 +15,8 @@
  */
 
 /*
- *    Copy.java
- *    Copyright (C) 1999 Len Trigg
+ *    Reorder.java
+ *    Copyright (C) 2005 FracPete
  *
  */
 
@@ -24,46 +24,50 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.filters.*;
-import java.io.*;
 import java.util.*;
 import weka.core.*;
 
 /** 
- * An instance filter that copies a range of attributes in the dataset.
- * This is used in conjunction with other filters that overwrite attribute
- * during the course of their operation -- this filter allows the original
- * attributes to be kept as well as the new attributes.<p>
+ * An instance filter that generates output with a new order of the attributes.
+ * Useful if one wants to move an attribute to the end to use it as class
+ * attribute (e.g. with using "-R 2-last,1").<p>
+ * But it's not only possible to change the order of all the attributes, but
+ * also to leave out attributes. E.g. if you have 10 attributes, you can 
+ * generate the following output order: 1,3,5,7,9,10 or 10,1-5.<p>
+ * You can also duplicate attributes, e.g. for further processing later on:
+ * e.g. 1,1,1,4,4,4,2,2,2 where the second and the third column of each 
+ * attribute are processed differently and the first one, i.e. the original
+ * one is kept.<p>
+ * After appyling the filter, the index of the class attribute is the last
+ * attribute.<p>
  *
  * Valid filter-specific options are:<p>
  *
  * -R index1,index2-index4,...<br>
- * Specify list of columns to copy. First and last are valid indexes.
- * Attribute copies are placed at the end of the dataset.
- * (default none)<p>
+ * Specify order of columns to be output. First and last are valid indexes.
+ * (default first-last)<p>
  *
- * -V<br>
- * Invert matching sense (i.e. copy all non-specified columns)<p>
- *
- * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.1 $
  */
-public class Copy extends Filter implements UnsupervisedFilter,
-					    StreamableFilter, OptionHandler {
+public class Reorder 
+  extends Filter 
+  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** Stores which columns to copy */
-  protected Range m_CopyCols = new Range();
+  /** Stores which columns to reorder */
+  protected Range m_NewOrderCols = new Range("first-last");
 
   /**
    * Stores the indexes of the selected attributes in order, once the
    * dataset is seen
    */
-  protected int [] m_SelectedAttributes;
+  protected int[] m_SelectedAttributes;
 
   /** 
    * Contains an index of string attributes in the input format
    * that survive the filtering process -- some entries may be duplicated 
    */
-  protected int [] m_InputStringIndex;
+  protected int[] m_InputStringIndex;
 
   /**
    * Returns an enumeration describing the available options.
@@ -71,16 +75,12 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector();
 
     newVector.addElement(new Option(
               "\tSpecify list of columns to copy. First and last are valid\n"
-	      +"\tindexes. (default none)",
+	      +"\tindexes. (default first-last)",
               "R", 1, "-R <index1,index2-index4,...>"));
-    newVector.addElement(new Option(
-	      "\tInvert matching sense (i.e. copy all non-specified columns)",
-              "V", 0, "-V"));
 
     return newVector.elements();
   }
@@ -90,22 +90,17 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * Valid options are:<p>
    *
    * -R index1,index2-index4,...<br>
-   * Specify list of columns to copy. First and last are valid indexes.
-   * (default none)<p>
-   *
-   * -V<br>
-   * Invert matching sense (i.e. copy all non-specified columns)<p>
+   * Specify order of columns to output. First and last are valid indexes.
+   * (default first-last)<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    String copyList = Utils.getOption('R', options);
-    if (copyList.length() != 0) {
-      setAttributeIndices(copyList);
+    String orderList = Utils.getOption('R', options);
+    if (orderList.length() != 0) {
+      setAttributeIndices(orderList);
     }
-    setInvertSelection(Utils.getFlag('V', options));
     
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
@@ -118,15 +113,12 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-
-    String [] options = new String [3];
+    String [] options = new String [2];
     int current = 0;
 
-    if (getInvertSelection()) {
-      options[current++] = "-V";
-    }
     if (!getAttributeIndices().equals("")) {
-      options[current++] = "-R"; options[current++] = getAttributeIndices();
+      options[current++] = "-R"; 
+      options[current++] = getAttributeIndices();
     }
 
     while (current < options.length) {
@@ -145,34 +137,40 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @exception Exception if a problem occurs setting the input format
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
-
     super.setInputFormat(instanceInfo);
     
-    m_CopyCols.setUpper(instanceInfo.numAttributes() - 1);
+    m_NewOrderCols.setUpper(instanceInfo.numAttributes() - 1);
 
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
-    m_SelectedAttributes = m_CopyCols.getSelection();
+    
+    // add attributes to the end
+    m_SelectedAttributes = m_NewOrderCols.getSelection();
     int inStrCopiedLen = 0;
-    int [] inStrCopied = new int[m_SelectedAttributes.length];
+    int[] inStrCopied = new int[m_SelectedAttributes.length];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       // Create a copy of the attribute with a different name
       Attribute origAttribute = instanceInfo.attribute(current);
       outputFormat.insertAttributeAt((Attribute)origAttribute.copy(),
 				     outputFormat.numAttributes());
-      outputFormat.renameAttribute(outputFormat.numAttributes() - 1,
-				   "Copy of " + origAttribute.name());
-      if (origAttribute.type() == Attribute.STRING) {
+      
+      if (origAttribute.type() == Attribute.STRING)
         inStrCopied[inStrCopiedLen++] = current;
-      }
     }
-    int [] origIndex = getInputStringIndex(); 
-    m_InputStringIndex = new int [origIndex.length + inStrCopiedLen];
-    System.arraycopy(origIndex, 0, m_InputStringIndex, 0, origIndex.length);
-    System.arraycopy(inStrCopied, 0, m_InputStringIndex, origIndex.length, 
-                     inStrCopiedLen);
+    
+    m_InputStringIndex = new int [inStrCopiedLen];
+    System.arraycopy(inStrCopied, 0, m_InputStringIndex, 0, inStrCopiedLen);
+
+    // move class index to last attribute
+    outputFormat.setClassIndex(outputFormat.numAttributes() - 1);
+    
+    // delete original attributes
+    for (int i = 0; i < instanceInfo.numAttributes(); i++)
+      outputFormat.deleteAttributeAt(0);
+    
     setOutputFormat(outputFormat);
+    
     return true;
   }
   
@@ -188,7 +186,6 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
-
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
@@ -198,24 +195,21 @@ public class Copy extends Filter implements UnsupervisedFilter,
     }
 
     double[] vals = new double[outputFormatPeek().numAttributes()];
-    for(int i = 0; i < getInputFormat().numAttributes(); i++) {
-      vals[i] = instance.value(i);
-    }
-    int j = getInputFormat().numAttributes();
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
-      vals[i + j] = instance.value(current);
+      vals[i] = instance.value(current);
     }
     Instance inst = null;
-    if (instance instanceof SparseInstance) {
+    if (instance instanceof SparseInstance)
       inst = new SparseInstance(instance.weight(), vals);
-    } else {
+    else
       inst = new Instance(instance.weight(), vals);
-    }
     copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
                      getOutputFormat(), getOutputStringIndex());
     inst.setDataset(getOutputFormat());
+    
     push(inst);
+    
     return true;
   }
 
@@ -226,7 +220,6 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-
     return "An instance filter that copies a range of attributes in the"
       + " dataset. This is used in conjunction with other filters that"
       + " overwrite attribute values during the course of their operation --"
@@ -235,50 +228,12 @@ public class Copy extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String invertSelectionTipText() {
-    return "Sets copy selected vs unselected action."
-      + " If set to false, only the specified attributes will be copied;"
-      + " If set to true, non-specified attributes will be copied.";
-  }
-
-  /**
-   * Get whether the supplied columns are to be removed or kept
-   *
-   * @return true if the supplied columns will be kept
-   */
-  public boolean getInvertSelection() {
-
-    return m_CopyCols.getInvert();
-  }
-
-  /**
-   * Set whether selected columns should be removed or kept. If true the 
-   * selected columns are kept and unselected columns are copied. If false
-   * selected columns are copied and unselected columns are kept. <br>
-   * Note: use this method before you call 
-   * <code>setInputFormat(Instances)</code>, since the output format is
-   * determined in that method.
-   *
-   * @param invert the new invert setting
-   */
-  public void setInvertSelection(boolean invert) {
-
-    m_CopyCols.setInvert(invert);
-  }
-
-  /**
    * Get the current range selection
    *
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
-
-    return m_CopyCols.getRanges();
+    return m_NewOrderCols.getRanges();
   }
 
   /**
@@ -307,8 +262,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @exception Exception if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) throws Exception {
-
-    m_CopyCols.setRanges(rangeList);
+    m_NewOrderCols.setRanges(rangeList);
   }
 
   /**
@@ -323,7 +277,6 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @exception Exception if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
-
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
 
@@ -333,15 +286,14 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
     try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new Copy(), argv); 
-      } else {
-	Filter.filterFile(new Copy(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
+      if (Utils.getFlag('b', argv))
+ 	Filter.batchFilterFile(new Reorder(), argv); 
+      else
+	Filter.filterFile(new Reorder(), argv);
+    } 
+    catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
 }
