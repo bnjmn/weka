@@ -27,19 +27,22 @@ import  weka.core.*;
  *
  * Valid options are: <p>
  *
+ * -P <start set> <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
+ * -R <br>
+ * Produce a ranked list of attributes. <p>
+ * 
  * -T <threshold> <br>
  * Specify a threshold by which the AttributeSelection module can. <br>
- * discard attributes. <p>
+ * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ForwardSelection extends ASSearch 
-  implements RankedOutputSearch, OptionHandler {
+  implements RankedOutputSearch, StartSetHandler, OptionHandler {
 
-  /** holds a starting set (if one is supplied) */
-  private int[] m_starting;
-  
  /** does the data have a class */
   private boolean m_hasClass;
  
@@ -49,12 +52,16 @@ public class ForwardSelection extends ASSearch
   /** number of attributes in the data */
   private int m_numAttribs;
 
+  /** true if the user has requested a ranked list of attributes */
+  private boolean m_rankingRequested;
+
   /** 
    * go from one side of the search space to the other in order to generate
    * a ranking
    */
   private boolean m_doRank;
 
+  /** used to indicate whether or not ranking has been performed */
   private boolean m_doneRanking;
 
   /**
@@ -76,9 +83,17 @@ public class ForwardSelection extends ASSearch
 
   private Instances m_Instances;
 
+  /** holds the start set for the search as a Range */
+  private Range m_startRange;
+
+  /** holds an array of starting attributes */
+  private int [] m_starting;
+
   public ForwardSelection () {
     m_threshold = -Double.MAX_VALUE;
     m_doneRanking = false;
+    m_startRange = new Range();
+    m_starting = null;
     resetOptions();
   }
 
@@ -100,14 +115,62 @@ public class ForwardSelection extends ASSearch
   }
 
   /**
+   * Records whether the user has requested a ranked list of attributes.
+   * @param doRank true if ranking is requested
+   */
+  public void setGenerateRanking(boolean doRank) {
+    m_rankingRequested = doRank;
+  }
+
+  /**
+   * Gets whether ranking has been requested. This is used by the
+   * AttributeSelection module to determine if rankedAttributes()
+   * should be called.
+   * @return true if ranking has been requested.
+   */
+  public boolean getGenerateRanking() {
+    return m_rankingRequested;
+  }
+
+  /**
+   * Sets a starting set of attributes for the search. It is the
+   * search method's responsibility to report this start set (if any)
+   * in its toString() method.
+   * @param startSet a string containing a list of attributes (and or ranges),
+   * eg. 1,2,6,10-15.
+   * @exception if start set can't be set.
+   */
+  public void setStartSet (String startSet) throws Exception {
+    m_startRange.setRanges(startSet);
+  }
+
+  /**
+   * Returns a list of attributes (and or attribute ranges) as a String
+   * @return a list of attributes (and or attribute ranges)
+   */
+  public String getStartSet () {
+    return m_startRange.getRanges();
+  }
+
+  /**
    * Returns an enumeration describing the available options
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(3);
+
+    newVector
+      .addElement(new Option("\tSpecify a starting set of attributes." 
+			     + "\n\tEg. 1,3,5-7."
+			     ,"P",1
+			     , "-P <start set>"));
+
+    newVector.addElement(new Option("\tProduce a ranked list of attributes."
+				    ,"R",0,"-R"));
     newVector
       .addElement(new Option("\tSpecify a theshold by which attributes" 
-			     + "\tmay be discarded from the ranking.","T",1
+			     + "\n\tmay be discarded from the ranking."
+			     +"\n\tUse in conjuction with -R","T",1
 			     , "-T <threshold>"));
 
     return newVector.elements();
@@ -118,10 +181,16 @@ public class ForwardSelection extends ASSearch
    * Parses a given list of options.
    *
    * Valid options are: <p>
+   * 
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
    *
+   * -R <br>
+   * Produce a ranked list of attributes. <p>
+   * 
    * -T <threshold> <br>
    * Specify a threshold by which the AttributeSelection module can. <br>
-   * discard attributes. <p>
+   * discard attributes. Use in conjunction with -R <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -132,6 +201,13 @@ public class ForwardSelection extends ASSearch
   {
     String optionString;
     resetOptions();
+
+    optionString = Utils.getOption('P', options);
+    if (optionString.length() != 0) {
+      setStartSet(optionString);
+    }
+
+    setGenerateRanking(Utils.getFlag('R', options));
 
     optionString = Utils.getOption('T', options);
     if (optionString.length() != 0) {
@@ -147,9 +223,17 @@ public class ForwardSelection extends ASSearch
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[2];
+    String[] options = new String[5];
     int current = 0;
+    
+    if (!(getStartSet().equals(""))) {
+      options[current++] = "-P";
+      options[current++] = ""+startSetToString();
+    }
 
+    if (getGenerateRanking()) {
+      options[current++] = "-R";
+    }
     options[current++] = "-T";
     options[current++] = "" + getThreshold();
 
@@ -157,6 +241,44 @@ public class ForwardSelection extends ASSearch
       options[current++] = "";
     }
     return  options;
+  }
+
+  /**
+   * converts the array of starting attributes to a string. This is
+   * used by getOptions to return the actual attributes specified
+   * as the starting set. This is better than using m_startRanges.getRanges()
+   * as the same start set can be specified in different ways from the
+   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
+   * is stored in a database is comparable.
+   * @return a comma seperated list of individual attribute numbers as a String
+   */
+  private String startSetToString() {
+    StringBuffer FString = new StringBuffer();
+    boolean didPrint;
+    
+    if (m_starting == null) {
+      return getStartSet();
+    }
+    for (int i = 0; i < m_starting.length; i++) {
+      didPrint = false;
+      
+      if ((m_hasClass == false) || 
+	  (m_hasClass == true && i != m_classIndex)) {
+	FString.append((m_starting[i] + 1));
+	didPrint = true;
+      }
+      
+      if (i == (m_starting.length - 1)) {
+	FString.append("");
+      }
+      else {
+	if (didPrint) {
+	  FString.append(",");
+	  }
+      }
+    }
+
+    return FString.toString();
   }
 
   /**
@@ -171,26 +293,7 @@ public class ForwardSelection extends ASSearch
       FString.append("no attributes\n");
     }
     else {
-      boolean didPrint;
-
-      for (int i = 0; i < m_starting.length; i++) {
-	didPrint = false;
-
-	if ((m_hasClass == false) || 
-	    (m_hasClass == true && i != m_classIndex)) {
-	  FString.append((m_starting[i] + 1));
-	  didPrint = true;
-	}
-
-	if (i == (m_starting.length - 1)) {
-	  FString.append("\n");
-	}
-	else {
-	  if (didPrint) {
-	    FString.append(",");
-	  }
-	}
-      }
+      FString.append(startSetToString()+"\n");
     }
     if (!m_doneRanking) {
       FString.append("\tMerit of best subset found: "
@@ -209,17 +312,14 @@ public class ForwardSelection extends ASSearch
   /**
    * Searches the attribute subset space by forward selection.
    *
-   * @param startSet a (possibly) ordered array of attribute indexes from
-   * which to start the search from. Set to null if no explicit start
-   * point.
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @exception Exception if the search can't be completed
    */
-  public int[] search (int[] startSet, ASEvaluation ASEval, Instances data)
+  public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
-    
+
     int i;
     double best_merit = -Double.MAX_VALUE;
     double temp_best,temp_merit;
@@ -247,8 +347,9 @@ public class ForwardSelection extends ASSearch
 			   + "Subset evaluator!");
     }
 
-    if (startSet != null) {
-      m_starting = startSet;
+    m_startRange.setUpper(m_numAttribs-1);
+    if (!(getStartSet().equals(""))) {
+      m_starting = m_startRange.getSelection();
     }
 
     if (m_ASEval instanceof UnsupervisedSubsetEvaluator) {
@@ -341,7 +442,7 @@ public class ForwardSelection extends ASSearch
 			  +"can be ranked.");
     }
     m_doRank = true;
-    search (null, m_ASEval, null);
+    search (m_ASEval, null);
 
     double [][] final_rank = new double [m_rankedSoFar][2];
     for (int i=0;i<m_rankedSoFar;i++) {
@@ -386,7 +487,6 @@ public class ForwardSelection extends ASSearch
    */
   private void resetOptions() {
     m_doRank = false;
-    m_starting = null;
     m_best_group = null;
     m_ASEval = null;
     m_Instances = null;
