@@ -27,6 +27,7 @@ import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Standardize;
 import weka.filters.Filter;
 import java.util.*;
@@ -40,9 +41,9 @@ import weka.core.*;
  *
  * This implementation globally replaces all missing values and
  * transforms nominal attributes into binary ones. It also
- * standardizes all attributes by default. (Note that the coefficients
- * in the output are based on the standardized data, not the original
- * data.)
+ * normalizes all attributes by default. (Note that the coefficients
+ * in the output are based on the normalized/standardized data, not the
+ * original data.)
  *
  * Multi-class problems are solved using pairwise classification.
  *
@@ -77,8 +78,8 @@ import weka.core.*;
  * -G num <br>
  * Gamma for the RBF kernel. (default 0.01)<p>
  *
- * -S <br>
- * Don't standardize the training instances. <p>
+ * -N <0|1|2> <br>
+ * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p>
  *
  * -F <br>
  * Feature-space normalization (only for non-linear polynomial kernels). <p>
@@ -113,7 +114,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.41 $ */
+ * @version $Revision: 1.42 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -833,8 +834,10 @@ public class SMO extends DistributionClassifier implements OptionHandler,
 	      }
 	      text.append(Utils.doubleToString(m_sparseWeights[i], 12, 4) +
 			  " * ");
-	      if (m_standardize) {
+	      if (m_filterType == FILTER_STANDARDIZE) {
 		text.append("(standardized) ");
+	      } else if (m_filterType == FILTER_NORMALIZE) {
+		text.append("(normalized) ");
 	      }
 	      if (!m_checksTurnedOff) {
 		text.append(m_data.attribute(m_sparseIndices[i]).name()+"\n");
@@ -1213,6 +1216,16 @@ public class SMO extends DistributionClassifier implements OptionHandler,
     }  
   }
 
+  /** The filter to apply to the training data */
+  public final static int FILTER_NORMALIZE = 0;
+  public final static int FILTER_STANDARDIZE = 1;
+  public final static int FILTER_NONE = 2;
+  public static final Tag [] TAGS_FILTER = {
+    new Tag(FILTER_NORMALIZE, "Normalize training data"),
+    new Tag(FILTER_STANDARDIZE, "Standardize training data"),
+    new Tag(FILTER_NONE, "No normalization/standardization"),
+  };
+
   /** The binary classifier(s) */
   private BinarySMO[][] m_classifiers = null;
 
@@ -1231,8 +1244,8 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   /** Tolerance for accuracy of result. */
   private double m_tol = 1.0e-3;
 
-  /** True if we don't want to standardize */
-  private boolean m_standardize = true;
+  /** Whether to normalize/standardize/neither */
+  private int m_filterType = FILTER_NORMALIZE;
   
   /** Feature-space normalization? */
   private boolean m_featureSpaceNormalization = false;
@@ -1249,8 +1262,8 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   /** The filter used to make attributes numeric. */
   private NominalToBinary m_NominalToBinary;
 
-  /** The filter used to standardize all values. */
-  private Standardize m_Standardization;
+  /** The filter used to standardize/normalize all values. */
+  private Filter m_Filter = null;
 
   /** The filter used to get rid of missing values. */
   private ReplaceMissingValues m_Missing;
@@ -1349,12 +1362,16 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       m_NominalToBinary = null;
     }
 
-    if (m_standardize) {
-      m_Standardization = new Standardize();
-      m_Standardization.setInputFormat(insts);
-      insts = Filter.useFilter(insts, m_Standardization); 
+    if (m_filterType == FILTER_STANDARDIZE) {
+      m_Filter = new Standardize();
+      m_Filter.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_Filter); 
+    } else if (m_filterType == FILTER_NORMALIZE) {
+      m_Filter = new Normalize();
+      m_Filter.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_Filter); 
     } else {
-      m_Standardization = null;
+      m_Filter = null;
     }
 
     m_classIndex = insts.classIndex();
@@ -1411,10 +1428,10 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       inst = m_NominalToBinary.output();
     }
     
-    if (m_standardize) {
-      m_Standardization.input(inst);
-      m_Standardization.batchFinished();
-      inst = m_Standardization.output();
+    if (m_Filter != null) {
+      m_Filter.input(inst);
+      m_Filter.batchFinished();
+      inst = m_Filter.output();
     }
     
     if (!m_fitLogisticModels) {
@@ -1545,10 +1562,10 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       inst = m_NominalToBinary.output();
     }
     
-    if (m_standardize) {
-      m_Standardization.input(inst);
-      m_Standardization.batchFinished();
-      inst = m_Standardization.output();
+    if (m_Filter != null) {
+      m_Filter.input(inst);
+      m_Filter.batchFinished();
+      inst = m_Filter.output();
     }
 
     int[] votes = new int[inst.numClasses()];
@@ -1603,8 +1620,9 @@ public class SMO extends DistributionClassifier implements OptionHandler,
     newVector.addElement(new Option("\tGamma for the "
 				    + "RBF kernel. (default 0.01)",
 				    "G", 1, "-G <double>"));
-    newVector.addElement(new Option("\tDon't standardize the data.",
-				    "S", 0, "-S"));
+    newVector.addElement(new Option("\tWhether to 0=normalize/1=standardize/2=neither. " +
+				    "(default 0=normalize)",
+				    "N", 1, "-N"));
     newVector.addElement(new Option("\tFeature-space normalization (only  non-linear for polynomial kernels).",
 				    "F", 0, "-F"));
     newVector.addElement(new Option("\tUse lower-order terms (only for non-linear polynomial kernels).",
@@ -1645,8 +1663,8 @@ public class SMO extends DistributionClassifier implements OptionHandler,
    * -G num <br>
    * Gamma for the RBF kernel. (default 0.01) <p>
    *
-   * -S <br>
-   * Don't standardize the training instances. <p>
+   * -N <0|1|2> <br>
+   * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p>
    *
    * -F <br>
    * Feature-space normalization (only for  non-linear polynomial kernels). <p>
@@ -1718,7 +1736,12 @@ public class SMO extends DistributionClassifier implements OptionHandler,
       m_eps = 1.0e-12;
     }
     m_useRBF = Utils.getFlag('R', options);
-    m_standardize = !Utils.getFlag('S', options);
+    String nString = Utils.getOption('N', options);
+    if (nString.length() != 0) {
+      setFilterType(new SelectedTag(Integer.parseInt(nString), TAGS_FILTER));
+    } else {
+      setFilterType(new SelectedTag(FILTER_NORMALIZE, TAGS_FILTER));
+    }
     m_featureSpaceNormalization = Utils.getFlag('F', options);
     if ((m_useRBF) && (m_featureSpaceNormalization)) {
       throw new Exception("RBF machine doesn't require feature-space normalization.");
@@ -1764,9 +1787,7 @@ public class SMO extends DistributionClassifier implements OptionHandler,
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
     options[current++] = "-T"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
-    if (!m_standardize) {
-      options[current++] = "-S";
-    }
+    options[current++] = "-N"; options[current++] = "" + m_filterType;
     if (m_featureSpaceNormalization) {
       options[current++] = "-F";
     }
@@ -1909,23 +1930,29 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   }
   
   /**
-   * Check whether data is to be standardized.
-   * @return true if data is to be standardized
+   * Gets the method of searching the tree for a new insertion. Will be one of
+   * FILTER_NORMALIZE, FILTER_STANDARDIZE, FILTER_NONE.
+   *
+   * @return the tree searching mode
    */
-  public boolean getStandardizeData() {
-    
-    return m_standardize;
+  public SelectedTag getFilterType() {
+
+    return new SelectedTag(m_filterType, TAGS_FILTER);
   }
   
   /**
-   * Set whether data is to be standardized.
-   * @param v  true if data is to be standardized
+   * Sets the method of searching the tree for a new insertion. Will be one of
+   * FILTER_NORMALIZE, FILTER_STANDARDIZE, FILTER_NONE.
+   *
+   * @param newType the new filtering mode
    */
-  public void setStandardizeData(boolean v) {
+  public void setFilterType(SelectedTag newType) {
     
-    m_standardize = v;
+    if (newType.getTags() == TAGS_FILTER) {
+      m_filterType = newType.getSelectedTag().getID();
+    }
   }
-  
+
   /**
    * Check if the RBF kernel is to be used.
    * @return true if RBF
