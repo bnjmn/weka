@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -257,6 +257,9 @@ public class ClustererPanel extends JPanel {
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.clusterers.DensityBasedClusterer.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.UnsupervisedSubsetEvaluator.class,
 		      weka.gui.GenericObjectEditor.class);
   }
   
@@ -703,6 +706,7 @@ public class ClustererPanel extends JPanel {
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
+	  inst.setClassIndex(-1);
 	  Instances userTest = null;
 	  PlotData2D predData = null;
 	  if (m_TestInstances != null) {
