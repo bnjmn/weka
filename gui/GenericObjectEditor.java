@@ -23,6 +23,7 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.Tag;
 import weka.core.SelectedTag;
+import weka.core.Utils;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
@@ -66,7 +67,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -90,7 +91,7 @@ public class GenericObjectEditor implements PropertyEditor {
   private boolean m_Enabled = true;
   
   /** The name of the properties file */
-  protected static String PROPERTY_FILE = "GenericObjectEditor.props";
+  protected static String PROPERTY_FILE = "weka/gui/GenericObjectEditor.props";
 
   /** Contains the editor properties */
   private static Properties EDITOR_PROPERTIES;
@@ -98,55 +99,16 @@ public class GenericObjectEditor implements PropertyEditor {
   /** Loads the configuration property file */
   static {
 
-    boolean noDefaultProps = false;
-    boolean noUserProps = false;
-    boolean noLocalProps = false;
-    
-    // Properties for user info
-    Properties systemProps = System.getProperties();
-
-    // Get default properties from the weka distribution
-    Properties defaultProps = new Properties();
-    try {
-      // Apparently hardcoded slashes are OK here
-      // jdk1.1/docs/guide/misc/resources.html
-      defaultProps.load(ClassLoader.getSystemResourceAsStream("weka/gui/" +
-							      PROPERTY_FILE));
-    } catch (Exception ex) {
-      noDefaultProps = true;
-      System.err.println("Couldn't load default properties: "
-			 + ex.getMessage());
-    }
-    
-    // Allow a properties file in the users home directory to override
-    Properties userProps = new Properties(defaultProps);
-    try {
-      userProps.load(new FileInputStream(systemProps.getProperty("user.home")
-			 + systemProps.getProperty("file.separator")
-			 + PROPERTY_FILE));
-    } catch (Exception ex) {
-      noUserProps = true;
-      System.err.println("Couldn't load user properties: "
-			 + ex.getMessage());
-    }
-
     // Allow a properties file in the current directory to override
-    EDITOR_PROPERTIES = new Properties(userProps);
     try {
-      EDITOR_PROPERTIES.load(new FileInputStream(PROPERTY_FILE));
+      EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
     } catch (Exception ex) {
-      noLocalProps = true;
-      System.err.println("Couldn't load localdir properties: "
-			 + ex.getMessage());
-    }
-
-    if (noDefaultProps && noUserProps && noLocalProps) {
       JOptionPane.showMessageDialog(null,
-	  "Could not read a configuration file for the generic object\n"
+          "Could not read a configuration file for the generic object\n"
          +"editor. An example file is included with the Weka distribution.\n"
 	 +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
 	 +"should be placed either in your user home (which is set\n"
-	 + "to \"" + systemProps.getProperty("user.home") + "\")\n"
+	 + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
 	 + "or the directory that java was started from\n",
 	 "GenericObjectEditor",
 	 JOptionPane.ERROR_MESSAGE);
@@ -358,7 +320,7 @@ public class GenericObjectEditor implements PropertyEditor {
     String className = m_ClassType.getName();
     String typeOptions = EDITOR_PROPERTIES.getProperty(className);
     if (typeOptions == null) {
-      System.err.println("No configuration property found in\n"
+      System.err.println("Warning: No configuration property found in\n"
 			 + PROPERTY_FILE + "\n"
 			 + "for " + className);
     } else {

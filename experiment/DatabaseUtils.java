@@ -19,6 +19,7 @@
 
 package weka.experiment;
 
+import weka.core.Utils;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.StringTokenizer;
@@ -47,7 +48,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -68,7 +69,7 @@ public class DatabaseUtils implements Serializable {
 
   /** The name of the properties file */
   protected static String PROPERTY_FILE
-    = "DatabaseUtils.props";
+    = "weka/experiment/DatabaseUtils.props";
 
   /** Holds the jdbc drivers to be used (only to stop them being gc'ed) */
   protected static Vector DRIVERS = new Vector();
@@ -81,42 +82,15 @@ public class DatabaseUtils implements Serializable {
    */
   static {
 
-    // Look in the Users home directory for the database connection
-    // properties file
-    Properties systemProps = System.getProperties();
-
-    Properties defaultProps = new Properties();
     try {
-      // Apparently hardcoded slashes are OK here
-      // jdk1.1/docs/guide/misc/resources.html
-      defaultProps.load(ClassLoader.getSystemResourceAsStream(
-		  "weka/experiment/" + PROPERTY_FILE));
+      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
     } catch (Exception ex) {
-      System.err.println("Couldn't load default properties: "
-			 + ex.getMessage());
+      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(ex);
     }
 
-    Properties userProps = new Properties(defaultProps);
-    try {
-      String propFile = systemProps.getProperty("user.home")
-	+ systemProps.getProperty("file.separator")
-	+ PROPERTY_FILE;
-      userProps.load(new FileInputStream(propFile));
-    } catch (Exception ex) {
-    }
-    // Allow a properties file in the current directory to override
-    // (eg: user default may be to use the central database, but
-    // they may have a directory for "experimental" experiment results
-    // they want to put into their own directory
-    Properties localProps = new Properties(userProps);
-    try {
-      localProps.load(new FileInputStream(PROPERTY_FILE));
-    } catch (Exception ex) {
-    }
-    PROPERTIES = localProps;
-    
     // Register the drivers in jdbc DriverManager
-    String drivers = localProps.getProperty("jdbcDriver",
+    String drivers = PROPERTIES.getProperty("jdbcDriver",
 					    "jdbc.idbDriver");
 
 
