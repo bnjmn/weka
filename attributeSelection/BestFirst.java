@@ -35,7 +35,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class BestFirst
   extends ASSearch
@@ -329,7 +329,7 @@ public class BestFirst
 
 
   /**
-   * Gets the current settings of WrapperSubsetEval.
+   * Gets the current settings of BestFirst.
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
