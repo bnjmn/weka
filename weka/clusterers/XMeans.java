@@ -106,7 +106,7 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
  * @author Gabi Schmidberger <gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware <mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -393,7 +393,7 @@ public class XMeans extends Clusterer implements OptionHandler {
     if (checkForNominalAttributes(data)) {
       m_NominalToBinary = new NominalToBinary();
       m_NominalToBinary.setInputFormat(data);
-      m_NominalToBinary.setValue(Math.sqrt(2.0));
+      //m_NominalToBinary.setValue(Math.sqrt(2.0));
       data = Filter.useFilter(data, m_NominalToBinary);
     } else {
       m_NominalToBinary = null;
