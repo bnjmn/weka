@@ -57,7 +57,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler {
@@ -473,6 +473,12 @@ public class CVParameterSelection extends Classifier
     }
     m_Train = new Instances(instances);
     m_Train.deleteWithMissingClass();
+    if (m_Train.numInstances() == 0) {
+      throw new Exception("No training instances without missing class.");
+    }
+    if (m_Train.numInstances() < m_NumFolds) {
+      throw new Exception("Number of training instances smaller than number of folds.");
+    }
     m_Train.randomize(new Random(m_Seed));
     if (m_Train.classAttribute().isNominal()) {
       m_Train.stratify(m_NumFolds);
