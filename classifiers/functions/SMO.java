@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.46 $ */
+ * @version $Revision: 1.47 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -1583,6 +1583,108 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   }
 
   /**
+   * Returns the weights in sparse format.
+   */
+  
+  public double [][][] sparseWeights() {
+    
+    int numValues = m_classAttribute.numValues();
+    double [][][] sparseWeights = new double[numValues][numValues][];
+    
+    for (int i = 0; i < numValues; i++) {
+      for (int j = i + 1; j < numValues; j++) {
+	sparseWeights[i][j] = m_classifiers[i][j].m_sparseWeights;
+      }
+    }
+    
+    return sparseWeights;
+  }
+  
+  /**
+   * Returns the indices in sparse format.
+   */
+  
+  public int [][][] sparseIndices() {
+    
+    int numValues = m_classAttribute.numValues();
+    int [][][] sparseIndices = new int[numValues][numValues][];
+
+    for (int i = 0; i < numValues; i++) {
+      for (int j = i + 1; j < numValues; j++) {
+	sparseIndices[i][j] = m_classifiers[i][j].m_sparseIndices;
+      }
+    }
+    
+    return sparseIndices;
+  }
+  
+  /**
+   * Returns the bias of each binary SMO.
+   */
+  
+  public double [][] bias() {
+    
+    int numValues = m_classAttribute.numValues();
+    double [][] bias = new double[numValues][numValues];
+
+    for (int i = 0; i < numValues; i++) {
+      for (int j = i + 1; j < numValues; j++) {
+	bias[i][j] = m_classifiers[i][j].m_b;
+      }
+    }
+    
+    return bias;
+  }
+  
+  /*
+   * Returns the number of values of the class attribute.
+   */
+  
+  public int numClassAttributeValues() {
+
+    return m_classAttribute.numValues();
+  }
+  
+  /*
+   * Returns the names of the class attributes.
+   */
+  
+  public String [] classAttributeNames() {
+
+    int numValues = m_classAttribute.numValues();
+    
+    String [] classAttributeNames = new String[numValues];
+    
+    for (int i = 0; i < numValues; i++) {
+      classAttributeNames[i] = m_classAttribute.value(i);
+    }
+    
+    return classAttributeNames;
+  }
+  
+  /**
+   * Returns the attribute names.
+   */
+  
+  public String [][][] attributeNames() {
+    
+    int numValues = m_classAttribute.numValues();
+    String [][][] attributeNames = new String[numValues][numValues][];
+    
+    for (int i = 0; i < numValues; i++) {
+      for (int j = i + 1; j < numValues; j++) {
+	int numAttributes = m_classifiers[i][j].m_data.numAttributes();
+	String [] attrNames = new String[numAttributes];
+	for (int k = 0; k < numAttributes; k++) {
+	  attrNames[k] = m_classifiers[i][j].m_data.attribute(k).name();
+	}
+	attributeNames[i][j] = attrNames;          
+      }
+    }
+    return attributeNames;
+  }
+  
+  /**
    * Returns the coefficients in sparse format.  Throws an exception
    * if there is more than one machine or if the machine is not
    * linear.  
@@ -1595,14 +1697,14 @@ public class SMO extends DistributionClassifier implements OptionHandler,
     if (m_classifiers[0][1].m_sparseWeights == null) {
       throw new Exception("No weight vector available.");
     }
-
+    
     FastVector vec = new FastVector(2);
     vec.addElement(m_classifiers[0][1].m_sparseWeights);
     vec.addElement(m_classifiers[0][1].m_sparseIndices);
-
+    
     return vec;
   }
-
+  
   /**
    * Returns an enumeration describing the available options.
    *
