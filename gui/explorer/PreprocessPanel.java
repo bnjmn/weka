@@ -85,7 +85,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -416,7 +416,6 @@ public class PreprocessPanel extends JPanel {
 				    + ex.getMessage(),
 				    "Instances",
 				    JOptionPane.ERROR_MESSAGE);
-      ex.printStackTrace();  //Added temporarily please remove later on.
     }
   }
 
