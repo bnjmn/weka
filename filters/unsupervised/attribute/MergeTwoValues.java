@@ -43,7 +43,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class MergeTwoValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -82,7 +82,7 @@ public class MergeTwoValues extends Filter
        throws Exception {
 
     super.setInputFormat(instanceInfo);
-    m_AttIndex.setUpper(instanceInfo.numAttributes());
+    m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
     m_FirstIndex.setUpper(instanceInfo.
 			  attribute(m_AttIndex.getIndex()).numValues() - 1);
     m_SecondIndex.setUpper(instanceInfo.
@@ -402,6 +402,7 @@ public class MergeTwoValues extends Filter
 	Filter.filterFile(new MergeTwoValues(), argv);
       }
     } catch (Exception ex) {
+      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }

@@ -217,7 +217,7 @@ weka.clusterers.Clusterer=\
  weka.clusterers.SimpleKMeans, \
  weka.clusterers.Cobweb, \
  weka.clusterers.FarthestFirst, \
- weka.clusterers.DistributionMetaClusterer
+ weka.clusterers.MakeDensityBasedClusterer
 
 # Lists the Loaders I want to choose from
 weka.core.converters.Loader =\
