@@ -113,7 +113,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 public class SMO extends Classifier implements OptionHandler, 
   WeightedInstancesHandler {
 
@@ -548,7 +548,16 @@ public class SMO extends Classifier implements OptionHandler,
 		text.append(" - ");
 	      }
 	      text.append(Utils.doubleToString(val, 12, 4) 
-			  + " * K[X(" + i + ") * X]\n");
+			  + " * <");
+	      for (int j = 0; j < m_data.numAttributes(); j++) {
+		if (j != m_data.classIndex()) {
+		  text.append(m_data.instance(i).toString(j));
+		}
+		if (j != m_data.numAttributes() - 1) {
+		  text.append(" ");
+		}
+	      }
+	      text.append("> * X]\n");
 	      printed++;
 	    }
 	  }
@@ -989,7 +998,7 @@ public class SMO extends Classifier implements OptionHandler,
   /** The number of folds for the internal cross-validation */
   private int m_numFolds = -1;
 
-  /** The random number seed for the internal cross-validation */
+  /** The random number seed  */
   private int m_randomSeed = 1;
 
   /**
@@ -1104,6 +1113,7 @@ public class SMO extends Classifier implements OptionHandler,
     }
 
     // Build the binary classifiers
+    Random rand = new Random(m_randomSeed);
     m_classifiers = new BinarySMO[insts.numClasses()][insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
       for (int j = i + 1; j < insts.numClasses(); j++) {
@@ -1116,6 +1126,7 @@ public class SMO extends Classifier implements OptionHandler,
 	  data.add(subsets[j].instance(k));
 	}
 	data.compactify();
+	data.randomize(rand);
 	m_classifiers[i][j].buildClassifier(data, i, j, 
 					    m_fitLogisticModels,
 					    m_numFolds, m_randomSeed);
@@ -1438,7 +1449,7 @@ public class SMO extends Classifier implements OptionHandler,
     newVector.addElement(new Option("\tThe number of folds for the internal cross-validation. " +
 				    "(default -1, use training data)",
 				    "V", 1, "-V <double>"));
-    newVector.addElement(new Option("\tThe random number seed for the internal cross-validation. " +
+    newVector.addElement(new Option("\tThe random number seed. " +
 				    "(default 1)",
 				    "W", 1, "-W <double>"));
 
@@ -1486,7 +1497,7 @@ public class SMO extends Classifier implements OptionHandler,
    * for logistic models. (default -1, use training data)
    *
    * -W num <br>
-   * Random number seed for cross-validation. (default 1)
+   * Random number seed. (default 1)
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported 
