@@ -53,7 +53,7 @@ import weka.core.Utils;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
@@ -294,7 +294,7 @@ public class Bagging extends DistributionClassifier
       throw new Exception("Can't handle string attributes!");
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
-    int bagSize = data.numInstances() * 100 / m_BagSizePercent;
+    int bagSize = data.numInstances() * m_BagSizePercent / 100;
     Random random = new Random(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {
       Instances bagData = new Instances(data, bagSize);
