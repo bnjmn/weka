@@ -18,7 +18,12 @@
  *    Queue.java
  *    Copyright (C) 1999 Len Trigg
  *
- */
+ *    Modified March-May 2004 by Mark Utting to add JML specs
+ *    (this was done as the example solution of an assignment for a
+ *     software engineering course, so the specifications are more precise
+ *     and complete than one would normally do).
+ *    Passed a static analysis using ESC/Java-2.0a6 with no warnings.
+*/
 
 package weka.core;
 
@@ -28,7 +33,7 @@ import java.io.*;
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Queue extends Object implements Serializable {
 
@@ -38,16 +43,20 @@ public class Queue extends Object implements Serializable {
   protected class QueueNode implements Serializable {
 
     /** The next node in the queue */
-    protected QueueNode m_Next;
+    protected /*@ spec_public @*/ QueueNode m_Next;
 
-    /** The nodes contents */
-    protected Object m_Contents;
+    /** The nodes contents
+     */
+    protected /*@ non_null spec_public @*/ Object m_Contents;
 
     /** 
      * Creates a queue node with the given contents 
      */
+    //@ requires contents != null;
+    //@ assignable m_Contents, m_Next;
+    //@ ensures m_Contents == contents;
+    //@ ensures m_Next == null;
     public QueueNode(Object contents) {
-
       m_Contents = contents;
       next(null);
     }
@@ -55,50 +64,67 @@ public class Queue extends Object implements Serializable {
     /**
      * Sets the next node in the queue, and returns it.
      */
+    //@ requires next != this ;
+    //@ assignable m_Next;
+    //@ ensures m_Next==next && \result==next;
     public QueueNode next(QueueNode next) {
-
       return m_Next = next;
-    }
+    } //@ nowarn Invariant; // Because it stupidly checks the Queue invariant!
 
     /**
      * Gets the next node in the queue. 
      */
-    public QueueNode next() {
-
+    //@ ensures \result == m_Next;
+    public /*@ pure @*/ QueueNode next() {
       return m_Next;
     }
 
     /**
      * Sets the contents of the node.
      */
+    //@ requires contents != null;
+    //@ assignable m_Contents;
+    //@ ensures  m_Contents == contents && \result == contents;
     public Object contents(Object contents) {
-
       return m_Contents = contents;
     }
 
     /**
      * Returns the contents in the node.
      */
-    public Object contents() {
-
+      //@ ensures \result == m_Contents;
+    public /*@ pure @*/ Object contents() {
       return m_Contents;
     }
   }
 
   /** Store a reference to the head of the queue */
-  protected QueueNode m_Head = null;
+  protected /*@ spec_public @*/ QueueNode m_Head = null;
 
   /** Store a reference to the tail of the queue */
-  protected QueueNode m_Tail = null;
+  protected /*@ spec_public @*/ QueueNode m_Tail = null;
 
-  /** Store the current number of elements in the queue */
-  protected int m_Size = 0;
+  /** Store the c m_Tail.m_Nexturrent number of elements in the queue */
+  protected /*@ spec_public @*/ int m_Size = 0;
+
+  //@ public invariant m_Head == null <==> m_Tail == null;
+  //@public invariant m_Tail != null ==> m_Tail.m_Next == null;
+  //@ public invariant m_Size >= 0;
+  //@ public invariant m_Size == 0 <==> m_Head == null;
+  //@ public invariant m_Size == 1 <==> m_Head != null && m_Head == m_Tail;
+  //@ public invariant m_Size > 1 ==> m_Head != m_Tail;
+  //@ public invariant m_Size > 1 <== m_Head != m_Tail;
+
+
 
   /**
-   * Removes all objects from the queue.
+   * Removes all objects from the queue m_Tail.m_Next.
    */
+  //@ assignable m_Size, m_Head, m_Tail;
+  //@ ensures m_Size == 0;
+  //@ ensures m_Head == null;
+  //@ ensures m_Tail == null;
   public final synchronized void removeAllElements() {
-
     m_Size = 0;
     m_Head = null;
     m_Tail = null;
@@ -110,9 +136,18 @@ public class Queue extends Object implements Serializable {
    * @param item the object to be appended
    * @return the object appended
    */
+  //@ requires item != null;
+  //@ assignable m_Head, m_Tail, m_Tail.m_Next, m_Head.m_Next, m_Size;
+  //@ ensures m_Head != null;
+  //@ ensures m_Tail != \old(m_Tail);
+  //@ ensures m_Size == \old(m_Size) + 1;
+  //@ ensures \old(m_Size) == 0 ==> m_Head == m_Tail; 
+  //@ ensures \old(m_Size) != 0 ==> m_Head == \old(m_Head);
+  //@ ensures m_Tail.contents() == \old(item);
+  //@ ensures \result == item;
   public synchronized Object push(Object item) {
-
     QueueNode newNode = new QueueNode(item);
+    
     if (m_Head == null) {
       m_Head = m_Tail = newNode;
     } else {
@@ -128,14 +163,27 @@ public class Queue extends Object implements Serializable {
    * @return the object at the front of the queue
    * @exception RuntimeException if the queue is empty
    */
-  public synchronized Object pop() {
-
+  //@ assignable m_Head, m_Tail, m_Size;
+  //@ ensures m_Size == \old(m_Size) - 1;
+  //@ ensures m_Head == \old(m_Head.m_Next);
+  //@ ensures m_Head != null ==> m_Tail == \old(m_Tail);
+  //@ ensures \result == \old(m_Head.m_Contents);
+  //@ signals (RuntimeException) \old(m_Head) == null;
+  public synchronized Object pop() 
+      throws RuntimeException   // REDUNDANT, BUT ESCJAVA REQUIRES THIS
+  {
     if (m_Head == null) {
-      throw new RuntimeException("Queue is empty");
+	throw new RuntimeException("Queue is empty");
     }
     Object retval = m_Head.contents();
     m_Size--;
     m_Head = m_Head.next();
+    // Here we need to either tell ESC/Java some facts about
+    // the contents of the list after popping off the head,
+    // or turn off the 'invariant' warnings.
+    //
+    //@ assume m_Size == 0 <==> m_Head == null;
+    //@ assume m_Size == 1 <==> m_Head == m_Tail;
     if (m_Head == null) {
       m_Tail = null;
     }
@@ -148,8 +196,11 @@ public class Queue extends Object implements Serializable {
    * @return the object at the front of the queue
    * @exception RuntimeException if the queue is empty
    */
-  public synchronized Object peek() {
-    
+  //@ ensures \result == \old(m_Head.m_Contents);
+  //@ signals (RuntimeException) \old(m_Head) == null;
+  public /*@ pure @*/ synchronized Object peek() 
+    throws RuntimeException
+  { 
     if (m_Head == null) {
       throw new RuntimeException("Queue is empty");
     }
@@ -161,18 +212,18 @@ public class Queue extends Object implements Serializable {
    * 
    * @return true if queue is empty
    */
-  public boolean empty() {
-
-    return (m_Head == null);
+  //@ ensures \result <==> m_Head == null;
+  public /*@ pure @*/ boolean empty() {
+    return m_Head == null;
   }
 
-  /** 
+  /**
    * Gets queue's size.
    *
    * @return size of queue
    */
-  public int size() {
-
+  //@ ensures \result == m_Size;
+  public /*@ pure @*/ int size() {
     return m_Size;
   }
 
@@ -181,7 +232,10 @@ public class Queue extends Object implements Serializable {
    *
    * @return textual description of queue
    */
-  public String toString() {
+  //@ also
+  //@ ensures \result != null;
+  //@ ensures (* \result == textual description of the queue *);
+  public  /*@ pure @*/ String toString() {
 
     String retval = "Queue Contents "+m_Size+" elements\n";
     QueueNode current = m_Head;
@@ -189,18 +243,21 @@ public class Queue extends Object implements Serializable {
       return retval + "Empty\n";
     } else {
       while (current != null) {
-	retval += current.contents().toString()+"\n";
+        retval += current.contents().toString()+"\n"; //@nowarn Modifies;
 	current = current.next();
       }
     }
     return retval;
-  }
+  } //@ nowarn Post;
 
   /**
    * Main method for testing this class.
    *
    * @param argv a set of strings that are pushed on a test queue
    */
+  //@ requires argv.length >= 0;
+  //@ requires argv != null;
+  //@ requires (\forall int i; 0 <= i && i < argv.length; argv[i] != null);
   public static void main(String [] argv) {
 
     try {
@@ -208,22 +265,23 @@ public class Queue extends Object implements Serializable {
       for(int i = 0; i < argv.length; i++) {
 	queue.push(argv[i]);
       }
-      System.out.println("After Pushing");
+      System.out.println("After pushing command line arguments");
       System.out.println(queue.toString());
-      System.out.println("Popping...");
       while (!queue.empty()) {
-	System.out.println(queue.pop().toString());
+	System.out.println("Pop: " + queue.pop().toString());
       }
+      // try one more pop, to make sure we get an exception
+      try 
+	{
+	  queue.pop();
+	  System.out.println("ERROR: pop did not throw exception!");
+	}
+      catch (RuntimeException ex)
+        {
+	  System.out.println("Pop on empty queue correctly gave exception.");
+	}
     } catch (Exception ex) {
       System.out.println(ex.getMessage());
     }
   }
 }
-
-
-
-
-
-
-
-

@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -121,13 +121,18 @@ public class Attribute implements Copyable, Serializable {
   private static final int STRING_COMPRESS_THRESHOLD = 200;
 
   /** The attribute's name. */
-  private String m_Name;
+  private /*@ spec_public non_null @*/ String m_Name;
 
   /** The attribute's type. */
-  private int m_Type;
+  private /*@ spec_public @*/ int m_Type;
+  /*@ invariant m_Type == NUMERIC || 
+                m_Type == DATE || 
+                m_Type == STRING || 
+                m_Type == NOMINAL;
+  */
 
   /** The attribute's values (if nominal or string). */
-  private FastVector m_Values;
+  private /*@ spec_public @*/ FastVector m_Values;
 
   /** Mapping of values to indices (if nominal or string). */
   private Hashtable m_Hashtable;
@@ -136,7 +141,7 @@ public class Attribute implements Copyable, Serializable {
   private SimpleDateFormat m_DateFormat;
 
   /** The attribute's index. */
-  private int m_Index;
+  private /*@ spec_public @*/ int m_Index;
 
   /** The attribute's metadata. */
   private ProtectedProperties m_Metadata;
@@ -173,6 +178,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param attributeName the name for the attribute
    */
+  //@ requires attributeName != null;
+  //@ ensures  m_Name == attributeName;
   public Attribute(String attributeName) {
 
     this(attributeName, new ProtectedProperties(new Properties()));
@@ -184,6 +191,9 @@ public class Attribute implements Copyable, Serializable {
    * @param attributeName the name for the attribute
    * @param metadata the attribute's properties
    */
+  //@ requires attributeName != null;
+  //@ requires metadata != null;
+  //@ ensures  m_Name == attributeName;
   public Attribute(String attributeName, ProtectedProperties metadata) {
 
     m_Name = attributeName;
@@ -201,6 +211,9 @@ public class Attribute implements Copyable, Serializable {
    * @param dateFormat a string suitable for use with
    * SimpleDateFormatter for parsing dates.
    */
+  //@ requires attributeName != null;
+  //@ requires dateFormat != null;
+  //@ ensures  m_Name == attributeName;
   public Attribute(String attributeName, String dateFormat) {
 
     this(attributeName, dateFormat,
@@ -215,6 +228,10 @@ public class Attribute implements Copyable, Serializable {
    * SimpleDateFormatter for parsing dates.
    * @param metadata the attribute's properties
    */
+  //@ requires attributeName != null;
+  //@ requires dateFormat != null;
+  //@ requires metadata != null;
+  //@ ensures  m_Name == attributeName;
   public Attribute(String attributeName, String dateFormat,
 		   ProtectedProperties metadata) {
 
@@ -241,6 +258,8 @@ public class Attribute implements Copyable, Serializable {
    * @param attributeValues a vector of strings denoting the 
    * attribute values. Null if the attribute is a string attribute.
    */
+  //@ requires attributeName != null;
+  //@ ensures  m_Name == attributeName;
   public Attribute(String attributeName, 
 		   FastVector attributeValues) {
 
@@ -258,6 +277,16 @@ public class Attribute implements Copyable, Serializable {
    * attribute values. Null if the attribute is a string attribute.
    * @param metadata the attribute's properties
    */
+  //@ requires attributeName != null;
+  //@ requires metadata != null;
+  /*@ ensures  m_Name == attributeName;
+      ensures  m_Index == -1;
+      ensures  attributeValues == null && m_Type == STRING
+            || attributeValues != null && m_Type == NOMINAL 
+                  && m_Values.size() == attributeValues.size();
+      signals (IllegalArgumentException ex) 
+                 (* if duplicate strings in attributeValues *);
+  */
   public Attribute(String attributeName, 
 		   FastVector attributeValues,
 		   ProtectedProperties metadata) {
@@ -299,7 +328,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return a copy of this attribute with the same index
    */
-  public Object copy() {
+  public /*@ pure non_null @*/ Object copy() {
 
     Attribute copy = new Attribute(m_Name);
 
@@ -319,7 +348,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return enumeration of all the attribute's values
    */
-  public final Enumeration enumerateValues() {
+  public final /*@ pure @*/ Enumeration enumerateValues() {
 
     if (isNominal() || isString()) {
       final Enumeration ee = m_Values.elements();
@@ -346,7 +375,7 @@ public class Attribute implements Copyable, Serializable {
    * @param other the Object to be compared to this attribute
    * @return true if the given attribute is equal to this attribute
    */
-  public final boolean equals(Object other) {
+  public final /*@ pure @*/ boolean equals(Object other) {
 
     if ((other == null) || !(other.getClass().equals(this.getClass()))) {
       return false;
@@ -375,7 +404,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the index of this attribute
    */
-  public final int index() {
+  //@ ensures \result == m_Index;
+  public final /*@ pure @*/ int index() {
 
     return m_Index;
   }
@@ -412,7 +442,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return true if the attribute is nominal
    */
-  public final boolean isNominal() {
+  //@ ensures \result <==> (m_Type == NOMINAL);
+  public final /*@ pure @*/ boolean isNominal() {
 
     return (m_Type == NOMINAL);
   }
@@ -422,7 +453,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return true if the attribute is numeric
    */
-  public final boolean isNumeric() {
+  //@ ensures \result <==> ((m_Type == NUMERIC) || (m_Type == DATE));
+  public final /*@ pure @*/ boolean isNumeric() {
 
     return ((m_Type == NUMERIC) || (m_Type == DATE));
   }
@@ -432,7 +464,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return true if the attribute is a string
    */
-  public final boolean isString() {
+  //@ ensures \result <==> (m_Type == STRING);
+  public final /*@ pure @*/ boolean isString() {
 
     return (m_Type == STRING);
   }
@@ -442,7 +475,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return true if the attribute is a date type
    */
-  public final boolean isDate() {
+  //@ ensures \result <==> (m_Type == DATE);
+  public final /*@ pure @*/ boolean isDate() {
 
     return (m_Type == DATE);
   }
@@ -452,7 +486,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the attribute's name as a string
    */
-  public final String name() {
+  //@ ensures \result == m_Name;
+  public final /*@ pure @*/ String name() {
 
     return m_Name;
   }
@@ -462,7 +497,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the number of attribute values
    */
-  public final int numValues() {
+  public final /*@ pure @*/ int numValues() {
 
     if (!isNominal() && !isString()) {
       return 0;
@@ -515,7 +550,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the attribute's type.
    */
-  public final int type() {
+  //@ ensures \result == m_Type;
+  public final /*@ pure @*/ int type() {
 
     return m_Type;
   }
@@ -528,7 +564,7 @@ public class Attribute implements Copyable, Serializable {
    * @param valIndex the value's index
    * @return the attribute's value as a string
    */
-  public final String value(int valIndex) {
+  public final /*@ non_null pure @*/ String value(int valIndex) {
     
     if (!isNominal() && !isString()) {
       return "";
@@ -549,6 +585,10 @@ public class Attribute implements Copyable, Serializable {
    * @param attributeName the name for the attribute
    * @param index the attribute's index
    */
+  //@ requires attributeName != null;
+  //@ requires index >= 0;
+  //@ ensures  m_Name == attributeName;
+  //@ ensures  m_Index == index;
   Attribute(String attributeName, int index) {
 
     this(attributeName);
@@ -564,6 +604,10 @@ public class Attribute implements Copyable, Serializable {
    * string.
    * @param index the attribute's index
    */
+  //@ requires attributeName != null;
+  //@ requires index >= 0;
+  //@ ensures  m_Name == attributeName;
+  //@ ensures  m_Index == index;
   Attribute(String attributeName, String dateFormat, 
 	    int index) {
 
@@ -582,6 +626,10 @@ public class Attribute implements Copyable, Serializable {
    * Null if the attribute is a string attribute.
    * @param index the attribute's index
    */
+  //@ requires attributeName != null;
+  //@ requires index >= 0;
+  //@ ensures  m_Name == attributeName;
+  //@ ensures  m_Index == index;
   Attribute(String attributeName, FastVector attributeValues, 
 	    int index) {
 
@@ -597,6 +645,10 @@ public class Attribute implements Copyable, Serializable {
    * @return the index assigned to the string, or -1 if the attribute is not
    * of type Attribute.STRING 
    */
+  /*@ requires value != null;
+      ensures  isString() && 0 <= \result && \result < m_Values.size() ||
+             ! isString() && \result == -1;
+  */
   public int addStringValue(String value) {
 
     if (!isString()) {
@@ -633,6 +685,11 @@ public class Attribute implements Copyable, Serializable {
    * @return the index assigned to the string, or -1 if the attribute is not
    * of type Attribute.STRING 
    */
+  /*@ requires src != null;
+      requires 0 <= index && index < src.m_Values.size();
+      ensures  isString() && 0 <= \result && \result < m_Values.size() ||
+             ! isString() && \result == -1;
+  */
   public int addStringValue(Attribute src, int index) {
 
     if (!isString()) {
@@ -669,7 +726,11 @@ public class Attribute implements Copyable, Serializable {
    * @param newName the name of the new attribute
    * @return a copy of this attribute with the same index
    */
-  final Attribute copy(String newName) {
+  //@ requires newName != null;
+  //@ ensures \result.m_Name  == newName;
+  //@ ensures \result.m_Index == m_Index;
+  //@ ensures \result.m_Type  == m_Type;
+  final /*@ pure non_null @*/ Attribute copy(String newName) {
 
     Attribute copy = new Attribute(newName);
 
@@ -690,6 +751,8 @@ public class Attribute implements Copyable, Serializable {
    * @param index the value's index
    * @exception IllegalArgumentException if the attribute is not nominal
    */
+  //@ requires isNominal() || isString();
+  //@ requires 0 <= index && index < m_Values.size();
   final void delete(int index) {
     
     if (!isNominal() && !isString()) 
@@ -719,6 +782,8 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param value the attribute value
    */
+  //@ requires value != null;
+  //@ ensures  m_Values.size() == \old(m_Values.size()) + 1;
   final void forceAddValue(String value) {
 
     Object store = value;
@@ -739,6 +804,9 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param the index of this attribute
    */
+  //@ requires 0 <= index;
+  //@ assignable m_Index;
+  //@ ensures m_Index == index;
   final void setIndex(int index) {
 
     m_Index = index;
@@ -753,6 +821,9 @@ public class Attribute implements Copyable, Serializable {
    * @exception IllegalArgumentException if the attribute is not nominal or 
    * string.
    */
+  //@ requires string != null;
+  //@ requires isNominal() || isString();
+  //@ requires 0 <= index && index < m_Values.size();
   final void setValue(int index, String string) {
     
     switch (m_Type) {
@@ -779,7 +850,8 @@ public class Attribute implements Copyable, Serializable {
     }
   }
 
-  public String formatDate(double date) {
+  //@ requires isDate();
+  public /*@pure@*/ String formatDate(double date) {
     switch (m_Type) {
     case DATE:
       return m_DateFormat.format(new Date((long)date));
@@ -789,6 +861,8 @@ public class Attribute implements Copyable, Serializable {
     }
   }
 
+  //@ requires isDate();
+  //@ requires string != null;
   public double parseDate(String string) throws ParseException {
     switch (m_Type) {
     case DATE:
@@ -806,7 +880,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return metadata for this attribute
    */  
-  public final ProtectedProperties getMetadata() {
+  public final /*@ pure @*/ ProtectedProperties getMetadata() {
 
     return m_Metadata;
   }
@@ -820,7 +894,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the ordering type of the attribute
    */
-  public final int ordering() {
+  public final /*@ pure @*/ int ordering() {
 
     return m_Ordering;
   }
@@ -830,7 +904,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return whether the attribute is regular or not
    */
-  public final boolean isRegular() {
+  public final /*@ pure @*/ boolean isRegular() {
 
     return m_IsRegular;
   }
@@ -840,7 +914,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return whether the attribute can be averaged or not
    */
-  public final boolean isAveragable() {
+  public final /*@ pure @*/ boolean isAveragable() {
 
     return m_IsAveragable;
   }
@@ -851,7 +925,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return whether the attribute has a zeropoint or not
    */
-  public final boolean hasZeropoint() {
+  public final /*@ pure @*/ boolean hasZeropoint() {
 
     return m_HasZeropoint;
   }
@@ -861,7 +935,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the attribute's weight as a double
    */
-  public final double weight() {
+  public final /*@ pure @*/ double weight() {
 
     return m_Weight;
   }
@@ -871,7 +945,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the lower bound of the specified numeric range
    */
-  public final double getLowerNumericBound() {
+  public final /*@ pure @*/ double getLowerNumericBound() {
 
     return m_LowerBound;
   }
@@ -881,7 +955,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return whether the lower numeric bound is open or not (closed)
    */
-  public final boolean lowerNumericBoundIsOpen() {
+  public final /*@ pure @*/ boolean lowerNumericBoundIsOpen() {
 
     return m_LowerBoundIsOpen;
   }
@@ -891,7 +965,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return the upper bound of the specified numeric range
    */
-  public final double getUpperNumericBound() {
+  public final /*@ pure @*/ double getUpperNumericBound() {
 
     return m_UpperBound;
   }
@@ -901,7 +975,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return whether the upper numeric bound is open or not (closed)
    */
-  public final boolean upperNumericBoundIsOpen() {
+  public final /*@ pure @*/ boolean upperNumericBoundIsOpen() {
 
     return m_UpperBoundIsOpen;
   }
@@ -911,7 +985,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @return whether the value is in range
    */
-  public final boolean isInRange(double value) {
+  public final /*@ pure @*/ boolean isInRange(double value) {
 
     // dates and missing values are a special case 
     if (m_Type == DATE || value == Instance.missingValue()) return true;
@@ -950,6 +1024,7 @@ public class Attribute implements Copyable, Serializable {
    * @param metadata the metadata
    * @exception IllegalArgumentException if the properties are not consistent
    */
+  //@ requires metadata != null;
   private void setMetadata(ProtectedProperties metadata) {
     
     m_Metadata = metadata;
@@ -1039,6 +1114,7 @@ public class Attribute implements Copyable, Serializable {
    * @param rangeString the string to parse as the attribute's numeric range
    * @exception IllegalArgumentException if the range is not valid
    */
+  //@ requires rangeString != null;
   private void setNumericRange(String rangeString)
   {
     // set defaults
@@ -1146,6 +1222,8 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Simple main method for testing this class.
    */
+  //@ requires ops != null;
+  //@ requires \nonnullelements(ops);
   public static void main(String[] ops) {
 
     try {

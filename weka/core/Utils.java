@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public final class Utils {
 
@@ -231,7 +231,7 @@ public final class Utils {
    * @param right true if inserted spaces should be added to the right
    * @return the output string
    */
-  private static String fixStringLength(String inString, int length,
+  private static /*@pure@*/ String fixStringLength(String inString, int length,
 					boolean right) {
 
     if (inString.length() < length) {
@@ -252,7 +252,7 @@ public final class Utils {
    * after the decimal point
    * @return the double as a formatted string
    */
-  public static String doubleToString(double value, int afterDecimalPoint) {
+  public static /*@pure@*/ String doubleToString(double value, int afterDecimalPoint) {
     
     StringBuffer stringBuffer;
     double temp;
@@ -310,7 +310,7 @@ public final class Utils {
    * @param afterDecimalPoint the number of digits after the decimal point
    * @return the double as a formatted string
    */
-  public static String doubleToString(double value, int width,
+  public static /*@pure@*/ String doubleToString(double value, int width,
 				      int afterDecimalPoint) {
     
     String tempString = doubleToString(value, afterDecimalPoint);
@@ -370,7 +370,7 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-  public static boolean eq(double a, double b){
+  public static /*@pure@*/ boolean eq(double a, double b){
     
     return (a - b < SMALL) && (b - a < SMALL); 
   }
@@ -503,7 +503,7 @@ public final class Utils {
    * @param string the string to be quoted
    * @return the string (possibly quoted)
    */
-  public static String quote(String string) {
+  public static /*@pure@*/ String quote(String string) {
       boolean quote = false;
 
       // backquote the following characters 
@@ -533,7 +533,7 @@ public final class Utils {
    * @param string the string
    * @return the converted string
    */
-  public static String backQuoteChars(String string) {
+  public static /*@pure@*/ String backQuoteChars(String string) {
 
     int index;
     StringBuffer newStringBuffer;
@@ -568,7 +568,7 @@ public final class Utils {
    * @param string the string
    * @return the converted string
    */
-  public static String convertNewLines(String string) {
+  public static /*@pure@*/ String convertNewLines(String string) {
     
     int index;
 
@@ -816,7 +816,7 @@ public final class Utils {
    * @return - a log2 a - b log2 b - c log2 c + (a+b+c) log2 (a+b+c)
    * when given array [a b c]
    */
-  public static double info(int counts[]) {
+  public static /*@pure@*/ double info(int counts[]) {
     
     int total = 0; int c;
     double x = 0;
@@ -833,7 +833,7 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-  public static boolean smOrEq(double a,double b) {
+  public static /*@pure@*/ boolean smOrEq(double a,double b) {
     
     return (a-b < SMALL);
   }
@@ -844,7 +844,7 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-  public static boolean grOrEq(double a,double b) {
+  public static /*@pure@*/ boolean grOrEq(double a,double b) {
     
     return (b-a < SMALL);
   }
@@ -855,7 +855,7 @@ public final class Utils {
    * @param a a double
    * @param b a double
    */
-  public static boolean sm(double a,double b) {
+  public static /*@pure@*/ boolean sm(double a,double b) {
     
     return (b-a > SMALL);
   }
@@ -866,7 +866,7 @@ public final class Utils {
    * @param a a double
    * @param b a double 
    */
-  public static boolean gr(double a,double b) {
+  public static /*@pure@*/ boolean gr(double a,double b) {
     
     return (a-b > SMALL);
   }
@@ -876,7 +876,7 @@ public final class Utils {
    *
    * @param a a double
    */
-  public static double log2(double a) {
+  public static /*@pure@*/ double log2(double a) {
     
     return Math.log(a) / log2;
   }
@@ -888,7 +888,7 @@ public final class Utils {
    * @param doubles the array of doubles
    * @return the index of the maximum element
    */
-  public static int maxIndex(double [] doubles) {
+  public static /*@pure@*/ int maxIndex(double [] doubles) {
 
     double maximum = 0;
     int maxIndex = 0;
@@ -910,7 +910,7 @@ public final class Utils {
    * @param ints the array of integers
    * @return the index of the maximum element
    */
-  public static int maxIndex(int [] ints) {
+  public static /*@pure@*/ int maxIndex(int [] ints) {
 
     int maximum = 0;
     int maxIndex = 0;
@@ -931,7 +931,7 @@ public final class Utils {
    * @param vector the array
    * @return the mean
    */
-  public static double mean(double[] vector) {
+  public static /*@pure@*/ double mean(double[] vector) {
   
     double sum = 0;
 
@@ -951,7 +951,7 @@ public final class Utils {
    * @param ints the array of integers
    * @return the index of the minimum element
    */
-  public static int minIndex(int [] ints) {
+  public static /*@pure@*/ int minIndex(int [] ints) {
 
     int minimum = 0;
     int minIndex = 0;
@@ -973,7 +973,7 @@ public final class Utils {
    * @param doubles the array of doubles
    * @return the index of the minimum element
    */
-  public static int minIndex(double [] doubles) {
+  public static /*@pure@*/ int minIndex(double [] doubles) {
 
     double minimum = 0;
     int minIndex = 0;
@@ -1055,7 +1055,7 @@ public final class Utils {
    * @param value the double value
    * @return the resulting integer value
    */
-  public static int round(double value) {
+  public static /*@pure@*/ int round(double value) {
 
     int roundedValue = value > 0
       ? (int)(value + 0.5)
@@ -1102,7 +1102,7 @@ public final class Utils {
    * @param afterDecimalPoint the number of digits after the decimal point
    * @return the double rounded to the given precision
    */
-  public static double roundDouble(double value,int afterDecimalPoint) {
+  public static /*@pure@*/ double roundDouble(double value,int afterDecimalPoint) {
 
     double mask = Math.pow(10.0, (double)afterDecimalPoint);
 
@@ -1119,7 +1119,7 @@ public final class Utils {
    * @return an array of integers with the positions in the sorted
    * array.
    */
-  public static int[] sort(int [] array) {
+  public static /*@pure@*/ int[] sort(int [] array) {
 
     int [] index = new int[array.length];
     int [] newIndex = new int[array.length];
@@ -1170,7 +1170,7 @@ public final class Utils {
    * @return an array of integers with the positions in the sorted
    * array.  
    */
-  public static int[] sort(double [] array) {
+  public static /*@pure@*/ int[] sort(/*@non_null@*/ double [] array) {
 
     int [] index = new int[array.length];
     array = (double [])array.clone();
@@ -1195,7 +1195,7 @@ public final class Utils {
    * @return an array of integers with the positions in the sorted
    * array.
    */
-  public static int[] stableSort(double [] array){
+  public static /*@pure@*/ int[] stableSort(double [] array){
 
     int [] index = new int[array.length];
     int [] newIndex = new int[array.length];
@@ -1242,7 +1242,7 @@ public final class Utils {
    * @param vector the array
    * @return the variance
    */
-  public static double variance(double[] vector) {
+  public static /*@pure@*/ double variance(double[] vector) {
   
     double sum = 0, sumSquared = 0;
 
@@ -1270,7 +1270,7 @@ public final class Utils {
    * @param doubles the array of double
    * @return the sum of the elements
    */
-  public static double sum(double[] doubles) {
+  public static /*@pure@*/ double sum(double[] doubles) {
 
     double sum = 0;
 
@@ -1286,7 +1286,7 @@ public final class Utils {
    * @param ints the array of integers
    * @return the sum of the elements
    */
-  public static int sum(int[] ints) {
+  public static /*@pure@*/ int sum(int[] ints) {
 
     int sum = 0;
 
@@ -1302,7 +1302,7 @@ public final class Utils {
    * @param c an integer value
    * @return c*log2(c) (but is careful to return 0 if c is 0)
    */
-  public static double xlogx(int c) {
+  public static /*@pure@*/ double xlogx(int c) {
     
     if (c == 0) {
       return 0.0;
@@ -1319,7 +1319,12 @@ public final class Utils {
    * @param lo0 the first index of the subset to be sorted
    * @param hi0 the last index of the subset to be sorted
    */
-  private static void quickSort(int [] array, int [] index,
+  //@ requires 0 <= lo0 && lo0 <= hi0 && hi0 < index.length;
+  //@ requires (\forall int i; 0 <= i && i < index.length; 0 <= index[i] && index[i] < array.length);
+  //@ requires array != index;
+  //@ assignable index;
+  private static void quickSort(/*@non_null@*/ int [] array, 
+				/*@non_null@*/ int [] index,
 				int lo0, int hi0) {
 
     int lo = lo0;

@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.52 $ 
+ * @version $Revision: 1.53 $ 
  */
 public class Instances implements Serializable {
  
@@ -72,16 +72,17 @@ public class Instances implements Serializable {
   static String ARFF_DATA = "@data";
 
   /** The dataset's name. */
-  protected String m_RelationName;         
+  protected /*@non_null@*/ String m_RelationName;         
 
   /** The attribute information. */
-  protected FastVector m_Attributes;
+  protected /*@non_null@*/ FastVector m_Attributes;
 
   /** The instances. */
-  protected FastVector m_Instances;
+  protected /*@non_null@*/ FastVector m_Instances;
 
   /** The class attribute's index */
   protected int m_ClassIndex;
+  //@ protected invariant classIndex() == m_ClassIndex;
 
   /** Buffer of values for sparse instance */
   protected double[] m_ValueBuffer;
@@ -158,7 +159,7 @@ public class Instances implements Serializable {
    * information is to be taken
    * @param capacity the capacity of the new dataset 
    */
-  public Instances(Instances dataset, int capacity) {
+  public Instances(/*@non_null@*/Instances dataset, int capacity) {
     
     if (capacity < 0) {
       capacity = 0;
@@ -203,7 +204,8 @@ public class Instances implements Serializable {
    * @param attInfo the attribute information
    * @param capacity the capacity of the set
    */
-  public Instances(String name, FastVector attInfo, int capacity) {
+  public Instances(/*@non_null@*/String name, 
+		   /*@non_null@*/FastVector attInfo, int capacity) {
 
     m_RelationName = name;
     m_ClassIndex = -1;
@@ -242,7 +244,7 @@ public class Instances implements Serializable {
    *
    * @param instance the instance to be added
    */
-  public void add(Instance instance) {
+  public void add(/*@non_null@*/ Instance instance) {
 
     Instance newInstance = (Instance)instance.copy();
 
@@ -256,7 +258,7 @@ public class Instances implements Serializable {
    * @param index the attribute's index
    * @return the attribute at the given position
    */ 
-  public Attribute attribute(int index) {
+  public /*@pure@*/ Attribute attribute(int index) {
     
     return (Attribute) m_Attributes.elementAt(index);
   }
@@ -270,7 +272,7 @@ public class Instances implements Serializable {
    * @return the attribute with the given name, null if the
    * attribute can't be found
    */ 
-  public Attribute attribute(String name) {
+  public /*@pure@*/ Attribute attribute(String name) {
     
     for (int i = 0; i < numAttributes(); i++) {
       if (attribute(i).name().equals(name)) {
@@ -285,7 +287,7 @@ public class Instances implements Serializable {
    *
    * @return true if string attributes are present, false otherwise
    */
-  public boolean checkForStringAttributes() {
+  public /*@pure@*/ boolean checkForStringAttributes() {
 
     int i = 0;
    
@@ -305,7 +307,7 @@ public class Instances implements Serializable {
    *
    * @return true if the instance is compatible with the dataset 
    */
-  public boolean checkInstance(Instance instance) {
+  public /*@pure@*/ boolean checkInstance(Instance instance) {
 
     if (instance.numAttributes() != numAttributes()) {
       return false;
@@ -334,7 +336,8 @@ public class Instances implements Serializable {
    * @return the class attribute
    * @exception UnassignedClassException if the class is not set
    */
-  public Attribute classAttribute() {
+  //@ requires classIndex() >= 0;
+  public /*@pure@*/ Attribute classAttribute() {
 
     if (m_ClassIndex < 0) {
       throw new UnassignedClassException("Class index is negative (not set)!");
@@ -348,7 +351,8 @@ public class Instances implements Serializable {
    *
    * @return the class index as an integer
    */
-  public int classIndex() {
+  // ensures \result == m_ClassIndex;
+  public /*@pure@*/ int classIndex() {
     
     return m_ClassIndex;
   }
@@ -386,9 +390,12 @@ public class Instances implements Serializable {
    * information is performed before the attribute is deleted.
    *
    * @param pos the attribute's position
-   * @exception IllegalArgumentException if the given index is out of range or the
-   * class attribute is being deleted
+   * @exception IllegalArgumentException if the given index is out of range 
+   *            or the class attribute is being deleted
    */
+  //@ requires 0 <= position;
+  //@ requires position < numAttributes();
+  //@ requires position != classIndex();
   public void deleteAttributeAt(int position) {
 	 
     if ((position < 0) || (position >= m_Attributes.size())) {
@@ -436,6 +443,8 @@ public class Instances implements Serializable {
    *
    * @param attIndex the attribute's index
    */
+  //@ requires 0 <= attIndex;
+  //@ requires attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
 
     FastVector newInstances = new FastVector(numInstances());
@@ -478,7 +487,7 @@ public class Instances implements Serializable {
    *
    * @return enumeration of all the attributes.
    */
-  public Enumeration enumerateAttributes() {
+  public /*@pure@*/ Enumeration enumerateAttributes() {
 
     return m_Attributes.elements(m_ClassIndex);
   }
@@ -488,7 +497,7 @@ public class Instances implements Serializable {
    *
    * @return enumeration of all instances in the dataset
    */
-  public Enumeration enumerateInstances() {
+  public /*@pure@*/ Enumeration enumerateInstances() {
 
     return m_Instances.elements();
   }
@@ -500,7 +509,7 @@ public class Instances implements Serializable {
    * @return true if the header of the given dataset is equivalent 
    * to this header
    */
-  public boolean equalHeaders(Instances dataset){
+  public /*@pure@*/ boolean equalHeaders(Instances dataset){
 
     // Check class and all attributes
     if (m_ClassIndex != dataset.m_ClassIndex) {
@@ -522,7 +531,7 @@ public class Instances implements Serializable {
    *
    * @return the first instance in the set
    */
-  public Instance firstInstance() {
+  public /*@pure@*/ Instance firstInstance() {
     
     return (Instance)m_Instances.firstElement();
   }
@@ -553,7 +562,9 @@ public class Instances implements Serializable {
    * @param pos the attribute's position
    * @exception IllegalArgumentException if the given index is out of range
    */
-  public void insertAttributeAt(Attribute att, int position) {
+  //@ requires 0 <= position;
+  //@ requires position <= numAttributes();
+  public void insertAttributeAt(/*@non_null@*/ Attribute att, int position) {
 	 
     if ((position < 0) ||
 	(position > m_Attributes.size())) {
@@ -581,7 +592,7 @@ public class Instances implements Serializable {
    * @param index the instance's index
    * @return the instance at the given position
    */
-  public Instance instance(int index) {
+  public /*@pure@*/ Instance instance(int index) {
 
     return (Instance)m_Instances.elementAt(index);
   }
@@ -591,7 +602,7 @@ public class Instances implements Serializable {
    *
    * @return the last instance in the set
    */
-  public Instance lastInstance() {
+  public /*@pure@*/ Instance lastInstance() {
     
     return (Instance)m_Instances.lastElement();
   }
@@ -604,7 +615,7 @@ public class Instances implements Serializable {
    * @param attIndex the attribute's index
    * @return the mean or the mode
    */
-  public double meanOrMode(int attIndex) {
+  public /*@pure@*/ double meanOrMode(int attIndex) {
 
     double result, found;
     int [] counts;
@@ -643,7 +654,7 @@ public class Instances implements Serializable {
    * @param att the attribute
    * @return the mean or the mode 
    */
-  public double meanOrMode(Attribute att) {
+  public /*@pure@*/ double meanOrMode(Attribute att) {
 
     return meanOrMode(att.index());
   }
@@ -653,7 +664,7 @@ public class Instances implements Serializable {
    *
    * @return the number of attributes as an integer
    */
-  public int numAttributes() {
+  public /*@pure@*/ int numAttributes() {
 
     return m_Attributes.size();
   }
@@ -665,7 +676,8 @@ public class Instances implements Serializable {
    * attribute is nominal, 1 otherwise.
    * @exception UnassignedClassException if the class is not set
    */
-  public int numClasses() {
+  //@ requires classIndex() >= 0;
+  public /*@pure@*/ int numClasses() {
     
     if (m_ClassIndex < 0) {
       throw new UnassignedClassException("Class index is negative (not set)!");
@@ -685,7 +697,9 @@ public class Instances implements Serializable {
    * @param attIndex the attribute
    * @return the number of distinct values of a given attribute
    */
-  public int numDistinctValues(int attIndex) {
+  //@ requires 0 <= attIndex;
+  //@ requires attIndex < numAttributes();
+  public /*@pure@*/ int numDistinctValues(int attIndex) {
 
     if (attribute(attIndex).isNumeric()) {
       double [] attVals = attributeToDoubleArray(attIndex);
@@ -717,7 +731,7 @@ public class Instances implements Serializable {
    * @param att the attribute
    * @return the number of distinct values of a given attribute
    */
-  public int numDistinctValues(Attribute att) {
+  public /*@pure@*/ int numDistinctValues(Attribute att) {
 
     return numDistinctValues(att.index());
   }
@@ -727,7 +741,7 @@ public class Instances implements Serializable {
    *
    * @return the number of instances in the dataset as an integer
    */
-  public int numInstances() {
+  public /*@pure@*/ int numInstances() {
 
     return m_Instances.size();
   }
@@ -769,7 +783,7 @@ public class Instances implements Serializable {
    *
    * @return the relation's name as a string
    */
-  public String relationName() {
+  public /*@pure@*/ String relationName() {
 
     return m_RelationName;
   }
@@ -1056,7 +1070,7 @@ public class Instances implements Serializable {
    *
    * @return the sum of all the instances' weights as a double
    */
-  public double sumOfWeights() {
+  public /*@pure@*/ double sumOfWeights() {
     
     double sum = 0;
 
@@ -1077,6 +1091,8 @@ public class Instances implements Serializable {
    * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
+  //@ requires 2 <= numFolds && numFolds < numInstances();
+  //@ requires 0 <= numFold && numFold < numFolds;
   public Instances testCV(int numFolds, int numFold) {
 
     int numInstForFold, first, offset;
@@ -1138,6 +1154,8 @@ public class Instances implements Serializable {
    * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
+  //@ requires 2 <= numFolds && numFolds < numInstances();
+  //@ requires 0 <= numFold && numFold < numFolds;
   public Instances trainCV(int numFolds, int numFold) {
 
     int numInstForFold, first, offset;
@@ -1177,6 +1195,8 @@ public class Instances implements Serializable {
    * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
+  //@ requires 2 <= numFolds && numFolds < numInstances();
+  //@ requires 0 <= numFold && numFold < numFolds;
   public Instances trainCV(int numFolds, int numFold, Random random) {
 
     Instances train = trainCV(numFolds, numFold);
@@ -1191,7 +1211,7 @@ public class Instances implements Serializable {
    * @return the variance if the attribute is numeric
    * @exception IllegalArgumentException if the attribute is not numeric
    */
-  public double variance(int attIndex) {
+  public /*@pure@*/ double variance(int attIndex) {
   
     double sum = 0, sumSquared = 0, sumOfWeights = 0;
 
@@ -1230,7 +1250,7 @@ public class Instances implements Serializable {
    * @return the variance if the attribute is numeric
    * @exception IllegalArgumentException if the attribute is not numeric
    */
-  public double variance(Attribute att) {
+  public /*@pure@*/ double variance(Attribute att) {
     
     return variance(att.index());
   }
@@ -1242,6 +1262,7 @@ public class Instances implements Serializable {
    * @param index the index of the attribute to summarize.
    * @return an AttributeStats object with it's fields calculated.
    */
+  //@ requires 0 <= index && index < numAttributes();
   public AttributeStats attributeStats(int index) {
 
     AttributeStats result = new AttributeStats();
@@ -1285,7 +1306,8 @@ public class Instances implements Serializable {
    * @return an array containing the value of the desired attribute for
    * each instance in the dataset. 
    */
-  public double [] attributeToDoubleArray(int index) {
+  //@ requires 0 <= index && index < numAttributes();
+  public /*@pure@*/ double [] attributeToDoubleArray(int index) {
 
     double [] result = new double[numInstances()];
     for (int i = 0; i < result.length; i++) {
@@ -1723,7 +1745,9 @@ public class Instances implements Serializable {
    * @param dest the destination for the instances
    * @param num the number of instances to be copied
    */
-  protected void copyInstances(int from, Instances dest, int num) {
+  //@ requires 0 <= from && from <= numInstances() - num;
+  //@ requires 0 <= num;
+  protected void copyInstances(int from, /*@non_null@*/ Instances dest, int num) {
     
     for (int i = 0; i < num; i++) {
       dest.add(instance(from + i));
@@ -1870,6 +1894,8 @@ public class Instances implements Serializable {
    * @param lo0 the first index of the subset to be sorted
    * @param hi0 the last index of the subset to be sorted
    */
+  //@ requires 0 <= attIndex && attIndex < numAttributes();
+  //@ requires 0 <= lo0 && lo0 <= hi0 && hi0 < numInstances();
   protected void quickSort(int attIndex, int lo0, int hi0) {
     
     int lo = lo0, hi = hi0;
@@ -1960,6 +1986,8 @@ public class Instances implements Serializable {
    * @param i the first instance's index
    * @param j the second instance's index
    */
+  //@ requires 0 <= i && i < numInstances();
+  //@ requires 0 <= j && j < numInstances();
   protected void swap(int i, int j){
     
     m_Instances.swap(i, j);
@@ -2007,6 +2035,9 @@ public class Instances implements Serializable {
    *
    * @param argv should contain one element: the name of an ARFF file
    */
+  //@ requires argv != null;
+  //@ requires argv.length == 1;
+  //@ requires argv[0] != null;
   public static void test(String [] argv) {
 
     Instances instances, secondInstances, train, test, transformed, empty;
