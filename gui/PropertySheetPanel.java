@@ -43,7 +43,6 @@ import java.beans.Beans;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.JPanel;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.Box;
@@ -56,96 +55,10 @@ import javax.swing.JComponent;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
-public class PropertySheet extends JFrame implements PropertyChangeListener {
-
-  /** The panel displaying the properties */
-  private PropertySheetPanel panel;
-
-  /**
-   * Creates the propertysheet frame at a given location.
-   *
-   * @param x the initial x coord
-   * @param y the initial y coord
-   */
-  public PropertySheet(int x, int y) {
-    
-    super("Properties - <initializing...>");
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-	e.getWindow().setVisible(false);
-      }
-    });
-    setLocation(x, y);
-    panel = new PropertySheetPanel(this);
-  }
-
-  /**
-   * Sets a new target object for the property sheet.
-   *
-   * @param targ a value of type 'Object'
-   */
-  public void setTarget(Object targ) {
-
-    panel.setTarget(targ);
-    setTitle("Properties - " + targ.getClass().getName());
-    pack();
-  }
-
-  /**
-   * Gets a count of the number of properties in the propertysheet.
-   *
-   * @return the number of editable properties.
-   */
-  public int editableProperties() {
-
-    return panel.editableProperties();
-  }
-
-  /** A support object for handling property change listeners */ 
-  private PropertyChangeSupport support = new PropertyChangeSupport(this);
-
-  /**
-   * Updates the property sheet panel with a changed property and also passed
-   * the event along.
-   *
-   * @param evt a value of type 'PropertyChangeEvent'
-   */
-  public void propertyChange(PropertyChangeEvent evt) {
-    panel.wasModified(evt); // Let our panel update before guys downstream
-    support.firePropertyChange("", null, null);
-  }
-
-  /**
-   * Adds a PropertyChangeListener.
-   *
-   * @param l a value of type 'PropertyChangeListener'
-   */
-  public void addPropertyChangeListener(PropertyChangeListener l) {
-    support.addPropertyChangeListener(l);
-  }
-
-  /**
-   * Removes a PropertyChangeListener.
-   *
-   * @param l a value of type 'PropertyChangeListener'
-   */
-  public void removePropertyChangeListener(PropertyChangeListener l) {
-    support.removePropertyChangeListener(l);
-  }
-}
-
-
-
-
-/**
- * Displays the editable properties in a panel.
- */
-class PropertySheetPanel extends JPanel {
-
-  /** The parent frame we are embedded in */
-  private PropertySheet m_Frame;
+public class PropertySheetPanel extends JPanel
+  implements PropertyChangeListener {
 
   /** The target object being edited */
   private Object m_Target;
@@ -169,14 +82,44 @@ class PropertySheetPanel extends JPanel {
   private int m_NumEditable = 0;
 
   /**
-   * Creates the property sheet with the given parent frame.
-   *
-   * @param frame a value of type 'PropertySheet'
+   * Creates the property sheet panel.
    */
-  PropertySheetPanel(PropertySheet frame) {
-    this.m_Frame = frame;
+  public PropertySheetPanel() {
+
     //    setBorder(BorderFactory.createLineBorder(Color.red));
     setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+  }
+
+  /** A support object for handling property change listeners */ 
+  private PropertyChangeSupport support = new PropertyChangeSupport(this);
+
+  /**
+   * Updates the property sheet panel with a changed property and also passed
+   * the event along.
+   *
+   * @param evt a value of type 'PropertyChangeEvent'
+   */
+  public void propertyChange(PropertyChangeEvent evt) {
+    wasModified(evt); // Let our panel update before guys downstream
+    support.firePropertyChange("", null, null);
+  }
+
+  /**
+   * Adds a PropertyChangeListener.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
+  public void addPropertyChangeListener(PropertyChangeListener l) {
+    support.addPropertyChangeListener(l);
+  }
+
+  /**
+   * Removes a PropertyChangeListener.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
+  public void removePropertyChangeListener(PropertyChangeListener l) {
+    support.removePropertyChangeListener(l);
   }
 
   /**
@@ -184,9 +127,9 @@ class PropertySheetPanel extends JPanel {
    *
    * @param targ a value of type 'Object'
    */
-  synchronized void setTarget(Object targ) {
+  public synchronized void setTarget(Object targ) {
 	
-    m_Frame.getContentPane().removeAll();	
+    // Close any child windows at this point
     removeAll();
     GridBagLayout gbLayout = new GridBagLayout();
     setLayout(gbLayout);
@@ -287,7 +230,7 @@ class PropertySheetPanel extends JPanel {
 	  continue;
 	}
 
-	editor.addPropertyChangeListener(m_Frame);
+	editor.addPropertyChangeListener(this);
 
       } catch (InvocationTargetException ex) {
 	System.err.println("Skipping property " + name
@@ -324,10 +267,12 @@ class PropertySheetPanel extends JPanel {
       add(newPanel);
       m_NumEditable ++;
     }
-
-    m_Frame.getContentPane().add(this);
-    //    doLayout();
-    m_Frame.pack();
+    if (m_NumEditable == 0) {
+      JLabel empty = new JLabel("No editable properties");
+      empty.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
+      add(empty);
+    }
+    validate();
     setVisible(true);	
   }
 
@@ -406,9 +351,9 @@ class PropertySheetPanel extends JPanel {
 	continue;
       }
       // The property has changed!  Update the editor.
-      m_Editors[i].removePropertyChangeListener(m_Frame);
+      m_Editors[i].removePropertyChangeListener(this);
       m_Editors[i].setValue(o);
-      m_Editors[i].addPropertyChangeListener(m_Frame);
+      m_Editors[i].addPropertyChangeListener(this);
       if (m_Views[i] != null) {
 	//System.err.println("Trying to repaint " + (i + 1));
 	m_Views[i].repaint();

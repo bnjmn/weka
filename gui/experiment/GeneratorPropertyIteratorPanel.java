@@ -59,13 +59,13 @@ import java.beans.PropertyChangeEvent;
  * resultgenerator property for an experiment to iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GeneratorPropertyIteratorPanel extends JPanel
   implements ActionListener {
 
   /** Click to select the property to iterate over */
-  protected JButton m_ConfigureBut = new JButton("Select property");
+  protected JButton m_ConfigureBut = new JButton("Select property...");
 
   /** Controls whether the custom iterator is used or not */
   protected JComboBox m_StatusBox = new JComboBox();

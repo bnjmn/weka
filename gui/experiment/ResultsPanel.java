@@ -19,12 +19,14 @@
 
 package weka.gui.experiment;
 
+import weka.gui.ListSelectorDialog;
 import weka.experiment.Experiment;
 import weka.experiment.InstancesResultListener;
 import weka.experiment.DatabaseResultListener;
 import weka.experiment.PairedTTester;
 import weka.experiment.InstanceQuery;
 import weka.core.Utils;
+import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Range;
 import weka.core.Instance;
@@ -64,7 +66,7 @@ import javax.swing.JOptionPane;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -72,10 +74,10 @@ public class ResultsPanel extends JPanel {
   protected final static String NO_SOURCE = "No source";
 
   /** Click to load results from a file */
-  protected JButton m_FromFileBut = new JButton("File");
+  protected JButton m_FromFileBut = new JButton("File...");
 
   /** Click to load results from a database */
-  protected JButton m_FromDBaseBut = new JButton("Database");
+  protected JButton m_FromDBaseBut = new JButton("Database...");
 
   /** Click to get results from the destination given in the experiment */
   protected JButton m_FromExpBut = new JButton("Experiment");
@@ -94,7 +96,7 @@ public class ResultsPanel extends JPanel {
 						 SwingConstants.RIGHT);
 
   /** Click to edit the columns used to determine the scheme */
-  protected JButton m_ResultKeyBut = new JButton("Select keys");
+  protected JButton m_ResultKeyBut = new JButton("Select keys...");
 
   /** Stores the list of attributes for selecting the scheme columns */
   protected DefaultListModel m_ResultKeyModel = new DefaultListModel();
@@ -148,6 +150,9 @@ public class ResultsPanel extends JPanel {
 
   /** Does any database querying for us */
   protected InstanceQuery m_InstanceQuery;
+
+  /** A thread to load results instances from a file or database */
+  protected Thread m_LoadThread;
   
   /** An experiment (used for identifying a result source) -- optional */
   protected Experiment m_Exp;
@@ -170,20 +175,44 @@ public class ResultsPanel extends JPanel {
     m_FromExpBut.setEnabled(false);
     m_FromExpBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	setInstancesFromExp(m_Exp);
+	if (m_LoadThread == null) {
+	  m_LoadThread = new Thread() {
+	    public void run() {
+	      setInstancesFromExp(m_Exp);
+	      m_LoadThread = null;
+	    }
+	  };
+	  m_LoadThread.start();
+	}
       }
     });
     m_FromDBaseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	setInstancesFromDBaseQuery();
+	if (m_LoadThread == null) {
+	  m_LoadThread = new Thread() {
+	    public void run() {
+	      setInstancesFromDBaseQuery();
+	    m_LoadThread = null;
+	    }
+	  };
+	  m_LoadThread.start();
+	}
       }
     });
     m_FromFileBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	int returnVal = m_FileChooser.showOpenDialog(ResultsPanel.this);
 	if (returnVal == JFileChooser.APPROVE_OPTION) {
-	  File selected = m_FileChooser.getSelectedFile();
-	  setInstancesFromFile(selected);
+	  final File selected = m_FileChooser.getSelectedFile();
+	  if (m_LoadThread == null) {
+	    m_LoadThread = new Thread() {
+	      public void run() {
+		setInstancesFromFile(selected);
+		m_LoadThread = null;
+	      }
+	    };
+	    m_LoadThread.start();
+	  }
 	}
       }
     });
@@ -192,6 +221,11 @@ public class ResultsPanel extends JPanel {
     m_RunCombo.setEnabled(false);
     m_RunCombo.addActionListener(m_ConfigureListener);
     m_ResultKeyBut.setEnabled(false);
+    m_ResultKeyBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	setResultKeyFromDialog();
+      }
+    });
     m_ResultKeyList.setSelectionMode(ListSelectionModel
 				     .MULTIPLE_INTERVAL_SELECTION);
     m_CompareCombo.setEnabled(false);
@@ -210,7 +244,7 @@ public class ResultsPanel extends JPanel {
 
     // Set up the GUI layout
     JPanel p1 = new JPanel();
-    p1.setBorder(BorderFactory.createTitledBorder("Result source"));
+    p1.setBorder(BorderFactory.createTitledBorder("Source"));
     JPanel p2 = new JPanel();
     p2.setLayout(new GridLayout(1, 3));
     p2.add(m_FromFileBut);
@@ -257,9 +291,11 @@ public class ResultsPanel extends JPanel {
     
     setLayout(new BorderLayout());
     add(p7, BorderLayout.NORTH);
-    JScrollPane js = new JScrollPane(m_OutputTex);
-    js.setBorder(BorderFactory.createTitledBorder("Test results"));
-    add(js , BorderLayout.CENTER);
+    JPanel output = new JPanel();
+    output.setLayout(new BorderLayout());
+    output.setBorder(BorderFactory.createTitledBorder("Test output"));
+    output.add(new JScrollPane(m_OutputTex), BorderLayout.CENTER);
+    add(output , BorderLayout.CENTER);
   }
 
   
@@ -324,25 +360,24 @@ public class ResultsPanel extends JPanel {
 	return;	
       }
       m_FromLab.setText("Got experiment index");
-      Instance [] options = new Instance [index.numInstances()];
-      for (int i = 0; i < options.length; i++) {
-	options[i] = index.instance(i);
+
+      DefaultListModel lm = new DefaultListModel();
+      for (int i = 0; i < index.numInstances(); i++) {
+	lm.addElement(index.instance(i).toString());
       }
-      Instance exp = (Instance) JOptionPane.showInputDialog(this,
-					     "Select the experiment",
-					     "Experiment",
-					     JOptionPane.PLAIN_MESSAGE,
-					     null,
-					     options,
-					     options[0]);
-      if (exp == null) {
+      JList jl = new JList(lm);
+      ListSelectorDialog jd = new ListSelectorDialog(null, jl);
+      int result = jd.showDialog();
+      if (result != ListSelectorDialog.APPROVE_OPTION) {
 	m_FromLab.setText("Cancelled");
 	return;
       }
+      Instance selInst = index.instance(jl.getSelectedIndex());
+      Attribute tableAttr = index.attribute(InstanceQuery.EXP_RESULT_COL);
       String table = InstanceQuery.EXP_RESULT_PREFIX
-	+ exp.toString(index.attribute(InstanceQuery.EXP_RESULT_COL));
+	+ selInst.toString(tableAttr);
+
       setInstancesFromDatabaseTable(table);
-      m_InstanceQuery.disconnectFromDatabase();
     } catch (Exception ex) {
       m_FromLab.setText("Problem reading database");
     }
@@ -376,7 +411,6 @@ public class ResultsPanel extends JPanel {
 	String tableName = m_InstanceQuery
 	  .getResultsTableName(exp.getResultProducer());
 	setInstancesFromDatabaseTable(tableName);
-	m_InstanceQuery.disconnectFromDatabase();
       } catch (Exception ex) {
 	m_FromLab.setText("Problem reading database");
       }
@@ -395,8 +429,10 @@ public class ResultsPanel extends JPanel {
   protected void setInstancesFromDatabaseTable(String tableName) {
 
     try {
-      m_FromLab.setText("Reading from database...");
-      setInstances(m_InstanceQuery.getInstances("SELECT * FROM " + tableName));
+      m_FromLab.setText("Reading from database, please wait...");
+      setInstances(m_InstanceQuery.getInstances("SELECT * FROM "
+						      + tableName));
+      m_InstanceQuery.disconnectFromDatabase();
     } catch (Exception ex) {
       m_FromLab.setText(ex.getMessage());
     }
@@ -464,21 +500,17 @@ public class ResultsPanel extends JPanel {
     m_RunCombo.setEnabled(true);
 
     m_ResultKeyModel.removeAllElements();
-    String selected = "";
     String selectedList = "";
     for (int i = 0; i < m_AttributeNames.length; i++) {
       m_ResultKeyModel.addElement(m_AttributeNames[i]);
       if (m_AttributeNames[i].toLowerCase().startsWith("key_")) {
 	if ((i != datasetCol) && (i != runCol)) {
 	  m_ResultKeyList.addSelectionInterval(i, i);
-	  selected += m_AttributeNames[i] + ' ';
 	  selectedList += "," + (i + 1);
 	}
       }
     }
-    /*
     m_ResultKeyBut.setEnabled(true);
-    */
     
     // Reconnect the configuration listener
     m_DatasetCombo.addActionListener(m_ConfigureListener);
@@ -560,6 +592,36 @@ public class ResultsPanel extends JPanel {
       m_OutputTex.append("\n");
     } catch (Exception ex) {
       m_OutputTex.append(ex.getMessage() + "\n");
+    }
+  }
+
+  
+  public void setResultKeyFromDialog() {
+
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_ResultKeyList);
+
+    // Open the dialog
+    int result = jd.showDialog();
+    
+    // If accepted, update the ttester
+    if (result == ListSelectorDialog.APPROVE_OPTION) {
+      System.err.println("Fields Selected");
+      int [] selected = m_ResultKeyList.getSelectedIndices();
+      String selectedList = "";
+      for (int i = 0; i < selected.length; i++) {
+	selectedList += "," + (selected[i] + 1);
+      }
+      Range generatorRange = new Range();
+      if (selectedList.length() != 0) {
+	try {
+	  generatorRange.setRanges(selectedList);
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  System.err.println(ex.getMessage());
+	}
+      }
+      m_TTester.setResultsetKeyColumns(generatorRange);
+      setTTester();
     }
   }
   

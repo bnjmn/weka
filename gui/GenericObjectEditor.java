@@ -46,6 +46,9 @@ import java.util.Properties;
 import java.io.FileInputStream;
 import java.util.StringTokenizer;
 import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import java.awt.Window;
 
 
 /** 
@@ -59,10 +62,9 @@ import javax.swing.JOptionPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class GenericObjectEditor
-  implements PropertyEditor {
+public class GenericObjectEditor implements PropertyEditor {
 
   /** The classifier being configured */
   private Object m_Object;
@@ -111,17 +113,13 @@ public class GenericObjectEditor
   /**
    * Handles the GUI side of editing values.
    */
-  public class GOEPanel extends JPanel
-    implements ItemListener, ActionListener {
+  public class GOEPanel extends JPanel implements ItemListener {
     
     /** The chooser component */
     private JComboBox m_ObjectChooser;
     
-    /** The button allowing classifier customization */
-    private JButton m_CustomizeBut;
-
     /** The component that performs classifier customization */
-    private PropertySheet m_ChildPropertySheet;
+    private PropertySheetPanel m_ChildPropertySheet;
 
     /** The model containing the list of names to select from */
     private DefaultComboBoxModel m_ObjectNames;
@@ -130,24 +128,28 @@ public class GenericObjectEditor
     public GOEPanel() {
 
       //System.err.println("GOE()");
-      m_CustomizeBut = new JButton("Customize");
       m_ObjectNames = new DefaultComboBoxModel(new String [0]);
       m_ObjectChooser = new JComboBox(m_ObjectNames);
       m_ObjectChooser.setEditable(false);
 
+      m_ChildPropertySheet = new PropertySheetPanel();
+      m_ChildPropertySheet.addPropertyChangeListener(
+      new PropertyChangeListener() {
+	public void propertyChange(PropertyChangeEvent evt) {
+	  m_Support.firePropertyChange("", null, null);
+	}
+      });
+
+      setLayout(new BorderLayout());
+      add(m_ObjectChooser, BorderLayout.NORTH);
+      add(new JScrollPane(m_ChildPropertySheet), BorderLayout.CENTER);
+      
       if (m_ClassType != null) {
 	updateClassType();
 	updateChooser();
 	updateChildPropertySheet();
       }
-
       m_ObjectChooser.addItemListener(this);
-      m_CustomizeBut.addActionListener(this);
-
-      setLayout(new BorderLayout());
-      add(m_ObjectChooser, BorderLayout.CENTER);
-      add(m_CustomizeBut, BorderLayout.WEST);
-
     }
     
     /** Called when the class of object being edited changes. */
@@ -204,53 +206,16 @@ public class GenericObjectEditor
     public void updateChildPropertySheet() {
 
       //System.err.println("GOE::updateChildPropertySheet()");
-      if (m_ChildPropertySheet == null) {
-	//System.err.println("Creating child property sheet");
-	int x = getLocation().x;
-	int y = getLocation().y + getSize().height;
-	m_ChildPropertySheet = new PropertySheet(x, y);
-	m_ChildPropertySheet
-	  .addPropertyChangeListener(new PropertyChangeListener() {
-	    public void propertyChange(PropertyChangeEvent evt) {
-	      m_Support.firePropertyChange("", null, null);
-	    }
-	  }
-				     );
-	m_ChildPropertySheet.addWindowListener(new WindowAdapter() {
-	  public void windowClosing(WindowEvent w) {
-	    m_CustomizeBut.setEnabled(true);
-	  }
-	});
-      }
       // Set the object as the target of the propertysheet
-      //System.err.println("Setting child property sheet target");
       m_ChildPropertySheet.setTarget(m_Object);
 
-      //System.err.println("Adjusting visible/enabled");
-      if (m_ChildPropertySheet.editableProperties() == 0) {
-	m_ChildPropertySheet.setVisible(false);
-	m_CustomizeBut.setEnabled(false);
-      } else {
-	m_CustomizeBut.setEnabled(!m_ChildPropertySheet.isVisible());
+      // Adjust size of containing window if possible
+      if ((getTopLevelAncestor() != null)
+	  && (getTopLevelAncestor() instanceof Window)) {
+	((Window) getTopLevelAncestor()).pack();
       }
     }
 
-    /**
-     * Handles opening the Object customization property sheet for
-     * Objects that support options.
-     *
-     * @param e a value of type 'ActionEvent'
-     */
-    public void actionPerformed(ActionEvent e) {
-
-      //System.err.println("GOE::actionPerformed()");
-      if (e.getSource() == m_CustomizeBut) {
-	// Pop up the property sheet for the Object
-	m_CustomizeBut.setEnabled(false);
-	m_ChildPropertySheet.setVisible(true);
-      }
-    }
-    
     /**
      * When the chooser selection is changed, ensures that the Object
      * is changed appropriately.
@@ -524,7 +489,7 @@ public class GenericObjectEditor
 			FileEditor.class);
       GenericObjectEditor ce = new GenericObjectEditor();
       ce.setClassType(weka.classifiers.Classifier.class);
-      Object initial = new weka.classifiers.ZeroR();
+      Object initial = new weka.classifiers.IBk();
       if (args.length > 0) {
 	initial = (Object)Class.forName(args[0]).newInstance();
       }

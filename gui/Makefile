@@ -6,7 +6,8 @@ SOURCES = \
 	PropertySelectorDialog.java \
 	PropertyPanel.java \
 	PropertyDialog.java \
-	PropertySheet.java \
+	PropertySheetPanel.java \
+	ListSelectorDialog.java \
 	GenericArrayEditor.java \
 	GenericObjectEditor.java \
 	SelectedTagEditor.java

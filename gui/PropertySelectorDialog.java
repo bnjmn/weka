@@ -64,7 +64,7 @@ import javax.swing.tree.TreeSelectionModel;
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PropertySelectorDialog extends JDialog {
   
@@ -189,7 +189,7 @@ public class PropertySelectorDialog extends JDialog {
       BeanInfo bi = Introspector.getBeanInfo(localObject.getClass());
       localProperties = bi.getPropertyDescriptors();
     } catch (IntrospectionException ex) {
-      System.err.println("PropertySheet: Couldn't introspect");
+      System.err.println("PropertySelectorDialog: Couldn't introspect");
       return;
     }
 
