@@ -82,7 +82,7 @@ import javax.swing.filechooser.FileFilter;
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class SetupPanel extends JPanel {
 
@@ -100,7 +100,8 @@ public class SetupPanel extends JPanel {
 
   /** A filter to ensure only experiment files get shown in the chooser */
   protected FileFilter m_ExpFilter = 
-    new ExtensionFileFilter(".exp", "Experiment configuration files");
+    new ExtensionFileFilter(Experiment.FILE_EXTENSION, 
+                            "Experiment configuration files");
 
   /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
@@ -364,6 +365,10 @@ public class SetupPanel extends JPanel {
       return;
     }
     File expFile = m_FileChooser.getSelectedFile();
+    if (!expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION)) {
+      expFile = new File(expFile.getParent(), expFile.getName()
+                         + Experiment.FILE_EXTENSION);
+    }
     try {
       FileInputStream fi = new FileInputStream(expFile);
       ObjectInputStream oi = new ObjectInputStream(
@@ -394,8 +399,9 @@ public class SetupPanel extends JPanel {
       return;
     }
     File expFile = m_FileChooser.getSelectedFile();
-    if (!expFile.getName().toLowerCase().endsWith(".exp")) {
-      expFile = new File(expFile.getParent(), expFile.getName() + ".exp");
+    if (!expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION)) {
+      expFile = new File(expFile.getParent(), expFile.getName() 
+                         + Experiment.FILE_EXTENSION);
     }
     try {
       FileOutputStream fo = new FileOutputStream(expFile);
