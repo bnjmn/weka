@@ -34,7 +34,7 @@ import javax.swing.event.TableModelListener;
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class ArffTableSorter extends TableSorter implements Undoable {
@@ -137,6 +137,13 @@ public class ArffTableSorter extends TableSorter implements Undoable {
    */
   public void renameAttributeAt(int columnIndex, String newName) {
     ((ArffTableModel) model).renameAttributeAt(columnIndex, newName);
+  }
+  
+  /**
+   * sets the attribute at the given col index as the new class attribute
+   */
+  public void attributeAsClassAt(int columnIndex) {
+    ((ArffTableModel) model).attributeAsClassAt(columnIndex);
   }
   
   /**
