@@ -81,7 +81,7 @@ import weka.filters.unsupervised.attribute.*;
  * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ */
+ * @version $Revision: 1.27 $ */
 public class Logistic extends DistributionClassifier 
     implements OptionHandler, WeightedInstancesHandler {
   
@@ -496,6 +496,8 @@ public class Logistic extends DistributionClassifier
 	else{
 	    opt.setMaxIteration(m_MaxIts);
 	    x = opt.findArgmin(x, b);
+	    if(x==null) // Not enough, but use the current value
+	      x = opt.getVarbValues();
 	}
 	
 	m_LL = -opt.getMinFunction(); // Log-likelihood
