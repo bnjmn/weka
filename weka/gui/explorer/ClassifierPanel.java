@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.79.2.2 $
+ * @version $Revision: 1.79.2.3 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -981,6 +981,12 @@ public class ClassifierPanel extends JPanel {
 	  int numFolds = 10, percent = 66;
 	  int classIndex = m_ClassCombo.getSelectedIndex();
 	  Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
+	  Classifier template = null;
+	  try {
+	    template = Classifier.makeCopy(classifier);
+	  } catch (Exception ex) {
+	    m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
+	  }
 	  Classifier fullClassifier = null;
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
@@ -1177,17 +1183,23 @@ public class ClassifierPanel extends JPanel {
 		eval.setPriors(train);
 		m_Log.statusMessage("Building model for fold "
 				    + (fold + 1) + "...");
-		classifier.buildClassifier(train);
+		Classifier current = null;
+		try {
+		  current = Classifier.makeCopy(template);
+		} catch (Exception ex) {
+		  m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
+		}
+		current.buildClassifier(train);
 		Instances test = inst.testCV(numFolds, fold);
 		m_Log.statusMessage("Evaluating model for fold "
 				    + (fold + 1) + "...");
 		for (int jj=0;jj<test.numInstances();jj++) {
-		  processClassifierPrediction(test.instance(jj), classifier,
+		  processClassifierPrediction(test.instance(jj), current,
 					      eval, predictions,
 					      predInstances, plotShape,
 					      plotSize);
 		  if (outputPredictionsText) { 
-		    outBuff.append(predictionText(classifier, test.instance(jj), jj+1));
+		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
 		  }
 		}
 	      }
@@ -1215,7 +1227,13 @@ public class ClassifierPanel extends JPanel {
 	      Instances train = new Instances(inst, 0, trainSize);
 	      Instances test = new Instances(inst, trainSize, testSize);
 	      m_Log.statusMessage("Building model on training split...");
-	      classifier.buildClassifier(train);
+	      Classifier current = null;
+	      try {
+		current = Classifier.makeCopy(template);
+	      } catch (Exception ex) {
+		m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
+	      }
+	      current.buildClassifier(train);
 	      eval = new Evaluation(train, costMatrix);
 	      m_Log.statusMessage("Evaluating on test split...");
 	     
@@ -1229,12 +1247,12 @@ public class ClassifierPanel extends JPanel {
 	      }
      
 	      for (int jj=0;jj<test.numInstances();jj++) {
-		processClassifierPrediction(test.instance(jj), classifier,
+		processClassifierPrediction(test.instance(jj), current,
 					    eval, predictions,
 					    predInstances, plotShape,
 					    plotSize);
 		if (outputPredictionsText) { 
-		    outBuff.append(predictionText(classifier, test.instance(jj), jj+1));
+		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
 		}
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test split. Processed "

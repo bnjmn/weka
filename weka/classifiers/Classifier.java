@@ -40,7 +40,7 @@ import weka.core.Option;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 public abstract class Classifier 
   implements Cloneable, Serializable, OptionHandler {
@@ -156,14 +156,22 @@ public abstract class Classifier
   }
 
   /**
-   * Creates copies of the current classifier, which can then
-   * be used for boosting etc. Note that this method now uses
-   * Serialization to perform a deep copy, so the Classifier
-   * object must be fully Serializable. Any currently built model
-   * will now be copied as well.
+   * Creates a deep copy of the given classifier using serialization.
    *
-   * @param model an example classifier to copy
-   * @param num the number of classifiers copies to create.
+   * @param model the classifier to copy
+   * @return a deep copy of the classifier
+   * @exception Exception if an error occurs
+   */
+  public static Classifier makeCopy(Classifier model) throws Exception {
+
+    return (Classifier)new SerializedObject(model).getObject();
+  }
+
+  /**
+   * Creates a given number of deep copies of the given classifier using serialization.
+   * 
+   * @param model the classifier to copy
+   * @param num the number of classifier copies to create.
    * @return an array of classifiers.
    * @exception Exception if an error occurs
    */

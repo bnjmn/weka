@@ -51,13 +51,16 @@ import weka.classifiers.rules.ZeroR;
  * Add the prediction and target columns to the result file for each fold.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.21.2.1 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
   
+  /** The template classifier */
+  protected Classifier m_Template = new ZeroR();
+
   /** The classifier used for evaluation */
-  protected Classifier m_Classifier = new ZeroR();
+  protected Classifier m_Classifier;
 
   /** The names of any additional measures to look for in SplitEvaluators */
   protected String [] m_AdditionalMeasures = null;
@@ -150,13 +153,13 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 	     "P", 0, 
 	     "-P"));
 
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
+    if ((m_Template != null) &&
+	(m_Template instanceof OptionHandler)) {
       newVector.addElement(new Option(
 	     "",
 	     "", 0, "\nOptions specific to classifier "
-	     + m_Classifier.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+	     + m_Template.getClass().getName() + ":"));
+      Enumeration enu = ((OptionHandler)m_Template).listOptions();
       while (enu.hasMoreElements()) {
 	newVector.addElement(enu.nextElement());
       }
@@ -230,9 +233,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   public String [] getOptions() {
 
     String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
+    if ((m_Template != null) && 
+	(m_Template instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler)m_Template).getOptions();
     }
     
     String [] options = new String [classifierOptions.length + 8];
@@ -276,8 +279,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     if (m_AdditionalMeasures != null && m_AdditionalMeasures.length > 0) {
       m_doesProduce = new boolean [m_AdditionalMeasures.length];
 
-      if (m_Classifier instanceof AdditionalMeasureProducer) {
-	Enumeration en = ((AdditionalMeasureProducer)m_Classifier).
+      if (m_Template instanceof AdditionalMeasureProducer) {
+	Enumeration en = ((AdditionalMeasureProducer)m_Template).
 	  enumerateMeasures();
 	while (en.hasMoreElements()) {
 	  String mname = (String)en.nextElement();
@@ -300,8 +303,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    */
   public Enumeration enumerateMeasures() {
     Vector newVector = new Vector();
-    if (m_Classifier instanceof AdditionalMeasureProducer) {
-      Enumeration en = ((AdditionalMeasureProducer)m_Classifier).
+    if (m_Template instanceof AdditionalMeasureProducer) {
+      Enumeration en = ((AdditionalMeasureProducer)m_Template).
 	enumerateMeasures();
       while (en.hasMoreElements()) {
 	String mname = (String)en.nextElement();
@@ -318,13 +321,18 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (m_Classifier instanceof AdditionalMeasureProducer) {
+    if (m_Template instanceof AdditionalMeasureProducer) {
+      if (m_Classifier == null) {
+	throw new IllegalArgumentException("ClassifierSplitEvaluator: " +
+					   "Can't return result for measure, " +
+					   "classifier has not been built yet.");
+      }
       return ((AdditionalMeasureProducer)m_Classifier).
 	getMeasure(additionalMeasureName);
     } else {
       throw new IllegalArgumentException("ClassifierSplitEvaluator: "
 			  +"Can't return value for : "+additionalMeasureName
-			  +". "+m_Classifier.getClass().getName()+" "
+			  +". "+m_Template.getClass().getName()+" "
 			  +"is not an AdditionalMeasureProducer");
     }
   }
@@ -373,7 +381,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   public Object [] getKey(){
 
     Object [] key = new Object[KEY_SIZE];
-    key[0] = m_Classifier.getClass().getName();
+    key[0] = m_Template.getClass().getName();
     key[1] = m_ClassifierOptions;
     key[2] = m_ClassifierVersion;
     return key;
@@ -548,7 +556,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Gets the results for the supplied train and test datasets.
+   * Gets the results for the supplied train and test datasets. Now performs
+   * a deep copy of the classifier before it is built and evaluated (just in case
+   * the classifier is not initialized properly in buildClassifier()).
    *
    * @param train the training Instances.
    * @param test the testing Instances.
@@ -562,7 +572,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     if (train.classAttribute().type() != Attribute.NOMINAL) {
       throw new Exception("Class attribute is not nominal!");
     }
-    if (m_Classifier == null) {
+    if (m_Template == null) {
       throw new Exception("No classifier has been specified");
     }
     int addm = (m_AdditionalMeasures != null) 
@@ -575,6 +585,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 
     Object [] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
+    m_Classifier = Classifier.makeCopy(m_Template);
     long trainTimeStart = System.currentTimeMillis();
     m_Classifier.buildClassifier(train);
     long trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
@@ -736,7 +747,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    */
   public Classifier getClassifier() {
     
-    return m_Classifier;
+    return m_Template;
   }
   
   /**
@@ -746,7 +757,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    */
   public void setClassifier(Classifier newClassifier) {
     
-    m_Classifier = newClassifier;
+    m_Template = newClassifier;
     updateOptions();
   }
   
@@ -802,14 +813,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    */
   protected void updateOptions() {
     
-    if (m_Classifier instanceof OptionHandler) {
-      m_ClassifierOptions = Utils.joinOptions(((OptionHandler)m_Classifier)
+    if (m_Template instanceof OptionHandler) {
+      m_ClassifierOptions = Utils.joinOptions(((OptionHandler)m_Template)
 					      .getOptions());
     } else {
       m_ClassifierOptions = "";
     }
-    if (m_Classifier instanceof Serializable) {
-      ObjectStreamClass obs = ObjectStreamClass.lookup(m_Classifier
+    if (m_Template instanceof Serializable) {
+      ObjectStreamClass obs = ObjectStreamClass.lookup(m_Template
 						       .getClass());
       m_ClassifierVersion = "" + obs.getSerialVersionUID();
     } else {
@@ -879,10 +890,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   public String toString() {
 
     String result = "ClassifierSplitEvaluator: ";
-    if (m_Classifier == null) {
+    if (m_Template == null) {
       return result + "<null> classifier";
     }
-    return result + m_Classifier.getClass().getName() + " " 
+    return result + m_Template.getClass().getName() + " " 
       + m_ClassifierOptions + "(version " + m_ClassifierVersion + ")";
   }
 } // ClassifierSplitEvaluator

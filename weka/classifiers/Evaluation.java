@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.53.2.1 $
+ * @version  $Revision: 1.53.2.2 $
   */
 public class Evaluation implements Summarizable {
 
@@ -322,9 +322,10 @@ public class Evaluation implements Summarizable {
     for (int i = 0; i < numFolds; i++) {
       Instances train = data.trainCV(numFolds, i, random);
       setPriors(train);
-      classifier.buildClassifier(train);
+      Classifier copiedClassifier = Classifier.makeCopy(classifier);
+      copiedClassifier.buildClassifier(train);
       Instances test = data.testCV(numFolds, i);
-      evaluateModel(classifier, test);
+      evaluateModel(copiedClassifier, test);
     }
     m_NumFolds = numFolds;
   }
