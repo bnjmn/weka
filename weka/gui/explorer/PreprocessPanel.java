@@ -81,7 +81,7 @@ import weka.core.UnassignedClassException;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -784,15 +784,14 @@ public class PreprocessPanel extends JPanel {
 	  } catch (Exception ex) {
 	    m_Log.statusMessage("Problem reading " + f.getName() 
 				+ " as an arff file.");
+	    JOptionPane.showMessageDialog(PreprocessPanel.this,
+					  "Couldn't read '"
+					  + f.getName() + "' as an arff file.\n"
+					  + "Reason:\n" + ex.getMessage(),
+					  "Load Instances",
+					  JOptionPane.ERROR_MESSAGE); 
 	    m_IOThread = null;
 	    converterQuery(f);
-	    /* m_Log.statusMessage("Problem reading " + f.getName());
-	    JOptionPane.showMessageDialog(PreprocessPanel.this,
-					  "Couldn't read from file:\n"
-					  + f.getName() + "\n"
-					  + ex.getMessage(),
-					  "Load Instances",
-					  JOptionPane.ERROR_MESSAGE); */
 	  }
 	  m_IOThread = null;
 	}
