@@ -30,7 +30,7 @@ import weka.filters.Filter;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RuleNode extends Classifier {
 
@@ -367,6 +367,7 @@ public class RuleNode extends Classifier {
 	// build left and right nodes
 	m_left = new RuleNode(m_globalDeviation, m_globalAbsDeviation, this);
 
+	m_left.setMinNumInstances(m_splitNum);
 	m_left.setRegressionTree(m_regressionTree);
 	m_left.setSmoothing(m_smoothPredictions);
 	m_left.setSaveInstances(m_saveInstances);
@@ -374,6 +375,7 @@ public class RuleNode extends Classifier {
 
 	m_right = new RuleNode(m_globalDeviation, m_globalAbsDeviation, this);
 	
+	m_right.setMinNumInstances(m_splitNum);
 	m_right.setRegressionTree(m_regressionTree);
 	m_right.setSmoothing(m_smoothPredictions);
 	m_right.setSaveInstances(m_saveInstances);
