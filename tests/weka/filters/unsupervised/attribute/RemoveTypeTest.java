@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.filters.unsupervised.attribute;
@@ -20,8 +20,8 @@ import weka.filters.AbstractFilterTest;
  * Tests RemoveType. Run from the command line with:<p>
  * java weka.filters.RemoveTypeTest
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.2 $
  */
 public class RemoveTypeTest extends AbstractFilterTest {
   

@@ -23,8 +23,8 @@ import junit.framework.TestSuite;
  * with:<p>
  * java weka.classifiers.AllTests
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.7 $
  */
 public class AllTests extends TestSuite {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.filters;
@@ -13,8 +13,8 @@ import weka.core.Instances;
  * Tests AllFilter. Run from the command line with:<p>
  * java weka.filters.AllFilterTest
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.3 $
  */
 public class AllFilterTest extends AbstractFilterTest {
   

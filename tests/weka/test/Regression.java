@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.test;
@@ -19,8 +19,8 @@ import java.util.Properties;
  * <code>Regression</code> provides support for performing regression
  * testing.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.3 $
  */
 public class Regression {
 

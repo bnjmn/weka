@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.filters.unsupervised.instance;
@@ -16,8 +16,8 @@ import weka.filters.AbstractFilterTest;
  * Tests RemoveRange. Run from the command line with:<p>
  * java weka.filters.RemoveRangeTest
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.2 $
  */
 public class RemoveRangeTest extends AbstractFilterTest {
   

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.filters.unsupervised.attribute;
@@ -16,8 +16,8 @@ import weka.filters.AbstractTimeSeriesFilterTest;
  * Tests TimeSeriesDelta. Run from the command line with:<p>
  * java weka.filters.TimeSeriesDeltaTest
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.2 $
  */
 public class TimeSeriesDeltaTest extends AbstractTimeSeriesFilterTest {
 

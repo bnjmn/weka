@@ -18,8 +18,8 @@ import weka.filters.AbstractFilterTest;
  * Tests Normalize. Run from the command line with:<p>
  * java weka.filters.NormalizeTest
  *
- * @author <a href="mailto:len@webmind.com">Eibe Frank</a>
- * @version $Revision: 1.1 $
+ * @author <a href="mailto:len@reeltwo.com">Eibe Frank</a>
+ * @version $Revision: 1.2 $
  */
 public class StandardizeTest extends AbstractFilterTest {
   

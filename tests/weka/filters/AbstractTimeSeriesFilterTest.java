@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.filters;
@@ -17,8 +17,8 @@ import weka.filters.unsupervised.attribute.TimeSeriesTranslateTest;
  * Tests TimeSeriesTranslateFilter. Run from the command line with:<p>
  * java weka.filters.TimeSeriesTranslateFilterTest
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
 

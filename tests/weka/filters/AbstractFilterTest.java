@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.filters;
@@ -15,8 +15,8 @@ import weka.test.Regression;
 /**
  * Abstract Test class for Filters.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.5 $
  */
 public abstract class AbstractFilterTest extends TestCase {
 

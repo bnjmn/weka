@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 Webmind Inc. 
+ * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.classifiers;
@@ -28,8 +28,8 @@ import weka.filters.Filter;
 /**
  * Abstract Test class for Classifiers.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
+ * @version $Revision: 1.7 $
  */
 public abstract class AbstractClassifierTest extends TestCase {
 
