@@ -65,7 +65,7 @@ import weka.core.UnsupportedClassTypeException;
  *  <p>
  *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  **/
 public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
@@ -390,10 +390,12 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       if (counts[i] > 0) {
         weights[i] = weights[i] / counts[i];
       }
+      /*
       System.err.println("Class:" + i + " " + getInputFormat().classAttribute().value(i)
                          + " Count:" + counts[i]
                          + " Total:" + weights[i] * counts[i]
                          + " Avg:" + weights[i]);
+      */
     }
     
     // find the class with the minimum number of instances
@@ -431,12 +433,14 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       double newWeight = 1.0;
       if (m_AdjustWeights && (new_counts[j] > 0)) {
         newWeight = weights[j] * counts[j] / new_counts[j];
+        /*
         System.err.println("Class:" + j + " " + getInputFormat().classAttribute().value(j) 
                            + " Count:" + counts[j]
                            + " Total:" + weights[j] * counts[j]
                            + " Avg:" + weights[j]
                            + " NewCount:" + new_counts[j]
                            + " NewAvg:" + newWeight);
+        */
       }
       for (int k = 0; k < new_counts[j]; k++) {
         boolean ok = false;
