@@ -35,7 +35,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class Matrix implements Cloneable, Serializable {
 
@@ -375,10 +375,11 @@ public class Matrix implements Cloneable, Serializable {
    * Performs a (ridged) linear regression.
    *
    * @param y the dependent variable vector
+   * @param ridge the ridge parameter
    * @return the coefficients 
    * @exception IllegalArgumentException if not successful
    */
-  public final double[] regression(Matrix y) {
+  public final double[] regression(Matrix y, double ridge) {
 
     if (y.numColumns() > 1) {
       throw new IllegalArgumentException("Only one dependent variable allowed");
@@ -388,7 +389,6 @@ public class Matrix implements Cloneable, Serializable {
     Matrix xt = this.transpose();
 
     boolean success = true;
-    double ridge = 1e-8;
 
     do {
       Matrix ss = xt.multiply(this);
@@ -420,11 +420,12 @@ public class Matrix implements Cloneable, Serializable {
    *
    * @param y the dependent variable vector
    * @param w the array of data point weights
+   * @param ridge the ridge parameter
    * @return the coefficients 
    * @exception IllegalArgumentException if the wrong number of weights were
    * provided.
    */
-  public final double[] regression(Matrix y, double [] w) {
+  public final double[] regression(Matrix y, double [] w, double ridge) {
 
     if (w.length != numRows()) {
       throw new IllegalArgumentException("Incorrect number of weights provided");
@@ -438,7 +439,7 @@ public class Matrix implements Cloneable, Serializable {
       }
       weightedDep.setElement(i, 0, y.getElement(i, 0) * sqrt_weight);
     }
-    return weightedThis.regression(weightedDep);
+    return weightedThis.regression(weightedDep, ridge);
   }
 
   /**
@@ -660,7 +661,7 @@ public class Matrix implements Cloneable, Serializable {
       r.setColumn(0, response);
       System.out.println("r:\n " + r);
       System.out.println("Coefficients of regression of b on r: ");
-      double[] coefficients = b.regression(r);
+      double[] coefficients = b.regression(r, 1.0e-8);
       for (int i = 0; i < coefficients.length; i++) {
 	System.out.print(coefficients[i] + " ");
       }
@@ -671,7 +672,7 @@ public class Matrix implements Cloneable, Serializable {
       }
       System.out.println();
       System.out.println("Coefficients of weighted regression of b on r: ");
-      coefficients = b.regression(r, weights);
+      coefficients = b.regression(r, weights, 1.0e-8);
       for (int i = 0; i < coefficients.length; i++) {
 	System.out.print(coefficients[i] + " ");
       }
