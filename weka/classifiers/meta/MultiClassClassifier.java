@@ -68,7 +68,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class MultiClassClassifier extends Classifier 
   implements OptionHandler {
@@ -390,7 +390,7 @@ public class MultiClassClassifier extends Classifier
       for(int i = 0; i < m_ClassFilters.length; i++) {
 	if (m_Classifiers[i] != null) {
 	  if (m_Method == METHOD_1_AGAINST_1) {    
-	    Instance tempInst = new Instance(inst); 
+	    Instance tempInst = (Instance)inst.copy(); 
 	    tempInst.setDataset(m_TwoClassDataset);
 	    result[i] = m_Classifiers[i].distributionForInstance(tempInst)[1];  
 	  } else {
@@ -421,7 +421,7 @@ public class MultiClassClassifier extends Classifier
     if (m_Method == METHOD_1_AGAINST_1) {    
       for(int i = 0; i < m_ClassFilters.length; i++) {
 	if (m_Classifiers[i] != null) {
-	  Instance tempInst = new Instance(inst); 
+	  Instance tempInst = (Instance)inst.copy(); 
 	  tempInst.setDataset(m_TwoClassDataset);
 	  double [] current = m_Classifiers[i].distributionForInstance(tempInst);  
 	  Range range = new Range(((RemoveWithValues)m_ClassFilters[i])

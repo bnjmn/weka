@@ -282,8 +282,7 @@ public class SMOreg extends Classifier implements OptionHandler,
     // determine which linear transformation has been 
     // applied to the class by the filter
     if (m_Filter != null) {
-      Instance witness = new Instance(insts.instance(0));
-      witness.setDataset(insts);
+      Instance witness = (Instance)insts.instance(0).copy();
       witness.setValue(m_classIndex, 0);
       m_Filter.input(witness);
       m_Filter.batchFinished();
