@@ -7,15 +7,8 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	NumericTransformFilter.java FirstOrderFilter.java \
 	NominalToBinaryFilter.java SplitDatasetFilter.java \
 	CopyAttributesFilter.java TimeSeriesDeltaFilter.java \
-	TimeSeriesTranslateFilter.java \
+	TimeSeriesTranslateFilter.java RandomizeFilter.java \
 	AttributeSelectionFilter.java
-
-# New Filters Done:
-# CopyAttributesFilter.java      -- create a copy of selected attributes
-# TimeSeriesTranslateFilter.java -- replace attribute values with values from
-#                                   historic instances 
-# TimeSeriesDeltaFilter.java     -- replace attribute values with first order
-#                                   difference from historic instances
 
 # Filters To Do:
 # TimeSeriesSmoothFilter.java    -- replace attribute values with values
@@ -29,7 +22,7 @@ CLASSFILES = $(SOURCES:.java=.class)
 
 .PHONY: all debug optimized clean
 
-#-------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
 
