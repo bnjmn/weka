@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -114,12 +114,13 @@ public class Attribute implements Copyable, Serializable {
 
     m_Name = attributeName;
     m_Index = -1;
-    m_Values = attributeValues;
     if (m_Values == null) {
       m_Values = new FastVector();
       m_Type = STRING;
-    } else
+    } else {
+      m_Values = (FastVector) attributeValues.copy();
       m_Type = NOMINAL;
+    }
   }
 
   /**
@@ -348,6 +349,29 @@ public class Attribute implements Copyable, Serializable {
     this(attributeName, attributeValues);
 
     m_Index = index;
+  }
+
+
+  /**
+   * Adds a string value to the list of valid strings for attributes
+   * of type STRING and returns the index of the string. The string
+   * will not be added if already present.
+   *
+   * @param value The string value to add
+   * @return the index assigned to the string, or -1 if the attribute is not
+   * of type Attribute.STRING 
+   */
+  public int addStringValue(String value) {
+
+    if (!isString()) {
+      return -1;
+    }
+    int existing = m_Values.indexOf(value);
+    if (existing == -1) {
+      forceAddValue(value);
+      existing = m_Values.indexOf(value);
+    }
+    return existing;
   }
 
   /**
