@@ -26,7 +26,8 @@ SOURCES = \
 	WekaTaskMonitor.java \
 	SaveBuffer.java \
 	CostMatrixEditor.java \
-	HierarchyPropertyParser.java
+	HierarchyPropertyParser.java \
+	CustomPanelSupplier.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
