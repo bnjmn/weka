@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $ 
+ * @version $Revision: 1.38 $ 
  */
 public class Instances implements Serializable {
  
@@ -71,6 +71,12 @@ public class Instances implements Serializable {
   /** The instances. */
   protected FastVector m_Instances;
 
+  /** Index in ranges for MIN and MAX and WIDTH */
+  public static int R_MIN = 0;
+  public static int R_MAX = 1;
+  public static int R_WIDTH = 2;
+
+
   /** The class attribute's index */
   protected int m_ClassIndex;
 
@@ -79,6 +85,9 @@ public class Instances implements Serializable {
 
   /** Buffer of indices for sparse instance */
   protected int[] m_IndicesBuffer;
+
+  /** Ranges of instances */
+  protected double[][] m_Ranges;
 
   /**
    * Reads an ARFF file from a reader, and assigns a weight of
@@ -1833,13 +1842,15 @@ public class Instances implements Serializable {
   private void quickSort(int attIndex, int lo0, int hi0) {
     
     int lo = lo0, hi = hi0;
-    double mid;
+    double mid, midPlus, midMinus;
     
     if (hi0 > lo0) {
       
       // Arbitrarily establishing partition element as the 
       // midpoint of the array.
       mid = instance((lo0 + hi0) / 2).value(attIndex);
+      midPlus = mid + 1e-6;
+      midMinus = mid - 1e-6;
 
       // loop through the array until indices cross
       while(lo <= hi) {
@@ -1847,14 +1858,14 @@ public class Instances implements Serializable {
 	// find the first element that is greater than or equal to 
 	// the partition element starting from the left Index.
 	while ((instance(lo).value(attIndex) < 
-		mid) && (lo < hi0)) {
+		midMinus) && (lo < hi0)) {
 	  ++lo;
 	}
 	
 	// find an element that is smaller than or equal to
 	// the partition element starting from the right Index.
 	while ((instance(hi).value(attIndex)  > 
-		mid) && (hi > lo0)) {
+		midPlus) && (hi > lo0)) {
 	  --hi;
 	}
 	
@@ -1960,6 +1971,264 @@ public class Instances implements Serializable {
       merged.add(first.instance(i).mergeInstance(second.instance(i)));
     }
     return merged;
+  }
+
+  /**
+   * Initializes the ranges using all instances of the dataset. 
+   * Sets m_Ranges.
+   * @return the ranges  
+   */
+
+  public double [][] initializeRanges() {
+
+    int numAtt = this.numAttributes();
+    double [][] ranges = new double [numAtt][3];
+    
+    if (this.numInstances() <= 0) {
+      initializeRangesEmpty(numAtt, ranges);
+      return ranges;
+    }
+    else
+      // initialize ranges using the first instance
+      updateRangesFirst(this.instance(0), numAtt, ranges);
+
+    // update ranges, starting from the second
+    for (int i = 1; i < this.numInstances(); i++) {
+      updateRanges(this.instance(i), numAtt, ranges);
+    }
+    m_Ranges = ranges; 
+    return ranges;
+  }
+
+  /**
+   * Initializes the ranges of a subset of the instances of this dataset.
+   * Therefore m_Ranges is not set.
+   * @param instList list of indexes of the subset
+   * @return the ranges
+   */
+  public double [][] initializeRanges(int[] instList) {
+    int numAtt = this.numAttributes();
+    double [][] ranges = new double [numAtt][3];
+    
+    if (this.numInstances() <= 0) {
+      initializeRangesEmpty(numAtt, ranges);
+      return ranges;
+    }
+    else {
+      // initialize ranges using the first instance
+      updateRangesFirst(this.instance(instList[0]), numAtt, ranges);
+      // update ranges, starting from the second
+      for (int i = 1; i < instList.length; i++) {
+	updateRanges(this.instance(instList[i]), numAtt, ranges);
+      }
+    }
+    return ranges;
+  }
+
+ /**
+   * Used to initialize the ranges. 
+   * @param numAtt number of attributes in the model
+   * @param ranges low, high and width values for all attributes
+   */
+  public void initializeRangesEmpty(int numAtt,
+				double[][] ranges) {  
+    
+    for (int j = 0; j < numAtt; j++) {
+      ranges[j][R_MIN] = Double.MAX_VALUE;
+      ranges[j][R_MAX] = Double.MIN_VALUE;
+      ranges[j][R_WIDTH] = Double.MIN_VALUE; 
+    }
+  }
+ 
+ /**
+   * Used to initialize the ranges. For this the values of the first 
+   * instance is used to save time.
+   * Sets low and high to the values of the first instance and
+   * width to zero.
+   * @param instance the new instance
+   * @param numAtt number of attributes in the model
+   * @param ranges low, high and width values for all attributes
+   */
+  public void updateRangesFirst(Instance instance, int numAtt,
+				double[][] ranges) {  
+    
+    for (int j = 0; j < numAtt; j++) {
+      if (!instance.isMissing(j)) {
+	ranges[j][R_MIN] = instance.value(j);
+	ranges[j][R_MAX] = instance.value(j);
+	ranges[j][R_WIDTH] = 0.0;
+      } 
+      else { // if value was missing
+	ranges[j][R_MIN] = Double.MIN_VALUE;
+	ranges[j][R_MAX] = Double.MAX_VALUE;
+	ranges[j][R_WIDTH] = Double.MAX_VALUE; 
+      }
+    }
+  }
+ 
+  /**
+   * Updates the minimum and maximum and width values for all the attributes
+   * based on a new instance.
+   * @param instance the new instance
+   * @param numAtt number of attributes in the model
+   * @param ranges low, high and width values for all attributes
+   */
+  private void updateRanges(Instance instance, int numAtt,
+			    double [][] ranges) {  
+    
+    // updateRangesFirst must have been called on ranges
+    for (int j = 0; j < numAtt; j++) {
+      double value = instance.value(j);
+      if (!instance.isMissing(j)) {
+	if (value < ranges[j][R_MIN]) {
+	  ranges[j][R_MIN] = value;
+	  ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+	} else {
+	  if (instance.value(j) > ranges[j][R_MAX]) {
+	    ranges[j][R_MAX] = value;
+	    ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+	  }
+	}
+      }
+    }
+  }
+
+  /**
+   * prints the ranges.
+   * @param instance the new instance
+   * @param numAtt number of attributes in the model
+   * @param ranges low, high and width values for all attributes
+   */
+  public static void printRanges(double [][] ranges) {  
+    
+    OOPSS("printRanges");
+    // updateRangesFirst must have been called on ranges
+    for (int j = 0; j < ranges.length; j++) {
+      OOPSS(" "+j+"-MIN "+ranges[j][R_MIN]);
+      OOPSS(" "+j+"-MAX "+ranges[j][R_MAX]);
+      OOPSS(" "+j+"-WIDTH "+ranges[j][R_WIDTH]);
+    }
+  }
+
+  /**
+   * Updates the ranges given a new instance.
+   * @param instance the new instance
+   * @param numAtt number of attributes in the model
+   * @param ranges low, high and width values for all attributes
+   *
+  public void updateRanges(Instance instance, double [][] ranges) {  
+    
+    int numAtt = numAttributes();
+
+    // updateRangesFirst must have been called on ranges
+    for (int j = 0; j < numAtt; j++) {
+      double value = instance.value(j);
+      if (!instance.isMissing(j)) {
+	if (value < ranges[j][R_MIN]) {
+	  ranges[j][R_MIN] = value;
+	  ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+	} else {
+	  if (instance.value(j) > ranges[j][R_MAX]) {
+	    ranges[j][R_MAX] = value;
+	    ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+	  }
+	}
+      }
+    }
+  }*/
+
+  /**
+   * Updates the ranges given a new instance.
+   * @param instance the new instance
+   * @param ranges low, high and width values for all attributes
+   */
+  public static double [][] updateRanges(Instance instance, 
+					 double [][] ranges) {  
+    // updateRangesFirst must have been called on ranges
+    for (int j = 0; j < ranges.length; j++) {
+      double value = instance.value(j);
+      if (!instance.isMissing(j)) {
+	if (value < ranges[j][R_MIN]) {
+	  ranges[j][R_MIN] = value;
+	  ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+	} else {
+	  if (instance.value(j) > ranges[j][R_MAX]) {
+	    ranges[j][R_MAX] = value;
+	    ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+	  }
+	}
+      }
+    }
+    return ranges;
+  }
+
+  /**
+   * Test if an instance is within the given ranges.
+   * @param instance the instance
+   * @param ranges the ranges the instance is tested to be in 
+   * @return true if instance is within the ranges
+   */
+  public static boolean inRanges(Instance instance, double [][] ranges) {  
+    boolean isIn = true;
+    
+    // updateRangesFirst must have been called on ranges
+    for (int j = 0; isIn && (j < ranges.length); j++) {
+      if (!instance.isMissing(j)) {
+	double value = instance.value(j);
+	isIn = value <= ranges[j][R_MAX];
+	if (isIn) isIn = value >= ranges[j][R_MIN];
+      }
+    }
+    return isIn;
+  }
+
+  /**
+   * Prints a range to standard output
+   * @param ranges the ranges to print
+   */
+  public static void printRanges(Instances model,
+				 double[][] ranges) {
+    System.out.println("printRanges");
+    for (int j = 0; j < model.numAttributes(); j++) {
+      System.out.print("Attribute "+ j +" MIN: " + ranges[j][R_MIN]);
+      System.out.print(" MAX: " + ranges[j][R_MAX]);
+      System.out.print(" WIDTH: " + ranges[j][R_WIDTH]);
+      System.out.println(" ");
+    }
+  }
+
+  /**
+   * Check if ranges are set.
+   * @return true if ranges are set
+   */
+  public boolean rangesSet() {
+    return (m_Ranges != null);
+  }
+
+  /**
+   * Method to get the ranges.
+   * @return the ranges
+   */
+  public double[][] getRanges() throws Exception {
+    if (m_Ranges == null) 
+      throw new Exception("Ranges not yet set.");
+    return m_Ranges;
+  }
+
+  /**
+   * Used for debug println's.
+   * @param output string that is printed
+   */
+  private void OOPS(String output) {
+    System.out.println(output);
+  }
+
+  /**
+   * Used for debug println's.
+   * @param output string that is printed
+   */
+  private static void OOPSS(String output) {
+    System.out.println(output);
   }
 
   /**
