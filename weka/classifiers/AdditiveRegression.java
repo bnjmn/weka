@@ -87,11 +87,17 @@ import weka.classifiers.*;
  * (but increase learning time).
  * (default = 1.0, ie no shrinkage). <p>
  *
+ * -M max models <br>
+ * Set the maximum number of models to generate. Values <= 0 indicate 
+ * no maximum, ie keep going until the reduction in error threshold is 
+ * reached.
+ * (default = -1). <p>
+ *
  * -D <br>
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -122,6 +128,12 @@ public class AdditiveRegression extends Classifier
    * Produce debugging output.
    */
   private boolean m_debug = false;
+
+  /**
+   * Maximum number of models to produce. -1 indicates keep going until the error
+   * threshold is met.
+   */
+  protected int m_maxModels = -1;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -165,7 +177,7 @@ public class AdditiveRegression extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use, followed\n"
@@ -181,6 +193,12 @@ public class AdditiveRegression extends Classifier
     newVector.addElement(new Option(
 	      "\tTurn on debugging output.",
 	      "D", 0, "-D"));
+
+    newVector.addElement(new Option(
+	      "\tSpecify max models to generate. "
+	      +"(default = -1, ie. no max; keep going until error reduction threshold "
+	      +"is reached)\n", 
+	      "M", 1, "-M"));
      
     return newVector.elements();
   }
@@ -200,6 +218,12 @@ public class AdditiveRegression extends Classifier
    *
    * -D <br>
    * Debugging output. <p>
+   *
+   * -M max models <br>
+   * Set the maximum number of models to generate. Values <= 0 indicate 
+   * no maximum, ie keep going until the reduction in error threshold is 
+   * reached.
+   * (default = -1). <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -227,6 +251,11 @@ public class AdditiveRegression extends Classifier
       temp = Double.valueOf(optionString);
       setShrinkage(temp.doubleValue());
     }
+
+    optionString = Utils.getOption('M', options);
+    if (optionString.length() != 0) {
+      setMaxModels(Integer.parseInt(optionString));
+    }
     Utils.checkForRemainingOptions(options);
   }
 
@@ -237,7 +266,7 @@ public class AdditiveRegression extends Classifier
    */
   public String [] getOptions() {
     
-    String [] options = new String [5];
+    String [] options = new String [7];
     int current = 0;
 
     if (getDebug()) {
@@ -248,6 +277,7 @@ public class AdditiveRegression extends Classifier
     options[current++] = "" + getClassifierSpec();
 
     options[current++] = "-S"; options[current++] = ""+getShrinkage();
+    options[current++] = "-M"; options[current++] = ""+getMaxModels();
 
     while (current < options.length) {
       options[current++] = "";
@@ -332,6 +362,32 @@ public class AdditiveRegression extends Classifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String maxModelsTipText() {
+    return "Max models to generate. <= 0 indicates no maximum, ie. continue until "
+      +"error reduction threshold is reached.";
+  }
+
+  /**
+   * Set the maximum number of models to generate
+   * @param maxM the maximum number of models
+   */
+  public void setMaxModels(int maxM) {
+    m_maxModels = maxM;
+  }
+
+  /**
+   * Get the max number of models to generate
+   * @return the max number of models to generate
+   */
+  public int getMaxModels() {
+    return m_maxModels;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String shrinkageTipText() {
     return "Shrinkage rate. Smaller values help prevent overfitting and "
       + "have a smoothing effect (but increase learning time). "
@@ -388,6 +444,7 @@ public class AdditiveRegression extends Classifier
 			 +"(predicting the mean) : "+sum);
     }
 
+    int modelCount = 0;
     do {
       temp_sum = sum;
       Classifier nextC = Classifier.makeCopies(m_Classifier, 1)[0];
@@ -398,9 +455,11 @@ public class AdditiveRegression extends Classifier
       if (m_debug) {
 	System.err.println("Sum of squared residuals : "+sum);
       }
-    } while ((temp_sum - 
+      modelCount++;
+    } while (((temp_sum - 
 		   (sum = newData.attributeStats(m_classIndex).
-		    numericStats.sumSq)) > Utils.SMALL);
+		    numericStats.sumSq)) > Utils.SMALL) && 
+	     (m_maxModels > 0 ? (modelCount < m_maxModels) : true));
 
     // remove last classifier
     m_additiveModels.removeElementAt(m_additiveModels.size()-1);
