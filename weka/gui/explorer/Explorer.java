@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Explorer extends JPanel {
 
@@ -150,9 +150,10 @@ public class Explorer extends JPanel {
   public static void main(String [] args) {
 
     try {
+      Explorer explorer = new Explorer();
       final JFrame jf = new JFrame("Weka Knowledge Explorer");
       jf.getContentPane().setLayout(new BorderLayout());
-      jf.getContentPane().add(new Explorer(), BorderLayout.CENTER);
+      jf.getContentPane().add(explorer, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
 	  jf.dispose();
@@ -162,6 +163,12 @@ public class Explorer extends JPanel {
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
+
+      if (args.length == 1) {
+	System.err.println("Loading instances from " + args[0]);
+	explorer.m_PreprocessPanel.setBaseInstancesFromFile(new File(args[0]));
+      }
+
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
