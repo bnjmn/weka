@@ -39,13 +39,19 @@ import weka.core.*;
  * Specifies the (maximum) number of bins to divide numeric attributes into.
  * Default = 10.<p>
  *
+ * -M num <br>
+ * Specifies the desired weight of instances per bin for equal-frequency
+ * binning. If this is set to a positive number then the -B option will be 
+ * ignored. Default = -1.<p>
+ *
  * -F <br>
  * Use equal-frequency instead of equal-width discretization if 
  * class-based discretisation is turned off.<p>
  *
  * -O <br>
  * Optimize the number of bins using a leave-one-out estimate of the 
- * entropy (for equal-width binning).<p>
+ * entropy (for equal-width binning). If this is set then the -B option
+ * will be ignored.<p>
  *
  * -R col1,col2-col4,... <br>
  * Specifies list of columns to Discretize. First
@@ -59,9 +65,9 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class Discretize extends Filter 
+public class Discretize extends PotentialClassIgnorer 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
 
   /** Stores which columns to Discretize */
@@ -69,6 +75,9 @@ public class Discretize extends Filter
 
   /** The number of bins to divide the attribute into */
   protected int m_NumBins = 10;
+
+  /** The desired weight of instances per bin */
+  protected double m_DesiredWeightOfInstancesPerInterval = -1;
 
   /** Store the current cutpoints */
   protected double [][] m_CutPoints = null;
@@ -105,12 +114,20 @@ public class Discretize extends Filter
               "B", 1, "-B <num>"));
 
     newVector.addElement(new Option(
+              "\tSpecifies the desired weight of instances per bin for\n"
+	      + "\tequal-frequency binning. If this is set to a positive\n"
+	      + "\tnumber then the -B option will be ignored.\n"
+	      + "\t(default = -1)",
+              "M", 1, "-M <num>"));
+
+    newVector.addElement(new Option(
               "\tUse equal-frequency instead of equal-width discretization.",
               "F", 0, "-F"));
 
     newVector.addElement(new Option(
               "\tOptimize number of bins using leave-one-out estimate\n"+
-	      "\tof estimated entropy (for equal-width discretization).",
+	      "\tof estimated entropy (for equal-width discretization).\n"+
+	      "\tIf this is set then the -B option will be ignored.",
               "O", 0, "-O"));
 
     newVector.addElement(new Option(
@@ -138,13 +155,19 @@ public class Discretize extends Filter
    * Specifies the (maximum) number of bins to divide numeric attributes into.
    * Default = 10.<p>
    *
+   * -M num <br>
+   * Specifies the desired weight of instances per bin for equal-frequency
+   * binning. If this is set to a positive number then the -B option will be 
+   * ignored. Default = -1.<p>
+   *
    * -F <br>
    * Use equal-frequency instead of equal-width discretization if 
    * class-based discretisation is turned off.<p>
    *
    * -O <br>
    * Optimize the number of bins using a leave-one-out estimate of the 
-   * entropy (for equal-width binning).<p>
+   * entropy (for equal-width binning). If this is set then the -B
+   * option will be ignored.<p>
    *
    * -R col1,col2-col4,... <br>
    * Specifies list of columns to Discretize. First
@@ -165,6 +188,13 @@ public class Discretize extends Filter
     setUseEqualFrequency(Utils.getFlag('F', options));
     setFindNumBins(Utils.getFlag('O', options));
     setInvertSelection(Utils.getFlag('V', options));
+
+    String weight = Utils.getOption('M', options);
+    if (weight.length() != 0) {
+      setDesiredWeightOfInstancesPerInterval((new Double(weight)).doubleValue());
+    } else {
+      setDesiredWeightOfInstancesPerInterval(-1);
+    }
 
     String numBins = Utils.getOption('B', options);
     if (numBins.length() != 0) {
@@ -192,7 +222,7 @@ public class Discretize extends Filter
    */
   public String [] getOptions() {
 
-    String [] options = new String [12];
+    String [] options = new String [10];
     int current = 0;
 
     if (getMakeBinary()) {
@@ -208,6 +238,8 @@ public class Discretize extends Filter
       options[current++] = "-V";
     }
     options[current++] = "-B"; options[current++] = "" + getBins();
+    options[current++] = "-M"; 
+    options[current++] = "" + getDesiredWeightOfInstancesPerInterval();
     if (!getAttributeIndices().equals("")) {
       options[current++] = "-R"; options[current++] = getAttributeIndices();
     }
@@ -325,7 +357,8 @@ public class Discretize extends Filter
    */
   public String findNumBinsTipText() {
 
-    return "Optimize number of equal-width bins using leave-one-out.";
+    return "Optimize number of equal-width bins using leave-one-out. Doesn't " +
+      "work for equal-frequency binning";
   }
 
   /**
@@ -377,6 +410,48 @@ public class Discretize extends Filter
   public void setMakeBinary(boolean makeBinary) {
 
     m_MakeBinary = makeBinary;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String desiredWeightOfInstancesPerIntervalTipText() {
+
+    return "Sets the desired weight of instances per interval for " +
+      "equal-frequency binning.";
+  }
+  
+  /**
+   * Get the DesiredWeightOfInstancesPerInterval value.
+   * @return the DesiredWeightOfInstancesPerInterval value.
+   */
+  public double getDesiredWeightOfInstancesPerInterval() {
+
+    return m_DesiredWeightOfInstancesPerInterval;
+  }
+
+  /**
+   * Set the DesiredWeightOfInstancesPerInterval value.
+   * @param newDesiredNumber The new DesiredNumber value.
+   */
+  public void setDesiredWeightOfInstancesPerInterval(double newDesiredNumber) {
+    
+    m_DesiredWeightOfInstancesPerInterval = newDesiredNumber;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useEqualFrequencyTipText() {
+
+    return "If set to true, equal-frequency binning will be used instead of" +
+      " equal-width binning.";
   }
   
   /**
@@ -612,12 +687,19 @@ public class Discretize extends Filter
 	sumOfWeights += data.instance(i).weight();
       }
     }
-    double freq = sumOfWeights / m_NumBins;
+    double freq;
+    double[] cutPoints = new double[m_NumBins - 1];
+    if (getDesiredWeightOfInstancesPerInterval() > 0) {
+      freq = getDesiredWeightOfInstancesPerInterval();
+      cutPoints = new double[(int)(sumOfWeights / freq)];
+    } else {
+      freq = sumOfWeights / m_NumBins;
+      cutPoints = new double[m_NumBins - 1];
+    }
 
     // Compute break points
-    double[] cutPoints = new double[m_NumBins - 1];
-    double counter = 0;
-    int cpindex = 0;
+    double counter = 0, last = 0;
+    int cpindex = 0, lastIndex = -1;
     for (int i = 0; i < data.numInstances() - 1; i++) {
 
       // Stop if value missing
@@ -625,17 +707,43 @@ public class Discretize extends Filter
 	break;
       }
       counter += data.instance(i).weight();
+      sumOfWeights -= data.instance(i).weight();
 
       // Do we have a potential breakpoint?
       if (data.instance(i).value(index) < 
 	  data.instance(i + 1).value(index)) {
+
+	// Have we passed the ideal size?
 	if (counter >= freq) {
-	  cutPoints[cpindex] = (data.instance(i).value(index) +
-				data.instance(i + 1).value(index)) / 2;
+
+	  // Is this break point worse than the last one?
+	  if (((freq - last) < (counter - freq)) && (lastIndex != -1)) {
+	    cutPoints[cpindex] = (data.instance(lastIndex).value(index) +
+				  data.instance(lastIndex + 1).value(index)) / 2;
+	    counter -= last;
+	    last = counter;
+	    lastIndex = i;
+	  } else {
+	    cutPoints[cpindex] = (data.instance(i).value(index) +
+				  data.instance(i + 1).value(index)) / 2;
+	    counter = 0;
+	    last = 0;
+	    lastIndex = -1;
+	  }
 	  cpindex++;
-	  counter = counter - freq;
+	  freq = (sumOfWeights + counter) / ((cutPoints.length + 1) - cpindex);
+	} else {
+	  lastIndex = i;
+	  last = counter;
 	}
       }
+    }
+
+    // Check whether there was another possibility for a cut point
+    if ((cpindex < cutPoints.length) && (lastIndex != -1)) {
+      cutPoints[cpindex] = (data.instance(lastIndex).value(index) +
+			    data.instance(lastIndex + 1).value(index)) / 2;      
+      cpindex++;
     }
 
     // Did we find any cutpoints?
@@ -879,6 +987,7 @@ public class Discretize extends Filter
 	Filter.filterFile(new Discretize(), argv);
       }
     } catch (Exception ex) {
+      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }

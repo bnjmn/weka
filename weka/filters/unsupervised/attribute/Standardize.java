@@ -33,9 +33,9 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Standardize extends Filter implements UnsupervisedFilter {
+public class Standardize extends PotentialClassIgnorer implements UnsupervisedFilter {
 
   /** The means */
   private double [] m_Means;

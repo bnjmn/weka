@@ -240,18 +240,14 @@ public class SMOreg extends Classifier implements OptionHandler,
     m_classIndex = insts.classIndex();
     if (m_filterType == FILTER_STANDARDIZE) {
       m_Filter = new Standardize();
-      insts.setClassIndex(-1);
+      ((Standardize)m_Filter).setIgnoreClass(true);
       m_Filter.setInputFormat(insts);
-      insts.setClassIndex(m_classIndex);
       insts = Filter.useFilter(insts, m_Filter); 
-      insts.setClassIndex(m_classIndex);
     } else if (m_filterType == FILTER_NORMALIZE) {
       m_Filter = new Normalize();
-      insts.setClassIndex(-1);
+      ((Normalize)m_Filter).setIgnoreClass(true);
       m_Filter.setInputFormat(insts);
-      insts.setClassIndex(m_classIndex);
       insts = Filter.useFilter(insts, m_Filter); 
-      insts.setClassIndex(m_classIndex);
     } else {
       m_Filter = null;
     }

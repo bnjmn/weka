@@ -36,9 +36,9 @@ import weka.core.*;
  * attribute will be one. The new attributes will nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
-public class NumericToBinary extends Filter
+public class NumericToBinary extends PotentialClassIgnorer
   implements UnsupervisedFilter, StreamableFilter {
 
   /**
