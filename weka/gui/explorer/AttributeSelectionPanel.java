@@ -100,7 +100,7 @@ import java.awt.Dimension;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -681,7 +681,7 @@ public class AttributeSelectionPanel extends JPanel {
 	      m_CurrentVis = new VisualizePanel();
 	      try {
 		Instances transformed = 
-		  ((AttributeTransformer)evaluator).getTransformedData();
+		  ((AttributeTransformer)evaluator).transformedData();
 		m_CurrentVis.setInstances(transformed);
 		m_CurrentVis.setColourIndex(transformed.classIndex());
 		m_CurrentVis.setName(name+" ("+inst.relationName()+")");
