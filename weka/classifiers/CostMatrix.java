@@ -19,13 +19,13 @@
 package weka.classifiers;
 
 import weka.core.Utils;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Matrix;
 
 import java.io.Reader;
-import java.util.Random;
 import java.io.StreamTokenizer;
-import weka.core.Instance;
+import java.util.Random;
 
 /**
  * Class for a misclassification cost matrix. The element in the i'th column
@@ -33,9 +33,19 @@ import weka.core.Instance;
  * having class i.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CostMatrix extends Matrix {
+
+  public CostMatrix(CostMatrix toCopy) {
+
+    this(toCopy.size());
+    for (int i = 0; i < size(); i++) {
+      for (int j = 0; j < size(); j++) {
+	setElement(i, j, toCopy.getElement(i, j));
+      }
+    }
+  }
 
   /**
    * Creates a default cost matrix for the given number of classes. The 
