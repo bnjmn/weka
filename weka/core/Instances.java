@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.50 $ 
+ * @version $Revision: 1.51 $ 
  */
 public class Instances implements Serializable {
  
@@ -64,9 +64,6 @@ public class Instances implements Serializable {
 
   /** The filename extension that should be used for bin. serialized instances files */
   public static String SERIALIZED_OBJ_FILE_EXTENSION = ".bsi";
-
-  /** The filename extension that should be used for XML serialized instances files */
-  public static String SERIALIZED_XML_FILE_EXTENSION = ".xsi";
 
   /** The keyword used to denote the start of an arff header */
   static String ARFF_RELATION = "@relation";
