@@ -43,7 +43,7 @@ import java.awt.*;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -89,12 +89,14 @@ public class IncrementalClassifierEvaluator
   public void acceptClassifier(final IncrementalClassifierEvent ce) {
     try {
       if (ce.getStatus() == IncrementalClassifierEvent.NEW_BATCH) {
-	m_eval = new Evaluation(ce.getCurrentInstance().dataset());
+	//	m_eval = new Evaluation(ce.getCurrentInstance().dataset());
+	m_eval = new Evaluation(ce.getStructure());
 	m_dataLegend = new Vector();
 	m_reset = true;
-	m_dataPoint = new double[1];
-	Instance inst = ce.getCurrentInstance();
-	if (inst.classIndex() >= 0) {
+	m_dataPoint = new double[0];
+	Instances inst = ce.getStructure();
+	System.err.println("NEW BATCH");
+	/* if (inst.classIndex() >= 0) {
 	  if (inst.attribute(inst.classIndex()).isNominal()) {
 	    if (inst.isMissing(inst.classIndex())) {
 	      m_dataLegend.addElement("Confidence");
@@ -108,7 +110,7 @@ public class IncrementalClassifierEvaluator
 	      m_dataLegend.addElement("RRSE");
 	    }
 	  }
-	}
+	} */
       } else {
 	Instance inst = ce.getCurrentInstance();
 	//	if (inst.attribute(inst.classIndex()).isNominal()) {
@@ -125,6 +127,7 @@ public class IncrementalClassifierEvaluator
 	    if (!inst.isMissing(inst.classIndex())) {
 	      if (m_dataPoint.length < 2) {
 		m_dataPoint = new double[2];
+		m_dataLegend.addElement("Accuracy");
 		m_dataLegend.addElement("RMSE (prob)");
 	      }
 	      //		int classV = (int) inst.value(inst.classIndex());
@@ -135,6 +138,11 @@ public class IncrementalClassifierEvaluator
 	      //  		  maxO = Utils.maxIndex(dist);
 	      //  		}
 	      //  		m_dataPoint[1] -= dist[maxO];
+	    } else {
+	      if (m_dataPoint.length < 1) {
+		m_dataPoint = new double[1];
+		m_dataLegend.addElement("Confidence");
+	      }
 	    }
 	    double primaryMeasure = 0;
 	    if (!inst.isMissing(inst.classIndex())) {
@@ -159,10 +167,18 @@ public class IncrementalClassifierEvaluator
 	    m_reset = false;
 	  } else {
 	    // numeric class
+	    if (m_dataPoint.length < 1) {
+	      m_dataPoint = new double[1];
+	      if (inst.isMissing(inst.classIndex())) {
+		m_dataLegend.addElement("Prediction");
+	      } else {
+		m_dataLegend.addElement("RMSE");
+	      }
+	    }
 	    if (!inst.isMissing(inst.classIndex())) {
 	      double update;
 	      if (!inst.isMissing(inst.classIndex())) {
-		update = m_eval.rootRelativeSquaredError();
+		update = m_eval.rootMeanSquaredError();
 	      } else {
 		update = pred;
 	      }

@@ -35,10 +35,10 @@ import javax.swing.SwingConstants;
 import java.awt.*;
 
 /**
- * Describe class <code>ClassAssigner</code> here.
+ * Bean that assigns a class attribute to a data set.
  *
- * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @author Mark Hall
+ * @version $Revision: 1.6 $
  */
 public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
@@ -47,6 +47,9 @@ public class ClassAssigner extends JPanel
 	     InstanceListener {
   
   private String m_classColumn = "last";
+
+  /** format of instances for current incoming connection (if any) */
+  private Instances m_connectedFormat;
 
   private Object m_trainingProvider;
   private Object m_testProvider;
@@ -57,6 +60,8 @@ public class ClassAssigner extends JPanel
   private Vector m_testListeners = new Vector();
   private Vector m_dataListeners = new Vector();
   private Vector m_instanceListeners = new Vector();
+
+  private Vector m_dataFormatListeners = new Vector();
 
   protected transient weka.gui.Logger m_logger = null;
 
@@ -89,8 +94,20 @@ public class ClassAssigner extends JPanel
     return "Specify the number of the column that contains the class attribute";
   }
 
+  /**
+   * Returns the structure of the incoming instances (if any)
+   *
+   * @return an <code>Instances</code> value
+   */
+  public Instances getConnectedFormat() {
+    return m_connectedFormat;
+  }
+
   public void setClassColumn(String col) {
     m_classColumn = col;
+    if (m_connectedFormat != null) {
+      assignClass(m_connectedFormat);
+    }
   }
 
   public String getClassColumn() {
@@ -101,6 +118,11 @@ public class ClassAssigner extends JPanel
     Instances dataSet = e.getDataSet();
     assignClass(dataSet);
     notifyDataListeners(e);
+    if (e.isStructureOnly()) {
+      m_connectedFormat = e.getDataSet();
+      // tell any listening customizers (or other
+      notifyDataFormatListeners();
+    }
   }
 
   public void acceptTrainingSet(TrainingSetEvent e) {
@@ -115,19 +137,22 @@ public class ClassAssigner extends JPanel
     notifyTestListeners(e);
   }
 
-  /* 
-  public void acceptInstance(InstanceEvent e) {
-    assignClass(e.getInstance().dataset());
-    notifyInstanceListeners(e);
-    } */
-
   public void acceptInstance(InstanceEvent e) {
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-      Instances dataSet = e.getInstance().dataset();
+      //      Instances dataSet = e.getInstance().dataset();
+      m_connectedFormat = e.getStructure();
+      
       //      System.err.println("Assigning class column...");
-      assignClass(dataSet);
+      assignClass(m_connectedFormat);
+      notifyInstanceListeners(e);
+
+      // tell any listening customizers (or other interested parties)
+      notifyDataFormatListeners();
+    } else {
+      //      Instances dataSet = e.getInstance().dataset();
+      //      assignClass(dataSet);
+      notifyInstanceListeners(e);
     }
-    notifyInstanceListeners(e);
   }
 
   private void assignClass(Instances dataSet) {
@@ -205,6 +230,21 @@ public class ClassAssigner extends JPanel
     }
   }
 
+  protected void notifyDataFormatListeners() {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_dataFormatListeners.clone();
+    }
+    if (l.size() > 0) {
+      DataSetEvent dse = new DataSetEvent(this, m_connectedFormat);
+      for(int i = 0; i < l.size(); i++) {
+	//	System.err.println("Notifying instance listeners "
+	//			   +"(ClassAssigner)");
+	((DataFormatListener)l.elementAt(i)).newDataFormat(dse);
+      }
+    }
+  }
+
   public synchronized void addInstanceListener(InstanceListener tsl) {
     m_instanceListeners.addElement(tsl);
   }
@@ -215,6 +255,11 @@ public class ClassAssigner extends JPanel
 
   public synchronized void addDataSourceListener(DataSourceListener tsl) {
     m_dataListeners.addElement(tsl);
+    // pass on any format that we might know about
+    if (m_connectedFormat != null) {
+      DataSetEvent e = new DataSetEvent(this, m_connectedFormat);
+      tsl.acceptDataSet(e);
+    }
   }
 
   public synchronized void removeDataSourceListener(DataSourceListener tsl) {
@@ -235,6 +280,14 @@ public class ClassAssigner extends JPanel
 
   public synchronized void removeTestSetListener(TestSetListener tsl) {
     m_testListeners.removeElement(tsl);
+  }
+
+  public synchronized void addDataFormatListener(DataFormatListener dfl) {
+    m_dataFormatListeners.addElement(dfl);
+  }
+
+  public synchronized void removeDataFormatListener(DataFormatListener dfl) {
+    m_dataFormatListeners.removeElement(dfl);
   }
 
   public void setVisual(BeanVisual newVisual) {
@@ -311,6 +364,7 @@ public class ClassAssigner extends JPanel
    */
   public synchronized void disconnectionNotification(String eventName,
 						     Object source) {
+
     if (eventName.compareTo("trainingSet") == 0) {
       if (m_trainingProvider == source) {
 	m_trainingProvider = null;
@@ -367,11 +421,15 @@ public class ClassAssigner extends JPanel
 
     if (eventName.compareTo("dataSet") == 0) { 
       if (m_dataProvider == null) {
+	m_connectedFormat = null;
+	notifyDataFormatListeners();
 	return false;
       } else {
 	if (m_dataProvider instanceof EventConstraints) {
 	  if (!((EventConstraints)m_dataProvider).
 	      eventGeneratable("dataSet")) {
+	    m_connectedFormat = null;
+	    notifyDataFormatListeners();
 	    return false;
 	  }
 	}

@@ -100,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.15 $
+ * @version  $Revision: 1.16 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -235,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.15 $
+   * @version $Revision: 1.16 $
    * @since 1.0
    * @see JPanel
    */
@@ -1014,13 +1014,16 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
   private void popupCustomizer(Class custClass, JComponent bc) {
     try {
       // instantiate
-      Object customizer = custClass.newInstance();
+      final Object customizer = custClass.newInstance();
       ((Customizer)customizer).setObject(bc);
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add((JComponent)customizer, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    if (customizer instanceof CustomizerClosingListener) {
+	      ((CustomizerClosingListener)customizer).customizerClosing();
+	    }
 	    jf.dispose();
 	  }
 	});

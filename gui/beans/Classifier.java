@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -307,7 +307,8 @@ public class Classifier extends JPanel
     }
 
     if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-      Instances dataset = m_incrementalEvent.getInstance().dataset();
+      //      Instances dataset = m_incrementalEvent.getInstance().dataset();
+      Instances dataset = m_incrementalEvent.getStructure();
       // default to the last column if no class is set
       if (dataset.classIndex() < 0) {
 	//	System.err.println("Classifier : setting class index...");
@@ -350,6 +351,13 @@ public class Classifier extends JPanel
       } catch (Exception ex) {
 	ex.printStackTrace();
       }
+      // Notify incremental classifier listeners of new batch
+      System.err.println("NOTIFYING NEW BATCH");
+      m_ie.setStructure(dataset); 
+      m_ie.setClassifier(m_Classifier);
+      
+      notifyIncrementalClassifierListeners(m_ie);
+      return;
     } else {
       if (m_trainingSet == null) {
 	// simply return. If the training set is still null after
@@ -363,10 +371,10 @@ public class Classifier extends JPanel
     try {
       // test on this instance
       int status = IncrementalClassifierEvent.WITHIN_BATCH;
-      if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-	status = IncrementalClassifierEvent.NEW_BATCH;
-      } else if (m_incrementalEvent.getStatus() ==
-		 InstanceEvent.BATCH_FINISHED) {
+      /*      if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+	      status = IncrementalClassifierEvent.NEW_BATCH; */
+      /* } else */ if (m_incrementalEvent.getStatus() ==
+		       InstanceEvent.BATCH_FINISHED) {
 	status = IncrementalClassifierEvent.BATCH_FINISHED;
       }
       

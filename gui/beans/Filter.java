@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -191,6 +191,7 @@ public class Filter extends JPanel
     processTrainingOrDataSourceEvents(e);
   }
 
+  private boolean m_structurePassedOn = false;
   /**
    * Accept an instance for processing by StreamableFilters only
    *
@@ -216,7 +217,8 @@ public class Filter extends JPanel
     }
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
       try {
-	Instances dataset = e.getInstance().dataset();
+	//	Instances dataset = e.getInstance().dataset();
+	Instances dataset = e.getStructure();
 	if (m_Filter instanceof SupervisedFilter) {
 	  // defualt to last column if no class is set
 	  if (dataset.classIndex() < 0) {
@@ -225,9 +227,24 @@ public class Filter extends JPanel
 	}
 	// initialize filter
 	m_Filter.setInputFormat(dataset);
+	// attempt to determine post-filtering
+	// structure. If successful this can be passed on to instance
+	// listeners as a new FORMAT_AVAILABLE event.
+	m_structurePassedOn = false;
+	try {
+	  if (m_Filter.isOutputFormatDefined()) {
+	    System.err.println(m_Filter.getOutputFormat());
+	    m_ie.setStructure(m_Filter.getOutputFormat());
+	    notifyInstanceListeners(m_ie);
+	    m_structurePassedOn = true;
+	  }
+	} catch (Exception ex) {
+	  System.err.println("Error in obtaining post-filter structure: Filter.java");
+	}
       } catch (Exception ex) {
 	ex.printStackTrace();
       }
+      return;
     }
    
     // pass instance through the filter
@@ -243,6 +260,12 @@ public class Filter extends JPanel
       Instance filteredInstance = m_Filter.output();
       if (filteredInstance == null) {
 	return;
+      }
+      if (!m_structurePassedOn) {
+	// pass on the new structure first
+	m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
+	notifyInstanceListeners(m_ie);
+	m_structurePassedOn = true;
       }
 
       m_ie.setInstance(filteredInstance);

@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -67,6 +67,11 @@ public class Loader extends AbstractDataSource
    * Holds the instances loaded
    */
   private transient Instances m_dataSet;
+
+  /**
+   * Holds the format of the last loaded data set
+   */
+  private transient Instances m_dataFormat;
 
   /**
    * Thread for doing IO in
@@ -109,8 +114,17 @@ public class Loader extends AbstractDataSource
 	}
 
 	if (instanceGeneration) {
-	  boolean start = true;
+	  //	  boolean start = true;
 	  Instance nextInstance = null;
+	  // load and pass on the structure first
+	  Instances structure = null;
+	  try {
+	    System.err.println("NOTIFYING STRUCTURE AVAIL");
+	    structure = m_Loader.getStructure();
+	    notifyStructureAvailable(structure);
+	  } catch (IOException e) {
+	    e.printStackTrace();
+	  }
 	  try {
 	    nextInstance = m_Loader.getNextInstance();
 	  } catch (IOException e) {
@@ -118,19 +132,20 @@ public class Loader extends AbstractDataSource
 	  }
 	  int z = 0;
 	  while (nextInstance != null) {
+	    nextInstance.setDataset(structure);
 	    //	    format.add(nextInstance);
 	    /*	    InstanceEvent ie = (start)
 	      ? new InstanceEvent(m_DP, nextInstance, 
 				  InstanceEvent.FORMAT_AVAILABLE)
 		: new InstanceEvent(m_DP, nextInstance, 
 		InstanceEvent.INSTANCE_AVAILABLE); */
-	    if (start) {
-	      m_ie.setStatus(InstanceEvent.FORMAT_AVAILABLE);
-	    } else {
-	      m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-	    }
+	    //	    if (start) {
+	    //	      m_ie.setStatus(InstanceEvent.FORMAT_AVAILABLE);
+	      //	    } else {
+	    m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
+	      //	    }
 	    m_ie.setInstance(nextInstance);
-	    start = false;
+	    //	    start = false;
 	    //	    System.err.println(z);
 	    nextInstance = m_Loader.getNextInstance();
 	    if (nextInstance == null) {
@@ -219,6 +234,14 @@ public class Loader extends AbstractDataSource
       }
     }
     m_visual.setText(loaderName);
+
+    // try to load structure (if possible) and notify any listeners
+    try {
+      m_dataFormat = m_Loader.getStructure();
+      System.err.println("Notifying listeners of instance structure avail. (Loader).");
+      notifyStructureAvailable(m_dataFormat);
+    } catch (Exception ex) {
+    }
   }
 
   /**
@@ -253,6 +276,22 @@ public class Loader extends AbstractDataSource
    */
   public Object getWrappedAlgorithm() {
     return getLoader();
+  }
+
+  /**
+   * Notify all listeners that the structure of a data set
+   * is available.
+   *
+   * @param structure an <code>Instances</code> value
+   */
+  protected void notifyStructureAvailable(Instances structure) {
+    if (m_dataSetEventTargets > 0 && structure != null) {
+      DataSetEvent dse = new DataSetEvent(this, structure);
+      notifyDataSetLoaded(dse);
+    } else if (m_instanceEventTargets > 0 && structure != null) {
+      m_ie.setStructure(structure);
+      notifyInstanceLoaded(m_ie);
+    }
   }
 
   /**
@@ -381,6 +420,8 @@ public class Loader extends AbstractDataSource
   public synchronized void addDataSourceListener(DataSourceListener dsl) {
     super.addDataSourceListener(dsl);
     m_dataSetEventTargets ++;
+    // pass on any current instance format
+    notifyStructureAvailable(m_dataFormat);
   }
   
   /**
@@ -401,6 +442,8 @@ public class Loader extends AbstractDataSource
   public synchronized void addInstanceListener(InstanceListener dsl) {
     super.addInstanceListener(dsl);
     m_instanceEventTargets ++;
+    // pass on any current instance format
+    notifyStructureAvailable(m_dataFormat);
   }
   
   /**
