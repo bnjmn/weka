@@ -53,7 +53,7 @@ import java.sql.PreparedStatement;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -195,7 +195,13 @@ public class DatabaseUtils implements Serializable {
    * which data type / get()-Method to use in order to retrieve values from the
    */
   int translateDBColumnType(String type) {
-    return Integer.parseInt(PROPERTIES.getProperty(type));
+
+    try {
+      return Integer.parseInt(PROPERTIES.getProperty(type));
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Unknown data type: " + type + ". Add entry " +
+					 "in weka/experiment/DatabaseUtils.props.");
+    }
   }
  
   /** The prepared statement used for database queries. */
