@@ -113,6 +113,7 @@ weka.classifiers.DistributionClassifier=\
 # Lists the Filters I want to choose from
 weka.filters.Filter = \
  weka.filters.AddFilter, \
+ weka.filters.AddNoiseFilter, \
  weka.filters.AllFilter, \
  weka.filters.AttributeExpressionFilter, \
  weka.filters.AttributeFilter, \
