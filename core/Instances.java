@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $ 
+ * @version $Revision: 1.42 $ 
  */
 public class Instances implements Serializable {
  
@@ -1086,6 +1086,56 @@ public class Instances implements Serializable {
     copyInstances(first, test, numInstForFold);
     return test;
   }
+
+  /**
+   * Creates the test set for one fold of a cross-validation on 
+   * the sequential dataset.
+   *
+   * @param numFolds the number of folds in the cross-validation. Must
+   * be greater than 1.
+   * @param numFold 0 for the first fold, 1 for the second, ...
+   * @return the test set as a set of weighted instances
+   * @exception IllegalArgumentException if the number of folds is less than 2
+   * or greater than the number of instances.
+   */
+  public Instances seqTestCV(int numFolds, int numFold) {
+
+    int numSeqForFold, first, offset;
+    Instances test;
+    int numSequences = (int)lastInstance().value(0);
+
+    if (numFolds < 2) {
+      throw new IllegalArgumentException("Number of folds must be at least 2!");
+    }
+    if (numFolds > numSequences) {
+      throw new IllegalArgumentException("Can't have more folds than instances!");
+    }
+    sort(0);
+
+    numSeqForFold = numSequences / numFolds;
+    if (numFold < numSequences % numFolds){
+      numSeqForFold++;
+      offset = numFold;
+    }else
+      offset = numSequences % numFolds;
+    test = new Instances(this, 0);
+    first = numFold * (numSequences / numFolds) + offset;    
+  
+    int j = 0;
+    double prev = -1;
+    double curr = -1;
+    for(int i=0; i<numInstances(); i++) {
+      if((instance(i).value(0) >= first) && (instance(i).value(0) < first+numSeqForFold)) {
+        curr = instance(i).value(0);
+	test.add(instance(i));
+	if(prev != curr) j++;
+	test.lastInstance().setValue(0, j); 
+	prev = curr;
+      }
+    }
+
+    return test;
+  }
  
   /**
    * Returns the dataset as a string in ARFF format. Strings
@@ -1147,6 +1197,61 @@ public class Instances implements Serializable {
     copyInstances(first + numInstForFold, train,
 		  numInstances() - first - numInstForFold);
 
+    return train;
+  }
+
+  /**
+   * Creates the training set for one fold of a cross-validation 
+   * on the sequential dataset.
+   *
+   * @param numFolds the number of folds in the cross-validation. Must
+   * be greater than 1.
+   * @param numFold 0 for the first fold, 1 for the second, ...
+   * @return the training set as a set of weighted 
+   * instances
+   * @exception IllegalArgumentException if the number of folds is less than 2
+   * or greater than the number of instances.
+   */
+  public Instances seqTrainCV(int numFolds, int numFold) {
+
+    int numSeqForFold, first, offset;
+    Instances train;
+    int numSequences = (int)lastInstance().value(0);
+    
+    if (numFolds < 2) {
+      throw new IllegalArgumentException("Number of folds must be at least 2!");
+    }
+    if (numFolds > numSequences) {
+      throw new IllegalArgumentException("Can't have more folds than instances!");
+    }
+    
+    sort(0);
+
+    numSeqForFold = numSequences / numFolds;
+    if (numFold < numSequences % numFolds) {
+      numSeqForFold++;
+      offset = numFold;
+    }else
+      offset = numSequences % numFolds;
+    train = new Instances(this, 0);
+    first = numFold * (numSequences / numFolds) + offset;
+    
+    double prev = first+numSeqForFold;
+    int j = 0;
+    for(int i=0; i<numInstances(); i++) {
+      double curr = instance(i).value(0);
+      if(curr < first) {
+        train.add(instance(i));
+      }
+      
+      if(curr >= first+numSeqForFold) {
+        train.add(instance(i));
+	train.lastInstance().setValue(0, first+j);
+	if(curr != prev) j++;
+	prev = curr;
+      }
+    }
+    
     return train;
   }
 
