@@ -64,7 +64,7 @@ import javax.swing.JOptionPane;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -476,8 +476,10 @@ public class ResultsPanel extends JPanel {
 	}
       }
     }
+    /*
     m_ResultKeyBut.setEnabled(true);
-
+    */
+    
     // Reconnect the configuration listener
     m_DatasetCombo.addActionListener(m_ConfigureListener);
     m_RunCombo.addActionListener(m_ConfigureListener);

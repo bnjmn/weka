@@ -49,7 +49,7 @@ import java.io.ObjectOutputStream;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -132,6 +132,7 @@ public class Experiment implements Serializable, OptionHandler {
 
     m_PropertyArray = newPropArray;
   }
+
   /**
    * Gets the array of values to set the custom property to.
    *
@@ -143,6 +144,28 @@ public class Experiment implements Serializable, OptionHandler {
     return m_PropertyArray;
   }
 
+  /**
+   * Gets the number of custom iterator values that have been defined
+   * for the experiment.
+   *
+   * @return the number of custom property iterator values.
+   */
+  public int getPropertyArrayLength() {
+
+    return Array.getLength(m_PropertyArray);
+  }
+
+  /**
+   * Gets a specified value from the custom property iterator array.
+   *
+   * @param index the index of the value wanted
+   * @return the property array value
+   */
+  public Object getPropertyArrayValue(int index) {
+
+    return Array.get(m_PropertyArray, index);
+  }
+  
   /* These may potentially want to be made un-transient if it is decided
    * that experiments may be saved mid-run and later resumed
    */
@@ -151,13 +174,13 @@ public class Experiment implements Serializable, OptionHandler {
   /** The current dataset number when the experiment is running */
   protected transient int m_DatasetNumber;
   /** The current custom property value index when the experiment is running */
-  protected transient int m_CustomNumber;
+  protected transient int m_PropertyNumber;
   /** True if the experiment has finished running */
   protected transient boolean m_Finished = true;
   /** The dataset currently being used */
   protected transient Instances m_CurrentInstances;
   /** The custom property value that has actually been set */
-  protected transient int m_CurrentCustom;
+  protected transient int m_CurrentProperty;
 
   /**
    * When an experiment is running, this returns the current run number.
@@ -183,8 +206,8 @@ public class Experiment implements Serializable, OptionHandler {
    *
    * @return the index of the current custom property value.
    */
-  public int getCurrentCustomNumber() {
-    return m_CustomNumber;
+  public int getCurrentPropertyNumber() {
+    return m_PropertyNumber;
   }
   
   /**
@@ -197,8 +220,8 @@ public class Experiment implements Serializable, OptionHandler {
     
     m_RunNumber = getRunLower();
     m_DatasetNumber = 0;
-    m_CustomNumber = 0;
-    m_CurrentCustom = -1;
+    m_PropertyNumber = 0;
+    m_CurrentProperty = -1;
     m_CurrentInstances = null;
     m_Finished = false;
     if (m_UsePropertyIterator && (m_PropertyArray == null)) {
@@ -240,7 +263,7 @@ public class Experiment implements Serializable, OptionHandler {
       subVal = getter.invoke(origValue, getArgs);
       setProperty(propertyDepth + 1, subVal);
     } else {
-      subVal = Array.get(m_PropertyArray, m_CustomNumber);
+      subVal = Array.get(m_PropertyArray, m_PropertyNumber);
     }
     Method setter = current.getWriteMethod();
     Object [] args = { subVal };
@@ -265,9 +288,9 @@ public class Experiment implements Serializable, OptionHandler {
   public void nextIteration() throws Exception {
     
     if (m_UsePropertyIterator) {
-      if (m_CurrentCustom != m_CustomNumber) {
+      if (m_CurrentProperty != m_PropertyNumber) {
 	setProperty(0, m_ResultProducer);
-	m_CurrentCustom = m_CustomNumber;
+	m_CurrentProperty = m_PropertyNumber;
       }
     }
     
@@ -297,8 +320,8 @@ public class Experiment implements Serializable, OptionHandler {
       if (m_DatasetNumber >= getDatasets().size()) {
 	m_DatasetNumber = 0;
 	if (m_UsePropertyIterator) {
-	  m_CustomNumber ++;
-	  if (m_CustomNumber >= Array.getLength(m_PropertyArray)) {
+	  m_PropertyNumber ++;
+	  if (m_PropertyNumber >= Array.getLength(m_PropertyArray)) {
 	    m_Finished = true;
 	  }
 	} else {

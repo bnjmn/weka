@@ -70,13 +70,14 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
+import java.beans.PropertyChangeSupport;
 
 
 /** 
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SetupPanel extends JPanel {
 
@@ -108,6 +109,12 @@ public class SetupPanel extends JPanel {
   /** Area for user notes */
   protected JTextArea m_NotesText = new JTextArea();
 
+  /**
+   * Manages sending notifications to people when we change the experiment,
+   * at this stage, only the resultlistener so the resultpanel can update.
+   */
+  protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
+  
   // Registers the appropriate property editors
   static {
     System.err.println("---Registering Weka Editors---");
@@ -155,7 +162,6 @@ public class SetupPanel extends JPanel {
     m_RPEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	m_Exp.setResultProducer((ResultProducer) m_RPEditor.getValue());
-	System.err.println("Turning off custom property iterator");
 	m_Exp.setUsePropertyIterator(false);
 	m_Exp.setPropertyArray(null);
 	m_Exp.setPropertyPath(null);
@@ -169,6 +175,7 @@ public class SetupPanel extends JPanel {
     m_RLEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	m_Exp.setResultListener((ResultListener) m_RLEditor.getValue());
+	m_Support.firePropertyChange("", null, null);
 	repaint();
       }
     });
@@ -254,7 +261,26 @@ public class SetupPanel extends JPanel {
     m_RunNumberPanel.setExperiment(m_Exp);
     m_DatasetListPanel.setExperiment(m_Exp);
   }
+
   
+  /**
+   * Adds a PropertyChangeListener who will be notified of value changes.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
+  public void addPropertyChangeListener(PropertyChangeListener l) {
+    m_Support.addPropertyChangeListener(l);
+  }
+
+  /**
+   * Removes a PropertyChangeListener.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
+  public void removePropertyChangeListener(PropertyChangeListener l) {
+    m_Support.removePropertyChangeListener(l);
+  }
+
   /**
    * Tests out the experiment setup from the command line.
    *

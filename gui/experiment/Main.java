@@ -42,6 +42,8 @@ import javax.swing.JPanel;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.JOptionPane;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 
 /** 
@@ -49,7 +51,7 @@ import javax.swing.JOptionPane;
  * load, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Main extends JPanel {
 
@@ -122,6 +124,11 @@ public class Main extends JPanel {
     m_RunPanel = new RunPanel();
     m_ResultsPanel = new ResultsPanel();
 
+    m_SetupPanel.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+	m_ResultsPanel.setExperiment(m_Exp);
+      }
+    });
     JPanel p1 = new JPanel();
     p1.setLayout(new GridLayout(1, 3));
     p1.add(m_OpenBut);

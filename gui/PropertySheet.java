@@ -56,7 +56,7 @@ import javax.swing.JComponent;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PropertySheet extends JFrame implements PropertyChangeListener {
 
@@ -406,7 +406,9 @@ class PropertySheetPanel extends JPanel {
 	continue;
       }
       // The property has changed!  Update the editor.
+      m_Editors[i].removePropertyChangeListener(m_Frame);
       m_Editors[i].setValue(o);
+      m_Editors[i].addPropertyChangeListener(m_Frame);
       if (m_Views[i] != null) {
 	//System.err.println("Trying to repaint " + (i + 1));
 	m_Views[i].repaint();
