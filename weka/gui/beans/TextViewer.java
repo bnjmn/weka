@@ -47,7 +47,7 @@ import java.util.Date;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class TextViewer 
   extends JPanel
@@ -157,6 +157,15 @@ public class TextViewer
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date());
     name += e.getTextTitle();
+
+    // see if there is an entry with this name already in the list -
+    // could happen if two items with the same name arrive at the same second
+    int mod = 2;
+    String nameOrig = new String(name);
+    while (m_history.getNamedBuffer(name) != null) {
+      name = new String(nameOrig+""+mod);
+      mod++;
+    }
     m_history.addResult(name, result);
     m_history.setSingle(name);
   }
