@@ -54,6 +54,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.ClassificationViaRegression,\
  weka.classifiers.meta.CostSensitiveClassifier,\
  weka.classifiers.meta.CVParameterSelection,\
+ weka.classifiers.meta.Decorate,\
  weka.classifiers.meta.FilteredClassifier,\
  weka.classifiers.meta.Grading,\
  weka.classifiers.meta.LogitBoost,\
@@ -69,6 +70,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.StackingC,\
  weka.classifiers.meta.ThresholdSelector,\
  weka.classifiers.meta.Vote,\
+ weka.classifiers.misc.FLR,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.VFI,\
  weka.classifiers.trees.adtree.ADTree,\
