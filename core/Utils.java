@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public final class Utils {
 
@@ -440,8 +440,20 @@ public final class Utils {
 	}
     }
 
+    return Utils.convertNewLines(string);
+  }
+
+  /**
+   * Converts carriage returns and new lines in a string into \r and \n.
+   * @param string the string
+   * @return the converted string
+   */
+  public static String convertNewLines(String string) {
+    
+    int index;
+
     // Replace with \n
-    newStringBuffer = new StringBuffer();
+    StringBuffer newStringBuffer = new StringBuffer();
     while ((index = string.indexOf('\n')) != -1) {
       if (index > 0) {
 	newStringBuffer.append(string.substring(0, index));
@@ -472,10 +484,9 @@ public final class Utils {
       }
     }
     newStringBuffer.append(string);
-    string = newStringBuffer.toString();
-
-    return string;
+    return newStringBuffer.toString();
   }
+    
 
   /**
    * Returns the secondary set of options (if any) contained in
