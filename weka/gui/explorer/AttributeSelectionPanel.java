@@ -54,6 +54,13 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -84,7 +91,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -134,6 +141,9 @@ public class AttributeSelectionPanel extends JPanel {
 
   /** The field where the seed value is entered */
   protected JTextField m_SeedText = new JTextField("1");
+  
+  /** Click to save the output associated with the currently selected result */
+  protected JButton m_SaveOutBut = new JButton("Save Output");
 
   /**
    * Alters the enabled/disabled status of elements associated with each
@@ -223,6 +233,8 @@ public class AttributeSelectionPanel extends JPanel {
 
     m_StartBut.setToolTipText("Starts attribute selection");
     m_StopBut.setToolTipText("Stops a attribute selection task");
+    m_SaveOutBut.setToolTipText("Save the selected attribute selection output "
+				+"to a file");
     m_ClassCombo.setEnabled(false);
     m_TrainBut.setSelected(true);
     updateRadioLinks();
@@ -235,6 +247,7 @@ public class AttributeSelectionPanel extends JPanel {
 
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
+    m_SaveOutBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startAttributeSelection();
@@ -245,6 +258,11 @@ public class AttributeSelectionPanel extends JPanel {
 	stopAttributeSelection();
       }
     });
+    m_SaveOutBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer();
+	}
+      });
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -321,7 +339,7 @@ public class AttributeSelectionPanel extends JPanel {
 
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(2, 1));
+    buttons.setLayout(new GridLayout(3, 2));
     buttons.add(m_ClassCombo);
     m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
@@ -330,6 +348,12 @@ public class AttributeSelectionPanel extends JPanel {
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
     buttons.add(ssButs);
+
+    JPanel vPl = new JPanel();
+    vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    vPl.setLayout(new GridLayout(1,1,5,5));
+    vPl.add(m_SaveOutBut);
+    buttons.add(vPl);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.
@@ -585,6 +609,7 @@ public class AttributeSelectionPanel extends JPanel {
 	      m_Log.logMessage("Interrupted " + ename+" "+sname);
 	      m_Log.statusMessage("See error log");
 	    }
+	    m_SaveOutBut.setEnabled(true);
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -610,6 +635,32 @@ public class AttributeSelectionPanel extends JPanel {
     }
   }
   
+    /**
+   * Save the currently selected classifier output to a file.
+   */
+  protected void saveBuffer() {
+    StringBuffer sb = m_History.getSelectedBuffer();
+    if (sb != null) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      int returnVal = fileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File sFile = fileChooser.getSelectedFile();
+	try {
+	  m_Log.statusMessage("Saving to file...");
+	  PrintWriter out
+	    = new PrintWriter(new BufferedWriter(new FileWriter(sFile)));
+	  out.write(sb.toString(),0,sb.toString().length());
+	  out.close();
+	  m_Log.statusMessage("OK");
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  m_Log.logMessage(ex.getMessage());
+	}
+      }
+    }
+  }
+
   /**
    * Tests out the attribute selection panel from the command line.
    *
