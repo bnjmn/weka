@@ -27,6 +27,7 @@ import java.awt.event.*;
 import javax.swing.JPanel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -56,7 +57,7 @@ import weka.gui.visualize.ClassPanel;
  * 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see JPanel
  */
@@ -228,6 +229,9 @@ public class BoundaryVisualizer extends JPanel {
 		  m_classAttBox.getPreferredSize().height);
 
   protected JButton m_startBut = new JButton("Start");
+
+  protected JCheckBox m_plotTrainingData = new JCheckBox("Plot training data");
+
   protected JPanel m_controlPanel;
 
   protected ClassPanel m_classPanel = new ClassPanel();
@@ -321,9 +325,10 @@ public class BoundaryVisualizer extends JPanel {
 
     JPanel startPanel = new JPanel();
     startPanel.setBorder(BorderFactory.
-			 createTitledBorder("Start/Stop"));
+			 createTitledBorder("Plotting"));
     startPanel.setLayout(new BorderLayout());
     startPanel.add(m_startBut, BorderLayout.CENTER);
+    startPanel.add(m_plotTrainingData, BorderLayout.WEST);
     JPanel tempPanel = new JPanel();
     tempPanel.setLayout(new BorderLayout());
     tempPanel.add(m_regionSamplesText, BorderLayout.NORTH);
@@ -385,6 +390,8 @@ public class BoundaryVisualizer extends JPanel {
 		m_boundaryPanel.setTrainingData(m_trainingInstances);
 		m_boundaryPanel.setXAttribute(m_xIndex);
 		m_boundaryPanel.setYAttribute(m_yIndex);
+		m_boundaryPanel.
+		  setPlotTrainingData(m_plotTrainingData.isSelected());
 		m_boundaryPanel.start();
 		m_startBut.setText("Stop");
 		setControlEnabledStatus(false);
@@ -425,6 +432,7 @@ public class BoundaryVisualizer extends JPanel {
     m_yAttBox.setEnabled(status);
     m_regionSamplesText.setEnabled(status);
     m_generatorSamplesText.setEnabled(status);
+    m_plotTrainingData.setEnabled(status);
   }
 
   /**
@@ -515,7 +523,7 @@ public class BoundaryVisualizer extends JPanel {
     m_classPanel.setInstances(m_trainingInstances);
     // setup combo boxes
     String [] classAttNames = new String [m_trainingInstances.numAttributes()];
-    Vector xAttNames = new Vector();
+    final Vector xAttNames = new Vector();
     Vector yAttNames = new Vector();
 
     for (int i = 0; i < m_trainingInstances.numAttributes(); i++) {
@@ -547,6 +555,13 @@ public class BoundaryVisualizer extends JPanel {
     m_xAttBox.addItemListener(new ItemListener() {
 	public void itemStateChanged(ItemEvent e) {
 	  if (e.getStateChange() == ItemEvent.SELECTED) {
+	    if (xAttNames.size() > 1) {
+	      if (m_xAttBox.getSelectedIndex() == 
+		  m_yAttBox.getSelectedIndex()) {
+		m_xAttBox.setSelectedIndex((m_xAttBox.getSelectedIndex() + 1) %
+					   xAttNames.size());
+	      }
+	    }
 	    computeBounds();
 	    repaint();
 	  }
@@ -556,6 +571,13 @@ public class BoundaryVisualizer extends JPanel {
     m_yAttBox.addItemListener(new ItemListener() {
 	public void itemStateChanged(ItemEvent e) {
 	  if (e.getStateChange() == ItemEvent.SELECTED) {
+	    if (xAttNames.size() > 1) {
+	      if (m_yAttBox.getSelectedIndex() == 
+		  m_xAttBox.getSelectedIndex()) {
+		m_yAttBox.setSelectedIndex((m_yAttBox.getSelectedIndex() + 1) %
+					   xAttNames.size());
+	      }
+	    }
 	    computeBounds();
 	    repaint();
 	  }

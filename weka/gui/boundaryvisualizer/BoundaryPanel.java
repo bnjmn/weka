@@ -139,6 +139,9 @@ public class BoundaryPanel extends JPanel {
   // cache of probabilities for fast replotting
   private double [][][] m_probabilityCache;
 
+  // plot the training data
+  private boolean m_plotTrainingData = true;
+
   /**
    * Creates a new <code>BoundaryPanel</code> instance.
    *
@@ -423,6 +426,9 @@ public class BoundaryPanel extends JPanel {
 		plotPoint(j, i, sumOfProbsForRegion);
 	      }
 	    }
+	      if (m_plotTrainingData) {
+		plotTrainingData();
+	      }
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    } finally {
@@ -443,6 +449,53 @@ public class BoundaryPanel extends JPanel {
       m_plotThread.setPriority(Thread.MIN_PRIORITY);
       m_plotThread.start();
     }
+  }
+
+  private void plotTrainingData() {
+    Graphics2D osg = (Graphics2D)m_osi.getGraphics();
+    Graphics g = m_plotPanel.getGraphics();
+    //    AlphaComposite ac =  AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+    //    						    0.5f);
+    //    osg.setComposite(ac);
+    osg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+			 RenderingHints.VALUE_ANTIALIAS_ON);
+    double xval = 0; double yval = 0;
+    for (int i = 0; i < m_trainingData.numInstances(); i++) {
+      if (!m_trainingData.instance(i).isMissing(m_xAttribute) &&
+	  !m_trainingData.instance(i).isMissing(m_yAttribute)) {
+
+	xval = m_trainingData.instance(i).value(m_xAttribute);
+	yval = m_trainingData.instance(i).value(m_yAttribute);
+       
+	int panelX = convertToPanelX(xval);
+	int panelY = convertToPanelY(yval);
+
+	osg.setColor(Color.white);	
+	osg.fillOval(panelX-3, panelY-3, 7, 7);
+       	osg.setColor(((Color)m_Colors.elementAt((int)m_trainingData.instance(i).value(m_classIndex))));
+	//	osg.setPaintMode();
+	//	osg.setXORMode(Color.white);
+	//	osg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+	//			      RenderingHints.VALUE_ANTIALIAS_OFF);
+	osg.fillOval(panelX-2, panelY-2, 5, 5);
+      }
+    }
+    g.drawImage(m_osi,0,0,m_plotPanel);
+  }
+
+  private int convertToPanelX(double xval) {
+    double temp = (xval - m_minX) / m_rangeX;
+    temp = temp * (double) m_panelWidth;
+
+    return (int)temp;
+  }
+
+  private int convertToPanelY(double yval) {
+    double temp = (yval - m_minY) / m_rangeY;
+    temp = temp * (double) m_panelHeight;
+    temp = m_panelHeight - temp;
+
+    return (int)temp;
   }
 
   private void plotPoint(int x, int y, double [] probs) {
@@ -584,6 +637,25 @@ public class BoundaryPanel extends JPanel {
   }
 
   /**
+   * Set whether to superimpose the training data
+   * plot
+   *
+   * @param pg a <code>boolean</code> value
+   */
+  public void setPlotTrainingData(boolean pg) {
+    m_plotTrainingData = pg;
+  }
+
+  /**
+   * Returns true if training data is to be superimposed
+   *
+   * @return a <code>boolean</code> value
+   */
+  public boolean getPlotTrainingData() {
+    return m_plotTrainingData;
+  }
+
+  /**
    * Get the current vector of Color objects used for the classes
    *
    * @return a <code>FastVector</code> value
@@ -616,6 +688,9 @@ public class BoundaryPanel extends JPanel {
 	    plotPoint(j, i, m_probabilityCache[i][j]);
 	  }
 	}
+	  if (m_plotTrainingData) {
+	    plotTrainingData();
+	  }
 	}
       };
     
