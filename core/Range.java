@@ -39,25 +39,26 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class Range implements Serializable {
 
   /** Record the string representations of the columns to delete */
-  Vector m_RangeStrings = new Vector();
+  /*@non_null spec_public@*/Vector m_RangeStrings = new Vector();
 
   /** Whether matching should be inverted */
-  boolean m_Invert;
+  /*@spec_public@*/ boolean m_Invert;
 
   /** The array of flags for whether an column is selected */
-  boolean [] m_SelectFlags;
+  /*@spec_public@*/boolean [] m_SelectFlags;
 
   /** Store the maximum value permitted in the range. -1 indicates that
       no upper value has been set */
-  int m_Upper = -1;
+  /*@spec_public@*/ int m_Upper = -1;
 
   /** Default constructor. */
-  public Range() {
+  //@assignable this.*;
+    public Range() {
   }
 
   /**
@@ -66,7 +67,7 @@ public class Range implements Serializable {
    * @param rangeList the initial range
    * @exception IllegalArgumentException if the range list is invalid
    */
-  public Range(String rangeList) {
+  public Range(/*@non_null@*/ String rangeList) {
 
     setRanges(rangeList);
   }
@@ -90,7 +91,8 @@ public class Range implements Serializable {
    * 
    * @return whether the matching sense is inverted
    */
-  public boolean getInvert() {
+  //@ensures \result <==> m_Invert;
+  public /*@pure@*/boolean getInvert() {
 
     return m_Invert;
   }
@@ -111,7 +113,8 @@ public class Range implements Serializable {
    *
    * @return the range selection string
    */
-  public String getRanges() {
+
+  public /*@non_null pure@*/String getRanges() {
 
     String result = null;
     Enumeration enum = m_RangeStrings.elements();
@@ -133,6 +136,8 @@ public class Range implements Serializable {
    * string sets the range to empty.
    * @exception IllegalArgumentException if the rangeList was not well formed
    */
+  //@requires rangeList != null;
+  //@assignable m_RangeStrings,m_SelectFlags;
   public void setRanges(String rangeList) {
 
     Vector ranges = new Vector (10);
@@ -163,7 +168,9 @@ public class Range implements Serializable {
    * @return true if index is in the current range
    * @exception RuntimeException if the upper limit of the range hasn't been defined
    */
-  public boolean isInRange(int index) {
+  //@requires m_Upper >= 0;
+  //@requires 0 <= index && index < m_SelectFlags.length;
+  public /*@pure@*/ boolean isInRange(int index) {
 
     if (m_Upper == -1) {
       throw new RuntimeException("No upper limit has been specified for range");
@@ -181,7 +188,7 @@ public class Range implements Serializable {
    * 
    * @return the string representation of the current range
    */
-  public String toString() {
+  public /*@non_null pure@*/ String toString() {
 
     if (m_RangeStrings.size() == 0) {
       return "Empty";
@@ -225,7 +232,8 @@ public class Range implements Serializable {
    * @return the array of selected values
    * @exception RuntimeException if the upper limit of the range hasn't been defined
    */
-  public int [] getSelection() {
+  //@requires m_Upper >= 0;
+  public /*@non_null@*/ int [] getSelection() {
 
     if (m_Upper == -1) {
       throw new RuntimeException("No upper limit has been specified for range");
@@ -266,7 +274,7 @@ public class Range implements Serializable {
    * Since the array will typically come from a program, indices are assumed
    * from 0, and thus will have 1 added in the String representation.
    */
-  public static String indicesToRangeList(int []indices) {
+  public static /*@non_null pure@*/String indicesToRangeList(/*@non_null@*/ int []indices) {
 
     StringBuffer rl = new StringBuffer();
     int last = -2;
@@ -316,7 +324,7 @@ public class Range implements Serializable {
    * @param single the string representing the selection (eg: 1 first last)
    * @return the number corresponding to the selected value
    */
-  protected int rangeSingle(String single) {
+  protected /*@pure@*/ int rangeSingle(/*@non_null@*/ String single) {
 
     if (single.toLowerCase().equals("first")) {
       return 0;
@@ -339,8 +347,8 @@ public class Range implements Serializable {
    *
    * @param range the string representation of the range
    * @return the lower index of the range
-   */
-  protected int rangeLower(String range) {
+   */ 
+  protected int rangeLower(/*@non_null@*/ String range) {
 
     int hyphenIndex;
     if ((hyphenIndex = range.indexOf('-')) >= 0) {
@@ -357,7 +365,7 @@ public class Range implements Serializable {
    * @param range the string representation of the range
    * @return the upper index of the range
    */
-  protected int rangeUpper(String range) {
+  protected int rangeUpper(/*@non_null@*/ String range) {
 
     int hyphenIndex;
     if ((hyphenIndex = range.indexOf('-')) >= 0) {
