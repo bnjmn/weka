@@ -36,7 +36,7 @@ import weka.filters.AttributeFilter;
  * No options. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SVMAttributeEval extends AttributeEvaluator {
 
@@ -108,29 +108,25 @@ public class SVMAttributeEval extends AttributeEvaluator {
       int[] indicesSparse = (int[])weightsAndIndices.elementAt(1);
       double[] weights = new double[trainCopy.numAttributes()];
       for (int j = 0; j < weightsSparse.length; j++) {
-	if (indicesSparse[j] == trainCopy.classIndex()) {
-	  weights[indicesSparse[j]] = -Double.MAX_VALUE;
-	} else {
-	  weights[indicesSparse[j]] = weightsSparse[j] * 
-	    weightsSparse[j];
-	}
+	weights[indicesSparse[j]] = weightsSparse[j] * weightsSparse[j];
       }
-      int maxWeightIndex = Utils.maxIndex(weights);
-      m_attScores[origIndices[maxWeightIndex]] = weights[maxWeightIndex];
+      weights[trainCopy.classIndex()] = Double.MAX_VALUE;
+      int minWeightIndex = Utils.minIndex(weights);
+      m_attScores[origIndices[minWeightIndex]] = weights[minWeightIndex];
       
       // Delete the best attribute. 
       AttributeFilter delTransform = new AttributeFilter();
       delTransform.setInvertSelection(false);
       int[] featArray = new int[1];
-      featArray[0] = maxWeightIndex;
+      featArray[0] = minWeightIndex;
       delTransform.setAttributeIndicesArray(featArray);
       delTransform.setInputFormat(trainCopy);
       trainCopy = Filter.useFilter(trainCopy, delTransform);
       
       // Update the array of indices
       int[] temp = new int[origIndices.length - 1];
-      System.arraycopy(origIndices, 0, temp, 0, maxWeightIndex);
-      for (int j = maxWeightIndex + 1; j < origIndices.length; j++) {
+      System.arraycopy(origIndices, 0, temp, 0, minWeightIndex);
+      for (int j = minWeightIndex + 1; j < origIndices.length; j++) {
 	temp[j - 1] = origIndices[j];
       }
       origIndices = temp;
