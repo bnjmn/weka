@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Explorer extends JPanel {
 
@@ -107,7 +107,7 @@ public class Explorer extends JPanel {
 		      "Identify instance clusters");
     m_TabbedPane.addTab("Associate", null, m_AssociationPanel,
 		      "Discover association rules");
-    m_TabbedPane.addTab("Select features", null, m_AttributeSelectionPanel,
+    m_TabbedPane.addTab("Select attributes", null, m_AttributeSelectionPanel,
 		      "Determine relevance of attributes");
     m_TabbedPane.addTab("Visualize", null, m_VisualizePanel,
 		      "Explore the data");
