@@ -52,6 +52,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.CVParameterSelection,\
  weka.classifiers.meta.DistributionMetaClassifier,\
  weka.classifiers.meta.FilteredClassifier,\
+ weka.classifiers.meta.Grading,\
  weka.classifiers.meta.LogitBoost,\
  weka.classifiers.meta.MetaCost,\
  weka.classifiers.meta.MultiBoostAB,\
@@ -61,7 +62,9 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.RacedIncrementalLogitBoost,\
  weka.classifiers.meta.RegressionByDiscretization,\
  weka.classifiers.meta.Stacking,\
+ weka.classifiers.meta.StackingC,\
  weka.classifiers.meta.ThresholdSelector,\
+ weka.classifiers.meta.Vote,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.VFI,\
  weka.classifiers.trees.adtree.ADTree,\
@@ -109,7 +112,9 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.meta.MultiClassClassifier,\
  weka.classifiers.meta.OrdinalClassClassifier,\
  weka.classifiers.meta.RacedIncrementalLogitBoost,\
+ weka.classifiers.meta.StackingC,\
  weka.classifiers.meta.ThresholdSelector,\
+ weka.classifiers.meta.Vote,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.VFI,\
  weka.classifiers.trees.adtree.ADTree,\
