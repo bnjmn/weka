@@ -38,58 +38,6 @@ import weka.classifiers.meta.*;
  * adding the predictions of each classifier. Smoothing is accomplished
  * through varying the shrinkage (learning rate) parameter. <p>
  *
- * <pre>
- * Analysing:  Root_relative_squared_error
- * Datasets:   36
- * Resultsets: 2
- * Confidence: 0.05 (two tailed)
- * Date:       10/13/00 10:00 AM
- *
- *
- * Dataset                   (1) m5.M5Prim | (2) AdditiveRegression -S 0.7 \
- *                                         |    -W weka.classifiers.meta.m5.M5Prime 
- *                          ----------------------------
- * auto93.names              (10)    54.4  |    49.41 * 
- * autoHorse.names           (10)    32.76 |    26.34 * 
- * autoMpg.names             (10)    35.32 |    34.84 * 
- * autoPrice.names           (10)    40.01 |    36.57 * 
- * baskball                  (10)    79.46 |    79.85   
- * bodyfat.names             (10)    10.38 |    11.41 v 
- * bolts                     (10)    19.29 |    12.61 * 
- * breastTumor               (10)    96.95 |    96.23 * 
- * cholesterol               (10)   101.03 |    98.88 * 
- * cleveland                 (10)    71.29 |    70.87 * 
- * cloud                     (10)    38.82 |    39.18   
- * cpu                       (10)    22.26 |    14.74 * 
- * detroit                   (10)   228.16 |    83.7  * 
- * echoMonths                (10)    71.52 |    69.15 * 
- * elusage                   (10)    48.94 |    49.03   
- * fishcatch                 (10)    16.61 |    15.36 * 
- * fruitfly                  (10)   100    |   100    * 
- * gascons                   (10)    18.72 |    14.26 * 
- * housing                   (10)    38.62 |    36.53 * 
- * hungarian                 (10)    74.67 |    72.19 * 
- * longley                   (10)    31.23 |    28.26 * 
- * lowbwt                    (10)    62.26 |    61.48 * 
- * mbagrade                  (10)    89.2  |    89.2    
- * meta                      (10)   163.15 |   188.28 v 
- * pbc                       (10)    81.35 |    79.4  * 
- * pharynx                   (10)   105.41 |   105.03   
- * pollution                 (10)    72.24 |    68.16 * 
- * pwLinear                  (10)    32.42 |    33.33 v 
- * quake                     (10)   100.21 |    99.93   
- * schlvote                  (10)    92.41 |    98.23 v 
- * sensory                   (10)    88.03 |    87.94   
- * servo                     (10)    37.07 |    35.5  * 
- * sleep                     (10)    70.17 |    71.65   
- * strike                    (10)    84.98 |    83.96 * 
- * veteran                   (10)    90.61 |    88.77 * 
- * vineyard                  (10)    79.41 |    73.95 * 
- *                        ----------------------------
- *                              (v| |*) |   (4|8|24) 
- *
- * </pre> <p>
- *
  * For more information see: <p>
  *
  * Friedman, J.H. (1999). Stochastic Gradient Boosting. Technical Report
@@ -117,7 +65,7 @@ import weka.classifiers.meta.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -458,7 +406,7 @@ public class AdditiveRegression extends Classifier
     ZeroR zr = new ZeroR();
     zr.buildClassifier(newData);
     m_additiveModels.addElement(zr);
-    newData = residualReplace(newData, zr);
+    newData = residualReplace(newData, zr, false);
     for (int i = 0; i < newData.numInstances(); i++) {
       sum += newData.instance(i).weight() *
 	newData.instance(i).classValue() *
@@ -475,7 +423,7 @@ public class AdditiveRegression extends Classifier
       Classifier nextC = Classifier.makeCopies(m_Classifier, 1)[0];
       nextC.buildClassifier(newData);
       m_additiveModels.addElement(nextC);
-      newData = residualReplace(newData, nextC);
+      newData = residualReplace(newData, nextC, true);
       sum = 0;
       for (int i = 0; i < newData.numInstances(); i++) {
 	sum += newData.instance(i).weight() *
@@ -503,7 +451,7 @@ public class AdditiveRegression extends Classifier
     for (int i = 0; i < m_additiveModels.size(); i++) {
       Classifier current = (Classifier)m_additiveModels.elementAt(i);
       double toAdd = current.classifyInstance(inst);
-      if (i < m_additiveModels.size() - 1) {
+      if (i > 0) {
 	toAdd *= getShrinkage();
       }
       prediction += toAdd;
@@ -518,21 +466,21 @@ public class AdditiveRegression extends Classifier
    *
    * @param data the instances to predict
    * @param c the classifier to use
+   * @param useShrinkage whether shrinkage is to be applied to the model's output
    * @return a new set of instances with class values replaced by residuals
    */
-  private Instances residualReplace(Instances data, Classifier c) {
+  private Instances residualReplace(Instances data, Classifier c, 
+				    boolean useShrinkage) throws Exception {
     double pred,residual;
     Instances newInst = new Instances(data);
 
     for (int i = 0; i < newInst.numInstances(); i++) {
-      try {
-	pred = c.classifyInstance(newInst.instance(i)) * getShrinkage();
-	residual = newInst.instance(i).classValue() - pred;
-	//	System.err.println("Residual : "+residual);
-	newInst.instance(i).setClassValue(residual);
-      } catch (Exception ex) {
-	// continue
+      pred = c.classifyInstance(newInst.instance(i));
+      if (useShrinkage) {
+	pred *= getShrinkage();
       }
+      residual = newInst.instance(i).classValue() - pred;
+      newInst.instance(i).setClassValue(residual);
     }
     //    System.err.print(newInst);
     return newInst;
