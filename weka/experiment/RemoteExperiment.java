@@ -72,7 +72,7 @@ import java.io.BufferedOutputStream;
  * </pre>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RemoteExperiment extends Experiment {
 
@@ -96,10 +96,10 @@ public class RemoteExperiment extends Experiment {
   protected static final int CONNECTION_FAILED=2;
   protected static final int SOME_OTHER_FAILURE=3;
 
-  protected static final int TO_BE_RUN=0;
-  protected static final int PROCESSING=1;
-  protected static final int FAILED=2;
-  protected static final int FINISHED=3;
+//    protected static final int TO_BE_RUN=0;
+//    protected static final int PROCESSING=1;
+//    protected static final int FAILED=2;
+//    protected static final int FINISHED=3;
 
   /** allow at most 3 failures on a host before it is removed from the list
       of usable hosts */
@@ -461,7 +461,9 @@ public class RemoteExperiment extends Experiment {
    */
   private String postExperimentInfo() {
     StringBuffer text = new StringBuffer();
-    text.append(m_finishedCount+" runs completed successfully. "
+    text.append(m_finishedCount+(m_splitByDataSet 
+				 ? " data sets" 
+				 : " runs") + " completed successfully. "
 		+m_failedCount+" failures during running.\n");
     System.err.print(text.toString());
     return text.toString();
@@ -538,10 +540,10 @@ public class RemoteExperiment extends Experiment {
     subExpThread = new Thread() {
 	public void run() {	      
 	  m_remoteHostsStatus[ah] = IN_USE;
-	  m_subExpComplete[wexp] = PROCESSING;
+	  m_subExpComplete[wexp] = TaskStatusInfo.PROCESSING;
 	  RemoteExperimentSubTask expSubTsk = new RemoteExperimentSubTask();
 	  expSubTsk.setExperiment(m_subExperiments[wexp]);
-	  String subTaskIdentifier = (getSplitByDataSet())
+	  String subTaskType = (getSplitByDataSet())
 	    ? "dataset :" + ((File)m_subExperiments[wexp].getDatasets().
 			     elementAt(0)).getName()
 	    : "run :" + m_subExperiments[wexp].getRunLower();
@@ -552,52 +554,75 @@ public class RemoteExperiment extends Experiment {
 	    Compute comp = (Compute) Naming.lookup(name);
 	    // assess the status of the sub-exp
 	    notifyListeners(false,true,false,"Starting "
-			    +subTaskIdentifier
+			    +subTaskType
 			    +" on host "
 			    +((String)m_remoteHosts.elementAt(ah)));
-	    FastVector status = (FastVector)comp.executeTask(expSubTsk);
-	    System.out.println((String)status.elementAt(1));
-	    m_remoteHostsStatus[ah] = AVAILABLE;
-	    m_subExpComplete[wexp] = 
-	      ((Integer)status.elementAt(0)).intValue();
-	    if (((Integer)status.elementAt(0)).intValue() == FAILED) {
-	      // a non connection related error---possibly host doesn't have
-	      // access to data sets or security policy is not set up
-	      // correctly or classifier(s) failed for some reason
-	      m_remoteHostsStatus[ah] = SOME_OTHER_FAILURE;
-	      m_subExpComplete[wexp] = FAILED;
-	      notifyListeners(false,true,false,subTaskIdentifier
-			      +" failed on host "
-			      +((String)m_remoteHosts.elementAt(ah))
-			      +". Scheduling for execution on another host.");
-	      incrementFailed(ah);
-	      // push experiment back onto queue
-	      waitingExperiment(wexp);	
-	      // push host back onto queue and try launching any waiting 
-	      // sub-experiments. Host is pushed back on the queue as the
-	      // failure may be temporary---eg. with InstantDB using the
-	      // RMI bridge, two or more threads may try to create the
-	      // experiment index or results table simultaneously; all but
-	      // one will throw an exception. These hosts are still usable
-	      // however.
-	    availableHost(ah);
-	    } else {
-	      notifyListeners(false,true,false,subTaskIdentifier
-			      +" completed successfully.");
-	      // push host back onto queue and try launching any waiting 
-	      // sub-experiments
-	      incrementFinished();
-	      availableHost(ah);
-	    }
+	    Object subTaskId = comp.executeTask(expSubTsk);
+	    boolean finished = false;
+	    TaskStatusInfo is = null;
+	    while (!finished) {
+	      try {
+		Thread.sleep(2000);
+		
+		TaskStatusInfo cs = (TaskStatusInfo)comp.
+		  checkStatus(subTaskId);
+		if (cs.getExecutionStatus() == TaskStatusInfo.FINISHED) {
+		  // push host back onto queue and try launching any waiting 
+		  // sub-experiments
+		  notifyListeners(false, true, false,  cs.getStatusMessage());
+		  m_remoteHostsStatus[ah] = AVAILABLE;
+		  incrementFinished();
+		  availableHost(ah);
+		  finished = true;
+		} else if (cs.getExecutionStatus() == TaskStatusInfo.FAILED) {
+		  // a non connection related error---possibly host doesn't have
+		  // access to data sets or security policy is not set up
+		  // correctly or classifier(s) failed for some reason
+		  notifyListeners(false, true, false,  cs.getStatusMessage());
+		  m_remoteHostsStatus[ah] = SOME_OTHER_FAILURE;
+		  m_subExpComplete[wexp] = TaskStatusInfo.FAILED;
+		  notifyListeners(false,true,false,subTaskType
+				  +" "+cs.getStatusMessage()
+				  +". Scheduling for execution on another host.");
+		  incrementFailed(ah);
+		  // push experiment back onto queue
+		  waitingExperiment(wexp);	
+		  // push host back onto queue and try launching any waiting 
+		  // sub-experiments. Host is pushed back on the queue as the
+		  // failure may be temporary---eg. with InstantDB using the
+		  // RMI bridge, two or more threads may try to create the
+		  // experiment index or results table simultaneously; all but
+		  // one will throw an exception. These hosts are still usable
+		  // however.
+		  availableHost(ah);
+		  finished = true;
+		} else {
+		  if (is == null) {
+		    is = cs;
+		    notifyListeners(false, true, false, cs.getStatusMessage());
+		  } else {
+		    if (cs.getStatusMessage().
+			compareTo(is.getStatusMessage()) != 0) {
+		     
+		      notifyListeners(false, true, false,  
+				      cs.getStatusMessage());
+		    }
+		    is = cs;
+		  }  
+		}
+	      } catch (InterruptedException ie) {
+	      }
+	    }	      
+
 	  } catch (Exception ce) {
 	    m_remoteHostsStatus[ah] = CONNECTION_FAILED;
-	    m_subExpComplete[wexp] = TO_BE_RUN;
+	    m_subExpComplete[wexp] = TaskStatusInfo.TO_BE_RUN;
 	    System.err.println(ce);
 	    ce.printStackTrace();
 	    notifyListeners(false,true,false,"Connection to "
 			    +((String)m_remoteHosts.elementAt(ah))
 			    +" failed. Scheduling "
-			    +subTaskIdentifier
+			    +subTaskType
 			    +" for execution on another host.");
 	    checkForAllFailedHosts();
 	    waitingExperiment(wexp);
