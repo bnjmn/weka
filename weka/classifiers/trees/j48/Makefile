@@ -1,14 +1,15 @@
 JAVAC = javac
 
-SOURCES = C45ModelSelection.java EntropyBasedSplitCrit.java \
-	C45PruneableClassifierTree.java GainRatioSplitCrit.java \
-	SplitCriterion.java C45Split.java InfoGainSplitCrit.java \
-	ClassifierSplitModel.java J48.java Stats.java \
-	ClassifierTree.java Distribution.java \
-	ModelSelection.java MakeDecList.java ClassifierDecList.java \
-	C45PruneableDecList.java PART.java EntropySplitCrit.java \
-	PruneableClassifierTree.java PruneableDecList.java \
-	BinC45ModelSelection.java BinC45Split.java
+SOURCES = BinC45ModelSelection.java BinC45Split.java \
+	C45ModelSelection.java C45PruneableClassifierTree.java \
+	C45Split.java ClassifierSplitModel.java ClassifierTree.java \
+	Distribution.java EntropyBasedSplitCrit.java \
+	EntropySplitCrit.java GainRatioSplitCrit.java \
+	InfoGainSplitCrit.java J48.java ModelSelection.java \
+	NoSplit.java PruneableClassifierTree.java SplitCriterion.java \
+	Stats.java
+
+
 
 CLASSFILES = $(SOURCES:.java=.class)
 
