@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class Instances implements Serializable {
  
@@ -706,18 +706,19 @@ public class Instances implements Serializable {
    */
   public final int numDistinctValues(int attIndex) {
 
-    double prev = 0;
-    int counter = 0;
-
     if (attribute(attIndex).isNumeric()) {
-      sort(attIndex);
-      for (int i = 0; i < numInstances(); i++) {
-	if (instance(i).isMissing(attIndex)) {
+      Instances instCopy = new Instances(this);
+      instCopy.sort(attIndex);
+      double prev = 0;
+      int counter = 0;
+      for (int i = 0; i < instCopy.numInstances(); i++) {
+	Instance current = instCopy.instance(i);
+	if (current.isMissing(attIndex)) {
 	  break;
 	}
 	if ((i == 0) || 
-	    Utils.gr(instance(i).value(attIndex), prev)) {
-	  prev = instance(i).value(attIndex);
+	    Utils.gr(current.value(attIndex), prev)) {
+	  prev = current.value(attIndex);
 	  counter++;
 	}
       }
@@ -1307,7 +1308,121 @@ public class Instances implements Serializable {
     
     return variance(att.index());
   }
- 
+
+  
+  /**
+   * Generates a string summarizing the set of instances. Gives a breakdown
+   * for each attribute indicating the number of missing/discrete/unique
+   * values and other information.
+   *
+   * @return a string summarizing the dataset
+   */
+  public String toSummaryString() {
+
+    StringBuffer result = new StringBuffer();
+    result.append("Relation Name:  ").append(relationName()).append('\n');
+    result.append("Num Instances:  ").append(numInstances()).append('\n');
+    result.append("Num Attributes: ").append(numAttributes()).append('\n');
+    result.append('\n');
+
+    result.append(Utils.padLeft("", 5)).append(Utils.padRight("Name", 25));
+    result.append(Utils.padLeft("Type", 5)).append(Utils.padLeft("Nom", 5));
+    result.append(Utils.padLeft("Int", 5)).append(Utils.padLeft("Real", 5));
+    result.append(Utils.padLeft("Missing", 12));
+    result.append(Utils.padLeft("Unique", 12));
+    result.append(Utils.padLeft("Dist", 6)).append('\n');
+    Instances temp = new Instances(this);
+    int total = temp.numInstances();
+    for (int i = 0; i < numAttributes(); i++) {
+      Attribute a = attribute(i);
+      temp.sort(i);
+      int intCount = 0, realCount = 0, missingCount = 0;
+      int distinctCount = 0, uniqueCount = 0, currentCount = 0;
+      double prev = Instance.missingValue();
+      for (int j = 0; j < temp.numInstances(); j++) {
+	Instance current = temp.instance(j);
+	if (current.isMissing(i)) {
+	  missingCount = temp.numInstances() - j;
+	  break;
+	}
+	if (Utils.eq(current.value(i), prev)) {
+	  currentCount++;
+	} else {
+	  distinctCount++;
+	  if (currentCount == 1) {
+	    uniqueCount++;
+	  }
+	  if (currentCount > 0) {
+	    if (Utils.eq(prev, (double)((int)prev))) {
+	      intCount += currentCount;
+	    } else {
+	      realCount += currentCount;
+	    }
+	  }
+	  currentCount = 1;
+	  prev = current.value(i);
+	}
+      }
+      if (currentCount == 1) {
+	uniqueCount++;
+      }
+      if (currentCount > 0) {
+	if (Utils.eq(prev, (double)((int)prev))) {
+	  intCount += currentCount;
+	} else {
+	  realCount += currentCount;
+	}
+      }
+      
+      result.append(Utils.padLeft("" + (i + 1), 4)).append(' ');
+      result.append(Utils.padRight(a.name(), 25)).append(' ');
+      int percent;
+      switch (a.type()) {
+      case Attribute.NOMINAL:
+	result.append(Utils.padLeft("Nom", 4)).append(' ');
+	percent = 100 * intCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	result.append(Utils.padLeft("" + 0, 3)).append("% ");
+	percent = 100 * realCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	break;
+      case Attribute.NUMERIC:
+	result.append(Utils.padLeft("Num", 4)).append(' ');
+	result.append(Utils.padLeft("" + 0, 3)).append("% ");
+	percent = 100 * intCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	percent = 100 * realCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	break;
+      case Attribute.STRING:
+	result.append(Utils.padLeft("Str", 4)).append(' ');
+	percent = 100 * intCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	result.append(Utils.padLeft("" + 0, 3)).append("% ");
+	percent = 100 * realCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	break;
+      default:
+	result.append(Utils.padLeft("???", 4)).append(' ');
+	result.append(Utils.padLeft("" + 0, 3)).append("% ");
+	percent = 100 * intCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	percent = 100 * realCount / total;
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	break;
+      }
+      result.append(Utils.padLeft("" + missingCount, 5)).append(" /");
+      percent = 100 * missingCount / total;
+      result.append(Utils.padLeft("" + percent, 3)).append("% ");
+      result.append(Utils.padLeft("" + uniqueCount, 5)).append(" /");
+      percent = 100 * uniqueCount / total;
+      result.append(Utils.padLeft("" + percent, 3)).append("% ");
+      result.append(Utils.padLeft("" + distinctCount, 5)).append(' ');
+      result.append('\n');
+    }
+    return result.toString();
+  }
+  
   /**
    * Reads a single instance using the tokenizer and appends it
    * to the dataset. Automatically expands the dataset if it
@@ -1726,12 +1841,13 @@ public class Instances implements Serializable {
     m_Instances.swap(i, j);
   }
 
+
   /**
-   * Main method for testing this class.
+   * Method for testing this class.
    *
    * @param argv should contain one element: the name of an ARFF file
    */
-  public static void main(String [] argv) {
+  public static void test(String [] argv) {
 
     Instances instances, secondInstances, train, test, transformed, empty;
     Instance instance;
@@ -1934,6 +2050,27 @@ public class Instances implements Serializable {
       System.out.println(instances.sumOfWeights());
     } catch (Exception e) {
       e.printStackTrace(); 
+    }
+  }
+
+  /**
+   * Main method for this class -- just prints a summary of a set
+   * of instances.
+   *
+   * @param argv should contain one element: the name of an ARFF file
+   */
+  public static void main(String [] args) {
+
+    try {
+      if (args.length != 1) {
+	throw (new Exception("Usage: Instances <filename>"));
+      }
+      Reader r = new BufferedReader(
+		 new FileReader(args[0]));
+      Instances i = new Instances(r);
+      System.out.println(i.toSummaryString());
+    } catch (Exception ex) {
+      System.err.println(ex.getMessage());
     }
   }
 }
