@@ -28,7 +28,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
@@ -129,15 +129,16 @@ public class ReplaceMissingValuesFilter extends Filter {
    */
   private void convertInstance(Instance instance) throws Exception {
   
-    Instance newInstance = new Instance(instance);
-
+    double [] newVals = new double[m_InputFormat.numAttributes()];
     for(int j = 0; j < m_InputFormat.numAttributes(); j++) 
       if (instance.isMissing(j) &&
           (m_InputFormat.attribute(j).isNominal() ||
            m_InputFormat.attribute(j).isNumeric())) {
-        newInstance.setValue(j, m_ModesAndMeans[j]); 
+        newVals[j] = m_ModesAndMeans[j]; 
+      } else {
+        newVals[j] = instance.value(j);
       }
-    push(newInstance);
+    push(new Instance(instance.weight(), newVals));
   }
 
   /**
