@@ -37,6 +37,7 @@ import java.awt.BorderLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
 import java.awt.*;
 import java.beans.*;
 import java.beans.beancontext.*;
@@ -46,7 +47,7 @@ import java.beans.beancontext.*;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributeSummarizer extends DataVisualizer {
 
@@ -61,10 +62,35 @@ public class AttributeSummarizer extends DataVisualizer {
   protected int m_maxPlots = 100;
 
   /**
+   * Index on which to color the plots. -1 indicates that we let the
+   * attribute visualize panels set this on the basis of the class index
+   * in the data.
+   */
+  protected int m_coloringIndex = -1;
+
+  /**
    * Creates a new <code>AttributeSummarizer</code> instance.
    */
   public AttributeSummarizer() {
     appearanceFinal();
+  }
+
+  /**
+   * Set the coloring index for the attribute summary plots
+   *
+   * @param ci an <code>int</code> value
+   */
+  public void setColoringIndex(int ci) {
+    m_coloringIndex = ci;
+  }
+
+  /**
+   * Return the coloring index for the attribute summary plots
+   *
+   * @return an <code>int</code> value
+   */
+  public int getColoringIndex() {
+    return m_coloringIndex;
   }
 
   /**
@@ -138,7 +164,7 @@ public class AttributeSummarizer extends DataVisualizer {
 
   protected void setUpFinal() {
     removeAll();
-    JPanel hp = makePanel();
+    JScrollPane hp = makePanel();
     add(hp, BorderLayout.CENTER);
   }
 
@@ -164,7 +190,7 @@ public class AttributeSummarizer extends DataVisualizer {
     return newVector.elements();
   }
 
-  private JPanel makePanel() {
+  private JScrollPane makePanel() {
     String fontFamily = this.getFont().getFamily();
     Font newFont = new Font(fontFamily, Font.PLAIN, 10);
     JPanel hp = new JPanel();
@@ -182,15 +208,24 @@ public class AttributeSummarizer extends DataVisualizer {
       temp.setBorder(BorderFactory.createTitledBorder(m_visualizeDataSet.
 						      attribute(i).name()));
 
-      /*      temp.add(new JLabel(m_visualizeDataSet.attribute(i).name(),
-	      SwingConstants.CENTER), BorderLayout.SOUTH); */
       AttributeVisualizationPanel ap = new AttributeVisualizationPanel();
       ap.setInstances(m_visualizeDataSet);
+      if (m_coloringIndex >= 0) {
+	ap.setColoringIndex(m_coloringIndex);
+      }
       temp.add(ap, BorderLayout.CENTER);
       ap.setAttribute(i);
       hp.add(temp);
     }
-    return hp;
+    
+    Dimension d = new Dimension(800, gridHeight * 100);
+    hp.setMinimumSize(d);
+    hp.setMaximumSize(d);
+    hp.setPreferredSize(d);
+    
+    JScrollPane scroller = new JScrollPane(hp);
+
+    return scroller;
   }
 
   /**
@@ -240,7 +275,7 @@ public class AttributeSummarizer extends DataVisualizer {
 	// popup matrix panel
 	if (!m_framePoppedUp) {
 	  m_framePoppedUp = true;
-	  final JPanel holderP = makePanel();
+	  final JScrollPane holderP = makePanel();
 
 	  final javax.swing.JFrame jf = 
 	    new javax.swing.JFrame("Visualize");
