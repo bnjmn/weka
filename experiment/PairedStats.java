@@ -30,7 +30,7 @@ import weka.core.Statistics;
  * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PairedStats {
   
@@ -134,8 +134,11 @@ public class PairedStats {
       double tval = differencesStats.mean
 	* Math.sqrt(count)
 	/ differencesStats.stdDev;
-      differencesProbability = Statistics.FProbability(tval * tval, 1,
-						       (int) count - 1);
+      
+      if (count > 1) {
+	differencesProbability = Statistics.FProbability(tval * tval, 1,
+							 (int) count - 1);
+      } else differencesProbability = 1;
     } else {
       if (differencesStats.sumSq == 0) {
 	differencesProbability = 1.0;
