@@ -1,4 +1,4 @@
-JAVA = jikes
+JAVA = javac
 JAVADOC = javadoc
 DOCDIR = /home/trigg/java/doc
 
