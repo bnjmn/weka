@@ -53,8 +53,11 @@ import weka.classifiers.*;
  * -S <br>
  * Don't perform subtree raising. <p>
  *
+ * -L <br>
+ * Do not clean up after the tree has been built.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable {
@@ -82,6 +85,9 @@ public class J48 extends DistributionClassifier implements OptionHandler,
 
   /** Subtree raising to be performed? */
   private boolean m_subtreeRaising = true;
+
+  /** Cleanup after the tree has been built. */
+  boolean m_noCleanup = false;
   
   /**
    * Generates the classifier.
@@ -99,9 +105,10 @@ public class J48 extends DistributionClassifier implements OptionHandler,
       modSelection = new C45ModelSelection(m_minNumObj, instances);
     if (!m_reducedErrorPruning)
       m_root = new C45PruneableClassifierTree(modSelection, !m_unpruned, m_CF,
-					    m_subtreeRaising);
+					    m_subtreeRaising, !m_noCleanup);
     else
-      m_root = new PruneableClassifierTree(modSelection, !m_unpruned, m_numFolds);
+      m_root = new PruneableClassifierTree(modSelection, !m_unpruned, m_numFolds,
+					   !m_noCleanup);
     m_root.buildClassifier(instances);
     if (m_binarySplits) {
       ((BinC45ModelSelection)modSelection).cleanup();
@@ -204,7 +211,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(7);
+    Vector newVector = new Vector(8);
 
     newVector.
 	addElement(new Option("\tUse unpruned tree.",
@@ -231,6 +238,9 @@ public class J48 extends DistributionClassifier implements OptionHandler,
     newVector.
         addElement(new Option("\tDon't perform subtree raising.",
 			      "S", 0, "-S"));
+    newVector.
+        addElement(new Option("\tDo not clean up after the tree has been built.",
+			      "L", 1, "-L"));
 
     return newVector.elements();
   }
@@ -255,6 +265,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
     // Pruning options
     m_unpruned = Utils.getFlag('U', options);
     m_subtreeRaising = !Utils.getFlag('S', options);
+    m_noCleanup = Utils.getFlag('L', options);
     if ((m_unpruned) && (!m_subtreeRaising)) {
       throw new Exception("Subtree raising doesn't need to be unset for unpruned tree!");
     }
@@ -302,9 +313,12 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [8];
+    String [] options = new String [9];
     int current = 0;
 
+    if (m_noCleanup) {
+      options[current++] = "-L";
+    }
     if (m_unpruned) {
       options[current++] = "-U";
     } else {

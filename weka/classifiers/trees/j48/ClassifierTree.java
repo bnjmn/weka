@@ -27,7 +27,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -50,7 +50,10 @@ public class ClassifierTree implements Drawable, Serializable {
   protected Instances m_train;                  
 
   /** The pruning instances. */
-  protected Distribution m_test;                
+  protected Distribution m_test;     
+
+  /** The id for the node. */
+  protected int m_id;
 
   /** 
    * For getting a unique ID when outputting the tree (hashcode isn't
@@ -232,6 +235,22 @@ public class ClassifierTree implements Drawable, Serializable {
   }
 
   /**
+   * Assigns a uniqe id to every node in the tree.
+   */
+  public int assignIDs(int lastID) {
+
+    int currLastID = lastID + 1;
+
+    m_id = currLastID;
+    if (m_sons != null) {
+      for (int i = 0; i < m_sons.length; i++) {
+	currLastID = m_sons[i].assignIDs(currLastID);
+      }
+    }
+    return currLastID;
+  }
+
+  /**
    * Returns graph describing the tree.
    *
    * @exception Exception if something goes wrong
@@ -240,18 +259,28 @@ public class ClassifierTree implements Drawable, Serializable {
 
     StringBuffer text = new StringBuffer();
 
-    text.append("digraph J48Tree {\n" +
-		"node [fontsize=10]\n" +
-		"edge [fontsize=10 style=bold]\n");
+    assignIDs(-1);
+    text.append("digraph J48Tree {\n");
     if (m_isLeaf) {
-      text.append("N" + Integer.toHexString(m_localModel.hashCode())
+      text.append("N" + m_id 
 		  + " [label=\"" + 
-		  m_localModel.dumpLabel(0,m_train) + "\" "+ 
-		  "shape=box style=filled color=gray95]\n");
+		  m_localModel.dumpLabel(0,m_train) + "\" " + 
+		  "shape=box style=filled ");
+      if (m_train != null) {
+	text.append("data =\n" + m_train + "\n");
+	text.append(",\n");
+
+      }
+      text.append("]\n");
     }else {
-      text.append("N" + Integer.toHexString(m_localModel.hashCode())
+      text.append("N" + m_id 
 		  + " [label=\"" + 
-		  m_localModel.leftSide(m_train) + "\"]\n");
+		  m_localModel.leftSide(m_train) + "\" ");
+      if (m_train != null) {
+	text.append("data =\n" + m_train + "\n");
+	text.append(",\n");
+     }
+      text.append("]\n");
       graphTree(text);
     }
     
@@ -458,18 +487,29 @@ public class ClassifierTree implements Drawable, Serializable {
   private void graphTree(StringBuffer text) throws Exception {
     
     for (int i = 0; i < m_sons.length; i++) {
-      text.append("N" + Integer.toHexString(m_localModel.hashCode()) 
+      text.append("N" + m_id  
 		  + "->" + 
-		  "N" + Integer.toHexString(m_sons[i].m_localModel.hashCode())  +
+		  "N" + m_sons[i].m_id +
 		  " [label=\"" + m_localModel.rightSide(i,m_train).trim() + 
 		  "\"]\n");
       if (m_sons[i].m_isLeaf) {
-	text.append("N" + Integer.toHexString(m_sons[i].m_localModel.hashCode()) +
+	text.append("N" + m_sons[i].m_id +
 		    " [label=\""+m_localModel.dumpLabel(i,m_train)+"\" "+ 
-		    "shape=box style=filled color=gray95]\n");
+		    "shape=box style=filled ");
+	if (m_train != null) {
+	  text.append("data =\n" + m_train + "\n");
+	  text.append(",\n");
+	}
+	text.append("]\n");
       } else {
-	text.append("N" + Integer.toHexString(m_sons[i].m_localModel.hashCode()) +
-		    " [label=\""+m_sons[i].m_localModel.leftSide(m_train)+"\"]\n");
+	text.append("N" + m_sons[i].m_id +
+		    " [label=\""+m_sons[i].m_localModel.leftSide(m_train) + 
+		    "\" ");
+	if (m_train != null) {
+	  text.append("data =\n" + m_train + "\n");
+	  text.append(",\n");
+	}
+	text.append("]\n");
 	m_sons[i].graphTree(text);
       }
     }
@@ -484,7 +524,7 @@ public class ClassifierTree implements Drawable, Serializable {
     text.append(m_localModel.leftSide(m_train)+":");
     for (int i = 0; i < m_sons.length; i++) {
       if (i > 0) {
-	text.append(",");
+	text.append(",\n");
       }
       text.append(m_localModel.rightSide(i, m_train));
     }

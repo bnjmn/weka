@@ -25,7 +25,7 @@ import weka.core.*;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class C45PruneableClassifierTree extends ClassifierTree{
@@ -39,6 +39,9 @@ public class C45PruneableClassifierTree extends ClassifierTree{
   /** Is subtree raising to be performed? */
   boolean m_subtreeRaising = true;
 
+  /** Cleanup after the tree has been built. */
+  boolean m_cleanup = true;
+
   /**
    * Constructor for pruneable tree structure. Stores reference
    * to associated training data at each node.
@@ -50,7 +53,8 @@ public class C45PruneableClassifierTree extends ClassifierTree{
    */
   public C45PruneableClassifierTree(ModelSelection toSelectLocModel,
 				    boolean pruneTree,float cf,
-				    boolean raiseTree)
+				    boolean raiseTree,
+				    boolean cleanup)
        throws Exception{
 
     super(toSelectLocModel);
@@ -58,6 +62,7 @@ public class C45PruneableClassifierTree extends ClassifierTree{
     m_pruneTheTree = pruneTree;
     m_CF = cf;
     m_subtreeRaising = raiseTree;
+    m_cleanup = cleanup;
   }
 
   /**
@@ -76,9 +81,12 @@ public class C45PruneableClassifierTree extends ClassifierTree{
    data.deleteWithMissingClass();
    buildTree(data, m_subtreeRaising);
    collapse();
-    if (m_pruneTheTree)
-      prune();
-    cleanup(new Instances(data, 0));
+   if (m_pruneTheTree) {
+     prune();
+   }
+   if (m_cleanup) {
+     cleanup(new Instances(data, 0));
+   }
   }
 
   /**
@@ -177,8 +185,8 @@ public class C45PruneableClassifierTree extends ClassifierTree{
   protected ClassifierTree getNewTree(Instances data) throws Exception{
     
     C45PruneableClassifierTree newTree = 
-      new C45PruneableClassifierTree(m_toSelectModel,m_pruneTheTree,m_CF,
-				     m_subtreeRaising);
+      new C45PruneableClassifierTree(m_toSelectModel, m_pruneTheTree, m_CF,
+				     m_subtreeRaising, m_cleanup);
     newTree.buildTree((Instances)data, m_subtreeRaising);
 
     return newTree;
