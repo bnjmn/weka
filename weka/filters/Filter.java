@@ -52,7 +52,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public abstract class Filter implements Serializable {
 
@@ -354,7 +354,7 @@ public abstract class Filter implements Serializable {
     if (m_OutputFormat == null) {
       throw new NullPointerException("No output format defined.");
     }
-    return m_OutputFormat;
+    return new Instances(m_OutputFormat, 0);
   }
 
   /**
