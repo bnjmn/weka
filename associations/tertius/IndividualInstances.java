@@ -15,7 +15,11 @@
  */
 
 /*
- * IndividualInstances.java
+ *    IndividualInstances.java
+ *    Copyright (C) 2003 Peter A. Flach, Nicolas Lachiche
+ *
+ *    Thanks to Amelie Deltour for porting the original C code to Java
+ *    and integrating it into Weka.
  *
  */
 

@@ -16,6 +16,10 @@
 
 /*
  *    Tertius.java
+ *    Copyright (C) 2003 Peter A. Flach, Nicolas Lachiche
+ *
+ *    Thanks to Amelie Deltour for porting the original C code to Java
+ *    and integrating it into Weka.
  */
 
 package weka.associations.tertius;
@@ -110,7 +114,7 @@ import java.awt.event.ActionEvent;
  * Set output of current values. (default: 0) <p>
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class Tertius extends Associator implements OptionHandler, Runnable {
