@@ -31,7 +31,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Matrix implements Cloneable, Serializable {
 
@@ -317,12 +317,7 @@ public class Matrix implements Cloneable, Serializable {
   public final Matrix transpose() {
 
     int nr = m_Elements.length, nc = m_Elements[0].length;
-    Matrix b;
-    try {
-      b = (Matrix)clone();
-    } catch (CloneNotSupportedException ex) {
-      b = new Matrix(nr, nc);
-    }
+    Matrix b = new Matrix(nc, nr);
 
     for(int i = 0;i < nc; i++) {
       for(int j = 0; j < nr; j++) {
