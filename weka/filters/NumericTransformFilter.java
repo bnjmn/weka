@@ -44,7 +44,7 @@ import weka.core.*;
  * Name of the method used for the transformation.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -52,13 +52,28 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
   private Range m_Cols = new Range();
 
   /** Class containing transformation method. */
-  private Class m_Class = null;
+  private Class m_Class;
 
   /** Transformation method. */
-  private Method m_Method = null;
+  private Method m_Method;
 
   /** Parameter types. */
   private static Class[] PARAM = new Class[] {Double.TYPE};
+
+  /**
+   * Default constructor -- sets the default transform method
+   * to java.lang.Math.abs().
+   */
+  public NumericTransformFilter() {
+
+    try {
+      m_Class = Math.class;
+      m_Method = Math.class.getMethod("abs", PARAM);
+    } catch (Exception ex) {
+      System.err.println("One of those errors that you should never see");
+      ex.printStackTrace();
+    }
+  }
 
   /**
    * Sets the format of the input instances.
