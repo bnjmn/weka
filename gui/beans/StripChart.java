@@ -52,7 +52,7 @@ import weka.core.Queue;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class StripChart 
   extends JPanel 
@@ -432,6 +432,11 @@ public class StripChart
     Graphics osg = m_osi.getGraphics();
     Graphics g = m_plotPanel.getGraphics();
 
+    osg.copyArea(m_refreshWidth,0,m_iwidth-m_refreshWidth,
+		 m_iheight,-m_refreshWidth,0);
+    osg.setColor(Color.black);
+    osg.fillRect(m_iwidth-m_refreshWidth,0, m_iwidth, m_iheight);
+
     // paint the old scale onto the plot if a scale update has occured
     if (m_yScaleUpdate) {
       String maxVal = numToString(m_oldMax);
@@ -451,13 +456,7 @@ public class StripChart
       osg.drawString(midVal, m_iwidth-wmd, (m_iheight / 2)+(hf / 2));
       osg.drawString(minVal, m_iwidth-wmn, m_iheight-1);
       m_yScaleUpdate = false;
-      System.err.println("Here");
     }
-
-    osg.copyArea(m_refreshWidth,0,m_iwidth-m_refreshWidth,
-		 m_iheight,-m_refreshWidth,0);
-    osg.setColor(Color.black);
-    osg.fillRect(m_iwidth-m_refreshWidth,0, m_iwidth, m_iheight);
 
     double pos;
     for (int i = 0; i < dataPoint.length-1; i++) {
