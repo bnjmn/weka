@@ -81,7 +81,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.31 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -1147,6 +1147,27 @@ public class SMO extends Classifier implements OptionHandler {
       }
     }
     return votes;
+  }
+
+  /**
+   * Returns the coefficients in sparse format.  Throws an exception
+   * if there is more than one machine or if the machine is not
+   * linear.  
+   */
+  public FastVector weights() throws Exception {
+    
+    if (m_classifiers.length > 2) {
+      throw new Exception("More than one machine has been built.");
+    }
+    if (m_classifiers[0][1].m_sparseWeights == null) {
+      throw new Exception("No weight vector available.");
+    }
+
+    FastVector vec = new FastVector(2);
+    vec.addElement(m_classifiers[0][1].m_sparseWeights);
+    vec.addElement(m_classifiers[0][1].m_sparseIndices);
+
+    return vec;
   }
 
   /**
