@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.13 $
+ * @version  $Revision: 1.14 $
   */
 public class Evaluation implements Summarizable {
 
@@ -2129,7 +2129,9 @@ public class Evaluation implements Summarizable {
 
       // Determine misclassification cost
       if (m_CostMatrix != null) {
-	if (predictedClass < 0) {
+	// If no prediction was made, this is taken as being maximally wrong.
+	// If the prediction was correct, assume this is maximally right.
+	if ((predictedClass < 0) || (predictedClass == actualClass)) {
 	  costFactor = m_CostMatrix.getMaxCost(actualClass); 
 	} else {
 	  costFactor = m_CostMatrix.getElement(actualClass, predictedClass);
