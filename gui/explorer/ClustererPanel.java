@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -620,11 +620,12 @@ public class ClustererPanel extends JPanel {
    * Sets up the structure for the visualizable instances. This dataset
    * contains the original attributes plus the clusterer's cluster assignments
    * @param testInstancs the instances that the clusterer has clustered
-   * @return a PlotData2D object encapsulating the visualizable instances. The    * instances contain one more attribute (predicted
+   * @return a PlotData2D object encapsulating the visualizable instances. The    
+   * instances contain one more attribute (predicted
    * cluster) than the testInstances
    */
-  private PlotData2D setUpVisualizableInstances(Instances testInstances,
-						ClusterEvaluation eval) 
+  public static PlotData2D setUpVisualizableInstances(Instances testInstances,
+						      ClusterEvaluation eval) 
     throws Exception {
 
     int numClusters = eval.getNumClusters();
