@@ -45,7 +45,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -408,7 +408,6 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
       instances.addElement(newInst);
       rowCount++;
     }
-    rs.close();
     //disconnectFromDatabase();  (perhaps other queries might be made)
     
     // Create the header and add the instances to the dataset
@@ -435,6 +434,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     for (int i = 0; i < instances.size(); i++) {
       result.add((Instance)instances.elementAt(i));
     }
+    rs.close();
     return result;
   }
 
