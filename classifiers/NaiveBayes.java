@@ -85,6 +85,9 @@ public class NaiveBayes extends DistributionClassifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     if (instances.classAttribute().isNumeric()) {
       throw new Exception("Naive Bayes: Class is numeric!");
     }

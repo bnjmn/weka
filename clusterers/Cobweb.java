@@ -1,6 +1,6 @@
 /*
  *    Cobweb.java
- *    Copyright (C) 1999 
+ *    Copyright (C) 1999 Ian H. Witten
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,12 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+/**
+ * Implementation of cobweb and classit algorithms for incremental clustering.
+ *
+ * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
+ * @version 1.0
+ */
 package weka.clusterers;
 
 import java.io.*;
@@ -277,6 +283,11 @@ public class Cobweb extends Clusterer implements OptionHandler{
    */
   public void buildClusterer(Instances data) throws Exception
   {
+
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     makeweb(data);
   }
 
@@ -531,7 +542,6 @@ public class Cobweb extends Clusterer implements OptionHandler{
     }
     catch (Exception e)
     {
-      e.printStackTrace();
       System.out.println(e.getMessage());
     }
   }

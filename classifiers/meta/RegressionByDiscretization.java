@@ -93,18 +93,24 @@ public class RegressionByDiscretization extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    if (instances.numClasses() < 0) {
-      throw new Exception ("Dataset has no class attribute");
+    if (!instances.classAttribute().isNumeric()) {
+      throw new Exception ("Class attribute has to be numeric");
     }
     
     if (m_Classifier instanceof WeightedInstancesHandler) {
       instances = new Instances(instances);
     } else {
       double[] weights = new double[instances.numInstances()];
+      boolean foundOne = false;
       for (int i = 0; i < weights.length; i++) {
 	weights[i] = instances.instance(i).weight();
+	if (!Utils.eq(weights[i], weights[0])) {
+	  foundOne = true;
+	}
       }
-      instances = instances.resampleWithWeights(new Random(42), weights);
+      if (foundOne) {
+	instances = instances.resampleWithWeights(new Random(42), weights);
+      }
     }
     instances.deleteWithMissingClass();
 

@@ -294,7 +294,6 @@ public class Evaluation implements Summarizable {
       savedOptions = new String[options.length];
     }
     data = new Instances(data);
-    data.deleteStringAttributes();
     if (data.classAttribute().isNominal()) {
       data.stratify(numFolds);
     }
@@ -455,6 +454,7 @@ public class Evaluation implements Summarizable {
     ObjectInputStream objectInputStream = null;
     ObjectOutputStream objectOutputStream = null;
     Random random;
+    StringBuffer schemeOptionsText = null;
     
     try {
 
@@ -518,7 +518,6 @@ public class Evaluation implements Summarizable {
 	  throw new Exception("Index of class attribute too large.");
 	}
 	trainWithoutStrings = new Instances(train);
-	trainWithoutStrings.deleteStringAttributes();
       }
       if (testFileName.length() != 0) {
 	test = new Instances(testReader, 1);
@@ -531,7 +530,6 @@ public class Evaluation implements Summarizable {
 	  throw new Exception("Index of class attribute too large.");
 	}
 	testWithoutStrings = new Instances(test);
-	testWithoutStrings.deleteStringAttributes();
       }
       if (trainFileName.length() != 0) {
 	template = trainWithoutStrings;
@@ -577,6 +575,14 @@ public class Evaluation implements Summarizable {
 
       // Set options for classifier
       if (classifier instanceof OptionHandler) {
+	for (int i = 0; i < options.length; i++) {
+	  if (options[i].length() != 0) {
+	    if (schemeOptionsText == null) {
+	      schemeOptionsText = new StringBuffer();
+	    }
+	    schemeOptionsText.append(options[i]+" ");
+	  }
+	}
 	((OptionHandler)classifier).setOptions(options);
       }
       Utils.checkForRemainingOptions(options);
@@ -678,6 +684,16 @@ public class Evaluation implements Summarizable {
 
     // Output model
     if (!(noOutput || printMargins)) {
+      if (classifier instanceof OptionHandler) {
+	if (schemeOptionsText != null) {
+	  //String[] ops = ((OptionHandler)classifier).getOptions();
+	  text.append("\nOptions: "+schemeOptionsText);
+	  /*for (int i = 0; i  < ops.length; i++) {
+	    text.append(ops[i]+" ");
+	    }*/
+	  text.append("\n");
+	}
+      }
       text.append("\n" + classifier.toString() + "\n");
     }
 

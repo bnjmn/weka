@@ -58,6 +58,10 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception{
+    
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
 
     train = new Instances(instances);
     minArray = new double [train.numAttributes()];

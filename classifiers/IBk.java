@@ -354,6 +354,9 @@ public class IBk extends DistributionClassifier implements
     if (instances.classIndex() < 0) {
       throw new Exception ("No class attribute assigned to instances");
     }
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     try {
       m_NumClasses = instances.numClasses();
       m_ClassType = instances.classAttribute().type();

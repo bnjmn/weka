@@ -232,6 +232,9 @@ public class Prism extends Classifier {
     Test test = null;
     int bestCorrect, bestCovers, attUsed;
 
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     if (data.classAttribute().isNumeric()) {
       throw new Exception("Prism can't handle a numeric class!");
     }

@@ -494,6 +494,9 @@ public class BVDecompose implements OptionHandler {
     int numClasses = data.numClasses();
 
     data.deleteWithMissingClass();
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
 
     if (data.numInstances() < 2 * m_TrainPoolSize) {
       throw new Exception("The dataset must contain at least "

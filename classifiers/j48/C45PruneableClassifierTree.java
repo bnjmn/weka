@@ -16,8 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
 package weka.classifiers.j48;
 
 import weka.core.*;
@@ -87,6 +85,9 @@ public class C45PruneableClassifierTree extends ClassifierTree{
 
    if (data.classAttribute().isNumeric())
       throw new Exception("Class is numeric!");
+   if (data.checkForStringAttributes()) {
+     throw new Exception("Can't handle string attributes!");
+   }
    data = new Instances(data);
    data.deleteWithMissingClass();
    buildTree(data, subtreeRaising);

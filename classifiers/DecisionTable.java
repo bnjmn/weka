@@ -1611,6 +1611,10 @@ public class DecisionTable extends DistributionClassifier
     rr = new Random(1);
     theInstances = data;
     
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     disTransform = new DiscretizeFilter();
 
     if (theInstances.classAttribute().isNumeric()) {
@@ -1905,7 +1909,6 @@ public class DecisionTable extends DistributionClassifier
       scheme = new DecisionTable();
       System.out.println(Evaluation.evaluateModel(scheme, argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }

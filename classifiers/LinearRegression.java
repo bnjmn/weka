@@ -106,6 +106,9 @@ public class LinearRegression extends Classifier implements OptionHandler,
     if (data.numInstances() == 0) {
       throw new Exception("No instances in training file!");
     }
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
 
     // Preprocess instances
     m_TransformedData = data;
@@ -604,7 +607,6 @@ public class LinearRegression extends Classifier implements OptionHandler,
       System.out.println(Evaluation.evaluateModel(new LinearRegression(),
 						  argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.out.println(e.getMessage());
     }
   }
