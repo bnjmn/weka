@@ -66,7 +66,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Sourcable {
@@ -668,6 +668,9 @@ public class AdaBoostM1 extends DistributionClassifier
       for (int i = 0; i < m_NumIterations; i++) {
 	sums[(int)m_Classifiers[i].classifyInstance(instance)] += 
 	m_Betas[i];
+      }
+      for (int i = 0; i < instance.numClasses(); i++) {
+	sums[i] = Math.exp(sums[i]);
       }
     }
     Utils.normalize(sums);
