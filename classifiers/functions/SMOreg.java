@@ -79,8 +79,8 @@ public class SMOreg extends Classifier implements OptionHandler,
   /** The size of the cache (a prime number) */
   protected int m_cacheSize = 1000003;
 
-    /** The full kernel matrix */
-    protected float[][] m_kernelMatrix;
+  /** The full kernel matrix */
+  protected double[][] m_kernelMatrix;
     
   /** Kernel to use **/
   protected Kernel m_kernel;
@@ -309,7 +309,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 
     int originalCacheSize = m_cacheSize;
     if (m_cacheSize < 1) {
-	m_kernelMatrix = new float[m_data.numInstances()][];
+	m_kernelMatrix = new double[m_data.numInstances()][];
 	m_cacheSize = 1; // cannot use 0, would break local kernel caches
     }
 
@@ -450,11 +450,12 @@ public class SMOreg extends Classifier implements OptionHandler,
     }
   }
 
-    public void precomputeKernelMatrix(float[][] k, Instances data) throws Exception {
+    public void precomputeKernelMatrix(double[][] k, Instances data) 
+      throws Exception {
 	for(int i = 0; i < data.numInstances(); i++) {
-	    k[i] = new float[i+1];
+	    k[i] = new double[i+1];
 	    for(int j = 0; j <= i; j++) {
-		k[i][j] = (float) m_kernel.eval(i,j,data.instance(i));
+		k[i][j] = (double) m_kernel.eval(i,j,data.instance(i));
 	    }
 	}
     }
