@@ -55,7 +55,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -198,9 +198,8 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
   private void addPopup() {
     addMouseListener(new MouseAdapter() {
 	public void mouseClicked(MouseEvent e) {
-	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	      == InputEvent.BUTTON1_MASK) {
-	  } else {
+	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
 	    JPopupMenu gcMenu = new JPopupMenu();
 	    JMenuItem availMem = new JMenuItem("Available memory");
 	    availMem.addActionListener(new ActionListener() {
