@@ -264,7 +264,7 @@ public class SparseInstance extends Instance {
 	return current;
       }
     }
-    return max;
+    return -1;
   }
 
   /**
