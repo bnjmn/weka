@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -346,7 +346,7 @@ public class REPTree extends DistributionClassifier
 
 	  // Numeric case
 	  (data.classAttribute().isNumeric() && 
-	   (priorVar < minVariance)) ||
+	   ((priorVar / totalWeight) < minVariance)) ||
 
 	  // Check tree depth
 	  ((m_MaxDepth >= 0) && (depth >= maxDepth))) {
@@ -987,8 +987,9 @@ public class REPTree extends DistributionClassifier
   /** The minimum number of instances per leaf. */
   protected double m_MinNum = 2;
 
-  /** The minimum amount of variance required for split. */
-  protected double m_MinVariance = 1e-3;
+  /** The minimum proportion of the total variance (over all the data)
+      required for split. */
+  protected double m_MinVarianceProp = 1e-3;
 
   /** Upper bound on the tree depth */
   protected int m_MaxDepth = -1;
@@ -1034,23 +1035,23 @@ public class REPTree extends DistributionClassifier
   }
 
   /**
-   * Get the value of MinVariance.
+   * Get the value of MinVarianceProp.
    *
-   * @return Value of MinVariance.
+   * @return Value of MinVarianceProp.
    */
-  public double getMinVariance() {
+  public double getMinVarianceProp() {
     
-    return m_MinVariance;
+    return m_MinVarianceProp;
   }
   
   /**
-   * Set the value of MinVariance.
+   * Set the value of MinVarianceProp.
    *
-   * @param newMinVariance Value to assign to MinVariance.
+   * @param newMinVarianceProp Value to assign to MinVarianceProp.
    */
-  public void setMinVariance(double newMinVariance) {
+  public void setMinVarianceProp(double newMinVarianceProp) {
     
-    m_MinVariance = newMinVariance;
+    m_MinVarianceProp = newMinVarianceProp;
   }
 
   /**
@@ -1155,7 +1156,7 @@ public class REPTree extends DistributionClassifier
     options[current++] = "-M"; 
     options[current++] = "" + getMinNum();
     options[current++] = "-V"; 
-    options[current++] = "" + getMinVariance();
+    options[current++] = "" + getMinVarianceProp();
     options[current++] = "-N"; 
     options[current++] = "" + getNumFolds();
     options[current++] = "-S"; 
@@ -1186,9 +1187,9 @@ public class REPTree extends DistributionClassifier
     }
     String minVarString = Utils.getOption('V', options);
     if (minVarString.length() != 0) {
-      m_MinVariance = Double.parseDouble(minVarString);
+      m_MinVarianceProp = Double.parseDouble(minVarString);
     } else {
-      m_MinVariance = 1e-3;
+      m_MinVarianceProp = 1e-3;
     }
     String numFoldsString = Utils.getOption('N', options);
     if (numFoldsString.length() != 0) {
@@ -1345,17 +1346,18 @@ public class REPTree extends DistributionClassifier
 	totalWeight += inst.weight();
       }
     }
+    m_Tree = new Tree();
     double trainVariance = 0;
     if (data.classAttribute().isNumeric()) {
-      trainVariance = totalSumSquared - ((classProbs[0] * classProbs[0]) / totalWeight);
+      trainVariance = m_Tree.
+	singleVariance(classProbs[0], totalSumSquared, totalWeight) / totalWeight;
       classProbs[0] /= totalWeight;
     }
 
     // Build tree
-    m_Tree = new Tree();
     m_Tree.buildTree(sortedIndices, weights, train, totalWeight, classProbs,
-		     new Instances(train, 0), m_MinNum, m_MinVariance * trainVariance,
-		     0, m_MaxDepth);
+		     new Instances(train, 0), m_MinNum, m_MinVarianceProp * 
+		     trainVariance, 0, m_MaxDepth);
     
     // Insert pruning data and perform reduced error pruning
     if (!m_NoPruning) {
