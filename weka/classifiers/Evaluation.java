@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.7 $
+ * @version  $Revision: 1.8 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1847,7 +1847,8 @@ public class Evaluation implements Summarizable {
 	      	    [(int)predValue]+" ");
 	    }
 	  }
-	  text.append(instanceWithoutStrings.classLabel() + "\n");
+	  text.append(instanceWithoutStrings.toString(instanceWithoutStrings.
+						      classIndex()) + "\n");
 	}
 	test.delete(0);
 	i++;
