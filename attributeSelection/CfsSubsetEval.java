@@ -151,6 +151,11 @@ public class CfsSubsetEval
    */
   public void buildEvaluator(Instances data)  throws Exception
   { 
+    if (data.checkForStringAttributes()) 
+      {
+	throw new Exception("Can't handle string attributes!");
+      }
+
     trainInstances = data;
     classIndex = trainInstances.classIndex();
     numAttribs = trainInstances.numAttributes();
