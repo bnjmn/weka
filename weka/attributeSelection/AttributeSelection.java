@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.11 $
+ * @version  $Revision: 1.12 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -543,10 +543,35 @@ public class AttributeSelection implements Serializable {
       // retrieve the threshold by which to select attributes
       m_threshold = ((RankedOutputSearch)m_searchMethod).getThreshold();
 
+      // determine fieldwidth for merit
+      int f_p=0;
+      int w_p=0;
       for (int i = 0; i < m_attributeRanking.length; i++) {
 	if (m_attributeRanking[i][1] > m_threshold) {
+	  double precision = (m_attributeRanking[i][1] - 
+	      (int)(m_attributeRanking[i][1]));
+
+	  if (precision > 0) {
+	    precision = Math.abs((Math.log(Math.abs(precision)) / 
+				  Math.log(10)))+3;
+	  }
+	  if (precision > f_p) {
+	    f_p = (int)precision;
+	  }
+	  if ((Math.abs((Math.log(Math.abs(m_attributeRanking[i][1])) 
+		/ Math.log(10)))+1) > w_p) {
+	    w_p = (int)Math.abs((Math.log(Math.abs(m_attributeRanking[i][1]))
+		    / Math.log(10)))+1;
+	  }
+	}
+      }
+
+      for (int i = 0; i < m_attributeRanking.length; i++) {
+	if (m_attributeRanking[i][1] > m_threshold) {
+
 	  m_selectionResults.
-	    append(Utils.doubleToString(m_attributeRanking[i][1],6,3) 
+	    append(Utils.doubleToString(m_attributeRanking[i][1],
+					f_p+w_p+1,f_p) 
 		   + Utils.doubleToString((m_attributeRanking[i][0] + 1),
 					  fieldWidth+1,0) 
 		   + " " 
