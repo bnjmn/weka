@@ -30,29 +30,29 @@ import weka.estimators.*;
  *
  * General options when evaluating a learning scheme from the command-line: <p>
  *
- * -t name of training file <br>
+ * -t filename <br>
  * Name of the file with the training data. (required) <p>
  *
- * -T name of test file <br>
+ * -T filename <br>
  * Name of the file with the test data. If missing a cross-validation 
  * is performed. <p>
  *
- * -c class index <br>
+ * -c index <br>
  * Index of the class attribute (1, 2, ...; default: last). <p>
  *
- * -x number of folds <br>
+ * -x number <br>
  * The number of folds for the cross-validation (default: 10). <p>
  *
- * -s random number seed <br>
+ * -s seed <br>
  * Random number seed for the cross-validation (default: 1). <p>
  *
- * -m file with cost matrix <br>
+ * -m filename <br>
  * The name of a file containing a cost matrix. <p>
  *
- * -l name of model input file <br>
+ * -l filename <br>
  * Loads classifier from the given file. <p>
  *
- * -d name of model output file <br>
+ * -d filename <br>
  * Saves classifier built from the training data into the given file. <p>
  *
  * -v <br>
@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.6 $
   */
 public class Evaluation implements Summarizable {
 
@@ -414,29 +414,29 @@ public class Evaluation implements Summarizable {
    *
    * Valid options are: <p>
    *
-   * -t name of training file <br>
+   * -t filename <br>
    * Name of the file with the training data. (required) <p>
    *
-   * -T name of test file <br>
+   * -T filename <br>
    * Name of the file with the test data. If missing a cross-validation 
    * is performed. <p>
    *
-   * -c class index <br>
+   * -c index <br>
    * Index of the class attribute (1, 2, ...; default: last). <p>
    *
-   * -x number of folds <br>
+   * -x number <br>
    * The number of folds for the cross-validation (default: 10). <p>
    *
-   * -s random number seed <br>
+   * -s seed <br>
    * Random number seed for the cross-validation (default: 1). <p>
    *
-   * -m file with cost matrix <br>
+   * -m filename <br>
    * The name of a file containing a cost matrix. <p>
    *
-   * -l name of model input file <br>
+   * -l filename <br>
    * Loads classifier from the given file. <p>
    *
-   * -d name of model output file <br>
+   * -d filename <br>
    * Saves classifier built from the training data into the given file. <p>
    *
    * -v <br>

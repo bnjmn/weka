@@ -38,12 +38,12 @@ import weka.core.*;
  * Set the number of bagging iterations (default 10). <p>
  *
  * -S seed <br>
- * Random number seed for resampling (default 1).. <p>
+ * Random number seed for resampling (default 1). <p>
  *
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {

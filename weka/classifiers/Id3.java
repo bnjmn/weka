@@ -30,7 +30,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class Id3 extends DistributionClassifier {
 
@@ -171,6 +171,10 @@ public class Id3 extends DistributionClassifier {
 
   /**
    * Computes information gain for an attribute.
+   *
+   * @param data the data for which info gain is to be computed
+   * @param att the attribute
+   * @return the information gain for the given attribute and data
    */
   private double computeInfoGain(Instances data, Attribute att) 
     throws Exception {
@@ -189,6 +193,9 @@ public class Id3 extends DistributionClassifier {
 
  /**
   * Computes the entropy of a dataset.
+  * 
+  * @param data the data for which entropy is to be computed
+  * @return the entropy of the data's class distribution
   */
   private double computeEntropy(Instances data) throws Exception {
 
@@ -210,6 +217,10 @@ public class Id3 extends DistributionClassifier {
 
   /**
    * Splits a dataset according to the values of a nominal attribute.
+   *
+   * @param data the data which is to be split
+   * @param att the attribute to be used for splitting
+   * @return the sets of instances produced by the split
    */
   private Instances[] splitData(Instances data, Attribute att) {
 
@@ -227,6 +238,8 @@ public class Id3 extends DistributionClassifier {
 
   /**
    * Outputs a tree at a certain level.
+   *
+   * @param level the level at which the tree is to be printed
    */
   private String toString(int level) {
 
@@ -253,6 +266,8 @@ public class Id3 extends DistributionClassifier {
 
   /**
    * Main method.
+   *
+   * @param args the options for the classifier
    */
   public static void main(String[] args) {
 
