@@ -89,7 +89,7 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.4 $ 
+ * @version $Revision: 1.1.2.5 $ 
  */
 public class XMLSerialization {
    /** the tag for an object */
@@ -344,10 +344,7 @@ public class XMLSerialization {
    /**
     * if the class of the given object (or one of its ancestors) is stored in 
     * the classname override hashtable, then the override name is returned 
-    * otherwise the classname of the given object.<br>
-    * <b>Note:</b> does not work with Arays that have zero length! The 
-    * problem here is that we can't get an object reference to determine
-    * the class from.
+    * otherwise the classname of the given object.
     * 
     * @param o          the object to check for overriding its classname
     * @return           if overridden then the classname stored in the hashtable,
@@ -366,6 +363,40 @@ public class XMLSerialization {
       while (enm.hasMoreElements()) {
          currentCls = (Class) enm.nextElement();
          if (currentCls.isInstance(o)) {
+           result = (String) m_ClassnameOverride.get(currentCls);
+           break;
+         }
+      }
+      
+      return result;
+   }
+   
+   /**
+    * if the given classname is stored in the classname override hashtable, 
+    * then the override name is returned otherwise the given classname.
+    * <b>Note:</b> in contrast to <code>overrideClassname(Object)</code> does
+    * this method only look for exact name matches. The other method checks
+    * whether the class of the given object is a subclass of any of the stored
+    * overrides.  
+    * 
+    * @param classname  the classname to check for overriding
+    * @return           if overridden then the classname stored in the hashtable,
+    *                   otherwise the given classname
+    * @see              #m_ClassnameOverride
+    * @see              #overrideClassname(Object)
+    */
+   protected String overrideClassname(String classname) {
+      Enumeration    enm;
+      String         result;
+      Class          currentCls;
+     
+      result = classname;
+
+      // check overrides
+      enm    = m_ClassnameOverride.keys();
+      while (enm.hasMoreElements()) {
+         currentCls = (Class) enm.nextElement();
+         if (currentCls.getName().equals(classname)) {
            result = (String) m_ClassnameOverride.get(currentCls);
            break;
          }
@@ -398,12 +429,20 @@ public class XMLSerialization {
    
    /**
     * adds the given Object to a DOM structure. 
-    * (only public due to reflection) 
+    * (only public due to reflection).<br>
+    * <b>Note:</b> <code>overrideClassname(Object)</code> is not invoked in case of
+    * arrays, since the array class could be a superclass, whereas the elements of
+    * the array can be specialized subclasses. In case of an array the method 
+    * <code>overrideClassname(String)</code> is invoked, which searches for an 
+    * exact match of the classname in the override hashtable.
     * 
     * @param parent the parent of this object, e.g. the class this object is a member of
     * @param o the Object to describe in XML
     * @param name the name of the object
     * @throws Exception if the DOM creation fails
+    * @see #overrideClassname(Object)
+    * @see #overrideClassname(String)
+    * @see #m_ClassnameOverride
     */
    public void writeToXML(Element parent, Object o, String name) throws Exception {
       String               classname;
@@ -425,8 +464,6 @@ public class XMLSerialization {
       // get information about object
       array = o.getClass().isArray();
       if (array) {
-         if (Array.getLength(o) > 0)
-           obj = Array.get(o, 0);
          classname = o.getClass().getComponentType().getName();
          primitive = o.getClass().getComponentType().isPrimitive(); 
       }
@@ -463,9 +500,11 @@ public class XMLSerialization {
          classname = parent.getAttribute(ATT_CLASS);
       }
 
-      // we need to override the classname
+      // perhaps we need to override the classname
       if (obj != null)
-        classname = overrideClassname(obj);
+        classname = overrideClassname(obj);         // for non-arrays
+      else
+        classname = overrideClassname(classname);   // for arrays
       
       // create node for current object
       node = addElement(parent, name, classname, primitive, array);
