@@ -42,7 +42,7 @@ import weka.core.Instance;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
@@ -80,7 +80,7 @@ public class PredictionAppender extends JPanel
    */
   protected boolean m_appendProbabilities;
 
-  protected weka.gui.Logger m_logger;
+  protected transient weka.gui.Logger m_logger;
 
   /**
    * Global description of this bean
