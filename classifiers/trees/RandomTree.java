@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -433,9 +433,13 @@ public class RandomTree extends Classifier
    */
   public String toString() {
     
-    return     
-      "\nRandomTree\n==========\n" + toString(0) + "\n" +
-      "\nSize of the tree : " + numNodes();
+    if (m_Successors == null) {
+      return "RandomTree: no model has been built yet.";
+    } else {
+      return     
+	"\nRandomTree\n==========\n" + toString(0) + "\n" +
+	"\nSize of the tree : " + numNodes();
+    }
   }
 
   /**

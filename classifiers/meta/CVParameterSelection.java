@@ -64,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -170,7 +170,7 @@ public class CVParameterSelection extends Classifier
   }
 
   /** The generated base classifier */
-  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.trees.j48.J48();
 
   /**
    * The base classifier options (not including those being set
