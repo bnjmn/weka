@@ -84,7 +84,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -541,14 +541,31 @@ public class AttributeSelectionPanel extends JPanel {
 	      break;
 
 	      case 1: // CV mode
-	      m_Log.statusMessage("Cross validating, please wait...");
-	      eval.SelectAttributes(inst);
+	      m_Log.statusMessage("Randomizing instances...");
+	      inst.randomize(new Random(seed));
+	      if (inst.attribute(classIndex).isNominal()) {
+		m_Log.statusMessage("Stratifying instances...");
+		inst.stratify(numFolds);
+	      }
+	      for (int fold = 0; fold < numFolds;fold++) {
+		m_Log.statusMessage("Creating splits for fold "
+				    + (fold + 1) + "...");
+		Instances train = inst.trainCV(numFolds, fold);
+		m_Log.statusMessage("Selecting attributes using all but fold "
+				    + (fold + 1) + "...");
+		
+		eval.selectAttributesCVSplit(train);
+	      }
 	      break;
-
 	      default:
 	      throw new Exception("Test mode not implemented");
 	    }
-	    outBuff.append(eval.toResultsString());
+
+	    if (testMode == 0) {
+	      outBuff.append(eval.toResultsString());
+	    } else {
+	      outBuff.append(eval.CVResultsString());
+	    }
 	  
 	    outBuff.append("\n");
 	    m_History.updateResult(name);
