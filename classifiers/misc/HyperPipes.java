@@ -30,6 +30,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.UnsupportedAttributeTypeException;
+import weka.core.UnsupportedClassTypeException;
 import java.io.*;
 
 /**
@@ -44,7 +45,7 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */ 
 public class HyperPipes extends DistributionClassifier {
 
@@ -181,6 +182,10 @@ public class HyperPipes extends DistributionClassifier {
     if (instances.classIndex() == -1) {
       throw new Exception("No class attribute assigned");
     }
+    if (!instances.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("HyperPipes: class attribute needs to be nominal!");
+    }
+
     m_ClassIndex = instances.classIndex();
     m_Instances = new Instances(instances, 0); // Copy the structure for ref
 

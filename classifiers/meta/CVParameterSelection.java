@@ -64,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -490,6 +490,12 @@ public class CVParameterSelection extends Classifier
     }
     if (trainData.numInstances() < m_NumFolds) {
       throw new Exception("Number of training instances smaller than number of folds.");
+    }
+
+    // Check whether there are any parameters to optimize
+    if (m_CVParams == null) {
+       m_Classifier.buildClassifier(trainData);
+       return;
     }
     trainData.randomize(new Random(m_Seed));
     if (trainData.classAttribute().isNominal()) {
