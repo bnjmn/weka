@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public final class Utils {
 
@@ -373,14 +373,63 @@ public final class Utils {
    */
   public static String quote(String string) {
 
-    if ((string.indexOf(' ') != -1) ||
-	(string.indexOf('\t') != -1) ||
-	(string.indexOf('\n') != -1) ||
-	(string.indexOf(',') != -1) ||
-	(string.equals("?")) ||
-	(string.equals(""))) {
+    if ((string.indexOf('\n') != -1) ||
+	(string.indexOf('\r') != -1)) {
+      string = ("'".concat(replaceNewLines(string))).concat("'");
+    } else if ((string.indexOf(' ') != -1) ||
+	       (string.indexOf('\t') != -1) ||
+	       (string.indexOf(',') != -1) ||
+	       (string.equals("?")) ||
+	       (string.equals(""))) {
       string = ("'".concat(string)).concat("'");
     }
+    return string;
+  }
+
+  /**
+   * Converts carriage returns and new lines in a string into \r and \n.
+   * @param string the string
+   * @return the converted string
+   */
+  public static String replaceNewLines(String string) {
+
+    int index;
+    StringBuffer newStringBuffer;
+
+    // Replace with \n
+    newStringBuffer = new StringBuffer();
+    while ((index = string.indexOf('\n')) != -1) {
+      if (index > 0) {
+	newStringBuffer.append(string.substring(0, index));
+      }
+      newStringBuffer.append('\\');
+      newStringBuffer.append('n');
+      if ((index + 1) < string.length()) {
+	string = string.substring(index + 1);
+      } else {
+	string = "";
+      }
+    }
+    newStringBuffer.append(string);
+    string = newStringBuffer.toString();
+
+    // Replace with \r
+    newStringBuffer = new StringBuffer();
+    while ((index = string.indexOf('\r')) != -1) {
+      if (index > 0) {
+	newStringBuffer.append(string.substring(0, index));
+      }
+      newStringBuffer.append('\\');
+      newStringBuffer.append('r');
+      if ((index + 1) < string.length()){
+	string = string.substring(index + 1);
+      } else {
+	string = "";
+      }
+    }
+    newStringBuffer.append(string);
+    string = newStringBuffer.toString();
+   
     return string;
   }
 
