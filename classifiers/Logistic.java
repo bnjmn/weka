@@ -25,7 +25,10 @@ import weka.filters.*;
 
 
 /**
- * Class for building and using a two-class logistic regression model.<p>
+ * Class for building and using a two-class logistic regression model.
+ * Missing values are replaced using a ReplaceMissingValuesFilter, and
+ * nominal attributes are transformed into numeric attributes using a
+ * NominalToBinaryFilter.<p>
  *
  * Valid options are:<p>
  *
@@ -33,7 +36,7 @@ import weka.filters.*;
  * Turn on debugging output.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - Nov 1998 - Initial version
+ * @version $Revision: 1.3 $
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
 
@@ -56,11 +59,14 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
   /** The index of the class attribute */
   protected int m_ClassIndex;
 
+  /** The filter used to make attributes numeric. */
+  private NominalToBinaryFilter m_NominalToBinary;
+
   /** The filter used to get rid of missing values. */
   private ReplaceMissingValuesFilter m_ReplaceMissingValues;
 
   /** Debugging output */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
 
   // =================
@@ -72,7 +78,12 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     return Statistics.chiSquaredProbability(z * z, 1);
   }
 
-  // Evaluate the probability for this point using the current coefficients
+  /**
+   * Evaluate the probability for this point using the current coefficients
+   *
+   * @param instDat the instance data
+   * @return the probability for this instance
+   */
   protected double evaluateProbability(double [] instDat) {
 
     double v = m_Par[0];
@@ -82,6 +93,18 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     return v;
   }
 
+  /**
+   * Calculates the log likelihood of the current set of
+   * coefficients (stored in m_Par), given the data.
+   *
+   * @param X the instance data
+   * @param Y the class values for each instance
+   * @param jacobian the matrix which will contain the jacobian matrix after
+   * the method returns
+   * @param deltas an array which will contain the parameter adjustments after
+   * the method returns
+   * @return the log likelihood of the data.
+   */
   protected double calculateLogLikelihood(double [][] X, double [] Y, 
 					  Matrix jacobian, double [] deltas) {
 
@@ -107,7 +130,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 	LL = LL - 2 * Math.log(1 - p);
       }
 
-      double w = p * (1 - p); // Weight
+      double w = p * (1 - p);     // Weight
       double z = (Y[i] - p);      // The error of this prediction
 
       for (int j = 0; j < Arr.length; j++) {
@@ -128,15 +151,13 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     for (int j = 0; j < Arr.length; j++) {
       jacobian.setRow(j, Arr[j]);
     }
-
     /*
-    System.err.println("Jacobian:\n"+jacobian.toString());
-    System.err.print("Deltas: ");
+    System.out.println("Jacobian:\n"+jacobian.toString());
+    System.out.print("Deltas: ");
     for(int j = 0; j < deltas.length; j++)
-      System.err.print(" "+Utils.doubleToString(deltas[j],10,3));
-    System.err.println("");
+      System.out.print(" "+Utils.doubleToString(deltas[j],10,3));
+    System.out.println("");
     */
-    
     return LL;
   }
 
@@ -194,13 +215,24 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     return options;
   }
 
+  /**
+   * Sets whether debugging output will be printed.
+   *
+   * @param debug true if debugging output should be printed
+   */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
+
+  /**
+   * Gets whether debugging output will be printed.
+   *
+   * @return true if debugging output will be printed
+   */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
   /**
@@ -221,15 +253,7 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     if (train.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
-
     m_ClassIndex = train.classIndex();
-    for(int i = 0; i < train.numAttributes(); i++) {
-      if ((i != m_ClassIndex) &&
-	  (train.attribute(i).type() != Attribute.NUMERIC)) {
-	throw new Exception("Only numeric predictor attributes allowed.\n"
-	    + "Try transforming nominal to 0-1 valued numeric.");
-      }
-    }
     train = new Instances(train);
     train.deleteWithMissingClass();
     if (train.numInstances() == 0) {
@@ -238,19 +262,22 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     m_ReplaceMissingValues = new ReplaceMissingValuesFilter();
     m_ReplaceMissingValues.inputFormat(train);
     train = Filter.useFilter(train, m_ReplaceMissingValues);
+    m_NominalToBinary = new NominalToBinaryFilter();
+    m_NominalToBinary.inputFormat(train);
+    train = Filter.useFilter(train, m_NominalToBinary);
 
-    int nC  = train.numInstances();
-    int nR  = m_NumPredictors = train.numAttributes()-1;
+    int nR = m_NumPredictors = train.numAttributes() - 1;
+    int nC = train.numInstances();
 
     double [][] X  = new double [nC][nR + 1];       // Data values
     double [] Y    = new double [nC];               // Class values
-    double [] xM   = new double [nR + 1];           // Attribute means
+    double [] xMean= new double [nR + 1];           // Attribute means
     double [] xSD  = new double [nR + 1];           // Attribute stddev's
     double sY0 = 0;                                 // Number of class 0
     double sY1 = 0;                                 // Number of class 1
 
-    if (b_Debug) {
-      System.err.println("Extracting data...");
+    if (m_Debug) {
+      System.out.println("Extracting data...");
     }
     for (int i = 0; i < X.length; i++) {
       Instance current = train.instance(i);
@@ -259,8 +286,11 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
       for (int k = 0; k <= nR; k++) {
 	if (k != m_ClassIndex) {
 	  double x = current.value(k);
+	  if ((i == j) && (i <= nR)) {
+	    x += 1e-8;
+	  }
 	  X[i][j] = x;
-	  xM[j] = xM[j] + x;
+	  xMean[j] = xMean[j] + x;
 	  xSD[j] = xSD[j] + x*x;
 	  j++;
 	}
@@ -275,35 +305,36 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 	sY1 = sY1 + 1;
       }
     }
-    xM[0] = 0; xSD[0] = 1;
+    xMean[0] = 0; xSD[0] = 1;
     for (int j = 1; j <= nR; j++) {
-      xM[j] = xM[j] / nC;
+      xMean[j] = xMean[j] / nC;
       xSD[j] = xSD[j] / nC;
-      xSD[j] = Math.sqrt( Math.abs( xSD[j] - xM[j] * xM[j] ) );
+      xSD[j] = Math.sqrt(Math.abs( xSD[j] - xMean[j] * xMean[j]));
     }
-    // Normalise input data
+    if (m_Debug) {
+      // Output stats about input data
+      System.out.println("Descriptives...");
+      System.out.println("" + sY0 + " cases have Y=0; " 
+			 + sY1 + " cases have Y=1.");
+      System.out.println("\n Variable     Avg       SD    ");
+      for (int j = 1; j <= nR; j++) 
+	System.out.println(Utils.doubleToString(j,8,4) 
+			   + Utils.doubleToString(xMean[j], 10, 4) 
+			   + Utils.doubleToString(xSD[j], 10, 4)
+			   );
+    }
+    
+    // Normalise input data and remove ignored attributes
     for (int i = 0; i < nC; i++) {
-      for (int j = 1; j <= nR; j++) { 
-	X[i][j] = ( X[i][j] - xM[j] ) / xSD[j];
+      for (int j = 0; j <= nR; j++) {
+	if (xSD[j] != 0) {
+	  X[i][j] = (X[i][j] - xMean[j]) / xSD[j];
+	}
       }
     }
-    if (b_Debug) {
-      // Output Stats about input data
-      System.err.println("Descriptives...");
-      System.err.println("" + sY0 + " cases have Y=0; " 
-			 + sY1 + " cases have Y=1.");
-      System.err.println("\n Variable     Avg       SD    ");
-      for (int j = 1; j <= nR; j++) 
-	System.err.println(Utils.doubleToString(j,8,4) 
-			   + Utils.doubleToString(xM[j], 10, 4) 
-			   + Utils.doubleToString(xSD[j], 10, 4));
-    }
 
-
-
-
-    if (b_Debug) {
-      System.err.println("\nIteration History..." );
+    if (m_Debug) {
+      System.out.println("\nIteration History..." );
     }
     m_Par = new double [nR + 1];    // Coefficients
     double LLp = 2e+10;             // Log-likelihood on previous iteration
@@ -322,13 +353,13 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     // While the log-likelihood is changing (i.e. no maxima found)
     while(Math.abs(LLp-m_LL) > 0.00001) {
       LLp = m_LL;
-      m_LL = calculateLogLikelihood(X,Y,jacobian,deltas);
+      m_LL = calculateLogLikelihood(X, Y, jacobian, deltas);
       if (LLp == 1e+10) {
 	m_LLn = m_LL; 
       }
-      if (b_Debug) {
-	System.err.println("-2 Log Likelihood = " 
-			   + Utils.doubleToString(m_LL,10,5)
+      if (m_Debug) {
+	System.out.println("-2 Log Likelihood = " 
+			   + Utils.doubleToString(m_LL, 10, 5)
 			   + ((m_LLn == m_LL) ? " (Null Model)" : ""));
       }
       
@@ -339,15 +370,17 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 	m_Par[j] += deltas[j];
       }
     }
-    if (b_Debug) {
-      System.err.println(" (Converged)");
+    if (m_Debug) {
+      System.out.println(" (Converged)");
     }
 
 
     // Convert coefficients back to non-normalized attribute units
     for(int j = 1; j <= nR; j++) {
-      m_Par[j] = m_Par[j] / xSD[j];
-      m_Par[0] = m_Par[0] - m_Par[j] * xM[j];
+      if (xSD[j] != 0) {
+	m_Par[j] = m_Par[j] / xSD[j];
+	m_Par[0] = m_Par[0] - m_Par[j] * xMean[j];
+      }
     }
   }		
 
@@ -363,6 +396,8 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 
     m_ReplaceMissingValues.input(instance);
     instance = m_ReplaceMissingValues.output();
+    m_NominalToBinary.input(instance);
+    instance = m_NominalToBinary.output();
 
     // Extract the predictor columns into an array
     double [] instDat = new double [m_NumPredictors + 1];
@@ -379,20 +414,28 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     return distribution;
   }
 
+  /**
+   * Gets a string describing the classifier.
+   *
+   * @return a string describing the classifer built.
+   */
   public String toString() {
 
     double CSq = m_LLn - m_LL;
     int df = m_NumPredictors;
     String result = "Logistic Regression (2 classes)\n";
+    if (m_Par == null) {
+      return result + "No model built yet.";
+    }
     result += "\nOverall Model Fit...\n" 
-    +"  Chi Square=" + Utils.doubleToString(CSq, 10, 4) 
-    + ";  df=" + df
-    + ";  p=" 
+      +"  Chi Square=" + Utils.doubleToString(CSq, 10, 4) 
+      + ";  df=" + df
+      + ";  p=" 
       + Utils.doubleToString(Statistics.chiSquaredProbability(CSq, df), 10, 2)
-    + "\n";
+      + "\n";
     
     result += "\nCoefficients...\n"
-    + "Variable      Coeff.\n";
+      + "Variable      Coeff.\n";
     for (int j = 1; j <= m_NumPredictors; j++) {
       result += Utils.doubleToString(j, 8, 0) 
       + Utils.doubleToString(m_Par[j], 12, 4) 
@@ -419,14 +462,15 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv should contain the command line arguments to the
+   * scheme (see Evaluation)
    */
   public static void main(String [] argv) {
 
     try {
       System.out.println(Evaluation.evaluateModel(new Logistic(), argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
