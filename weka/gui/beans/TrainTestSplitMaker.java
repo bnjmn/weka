@@ -49,7 +49,7 @@ public class TrainTestSplitMaker
 	     UserRequestAcceptor, EventConstraints, Serializable {
 
   private int m_trainPercentage = 66;
-  private int m_randomSeed = 42;
+  private int m_randomSeed = 1;
   
   private Thread m_splitThread = null;
 
