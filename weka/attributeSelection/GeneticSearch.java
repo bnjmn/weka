@@ -54,7 +54,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GeneticSearch extends ASSearch implements OptionHandler {
 
@@ -639,11 +639,7 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
       for (i=0;i<m_popSize;i++) {
 	temp = m_population[i].getChromosome();
 	count = countFeatures(temp);;
-	/*	for (j=0;j<m_numAttribs;j++) {
-	  if (temp.get(j)) {
-	    count++;
-	  }
-	  }*/
+
 	if (count < lowestCount) {
 	  lowestCount = count;
 	  localbest = m_population[i];
@@ -657,11 +653,6 @@ public class GeneticSearch extends ASSearch implements OptionHandler {
     count = 0;
     temp = localbest.getChromosome();
     count = countFeatures(temp);
-    /*    for (j=0;j<m_numAttribs;j++) {
-      if (temp.get(j)) {
-	count++;
-      }
-      } */
 
     // compare to the best found so far
     if (m_best == null) {
