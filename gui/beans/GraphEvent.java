@@ -28,12 +28,13 @@ import java.util.EventObject;
  * Event for graphs
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GraphEvent extends EventObject {
 
   protected String m_graphString;
   protected String m_graphTitle;
+  protected int m_graphType;
 
   /**
    * Creates a new <code>GraphEvent</code> instance.
@@ -41,12 +42,14 @@ public class GraphEvent extends EventObject {
    * @param source the source of the event
    * @param graphString a string describing the graph in "dot" format
    * @param graphTitle the title for the graph
+   * @param graphType the type for the graph
    */
   public GraphEvent(Object source, String graphString,
-		    String graphTitle) {
+		    String graphTitle, int graphType) {
     super(source);
     m_graphString = graphString;
     m_graphTitle = graphTitle;
+    m_graphType = graphType;
   }
 
   /**
@@ -66,5 +69,13 @@ public class GraphEvent extends EventObject {
   public String getGraphTitle() {
     return m_graphTitle;
   }
-}
 
+  /**
+   * Return the graph type
+   *
+   * @return a <code>int</code> value
+   */
+  public int getGraphType() {
+    return m_graphType;
+  }
+}
