@@ -23,7 +23,7 @@ import  weka.filters.ReplaceMissingValuesFilter;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -178,6 +178,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
   public int clusterInstance(Instance instance) throws Exception {
     m_ReplaceMissingFilter.input(instance);
     Instance inst = m_ReplaceMissingFilter.output();
+    m_ReplaceMissingFilter.batchFinished();
 
     return clusterProcessedInstance(inst);
   }

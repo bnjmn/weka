@@ -29,7 +29,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -258,6 +258,11 @@ public class FilteredClassifier extends DistributionClassifier
   public double [] distributionForInstance(Instance instance)
     throws Exception {
 
+    /*
+      System.err.println("FilteredClassifier:: " 
+                         + m_Filter.getClass().getName()
+                         + " in: " + instance);
+    */
     if (m_Filter.numPendingOutput() > 0) {
       throw new Exception("Filter output queue not empty!");
     }
@@ -266,6 +271,12 @@ public class FilteredClassifier extends DistributionClassifier
 			  + " immediately available!");
     }
     Instance newInstance = m_Filter.output();
+    m_Filter.batchFinished();
+    /*
+    System.err.println("FilteredClassifier:: " 
+                       + m_Filter.getClass().getName()
+                       + " out: " + newInstance);
+    */
     if (m_Classifier instanceof DistributionClassifier) {
       return ((DistributionClassifier)m_Classifier)
 	.distributionForInstance(newInstance);

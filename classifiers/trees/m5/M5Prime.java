@@ -36,7 +36,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler,
  AdditionalMeasureProducer {
@@ -134,8 +134,12 @@ public final class  M5Prime extends Classifier implements OptionHandler,
 
     m_ReplaceMissingValuesFilter.input(ins);
     ins = m_ReplaceMissingValuesFilter.output();
+    m_ReplaceMissingValuesFilter.batchFinished();
+
     m_NominalToBinaryFilter.input(ins);
     ins = m_NominalToBinaryFilter.output();
+    m_NominalToBinaryFilter.batchFinished();
+
     return m_root[1].predict(ins,!m_UseUnsmoothed);
   }
 

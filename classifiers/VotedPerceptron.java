@@ -36,7 +36,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
 */
 public class VotedPerceptron extends DistributionClassifier implements OptionHandler {
   
@@ -238,8 +238,11 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
     // Filter instance
     m_ReplaceMissingValues.input(inst);
     inst = m_ReplaceMissingValues.output();
+    m_ReplaceMissingValues.batchFinished();
+
     m_NominalToBinary.input(inst);
     inst = m_NominalToBinary.output();
+    m_NominalToBinary.batchFinished();
     
     // Get probabilities
     double output = 0, sumSoFar = 0;

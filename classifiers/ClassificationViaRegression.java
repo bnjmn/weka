@@ -26,7 +26,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -82,6 +82,7 @@ public class ClassificationViaRegression extends DistributionClassifier
     for (int i = 0; i < inst.numClasses(); i++) {
       m_ClassFilters[i].input(inst);
       newInst = m_ClassFilters[i].output();
+      m_ClassFilters[i].batchFinished();
       probs[i] = m_Classifiers[i].classifyInstance(newInst);
       if (probs[i] > 1) {
         probs[i] = 1;
