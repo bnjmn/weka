@@ -50,7 +50,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -378,11 +378,10 @@ public class Attribute implements Copyable, Serializable {
     m_Index = index;
   }
 
-
   /**
    * Adds a string value to the list of valid strings for attributes
-   * of type STRING and returns the index of the string. The string
-   * will not be added if already present.
+   * of type STRING and returns the index of the string. No check is
+   * done to see whether the string value is already present.
    *
    * @param value The string value to add
    * @return the index assigned to the string, or -1 if the attribute is not
@@ -403,11 +402,30 @@ public class Attribute implements Copyable, Serializable {
                            + " storing uncompressed.");
       }
     }
-    int existing = m_Values.indexOf(store);
-    if (existing == -1) {
-      existing = m_Values.size();
-      m_Values.addElement(store);
+    int existing = m_Values.size();
+    m_Values.addElement(store);
+    return existing;
+  }
+
+  /**
+   * Adds a string value to the list of valid strings for attributes
+   * of type STRING and returns the index of the string. No check is
+   * done to see whether the string value is already present. This method is
+   * more efficient than addStringValue(String) for long strings.
+   *
+   * @param src The Attribute containing the string value to add.
+   * @param int index the index of the string value in the source attribute.
+   * @return the index assigned to the string, or -1 if the attribute is not
+   * of type Attribute.STRING 
+   */
+  public int addStringValue(Attribute src, int index) {
+
+    if (!isString()) {
+      return -1;
     }
+    Object store = src.m_Values.elementAt(index);
+    int existing = m_Values.size();
+    m_Values.addElement(store);
     return existing;
   }
 
