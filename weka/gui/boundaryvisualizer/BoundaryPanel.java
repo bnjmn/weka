@@ -52,15 +52,14 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revison: 1.0 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  * @see JPanel
  */
-
 public class BoundaryPanel extends JPanel {
 
   // default colours for classes
-  public final static Color [] DEFAULT_COLORS = {
+  public static final Color [] DEFAULT_COLORS = {
     Color.red,
     Color.green,
     Color.blue,
