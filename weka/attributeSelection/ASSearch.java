@@ -21,33 +21,30 @@ package weka.attributeSelection;
 import java.io.*;
 import weka.core.*;
 
-
 /** 
  * Abstract attribute selection search class.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
-public abstract class ASSearch implements Serializable {
-
-
-    // ===============
-    // Public methods.
-    // ===============
-
-    /**
-     * Searches the attribute subset/ranking space.
-     *
-     * @param startSet an (possibly) ordered array of attribute indexes
-     * from which to start the search from. Set to null if no explicit start
-     * point.
-     * @param ASEvaluator the attribute evaluator to guide the search
-     * @param data the training instances.
-     * @return an array (not necessarily ordered) of selected attribute indexes
-     * @exception Exception if the search can't be completed
-     */
-    public abstract int [] search(int [] startSet,
+public abstract class ASSearch implements Serializable 
+{
+  // ===============
+  // Public methods.
+  // ===============
+  
+  /**
+   * Searches the attribute subset/ranking space.
+   *
+   * @param startSet an (possibly) ordered array of attribute indexes
+   * from which to start the search from. Set to null if no explicit start
+   * point.
+   * @param ASEvaluator the attribute evaluator to guide the search
+   * @param data the training instances.
+   * @return an array (not necessarily ordered) of selected attribute indexes
+   * @exception Exception if the search can't be completed
+   */
+  public abstract int [] search(int [] startSet,
 				ASEvaluation ASEvaluator,
 				Instances data) throws Exception;
-
 }

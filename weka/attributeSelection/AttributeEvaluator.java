@@ -21,15 +21,14 @@ package weka.attributeSelection;
 import java.io.*;
 import weka.core.*;
 
-
 /** 
  * Abstract attribute evaluator. Evaluate attributes individually.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
-public abstract class AttributeEvaluator extends ASEvaluation {
-
+public abstract class AttributeEvaluator extends ASEvaluation 
+{
     // ===============
     // Public methods.
     // ===============
@@ -42,4 +41,3 @@ public abstract class AttributeEvaluator extends ASEvaluation {
      */
     public abstract double evaluateAttribute(int attribute) throws Exception;
 }
-
