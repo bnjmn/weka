@@ -11,7 +11,7 @@ package weka.classifiers.evaluation;
  * actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface Prediction {
 
@@ -44,5 +44,6 @@ public interface Prediction {
    * @return the predicted class value, or MISSING_VALUE if no
    * prediction was made.  
    */
-  double predicted();
+  public double predicted();
+
 }
