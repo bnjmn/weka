@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.74 $
+ * @version $Revision: 1.75 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -200,7 +200,7 @@ public class ClassifierPanel extends JPanel {
 
   /** Check to output text predictions */
   protected JCheckBox m_OutputPredictionsTextBut =
-    new JCheckBox("Output text predictions on test set");
+    new JCheckBox("Output predictions");
 
   /** Check to evaluate w.r.t a cost matrix */
   protected JCheckBox m_EvalWRTCostsBut =
@@ -362,7 +362,7 @@ public class ClassifierPanel extends JPanel {
     m_EvalWRTCostsBut
       .setToolTipText("Evaluate errors with respect to a cost matrix");
     m_OutputPredictionsTextBut
-      .setToolTipText("Include the predictions on the test set in the output buffer");
+      .setToolTipText("Include the predictions in the output buffer");
 
     m_FileChooser.setFileFilter(m_ModelFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -683,7 +683,6 @@ public class ClassifierPanel extends JPanel {
   protected void updateRadioLinks() {
     
     m_SetTestBut.setEnabled(m_TestSplitBut.isSelected());
-    m_OutputPredictionsTextBut.setEnabled(m_TestSplitBut.isSelected());
     if ((m_SetTestFrame != null) && (!m_TestSplitBut.isSelected())) {
       m_SetTestFrame.setVisible(false);
     }
@@ -1130,17 +1129,33 @@ public class ClassifierPanel extends JPanel {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
 	      eval = new Evaluation(inst, costMatrix);
+	      
+	      if (outputPredictionsText) {
+		outBuff.append("=== Predictions on training set ===\n\n");
+		outBuff.append(" inst#,    actual, predicted, error");
+		if (inst.classAttribute().isNominal()) {
+		  outBuff.append(", probability distribution");
+		}
+		outBuff.append("\n");
+	      }
+
 	      for (int jj=0;jj<inst.numInstances();jj++) {
 		processClassifierPrediction(inst.instance(jj), classifier,
 					    eval, predictions,
 					    predInstances, plotShape, 
 					    plotSize);
 		
+		if (outputPredictionsText) { 
+		  outBuff.append(predictionText(classifier, inst.instance(jj), jj+1));
+		}
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on training data. Processed "
 				      +jj+" instances...");
 		}
 	      }
+	      if (outputPredictionsText) {
+		outBuff.append("\n");
+	      } 
 	      outBuff.append("=== Evaluation on training set ===\n");
 	      break;
 
@@ -1161,6 +1176,15 @@ public class ClassifierPanel extends JPanel {
 		inst.stratify(numFolds);
 	      }
 	      eval = new Evaluation(inst, costMatrix);
+      
+	      if (outputPredictionsText) {
+		outBuff.append("=== Predictions on test data ===\n\n");
+		outBuff.append(" inst#,    actual, predicted, error");
+		if (inst.classAttribute().isNominal()) {
+		  outBuff.append(", probability distribution");
+		}
+		outBuff.append("\n");
+	      }
 
 	      // Make some splits and do a CV
 	      for (int fold = 0; fold < numFolds; fold++) {
@@ -1179,8 +1203,14 @@ public class ClassifierPanel extends JPanel {
 					      eval, predictions,
 					      predInstances, plotShape,
 					      plotSize);
+		  if (outputPredictionsText) { 
+		    outBuff.append(predictionText(classifier, test.instance(jj), jj+1));
+		  }
 		}
 	      }
+	      if (outputPredictionsText) {
+		outBuff.append("\n");
+	      } 
 	      if (inst.attribute(classIndex).isNominal()) {
 		outBuff.append("=== Stratified cross-validation ===\n");
 	      } else {
@@ -1206,17 +1236,31 @@ public class ClassifierPanel extends JPanel {
 	      eval = new Evaluation(train, costMatrix);
 	      m_Log.statusMessage("Evaluating on test split...");
 	     
+	      if (outputPredictionsText) {
+		outBuff.append("=== Predictions on test split ===\n\n");
+		outBuff.append(" inst#,    actual, predicted, error");
+		if (inst.classAttribute().isNominal()) {
+		  outBuff.append(", probability distribution");
+		}
+		outBuff.append("\n");
+	      }
+     
 	      for (int jj=0;jj<test.numInstances();jj++) {
 		processClassifierPrediction(test.instance(jj), classifier,
 					    eval, predictions,
 					    predInstances, plotShape,
 					    plotSize);
-
+		if (outputPredictionsText) { 
+		    outBuff.append(predictionText(classifier, test.instance(jj), jj+1));
+		}
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test split. Processed "
 				      +jj+" instances...");
 		}
 	      }
+	      if (outputPredictionsText) {
+		outBuff.append("\n");
+	      } 
 	      outBuff.append("=== Evaluation on test split ===\n");
 	      break;
 		
