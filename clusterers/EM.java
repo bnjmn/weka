@@ -70,7 +70,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -580,30 +580,26 @@ public class EM
 	    //	    m_modelNormal[i][j][0] = 0;
 	    m_modelNormal[i][j][0] = m_minStdDev;
           } else {
-	    if (m_modelNormal[i][j][2] > 0) {
 	      
-	      // variance
-	      m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - 
-					(m_modelNormal[i][j][0] * 
-					 m_modelNormal[i][j][0] / 
-					 m_modelNormal[i][j][2])) / 
-		(m_modelNormal[i][j][2]);
+	    // variance
+	    m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - 
+				      (m_modelNormal[i][j][0] * 
+				       m_modelNormal[i][j][0] / 
+				       m_modelNormal[i][j][2])) / 
+	      (m_modelNormal[i][j][2]);
+	    
+	    if (m_modelNormal[i][j][1] < 0) {
+	      m_modelNormal[i][j][1] = 0;
+	    }
+	    
+	    // std dev      
+	    m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]); 
 
-	      if (m_modelNormal[i][j][1] < 0) {
-		m_modelNormal[i][j][1] = 0;
-	      }
-	      
-	      // std dev      
-	      m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]); 
-
+	    if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
+	      m_modelNormal[i][j][1] = inst.attributeStats(j).numericStats.stdDev;
 	      if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
-		m_modelNormal[i][j][1] = inst.attributeStats(j).numericStats.stdDev;
-		if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
-		  m_modelNormal[i][j][1] = m_minStdDev;
-		}
+		m_modelNormal[i][j][1] = m_minStdDev;
 	      }
-	    } else {
-	      m_modelNormal[i][j][1] = m_minStdDev;
 	    }
 	    
 	    // mean
