@@ -77,7 +77,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -115,9 +115,8 @@ public class ResultsPanel extends JPanel {
   protected DefaultComboBoxModel m_CompareModel = 
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
   
-  /** The model embedded in m_TestsCombo */
-  protected DefaultComboBoxModel m_TestsModel = 
-    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
+  /** The model embedded in m_TestsList */
+  protected DefaultListModel m_TestsModel = new DefaultListModel();
 
   /** Displays the currently selected column names for the scheme & options */
   protected JLabel m_DatasetKeyLabel = new JLabel("Row key fields",
@@ -148,14 +147,17 @@ public class ResultsPanel extends JPanel {
   /** Displays the list of selected columns determining the scheme */
   protected JList m_ResultKeyList = new JList(m_ResultKeyModel);
 
+  /** Lets the user select which scheme to base comparisons against */
+  protected JButton m_TestsButton = new JButton("Select base...");
+
+  /** Holds the list of schemes to base the test against */
+  protected JList m_TestsList = new JList(m_TestsModel);
+
   /** Lets the user select which performance measure to analyze */
   protected JComboBox m_CompareCombo = new JComboBox(m_CompareModel);
 
   /** Lets the user edit the test significance */
   protected JTextField m_SigTex = new JTextField("0.05");
-
-  /** Lets the user select which scheme to base comparisons against */
-  protected JComboBox m_TestsCombo = new JComboBox(m_TestsModel);
 
   /** Lets the user select whether standard deviations are to be output
       or not */
@@ -282,8 +284,15 @@ public class ResultsPanel extends JPanel {
     m_ResultKeyList.setSelectionMode(ListSelectionModel
 				     .MULTIPLE_INTERVAL_SELECTION);
     m_CompareCombo.setEnabled(false);
+
     m_SigTex.setEnabled(false);
-    m_TestsCombo.setEnabled(false);
+    m_TestsButton.setEnabled(false);
+    m_TestsButton.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  setTestBaseFromDialog();
+	}
+      });
+
     m_PerformBut.setEnabled(false);
     m_PerformBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -402,10 +411,12 @@ public class ResultsPanel extends JPanel {
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
+    gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 5;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
-    gbL.setConstraints(m_TestsCombo, gbC);
-    p3.add(m_TestsCombo);
+    gbL.setConstraints(m_TestsButton, gbC);
+    p3.add(m_TestsButton);
+
 
     lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
     gbC = new GridBagConstraints();
@@ -478,21 +489,18 @@ public class ResultsPanel extends JPanel {
     m_ResultKeyBut.setPreferredSize(COMBO_SIZE);
     m_CompareCombo.setPreferredSize(COMBO_SIZE);
     m_SigTex.setPreferredSize(COMBO_SIZE);
-    m_TestsCombo.setPreferredSize(COMBO_SIZE);
 
     m_DatasetKeyBut.setMaximumSize(COMBO_SIZE);
     m_RunCombo.setMaximumSize(COMBO_SIZE);
     m_ResultKeyBut.setMaximumSize(COMBO_SIZE);
     m_CompareCombo.setMaximumSize(COMBO_SIZE);
     m_SigTex.setMaximumSize(COMBO_SIZE);
-    m_TestsCombo.setMaximumSize(COMBO_SIZE);
 
     m_DatasetKeyBut.setMinimumSize(COMBO_SIZE);
     m_RunCombo.setMinimumSize(COMBO_SIZE);
     m_ResultKeyBut.setMinimumSize(COMBO_SIZE);
     m_CompareCombo.setMinimumSize(COMBO_SIZE);
     m_SigTex.setMinimumSize(COMBO_SIZE);
-    m_TestsCombo.setMinimumSize(COMBO_SIZE);
   }
   
   /**
@@ -769,8 +777,8 @@ public class ResultsPanel extends JPanel {
     }
     m_TestsModel.addElement("Summary");
     m_TestsModel.addElement("Ranking");
-    m_TestsCombo.setSelectedIndex(0);
-    m_TestsCombo.setEnabled(true);
+    m_TestsList.setSelectedIndex(0);
+    m_TestsButton.setEnabled(true);
 
     m_PerformBut.setEnabled(true);
     
@@ -792,12 +800,12 @@ public class ResultsPanel extends JPanel {
     // Carry out the test chosen and biff the results to the output area
     m_TTester.setShowStdDevs(m_ShowStdDevs.isSelected());
     int compareCol = m_CompareCombo.getSelectedIndex();
-    int tType = m_TestsCombo.getSelectedIndex();
+    int tType = m_TestsList.getSelectedIndex();
 
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date())
       + (String) m_CompareCombo.getSelectedItem() + " - "
-      + (String) m_TestsCombo.getSelectedItem();
+      + (String) m_TestsList.getSelectedValue();
     StringBuffer outBuff = new StringBuffer();
     outBuff.append(m_TTester.header(compareCol));
     outBuff.append("\n");
@@ -873,6 +881,13 @@ public class ResultsPanel extends JPanel {
       m_TTester.setDatasetKeyColumns(generatorRange);
       setTTester();
     }
+  }
+
+  public void setTestBaseFromDialog() {
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_TestsList);
+
+    // Open the dialog
+    jd.showDialog();
   }
 
   /**
