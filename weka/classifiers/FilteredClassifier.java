@@ -29,7 +29,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -325,7 +325,13 @@ public class FilteredClassifier extends DistributionClassifier
       }
       atts.addElement(att);
     }
-    return new Instances(data.relationName(), atts, 0);
+    Instances result = new Instances(data.relationName(), atts, 0);
+    try {
+      result.setClassIndex(data.classIndex());
+    } catch (Exception ex) {
+      // Ignore, we only want to set the class index if there was one already
+    }
+    return result;
   }
 
 
