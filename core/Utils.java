@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public final class Utils {
 
@@ -72,6 +72,26 @@ public final class Utils {
     
     return c;
   }
+
+  /**
+   * Removes all occurrences of a string from another string.
+   *
+   * @param inString the string to remove substrings from.
+   * @param substring the substring to remove.
+   * @return the input string with occurrences of substring removed.
+   */
+  public static String removeSubstring(String inString, String substring) {
+
+    StringBuffer result = new StringBuffer();
+    int oldLoc = 0, loc = 0;
+    while ((loc = inString.indexOf(substring, oldLoc))!= -1) {
+      result.append(inString.substring(oldLoc, loc));
+      oldLoc = loc + substring.length();
+    }
+    result.append(inString.substring(oldLoc));
+    return result.toString();
+  }
+
 
   /**
    * Pads a string to a specified length, inserting spaces on the left
