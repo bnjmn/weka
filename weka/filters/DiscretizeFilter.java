@@ -64,7 +64,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -943,7 +943,6 @@ public class DiscretizeFilter extends Filter
 	cutPoints[0] = bestCutPoint;
 	System.arraycopy(right, 0, cutPoints, 1, right.length);
       } else {
-	cutPoints =  new double[left.length + right.length + 1];
 	cutPoints = new double[left.length + right.length + 1];
 	System.arraycopy(left, 0, cutPoints, 0, left.length);
 	cutPoints[left.length] = bestCutPoint;
