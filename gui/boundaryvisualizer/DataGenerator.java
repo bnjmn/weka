@@ -29,7 +29,7 @@ import weka.core.*;
  * a set of input instances
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public interface DataGenerator {
@@ -48,16 +48,12 @@ public interface DataGenerator {
    * @return an <code>Instance</code> value
    * @exception Exception if an error occurs
    */
-  Instance generateInstance() throws Exception;
+  double [][] generateInstances(int [] indices) throws Exception;
 
   /**
-   * Generate an instance. Can reuse an existing instance object
-   * for speed.
-   *
-   * @return an <code>Instance</code> value
-   * @exception Exception if an error occurs
+   * Get weights
    */
-  Instance generateInstanceFast() throws Exception;
+  double [] getWeights() throws Exception;
 
   /**
    * Set the dimensions to be used in computing a weight for

@@ -93,9 +93,8 @@ public class BoundaryPanel extends JPanel {
   private int m_panelWidth;
   private int m_panelHeight;
 
-  // the number of samples to take from each generating model for each
-  // pixel
-  private int m_numberOfSamplesFromEachGeneratingModel = 2;
+  private int m_numOfSamplesPerRegion = 2;
+  private int m_numOfSamplesPerGenerator = 2;
   
   // listeners to be notified when plot is complete
   private Vector m_listeners = new Vector();
@@ -219,18 +218,19 @@ public class BoundaryPanel extends JPanel {
    * @return a value in attribute space
    */
   private double getRandomY(int pix) {
-
+    
     double minPix = m_minY + (pix * m_pixHeight);
-
+    
     return minPix +  m_random.nextDouble() * m_pixHeight;
   }
-
+  
   /**
    * Start the plotting thread
    *
    * @exception Exception if an error occurs
    */
   public void start() throws Exception {
+
     if (m_trainingData == null) {
       throw new Exception("No training data set (BoundaryPanel)");
     }
@@ -247,120 +247,136 @@ public class BoundaryPanel extends JPanel {
     }
     
     computeMinMaxAtts();
-
+    
     if (m_plotThread == null) {
       m_plotThread = new Thread() {
 	  public void run() {
 	    m_stopPlotting = false;
 	    try {
 	      /*  if (m_osi == null) {
-		initialize();
-		repaint();
-		} */
+		  initialize();
+		  repaint();
+		  } */
 	      initialize();
 	      repaint();
-
+	      
 	      // train the classifier
 	      //	      System.err.println("Building classifier...");
 	      m_classifier.buildClassifier(m_trainingData);
-	      // make a copy of the training data minus the class
-	      Remove rmF = new Remove();
-	      rmF.setAttributeIndices(""+(m_classIndex+1));
-	      rmF.setInvertSelection(false);
-	      rmF.setInputFormat(m_trainingData);
-	      rmF.setAttributeIndices(""+(m_classIndex+1));
-	      Instances trainNoClass = Filter.useFilter(m_trainingData, rmF);
-	      Instances trainNoClassHeader = new Instances(trainNoClass,0);
 	      
 	      // build DataGenerator
 	      //	      System.err.println("Building data generator...");
-	      boolean [] attsToWeightOn = 
-		new boolean[trainNoClass.numAttributes()];
+	      boolean [] attsToWeightOn = new boolean[m_trainingData.numAttributes()];
 	      attsToWeightOn[m_xAttribute] = true;
 	      attsToWeightOn[m_yAttribute] = true;
-
+	      
 	      m_dataGenerator.setWeightingDimensions(attsToWeightOn);
-
-	      m_dataGenerator.buildGenerator(trainNoClass);
-	      int samplesPerPixel = 
-		m_numberOfSamplesFromEachGeneratingModel * 
-		m_dataGenerator.getNumGeneratingModels();
+	      
+	      m_dataGenerator.buildGenerator(m_trainingData);
 	      
 	      // generate samples
-	      Add addF = new Add();
-	      addF.setInputFormat(trainNoClass);
-	      addF.setAttributeIndex(m_classIndex);
 	      double [] dist;
 	      double [] weightingAttsValues = 
 		new double [attsToWeightOn.length];
 	      double [] vals = new double[m_trainingData.numAttributes()];
 	      Instance predInst = new Instance(1.0, vals);
 	      predInst.setDataset(m_trainingData);
-	      abortPlot: for (int i = 0; i < m_panelHeight; i++) {
-		for (int j = 0; j < m_panelWidth; j++) {
-		  if (m_stopPlotting) {
-		    break abortPlot;
-		  }
-		  double sumOfWeights = 0;
-		  double [] sumOfProbs = 
+	    abortPlot: for (int i = 0; i < m_panelHeight; i++) {
+	      for (int j = 0; j < m_panelWidth; j++) {
+		
+		if (m_stopPlotting) {
+		  break abortPlot;
+		}
+		
+		double [] sumOfProbsForRegion = 
+		  new double [m_trainingData.classAttribute().numValues()];
+		
+		for (int u = 0; u < m_numOfSamplesPerRegion; u++) {
+		  
+		  double [] sumOfProbsForLocation = 
 		    new double [m_trainingData.classAttribute().numValues()];
-		  for (int z = 0; z < samplesPerPixel; z++) {
-
-		    weightingAttsValues[m_xAttribute] = 
-		      getRandomX(j);
-		    weightingAttsValues[m_yAttribute] = 
-		      getRandomY(m_panelHeight-i-1);
-
+		  
+		  weightingAttsValues[m_xAttribute] = 
+		    getRandomX(j);
+		  weightingAttsValues[m_yAttribute] = 
+		    getRandomY(m_panelHeight-i-1);
+		  
+		  m_dataGenerator.setWeightingValues(weightingAttsValues);
+		  
+		  double [] weights = m_dataGenerator.getWeights();
+		  double sumOfWeights = Utils.sum(weights);
+		  int [] indices = Utils.sort(weights);
+		  
+		  // Prune 1% of weight mass
+		  int [] newIndices = new int[indices.length];
+		  double sumSoFar = 0; double criticalMass = 0.99 * sumOfWeights;
+		  int index = weights.length - 1; int counter = 0;
+		  for (int z = weights.length - 1; z >= 0; z--) {
+		    newIndices[index--] = indices[z];
+		    sumSoFar += weights[indices[z]];
+		    counter++;
+		    if (sumSoFar > criticalMass) {
+		      break;
+		    }
+		  }
+		  indices = new int[counter];
+		  System.arraycopy(newIndices, index + 1, indices, 0, counter);
+		  
+		  for (int z = 0; z < m_numOfSamplesPerGenerator; z++) {
+		    
 		    m_dataGenerator.setWeightingValues(weightingAttsValues);
-
-		    Instance newInst = 
-		      m_dataGenerator.generateInstanceFast();
-		    sumOfWeights += newInst.weight();
-		    int index = 0;
-		    for (int k = 0; k < predInst.numAttributes(); k++) {
-		      if (k != m_trainingData.classIndex()) {
-			vals[k] = newInst.value(index);
-			index++;
+		    double [][] values = m_dataGenerator.generateInstances(indices);
+		    for (int q = 0; q < values.length; q++) {
+		      if (values[q] != null) {
+			System.arraycopy(values[q], 0, vals, 0, vals.length);
+			vals[m_xAttribute] = weightingAttsValues[m_xAttribute];
+			vals[m_yAttribute] = weightingAttsValues[m_yAttribute];
+			
+			// classify the instance
+			dist = m_classifier.distributionForInstance(predInst);
+			for (int k = 0; k < sumOfProbsForLocation.length; k++) {
+			  sumOfProbsForLocation[k] += (dist[k] * weights[q]); 
+			}
 		      }
 		    }
-
-		    // classify the instance
-		    dist = m_classifier.distributionForInstance(predInst);
-		    for (int k = 0; k < sumOfProbs.length; k++) {
-		      sumOfProbs[k] += (dist[k] * newInst.weight()); 
-		    }
 		  }
-		  // average
-		  Utils.normalize(sumOfProbs, sumOfWeights);
-
-		  // plot the point
-		  Graphics osg = m_osi.getGraphics();
-		  Graphics g = m_plotPanel.getGraphics();
-		  float [] colVal = new float[3];
-		  for (int k = 0; k < 3; k++) {
-		    if (k < sumOfProbs.length) {
-		      if (m_rgbClassValues[k] != -1) {
-			colVal[k] = 
-			  (float)sumOfProbs[m_rgbClassValues[k]];
-		      }
-		    }
-		    if (colVal[k] < 0) {
-		      colVal[k] = 0;
-		    }
-		    if (colVal[k] > 1) {
-		      colVal[k] = 1;
-		    }
-		  }
-
-		  osg.setColor(new Color(colVal[0], 
-					 colVal[1], 
-					 colVal[2]));
-		  osg.drawLine(j,i,j,i);
-		  if (j == 0) {
-		    g.drawImage(m_osi,0,0,m_plotPanel);
+		  
+		  for (int k = 0; k < sumOfProbsForRegion.length; k++) {
+		    sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] * sumOfWeights); 
 		  }
 		}
+		
+		// average
+		Utils.normalize(sumOfProbsForRegion);
+		
+		// plot the point
+		Graphics osg = m_osi.getGraphics();
+		Graphics g = m_plotPanel.getGraphics();
+		float [] colVal = new float[3];
+		for (int k = 0; k < 3; k++) {
+		  if (k < sumOfProbsForRegion.length) {
+		    if (m_rgbClassValues[k] != -1) {
+		      colVal[k] = 
+			(float)sumOfProbsForRegion[m_rgbClassValues[k]];
+		    }
+		  }
+		  if (colVal[k] < 0) {
+		    colVal[k] = 0;
+		  }
+		  if (colVal[k] > 1) {
+		    colVal[k] = 1;
+		  }
+		}
+		
+		osg.setColor(new Color(colVal[0], 
+				       colVal[1], 
+				       colVal[2]));
+		osg.drawLine(j,i,j,i);
+		if (j == 0) {
+		  g.drawImage(m_osi,0,0,m_plotPanel);
+		}
 	      }
+	    }
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    } finally {
@@ -384,25 +400,15 @@ public class BoundaryPanel extends JPanel {
   }
 
   /**
-   * Set how many samples to take from each generating model for use in
-   * computing the colour of a pixel
-   *
-   * @param ns the number of samples to use from each generating model
-   */
-  public void setNumberOfSamplesFromEachGeneratingModel(int ns) {
-    if (ns >= 1) {
-      m_numberOfSamplesFromEachGeneratingModel = ns;
-    }
-  }
-
-  /**
    * Set the training data to use
    *
    * @param trainingData the training data
    * @exception Exception if an error occurs
    */
   public void setTrainingData(Instances trainingData) throws Exception {
+
     m_trainingData = trainingData;
+    m_numOfSamplesPerGenerator = (int)Math.pow(2.0, m_trainingData.numAttributes()-3);
     if (m_trainingData.classIndex() < 0) {
       throw new Exception("No class attribute set (BoundaryPanel)");
     }
