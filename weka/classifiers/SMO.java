@@ -74,12 +74,9 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
-
-  /** The internal version number */
-  static final long serialVersionUID = -714931895144195926L;
 
   /**
    * Stores a set of a given size.
