@@ -63,7 +63,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -173,6 +173,9 @@ public class AttributeVisualizationPanel extends JPanel {
 				       ((m_data.attribute(i).isNominal()) ? "(Nom)":"(Num)")));
     }
     m_colorAttrib.setSelectedIndex(m_data.numAttributes()-1);  
+    if (m_data.classIndex() >= 0) {
+      m_colorAttrib.setSelectedIndex(m_data.classIndex());
+    }
     classIndex = m_data.numAttributes()-1;
     
     this.repaint();
@@ -304,8 +307,12 @@ public class AttributeVisualizationPanel extends JPanel {
   private class HistCalc extends Thread {
     public void run() {
       if(m_data.attribute(classIndex).isNominal()) {
+	int tempVal = AttributeVisualizationPanel.this.getWidth()-4;
+	if (tempVal < 1) {
+	  tempVal = 1;
+	}
 	int histClassCounts[][]  = (AttributeVisualizationPanel.this.getWidth()<(int)(as.totalCount*0.1)) ?
-	  new int[AttributeVisualizationPanel.this.getWidth()-4][m_data.attribute(classIndex).numValues()+1] : 
+	  new int[tempVal][m_data.attribute(classIndex).numValues()+1] : 
 	  new int[(int)(as.totalCount*0.1)][m_data.attribute(classIndex).numValues()+1];
 	double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histClassCounts.length;
 	double currentBar = as.numericStats.min; // + barRange;
@@ -369,8 +376,12 @@ public class AttributeVisualizationPanel extends JPanel {
 	  
       }
       else { //else if the class attribute is numeric
+	int tempVal = AttributeVisualizationPanel.this.getWidth()-4;
+	if (tempVal < 1) {
+	  tempVal = 1;
+	}
 	int histCounts[]  = (AttributeVisualizationPanel.this.getWidth()<(int)(as.totalCount*0.1)) ?
-	  new int[AttributeVisualizationPanel.this.getWidth()-4] : new int[(int)(as.totalCount*0.1)];
+	  new int[tempVal] : new int[(int)(as.totalCount*0.1)];
 	double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histCounts.length;
 	double currentBar = as.numericStats.min; // + barRange;
 	maxValue = 0;
