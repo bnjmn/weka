@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.41 $
+ * @version  $Revision: 1.42 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1205,7 +1205,11 @@ public class Evaluation implements Summarizable {
     chanceAgreement /= (sumOfWeights * sumOfWeights);
     correct /= sumOfWeights;
 
-    return (correct - chanceAgreement) / (1 - chanceAgreement);
+    if (chanceAgreement < 1) {
+      return (correct - chanceAgreement) / (1 - chanceAgreement);
+    } else {
+      return 1;
+    }
   }
 
   /**
