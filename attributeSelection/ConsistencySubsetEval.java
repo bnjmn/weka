@@ -32,7 +32,7 @@ import  weka.filters.*;
  * Machine Learning (ICML'96), July 1996, pp. 319-327. Bari, Italy. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ConsistencySubsetEval extends SubsetEvaluator {
   
@@ -260,6 +260,7 @@ public class ConsistencySubsetEval extends SubsetEvaluator {
     }
 
     m_trainInstances = data;
+    m_trainInstances.deleteWithMissingClass();
     m_classIndex = m_trainInstances.classIndex();
     if (m_classIndex < 0) {
       throw new Exception("Consistency subset evaluator requires a class "
