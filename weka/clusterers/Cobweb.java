@@ -47,7 +47,7 @@ import weka.experiment.Stats;
  * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -131,7 +131,7 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 	return;
       } else if (m_children == null) {
 	/* we are a leaf, so make our existing instance(s) into a child
-	 and then add the new instance as a child */
+	   and then add the new instance as a child */
 	m_children = new FastVector();
 	CNode tempSubCluster = new CNode(m_numAttributes, 
 					 m_clusterInstances.instance(0)); 
@@ -167,25 +167,19 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
     }
 
     /**
-     * Finds a host for the new instance in this nodes children. Also
-     * considers merging the two best hosts and splitting the best host.
+     * Temporarily adds a new instance to each of this nodes children
+     * in turn and computes the category utility.
      *
-     * @param newInstance the instance to find a host for
-     * @param structureFrozen true if the instance is not to be added to
-     * the tree and instead the best potential host is to be returned
-     * @return the best host
+     * @param newInstance the new instance to evaluate
+     * @return an array of category utility values---the result of considering
+     * each child in turn as a host for the new instance
      * @exception Exception if an error occurs
      */
-    private CNode findHost(Instance newInstance, 
-			  boolean structureFrozen) throws Exception {
-
-      if (!structureFrozen) {
-	updateStats(newInstance, false);
-      }
-      
-      // look for a host in existing children and also consider as a new leaf
+    private double [] cuScoresForChildren(Instance newInstance) 
+      throws Exception {
+      // look for a host in existing children
       double [] categoryUtils = new double [m_children.size()];
-
+      
       // look for a home for this instance in the existing children
       for (int i = 0; i < m_children.size(); i++) {
 	CNode temp = (CNode) m_children.elementAt(i);
@@ -196,6 +190,54 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 	// remove the new instance from this child
 	temp.updateStats(newInstance, true);
       }
+      return categoryUtils;
+    }
+
+    private double cuScoreForBestTwoMerged(CNode merged, 
+					   CNode a, CNode b,
+					   Instance newInstance) 
+      throws Exception {
+
+      double mergedCU = -Double.MAX_VALUE;
+      // consider merging the best and second
+      // best.
+      merged.m_clusterInstances = new Instances(m_clusterInstances, 1);
+      
+      merged.addChildNode(a);
+      merged.addChildNode(b);
+      merged.updateStats(newInstance, false); // add new instance to stats
+      // remove the best and second best nodes
+      m_children.removeElementAt(m_children.indexOf(a));
+      m_children.removeElementAt(m_children.indexOf(b));	
+      m_children.addElement(merged);
+      mergedCU = categoryUtility();
+      // restore the status quo
+      merged.updateStats(newInstance, true);
+      m_children.removeElementAt(m_children.indexOf(merged));
+      m_children.addElement(a);
+      m_children.addElement(b);
+      return mergedCU;
+    }
+
+    /**
+     * Finds a host for the new instance in this nodes children. Also
+     * considers merging the two best hosts and splitting the best host.
+     *
+     * @param newInstance the instance to find a host for
+     * @param structureFrozen true if the instance is not to be added to
+     * the tree and instead the best potential host is to be returned
+     * @return the best host
+     * @exception Exception if an error occurs
+     */
+    private CNode findHost(Instance newInstance, 
+			   boolean structureFrozen) throws Exception {
+
+      if (!structureFrozen) {
+	updateStats(newInstance, false);
+      }
+      
+      // look for a host in existing children and also consider as a new leaf
+      double [] categoryUtils = cuScoresForChildren(newInstance);
       
       // make a temporary new leaf for this instance and get CU
       CNode newLeaf = new CNode(m_numAttributes, newInstance);
@@ -240,30 +282,19 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
       double mergedCU = -Double.MAX_VALUE;
       CNode merged = new CNode(m_numAttributes);
       if (a != b) {
-	// consider merging the best and second
-	// best. If thats no good then consider splitting the best
-	merged.m_clusterInstances = new Instances(m_clusterInstances, 1);
-	
-	merged.addChildNode(a);
-	merged.addChildNode(b);
-	merged.updateStats(newInstance, false); // add new instance to stats
-	// remove the best and second best nodes
-	m_children.removeElementAt(m_children.indexOf(a));
-	m_children.removeElementAt(m_children.indexOf(b));	
-	m_children.addElement(merged);
-	mergedCU = categoryUtility();
-	// restore the status quo
-	m_children.removeElementAt(m_children.indexOf(merged));
-	m_children.addElement(a);
-	m_children.addElement(b);
+	mergedCU = cuScoreForBestTwoMerged(merged, a, b, newInstance);
+
 	if (mergedCU > bestHostCU) {
-	  merged.updateStats(newInstance, true);
 	  bestHostCU = mergedCU;
 	  finalBestHost = merged;
 	}
       }
-	
+
+      // Consider splitting the best
       double splitCU = -Double.MAX_VALUE;
+      double splitBestChildCU = -Double.MAX_VALUE;
+      double splitPlusNewLeafCU = -Double.MAX_VALUE;
+      double splitPlusMergeBestTwoCU = -Double.MAX_VALUE;
       if (a.m_children != null) {
 	FastVector tempChildren = new FastVector();
 
@@ -277,20 +308,49 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 	  CNode promotedChild = (CNode)a.m_children.elementAt(i);
 	  tempChildren.addElement(promotedChild);
 	}
-
 	// also add the new leaf
 	tempChildren.addElement(newLeaf);
 
 	FastVector saveStatusQuo = m_children;
 	m_children = tempChildren;
-	splitCU = categoryUtility();
+	splitPlusNewLeafCU = categoryUtility(); // split + new leaf
+	// remove the new leaf
+	tempChildren.removeElementAt(tempChildren.size()-1);
+	// now look for best and second best
+	categoryUtils = cuScoresForChildren(newInstance);
+
+	// now determine the best host (and the second best)
+	best = 0;
+	secondBest = 0;
+	for (int i = 0; i < categoryUtils.length; i++) {
+	  if (categoryUtils[i] > categoryUtils[secondBest]) {
+	    if (categoryUtils[i] > categoryUtils[best]) {
+	      secondBest = best;
+	      best = i;
+	    } else {
+	      secondBest = i;
+	    }
+	  } 
+	}
+	CNode sa = (CNode) m_children.elementAt(best);
+	CNode sb = (CNode) m_children.elementAt(secondBest);
+	splitBestChildCU = categoryUtils[best];
+
+	// now merge best and second best
+	CNode mergedSplitChildren = new CNode(m_numAttributes);
+	if (sa != sb) {
+	  splitPlusMergeBestTwoCU = 
+	    cuScoreForBestTwoMerged(mergedSplitChildren, sa, sb, newInstance);
+	}
+	splitCU = (splitBestChildCU > splitPlusNewLeafCU) ?
+	  splitBestChildCU : splitPlusNewLeafCU;
+	splitCU = (splitCU > splitPlusMergeBestTwoCU) ? 
+	  splitCU : splitPlusMergeBestTwoCU;
 
 	if (splitCU > bestHostCU) {
 	  bestHostCU = splitCU;
 	  finalBestHost = this;
-	  // pull the new leaf back out as we will probably be recursively
-	  // calling on this node again
-	  tempChildren.removeElementAt(tempChildren.size()-1);
+	  //	  tempChildren.removeElementAt(tempChildren.size()-1);
 	} else {
 	  // restore the status quo
 	  m_children = saveStatusQuo;
@@ -603,12 +663,12 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
       
       text.append("N"+m_clusterNum
 		  + " [label=\""+((m_children == null) 
-				 ? "leaf " : "node ")
+				  ? "leaf " : "node ")
 		  +m_clusterNum+" "
 		  +" ("+m_clusterInstances.numInstances()
 		  +")\" "
 		  +((m_children == null) 
-				 ? "shape=box style=filled " : "")
+		    ? "shape=box style=filled " : "")
 		  +(m_saveInstances 
 		    ? "data =\n"+dumpData() +"\n,\n"
 		    : "")
@@ -822,7 +882,7 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
     return m_acuity;
   }
 
-   /**
+  /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -939,9 +999,9 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 							     argv));
     }
     catch (Exception e)
-    {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+      {
+	System.out.println(e.getMessage());
+	e.printStackTrace();
+      }
   }
 }
