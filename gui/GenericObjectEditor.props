@@ -113,6 +113,7 @@ weka.filters.Filter = \
  weka.filters.unsupervised.attribute.Discretize, \
  weka.filters.unsupervised.attribute.FirstOrder, \
  weka.filters.unsupervised.attribute.MakeIndicator, \
+ weka.filters.unsupervised.attribute.MathExpression, \
  weka.filters.unsupervised.attribute.MergeTwoValues, \
  weka.filters.unsupervised.attribute.NominalToBinary, \
  weka.filters.unsupervised.attribute.Normalize, \
