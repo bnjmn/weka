@@ -34,7 +34,7 @@ import weka.core.Instances;
  *      Machine Learning, 29: 131--163, 1997
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
@@ -175,6 +175,7 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
+		super.setOptions(options);
 	} // setOptions
 	
 	/**

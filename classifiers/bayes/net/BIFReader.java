@@ -20,7 +20,7 @@
  * 
  */
 
-package weka.classifiers.bayes;
+package weka.classifiers.bayes.net;
 
 import java.io.*;
 import java.util.*;
@@ -28,6 +28,7 @@ import java.util.*;
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 
+import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.core.*;
 import weka.estimators.*;
@@ -38,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
 
 
@@ -221,9 +222,7 @@ public class BIFReader extends BayesNet {
         
  		m_Instances = new Instances(sName, attInfo, 100);
 		m_Instances.setClassIndex(nNodes - 1);
- 		m_bUseADTree = false;
-// 		m_bInitAsNaiveBayes = false;
-// 		m_bMarkovBlanketClassifier = false;
+		setUseADTree(false);
 		initStructure();
 	} // buildInstances
 
@@ -234,10 +233,10 @@ public class BIFReader extends BayesNet {
 	 */
 	public int missingArcs(BayesNet other) {
 		int nMissing = 0;
-	    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < other.m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
-				int nParent = other.m_ParentSets[iAttribute].GetParent(iParent);
-				if (!m_ParentSets[iAttribute].Contains(nParent) && !m_ParentSets[nParent].Contains(nParent)) {
+		for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+			for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
+				int nParent = m_ParentSets[iAttribute].GetParent(iParent);
+				if (!other.getParentSet(iAttribute).Contains(nParent) && !other.getParentSet(nParent).Contains(iAttribute)) {
 					nMissing++;
 				}
 			}
@@ -252,10 +251,10 @@ public class BIFReader extends BayesNet {
 	 */
 	public int extraArcs(BayesNet other) {
 		int nExtra = 0;
-	    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
-				int nParent = m_ParentSets[iAttribute].GetParent(iParent);
-				if (!other.m_ParentSets[iAttribute].Contains(nParent) && !other.m_ParentSets[nParent].Contains(nParent)) {
+		for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+			for (int iParent = 0; iParent < other.getParentSet(iAttribute).GetNrOfParents(); iParent++) {
+				int nParent = other.getParentSet(iAttribute).GetParent(iParent);
+				if (!m_ParentSets[iAttribute].Contains(nParent) && !m_ParentSets[nParent].Contains(iAttribute)) {
 					nExtra++;
 				}
 			}
@@ -291,7 +290,9 @@ public class BIFReader extends BayesNet {
 			while (i < nNodes && x[i] == m_Instances.attribute(i).numValues()) {
 				x[i] = 0;
 				i++;
-				x[i]++;
+				if (i < nNodes){
+					x[i]++;
+				}
 			}
 			if (i < nNodes) {
 				i = 0;
@@ -309,8 +310,8 @@ public class BIFReader extends BayesNet {
 				double Q = 1.0;
 				for (int iNode = 0; iNode < nNodes; iNode++) {
 					int iCPT = 0;
-					for (int iParent = 0; iParent < other.m_ParentSets[iNode].GetNrOfParents(); iParent++) {
-				    	int nParent = other.m_ParentSets[iNode].GetParent(iParent);
+					for (int iParent = 0; iParent < other.getParentSet(iNode).GetNrOfParents(); iParent++) {
+				    	int nParent = other.getParentSet(iNode).GetParent(iParent);
 					    iCPT = iCPT * nCard[nParent] + x[nParent];
 					} 
 					Q = Q * other.m_Distributions[iNode][iCPT].getProbability(x[iNode]);
@@ -334,7 +335,7 @@ public class BIFReader extends BayesNet {
 	    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
 			for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
 				int nParent = m_ParentSets[iAttribute].GetParent(iParent);
-				if (!other.m_ParentSets[iAttribute].Contains(nParent) && other.m_ParentSets[nParent].Contains(nParent)) {
+				if (!other.getParentSet(iAttribute).Contains(nParent) && other.getParentSet(nParent).Contains(iAttribute)) {
 					nReversed++;
 				}
 			}
@@ -342,7 +343,8 @@ public class BIFReader extends BayesNet {
 		return nReversed;
 	} // reversedArcs
 
-
+	public BIFReader() {}
+		
     public static void main(String[] args) {
         try {
             BIFReader br = new BIFReader();
