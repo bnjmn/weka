@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class Instances implements Serializable {
  
@@ -336,6 +336,14 @@ public class Instances implements Serializable {
   public final void compactify() {
 
     m_Instances.trimToSize();
+  }
+
+  /**
+   * Removes all instances from the set.
+   */
+  public final void delete() {
+    
+    m_Instances = new FastVector();
   }
 
   /**
