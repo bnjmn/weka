@@ -16,7 +16,7 @@
 
 /*
  *    LWR.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999, 2002 Len Trigg, Eibe Frank
  *
  */
 
@@ -54,8 +54,18 @@ import weka.core.*;
  * Set the weighting kernel shape to use. 1 = Inverse, 2 = Gaussian.
  * (default 0 = Linear) <p>
  *
+ * -S num <br>
+ * Set the attriute selection method to use. 1 = None, 2 = Greedy
+ * (default 0 = M5' method) <p>
+ *
+ * -C <br>
+ * Do not try to eliminate colinear attributes <p>
+ *
+ * -R num <br>
+ * The ridge parameter (default 1.0e-8) <p>
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -74,7 +84,7 @@ public class LWR extends Classifier
   protected boolean m_Debug;
 
   /** The number of neighbours used to select the kernel bandwidth */
-  protected int m_kNN = 5;
+  protected int m_kNN = -1;
 
   /** The weighting kernel method currently selected */
   protected int m_WeightKernel = LINEAR;
@@ -82,10 +92,13 @@ public class LWR extends Classifier
   /** True if m_kNN should be set to all instances */
   protected boolean m_UseAllK = true;
 
-  /* The available kernel weighting methods */
+  /** The available kernel weighting methods */
   protected static final int LINEAR  = 0;
   protected static final int INVERSE = 1;
   protected static final int GAUSS   = 2;
+
+  /** The linear regression object */
+  protected LinearRegression lr = new LinearRegression();
 
   /**
    * Returns an enumeration describing the available options.
@@ -94,7 +107,7 @@ public class LWR extends Classifier
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(5);
     newVector.addElement(new Option("\tProduce debugging output.\n"
 				    + "\t(default no debugging output)",
 				    "D", 0, "-D"));
@@ -106,6 +119,16 @@ public class LWR extends Classifier
 				    + " 1 = Inverse, 2 = Gaussian.\n"
 				    + "\t(default 0 = Linear)",
 				    "W", 1,"-W <number of weighting method>"));
+    newVector.addElement(new Option("\tSet the attribute selection method"
+				    + " to use. 1 = None, 2 = Greedy.\n"
+				    + "\t(default 0 = M5' method)",
+				    "S", 1, "-S <number of selection method>"));
+    newVector.addElement(new Option("\tDo not try to eliminate colinear"
+				    + " attributes.\n",
+				    "C", 0, "-C"));
+    newVector.addElement(new Option("\tSet ridge parameter (default 1.0e-8).\n",
+				    "R", 1, "-R <double>"));
+    
     return newVector.elements();
   }
 
@@ -122,6 +145,16 @@ public class LWR extends Classifier
    * -W num <br>
    * Set the weighting kernel shape to use. 1 = Inverse, 2 = Gaussian.
    * (default 0 = Linear) <p>
+   *
+   * -S num <br>
+   * Set the attriute selection method to use. 1 = None, 2 = Greedy
+   * (default 0 = M5' method) <p>
+   *
+   * -C <br>
+   * Do not try to eliminate colinear attributes <p>
+   *
+   * -R num <br>
+   * The ridge parameter (default 1.0e-8) <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -142,6 +175,24 @@ public class LWR extends Classifier
       setWeightingKernel(LINEAR);
     }
 
+    String selectionString = Utils.getOption('S', options);
+    if (selectionString.length() != 0) {
+      setAttributeSelectionMethod(new SelectedTag(Integer
+						  .parseInt(selectionString),
+						  LinearRegression.TAGS_SELECTION));
+    } else {
+      setAttributeSelectionMethod(new SelectedTag(LinearRegression.SELECTION_M5,
+						  LinearRegression.TAGS_SELECTION));
+    }
+
+    setEliminateColinearAttributes(!Utils.getFlag('C', options));
+    String ridgeString = Utils.getOption('R', options);
+    if (ridgeString.length() != 0) {
+      lr.setRidge(new Double(ridgeString).doubleValue());
+    } else {
+      lr.setRidge(1.0e-8);
+    }
+
     setDebug(Utils.getFlag('D', options));
   }
 
@@ -152,7 +203,7 @@ public class LWR extends Classifier
    */
   public String [] getOptions() {
 
-    String [] options = new String [5];
+    String [] options = new String [9];
     int current = 0;
 
     if (getDebug()) {
@@ -162,10 +213,62 @@ public class LWR extends Classifier
     if (!m_UseAllK) {
       options[current++] = "-K"; options[current++] = "" + getKNN();
     }
+
+    options[current++] = "-S";
+    options[current++] = "" + getAttributeSelectionMethod()
+      .getSelectedTag().getID();
+    if (!getEliminateColinearAttributes()) {
+      options[current++] = "-C";
+    }
+    options[current++] = "-R";
+    options[current++] = "" + lr.getRidge();
+
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
+  }
+  
+  /**
+   * Get the value of EliminateColinearAttributes.
+   *
+   * @return Value of EliminateColinearAttributes.
+   */
+  public boolean getEliminateColinearAttributes() {
+    
+    return lr.getEliminateColinearAttributes();
+  }
+  
+  /**
+   * Set the value of EliminateColinearAttributes.
+   *
+   * @param newEliminateColinearAttributes Value to assign to EliminateColinearAttributes.
+   */
+  public void setEliminateColinearAttributes(boolean newEliminateColinearAttributes) {
+    
+    lr.setEliminateColinearAttributes(newEliminateColinearAttributes);
+  }
+
+  /**
+   * Sets the method used to select attributes for use in the
+   * linear regression. 
+   *
+   * @param method the attribute selection method to use.
+   */
+  public void setAttributeSelectionMethod(SelectedTag method) {
+
+    lr.setAttributeSelectionMethod(method);
+  }
+
+  /**
+   * Gets the method used to select attributes for use in the
+   * linear regression. 
+   *
+   * @return the method to use.
+   */
+  public SelectedTag getAttributeSelectionMethod() {
+
+    return lr.getAttributeSelectionMethod();
   }
 
   /**
@@ -411,16 +514,15 @@ public class LWR extends Classifier
     }
     
     // Create a weighted linear regression
-    LinearRegression weightedRegression = new LinearRegression();
-    weightedRegression.buildClassifier(weightedTrain);
+    lr.buildClassifier(weightedTrain);
 
     if (m_Debug) {
       System.out.println("Classifying test instance: " + instance);
       System.out.println("Built regression model:\n" 
-			 + weightedRegression.toString());
+			 + lr.toString());
     }
     // Return the linear regression's prediction
-    return weightedRegression.classifyInstance(instance);
+    return lr.classifyInstance(instance);
   }
  
   /**

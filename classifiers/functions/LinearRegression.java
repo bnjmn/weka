@@ -43,9 +43,15 @@ import weka.filters.*;
  * Set the attriute selection method to use. 1 = None, 2 = Greedy
  * (default 0 = M5' method) <p>
  *
+ * -C <br>
+ * Do not try to eliminate colinear attributes <p>
+ *
+ * -R num <br>
+ * The ridge parameter (default 1.0e-8) <p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -79,14 +85,39 @@ public class LinearRegression extends Classifier implements OptionHandler,
   private int m_AttributeSelection;
 
   /* Attribute selection methods */
-  private static final int SELECTION_M5 = 0;
-  private static final int SELECTION_NONE = 1;
-  private static final int SELECTION_GREEDY = 2;
+  public static final int SELECTION_M5 = 0;
+  public static final int SELECTION_NONE = 1;
+  public static final int SELECTION_GREEDY = 2;
   public static final Tag [] TAGS_SELECTION = {
     new Tag(SELECTION_NONE, "No attribute selection"),
     new Tag(SELECTION_M5, "M5 method"),
     new Tag(SELECTION_GREEDY, "Greedy method")
   };
+
+  /** Try to eliminate correlated attributes? */
+  private boolean m_EliminateColinearAttributes = true;
+
+  /** Turn off all checks and conversions? */
+  private boolean m_checksTurnedOff = false;
+
+  /** The ridge parameter */
+  private double m_Ridge = 1.0e-8;
+
+  /**
+   * Turns off checks for missing values, etc. Use with caution.
+   */
+  public void turnChecksOff() {
+
+    m_checksTurnedOff = true;
+  }
+
+  /**
+   * Turns on checks for missing values, etc.
+   */
+  public void turnChecksOn() {
+
+    m_checksTurnedOff = false;
+  }
 
   /**
    * Builds a regression model for the given data.
@@ -97,25 +128,32 @@ public class LinearRegression extends Classifier implements OptionHandler,
    */
   public void buildClassifier(Instances data) throws Exception {
   
-    if (!data.classAttribute().isNumeric()) {
-      throw new Exception("Class attribute has to be numeric for regression!");
-    }
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances in training file!");
-    }
-    if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+    if (!m_checksTurnedOff) {
+      if (!data.classAttribute().isNumeric()) {
+	throw new Exception("Class attribute has to be numeric for regression!");
+      }
+      if (data.numInstances() == 0) {
+	throw new Exception("No instances in training file!");
+      }
+      if (data.checkForStringAttributes()) {
+	throw new Exception("Can't handle string attributes!");
+      }
     }
 
     // Preprocess instances
     m_TransformedData = data;
-    m_TransformFilter = new NominalToBinaryFilter();
-    m_TransformFilter.setInputFormat(m_TransformedData);
-    m_TransformedData = Filter.useFilter(m_TransformedData, m_TransformFilter);
-    m_MissingFilter = new ReplaceMissingValuesFilter();
-    m_MissingFilter.setInputFormat(m_TransformedData);
-    m_TransformedData = Filter.useFilter(m_TransformedData, m_MissingFilter);
-    m_TransformedData.deleteWithMissingClass();
+    if (!m_checksTurnedOff) {
+      m_TransformFilter = new NominalToBinaryFilter();
+      m_TransformFilter.setInputFormat(m_TransformedData);
+      m_TransformedData = Filter.useFilter(m_TransformedData, m_TransformFilter);
+      m_MissingFilter = new ReplaceMissingValuesFilter();
+      m_MissingFilter.setInputFormat(m_TransformedData);
+      m_TransformedData = Filter.useFilter(m_TransformedData, m_MissingFilter);
+      m_TransformedData.deleteWithMissingClass();
+    } else {
+      m_TransformFilter = null;
+      m_MissingFilter = null;
+    }
     m_ClassIndex = m_TransformedData.classIndex();
 
     // Calculate attribute standard deviations
@@ -139,12 +177,14 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
     // Transform the input instance
     Instance transformedInstance = instance;
-    m_TransformFilter.input(transformedInstance);
-    m_TransformFilter.batchFinished();
-    transformedInstance = m_TransformFilter.output();
-    m_MissingFilter.input(transformedInstance);
-    m_MissingFilter.batchFinished();
-    transformedInstance = m_MissingFilter.output();
+    if (!m_checksTurnedOff) {
+      m_TransformFilter.input(transformedInstance);
+      m_TransformFilter.batchFinished();
+      transformedInstance = m_TransformFilter.output();
+      m_MissingFilter.input(transformedInstance);
+      m_MissingFilter.batchFinished();
+      transformedInstance = m_MissingFilter.output();
+    }
 
     // Calculate the dependent variable from the regression model
     return regressionPrediction(transformedInstance,
@@ -196,14 +236,19 @@ public class LinearRegression extends Classifier implements OptionHandler,
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(4);
     newVector.addElement(new Option("\tProduce debugging output.\n"
 				    + "\t(default no debugging output)",
-				    "D", 0,"-D"));
+				    "D", 0, "-D"));
     newVector.addElement(new Option("\tSet the attribute selection method"
 				    + " to use. 1 = None, 2 = Greedy.\n"
 				    + "\t(default 0 = M5' method)",
-				    "S", 1,"-S <number of selection method>"));
+				    "S", 1, "-S <number of selection method>"));
+    newVector.addElement(new Option("\tDo not try to eliminate colinear"
+				    + " attributes.\n",
+				    "C", 0, "-C"));
+    newVector.addElement(new Option("\tSet ridge parameter (default 1.0e-8).\n",
+				    "R", 1, "-R <double>"));
     return newVector.elements();
   }
 
@@ -216,6 +261,12 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * -S num <br>
    * Set the attriute selection method to use. 1 = None, 2 = Greedy
    * (default 0 = M5' method) <p>
+   *
+   * -C <br>
+   * Do not try to eliminate colinear attributes <p>
+   *
+   * -R num <br>
+   * The ridge parameter (default 1.0e-8) <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -231,8 +282,32 @@ public class LinearRegression extends Classifier implements OptionHandler,
       setAttributeSelectionMethod(new SelectedTag(SELECTION_M5,
 						  TAGS_SELECTION));
     }
-
+    String ridgeString = Utils.getOption('R', options);
+    if (ridgeString.length() != 0) {
+      setRidge(new Double(ridgeString).doubleValue());
+    } else {
+      setRidge(1.0e-8);
+    }
     setDebug(Utils.getFlag('D', options));
+    setEliminateColinearAttributes(!Utils.getFlag('C', options));
+  }
+
+  /**
+   * Returns the coefficients for this linear model.
+   */
+  public double[] coefficients() {
+
+    double[] coefficients = new double[m_SelectedAttributes.length + 1];
+    int counter = 0;
+    for (int i = 0; i < m_SelectedAttributes.length; i++) {
+      if ((m_SelectedAttributes[i]) && ((i != m_ClassIndex))) {
+	coefficients[i] = m_Coefficients[counter++];
+      } else {
+	coefficients[i] = 0;
+      }
+    }
+    coefficients[m_SelectedAttributes.length] = m_Coefficients[counter];
+    return coefficients;
   }
 
   /**
@@ -242,7 +317,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [3];
+    String [] options = new String [6];
     int current = 0;
 
     options[current++] = "-S";
@@ -251,13 +326,58 @@ public class LinearRegression extends Classifier implements OptionHandler,
     if (getDebug()) {
       options[current++] = "-D";
     }
+    if (!getEliminateColinearAttributes()) {
+      options[current++] = "-C";
+    }
+    options[current++] = "-R";
+    options[current++] = "" + getRidge();
 
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
   }
-
+  
+  /**
+   * Get the value of Ridge.
+   *
+   * @return Value of Ridge.
+   */
+  public double getRidge() {
+    
+    return m_Ridge;
+  }
+  
+  /**
+   * Set the value of Ridge.
+   *
+   * @param newRidge Value to assign to Ridge.
+   */
+  public void setRidge(double newRidge) {
+    
+    m_Ridge = newRidge;
+  }
+  
+  /**
+   * Get the value of EliminateColinearAttributes.
+   *
+   * @return Value of EliminateColinearAttributes.
+   */
+  public boolean getEliminateColinearAttributes() {
+    
+    return m_EliminateColinearAttributes;
+  }
+  
+  /**
+   * Set the value of EliminateColinearAttributes.
+   *
+   * @param newEliminateColinearAttributes Value to assign to EliminateColinearAttributes.
+   */
+  public void setEliminateColinearAttributes(boolean newEliminateColinearAttributes) {
+    
+    m_EliminateColinearAttributes = newEliminateColinearAttributes;
+  }
+  
   /**
    * Get the number of coefficients used in the model
    *
@@ -336,8 +456,8 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * model
    * @return true if an attribute was removed
    */
-  private boolean deselectColinearAttribute(boolean [] selectedAttributes,
-					    double [] coefficients) {
+  private boolean deselectColinearAttributes(boolean [] selectedAttributes,
+					     double [] coefficients) {
 
     double maxSC = 1.5;
     int maxAttr = -1, coeff = 0;
@@ -388,7 +508,8 @@ public class LinearRegression extends Classifier implements OptionHandler,
     double [] coefficients;
     do {
       coefficients = doRegression(selectedAttributes);
-    } while (deselectColinearAttribute(selectedAttributes, coefficients));
+    } while (m_EliminateColinearAttributes && 
+	     deselectColinearAttributes(selectedAttributes, coefficients));
 
     double fullMSE = calculateMSE(selectedAttributes, coefficients);
     double akaike = (numInstances - numAttributes) + 2 * numAttributes;
@@ -610,7 +731,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
     }
 
     // Compute coefficients
-    return independent.regression(dependent, weights);
+    return independent.regression(dependent, weights, m_Ridge);
   }
  
   /**
