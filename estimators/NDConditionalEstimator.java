@@ -27,28 +27,20 @@ import weka.core.*;
  * conditioning value).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class NDConditionalEstimator implements ConditionalEstimator {
 
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * Hold the sub-estimators
-   */
+  /** Hold the sub-estimators */
   private NormalEstimator [] m_Estimators;
 
-  // ===============
-  // Public methods.
-  // ===============
-  
   /**
    * Constructor
    *
    * @param numCondSymbols the number of conditioning symbols 
+   * @param precision the  precision to which numeric values are given. For
+   * example, if the precision is stated to be 0.1, the values in the
+   * interval (0.25,0.35] are all treated as 0.3. 
    */
   public NDConditionalEstimator(int numCondSymbols, double precision) {
 
@@ -106,12 +98,48 @@ public class NDConditionalEstimator implements ConditionalEstimator {
     }
     return result;
   }
+
+  /**
+   * Main method for testing this class.
+   *
+   * @param argv should contain a sequence of pairs of integers which
+   * will be treated as numeric, symbolic.
+   */
+  public static void main(String [] argv) {
+    
+    try {
+      if (argv.length == 0) {
+	System.out.println("Please specify a set of instances.");
+	return;
+      }
+      int currentA = Integer.parseInt(argv[0]);
+      int maxA = currentA;
+      int currentB = Integer.parseInt(argv[1]);
+      int maxB = currentB;
+      for(int i = 2; i < argv.length - 1; i += 2) {
+	currentA = Integer.parseInt(argv[i]);
+	currentB = Integer.parseInt(argv[i + 1]);
+	if (currentA > maxA) {
+	  maxA = currentA;
+	}
+	if (currentB > maxB) {
+	  maxB = currentB;
+	}
+      }
+      NDConditionalEstimator newEst = new NDConditionalEstimator(maxB + 1,
+								 1);
+      for(int i = 0; i < argv.length - 1; i += 2) {
+	currentA = Integer.parseInt(argv[i]);
+	currentB = Integer.parseInt(argv[i + 1]);
+	System.out.println(newEst);
+	System.out.println("Prediction for " + currentA + '|' + currentB 
+			   + " = "
+			   + newEst.getProbability(currentA, currentB));
+	newEst.addValue(currentA, currentB, 1);
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
+
 }
-
-
-
-
-
-
-
-

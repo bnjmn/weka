@@ -25,7 +25,8 @@ import weka.core.*;
 /**
  * Class for boosting any classifier that can handle weighted instances.
  * This class performs classification using a regression scheme as the 
- * base learner, and can handle multi-class problems. See <p>
+ * base learner, and can handle multi-class problems.  For more
+ * information, see<p>
  * 
  * Friedman, J., T. Hastie and R. Tibshirani (1998) <i>Additive Logistic
  * Regression: a Statistical View of Boosting</i> 
@@ -51,7 +52,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {

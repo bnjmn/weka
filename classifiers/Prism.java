@@ -23,14 +23,15 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for building and using a PRISM classifier
+ * Class for building and using a PRISM classifier.  For more information,
+ * see <p>
  *
- * Reference: J. Cendrowska (1987). <i>PRISM: An algorithm for
+ * J. Cendrowska (1987). <i>PRISM: An algorithm for
  * inducing modular rules</i>. International Journal of Man-Machine
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class Prism extends Classifier {
 

@@ -23,15 +23,14 @@ import weka.core.*;
 import weka.classifiers.*;
 
 /**
- * Class for generating a PART decision list.
+ * Class for generating a PART decision list. For more information, see<p>
  *
- * Reference:
  * Eibe Frank and Ian H. Witten (1998).  <a
  * href="http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz">Generating
  * Accurate Rule Sets Without Global Optimization.</a> In Shavlik, J.,
  * ed., <i>Machine Learning: Proceedings of the Fifteenth
  * International Conference</i>, Morgan Kaufmann Publishers, San
- * Francisco, CA.
+ * Francisco, CA. <p>
  *
  * Valid options are: <p>
  *
@@ -52,7 +51,7 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler {

@@ -25,7 +25,7 @@ import weka.classifiers.*;
 import weka.filters.*;
 
 /**
- * Class for contructing and evaluating model trees; M5' algorithm
+ * Class for contructing and evaluating model trees; M5' algorithm.<p>
  *
  * Valid options are: <p>
  *
@@ -43,7 +43,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler {
   

@@ -26,12 +26,13 @@ import weka.filters.*;
  * Implements John C. Platt's sequential minimal optimization algorithm for 
  * training a support vector classifier. Does not implement speed-up
  * for linear feature space and sparse input data. Globally replaces all 
- * missing values, and transforms nominal attributes into binary ones. <p>
+ * missing values, and transforms nominal attributes into binary ones.
+ * For more information, see<p>
  *
- * Reference: J. Platt (1998). <i>Fast Training of Support Vector
- * Machines using Sequential Minimal Optimization. Advances in Kernel
- * Methods - Support Vector Learning<\i>, B. Schölkopf, C. Burges, and
- * A. Smola, eds., MIT Press.
+ * J. Platt (1998). <i>Fast Training of Support Vector
+ * Machines using Sequential Minimal Optimization</i>. Advances in Kernel
+ * Methods - Support Vector Learning, B. Schölkopf, C. Burges, and
+ * A. Smola, eds., MIT Press. <p>
  *
  * Valid options are:<p>
  *
@@ -45,7 +46,7 @@ import weka.filters.*;
  * The seed for the random number generator. (default 1)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
   

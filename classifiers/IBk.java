@@ -24,7 +24,11 @@ import weka.core.*;
 
 /**
  * IB1-type classifier class. Predicts enumerated class attributes. May
- * specify <i>k</i> nearest neighbors to use for prediction. <p>
+ * specify <i>k</i> nearest neighbors to use for prediction.  For more
+ * information, see <p>
+ * 
+ * Aha, D., and D. Kibler (1991) "Instance-based learning algorithms",
+ * <i>Machine Learning</i>, vol.6, pp. 37-66.<p>
  *
  * Valid options are:<p>
  *
@@ -57,7 +61,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {

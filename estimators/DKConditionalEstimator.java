@@ -26,29 +26,16 @@ import weka.core.*;
  * a numeric domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class DKConditionalEstimator implements ConditionalEstimator {
 
-  // =================
-  // Private variables
-  // =================
-
-  /**
-   * Hold the sub-estimators
-   */
+  /** Hold the sub-estimators */
   private KernelEstimator [] m_Estimators;
 
-  /**
-   * Hold the weights for each of the sub-estimators
-   */
+  /** Hold the weights for each of the sub-estimators */
   private DiscreteEstimator m_Weights;
 
-  // ===============
-  // Public methods.
-  // ===============
-  
   /**
    * Constructor
    *
@@ -90,10 +77,12 @@ public class DKConditionalEstimator implements ConditionalEstimator {
 
     Estimator result = new DiscreteEstimator(m_Estimators.length,false);
     for(int i = 0; i < m_Estimators.length; i++) {
-      System.out.println("Val " + i + " Weight:"+m_Weights.getProbability(i)
-			 +" EstProb("+given+")="+m_Estimators[i].getProbability(given));
-      result.addValue(i,m_Weights.getProbability(i)
-		      *m_Estimators[i].getProbability(given));
+      //System.out.println("Val " + i
+      //			 + " Weight:" + m_Weights.getProbability(i)
+      //			 +" EstProb(" + given + ")="
+      //			 + m_Estimators[i].getProbability(given));
+      result.addValue(i, m_Weights.getProbability(i)
+		      * m_Estimators[i].getProbability(given));
     }
     return result;
   }
@@ -123,12 +112,48 @@ public class DKConditionalEstimator implements ConditionalEstimator {
     result += "Weights of each estimator given by " + m_Weights;
     return result;
   }
+
+
+  /**
+   * Main method for testing this class.
+   *
+   * @param argv should contain a sequence of pairs of integers which
+   * will be treated as pairs of symbolic, numeric.
+   */
+  public static void main(String [] argv) {
+    
+    try {
+      if (argv.length == 0) {
+	System.out.println("Please specify a set of instances.");
+	return;
+      }
+      int currentA = Integer.parseInt(argv[0]);
+      int maxA = currentA;
+      int currentB = Integer.parseInt(argv[1]);
+      int maxB = currentB;
+      for(int i = 2; i < argv.length - 1; i += 2) {
+	currentA = Integer.parseInt(argv[i]);
+	currentB = Integer.parseInt(argv[i + 1]);
+	if (currentA > maxA) {
+	  maxA = currentA;
+	}
+	if (currentB > maxB) {
+	  maxB = currentB;
+	}
+      }
+      DKConditionalEstimator newEst = new DKConditionalEstimator(maxA + 1,
+								 1);
+      for(int i = 0; i < argv.length - 1; i += 2) {
+	currentA = Integer.parseInt(argv[i]);
+	currentB = Integer.parseInt(argv[i + 1]);
+	System.out.println(newEst);
+	System.out.println("Prediction for " + currentA + '|' + currentB 
+			   + " = "
+			   + newEst.getProbability(currentA, currentB));
+	newEst.addValue(currentA, currentB, 1);
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
 }
-
-
-
-
-
-
-
-

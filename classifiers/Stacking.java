@@ -23,9 +23,9 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Implements stacking.<p>
+ * Implements stacking. For more information, see<p>
  *
- * Reference: David H. Wolpert (1992). <i>Stacked
+ * David H. Wolpert (1992). <i>Stacked
  * generalization</i>. Neural Networks, 5:241-259, Pergamon Press. <p>
  *
  * Valid options are:<p>
@@ -46,7 +46,7 @@ import weka.core.*;
  * (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 public class Stacking extends Classifier implements OptionHandler {
 
   /** The meta classifier. */

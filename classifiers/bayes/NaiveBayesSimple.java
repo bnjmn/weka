@@ -23,13 +23,15 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for building and using a Naive Bayes classifier. <p>
+ * Class for building and using a simple Naive Bayes classifier.
+ * Numeric attributes are modelled by a normal distribution. For more
+ * information, see<p>
  *
- * Reference: Richard Duda and Peter Hart (1973).<i>Pattern
+ * Richard Duda and Peter Hart (1973).<i>Pattern
  * Classification and Scene Analysis</i>. Wiley, New York.
 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class NaiveBayesSimple extends DistributionClassifier {
 
