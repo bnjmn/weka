@@ -16,46 +16,32 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /**
  * Class for building and using a decision stump.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.3 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler {
 
-  // =================
-  // Private variables
-  // =================
-
   /** The attribute used for classification. */
-
   private int m_AttIndex;
 
   /** The split point (index respectively). */
-
   private double m_SplitPoint;
 
   /** The distribution of class values or the means in each subset. */
-
   private double[][] m_Distribution;
 
   /** The instances used for training. */
-
   private Instances theInstances;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Generates the classifier.
@@ -84,16 +70,13 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // For each attribute
-    
     for (int i = 0; i < theInstances.numAttributes(); i++) {
       if (i != theInstances.classIndex()) {
 	
 	// Reserve space for distribution.
-	
 	m_Distribution = new double[3][numClasses];
 
 	// Compute value of criterion for best split on attribute
-	
 	if (theInstances.attribute(i).isNominal()) {
 	  currVal = findSplitNominal(i);
 	} else {
@@ -112,7 +95,6 @@ public class DecisionStump extends DistributionClassifier
     }
     
     // Set attribute, split point and distribution.
-    
     m_AttIndex = bestAtt;
     m_SplitPoint = bestPoint;
     m_Distribution = bestDist;
@@ -123,7 +105,6 @@ public class DecisionStump extends DistributionClassifier
     }
     
     // Save memory
-    
     theInstances = new Instances(theInstances, 0);
   }
 
@@ -160,7 +141,6 @@ public class DecisionStump extends DistributionClassifier
    *
    * @return a description of the classifier as a string.
    */
-
   public String toString(){
     
     try {
@@ -209,10 +189,6 @@ public class DecisionStump extends DistributionClassifier
       return "Can't print decision stump classifier!";
     }
   }
- 
-  // ===============
-  // Private methods
-  // ===============
 
   /** 
    * Prints a class distribution.
@@ -293,7 +269,6 @@ public class DecisionStump extends DistributionClassifier
     int numMissing = 0;
 
     // Compute counts for all the values
-
     for (int i = 0; i < theInstances.numInstances(); i++) {
       Instance inst = theInstances.instance(i);
       if (inst.isMissing(index)) {
@@ -307,7 +282,6 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Compute sum of counts
-
     for (int i = 0; i < theInstances.attribute(index).numValues() + 1; i++) {
       for (int j = 0; j < theInstances.numClasses(); j++) {
 	sumCounts[j] += counts[i][j];
@@ -315,7 +289,6 @@ public class DecisionStump extends DistributionClassifier
     }
     
     // Make split counts for each possible split and evaluate
-
     System.arraycopy(counts[theInstances.attribute(index).numValues()], 0,
 		     m_Distribution[2], 0, theInstances.numClasses());
     for (int i = 0; i < theInstances.attribute(index).numValues(); i++) {
@@ -335,7 +308,6 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // No missing values in training data.
-
     if (numMissing == 0) {
       System.arraycopy(sumCounts, 0, bestDist[2], 0, 
 		       theInstances.numClasses());
@@ -365,7 +337,6 @@ public class DecisionStump extends DistributionClassifier
     double[][] bestDist = new double[3][1];
 
     // Compute counts for all the values
-
     for (int i = 0; i < theInstances.numInstances(); i++) {
       Instance inst = theInstances.instance(i);
       if (inst.isMissing(index)) {
@@ -383,7 +354,6 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Compute sum of counts without missing ones
-
     for (int i = 0; i < theInstances.attribute(index).numValues(); i++) {
       totalSumOfWeights += weightsPerValue[i];
       totalSumSquares += sumsSquaresPerValue[i];
@@ -391,7 +361,6 @@ public class DecisionStump extends DistributionClassifier
     }
     
     // Make split counts for each possible split and evaluate
-
     for (int i = 0; i < theInstances.attribute(index).numValues(); i++) {
       
       m_Distribution[0][0] = sumsPerValue[i];
@@ -407,15 +376,13 @@ public class DecisionStump extends DistributionClassifier
 	bestVal = currVal;
 	m_SplitPoint = (double)i;
 	for (int j = 0; j < 3; j++) {
-	  bestDist[j][0] = m_Distribution[j][0] / sumOfWeights[j];
+	  if (!Utils.eq(sumOfWeights[j], 0)) {
+	    bestDist[j][0] = m_Distribution[j][0] / sumOfWeights[j];
+	  } else {
+	    bestDist[j][0] = totalSum / totalSumOfWeights;
+	  }
 	}
       }
-    }
-
-    // No missing values in training data.
-
-    if (Utils.eq(sumOfWeights[2], 0)) {
-      bestDist[2][0] = totalSum / totalSumOfWeights;
     }
 
     m_Distribution = bestDist;
@@ -454,7 +421,6 @@ public class DecisionStump extends DistributionClassifier
     double[][] bestDist = new double[3][theInstances.numClasses()];
 
     // Compute counts for all the values
-
     for (int i = 0; i < theInstances.numInstances(); i++) {
       Instance inst = theInstances.instance(i);
       if (!inst.isMissing(index)) {
@@ -467,11 +433,9 @@ public class DecisionStump extends DistributionClassifier
     System.arraycopy(m_Distribution[1], 0, sum, 0, theInstances.numClasses());
 
     // Sort instances
-
     theInstances.sort(index);
     
     // Make split counts for each possible split and evaluate
-
     for (int i = 0; i < theInstances.numInstances() - (numMissing + 1); i++) {
       Instance inst = theInstances.instance(i);
       Instance instPlusOne = theInstances.instance(i + 1);
@@ -492,7 +456,6 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // No missing values in training data.
-
     if (numMissing == 0) {
       System.arraycopy(sum, 0, bestDist[2], 0, theInstances.numClasses());
     }
@@ -515,10 +478,9 @@ public class DecisionStump extends DistributionClassifier
     int numMissing = 0;
     double[] sumsSquares = new double[3], sumOfWeights = new double[3];
     double[][] bestDist = new double[3][1];
-    double meanNoMissing;
+    double totalSum = 0, totalSumOfWeights = 0;
 
     // Compute counts for all the values
-
     for (int i = 0; i < theInstances.numInstances(); i++) {
       Instance inst = theInstances.instance(i);
       if (!inst.isMissing(index)) {
@@ -533,15 +495,14 @@ public class DecisionStump extends DistributionClassifier
 	sumOfWeights[2] += inst.weight();
 	numMissing++;
       }
+      totalSumOfWeights += inst.weight();
+      totalSum += inst.classValue() * inst.weight();
     }
-    meanNoMissing = m_Distribution[1][0] / sumOfWeights[1];
 
     // Sort instances
-
     theInstances.sort(index);
     
     // Make split counts for each possible split and evaluate
-
     for (int i = 0; i < theInstances.numInstances() - (numMissing + 1); i++) {
       Instance inst = theInstances.instance(i);
       Instance instPlusOne = theInstances.instance(i + 1);
@@ -558,16 +519,14 @@ public class DecisionStump extends DistributionClassifier
 	  m_SplitPoint = currCutPoint;
 	  bestVal = currVal;
 	  for (int j = 0; j < 3; j++) {
-	    bestDist[j][0] = m_Distribution[j][0] / sumOfWeights[j];
+	    if (!Utils.eq(sumOfWeights[j], 0)) {
+	      bestDist[j][0] = m_Distribution[j][0] / sumOfWeights[j];
+	    } else {
+	      bestDist[j][0] = totalSum / totalSumOfWeights;
+	    }
 	  }
 	}
       }
-    }
-
-    // No missing values in training data
-    
-    if (numMissing == 0) {
-      bestDist[2][0] = meanNoMissing;
     }
 
     m_Distribution = bestDist;
@@ -612,15 +571,10 @@ public class DecisionStump extends DistributionClassifier
     }
   }
  
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 
