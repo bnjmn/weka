@@ -87,7 +87,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -123,6 +123,9 @@ public class ResultsPanel extends JPanel {
   
   /** The model embedded in m_TestsList */
   protected DefaultListModel m_TestsModel = new DefaultListModel();
+  
+  /** The model embedded in m_DisplayedList */
+  protected DefaultListModel m_DisplayedModel = new DefaultListModel();
 
   /** Displays the currently selected column names for the scheme & options */
   protected JLabel m_DatasetKeyLabel = new JLabel("Row",
@@ -153,8 +156,14 @@ public class ResultsPanel extends JPanel {
   /** Lets the user select which scheme to base comparisons against */
   protected JButton m_TestsButton = new JButton("Select base...");
 
+  /** Lets the user select which schemes are compared to base */
+  protected JButton m_DisplayedButton = new JButton("Select");
+
   /** Holds the list of schemes to base the test against */
   protected JList m_TestsList = new JList(m_TestsModel);
+
+  /** Holds the list of schemes to display */
+  protected JList m_DisplayedList = new JList(m_DisplayedModel);
 
   /** Lets the user select which performance measure to analyze */
   protected JComboBox m_CompareCombo = new JComboBox(m_CompareModel);
@@ -166,6 +175,12 @@ public class ResultsPanel extends JPanel {
       or not */
   protected JCheckBox m_ShowStdDevs = 
     new JCheckBox("");
+  
+  /** the different types for outputting the comparison tables */
+  protected final static String[] m_OutputFormats = {"Plain Text", "LaTeX", "CSV"};
+  
+  /** lets the user choose the format for the output */
+  protected JComboBox m_OutputFormat = new JComboBox(m_OutputFormats);
 
   /** Click to start the test */
   protected JButton m_PerformBut = new JButton("Perform test");
@@ -295,6 +310,16 @@ public class ResultsPanel extends JPanel {
 	}
       });
 
+    m_DisplayedButton.setEnabled(false);
+    m_DisplayedButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setDisplayedFromDialog();
+      }
+      });
+
+    m_ShowStdDevs.setEnabled(false);
+    m_OutputFormat.setEnabled(false);
+    
     m_PerformBut.setEnabled(false);
     m_PerformBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -409,8 +434,7 @@ public class ResultsPanel extends JPanel {
     gbL.setConstraints(m_TestsButton, gbC);
     p3.add(m_TestsButton);
 
-
-    lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
+    lab = new JLabel("Displayed Columns", SwingConstants.RIGHT);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = 6;     gbC.gridx = 0;
@@ -418,12 +442,41 @@ public class ResultsPanel extends JPanel {
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.WEST;
+    gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 6;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
+    gbL.setConstraints(m_DisplayedButton, gbC);
+    p3.add(m_DisplayedButton);
+
+
+    lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 7;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 7;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_ShowStdDevs, gbC);
     p3.add(m_ShowStdDevs);
 
+    lab = new JLabel("Output Format", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 8;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.gridy = 8;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
+    gbL.setConstraints(m_OutputFormat, gbC);
+    p3.add(m_OutputFormat);
+    
     JPanel output = new JPanel();
     output.setLayout(new BorderLayout());
     output.setBorder(BorderFactory.createTitledBorder("Test output"));
@@ -569,6 +622,7 @@ public class ResultsPanel extends JPanel {
 	lm.addElement(index.instance(i).toString());
       }
       JList jl = new JList(lm);
+      jl.setSelectedIndex(0);
       ListSelectorDialog jd = new ListSelectorDialog(null, jl);
       int result = jd.showDialog();
       if (result != ListSelectorDialog.APPROVE_OPTION) {
@@ -780,6 +834,9 @@ public class ResultsPanel extends JPanel {
    */
   protected void setTTester() {
     
+    // default is to display all columns
+    m_TTester.setDisplayedResultsets(null);       
+
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date())
       + "Available resultsets";
@@ -797,11 +854,21 @@ public class ResultsPanel extends JPanel {
 	} */
       m_TestsModel.addElement(tname);
     }
+    
+    m_DisplayedModel.removeAllElements();
+    for (int i = 0; i < m_TestsModel.size(); i++)
+      m_DisplayedModel.addElement(m_TestsModel.elementAt(i));
+    
     m_TestsModel.addElement("Summary");
     m_TestsModel.addElement("Ranking");
-    m_TestsList.setSelectedIndex(0);
-    m_TestsButton.setEnabled(true);
 
+    m_TestsList.setSelectedIndex(0);
+    m_DisplayedList.setSelectionInterval(0, m_DisplayedModel.size() - 1);
+    
+    m_TestsButton.setEnabled(true);
+    m_DisplayedButton.setEnabled(true);
+    m_ShowStdDevs.setEnabled(true);
+    m_OutputFormat.setEnabled(true);
     m_PerformBut.setEnabled(true);
     
   }
@@ -833,6 +900,9 @@ public class ResultsPanel extends JPanel {
     outBuff.append("\n");
     m_History.addResult(name, outBuff);
     m_History.setSingle(name);
+    m_TTester.setDisplayedResultsets(m_DisplayedList.getSelectedIndices());
+    m_TTester.setProduceLatex(m_OutputFormat.getSelectedIndex() == 1);
+    m_TTester.setProduceCSV(m_OutputFormat.getSelectedIndex() == 2);
     try {
       if (tType < m_TTester.getNumResultsets()) {
 	outBuff.append(m_TTester.multiResultsetFull(tType, compareCol));
@@ -907,6 +977,13 @@ public class ResultsPanel extends JPanel {
 
   public void setTestBaseFromDialog() {
     ListSelectorDialog jd = new ListSelectorDialog(null, m_TestsList);
+
+    // Open the dialog
+    jd.showDialog();
+  }
+
+  public void setDisplayedFromDialog() {
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_DisplayedList);
 
     // Open the dialog
     jd.showDialog();
