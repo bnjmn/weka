@@ -33,16 +33,24 @@ import weka.classifiers.DistributionClassifier;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MarginCurve {
 
   /**
-   * Calculates the cumulative margin distribution for the set of predictions,
-   * returning the result as a set of Instances.
+   * Calculates the cumulative margin distribution for the set of
+   * predictions, returning the result as a set of Instances. The
+   * structure of these Instances is as follows:<p> <ul> 
+   * <li> <b>Margin</b> contains the margin value (which should be plotted
+   * as an x-coordinate) 
+   * <li> <b>Current</b> contains the count of instances with the current 
+   * margin (plot as y axis)
+   * <li> <b>Cumulative</b> contains the count of instances with margin
+   * less than or equal to the current margin (plot as y axis)
+   * </ul> <p>
    *
    * @return datapoints as a set of instances, null if no predictions
-   * have been made.
+   * have been made.  
    */
   public Instances getCurve(FastVector predictions) {
 
@@ -70,6 +78,12 @@ public class MarginCurve {
     return insts;
   }
 
+  /**
+   * Pulls all the margin values out of a vector of NominalPredictions.
+   *
+   * @param predictions a FastVector containing NominalPredictions
+   * @return an array of margin values.
+   */
   private double [] getMargins(FastVector predictions) {
 
     // sort by predicted probability of the desired class.
@@ -81,6 +95,11 @@ public class MarginCurve {
     return margins;
   }
 
+  /**
+   * Creates an Instances object with the attributes we will be calculating.
+   *
+   * @return the Instances structure.
+   */
   private Instances makeHeader() {
 
     FastVector fv = new FastVector();
@@ -90,6 +109,15 @@ public class MarginCurve {
     return new Instances("Margin Curve", fv, 100);
   }
   
+  /**
+   * Creates an Instance object with the attributes calculated.
+   *
+   * @param margin the margin for this data point.
+   * @param current the number of instances with this margin.
+   * @param cumulative the number of instances with margin less than or equal
+   * to this margin.
+   * @return the Instance object.
+   */
   private Instance makeInstance(double margin, int current, int cumulative) {
 
     int count = 0;
