@@ -35,7 +35,7 @@ import java.io.*;
  * the data models of the two instances exactly the same), is low. 
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EuclideanDistance extends DistanceFunction
                                implements 
@@ -53,7 +53,6 @@ public class EuclideanDistance extends DistanceFunction
    * @param data the instances the distance function should work on
     */
   public EuclideanDistance() {
-    
   }
 
   /**
@@ -125,11 +124,11 @@ public class EuclideanDistance extends DistanceFunction
    */
   public double distance(Instance first, Instance second) throws Exception {
 
-    if (!Instances.inRanges(first,m_Ranges))
-	OOPS("Not in ranges");
+    //if (!Instances.inRanges(first,m_Ranges))
+    //	OOPS("Not in ranges");
     //OOPS(" dist first  "+ first);
-    if (!Instances.inRanges(second,m_Ranges))
-	OOPS("Not in ranges");
+    //if (!Instances.inRanges(second,m_Ranges))
+    //	OOPS("Not in ranges");
     //OOPS(" dist second "+ second);
     double distance = 0;
     int firstI, secondI;
@@ -216,7 +215,7 @@ public class EuclideanDistance extends DistanceFunction
     for (int i = 0; i < m_Model.numAttributes(); i++) {
       if (m_Model.classIndex() != i) {
 	if (!m_Model.attribute(i).isNumeric())
-	  throw new Exception("Euclidean Distance allows only numeric attributes.");
+	  throw new Exception("Euclidean Distance only allows numeric attributes.");
       }
     }
   }
