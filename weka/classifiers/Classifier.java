@@ -1,6 +1,6 @@
 /*
  *    Classifier.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 Eibe Frank, Len Trigg
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,8 @@ import weka.core.*;
  * Weka extend this class.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.4 $
  */
 public abstract class Classifier implements Cloneable, Serializable {
  
@@ -71,20 +72,9 @@ public abstract class Classifier implements Cloneable, Serializable {
   public static Classifier forName(String classifierName,
 				   String [] options) throws Exception {
 
-    Classifier c = null;
-    try {
-      c = (Classifier)Class.forName(classifierName).newInstance();
-    } catch (Exception ex) {
-      throw new Exception("Can't set Classifier with class name: "
-			  + classifierName);
-    }
-    if ((c instanceof OptionHandler)
-	&& (options != null)) {
-      String [] classifierOptions = Utils.partitionOptions(options);
-      ((OptionHandler)c).setOptions(classifierOptions);
-      Utils.checkForRemainingOptions(classifierOptions);
-    }
-    return c;
+    return (Classifier)Utils.forName(Classifier.class,
+				     classifierName,
+				     options);
   }
 
   /**
