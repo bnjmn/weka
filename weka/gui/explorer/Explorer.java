@@ -61,7 +61,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class Explorer extends JPanel {
 
@@ -105,7 +105,7 @@ public class Explorer extends JPanel {
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
     m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg, Mark Hall and Eibe Frank");
-    m_LogPanel.logMessage("(c) 1999 The University of Waikato, Hamilton,"
+    m_LogPanel.logMessage("(c) 2001 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
     m_LogPanel.logMessage("email: wekasupport@cs.waikato.ac.nz");
@@ -133,8 +133,8 @@ public class Explorer extends JPanel {
     m_TabbedPane.addTab("Visualize", null, m_VisualizePanel,
 		      "Explore the data");
     m_TabbedPane.setSelectedIndex(0);
-    m_TabbedPane.setEnabledAt(1, false);
-    m_TabbedPane.setEnabledAt(2, false);
+    m_TabbedPane.setEnabledAt(1, true);
+    m_TabbedPane.setEnabledAt(2, true);
     m_TabbedPane.setEnabledAt(3, false);
     m_TabbedPane.setEnabledAt(4, false);
     m_TabbedPane.setEnabledAt(5, false);
