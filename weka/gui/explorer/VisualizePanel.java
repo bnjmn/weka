@@ -35,6 +35,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Font;
+import java.awt.event.InputEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
@@ -84,7 +85,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -149,11 +150,11 @@ public class VisualizePanel extends JPanel {
      */
     private void setFonts(Graphics gx) {
       if (m_labelMetrics == null) {
-	m_labelFont = new Font("Sanserif", Font.PLAIN, 12);
+	m_labelFont = new Font("Monospaced", Font.PLAIN, 12);
 	m_labelMetrics = gx.getFontMetrics(m_labelFont);
 	int hf = m_labelMetrics.getAscent();
 	if (getHeight() < (3*hf)) {
-	  m_labelFont = new Font("Sanserif",Font.PLAIN,10);
+	  m_labelFont = new Font("Monospaced",Font.PLAIN,11);
 	  m_labelMetrics = gx.getFontMetrics(m_labelFont);
 	}
       }
@@ -480,13 +481,22 @@ public class VisualizePanel extends JPanel {
                                           Color.darkGray,
                                           Color.black};
 
-
+    private JFrame m_InstanceInfo = null;
+    private JTextArea m_InstanceInfoText = new JTextArea();
+    
     /** Constructor */
     public PlotPanel() {
       setBackground(Color.white);
+      m_InstanceInfoText.setFont(new Font("Monospaced", Font.PLAIN,12));
+      m_InstanceInfoText.setEditable(false);
       addMouseListener(new MouseAdapter() {
 	  public void mouseClicked(MouseEvent e) {
-	    searchPoints(e.getX(),e.getY());
+	    if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == 
+		InputEvent.BUTTON1_MASK) {
+	      searchPoints(e.getX(),e.getY(), false);
+	    } else {
+	      searchPoints(e.getX(),e.getY(), true);
+	    }
 	  }
 	});
     }
@@ -570,7 +580,7 @@ public class VisualizePanel extends JPanel {
      */
     private void setFonts(Graphics gx) {
       if (m_labelMetrics == null) {
-	m_labelFont = new Font("Sanserif", Font.PLAIN, 12);
+	m_labelFont = new Font("Monospaced", Font.PLAIN, 12);
 	m_labelMetrics = gx.getFontMetrics(m_labelFont);
       }
       gx.setFont(m_labelFont);
@@ -582,8 +592,10 @@ public class VisualizePanel extends JPanel {
      * corresponding to the points under the clicked point
      * @param x the x value of the clicked point
      * @param y the y value of the clicked point
+     * @param newFrame true if instance info is to be displayed in a
+     * new frame.
      */
-    private void searchPoints(int x, int y) {
+    private void searchPoints(int x, int y, final boolean newFrame) {
       if (m_pointLookup != null) {
 	int longest=0;
 	for (int j=0;j<m_plotInstances.numAttributes();j++) {
@@ -656,22 +668,36 @@ public class VisualizePanel extends JPanel {
 	    }
 	  }
 	}
+
 	if (insts.length() > 0) {
-	  JTextArea jt = new JTextArea();
-	  jt.setFont(new Font("Dialoginput", Font.PLAIN,10));
-	  jt.setEditable(false);
-	  jt.setText(insts.toString());
-	  final JFrame jf = new JFrame("Weka: Instance info");
-	  jf.addWindowListener(new WindowAdapter() {
-	    public void windowClosing(WindowEvent e) {
-	      jf.dispose();
+	  // Pop up a new frame
+	  if (newFrame || m_InstanceInfo == null) {
+	    JTextArea jt = new JTextArea();
+	    jt.setFont(new Font("Monospaced", Font.PLAIN,12));
+	    jt.setEditable(false);
+	    jt.setText(insts.toString());
+	    final JFrame jf = new JFrame("Weka : Instance info");
+	    jf.addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent e) {
+		  jf.dispose();
+		  if (!newFrame) {
+		    m_InstanceInfo = null;
+		  }
+		}
+	      });
+	    jf.getContentPane().setLayout(new BorderLayout());
+	    jf.getContentPane().add(new JScrollPane(jt), BorderLayout.CENTER);
+	    jf.pack();
+	    jf.setSize(320, 400);
+	    jf.setVisible(true);
+	    if (m_InstanceInfo == null) {
+	      m_InstanceInfo = jf;
+	      m_InstanceInfoText = jt;
 	    }
-	  });
-	  jf.getContentPane().setLayout(new BorderLayout());
-	  jf.getContentPane().add(new JScrollPane(jt), BorderLayout.CENTER);
-	  jf.pack();
-	  jf.setSize(320, 400);
-	  jf.setVisible(true);
+	  }  else {
+	    // Overwrite info in existing frame	  
+	    m_InstanceInfoText.setText(insts.toString());
+	  }
 	}
       }
     }

@@ -54,7 +54,7 @@ import javax.swing.event.ListSelectionListener;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -249,7 +249,7 @@ public class ResultHistoryPanel extends JPanel {
     if ((buff != null) && (currentText == null)) {
       // Open the frame.
       JTextArea ta = new JTextArea();
-      ta.setFont(new Font("Dialoginput", Font.PLAIN, 10));
+      ta.setFont(new Font("Monospaced", Font.PLAIN, 12));
       ta.setEditable(false);
       ta.setText(buff.toString());
       m_FramedOutput.put(name, ta);

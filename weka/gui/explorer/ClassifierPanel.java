@@ -100,7 +100,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -265,7 +265,7 @@ public class ClassifierPanel extends JPanel {
 
     // Connect / configure the components
     m_OutText.setEditable(false);
-    m_OutText.setFont(new Font("Dialoginput", Font.PLAIN, 10));
+    m_OutText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutText.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {

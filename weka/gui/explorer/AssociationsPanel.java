@@ -82,7 +82,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -140,7 +140,7 @@ public class AssociationsPanel extends JPanel {
 
     // Connect / configure the components
     m_OutText.setEditable(false);
-    m_OutText.setFont(new Font("Dialoginput", Font.PLAIN, 10));
+    m_OutText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutText.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
