@@ -28,6 +28,10 @@ import javax.swing.JPanel;
 import java.util.Vector;
 import java.util.Random;
 
+import com.sun.image.codec.jpeg.*;
+import java.awt.image.*;
+import java.io.*;
+
 import weka.core.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
@@ -167,6 +171,26 @@ public class BoundaryPanel extends JPanel {
 				    DEFAULT_COLORS[i].getBlue()));
     }
     m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
+    setToolTipText("bbb");
+  }
+
+  public String getToolTipText(MouseEvent event) {
+    if (m_probabilityCache == null) {
+      return null;
+    }
+
+    if (m_probabilityCache[event.getY()][event.getX()] == null) {
+      return null;
+    }
+
+    String pVec = "(X: "+event.getX()+" Y: "+event.getY()+") ";
+    // construct a string holding the probability vector
+    for (int i = 0; i < m_trainingData.classAttribute().numValues(); i++) {
+      pVec += 
+	Utils.doubleToString(m_probabilityCache[event.getY()][event.getX()][i],
+			     3)+" ";
+    }
+    return pVec;
   }
 
   /**
@@ -429,6 +453,8 @@ public class BoundaryPanel extends JPanel {
 	      if (m_plotTrainingData) {
 		plotTrainingData();
 	      }
+	      
+	      //	      saveImage("test.jpg");
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    } finally {
@@ -700,6 +726,29 @@ public class BoundaryPanel extends JPanel {
     replotThread.start();      
   }
 
+  protected void saveImage(String fileName) {
+    try {
+      BufferedOutputStream out = 
+	new BufferedOutputStream(new FileOutputStream(fileName));
+      
+      JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+
+      BufferedImage bi = new BufferedImage(m_panelWidth, m_panelHeight,
+					   BufferedImage.TYPE_INT_RGB);
+      Graphics2D gr2 = bi.createGraphics();
+      gr2.drawImage(m_osi, 0, 0, m_panelWidth, m_panelHeight, null);
+
+      JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(bi);
+      param.setQuality(1.0f, false);
+      encoder.setJPEGEncodeParam(param);
+      encoder.encode(bi);
+      out.flush();
+      out.close();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
   /**
    * Main method for testing this class
    *
@@ -707,15 +756,46 @@ public class BoundaryPanel extends JPanel {
    */
   public static void main (String [] args) {
     try {
-      if (args.length < 4) {
+      if (args.length < 7) {
 	System.err.println("Usage : BoundaryPanel <dataset> "
-			   +"<class col> <xAtt> <yAtt>");
+			   +"<class col> <xAtt> <yAtt> <display width> "
+			   +"<display height> <classifier "
+			   +"[classifier options]>");
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
 	new javax.swing.JFrame("Weka classification boundary visualizer");
       jf.getContentPane().setLayout(new BorderLayout());
-      final BoundaryPanel bv = new BoundaryPanel(200,200);
+
+      System.err.println("Loading instances from : "+args[0]);
+      java.io.Reader r = new java.io.BufferedReader(
+			 new java.io.FileReader(args[0]));
+      final Instances i = new Instances(r);
+      i.setClassIndex(Integer.parseInt(args[1]));
+
+      //      bv.setClassifier(new Logistic());
+      final int xatt = Integer.parseInt(args[2]);
+      final int yatt = Integer.parseInt(args[3]);
+      int panelWidth = Integer.parseInt(args[4]);
+      int panelHeight = Integer.parseInt(args[5]);
+
+      final String classifierName = args[6];
+      final BoundaryPanel bv = new BoundaryPanel(panelWidth,panelHeight);
+      bv.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    classifierName = 
+	      classifierName.substring(classifierName.lastIndexOf('.')+1, 
+				       classifierName.length());
+	    bv.saveImage(classifierName+"_"+i.relationName()
+			 +"_X"+xatt+"_Y"+yatt+".jpg");
+	  }
+	});
+
+      bv.setDataGenerator(new KDDataGenerator());
+      bv.setTrainingData(i);
+      bv.setXAttribute(xatt);
+      bv.setYAttribute(yatt);
+
       jf.getContentPane().add(bv, BorderLayout.CENTER);
       jf.setSize(bv.getMinimumSize());
       //      jf.setSize(200,200);
@@ -731,16 +811,16 @@ public class BoundaryPanel extends JPanel {
       //      bv.initialize();
       bv.repaint();
       
-      System.err.println("Loading instances from : "+args[0]);
-      java.io.Reader r = new java.io.BufferedReader(
-			 new java.io.FileReader(args[0]));
-      Instances i = new Instances(r);
-      i.setClassIndex(Integer.parseInt(args[1]));
-      bv.setTrainingData(i);
-      bv.setClassifier(new Logistic());
-      bv.setDataGenerator(new KDDataGenerator());
-      bv.setXAttribute(Integer.parseInt(args[2]));
-      bv.setYAttribute(Integer.parseInt(args[3]));
+
+      String [] argsR = null;
+      if (args.length > 7) {
+	argsR = new String [args.length-7];
+	for (int j = 7; j < args.length; j++) {
+	  argsR[j-7] = args[j];
+	}
+      }
+      Classifier c = Classifier.forName(args[6], argsR);
+      bv.setClassifier((DistributionClassifier)c);
       bv.start();
     } catch (Exception ex) {
       ex.printStackTrace();
