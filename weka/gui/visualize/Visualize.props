@@ -17,3 +17,13 @@ weka.gui.visualize.AttributePanel.barColour=black
 # weka.gui.visualize.VisualizePanel.<relation name>.XDimension=<attribute name>
 # weka.gui.visualize.VisualizePanel.<relation name>.YDimension=<attribute name>
 # weka.gui.visualize.VisualizePanel.<relation name>.ColourDimension=<attribute name>
+
+# Defaults for threshold curve plots (note escaped space chars)
+weka.gui.visualize.VisualizePanel.Threshold\ Curve.XDimension=Recall
+weka.gui.visualize.VisualizePanel.Threshold\ Curve.YDimension=Precision
+weka.gui.visualize.VisualizePanel.Threshold\ Curve.ColourDimension=Threshold
+
+# Defaults for margin curve plots (note escaped space chars)
+weka.gui.visualize.VisualizePanel.Margin\ Curve.XDimension=Margin
+weka.gui.visualize.VisualizePanel.Margin\ Curve.YDimension=Cumulative
+weka.gui.visualize.VisualizePanel.Margin\ Curve.ColourDimension=Margin
