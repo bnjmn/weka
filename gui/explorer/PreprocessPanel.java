@@ -69,7 +69,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -260,7 +260,7 @@ public class PreprocessPanel extends JPanel {
 
     m_BaseInstances = inst;
     try {
-      SwingUtilities.invokeAndWait(new Runnable() {
+      Runnable r = new Runnable() {
 	public void run() {
 	  m_BaseInstPanel.setInstances(m_BaseInstances);
 	  m_AttPanel.setInstances(m_BaseInstances);
@@ -275,7 +275,12 @@ public class PreprocessPanel extends JPanel {
 	  m_ReplaceBut.setEnabled(false);
 	  m_SaveBut.setEnabled(false);
 	}
-      });
+      };
+      if (SwingUtilities.isEventDispatchThread()) {
+	r.run();
+      } else {
+	SwingUtilities.invokeAndWait(r);
+      }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
 				    "Problem setting base instances:\n"
