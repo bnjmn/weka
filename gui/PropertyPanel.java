@@ -34,7 +34,7 @@ import javax.swing.BorderFactory;
  * Support for drawing a property value in a component.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PropertyPanel extends JPanel {
 
@@ -58,12 +58,14 @@ public class PropertyPanel extends JPanel {
     m_Editor = pe;
     addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent evt) {
-	if (m_PD == null) {
-	  int x = getLocationOnScreen().x;
-	  int y = getLocationOnScreen().y;
-	  m_PD = new PropertyDialog(m_Editor, x, y);
-	} else {
-	  m_PD.setVisible(true);
+	if (m_Editor.getValue() != null) {
+	  if (m_PD == null) {
+	    int x = getLocationOnScreen().x;
+	    int y = getLocationOnScreen().y;
+	    m_PD = new PropertyDialog(m_Editor, x, y);
+	  } else {
+	    m_PD.setVisible(true);
+	  }
 	}
       }
     });
