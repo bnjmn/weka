@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -54,7 +54,10 @@ public class CrossValidationFoldMaker
   private Thread m_foldThread = null;
 
   public CrossValidationFoldMaker() {
-    super();
+    m_visual.loadIcons(BeanVisual.ICON_PATH
+		       +"CrossValidationFoldMaker.gif",
+		       BeanVisual.ICON_PATH
+		       +"CrossValidationFoldMaker_animated.gif");
     m_visual.setText("CrossValidationFoldMaker");
   }
 

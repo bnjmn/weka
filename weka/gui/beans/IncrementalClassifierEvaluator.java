@@ -43,7 +43,7 @@ import java.awt.*;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -67,7 +67,10 @@ public class IncrementalClassifierEvaluator
   private double m_max = Double.MIN_VALUE;
 
   public IncrementalClassifierEvaluator() {
-    super();
+     m_visual.loadIcons(BeanVisual.ICON_PATH
+		       +"IncrementalClassifierEvaluator.gif",
+		       BeanVisual.ICON_PATH
+		       +"IncrementalClassifierEvaluator_animated.gif");
     m_visual.setText("IncrementalClassifierEvaluator");
   }
 
