@@ -35,7 +35,7 @@ import java.awt.image.*;
  * simple bird animation while their are active tasks
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class WekaTaskMonitor extends JPanel implements TaskLogger {
 
@@ -67,10 +67,10 @@ public class WekaTaskMonitor extends JPanel implements TaskLogger {
     m_iconAnimated = new ImageIcon(pic2);
     
     m_MonitorLabel = new JLabel(" x "+m_ActiveTasks,m_iconStationary,SwingConstants.CENTER);
-    setBorder(BorderFactory.createCompoundBorder(
-		 BorderFactory.createTitledBorder("Weka Tasks"),
-		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
-		 ));
+//      setBorder(BorderFactory.createCompoundBorder(
+//  		 BorderFactory.createTitledBorder("Weka Tasks"),
+//  		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
+//  		 ));
 
     setLayout(new BorderLayout());
     Dimension d = m_MonitorLabel.getPreferredSize();
