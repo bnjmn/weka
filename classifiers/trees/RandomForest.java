@@ -47,7 +47,7 @@ import java.util.*;
  * Random number seed (default 1). <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RandomForest extends Classifier 
   implements OptionHandler, Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -69,6 +69,27 @@ public class RandomForest extends Classifier
   protected Bagging m_bagger = null;
 
   /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for constructing a forest of random trees. For more information "
+      + "see: \n\n"
+      + "Leo Breiman. \"Random Forests\". Machine Learning 45 (1):5-32, October 2001.";
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numTreesTipText() {
+    return "The number of trees to be generated.";
+  }
+
+  /**
    * Get the value of numTrees.
    *
    * @return Value of numTrees.
@@ -86,6 +107,15 @@ public class RandomForest extends Classifier
   public void setNumTrees(int newNumTrees) {
     
     m_numTrees = newNumTrees;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFeaturesTipText() {
+    return "The number of attributes to be used in random selection (see RandomTree).";
   }
 
   /**
@@ -106,6 +136,15 @@ public class RandomForest extends Classifier
   public void setNumFeatures(int newNumFeatures) {
     
     m_numFeatures = newNumFeatures;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The random number seed to be used.";
   }
 
   /**

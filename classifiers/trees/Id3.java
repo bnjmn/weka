@@ -36,7 +36,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class Id3 extends Classifier {
 
@@ -54,6 +54,21 @@ public class Id3 extends Classifier {
 
   /** Class attribute of dataset. */
   private Attribute m_ClassAttribute;
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for constructing an unpruned decision tree based on the ID3 "
+      + "algorithm. Can only deal with nominal attributes. No missing values allowed. "
+      + "Note: empty leaves may result in unclassified instances. For more information "
+      + "see: \n\n"
+      + " R. Quinlan (1986). \"Induction of decision "
+      + "trees\". Machine Learning. Vol.1, No.1, pp. 81-106";
+  }
 
   /**
    * Builds Id3 decision tree classifier.

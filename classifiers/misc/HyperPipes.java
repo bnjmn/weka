@@ -44,7 +44,7 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */ 
 public class HyperPipes extends Classifier {
 
@@ -57,6 +57,23 @@ public class HyperPipes extends Classifier {
   /** Stores the HyperPipe for each class */
   protected HyperPipe [] m_HyperPipes;
 
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Class implementing a HyperPipe classifier. For each category a "
+    +  "HyperPipe is constructed that contains all points of that category "
+      + "(essentially records the attribute bounds observed for each category). "
+      + "Test instances are classified according to the category that \"most "
+      + "contains the instance\". " 
+      + "Does not handle numeric class, or missing values in test cases. Extremely "
+      + "simple algorithm, but has the advantage of being extremely fast, and "
+      + "works quite well when you have \"smegloads\" of attributes.";
+  }
 
   /**
    * Represents an n-dimensional structure that bounds all instances 

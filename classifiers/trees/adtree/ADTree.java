@@ -54,7 +54,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ADTree
   extends Classifier implements OptionHandler, Drawable,
@@ -62,6 +62,24 @@ public class ADTree
 				WeightedInstancesHandler,
 				IterativeClassifier
 {
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for generating an alternating decision tree. The basic "
+      + "algorithm is based on:\n\n"
+      + "Freund, Y., Mason, L.: \"The alternating decision tree learning algorithm\". "
+      + "Proceeding of the Sixteenth International Conference on Machine Learning, "
+      + "Bled, Slovenia, (1999) 124-133.\n\n"
+      + "This version currently only supports two-class problems. The number of boosting "
+      + "iterations needs to be manually tuned to suit the dataset and the desired "
+      + "complexity/accuracy tradeoff. Induction of the trees has been optimized, and heuristic "
+      + "search methods have been introduced to speed learning.";
+  }
 
   /** The search modes */
   public static final int SEARCHPATH_ALL = 0;
@@ -876,15 +894,6 @@ public class ADTree
     try {classAttribute = m_trainInstances.classAttribute();} catch (Exception x){};
     return ("-ve = " + classAttribute.value(0) +
 	    ", +ve = " + classAttribute.value(1));
-  }
-
-  /**
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-
-    return "Builds an alternating decision tree, optimized for 2-class problems only.";
   }
 
   /**

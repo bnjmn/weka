@@ -67,7 +67,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class J48 extends Classifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -109,6 +109,19 @@ public class J48 extends Classifier implements OptionHandler,
 
   /** Random number seed for reduced-error pruning. */
   private int m_Seed = 1;
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for generating a pruned or unpruned C4.5 decision tree. For more "
+      + "information, see\n\n"
+      + "Ross Quinlan (1993). \"C4.5: Programs for Machine Learning\", "
+      + "Morgan Kaufmann Publishers, San Mateo, CA.\n\n";
+  }
   
   /**
    * Generates the classifier.
@@ -398,7 +411,17 @@ public class J48 extends Classifier implements OptionHandler,
     }
     return options;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data " +
+      "when reduced-error pruning is used.";
+  }
+
   /**
    * Get the value of Seed.
    *
@@ -417,6 +440,15 @@ public class J48 extends Classifier implements OptionHandler,
   public void setSeed(int newSeed) {
     
     m_Seed = newSeed;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useLaplaceTipText() {
+    return "Whether counts at leaves are smoothed based on Laplace.";
   }
 
   /**
@@ -516,6 +548,15 @@ public class J48 extends Classifier implements OptionHandler,
 			  + " not supported (j48)");
     }
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String unprunedTipText() {
+    return "Whether pruning is performed.";
+  }
 
   /**
    * Get the value of unpruned.
@@ -539,6 +580,16 @@ public class J48 extends Classifier implements OptionHandler,
     }
     m_unpruned = v;
   }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String confidenceFactorTipText() {
+    return "The confidence factor used for pruning (smaller values incur "
+      + "more pruning).";
+  }
   
   /**
    * Get the value of CF.
@@ -559,7 +610,16 @@ public class J48 extends Classifier implements OptionHandler,
     
     m_CF = v;
   }
-  
+   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minNumObjTipText() {
+    return "The minimum number of instances per leaf.";
+  }
+
   /**
    * Get the value of minNumObj.
    *
@@ -579,7 +639,16 @@ public class J48 extends Classifier implements OptionHandler,
     
     m_minNumObj = v;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String reducedErrorPruningTipText() {
+    return "Whether reduced-error pruning is used instead of C.4.5 pruning.";
+  }
+ 
   /**
    * Get the value of reducedErrorPruning. 
    *
@@ -605,6 +674,16 @@ public class J48 extends Classifier implements OptionHandler,
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "Determines the amount of data used for reduced-error pruning. "
+      + " One fold is used for pruning, the rest for growing the tree.";
+  }
+
+  /**
    * Get the value of numFolds.
    *
    * @return Value of numFolds.
@@ -622,6 +701,16 @@ public class J48 extends Classifier implements OptionHandler,
   public void setNumFolds(int v) {
     
     m_numFolds = v;
+  }
+ 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String binarySplitsTipText() {
+    return "Whether to use binary splits on nominal attributes when "
+      + "building the trees.";
   }
   
   /**
@@ -645,6 +734,15 @@ public class J48 extends Classifier implements OptionHandler,
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String subtreeRaisingTipText() {
+    return "Whether to consider the subtree raising operation when pruning.";
+  }
+ 
+  /**
    * Get the value of subtreeRaising.
    *
    * @return Value of subtreeRaising.
@@ -663,7 +761,16 @@ public class J48 extends Classifier implements OptionHandler,
     
     m_subtreeRaising = v;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String saveInstanceDataTipText() {
+    return "Whether to save the training data for visualization.";
+  }
+
   /**
    * Check whether instance data is to be saved.
    *
