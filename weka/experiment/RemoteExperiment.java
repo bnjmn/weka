@@ -85,7 +85,7 @@ import java.io.ByteArrayInputStream;
  * </pre>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemoteExperiment extends Experiment {
 
@@ -101,6 +101,9 @@ public class RemoteExperiment extends Experiment {
   /** The status of each of the remote hosts */
   private int [] m_remoteHostsStatus;
 
+  /** The number of times tasks have failed on each remote host */
+  private int [] m_remoteHostFailureCounts;
+
   protected static final int AVAILABLE=0;
   protected static final int IN_USE=1;
   protected static final int CONNECTION_FAILED=2;
@@ -111,10 +114,16 @@ public class RemoteExperiment extends Experiment {
   protected static final int FAILED=2;
   protected static final int FINISHED=3;
 
-  protected static final int MAX_FAILURES=10;
+  /** allow at most 3 failures on a host before it is removed from the list
+      of usable hosts */
+  protected static final int MAX_FAILURES=3;
 
-  /** Set to true if MAX_FAILURES exceeded */
+  /** Set to true if MAX_FAILURES exceeded on all hosts or connections fail 
+      on all hosts or user aborts experiment (via gui) */
   private boolean m_experimentAborted = false;
+
+  /** The number of hosts removed due to exceeding max failures */
+  private int m_removedHosts;
 
   /** The count of failed sub-experiments */
   private int m_failedCount;
@@ -309,6 +318,7 @@ public class RemoteExperiment extends Experiment {
     }
     // initialize all remote hosts to available
     m_remoteHostsStatus = new int [m_remoteHosts.size()];    
+    m_remoteHostFailureCounts = new int [m_remoteHosts.size()];
 
     m_remoteHostsQueue = new Queue();
     // prime the hosts queue
@@ -382,10 +392,13 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Increment the number of failures
+   * Increment the overall number of failures and the number of failures for
+   * a particular host
+   * @param hostNum the index of the host to increment failure count
    */
-  protected synchronized void incrementFailed() {
+  protected synchronized void incrementFailed(int hostNum) {
     m_failedCount++;
+    m_remoteHostFailureCounts[hostNum]++;
   }
 
   /**
@@ -434,16 +447,23 @@ public class RemoteExperiment extends Experiment {
    * available hosts
    */
   protected synchronized void availableHost(int hostNum) {
-    if (hostNum >= 0) {
-      m_remoteHostsQueue.push(new Integer(hostNum));
+    if (hostNum >= 0) { 
+      if (m_remoteHostFailureCounts[hostNum] < MAX_FAILURES) {
+	m_remoteHostsQueue.push(new Integer(hostNum));
+      } else {
+	notifyListeners(false,true,false,"Max failures exceeded for host "
+			+((String)m_remoteHosts.elementAt(hostNum))
+			+". Removed from host list.");
+	m_removedHosts++;
+      }
     }
 
     // check for all sub exp complete or all hosts failed or failed count
     // exceeded
-    if (m_failedCount == MAX_FAILURES) {
+    if (m_failedCount == (MAX_FAILURES * m_remoteHosts.size())) {
       abortExperiment();
       notifyListeners(false,true,true,"Experiment aborted! Max failures "
-		      +"exceeded.");
+		      +"exceeded on all remote hosts.");
       return;
     }
 
@@ -455,6 +475,12 @@ public class RemoteExperiment extends Experiment {
     
     if (checkForAllFailedHosts()) {
       return;
+    }
+
+    if (m_experimentAborted && 
+	(m_remoteHostsQueue.size() + m_removedHosts) == m_remoteHosts.size()) {
+      notifyListeners(false,true,true,"Experiment aborted. All remote tasks "
+		      +"finished.");
     }
         
     if (!m_subExpQueue.empty() && !m_experimentAborted) {
@@ -511,7 +537,7 @@ public class RemoteExperiment extends Experiment {
 			      +" failed on host "
 			      +((String)m_remoteHosts.elementAt(ah))
 			      +". Scheduling for execution on another host.");
-	      incrementFailed();
+	      incrementFailed(ah);
 	      // push experiment back onto queue
 	      waitingExperiment(wexp);	
 	      // push host back onto queue and try launching any waiting 
