@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -343,12 +343,20 @@ public class Classifier extends JPanel
 	  }
 	  if (m_trainingSet == null) {
 	    // initialize the classifier if it hasn't been trained yet
-	    m_Classifier.buildClassifier(dataset);
 	    m_trainingSet = new Instances(dataset, 0);
+	    m_Classifier.buildClassifier(m_trainingSet);
 	  }
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();
+      }
+    } else {
+      if (m_trainingSet == null) {
+	// simply return. If the training set is still null after
+	// the first instance then the classifier must not be updateable
+	// and hasn't been previously batch trained - therefore we can't
+	// do anything meaningful
+	return;
       }
     }
     
