@@ -72,7 +72,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions.LeastMedSq,\
  weka.classifiers.rules.ConjunctiveRule,\
  weka.classifiers.rules.Ridor,\
- weka.classifiers.trees.DecisionTree
+ weka.classifiers.trees.REPTree
 
 # Lists the DistributionClassifiers I want to choose from
 weka.classifiers.DistributionClassifier=\
@@ -110,7 +110,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.trees.adtree.ADTree,\
  weka.classifiers.meta.Cleanser,\
  weka.classifiers.rules.ConjunctiveRule,\
- weka.classifiers.trees.DecisionTree
+ weka.classifiers.trees.REPTree
 
 # Lists the Filters I want to choose from
 weka.filters.Filter = \
