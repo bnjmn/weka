@@ -30,7 +30,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -294,8 +294,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
 	  newAtts.addElement(new Attribute(att.name()));
 	} else {
 	  newVals = new FastVector(2);
-	  newVals.addElement("not_" + att.value(m_ValIndex));
-	  newVals.addElement(att.value(m_ValIndex));
+	  newVals.addElement("neg_" + att.value(m_ValIndex));
+	  newVals.addElement("pos_" + att.value(m_ValIndex));
 	  newAtts.addElement(new Attribute(att.name(), newVals));
 	}
       }
