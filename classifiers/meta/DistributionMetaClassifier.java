@@ -15,7 +15,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 
 /**
  * Class that wraps up a Classifier and presents it as a DistributionClassifier
@@ -30,10 +29,10 @@ import weka.core.WeightedInstancesHandler;
  * Specify the full class name of a sub-classifier (required).<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DistributionMetaClassifier extends DistributionClassifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler {
 
   /** The classifier. */
   private Classifier m_Classifier = new weka.classifiers.ZeroR();
@@ -65,17 +64,6 @@ public class DistributionMetaClassifier extends DistributionClassifier
       throw new Exception("No base classifier has been set!");
     }
 
-    Instances newInsts;
-    if (m_Classifier instanceof WeightedInstancesHandler) {
-      // Base classifier can handle weights
-      insts = new Instances(insts);
-    } else {
-      insts = insts.resampleWithWeights(new Random(42));
-    }     
-    insts.deleteWithMissingClass();
-    if (insts.numInstances() == 0) {
-      throw new Exception("No train instances without missing class!");
-    }
     m_Classifier.buildClassifier(insts);
   }
 
