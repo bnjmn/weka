@@ -80,7 +80,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -437,10 +437,13 @@ public class GenericObjectEditor implements PropertyEditor {
 			     .getSelectedItem();
 	try {
 	  //System.err.println("Setting object from chooser");
-	  setObject((Object)Class
-		    .forName(className)
-		    .newInstance());
-	  //System.err.println("done setting object from chooser");
+	  if (m_Object.getClass().getName().compareTo(className) != 0) {
+	    //	    System.err.println("Different class type");
+	    setObject((Object)Class
+		      .forName(className)
+		      .newInstance());
+	  }
+	  //	  System.err.println("done setting object from chooser");
 	} catch (Exception ex) {
 	  m_ObjectChooser.hidePopup();
 	  m_ObjectChooser.setSelectedIndex(0);
