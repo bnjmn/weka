@@ -38,6 +38,9 @@ import weka.core.*;
  *
  * -N <br>
  * If binary attributes are to be coded as nominal ones.<p>
+ * 
+ * -A <br>
+ * For each nominal value a new attribute is created, not only if there are more than 2 values.<p>
  *
  * -R col1,col2-col4,... <br>
  * Specifies list of columns to convert. First
@@ -47,7 +50,7 @@ import weka.core.*;
  * Invert matching sense.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class NominalToBinary extends Filter implements UnsupervisedFilter,
 						       OptionHandler {
@@ -60,6 +63,9 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 
   /** Are the new attributes going to be nominal or numeric ones? */
   private boolean m_Numeric = true;
+
+  /** Are all values transformed into new attributes? */
+  private boolean m_TransformAll = false;
 
   /** Constructor - initialises the filter */
   public NominalToBinary() {
@@ -78,7 +84,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     return "Converts all nominal attributes into binary numeric attributes. An "
       + "attribute with k values is transformed into k binary attributes if "
       + "the class is nominal (using the one-attribute-per-value approach). "
-      + "Binary attributes are left binary."
+      + "Binary attributes are left binary, if option '-A' is not given."
       + "If the class is numeric, you might want to use the supervised version of "
       + "this filter.";
   }
@@ -142,6 +148,10 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 	      "N", 0, "-N"));
 
     newVector.addElement(new Option(
+	      "\tFor each nominal value a new attribute is created, \nnot only if there are more than 2 values.",
+	      "A", 0, "-A"));
+
+    newVector.addElement(new Option(
               "\tSpecifies list of columns to act on. First"
 	      + " and last are valid indexes.\n"
 	      + "\t(default: first-last)",
@@ -161,6 +171,9 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * -N <br>
    * If binary attributes are to be coded as nominal ones.<p>
    *
+   * -A <br>
+   * Whether all nominal values are turned into new attributes.<p>
+   *
    * -R col1,col2-col4,... <br>
    * Specifies list of columns to convert. First
    * and last are valid indexes. (default none) <p>
@@ -172,9 +185,11 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
+
     setBinaryAttributesNominal(Utils.getFlag('N', options));
-    
+
+    setTransformAllValues(Utils.getFlag('A', options));
+
     String convertList = Utils.getOption('R', options);
     if (convertList.length() != 0) {
       setAttributeIndices(convertList);
@@ -201,6 +216,10 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
       options[current++] = "-N";
     }
 
+    if (getTransformAllValues()) {
+      options[current++] = "-A";
+    }
+
     if (!getAttributeIndices().equals("")) {
       options[current++] = "-R"; options[current++] = getAttributeIndices();
     }
@@ -213,7 +232,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     }
     return options;
   }
-    
+
   /**
    * Returns the tip text for this property
    *
@@ -242,6 +261,38 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
   public void setBinaryAttributesNominal(boolean bool) {
 
     m_Numeric = !bool;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String transformAllValuesTipText() {
+    return "Whether all nominal values are turned into new attributes, not only if there are more than 2.";
+  }
+
+  /**
+   * Gets if all nominal values are turned into new attributes, not only if
+   * there are more than 2.
+   *
+   * @return true all nominal values are transformed into new attributes
+   */
+  public boolean getTransformAllValues() {
+
+    return m_TransformAll;
+  }
+
+  /**
+   * Sets whether all nominal values are transformed into new attributes, not
+   * just if there are more than 2.
+   *
+   * @param bool true if all nominal value are transformed into new attributes
+   */
+  public void setTransformAllValues(boolean bool) {
+
+    m_TransformAll = bool;
   }
 
   /**
@@ -337,7 +388,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 	  !m_Columns.isInRange(j)) {
 	newAtts.addElement(att.copy());
       } else {
-	if (att.numValues() <= 2) {
+	if ( (att.numValues() <= 2) && (!m_TransformAll) ) {
 	  if (m_Numeric) {
 	    newAtts.addElement(new Attribute(att.name()));
 	  } else {
@@ -380,7 +431,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * @param instance the instance to convert
    */
   private void convertInstance(Instance instance) {
-  
+
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
 
@@ -391,7 +442,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 	vals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
-	if (att.numValues() <= 2) {
+	if ( (att.numValues() <= 2) && (!m_TransformAll) ) {
 	  vals[attSoFar] = instance.value(j);
 	  attSoFar++;
 	} else {
@@ -443,11 +494,3 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     }
   }
 }
-
-
-
-
-
-
-
-
