@@ -100,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.20 $
+ * @version  $Revision: 1.21 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -235,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.20 $
+   * @version $Revision: 1.21 $
    * @since 1.0
    * @see JPanel
    */
@@ -828,31 +828,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       }
       tempButton.setToolTipText(summary);
     }
-    /*
-    try {
-      BeanInfo bi = Introspector.getBeanInfo(tempBean.getClass());
-      MethodDescriptor [] methods = bi.getMethodDescriptors();
-      for (int i = 0; i < methods.length; i++) {
-	String name = methods[i].getDisplayName();
-	Method meth = methods[i].getMethod();
-	if (name.equals("globalInfo")) {
-	  if (meth.getReturnType().equals(String.class)) {
-	    Object args[] = { };
-	    String globalInfo = (String)(meth.invoke(tempBean, args));
-	    String summary = globalInfo;
-	    int ci = globalInfo.indexOf('.');
-	    if (ci != -1) {
-	      summary = globalInfo.substring(0, ci + 1);
-	    }
-	    tempButton.setToolTipText(summary);
-	    
-	    break;
-	  }
-	}
-      }
-    } catch (Exception ex) {
-      
-    } */
+
     //return tempBean;
     return tempP;
   }
@@ -1303,6 +1279,13 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     m_loadB.setEnabled(true);
   }
 
+  /**
+   * Utility method for grabbing the global info help (if it exists) from
+   * an arbitrary object
+   *
+   * @param tempBean the object to grab global info from 
+   * @return the global help info or null if global info does not exist
+   */
   public static String getGlobalInfo(Object tempBean) {
     // set tool tip text from global info if supplied
     String gi = null;
