@@ -28,13 +28,9 @@ import weka.core.*;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 
+ * @version $Revision: 1.2 $
  */
 public class AllFilter extends Filter {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Sets the format of the input instances.
@@ -48,7 +44,7 @@ public class AllFilter extends Filter {
 
     m_InputFormat = new Instances(instanceInfo, 0);
     setOutputFormat(m_InputFormat);
-    b_NewBatch = true;
+    m_NewBatch = true;
     return true;
   }
 
@@ -69,17 +65,13 @@ public class AllFilter extends Filter {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
     push((Instance)instance.copy());
     return true;
   }
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.
@@ -90,9 +82,9 @@ public class AllFilter extends Filter {
     
     try {
       if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new AllFilter(),argv);
+	Filter.batchFilterFile(new AllFilter(), argv);
       } else {
-	Filter.filterFile(new AllFilter(),argv);
+	Filter.filterFile(new AllFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

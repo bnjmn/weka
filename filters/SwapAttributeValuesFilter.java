@@ -39,27 +39,19 @@ import weka.core.*;
  * Index of the second value.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {
 
-  // =================
-  // Private variables
-  // =================
-
   /** The attribute's index. */
-  private int theAttIndex = -1;
+  private int m_AttIndex = -1;
 
   /** The first value's index. */
-  private int theFirstIndex = -1;
+  private int m_FirstIndex = -1;
 
   /** The second value's index. */
-  private int theSecondIndex = -1;
-
-  // ==============
-  // Public methods
-  // ==============
+  private int m_SecondIndex = -1;
 
   /**
    * Sets the format of the input instances.
@@ -75,22 +67,22 @@ public class SwapAttributeValuesFilter extends Filter
        throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    if (theAttIndex < 0) {
+    if (m_AttIndex < 0) {
       throw new Exception("No attribute chosen.");
     }
-    if (!m_InputFormat.attribute(theAttIndex).isNominal()) {
+    if (!m_InputFormat.attribute(m_AttIndex).isNominal()) {
       throw new Exception("Chosen attribute not nominal.");
     }
-    if (m_InputFormat.attribute(theAttIndex).numValues() < 2) {
+    if (m_InputFormat.attribute(m_AttIndex).numValues() < 2) {
       throw new Exception("Chosen attribute has less than two values.");
     }
-    if (theFirstIndex < 0) {
+    if (m_FirstIndex < 0) {
       throw new Exception("First value undefined.");
     }
-    if (theSecondIndex < 0) {
+    if (m_SecondIndex < 0) {
       throw new Exception("Second value undefined.");
     }
-    b_NewBatch = true;
+    m_NewBatch = true;
     setOutputFormat();
     return true;
   }
@@ -110,15 +102,15 @@ public class SwapAttributeValuesFilter extends Filter
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
     Instance newInstance = (Instance)instance.copy();
-    if ((int)newInstance.value(theAttIndex) == theSecondIndex) {
-      newInstance.setValue(theAttIndex, (double)theFirstIndex);
-    } else if ((int)newInstance.value(theAttIndex) == theFirstIndex) {
-      newInstance.setValue(theAttIndex, (double)theSecondIndex);
+    if ((int)newInstance.value(m_AttIndex) == m_SecondIndex) {
+      newInstance.setValue(m_AttIndex, (double)m_FirstIndex);
+    } else if ((int)newInstance.value(m_AttIndex) == m_FirstIndex) {
+      newInstance.setValue(m_AttIndex, (double)m_SecondIndex);
     }
     push(newInstance);
     return true;
@@ -169,40 +161,40 @@ public class SwapAttributeValuesFilter extends Filter
     String attributeIndex = Utils.getOption('C', options);
     if (attributeIndex.length() != 0) {
       if (attributeIndex.toLowerCase().equals("last")) {
-	setAttributeIndex(0);
+	setAttributeIndex(-1);
       } else if (attributeIndex.toLowerCase().equals("first")) {
-	setAttributeIndex(1);
+	setAttributeIndex(0);
       } else {
-	setAttributeIndex(Integer.parseInt(attributeIndex));
+	setAttributeIndex(Integer.parseInt(attributeIndex) - 1);
       }
     } else {
-      setAttributeIndex(0);
+      setAttributeIndex(-1);
     }
     
     String firstIndex = Utils.getOption('F', options);
     if (firstIndex.length() != 0) { 
       if (firstIndex.toLowerCase().equals("last")) {
-	setFirstValueIndex(0);
+	setFirstValueIndex(-1);
       } else if (firstIndex.toLowerCase().equals("first")) {
-	setFirstValueIndex(1);
+	setFirstValueIndex(0);
       } else {
-	setFirstValueIndex(Integer.parseInt(firstIndex));
+	setFirstValueIndex(Integer.parseInt(firstIndex) - 1);
       }
     } else {
-      setFirstValueIndex(0);
+      setFirstValueIndex(-1);
     }
      
     String secondIndex = Utils.getOption('S', options);
     if (secondIndex.length() != 0) {
       if (secondIndex.toLowerCase().equals("last")) {
-	setSecondValueIndex(0);
+	setSecondValueIndex(-1);
       } else if (secondIndex.toLowerCase().equals("first")) {
-	setSecondValueIndex(1);
+	setSecondValueIndex(0);
       } else {
-	setSecondValueIndex(Integer.parseInt(secondIndex)); 
+	setSecondValueIndex(Integer.parseInt(secondIndex) - 1); 
       }
     } else {
-      setSecondValueIndex(0);
+      setSecondValueIndex(-1);
     }
    
     if (m_InputFormat != null) {
@@ -220,11 +212,12 @@ public class SwapAttributeValuesFilter extends Filter
     String [] options = new String [6];
     int current = 0;
 
-    options[current++] = "-C"; options[current++] = "" + getAttributeIndex();
+    options[current++] = "-C";
+    options[current++] = "" + (getAttributeIndex() + 1);
     options[current++] = "-F"; 
-    options[current++] = "" + getFirstValueIndex();
+    options[current++] = "" + (getFirstValueIndex() + 1);
     options[current++] = "-S"; 
-    options[current++] = "" + getSecondValueIndex();
+    options[current++] = "" + (getSecondValueIndex() + 1);
     while (current < options.length) {
       options[current++] = "";
     }
@@ -232,68 +225,64 @@ public class SwapAttributeValuesFilter extends Filter
   }
 
   /**
-   * Get the index (starting from 1) of the attribute used.
+   * Get the index of the attribute used.
    *
    * @return the index of the attribute
    */
   public int getAttributeIndex() {
 
-    return theAttIndex + 1;
+    return m_AttIndex;
   }
 
   /**
-   * Sets index of (starting from 1) of the attribute used.
+   * Sets index of the attribute used.
    *
    * @param index the index of the attribute
    */
   public void setAttributeIndex(int attIndex) {
     
-    theAttIndex = attIndex - 1;
+    m_AttIndex = attIndex;
   }
 
   /**
-   * Get the index (starting from 1) of the first value used.
+   * Get the index of the first value used.
    *
    * @return the index of the first value
    */
   public int getFirstValueIndex() {
 
-    return theFirstIndex + 1;
+    return m_FirstIndex;
   }
 
   /**
-   * Sets index of (starting from 1) of the first value used.
+   * Sets index of the first value used.
    *
    * @param index the index of the first value
    */
   public void setFirstValueIndex(int firstIndex) {
     
-    theFirstIndex = firstIndex - 1;
+    m_FirstIndex = firstIndex;
   }
 
   /**
-   * Get the index (starting from 1) of the second value used.
+   * Get the index of the second value used.
    *
    * @return the index of the second value
    */
   public int getSecondValueIndex() {
 
-    return theSecondIndex + 1;
+    return m_SecondIndex;
   }
 
   /**
-   * Sets index of (starting from 1) of the second value used.
+   * Sets index of the second value used.
    *
    * @param index the index of the second value
    */
   public void setSecondValueIndex(int secondIndex) {
     
-    theSecondIndex = secondIndex - 1;
+    m_SecondIndex = secondIndex;
   }
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Set the output format. Takes the current average class values
@@ -312,7 +301,7 @@ public class SwapAttributeValuesFilter extends Filter
       newAtts = new FastVector(m_InputFormat.numAttributes());
       for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
 	Attribute att = m_InputFormat.attribute(j);
-	if (j != theAttIndex) {
+	if (j != m_AttIndex) {
 	  newAtts.addElement(att.copy()); 
 	} else {
 	  
@@ -320,10 +309,10 @@ public class SwapAttributeValuesFilter extends Filter
 	  
 	  newVals = new FastVector(att.numValues());
 	  for (int i = 0; i < att.numValues(); i++) {
-	    if (i == theFirstIndex) {
-	      newVals.addElement(att.value(theSecondIndex));
-	    } else if (i == theSecondIndex) {
-	      newVals.addElement(att.value(theFirstIndex));
+	    if (i == m_FirstIndex) {
+	      newVals.addElement(att.value(m_SecondIndex));
+	    } else if (i == m_SecondIndex) {
+	      newVals.addElement(att.value(m_FirstIndex));
 	    } else {
 	      newVals.addElement(att.value(i)); 
 	    }
@@ -344,24 +333,19 @@ public class SwapAttributeValuesFilter extends Filter
     }
   }
   
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
    * @param argv should contain arguments to the filter: 
    * use -h for help
    */
-
   public static void main(String [] argv) {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new SwapAttributeValuesFilter(),argv);
+ 	Filter.batchFilterFile(new SwapAttributeValuesFilter(), argv);
       } else {
-	Filter.filterFile(new SwapAttributeValuesFilter(),argv);
+	Filter.filterFile(new SwapAttributeValuesFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

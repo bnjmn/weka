@@ -28,20 +28,12 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
-  // =================
-  // Private variables
-  // =================
-
   /** The modes and means */
   private double[] m_ModesAndMeans = null;
-
-  // ==============
-  // Public methods
-  // ==============
 
   /**
    * Sets the format of the input instances.
@@ -58,7 +50,7 @@ public class ReplaceMissingValuesFilter extends Filter {
 
     m_InputFormat = new Instances(instanceInfo, 0);
     setOutputFormat(m_InputFormat);
-    b_NewBatch = true;
+    m_NewBatch = true;
     m_ModesAndMeans = null;
     return true;
   }
@@ -78,9 +70,9 @@ public class ReplaceMissingValuesFilter extends Filter {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
     if (m_ModesAndMeans == null) {
       m_InputFormat.add(instance);
@@ -99,7 +91,6 @@ public class ReplaceMissingValuesFilter extends Filter {
    * @return true if there are instances pending output
    * @exception Exception if no input structure has been defined
    */
-
   public boolean batchFinished() throws Exception {
 
     Instance current;
@@ -126,13 +117,9 @@ public class ReplaceMissingValuesFilter extends Filter {
       }
     } 
 
-    b_NewBatch = true;
+    m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
-
-  // ===============
-  // Private methods
-  // ===============
 
   /**
    * Convert a single instance over. The converted instance is 
@@ -140,7 +127,6 @@ public class ReplaceMissingValuesFilter extends Filter {
    *
    * @param instance the instance to convert
    */
-
   private void convertInstance(Instance instance) throws Exception {
   
     Instance newInstance = new Instance(instance);
@@ -154,10 +140,6 @@ public class ReplaceMissingValuesFilter extends Filter {
     push(newInstance);
   }
 
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
@@ -168,9 +150,9 @@ public class ReplaceMissingValuesFilter extends Filter {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new ReplaceMissingValuesFilter(),argv);
+ 	Filter.batchFilterFile(new ReplaceMissingValuesFilter(), argv);
       } else {
-	Filter.filterFile(new ReplaceMissingValuesFilter(),argv);
+	Filter.filterFile(new ReplaceMissingValuesFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

@@ -58,17 +58,12 @@ import weka.core.*;
  * -K <br>
  * Use Kononeko's MDL criterion. <p>
  * 
-  * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
-
-  // =================
-  // Protected members
-  // =================
 
   /** Stores which columns to Discretize */
   protected Range m_DiscretizeCols = new Range();
@@ -83,27 +78,21 @@ public class DiscretizeFilter extends Filter
   protected double [][] m_CutPoints = null;
 
   /** True if discretisation will be done by MDL rather than binning */
-  protected boolean b_UseMDL = true;
+  protected boolean m_UseMDL = true;
 
   /** Output binary attributes for discretized attributes. */
-  protected boolean b_MakeBinary = false;
+  protected boolean m_MakeBinary = false;
 
   /** Use better encoding of split point for MDL. */
-  protected boolean b_UseBetterEncoding = false;
+  protected boolean m_UseBetterEncoding = false;
 
   /** Use Kononenko's MDL criterion instead of Fayyad et al.'s */
-  protected boolean b_UseKononenko = false;
+  protected boolean m_UseKononenko = false;
 
   /** Find the number of bins using cross-validated entropy. */
-  protected boolean b_FindNumBins = false;
+  protected boolean m_FindNumBins = false;
 
-  // ===============
-  // Public methods.
-  // ===============
-
-  /**
-   * Constructor - initialises the filter
-   */
+  /** Constructor - initialises the filter */
   public DiscretizeFilter() {
 
     try {
@@ -155,6 +144,10 @@ public class DiscretizeFilter extends Filter
 	      + " and last are valid indexes.\n"
 	      + "\t(default none)",
               "R", 1, "-R <col1,col2-col4,...>"));
+
+    newVector.addElement(new Option(
+              "\tInvert matching sense of column indexes.",
+              "V", 0, "-V"));
 
     newVector.addElement(new Option(
               "\tOutput binary attributes for discretized attributes.",
@@ -213,6 +206,7 @@ public class DiscretizeFilter extends Filter
     setUseKononenko(Utils.getFlag('K', options));
     setFindNumBins(Utils.getFlag('O', options));
     setInvertSelection(Utils.getFlag('V', options));
+    setUseMDL(true);
 
     String numBins = Utils.getOption('B', options);
     if (numBins.length() != 0) {
@@ -225,16 +219,18 @@ public class DiscretizeFilter extends Filter
     String convertList = Utils.getOption('R', options);
     if (convertList.length() != 0) {
       setAttributeIndices(convertList);
+    } else {
+      setAttributeIndices("first-last");
     }
 
     String classIndex = Utils.getOption('C', options);
     if (classIndex.length() != 0) {
       if (classIndex.toLowerCase().equals("last")) {
-	setClassIndex(0);
+	setClassIndex(-1);
       } else if (classIndex.toLowerCase().equals("first")) {
-	setClassIndex(1);
+	setClassIndex(0);
       } else {
-	setClassIndex(Integer.parseInt(classIndex));
+	setClassIndex(Integer.parseInt(classIndex) - 1);
       }
       setUseMDL(true);
     }
@@ -269,7 +265,8 @@ public class DiscretizeFilter extends Filter
       options[current++] = "-V";
     }
     if (getUseMDL()) {
-      options[current++] = "-C"; options[current++] = "" + getClassIndex();
+      options[current++] = "-C";
+      options[current++] = "" + (getClassIndex() + 1);
     } else {
       options[current++] = "-B"; options[current++] = "" + getBins();
     }
@@ -292,16 +289,15 @@ public class DiscretizeFilter extends Filter
    * @return true if the outputFormat may be collected immediately
    * @exception Exception if the input format can't be set successfully
    */
-  
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    b_NewBatch = true;
+    m_NewBatch = true;
     setOutputFormat(null);
 
     m_DiscretizeCols.setUpper(m_InputFormat.numAttributes() - 1);
     m_CutPoints = null;
-    if (b_UseMDL) {
+    if (m_UseMDL) {
       if (m_ClassIndex >= 0) {
 	m_InputFormat.setClassIndex(m_ClassIndex);
       } else if ((m_ClassIndex == -1) && (m_InputFormat.classIndex() < 0)) {
@@ -337,10 +333,9 @@ public class DiscretizeFilter extends Filter
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
-      //if (m_OutputFormat != null)
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
     
     if (m_CutPoints != null) {
@@ -374,15 +369,13 @@ public class DiscretizeFilter extends Filter
       // If we implement saving cutfiles, save the cuts here
 
       // Convert pending input instances
-      Instance current;
       for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-	current = m_InputFormat.instance(i);
-	convertInstance(current);
+	convertInstance(m_InputFormat.instance(i));
       }
       m_InputFormat = new Instances(m_InputFormat, 0);
     } 
 
-    b_NewBatch = true;
+    m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
 
@@ -394,7 +387,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean getFindNumBins() {
     
-    return b_FindNumBins;
+    return m_FindNumBins;
   }
   
   /**
@@ -404,7 +397,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setFindNumBins(boolean newFindNumBins) {
     
-    b_FindNumBins = newFindNumBins;
+    m_FindNumBins = newFindNumBins;
   }
   
   /**
@@ -414,7 +407,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean getMakeBinary() {
 
-    return b_MakeBinary;
+    return m_MakeBinary;
   }
 
   /** 
@@ -424,7 +417,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setMakeBinary(boolean makeBinary) {
 
-    b_MakeBinary = makeBinary;
+    m_MakeBinary = makeBinary;
   }
 
   /**
@@ -433,7 +426,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean getUseMDL() {
 
-    return b_UseMDL;
+    return m_UseMDL;
   }
 
   /** 
@@ -443,7 +436,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setUseMDL(boolean useMDL) {
 
-    b_UseMDL = useMDL;
+    m_UseMDL = useMDL;
   }
 
   /**
@@ -453,7 +446,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean getUseKononenko() {
 
-    return b_UseKononenko;
+    return m_UseKononenko;
   }
 
   /** 
@@ -463,7 +456,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setUseKononenko(boolean useKon) {
 
-    b_UseKononenko = useKon;
+    m_UseKononenko = useKon;
   }
 
   /**
@@ -473,7 +466,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean getUseBetterEncoding() {
 
-    return b_UseBetterEncoding;
+    return m_UseBetterEncoding;
   }
 
   /** 
@@ -483,7 +476,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setUseBetterEncoding(boolean useBetterEncoding) {
 
-    b_UseBetterEncoding = useBetterEncoding;
+    m_UseBetterEncoding = useBetterEncoding;
   }
 
   /**
@@ -507,24 +500,24 @@ public class DiscretizeFilter extends Filter
   }
 
   /**
-   * Gets the index (starting from 1) of the attribute used as the class when
+   * Gets the index of the attribute used as the class when
    * using MDL discretisation
    *
    * @return the class attribute index
    */
   public int getClassIndex() {
 
-    return m_ClassIndex + 1;
+    return m_ClassIndex;
   }
 
   /**
-   * Sets index (from 1) of attribute to discretize on
+   * Sets index of attribute to discretize on
    *
    * @param index the index of the class
    */
   public void setClassIndex(int classIndex) {
 
-    m_ClassIndex = classIndex - 1;
+    m_ClassIndex = classIndex;
   }
 
   /**
@@ -588,9 +581,9 @@ public class DiscretizeFilter extends Filter
     String rangeList = "";
     for(int i = 0; i < attributes.length; i++) {
       if (i == 0) {
-	rangeList = ""+(attributes[i] + 1);
+	rangeList = "" + (attributes[i] + 1);
       } else {
-	rangeList += ","+(attributes[i] + 1);
+	rangeList += "," + (attributes[i] + 1);
       }
     }
     setAttributeIndices(rangeList);
@@ -618,7 +611,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean getOptimzeBinning() {
 
-    return b_FindNumBins;
+    return m_FindNumBins;
   }
 
   /**
@@ -628,16 +621,10 @@ public class DiscretizeFilter extends Filter
    */
   public void setOptimizeBinning(boolean bool) {
 
-    b_FindNumBins = bool;
+    m_FindNumBins = bool;
   }
 
-  // =================
-  // Protected methods
-  // =================
-
-  /**
-   * Generate the cutpoints for each attribute
-   */
+  /** Generate the cutpoints for each attribute */
   protected void calculateCutPoints() throws Exception {
 
     Instances copy = null;
@@ -645,9 +632,8 @@ public class DiscretizeFilter extends Filter
     m_CutPoints = new double [m_InputFormat.numAttributes()] [];
     for(int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
       if ((m_DiscretizeCols.isInRange(i)) && 
-	  (m_InputFormat.attribute(i).isNumeric()))
-      {
-	if (b_UseMDL) {
+	  (m_InputFormat.attribute(i).isNumeric())) {
+	if (m_UseMDL) {
 
 	  // Use copy to preserve order
 	  if (copy == null) {
@@ -655,7 +641,7 @@ public class DiscretizeFilter extends Filter
 	  }
 	  calculateCutPointsByMDL(i, copy);
 	} else {
-	  if (b_FindNumBins) {
+	  if (m_FindNumBins) {
 	    findNumBins(i);
 	  } else {
 	    calculateCutPointsByBinning(i);
@@ -667,20 +653,17 @@ public class DiscretizeFilter extends Filter
 
   /**
    * Set cutpoints for a single attribute using MDL.
+   *
    * @param index the index of the attribute to set cutpoints for
    */
   protected void calculateCutPointsByMDL(int index,
 					 Instances data) throws Exception {
 
-    int firstMissing;
-
     // Sort instances
-
     data.sort(data.attribute(index));
 
     // Find first instances that's missing
-
-    firstMissing = data.numInstances();
+    int firstMissing = data.numInstances();
     for (int i = 0; i < data.numInstances(); i++) {
       if (data.instance(i).isMissing(index)) {
         firstMissing = i;
@@ -690,9 +673,7 @@ public class DiscretizeFilter extends Filter
     m_CutPoints[index] = cutPointsForSubset(data, index, 0, firstMissing);
   }
 
-  /**
-   * Test using Kononenko's MDL criterion.
-   */
+  /** Test using Kononenko's MDL criterion. */
   private boolean KononenkosMDL(double[] priorCounts,
 				double[][] bestCounts,
 				double numInstances,
@@ -738,9 +719,7 @@ public class DiscretizeFilter extends Filter
   }
 
 
-  /**
-   * Test using Fayyad and Irani's MDL criterion.
-   */
+  /** Test using Fayyad and Irani's MDL criterion. */
   private boolean FayyadAndIranisMDL(double[] priorCounts,
 				     double[][] bestCounts,
 				     double numInstances,
@@ -799,9 +778,7 @@ public class DiscretizeFilter extends Filter
   }
     
 
-  /**
-   * Selects cutpoints for sorted subset.
-   */
+  /** Selects cutpoints for sorted subset. */
   private double[] cutPointsForSubset(Instances instances, int attIndex, 
 				      int first, int lastPlusOne) 
        throws Exception { 
@@ -860,7 +837,7 @@ public class DiscretizeFilter extends Filter
     }
 
     // Use worse encoding?
-    if (!b_UseBetterEncoding) {
+    if (!m_UseBetterEncoding) {
       numCutPoints = (lastPlusOne - first) - 1;
     }
 
@@ -871,9 +848,9 @@ public class DiscretizeFilter extends Filter
     }
 
     // Check if split is to be accepted
-    if ((b_UseKononenko && KononenkosMDL(priorCounts, bestCounts,
+    if ((m_UseKononenko && KononenkosMDL(priorCounts, bestCounts,
 					 numInstances, numCutPoints)) ||
-	(!b_UseKononenko && FayyadAndIranisMDL(priorCounts, bestCounts,
+	(!m_UseKononenko && FayyadAndIranisMDL(priorCounts, bestCounts,
 					       numInstances, numCutPoints))) {
       
       // Select split points for the left and right subsets
@@ -908,6 +885,7 @@ public class DiscretizeFilter extends Filter
  
   /**
    * Set cutpoints for a single attribute.
+   *
    * @param index the index of the attribute to set cutpoints for
    */
   protected void calculateCutPointsByBinning(int index) {
@@ -943,6 +921,7 @@ public class DiscretizeFilter extends Filter
 
   /**
    * Optimizes the number of bins using leave-one-out cross-validation.
+   *
    * @param index the attribute index
    */
   protected void findNumBins(int index) {
@@ -1031,7 +1010,7 @@ public class DiscretizeFilter extends Filter
       for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
 	if ((m_DiscretizeCols.isInRange(i)) 
 	    && (m_InputFormat.attribute(i).isNumeric())) {
-	  if (!b_MakeBinary) {
+	  if (!m_MakeBinary) {
 	    FastVector attribValues = new FastVector(1);
 	    if (m_CutPoints[i] == null) {
 	      attribValues.addElement("'All'");
@@ -1104,6 +1083,7 @@ public class DiscretizeFilter extends Filter
   /**
    * Convert a single instance over. The converted instance is added to 
    * the end of the output queue.
+   *
    * @param instance the instance to convert
    */
   protected void convertInstance(Instance instance) throws Exception {
@@ -1112,8 +1092,7 @@ public class DiscretizeFilter extends Filter
     int index = 0;
 
     // Copy and convert the values
-    int i;
-    for(i = 0; i < m_InputFormat.numAttributes(); i++) {
+    for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
       if (m_DiscretizeCols.isInRange(i) && 
 	  m_InputFormat.attribute(i).isNumeric()) {
 	int j;
@@ -1126,7 +1105,7 @@ public class DiscretizeFilter extends Filter
 	  }
 	  index++;
 	} else {
-	  if (!b_MakeBinary) {
+	  if (!m_MakeBinary) {
 	    if (instance.isMissing(i)) {
 	      newInstance.setMissing(index);
 	    } else {
@@ -1161,22 +1140,18 @@ public class DiscretizeFilter extends Filter
     push(newInstance);
   }
 
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
+   *
    * @param argv should contain arguments to the filter: use -h for help
    */
-
   public static void main(String [] argv) {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new DiscretizeFilter(),argv);
+ 	Filter.batchFilterFile(new DiscretizeFilter(), argv);
       } else {
-	Filter.filterFile(new DiscretizeFilter(),argv);
+	Filter.filterFile(new DiscretizeFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());

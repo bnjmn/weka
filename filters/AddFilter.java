@@ -41,13 +41,9 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class AddFilter extends Filter implements OptionHandler {
-
-  // =================
-  // Protected members
-  // =================
 
   /** Record the type of attribute to insert */
   protected int m_AttributeType = Attribute.NUMERIC;
@@ -60,10 +56,6 @@ public class AddFilter extends Filter implements OptionHandler {
 
   /** The list of labels for nominal attribute */
   protected FastVector m_Labels = new FastVector(5);
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Returns an enumeration describing the available options
@@ -113,11 +105,11 @@ public class AddFilter extends Filter implements OptionHandler {
     String insertString = Utils.getOption('C', options);
     if (insertString.length() != 0) {
       if (insertString.toLowerCase().equals("last")) {
-	setAttributeIndex(0);
+	setAttributeIndex(-1);
       } else if (insertString.toLowerCase().equals("first")) {
-	setAttributeIndex(1);
+	setAttributeIndex(0);
       } else {
-	setAttributeIndex(Integer.parseInt(insertString)); 
+	setAttributeIndex(Integer.parseInt(insertString) - 1); 
       }
     }
 
@@ -143,7 +135,8 @@ public class AddFilter extends Filter implements OptionHandler {
     if (m_AttributeType == Attribute.NOMINAL) {
       options[current++] = "-L"; options[current++] = getNominalLabels();
     }
-    options[current++] = "-C"; options[current++] = "" + getAttributeIndex();
+    options[current++] = "-C";
+    options[current++] = "" + (getAttributeIndex() + 1);
 
     while (current < options.length) {
       options[current++] = "";
@@ -162,7 +155,7 @@ public class AddFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) {
 
     m_InputFormat = new Instances(instanceInfo, 0);
-    b_NewBatch = true;
+    m_NewBatch = true;
 
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute = null;
@@ -208,9 +201,9 @@ public class AddFilter extends Filter implements OptionHandler {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if (b_NewBatch) {
+    if (m_NewBatch) {
       resetQueue();
-      b_NewBatch = false;
+      m_NewBatch = false;
     }
 
     Instance newInstance = new Instance(outputFormatPeek().
@@ -250,7 +243,7 @@ public class AddFilter extends Filter implements OptionHandler {
       if (newName.indexOf('\'') != 0) {
 	newName = newName.replace('\'',' ');
       }
-      newName = '\''+newName+'\'';
+      newName = '\'' + newName + '\'';
     }
     if (newName.equals("")) {
       newName = "unnamed";
@@ -266,16 +259,16 @@ public class AddFilter extends Filter implements OptionHandler {
    */
   public int getAttributeIndex() {
 
-    return m_Insert+1;
+    return m_Insert;
   }
 
   /**
    * Set the index where the attribute will be inserted
    *
-   * @param attributeIndex the insertion index (starting from 1, 0 means last)
+   * @param attributeIndex the insertion index (-1 means last)
    */
   public void setAttributeIndex(int attributeIndex) {
-    m_Insert = attributeIndex - 1;
+    m_Insert = attributeIndex;
   }
 
   
@@ -291,7 +284,7 @@ public class AddFilter extends Filter implements OptionHandler {
       if (i == 0) {
 	labelList = (String)m_Labels.elementAt(i);
       } else {
-	labelList += ","+(String)m_Labels.elementAt(i); 
+	labelList += "," + (String)m_Labels.elementAt(i); 
       }
     }
     return labelList;
@@ -310,14 +303,14 @@ public class AddFilter extends Filter implements OptionHandler {
     // Split the labelList up into the vector
     int commaLoc;
     while ((commaLoc = labelList.indexOf(',')) >= 0) {
-      String label = labelList.substring(0,commaLoc).trim();
+      String label = labelList.substring(0, commaLoc).trim();
       if (!label.equals("")) {
 	labels.addElement(label);
       } else {
 	throw new Exception("Invalid label list at "+
 			    labelList.substring(commaLoc));
       }
-      labelList = labelList.substring(commaLoc+1);
+      labelList = labelList.substring(commaLoc + 1);
     }
     String label = labelList.trim();
     if (!label.equals("")) {
@@ -333,24 +326,18 @@ public class AddFilter extends Filter implements OptionHandler {
     }
   }
 
-
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
    * @param argv should contain arguments to the filter: use -h for help
    */
-
   public static void main(String [] argv) {
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new AddFilter(),argv);
+ 	Filter.batchFilterFile(new AddFilter(), argv);
       } else {
-	Filter.filterFile(new AddFilter(),argv);
+	Filter.filterFile(new AddFilter(), argv);
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());
