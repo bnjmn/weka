@@ -69,6 +69,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
 import javax.swing.JCheckBox;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.Point;
 
 /** 
@@ -79,7 +82,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -245,25 +248,20 @@ public class ClustererPanel extends JPanel {
 	visualizeClusterer();
       }
     });
-    m_History.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-	if (m_History.getSelectedObject() != null) {
-	  m_VisualizeBut.setEnabled(true);
-	} else {
-	  m_VisualizeBut.setEnabled(false);
-	}
-      }
-    });
-
-    /*    m_StorePredictionsBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  if (m_StorePredictionsBut.isSelected()) {
-	    if (m_CurrentVis != null) {
+    
+    m_History.getSelectionModel()
+      .addListSelectionListener(new ListSelectionListener() {
+	public void valueChanged(ListSelectionEvent e) {
+	  if (!e.getValueIsAdjusting()) {
+	    ListSelectionModel lm = (ListSelectionModel) e.getSource();
+	    if (m_History.getSelectedObject() != null) {
 	      m_VisualizeBut.setEnabled(true);
+	    } else {
+	      m_VisualizeBut.setEnabled(false);
 	    }
 	  }
 	}
-	}); */
+      });
 
     // Layout the GUI
     JPanel p1 = new JPanel();
