@@ -37,7 +37,7 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
 */
 public class Prism extends Classifier {
 
@@ -194,7 +194,7 @@ public class Prism extends Classifier {
   /**
    * Class for storing a list of attribute-value tests
    */
-  private class Test { 
+  private class Test implements Serializable { 
 
     /** Attribute to test */
     private int m_attr = -1; 
