@@ -120,7 +120,7 @@ import javax.swing.JMenuItem;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -225,11 +225,8 @@ public class ClassifierPanel extends JPanel {
   /** Click to stop a running classifier */
   protected JButton m_StopBut = new JButton("Stop");
 
-  /** Click to save the output associated with the currently selected result */
-  protected JButton m_SaveOutBut = new JButton("Save Output");
-
   /** Stop the class combo from taking up to much space */
-  private Dimension COMBO_SIZE = new Dimension(150, m_SaveOutBut
+  private Dimension COMBO_SIZE = new Dimension(150, m_StartBut
 					       .getPreferredSize().height);
 
   /** The cost matrix editor for evaluation costs */
@@ -311,7 +308,6 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
-    m_SaveOutBut.setToolTipText("Save the selected classifier output to a file");
     m_ClassCombo.setToolTipText("Select the attribute to use as the class");
     m_TrainBut.setToolTipText("Test on the same set that the classifier"
 			      + " is trained on");
@@ -390,7 +386,6 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
-    m_SaveOutBut.setEnabled(false);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
@@ -404,11 +399,6 @@ public class ClassifierPanel extends JPanel {
       }
     });
    
-    m_SaveOutBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveBuffer();
-	}
-      });
     m_ClassCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	int selected = m_ClassCombo.getSelectedIndex();
@@ -420,13 +410,18 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
+    m_History.setHandleRightClicks(false);
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
 	public void mouseClicked(MouseEvent e) {
 	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	      == InputEvent.BUTTON1_MASK) {
 	  } else {
-	    visualize2(e.getX(), e.getY());
+	    int index = m_History.getList().locationToIndex(e.getPoint());
+	    if (index != -1) {
+	      String name = m_History.getNameAtIndex(index);
+	      visualize(name, e.getX(), e.getY());
+	    }
 	  }
 	}
       });
@@ -576,7 +571,7 @@ public class ClassifierPanel extends JPanel {
 
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(3, 2));
+    buttons.setLayout(new GridLayout(2, 2));
     buttons.add(m_ClassCombo);
     m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
@@ -586,11 +581,11 @@ public class ClassifierPanel extends JPanel {
     ssButs.add(m_StopBut);
 
     buttons.add(ssButs);
-    JPanel vPl = new JPanel();
+    /*JPanel vPl = new JPanel();
     vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     vPl.setLayout(new GridLayout(1,1,5,5));
     vPl.add(m_SaveOutBut);
-    buttons.add(vPl);
+    buttons.add(vPl); */
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Classifier output"));
@@ -840,8 +835,9 @@ public class ClassifierPanel extends JPanel {
 	double [] dist = 
 	  dc.distributionForInstance(toPredict);
 	pred = eval.evaluateModelOnce(dist, toPredict);
+	int actual = (int)toPredict.classValue();
 	predictions.addElement(new 
-	  NominalPrediction(pred, dist, toPredict.weight()));
+	  NominalPrediction(actual, dist, toPredict.weight()));
       } else {
 	pred = eval.evaluateModelOnce(classifier, 
 				      toPredict);
@@ -1284,7 +1280,7 @@ public class ClassifierPanel extends JPanel {
 	      m_Log.logMessage("Interrupted " + cname);
 	      m_Log.statusMessage("See error log");
 	    }
-	    m_SaveOutBut.setEnabled(true);
+
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -1304,11 +1300,38 @@ public class ClassifierPanel extends JPanel {
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
-  protected void visualize2(int x, int y) {
-    final String selectedName = m_History.getSelectedName();
-    FastVector o = (FastVector)m_History.getSelectedObject();
+  protected void visualize(String name, int x, int y) {
+    final String selectedName = name;
+    JPopupMenu resultListMenu = new JPopupMenu();
 
-    if (selectedName != null && o != null) {
+    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    visMainBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.setSingle(selectedName);
+	}
+      });
+    resultListMenu.add(visMainBuffer);
+
+    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    visSepBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.openFrame(selectedName);
+	}
+      });
+    resultListMenu.add(visSepBuffer);
+
+    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    saveOutput.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer();
+	}
+      });
+    resultListMenu.add(saveOutput);
+    resultListMenu.addSeparator();
+
+    FastVector o = (FastVector)m_History.getNamedObject(selectedName);
+
+    if (o != null) {
       VisualizePanel temp_vp = null;
       String temp_grph = null;
       FastVector temp_preds = null;
@@ -1332,16 +1355,6 @@ public class ClassifierPanel extends JPanel {
       final FastVector preds = temp_preds;
       final Attribute classAtt = temp_classAtt;
 
-      JPopupMenu resultListMenu = new JPopupMenu();
-      resultListMenu.setLabel(selectedName);
-      JMenuItem visBuffer = new JMenuItem("View result buffer");
-      visBuffer.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    m_History.openFrame(selectedName);
-	  }
-	});
-
-      resultListMenu.add(visBuffer);
       JMenuItem visErrors = new JMenuItem("Visualize classifer errors");
       if (vp != null) {
 	visErrors.addActionListener(new ActionListener() {
@@ -1406,67 +1419,8 @@ public class ClassifierPanel extends JPanel {
 	}
 	resultListMenu.add(visThreshold);
       }
-      resultListMenu.show(m_History.getList(), x, y);
     }
-  }
-
-  /**
-   * Handles visualizing classifier errors and trees (when possible)
-   */
-  public void visualize() {
-    final VisualizePanel sp;
-    final Object o;
-    final String grph;
-
-    o = m_History.getSelectedObject();
-    if (o instanceof VisualizePanel) {
-      sp = (VisualizePanel)o;
-      grph = null;
-    } else {
-      sp = (VisualizePanel)(((Object [])o)[0]);
-      grph = (String)(((Object [])o)[1]);
-    }
-    
-    if (sp != null && grph != null) {
-      final javax.swing.JFrame jf = 
-	 new javax.swing.JFrame("Visualize options");
-      JPanel pp = new JPanel();
-      JButton err = new JButton("Visualize errors");
-      err.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    visualizeClassifierErrors(sp);
-	    jf.dispose();
-	  }
-	});
-      JButton tree = new JButton("Visualize tree");
-      tree.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    visualizeTree(grph,sp.getName());
-	    jf.dispose();
-	  }
-	});
-      pp.setLayout(new BorderLayout());
-      JPanel buts = new JPanel();
-      buts.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      buts.setLayout(new GridLayout(1, 2, 5, 5));
-      buts.add(err);
-      buts.add(tree);
-      pp.add(buts, BorderLayout.CENTER);
-     
-      jf.setSize(350,80);
-      jf.getContentPane().setLayout(new BorderLayout());
-      
-      jf.getContentPane().add(pp, BorderLayout.CENTER);
-      jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	  public void windowClosing(java.awt.event.WindowEvent e) {
-	    jf.dispose();
-	  }
-	});
-      
-      jf.setVisible(true);
-    } else if (sp != null) {
-      visualizeClassifierErrors(sp);
-    }
+    resultListMenu.show(m_History.getList(), x, y);
   }
 
   /**
