@@ -10,9 +10,12 @@ package weka.classifiers.evaluation;
  * Encapsulates performance functions for two-class problems.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class TwoClassStats {
+
+  /** The names used when converting this object to a confusion matrix */
+  private final static String [] CATEGORY_NAMES = {"negative", "positive"};
 
   /** Pos predicted as pos */
   private double m_TruePos;
@@ -175,6 +178,22 @@ public class TwoClassStats {
     } else {
       return m_FalsePos / (m_TruePos + m_FalsePos); 
     }
+  }
+
+  /**
+   * Generates a <code>ConfusionMatrix</code> representing the current
+   * two-class statistics, using class names "negative" and "positive".
+   *
+   * @return a <code>ConfusionMatrix</code>.
+   */
+  public ConfusionMatrix getConfusionMatrix() {
+
+    ConfusionMatrix cm = new ConfusionMatrix(CATEGORY_NAMES);
+    cm.setElement(0, 0, m_TrueNeg);
+    cm.setElement(0, 1, m_FalsePos);
+    cm.setElement(1, 0, m_FalseNeg);
+    cm.setElement(1, 1, m_TruePos);
+    return cm;
   }
 
   /**
