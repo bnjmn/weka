@@ -39,7 +39,7 @@ import weka.core.AdditionalMeasureProducer;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.UnsupportedClassTypeException;
 
-import weka.filters.supervised.instance.ClassOrder;
+import weka.filters.supervised.attribute.ClassOrder;
 import weka.filters.Filter;
 
 import weka.classifiers.DistributionClassifier;
@@ -133,7 +133,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class JRip extends DistributionClassifier 
   implements OptionHandler, 
