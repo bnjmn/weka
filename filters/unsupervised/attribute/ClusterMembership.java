@@ -26,6 +26,7 @@ package weka.filters.unsupervised.attribute;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.clusterers.Clusterer;
 import weka.clusterers.DensityBasedClusterer;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -39,8 +40,11 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * A filter that uses a clusterer to obtain cluster membership probabilites
- * for each input instance and outputs them as new instances. <p>
+ * A filter that uses a clusterer to obtain cluster membership values
+ * for each input instance and outputs them as new instances. The
+ * clusterer needs to be a density-based clusterer. If
+ * a (nominal) class is set, then the clusterer will be run individually
+ * for each class.<p>
  *
  * Valid filter-specific options are: <p>
  *
@@ -52,13 +56,16 @@ import java.util.Vector;
  * the class attribute (if set) is automatically ignored during clustering.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClusterMembership extends Filter implements UnsupervisedFilter, 
 							 OptionHandler {
 
   /** The clusterer */
   protected DensityBasedClusterer m_clusterer = new weka.clusterers.EM();
+
+  /** Array for storing the clusterers */
+  protected DensityBasedClusterer[] m_clusterers;
 
   /** Range of attributes to ignore */
   protected Range m_ignoreAttributesRange = null;
@@ -97,11 +104,27 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
 
     if (outputFormatPeek() == null) {
       Instances toFilter = getInputFormat();
-      Instances toFilterIgnoringAttributes = toFilter;
-      
+      Instances[] toFilterIgnoringAttributes;
+
+      // Make subsets if class is nominal
+      if ((toFilter.classIndex() >= 0) && toFilter.classAttribute().isNominal()) {
+	toFilterIgnoringAttributes = new Instances[toFilter.numClasses()];
+	for (int i = 0; i < toFilter.numClasses(); i++) {
+	  toFilterIgnoringAttributes[i] = new Instances(toFilter, toFilter.numInstances());
+	}
+	for (int i = 0; i < toFilter.numInstances(); i++) {
+	  toFilterIgnoringAttributes[(int)toFilter.instance(i).classValue()].add(toFilter.instance(i));
+	}
+	for (int i = 0; i < toFilter.numClasses(); i++) {
+	  toFilterIgnoringAttributes[i].compactify();
+	}
+      } else {
+	toFilterIgnoringAttributes = new Instances[1];
+	toFilterIgnoringAttributes[0] = toFilter;
+      }
+
       // filter out attributes if necessary
       if (m_ignoreAttributesRange != null || toFilter.classIndex() >= 0) {
-	toFilterIgnoringAttributes = new Instances(toFilter);
 	m_removeAttributes = new Remove();
 	String rangeString = "";
 	if (m_ignoreAttributesRange != null) {
@@ -116,34 +139,41 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
 	}
 	((Remove)m_removeAttributes).setAttributeIndices(rangeString);
 	((Remove)m_removeAttributes).setInvertSelection(false);
-	m_removeAttributes.setInputFormat(toFilter);
-	for (int i = 0; i < toFilter.numInstances(); i++) {
-	  m_removeAttributes.input(toFilter.instance(i));
+	((Remove)m_removeAttributes).setInputFormat(toFilter);
+	for (int i = 0; i < toFilterIgnoringAttributes.length; i++) {
+	  toFilterIgnoringAttributes[i] = Filter.useFilter(toFilterIgnoringAttributes[i],
+							   m_removeAttributes);
 	}
-	m_removeAttributes.batchFinished();
-	toFilterIgnoringAttributes = m_removeAttributes.getOutputFormat();
-	
-	Instance tempInst;
-	while ((tempInst = m_removeAttributes.output()) != null) {
-	  toFilterIgnoringAttributes.add(tempInst);
+      }     
+
+      // build the clusterers
+      if ((toFilter.classIndex() <= 0) || !toFilter.classAttribute().isNominal()) {
+	m_clusterers = DensityBasedClusterer.makeCopies(m_clusterer, 1);
+	m_clusterers[0].buildClusterer(toFilterIgnoringAttributes[0]);
+      } else {
+	m_clusterers = DensityBasedClusterer.makeCopies(m_clusterer, toFilter.numClasses());
+	for (int i = 0; i < m_clusterers.length; i++) {
+	  if (toFilterIgnoringAttributes[i].numInstances() == 0) {
+	    m_clusterers[i] = null;
+	  } else {
+	    m_clusterers[i].buildClusterer(toFilterIgnoringAttributes[i]);
+	  }
 	}
       }
       
-      // build the clusterer
-      m_clusterer.buildClusterer(toFilterIgnoringAttributes);
-      
       // create output dataset
-      int numAtts = (toFilter.classIndex() >=0)
-	? m_clusterer.numberOfClusters() + 1
-	: m_clusterer.numberOfClusters();
-      
-      FastVector attInfo = new FastVector(numAtts);
-      for (int i = 0; i < m_clusterer.numberOfClusters(); i++) {
-	attInfo.addElement(new Attribute("pCluster"+i));
+      FastVector attInfo = new FastVector();
+      for (int j = 0; j < m_clusterers.length; j++) {
+	if (m_clusterers[j] != null) {
+	  for (int i = 0; i < m_clusterers[j].numberOfClusters(); i++) {
+	    attInfo.addElement(new Attribute("pCluster_" + j + "_" + i));
+	  }
+	}
       }
       if (toFilter.classIndex() >= 0) {
 	attInfo.addElement(toFilter.classAttribute().copy());
       }
+      attInfo.trimToSize();
       Instances filtered = new Instances(toFilter.relationName()+"_clusterMembership",
 					 attInfo, 0);
       if (toFilter.classIndex() >= 0) {
@@ -194,9 +224,9 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
   /**
    * Converts logs back to density values.
    */
-  protected double[] logs2densities(Instance in) throws Exception {
+  protected double[] logs2densities(int j, Instance in) throws Exception {
 
-    double[] logs = m_clusterer.logDensityPerClusterForInstance(in);
+    double[] logs = m_clusterers[j].logDensityPerClusterForInstance(in);
 
     for (int i = 0; i < logs.length; i++) {
       logs[i] = Math.exp(logs[i]);
@@ -212,18 +242,22 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    */
   protected void convertInstance(Instance instance) throws Exception {
     
-    double [] probs;
-    if (m_removeAttributes != null) {
-      m_removeAttributes.input(instance);
-      probs = logs2densities(m_removeAttributes.output());
-    } else {
-      probs = logs2densities(instance);
-    }
     
     // set up values
     double [] instanceVals = new double[outputFormatPeek().numAttributes()];
-    for (int j = 0; j < probs.length; j++) {
-      instanceVals[j] = probs[j];
+    int pos = 0;
+    for (int j = 0; j < m_clusterers.length; j++) {
+      if (m_clusterers[j] != null) {
+	double [] probs;
+	if (m_removeAttributes != null) {
+	  m_removeAttributes.input(instance);
+	  probs = logs2densities(j, m_removeAttributes.output());
+	} else {
+	  probs = logs2densities(j, instance);
+	}
+	System.arraycopy(probs, 0, instanceVals, pos, probs.length);
+	pos += probs.length;
+      }
     }
     if (instance.classIndex() >= 0) {
       instanceVals[instanceVals.length - 1] = instance.classValue();
@@ -327,11 +361,12 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
 
-    return "A filter that uses a clusterer to generate cluster membership "
-      + "probabilities; filtered instances are composed of these probabilities "
-      + "plus the class attribute (if set in the input data). The class attribute "
-      + "(if set) and any user specified attributes are ignored during the "
-      + "clustering operation";
+    return "A filter that uses a density-based clusterer to generate cluster "
+      + "membership values; filtered instances are composed of these values "
+      + "plus the class attribute (if set in the input data). If a (nominal) "
+      + "class attribute is set, the clusterer is run separately for each "
+      + "class. The class attribute (if set) and any user-specified "
+      + "attributes are ignored during the clustering operation";
   }
   
   /**
@@ -341,7 +376,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    * @return description of this option
    */
   public String clustererTipText() {
-    return "The clusterer that will generate membership probabilities for instances.";
+    return "The clusterer that will generate membership values for the instances.";
   }
 
   /**
