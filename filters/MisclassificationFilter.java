@@ -53,7 +53,7 @@ import java.util.Vector;
  * Invert the match so that correctly classified instances are discarded.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MisclassificationFilter extends Filter implements OptionHandler {
 
@@ -104,6 +104,7 @@ public class MisclassificationFilter extends Filter implements OptionHandler {
     double ans;
     int iterations = 0;
     int classIndex = m_classIndex;
+    if (classIndex < 0) classIndex = data.classIndex();
     if (classIndex < 0) classIndex = data.numAttributes()-1;
 
     // loop until perfect
@@ -119,8 +120,6 @@ public class MisclassificationFilter extends Filter implements OptionHandler {
       m_cleansingClassifier.buildClassifier(buildSet);
 
       temp = new Instances(buildSet, buildSet.numInstances());
-      
-      //if (m_invertMatching) inverseSet = new Instances(buildSet, buildSet.numInstances());
 
       // test on training data
       for (int i = 0; i < buildSet.numInstances(); i++) {
@@ -165,6 +164,7 @@ public class MisclassificationFilter extends Filter implements OptionHandler {
     double ans;
     int iterations = 0;
     int classIndex = m_classIndex;
+    if (classIndex < 0) classIndex = data.classIndex();
     if (classIndex < 0) classIndex = data.numAttributes()-1;
 
     // loop until perfect
@@ -184,7 +184,7 @@ public class MisclassificationFilter extends Filter implements OptionHandler {
       }
       // do the folds
       temp = new Instances(crossSet, crossSet.numInstances());
-      //if (m_invertMatching) inverseSet = new Instances(crossSet, crossSet.numInstances());
+      
       for (int fold = 0; fold < m_numOfCrossValidationFolds; fold++) {
 	Instances train = crossSet.trainCV(m_numOfCrossValidationFolds, fold);
 	m_cleansingClassifier.buildClassifier(train);
