@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
 */
 public class Instances implements Serializable {
  
@@ -228,7 +228,7 @@ public class Instances implements Serializable {
     Instances newData;
 
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negativ (not set)!");
+      throw new Exception("Class index is not set!");
     }
     if (weights.length != numClasses()) {
       throw new Exception("Misclassification cost matrix has "+
