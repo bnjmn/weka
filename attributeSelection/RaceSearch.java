@@ -71,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -971,16 +971,8 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 		  //		  System.err.println(raceStats[i][0]);
 		  //		  System.err.println(raceStats[i][1]);
 		  // check the ttest
-		  double prob;
-		  // first check for difference in variance
-		  /*if ((prob = ftest(raceStats[i][0], raceStats[i][1])) < m_sigLevel) {
-		    System.err.println("Ftest prob (diff var) : "+prob);
-		    prob = tutest(raceStats[i][0], raceStats[i][1]);
-		    } else { */ // use ttest for same variance
-		  //		    System.err.println("Ftest prob : "+prob);
-		    prob = ttest(raceStats[i][0], raceStats[i][1]);
-		    // }
-		    //		  System.err.println("Prob :"+prob);
+		  double prob = ttest(raceStats[i][0], raceStats[i][1]);
+		  //		  System.err.println("Prob :"+prob);
 		  if (prob < m_sigLevel) { // stop the races we have a winner!
 		    if (raceStats[i][0].mean < raceStats[i][1].mean) {
 		      base = (char [])parallelRaces[i][0].clone();
@@ -1056,140 +1048,21 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     return attributeList(base);
   }
 
-  // Adapted from numerical recipes
-  private double gammln(double xx) {
-    double x,y,tmp,ser;
-    final double [] cof = {76.18009172947146,-86.50532032941677,
-			  24.01409824083091,-1.231739572450155,
-			  0.1208650973866179e-2,-0.5395239384953e-5};
-    int j;
-    
-    y=x=xx;
-    tmp=x+5.5;
-    tmp -= (x+0.5)*Math.log(tmp);
-    ser=1.000000000190015;
-    for (j=0;j<=5;j++) ser += cof[j]/++y;
-    return -tmp+Math.log(2.5066282746310005*ser/x);
-  }
-
-  // Adapted from numerical recipes
-  private double betacf(double a, double b, double x) throws Exception {
-    final int maxit = 100;
-    final double eps = 3.0e-7;
-    final double fpmin = 1.0e-30;
-    int m,m2;
-    double aa,c,d,del,h,qab,qam,qap;
-    //    System.err.println("a "+a+" b "+b+" x "+x);
-    qab=a+b;
-    qap=a+1.0;
-    qam=a-1.0;
-    c=1.0;
-    d=1.0-qab*x/qap;
-    if (Math.abs(d) < fpmin) d=fpmin;
-    d=1.0/d;
-    h=d;
-    for (m=1;m<=maxit;m++) {
-      m2=2*m;
-      aa=m*(b-m)*x/((qam+m2)*(a+m2));
-      d=1.0+aa*d;
-      if (Math.abs(d) < fpmin) d=fpmin;
-      c=1.0+aa/c;
-      if (Math.abs(c) < fpmin) c=fpmin;
-      d=1.0/d;
-      h *= d*c;
-      aa = -(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
-      d=1.0+aa*d;
-      if (Math.abs(d) < fpmin) d=fpmin;
-      c=1.0+aa/c;
-      if (Math.abs(c) < fpmin) c=fpmin;
-      d=1.0/d;
-      del=d*c;
-      h *= del;
-      if (Math.abs(del-1.0) < eps) break;
-    }
-    if (m > maxit) {
-      throw new Exception("a or b too big, or maxit too small in betacf");
-    }
-    return h;
-  }
-
-  // Adapted from numerical recipes
-  private double betai(double a, double b, double x) throws Exception {
-    double bt;
-    //    System.err.println("***a "+a+" b "+b+" x "+x);
-    if (x < 0.0 || x > 1.0) {
-      throw new Exception("Bad x in routine betai");
-    }
-    if (x == 0.0 || x == 1.0) bt=0.0;
-    else
-      bt=Math.exp(gammln(a+b)-gammln(a)-gammln(b)+a*Math.log(x)+b*Math.log(1.0-x));
-    if (x < (a+1.0)/(a+b+2.0))
-      return bt*betacf(a,b,x)/a;
-    else
-      return 1.0-bt*betacf(b,a,1.0-x)/b;
-  }
-
-  // ftest for differences in variance. Returns probability that difference
-  // in variance is due to chance. Adapted from numerical recipes
-  private double ftest(Stats c1, Stats c2) throws Exception {
-    double n1 = c1.count; double n2 = c2.count;
-    double var1 = c1.stdDev*c1.stdDev;
-    double var2 = c2.stdDev*c2.stdDev;
-    double ave1 = c1.mean;
-    double ave2 = c2.mean;
-    double f,df1,df2,prob;
-    
-    if (var1 > var2) {
-      f=var1/var2;
-      df1=n1-1;
-      df2=n2-1;
-    } else {
-      f=var2/var1;
-      df1=n2-1;
-      df2=n1-1;
-    }
-    prob = 2.0*betai(0.5*df2,0.5*df1,df2/(df2+df1*(f)));
-    if (prob > 1.0) prob=2.0-prob;
-
-    return prob;
-  }
-
   // t-test for unequal sample sizes and same variance. Returns probability
-  // that observed difference in means is due to chance. Adapted from
-  // numerical recipes
+  // that observed difference in means is due to chance.
   private double ttest(Stats c1, Stats c2) throws Exception {
     double n1 = c1.count; double n2 = c2.count;
-    double var1 = c1.stdDev*c1.stdDev;
-    double var2 = c2.stdDev*c2.stdDev;
-    double ave1 = c1.mean;
-    double ave2 = c2.mean;
+    double v1 = c1.stdDev * c1.stdDev;
+    double v2 = c2.stdDev * c2.stdDev;
+    double av1 = c1.mean;
+    double av2 = c2.mean;
     
-    double df=n1+n2-2;
-    double svar=((n1-1)*var1+(n2-1)*var2)/df;
-    double t=(ave1-ave2)/Math.sqrt(svar*(1.0/n1+1.0/n2));
-    t = Math.abs(t);
-    //    System.err.println("t : "+t);
-    double prob=betai(0.5*df,0.5,df/(df+(t)*(t)));
+    double df = n1 + n2 - 2;
+    double cv = (((n1 - 1) * v1) + ((n2 - 1) * v2)) /df;
+    double t = (av1 - av2) / Math.sqrt(cv * ((1.0 / n1) + (1.0 / n2)));
     
-    return prob;
-  }
-
-  // t-test for unequal sample sizes and different variances. Returns the 
-  // probability. Adapted from numerical recipes
-  private double tutest(Stats c1, Stats c2) throws Exception {
-    double n1 = c1.count; double n2 = c2.count;
-    double var1 = c1.stdDev*c1.stdDev;
-    double var2 = c2.stdDev*c2.stdDev;
-    double ave1 = c1.mean;
-    double ave2 = c2.mean;
-
-    double t=(ave1-ave2)/Math.sqrt(var1/n1+var2/n2);
-    t = Math.abs(t);
-    double df=Math.sqrt(var1/n1+var2/n2)/(Math.sqrt(var1/n1)/(n1-1)+Math.sqrt(var2/n2)/(n2-1));
-    //    System.err.println("t : "+t);
-    //    System.err.println("df : "+df);
-    double prob = betai(0.5*df,0.5,df/(df+Math.sqrt(t)));
-    return prob;
+    return Statistics.incompleteBeta(df / 2.0, 0.5,
+				     df / (df + (t * t)));
   }
     
   /**
