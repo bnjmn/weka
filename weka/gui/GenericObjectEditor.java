@@ -25,42 +25,45 @@ import weka.core.Tag;
 import weka.core.SelectedTag;
 import weka.core.Utils;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyEditor;
-import java.util.Vector;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.io.FileInputStream;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.BorderLayout;
 import java.awt.FontMetrics;
+import java.awt.GridLayout;
 import java.awt.Window;
-import java.awt.event.ItemListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.GridLayout;
-import javax.swing.JPanel;
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
-import javax.swing.JButton;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JOptionPane;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyEditor;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import java.io.File;
+import java.io.FileOutputStream;
 
 
 /** 
@@ -75,7 +78,7 @@ import java.io.ByteArrayInputStream;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -137,11 +140,20 @@ public class GenericObjectEditor implements PropertyEditor {
     /** The model containing the list of names to select from */
     private DefaultComboBoxModel m_ObjectNames;
 
+    /** Open object from disk */
+    private JButton m_OpenBut;
+
+    /** Save object to disk */
+    private JButton m_SaveBut;
+
     /** ok button */
     private JButton m_okBut;
     
     /** cancel button */
     private JButton m_cancelBut;
+
+    /** The filechooser for opening and saving object files */
+    private JFileChooser m_FileChooser;
 
     /** Creates the GUI editor component */
     public GOEPanel() {
@@ -156,6 +168,31 @@ public class GenericObjectEditor implements PropertyEditor {
       new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent evt) {
 	  m_Support.firePropertyChange("", null, null);
+	}
+      });
+
+      m_OpenBut = new JButton("Open...");
+      m_OpenBut.setEnabled(true);
+      m_OpenBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  Object object = openObject();
+          if (object != null) {
+            System.err.println("Loaded object");
+            setObject(object);
+            updateClassType();
+            updateChooser();
+            updateChildPropertySheet();
+          }
+          // Make sure obj is of right type. 
+          // Fire prop change.
+	}
+      });
+
+      m_SaveBut = new JButton("Save...");
+      m_SaveBut.setEnabled(true);
+      m_SaveBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveObject(m_Object);
 	}
       });
 
@@ -197,7 +234,9 @@ public class GenericObjectEditor implements PropertyEditor {
 
       JPanel okcButs = new JPanel();
       okcButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      okcButs.setLayout(new GridLayout(1, 2, 5, 5));
+      okcButs.setLayout(new GridLayout(1, 4, 5, 5));
+      okcButs.add(m_OpenBut);
+      okcButs.add(m_SaveBut);
       okcButs.add(m_okBut);
       okcButs.add(m_cancelBut);
       add(okcButs, BorderLayout.SOUTH);
@@ -208,6 +247,73 @@ public class GenericObjectEditor implements PropertyEditor {
 	updateChildPropertySheet();
       }
       m_ObjectChooser.addItemListener(this);
+    }
+
+    /**
+     * Opens an object from a file selected by the user.
+     * 
+     * @return the loaded object, or null if the operation was cancelled
+     */
+    protected Object openObject() {
+
+      if (m_FileChooser == null) {
+        createFileChooser();
+      }
+      int returnVal = m_FileChooser.showOpenDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File selected = m_FileChooser.getSelectedFile();
+	try {
+	  ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(new FileInputStream(selected)));
+          Object obj = oi.readObject();
+          oi.close();
+          if (!m_ClassType.isAssignableFrom(obj.getClass())) {
+            throw new Exception("Object not of type: " + m_ClassType.getName());
+          }
+          return obj;
+	} catch (Exception ex) {
+	  JOptionPane.showMessageDialog(this,
+					"Couldn't read object: "
+					+ selected.getName() 
+					+ "\n" + ex.getMessage(),
+					"Open object file",
+					JOptionPane.ERROR_MESSAGE);
+	}
+      }
+      return null;
+    }
+
+    /**
+     * Opens an object from a file selected by the user.
+     * 
+     * @return the loaded object, or null if the operation was cancelled
+     */
+    protected void saveObject(Object object) {
+
+      if (m_FileChooser == null) {
+        createFileChooser();
+      }
+      int returnVal = m_FileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File sFile = m_FileChooser.getSelectedFile();
+	try {
+	  ObjectOutputStream oo = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(sFile)));
+          oo.writeObject(object);
+          oo.close();
+	} catch (Exception ex) {
+	  JOptionPane.showMessageDialog(this,
+					"Couldn't write to file: "
+					+ sFile.getName() 
+					+ "\n" + ex.getMessage(),
+					"Save object",
+					JOptionPane.ERROR_MESSAGE);
+	}
+      }
+    }
+
+    protected void createFileChooser() {
+
+      m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
+      m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     }
 
     /**
