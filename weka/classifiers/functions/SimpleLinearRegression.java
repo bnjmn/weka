@@ -31,18 +31,24 @@ import weka.classifiers.*;
  * Missing values are not allowed. Can only deal with numeric attributes.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SimpleLinearRegression extends Classifier implements WeightedInstancesHandler {
 
   /** The chosen attribute */
   private Attribute m_attribute;
 
+  /** The index of the chosen attribute */
+  private int m_attributeIndex;
+
   /** The slope */
   private double m_slope;
   
   /** The intercept */
   private double m_intercept;
+
+  /** If true, suppress error message if no useful attribute was found*/   
+  private boolean m_suppressErrorMessage = false;  
 
   public double classifyInstance(Instance inst) throws Exception {
     
@@ -83,7 +89,7 @@ public class SimpleLinearRegression extends Classifier implements WeightedInstan
 	  throw new Exception("SimpleLinearRegression: Only numeric attributes!");
 	}
 	m_attribute = insts.attribute(i);
-
+	
 	// Compute slope and intercept
 	double xMean = insts.meanOrMode(i);
 	double sumWeightedXDiffSquared = 0;
@@ -125,17 +131,38 @@ public class SimpleLinearRegression extends Classifier implements WeightedInstan
 
     // Set parameters
     if (chosen == -1) {
-
-      System.err.println("----- no useful attribute found");
+      if (!m_suppressErrorMessage) System.err.println("----- no useful attribute found");
       m_attribute = null;
+      m_attributeIndex = 0;
       m_slope = 0;
       m_intercept = yMean;
     } else {
       m_attribute = insts.attribute(chosen);
+      m_attributeIndex = chosen;
       m_slope = chosenSlope;
       m_intercept = chosenIntercept;
     }
   }
+
+  public boolean foundUsefulAttribute(){
+      return (m_attribute != null); 
+  } 
+
+  public int getAttributeIndex(){
+      return m_attributeIndex;
+  }
+
+  public double getSlope(){
+      return m_slope;
+  }
+    
+  public double getIntercept(){
+      return m_intercept;
+  }  
+
+  public void setSuppressErrorMessage(boolean s){
+      m_suppressErrorMessage = s;
+  }   
 
   public String toString() {
 
