@@ -31,7 +31,7 @@ import weka.classifiers.*;
  * Missing values are not allowed. Can only deal with numeric attributes.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SimpleLinearRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -57,6 +57,16 @@ public class SimpleLinearRegression extends Classifier implements WeightedInstan
   }
   
   public void buildClassifier(Instances insts) throws Exception {
+
+    if (!insts.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
+    }
+    if (insts.numInstances() == 0) {
+      throw new Exception("No instances in training file!");
+    }
+    if (insts.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
 
     // Compute mean of target value
     double yMean = insts.meanOrMode(insts.classIndex());
