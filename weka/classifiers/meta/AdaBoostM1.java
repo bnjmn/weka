@@ -57,10 +57,10 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler, WeightedInstancesHandler, Sourcable {
 
   /** Max num iterations tried to find classifier with non-zero error. */ 
   private static int MAX_NUM_RESAMPLING_ITERATIONS = 10;
@@ -91,6 +91,9 @@ public class AdaBoostM1 extends DistributionClassifier
 
   /** Seed for boosting with resampling. */
   protected int m_Seed = 1;
+
+  /** The number of classes */
+  protected int m_NumClasses;
 
   /**
    * Select only instances with weights that contribute to 
@@ -434,6 +437,7 @@ public class AdaBoostM1 extends DistributionClassifier
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
+    m_NumClasses = data.numClasses();
     m_Classifiers = Classifier.makeCopies(m_Classifier, getMaxIterations());
     if ((!m_UseResampling) && 
 	(m_Classifier instanceof WeightedInstancesHandler)) {
@@ -662,11 +666,54 @@ public class AdaBoostM1 extends DistributionClassifier
   }
 
   /**
+   * Returns the boosted model as Java source code.
+   *
+   * @return the tree as Java source code
+   * @exception Exception if something goes wrong
+   */
+  public String toSource(String className) throws Exception {
+
+    if (m_NumIterations == 0) {
+      throw new Exception("No model built yet");
+    }
+    if (!(m_Classifiers[0] instanceof Sourcable)) {
+      throw new Exception("Base learner " + m_Classifier.getClass().getName()
+			  + " is not Sourcable");
+    }
+
+    StringBuffer text = new StringBuffer("class ");
+    text.append(className).append(" {\n\n");
+
+    text.append("  public static double classify(Object [] i) {\n");
+
+    if (m_NumIterations == 1) {
+      text.append("    return " + className + "_0.classify(i);\n");
+    } else {
+      text.append("    double [] sums = new double [" + m_NumClasses + "];\n");
+      for (int i = 0; i < m_NumIterations; i++) {
+	text.append("    sums[(int) " + className + '_' + i 
+		    + ".classify(i)] += " + m_Betas[i] + ";\n");
+      }
+      text.append("    double maxV = sums[0];\n" +
+		  "    int maxI = 0;\n"+
+		  "    for (int j = 1; j < " + m_NumClasses + "; j++) {\n"+
+		  "      if (sums[j] > maxV) { maxV = sums[j]; maxI = j; }\n"+
+		  "    }\n    return (double) maxI;\n");
+    }
+    text.append("  }\n}\n");
+
+    for (int i = 0; i < m_Classifiers.length; i++) {
+	text.append(((Sourcable)m_Classifiers[i])
+		    .toSource(className + '_' + i));
+    }
+    return text.toString();
+  }
+
+  /**
    * Returns description of the boosted classifier.
    *
    * @return description of the boosted classifier as a string
    */
- 
   public String toString() {
     
     StringBuffer text = new StringBuffer();
