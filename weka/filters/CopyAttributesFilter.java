@@ -28,7 +28,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CopyAttributesFilter extends Filter implements OptionHandler {
 
@@ -83,8 +83,8 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
     }
     setInvertSelection(Utils.getFlag('V', options));
     
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -122,10 +122,9 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
     
-    m_CopyCols.setUpper(m_InputFormat.numAttributes() - 1);
+    m_CopyCols.setUpper(instanceInfo.numAttributes() - 1);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
 
@@ -133,7 +132,7 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       // Create a copy of the attribute with a different name
-      Attribute origAttribute = m_InputFormat.attribute(current);
+      Attribute origAttribute = instanceInfo.attribute(current);
       outputFormat.insertAttributeAt((Attribute)origAttribute.copy(),
 				     outputFormat.numAttributes());
       outputFormat.renameAttribute(outputFormat.numAttributes() - 1,
@@ -157,7 +156,7 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -166,10 +165,10 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
     }
 
     double[] vals = new double[outputFormatPeek().numAttributes()];
-    for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
+    for(int i = 0; i < getInputFormat().numAttributes(); i++) {
       vals[i] = instance.value(i);
     }
-    int j = m_InputFormat.numAttributes();
+    int j = getInputFormat().numAttributes();
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       vals[i + j] = instance.value(current);

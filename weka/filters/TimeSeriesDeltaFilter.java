@@ -40,7 +40,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
 
@@ -55,13 +55,14 @@ public class TimeSeriesDeltaFilter extends TimeSeriesTranslateFilter {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    // XXX this is probably not right... It should only call
+    // Filter.inputFormat, not TimeSeriesTranslateFilter.inputFormat
+    super.inputFormat(instanceInfo);
     resetHistory();
-    m_SelectedCols.setUpper(m_InputFormat.numAttributes() - 1);
+    m_SelectedCols.setUpper(instanceInfo.numAttributes() - 1);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
-    for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
+    for(int i = 0; i < instanceInfo.numAttributes(); i++) {
       if (m_SelectedCols.isInRange(i)) {
 	if (outputFormat.attribute(i).isNumeric()) {
 	  outputFormat.renameAttribute(i, outputFormat.attribute(i).name()

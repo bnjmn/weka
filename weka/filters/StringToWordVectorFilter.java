@@ -30,7 +30,7 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@intelligenesis.net)
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  **/
 public class StringToWordVectorFilter extends Filter {
 
@@ -89,9 +89,7 @@ public class StringToWordVectorFilter extends Filter {
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(null);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
     m_FirstBatchDone = false;
     return false;
   }
@@ -108,7 +106,7 @@ public class StringToWordVectorFilter extends Filter {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -119,7 +117,7 @@ public class StringToWordVectorFilter extends Filter {
       convertInstance(instance);
       return true;
     } else {
-      m_InputFormat.add(instance);
+      bufferInput(instance);
       return false;
     }
   }
@@ -134,18 +132,20 @@ public class StringToWordVectorFilter extends Filter {
    */
   public boolean batchFinished() throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
 
     // Determine the dictionary
-    determineDictionary();
+    if (!m_FirstBatchDone) {
+      determineDictionary();
+    }
 
     // Convert pending input instances.
-    for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-      convertInstance(m_InputFormat.instance(i));
+    for(int i = 0; i < getInputFormat().numInstances(); i++) {
+      convertInstance(getInputFormat().instance(i));
     }
-    m_InputFormat = m_InputFormat.stringFreeStructure();
+    flushInput();
 
     m_NewBatch = true;
     m_FirstBatchDone = true;
@@ -199,10 +199,10 @@ public class StringToWordVectorFilter extends Filter {
 
   private void determineDictionary() throws Exception {
     
-    int classInd = m_InputFormat.classIndex();
+    int classInd = getInputFormat().classIndex();
     int values = 1;
     if (classInd != -1) {
-      values = m_InputFormat.attribute(classInd).numValues();
+      values = getInputFormat().attribute(classInd).numValues();
     }
     TreeMap dictionaryArr [] = new TreeMap[values];
     for (int i = 0; i < values; i++) {
@@ -212,16 +212,16 @@ public class StringToWordVectorFilter extends Filter {
     //System.err.print("Creating dictionary\n"); System.err.flush();
 
     // Tokenize all training text into an orderedMap.
-    for (int i = 0; i < m_InputFormat.numInstances(); i++) {
+    for (int i = 0; i < getInputFormat().numInstances(); i++) {
       /*
       if (i % 10 == 0) {
-        System.err.print( i + " " + m_InputFormat.numInstances() + "\r"); 
+        System.err.print( i + " " + getInputFormat().numInstances() + "\r"); 
         System.err.flush();
       }
       */
-      Instance instance = m_InputFormat.instance(i);
+      Instance instance = getInputFormat().instance(i);
       for (int j = 0; j < instance.numAttributes(); j++) { 
-        if ((m_InputFormat.attribute(j).type() == Attribute.STRING) 
+        if ((getInputFormat().attribute(j).type() == Attribute.STRING) 
             && (instance.isMissing(j) == false)) {
           StringTokenizer st = new StringTokenizer(instance.stringValue(j),
                                                    DELIMS);
@@ -299,7 +299,7 @@ public class StringToWordVectorFilter extends Filter {
           if(newDictionary.get(word) == null) {
             /*
             if (values > 1) {
-              System.err.print(m_InputFormat.classAttribute().value(z) + " ");
+              System.err.print(getInputFormat().classAttribute().value(z) + " ");
             }
             System.err.println(word);
             */
@@ -314,19 +314,19 @@ public class StringToWordVectorFilter extends Filter {
     m_Dictionary = newDictionary;
 
     int classIndex = -1;
-    for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-      if (m_InputFormat.attribute(i).type() != Attribute.STRING) {
-        if (m_InputFormat.classIndex() == i) {
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      if (getInputFormat().attribute(i).type() != Attribute.STRING) {
+        if (getInputFormat().classIndex() == i) {
           classIndex = attributes.size();
         }
-        attributes.addElement(m_InputFormat.attribute(i).copy());
+        attributes.addElement(getInputFormat().attribute(i).copy());
       }     
     }
     /*
     System.err.println("done. " + index + " words in total.");
     */
     
-    Instances outputFormat = new Instances(m_InputFormat.relationName(), 
+    Instances outputFormat = new Instances(getInputFormat().relationName(), 
                                            attributes, 0);
     outputFormat.setClassIndex(classIndex);
     setOutputFormat(outputFormat);
@@ -338,7 +338,7 @@ public class StringToWordVectorFilter extends Filter {
     // Convert the instance into a sorted set of indexes
     TreeMap contained = new TreeMap();
     for (int j = 0; j < instance.numAttributes(); j++) { 
-      if ((m_InputFormat.attribute(j).type() == Attribute.STRING) 
+      if ((getInputFormat().attribute(j).type() == Attribute.STRING) 
           && (instance.isMissing(j) == false)) {
         StringTokenizer st = new StringTokenizer(instance.stringValue(j),
                                                  DELIMS);
@@ -353,8 +353,8 @@ public class StringToWordVectorFilter extends Filter {
     }
 
     int firstCopy = m_Dictionary.size();
-    for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-      if (m_InputFormat.attribute(i).type() != Attribute.STRING) {
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      if (getInputFormat().attribute(i).type() != Attribute.STRING) {
         if (instance.value(i) != 0.0) {
           contained.put(new Integer(firstCopy++), 
                         new Double(instance.value(i)));

@@ -29,7 +29,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -116,8 +116,8 @@ public class AddFilter extends Filter implements OptionHandler {
     setNominalLabels(Utils.getOption('L', options));
     setAttributeName(Utils.getOption('N', options));
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -155,8 +155,7 @@ public class AddFilter extends Filter implements OptionHandler {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
 
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute = null;
@@ -171,8 +170,8 @@ public class AddFilter extends Filter implements OptionHandler {
       throw new Error("Unknown attribute type in AddFilter");
     }
 
-    if ((m_Insert < 0) || (m_Insert > m_InputFormat.numAttributes())) {
-      m_Insert = m_InputFormat.numAttributes();
+    if ((m_Insert < 0) || (m_Insert > getInputFormat().numAttributes())) {
+      m_Insert = getInputFormat().numAttributes();
     }
     outputFormat.insertAttributeAt(newAttribute, m_Insert);
     setOutputFormat(outputFormat);
@@ -192,7 +191,7 @@ public class AddFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {

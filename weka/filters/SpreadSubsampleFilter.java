@@ -48,7 +48,7 @@ import java.util.Hashtable;
  *  <p>
  *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  **/
 public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
@@ -173,8 +173,8 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
     setAdjustWeights(Utils.getFlag('W', options));
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -281,9 +281,8 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
+    setOutputFormat(getInputFormat());
     m_FirstBatchDone = false;
     return true;
   }
@@ -300,7 +299,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -311,7 +310,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       push(instance);
       return true;
     } else {
-      m_InputFormat.add(instance);
+      bufferInput(instance);
       return false;
     }
   }
@@ -326,16 +325,16 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    */
   public boolean batchFinished() throws Exception {
 
-    Instance current;
-
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
 
-    // Do the subsample, and clear the input instances.
-    createSubsample();
-    m_InputFormat = new Instances(m_InputFormat, 0);
+    if (!m_FirstBatchDone) {
+      // Do the subsample, and clear the input instances.
+      createSubsample();
+    }
 
+    flushInput();
     m_NewBatch = true;
     m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
@@ -348,26 +347,26 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    */
   private void createSubsample() throws Exception {
 
-    int classI = m_InputFormat.classIndex();
+    int classI = getInputFormat().classIndex();
     if (classI == -1) {
       throw new Exception("No class attribute is set");
     }
 
-    if (m_InputFormat.classAttribute().isNominal() == false) {
+    if (getInputFormat().classAttribute().isNominal() == false) {
       throw new Exception ("The class attribute must be nominal.");
     }
 
     // Sort according to class attribute.
-    m_InputFormat.sort(classI);
+    getInputFormat().sort(classI);
     // Determine where each class starts in the sorted dataset
     int [] classIndices = getClassIndices();
 
     // Get the existing class distribution
-    int [] counts = new int [m_InputFormat.numClasses()];
-    double [] weights = new double [m_InputFormat.numClasses()];
+    int [] counts = new int [getInputFormat().numClasses()];
+    double [] weights = new double [getInputFormat().numClasses()];
     int min = -1;
-    for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-      Instance current = m_InputFormat.instance(i);
+    for (int i = 0; i < getInputFormat().numInstances(); i++) {
+      Instance current = getInputFormat().instance(i);
       if (current.classIsMissing() == false) {
         counts[(int)current.classValue()]++;
         weights[(int)current.classValue()]+= current.weight();
@@ -379,9 +378,12 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       if (counts[i] > 0) {
         weights[i] = weights[i] / counts[i];
       }
-      //System.err.println("Avg weight for class " + i + ": " + weights[i]);
+      System.err.println("Class:" + i + " " + getInputFormat().classAttribute().value(i)
+                         + " Count:" + counts[i]
+                         + " Total:" + weights[i] * counts[i]
+                         + " Avg:" + weights[i]);
     }
-
+    
     // find the class with the minimum number of instances
     for (int i = 0; i < counts.length; i++) {
       if ( (min < 0) && (counts[i] > 0) ) {
@@ -397,7 +399,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
     }
 
     // determine the new distribution 
-    int [] new_counts = new int [m_InputFormat.numClasses()];
+    int [] new_counts = new int [getInputFormat().numClasses()];
     for (int i = 0; i < counts.length; i++) {
       new_counts[i] = (int)Math.abs(Math.min(counts[i],
                                              min * m_DistributionSpread));
@@ -406,7 +408,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       }
 
       if (m_MaxCount > 0) {
-	  new_counts[i] = Math.min(new_counts[i], m_MaxCount);
+        new_counts[i] = Math.min(new_counts[i], m_MaxCount);
       }
     }
 
@@ -417,7 +419,12 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       double newWeight = 1.0;
       if (m_AdjustWeights && (new_counts[j] > 0)) {
         newWeight = weights[j] * counts[j] / new_counts[j];
-        //System.err.println("Adjusted avg weight for class " + j + ": " + newWeight);
+        System.err.println("Class:" + j + " " + getInputFormat().classAttribute().value(j) 
+                           + " Count:" + counts[j]
+                           + " Total:" + weights[j] * counts[j]
+                           + " Avg:" + weights[j]
+                           + " NewCount:" + new_counts[j]
+                           + " NewAvg:" + newWeight);
       }
       for (int k = 0; k < new_counts[j]; k++) {
         boolean ok = false;
@@ -430,7 +437,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
             t.put("" + index, "");
             ok = true;
 	    if(index >= 0) {
-              Instance newInst = (Instance)m_InputFormat.instance(index).copy();
+              Instance newInst = (Instance)getInputFormat().instance(index).copy();
               if (m_AdjustWeights) {
                 newInst.setWeight(newWeight);
               }
@@ -444,16 +451,16 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
   /**
    * Creates an index containing the position where each class starts in 
-   * the m_InputFormat. m_InputFormat must be sorted on the class attribute.
+   * the getInputFormat(). m_InputFormat must be sorted on the class attribute.
    */
   private int []getClassIndices() throws Exception {
 
     // Create an index of where each class value starts
-    int [] classIndices = new int [m_InputFormat.numClasses() + 1];
+    int [] classIndices = new int [getInputFormat().numClasses() + 1];
     int currentClass = 0;
     classIndices[currentClass] = 0;
-    for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-      Instance current = m_InputFormat.instance(i);
+    for (int i = 0; i < getInputFormat().numInstances(); i++) {
+      Instance current = getInputFormat().instance(i);
       if (current.classIsMissing()) {
         for (int j = currentClass + 1; j < classIndices.length; j++) {
           classIndices[j] = i;
@@ -466,9 +473,9 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
         currentClass = (int) current.classValue();
       }
     }
-    if (currentClass <= m_InputFormat.numClasses()) {
+    if (currentClass <= getInputFormat().numClasses()) {
       for (int j = currentClass + 1; j < classIndices.length; j++) {
-        classIndices[j] = m_InputFormat.numInstances();
+        classIndices[j] = getInputFormat().numInstances();
       }
     }
     return classIndices;

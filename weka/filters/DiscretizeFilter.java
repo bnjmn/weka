@@ -44,7 +44,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -195,8 +195,8 @@ public class DiscretizeFilter extends Filter
       setAttributeIndices("first-last");
     }
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
   /**
@@ -248,18 +248,16 @@ public class DiscretizeFilter extends Filter
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
-    setOutputFormat(null);
+    super.inputFormat(instanceInfo);
 
-    m_DiscretizeCols.setUpper(m_InputFormat.numAttributes() - 1);
+    m_DiscretizeCols.setUpper(instanceInfo.numAttributes() - 1);
     m_CutPoints = null;
     if (m_UseMDL) {
-      if (m_InputFormat.classIndex() < 0) {
+      if (instanceInfo.classIndex() < 0) {
 	throw new Exception("Cannot use class-based discretization: "
 			    + "no class assigned to the dataset");
       }
-      if (!m_InputFormat.classAttribute().isNominal()) {
+      if (!instanceInfo.classAttribute().isNominal()) {
 	throw new Exception("Supervised discretization not possible:"
 			    + " class is not nominal!");
       }
@@ -285,7 +283,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -298,7 +296,7 @@ public class DiscretizeFilter extends Filter
       return true;
     }
 
-    m_InputFormat.add(instance);
+    bufferInput(instance);
     return false;
   }
 
@@ -313,7 +311,7 @@ public class DiscretizeFilter extends Filter
    */
   public boolean batchFinished() throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_CutPoints == null) {
@@ -324,11 +322,11 @@ public class DiscretizeFilter extends Filter
       // If we implement saving cutfiles, save the cuts here
 
       // Convert pending input instances
-      for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-	convertInstance(m_InputFormat.instance(i));
+      for(int i = 0; i < getInputFormat().numInstances(); i++) {
+	convertInstance(getInputFormat().instance(i));
       }
-      m_InputFormat = new Instances(m_InputFormat, 0);
     } 
+    flushInput();
 
     m_NewBatch = true;
     return (numPendingOutput() != 0);
@@ -654,15 +652,15 @@ public class DiscretizeFilter extends Filter
 
     Instances copy = null;
 
-    m_CutPoints = new double [m_InputFormat.numAttributes()] [];
-    for(int i = m_InputFormat.numAttributes() - 1; i >= 0; i--) {
+    m_CutPoints = new double [getInputFormat().numAttributes()] [];
+    for(int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
       if ((m_DiscretizeCols.isInRange(i)) && 
-	  (m_InputFormat.attribute(i).isNumeric())) {
+	  (getInputFormat().attribute(i).isNumeric())) {
 	if (m_UseMDL) {
 
 	  // Use copy to preserve order
 	  if (copy == null) {
-	    copy = new Instances(m_InputFormat);
+	    copy = new Instances(getInputFormat());
 	  }
 	  calculateCutPointsByMDL(i, copy);
 	} else {
@@ -918,8 +916,8 @@ public class DiscretizeFilter extends Filter
     // Scan for max and min values
     double max = 0, min = 1, currentVal;
     Instance currentInstance;
-    for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-      currentInstance = m_InputFormat.instance(i);
+    for(int i = 0; i < getInputFormat().numInstances(); i++) {
+      currentInstance = getInputFormat().instance(i);
       if (!currentInstance.isMissing(index)) {
 	currentVal = currentInstance.value(index);
 	if (max < min) {
@@ -958,8 +956,8 @@ public class DiscretizeFilter extends Filter
     Instance currentInstance;
 
     // Find minimum and maximum
-    for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-      currentInstance = m_InputFormat.instance(i);
+    for (int i = 0; i < getInputFormat().numInstances(); i++) {
+      currentInstance = getInputFormat().instance(i);
       if (!currentInstance.isMissing(index)) {
 	currentVal = currentInstance.value(index);
 	if (currentVal > max) {
@@ -977,8 +975,8 @@ public class DiscretizeFilter extends Filter
       binWidth = (max - min) / (i + 1);
 
       // Compute distribution
-      for (int j = 0; j < m_InputFormat.numInstances(); j++) {
-	currentInstance = m_InputFormat.instance(j);
+      for (int j = 0; j < getInputFormat().numInstances(); j++) {
+	currentInstance = getInputFormat().instance(j);
 	if (!currentInstance.isMissing(index)) {
 	  for (int k = 0; k < i + 1; k++) {
 	    if (currentInstance.value(index) <= 
@@ -1031,11 +1029,11 @@ public class DiscretizeFilter extends Filter
       setOutputFormat(null);
       return;
     }
-    FastVector attributes = new FastVector(m_InputFormat.numAttributes());
-    int classIndex = m_InputFormat.classIndex();
-    for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
+    FastVector attributes = new FastVector(getInputFormat().numAttributes());
+    int classIndex = getInputFormat().classIndex();
+    for(int i = 0; i < getInputFormat().numAttributes(); i++) {
       if ((m_DiscretizeCols.isInRange(i)) 
-	  && (m_InputFormat.attribute(i).isNumeric())) {
+	  && (getInputFormat().attribute(i).isNumeric())) {
 	if (!m_MakeBinary) {
 	  FastVector attribValues = new FastVector(1);
 	  if (m_CutPoints[i] == null) {
@@ -1056,18 +1054,18 @@ public class DiscretizeFilter extends Filter
 	      }
 	    }
 	  }
-	  attributes.addElement(new Attribute(m_InputFormat.
+	  attributes.addElement(new Attribute(getInputFormat().
 					      attribute(i).name(),
 					      attribValues));
 	} else {
 	  if (m_CutPoints[i] == null) {
 	    FastVector attribValues = new FastVector(1);
 	    attribValues.addElement("'All'");
-	    attributes.addElement(new Attribute(m_InputFormat.
+	    attributes.addElement(new Attribute(getInputFormat().
 						attribute(i).name(),
 						attribValues));
 	  } else {
-	    if (i < m_InputFormat.classIndex()) {
+	    if (i < getInputFormat().classIndex()) {
 	      classIndex += m_CutPoints[i].length - 1;
 	    }
 	    for(int j = 0; j < m_CutPoints[i].length; j++) {
@@ -1076,18 +1074,18 @@ public class DiscretizeFilter extends Filter
 		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
 	      attribValues.addElement("'("
 		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "-inf)'");
-	      attributes.addElement(new Attribute(m_InputFormat.
+	      attributes.addElement(new Attribute(getInputFormat().
 						  attribute(i).name(),
 						  attribValues));
 	    }
 	  }
 	}
       } else {
-	attributes.addElement(m_InputFormat.attribute(i).copy());
+	attributes.addElement(getInputFormat().attribute(i).copy());
       }
     }
     Instances outputFormat = 
-      new Instances(m_InputFormat.relationName(), attributes, 0);
+      new Instances(getInputFormat().relationName(), attributes, 0);
     outputFormat.setClassIndex(classIndex);
     setOutputFormat(outputFormat);
   }
@@ -1103,9 +1101,9 @@ public class DiscretizeFilter extends Filter
     int index = 0;
     double [] newVals = new double [outputFormatPeek().numAttributes()];
     // Copy and convert the values
-    for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
+    for(int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (m_DiscretizeCols.isInRange(i) && 
-	  m_InputFormat.attribute(i).isNumeric()) {
+	  getInputFormat().attribute(i).isNumeric()) {
 	int j;
 	double currentVal = instance.value(i);
 	if (m_CutPoints[i] == null) {

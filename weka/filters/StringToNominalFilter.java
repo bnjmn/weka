@@ -30,7 +30,7 @@ import java.util.Vector;
  * Index of the attribute to be changed. (default last)<p>
  *
  * @author Len Trigg (len@intelligenesis.net) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class StringToNominalFilter extends Filter 
   implements OptionHandler {
@@ -54,16 +54,14 @@ public class StringToNominalFilter extends Filter
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(null);
+    super.inputFormat(instanceInfo);
     m_AttIndex = m_AttIndexSet;
     if (m_AttIndex < 0) {
-      m_AttIndex = m_InputFormat.numAttributes() - 1;
+      m_AttIndex = instanceInfo.numAttributes() - 1;
     }
-    if (!m_InputFormat.attribute(m_AttIndex).isString()) {
+    if (!instanceInfo.attribute(m_AttIndex).isString()) {
       throw new Exception("Chosen attribute is not of type string.");
     }
-    m_NewBatch = true;
     return false;
   }
 
@@ -79,7 +77,7 @@ public class StringToNominalFilter extends Filter
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -93,7 +91,7 @@ public class StringToNominalFilter extends Filter
       return true;
     }
 
-    m_InputFormat.add(instance);
+    bufferInput(instance);
     return false;
   }
 
@@ -108,7 +106,7 @@ public class StringToNominalFilter extends Filter
    */
   public boolean batchFinished() throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (!isOutputFormatDefined()) {
@@ -116,12 +114,12 @@ public class StringToNominalFilter extends Filter
       setOutputFormat();
 
       // Convert pending input instances
-      for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-	push((Instance) m_InputFormat.instance(i).copy());
+      for(int i = 0; i < getInputFormat().numInstances(); i++) {
+	push((Instance) getInputFormat().instance(i).copy());
       }
-      m_InputFormat = new Instances(m_InputFormat, 0);
     } 
 
+    flushInput();
     m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
@@ -168,8 +166,8 @@ public class StringToNominalFilter extends Filter
       setAttributeIndex(-1);
     }
        
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -226,9 +224,9 @@ public class StringToNominalFilter extends Filter
       
     // Compute new attributes
       
-    newAtts = new FastVector(m_InputFormat.numAttributes());
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
+    newAtts = new FastVector(getInputFormat().numAttributes());
+    for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
       if (j != m_AttIndex) {
 	newAtts.addElement(att.copy()); 
       } else {
@@ -243,8 +241,8 @@ public class StringToNominalFilter extends Filter
     }
       
     // Construct new header
-    newData = new Instances(m_InputFormat.relationName(), newAtts, 0);
-    newData.setClassIndex(m_InputFormat.classIndex());
+    newData = new Instances(getInputFormat().relationName(), newAtts, 0);
+    newData.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(newData);
   }
   

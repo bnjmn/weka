@@ -25,7 +25,7 @@ import weka.attributeSelection.*;
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
@@ -237,7 +237,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
     
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
 
@@ -251,7 +251,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       return true;
     }
 
-    m_InputFormat.add(instance);
+    bufferInput(instance);
     return false;
   }
 
@@ -265,14 +265,14 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    */
   public boolean batchFinished() throws Exception {
     
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
 
     if (outputFormatPeek() == null) {
       m_trainSelector.setEvaluator(m_ASEvaluator);
       m_trainSelector.setSearch(m_ASSearch);
-      m_trainSelector.SelectAttributes(m_InputFormat);
+      m_trainSelector.SelectAttributes(getInputFormat());
       //      System.out.println(m_trainSelector.toResultsString());
 
       m_SelectedAttributes = m_trainSelector.selectedAttributes();
@@ -283,10 +283,10 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       setOutputFormat();
       
       // Convert pending input instances
-      for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-	convertInstance(m_InputFormat.instance(i));
+      for (int i = 0; i < getInputFormat().numInstances(); i++) {
+	convertInstance(getInputFormat().instance(i));
       }
-      m_InputFormat = new Instances(m_InputFormat, 0);
+      flushInput();
     }
     
     m_NewBatch = true;
@@ -311,7 +311,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
     if (m_ASEvaluator instanceof AttributeTransformer) {
       informat = ((AttributeTransformer)m_ASEvaluator).transformedData();
     } else {
-      informat = m_InputFormat;
+      informat = getInputFormat();
     }
 
     for (i=0;i < m_SelectedAttributes.length;i++) {
@@ -320,7 +320,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
     }
 
     Instances outputFormat = 
-      new Instances(m_InputFormat.relationName(), attributes, 0);
+      new Instances(getInputFormat().relationName(), attributes, 0);
 
 
     if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) &&

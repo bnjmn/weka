@@ -24,7 +24,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -47,14 +47,13 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    if (m_InputFormat.classIndex() < 0) {
+    super.inputFormat(instanceInfo);
+    if (instanceInfo.classIndex() < 0) {
       throw new Exception("No class has been assigned to the instances");
     }
-    m_NewBatch = true;
     setOutputFormat();
     m_Indices = null;
-    if (m_InputFormat.classAttribute().isNominal()) {
+    if (instanceInfo.classAttribute().isNominal()) {
       return true;
     } else {
       return false;
@@ -73,7 +72,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -81,11 +80,11 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
     if ((m_Indices != null) || 
-	(m_InputFormat.classAttribute().isNominal())) {
+	(getInputFormat().classAttribute().isNominal())) {
       convertInstance(instance);
       return true;
     }
-    m_InputFormat.add(instance);
+    bufferInput(instance);
     return false;
   }
 
@@ -99,24 +98,21 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   public boolean batchFinished() throws Exception {
 
-    Instance current;
-
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if ((m_Indices == null) && 
-	(m_InputFormat.classAttribute().isNumeric())) {
+	(getInputFormat().classAttribute().isNumeric())) {
       computeAverageClassValues();
       setOutputFormat();
 
       // Convert pending input instances
 
-      for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-	current = m_InputFormat.instance(i);
-	convertInstance(current);
+      for(int i = 0; i < getInputFormat().numInstances(); i++) {
+	convertInstance(getInputFormat().instance(i));
       }
-      m_InputFormat = new Instances(m_InputFormat, 0);
     } 
+    flushInput();
 
     m_NewBatch = true;
     return (numPendingOutput() != 0);
@@ -152,8 +148,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     
     setBinaryAttributesNominal(Utils.getFlag('N', options));
 
-    if (m_InputFormat != null)
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null)
+      inputFormat(getInputFormat());
   }
 
   /**
@@ -203,15 +199,15 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     Instance instance;
     double [] counts;
 
-    double [][] avgClassValues = new double[m_InputFormat.numAttributes()][0];
-    m_Indices = new int[m_InputFormat.numAttributes()][0];
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
+    double [][] avgClassValues = new double[getInputFormat().numAttributes()][0];
+    m_Indices = new int[getInputFormat().numAttributes()][0];
+    for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
       if (att.isNominal()) {
 	avgClassValues[j] = new double [att.numValues()];
 	counts = new double [att.numValues()];
-	for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-	  instance = m_InputFormat.instance(i);
+	for (int i = 0; i < getInputFormat().numInstances(); i++) {
+	  instance = getInputFormat().instance(i);
 	  if (!instance.classIsMissing() && 
 	      (!instance.isMissing(j))) {
 	    counts[(int)instance.value(j)] += instance.weight();
@@ -238,7 +234,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   /** Set the output format. */
   private void setOutputFormat() throws Exception {
 
-    if (m_InputFormat.classAttribute().isNominal()) {
+    if (getInputFormat().classAttribute().isNominal()) {
       setOutputFormatNominal();
     } else {
       setOutputFormatNumeric();
@@ -253,7 +249,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   private void convertInstance(Instance inst) throws Exception {
 
-    if (m_InputFormat.classAttribute().isNominal()) {
+    if (getInputFormat().classAttribute().isNominal()) {
       convertInstanceNominal(inst);
     } else {
       convertInstanceNumeric(inst);
@@ -275,12 +271,12 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
     // Compute new attributes
 
-    newClassIndex = m_InputFormat.classIndex();
+    newClassIndex = getInputFormat().classIndex();
     newAtts = new FastVector();
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
+    for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
       if ((!att.isNominal()) || 
-	  (j == m_InputFormat.classIndex())) {
+	  (j == getInputFormat().classIndex())) {
 	newAtts.addElement(att.copy());
       } else {
 	if (att.numValues() <= 2) {
@@ -291,7 +287,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	  }
 	} else {
 
-	  if (j < m_InputFormat.classIndex()) {
+	  if (j < getInputFormat().classIndex()) {
 	    newClassIndex += att.numValues() - 1;
 	  }
 
@@ -313,7 +309,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	}
       }
     }
-    outputFormat = new Instances(m_InputFormat.relationName(),
+    outputFormat = new Instances(getInputFormat().relationName(),
 				 newAtts, 0);
     outputFormat.setClassIndex(newClassIndex);
     setOutputFormat(outputFormat);
@@ -338,15 +334,15 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
     // Compute new attributes
 
-    newClassIndex = m_InputFormat.classIndex();
+    newClassIndex = getInputFormat().classIndex();
     newAtts = new FastVector();
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
+    for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
       if ((!att.isNominal()) || 
-	  (j == m_InputFormat.classIndex())) {
+	  (j == getInputFormat().classIndex())) {
 	newAtts.addElement(att.copy());
       } else {
-	if (j < m_InputFormat.classIndex())
+	if (j < getInputFormat().classIndex())
 	  newClassIndex += att.numValues() - 2;
 	  
 	// Compute values for new attributes
@@ -372,7 +368,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	}
       }
     }
-    outputFormat = new Instances(m_InputFormat.relationName(),
+    outputFormat = new Instances(getInputFormat().relationName(),
 				 newAtts, 0);
     outputFormat.setClassIndex(newClassIndex);
     setOutputFormat(outputFormat);
@@ -389,9 +385,9 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     int attSoFar = 0;
     double [] newVals = new double [outputFormatPeek().numAttributes()];
 
-    for(int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
-      if ((!att.isNominal()) || (j == m_InputFormat.classIndex())) {
+    for(int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
+      if ((!att.isNominal()) || (j == getInputFormat().classIndex())) {
 	newVals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
@@ -435,9 +431,9 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     double [] newVals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
 
-    for(int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
-      if ((!att.isNominal()) || (j == m_InputFormat.classIndex())) {
+    for(int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
+      if ((!att.isNominal()) || (j == getInputFormat().classIndex())) {
 	newVals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {

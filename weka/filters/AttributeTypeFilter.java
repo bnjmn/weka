@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and "string". (default "string")<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
@@ -90,8 +90,8 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
       setAttributeType(new SelectedTag(Attribute.STRING, TAGS_ATTRIBUTES));
     }
     
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -161,21 +161,20 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
     
     // Create the output buffer
     FastVector attributes = new FastVector();
     int outputClass = -1;
-    for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-      if (m_InputFormat.attribute(i).type() != m_DeleteType) {
-        if (m_InputFormat.classIndex() == i) {
+    for (int i = 0; i < instanceInfo.numAttributes(); i++) {
+      if (instanceInfo.attribute(i).type() != m_DeleteType) {
+        if (instanceInfo.classIndex() == i) {
           outputClass = attributes.size();
         }
-        attributes.addElement(m_InputFormat.attribute(i));
+        attributes.addElement(instanceInfo.attribute(i));
       }
     }
-    Instances outputFormat = new Instances(m_InputFormat.relationName(),
+    Instances outputFormat = new Instances(instanceInfo.relationName(),
 					   attributes, 0); 
     outputFormat.setClassIndex(outputClass);
     setOutputFormat(outputFormat);
@@ -196,7 +195,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -206,8 +205,8 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
 
     double[] vals = new double[outputFormatPeek().numAttributes()];
     int j = 0;
-    for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-      if (m_InputFormat.attribute(i).type() != m_DeleteType) {
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      if (getInputFormat().attribute(i).type() != m_DeleteType) {
 	vals[j++] = instance.value(i);
       }
     }

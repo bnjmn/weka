@@ -38,7 +38,7 @@ import java.util.*;
  * If set, data is not being stratified even if class index is set. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -147,8 +147,8 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     } else {
       setSeed(0);
     }
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -335,9 +335,8 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
       throw new Exception("Fold has to be smaller or equal to "+
 			  "number of folds.");
     }
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
+    setOutputFormat(instanceInfo);
     return true;
   }
 
@@ -351,34 +350,34 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    */
   public boolean batchFinished() throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_Seed > 0) {
       // User has provided a random number seed.
-      m_InputFormat.randomize(new Random(m_Seed));
+      getInputFormat().randomize(new Random(m_Seed));
     }
     // Push instances for output into output queue
     if (m_Range != null) {
       // User has provided a range
       m_Range.setInvert(m_Inverse);
-      m_Range.setUpper(m_InputFormat.numInstances() - 1);
-      for (int i = 0; i < m_InputFormat.numInstances(); i++) {
+      m_Range.setUpper(getInputFormat().numInstances() - 1);
+      for (int i = 0; i < getInputFormat().numInstances(); i++) {
 	if (m_Range.isInRange(i)) {
-	  push(m_InputFormat.instance(i));
+	  push(getInputFormat().instance(i));
 	}
       }
     } else {
       // Select out a fold
-      if ((m_InputFormat.classIndex() >= 0) && 
+      if ((getInputFormat().classIndex() >= 0) && 
 	  (!(m_DontStratifyData))) {
-	m_InputFormat.stratify(m_NumFolds);
+	getInputFormat().stratify(m_NumFolds);
       }
       Instances instances;
       if (!m_Inverse) {
-	instances = m_InputFormat.testCV(m_NumFolds, m_Fold - 1);
+	instances = getInputFormat().testCV(m_NumFolds, m_Fold - 1);
       } else {
-	instances = m_InputFormat.trainCV(m_NumFolds, m_Fold - 1);
+	instances = getInputFormat().trainCV(m_NumFolds, m_Fold - 1);
       }
       for (int i = 0; i < instances.numInstances(); i++) {
 	push(instances.instance(i));

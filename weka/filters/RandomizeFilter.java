@@ -22,7 +22,7 @@ import weka.core.*;
  * Specify the random number seed (default 42).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RandomizeFilter extends Filter implements OptionHandler {
 
@@ -67,8 +67,8 @@ public class RandomizeFilter extends Filter implements OptionHandler {
       setRandomSeed(42);
     }
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -120,12 +120,11 @@ public class RandomizeFilter extends Filter implements OptionHandler {
    * structure is required).
    * @return true if the outputFormat may be collected immediately
    */
-  public boolean inputFormat(Instances instanceInfo) {
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(m_InputFormat);
+    super.inputFormat(instanceInfo);
+    setOutputFormat(instanceInfo);
     m_Random = new Random(m_Seed);
-    m_NewBatch = true;
     return true;
   }
 
@@ -143,15 +142,15 @@ public class RandomizeFilter extends Filter implements OptionHandler {
    */
   public boolean batchFinished() throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
 
-    m_InputFormat.randomize(m_Random);
-    for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-      push(m_InputFormat.instance(i));
+    getInputFormat().randomize(m_Random);
+    for (int i = 0; i < getInputFormat().numInstances(); i++) {
+      push(getInputFormat().instance(i));
     }
-    m_InputFormat = new Instances(m_InputFormat, 0);
+    flushInput();
     
     m_NewBatch = true;
     return (numPendingOutput() != 0);

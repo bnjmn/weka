@@ -32,7 +32,7 @@ import weka.core.*;
  * Name of the method used for the transformation.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -82,10 +82,9 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     if (m_Method == null) {
       throw new Exception("No method has been set.");
     }
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_Cols.setUpper(m_InputFormat.numAttributes() - 1);
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
+    m_Cols.setUpper(instanceInfo.numAttributes() - 1);
+    setOutputFormat(instanceInfo);
     return true;
   }
 
@@ -105,7 +104,7 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     Double[] params = new Double[1];
     Double newVal;
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -199,8 +198,8 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
     setClassName(Utils.getOption('C', options));
     setMethodName(Utils.getOption('M', options));
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 

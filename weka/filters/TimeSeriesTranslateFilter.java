@@ -39,7 +39,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TimeSeriesTranslateFilter extends Filter
   implements OptionHandler {
@@ -136,8 +136,8 @@ public class TimeSeriesTranslateFilter extends Filter
       setInstanceRange(-1);
     }
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -179,13 +179,12 @@ public class TimeSeriesTranslateFilter extends Filter
    */
   public boolean inputFormat(Instances instanceInfo) throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
     resetHistory();
-    m_SelectedCols.setUpper(m_InputFormat.numAttributes() - 1);
+    m_SelectedCols.setUpper(instanceInfo.numAttributes() - 1);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
-    for(int i = 0; i < m_InputFormat.numAttributes(); i++) {
+    for(int i = 0; i < instanceInfo.numAttributes(); i++) {
       if (m_SelectedCols.isInRange(i)) {
 	if (outputFormat.attribute(i).isNominal()
 	    || outputFormat.attribute(i).isNumeric()) {
@@ -216,7 +215,7 @@ public class TimeSeriesTranslateFilter extends Filter
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -244,7 +243,7 @@ public class TimeSeriesTranslateFilter extends Filter
    */
   public boolean batchFinished() throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (getFillWithMissing() && (m_InstanceRange > 0)) {

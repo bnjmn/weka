@@ -17,7 +17,7 @@ import weka.core.*;
  * intervals.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class NormalizationFilter extends Filter {
 
@@ -40,9 +40,8 @@ public class NormalizationFilter extends Filter {
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
-    setOutputFormat(m_InputFormat);
-    m_NewBatch = true;
+    super.inputFormat(instanceInfo);
+    setOutputFormat(instanceInfo);
     m_MinArray = m_MaxArray = null;
     return true;
   }
@@ -59,7 +58,7 @@ public class NormalizationFilter extends Filter {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -67,7 +66,7 @@ public class NormalizationFilter extends Filter {
       m_NewBatch = false;
     }
     if (m_MinArray == null) {
-      m_InputFormat.add(instance);
+      bufferInput(instance);
       return false;
     } else {
       convertInstance(instance);
@@ -85,23 +84,21 @@ public class NormalizationFilter extends Filter {
    */
   public boolean batchFinished() throws Exception {
 
-    Instance current;
-
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_MinArray == null) {
    
       // Compute minimums and maximums
-      m_MinArray = new double[m_InputFormat.numAttributes()];
-      m_MaxArray = new double[m_InputFormat.numAttributes()];
-      for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
+      m_MinArray = new double[getInputFormat().numAttributes()];
+      m_MaxArray = new double[getInputFormat().numAttributes()];
+      for (int i = 0; i < getInputFormat().numAttributes(); i++) {
 	m_MinArray[i] = Double.NaN;
       }
-      for (int j = 0; j < m_InputFormat.numInstances(); j++) {
-	double[] value = m_InputFormat.instance(j).toDoubleArray();
-	for (int i = 0; i < m_InputFormat.numAttributes(); i++) {
-	  if (m_InputFormat.attribute(i).isNumeric()) {
+      for (int j = 0; j < getInputFormat().numInstances(); j++) {
+	double[] value = getInputFormat().instance(j).toDoubleArray();
+	for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+	  if (getInputFormat().attribute(i).isNumeric()) {
 	    if (!Instance.isMissingValue(value[i])) {
 	      if (Double.isNaN(m_MinArray[i])) {
 		m_MinArray[i] = m_MaxArray[i] = value[i];
@@ -119,14 +116,12 @@ public class NormalizationFilter extends Filter {
       }
 
       // Convert pending input instances
-      for(int i = 0; i < m_InputFormat.numInstances(); i++) {
-	current = m_InputFormat.instance(i);
-	convertInstance(current);
+      for(int i = 0; i < getInputFormat().numInstances(); i++) {
+	convertInstance(getInputFormat().instance(i));
       }
-
-      // Free memory
-      m_InputFormat = new Instances(m_InputFormat, 0);
     } 
+    // Free memory
+    flushInput();
 
     m_NewBatch = true;
     return (numPendingOutput() != 0);
@@ -142,7 +137,7 @@ public class NormalizationFilter extends Filter {
   
     if (!(instance instanceof SparseInstance)) {
       double[] vals = instance.toDoubleArray();
-      for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
+      for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
 	    (!Instance.isMissingValue(vals[j]))) {
 	  if (Double.isNaN(m_MinArray[j]) ||

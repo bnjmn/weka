@@ -30,7 +30,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -63,22 +63,21 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
   public boolean inputFormat(Instances instanceInfo) 
        throws Exception {
 
-    m_InputFormat = new Instances(instanceInfo, 0);
+    super.inputFormat(instanceInfo);
     m_AttIndex = m_AttIndexSet;
     if (m_AttIndex < 0) {
-      m_AttIndex = m_InputFormat.numAttributes() - 1;
+      m_AttIndex = instanceInfo.numAttributes() - 1;
     }
     m_ValIndex = m_ValIndexSet;
     if (m_ValIndex < 0) {
-      m_ValIndex = m_InputFormat.attribute(m_AttIndex).numValues() - 1;
+      m_ValIndex = instanceInfo.attribute(m_AttIndex).numValues() - 1;
     }
-    if (!m_InputFormat.attribute(m_AttIndex).isNominal()) {
+    if (!instanceInfo.attribute(m_AttIndex).isNominal()) {
       throw new Exception("Chosen attribute not nominal.");
     }
-    if (m_InputFormat.attribute(m_AttIndex).numValues() < 2) {
+    if (instanceInfo.attribute(m_AttIndex).numValues() < 2) {
       throw new Exception("Chosen attribute has less than two values.");
     }
-    m_NewBatch = true;
     setOutputFormat();
     return true;
   }
@@ -95,7 +94,7 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
    */
   public boolean input(Instance instance) throws Exception {
 
-    if (m_InputFormat == null) {
+    if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
     }
     if (m_NewBatch) {
@@ -184,8 +183,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
 
     setNumeric(!Utils.getFlag('N', options));
 
-    if (m_InputFormat != null) {
-      inputFormat(m_InputFormat);
+    if (getInputFormat() != null) {
+      inputFormat(getInputFormat());
     }
   }
 
@@ -284,9 +283,9 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
       
     // Compute new attributes
     
-    newAtts = new FastVector(m_InputFormat.numAttributes());
-    for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
-      Attribute att = m_InputFormat.attribute(j);
+    newAtts = new FastVector(getInputFormat().numAttributes());
+    for (int j = 0; j < getInputFormat().numAttributes(); j++) {
+      Attribute att = getInputFormat().attribute(j);
       if (j != m_AttIndex) {
 	newAtts.addElement(att.copy());
       } else {
@@ -303,8 +302,8 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     
     // Construct new header
     
-    newData = new Instances(m_InputFormat.relationName(), newAtts, 0);
-    newData.setClassIndex(m_InputFormat.classIndex());
+    newData = new Instances(getInputFormat().relationName(), newAtts, 0);
+    newData.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(newData);
   }
  
