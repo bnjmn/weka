@@ -34,8 +34,11 @@ import java.util.*;
  * Specifies a random number seed for shuffling the dataset.
  * (default 0, don't randomize)<p>
  *
+ * -A <br>
+ * If set, data is not being stratified even if class index is set. <p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -54,6 +57,9 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   /** Random number seed. */
   private long m_Seed = 0;
 
+  /** Don't stratify data if class index is set? */
+  private boolean m_DontStratifyData = false;
+
   /**
    * Gets an enumeration describing the available options.
    *
@@ -61,7 +67,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(6);
 
     newVector.addElement(new Option(
               "\tSpecifies list of instances to select. First and last\n"
@@ -84,6 +90,10 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     newVector.addElement(new Option(
 	      "\tSpecifies random number seed. (default 0, no randomizing)\n",
 	      "S", 1, "-S <seed>"));
+
+    newVector.addElement(new Option(
+	      "\tIf set, data is not being stratified even if class index is set.\n",
+	      "A", 0, "-A"));
 
     return newVector.elements();
   }
@@ -108,6 +118,9 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    * Specifies a random number seed for shuffling the dataset.
    * (default 0, no randomizing)<p>
    *
+   * -A <br>
+   * If set, data is not being stratified even if class index is set. <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -115,6 +128,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
 
     setInstancesIndices(Utils.getOption('R', options));
     setInvertSelection(Utils.getFlag('V', options));
+    setDontStratifyData(Utils.getFlag('A', options));
     String numFolds = Utils.getOption('N', options);
     if (numFolds.length() != 0) {
       setNumFolds(Integer.parseInt(numFolds));
@@ -145,7 +159,7 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [7];
+    String [] options = new String [8];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = "" + getSeed();
@@ -157,6 +171,9 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
     } else {
       options[current++] = "-N"; options[current++] = "" + getNumFolds();
       options[current++] = "-F"; options[current++] = "" + getFold();
+    }
+    if (getDontStratifyData()) {
+      options[current++] = "-A";
     }
     while (current < options.length) {
       options[current++] = "";
@@ -288,6 +305,22 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
   }
 
   /**
+   * Sets whether stratification is not performed.
+   */
+  public void setDontStratifyData(boolean flag) {
+
+    m_DontStratifyData = flag;
+  }
+
+  /**
+   * Gets whether stratification is not performed.
+   */
+  public boolean getDontStratifyData() {
+    
+    return m_DontStratifyData;
+  }
+
+  /**
    * Sets the format of the input instances.
    *
    * @param instanceInfo an Instances object containing the input instance
@@ -337,7 +370,8 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
       }
     } else {
       // Select out a fold
-      if (m_InputFormat.classIndex() >= 0) {
+      if ((m_InputFormat.classIndex() >= 0) && 
+	  (!(m_DontStratifyData))) {
 	m_InputFormat.stratify(m_NumFolds);
       }
       Instances instances;
