@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Plot2D extends JPanel {
 
@@ -75,6 +75,12 @@ public class Plot2D extends JPanel {
   public static final int TRIANGLEUP_SHAPE = 3;
   public static final int TRIANGLEDOWN_SHAPE = 4;
   public static final int DEFAULT_SHAPE_SIZE = 2;
+
+  /** Default colour for the axis */
+  private Color m_axisColour = Color.green;
+
+  /** Default colour for the plot background */
+  private Color m_backgroundColour = Color.black;
 
   /** The plots to display */
   protected FastVector m_plots = new FastVector();
@@ -171,7 +177,8 @@ public class Plot2D extends JPanel {
 
   /** Constructor */
   public Plot2D() {
-    this.setBackground(Color.black);
+    setProperties();
+    this.setBackground(m_backgroundColour);
     m_InstanceInfoText.setFont(new Font("Monospaced", Font.PLAIN,12));
     m_InstanceInfoText.setEditable(false);
 
@@ -188,6 +195,40 @@ public class Plot2D extends JPanel {
       }
       
       m_colorList.addElement(pc);
+    }
+  }
+
+  /**
+   * Set the properties for Plot2D
+   */
+  private void setProperties() {
+    if (VisualizeUtils.VISUALIZE_PROPERTIES != null) {
+      String thisClass = this.getClass().getName();
+      String axisKey = thisClass+".axisColour";
+      String backgroundKey = thisClass+".backgroundColour";
+
+      String axisColour = VisualizeUtils.VISUALIZE_PROPERTIES.
+	getProperty(axisKey);
+      if (axisColour == null) {
+	System.err.println("Warning: no configuration property found in "
+			   +VisualizeUtils.PROPERTY_FILE
+			   +" for "+axisKey);
+      } else {
+	System.err.println("Setting axis colour to: "+axisColour);
+	m_axisColour = VisualizeUtils.processColour(axisColour, m_axisColour);
+      }
+
+      String backgroundColour = 
+	VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(backgroundKey);
+      if (backgroundColour == null) {
+	System.err.println("Warning: no configuration property found in "
+			   +VisualizeUtils.PROPERTY_FILE
+			   +" for "+backgroundKey);
+      } else {
+	System.err.println("Setting background colour to: "+backgroundColour);
+	m_backgroundColour = VisualizeUtils.processColour(backgroundColour, 
+							  m_backgroundColour);
+      }
     }
   }
 
@@ -1159,7 +1200,7 @@ public class Plot2D extends JPanel {
     m_YaxisEnd = h-m_axisPad-(2 * hf)-m_tickSize;
 
     // draw axis
-    gx.setColor(Color.green);
+    gx.setColor(m_axisColour);
     if (m_plotInstances.attribute(m_xIndex).isNumeric()) {
       if (w > (2 * mswx)) {
 	

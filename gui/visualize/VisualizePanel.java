@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -146,7 +146,7 @@ public class VisualizePanel extends JPanel {
     //////
     /** Constructor */
     public PlotPanel() {
-      this.setBackground(Color.black);
+      this.setBackground(m_plot2D.getBackground());
       this.setLayout(new BorderLayout());
       this.add(m_plot2D, BorderLayout.CENTER);
       m_plot2D.setPlotCompanion(this);
@@ -1594,6 +1594,12 @@ public class VisualizePanel extends JPanel {
   /** The list of the colors used */
   protected FastVector m_colorList;
 
+  /** These hold the names of preferred columns to visualize on---if the
+      user has defined them in the Visualize.props file */
+  protected String m_preferredXDimension = null;
+  protected String m_preferredYDimension = null;
+  protected String m_preferredColourDimension = null;
+
   /** This constructor allows a VisualizePanelListener to be set. */
   public VisualizePanel(VisualizePanelListener ls) {
     this();
@@ -1601,9 +1607,53 @@ public class VisualizePanel extends JPanel {
   }
 
   /**
+   * Set the properties for the VisualizePanel
+   */
+  private void setProperties() {
+    if (VisualizeUtils.VISUALIZE_PROPERTIES != null) {
+      String thisClass = this.getClass().getName();
+      String xcolKey = thisClass+".XDimension";
+      String ycolKey = thisClass+".YDimension";
+      String ccolKey = thisClass+".ColourDimension";
+
+      m_preferredXDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
+	      getProperty(xcolKey);
+      if (m_preferredXDimension == null) {
+	System.err.println("No preferred X dimension found in "
+			   +VisualizeUtils.PROPERTY_FILE
+			   +" for "+xcolKey);
+      } else {
+	System.err.println("Setting preferred X dimension to "
+			   +m_preferredXDimension);
+      }
+      m_preferredYDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
+	getProperty(ycolKey);
+      if (m_preferredYDimension == null) {
+	System.err.println("No preferred Y dimension found in "
+			   +VisualizeUtils.PROPERTY_FILE
+			   +" for "+ycolKey);
+      } else {
+	System.err.println("Setting preferred dimension Y to "
+			   +m_preferredYDimension);
+      }
+      m_preferredColourDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
+	getProperty(ccolKey);
+      if (m_preferredColourDimension == null) {
+	System.err.println("No preferred Colour dimension found in "
+			   +VisualizeUtils.PROPERTY_FILE
+			   +" for "+ycolKey);
+      } else {
+	System.err.println("Setting preferred Colour dimension to "
+			   +m_preferredColourDimension);
+      }
+    }
+  }
+
+  /**
    * Constructor
    */
   public VisualizePanel() {
+    setProperties();
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -2022,6 +2072,9 @@ public class VisualizePanel extends JPanel {
   }
 
   public void setUpComboBoxes(Instances inst) {
+    int prefX = -1;
+    int prefY = -1;
+    int prefC = -1;
     String [] XNames = new String [inst.numAttributes()];
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
@@ -2044,6 +2097,25 @@ public class VisualizePanel extends JPanel {
       XNames[i] = "X: "+ inst.attribute(i).name()+type;
       YNames[i] = "Y: "+ inst.attribute(i).name()+type;
       CNames[i] = "Colour: "+ inst.attribute(i).name()+type;
+      if (m_preferredXDimension != null) {
+	if (m_preferredXDimension.compareTo(inst.attribute(i).name()) == 0) {
+	  prefX = i;
+	  System.err.println("Found preferred X dimension");
+	}
+      }
+      if (m_preferredYDimension != null) {
+	if (m_preferredYDimension.compareTo(inst.attribute(i).name()) == 0) {
+	  prefY = i;
+	  System.err.println("Found preferred Y dimension");
+	}
+      }
+      if (m_preferredColourDimension != null) {
+	if (m_preferredColourDimension.
+	    compareTo(inst.attribute(i).name()) == 0) {
+	  prefC = i;
+	  System.err.println("Found preferred Colour dimension");
+	}
+      }
     }
     m_XCombo.setModel(new DefaultComboBoxModel(XNames));
     m_YCombo.setModel(new DefaultComboBoxModel(YNames));
@@ -2060,6 +2132,19 @@ public class VisualizePanel extends JPanel {
     }
     m_plotSurround.setBorder((BorderFactory.createTitledBorder("Plot: "
 			      +inst.relationName())));
+    try {
+      if (prefX != -1) {
+	setXIndex(prefX);
+      }
+      if (prefY != -1) {
+	setYIndex(prefY);
+      }
+      if (prefC != -1) {
+	setColourIndex(prefC);
+      }
+    } catch (Exception ex) {
+      System.err.println("Problem setting preferred Visualization dimensions");
+    }
   }
 
   /**

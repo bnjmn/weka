@@ -53,7 +53,7 @@ import java.awt.Graphics;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributePanel extends JScrollPane {
   /** The instances to be plotted */
@@ -92,6 +92,10 @@ public class AttributePanel extends JScrollPane {
    * X,Y or B get printed.
    */ 
   protected JPanel m_span=null;
+
+  /** The default colour to use for the background of the bars if
+      a colour is not defined in Visualize.props */
+  protected Color m_barColour=Color.black;
     
   /** inner inner class used for plotting the points 
    * into a bar for a particular attribute. 
@@ -136,7 +140,7 @@ public class AttributePanel extends JScrollPane {
     public AttributeSpacing(Attribute a, int aind) {
       m_attrib = a;
       m_attribIndex = aind;
-      this.setBackground(Color.black);
+      this.setBackground(m_barColour);
       this.setPreferredSize(new Dimension(0, 20));
       this.setMinimumSize(new Dimension(0, 20));
       m_cached = new int[m_plotInstances.numInstances()];
@@ -289,9 +293,31 @@ public class AttributePanel extends JScrollPane {
   }   
     
   /**
+   * Set the properties for the AttributePanel
+   */
+  private void setProperties() {
+    if (VisualizeUtils.VISUALIZE_PROPERTIES != null) {
+      String thisClass = this.getClass().getName();
+      String barKey = thisClass+".barColour";
+      
+      String barC = VisualizeUtils.VISUALIZE_PROPERTIES.
+	      getProperty(barKey);
+      if (barC == null) {
+	System.err.println("Warning: no configuration property found in "
+			   +VisualizeUtils.PROPERTY_FILE
+			   +" for "+barKey);
+      } else {
+	System.err.println("Setting attribute bar colour to: "+barC);
+	m_barColour = VisualizeUtils.processColour(barC, m_barColour);
+      }
+    }
+  }
+ 
+  /**
    * This constructs an attributePanel.
    */
   public AttributePanel() {
+    setProperties();
     this.setBackground(Color.blue);
     setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
     m_colorList = new FastVector(10);
