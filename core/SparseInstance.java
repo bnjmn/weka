@@ -188,14 +188,18 @@ public class SparseInstance extends Instance {
   }
 
   /**
-   * Produces a shallow copy of this instance. The copy doesn't have
-   * access to a dataset.
+   * Produces a shallow copy of this instance. The copy has
+   * access to the same dataset. (if you want to make a copy
+   * that doesn't have access to the dataset, use 
+   * <code>new SparseInstance(instance)</code>
    *
    * @return the shallow copy
    */
   public Object copy() {
 
-    return new SparseInstance(this);
+    Instance result = new SparseInstance(this);
+    result.m_Dataset = m_Dataset;
+    return result;
   }
 
   /**
