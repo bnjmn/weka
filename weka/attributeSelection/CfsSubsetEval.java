@@ -41,7 +41,7 @@ import  weka.filters.*;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -71,6 +71,18 @@ public class CfsSubsetEval
   /** Threshold for admitting locally predictive features */
   private double m_c_Threshold;
 
+  /**
+   * Returns a string describing this attribute evaluator
+   * @return a description of the evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "CfsSubsetEval:\n\nEvaluates the worth of a subset of features\n"
+      +"by considering the individual predictive ability of each feature\n"
+      +"along with the degree of redundancy between them.\n"
+      +"Subsets of features that are highly correlated with the class\n"
+      +"while having low intercorrelation are preferred.\n";
+  }
 
   /**
    * Constructor
@@ -119,6 +131,14 @@ public class CfsSubsetEval
     setLocallyPredictive(Utils.getFlag('L', options));
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String locallyPredictiveTipText() {
+    return "Identify locally predictive attributes";
+  }
 
   /**
    * Include locally predictive attributes
@@ -139,6 +159,14 @@ public class CfsSubsetEval
     return  m_locallyPredictive;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String missingSeperateTipText() {
+    return "Treat missing as a seperate value";
+  }
 
   /**
    * Treat missing as a seperate value

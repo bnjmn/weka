@@ -41,7 +41,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -56,6 +56,17 @@ public class AddFilter extends Filter implements OptionHandler {
 
   /** The list of labels for nominal attribute */
   protected FastVector m_Labels = new FastVector(5);
+
+  /**
+   * Returns a string describing this filter
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "AddFilter: \n\nAn instance filter that adds a new attribute to "
+      +"the dataset.\n"
+      +"The new attribute contains all missing values.\n";
+  }
 
   /**
    * Returns an enumeration describing the available options
@@ -216,6 +227,15 @@ public class AddFilter extends Filter implements OptionHandler {
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeNameTipText() {
+    return "Set the new attribute's name";
+  }
+
+  /**
    * Get the name of the attribute to be created
    *
    * @return the new attribute name
@@ -247,6 +267,15 @@ public class AddFilter extends Filter implements OptionHandler {
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndexTipText() {
+    return "The index where the attribute will be inserted";
+  }
+
+  /**
    * Get the index where the attribute will be inserted
    *
    * @return the attribute insertion index
@@ -265,7 +294,15 @@ public class AddFilter extends Filter implements OptionHandler {
     m_Insert = attributeIndex;
   }
 
-  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String nominalLabelsTipText() {
+    return "The list of labels for nominal attribute creation";
+  }
+
   /**
    * Get the list of labels for nominal attribute creation
    *

@@ -38,7 +38,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -231,6 +231,23 @@ public class BestFirst extends ASSearch
 
   /** holds the merit of the best subset found */
   private double m_bestMerit;
+  
+  /**
+   * Returns a string describing this search method
+   * @return a description of the search method suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "BestFirst:\n\n"
+      +"Searches the space of attribute subsets by greedy hillclimbing\n"
+      +"augmented with a backtracking facility. Setting the number of\n"
+      +"consecutive non-improving nodes allowed controls the level of\n"
+      +"backtracking done. Best first may start with the empty set of\n"
+      +"attributes and search forward, or start with the full set of\n"
+      +"attributes and search backward, or start at any point and search\n"
+      +"in both directions (by considering all possible single attribute\n"
+      +"additions and deletions at a given point).\n";
+  }
 
   /** 
    *Constructor 
@@ -310,6 +327,15 @@ public class BestFirst extends ASSearch
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String startSetTipText() {
+    return "Set the start point for the search.";
+  }
+
+  /**
    * Sets a starting set of attributes for the search. It is the
    * search method's responsibility to report this start set (if any)
    * in its toString() method.
@@ -327,6 +353,15 @@ public class BestFirst extends ASSearch
    */
   public String getStartSet () {
     return m_startRange.getRanges();
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String searchTerminationTipText() {
+    return "Set the amount of backtracking.";
   }
 
   /**
@@ -356,6 +391,14 @@ public class BestFirst extends ASSearch
     return  m_maxStale;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String directionTipText() {
+    return "Set the direction of the search.";
+  }
 
   /**
    * Set the search direction
