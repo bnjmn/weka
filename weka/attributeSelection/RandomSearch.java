@@ -41,7 +41,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RandomSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -364,7 +364,7 @@ public class RandomSearch extends ASSearch
   }
 
   /**
-   * Searches the attribute subset space using a genetic algorithm.
+   * Searches the attribute subset space randomly.
    *
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
