@@ -35,7 +35,6 @@ import weka.gui.SetInstancesPanel;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
 import weka.filters.Filter;
-//import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 
@@ -99,7 +98,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -737,10 +736,7 @@ public class ClustererPanel extends JPanel {
 	      } catch (Exception ex) {
 		ex.printStackTrace();
 	      }
-	      /*m_CurrentVis.setInstances(predInstances);
-	      m_CurrentVis.setColourIndex(-1);
-	      m_CurrentVis.setPredictionsNumeric(false);
-	      m_CurrentVis.setPredictions(predictions); */
+	      
 	      try {
 		m_CurrentVis.setXIndex(m_visXIndex); m_CurrentVis.setYIndex(m_visYIndex);
 	      } catch (Exception ex) {
