@@ -29,68 +29,87 @@ import java.io.File;
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RemoteExperimentSubTask implements Task {
 
-    /* The (sub) experiment to execute */
-    private Experiment m_experiment;
+  /* Info on the task */
+  private TaskStatusInfo m_result = new TaskStatusInfo();
+  
+  /* The (sub) experiment to execute */
+  private Experiment m_experiment;
+  
+  public RemoteExperimentSubTask() {
+    m_result.setStatusMessage("Not running.");
+    m_result.setExecutionStatus(TaskStatusInfo.TO_BE_RUN);
+  }
 
-    /**
-     * Set the experiment for this sub task
-     * @param task the experiment
-     */
-    public void setExperiment(Experiment task) {
-      m_experiment = task;
+  /**
+   * Set the experiment for this sub task
+   * @param task the experiment
+   */
+  public void setExperiment(Experiment task) {
+    m_experiment = task;
+  }
+  
+  /**
+   * Get the experiment for this sub task
+   * @return this sub task's experiment
+   */
+  public Experiment getExperiment() {
+    return m_experiment;
+  }
+  
+  /**
+   * Run the experiment
+   */
+  public void execute() {
+    //      FastVector result = new FastVector();
+    m_result = new TaskStatusInfo();
+    m_result.setStatusMessage("Running...");
+    String goodResult = "(sub)experiment completed successfully";
+    String subTaskType;
+    if (m_experiment.getRunLower() != m_experiment.getRunUpper()) {
+      subTaskType = "(datataset "
+	+ ((File)m_experiment.getDatasets().elementAt(0)).getName();
+    } else {
+      subTaskType = "(exp run # "+
+	m_experiment.getRunLower();
     }
+    try {	
+      System.err.println("Initializing " + subTaskType + ")...");
+      m_experiment.initialize();
+      System.err.println("Iterating " + subTaskType + ")...");
+      m_experiment.runExperiment();
+      System.err.println("Postprocessing " + subTaskType + ")...");
+      m_experiment.postProcess();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      String badResult =  "(sub)experiment " + subTaskType 
+	+ ") failed : "+ex.toString();
+      m_result.setExecutionStatus(TaskStatusInfo.FAILED);
+      //	m_result.addElement(new Integer(RemoteExperiment.FAILED));
+      //	m_result.addElement(badResult);
+      m_result.setStatusMessage(badResult);
+      m_result.setTaskResult("Failed");
+      //      return m_result;
+      return;
+    }            
+    //      m_result.addElement(new Integer(RemoteExperiment.FINISHED));
+    //      m_result.addElement(goodResult);
+    m_result.setExecutionStatus(TaskStatusInfo.FINISHED);
+    m_result.setStatusMessage(goodResult+" "+subTaskType+").");
+    m_result.setTaskResult("No errors");
+    //    return m_result;
+  }
 
-    /**
-     * Get the experiment for this sub task
-     * @return this sub task's experiment
-     */
-    public Experiment getExperiment() {
-      return m_experiment;
-    }
-    
-    /**
-     * Run the experiment
-     */
-    public TaskStatusInfo execute() {
-      //      FastVector result = new FastVector();
-      TaskStatusInfo result = new TaskStatusInfo();
-      result.setStatusMessage("Running...");
-      String goodResult = "(sub)experiment completed successfully";
-      String subTaskType;
-      if (m_experiment.getRunLower() != m_experiment.getRunUpper()) {
-	subTaskType = "(datataset "
-	  + ((File)m_experiment.getDatasets().elementAt(0)).getName();
-      } else {
-	subTaskType = "(exp run # "+
-	  m_experiment.getRunLower();
-      }
-      try {	
-	System.err.println("Initializing " + subTaskType + ")...");
-	m_experiment.initialize();
-	System.err.println("Iterating " + subTaskType + ")...");
-	m_experiment.runExperiment();
-	System.err.println("Postprocessing " + subTaskType + ")...");
-	m_experiment.postProcess();
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	String badResult =  "(sub)experiment " + subTaskType 
-	  + ") failed : "+ex.toString();
-	result.setExecutionStatus(TaskStatusInfo.FAILED);
-	//	result.addElement(new Integer(RemoteExperiment.FAILED));
-	//	result.addElement(badResult);
-	result.setStatusMessage(badResult);
-	result.setTaskResult("Failed");
-	return result;
-      }            
-      //      result.addElement(new Integer(RemoteExperiment.FINISHED));
-      //      result.addElement(goodResult);
-      result.setExecutionStatus(TaskStatusInfo.FINISHED);
-      result.setStatusMessage(goodResult+" "+subTaskType+").");
-      result.setTaskResult("No errors");
-      return result;
-    }
+  public TaskStatusInfo getTaskStatus() {
+    return m_result;
+  }
 }
+
+
+
+
+
+

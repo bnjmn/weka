@@ -29,15 +29,21 @@ import java.io.Serializable;
  * Interface to something that can be remotely executed as a task.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public interface Task extends Serializable {
   
   /**
    * Execute this task.
-   * @return a TaskStatusInfo object holding info and result from executing
+   */
+  void execute();
+
+  /**
+   * Clients should be able to call this method at any time to obtain
+   * information on a current task.
+   *
+   * @return a TaskStatusInfo object holding info and result (if available) for
    * this task
    */
-  TaskStatusInfo execute();
-
+  TaskStatusInfo getTaskStatus();
 }
