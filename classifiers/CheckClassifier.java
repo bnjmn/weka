@@ -83,7 +83,7 @@ import weka.core.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CheckClassifier implements OptionHandler {
 
@@ -314,6 +314,7 @@ public class CheckClassifier implements OptionHandler {
       correctBuildInitialisation(PNom, PNum, numericClass);
       datasetIntegrity(PNom, PNum, numericClass,
 		       handleMissingPredictors, handleMissingClass);
+      doesntUseTestClassVal(PNom, PNum, numericClass);
       if (updateable) {
 	updatingEquality(PNom, PNum, numericClass);
       }
@@ -809,6 +810,119 @@ public class CheckClassifier implements OptionHandler {
 	System.out.print(" training");
       }
       System.out.println(": " + ex.getMessage() + "\n");
+    }
+    return false;
+  }
+
+  /**
+   * Checks whether the classifier erroneously uses the class
+   * value of test instances (if provided). Runs the classifier with
+   * test instance class values set to missing and compares with results
+   * when test instance class values are left intact.
+   *
+   * @param nominalPredictor if true use nominal predictor attributes
+   * @param numericPredictor if true use numeric predictor attributes
+   * @param numericClass if true use a numeric class attribute otherwise a
+   * nominal class attribute
+   * @return true if the test was passed
+   */
+  protected boolean doesntUseTestClassVal(boolean nominalPredictor,
+					  boolean numericPredictor, 
+					  boolean numericClass) {
+
+    System.out.print("classifier ignores test instance class vals");
+    printAttributeSummary(nominalPredictor, numericPredictor, numericClass);
+    System.out.print("...");
+    int numTrain = 40, numTest = 20, numClasses = 2, missingLevel = 0;
+    boolean predictorMissing = false, classMissing = false;
+
+    Instances train = null;
+    Instances test = null;
+    Classifier [] classifiers = null;
+    Evaluation evaluationB = null;
+    Evaluation evaluationI = null;
+    boolean evalFail = false;
+    try {
+      train = makeTestDataset(43, numTrain, 
+			      nominalPredictor ? 3 : 0,
+			      numericPredictor ? 2 : 0, 
+			      numClasses, 
+			      numericClass);
+      test = makeTestDataset(24, numTest,
+			     nominalPredictor ? 3 : 0,
+			     numericPredictor ? 2 : 0, 
+			     numClasses, 
+			     numericClass);
+      if (nominalPredictor) {
+	train.deleteAttributeAt(0);
+	test.deleteAttributeAt(0);
+      }
+      if (missingLevel > 0) {
+	addMissing(train, missingLevel, predictorMissing, classMissing);
+	addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
+		   classMissing);
+      }
+      classifiers = Classifier.makeCopies(getClassifier(), 2);
+      evaluationB = new Evaluation(train);
+      evaluationI = new Evaluation(train);
+      classifiers[0].buildClassifier(train);
+      classifiers[1].buildClassifier(train);
+    } catch (Exception ex) {
+      throw new Error("Error setting up for tests: " + ex.getMessage());
+    }
+    try {
+
+      // Now set test values to missing when predicting
+      for (int i = 0; i < test.numInstances(); i++) {
+	Instance testInst = test.instance(i);
+	Instance classMissingInst = new Instance(testInst);
+	classMissingInst.setClassMissing();
+	if (classifiers[0] instanceof DistributionClassifier) {
+	  double [] dist0 = ((DistributionClassifier)classifiers[0]).
+	    distributionForInstance(testInst);
+	  double [] dist1 = ((DistributionClassifier)classifiers[1]).
+	    distributionForInstance(classMissingInst);
+	  for (int j = 0; j < dist0.length; j++) {
+	    if (dist0[j] != dist1[j]) {
+	      throw new Exception("Prediction different for instance " 
+				  + (i + 1));
+	    }
+	  }
+	} else {
+	  double pred0 = classifiers[0].classifyInstance(testInst);
+	  double pred1 = classifiers[1].classifyInstance(classMissingInst);
+	  if (pred0 != pred1) {
+	    throw new Exception("Prediction different for instance " 
+				+ (i + 1));
+	  }
+	}
+      }
+      System.out.println("yes");
+      return true;
+    } catch (Exception ex) {
+      System.out.println("no");
+      if (m_Debug) {
+	System.out.println("\n=== Full Report ===");
+	
+	if (evalFail) {
+	  System.out.println("Results differ between non-missing and "
+			     + "missing test class values.");
+	} else {
+	  System.out.print("Problem during testing");
+	  System.out.println(": " + ex.getMessage() + "\n");
+	}
+	System.out.println("Here are the datasets:\n");
+	System.out.println("=== Train Dataset ===\n"
+			   + train.toString() + "\n");
+	System.out.println("=== Train Weights ===\n");
+	for (int i = 0; i < train.numInstances(); i++) {
+	  System.out.println(" " + (i + 1) 
+			     + "    " + train.instance(i).weight());
+	}
+	System.out.println("=== Test Dataset ===\n"
+			   + test.toString() + "\n\n");	
+	System.out.println("(test weights all 1.0\n");
+      }
     }
     return false;
   }
