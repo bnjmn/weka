@@ -6,11 +6,21 @@
 
 package weka.classifiers;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
-
 
 /**
  * This metaclassifier makes its base classifier cost-sensitive. Two methods
@@ -46,7 +56,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler {
@@ -240,6 +250,37 @@ public class CostSensitiveClassifier extends Classifier
     return options;
   }
 
+  /**
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "A metaclassifier that makes its base classifier cost-sensitive. "
+      + "Two methods can be used to introduce cost-sensitivity: reweighting "
+      + "training instances according to the total cost assigned to each "
+      + "class; or predicting the class with minimum expected "
+      + "misclassification cost (rather than the most likely class). The "
+      + "minimum expected cost approach requires that the base classifier be "
+      + "a DistributionClassifier (and is optimal if given accurate "
+      + "probabilities by it's base classifier). Performance can often be "
+      + "improved by using a Bagged classifier to improve the probability "
+      + "estimates of the base classifier.";
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String costMatrixSourceTipText() {
+
+    return "Sets where to get the cost matrix. The two options are"
+      + "to use the supplied explicit cost matrix (the setting of the "
+      + "costMatrix property), or to load a cost matrix from a file when "
+      + "required (this file will be loaded from the directory set by the "
+      + "onDemandDirectory property and will be named relation_name" 
+      + CostMatrix.FILE_EXTENSION + ").";
+  }
 
   /**
    * Gets the source location method of the cost matrix. Will be one of
@@ -270,6 +311,16 @@ public class CostSensitiveClassifier extends Classifier
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String onDemandDirectoryTipText() {
+
+    return "Sets the directory where cost files are loaded from. This option "
+      + "is used when the costMatrixSource is set to \"On Demand\".";
+  }
+
+  /**
    * Returns the directory that will be searched for cost files when
    * loading on demand.
    *
@@ -297,6 +348,18 @@ public class CostSensitiveClassifier extends Classifier
   }
 
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minimizeExpectedCostTipText() {
+
+    return "Sets whether the minimum expected cost criteria will be used. If "
+      + "this is false, the training data will be reweighted according to the "
+      + "costs assigned to each class. If true, the minimum expected cost "
+      + "criteria will be used.";
+  }
+
+  /**
    * Gets the value of MinimizeExpectedCost.
    *
    * @return Value of MinimizeExpectedCost.
@@ -317,9 +380,19 @@ public class CostSensitiveClassifier extends Classifier
   }
   
   /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifierTipText() {
+    return "Sets the Classifier used as the basis for "
+      + "the cost-sensitive classification. This must be a "
+      + "DistributionClassifier if using the minimum expected cost criteria.";
+  }
+
+  /**
    * Sets the distribution classifier
    *
-   * @param classifier the distribution classifier with all options set.
+   * @param classifier the classifier with all options set.
    */
   public void setClassifier(Classifier classifier) {
 
@@ -327,7 +400,7 @@ public class CostSensitiveClassifier extends Classifier
   }
 
   /**
-   * Gets the distribution classifier used.
+   * Gets the classifier used.
    *
    * @return the classifier
    */
@@ -352,8 +425,15 @@ public class CostSensitiveClassifier extends Classifier
     }
     return c.getClass().getName();
   }
-
   
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String costMatrixTipText() {
+    return "Sets the cost matrix explicitly. This matrix is used if the "
+      + "costMatrixSource property is set to \"Supplied\".";
+  }
 
   /**
    * Gets the misclassification cost matrix.
@@ -374,6 +454,15 @@ public class CostSensitiveClassifier extends Classifier
     
     m_CostMatrix = newCostMatrix;
     m_MatrixSource = MATRIX_SUPPLIED;
+  }
+  
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Sets the random number seed when reweighting instances. Ignored "
+      + "when using minimum expected cost criteria.";
   }
   
   /**
