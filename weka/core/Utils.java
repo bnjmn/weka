@@ -18,7 +18,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public final class Utils {
 
@@ -913,6 +913,7 @@ public final class Utils {
       throw new IllegalArgumentException("Can't normalize array. Sum is NaN.");
     }
     if (sum == 0) {
+      // Maybe this should just be a return.
       throw new IllegalArgumentException("Can't normalize array. Sum is zero.");
     }
     for (int i = 0; i < doubles.length; i++) {
