@@ -44,6 +44,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.BorderFactory;
 
@@ -54,9 +55,9 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
-public class GUIChooser extends Frame {
+public class GUIChooser extends JFrame {
 
   /** Click to open the simplecli */
   protected Button m_SimpleBut = new Button("Simple CLI");
@@ -93,75 +94,61 @@ public class GUIChooser extends Frame {
   public GUIChooser() {
 
     super("Weka GUI Chooser");
-    boolean haveSwing = true;
-    try {
-      Class c = Class.forName("javax.swing.JFrame");
-    } catch (Exception ex) {
-      haveSwing = false;
-    }
-    if (!haveSwing) {
-      System.err.println("Swing is not installed");
-      // Pop up dialog saying you get extra if you have swing
-      setLayout(new GridLayout(2, 1));
-      add(m_SimpleBut);
-      add(new Label("Swing is not installed"));
-    } else {
-      Image icon = Toolkit.getDefaultToolkit().
-	getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
-      setIconImage(icon);
-      setLayout(new BorderLayout());
-      JPanel wbuts = new JPanel();
-      wbuts.setBorder(BorderFactory.createTitledBorder("GUI"));
-      wbuts.setLayout(new GridLayout(2, 2));
-      wbuts.add(m_SimpleBut);
-      wbuts.add(m_ExplorerBut);
-      wbuts.add(m_ExperimenterBut);
-      wbuts.add(m_KnowledgeFlowBut);
-      add(wbuts, BorderLayout.SOUTH);
-
-      JPanel wekaPan = new JPanel();
-      wekaPan.setToolTipText("Weka, a native bird of New Zealand");
-      ImageIcon wii = new ImageIcon(m_weka);
-      JLabel wekaLab = new JLabel(wii);
-      wekaPan.add(wekaLab);
-      add(wekaPan, BorderLayout.CENTER);
-
-      JPanel titlePan = new JPanel();
-      titlePan.setLayout(new GridLayout(6,1));
-      titlePan.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-      titlePan.add(new JLabel("Waikato Environment for", 
-			      SwingConstants.CENTER));
-      titlePan.add(new JLabel("Knowledge Analysis", 
-			      SwingConstants.CENTER));
-      titlePan.add(new JLabel(""));
-      titlePan.add(new JLabel("(c) 1999 - 2004", 
-			      SwingConstants.CENTER));
-      titlePan.add(new JLabel("University of Waikato", 
-			      SwingConstants.CENTER));
-      titlePan.add(new JLabel("New Zealand",
-			      SwingConstants.CENTER));
-      add(titlePan, BorderLayout.NORTH);
-    }
-
+    Image icon = Toolkit.getDefaultToolkit().
+    getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
+    setIconImage(icon);
+    this.getContentPane().setLayout(new BorderLayout());
+    JPanel wbuts = new JPanel();
+    wbuts.setBorder(BorderFactory.createTitledBorder("GUI"));
+    wbuts.setLayout(new GridLayout(2, 2));
+    wbuts.add(m_SimpleBut);
+    wbuts.add(m_ExplorerBut);
+    wbuts.add(m_ExperimenterBut);
+    wbuts.add(m_KnowledgeFlowBut);
+    this.getContentPane().add(wbuts, BorderLayout.SOUTH);
+    
+    JPanel wekaPan = new JPanel();
+    wekaPan.setToolTipText("Weka, a native bird of New Zealand");
+    ImageIcon wii = new ImageIcon(m_weka);
+    JLabel wekaLab = new JLabel(wii);
+    wekaPan.add(wekaLab);
+    this.getContentPane().add(wekaPan, BorderLayout.CENTER);
+    
+    JPanel titlePan = new JPanel();
+    titlePan.setLayout(new GridLayout(6,1));
+    titlePan.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    titlePan.add(new JLabel("Waikato Environment for",
+                            SwingConstants.CENTER));
+    titlePan.add(new JLabel("Knowledge Analysis",
+                            SwingConstants.CENTER));
+    titlePan.add(new JLabel(""));
+    titlePan.add(new JLabel("(c) 1999 - 2004",
+    SwingConstants.CENTER));
+    titlePan.add(new JLabel("University of Waikato",
+    SwingConstants.CENTER));
+    titlePan.add(new JLabel("New Zealand",
+    SwingConstants.CENTER));
+    this.getContentPane().add(titlePan, BorderLayout.NORTH);
+    
     m_SimpleBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	if (m_SimpleCLI == null) {
-	  m_SimpleBut.setEnabled(false);
-	  try {
-	    m_SimpleCLI = new SimpleCLI();
-	  } catch (Exception ex) {
-	    throw new Error("Couldn't start SimpleCLI!");
-	  }
-	  m_SimpleCLI.addWindowListener(new WindowAdapter() {
-	    public void windowClosing(WindowEvent w) {
-	      m_SimpleCLI.dispose();
-	      m_SimpleCLI = null;
-	      m_SimpleBut.setEnabled(true);
-	      checkExit();
-	    }
-	  });
-	  m_SimpleCLI.setVisible(true);
-	}
+        if (m_SimpleCLI == null) {
+          m_SimpleBut.setEnabled(false);
+          try {
+            m_SimpleCLI = new SimpleCLI();
+          } catch (Exception ex) {
+            throw new Error("Couldn't start SimpleCLI!");
+          }
+          m_SimpleCLI.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent w) {
+              m_SimpleCLI.dispose();
+              m_SimpleCLI = null;
+              m_SimpleBut.setEnabled(true);
+              checkExit();
+            }
+          });
+          m_SimpleCLI.setVisible(true);
+        }
       }
     });
 
@@ -256,7 +243,18 @@ public class GUIChooser extends Frame {
       System.exit(0);
     }
   }
-  
+
+  /** variable for the GUIChooser class which would be set to null by the memory 
+      monitoring thread to free up some memory if we running out of memory
+   */
+  private static GUIChooser m_chooser;
+  /** 
+   * The size in bytes of the java virtual machine at the start. This 
+   * represents the critical amount of memory that is necessary for the  
+   * program to run. If our free memory falls below (or is very close) to this 
+   * critical amount then the virtual machine throws an OutOfMemoryError.
+   */
+  private static long m_initialJVMSize;  
   /**
    * Tests out the GUIChooser environment.
    *
@@ -264,12 +262,89 @@ public class GUIChooser extends Frame {
    */
   public static void main(String [] args) {
 
-    try { // use system look & feel
+    try { //use system look & feel
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {}
     try {
-      GUIChooser c = new GUIChooser();
-      c.setVisible(true);
+      m_chooser = new GUIChooser();
+      m_chooser.setVisible(true);
+
+      Thread memMonitor = new Thread() {
+        public void run() {
+          while(true) {
+            try {
+              //System.out.println("before sleeping");
+              this.sleep(4000);
+              
+              System.gc();
+              if((Runtime.getRuntime().maxMemory() - 
+                  Runtime.getRuntime().totalMemory())  < 
+                                      m_initialJVMSize+200000) {
+
+                m_chooser.dispose();
+                if(m_chooser.m_ExperimenterFrame!=null) {
+                  m_chooser.m_ExperimenterFrame.dispose();
+                  m_chooser.m_ExperimenterFrame =null;
+                }
+                if(m_chooser.m_ExplorerFrame!=null) {
+                  m_chooser.m_ExplorerFrame.dispose();
+                  m_chooser.m_ExplorerFrame = null;
+                }
+                if(m_chooser.m_KnowledgeFlowFrame!=null) {
+                  m_chooser.m_KnowledgeFlowFrame.dispose();
+                  m_chooser.m_KnowledgeFlowFrame = null;
+                }
+                if(m_chooser.m_SimpleCLI!=null) {
+                  m_chooser.m_SimpleCLI.dispose();
+                  m_chooser.m_SimpleCLI = null;
+                }
+                m_chooser = null;
+                System.gc();
+
+                Thread [] thGroup = new Thread[Thread.activeCount()];
+                Thread.enumerate(thGroup);
+                //System.out.println("No of threads in the ThreadGroup:"+
+                //                   thGroup.length);
+                for(int i=0; i<thGroup.length; i++) {
+                  Thread t = thGroup[i];
+                  if(t!=null) {
+                    //System.out.println("Thread "+(i+1)+": "+t.getName());
+                    if(t!=Thread.currentThread()) {
+                      if(t.getName().startsWith("Thread")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                      else if(t.getName().startsWith("AWT-EventQueue")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                    }
+                  }
+                  //else
+                  //  System.out.println("Thread "+(i+1)+" is null.");
+                }
+                thGroup=null;
+                //System.gc();
+
+                JOptionPane.showMessageDialog(null,
+                                              "Not enough memory. Please load "+
+                                              "a smaller dataset or use "+
+                                              "larger heap size.", 
+                                              "OutOfMemory",
+                                              JOptionPane.WARNING_MESSAGE);
+                System.err.println("displayed message");
+                System.err.println("Not enough memory. Please load a smaller "+
+                                   "dataset or use larger heap size.");
+                System.err.println("exiting");
+                System.exit(-1);
+              }
+            } catch(InterruptedException ex) { ex.printStackTrace(); }
+          }
+        }
+      };
+
+      memMonitor.setPriority(Thread.NORM_PRIORITY);
+      memMonitor.start();    
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
