@@ -57,7 +57,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -436,7 +436,7 @@ public class AdaBoostM1 extends DistributionClassifier
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, getMaxIterations());
     if ((!m_UseResampling) && 
-	(m_Classifier instanceof OptionHandler)) {
+	(m_Classifier instanceof WeightedInstancesHandler)) {
       buildClassifierWithWeights(data);
     } else {
       buildClassifierUsingResampling(data);
