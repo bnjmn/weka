@@ -49,22 +49,22 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for building and using a Lazy Bayesian classifier.<BR>
- * The naive Bayesian classifier provides a simple and effective approach to 
- * classifier learning, but its attribute independence assumption is often violated 
- * in the real world. A number of approaches have sought to alleviate this problem. 
- * A Bayesian tree learning algorithm builds a decision tree, and generates a local 
- * naive Bayesian classifier at each leaf. The tests leading to a leaf can alleviate 
- * attribute inter­dependencies for the local naive Bayesian classifier. However, 
- * Bayesian tree learning still suffers from the small disjunct problem of tree learning. 
- * While inferred Bayesian trees demonstrate low average prediction error rates, there is 
- * reason to believe that error rates will be higher for those leaves with few training examples. <BR>
+ * Lazy Bayesian Rules implement a lazy learning approach to lessening the
+ * attribute-independence assumption of naive Bayes.  For each object to be
+ * classified, LBR selects a set of attributes for which the attribute
+ * independence assumption should not be made.  All remaining attributes are
+ * treated as independent of each other given the class and the selected set of
+ * attributes.  LBR has demonstrated very high accuracy.  Its training time is
+ * low but its classification time is high due to the use of a lazy
+ * methodology.  This implementation does not include caching, that can
+ * substantially reduce classification time when multiple classifications are
+ * performed for a single training set.
  *
  * For more information, see<p>
  * Zijian Zheng & G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
- * @author Zhihai Wang (Email: zhw@deakin.edu.au) : July 2001 implemented the algorithm
- * @author Jason Wells (Email: wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- *
+ * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
+ * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
+ * @version $Revision: 1.3 $
  */
 public class LBR extends DistributionClassifier {
 
@@ -680,10 +680,13 @@ public class LBR extends DistributionClassifier {
     // Compute counts and priors
     for(i = 0; i < m_numInsts; i++) {
       Instance instance = (Instance) instances.instance(i);
+      int classValue = (int)instance.classValue();
+      // pointer for more efficient access to counts matrix in loop
+      int [][] countsPointer = m_tCounts[classValue];
       for(attIndex = 0; attIndex < m_numAtts; attIndex++) {
-        m_tCounts[(int)instance.classValue()][attIndex][(int)instance.value(attIndex)]++;
+        countsPointer[attIndex][(int)instance.value(attIndex)]++;
       }
-      m_tPriors[(int)instance.classValue()]++;
+      m_tPriors[classValue]++;
     }
     
     // Step 2: Leave-one-out on the training data set.
@@ -745,7 +748,7 @@ public class LBR extends DistributionClassifier {
 
     // Step 4: Beginning Repeat.
     // Selecting all the attributes that can be moved to the lefthand.
-    while ( localErrors >= 5 ){
+    while (localErrors >= 5) {
       attributeBest = -1;
       whileCnt++;
       // Step 5:
@@ -942,11 +945,13 @@ public class LBR extends DistributionClassifier {
       tempInstance = (Instance) m_Instances.instance(instIndex);
       if (!tempInstance.classIsMissing()) {
       tempInstanceClassValue = (int)tempInstance.classValue();
+      // pointer to first index of counts matrix for efficiency
+      int [][] countsPointer = counts[tempInstanceClassValue];
       // Compute the counts and priors for (n-1) instances.
       for(attIndex = 0; attIndex < instanceIndex.m_NumSeqAttsSet; attIndex++) {
         AIndex = instanceIndex.m_SequentialAttIndexes[attIndex];
         tempAttributeValues[attIndex] = (int)tempInstance.value(AIndex);
-        counts[tempInstanceClassValue][AIndex][tempAttributeValues[attIndex]]--;
+        countsPointer[AIndex][tempAttributeValues[attIndex]]--;
       }
       
       priors[tempInstanceClassValue]--;
@@ -958,11 +963,12 @@ public class LBR extends DistributionClassifier {
         posteriors = 0.0;
         posteriors = (priors[clss] + 1) / (sumForPriors + m_numClasses);
         
+	countsPointer = counts[clss];
         for(attIndex = 0; attIndex < instanceIndex.m_NumSeqAttsSet; attIndex++) {
           AIndex = instanceIndex.m_SequentialAttIndexes[attIndex];
           if (!tempInstance.isMissing(AIndex)) {
-            sumForCounts = Utils.sum(counts[clss][AIndex]);
-            posteriors *= ((counts[clss][AIndex][tempAttributeValues[attIndex]] + 1) / (sumForCounts + (double)tempInstance.attribute(AIndex).numValues()));
+            sumForCounts = Utils.sum(countsPointer[AIndex]);
+            posteriors *= ((countsPointer[AIndex][tempAttributeValues[attIndex]] + 1) / (sumForCounts + (double)tempInstance.attribute(AIndex).numValues()));
           }
         }
         
@@ -988,6 +994,7 @@ public class LBR extends DistributionClassifier {
         errors++;
       }
       
+      countsPointer = counts[tempInstanceClassValue];
       for(attIndex = 0; attIndex < instanceIndex.m_NumSeqAttsSet; attIndex++) {
         AIndex = instanceIndex.m_SequentialAttIndexes[attIndex];
         counts[tempInstanceClassValue][AIndex][tempAttributeValues[attIndex]]++;
@@ -1024,10 +1031,14 @@ public class LBR extends DistributionClassifier {
 
     // reset local counts
     for(classVal = 0; classVal < m_numClasses; classVal++) {
+      // counts pointer mcTimesaver
+      int [][] countsPointer1 = m_Counts[classVal];
       for(attIndex = 0; attIndex < m_numAtts; attIndex++) {
         Attribute attribute = m_Instances.attribute(attIndex);
+         // love those pointers for saving time
+         int [] countsPointer2 = countsPointer1[attIndex];
         for(attVal = 0; attVal < attribute.numValues(); attVal++)  {
-          m_Counts[classVal][attIndex][attVal] = 0;
+          countsPointer2[attVal] = 0;
         }
      }
      m_Priors[classVal] = 0;
@@ -1067,12 +1078,14 @@ public class LBR extends DistributionClassifier {
     // Calculate all of conditional probabilities.
     sumForPriors = Utils.sum(m_Priors) + numClassesOfInstance;
     for (int j = 0; j < numClassesOfInstance; j++) {
+      // pointer to counts to make access more efficient in loop
+      int [][] countsPointer = m_Counts[j];
       posteriorsArray[j] = (m_Priors[j] + 1) / (sumForPriors);
       for(attIndex = 0; attIndex < instanceIndex.m_NumSeqAttsSet; attIndex++) {
         AIndex = instanceIndex.m_SequentialAttIndexes[attIndex];
-        sumForCounts = Utils.sum(m_Counts[j][AIndex]);
+        sumForCounts = Utils.sum(countsPointer[AIndex]);
         if (!instance.isMissing(AIndex)) {
-          posteriorsArray[j] *= ((m_Counts[j][AIndex][(int)instance.value(AIndex)] + 1) / (sumForCounts + (double)instance.attribute(AIndex).numValues()));
+          posteriorsArray[j] *= ((countsPointer[AIndex][(int)instance.value(AIndex)] + 1) / (sumForCounts + (double)instance.attribute(AIndex).numValues()));
         }
       }
     }

@@ -15,7 +15,7 @@
  */
 
 /*
- *    AODE.java 
+ *    AODE.java
  *    Copyright (C) 2003
  *    Algorithm developed by: Geoff Webb
  *    Code written by: Janice Boughton & Zhihai Wang
@@ -23,24 +23,22 @@
 
 package weka.classifiers.bayes;
 
-import weka.classifiers.*;
-import weka.core.*;
-
 import java.io.*;
 import java.util.*;
-
+import weka.core.*;
+import weka.classifiers.*;
 
 /**
  * AODE achieves highly accurate classification by averaging over all
  * of a small space of alternative naive-Bayes-like models that have
  * weaker (and hence less detrimental) independence assumptions than
- * naive Bayes.  The resulting algorithm is computationally efficient while
+ * naive Bayes. The resulting algorithm is computationally efficient while
  * delivering highly accurate classification on many learning tasks.<br>
  * For more information, see<p>
  * G. Webb, J. Boughton & Z. Wang (2003). <i>Not So Naive Bayes.</i>
  * Submitted for publication<br>
  * G. Webb, J. Boughton & Z. Wang (2002). <i>Averaged One-Dependence
- * Estimators: Preliminary Results.</i>  AI2002 Data Mining Workshop, Canberra.
+ * Estimators: Preliminary Results.</i> AI2002 Data Mining Workshop, Canberra.
  *
  * Valid options are:<p>
  *
@@ -50,12 +48,11 @@ import java.util.*;
  * -F <br>
  * Specify the frequency limit for parent attributes.<p>
  *
- * @author Janice Boughton (jrbought@csse.monash.edu.au)
- * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.2 $
+ * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
+ * @version $Revision: 1.3 $
  */
 public class AODE extends DistributionClassifier
-  implements OptionHandler, WeightedInstancesHandler {
+                  implements OptionHandler, WeightedInstancesHandler {
     
   /**
    * 3D array (m_NumClasses * m_TotalAttValues * m_TotalAttValues)
@@ -110,7 +107,7 @@ public class AODE extends DistributionClassifier
   private double m_SumInstances;
     
   /** An att's frequency must be this value or more to be a superParent */
-  private int m_Limit = 30;
+  private int m_Limit;
 
   /** If true, outputs debugging info */
   private boolean m_Debug = false;
@@ -125,6 +122,9 @@ public class AODE extends DistributionClassifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    // reset variable for this fold
+    m_SumInstances = 0;
+    
     m_NumClasses = instances.numClasses();
     if(m_NumClasses < 2) {
        throw new Exception ("Dataset has no class attribute");
@@ -192,34 +192,35 @@ public class AODE extends DistributionClassifier
    */
   private void addToCounts(Instance instance) {
         
+    double [] pointer;
+    
     int classVal = (int)instance.classValue();
-        
+    
     m_ClassCounts[classVal]++;
     m_SumInstances++;
         
     // store instance's att vals in an int array, b/c accessing it in the loop(s) is more efficient
     int [] attIndex = new int[m_NumAttributes];
-    boolean [] blocked = new boolean[m_NumAttributes];
     for(int i = 0; i < m_NumAttributes; i++) {
-       attIndex[i] = m_StartAttIndex[i] + (int)instance.value(i);
        if(instance.isMissing(i) || i == m_ClassIndex)
-          blocked[i] = true;
+          attIndex[i] = -1;
        else
-          blocked[i] = false;
+          attIndex[i] = m_StartAttIndex[i] + (int)instance.value(i);
     }
 
     for(int Att1 = 0; Att1 < m_NumAttributes; Att1++) {
-       if((blocked[Att1]))
+       if(attIndex[Att1] == -1)
           continue;   // avoid pointless looping
 
        m_Frequencies[attIndex[Att1]]++;
        m_SumForCounts[classVal][Att1]++;
 
+       // save time by referencing this now, rather than do it repeatedly in the loop
+       pointer = m_CondiCounts[classVal][attIndex[Att1]];
+    
        for(int Att2 = 0; Att2 < m_NumAttributes; Att2++) {
-          if((!blocked[Att2])) {
-             m_CondiCounts[classVal]
-                     [attIndex[Att1]]
-                     [attIndex[Att2]]++;
+          if((attIndex[Att2] != -1)) {
+             pointer[attIndex[Att2]]++;
           }
        }
     }
@@ -240,15 +241,16 @@ public class AODE extends DistributionClassifier
     int pIndex, parentCount; 
     double probSum = 0;
     
+    double [][] pointer1;
+    double [] pointer2;
+    
     // store instance's att values in an int array, so accessing them is more efficient in loop(s)
     int [] attIndex = new int[m_NumAttributes];
-    boolean [] blocked = new boolean[m_NumAttributes];
     for(int att = 0; att < m_NumAttributes; att++) {
-       attIndex[att] = m_StartAttIndex[att] + (int)instance.value(att);
        if(instance.isMissing(att) || att == m_ClassIndex)
-          blocked[att] = true;
+          attIndex[att] = -1;
        else
-          blocked[att] = false;
+          attIndex[att] = m_StartAttIndex[att] + (int)instance.value(att);
     }
     
     // calculate probabilities for each possible class value
@@ -257,26 +259,30 @@ public class AODE extends DistributionClassifier
        probs[classVal] = 0;
        double x = 0;
        
+       pointer1 = m_CondiCounts[classVal];
+       
        parentCount = 0;
 
        // each attribute has a turn of being the parent
        for(int parent = 0; parent < m_NumAttributes; parent++) {
-          if(blocked[parent])
+          if(attIndex[parent] == -1)
              continue;
 
           // determine correct index for the parent in m_CondiCounts matrix
           pIndex = attIndex[parent];
+
+          pointer2 = pointer1[pIndex];
 
           // check that the att value has a frequency of m_Limit or greater
 	  if(m_Frequencies[pIndex] < m_Limit)
 	     continue;
 	     
           // block the parent from being its own child
-	  blocked[parent] = true;
+	  attIndex[parent] = -1;
 	  
           parentCount++;
 
-          double classparentfreq = m_CondiCounts[classVal][pIndex][pIndex];
+          double classparentfreq = pointer2[pIndex];
 
           // calculate the prior probability -- P(parent & classVal)
           x = (classparentfreq + 1.0)
@@ -284,10 +290,10 @@ public class AODE extends DistributionClassifier
 
 	  // take into account the value of each attribute
           for(int att = 0; att < m_NumAttributes; att++) {
-             if(blocked[att])
+             if(attIndex[att] == -1)
                 continue;
  
-             x *= (m_CondiCounts[classVal][pIndex][attIndex[att]] + 1.0)
+             x *= (pointer2[attIndex[att]] + 1.0)
                  / (classparentfreq + m_NumAttValues[att]);
           }
 
@@ -295,7 +301,7 @@ public class AODE extends DistributionClassifier
           probs[classVal] += x;
        
           // unblock the parent
-	  blocked[parent] = false;
+	  attIndex[parent] = pIndex;
        }
         
        // check that at least one att was a parent
@@ -311,25 +317,30 @@ public class AODE extends DistributionClassifier
        }
     }
  
+    Utils.normalize(probs);
     return probs;
   }
 
 
   /**
-   * Calculates the class membership probabilities for the given test
+   * Calculates the probability of the specified class for the given test
    * instance, using naive Bayes.
    *
    * @param instance the instance to be classified
-   * @return predicted class probability distribution
+   * @param classVal the class for which to calculate the probability
+   * @return predicted class probability
    * @exception Exception if there is a problem generating the prediction
    */
   public double NBconditionalProb(Instance instance, int classVal) {
     
     double prob;
     int attIndex;
+    double [][] pointer;
 
     // calculate the prior probability
     prob = (m_ClassCounts[classVal] + 1.0) / (m_SumInstances + m_NumClasses);
+    
+    pointer = m_CondiCounts[classVal];
     
     // consider effect of each att value
     for(int att = 0; att < m_NumAttributes; att++) {
@@ -339,7 +350,7 @@ public class AODE extends DistributionClassifier
        // determine correct index for att in m_CondiCounts
        attIndex = m_StartAttIndex[att] + (int)instance.value(att);
 
-       prob *= (double)(m_CondiCounts[classVal][attIndex][attIndex] + 1.0)
+       prob *= (double)(pointer[attIndex][attIndex] + 1.0)
               / ((double)m_SumForCounts[classVal][att] + m_NumAttValues[att]);
     }
 
@@ -391,26 +402,6 @@ public class AODE extends DistributionClassifier
     
     Utils.checkForRemainingOptions(options);
   }
-
-  /**
-   * Set the frequency limit for parent attributes
-   *
-   * @param fl an <code>int</code> value
-   */
-  public void setFrequencyLimitForParentAttributes(int fl) {
-    if (fl > 0) {
-      m_Limit = fl;
-    }
-  }
-
-  /**
-   * Return the frequency limit for parent attributes
-   *
-   * @return an <code>int</code> value
-   */
-  public int getFrequencyLimitForParentAttributes() {
-    return m_Limit;
-  }
     
   /**
    * Gets the current settings of the classifier.
@@ -426,7 +417,7 @@ public class AODE extends DistributionClassifier
        options[current++] = "-D";
     }
         
-    options[current++] = "-F"; options[current++] = ""+m_Limit;
+    options[current++] = "-F " + m_Limit;
 
     while (current < options.length) {
        options[current++] = "";
