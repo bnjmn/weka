@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -35,9 +36,9 @@ import java.util.zip.GZIPOutputStream;
  * in memory), or can be used as a mechanism for deep copying objects.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class SerializedObject {
+public class SerializedObject implements Serializable {
 
   /** Stores the serialized object */
   private byte [] m_Serialized;
