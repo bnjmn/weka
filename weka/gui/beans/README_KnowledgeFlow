@@ -84,9 +84,9 @@ environments. Select the button labeled "KnowledgeFlow" to start the
 KnowledgeFlow. Alternatively, you can launch the KnowledgeFlow from a
 terminal window by typing "java weka.gui.beans.KnowledgeFlow".
 
-At the top of the KnowledgeFlow window is are four tabs: Tools,
-Filters, Classifiers, DataSources. The names are pretty much self
-explanatory.
+At the top of the KnowledgeFlow window is are four tabs: Evaluation,
+Visualization, Filters, Classifiers, DataSources.
+The names are pretty much self explanatory.
 
 EXAMPLE:
 -----------------
