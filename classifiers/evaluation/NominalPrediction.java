@@ -18,14 +18,16 @@
  */
 package weka.classifiers.evaluation;
 
+import java.io.Serializable;
+
 /**
  * Encapsulates an evaluatable nominal prediction: the predicted probability
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class NominalPrediction implements Prediction {
+public class NominalPrediction implements Prediction, Serializable {
 
   /** The predicted probabilities */
   private double [] m_Distribution;
