@@ -1,6 +1,6 @@
 JAVA = javac
 
-SOURCES = ItemSet.java Apriori.java
+SOURCES = Associator.java ItemSet.java Apriori.java 
 
 CLASSFILES = $(SOURCES:.java=.class)
 
