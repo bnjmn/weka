@@ -33,7 +33,7 @@ import weka.core.Utils;
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public abstract class Associator implements Cloneable, Serializable {
  
@@ -48,6 +48,11 @@ public abstract class Associator implements Cloneable, Serializable {
    * generated successfully
    */
   public abstract void buildAssociations(Instances data) throws Exception;
+
+
+ 
+   
+
 
   /**
    * Creates a new instance of a associator given it's class name and

@@ -31,9 +31,11 @@ import weka.core.*;
  * order, which is determined by the header information of the set of instances
  * used for generating the set of items. All methods in this class assume that
  * item sets are stored in lexicographic order.
+ * The class provides the general methods used for item sets in class - and 
+ * standard association rule mining.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ItemSet implements Serializable {
 
@@ -46,6 +48,11 @@ public class ItemSet implements Serializable {
   /** The total number of transactions */
   protected int m_totalTransactions;
 
+ 
+    
+
+    
+
   /**
    * Constructor
    * @param totalTrans the total number of transactions in the data
@@ -54,91 +61,26 @@ public class ItemSet implements Serializable {
     m_totalTransactions = totalTrans;
   }
 
-  /**
-   * Outputs the confidence for a rule.
-   *
-   * @param premise the premise of the rule
-   * @param consequence the consequence of the rule
-   * @return the confidence on the training data
+   /**
+   * Constructor
+   * @param totalTrans the total number of transactions in the data
+   * @param array the attribute values encoded in an int array
    */
-  public static double confidenceForRule(ItemSet premise, 
-					 ItemSet consequence) {
-
-    return (double)consequence.m_counter/(double)premise.m_counter;
-  }
-
-  /**
-   * Outputs the lift for a rule. Lift is defined as:<br>
-   * confidence / prob(consequence)
-   *
-   * @param premise the premise of the rule
-   * @param consequence the consequence of the rule
-   * @param consequenceCount how many times the consequence occurs independent
-   * of the premise
-   * @return the lift on the training data
-   */
-  public double liftForRule(ItemSet premise, 
-			    ItemSet consequence,
-			    int consequenceCount) {
-    double confidence = confidenceForRule(premise, consequence);
-
-   return confidence / ((double)consequenceCount / 
-	  (double)m_totalTransactions);
-  }
-
-  /**
-   * Outputs the leverage for a rule. Leverage is defined as: <br>
-   * prob(premise & consequence) - (prob(premise) * prob(consequence))
-   *
-   * @param premise the premise of the rule
-   * @param consequence the consequence of the rule
-   * @param premiseCount how many times the premise occurs independent
-   * of the consequent
-   * @param consequenceCount how many times the consequence occurs independent
-   * of the premise
-   * @return the leverage on the training data
-   */
-  public double leverageForRule(ItemSet premise,
-				ItemSet consequence,
-				int premiseCount,
-				int consequenceCount) {
-    double coverageForItemSet = (double)consequence.m_counter / 
-      (double)m_totalTransactions;
-    double expectedCoverageIfIndependent = 
-      ((double)premiseCount / (double)m_totalTransactions) * 
-      ((double)consequenceCount / (double)m_totalTransactions);
-    double lev = coverageForItemSet - expectedCoverageIfIndependent;
-    return lev;
-  }
-
-  /**
-   * Outputs the conviction for a rule. Conviction is defined as: <br>
-   * prob(premise) * prob(!consequence) / prob(premise & !consequence)
-   *
-   * @param premise the premise of the rule
-   * @param consequence the consequence of the rule
-   * @param premiseCount how many times the premise occurs independent
-   * of the consequent
-   * @param consequenceCount how many times the consequence occurs independent
-   * of the premise
-   * @return the conviction on the training data
-   */
-  public double convictionForRule(ItemSet premise,
-				   ItemSet consequence,
-				   int premiseCount,
-				   int consequenceCount) {
-    double num = 
-      (double)premiseCount * (double)(m_totalTransactions - consequenceCount) *
-       (double)m_totalTransactions;
-    double denom = 
-      ((premiseCount - consequence.m_counter)+1);
-    
-    if (num < 0 || denom < 0) {
-      System.err.println("*** "+num+" "+denom);
-      System.err.println("premis count: "+premiseCount+" consequence count "+consequenceCount+" total trans "+m_totalTransactions);
-    }
-    return num / denom;
-  }
+  public ItemSet(int totalTrans, int[] array){
+       
+       m_totalTransactions = totalTrans;
+       m_items = array;
+       m_counter =1;
+   }
+  
+  /** Contsructor
+   * @param array the item set represented as an int array
+   */  
+  public ItemSet(int[] array){
+       
+       m_items = array;
+       m_counter = 0;
+   }
 
   /**
    * Checks if an instance contains an item set.
@@ -158,12 +100,11 @@ public class ItemSet implements Serializable {
     return true;
   }
 
-  /**
-   * Deletes all item sets that don't have minimum support.
-   *
+  /** Deletes all item sets that don't have minimum support.
+   * @return the reduced set of item sets
+   * @param maxSupport the maximum support
    * @param itemSets the set of item sets to be pruned
    * @param minSupport the minimum number of transactions to be covered
-   * @return the reduced set of item sets
    */
   public static FastVector deleteItemSets(FastVector itemSets, 
 					  int minSupport,
@@ -186,7 +127,7 @@ public class ItemSet implements Serializable {
    * @param itemSet another item set
    * @return true if this item set contains the same items as the given one
    */
-  public final boolean equals(Object itemSet) {
+  public boolean equals(Object itemSet) {
 
     if ((itemSet == null) || !(itemSet.getClass().equals(this.getClass()))) {
       return false;
@@ -197,202 +138,6 @@ public class ItemSet implements Serializable {
       if (m_items[i] != ((ItemSet)itemSet).m_items[i])
 	return false;
     return true;
-  }
-
-  /**
-   * Generates all rules for an item set.
-   *
-   * @param minConfidence the minimum confidence the rules have to have
-   * @param hashtables containing all(!) previously generated
-   * item sets
-   * @param numItemsInSet the size of the item set for which the rules
-   * are to be generated
-   * @return all the rules with minimum confidence for the given item set
-   */
-  public final FastVector[] generateRules(double minConfidence, 
-					  FastVector hashtables,
-					  int numItemsInSet) {
-
-    FastVector premises = new FastVector(),consequences = new FastVector(),
-      conf = new FastVector();
-    FastVector[] rules = new FastVector[3], moreResults;
-    ItemSet premise, consequence;
-    Hashtable hashtable = (Hashtable)hashtables.elementAt(numItemsInSet - 2);
-
-    // Generate all rules with one item in the consequence.
-    for (int i = 0; i < m_items.length; i++) 
-      if (m_items[i] != -1) {
-	premise = new ItemSet(m_totalTransactions);
-	consequence = new ItemSet(m_totalTransactions);
-	premise.m_items = new int[m_items.length];
-	consequence.m_items = new int[m_items.length];
-	consequence.m_counter = m_counter;
-	for (int j = 0; j < m_items.length; j++) 
-	  consequence.m_items[j] = -1;
-	System.arraycopy(m_items, 0, premise.m_items, 0, m_items.length);
-	premise.m_items[i] = -1;
-	consequence.m_items[i] = m_items[i];
-	premise.m_counter = ((Integer)hashtable.get(premise)).intValue();
-	premises.addElement(premise);
-	consequences.addElement(consequence);
-	conf.addElement(new Double(confidenceForRule(premise, consequence)));
-      }
-    rules[0] = premises;
-    rules[1] = consequences;
-    rules[2] = conf;
-    pruneRules(rules, minConfidence);
-
-    // Generate all the other rules
-    moreResults = moreComplexRules(rules, numItemsInSet, 1, minConfidence,
-				   hashtables);
-    if (moreResults != null) 
-      for (int i = 0; i < moreResults[0].size(); i++) {
-	rules[0].addElement(moreResults[0].elementAt(i));
-	rules[1].addElement(moreResults[1].elementAt(i));
-	rules[2].addElement(moreResults[2].elementAt(i));
-      }
-    return rules;
-  }
-
-  /**
-   * Generates all significant rules for an item set.
-   *
-   * @param minMetric the minimum metric (confidence, lift, leverage, 
-   * improvement) the rules have to have
-   * @param metricType (confidence=0, lift, leverage, improvement)
-   * @param hashtables containing all(!) previously generated
-   * item sets
-   * @param numItemsInSet the size of the item set for which the rules
-   * are to be generated
-   * @param the significance level for testing the rules
-   * @return all the rules with minimum metric for the given item set
-   * @exception Exception if something goes wrong
-   */
-  public final FastVector[] generateRulesBruteForce(double minMetric,
-						    int metricType,
-						FastVector hashtables,
-						int numItemsInSet,
-						int numTransactions,
-						double significanceLevel) 
-  throws Exception {
-
-    FastVector premises = new FastVector(),consequences = new FastVector(),
-      conf = new FastVector(), lift = new FastVector(), lev = new FastVector(),
-      conv = new FastVector(); 
-    FastVector[] rules = new FastVector[6];
-    ItemSet premise, consequence;
-    Hashtable hashtableForPremise, hashtableForConsequence;
-    int numItemsInPremise, help, max, consequenceUnconditionedCounter;
-    double[][] contingencyTable = new double[2][2];
-    double metric, chiSquared;
-
-    // Generate all possible rules for this item set and test their
-    // significance.
-    max = (int)Math.pow(2, numItemsInSet);
-    for (int j = 1; j < max; j++) {
-      numItemsInPremise = 0;
-      help = j;
-      while (help > 0) {
-	if (help % 2 == 1)
-	  numItemsInPremise++;
-	help /= 2;
-      }
-      if (numItemsInPremise < numItemsInSet) {
-	hashtableForPremise = 
-	  (Hashtable)hashtables.elementAt(numItemsInPremise-1);
-	hashtableForConsequence = 
-	  (Hashtable)hashtables.elementAt(numItemsInSet-numItemsInPremise-1);
-	premise = new ItemSet(m_totalTransactions);
-	consequence = new ItemSet(m_totalTransactions);
-	premise.m_items = new int[m_items.length];
-	consequence.m_items = new int[m_items.length];
-	consequence.m_counter = m_counter;
-	help = j;
-	for (int i = 0; i < m_items.length; i++) 
-	  if (m_items[i] != -1) {
-	    if (help % 2 == 1) {          
-	      premise.m_items[i] = m_items[i];
-	      consequence.m_items[i] = -1;
-	    } else {
-	      premise.m_items[i] = -1;
-	      consequence.m_items[i] = m_items[i];
-	    }
-	    help /= 2;
-	  } else {
-	    premise.m_items[i] = -1;
-	    consequence.m_items[i] = -1;
-	  }
-	premise.m_counter = ((Integer)hashtableForPremise.get(premise)).intValue();
-	consequenceUnconditionedCounter =
-	  ((Integer)hashtableForConsequence.get(consequence)).intValue();
-
-	if (metricType == 0) {
-	  contingencyTable[0][0] = (double)(consequence.m_counter);
-	  contingencyTable[0][1] = (double)(premise.m_counter - consequence.m_counter);
-	  contingencyTable[1][0] = (double)(consequenceUnconditionedCounter -
-					    consequence.m_counter);
-	  contingencyTable[1][1] = (double)(numTransactions - premise.m_counter -
-					    consequenceUnconditionedCounter +
-					    consequence.m_counter);
-	  chiSquared = ContingencyTables.chiSquared(contingencyTable, false);
-	
-	  metric = confidenceForRule(premise, consequence);
-	
-	  if ((!(metric < minMetric)) &&
-	      (!(chiSquared > significanceLevel))) {
-	    premises.addElement(premise);
-	    consequences.addElement(consequence);
-	    conf.addElement(new Double(metric));
-	    lift.addElement(new Double(liftForRule(premise, consequence, 
-				       consequenceUnconditionedCounter)));
-	    lev.addElement(new Double(leverageForRule(premise, consequence,
-				     premise.m_counter,
-				     consequenceUnconditionedCounter)));
-	    conv.addElement(new Double(convictionForRule(premise, consequence,
-				       premise.m_counter,
-				       consequenceUnconditionedCounter)));
-	  }
-	} else {
-	  double tempConf = confidenceForRule(premise, consequence);
-	  double tempLift = liftForRule(premise, consequence, 
-					consequenceUnconditionedCounter);
-	  double tempLev = leverageForRule(premise, consequence,
-					   premise.m_counter,
-					   consequenceUnconditionedCounter);
-	  double tempConv = convictionForRule(premise, consequence,
-					      premise.m_counter,
-					      consequenceUnconditionedCounter);
-	  switch(metricType) {
-	  case 1: 
-	    metric = tempLift;
-	    break;
-	  case 2:
-	    metric = tempLev;
-	    break;
-	  case 3: 
-	    metric = tempConv;
-	    break;
-	  default:
-	    throw new Exception("ItemSet: Unknown metric type!");
-	  }
-	  if (!(metric < minMetric)) {
-	    premises.addElement(premise);
-	    consequences.addElement(consequence);
-	    conf.addElement(new Double(tempConf));
-	    lift.addElement(new Double(tempLift));
-	    lev.addElement(new Double(tempLev));
-	    conv.addElement(new Double(tempConv));
-	  }
-	}
-      }
-    }
-    rules[0] = premises;
-    rules[1] = consequences;
-    rules[2] = conf;
-    rules[3] = lift;
-    rules[4] = lev;
-    rules[5] = conv;
-    return rules;
   }
 
   /**
@@ -427,13 +172,12 @@ public class ItemSet implements Serializable {
     return (int)result;
   }
 
-  /**
-   * Merges all item sets in the set of (k-1)-item sets 
+  /** Merges all item sets in the set of (k-1)-item sets
    * to create the (k)-item sets and updates the counters.
-   *
+   * @return the generated (k)-item sets
+   * @param totalTrans thetotal number of transactions
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
-   * @return the generated (k)-item sets
    */
   public static FastVector mergeAllItemSets(FastVector itemSets, int size, 
 					    int totalTrans) {
@@ -449,7 +193,7 @@ public class ItemSet implements Serializable {
 	ItemSet second = (ItemSet)itemSets.elementAt(j);
 	result = new ItemSet(totalTrans);
 	result.m_items = new int[first.m_items.length];
-
+        
 	// Find and copy common prefix of size 'size'
 	numFound = 0;
 	k = 0;
@@ -477,6 +221,7 @@ public class ItemSet implements Serializable {
 	}
 	if (k == first.m_items.length) {
 	  result.m_counter = 0;
+         
 	  newVector.addElement(result);
 	}
       }
@@ -505,8 +250,9 @@ public class ItemSet implements Serializable {
 	  if (kMinusOne.get(current) == null) {
 	    current.m_items[j] = help;
 	    break;
-	  } else 
+	  } else{ 
 	    current.m_items[j] = help;
+          }
 	}
       if (j == current.m_items.length) 
 	newVector.addElement(current);
@@ -538,6 +284,10 @@ public class ItemSet implements Serializable {
     rules[1] = newConsequences;
     rules[2] = newConf;
   }
+  
+  
+ 
+  
 
   /**
    * Converts the header info of the given set of instances into a set 
@@ -562,31 +312,11 @@ public class ItemSet implements Serializable {
 	for (int k = 0; k < instances.numAttributes(); k++)
 	  current.m_items[k] = -1;
 	current.m_items[i] = j;
+        
 	setOfItemSets.addElement(current);
       }
     }
     return setOfItemSets;
-  }
-  
-  /**
-   * Subtracts an item set from another one.
-   *
-   * @param toSubtract the item set to be subtracted from this one.
-   * @return an item set that only contains items form this item sets that
-   * are not contained by toSubtract
-   */
-  public final ItemSet subtract(ItemSet toSubtract) {
-
-    ItemSet result = new ItemSet(m_totalTransactions);
-    
-    result.m_items = new int[m_items.length];
-    for (int i = 0; i < m_items.length; i++) 
-      if (toSubtract.m_items[i] == -1)
-	result.m_items[i] = m_items[i];
-      else
-	result.m_items[i] = -1;
-    result.m_counter = 0;
-    return result;
   }
 
   /**
@@ -594,7 +324,7 @@ public class ItemSet implements Serializable {
    *
    * @return the support
    */
-  public final int support() {
+  public int support() {
 
     return m_counter;
   }
@@ -605,7 +335,7 @@ public class ItemSet implements Serializable {
    * @param instances contains the relevant header information
    * @return string describing the item set
    */
-  public final String toString(Instances instances) {
+  public String toString(Instances instances) {
 
     StringBuffer text = new StringBuffer();
 
@@ -618,12 +348,14 @@ public class ItemSet implements Serializable {
     return text.toString();
   }
 
+
+
   /**
    * Updates counter of item set with respect to given transaction.
    *
    * @param instance the instance to be used for ubdating the counter
    */
-  public final void upDateCounter(Instance instance) {
+  public void upDateCounter(Instance instance) {
 
     if (containedBy(instance))
       m_counter++;
@@ -644,60 +376,63 @@ public class ItemSet implements Serializable {
     }
   }
 
-  /**
-   * Generates rules with more than one item in the consequence.
-   *
-   * @param rules all the rules having (k-1)-item sets as consequences
-   * @param numItemsInSet the size of the item set for which the rules
-   * are to be generated
-   * @param numItemsInConsequence the value of (k-1)
-   * @param minConfidence the minimum confidence a rule has to have
-   * @param hashtables the hashtables containing all(!) previously generated
-   * item sets
-   * @return all the rules having (k)-item sets as consequences
-   */
-  private final FastVector[] moreComplexRules(FastVector[] rules, 
-					      int numItemsInSet, 
-					      int numItemsInConsequence,
-					      double minConfidence, 
-					      FastVector hashtables) {
-
-    ItemSet newPremise;
-    FastVector[] result, moreResults;
-    FastVector newConsequences, newPremises = new FastVector(), 
-      newConf = new FastVector();
-    Hashtable hashtable;
-
-    if (numItemsInSet > numItemsInConsequence + 1) {
-      hashtable =
-	(Hashtable)hashtables.elementAt(numItemsInSet - numItemsInConsequence - 2);
-      newConsequences = mergeAllItemSets(rules[1], 
-					 numItemsInConsequence - 1,
-					 m_totalTransactions);
-      Enumeration enum = newConsequences.elements();
-      while (enum.hasMoreElements()) {
-	ItemSet current = (ItemSet)enum.nextElement();
-	current.m_counter = m_counter;
-	newPremise = subtract(current);
-	newPremise.m_counter = ((Integer)hashtable.get(newPremise)).intValue();
-	newPremises.addElement(newPremise);
-	newConf.addElement(new Double(confidenceForRule(newPremise, current)));
-      }
-      result = new FastVector[3];
-      result[0] = newPremises;
-      result[1] = newConsequences;
-      result[2] = newConf;
-      pruneRules(result, minConfidence);
-      moreResults = moreComplexRules(result,numItemsInSet,numItemsInConsequence+1,
-				     minConfidence, hashtables);
-      if (moreResults != null) 
-	for (int i = 0; i < moreResults[0].size(); i++) {
-	  result[0].addElement(moreResults[0].elementAt(i));
-	  result[1].addElement(moreResults[1].elementAt(i));
-	  result[2].addElement(moreResults[2].elementAt(i));
-	}
-      return result;
-    } else
-      return null;
+  /** Gets the counter
+   * @return the counter
+   */  
+  public int counter(){
+      
+      return m_counter;
   }
+  
+  /** Gest the item set as an int array
+   * @return int array represneting an item set
+   */  
+  public int[] items(){
+      
+      return m_items;
+  }
+  
+  /** Gest the index of the value of the specified attribute
+   * @param k the attribute index
+   * @return the index of the attribute value
+   */  
+  public int itemAt(int k){
+      
+      return m_items[k];
+  }
+  
+  /** Sets the counter
+   * @param count the counter
+   */  
+  public void setCounter(int count){
+      
+      m_counter = count;
+  }
+  
+  /** Sets an item sets
+   * @param items an int array representing an item set
+   */  
+  public void setItem(int[] items){
+      
+      m_items = items;
+  }
+  
+  /** Sets the index of an attribute value
+   * @param value the inex of the attribute value
+   * @param k the index of the attribute
+   */  
+  public void setItemAt(int value, int k){
+      
+      m_items[k] = value;
+  }
+  
 }
+
+
+
+
+
+
+
+
+

@@ -10,7 +10,7 @@
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
+ *    alo0ng with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ */
+ * @version $Revision: 1.17 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
@@ -176,7 +176,7 @@ public class Apriori extends Associator implements OptionHandler {
    * @param instances the instances
    * @return a new set of instances with all missing columns removed
    */
-  private Instances removeMissingColumns(Instances instances) 
+  protected Instances removeMissingColumns(Instances instances) 
     throws Exception {
     int numInstances = instances.numInstances();
     StringBuffer deleteString = new StringBuffer();
@@ -289,7 +289,7 @@ public class Apriori extends Associator implements OptionHandler {
       // Sort rules according to their support
       supports = new double[m_allTheRules[2].size()];
       for (int i = 0; i < m_allTheRules[2].size(); i++) 
-	supports[i] = (double)((ItemSet)m_allTheRules[1].elementAt(i)).support();
+	supports[i] = (double)((AprioriItemSet)m_allTheRules[1].elementAt(i)).support();
       indices = Utils.stableSort(supports);
       for (int i = 0; i < m_allTheRules[2].size(); i++) {
 	sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[i]));
@@ -555,7 +555,7 @@ public class Apriori extends Associator implements OptionHandler {
       if (m_outputItemSets) {
 	text.append("\nLarge Itemsets L("+(i+1)+"):\n");
 	for (int j = 0; j < ((FastVector)m_Ls.elementAt(i)).size(); j++)
-	  text.append(((ItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).
+	  text.append(((AprioriItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).
 		      toString(m_instances)+"\n");
       }
     }
@@ -563,9 +563,9 @@ public class Apriori extends Associator implements OptionHandler {
     for (int i = 0; i < m_allTheRules[0].size(); i++) {
       text.append(Utils.doubleToString((double)i+1, 
 		  (int)(Math.log(m_numRules)/Math.log(10)+1),0)+
-		  ". " + ((ItemSet)m_allTheRules[0].elementAt(i)).
+		  ". " + ((AprioriItemSet)m_allTheRules[0].elementAt(i)).
 		  toString(m_instances) 
-		  + " ==> " + ((ItemSet)m_allTheRules[1].elementAt(i)).
+		  + " ==> " + ((AprioriItemSet)m_allTheRules[1].elementAt(i)).
 		  toString(m_instances) +"    conf:("+  
 		  Utils.doubleToString(((Double)m_allTheRules[2].
 					elementAt(i)).doubleValue(),2)+")");
@@ -701,9 +701,8 @@ public class Apriori extends Associator implements OptionHandler {
       +"premise and consequence were independent of each other. The total "
       +"number of examples that this represents is presented in brackets "
       +"following the leverage. Conviction is "
-      +"another measure of departure from independence and furthermore takes into "
-      +"account implicaton. Conviction is given "
-      +"by P(premise)P(!consequence) / P(premise, !consequence).";
+      +"another measure of departure from independence. Conviction is given "
+      +"by ";
   }
 
   /**
@@ -873,20 +872,20 @@ public class Apriori extends Associator implements OptionHandler {
     necSupport = (int)(m_minSupport * (double)instances.numInstances()+0.5);
     necMaxSupport = (int)(m_upperBoundMinSupport * (double)instances.numInstances()+0.5);
    
-    kSets = ItemSet.singletons(instances);
-    ItemSet.upDateCounters(kSets, instances);
-    kSets = ItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+    kSets = AprioriItemSet.singletons(instances);
+    AprioriItemSet.upDateCounters(kSets, instances);
+    kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
     if (kSets.size() == 0)
       return;
     do {
       m_Ls.addElement(kSets);
       kMinusOneSets = kSets;
-      kSets = ItemSet.mergeAllItemSets(kMinusOneSets, i, instances.numInstances());
-      hashtable = ItemSet.getHashtable(kMinusOneSets, kMinusOneSets.size());
+      kSets = AprioriItemSet.mergeAllItemSets(kMinusOneSets, i, instances.numInstances());
+      hashtable = AprioriItemSet.getHashtable(kMinusOneSets, kMinusOneSets.size());
       m_hashtables.addElement(hashtable);
-      kSets = ItemSet.pruneItemSets(kSets, hashtable);
-      ItemSet.upDateCounters(kSets, instances);
-      kSets = ItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+      kSets = AprioriItemSet.pruneItemSets(kSets, hashtable);
+      AprioriItemSet.upDateCounters(kSets, instances);
+      kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
       i++;
     } while (kSets.size() > 0);
   }  
@@ -905,9 +904,9 @@ public class Apriori extends Associator implements OptionHandler {
       FastVector currentItemSets = (FastVector)m_Ls.elementAt(j);
       Enumeration enumItemSets = currentItemSets.elements();
       while (enumItemSets.hasMoreElements()) {
-	ItemSet currentItemSet = (ItemSet)enumItemSets.nextElement();
-	rules=currentItemSet.
-	  generateRulesBruteForce(m_minMetric,m_metricType,
+	AprioriItemSet currentItemSet = (AprioriItemSet)enumItemSets.nextElement();
+        //AprioriItemSet currentItemSet = new AprioriItemSet((ItemSet)enumItemSets.nextElement());
+	rules=currentItemSet.generateRulesBruteForce(m_minMetric,m_metricType,
 				  m_hashtables,j+1,
 				  m_instances.numInstances(),
 				  m_significanceLevel);
@@ -938,7 +937,8 @@ public class Apriori extends Associator implements OptionHandler {
       FastVector currentItemSets = (FastVector)m_Ls.elementAt(j);
       Enumeration enumItemSets = currentItemSets.elements();
       while (enumItemSets.hasMoreElements()) {
-	ItemSet currentItemSet = (ItemSet)enumItemSets.nextElement();
+	AprioriItemSet currentItemSet = (AprioriItemSet)enumItemSets.nextElement();
+        //AprioriItemSet currentItemSet = new AprioriItemSet((ItemSet)enumItemSets.nextElement());
 	rules = currentItemSet.generateRules(m_minMetric, m_hashtables, j + 1);
 	for (int k = 0; k < rules[0].size(); k++) {
 	  m_allTheRules[0].addElement(rules[0].elementAt(k));
