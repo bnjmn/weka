@@ -49,9 +49,153 @@ import  weka.core.*;
  * be performed if the test file is missing.
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.3 $
+ * @version  $Revision: 1.4 $
  */
 public class ClusterEvaluation {
+
+  /** the instances to cluster */
+  private Instances m_trainInstances;
+  
+  /** the clusterer */
+  private Clusterer m_Clusterer;
+
+  /** do cross validation (DistributionClusterers only) */
+  private boolean m_doXval;
+
+  /** the number of folds to use for cross validation */
+  private int m_numFolds;
+
+  /** seed to use for cross validation */
+  private int m_seed;
+
+  /** holds a string describing the results of clustering the training data */
+  private StringBuffer m_clusteringResults;
+
+  /** holds the assigments of instances to clusters for a particular testing
+      dataset */
+  private int [] m_clusterAssignments;
+
+  /**
+   * set the clusterer
+   * @param clusterer the clusterer to use
+   */
+  public void setClusterer(Clusterer clusterer) {
+    m_Clusterer = clusterer;
+  }
+
+  /**
+   * set whether or not to do cross validation
+   * @param x true if cross validation is to be done
+   */
+  public void setDoXval(boolean x) {
+    m_doXval = x;
+  }
+
+  /**
+   * set the number of folds to use for cross validation
+   * @param folds the number of folds
+   */
+  public void setFolds(int folds) {
+    m_numFolds = folds;
+  }
+
+  /**
+   * set the seed to use for cross validation
+   * @param s the seed.
+   */
+  public void setSeed(int s) {
+    m_seed = s;
+  }
+
+  /**
+   * return the results of clustering.
+   * @return a string detailing the results of clustering a data set
+   */
+  public String clusterResultsToString() {
+    return m_clusteringResults.toString();
+  }
+
+  /**
+   * Constructor. Sets defaults for each member variable. Default Clusterer
+   * is EM.
+   */
+  public ClusterEvaluation () {
+    setFolds(10);
+    setDoXval(false);
+    setSeed(1);
+    setClusterer(new EM());
+    m_trainInstances = null;
+    m_clusteringResults = new StringBuffer();
+    m_clusterAssignments = null;
+  }
+
+  /**
+   * Evaluate the clusterer on a set of instances. Calculates clustering
+   * statistics and stores cluster assigments for the instances in
+   * m_clusterAssignments
+   * @param test the set of instances to cluster
+   */
+  public void evaluateClusterer(Instances test) throws Exception {
+    int i = 0;
+    int cnum;
+    double loglk = 0.0;
+    double[] dist;
+    double temp;
+    int cc = m_Clusterer.numberOfClusters();
+    int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
+    int numInstFieldWidth = (int)((Math.log(test.numInstances())/
+				   Math.log(10))+1);
+    double[] instanceStats = new double[cc];
+    m_clusterAssignments = new int [test.numInstances()];
+
+    for (i=0;i<test.numInstances();i++) {
+      try {
+	if (m_Clusterer instanceof DistributionClusterer) {
+	  dist = ((DistributionClusterer)m_Clusterer).
+	    distributionForInstance(test.instance(i));
+	  temp = Utils.sum(dist);
+	  
+	  if (temp > 0) {
+	    loglk += Math.log(temp);
+	  }
+	  Utils.normalize(dist);
+	  cnum = Utils.maxIndex(dist);
+	  m_clusterAssignments[i] = cnum;
+	} else {
+	  cnum = m_Clusterer.clusterInstance(test.instance(i));
+	  m_clusterAssignments[i] = cnum;
+	}
+      }
+      catch (Exception e) {
+	throw  new Exception('\n' + "Unable to cluster instance\n" 
+			       + e.getMessage());
+      }
+      
+      instanceStats[cnum]++;
+    }
+
+    double sum = Utils.sum(instanceStats);
+    loglk /= sum;
+    m_clusteringResults.append("Cluster Instances\n");
+    
+    for (i = 0; i < cc; i++) {
+      m_clusteringResults.append(Utils.doubleToString((double)i, 
+						      clustFieldWidth, 0) 
+				 + "      " 
+				 + Utils.doubleToString(instanceStats[i],
+							numInstFieldWidth, 0) 
+				 + " (" 
+				 + Utils.doubleToString((instanceStats[i] / 
+							 sum * 100.0)
+							, 3, 0) + "%)\n");
+    }
+    
+    if (m_Clusterer instanceof DistributionClusterer) {
+      m_clusteringResults.append("\nLog likelihood: " 
+				 + Utils.doubleToString(loglk, 1, 5) 
+				 + "\n");
+    }
+  }
 
   /**
    * Evaluates a clusterer with the options given in an array of
@@ -370,14 +514,18 @@ public class ClusterEvaluation {
 	i++;
       }
 
+      int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
+      int numInstFieldWidth = (int)((Math.log(i)/Math.log(10))+1);
       double sum = Utils.sum(instanceStats);
       loglk /= sum;
       text.append("Cluster Instances\n");
 
       for (i = 0; i < cc; i++) {
-	text.append(Utils.doubleToString((double)i, 8, 0) 
-		    + " " 
-		    + Utils.doubleToString(instanceStats[i], 9, 0) 
+	text.append(Utils.doubleToString((double)i, 
+					 clustFieldWidth, 0) 
+		    + "      " 
+		    + Utils.doubleToString(instanceStats[i], 
+					   numInstFieldWidth, 0) 
 		    + " (" 
 		    + Utils.doubleToString((instanceStats[i]/sum*100.0)
 					   , 3, 0) + "%)\n");
