@@ -36,10 +36,29 @@ import java.util.Vector;
 import weka.core.Option;
 
 /**
- * Calculates T-Test statistics on data stored in a set of instances.
+ * Calculates T-Test statistics on data stored in a set of instances.<p>
+ *
+ * Valid options from the command-line are:<p>
+ *
+ * -D num <br>
+ * The column number containing the dataset name.
+ * (default last) <p>
+ *
+ * -R num <br>
+ * The column number containing the run number.
+ * (default last) <p>
+ *
+ * -S num <br>
+ * The significance level for T-Tests.
+ * (default 0.05) <p>
+ *
+ * -R num,num2... <br>
+ * The column numbers that uniquely specify one result generator (eg:
+ * scheme name plus options).
+ * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -48,10 +67,14 @@ public class PairedTTester implements OptionHandler {
 
   /** The index of the column containing the run number */
   protected int m_RunColumn = 0;
+
+  /** The option setting for the run number column (-1 means last) */
   protected int m_RunColumnSet = -1;
 
   /** The index of the column containing the dataset names */
   protected int m_DatasetColumn = 0;
+
+  /** The option setting for the dataset name column (-1 means last) */
   protected int m_DatasetColumnSet = -1;
 
   /** The significance level for comparisons */
@@ -603,8 +626,9 @@ public class PairedTTester implements OptionHandler {
   }
 
   /**
+   * Lists options understood by this object.
    *
-   * @return <description>
+   * @return an enumeration of Options.
    */
   public Enumeration listOptions() {
     
@@ -629,6 +653,24 @@ public class PairedTTester implements OptionHandler {
   }
 
   /**
+   * Parses a given list of options. Valid options are:<p>
+   *
+   * -D num <br>
+   * The column number containing the dataset name.
+   * (default last) <p>
+   *
+   * -R num <br>
+   * The column number containing the run number.
+   * (default last) <p>
+   *
+   * -S num <br>
+   * The significance level for T-Tests.
+   * (default 0.05) <p>
+   *
+   * -R num,num2... <br>
+   * The column numbers that uniquely specify one result generator (eg:
+   * scheme name plus options).
+   * (default last) <p>
    *
    * @param options an array containing options to set.
    * @exception Exception if invalid options are given
@@ -677,8 +719,9 @@ public class PairedTTester implements OptionHandler {
   }
   
   /**
+   * Gets current settings of the PairedTTester.
    *
-   * @return <description>
+   * @return an array of strings containing current options.
    */
   public String[] getOptions() {
 

@@ -24,9 +24,8 @@ import weka.core.Utils;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision $
+ * @version $Revision: 1.2 $
  */
-
 public class Stats {
   
   /** The number of values seen */

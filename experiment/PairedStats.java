@@ -23,10 +23,10 @@ import weka.core.Utils;
 import weka.core.Statistics;
 
 /**
- * A class for storing stats on a paired t-test comparison
+ * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision $
+ * @version $Revision: 1.2 $
  */
 public class PairedStats {
   
@@ -193,6 +193,12 @@ public class PairedStats {
       + Utils.doubleToString(correlation,4) + "\n";
   }
 
+  /**
+   * Tests the paired stats object from the command line.
+   * reads line from stdin, expecting two values per line.
+   *
+   * @param args ignored.
+   */
   public static void main(String [] args) {
 
     try {
