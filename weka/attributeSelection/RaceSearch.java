@@ -67,7 +67,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -1511,9 +1511,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 		if (!eliminated[k]) {
 		  testers[j][k].calculateDerived();
 		  // near identical ?
-		  if (Utils.eq(testers[j][k].differencesStats.mean, 0.0) ||
+		  if ((testers[j][k].differencesSignificance == 0) && 
+		      (Utils.eq(testers[j][k].differencesStats.mean, 0.0) ||
 		      (Utils.gr(m_delta, Math.abs(testers[j][k].
-						  differencesStats.mean)))) {
+						  differencesStats.mean))))) {
 		    // if they're exactly the same and there is a base set
 		    // in this race, make sure that the base set is NOT the
 		    // one eliminated.
