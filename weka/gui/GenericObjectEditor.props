@@ -222,7 +222,9 @@ weka.clusterers.Clusterer=\
  weka.clusterers.SimpleKMeans, \
  weka.clusterers.Cobweb, \
  weka.clusterers.FarthestFirst, \
- weka.clusterers.MakeDensityBasedClusterer
+ weka.clusterers.MakeDensityBasedClusterer, \
+ weka.clusterers.DBScan, \
+ weka.clusterers.OPTICS
 
 # Lists the DensityBasedClusterers I want to choose from
 weka.clusterers.DensityBasedClusterer=\
