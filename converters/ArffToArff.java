@@ -14,7 +14,7 @@ import weka.core.Instances;
  * Reads a text file that is in arff format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Converter
  * @see Serializable
  */
@@ -42,7 +42,7 @@ public class ArffToArff implements Converter, Serializable {
   /**
    * The reader for the source file.
    */
-  private Reader m_sourceReader = null;
+  private transient Reader m_sourceReader = null;
 
   /**
    * Resets the converter ready to read a new data set
