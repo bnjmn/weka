@@ -42,11 +42,11 @@ import weka.core.*;
  *
  * -N <num> <br>
  * The number of dimensions (attributes) the data should
- * be reduced to (exclusive of the class attribute). <p>
+ * be reduced to (exclusive of the class attribute, if it is set). <p>
  *
  * -P <percent> <br>
  * The percentage of dimensions (attributes) the data should
- * be reduced to  (exclusive of the class attribute). This 
+ * be reduced to  (exclusive of the class attribute, if it is set). This 
  * -N option is ignored if this option is present or is greater 
  * than zero.<p>
  *
@@ -132,7 +132,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 
     newVector.addElement(new Option(
 	      "\tThe number of dimensions (attributes) the data should be reduced to\n"
-             +"\t(exclusive of the class attribute).",
+             +"\t(exclusive of the class attribute, if it is set).",
 	      "N", 1, "-N <number>"));
 
     newVector.addElement(new Option(
@@ -149,7 +149,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 
     newVector.addElement(new Option(
 	      "\tThe percentage of dimensions (attributes) the data should\n"
-	     +"\tbe reduced to  (inclusive of the class attribute). This -N\n"
+	     +"\tbe reduced to (exclusive of the class attribute, if it is set). This -N\n"
 	     +"\toption is ignored if this option is present or is greater\n"
 	     +"\tthan zero.",
 	      "P", 1, "-P <percent>"));
