@@ -64,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Summarizable {
@@ -458,7 +458,7 @@ public class CVParameterSelection extends Classifier
 
     int current = 0;
     String [] options = new String [classifierOptions.length + 8];
-    if (m_CVParams != null) {
+    if (m_CVParams.size() > 0) {
       options = new String [m_CVParams.size() * 2 + options.length];
       for (int i = 0; i < m_CVParams.size(); i++) {
 	options[current++] = "-P"; options[current++] = "" + getCVParameter(i);
@@ -507,7 +507,7 @@ public class CVParameterSelection extends Classifier
     }
 
     // Check whether there are any parameters to optimize
-    if (m_CVParams == null) {
+    if (m_CVParams.size() == 0) {
        m_Classifier.buildClassifier(trainData);
        return;
     }
