@@ -28,7 +28,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CopyAttributesFilter extends Filter implements OptionHandler {
 
@@ -40,6 +40,12 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
    * dataset is seen
    */
   protected int [] m_SelectedAttributes;
+
+  /** 
+   * Contains an index of string attributes in the input format
+   * that survive the filtering process -- some entries may be duplicated 
+   */
+  protected int [] m_InputStringIndex;
 
   /**
    * Returns an enumeration describing the available options
@@ -125,10 +131,12 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
     super.inputFormat(instanceInfo);
     
     m_CopyCols.setUpper(instanceInfo.numAttributes() - 1);
+
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
-
     m_SelectedAttributes = m_CopyCols.getSelection();
+    int inStrCopiedLen = 0;
+    int [] inStrCopied = new int[m_SelectedAttributes.length];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       // Create a copy of the attribute with a different name
@@ -137,7 +145,15 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
 				     outputFormat.numAttributes());
       outputFormat.renameAttribute(outputFormat.numAttributes() - 1,
 				   "Copy of " + origAttribute.name());
+      if (origAttribute.type() == Attribute.STRING) {
+        inStrCopied[inStrCopiedLen++] = current;
+      }
     }
+    int [] origIndex = getInputStringIndex(); 
+    m_InputStringIndex = new int [origIndex.length + inStrCopiedLen];
+    System.arraycopy(origIndex, 0, m_InputStringIndex, 0, origIndex.length);
+    System.arraycopy(inStrCopied, 0, m_InputStringIndex, origIndex.length, 
+                     inStrCopiedLen);
     setOutputFormat(outputFormat);
     return true;
   }
@@ -173,11 +189,16 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
       int current = m_SelectedAttributes[i];
       vals[i + j] = instance.value(current);
     }
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), vals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), vals));
+      inst = new Instance(instance.weight(), vals);
     }
+    copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
+                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    push(inst);
     return true;
   }
 

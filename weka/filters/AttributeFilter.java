@@ -24,7 +24,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -36,7 +36,13 @@ public class AttributeFilter extends Filter implements OptionHandler {
    * dataset is seen
    */
   protected int [] m_SelectedAttributes;
-  
+
+  /** 
+   * Contains an index of string attributes in the input format
+   * that will survive the filtering process 
+   */
+  protected int [] m_InputStringIndex;
+
   /**
    * Returns an enumeration describing the available options
    *
@@ -126,13 +132,21 @@ public class AttributeFilter extends Filter implements OptionHandler {
     FastVector attributes = new FastVector();
     int outputClass = -1;
     m_SelectedAttributes = m_SelectCols.getSelection();
+    int inStrKeepLen = 0;
+    int [] inStrKeep = new int[m_SelectedAttributes.length];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       if (instanceInfo.classIndex() == current) {
 	outputClass = attributes.size();
       }
-      attributes.addElement(instanceInfo.attribute(current).copy());
+      Attribute keep = (Attribute)instanceInfo.attribute(current).copy();
+      if (keep.type() == Attribute.STRING) {
+        inStrKeep[inStrKeepLen++] = current;
+      }
+      attributes.addElement(keep);
     }
+    m_InputStringIndex = new int [inStrKeepLen];
+    System.arraycopy(inStrKeep, 0, m_InputStringIndex, 0, inStrKeepLen);
     Instances outputFormat = new Instances(instanceInfo.relationName(),
 					   attributes, 0); 
     outputFormat.setClassIndex(outputClass);
@@ -162,16 +176,21 @@ public class AttributeFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
 
-    double [] newVals = new double[outputFormatPeek().numAttributes()];
+    double [] vals = new double[getOutputFormat().numAttributes()];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
-      newVals[i] = instance.value(current);
+      vals[i] = instance.value(current);
     }
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), newVals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), newVals));
+      inst = new Instance(instance.weight(), vals);
     }
+    copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
+                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    push(inst);
     return true;
   }
 

@@ -29,7 +29,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -200,6 +200,13 @@ public class AddFilter extends Filter implements OptionHandler {
     }
 
     Instance inst = (Instance)instance.copy();
+
+    // First copy string values from input to output
+    // Will break if the attribute being created is of type STRING (currently
+    // AddFilter only adds NOMINAL or NUMERIC types)
+    copyStringValues(inst, true, inst.dataset(), getOutputFormat());
+
+    // Insert the new attribute and reassign to output
     inst.setDataset(null);
     inst.insertAttributeAt(m_Insert);
     inst.setDataset(outputFormat());

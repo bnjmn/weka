@@ -25,7 +25,7 @@ import weka.attributeSelection.*;
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
@@ -246,7 +246,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
 
-    if (outputFormatPeek() != null) {
+    if (isOutputFormatDefined()) {
       convertInstance(instance);
       return true;
     }
@@ -269,7 +269,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       throw new Exception("No input instance format defined");
     }
 
-    if (outputFormatPeek() == null) {
+    if (!isOutputFormatDefined()) {
       m_trainSelector.setEvaluator(m_ASEvaluator);
       m_trainSelector.setSearch(m_ASSearch);
       m_trainSelector.SelectAttributes(getInputFormat());
@@ -341,7 +341,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
   protected void convertInstance(Instance instance) throws Exception {
     int index = 0;
     Instance newInstance;
-    double[] newVals = new double[outputFormatPeek().numAttributes()];
+    double[] newVals = new double[getOutputFormat().numAttributes()];
 
     if (m_ASEvaluator instanceof AttributeTransformer) {
       Instance tempInstance = ((AttributeTransformer)m_ASEvaluator).

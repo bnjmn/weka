@@ -7,9 +7,17 @@
 
 package weka.filters;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Vector;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 
 /** 
  * This instance filter takes a range of N numeric attributes and replaces
@@ -34,7 +42,7 @@ import weka.core.*;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class FirstOrderFilter extends Filter implements OptionHandler {
 
@@ -121,37 +129,37 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
     super.inputFormat(instanceInfo);
 
     m_DeltaCols.setUpper(getInputFormat().numAttributes() - 1);
-
+    int selectedCount = 0;
     for (int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
-      if (m_DeltaCols.isInRange(i) 
-	  && (getInputFormat().attribute(i).type() != Attribute.NUMERIC)) {
-	throw new Exception("Selected attributes must be all numeric");
+      if (m_DeltaCols.isInRange(i)) {
+        selectedCount++;
+        if (getInputFormat().attribute(i).type() != Attribute.NUMERIC) {
+          throw new Exception("Selected attributes must be all numeric");
+        }
       }
+    }
+    if (selectedCount == 1) {
+      throw new Exception("Cannot select only one attribute.");
     }
 
     // Create the output buffer
-    Instances outputFormat = new Instances(instanceInfo, 0); 
-
+    FastVector newAtts = new FastVector();
     boolean inRange = false;
-    for (int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
+    String foName = null;
+    for(int i = 0; i < instanceInfo.numAttributes(); i++) {
       if (m_DeltaCols.isInRange(i)) {
-	// If they want the class column modified, unassign it
-	if (i == outputFormat.classIndex()) {
-	  outputFormat.setClassIndex(-1);
-	}
-	
-	String foName = outputFormat.attribute(i).name();
-	foName = "'FO " + foName.replace('\'', ' ').trim() + '\'';
-	outputFormat.deleteAttributeAt(i);
-	// Create the new attribute
 	if (inRange) {
 	  Attribute newAttrib = new Attribute(foName);
-	  outputFormat.insertAttributeAt(newAttrib, i);
+          newAtts.addElement(newAttrib);
 	}
-	inRange = true;
-      }
+        foName = instanceInfo.attribute(i).name();
+        foName = "'FO " + foName.replace('\'', ' ').trim() + '\'';
+        inRange = true;
+      } else {
+	newAtts.addElement((Attribute)instanceInfo.attribute(i).copy());
+      }      
     }
-    setOutputFormat(outputFormat);
+    setOutputFormat(new Instances(instanceInfo.relationName(), newAtts, 0));
     return true;
   }
   
@@ -198,11 +206,17 @@ public class FirstOrderFilter extends Filter implements OptionHandler {
 	vals[j++] = instance.value(i);
       }
     }
+
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), vals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), vals));
+      inst = new Instance(instance.weight(), vals);
     }
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    push(inst);
     return true;
   }
 

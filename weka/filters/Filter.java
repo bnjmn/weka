@@ -52,9 +52,19 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public abstract class Filter implements Serializable {
+
+  /*
+   * Filter refactoring TODO:
+   *
+   * - Update all filters to use getOutputFormat and setInputFormat
+   * instead of outputFormat, outputFormatPeek and inputFormat.
+   * - Update users of filters to use getOutputFormat and setInputFormat
+   * - remove outputFormat, outputFormatPeek and inputFormat
+   *
+   */
 
   /** Debugging mode */
   private boolean m_Debug = false;
@@ -137,7 +147,8 @@ public abstract class Filter implements Serializable {
   protected void push(Instance instance) {
 
     if (instance != null) {
-      reassignWithStrings(instance, m_OutputFormat, m_OutputStringAtts);
+      copyStringValues(instance, m_OutputFormat, m_OutputStringAtts);
+      instance.setDataset(m_OutputFormat);
       m_OutputQueue.push(instance);
     }
   }
@@ -151,76 +162,6 @@ public abstract class Filter implements Serializable {
   }
 
   /**
-   * Sets the format of the input instances. If the filter is able to
-   * determine the output format before seeing any input instances, it
-   * does so here. This default implementation clears the output format
-   * and output queue, and the new batch flag is set. Overriders should
-   * call super.inputFormat()
-   *
-   * @param instanceInfo an Instances object containing the input instance
-   * structure (any instances contained in the object are ignored - only the
-   * structure is required).
-   * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the inputFormat can't be set successfully 
-   */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
-
-    m_InputFormat = instanceInfo.stringFreeStructure();
-    m_InputStringAtts = getStringIndices(instanceInfo);
-    m_OutputFormat = null;
-    m_OutputQueue = new Queue();
-    m_NewBatch = true;
-    return false;
-  }
-
-  /**
-   * Gets the format of the output instances. This should only be called
-   * after input() or batchFinished() has returned true. The relation
-   * name of the output instances should be changed to reflect the
-   * action of the filter (eg: add the filter name and options).
-   *
-   * @return an Instances object containing the output instance
-   * structure only.
-   * @exception Exception if no input structure has been defined (or the 
-   * output format hasn't been determined yet)
-   */
-  public final Instances outputFormat() throws Exception {
-
-    if (m_OutputFormat == null) {
-      throw new Exception("No output format defined.");
-    }
-    return m_OutputFormat;
-  }
-  
-  /**
-   * Input an instance for filtering. Ordinarily the instance is
-   * processed and made available for output immediately. Some filters
-   * require all instances be read before producing output, in which
-   * case output instances should be collected after calling
-   * batchFinished(). If the input marks the start of a new batch, the
-   * output queue is cleared. This default implementation assumes all
-   * instance conversion will occur when batchFinished() is called.
-   *
-   * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
-   * @exception Exception if the input instance was not of the correct 
-   * format or if there was a problem with the filtering.  
-   */
-  public boolean input(Instance instance) throws Exception {
-
-    if (m_InputFormat == null) {
-      throw new Exception("No input instance format defined");
-    }
-    if (m_NewBatch) {
-      m_OutputQueue = new Queue();
-      m_NewBatch = false;
-    }
-    bufferInput(instance);
-    return false;
-  }
-
-  /**
    * Adds the supplied input instance to the inputformat dataset for
    * later processing.  Use this method rather than
    * getInputFormat().add(instance). Or else.
@@ -230,36 +171,134 @@ public abstract class Filter implements Serializable {
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      reassignWithStrings(instance, m_InputFormat, m_InputStringAtts);
+      copyStringValues(instance, m_InputFormat, m_InputStringAtts);
+      instance.setDataset(m_InputFormat);
       m_InputFormat.add(instance);
     }
   }
 
   /**
-   * Assigns a new dataset to an instance, ensuring that any string values
-   * contained in the instance are copied to the new dataset if need be. The
-   * Instance must already be assigned to a dataset. This dataset and the
-   * destination dataset must have the same structure.
+   * Returns an array containing the indices of all string attributes in the
+   * input format. This index is created during setInputFormat()
    *
-   * @param instance the Instance to reassign.
-   * @param destDataset the destination set of Instances
-   * @param stringAtts an array containing the indices of any string attributes
-   * in the dataset.
+   * @return an array containing the indices of string attributes in the 
+   * input dataset.
    */
-  private void reassignWithStrings(Instance instance, Instances destDataset, 
-                                   int []stringAtts) {
+  protected int [] getInputStringIndex() {
 
-    Instances origDataset = instance.dataset();
-    for (int i = 0; i < stringAtts.length; i++) {
-      int attIndex = stringAtts[i];
-      Attribute dest = destDataset.attribute(attIndex);
-      Attribute src = origDataset.attribute(attIndex);
-      if (!instance.isMissing(attIndex)) {
-        int valIndex = dest.addStringValue(src, (int)instance.value(attIndex));
-        instance.setValue(attIndex, (double)valIndex);
+    return m_InputStringAtts;
+  }
+
+  /**
+   * Returns an array containing the indices of all string attributes in the
+   * output format. This index is created during setOutputFormat()
+   *
+   * @return an array containing the indices of string attributes in the 
+   * output dataset.
+   */
+  protected int [] getOutputStringIndex() {
+
+    return m_OutputStringAtts;
+  }
+
+  /**
+   * Copies string values contained in the instance copied to a new
+   * dataset. The Instance must already be assigned to a dataset. This
+   * dataset and the destination dataset must have the same structure.
+   *
+   * @param instance the Instance containing the string values to copy.
+   * @param destDataset the destination set of Instances
+   * @param strAtts an array containing the indices of any string attributes
+   * in the dataset.  
+   */
+  private void copyStringValues(Instance inst, Instances destDataset, 
+                                int []strAtts) {
+
+    if (strAtts.length == 0) {
+      return;
+    }
+    if (inst.dataset() == null) {
+      throw new IllegalArgumentException("Instance has no dataset assigned!!");
+    } else if (inst.dataset().numAttributes() != destDataset.numAttributes()) {
+      throw new IllegalArgumentException("Src and Dest differ in # of attributes!!");
+    } 
+    copyStringValues(inst, true, inst.dataset(), strAtts,
+                     destDataset, strAtts);
+  }
+
+  /**
+   * Takes string values referenced by an Instance and copies them from a
+   * source dataset to a destination dataset. The instance references are
+   * updated to be valid for the destination dataset. The instance may have the 
+   * structure (i.e. number and attribute position) of either dataset (this
+   * affects where references are obtained from). The source dataset must
+   * have the same structure as the filter input format and the destination
+   * must have the same structure as the filter output format.
+   *
+   * @param instance the instance containing references to strings in the source
+   * dataset that will have references updated to be valid for the destination
+   * dataset.
+   * @param instSrcCompat true if the instance structure is the same as the
+   * source, or false if it is the same as the destination
+   * @param srcDataset the dataset for which the current instance string
+   * references are valid (after any position mapping if needed)
+   * @param destDataset the dataset for which the current instance string
+   * references need to be inserted (after any position mapping if needed)
+   */
+  protected void copyStringValues(Instance instance, boolean instSrcCompat,
+                                  Instances srcDataset, Instances destDataset) {
+
+    copyStringValues(instance, instSrcCompat, srcDataset, m_InputStringAtts,
+                     destDataset, m_OutputStringAtts);
+  }
+
+  /**
+   * Takes string values referenced by an Instance and copies them from a
+   * source dataset to a destination dataset. The instance references are
+   * updated to be valid for the destination dataset. The instance may have the 
+   * structure (i.e. number and attribute position) of either dataset (this
+   * affects where references are obtained from). Only works if the number
+   * of string attributes is the same in both indices (implicitly these string
+   * attributes should be semantically same but just with shifted positions).
+   *
+   * @param instance the instance containing references to strings in the source
+   * dataset that will have references updated to be valid for the destination
+   * dataset.
+   * @param instSrcCompat true if the instance structure is the same as the
+   * source, or false if it is the same as the destination (i.e. which of the
+   * string attribute indices contains the correct locations for this instance).
+   * @param srcDataset the dataset for which the current instance string
+   * references are valid (after any position mapping if needed)
+   * @param srcStrAtts an array containing the indices of string attributes
+   * in the source datset.
+   * @param destDataset the dataset for which the current instance string
+   * references need to be inserted (after any position mapping if needed)
+   * @param destStrAtts an array containing the indices of string attributes
+   * in the destination datset.
+   */
+  protected void copyStringValues(Instance instance, boolean instSrcCompat,
+                                  Instances srcDataset, int []srcStrAtts,
+                                  Instances destDataset, int []destStrAtts) {
+    if (srcDataset == destDataset) {
+      return;
+    }
+    if (srcStrAtts.length != destStrAtts.length) {
+      throw new IllegalArgumentException("Src and Dest string indices differ in length!!");
+    }
+    for (int i = 0; i < srcStrAtts.length; i++) {
+      int instIndex = instSrcCompat ? srcStrAtts[i] : destStrAtts[i];
+      Attribute src = srcDataset.attribute(srcStrAtts[i]);
+      Attribute dest = destDataset.attribute(destStrAtts[i]);
+      if (!instance.isMissing(instIndex)) {
+        //System.err.println(instance.value(srcIndex) 
+        //                   + " " + src.numValues()
+        //                   + " " + dest.numValues());
+        int valIndex = dest.addStringValue(src, (int)instance.value(instIndex));
+        // setValue here shouldn't be too slow here unless your dataset has
+        // squillions of string attributes
+        instance.setValue(instIndex, (double)valIndex);
       }
     }
-    instance.setDataset(destDataset);
   }
 
   /**
@@ -277,6 +316,94 @@ public abstract class Filter implements Serializable {
   }
 
   /**
+   * @deprecated use <code>setInputFormat(Instances)</code> instead.
+   */
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
+
+    m_InputFormat = instanceInfo.stringFreeStructure();
+    m_InputStringAtts = getStringIndices(instanceInfo);
+    m_OutputFormat = null;
+    m_OutputQueue = new Queue();
+    m_NewBatch = true;
+    return false;
+  }
+
+  /**
+   * Sets the format of the input instances. If the filter is able to
+   * determine the output format before seeing any input instances, it
+   * does so here. This default implementation clears the output format
+   * and output queue, and the new batch flag is set. Overriders should
+   * call <code>super.setInputFormat(Instances)</code>
+   *
+   * @param instanceInfo an Instances object containing the input instance
+   * structure (any instances contained in the object are ignored - only the
+   * structure is required).
+   * @return true if the outputFormat may be collected immediately
+   * @exception Exception if the inputFormat can't be set successfully 
+   */
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
+
+    return inputFormat(instanceInfo);
+  }
+
+  /**
+   * @deprecated use <code>getOutputFormat()</code> instead.
+   */
+  public final Instances outputFormat() {
+
+    if (m_OutputFormat == null) {
+      throw new NullPointerException("No output format defined.");
+    }
+    return m_OutputFormat;
+  }
+
+  /**
+   * Gets the format of the output instances. This should only be called
+   * after input() or batchFinished() has returned true. The relation
+   * name of the output instances should be changed to reflect the
+   * action of the filter (eg: add the filter name and options).
+   *
+   * @return an Instances object containing the output instance
+   * structure only.
+   * @exception NullPointerException if no input structure has been
+   * defined (or the output format hasn't been determined yet) 
+   */
+  public final Instances getOutputFormat() {
+
+    return outputFormat();
+  }
+
+  /**
+   * Input an instance for filtering. Ordinarily the instance is
+   * processed and made available for output immediately. Some filters
+   * require all instances be read before producing output, in which
+   * case output instances should be collected after calling
+   * batchFinished(). If the input marks the start of a new batch, the
+   * output queue is cleared. This default implementation assumes all
+   * instance conversion will occur when batchFinished() is called.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @exception NullPointerException if the input format has not been
+   * defined.
+   * @exception Exception if the input instance was not of the correct 
+   * format or if there was a problem with the filtering.  
+   */
+  public boolean input(Instance instance) throws Exception {
+
+    if (m_InputFormat == null) {
+      throw new NullPointerException("No input instance format defined");
+    }
+    if (m_NewBatch) {
+      m_OutputQueue = new Queue();
+      m_NewBatch = false;
+    }
+    bufferInput(instance);
+    return false;
+  }
+
+  /**
    * Signify that this batch of input to the filter is finished. If
    * the filter requires all instances prior to filtering, output()
    * may now be called to retrieve the filtered instances. Any
@@ -287,12 +414,13 @@ public abstract class Filter implements Serializable {
    * inputFormat() and input().
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined 
+   * @exception NullPointerException if no input structure has been defined,
+   * @exception Exception if there was a problem finishing the batch.
    */
   public boolean batchFinished() throws Exception {
 
     if (m_InputFormat == null) {
-      throw new Exception("No input instance format defined");
+      throw new NullPointerException("No input instance format defined");
     }
     flushInput();
     m_NewBatch = true;
@@ -305,12 +433,12 @@ public abstract class Filter implements Serializable {
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @exception Exception if no input structure has been defined
+   * @exception NullPointerException if no output structure has been defined
    */
-  public Instance output() throws Exception {
+  public Instance output() {
 
     if (m_OutputFormat == null) {
-      throw new Exception("No output instance format defined");
+      throw new NullPointerException("No output instance format defined");
     }
     if (m_OutputQueue.empty()) {
       return null;
@@ -335,12 +463,12 @@ public abstract class Filter implements Serializable {
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @exception Exception if no input structure has been defined 
+   * @exception NullPointerException if no input structure has been defined 
    */
-  public Instance outputPeek() throws Exception {
+  public Instance outputPeek() {
 
     if (m_OutputFormat == null) {
-      throw new Exception("No output instance format defined");
+      throw new NullPointerException("No output instance format defined");
     }
     if (m_OutputQueue.empty()) {
       return null;
@@ -353,12 +481,12 @@ public abstract class Filter implements Serializable {
    * Returns the number of instances pending output
    *
    * @return the number of instances  pending output
-   * @exception Exception if no input structure has been defined
+   * @exception NullPointerException if no input structure has been defined
    */
-  public int numPendingOutput() throws Exception {
+  public int numPendingOutput() {
 
     if (m_OutputFormat == null) {
-      throw new Exception("No output instance format defined");
+      throw new NullPointerException("No output instance format defined");
     }
     return m_OutputQueue.size();
   }
@@ -407,20 +535,23 @@ public abstract class Filter implements Serializable {
    */
   public static Instances useFilter(Instances data,
 				    Filter filter) throws Exception {
-
+    /*
     System.err.println(filter.getClass().getName() 
                        + " in:" + data.numInstances());
+    */
     for (int i = 0; i < data.numInstances(); i++) {
       filter.input(data.instance(i));
     }
     filter.batchFinished();
-    Instances newData = filter.outputFormat();
+    Instances newData = filter.getOutputFormat();
     Instance processed;
     while ((processed = filter.output()) != null) {
       newData.add(processed);
     }
+    /*
     System.err.println(filter.getClass().getName() 
                        + " out:" + newData.numInstances());
+    */
     return newData;
   }
 
@@ -519,11 +650,11 @@ public abstract class Filter implements Serializable {
       System.err.println("Setting input format");
     }
     boolean printedHeader = false;
-    if (filter.inputFormat(data)) {
+    if (filter.setInputFormat(data)) {
       if (debug) {
 	System.err.println("Getting output format");
       }
-      output.println(filter.outputFormat().toString());
+      output.println(filter.getOutputFormat().toString());
       printedHeader = true;
     }
     
@@ -537,7 +668,7 @@ public abstract class Filter implements Serializable {
 	  System.err.println("Filter said collect immediately");
 	}
 	if (!printedHeader) {
-	  throw new Error("Filter didn't return true from inputFormat() "
+	  throw new Error("Filter didn't return true from setInputFormat() "
 			  + "earlier!");
 	}
 	if (debug) {
@@ -560,7 +691,7 @@ public abstract class Filter implements Serializable {
 	if (debug) {
 	  System.err.println("Getting output format");
 	}
-	output.println(filter.outputFormat().toString());
+	output.println(filter.getOutputFormat().toString());
       }
       if (debug) {
 	System.err.println("Getting output instance");
@@ -694,8 +825,8 @@ public abstract class Filter implements Serializable {
 			  + filterOptions+genericOptions);
     }
     boolean printedHeader = false;
-    if (filter.inputFormat(firstData)) {
-      firstOutput.println(filter.outputFormat().toString());
+    if (filter.setInputFormat(firstData)) {
+      firstOutput.println(filter.getOutputFormat().toString());
       printedHeader = true;
     }
     
@@ -703,7 +834,7 @@ public abstract class Filter implements Serializable {
     while (firstData.readInstance(firstInput)) {
       if (filter.input(firstData.instance(0))) {
 	if (!printedHeader) {
-	  throw new Error("Filter didn't return true from inputFormat() "
+	  throw new Error("Filter didn't return true from setInputFormat() "
 			  + "earlier!");
 	}
 	firstOutput.println(filter.output().toString());
@@ -714,7 +845,7 @@ public abstract class Filter implements Serializable {
     // Say that input has finished, and print any pending output instances
     if (filter.batchFinished()) {
       if (!printedHeader) {
-	firstOutput.println(filter.outputFormat().toString());
+	firstOutput.println(filter.getOutputFormat().toString());
       }
       while (filter.numPendingOutput() > 0) {
 	firstOutput.println(filter.output().toString());
@@ -726,7 +857,7 @@ public abstract class Filter implements Serializable {
     }    
     printedHeader = false;
     if (filter.isOutputFormatDefined()) {
-      secondOutput.println(filter.outputFormat().toString());
+      secondOutput.println(filter.getOutputFormat().toString());
       printedHeader = true;
     }
     // Pass all the second instances to the filter
@@ -744,7 +875,7 @@ public abstract class Filter implements Serializable {
     // Say that input has finished, and print any pending output instances
     if (filter.batchFinished()) {
       if (!printedHeader) {
-	secondOutput.println(filter.outputFormat().toString());
+	secondOutput.println(filter.getOutputFormat().toString());
       }
       while (filter.numPendingOutput() > 0) {
 	secondOutput.println(filter.output().toString());
