@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public final class Utils {
 
@@ -393,7 +393,7 @@ public final class Utils {
       if (optionArray[i].equals("")) {
 	continue;
       }
-      if (optionArray[i].indexOf('"') != -1) {
+      if (optionArray[i].indexOf(' ') != -1) {
 	optionString += '"' + optionArray[i] + '"';
       } else {
 	optionString += optionArray[i];
