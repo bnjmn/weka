@@ -33,10 +33,9 @@ import java.util.EventObject;
  * @version 1.0 - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class LayoutCompleteEvent extends EventObject {
-
-    public LayoutCompleteEvent(Object source) {
-	super(source);
-    }
-
+  
+  public LayoutCompleteEvent(Object source) {
+    super(source);
+  }
+  
 }
-

@@ -30,49 +30,51 @@ package weka.gui.graphvisualizer;
  */
 
 public class GraphNode extends Object implements GraphConstants {
-    /** ID and label for the node */
-    String ID, lbl;
-    /** The outcomes for the given node */
-    String [] outcomes;
-    /** probability table for each outcome given outcomes of parents, if any */
-    double [][] probs;   //probabilities
-    /** The x and y position of the node */
-    int x=0, y=0; 
-    /** The indices of parent nodes */
-    int [] prnts;       //parent nodes
-    /** The indices of nodes to which there are edges from this 
-        node, plus the type of edge */
-    int [][] edges;
-    /**  Type of node. Default is Normal node type */
-    int nodeType=NORMAL;
-    
-    /**
-     *  Constructor
-     *
-     */
-    public GraphNode(String id, String label) {
-	ID = id; lbl = label; nodeType=NORMAL;
+  /** ID and label for the node */
+  String ID, lbl;
+  /** The outcomes for the given node */
+  String [] outcomes;
+  /** probability table for each outcome given outcomes of parents, if any */
+  double [][] probs;   //probabilities
+  /** The x and y position of the node */
+  int x=0, y=0;
+  /** The indices of parent nodes */
+  int [] prnts;       //parent nodes
+  /** The indices of nodes to which there are edges from this
+   * node, plus the type of edge */
+  int [][] edges;
+  /**  Type of node. Default is Normal node type */
+  int nodeType=NORMAL;
+  
+  /**
+   *  Constructor
+   *
+   */
+  public GraphNode(String id, String label) {
+    ID = id; lbl = label; nodeType=NORMAL;
+  }
+  
+  /**
+   *  Constructor
+   *
+   */
+  public GraphNode(String id, String label, int type ) {
+    ID = id; lbl = label; nodeType = type;
+  }
+  
+  /**
+   *  Returns true if passed in argument is an instance
+   *  of GraphNode and is equal to this node.
+   *  Implemented to enable the use of contains method
+   *  in Vector/FastVector class.
+   */
+  public boolean equals(Object n) {
+    if(n instanceof GraphNode && ((GraphNode) n).ID.equalsIgnoreCase(this.ID)) {
+      //System.out.println("returning true, n.ID >"+((GraphNode)n).ID+
+      //                   "< this.ID >"+this.ID+"<");
+      return true;
     }
-    
-    /**
-     *  Constructor
-     *
-     */
-    public GraphNode(String id, String label, int type ) {
-	ID = id; lbl = label; nodeType = type;
-    }
-    
-    /**
-     *  Returns true if passed in argument is an instance
-     *  of GraphNode and is equal to this node.
-     *  Implemented to enable the use of contains method
-     *  in Vector/FastVector class.
-     */
-    public boolean equals(Object n) {
-	if(n instanceof GraphNode && ((GraphNode) n).ID.equalsIgnoreCase(this.ID))
-	    { //System.out.println("returning true, n.ID >"+((GraphNode)n).ID+"< this.ID >"+this.ID+"<"); 
-		return true; }
-	else
-	    return false;
-    }
+    else
+      return false;
+  }
 } // GraphNode

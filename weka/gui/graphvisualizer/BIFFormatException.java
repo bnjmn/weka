@@ -32,9 +32,9 @@ package weka.gui.graphvisualizer;
  * @version 1.0 - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class BIFFormatException extends Exception {
- 
-    public BIFFormatException(String s) {
-	super(s);
-    }
-    
+  
+  public BIFFormatException(String s) {
+    super(s);
+  }
+  
 } // BIFFormatException
