@@ -17,18 +17,18 @@ import weka.core.*;
  * item sets are stored in lexicographic order.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ItemSet implements Serializable {
 
   /** The items stored as an array of of ints. */
-  private int[] m_items;
+  protected int[] m_items;
 
   /** Counter for how many transactions contain this item set. */
-  private int m_counter;
+  protected int m_counter;
 
   /** The total number of transactions */
-  private int m_totalTransactions;
+  protected int m_totalTransactions;
 
   /**
    * Constructor
