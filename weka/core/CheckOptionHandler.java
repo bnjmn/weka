@@ -37,7 +37,7 @@ import java.util.*;
  * OptionHandler <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CheckOptionHandler {
   
@@ -134,7 +134,7 @@ public class CheckOptionHandler {
     System.out.println("OK");
 
     System.out.println("Resetting to default options...");
-    oh.setOptions(new String[0]);
+    oh.setOptions((String [])defaultOptions.clone());
     System.out.print("Checking default options match previous default...");
     String [] defaultOptionsCheck = oh.getOptions();
     CheckOptionHandler.compareOptions(defaultOptions, defaultOptionsCheck);
