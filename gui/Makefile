@@ -51,6 +51,7 @@ all :	$(CLASSFILES)
 	(cd visualize; make all JAVAC=$(JAVAC))
 	(cd boundaryvisualizer; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make all JAVAC=$(JAVAC))
+	(cd graphvisualizer; make all JAVAC=$(JAVAC))
 	(cd beans; make all JAVAC=$(JAVAC))
 
 debug : clean
@@ -61,6 +62,7 @@ debug : clean
 	(cd visualize; make debug JAVAC=$(JAVAC))	
 	(cd boundaryvisualizer; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make debug JAVAC=$(JAVAC))
+	(cd graphvisualizer; make debug JAVAC=$(JAVAC))
 	(cd beans; make debug JAVAC=$(JAVAC))
 
 optimized : clean
@@ -71,6 +73,7 @@ optimized : clean
 	(cd visualize; make optimized JAVAC=$(JAVAC))
 	(cd boundaryvisualizer; make all JAVAC=$(JAVAC))
 	(cd treevisualizer; make optimized JAVAC=$(JAVAC))
+	(cd graphvisualizer; make optimized JAVAC=$(JAVAC))
 	(cd beans; make optimized JAVAC=$(JAVAC))
 
 fulljar : all
@@ -90,6 +93,7 @@ classjar :  all
 	$(PACKAGEDIR)/visualize/*.class \
 	$(PACKAGEDIR)/boundaryvisualizer/*.class \
 	$(PACKAGEDIR)/treevisualizer/*.class \
+	$(PACKAGEDIR)/graphvisualizer/*.class \
 	$(PACKAGEDIR)/streams/*.class; \
 	rm -f $(PACKAGE).jar; \
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
@@ -105,5 +109,6 @@ clean :
 	(cd boundaryvisualizer; make clean)
 	(cd streams; make clean)
 	(cd treevisualizer; make clean)
+	(cd graphvisualizer; make clean)
 	(cd beans; make clean)
 
