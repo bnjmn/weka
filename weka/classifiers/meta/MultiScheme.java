@@ -52,7 +52,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 
@@ -339,7 +339,10 @@ public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
       if (m_NumXValFolds > 1) {
 	evaluation = new Evaluation(newData);
 	for (int j = 0; j < m_NumXValFolds; j++) {
-	  train = newData.trainCV(m_NumXValFolds, j, random);
+
+          // We want to randomize the data the same way for every 
+          // learning scheme.
+	  train = newData.trainCV(m_NumXValFolds, j, new Random (1));
 	  test = newData.testCV(m_NumXValFolds, j);
 	  currentClassifier.buildClassifier(train);
 	  evaluation.setPriors(train);

@@ -71,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -911,7 +911,11 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 	
 	// randomly select an instance to test on
 	int testIndex = Math.abs(r.nextInt() % numInstances);
-	trainCV = data.trainCV(numInstances, testIndex, random);
+
+
+        // We want to randomize the data the same way for every 
+        // learning scheme.
+	trainCV = data.trainCV(numInstances, testIndex, new Random (1));
 	testCV = data.testCV(numInstances, testIndex);
 	testInstance = testCV.instance(0);
 	sampleCount++;
@@ -1343,7 +1347,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     int foldSize=1;
     processedCount = 0;
     race: for (int i=0;i<m_numFolds;i++) {
-      trainCV = data.trainCV(m_numFolds, i, random);
+
+      // We want to randomize the data the same way for every 
+      // learning scheme.
+      trainCV = data.trainCV(m_numFolds, i, new Random (1));
       testCV = data.testCV(m_numFolds, i);
       foldSize = testCV.numInstances();
       
