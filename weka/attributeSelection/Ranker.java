@@ -27,7 +27,7 @@ import weka.core.*;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version 1.0 March 1999 (Mark)
  */
-public class Ranker extends RankedOutputSearch {
+class Ranker extends RankedOutputSearch {
 
   private int [] starting;
 
