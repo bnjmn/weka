@@ -24,30 +24,30 @@ import weka.core.Utils;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Stats {
   
   /** The number of values seen */
-  public double count;
+  public double count = 0;
 
   /** The sum of values seen */
-  public double sum;
+  public double sum = 0;
 
   /** The sum of values squared seen */
-  public double sumSq;
+  public double sumSq = 0;
 
   /** The std deviation of values at the last calculateDerived() call */    
-  public double stdDev;
+  public double stdDev = Double.NaN;
 
   /** The mean of values at the last calculateDerived() call */    
-  public double mean;
+  public double mean = Double.NaN;
 
-  /** The minimum value seen */
-  public double min;
+  /** The minimum value seen, or Double.NaN if no values seen */
+  public double min = Double.NaN;
 
-  /** The maximum value seen */
-  public double max;
+  /** The maximum value seen, or Double.NaN if no values seen */
+  public double max = Double.NaN;
     
   /**
    * Adds a value to the observed values
@@ -70,7 +70,7 @@ public class Stats {
     sum += value * n;
     sumSq += value * value * n;
     count += n;
-    if (count == n) {
+    if (Double.isNaN(min)) {
       min = max = value;
     } else if (value < min) {
       min = value;
@@ -128,5 +128,51 @@ public class Stats {
       + "Mean    " + Utils.doubleToString(mean, 8) + '\n'
       + "StdDev  " + Utils.doubleToString(stdDev, 8) + '\n';
   }
+
+  /**
+   * Tests the paired stats object from the command line.
+   * reads line from stdin, expecting two values per line.
+   *
+   * @param args ignored.
+   */
+  public static void main(String [] args) {
+
+    try {
+      Stats ps = new Stats();
+      java.io.LineNumberReader r = new java.io.LineNumberReader(
+				   new java.io.InputStreamReader(System.in));
+      String line;
+      while ((line = r.readLine()) != null) {
+        line = line.trim();
+        if (line.equals("") || line.startsWith("@") || line.startsWith("%")) {
+          continue;
+        }
+	java.util.StringTokenizer s 
+          = new java.util.StringTokenizer(line, " ,\t\n\r\f");
+	int count = 0;
+	double v1 = 0;
+	while (s.hasMoreTokens()) {
+	  double val = (new Double(s.nextToken())).doubleValue();
+	  if (count == 0) {
+	    v1 = val;
+	  } else {
+            System.err.println("MSG: Too many values in line \"" 
+                               + line + "\", skipped.");
+	    break;
+	  }
+	  count++;
+	}
+        if (count == 1) {
+          ps.add(v1);
+        }
+      }
+      ps.calculateDerived();
+      System.err.println(ps);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println(ex.getMessage());
+    }
+  }
+
 } // Stats
 
