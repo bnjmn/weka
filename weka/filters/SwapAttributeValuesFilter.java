@@ -30,28 +30,37 @@ import weka.core.*;
  * Valid scheme-specific options are: <p>
  *
  * -C col <br>
- * Index of the attribute to be changed.<p>
+ * Index of the attribute to be changed. (default last)<p>
  *
  * -F index <br>
- * Index of the first value.<p>
+ * Index of the first value (default first).<p>
  *
  * -S index <br>
- * Index of the second value.<p>
+ * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {
 
+  /** The attribute's index setting. */
+  private int m_AttIndexSet = -1; 
+
+  /** The first value's index setting. */
+  private int m_FirstIndexSet = 0;
+
+  /** The second value's index setting. */
+  private int m_SecondIndexSet = -1;
+
   /** The attribute's index. */
-  private int m_AttIndex = -1;
+  private int m_AttIndex; 
 
   /** The first value's index. */
-  private int m_FirstIndex = -1;
+  private int m_FirstIndex;
 
   /** The second value's index. */
-  private int m_SecondIndex = -1;
+  private int m_SecondIndex;
 
   /**
    * Sets the format of the input instances.
@@ -67,20 +76,23 @@ public class SwapAttributeValuesFilter extends Filter
        throws Exception {
 
     m_InputFormat = new Instances(instanceInfo, 0);
+    m_AttIndex = m_AttIndexSet;
     if (m_AttIndex < 0) {
-      throw new Exception("No attribute chosen.");
+      m_AttIndex = m_InputFormat.numAttributes() - 1;
+    }
+    m_FirstIndex = m_FirstIndexSet;
+    if (m_FirstIndex < 0) {
+      m_FirstIndex = m_InputFormat.attribute(m_AttIndex).numValues() - 1;
+    }
+    m_SecondIndex = m_SecondIndexSet;
+    if (m_SecondIndex < 0) {
+      m_SecondIndex = m_InputFormat.attribute(m_AttIndex).numValues() - 1;
     }
     if (!m_InputFormat.attribute(m_AttIndex).isNominal()) {
       throw new Exception("Chosen attribute not nominal.");
     }
     if (m_InputFormat.attribute(m_AttIndex).numValues() < 2) {
       throw new Exception("Chosen attribute has less than two values.");
-    }
-    if (m_FirstIndex < 0) {
-      throw new Exception("First value undefined.");
-    }
-    if (m_SecondIndex < 0) {
-      throw new Exception("Second value undefined.");
     }
     m_NewBatch = true;
     setOutputFormat();
@@ -126,16 +138,16 @@ public class SwapAttributeValuesFilter extends Filter
     Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
-              "\tSets the attribute index.",
+              "\tSets the attribute index (default last).",
               "C", 1, "-C <col>"));
 
     newVector.addElement(new Option(
-              "\tSets the first value's index.",
-              "F", 1, "-F <index>"));
+              "\tSets the first value's index (default first).",
+              "F", 1, "-F <value index>"));
 
     newVector.addElement(new Option(
-              "\tSets the second value's index.",
-              "S", 1, "-S <index>"));
+              "\tSets the second value's index (default last).",
+              "S", 1, "-S <value index>"));
 
     return newVector.elements();
   }
@@ -145,13 +157,13 @@ public class SwapAttributeValuesFilter extends Filter
    * Parses the options for this object. Valid options are: <p>
    *
    * -C col <br>
-   * Index of the attribute to be changed.<p>
+   * The column containing the values to be merged. (default last)<p>
    *
    * -F index <br>
-   * Index of the first value.<p>
+   * Index of the first value (default first).<p>
    *
    * -S index <br>
-   * Index of the second value.<p>
+   * Index of the second value (default last).<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -231,7 +243,7 @@ public class SwapAttributeValuesFilter extends Filter
    */
   public int getAttributeIndex() {
 
-    return m_AttIndex;
+    return m_AttIndexSet;
   }
 
   /**
@@ -241,7 +253,7 @@ public class SwapAttributeValuesFilter extends Filter
    */
   public void setAttributeIndex(int attIndex) {
     
-    m_AttIndex = attIndex;
+    m_AttIndexSet = attIndex;
   }
 
   /**
@@ -251,7 +263,7 @@ public class SwapAttributeValuesFilter extends Filter
    */
   public int getFirstValueIndex() {
 
-    return m_FirstIndex;
+    return m_FirstIndexSet;
   }
 
   /**
@@ -261,7 +273,7 @@ public class SwapAttributeValuesFilter extends Filter
    */
   public void setFirstValueIndex(int firstIndex) {
     
-    m_FirstIndex = firstIndex;
+    m_FirstIndexSet = firstIndex;
   }
 
   /**
@@ -271,7 +283,7 @@ public class SwapAttributeValuesFilter extends Filter
    */
   public int getSecondValueIndex() {
 
-    return m_SecondIndex;
+    return m_SecondIndexSet;
   }
 
   /**
@@ -281,7 +293,7 @@ public class SwapAttributeValuesFilter extends Filter
    */
   public void setSecondValueIndex(int secondIndex) {
     
-    m_SecondIndex = secondIndex;
+    m_SecondIndexSet = secondIndex;
   }
 
   /**
