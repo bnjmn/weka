@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.22 $
+ * @version  $Revision: 1.23 $
   */
 public class Evaluation implements Summarizable {
 
@@ -499,9 +499,7 @@ public class Evaluation implements Summarizable {
   public static String evaluateModel(Classifier classifier,
 				     String [] options) throws Exception {
 			      
-    Instances train = null, tempTrain, test = null, 
-      trainWithoutStrings = null, testWithoutStrings = null, template;
-    Instance instanceWithoutStrings;
+    Instances train = null, tempTrain, test = null, template = null;
     CostMatrix costMatrix = null;
     int seed = 1, folds = 10, classIndex = -1;
     double predValue;
@@ -566,26 +564,8 @@ public class Evaluation implements Summarizable {
       } catch (Exception e) {
 	throw new Exception("Can't open file " + e.getMessage() + '.');
       }
-      if (trainFileName.length() != 0) {
-	if ((classifier instanceof UpdateableClassifier) &&
-	    (testFileName.length() != 0) &&
-	    (costMatrix == null)) {
-	  train = new Instances(trainReader, 1);
-	} else {
-	  train = new Instances(trainReader);
-	}
-	if (classIndex != -1) {
-	  train.setClassIndex(classIndex - 1);
-	} else {
-	  train.setClassIndex(train.numAttributes() - 1);
-	}
-	if (classIndex > train.numAttributes()) {
-	  throw new Exception("Index of class attribute too large.");
-	}
-	trainWithoutStrings = new Instances(train);
-      }
       if (testFileName.length() != 0) {
-	test = new Instances(testReader, 1);
+	template = test = new Instances(testReader, 1);
 	if (classIndex != -1) {
 	  test.setClassIndex(classIndex - 1);
 	} else {
@@ -594,12 +574,28 @@ public class Evaluation implements Summarizable {
 	if (classIndex > test.numAttributes()) {
 	  throw new Exception("Index of class attribute too large.");
 	}
-	testWithoutStrings = new Instances(test);
       }
       if (trainFileName.length() != 0) {
-	template = trainWithoutStrings;
-      } else {
-	template = testWithoutStrings;
+	if ((classifier instanceof UpdateableClassifier) &&
+	    (testFileName.length() != 0) &&
+	    (costMatrix == null)) {
+	  train = new Instances(trainReader, 1);
+	} else {
+	  train = new Instances(trainReader);
+	}
+        template = train;
+	if (classIndex != -1) {
+	  train.setClassIndex(classIndex - 1);
+	} else {
+	  train.setClassIndex(train.numAttributes() - 1);
+	}
+	if (classIndex > train.numAttributes()) {
+	  throw new Exception("Index of class attribute too large.");
+	}
+	//train = new Instances(train);
+      }
+      if (template == null) {
+        throw new Exception("No actual dataset provided to use as template");
       }
       seedString = Utils.getOption('s', options);
       if (seedString.length() != 0) {
@@ -702,30 +698,17 @@ public class Evaluation implements Summarizable {
 	(trainFileName.length() != 0)) {
       
       // Build classifier incrementally
-      trainingEvaluation.setPriors(trainWithoutStrings);
-      testingEvaluation.setPriors(trainWithoutStrings);
+      trainingEvaluation.setPriors(train);
+      testingEvaluation.setPriors(train);
       if (objectInputFileName.length() == 0) {
-	classifier.buildClassifier(trainWithoutStrings);
+	classifier.buildClassifier(train);
       }
-      instanceWithoutStrings = 
-	new Instance(trainWithoutStrings.numAttributes());
-      instanceWithoutStrings.setDataset(trainWithoutStrings);
       while (train.readInstance(trainReader)) {
 	
-	// Copy instance from format with strings to format without
-	// strings.
-	int j = 0;
-	for (int i = 0; i < train.numAttributes(); i++) {
-	  if (!train.attribute(i).isString()) {
-	    instanceWithoutStrings.
-	      setValue(j, train.instance(0).value(i));
-	    j++;
-	  }
-	}
-	trainingEvaluation.updatePriors(instanceWithoutStrings);
-	testingEvaluation.updatePriors(instanceWithoutStrings);
+	trainingEvaluation.updatePriors(train.instance(0));
+	testingEvaluation.updatePriors(train.instance(0));
 	((UpdateableClassifier)classifier).
-	  updateClassifier(instanceWithoutStrings);
+	  updateClassifier(train.instance(0));
 	train.delete(0);
       }
       trainReader.close();
@@ -793,30 +776,17 @@ public class Evaluation implements Summarizable {
 	} else {
 	  train.setClassIndex(train.numAttributes() - 1);
 	}
-	instanceWithoutStrings = 
-	  new Instance(trainWithoutStrings.numAttributes());
-	instanceWithoutStrings.setDataset(trainWithoutStrings);
 	while (train.readInstance(trainReader)) {
 
-	  // Copy instance from format with strings to format 
-	  // without strings.
-	  int j = 0;
-	  for (int i = 0; i < train.numAttributes(); i++) {
-	    if (!train.attribute(i).isString()) {
-	      instanceWithoutStrings.
-	      setValue(j, train.instance(0).value(i));
-	      j++;
-	    }
-	  }
 	  trainingEvaluation.
 	  evaluateModelOnce((Classifier)classifier, 
-			    instanceWithoutStrings);
+			    train.instance(0));
 	  train.delete(0);
 	}
 	trainReader.close();
       } else {
 	trainingEvaluation.evaluateModel(classifier, 
-					 trainWithoutStrings);
+					 train);
       }
 
       // Print the results of the training evaluation
@@ -844,24 +814,11 @@ public class Evaluation implements Summarizable {
     if (testFileName.length() != 0) {
 
       // Testing is on the supplied test data
-      instanceWithoutStrings = 
-	  new Instance(testWithoutStrings.numAttributes());
-      instanceWithoutStrings.setDataset(testWithoutStrings);
       while (test.readInstance(testReader)) {
 	  
-	// Copy instance from format with strings to format 
-	// without strings.
-	int j = 0;
-	for (int i = 0; i < test.numAttributes(); i++) {
-	  if (!test.attribute(i).isString()) {
-	    instanceWithoutStrings.
-		setValue(j, test.instance(0).value(i));
-	    j++;
-	  }
-	}
 	testingEvaluation.
 	  evaluateModelOnce((Classifier)classifier, 
-			    instanceWithoutStrings);
+			    test.instance(0));
 	test.delete(0);
       }
       testReader.close();
@@ -873,9 +830,9 @@ public class Evaluation implements Summarizable {
       // Testing is via cross-validation on training data
       random = new Random(seed);
       random.setSeed(seed);
-      trainWithoutStrings.randomize(random);
+      train.randomize(random);
       testingEvaluation.
-      crossValidateModel(classifier, trainWithoutStrings, folds);
+      crossValidateModel(classifier, train, folds);
       if (template.classAttribute().isNumeric()) {
 	text.append("\n\n" + testingEvaluation.
 		    toSummaryString("=== Cross-validation ===\n",
@@ -1873,7 +1830,7 @@ public class Evaluation implements Summarizable {
    * Prints the predictions for the given dataset into a String variable.
    */
   private static String printClassifications(Classifier classifier, 
-					     Instances trainWithoutStrings,
+					     Instances train,
 					     String testFileName,
 					     int classIndex) throws Exception {
 
@@ -1891,24 +1848,11 @@ public class Evaluation implements Summarizable {
       } else {
 	test.setClassIndex(test.numAttributes() - 1);
       }
-      Instance instanceWithoutStrings = 
-	new Instance(trainWithoutStrings.numAttributes());
-      instanceWithoutStrings.setDataset(trainWithoutStrings);
       int i = 0;
       while (test.readInstance(testReader)) {
-	    
-	// Copy instance from format with strings to format 
-	// without strings.
-	int j = 0;
-	for (int k = 0; k < test.numAttributes(); k++) {
-	  if (!test.attribute(k).isString()) {
-	    instanceWithoutStrings.
-	      setValue(j, test.instance(0).value(k));
-	    j++;
-	  }
-	}
-	Instance withMissing = new Instance(instanceWithoutStrings);
-	withMissing.setDataset(instanceWithoutStrings.dataset());
+	Instance instance = test.instance(0);    
+	Instance withMissing = new Instance(instance);
+	withMissing.setDataset(test);
 	double predValue = 
 	  ((Classifier)classifier).classifyInstance(withMissing);
 	if (test.classAttribute().isNumeric()) {
@@ -1917,10 +1861,10 @@ public class Evaluation implements Summarizable {
 	  } else {
 	    text.append(i + " " + predValue + " ");
 	  }
-	  if (instanceWithoutStrings.classIsMissing()) {
+	  if (instance.classIsMissing()) {
 	    text.append("missing\n");
 	  } else {
-	    text.append(instanceWithoutStrings.classValue() + "\n");
+	    text.append(instance.classValue() + "\n");
 	  }
 	} else {
 	  if (Instance.isMissingValue(predValue)) {
@@ -1938,8 +1882,7 @@ public class Evaluation implements Summarizable {
 	      	    [(int)predValue]+" ");
 	    }
 	  }
-	  text.append(instanceWithoutStrings.toString(instanceWithoutStrings.
-						      classIndex()) + "\n");
+	  text.append(instance.toString(instance.classIndex()) + "\n");
 	}
 	test.delete(0);
 	i++;
