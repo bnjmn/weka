@@ -47,7 +47,7 @@ import java.beans.beancontext.*;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributeSummarizer extends DataVisualizer {
 
@@ -168,6 +168,7 @@ public class AttributeSummarizer extends DataVisualizer {
   }
 
   protected void appearanceFinal() {
+    removeAll();
     setLayout(new BorderLayout());
   }
 

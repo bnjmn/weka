@@ -43,7 +43,7 @@ import java.beans.beancontext.*;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -88,6 +88,7 @@ public class DataVisualizer extends JPanel
   }
 
   protected void appearanceDesign() {
+    m_visPanel = null;
     removeAll();
     m_visual = new BeanVisual("DataVisualizer", 
 			      BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
@@ -98,12 +99,12 @@ public class DataVisualizer extends JPanel
   }
 
   protected void appearanceFinal() {
+    removeAll();
     setLayout(new BorderLayout());
     setUpFinal();
   }
 
   protected void setUpFinal() {
-    removeAll();
     if (m_visPanel == null) {
       m_visPanel = new VisualizePanel();
     }
@@ -242,6 +243,8 @@ public class DataVisualizer extends JPanel
     m_design = m_beanContext.isDesignTime();
     if (m_design) {
       appearanceDesign();
+    } else {
+      appearanceFinal();
     }
   }
 

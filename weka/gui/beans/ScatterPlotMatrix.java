@@ -43,7 +43,7 @@ import java.awt.*;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ScatterPlotMatrix extends DataVisualizer {
 
@@ -64,6 +64,7 @@ public class ScatterPlotMatrix extends DataVisualizer {
   }
 
   protected void appearanceDesign() {
+    m_matrixPanel = null;
     removeAll();
     m_visual = 
       new BeanVisual("ScatterPlotMatrix", 
@@ -74,12 +75,12 @@ public class ScatterPlotMatrix extends DataVisualizer {
   }
 
   protected void appearanceFinal() {
+    removeAll();
     setLayout(new BorderLayout());
     setUpFinal();
   }
 
   protected void setUpFinal() {
-    removeAll();
     if (m_matrixPanel == null) {
       m_matrixPanel = new MatrixPanel();
     }
