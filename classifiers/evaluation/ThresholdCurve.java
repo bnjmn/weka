@@ -22,7 +22,7 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ThresholdCurve {
 
@@ -89,14 +89,22 @@ public class ThresholdCurve {
       return null;
     }
 
-    Instances insts = makeHeader();
-    int totPos = 0, totNeg = 0;
+    double totPos = 0, totNeg = 0;
     double [] probs = getProbabilities(predictions, classIndex);
-    int [] sorted = Utils.sort(probs);
 
     // Get distribution of positive/negatives
     for (int i = 0; i < probs.length; i++) {
       NominalPrediction pred = (NominalPrediction)predictions.elementAt(i);
+      if (pred.actual() == Prediction.MISSING_VALUE) {
+        System.err.println(getClass().getName() 
+                           + " Skipping prediction with missing class value");
+        continue;
+      }
+      if (pred.weight() < 0) {
+        System.err.println(getClass().getName() 
+                           + " Skipping prediction with negative weight");
+        continue;
+      }
       if (pred.actual() == classIndex) {
         totPos += pred.weight();
       } else {
@@ -104,9 +112,21 @@ public class ThresholdCurve {
       }
     }
 
+    Instances insts = makeHeader();
+    int [] sorted = Utils.sort(probs);
     TwoClassStats tc = new TwoClassStats(totPos, totNeg, 0, 0);
     for (int i = 0; i < sorted.length; i++) {
       NominalPrediction pred = (NominalPrediction)predictions.elementAt(sorted[i]);
+      if (pred.actual() == Prediction.MISSING_VALUE) {
+        System.err.println(getClass().getName()
+                           + " Skipping prediction with missing class value");
+        continue;
+      }
+      if (pred.weight() < 0) {
+        System.err.println(getClass().getName() 
+                           + " Skipping prediction with negative weight");
+        continue;
+      }
       if (pred.actual() == classIndex) {
         tc.setTruePositive(tc.getTruePositive() - pred.weight());
         tc.setFalseNegative(tc.getFalseNegative() + pred.weight());
