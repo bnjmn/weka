@@ -24,7 +24,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -59,6 +59,9 @@ public class Ranker extends ASSearch
   /** The number of attributes to select. -1 indicates that all attributes
       are to be retained. Has precedence over m_threshold */
   private int m_numToSelect = -1;
+
+  /** Used to compute the number to select */
+  private int m_calculatedNumToSelect = -1;
 
   /**
    * Returns a string describing this search method
@@ -104,6 +107,19 @@ public class Ranker extends ASSearch
    */
   public int getNumToSelect() {
     return m_numToSelect;
+  }
+
+  /**
+   * Gets the calculated number to select. This might be computed
+   * from a threshold, or if < 0 is set as the number to select then
+   * it is set to the number of attributes in the (transformed) data.
+   * @return the calculated number of attributes to select
+   */
+  public int getCalculatedNumToSelect() {
+    if (m_numToSelect >= 0) {
+      m_calculatedNumToSelect = m_numToSelect;
+    }
+    return m_calculatedNumToSelect;
   }
 
   /**
@@ -463,7 +479,7 @@ public class Ranker extends ASSearch
 
     if (m_numToSelect <= 0) {
       if (m_threshold == -Double.MAX_VALUE) {
-	m_numToSelect = bestToWorst.length;
+	m_calculatedNumToSelect = bestToWorst.length;
       } else {
 	determineNumToSelectFromThreshold(bestToWorst);
       }
@@ -482,7 +498,7 @@ public class Ranker extends ASSearch
 	count++;
       }
     }
-    m_numToSelect = count;
+    m_calculatedNumToSelect = count;
   }
 
   private void determineThreshFromNumToSelect(double [][] ranking) 
