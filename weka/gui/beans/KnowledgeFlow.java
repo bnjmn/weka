@@ -94,7 +94,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.7 $
+ * @version  $Revision: 1.8 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -229,7 +229,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.7 $
+   * @version $Revision: 1.8 $
    * @since 1.0
    * @see JPanel
    */
@@ -309,7 +309,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  protected LogPanel m_logPanel = new LogPanel();
+  protected LogPanel m_logPanel = new LogPanel(null, true);
 
   /**
    * Creates a new <code>KnowledgeFlow</code> instance.
