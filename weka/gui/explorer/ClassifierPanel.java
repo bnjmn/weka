@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.72 $
+ * @version $Revision: 1.73 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -799,8 +799,8 @@ public class ClassifierPanel extends JPanel {
    * @param plotShape additional plotting information (shape)
    * @param plotSize additional plotting information (size)
    */
-  private void processClassifierPrediction(Instance toPredict,
-					   Classifier classifier,
+  public static void processClassifierPrediction(Instance toPredict,
+                                           Classifier classifier,
 					   Evaluation eval,
 					   FastVector predictions,
 					   Instances plotInstances,
@@ -921,7 +921,7 @@ public class ClassifierPanel extends JPanel {
    * @return a new set of instances containing one more attribute (predicted
    * class) than the trainInstances
    */
-  private Instances setUpVisualizableInstances(Instances trainInstances) {
+  public static Instances setUpVisualizableInstances(Instances trainInstances) {
     FastVector hv = new FastVector();
     Attribute predictedClass;
 
