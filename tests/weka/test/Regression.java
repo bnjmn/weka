@@ -20,7 +20,7 @@ import java.util.Properties;
  * testing.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Regression {
 
@@ -32,6 +32,9 @@ public class Regression {
    * location of the reference root.
    */
   private static final String ROOT_PROPERTY = "weka.test.Regression.root";
+
+  /** Default root location, relative to the users home direcory. */
+  private static final String DEFAULT_ROOT = "wekarefs";
 
   /** Stores the root location under which reference files are stored. */
   private static File ROOT;
@@ -54,8 +57,10 @@ public class Regression {
       String root = System.getProperty(ROOT_PROPERTY);
       if (root == null) {
         root = System.getProperty("user.dir");
+        ROOT = new File(root, DEFAULT_ROOT);
+      } else {
+        ROOT = new File(root);
       }
-      ROOT = new File(root);
     }
     return ROOT;
   }
@@ -104,7 +109,7 @@ public class Regression {
     try {
       String reference = readReference();
       return diff(reference, m_Output.toString());
-    } catch (IOException fnf) {
+    } catch (FileNotFoundException fnf) {
       // No, write out the current output
       writeAsReference();
       return null;
@@ -175,7 +180,6 @@ public class Regression {
     w.write(m_Output.toString());
     w.close();
   }
-
 
   /**
    * Tests Regression from the command line
