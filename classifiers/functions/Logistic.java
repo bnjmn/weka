@@ -31,6 +31,7 @@ import weka.core.UnsupportedClassTypeException;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.OptionHandler;
+import weka.core.WeightedInstancesHandler;
 import weka.core.SelectedTag;
 import weka.core.Utils;
 import weka.core.Attribute;
@@ -65,10 +66,10 @@ import java.util.Vector;
  * (default 200)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
  */
 public class Logistic extends DistributionClassifier 
-  implements OptionHandler {
+  implements OptionHandler, WeightedInstancesHandler {
 
   /* The coefficients */
   private double[][] m_Coefficients = null;
