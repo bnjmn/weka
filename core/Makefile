@@ -9,7 +9,12 @@ SOURCES = Attribute.java Instance.java Instances.java Utils.java \
 	Drawable.java Matchable.java Summarizable.java AttributeStats.java \
 	SparseInstance.java AdditionalMeasureProducer.java \
 	ProtectedProperties.java Optimization.java RandomVariates.java \
-	Randomizable.java
+	Randomizable.java NoSupportForMissingValuesException.java \
+	UnassignedClassException.java UnassignedDatasetException.java \
+	UnsupportedAttributeTypeException.java \
+	UnsupportedClassTypeException.java WekaException.java \
+	BinarySparseInstance.java  KDTree.java DistanceFunction.java \
+	EuclideanDistance.java DynamicArrayOfPosInt.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
