@@ -30,7 +30,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class Id3 extends DistributionClassifier {
 
@@ -166,7 +166,10 @@ public class Id3 extends DistributionClassifier {
    */
   public String toString() {
 
-    return "Id3 classifier\n==============\n" + toString(0);
+    if ((m_Distribution == null) && (m_Successors == null)) {
+      return "Id3: No model built yet.";
+    }
+    return "Id3\n\n" + toString(0);
   }
 
   /**
@@ -251,7 +254,7 @@ public class Id3 extends DistributionClassifier {
       } else {
         text.append(": "+m_ClassAttribute.value((int) m_ClassValue));
       } 
-   } else {
+    } else {
       for (int j = 0; j < m_Attribute.numValues(); j++) {
         text.append("\n");
         for (int i = 0; i < level; i++) {

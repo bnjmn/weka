@@ -34,7 +34,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -136,8 +136,10 @@ public class MultiClassClassifier extends DistributionClassifier
    */
   public String toString() {
 
+    if (m_Classifiers == null) {
+      return "MultiClassClassifier: No model built yet.";
+    }
     StringBuffer text = new StringBuffer();
-
     text.append("MultiClassClassifier\n\n");
     for (int i = 0; i < m_Classifiers.length; i++) {
       text.append(m_Classifiers[i].toString() + "\n");

@@ -31,7 +31,7 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 */
 public class NaiveBayesSimple extends DistributionClassifier {
 
@@ -250,12 +250,13 @@ public class NaiveBayesSimple extends DistributionClassifier {
    * @return a description of the classifier as a string.
    */
   public String toString() {
-    
+
+    if (m_Instances == null) {
+      return "Naive Bayes (simple): No model built yet.";
+    }
     try {
-      StringBuffer text = new StringBuffer();
+      StringBuffer text = new StringBuffer("Naive Bayes (simple)");
       int attIndex;
-      
-      text.append("Naive Bayes");
       
       for (int i = 0; i < m_Instances.numClasses(); i++) {
 	text.append("\n\nClass " + m_Instances.classAttribute().value(i) 

@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -1208,11 +1208,11 @@ public class DecisionTable
   public String toString() {
 
     if (m_entries == null) {
-      return "Can't print decision table classifier!";
+      return "Decision Table: No model built yet.";
     } else {
       StringBuffer text = new StringBuffer();
       
-      text.append("Decision Table classifier:"+
+      text.append("Decision Table:"+
 		  "\n\nNumber of training instances: "+m_numInstances+
 		  "\nNumber of Rules : "+m_entries.size()+"\n");
       

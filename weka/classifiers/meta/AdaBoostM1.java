@@ -57,7 +57,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -675,12 +675,12 @@ public class AdaBoostM1 extends DistributionClassifier
     StringBuffer text = new StringBuffer();
     
     if (m_NumIterations == 0) {
-      text.append("No model built yet.\n");
+      text.append("AdaBoostM1: No model built yet.\n");
     } else if (m_NumIterations == 1) {
-      text.append("No boosting possible, standard classifier used!\n");
+      text.append("AdaBoostM1: No boosting possible, one classifier used!\n");
       text.append(m_Classifiers[0].toString() + "\n");
     } else {
-      text.append("All the base classifiers and their weights: \n\n");
+      text.append("AdaBoostM1: Base classifiers and their weights: \n\n");
       for (int i = 0; i < m_NumIterations ; i++) {
 	text.append(m_Classifiers[i].toString() + "\n\n");
 	text.append("Weight: " + Utils.roundDouble(m_Betas[i], 2) + "\n\n");

@@ -51,7 +51,7 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable {
@@ -250,7 +250,10 @@ public class PART extends DistributionClassifier implements OptionHandler,
    * Returns a description of the classifier
    */
   public String toString() {
-    
+
+    if (m_root == null) {
+      return "No classifier built";
+    }
     return "PART decision list\n------------------\n\n" + m_root.toString();
   }
   

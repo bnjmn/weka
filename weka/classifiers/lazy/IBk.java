@@ -59,7 +59,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -723,6 +723,9 @@ public class IBk extends DistributionClassifier implements
    */
   public String toString() {
 
+    if (m_Train == null) {
+      return "IBk: No model built yet.";
+    }
     String result = "IB1 instance-based classifier\n" +
       "using " + m_kNN;
 

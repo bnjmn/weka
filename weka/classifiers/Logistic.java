@@ -34,7 +34,7 @@ import weka.filters.*;
  * Turn on debugging output.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
 
@@ -413,11 +413,11 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
 
     double CSq = m_LLn - m_LL;
     int df = m_NumPredictors;
-    String result = "Logistic Regression (2 classes)\n";
+    String result = "Logistic Regression (2 classes)";
     if (m_Par == null) {
-      return result + "No model built yet.";
+      return result + ": No model built yet.";
     }
-    result += "\nOverall Model Fit...\n" 
+    result += "\n\nOverall Model Fit...\n" 
       +"  Chi Square=" + Utils.doubleToString(CSq, 10, 4) 
       + ";  df=" + df
       + ";  p=" 

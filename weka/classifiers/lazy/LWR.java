@@ -46,7 +46,7 @@ import weka.core.*;
  * (default 0 = Linear) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -421,6 +421,9 @@ public class LWR extends Classifier
    */
   public String toString() {
 
+    if (m_Train == null) {
+      return "Locally weighted regression: No model built yet.";
+    }
     String result = "Locally weighted regression\n"
       + "===========================\n";
 
