@@ -120,7 +120,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -812,15 +812,16 @@ public class ClassifierPanel extends JPanel {
    * the instance to predict
    * @param predictions a fastvector to add the prediction to
    * @param plotInstances a set of plottable instances
-   * @param plotInfo additional plotting information (either shape type or
-   * shape size).
+   * @param plotShape additional plotting information (shape)
+   * @param plotSize additional plotting information (size)
    */
   private void processClassifierPrediction(Instance toPredict,
 					   Classifier classifier,
 					   Evaluation eval,
 					   FastVector predictions,
 					   Instances plotInstances,
-					   FastVector plotInfo) {
+					   FastVector plotShape,
+					   FastVector plotSize) {
     try {
       double pred;
       // classifier is a distribution classifer and class is nominal
@@ -845,11 +846,11 @@ public class ClassifierPanel extends JPanel {
 	} else if (i == toPredict.classIndex()) {
 	  values[i] = pred;
 	  values[i+1] = toPredict.value(i);
-	  // if the class value of the instances to predict is missing then
+	  /* // if the class value of the instances to predict is missing then
 	  // set it to the predicted value
 	  if (toPredict.isMissing(i)) {
 	    values[i+1] = pred;
-	  }
+	    } */
 	  i++;
 	} else {
 	  values[i] = toPredict.value(i-1);
@@ -858,16 +859,27 @@ public class ClassifierPanel extends JPanel {
 
       plotInstances.add(new Instance(1.0, values));
       if (toPredict.classAttribute().isNominal()) {
-	if (pred != toPredict.classValue()) {
+	if (toPredict.isMissing(toPredict.classIndex())) {
+	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+	} else if (pred != toPredict.classValue()) {
 	  // set to default error point shape
-	  plotInfo.addElement(new Integer(Plot2D.ERROR_SHAPE));
+	  plotShape.addElement(new Integer(Plot2D.ERROR_SHAPE));
 	} else {
 	  // otherwise set to constant (automatically assigned) point shape
-	  plotInfo.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
 	}
+	plotSize.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
       } else {
 	// store the error (to be converted to a point size later)
-	plotInfo.addElement(new Double(pred - toPredict.classValue()));
+	Double errd = null;
+	if (!toPredict.isMissing(toPredict.classIndex())) {
+	  errd = new Double(pred - toPredict.classValue());
+	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+	} else {
+	  // missing shape if actual class not present
+	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+	}
+	plotSize.addElement(errd);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -877,32 +889,40 @@ public class ClassifierPanel extends JPanel {
   /**
    * Post processes numeric class errors into shape sizes for plotting
    * in the visualize panel
-   * @param plotInfo a FastVector of numeric class errors
+   * @param plotSize a FastVector of numeric class errors
    */
-  private void postProcessPlotInfo(FastVector plotInfo) {
+  private void postProcessPlotInfo(FastVector plotSize) {
     int maxpSize = 20;
     double maxErr = Double.NEGATIVE_INFINITY;
     double minErr = Double.POSITIVE_INFINITY;
     double err;
     
-    for (int i = 0; i < plotInfo.size(); i++) {
-      err = Math.abs(((Double)plotInfo.elementAt(i)).doubleValue());
+    for (int i = 0; i < plotSize.size(); i++) {
+      Double errd = (Double)plotSize.elementAt(i);
+      if (errd != null) {
+	err = Math.abs(errd.doubleValue());
         if (err < minErr) {
-	minErr = err;
-      }
-      if (err > maxErr) {
-	maxErr = err;
+	  minErr = err;
+	}
+	if (err > maxErr) {
+	  maxErr = err;
+	}
       }
     }
     
-    for (int i = 0; i < plotInfo.size(); i++) {
-      err = Math.abs(((Double)plotInfo.elementAt(i)).doubleValue());
-      if (maxErr - minErr > 0) {
-	Double temp = new Double(((err - minErr) / (maxErr - minErr)) 
-				 * maxpSize);
-	plotInfo.setElementAt(temp, i);
+    for (int i = 0; i < plotSize.size(); i++) {
+      Double errd = (Double)plotSize.elementAt(i);
+      if (errd != null) {
+	err = Math.abs(errd.doubleValue());
+	if (maxErr - minErr > 0) {
+	  Double temp = new Double(((err - minErr) / (maxErr - minErr)) 
+				   * maxpSize);
+	  plotSize.setElementAt(temp, i);
+	} else {
+	  plotSize.setElementAt(new Double(1.0), i);
+	}
       } else {
-	plotInfo.setElementAt(new Double(1.0), i);
+	plotSize.setElementAt(new Double(1.0), i);
       }
     }
   }
@@ -959,7 +979,8 @@ public class ClassifierPanel extends JPanel {
 	  Instances inst = new Instances(m_Instances);
 	  Instances userTest = null;
 	  // additional vis info (either shape type or point size)
-	  FastVector plotInfo = new FastVector();
+	  FastVector plotShape = new FastVector();
+	  FastVector plotSize = new FastVector();
 	  Instances predInstances = null;
 
 	  // will hold the prediction objects if the class is nominal
@@ -1110,7 +1131,8 @@ public class ClassifierPanel extends JPanel {
 	      for (int jj=0;jj<inst.numInstances();jj++) {
 		processClassifierPrediction(inst.instance(jj), classifier,
 					    eval, predictions,
-					    predInstances, plotInfo);
+					    predInstances, plotShape, 
+					    plotSize);
 		
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on training data. Processed "
@@ -1143,7 +1165,8 @@ public class ClassifierPanel extends JPanel {
 		for (int jj=0;jj<test.numInstances();jj++) {
 		  processClassifierPrediction(test.instance(jj), classifier,
 					      eval, predictions,
-					      predInstances, plotInfo);
+					      predInstances, plotShape,
+					      plotSize);
 		}
 	      }
 	      if (inst.attribute(classIndex).isNominal()) {
@@ -1168,7 +1191,8 @@ public class ClassifierPanel extends JPanel {
 	      for (int jj=0;jj<test.numInstances();jj++) {
 		processClassifierPrediction(test.instance(jj), classifier,
 					    eval, predictions,
-					    predInstances, plotInfo);
+					    predInstances, plotShape,
+					    plotSize);
 
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test split. Processed "
@@ -1185,7 +1209,8 @@ public class ClassifierPanel extends JPanel {
 	      for (int jj=0;jj<userTest.numInstances();jj++) {
 		processClassifierPrediction(userTest.instance(jj), classifier,
 					    eval, predictions,
-					    predInstances, plotInfo);
+					    predInstances, plotShape,
+					    plotSize);
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test data. Processed "
 				      +jj+" instances...");
@@ -1222,19 +1247,16 @@ public class ClassifierPanel extends JPanel {
 	    m_Log.statusMessage("See error log");
 	  } finally {
 	    try {
-	      if (predInstances != null) {
+	      if (predInstances != null && predInstances.numInstances() > 0) {
 		if (predInstances.attribute(predInstances.classIndex())
 		    .isNumeric()) {
-		  postProcessPlotInfo(plotInfo);
+		  postProcessPlotInfo(plotSize);
 		}
 		m_CurrentVis = new VisualizePanel();
 		m_CurrentVis.setName(name+" ("+inst.relationName()+")");
 		PlotData2D tempd = new PlotData2D(predInstances);
-		if (predInstances.classAttribute().isNumeric()) {
-		  tempd.setShapeSize(plotInfo);
-		} else {
-		  tempd.setShapeType(plotInfo);
-		}
+		tempd.setShapeSize(plotSize);
+		tempd.setShapeType(plotShape);
 		tempd.setPlotName(name+" ("+inst.relationName()+")");
 		
 		m_CurrentVis.addPlot(tempd);
