@@ -15,7 +15,7 @@
  */
 
 /*
- *    DistributionMetaClusterer.java
+ *    MakeDensityBasedClusterer.java
  *    Copyright (C) 2002 Richard Kirkby
  *
  */
@@ -35,9 +35,9 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.1 $
  */
-public class DistributionMetaClusterer extends DistributionClusterer 
+public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements OptionHandler, WeightedInstancesHandler {
 
   /** holds training instances header information */
@@ -57,16 +57,16 @@ public class DistributionMetaClusterer extends DistributionClusterer
    * Default constructor.
    * 
    */  
-  public DistributionMetaClusterer() {
+  public MakeDensityBasedClusterer() {
 
   }
    
   /**
-   * Contructs a DistributionMetaClusterer wrapping a given Clusterer.
+   * Contructs a MakeDensityBasedClusterer wrapping a given Clusterer.
    * 
    * @param toWrap the clusterer to wrap around
    */    
-  public DistributionMetaClusterer(Clusterer toWrap) {
+  public MakeDensityBasedClusterer(Clusterer toWrap) {
 
     setClusterer(toWrap);
   }
@@ -158,75 +158,48 @@ public class DistributionMetaClusterer extends DistributionClusterer
      
      Utils.normalize(m_priors);
   }
-  
+
   /**
-   * Computes the density for a given instance.
+   * Returns the cluster priors.
+   */
+  public double[] clusterPriors() {
+
+    double[] n = new double[m_priors.length];
+  
+    System.arraycopy(m_priors, 0, n, 0, n.length);
+    return n;
+  }
+
+  /**
+   * Computes the log of the conditional density (per cluster) for a given instance.
    * 
    * @param instance the instance to compute the density for
    * @return the density.
-   * @exception Exception if the density could not be computed successfully
+   * @return an array containing the estimated densities
+   * @exception Exception if the density could not be computed
+   * successfully
    */
-  public double logDensityForInstance(Instance instance) throws Exception {
-
-    double[] a = logOfWeightsForInstance(instance);
-    double max = a[Utils.maxIndex(a)];
-    double sum = 0.0;
-
-    for(int i = 0; i < a.length; i++) {
-      sum += Math.exp(a[i] - max);
-    }
-
-    return max + Math.log(sum);
-  }
-
-  /**
-   * Returns the cluster probability distribution for an instance. Will simply have a
-   * probability of 1 for the chosen cluster and 0 for the others.
-   *
-   * @param instance the instance to be clustered
-   * @return the probability distribution
-   */  
-  public double[] distributionForInstance(Instance instance) throws Exception {
-    
-    return Utils.logs2probs(logOfWeightsForInstance(instance));
-  }
-
-  /**
-   * Returns the weights (indicating cluster membership) for a given instance
-   * 
-   * @param inst the instance to be assigned a cluster
-   * @return an array of weights
-   * @exception Exception if weights could not be computed
-   */
-  protected double[] logOfWeightsForInstance(Instance inst)
-    throws Exception {
+  public double[] logDensityPerClusterForInstance(Instance inst) throws Exception {
 
     int i, j;
     double logprob;
     double[] wghts = new double[m_wrappedClusterer.numberOfClusters()];
 
     for (i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
-      if (m_priors[i] > 0) {
-	logprob = 0;
-	
-	for (j = 0; j < inst.numAttributes(); j++) {
-	  if (!inst.isMissing(j)) {
-	    if (inst.attribute(j).isNominal()) {
-	      logprob += Math.log(m_model[i][j].getProbability(inst.value(j)));
-	    } else { // numeric attribute
-	      logprob += logNormalDens(inst.value(j), 
-				       m_modelNormal[i][j][0], 
-				       m_modelNormal[i][j][1]);
-	    }
+      logprob = 0;
+      for (j = 0; j < inst.numAttributes(); j++) {
+	if (!inst.isMissing(j)) {
+	  if (inst.attribute(j).isNominal()) {
+	    logprob += Math.log(m_model[i][j].getProbability(inst.value(j)));
+	  } else { // numeric attribute
+	    logprob += logNormalDens(inst.value(j), 
+				     m_modelNormal[i][j][0], 
+				     m_modelNormal[i][j][1]);
 	  }
 	}
-
-	wghts[i] = (logprob + Math.log(m_priors[i]));
-      } else {
-	throw new IllegalArgumentException("Cluster empty!");
       }
+      wghts[i] = logprob;
     }
-
     return  wghts;
   }
 
@@ -264,7 +237,7 @@ public class DistributionMetaClusterer extends DistributionClusterer
    */
   public String toString() {
     StringBuffer text = new StringBuffer();
-    text.append("DistributionMetaClusterer: \n\nWrapped clusterer: " 
+    text.append("MakeDensityBasedClusterer: \n\nWrapped clusterer: " 
 		+ m_wrappedClusterer.toString());
 
     text.append("\nFitted estimators (with ML estimates of variance):\n");
@@ -445,7 +418,7 @@ public class DistributionMetaClusterer extends DistributionClusterer
     
     try {
       System.out.println(ClusterEvaluation.
-			 evaluateClusterer(new DistributionMetaClusterer(), 
+			 evaluateClusterer(new MakeDensityBasedClusterer(), 
 					   argv));
     } catch (Exception e) {
       System.err.println(e.getMessage());

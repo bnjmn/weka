@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.22 $
+ * @version  $Revision: 1.23 $
  */
 public class ClusterEvaluation {
 
@@ -71,7 +71,7 @@ public class ClusterEvaluation {
   /** the clusterer */
   private Clusterer m_Clusterer;
 
-  /** do cross validation (DistributionClusterers only) */
+  /** do cross validation (DensityBasedClusterers only) */
   private boolean m_doXval;
 
   /** the number of folds to use for cross validation */
@@ -213,8 +213,8 @@ public class ClusterEvaluation {
     for (i=0;i<testCopy.numInstances();i++) {
       cnum = -1;
       try {
-	if (m_Clusterer instanceof DistributionClusterer) {
-	  loglk += ((DistributionClusterer)m_Clusterer).
+	if (m_Clusterer instanceof DensityBasedClusterer) {
+	  loglk += ((DensityBasedClusterer)m_Clusterer).
 	    logDensityForInstance(testCopy.instance(i));
 	  //	  temp = Utils.sum(dist);
 	  
@@ -286,7 +286,7 @@ public class ClusterEvaluation {
 				 +unclusteredInstances);
     }
 
-    if (m_Clusterer instanceof DistributionClusterer) {
+    if (m_Clusterer instanceof DensityBasedClusterer) {
       m_clusteringResults.append("\n\nLog likelihood: " 
 				 + Utils.doubleToString(loglk, 1, 5) 
 				 + "\n");
@@ -663,7 +663,7 @@ public class ClusterEvaluation {
 		  + printClusterStats(clusterer, testFileName));
     }
 
-    if ((clusterer instanceof DistributionClusterer) && 
+    if ((clusterer instanceof DensityBasedClusterer) && 
 	(doXval == true) && 
 	(testFileName.length() == 0) && 
 	(objectInputFileName.length() == 0)) {
@@ -729,7 +729,7 @@ public class ClusterEvaluation {
 			     + clustererString + '.');
       }
 
-      if (!(clusterer instanceof DistributionClusterer)) {
+      if (!(clusterer instanceof DensityBasedClusterer)) {
 	throw  new Exception(clustererString 
 			     + " must be a distrinbution " 
 			     + "clusterer.");
@@ -760,7 +760,7 @@ public class ClusterEvaluation {
 
       for (int j = 0; j < test.numInstances(); j++) {
 	try {
-	  foldAv += ((DistributionClusterer)clusterer).
+	  foldAv += ((DensityBasedClusterer)clusterer).
 	    logDensityForInstance(test.instance(j));
 	  //	double temp = Utils.sum(tempDist);
 	} catch (Exception ex) {
@@ -820,8 +820,8 @@ public class ClusterEvaluation {
 	try {
 	  cnum = clusterer.clusterInstance(inst.instance(0));
 
-	  if (clusterer instanceof DistributionClusterer) {
-	    loglk += ((DistributionClusterer)clusterer).
+	  if (clusterer instanceof DensityBasedClusterer) {
+	    loglk += ((DensityBasedClusterer)clusterer).
 	      logDensityForInstance(inst.instance(0));
 	    //	    temp = Utils.sum(dist);
 	  }
@@ -876,7 +876,7 @@ public class ClusterEvaluation {
 	text.append("\nUnclustered Instances : "+unclusteredInstances);
       }
 
-      if (clusterer instanceof DistributionClusterer) {
+      if (clusterer instanceof DensityBasedClusterer) {
 	text.append("\n\nLog likelihood: " 
 		    + Utils.doubleToString(loglk, 1, 5) 
 		    + "\n");

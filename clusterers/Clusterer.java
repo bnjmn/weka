@@ -33,7 +33,7 @@ import weka.core.Utils;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public abstract class Clusterer implements Cloneable, Serializable {
 
@@ -52,15 +52,48 @@ public abstract class Clusterer implements Cloneable, Serializable {
   public abstract void buildClusterer(Instances data) throws Exception;
 
   /**
-   * Classifies a given instance.
+   * Classifies a given instance. Either this or distributionForInstance()
+   * needs to be implemented by subclasses.
    *
    * @param instance the instance to be assigned to a cluster
-   * @return the number of the assigned cluster as an interger
-   * if the class is enumerated, otherwise the predicted value
-   * @exception Exception if instance could not be classified
+   * @return the number of the assigned cluster as an integer
+   * @exception Exception if instance could not be clustered
    * successfully
    */
-  public abstract int clusterInstance(Instance instance) throws Exception; 
+  public int clusterInstance(Instance instance) throws Exception {
+
+    double [] dist = distributionForInstance(instance);
+
+    if (dist == null) {
+      throw new Exception("Null distribution predicted");
+    }
+
+    if (Utils.sum(dist) <= 0) {
+      throw new Exception("Unable to cluster instance");
+    }
+    return Utils.maxIndex(dist);
+  }
+
+  /**
+   * Predicts the cluster memberships for a given instance.  Either
+   * this or clusterInstance() needs to be implemented by subclasses.
+   *
+   * @param instance the instance to be assigned a cluster.
+   * @return an array containing the estimated membership 
+   * probabilities of the test instance in each cluster (this 
+   * should sum to at most 1)
+   * @exception Exception if distribution could not be 
+   * computed successfully 
+   */
+  public double[] distributionForInstance(Instance instance) 
+    throws Exception {
+
+    double[] d = new double[numberOfClusters()];
+
+    d[clusterInstance(instance)] = 1.0;
+    
+    return d;
+  }
 
   /**
    * Returns the number of clusters.
