@@ -34,14 +34,16 @@ import java.io.Serializable;
  * Abstract class for objects that store instances to some destination.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
  */
 
 public abstract class AbstractDataSink extends JPanel
-  implements DataSink, BeanCommon, Visible, Serializable {
+  implements DataSink, BeanCommon, Visible, 
+	     DataSourceListener, TrainingSetListener,
+	     TestSetListener, Serializable {
 
   /**
    * Default visual for data sources
@@ -66,6 +68,33 @@ public abstract class AbstractDataSink extends JPanel
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
+
+  /**
+   * Accept a training set
+   *
+   * @param e a <code>TrainingSetEvent</code> value
+   */
+  public synchronized void acceptTrainingSet(TrainingSetEvent e) {
+    DataSetEvent de = new DataSetEvent(e.getSource(), e.getTrainingSet());
+    acceptDataSet(de);
+  }
+
+  /**
+   * Accept a test set
+   *
+   * @param e a <code>TestSetEvent</code> value
+   */
+  public synchronized void acceptTestSet(TestSetEvent e) {
+    DataSetEvent de = new DataSetEvent(e.getSource(), e.getTestSet());
+    acceptDataSet(de);
+  }
+
+  /**
+   * Accept a data set
+   *
+   * @param e a <code>DataSetEvent</code> value
+   */
+  public abstract void acceptDataSet(DataSetEvent e);
 
   /**
    * Set the visual for this data source

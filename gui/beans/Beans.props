@@ -2,7 +2,8 @@
 # base class types)
 weka.gui.beans.KnowledgeFlow.standardToolBars=\
  Evaluation,\
- Visualization
+ Visualization,\
+ DataSinks
 
 # Specifies the tools for each standard toolbar
 weka.gui.beans.KnowledgeFlow.Evaluation=weka.gui.beans.TrainingSetMaker,\
@@ -19,6 +20,7 @@ weka.gui.beans.KnowledgeFlow.Visualization=weka.gui.beans.DataVisualizer,\
  weka.gui.beans.TextViewer,\
  weka.gui.beans.GraphViewer,\
  weka.gui.beans.StripChart
+weka.gui.beans.KnowledgeFlow.DataSinks=weka.gui.beans.CSVDataSink
 
 # the bean panel processes keys in the generic object editor properties file.
 # If there is a corresponding entry here, then a toolbar is constructed using
