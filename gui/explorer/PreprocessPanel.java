@@ -70,7 +70,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -607,7 +607,7 @@ public class PreprocessPanel extends JPanel {
    */
   protected void saveInstancesToFile(final File f, final Instances inst) {
       
-    if (m_IOThread != null) {
+    if (m_IOThread == null) {
       m_IOThread = new Thread() {
 	public void run() {
 	  try {
@@ -621,6 +621,7 @@ public class PreprocessPanel extends JPanel {
 	      w.write("\n");
 	    }
 	    w.close();
+	    m_Log.statusMessage("OK");
 	  } catch (Exception ex) {
 	    ex.printStackTrace();
 	    m_Log.logMessage(ex.getMessage());
