@@ -35,7 +35,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class BestFirst
   extends ASSearch
@@ -207,7 +207,8 @@ public class BestFirst
   private int m_totalEvals;
   /** for debugging */
   private boolean m_debug;
-
+  /** holds the merit of the best subset found */
+  private double m_bestMerit;
 
   /** 
    *Constructor 
@@ -397,6 +398,8 @@ public class BestFirst
 		    + m_maxStale + " node expansions\n");
     BfString.append("\tTotal number of subsets evaluated: " 
 		    + m_totalEvals + "\n");
+    BfString.append("\tMerit of best subset found: "
+		    +Utils.doubleToString(m_bestMerit,8,3)+"\n");
     return  BfString.toString();
   }
 
@@ -613,6 +616,7 @@ public class BestFirst
       }
     }
 
+    m_bestMerit = best_merit;
     return  attributeList(best_group);
   }
 
