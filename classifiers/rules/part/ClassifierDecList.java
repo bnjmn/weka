@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import weka.core.*;
@@ -24,43 +23,49 @@ import java.io.*;
 
 /**
  * Class for handling a rule (partial tree) for a decision list.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class ClassifierDecList implements Serializable {
-    
-  // ====================
-  // Protected variables.
-  // ====================
 
-  protected ModelSelection toSelectModeL;    // The model selection method.
-  protected ClassifierSplitModel localModeL; // Local model at node.
-  protected ClassifierDecList [] sonS;       // References to sons.
-  protected boolean isLeaF;                  // True if node is leaf.
-  protected boolean isEmptY;                 // True if node is empty.
-  protected Instances traiN;                 // The training instances.
-  protected Distribution tesT;               // The pruning instances.
-  protected int indeX;                       // Which son to expand?
-    
-  // ===============
-  // Public methods.
-  // ===============
+  /** The model selection method. */
+  protected ModelSelection m_toSelectModel;   
+
+  /** Local model at node. */  
+  protected ClassifierSplitModel m_localModel; 
+
+  /** References to sons. */
+  protected ClassifierDecList [] m_sons;       
+  
+  /** True if node is leaf. */
+  protected boolean m_isLeaf;   
+
+  /** True if node is empty. */
+  protected boolean m_isEmpty;                 
+
+  /** The training instances. */
+  protected Instances m_train;                 
+
+  /** The pruning instances. */ 
+  protected Distribution m_test;               
+
+  /** Which son to expand? */  
+  protected int indeX;         
 
   /**
    * Constructor - just calls constructor of class DecList.
    */
-
   public ClassifierDecList(ModelSelection toSelectLocModel){
 
-    toSelectModeL = toSelectLocModel;
+    m_toSelectModel = toSelectLocModel;
    }
 
   /**
    * Builds the partial tree without hold out set.
+   *
    * @exception Exception if something goes wrong
    */
-
   public void buildDecList(Instances data, boolean leaf) throws Exception{
     
     Instances [] localInstances,localPruneInstances;
@@ -69,67 +74,66 @@ public class ClassifierDecList implements Serializable {
     double sumOfWeights;
     NoSplit noSplit;
     
-    traiN = null;
-    tesT = null;
-    isLeaF = false;
-    isEmptY = false;
-    sonS = null;
+    m_train = null;
+    m_test = null;
+    m_isLeaf = false;
+    m_isEmpty = false;
+    m_sons = null;
     indeX = 0;
     sumOfWeights = data.sumOfWeights();
     noSplit = new NoSplit (new Distribution((Instances)data));
     if (leaf)
-      localModeL = noSplit;
+      m_localModel = noSplit;
     else
-      localModeL = toSelectModeL.selectModel(data);
-    if (localModeL.numSubsets() > 1) {
-      localInstances = localModeL.split(data);
+      m_localModel = m_toSelectModel.selectModel(data);
+    if (m_localModel.numSubsets() > 1) {
+      localInstances = m_localModel.split(data);
       data = null;
-      sonS = new ClassifierDecList [localModeL.numSubsets()];
+      m_sons = new ClassifierDecList [m_localModel.numSubsets()];
       i = 0;
       do {
 	i++;
 	ind = chooseIndex();
 	if (ind == -1) {
-	  for (j = 0; j < sonS.length; j++) 
-	    if (sonS[j] == null)
-	      sonS[j] = getNewDecList(localInstances[j],true);
+	  for (j = 0; j < m_sons.length; j++) 
+	    if (m_sons[j] == null)
+	      m_sons[j] = getNewDecList(localInstances[j],true);
 	  if (i < 2) {
-	    localModeL = noSplit;
-	    isLeaF = true;
-	    sonS = null;
+	    m_localModel = noSplit;
+	    m_isLeaf = true;
+	    m_sons = null;
 	    if (Utils.eq(sumOfWeights,0))
-	      isEmptY = true;
+	      m_isEmpty = true;
 	    return;
 	  }
 	  ind = 0;
 	  break;
 	} else 
-	  sonS[ind] = getNewDecList(localInstances[ind],false);
-      } while ((i < sonS.length) && (sonS[ind].isLeaF));
+	  m_sons[ind] = getNewDecList(localInstances[ind],false);
+      } while ((i < m_sons.length) && (m_sons[ind].m_isLeaf));
       
       // Check if all successors are leaves
-
-      for (j = 0; j < sonS.length; j++) 
-	if ((sonS[j] == null) || (!sonS[j].isLeaF))
+      for (j = 0; j < m_sons.length; j++) 
+	if ((m_sons[j] == null) || (!m_sons[j].m_isLeaf))
 	  break;
-      if (j == sonS.length) {
+      if (j == m_sons.length) {
 	pruneEnd();
-	if (!isLeaF) 
+	if (!m_isLeaf) 
 	  indeX = chooseLastIndex();
       }else 
 	indeX = chooseLastIndex();
     }else{
-      isLeaF = true;
+      m_isLeaf = true;
       if (Utils.eq(sumOfWeights, 0))
-	isEmptY = true;
+	m_isEmpty = true;
     }
   }
 
   /**
    * Builds the partial tree with hold out set
+   *
    * @exception Exception if something goes wrong
    */
-
   public void buildDecList(Instances train, Instances test, 
 			   boolean leaf) throws Exception{
     
@@ -139,69 +143,68 @@ public class ClassifierDecList implements Serializable {
     double sumOfWeights;
     NoSplit noSplit;
     
-    traiN = null;
-    isLeaF = false;
-    isEmptY = false;
-    sonS = null;
+    m_train = null;
+    m_isLeaf = false;
+    m_isEmpty = false;
+    m_sons = null;
     indeX = 0;
     sumOfWeights = train.sumOfWeights();
     noSplit = new NoSplit (new Distribution((Instances)train));
     if (leaf)
-      localModeL = noSplit;
+      m_localModel = noSplit;
     else
-      localModeL = toSelectModeL.selectModel(train, test);
-    tesT = new Distribution(test, localModeL);
-    if (localModeL.numSubsets() > 1) {
-      localTrain = localModeL.split(train);
-      localTest = localModeL.split(test);
+      m_localModel = m_toSelectModel.selectModel(train, test);
+    m_test = new Distribution(test, m_localModel);
+    if (m_localModel.numSubsets() > 1) {
+      localTrain = m_localModel.split(train);
+      localTest = m_localModel.split(test);
       train = null;
       test = null;
-      sonS = new ClassifierDecList [localModeL.numSubsets()];
+      m_sons = new ClassifierDecList [m_localModel.numSubsets()];
       i = 0;
       do {
 	i++;
 	ind = chooseIndex();
 	if (ind == -1) {
-	  for (j = 0; j < sonS.length; j++) 
-	    if (sonS[j] == null)
-	      sonS[j] = getNewDecList(localTrain[j],localTest[j],true);
+	  for (j = 0; j < m_sons.length; j++) 
+	    if (m_sons[j] == null)
+	      m_sons[j] = getNewDecList(localTrain[j],localTest[j],true);
 	  if (i < 2) {
-	    localModeL = noSplit;
-	    isLeaF = true;
-	    sonS = null;
+	    m_localModel = noSplit;
+	    m_isLeaf = true;
+	    m_sons = null;
 	    if (Utils.eq(sumOfWeights,0))
-	      isEmptY = true;
+	      m_isEmpty = true;
 	    return;
 	  }
 	  ind = 0;
 	  break;
 	} else 
-	  sonS[ind] = getNewDecList(localTrain[ind],localTest[ind],false);
-      } while ((i < sonS.length) && (sonS[ind].isLeaF));
+	  m_sons[ind] = getNewDecList(localTrain[ind],localTest[ind],false);
+      } while ((i < m_sons.length) && (m_sons[ind].m_isLeaf));
       
       // Check if all successors are leaves
-
-      for (j = 0; j < sonS.length; j++) 
-	if ((sonS[j] == null) || (!sonS[j].isLeaF))
+      for (j = 0; j < m_sons.length; j++) 
+	if ((m_sons[j] == null) || (!m_sons[j].m_isLeaf))
 	  break;
-      if (j == sonS.length) {
+      if (j == m_sons.length) {
 	pruneEnd();
-	if (!isLeaF) 
+	if (!m_isLeaf) 
 	  indeX = chooseLastIndex();
       }else 
 	indeX = chooseLastIndex();
     }else{
-      isLeaF = true;
+      m_isLeaf = true;
       if (Utils.eq(sumOfWeights, 0))
-	isEmptY = true;
+	m_isEmpty = true;
     }
   }
 
   /** 
-   * Classifies a weighted instance.
+   * Classifies an instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   public double classifyInstance(Instance instance)
        throws Exception {
 
@@ -226,9 +229,9 @@ public class ClassifierDecList implements Serializable {
 
   /** 
    * Returns class probabilities for a weighted instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   public final double [] distributionForInstance(Instance instance) 
        throws Exception {
 		
@@ -244,51 +247,49 @@ public class ClassifierDecList implements Serializable {
   
   /**
    * Returns the weight a rule assigns to an instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   public double weight(Instance instance) throws Exception {
 
     int subset;
 
-    if (isLeaF)
+    if (m_isLeaf)
       return 1;
-    subset = localModeL.whichSubset(instance);
+    subset = m_localModel.whichSubset(instance);
     if (subset == -1)
-      return (localModeL.weights(instance))[indeX]*
-	sonS[indeX].weight(instance);
+      return (m_localModel.weights(instance))[indeX]*
+	m_sons[indeX].weight(instance);
     if (subset == indeX)
-      return sonS[indeX].weight(instance);
+      return m_sons[indeX].weight(instance);
     return 0;
   }
 
   /**
    * Cleanup in order to save memory.
    */
-
   public final void cleanup(Instances justHeaderInfo) {
 
-    traiN = justHeaderInfo;
-    tesT = null;
-    if (!isLeaF)
-      for (int i = 0; i < sonS.length; i++)
-	if (sonS[i] != null)
-	  sonS[i].cleanup(justHeaderInfo);
+    m_train = justHeaderInfo;
+    m_test = null;
+    if (!m_isLeaf)
+      for (int i = 0; i < m_sons.length; i++)
+	if (m_sons[i] != null)
+	  m_sons[i].cleanup(justHeaderInfo);
   }
 
   /**
    * Prints rules.
    */
-
   public String toString(){
 
     try {
       StringBuffer text;
       
       text = new StringBuffer();
-      if (isLeaF){
+      if (m_isLeaf){
 	text.append(": ");
-	text.append(localModeL.dumpLabel(0,traiN)+"\n");
+	text.append(m_localModel.dumpLabel(0,m_train)+"\n");
       }else{
       dumpDecList(text);
       //dumpTree(0,text);
@@ -299,19 +300,15 @@ public class ClassifierDecList implements Serializable {
     }
   }
 
-  // ==================
-  // Protected methods.
-  // ==================
-
   /**
    * Returns a newly created tree.
+   *
    * @exception Exception if something goes wrong
    */
-
   protected ClassifierDecList getNewDecList(Instances train, boolean leaf) 
     throws Exception{
 	 
-    ClassifierDecList newDecList = new ClassifierDecList(toSelectModeL);
+    ClassifierDecList newDecList = new ClassifierDecList(m_toSelectModel);
     newDecList.buildDecList(train,leaf);
     
     return newDecList;
@@ -319,94 +316,96 @@ public class ClassifierDecList implements Serializable {
 
   /**
    * Returns a newly created tree.
+   *
    * @exception Exception if something goes wrong
    */
-
   protected ClassifierDecList getNewDecList(Instances train, Instances test,
 				  boolean leaf) 
        throws Exception{
 	 
-    ClassifierDecList newDecList = new ClassifierDecList(toSelectModeL);
+    ClassifierDecList newDecList = new ClassifierDecList(m_toSelectModel);
     newDecList.buildDecList(train, test ,leaf);
     
     return newDecList;
   }
 
-  // Three dummy methods
-
+  /**
+   * Dummy method. Overwritten by sub classes.
+   */
   protected int chooseLastIndex() {
 
     return 0;
   };
 
+  /**
+   * Dummy method. Overwritten by sub classes.
+   */
   protected int chooseIndex() {
 
     return 0;
   };
   
+  /**
+   * Dummy method. Overwritten by sub classes.
+   */
   protected void pruneEnd() throws Exception {
   };
-  
-  // ================
-  // Private methods.
-  // ================
 
   /**
    * Help method for printing tree structure.
    */
-
   private void dumpDecList(StringBuffer text) throws Exception {
     
-    text.append(localModeL.leftSide(traiN));
-    text.append(localModeL.rightSide(indeX, traiN));
-    if (sonS[indeX].isLeaF){
+    text.append(m_localModel.leftSide(m_train));
+    text.append(m_localModel.rightSide(indeX, m_train));
+    if (m_sons[indeX].m_isLeaf){
       text.append(": ");
-      text.append(localModeL.dumpLabel(indeX,traiN)+"\n");
+      text.append(m_localModel.dumpLabel(indeX,m_train)+"\n");
     }else{
       text.append(" AND\n");
-      sonS[indeX].dumpDecList(text);
+      m_sons[indeX].dumpDecList(text);
     }
   }
 
   /**
    * Dumps the partial tree (only used for debugging)
+   *
    * @exception exception Exception if something goes wrong
    */
-
   private void dumpTree(int depth,StringBuffer text)
        throws Exception {
     
     int i,j;
     
-    for (i=0;i<sonS.length;i++){
+    for (i=0;i<m_sons.length;i++){
       text.append("\n");;
       for (j=0;j<depth;j++)
 	text.append("|   ");
-      text.append(localModeL.leftSide(traiN));
-      text.append(localModeL.rightSide(i, traiN));
-      if (sonS[i] == null)
+      text.append(m_localModel.leftSide(m_train));
+      text.append(m_localModel.rightSide(i, m_train));
+      if (m_sons[i] == null)
 	text.append("null");
-      else if (sonS[i].isLeaF){
+      else if (m_sons[i].m_isLeaf){
 	text.append(": ");
-	text.append(localModeL.dumpLabel(i,traiN));
+	text.append(m_localModel.dumpLabel(i,m_train));
       }else
-	sonS[i].dumpTree(depth+1,text);
+	m_sons[i].dumpTree(depth+1,text);
     }
   }
 
   /**
    * Help method for computing class probabilities of 
    * a given instance.
+   *
    * @exception exception Exception if something goes wrong
    */
-
   private double getProbs(int classIndex,Instance instance,
 			  double weight) throws Exception {
     
     double [] weights;
     int treeIndex;
 
-    if (isLeaF){
+    if (m_isLeaf){
       return weight*localModel().classProb(classIndex,instance);
     }else{
       treeIndex = localModel().whichSubset(instance);
@@ -424,19 +423,17 @@ public class ClassifierDecList implements Serializable {
   /**
    * Method just exists to make program easier to read.
    */
-  
   private ClassifierSplitModel localModel(){
     
-    return localModeL;
+    return m_localModel;
   }
 
   /**
    * Method just exists to make program easier to read.
    */
-
   private ClassifierDecList son(int index){
     
-    return sonS[index];
+    return m_sons[index];
   }
 }
 

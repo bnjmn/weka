@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import java.io.*;
@@ -24,32 +23,24 @@ import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /** 
  * Abstract class for classification models that can be used 
  * recursively to split the data.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public abstract class ClassifierSplitModel implements Cloneable, Serializable {
 
-  // =====================
-  // Protected  variables.
-  // =====================
+  /** Distribution of class values. */  
+  protected Distribution m_distribution;  
 
-  protected Distribution distributioN;  // Distribution of class values.
-
-  protected int numSubsetS;             // Number of created subsets.
-
-  // ===============
-  // Public methods.
-  // ===============
+  /** Number of created subsets. */
+  protected int m_numSubsets;         
 
   /**
    * Allows to clone a model (shallow copy).
    */
-
   public Object clone() {
 
     Object clone = null;
@@ -62,19 +53,18 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
   }
 
   /**
-   * Builds the classifier split model.
+   * Builds the classifier split model for the given set of instances.
+   *
    * @exception Exception if something goes wrong
    */
-
   abstract public void buildClassifier(Instances instances) throws Exception;
   
   /**
    * Checks if generated model is valid.
    */
-  
-  public final boolean checkModel(){
+  public final boolean checkModel() {
     
-    if (numSubsetS > 0)
+    if (m_numSubsets > 0)
       return true;
     else
       return false;
@@ -82,9 +72,9 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
   
   /**
    * Classifies a given instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   public final double classifyInstance(Instance instance)
        throws Exception {
     
@@ -92,32 +82,31 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
     
     theSubset = whichSubset(instance);
     if (theSubset > -1)
-      return (double)distributioN.maxClass(theSubset);
+      return (double)m_distribution.maxClass(theSubset);
     else
-      return (double)distributioN.maxClass();
+      return (double)m_distribution.maxClass();
   }
 
   /**
    * Gets class probability for instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   public double classProb(int classIndex,Instance instance) 
        throws Exception {
     
     int theSubset = whichSubset(instance);
 
     if (theSubset > -1)
-      return distributioN.prob(classIndex,theSubset);
+      return m_distribution.prob(classIndex,theSubset);
     else
-      return distributioN.prob(classIndex);
+      return m_distribution.prob(classIndex);
   }
 
   /**
    * Returns coding costs of model. Returns 0 if not overwritten.
    */
-
-  public double codingCost(){
+  public double codingCost() {
 
     return 0;
   }
@@ -125,40 +114,38 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
   /**
    * Returns the distribution of class values induced by the model.
    */
+  public final Distribution distribution() {
 
-  public final Distribution distribution(){
-
-    return distributioN;
+    return m_distribution;
   }
 
   /**
    * Prints left side of condition satisfied by instances.
+   *
    * @param data the data.
    */
-
   abstract public String leftSide(Instances data);
 
   /**
    * Prints left side of condition satisfied by instances in subset index.
    */
-
   abstract public String rightSide(int index,Instances data);
 
   /**
    * Prints label for subset index of instances (eg class).
+   *
    * @exception Exception if something goes wrong
    */
-  
   public final String dumpLabel(int index,Instances data) throws Exception {
 
     StringBuffer text;
 
     text = new StringBuffer();
     text.append(((Instances)data).classAttribute().
-		value(distributioN.maxClass(index)));
-    text.append(" ("+Utils.roundDouble(distributioN.perBag(index),2));
-    if (Utils.gr(distributioN.numIncorrect(index),0))
-      text.append("/"+Utils.roundDouble(distributioN.numIncorrect(index),2));
+		value(m_distribution.maxClass(index)));
+    text.append(" ("+Utils.roundDouble(m_distribution.perBag(index),2));
+    if (Utils.gr(m_distribution.numIncorrect(index),0))
+      text.append("/"+Utils.roundDouble(m_distribution.numIncorrect(index),2));
     text.append(")");
 
     return text.toString();
@@ -166,16 +153,16 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
   
   /**
    * Prints the split model.
+   *
    * @exception Exception if something goes wrong
    */
-
   public final String dumpModel(Instances data) throws Exception {
 
     StringBuffer text;
     int i;
 
     text = new StringBuffer();
-    for (i=0;i<numSubsetS;i++){
+    for (i=0;i<m_numSubsets;i++) {
       text.append(leftSide(data)+rightSide(i,data)+": ");
       text.append(dumpLabel(i,data)+"\n");
     }
@@ -185,53 +172,51 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
   /**
    * Returns the number of created subsets for the split.
    */
+  public final int numSubsets() {
 
-  public final int numSubsets(){
-
-    return numSubsetS;
+    return m_numSubsets;
   }
   
   /**
    * Sets distribution associated with model.
    */
+  public final void setDistribution(Distribution distribution) {
 
-  public final void setDistribution(Distribution distribution){
-
-    distributioN = distribution;
+    m_distribution = distribution;
   }
 
   /**
    * Splits the given set of instances into subsets.
+   *
    * @exception Exception if something goes wrong
    */
-
   public final Instances [] split(Instances data) 
        throws Exception { 
 
-    Instances [] instances = new Instances [numSubsetS];
+    Instances [] instances = new Instances [m_numSubsets];
     double [] weights;
     double newWeight;
     Instance instance;
     int subset, i, j;
 
-    for (j=0;j<numSubsetS;j++)
+    for (j=0;j<m_numSubsets;j++)
       instances[j] = new Instances((Instances)data,
 					    data.numInstances());
-    for (i = 0; i < data.numInstances(); i++){
+    for (i = 0; i < data.numInstances(); i++) {
       instance = ((Instances) data).instance(i);
       weights = weights(instance);
       subset = whichSubset(instance);
       if (subset > -1)
 	instances[subset].add(instance);
       else
-	for (j = 0; j < numSubsetS; j++)
-	  if (Utils.gr(weights[j],0)){
+	for (j = 0; j < m_numSubsets; j++)
+	  if (Utils.gr(weights[j],0)) {
 	    newWeight = weights[j]*instance.weight();
 	    instances[j].add(instance);
 	    instances[j].lastInstance().setWeight(newWeight);
 	  }
     }
-    for (j = 0; j < numSubsetS; j++)
+    for (j = 0; j < m_numSubsets; j++)
       instances[j].compactify();
     
     return instances;
@@ -241,15 +226,14 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
    * Returns weights if instance is assigned to more than one subset.
    * Returns null if instance is only assigned to one subset.
    */
-  
   abstract public double [] weights(Instance instance);
   
   /**
    * Returns index of subset instance is assigned to.
    * Returns -1 if instance is assigned to more than one subset.
+   *
    * @exception Exception if something goes wrong
    */
-
   abstract public int whichSubset(Instance instance) throws Exception;
 }
 

@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import java.util.*;
@@ -25,57 +24,33 @@ import weka.classifiers.*;
 
 /**
  * Class for handling a decision list.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.3 $
  */
-
 public class MakeDecList {
 
-  /**
-   * Vector storing the rules.
-   */
-
+  /** Vector storing the rules. */
   private Vector theRules;
 
-  /**
-   * The confidence for C45-type pruning.
-   */
-
+  /** The confidence for C45-type pruning. */
   private double CF = 0.25f;
 
-  /**
-   * Minimum number of objects
-   */
-
+  /** Minimum number of objects */
   private int minNumObj;
 
-  /**
-   * The model selection method.
-   */
-
+  /** The model selection method. */
   private ModelSelection toSelectModeL;
 
-  /**
-   * How many subsets of equal size?
-   * One used for pruning, the rest for training
-   */
-
+  /** How many subsets of equal size? One used for pruning, the rest for training. */
   private int numSetS = 3;
 
-  /**
-   * Use reduced error pruning?
-   */
-
+  /** Use reduced error pruning? */
   private boolean reducedErrorPruning = false;
 
-  // ===============
-  // Public methods.
-  // ===============
-
   /**
-   * Constructor for dec list pruned using pessimistic pruning.
+   * Constructor for dec list pruned using C4.5 pruning.
    */
-
   public MakeDecList(ModelSelection toSelectLocModel, double cf,
 		     int minNum){
 
@@ -86,9 +61,8 @@ public class MakeDecList {
   }
 
   /**
-   * Constructor for dec list pruned using pessimistic pruning.
+   * Constructor for dec list pruned using hold-out pruning.
    */
-
   public MakeDecList(ModelSelection toSelectLocModel, int num,
 		     int minNum){
 
@@ -100,9 +74,9 @@ public class MakeDecList {
 
   /**
    * Builds dec list.
+   *
    * @exception Exception if dec list can't be built successfully
    */
-
   public void buildClassifier(Instances data) throws Exception{
     
     ClassifierDecList currentRule;
@@ -134,7 +108,6 @@ public class MakeDecList {
     while (Utils.gr(oldGrowData.numInstances(),0)){
 
       // Create rule
-
       if (reducedErrorPruning) {
 	currentRule = new PruneableDecList(toSelectModeL,
 					   minNumObj);
@@ -148,7 +121,6 @@ public class MakeDecList {
       numRules++;
 
       // Remove instances from growing data
-
       newGrowData = new Instances(oldGrowData,
 					   oldGrowData.numInstances());
       Enumeration enum = oldGrowData.enumerateInstances();
@@ -164,7 +136,6 @@ public class MakeDecList {
       oldGrowData = newGrowData;
       
       // Remove instances from pruning data
-      
       if (reducedErrorPruning) {
 	newPruneData = new Instances(oldPruneData,
 					     oldPruneData.numInstances());
@@ -187,7 +158,6 @@ public class MakeDecList {
   /**
    * Outputs the classifier into a string.
    */
-  
   public String toString(){
 
     StringBuffer text = new StringBuffer();
@@ -201,9 +171,9 @@ public class MakeDecList {
 
   /** 
    * Classifies an instance.
+   *
    * @exception Exception if instance can't be classified
    */
-
   public double classifyInstance(Instance instance) 
        throws Exception {
 
@@ -224,9 +194,9 @@ public class MakeDecList {
 
   /** 
    * Returns the class distribution for an instance.
+   *
    * @exception Exception if distribution can't be computed
    */
-
   public double[] distributionForInstance(Instance instance) 
        throws Exception {
 
@@ -236,7 +206,6 @@ public class MakeDecList {
     int i,j;
 	
     // Get probabilities.
- 
     sumProbs = new double [instance.numClasses()];
     i = 0;
     while (Utils.gr(weight,0)){
@@ -258,7 +227,6 @@ public class MakeDecList {
   /**
    * Outputs the number of rules in the classifier.
    */
-
   public int numRules(){
 
     return theRules.size();

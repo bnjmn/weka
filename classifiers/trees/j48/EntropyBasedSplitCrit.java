@@ -16,36 +16,26 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 /**
  * "Abstract" class for computing splitting criteria
  * based on the entropy of a class distribution.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public abstract class EntropyBasedSplitCrit extends SplitCriterion{
 
-  // ====================
-  // Protected variables.
-  // ====================
-
+  /** The log of 2. */
   protected static double log2 = Math.log(2);
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Help method for computing entropy.
    */
-
-  public final double logFunc(double num){
+  protected final double logFunc(double num) {
 
     // Constant hard coded for efficiency reasons
-
     if (num < 1e-6)
       return 0;
     else
@@ -55,8 +45,7 @@ public abstract class EntropyBasedSplitCrit extends SplitCriterion{
   /**
    * Computes entropy of distribution before splitting.
    */
-
-  public final double oldEnt(Distribution bags){
+  public final double oldEnt(Distribution bags) {
 
     double returnValue = 0;
     int j;
@@ -69,8 +58,7 @@ public abstract class EntropyBasedSplitCrit extends SplitCriterion{
   /**
    * Computes entropy of distribution after splitting.
    */
-  
-  public final double newEnt(Distribution bags){
+  public final double newEnt(Distribution bags) {
     
     double returnValue = 0;
     int i,j;
@@ -87,8 +75,7 @@ public abstract class EntropyBasedSplitCrit extends SplitCriterion{
    * Computes entropy after splitting without considering the
    * class values.
    */
-
-  public final double splitEnt(Distribution bags){
+  public final double splitEnt(Distribution bags) {
 
     double returnValue = 0;
     int i;

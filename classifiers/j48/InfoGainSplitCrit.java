@@ -16,53 +16,46 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import weka.core.*;
 
 /**
  * Class for computing the information gain for a given distribution.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * This method is a straightforward implementation of the information
-   * gain criterion.
+   * gain criterion for the given distribution.
    */
-
-  public final double splitCritValue(Distribution bags){
+  public final double splitCritValue(Distribution bags) {
 
     double numerator;
         
     numerator = oldEnt(bags)-newEnt(bags);
 
     // Splits with no gain are useless.
-
     if (Utils.eq(numerator,0))
       return Double.MAX_VALUE;
         
     // We take the reciprocal value because we want to minimize the
     // splitting criterion's value.
-
     return bags.total()/numerator;
   }
 
   /**
    * This method computes the information gain in the same way 
    * C4.5 does.
-   * @param distribution and weight of ALL instances (including the
+   *
+   * @param distribution 
+   * @param totalNoInst weight of ALL instances (including the
    * ones with missing values).
    */
-
-  public final double splitCritValue(Distribution bags,double totalNoInst){
+  public final double splitCritValue(Distribution bags,double totalNoInst) {
     
     double numerator;
     double noUnknown;
@@ -75,7 +68,6 @@ public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
     numerator = (1-unknownRate)*numerator;
     
     // Splits with no gain are useless.
-
     if (Utils.eq(numerator,0))
       return 0;
     
@@ -85,12 +77,13 @@ public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
   /**
    * This method computes the information gain in the same way 
    * C4.5 does.
-   * @param distribution, weight of ALL instances and entropy with
-   * respect to "no-split"-model.
+   *
+   * @param distribution 
+   * @param totalNoInst weight of ALL instances 
+   * @param oldEnt entropy with respect to "no-split"-model.
    */
-
   public final double splitCritValue(Distribution bags,double totalNoInst,
-                                     double oldEnt){
+                                     double oldEnt) {
     
     double numerator;
     double noUnknown;
@@ -103,7 +96,6 @@ public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
     numerator = (1-unknownRate)*numerator;
     
     // Splits with no gain are useless.
-
     if (Utils.eq(numerator,0))
       return 0;
     

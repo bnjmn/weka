@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import java.util.*;
@@ -24,7 +23,11 @@ import weka.core.*;
 import weka.classifiers.*;
 
 /**
- * Class for generating an unpruned and a pruned C4.5 decision tree.
+ * Class for generating an unpruned or a pruned C4.5 decision tree.
+ *
+ * Reference:
+ * Ross Quinlan (1993). <i>C4.5: Programs for Machine Learning</i>, 
+ * Morgan Kaufmann Publishers, San Mateo, CA.
  *
  * Valid options are: <p>
  *
@@ -50,130 +53,97 @@ import weka.classifiers.*;
  * -S <br>
  * Don't perform subtree raising. <p>
  *
-  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
-
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, WeightedInstancesHandler {
-  
-  // =================
-  // Private variables
-  // =================
 
-  /**
-   * The decision tree
-   */
+  /** The decision tree */
+  private ClassifierTree m_root;
 
-  private ClassifierTree root;
+  /** Unpruned tree? */
+  private boolean m_unpruned = false;
 
-  /**
-   * Unpruned tree?
-   */
+  /** Confidence level */
+  private float m_CF = 0.25f;
 
-  private boolean unpruned = false;
+  /** Minimum number of instances */
+  private int m_minNumObj = 2;
 
-  /**
-   * Confidence level
-   */
+  /** Use reduced error pruning? */
+  private boolean m_reducedErrorPruning = false;
 
-  private float CF = 0.25f;
+  /** Number of folds for reduced error pruning. */
+  private int m_numFolds = 3;
 
-  /**
-   * Minimum number of instances
-   */
+  /** Binary splits on nominal attributes? */
+  private boolean m_binarySplits = false;
 
-  private int minNumObj = 2;
-
-  /**
-   * Use reduced error pruning?
-   */
-
-  private boolean reducedErrorPruning = false;
-
-  /**
-   * Number of folds for reduced error pruning.
-   */
-
-  private int numFolds = 3;
-
-  /**
-   * Binary splits on nominal attributes?
-   */
-
-  private boolean binarySplits = false;
-
-  /**
-   * Subtree raising to be performed?
-   */
-
-  private boolean subtreeRaising = true;
-
-  /**
-   * Constructs a new classifier.
-   */
+  /** Subtree raising to be performed? */
+  private boolean m_subtreeRaising = true;
   
   /**
    * Generates the classifier.
+   *
    * @exception Exception if classifier can't be built successfully
    */
- 
   public void buildClassifier(Instances instances) 
        throws Exception{
 
     ModelSelection modSelection;	 
 
-    if (binarySplits)
-      modSelection = new BinC45ModelSelection(minNumObj, instances);
+    if (m_binarySplits)
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances);
     else
-      modSelection = new C45ModelSelection(minNumObj, instances);
-    if (!reducedErrorPruning)
-      root = new C45PruneableClassifierTree(modSelection, !unpruned, CF,
-					    subtreeRaising);
+      modSelection = new C45ModelSelection(m_minNumObj, instances);
+    if (!m_reducedErrorPruning)
+      m_root = new C45PruneableClassifierTree(modSelection, !m_unpruned, m_CF,
+					    m_subtreeRaising);
     else
-      root = new PruneableClassifierTree(modSelection, !unpruned, numFolds);
-    root.buildClassifier(instances);
+      m_root = new PruneableClassifierTree(modSelection, !m_unpruned, m_numFolds);
+    m_root.buildClassifier(instances);
   }
 
   /**
    * Classifies an instance.
+   *
    * @exception Exception if instance can't be classified successfully
    */
- 
   public double classifyInstance(Instance instance) throws Exception {
 
-    return root.classifyInstance(instance);
+    return m_root.classifyInstance(instance);
   }
 
   /** 
    * Returns class probabilities for an instance.
+   *
    * @exception Exception if distribution can't be computed successfully
    */
-
   public final double [] distributionForInstance(Instance instance) 
        throws Exception {
 
-    return root.distributionForInstance(instance);
+    return m_root.distributionForInstance(instance);
   }
 
   /**
    * Returns graph describing the tree.
+   *
    * @exception Exception if graph can't be computed
    */
-
   public String graph() throws Exception {
 
-    return root.graph();
+    return m_root.graph();
   }
 
   /**
    * Returns tree in prefix order.
+   *
    * @exception Exception if something goes wrong
    */
-
   public String prefix() throws Exception {
     
-    return root.prefix();
+    return m_root.prefix();
   }
 
   /**
@@ -205,7 +175,6 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    *
    * @return an enumeration of all the available options
    */
-
   public Enumeration listOptions() {
 
     Vector newVector = new Vector(7);
@@ -214,17 +183,20 @@ public class J48 extends DistributionClassifier implements OptionHandler,
 	addElement(new Option("\tUse unpruned tree.",
 			      "U", 0, "-U"));
     newVector.
-	addElement(new Option("\tSet confidence threshold for pruning.",
+	addElement(new Option("\tSet confidence threshold for pruning.\n" +
+			      "\t(default 0.25)",
 			      "C", 1, "-C <pruning confidence>"));
     newVector.
-	addElement(new Option("\tSet minimum number of instances per leaf.",
+	addElement(new Option("\tSet minimum number of instances per leaf.\n" +
+			      "\t(default 2)",
 			      "M", 1, "-M <minimum number of instances>"));
     newVector.
 	addElement(new Option("\tUse reduced error pruning.",
 			      "R", 0, "-R"));
     newVector.
-	addElement(new Option("\tSet number of folds for reduced error" +
-			      "\tpruning. One fold is used as pruning set.",
+	addElement(new Option("\tSet number of folds for reduced error\n" +
+			      "\tpruning. One fold is used as pruning set.\n" +
+			      "\t(default 3)",
 			      "N", 1, "-N <number of folds>"));
     newVector.
 	addElement(new Option("\tUse binary splits only.",
@@ -238,42 +210,62 @@ public class J48 extends DistributionClassifier implements OptionHandler,
 
   /**
    * Parses a given list of options.
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-
   public void setOptions(String[] options) throws Exception{
     
-    String confidenceString = Utils.getOption('C', options);
+    // Other options
     String minNumString = Utils.getOption('M', options);
-    String numFoldsString = Utils.getOption('N', options);
-
-    subtreeRaising = !Utils.getFlag('S', options);
-    unpruned = Utils.getFlag('U', options);
-    if (unpruned) {
-      subtreeRaising = false;
+    if (minNumString.length() != 0) {
+      m_minNumObj = Integer.parseInt(minNumString);
+    } else {
+      m_minNumObj = 2;
     }
-    reducedErrorPruning = Utils.getFlag('R', options);
-    binarySplits = Utils.getFlag('B', options);
-    if (confidenceString.length() != 0) 
-      if (reducedErrorPruning)
-	throw new Exception("Setting CF doesn't make sense" +
-			    " for reduced error pruning.");
-      else {
-	CF = (new Float(confidenceString)).floatValue();
-	if ((CF <= 0) || (CF >= 1)) {
-	  throw new Exception("CF has to be greater than zero and smaller than one!");
+    m_binarySplits = Utils.getFlag('B', options);
+
+    // Pruning options
+    m_unpruned = Utils.getFlag('U', options);
+    m_subtreeRaising = !Utils.getFlag('S', options);
+    if ((m_unpruned) || (!m_subtreeRaising)) {
+      throw new Exception("Subtree raising doesn't need to be unset for unpruned tree!");
+    }
+    m_reducedErrorPruning = Utils.getFlag('R', options);
+    if ((m_unpruned) && (m_reducedErrorPruning)) {
+      throw new Exception("Unpruned tree and reduced error pruning can't be selected " +
+			  "simultaneously!");
+    }
+    String confidenceString = Utils.getOption('C', options);
+    if (confidenceString.length() != 0) {
+      if (m_reducedErrorPruning) {
+	throw new Exception("Setting the confidence doesn't make sense " +
+			    "for reduced error pruning.");
+      } else if (m_unpruned) {
+	throw new Exception("Doesn't make sense to change confidence for unpruned "
+			    +"tree!");
+      } else {
+	m_CF = (new Float(confidenceString)).floatValue();
+	if ((m_CF <= 0) || (m_CF >= 1)) {
+	  throw new Exception("Confidence has to be greater than zero and smaller " +
+			      "than one!");
 	}
       }
-    if (numFoldsString.length() != 0)
-      if (!reducedErrorPruning)
+    } else {
+      m_CF = 0.25f;
+    }
+    String numFoldsString = Utils.getOption('N', options);
+    if (numFoldsString.length() != 0) {
+      if (!m_reducedErrorPruning) {
 	throw new Exception("Setting the number of folds" +
-			    " doesn't make sense for" +
-			    " pessimistic pruning.");
-      else
-	numFolds = Integer.parseInt(numFoldsString);
-    if (minNumString.length() != 0)
-      minNumObj = Integer.parseInt(minNumString);
+			    " doesn't make sense if" +
+			    " reduced error pruning is not selected.");
+      } else {
+	m_numFolds = Integer.parseInt(numFoldsString);
+      }
+    } else {
+      m_numFolds = 3;
+    }
   }
 
   /**
@@ -283,26 +275,26 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [7];
+    String [] options = new String [8];
     int current = 0;
 
-    if (unpruned) {
+    if (m_unpruned) {
       options[current++] = "-U";
     } else {
-      if (!subtreeRaising) {
+      if (!m_subtreeRaising) {
 	options[current++] = "-S";
       }
+      if (m_reducedErrorPruning) {
+	options[current++] = "-R";
+	options[current++] = "-N"; options[current++] = "" + m_numFolds;
+      } else {
+	options[current++] = "-C"; options[current++] = "" + m_CF;
+      }
     }
-    if (reducedErrorPruning) {
-      options[current++] = "-R";
-      options[current++] = "-N"; options[current++] = "" + numFolds;
-    } else {
-      options[current++] = "-C"; options[current++] = "" + CF;
-    }
-    if (binarySplits) {
+    if (m_binarySplits) {
       options[current++] = "-B";
     }
-    options[current++] = "-M"; options[current++] = "" + minNumObj;
+    options[current++] = "-M"; options[current++] = "" + m_minNumObj;
 
     while (current < options.length) {
       options[current++] = "";
@@ -311,31 +303,21 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   }
 
   /**
-   * Returns a description of the classifier
+   * Returns a description of the classifier.
    */
   public String toString() {
     
-    if (unpruned)
-      return "J48 unpruned tree\n------------------\n"+root.toString();
+    if (m_unpruned)
+      return "J48 unpruned tree\n------------------\n"+m_root.toString();
     else
-      return "J48 pruned tree\n------------------\n"+root.toString();
+      return "J48 pruned tree\n------------------\n"+m_root.toString();
   }
-
-  
-
-  // ===============
-  // Public methods.
-  // ===============
   
   /**
-   * Generates a pruned and an unpruned C4.5 decision tree.
-   * @param String with options: -c <index of class>, 
-   * -t <name of file with training data>, -T <name of file with test data>, 
-   * -U (output accuracy of unpruned tree), -M <minimum number of instances in
-   * subset> (default 2), -C <confidence factor> (default 0.25)
-   * -m <name of file with cost matrix>.
+   * Main method for testing this class
+   *
+   * @param String options 
    */
-  
   public static void main(String [] argv){
 
     try {
