@@ -48,7 +48,10 @@ import weka.attributeSelection.*;
  * @version $Revision 1.0 $
  */
 public class AttributeSelectionFilter extends Filter implements OptionHandler {
-  
+
+  /** the attribute selection evaluation object */
+  private AttributeSelection m_trainSelector;
+
   /** the attribute evaluator to use */
   private ASEvaluation m_ASEvaluator;
 
@@ -59,20 +62,13 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
   private String [] m_FilterOptions;
 
   /** holds the selected attributes  */
-  private int [][] m_SelectedAttributes;
+  private int [] m_SelectedAttributes;
 
-  /** holds the class name of the attribute/subset evaluator */
-  private String m_EvaluatorString;
+  /** Range object for starting set of attributes */
+  private Range m_StartSet;
 
-  /** holds the class name of the search method */
-  private String m_SearchString;
-
-  /** holds the starting set of attributes if specified */
-  private String m_StartSet;
-
-  /** holds the threshold by which to discard attributes 
-      (attribute evaluators only) */
-  private double m_Threshold;
+  /** set to true for attribute evaluators */
+  private boolean m_doRank;
 
   /**
    * Constructor
@@ -88,7 +84,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(7);
+    Vector newVector = new Vector(6);
 
     newVector.addElement(new Option("\tSets search method for subset "
 				    + "evaluators.", "S", 1,
@@ -103,10 +99,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
 				    + "\n\tto start the search from, eg "
 				    + "1,2,5-9.",
 				    "P", 1, "-P <range>"));
-    newVector.addElement(new Option("\tThreshold by which to discard "
-				    + "attributes"
-				    + "\n\tfor attribute evaluators.",
-				    "T", 1, "-T <threshold>"));
     
     if ((m_ASEvaluator != null) && (m_ASEvaluator instanceof OptionHandler)) {
       Enumeration enum = ((OptionHandler)m_ASEvaluator).listOptions();
@@ -167,144 +159,43 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       setStartSet(optionString);
     }
 
-    optionString = Utils.getOption('T',options);
-    if (optionString.length() != 0) {
-      Double temp;
-      temp = Double.valueOf(optionString);
-      setThreshold(temp.doubleValue());
-    }
-    
     optionString = Utils.getOption('E',options);
     if (optionString.length() != 0) {
-      setEvaluator(optionString);
-    }
-
-    optionString = Utils.getOption('S',options);
-    if (optionString.length() != 0) {
-      setSearch(optionString);
-    }
-
-    makeOptions();
-    Utils.checkForRemainingOptions(options);
-  }
-
-  /**
-   * Assembles a set of options from set member variables. Checks
-   * that options for evaluators and search methods are valid.
-   */
-  private void makeOptions() throws Exception {
-    
-    String optionString;
-    String [] SearchOptions = null;
-    String [] evalOptions = null;
-    boolean noEvaluator = false;
-    boolean noSearch = false;
-    int breakLoc;
-    int current = 0;
-    int current2 = 0;
-  
-    m_FilterOptions = new String[14];
-
-    if (m_StartSet != null) {
-      m_FilterOptions[current++] = "-P";
-      m_FilterOptions[current++] = "" + m_StartSet;
-    }
-    
-    if (m_Threshold != Double.MAX_VALUE) {
-      m_FilterOptions[current++] = "-T";
-      m_FilterOptions[current++] = "" + m_Threshold;
-    }
-
-    if (m_EvaluatorString == null) {
-      noEvaluator = true;
-    } else {
-      optionString = new String(m_EvaluatorString);
       optionString = optionString.trim();
       // split a quoted evaluator name from its options (if any)
-      breakLoc = optionString.indexOf(' ');
+      int breakLoc = optionString.indexOf(' ');
       String evalClassName = optionString;
       String evalOptionsString = "";
+      String [] evalOptions=null;
       if (breakLoc != -1) {
 	evalClassName = optionString.substring(0, breakLoc);
 	evalOptionsString = optionString.substring(breakLoc).trim();
 	evalOptions = Utils.splitOptions(evalOptionsString);
       }
-
-      m_ASEvaluator = 
-	(ASEvaluation)Class.forName(evalClassName).newInstance();
-
-      // see if any evaluator options are valid
-      // Try setting options for m_ASEvaluator
-      if (m_ASEvaluator instanceof OptionHandler) {
-	if (evalOptions != null) {
-	  String [] evalOptionsCopy = new String[evalOptions.length];
-	  System.arraycopy(evalOptions, 0, evalOptionsCopy, 0,
-			   evalOptions.length);
-	  
-	  ((OptionHandler)m_ASEvaluator).setOptions(evalOptionsCopy);
-	  Utils.checkForRemainingOptions(evalOptionsCopy);
-	  //m_FilterOptions[current++]=""+evalOptionsString;
-	}
-      }
-    }
-  
-    // set up a dummy search object (if necessary) so help can be printed
-    if ((m_SearchString == null) &&
-	(!(m_ASEvaluator instanceof 
-	   AttributeEvaluator))) {
-      noSearch = true;
-    }
-  
-    if ((m_SearchString != null)
-      && (m_ASEvaluator instanceof AttributeEvaluator)) {
-      throw new Exception("Can't specify search method for "
-			  + "attribute evaluators.");
+      setEvaluator(ASEvaluation.forName(evalClassName, evalOptions));
     }
 
-    if (!(m_ASEvaluator instanceof AttributeEvaluator)) {
-      optionString = new String(m_SearchString);
-      // split a quoted evaluator name from its options (if any)
+    if (m_ASEvaluator instanceof AttributeEvaluator) {
+      setSearch(new Ranker());
+    }
+
+    optionString = Utils.getOption('S',options);
+    if (optionString.length() != 0) {
       optionString = optionString.trim();
-      breakLoc = optionString.indexOf(' ');
+      int breakLoc = optionString.indexOf(' ');
       String SearchClassName = optionString;
       String SearchOptionsString = "";
+      String [] SearchOptions=null;
       if (breakLoc != -1) {
 	SearchClassName = optionString.substring(0, breakLoc);
 	SearchOptionsString = optionString.substring(breakLoc).trim();
 	SearchOptions = Utils.splitOptions(SearchOptionsString);
       }
-
-      m_ASSearch = (ASSearch)Class.forName(SearchClassName).newInstance();
-
-      // see if any search options are valid
-      if (m_ASSearch instanceof OptionHandler) {
-	if (SearchOptions != null) {
-	  ((OptionHandler)m_ASSearch).setOptions(SearchOptions);
-	  Utils.checkForRemainingOptions(SearchOptions);
-	}
-      }
-	 
-      // append to the filter options
-      m_FilterOptions[current++]="-S";
-      m_FilterOptions[current++]="" + m_SearchString;
+      setSearch(ASSearch.forName(SearchClassName, SearchOptions));
     }
 
-    if (noEvaluator) {
-      throw new Exception("No attribute/subset evaluator given.");
-    }
-     
-    if (noSearch) {
-      throw new Exception("No search method specified.");
-    }
-
-    if (evalOptions != null) {
-      for (int i = 0; i < evalOptions.length; i++) {
-	m_FilterOptions[current++] = "" + evalOptions[i];
-      }
-    }
-    while (current < m_FilterOptions.length) {
-      m_FilterOptions[current++] = "";
-    }
+    // makeOptions();
+    Utils.checkForRemainingOptions(options);
   }
 
 
@@ -315,21 +206,31 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * @return an array of strings suitable for passing to setOptions()
    */
   public String [] getOptions() {
-    
-    String [] setOptions = new String [14];
+    String [] EvaluatorOptions = new String[0];
+    String [] SearchOptions = new String[0];
     int current = 0;
 
+    if (m_ASEvaluator instanceof OptionHandler) {
+      EvaluatorOptions = ((OptionHandler)m_ASEvaluator).getOptions();
+    }
+
+    if (m_ASSearch instanceof OptionHandler) {
+      SearchOptions = ((OptionHandler)m_ASSearch).getOptions();
+    }
+
+    String [] setOptions = new String [10];
     setOptions[current++]="-E";
-    setOptions[current++]="" + m_EvaluatorString;
+    setOptions[current++]= getEvaluator().getClass().getName()
+      +" "+Utils.joinOptions(EvaluatorOptions);
 
     setOptions[current++]="-S";
-    setOptions[current++]="" + m_SearchString;
+    setOptions[current++]=getSearch().getClass().getName() 
+      + " "+Utils.joinOptions(SearchOptions);
 
-    setOptions[current++] = "-P";
-    setOptions[current++] = "" + m_StartSet;
-
-    setOptions[current++] = "-T";
-    setOptions[current++] = "" + m_Threshold;
+    if (!(getStartSet().equals(""))) {
+      setOptions[current++] = "-P";
+      setOptions[current++] = "" + getStartSet();
+    }
 
     while (current < setOptions.length) {
       setOptions[current++] = "";
@@ -341,49 +242,26 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
   /**
    * Set the starting set
    */
-  public void setStartSet(String startSet) {
-    
-    if (startSet.length() != 0) {
-      m_StartSet = new String(startSet);
-    }
-  }
-
-  /**
-   * Set a threshold by which to discard attributes
-   */
-  public void setThreshold(double t) {
-    
-    m_Threshold = t;
+  public void setStartSet(String startSet) throws Exception{
+   
+      m_StartSet.setRanges(startSet);
   }
 
   /**
    * set a string holding the name of a attribute/subset evaluator
    */
-  public void setEvaluator(String evString) {
-    
-    if (evString.length() != 0) {
-      m_EvaluatorString = new String(evString);
+  public void setEvaluator(ASEvaluation evaluator) {
+    m_ASEvaluator = evaluator;
+    if (m_ASEvaluator instanceof AttributeEvaluator) {
+      m_doRank = true;
     }
   }
 
   /**
    * Set as string holding the name of a search class
    */
-  public void setSearch(String searchString) {
-    
-    if (searchString.length() != 0) {
-      m_SearchString = new String(searchString);
-    }
-  }
-
-  /**
-   * Get the threshold
-   *
-   * @return a threshold as a double
-   */
-  public double getThreshold() {
-    
-    return m_Threshold;
+  public void setSearch(ASSearch search) {
+    m_ASSearch = search;
   }
 
   /**
@@ -393,7 +271,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    */
   public String getStartSet() {
     
-    return m_StartSet;
+    return m_StartSet.getRanges();
   }
 
   /**
@@ -401,9 +279,9 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    *
    * @return the name of the attribute/subset evaluator as a string
    */
-  public String getEvaluator() {
+  public ASEvaluation getEvaluator() {
     
-      return m_EvaluatorString;
+      return m_ASEvaluator;
   }
 
   /**
@@ -411,9 +289,9 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    *
    * @return the name of the search method as a string
    */
-  public String getSearch() {
+  public ASSearch getSearch() {
     
-      return m_SearchString;
+      return m_ASSearch;
   }
 
   /**
@@ -438,7 +316,7 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
 
-    if (m_SelectedAttributes[0] != null) {
+    if (outputFormatPeek() != null) {
       convertInstance(instance);
       return true;
     }
@@ -461,24 +339,24 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       throw new Exception("No input instance format defined");
     }
 
-    if (m_SelectedAttributes[0] == null) {
-      makeOptions();
-      // for (int i=0;i<m_FilterOptions.length;i++)
-      // System.out.println(m_FilterOptions[i]);
-      AttributeSelection.SelectAttributes(m_ASEvaluator, m_FilterOptions,
-					  m_SelectedAttributes, m_InputFormat);
-      
-      if (m_SelectedAttributes[0] == null) {
+    if (outputFormatPeek() == null) {
+      m_trainSelector.setEvaluator(m_ASEvaluator);
+      m_trainSelector.setSearch(m_ASSearch);
+      m_trainSelector.setStartSet(m_StartSet);
+      m_trainSelector.setRanking(m_doRank);
+      m_trainSelector.SelectAttributes(m_InputFormat);
+      //      System.out.println(m_trainSelector.toResultsString());
+
+      m_SelectedAttributes = m_trainSelector.selectedAttributes();
+      if (m_SelectedAttributes == null) {
 	throw new Exception("No selected attributes\n");
       }
 
       setOutputFormat();
       
       // Convert pending input instances
-      Instance current;
       for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-	current = m_InputFormat.instance(i);
-	convertInstance(current);
+	convertInstance(m_InputFormat.instance(i));
       }
       m_InputFormat = new Instances(m_InputFormat, 0);
     }
@@ -493,25 +371,26 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    */
   protected void setOutputFormat() throws Exception {
     
-    if (m_SelectedAttributes[0] == null) {
+    if (m_SelectedAttributes == null) {
       setOutputFormat(null);
       return;
     }
 
-    FastVector attributes = new FastVector(m_SelectedAttributes[0].length);
+    FastVector attributes = new FastVector(m_SelectedAttributes.length);
 
     int i;
-    for (i=0;i < m_SelectedAttributes[0].length;i++) {
+    for (i=0;i < m_SelectedAttributes.length;i++) {
       attributes.
-	addElement(m_InputFormat.attribute(m_SelectedAttributes[0][i]).copy());
+	addElement(m_InputFormat.attribute(m_SelectedAttributes[i]).copy());
     }
 
     Instances outputFormat = 
       new Instances(m_InputFormat.relationName(), attributes, 0);
 
+
     if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) &&
 	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
-      outputFormat.setClassIndex(m_SelectedAttributes[0].length - 1);
+      outputFormat.setClassIndex(m_SelectedAttributes.length - 1);
     }
     
     setOutputFormat(outputFormat);  
@@ -525,12 +404,11 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * @param instance the instance to convert
    */
   protected void convertInstance(Instance instance) throws Exception {
-    
     int index = 0;
     Instance newInstance = new Instance(outputFormatPeek().numAttributes());
     
-    for (int i = 0; i < m_SelectedAttributes[0].length; i++) {
-      newInstance.setValue(index, instance.value(m_SelectedAttributes[0][i]));
+    for (int i = 0; i < m_SelectedAttributes.length; i++) {
+      newInstance.setValue(index, instance.value(m_SelectedAttributes[i]));
       index++;
     }
 
@@ -543,17 +421,14 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * set options to their default values
    */
   protected void resetOptions() {
-    
-    m_ASEvaluator = null;
-    m_ASSearch = null;
-    //m_optionsCopy = null;
-    m_SelectedAttributes = new int [1][0];
-    m_SelectedAttributes[0] = null;
+
+    m_trainSelector = new AttributeSelection();
+    setEvaluator(new CfsSubsetEval());
+    setSearch(new BestFirst());
+    m_SelectedAttributes = null;
     m_FilterOptions = null;
-    m_EvaluatorString = null;
-    m_SearchString = null;
-    m_StartSet = null;
-    m_Threshold = Double.MAX_VALUE; // no threshold
+    m_StartSet = new Range();
+    m_doRank = false;
   }
 
   /**
