@@ -49,7 +49,7 @@ import java.io.ObjectOutputStream;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -299,7 +299,8 @@ public class Experiment implements Serializable, OptionHandler {
       Reader reader = new FileReader(currentFile);
       Instances data = new Instances(new BufferedReader(reader));
       data.setClassIndex(data.numAttributes() - 1);
-      m_ResultProducer.setInstances(data);
+      m_CurrentInstances = data;
+      m_ResultProducer.setInstances(m_CurrentInstances);
     }
     
     m_ResultProducer.doRun(m_RunNumber);
