@@ -22,6 +22,8 @@ import java.util.*;
 import java.io.*;
 import weka.core.*;
 import weka.estimators.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Class for evaluating machine learning models. <p>
@@ -109,7 +111,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.26 $
+ * @version  $Revision: 1.27 $
   */
 public class Evaluation implements Summarizable {
 
@@ -555,12 +557,18 @@ public class Evaluation implements Summarizable {
 	  testReader = new BufferedReader(new FileReader(testFileName));
 	}
 	if (objectInputFileName.length() != 0) {
-	  objectInputStream = 
-	    new ObjectInputStream(new FileInputStream(objectInputFileName));
+          InputStream is = new FileInputStream(objectInputFileName);
+          if (objectInputFileName.endsWith(".gz")) {
+            is = new GZIPInputStream(is);
+          }
+	  objectInputStream = new ObjectInputStream(is);
 	}
 	if (objectOutputFileName.length() != 0) {
-	  objectOutputStream = 
-	    new ObjectOutputStream(new FileOutputStream(objectOutputFileName));
+          OutputStream os = new FileOutputStream(objectOutputFileName);
+          if (objectOutputFileName.endsWith(".gz")) {
+            os = new GZIPOutputStream(os);
+          }
+	  objectOutputStream = new ObjectOutputStream(os);
 	}
       } catch (Exception e) {
 	throw new Exception("Can't open file " + e.getMessage() + '.');
