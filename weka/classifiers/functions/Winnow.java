@@ -20,6 +20,7 @@
  *
  */
 
+
 package weka.classifiers.functions;
 
 import weka.classifiers.*;
@@ -28,6 +29,7 @@ import weka.core.*;
 import java.util.*;
 
 /**
+ *
  * Implements Winnow and Balanced Winnow algorithms by
  * N. Littlestone. For more information, see<p>
  *
@@ -44,10 +46,10 @@ import java.util.*;
  * The number of iterations to be performed. (default 1)<p>
  *
  * -A double <br>
- * Promotion coefficient alpha. (default 1.3)<p>
+ * Promotion coefficient alpha. (default 2.0)<p>
  *
  * -B double <br>
- * Demotion coefficient beta. (default 0.8)<p>
+ * Demotion coefficient beta. (default 0.5)<p>
  *
  * -W double <br>
  * Starting weights of the prediction coeffs. (default 2.0)<p>
@@ -59,40 +61,42 @@ import java.util.*;
  * Random seed to shuffle the input. (default 1), -1 == no shuffling<p>
  *
  * @author J. Lindgren (jtlindgr<at>cs.helsinki.fi)
- * @version $Revision: 1.1 $ 
- */
-public class Winnow extends Classifier implements OptionHandler,UpdateableClassifier {
+ * @version $Revision: 1.2 $ 
+*/
+public class Winnow extends Classifier implements OptionHandler,
+						  UpdateableClassifier
+{
   
   /** Use the balanced variant? **/
   protected boolean m_Balanced;
-  
+ 
   /** The number of iterations **/
-  protected int m_NumIterations = 1;
+  protected int m_numIterations = 1;
 
   /** The promotion coefficient **/
-  protected double m_Alpha = 1.3;
+  protected double m_Alpha=2.0;
 
   /** The demotion coefficient **/
-  protected double m_Beta = 0.8;
+  protected double m_Beta=0.5;
 
-  /** Threshold for the unbalanced algorithm **/
-  protected double m_Threshold = -1.0;
+  /** Prediction threshold, <0 == numAttributes **/
+  protected double m_Threshold=-1.0;
   
   /** Random seed used for shuffling the dataset, -1 == disable **/
-  protected int m_Seed = 1;
+  protected int m_Seed=1;
 
-  /** Default weights for the prediction vector(s) **/
-  protected double m_DefaultWeight = 2.0;
+  /** Accumulated mistake count (for statistics) **/
+  protected int m_Mistakes;
+
+  /** Starting weights for the prediction vector(s) **/
+  protected double m_defaultWeight=2.0;
   
-  /** The weight vectors for prediction**/
-  private double[] predPosVector = null;
-  private double[] predNegVector = null;
+  /** The weight vectors for prediction **/
+  private double[] m_predPosVector=null;
+  private double[] m_predNegVector=null;
 
   /** The true threshold used for prediction **/
-  private double actualThreshold;
-
-  /** Length of the vectors (numAttributes()-1) **/
-  private int predVectorLen = 0;
+  private double m_actualThreshold;
 
   /** The training instances */
   private Instances m_Train = null;
@@ -119,16 +123,16 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
 				    + "\t(default 1)",
 				    "I", 1, "-I <int>"));
     newVector.addElement(new Option("\tPromotion coefficient alpha.\n"
-				    + "\t(default 1.3)",
+				    + "\t(default 2.0)",
 				    "A", 1, "-A <double>"));
     newVector.addElement(new Option("\tDemotion coefficient beta.\n"
-				    + "\t(default 0.85)",
+				    + "\t(default 0.5)",
 				    "B", 1, "-B <double>"));
     newVector.addElement(new Option("\tPrediction threshold.\n"
 				    + "\t(default -1.0 == number of attributes)",
 				    "H", 1, "-H <double>"));
-    newVector.addElement(new Option("\tDefault weight.\n"
-				    + "\t(default 1.0)",
+    newVector.addElement(new Option("\tStarting weights.\n"
+				    + "\t(default 2.0)",
 				    "W", 1, "-W <double>"));
     newVector.addElement(new Option("\tDefault random seed.\n"
 				    + "\t(default 1)",
@@ -146,10 +150,10 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
   public void setOptions(String[] options) throws Exception {
     
     m_Balanced = Utils.getFlag('L', options);
-    
+	
     String iterationsString = Utils.getOption('I', options);
     if (iterationsString.length() != 0) {
-      m_NumIterations = Integer.parseInt(iterationsString);
+      m_numIterations = Integer.parseInt(iterationsString);
     }
     String alphaString = Utils.getOption('A', options);
     if (alphaString.length() != 0) { 
@@ -165,7 +169,7 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
     }
     String wString = Utils.getOption('W', options);
     if (wString.length() != 0) {
-      m_DefaultWeight = (new Double(wString)).doubleValue();
+      m_defaultWeight = (new Double(wString)).doubleValue();
     }
     String rString = Utils.getOption('S', options);
     if (rString.length() != 0) {
@@ -180,18 +184,18 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    */
   public String[] getOptions() {
 
-    String[] options = new String [13];
+    String[] options = new String [20];
     int current = 0;
 
     if(m_Balanced) {
       options[current++] = "-L"; 
     }
-
-    options[current++] = "-I"; options[current++] = "" + m_NumIterations;
+    
+    options[current++] = "-I"; options[current++] = "" + m_numIterations;
     options[current++] = "-A"; options[current++] = "" + m_Alpha;
     options[current++] = "-B"; options[current++] = "" + m_Beta;
     options[current++] = "-H"; options[current++] = "" + m_Threshold;
-    options[current++] = "-W"; options[current++] = "" + m_DefaultWeight;
+    options[current++] = "-W"; options[current++] = "" + m_defaultWeight;
     options[current++] = "-S"; options[current++] = "" + m_Seed;
     while (current < options.length) {
       options[current++] = "";
@@ -205,6 +209,7 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    * @exception Exception if something goes wrong during building
    */
   public void buildClassifier(Instances insts) throws Exception {
+
     if (insts.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
@@ -225,10 +230,10 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
     // Filter data
     m_Train = new Instances(insts);
     m_Train.deleteWithMissingClass();
+    
     m_ReplaceMissingValues = new ReplaceMissingValuesFilter();
     m_ReplaceMissingValues.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_ReplaceMissingValues);
-    
     m_NominalToBinary = new NominalToBinaryFilter();
     m_NominalToBinary.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_NominalToBinary);
@@ -237,38 +242,37 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
     if(m_Seed!=-1)
       m_Train.randomize(new Random(m_Seed));
 
-    /** Make space to store weight vectors */
-    predVectorLen = m_Train.numAttributes()-1;
-    predPosVector = new double[predVectorLen];
+    /** Make space to store weights */
+    m_predPosVector = new double[m_Train.numAttributes()-1];
 
     if(m_Balanced)
-      predNegVector = new double[predVectorLen];
-    
-    /** Init prediction vector(s) **/
-    for(int it = 0 ; it < predVectorLen ; it++) {
-      predPosVector[it]=m_DefaultWeight;
-    }
-       
+      m_predNegVector = new double[m_Train.numAttributes()-1];
+
+    /** Initialize the weights to starting values **/
+    for(int i=0;i<m_Train.numAttributes()-1;i++)
+      m_predPosVector[i]=m_defaultWeight;
+
     if(m_Balanced)
-      for(int it = 0 ; it < predVectorLen ; it++) {
-	predNegVector[it]=m_DefaultWeight;
-      }
-  
+      for(int i=0;i<m_Train.numAttributes()-1;i++)
+	m_predNegVector[i]=m_defaultWeight;
+	
     /** Set actual prediction threshold **/
     if(m_Threshold<0)
-      actualThreshold = (double)predVectorLen;
+      m_actualThreshold = (double)m_Train.numAttributes()-1;
     else    
-      actualThreshold = m_Threshold;
+      m_actualThreshold = m_Threshold;
+
+    m_Mistakes=0;
 
     /** Compute the weight vectors **/
     if(m_Balanced)
-      for (int it = 0; it < m_NumIterations; it++) {
+      for (int it = 0; it < m_numIterations; it++) {
 	for (int i = 0; i < m_Train.numInstances(); i++) {
 	  actualUpdateClassifierBalanced(m_Train.instance(i));
 	}
       }
     else
-      for (int it = 0; it < m_NumIterations; it++) {
+      for (int it = 0; it < m_numIterations; it++) {
 	for (int i = 0; i < m_Train.numInstances(); i++) {
 	  actualUpdateClassifier(m_Train.instance(i));
 	}
@@ -281,18 +285,18 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    * @exception Exception if something goes wrong
    */
   public void updateClassifier(Instance instance) throws Exception {
-        
+	
     m_ReplaceMissingValues.input(instance);
     m_ReplaceMissingValues.batchFinished();
-    instance = m_ReplaceMissingValues.output();
-    m_NominalToBinary.input(instance);
+    Instance filtered = m_ReplaceMissingValues.output();
+    m_NominalToBinary.input(filtered);
     m_NominalToBinary.batchFinished();
-    instance = m_NominalToBinary.output();
+    filtered = m_NominalToBinary.output();
 
     if(m_Balanced)
-      actualUpdateClassifierBalanced(instance);
+      actualUpdateClassifierBalanced(filtered);
     else
-      actualUpdateClassifier(instance);
+      actualUpdateClassifier(filtered);
   }
   
   /**
@@ -300,30 +304,31 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    *
    * @exception Exception if something goes wrong
    */
-  private void actualUpdateClassifier(Instance instance) throws Exception {
+  private void actualUpdateClassifier(Instance inst) throws Exception {
     
     double posmultiplier;
+	
+    if (!inst.classIsMissing()) {
+      double prediction = makePrediction(inst);
+   
+      if (prediction != inst.classValue()) {
+	m_Mistakes++;
 
-    if (!instance.classIsMissing()) {
-      double prediction = makePrediction(instance);
-        
-      if (prediction != instance.classValue()) {
-	if(prediction == 0)
-	  {
-	    /* promote */
-	    posmultiplier=m_Alpha;
-	  }
-	else
-	  {
-	    /* demote */
-	    posmultiplier=m_Beta;
-	  }
-	for(int l = 0 ; l < predVectorLen ; l++) {
-	  if(instance.value(l)==1)
-	    {
-	      predPosVector[l]*=posmultiplier;
-	    }
+	if(prediction == 0) {
+	  /* false neg: promote */
+	  posmultiplier=m_Alpha;
 	}
+	else {
+	  /* false pos: demote */
+	  posmultiplier=m_Beta;
+	}
+	int n1 = inst.numValues(); int classIndex = m_Train.classIndex();
+	for(int l = 0 ; l < n1 ; l++) {
+	  if(inst.index(l) != classIndex && inst.valueSparse(l)==1) {
+	    m_predPosVector[inst.index(l)]*=posmultiplier;
+	  }
+	}
+	//Utils.normalize(m_predPosVector);
       }
     }
     else
@@ -335,33 +340,34 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    *
    * @exception Exception if something goes wrong
    */
-  private void actualUpdateClassifierBalanced(Instance instance) throws Exception {
+  private void actualUpdateClassifierBalanced(Instance inst) throws Exception {
     
     double posmultiplier,negmultiplier;
 
-    if (!instance.classIsMissing()) {
-      double prediction = makePredictionBalanced(instance);
+    if (!inst.classIsMissing()) {
+      double prediction = makePredictionBalanced(inst);
         
-      if (prediction != instance.classValue()) {
-	if(prediction == 0)
-	  {
-	    /* promote positive, demote negative*/
-	    posmultiplier=m_Alpha;
-	    negmultiplier=m_Beta;
-	  }
-	else
-	  {
-	    /* demote positive, promote negative */
-	    posmultiplier=m_Beta;
-	    negmultiplier=m_Alpha;
-	  }
-	for(int l = 0 ; l < predVectorLen ; l++) {
-	  if(instance.value(l)==1)
-	    {
-	      predPosVector[l]*=posmultiplier;
-	      predNegVector[l]*=negmultiplier;
-	    }
+      if (prediction != inst.classValue()) {
+	m_Mistakes++;
+	
+	if(prediction == 0) {
+	  /* false neg: promote positive, demote negative*/
+	  posmultiplier=m_Alpha;
+	  negmultiplier=m_Beta;
+	} else {
+	  /* false pos: demote positive, promote negative */
+	  posmultiplier=m_Beta;
+	  negmultiplier=m_Alpha;
 	}
+	int n1 = inst.numValues(); int classIndex = m_Train.classIndex();
+	for(int l = 0 ; l < n1 ; l++) {
+	  if(inst.index(l) != classIndex && inst.valueSparse(l)==1) {
+	    m_predPosVector[inst.index(l)]*=posmultiplier;
+	    m_predNegVector[inst.index(l)]*=negmultiplier;
+	  }
+	}
+	//Utils.normalize(m_predPosVector);
+	//Utils.normalize(m_predNegVector);
       }
     }
     else
@@ -376,18 +382,18 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    * @exception Exception if something goes wrong
    */
   public double classifyInstance(Instance inst) throws Exception {
-    
+
     m_ReplaceMissingValues.input(inst);
     m_ReplaceMissingValues.batchFinished();
-    inst = m_ReplaceMissingValues.output();
-    m_NominalToBinary.input(inst);
+    Instance filtered = m_ReplaceMissingValues.output();
+    m_NominalToBinary.input(filtered);
     m_NominalToBinary.batchFinished();
-    inst = m_NominalToBinary.output();
-    
+    filtered = m_NominalToBinary.output();
+
     if(m_Balanced)
-      return(makePredictionBalanced(inst));
+      return(makePredictionBalanced(filtered));
     else    
-      return(makePrediction(inst));
+      return(makePrediction(filtered));
   }
   
   /** 
@@ -401,13 +407,15 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
 
     double total = 0;
 
-    for(int i=0;i<predVectorLen;i++) {
-      if(inst.value(i)==1) {
-	total+=predPosVector[i];
+    int n1 = inst.numValues(); int classIndex = m_Train.classIndex();
+	
+    for(int i=0;i<n1;i++) {
+      if(inst.index(i) != classIndex && inst.valueSparse(i)==1) {
+	total+=m_predPosVector[inst.index(i)];
       }
     }
-      
-    if(total>actualThreshold)
+    
+    if(total>m_actualThreshold)
       return(1);
     else
       return(0);
@@ -422,16 +430,15 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    */
   private double makePredictionBalanced(Instance inst) throws Exception {
     double total=0;
-
-    for(int i=0;i<predVectorLen;i++)
-      {
-        if(inst.value(i)==1)
-	  {
-            total+=predPosVector[i]-predNegVector[i];
-	  }
+	
+    int n1 = inst.numValues(); int classIndex = m_Train.classIndex();
+    for(int i=0;i<n1;i++) {
+      if(inst.index(i) != classIndex && inst.valueSparse(i)==1) {
+	total+=(m_predPosVector[inst.index(i)]-m_predNegVector[inst.index(i)]);
       }
+    }
      
-    if(total>0)
+    if(total>m_actualThreshold)
       return(1);
     else
       return(0);
@@ -442,25 +449,30 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    */
   public String toString() {
 
-    if(predVectorLen==0 || predPosVector==null)
+    if(m_predPosVector==null)
       return("Winnow: No model built yet.");
+	   
+    String result = "Winnow\n\nAttribute weights\n\n";
 
-    String result = "Winnow\n\nWeight vector(s)\n\n";
-    result += "Pos: ";
-    for( int i = 0 ; i < predVectorLen; i++) {
-      result += predPosVector[i] + " ";
-    }
-    result += "\n\n";
-    
-    if(m_Balanced)
+    if(!m_Balanced)
       {
-        result+= "Neg: ";
-        for( int i = 0 ; i < predVectorLen; i++) {
-	  result += predNegVector[i] + " ";
-        }
-        result += "\n\n";
+	for( int i = 0 ; i < m_Train.numAttributes()-1; i++) {
+	  result += "w" + i + " " + m_predPosVector[i] + "\n";
+	}
       }
+    else
+      {
+        for( int i = 0 ; i < m_Train.numAttributes()-1; i++) {
+	  result += "w" + i + " p " + m_predPosVector[i];
+	  result += " n " + m_predNegVector[i];
+			
+	  double wdiff=m_predPosVector[i]-m_predNegVector[i];
 
+	  result += " d " + wdiff + "\n";
+        }
+      }
+    result += "\nCumulated mistake count: " + m_Mistakes + "\n\n";
+	
     return(result);
   }
   
@@ -501,7 +513,7 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    */
   public void setAlpha(double a) {
     
-    m_Alpha=a;
+    m_Alpha = a;
   }
   
   /**
@@ -521,7 +533,7 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
    */
   public void setBeta(double b) {
     
-    m_Beta=b;
+    m_Beta = b;
   }
   
   /**
@@ -545,44 +557,43 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
   }
   
   /**
-   * Get the value of DefaultWeight.
+   * Get the value of defaultWeight.
    *
-   * @return Value of DefaultWeight.
+   * @return Value of defaultWeight.
    */
   public double getDefaultWeight() {
     
-    return m_DefaultWeight;
+    return m_defaultWeight;
   }
   
   /**
-   * Set the value of DefaultWeight.
+   * Set the value of defaultWeight.
    *
-   * @param w  Value to assign to DefaultWeight.
+   * @param w  Value to assign to defaultWeight.
    */
   public void setDefaultWeight(double w) {
     
-    m_DefaultWeight = w;
+    m_defaultWeight = w;
   }
   
-
   /**
-   * Get the value of NumIterations.
+   * Get the value of numIterations.
    *
-   * @return Value of NumIterations.
+   * @return Value of numIterations.
    */
   public int getNumIterations() {
     
-    return m_NumIterations;
+    return m_numIterations;
   }
   
   /**
-   * Set the value of NumIterations.
+   * Set the value of numIterations.
    *
-   * @param v  Value to assign to NumIterations.
+   * @param v  Value to assign to numIterations.
    */
   public void setNumIterations(int v) {
     
-    m_NumIterations = v;
+    m_numIterations = v;
   }
 
   /**
@@ -617,4 +628,3 @@ public class Winnow extends Classifier implements OptionHandler,UpdateableClassi
     }
   }
 }
-    
