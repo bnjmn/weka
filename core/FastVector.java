@@ -31,7 +31,7 @@ import java.io.*;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ */
+ * @version $Revision: 1.11 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -44,12 +44,16 @@ public class FastVector implements Copyable, Serializable {
     // These JML commands say how m_Counter implements Enumeration
     //@ in moreElements;
     //@ private represents moreElements = m_Counter < m_Vector.size();
+    //@ private invariant 0 <= m_Counter && m_Counter <= m_Vector.size();
 
     /** The vector. */
     private /*@non_null@*/ FastVector m_Vector;
 
     /** Special element. Skipped during enumeration. */
     private int m_SpecialElement;
+    //@ private invariant -1 <= m_SpecialElement;
+    //@ private invariant m_SpecialElement < m_Vector.size();
+    //@ private invariant m_SpecialElement>=0 ==> m_Counter!=m_SpecialElement;
 
     /**
      * Constructs an enumeration.
@@ -70,6 +74,7 @@ public class FastVector implements Copyable, Serializable {
      * @param vector the vector which is to be enumerated
      * @param special the index of the special element
      */
+    //@ requires 0 <= special && special < vector.size();
     public FastVectorEnumeration(/*@non_null@*/FastVector vector, int special){
 
       m_Vector = vector;
@@ -100,6 +105,7 @@ public class FastVector implements Copyable, Serializable {
      *
      * @return the next element to be enumerated
      */
+    //@ also requires hasMoreElements();
     public final Object nextElement() {
   
       Object result = m_Vector.elementAt(m_Counter);
@@ -250,6 +256,7 @@ public class FastVector implements Copyable, Serializable {
    * @param index the element to skip
    * @return an enumeration of this vector
    */
+  //@ requires 0 <= index && index < size();
   public final /*@pure@*/ Enumeration elements(int index) {
   
     return new FastVectorEnumeration(this, index);
@@ -289,7 +296,7 @@ public class FastVector implements Copyable, Serializable {
    * @return the index of the first occurrence of the argument 
    * in this vector; returns -1 if the object is not found
    */
-  public final /*@pure@*/ int indexOf(Object element) {
+  public final /*@pure@*/ int indexOf(/*@non_null@*/ Object element) {
 
     for (int i = 0; i < m_Size; i++) {
       if (element.equals(m_Objects[i])) {
@@ -342,6 +349,7 @@ public class FastVector implements Copyable, Serializable {
    *
    * @param index the index of the element to be deleted
    */
+  //@ requires 0 <= index && index < m_Size;
   public final void removeElementAt(int index) {
 
     System.arraycopy(m_Objects, index + 1, m_Objects, index, 
@@ -404,6 +412,7 @@ public class FastVector implements Copyable, Serializable {
    * @param element the element to be put into the vector
    * @param index the index at which the element is to be placed
    */
+  //@ requires 0 <= index && index < size();
   public final void setElementAt(Object element, int index) {
 
     m_Objects[index] = element;
@@ -426,6 +435,8 @@ public class FastVector implements Copyable, Serializable {
    * @param first index of the first element
    * @param second index of the second element
    */
+  //@ requires 0 <= first && first < size();
+  //@ requires 0 <= second && second < size();
   public final void swap(int first, int second) {
 
     Object help = m_Objects[first];

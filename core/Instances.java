@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.56 $ 
+ * @version $Revision: 1.57 $ 
  */
 public class Instances implements Serializable {
  
@@ -81,7 +81,7 @@ public class Instances implements Serializable {
   */
 
   /** The instances. */
-  protected /*@non_null@*/ FastVector m_Instances;
+  protected /*@spec_public non_null@*/ FastVector m_Instances;
 
   /** The class attribute's index */
   protected int m_ClassIndex;
@@ -102,7 +102,7 @@ public class Instances implements Serializable {
    * @exception IOException if the ARFF file is not read 
    * successfully
    */
-  public Instances(Reader reader) throws IOException {
+  public Instances(/*@non_null@*/Reader reader) throws IOException {
 
     StreamTokenizer tokenizer;
 
@@ -126,7 +126,10 @@ public class Instances implements Serializable {
    * or the capacity is negative.
    * @exception IOException if there is a problem with the reader.
    */
-   public Instances(Reader reader, int capacity) throws IOException {
+  //@ requires capacity >= 0;
+  //@ ensures classIndex() == -1;
+  public Instances(/*@non_null@*/Reader reader, int capacity)
+    throws IOException {
 
     StreamTokenizer tokenizer;
 
@@ -146,7 +149,7 @@ public class Instances implements Serializable {
    *
    * @param instances the set to be copied
    */
-  public Instances(Instances dataset) {
+  public Instances(/*@non_null@*/Instances dataset) {
 
     this(dataset, dataset.numInstances());
 
@@ -186,7 +189,10 @@ public class Instances implements Serializable {
    * @param toCopy the number of instances to be copied
    * @exception IllegalArgumentException if first and toCopy are out of range
    */
-  public Instances(Instances source, int first, int toCopy) {
+  //@ requires 0 <= first;
+  //@ requires 0 <= toCopy;
+  //@ requires first + toCopy <= source.numInstances();
+  public Instances(/*@non_null@*/Instances source, int first, int toCopy) {
     
     this(source, toCopy);
 
@@ -261,6 +267,8 @@ public class Instances implements Serializable {
    * @param index the attribute's index
    * @return the attribute at the given position
    */
+  //@ requires 0 <= index;
+  //@ requires index < m_Attributes.size();
   //@ ensures \result != null;
   public /*@pure@*/ Attribute attribute(int index) {
     
@@ -383,6 +391,7 @@ public class Instances implements Serializable {
    *
    * @param index the instance's position
    */
+  //@ requires 0 <= index && index < numInstances();
   public void delete(int index) {
     
     m_Instances.removeElementAt(index);
@@ -397,8 +406,7 @@ public class Instances implements Serializable {
    * @exception IllegalArgumentException if the given index is out of range 
    *            or the class attribute is being deleted
    */
-  //@ requires 0 <= position;
-  //@ requires position < numAttributes();
+  //@ requires 0 <= position && position < numAttributes();
   //@ requires position != classIndex();
   public void deleteAttributeAt(int position) {
 	 
@@ -447,8 +455,7 @@ public class Instances implements Serializable {
    *
    * @param attIndex the attribute's index
    */
-  //@ requires 0 <= attIndex;
-  //@ requires attIndex < numAttributes();
+  //@ requires 0 <= attIndex && attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
 
     FastVector newInstances = new FastVector(numInstances());
@@ -467,7 +474,7 @@ public class Instances implements Serializable {
    *
    * @param att the attribute
    */
-  public void deleteWithMissing(Attribute att) {
+  public void deleteWithMissing(/*@non_null@*/ Attribute att) {
 
     deleteWithMissing(att.index());
   }
@@ -491,7 +498,7 @@ public class Instances implements Serializable {
    *
    * @return enumeration of all the attributes.
    */
-  public /*@pure@*/ Enumeration enumerateAttributes() {
+  public /*@non_null pure@*/ Enumeration enumerateAttributes() {
 
     return m_Attributes.elements(m_ClassIndex);
   }
@@ -501,7 +508,7 @@ public class Instances implements Serializable {
    *
    * @return enumeration of all instances in the dataset
    */
-  public /*@pure@*/ Enumeration enumerateInstances() {
+  public /*@non_null pure@*/ Enumeration enumerateInstances() {
 
     return m_Instances.elements();
   }
@@ -535,7 +542,8 @@ public class Instances implements Serializable {
    *
    * @return the first instance in the set
    */
-  public /*@pure@*/ Instance firstInstance() {
+  //@ requires numInstances() > 0;
+  public /*@non_null pure@*/ Instance firstInstance() {
     
     return (Instance)m_Instances.firstElement();
   }
@@ -596,7 +604,9 @@ public class Instances implements Serializable {
    * @param index the instance's index
    * @return the instance at the given position
    */
-  public /*@pure@*/ Instance instance(int index) {
+  //@ requires 0 <= index;
+  //@ requires index < numInstances();
+  public /*@non_null pure@*/ Instance instance(int index) {
 
     return (Instance)m_Instances.elementAt(index);
   }
@@ -606,7 +616,8 @@ public class Instances implements Serializable {
    *
    * @return the last instance in the set
    */
-  public /*@pure@*/ Instance lastInstance() {
+  //@ requires numInstances() > 0;
+  public /*@non_null pure@*/ Instance lastInstance() {
     
     return (Instance)m_Instances.lastElement();
   }
@@ -736,7 +747,7 @@ public class Instances implements Serializable {
    * @param att the attribute
    * @return the number of distinct values of a given attribute
    */
-  public /*@pure@*/ int numDistinctValues(Attribute att) {
+  public /*@pure@*/ int numDistinctValues(/*@non_null@*/Attribute att) {
 
     return numDistinctValues(att.index());
   }
@@ -746,6 +757,7 @@ public class Instances implements Serializable {
    *
    * @return the number of instances in the dataset as an integer
    */
+  //@ ensures \result == m_Instances.size();
   public /*@pure@*/ int numInstances() {
 
     return m_Instances.size();
@@ -985,7 +997,7 @@ public class Instances implements Serializable {
    *
    * @param newName the new relation name.
    */
-  public void setRelationName(String newName) {
+  public void setRelationName(/*@non_null@*/String newName) {
     
     m_RelationName = newName;
   }
@@ -1880,7 +1892,7 @@ public class Instances implements Serializable {
    *
    * @return description of instance and its weight as a string
    */
-  protected String instancesAndWeights(){
+  protected /*@pure@*/ String instancesAndWeights(){
 
     StringBuffer text = new StringBuffer();
 
