@@ -57,6 +57,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import weka.core.Instances;
+import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.SerializedObject;
 import weka.core.converters.Loader;
 import weka.core.converters.CSVLoader;
@@ -86,7 +88,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -133,6 +135,18 @@ public class PreprocessPanel extends JPanel {
   /** The file chooser for selecting arff files */
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
+
+  protected ExtensionFileFilter m_c45FileFilter = 
+    new ExtensionFileFilter(C45Loader.FILE_EXTENSION,
+			    "C45 names files");
+
+  protected ExtensionFileFilter m_csvFileFilter = 
+    new ExtensionFileFilter(CSVLoader.FILE_EXTENSION,
+			    "CSV data files");
+
+  protected ExtensionFileFilter m_arffFileFilter = 
+    new ExtensionFileFilter(Instances.FILE_EXTENSION,
+			    "Arff data files");
 
   /** Stores the last URL that instances were loaded from */
   protected String m_LastURL = "http://";
@@ -215,14 +229,11 @@ public class PreprocessPanel extends JPanel {
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
 
     m_FileChooser.
-      addChoosableFileFilter(new ExtensionFileFilter(C45Loader.FILE_EXTENSION,
-						     "C45 names files"));
+      addChoosableFileFilter(m_c45FileFilter);
     m_FileChooser.
-      addChoosableFileFilter(new ExtensionFileFilter(CSVLoader.FILE_EXTENSION,
-						     "CSV data files"));
+      addChoosableFileFilter(m_csvFileFilter);
     m_FileChooser.
-      addChoosableFileFilter(new ExtensionFileFilter(Instances.FILE_EXTENSION,
-						     "Arff data files"));
+      addChoosableFileFilter(m_arffFileFilter);
 
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -530,16 +541,32 @@ public class PreprocessPanel extends JPanel {
   public void saveWorkingInstancesToFileQ() {
     
     if (m_IOThread == null) {
+      m_FileChooser.setAcceptAllFileFilterUsed(false);
       int returnVal = m_FileChooser.showSaveDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
 	File sFile = m_FileChooser.getSelectedFile();
-	if (!sFile.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {
-	  sFile = new File(sFile.getParent(), sFile.getName() 
-                           + Instances.FILE_EXTENSION);
+	if (m_FileChooser.getFileFilter() == m_arffFileFilter) {
+	  if (!sFile.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {
+	    sFile = new File(sFile.getParent(), sFile.getName() 
+			     + Instances.FILE_EXTENSION);
+	  }
+	  File selected = sFile;
+	  saveInstancesToFile(selected, m_Instances, true);
+	} else if (m_FileChooser.getFileFilter() == m_csvFileFilter) {
+	  if (!sFile.getName().toLowerCase().endsWith(CSVLoader.FILE_EXTENSION)) {
+	    sFile = new File(sFile.getParent(), sFile.getName() 
+			     + CSVLoader.FILE_EXTENSION);
+	  }
+	  File selected = sFile;
+	  saveInstancesToFile(selected, m_Instances, false);
+	} else if (m_FileChooser.getFileFilter() == m_c45FileFilter) {	 
+	  File selected = sFile;
+	  saveInstancesToC45File(selected, m_Instances);
 	}
-	File selected = sFile;
-	saveInstancesToFile(selected, m_Instances);
       }
+      FileFilter temp = m_FileChooser.getFileFilter();
+      m_FileChooser.setAcceptAllFileFilterUsed(true);
+      m_FileChooser.setFileFilter(temp);
     } else {
       JOptionPane.showMessageDialog(this,
 				    "Can't save at this time,\n"
@@ -648,13 +675,115 @@ public class PreprocessPanel extends JPanel {
     }
   }
   
+
+  protected void saveInstancesToC45File(final File f, final Instances inst) {
+    if (m_IOThread == null) {
+      final int classIndex = m_AttVisualizePanel.getColoringIndex();
+      if (inst.attribute(classIndex).isNumeric()) {	      
+	JOptionPane.showMessageDialog(this,
+				      "Can't save in C45 format,\n"
+				      + "as the selected class is numeric.",
+				      "Save Instances",
+				      JOptionPane.ERROR_MESSAGE);
+	return;
+      }
+      m_IOThread = new Thread() {
+	  public void run() {
+	    try {
+	      m_Log.statusMessage("Saving to file...");
+	      String name = f.getAbsolutePath();
+	      if (name.lastIndexOf('.') != -1) {
+		name = name.substring(0, name.lastIndexOf('.'));
+	      }
+	      File fData = new File(name+".data");
+	      File fNames = new File(name+".names");
+	      Writer w = new BufferedWriter(new FileWriter(fNames));
+	      Writer w2 =  new BufferedWriter(new FileWriter(fData));	      
+	      
+	      // write the names file
+	      for (int i = 0; i < inst.attribute(classIndex).numValues(); i++) {
+		w.write(inst.attribute(classIndex).value(i));
+		if (i < inst.attribute(classIndex).numValues()-1) {
+		  w.write(",");
+		} else {
+		  w.write(".\n");
+		}
+	      }
+	      for (int i = 0; i < inst.numAttributes(); i++) {
+		if (i != classIndex) {
+		  w.write(inst.attribute(i).name()+": ");
+		  if (inst.attribute(i).isNumeric() || inst.attribute(i).isDate()) {
+		    w.write("continuous.\n");
+		  } else {
+		    Attribute temp = inst.attribute(i);
+		    for (int j = 0; j < temp.numValues(); j++) {
+		      w.write(temp.value(j));
+		      if (j < temp.numValues()-1) {
+			w.write(",");
+		      } else {
+			w.write(".\n");
+		      }
+		    }
+		  }
+		}
+	      }
+	      w.close();
+	      
+	      // write the data file
+	      for (int i = 0; i < inst.numInstances(); i++) {
+		Instance tempI = inst.instance(i);
+		for (int j = 0; j < inst.numAttributes(); j++) {
+		  if (j != classIndex) {
+		    if (tempI.isMissing(j)) {
+		      w2.write("?,");
+		    } else if (inst.attribute(j).isNominal() || 
+			       inst.attribute(j).isString()) {
+		      w2.write(inst.attribute(j).value((int)tempI.value(j))+",");
+		    } else {
+		      w2.write(""+tempI.value(j)+",");
+		    }
+		  }
+		}
+		//		w2.write(inst.instance(i).toString());
+		// write the class value
+		if (tempI.isMissing(classIndex)) {
+		  w2.write("?");
+		} else {
+		  w2.write(inst.attribute(classIndex).
+			   value((int)tempI.value(classIndex)));
+		}
+		w2.write("\n");
+	      }
+	      w2.close();
+	      m_Log.statusMessage("OK");
+	 
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	      m_Log.logMessage(ex.getMessage());
+	    }
+	    m_IOThread = null;
+	  }
+	};
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    } else {
+      JOptionPane.showMessageDialog(this,
+				    "Can't save at this time,\n"
+				    + "currently busy with other IO",
+				    "Save Instances",
+				    JOptionPane.WARNING_MESSAGE);
+    }
+  }
+
   /**
    * Saves the current instances to the supplied file.
    *
    * @param f a value of type 'File'
    * @param inst the instances to save
+   * @param saveHeader true to save in arff format, false to save in csv
    */
-  protected void saveInstancesToFile(final File f, final Instances inst) {
+  protected void saveInstancesToFile(final File f, final Instances inst,
+				     final boolean saveHeader) {
       
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
@@ -662,9 +791,20 @@ public class PreprocessPanel extends JPanel {
 	  try {
 	    m_Log.statusMessage("Saving to file...");
 	    Writer w = new BufferedWriter(new FileWriter(f));
-	    Instances h = new Instances(inst, 0);
-	    w.write(h.toString());
-	    w.write("\n");
+	    if (saveHeader) {
+	      Instances h = new Instances(inst, 0);
+	      w.write(h.toString());
+	      w.write("\n");
+	    } else {
+	      // csv - write attribute names as first row
+	      for (int i = 0; i < inst.numAttributes(); i++) {
+		w.write(inst.attribute(i).name());
+		if (i < inst.numAttributes()-1) {
+		  w.write(",");
+		}
+	      }
+	      w.write("\n");
+	    }
 	    for (int i = 0; i < inst.numInstances(); i++) {
 	      w.write(inst.instance(i).toString());
 	      w.write("\n");
@@ -759,26 +899,29 @@ public class PreprocessPanel extends JPanel {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
 	public void run() {
-	  String fileType = "";
+	  String fileType = f.getName();
 	  try {
 	    m_Log.statusMessage("Reading from file...");
-	    if (f.getName().toLowerCase().endsWith(".arff")) {	    
+	    if (f.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)
+		|| f.getName().toLowerCase().endsWith(".tmp")) {	    
 	      fileType = "arff";
 	      Reader r = new BufferedReader(new FileReader(f));
 	      setInstances(new Instances(r));
 	      r.close();
-	    } else if (f.getName().toLowerCase().endsWith(".csv")) {
+	    } else if (f.getName().toLowerCase().endsWith(CSVLoader.FILE_EXTENSION)) {
 	      fileType = "csv";
 	      CSVLoader cnv = new CSVLoader();
 	      cnv.setSource(f);
 	      Instances inst = cnv.getDataSet();
 	      setInstances(inst);
-	    } else if (f.getName().toLowerCase().endsWith(".names")) {
+	    } else if (f.getName().toLowerCase().endsWith(C45Loader.FILE_EXTENSION)) {
 	      fileType = "C45 names";
 	      C45Loader cnv = new C45Loader();
 	      cnv.setSource(f);
 	      Instances inst = cnv.getDataSet();
 	      setInstances(inst);
+	    } else {
+	      throw new Exception("Unrecognized file type");
 	    }
 	  } catch (Exception ex) {
 	    m_Log.statusMessage("File '" + f.getName() + "' not recognised as an "
