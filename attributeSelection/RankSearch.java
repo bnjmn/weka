@@ -38,7 +38,7 @@ import  weka.core.*;
  * search is used to produce a ranked list of attributes.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class RankSearch extends ASSearch implements OptionHandler {
 
@@ -267,7 +267,7 @@ public class RankSearch extends ASSearch implements OptionHandler {
       }
       m_Ranking = ranker.search((AttributeEvaluator)m_ASEval, m_Instances);
     } else {
-      ForwardSelection fs = new ForwardSelection();
+      GreedyStepwise fs = new GreedyStepwise();
       double [][]rankres; 
       fs.setGenerateRanking(true);
       ((SubsetEvaluator)m_ASEval).buildEvaluator(m_Instances);
