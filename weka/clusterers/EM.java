@@ -47,22 +47,29 @@ import  weka.estimators.*;
  * -S <seed> <br>
  * Specify random number seed. <p>
  *
+ * -M <num> <br>
+ * Set the minimum allowable standard deviation for normal density calculation.
+ * <p>
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class EM
   extends DistributionClusterer
   implements OptionHandler
 {
 
-  /** holds the estimators for each cluster */
+  /** hold the discrete estimators for each cluster */
   private Estimator m_model[][];
+
+  /** hold the normal estimators for each cluster */
+  private double m_modelNormal[][][];
+
+  /** default minimum standard deviation */
+  private double m_minStdDev = 1e-6;
 
   /** hold the weights of each instance for each cluster */
   private double m_weights[][];
-
-  /** hold default precisions for numeric attributes */
-  private double m_precisions[];
 
   /** the prior probabilities for clusters */
   private double m_priors[];
@@ -93,8 +100,21 @@ public class EM
   private Random m_rr;
   private int m_rseed;
 
+  /** Constant for normal distribution. */
+  private static double m_normConst = Math.sqrt(2*Math.PI);
+
   /** Verbose? */
   private boolean m_verbose;
+
+  /**
+   * Returns a string describing this clusterer
+   * @return a description of the evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Cluster data using expectation maximization";
+  }
+
 
   /**
    * Returns an enumeration describing the available options. <p>
@@ -115,11 +135,15 @@ public class EM
    * -S <seed> <br>
    * Specify random number seed. <p>
    *
+   * -M <num> <br>
+   *  Set the minimum allowable standard deviation for normal density 
+   * calculation. <p>
+   *
    * @return an enumeration of all the available options
    *
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(6);
     newVector.addElement(new Option("\tnumber of clusters. If omitted or" 
 				    + "\n\t-1 specified, then cross " 
 				    + "validation is used to\n\tselect the " 
@@ -130,6 +154,10 @@ public class EM
     newVector.addElement(new Option("\trandom number seed.\n(default 1)"
 				    , "S", 1, "-S <num>"));
     newVector.addElement(new Option("\tverbose.", "V", 0, "-V"));
+    newVector.addElement(new Option("\tminimum allowable standard deviation "
+				    +"for normal density computation "
+				    +"\n\t(default 1e-6)"
+				    ,"M",1,"-M <num>"));
     return  newVector.elements();
   }
 
@@ -162,6 +190,49 @@ public class EM
     if (optionString.length() != 0) {
       setSeed(Integer.parseInt(optionString));
     }
+
+    optionString = Utils.getOption('M', options);
+    if (optionString.length() != 0) {
+      setMinStdDev((new Double(optionString)).doubleValue());
+    }
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minStdDevTipText() {
+    return "set minimum allowable standard deviation";
+  }
+
+  /**
+   * Set the minimum value for standard deviation when calculating
+   * normal density. Reducing this value can help prevent arithmetic
+   * overflow resulting from multiplying large densities (arising from small
+   * standard deviations) when there are many singleton or near singleton
+   * values.
+   * @param m minimum value for standard deviation
+   */
+  public void setMinStdDev(double m) {
+    m_minStdDev = m;
+  }
+
+  /**
+   * Get the minimum allowable standard deviation.
+   * @return the minumum allowable standard deviation
+   */
+  public double getMinStdDev() {
+    return m_minStdDev;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "random number seed";
   }
 
 
@@ -184,6 +255,15 @@ public class EM
     return  m_rseed;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numClustersTipText() {
+    return "set number of clusters. -1 to select number of clusters "
+      +"automatically by cross validation.";
+  }
 
   /**
    * Set the number of clusters (-1 to select by CV).
@@ -219,6 +299,14 @@ public class EM
     return  m_initialNumClusters;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String maxIterationsTipText() {
+    return "maximum number of iterations";
+  }
 
   /**
    * Set the maximum number of iterations to perform
@@ -273,7 +361,7 @@ public class EM
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[7];
+    String[] options = new String[9];
     int current = 0;
 
     if (m_verbose) {
@@ -286,6 +374,8 @@ public class EM
     options[current++] = "" + getNumClusters();
     options[current++] = "-S";
     options[current++] = "" + m_rseed;
+    options[current++] = "-M";
+    options[current++] = ""+getMinStdDev();
 
     while (current < options.length) {
       options[current++] = "";
@@ -293,56 +383,6 @@ public class EM
 
     return  options;
   }
-
-
-  /**
-   * Sets default precision for numeric attributes based on the 
-   * differences between their sorted values.
-   * @param inst the instances
-   **/
-  private void setDefaultPrecision (Instances inst) {
-    int i;
-    Instances copyI = new Instances(inst);
-    inst = copyI;
-    m_precisions = new double[m_num_attribs];
-
-    for (i = 0; i < m_num_attribs; i++) {
-      m_precisions[i] = 0.01;
-    }
-
-    for (i = 0; i < m_num_attribs; i++) {
-      if (inst.attribute(i).isNumeric()) {
-        inst.sort(i);
-
-        if ((inst.numInstances() > 0) && !inst.instance(0).isMissing(i)) {
-          double lastVal = inst.instance(0).value(i);
-          double currentVal, deltaSum = 0;
-          int distinct = 0;
-
-          for (int j = 1; j < inst.numInstances(); j++) {
-            Instance currentInst = inst.instance(j);
-
-            if (currentInst.isMissing(i)) {
-              break;
-            }
-
-            currentVal = currentInst.value(i);
-
-            if (currentVal != lastVal) {
-              deltaSum += currentVal - lastVal;
-              lastVal = currentVal;
-              distinct++;
-            }
-          }
-
-          if (distinct > 0) {
-            m_precisions[i] = deltaSum/distinct;
-          }
-        }
-      }
-    }
-  }
-
 
   /**
    * Initialised estimators and storage.
@@ -356,6 +396,7 @@ public class EM
     m_weights = new double[inst.numInstances()][num_cl];
     int z;
     m_model = new Estimator[num_cl][m_num_attribs];
+    m_modelNormal = new double[num_cl][m_num_attribs][3];
     m_priors = new double[num_cl];
 
     for (int i = 0; i < inst.numInstances(); i++) {
@@ -385,14 +426,28 @@ public class EM
       m_priors[i] = 0.0;
     }
 
-    for (int i = 0; i < inst.numInstances(); i++) {      
+    for (int i = 0; i < inst.numInstances(); i++) {
       for (int j = 0; j < num_cl; j++) {
-        m_priors[j] += m_weights[i][j];	
+        m_priors[j] += m_weights[i][j];
       }
     }
 
     Utils.normalize(m_priors);
   }
+
+
+  /**
+   * Density function of normal distribution.
+   * @param x input value
+   * @param mean mean of distribution
+   * @param stdDev standard deviation of distribution
+   */
+  private double normalDens (double x, double mean, double stdDev) {
+    double diff = x - mean;
+   
+    return  (1/(m_normConst*stdDev))*Math.exp(-(diff*diff/(2*stdDev*stdDev)));
+  }
+
 
   /**
    * New probability estimators for an iteration
@@ -408,7 +463,8 @@ public class EM
 						, true);
         }
         else {
-	  m_model[i][j] = new NormalEstimator(m_precisions[j]);
+          m_modelNormal[i][j][0] = m_modelNormal[i][j][1] = 
+	    m_modelNormal[i][j][2] = 0.0;
         }
       }
     }
@@ -421,7 +477,8 @@ public class EM
    * @param num_cl the number of clusters
    */
   private void M (Instances inst, int num_cl)
-    throws Exception {
+    throws Exception
+  {
     int i, j, l;
     new_estimators(num_cl);
 
@@ -429,9 +486,51 @@ public class EM
       for (j = 0; j < m_num_attribs; j++) {
         for (l = 0; l < inst.numInstances(); l++) {
           if (!inst.instance(l).isMissing(j)) {
-	    m_model[i][j].addValue(inst.instance(l).value(j), 
-				   m_weights[l][i]);
+            if (inst.attribute(j).isNominal()) {
+              m_model[i][j].addValue(inst.instance(l).value(j), 
+				     m_weights[l][i]);
+            }
+            else {
+              m_modelNormal[i][j][0] += (inst.instance(l).value(j) * 
+					 m_weights[l][i]);
+              m_modelNormal[i][j][2] += m_weights[l][i];
+              m_modelNormal[i][j][1] += (inst.instance(l).value(j) * 
+					 inst.instance(l).value(j)*m_weights[l][i]);
+            }
           }
+        }
+      }
+    }
+    
+       // calcualte mean and std deviation for numeric attributes
+    for (j = 0; j < m_num_attribs; j++) {
+      if (!inst.attribute(j).isNominal()) {
+        for (i = 0; i < num_cl; i++) {
+          if (m_modelNormal[i][j][2] < 0) {
+            m_modelNormal[i][j][1] = 0;
+          } else {
+
+	  // variance
+	    m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - 
+				      (m_modelNormal[i][j][0] * 
+				       m_modelNormal[i][j][0] / 
+				       m_modelNormal[i][j][2])) / 
+	      m_modelNormal[i][j][2];
+
+	    // std dev      
+	    m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]); 
+
+	    if (m_modelNormal[i][j][1] <= m_minStdDev 
+		|| Double.isNaN(m_modelNormal[i][j][1])) {
+	      m_modelNormal[i][j][1] = 
+		m_minStdDev;
+	    }
+	    
+	    // mean
+	    if (m_modelNormal[i][j][2] > 0.0) {
+	      m_modelNormal[i][j][0] /= m_modelNormal[i][j][2];
+	    }
+	  }        
         }
       }
     }
@@ -447,7 +546,8 @@ public class EM
    * @return the average log likelihood
    */
   private double E (Instances inst, int num_cl)
-    throws Exception {
+    throws Exception
+  {
     int i, j, l;
     double prob;
     double loglk = 0.0;
@@ -458,10 +558,28 @@ public class EM
 
         for (j = 0; j < m_num_attribs; j++) {
           if (!inst.instance(l).isMissing(j)) {
-	    prob *= m_model[i][j].getProbability(inst.instance(l).value(j));
+            if (inst.attribute(j).isNominal()) {
+              prob *= m_model[i][j].getProbability(inst.instance(l).value(j));
+            }
+            else {
+              // numeric attribute
+              prob *= normalDens(inst.instance(l).value(j), 
+				 m_modelNormal[i][j][0], 
+				 m_modelNormal[i][j][1]);
+	      if (Double.isInfinite(prob)) {
+		throw new Exception("Joint density has overflowed. Try "
+				    +"increasing the minimum allowable "
+				    +"standard deviation for normal "
+				    +"density calculation.");
+	      }
+            }
           }
         }
-        m_weights[l][i] = (prob*m_priors[i]);	
+
+        m_weights[l][i] = (prob*m_priors[i]);
+	if (m_weights[l][i] < 0) {
+	  m_weights[l][i] = 0;
+	}
       }
 
       double temp1 = 0;
@@ -497,6 +615,7 @@ public class EM
    * Reset to default options
    */
   protected void resetOptions () {
+    m_minStdDev = 1e-6;
     m_max_iterations = 100;
     m_rseed = 100;
     m_num_clusters = -1;
@@ -520,16 +639,26 @@ public class EM
 
     for (int j = 0; j < m_num_clusters; j++) {
       text.append("\nCluster: " + j + " Prior probability: " 
-		  + Utils.doubleToString(m_priors[j], 6, 4) + "\n\n");
+		  + Utils.doubleToString(m_priors[j], 4) + "\n\n");
 
       for (int i = 0; i < m_num_attribs; i++) {
         text.append("Attribute: " + m_theInstances.attribute(i).name() + "\n");
 
-	if (m_model[j][i] != null) {
-	  text.append(m_model[j][i].toString());
-	}
+        if (m_theInstances.attribute(i).isNominal()) {
+          if (m_model[j][i] != null) {
+            text.append(m_model[j][i].toString());
+          }
+        }
+        else {
+          text.append("Normal Distribution. Mean = " 
+		      + Utils.doubleToString(m_modelNormal[j][i][0], 4) 
+		      + " StdDev = " 
+		      + Utils.doubleToString(m_modelNormal[j][i][1], 4) 
+		      + "\n");
+        }
       }
     }
+
     return  text.toString();
   }
 
@@ -544,9 +673,23 @@ public class EM
 
     for (j = 0; j < m_num_clusters; j++) {
       for (i = 0; i < m_num_attribs; i++) {
-	if (m_model[j][i] != null) {
-	  System.out.println("Clust: " + j + " att: " + i + "\n");
-	  System.out.println(m_model[j][i].toString());
+	System.out.println("Clust: " + j + " att: " + i + "\n");
+
+	if (m_theInstances.attribute(i).isNominal()) {
+	  if (m_model[j][i] != null) {
+	    System.out.println(m_model[j][i].toString());
+	  }
+	}
+	else {
+	  System.out.println("Normal Distribution. Mean = " 
+			     + Utils.doubleToString(m_modelNormal[j][i][0]
+						    , 8, 4) 
+			     + " StandardDev = " 
+			     + Utils.doubleToString(m_modelNormal[j][i][1]
+						    , 8, 4) 
+			     + " WeightSum = " 
+			     + Utils.doubleToString(m_modelNormal[j][i][2]
+						    , 8, 4));
 	}
       }
     }
@@ -595,13 +738,12 @@ public class EM
 	Instances cvTrain = trainCopy.trainCV(numFolds, i);
 	Instances cvTest = trainCopy.testCV(numFolds, i);
 	EM_Init(cvTrain, num_cl);
-
 	iterate(cvTrain, num_cl, false);
 	tll = E(cvTest, num_cl);
 
 	if (m_verbose) {
 	  System.out.println("# clust: " + num_cl + " Fold: " + i 
-			     + " Log likelihood: " + tll);
+			     + " Loglikely: " + tll);
 	}
 
 	templl += tll;
@@ -653,17 +795,15 @@ public class EM
 
 
   /**
-   * Classifies a given instance.
+   * Generates a clusterer. Has to initialize all fields of the clusterer
+   * that are not being set via options.
    *
-   * @param instance the instance to be assigned to a cluster
-   * @return the number of the assigned cluster as an interger
-   * if the class is enumerated, otherwise the predicted value
-   * @exception Exception if instance could not be classified
-   * successfully
+   * @param data set of instances serving as training data 
+   * @exception Exception if the clusterer has not been 
+   * generated successfully
    */
   public void buildClusterer (Instances data)
-    throws Exception
-  {
+    throws Exception {
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
     }
@@ -690,6 +830,7 @@ public class EM
   /**
    * Predicts the cluster memberships for a given instance.
    *
+   * @param data set of test instances
    * @param instance the instance to be assigned a cluster.
    * @return an array containing the estimated membership 
    * probabilities of the test instance in each cluster (this 
@@ -697,7 +838,7 @@ public class EM
    * @exception Exception if distribution could not be 
    * computed successfully
    */
-  public double[] distributionForInstance(Instance inst) 
+  public double[] distributionForInstance (Instance inst)
     throws Exception {
     double [] distrib = weightsForInstance(inst);
     Utils.normalize(distrib);
@@ -713,6 +854,7 @@ public class EM
    */
   protected double[] weightsForInstance(Instance inst)
     throws Exception {
+
     int i, j;
     double prob;
     double[] wghts = new double[m_num_clusters];
@@ -722,11 +864,20 @@ public class EM
 
       for (j = 0; j < m_num_attribs; j++) {
 	if (!inst.isMissing(j)) {
-	  prob *= m_model[i][j].getProbability(inst.value(j));
+	  if (inst.attribute(j).isNominal()) {
+	    prob *= m_model[i][j].getProbability(inst.value(j));
+	  }
+	  else { // numeric attribute
+	    prob *= normalDens(inst.value(j), 
+			       m_modelNormal[i][j][0], 
+			       m_modelNormal[i][j][1]);
+	  }
 	}
       }
+
       wghts[i] = (prob*m_priors[i]);
     }
+
     return  wghts;
   }
 
@@ -753,7 +904,7 @@ public class EM
 			 + "\n");
     }
 
-    setDefaultPrecision(m_theInstances);
+    // setDefaultStdDevs(theInstances);
     // cross validate to determine number of clusters?
     if (m_initialNumClusters == -1) {
       if (m_theInstances.numInstances() > 9) {
@@ -761,7 +912,6 @@ public class EM
       } else {
 	m_num_clusters = 1;
       }
-      m_rr = new Random(m_rseed);
     }
 
     // fit full training set
@@ -829,8 +979,9 @@ public class EM
 			 evaluateClusterer(new EM(), argv));
     }
     catch (Exception e) {
-      e.printStackTrace();
       System.out.println(e.getMessage());
+      e.printStackTrace();
     }
   }
 }
+
