@@ -27,7 +27,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class SwapAttributeValuesFilter extends Filter 
   implements OptionHandler {
@@ -82,6 +82,7 @@ public class SwapAttributeValuesFilter extends Filter
     if (instanceInfo.attribute(m_AttIndex).numValues() < 2) {
       throw new Exception("Chosen attribute has less than two values.");
     }
+    setOutputFormat();
     return true;
   }
 
@@ -105,10 +106,12 @@ public class SwapAttributeValuesFilter extends Filter
       m_NewBatch = false;
     }
     Instance newInstance = (Instance)instance.copy();
-    if ((int)newInstance.value(m_AttIndex) == m_SecondIndex) {
-      newInstance.setValue(m_AttIndex, (double)m_FirstIndex);
-    } else if ((int)newInstance.value(m_AttIndex) == m_FirstIndex) {
-      newInstance.setValue(m_AttIndex, (double)m_SecondIndex);
+    if (!newInstance.isMissing(m_AttIndex)) {
+      if ((int)newInstance.value(m_AttIndex) == m_SecondIndex) {
+        newInstance.setValue(m_AttIndex, (double)m_FirstIndex);
+      } else if ((int)newInstance.value(m_AttIndex) == m_FirstIndex) {
+        newInstance.setValue(m_AttIndex, (double)m_SecondIndex);
+      }
     }
     push(newInstance);
     return true;
@@ -283,9 +286,8 @@ public class SwapAttributeValuesFilter extends Filter
   }
 
   /**
-   * Set the output format. Takes the current average class values
-   * and m_InputFormat and calls setOutputFormat(Instances) 
-   * appropriately.
+   * Set the output format. Swapss the desired nominal attribute values in
+   * the header and calls setOutputFormat(Instances) appropriately.
    *
    * @exception Exception if a problem occurs when setting the output format
    */

@@ -6,7 +6,8 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	MakeIndicatorFilter.java ReplaceMissingValuesFilter.java \
 	NumericTransformFilter.java FirstOrderFilter.java \
 	NominalToBinaryFilter.java SplitDatasetFilter.java \
-	CopyAttributesFilter.java TimeSeriesDeltaFilter.java \
+	CopyAttributesFilter.java AbstractTimeSeriesFilter.java \
+	TimeSeriesDeltaFilter.java \
 	TimeSeriesTranslateFilter.java RandomizeFilter.java \
 	AttributeSelectionFilter.java NormalizationFilter.java \
 	ResampleFilter.java AttributeTypeFilter.java \

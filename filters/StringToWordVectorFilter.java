@@ -30,7 +30,7 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@intelligenesis.net)
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  **/
 public class StringToWordVectorFilter extends Filter {
 
@@ -356,9 +356,10 @@ public class StringToWordVectorFilter extends Filter {
     for (int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (getInputFormat().attribute(i).type() != Attribute.STRING) {
         if (instance.value(i) != 0.0) {
-          contained.put(new Integer(firstCopy++), 
+          contained.put(new Integer(firstCopy), 
                         new Double(instance.value(i)));
         }
+        firstCopy++;
       }     
     }
     
@@ -372,8 +373,10 @@ public class StringToWordVectorFilter extends Filter {
       values[i] = value.doubleValue();
       indices[i] = index.intValue();
     }
-    push(new SparseInstance(instance.weight(), values, indices, 
-                            outputFormatPeek().numAttributes()));
+    Instance inst = new SparseInstance(instance.weight(), values, indices, 
+                                       outputFormatPeek().numAttributes());
+    inst.setDataset(outputFormatPeek());
+    push(inst);
     //System.err.print("#"); System.err.flush();
   }
 
