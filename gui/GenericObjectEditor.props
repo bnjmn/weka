@@ -74,7 +74,7 @@ weka.filters.Filter = \
  weka.filters.NumericTransformFilter, \
  weka.filters.RandomizeFilter, \
  weka.filters.ReplaceMissingValuesFilter, \
- weka.filters.ResampleFilter.java, \
+ weka.filters.ResampleFilter, \
  weka.filters.SplitDatasetFilter, \
  weka.filters.StringToNominalFilter, \
  weka.filters.SwapAttributeValuesFilter, \
