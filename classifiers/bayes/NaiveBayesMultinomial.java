@@ -15,16 +15,15 @@
  */
 
 /*
- *    NaiveBayesMultinomial.java
+ *    NaiveBayesMultinomial1.java
  *    Copyright (C) 2003 Andrew Golightly
- *                  -- last updated 10/06/2003
+ *                  -- last updated 30/06/2003
  */
 
 package weka.classifiers.bayes;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.SpecialFunctions;
 import weka.core.Utils;
 
 /**
@@ -32,9 +31,17 @@ import weka.core.Utils;
  * For more information see,<p>
  *
  * Andrew Mccallum, Kamal Nigam (1998)<i>A Comparison of Event Models for Naive Bayes Text Classification </i>
- 
+ *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz) and Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
+ */
+
+/**
+ * The core equation for this classifier:
+ * 
+ * P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)
+ * 
+ * where Ci is class i and D is a document
  */
 
 public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifier 
@@ -43,6 +50,7 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
     /*
       probability that a word (w) exists in a class (H) (i.e. Pr[w|H])
       The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
+      NOTE: the values are actually the log of Pr[w|H]
     */
     private double[][] probOfWordGivenClass;
     
@@ -55,9 +63,9 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
     //number of class values
     private int numClasses;
     
-    //cache lnFactorial computations (BP)
+    //cache lnFactorial computations
     private double[] lnFactorialCache = new double[]{0.0,0.0};
-
+    
     //copy of header information for use in toString method
     Instances headerInfo;
 
@@ -69,32 +77,34 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
      */
     public void buildClassifier(Instances instances) throws Exception 
     {
-        headerInfo = new Instances(instances, 0);
+	headerInfo = new Instances(instances, 0);
 	numClasses = instances.numClasses();
 	numAttributes = instances.numAttributes();
 	probOfWordGivenClass = new double[numClasses][];
 	
-	//initialising the matrix of word counts
-	//NOTE: Laplace estimator introduced in case a word that does not appear for a class in the 
-	//training set does so for the test set
+	/*
+	  initialising the matrix of word counts
+	  NOTE: Laplace estimator introduced in case a word that does not appear for a class in the 
+	  training set does so for the test set
+	*/
 	for(int c = 0; c<numClasses; c++)
 	    {
 		probOfWordGivenClass[c] = new double[numAttributes];
-		for(int laplace = 0; laplace<numAttributes; laplace++)
+		for(int att = 0; att<numAttributes; att++)
 		    {
 			/*
 			  check all attributes (except the class attribute) are numeric and 
 			  that the class attribute in nominal
 			*/
-			if(instances.classIndex() == laplace)
+			if(instances.classIndex() == att)
 			    {
-				if(!instances.attribute(laplace).isNominal())
+				if(!instances.attribute(att).isNominal())
 				    throw new Exception("The class attribute is required to be nominal. This is currently not the case!");
 			    }
 			else
-			    if(!instances.attribute(laplace).isNumeric())
-				throw new Exception(("Attribute " + instances.attribute(laplace).name() + " is not numeric! NaiveBayesMultinomial1 requires that all attributes (except the class attribute) are numeric."));
-			probOfWordGivenClass[c][laplace] = 1;
+			    if(!instances.attribute(att).isNumeric())
+				throw new Exception(("Attribute " + instances.attribute(att).name() + " is not numeric! NaiveBayesMultinomial1 requires that all attributes (except the class attribute) are numeric."));
+			probOfWordGivenClass[c][att] = 1;
 		    }
 	    }
 	
@@ -126,16 +136,19 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
 			} 
 	    }
 	
-	//normalising probOfWordGivenClass values 
-	// + precompute logs (BP)
+	/*
+	  normalising probOfWordGivenClass values
+	  and saving each value as the log of each value
+	*/
 	for(int c = 0; c<numClasses; c++)
 	    for(int v = 0; v<numAttributes; v++) 
-		probOfWordGivenClass[c][v] = Math.log(probOfWordGivenClass[c][v] 
-						      / (wordsPerClass[c] + numAttributes - 1));
+		probOfWordGivenClass[c][v] = Math.log(probOfWordGivenClass[c][v] / (wordsPerClass[c] + numAttributes - 1));
 	
-	//calculating Pr(H)
-	//NOTE: Laplace estimator introduced in case a class does not get mentioned in the set of
-	//test instances
+	/*
+	  calculating Pr(H)
+	  NOTE: Laplace estimator introduced in case a class does not get mentioned in the set of 
+	  training instances
+	*/
 	final double numDocs = instances.sumOfWeights() + numClasses;
 	probOfClass = new double[numClasses];
 	for(int h=0; h<numClasses; h++)
@@ -154,17 +167,17 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
     {
 	double[] probOfClassGivenDoc = new double[numClasses];
 	
-	//calculate the array of log(Pr[E|H])
-	double[] logClassGivenDoc = new double[numClasses];
+	//calculate the array of log(Pr[D|C])
+	double[] logDocGivenClass = new double[numClasses];
 	for(int h = 0; h<numClasses; h++)
-	    logClassGivenDoc[h] = probOfDocGivenClass(instance, h);
+	    logDocGivenClass[h] = probOfDocGivenClass(instance, h);
 	
-	double max = logClassGivenDoc[Utils.maxIndex(logClassGivenDoc)];
+	double max = logDocGivenClass[Utils.maxIndex(logDocGivenClass)];
 	double probOfDoc = 0.0;
 	
 	for(int i = 0; i<numClasses; i++) 
 	    {
-		probOfClassGivenDoc[i] = Math.exp(logClassGivenDoc[i] - max) * probOfClass[i];
+		probOfClassGivenDoc[i] = Math.exp(logDocGivenClass[i] - max) * probOfClass[i];
 		probOfDoc += probOfClassGivenDoc[i];
 	    }
 	
@@ -179,10 +192,10 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
      *  where 
      *      N is the total number of words
      *      Pi is the probability of obtaining word i
-     *      ni is the number of times the word ni occurs in the document
+     *      ni is the number of times the word at index i occurs in the document
      *
      * @param inst       The instance to be classified
-     * @param classIndex The class we are calculating the probability with respect to
+     * @param classIndex The index of the class we are calculating the probability with respect to
      *
      * @return The log of the probability of the document occuring given the class
      */
@@ -208,7 +221,8 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
     }
     
     /**
-     * Fast computation of ln(n!) for non-negative ints (BP)
+     * Fast computation of ln(n!) for non-negative ints
+     *
      * negative ints are passed on to the general gamma-function
      * based version in weka.core.SpecialFunctions
      *
@@ -217,13 +231,13 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
      *
      * the common case is reduced to a simple array lookup
      *
-     * @param n the integer 
+     * @param  n the integer 
      * @return ln(n!)
      */
     
     public double lnFactorial(int n) 
     {
-	if (n < 0) return SpecialFunctions.lnFactorial(n);
+	if (n < 0) return weka.core.SpecialFunctions.lnFactorial(n);
 	
 	if (lnFactorialCache.length <= n) {
 	    double[] tmp = new double[n+1];
@@ -260,7 +274,7 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
 
 	return result;
     }
-
+    
     /**
      * Main method for testing this class.
      *
