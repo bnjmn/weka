@@ -47,7 +47,7 @@ import weka.core.FastVector;
  * and "string". (default "string")<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
@@ -58,7 +58,8 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
   public static final Tag [] TAGS_ATTRIBUTES = {
     new Tag(Attribute.STRING, "Delete string attributes"),
     new Tag(Attribute.NOMINAL, "Delete nominal attributes"),
-    new Tag(Attribute.NUMERIC, "Delete numeric attributes")
+    new Tag(Attribute.NUMERIC, "Delete numeric attributes"),
+    new Tag(Attribute.DATE, "Delete date attributes")
   };
 
   /**
@@ -72,7 +73,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
 
     newVector.addElement(new Option(
               "\tSpecify the attribute type to delete. Valid values are:\n"
-	      + "\t\"nominal\", \"numeric\", and \"string\". \n"
+	      + "\t\"nominal\", \"numeric\", \"date\", and \"string\". \n"
               + "(default \"string\")",
               "T", 1, "-T <type>"));
 
@@ -85,7 +86,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    *
    * -T type <br>
    * Specify the attribute type to delete. Valid values are "nominal", 
-   * "numeric", and "string". (default "string")<p>
+   * "numeric", "date", and "string". (default "string")<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -99,6 +100,8 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
         setAttributeType(new SelectedTag(Attribute.NOMINAL, TAGS_ATTRIBUTES));
       } else if (attributeType.equals("numeric")) {
         setAttributeType(new SelectedTag(Attribute.NUMERIC, TAGS_ATTRIBUTES));
+      } else if (attributeType.equals("date")) {
+        setAttributeType(new SelectedTag(Attribute.DATE, TAGS_ATTRIBUTES));
       } else {
         setAttributeType(new SelectedTag(Attribute.STRING, TAGS_ATTRIBUTES));
       }
@@ -126,6 +129,8 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
       options[current++] = "nominal";
     } else if (m_DeleteType == Attribute.NUMERIC) {
       options[current++] = "numeric";
+    } else if (m_DeleteType == Attribute.DATE) {
+      options[current++] = "date";
     } else {
       options[current++] = "string";
     }
@@ -183,7 +188,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
         if (instanceInfo.classIndex() == i) {
           outputClass = attributes.size();
         }
-        attributes.addElement(instanceInfo.attribute(i));
+        attributes.addElement(instanceInfo.attribute(i).copy());
       }
     }
     Instances outputFormat = new Instances(instanceInfo.relationName(),
