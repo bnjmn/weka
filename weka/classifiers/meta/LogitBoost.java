@@ -80,10 +80,10 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class LogitBoost extends DistributionClassifier 
-  implements OptionHandler, Sourcable {
+  implements OptionHandler, Sourcable, WeightedInstancesHandler {
 
   // To maintain the same version number after adding m_ClassAttribute
   static final long serialVersionUID = -2177331683936258888L;
@@ -762,12 +762,12 @@ public class LogitBoost extends DistributionClassifier
   private void performIteration(double[][] trainYs,
 				double[][] trainFs,
 				double[][] probs,
-				Instances boostData) throws Exception {
+				Instances data) throws Exception {
 
     if (m_Debug) {
       System.err.println("Training classifier " + (m_NumIterations + 1));
     }
-    
+
     // Build the new models
     for (int j = 0; j < m_NumClasses; j++) {
       if (m_Debug) {
@@ -775,6 +775,9 @@ public class LogitBoost extends DistributionClassifier
 			   + " (" + m_ClassAttribute.name() 
 			   + "=" + m_ClassAttribute.value(j) + ")");
       }
+    
+      // Make copy because we want to save the weights
+      Instances boostData = new Instances(data);
       
       // Set instance pseudoclass and weights
       for (int i = 0; i < probs.length; i++) {
@@ -798,7 +801,7 @@ public class LogitBoost extends DistributionClassifier
 	// Set values for instance
 	Instance current = boostData.instance(i);
 	current.setValue(boostData.classIndex(), z);
-	current.setWeight(/*trainYs.length **/ w);
+	current.setWeight(/*trainYs.length **/ current.weight() * w);
       }
       
       // Select instances to train the classifier on
@@ -827,7 +830,7 @@ public class LogitBoost extends DistributionClassifier
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
 	pred[j] = m_Classifiers[j][m_NumIterations]
-	  .classifyInstance(boostData.instance(i));
+	  .classifyInstance(data.instance(i));
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;

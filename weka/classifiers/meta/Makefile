@@ -3,7 +3,7 @@ JAVAC = javac
 SOURCES = AdaBoostM1.java AdditiveRegression.java \
 	AttributeSelectedClassifier.java Bagging.java \
 	CVParameterSelection.java ClassificationViaRegression.java \
-	Cleanser.java CostSensitiveClassifier.java \
+	CostSensitiveClassifier.java \
 	DistributionMetaClassifier.java FilteredClassifier.java \
 	LogitBoost.java MetaCost.java MultiClassClassifier.java \
 	MultiBoostAB.java MultiScheme.java OrdinalClassClassifier.java \
