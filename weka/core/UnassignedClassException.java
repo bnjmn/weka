@@ -16,37 +16,37 @@
 
 /*
  *    UnassignedClassException.java
- *    Copyright (C) 2001 Webmind Corp.
+ *    Copyright (C) 2002 Richard Kirkby
+ *
  */
 
 package weka.core;
 
 /**
- * <code>UnassignedClassException</code> is used when
- * a method requires access to the Attribute designated as 
- * the class attribute in a set of Instances, but the Instances does not
- * have any class attribute assigned (such as by setClassIndex()).
+ * Exception that is raised when trying to use some data that has no
+ * class assigned to it, but a class is needed to perform the operation.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class UnassignedClassException extends RuntimeException {
 
   /**
-   * Creates a new <code>UnassignedClassException</code> instance
-   * with no detail message.
+   * Creates a new UnassignedClassException with no message.
+   *
    */
-  public UnassignedClassException() { 
-    super(); 
+  public UnassignedClassException() {
+
+    super();
   }
 
   /**
-   * Creates a new <code>UnassignedClassException</code> instance
-   * with a specified message.
+   * Creates a new UnassignedClassException.
    *
-   * @param messagae a <code>String</code> containing the message.
+   * @param message the reason for raising an exception.
    */
-  public UnassignedClassException(String message) { 
-    super(message); 
+  public UnassignedClassException(String message) {
+
+    super(message);
   }
 }

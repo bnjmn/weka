@@ -15,38 +15,38 @@
  */
 
 /*
- *    UnsupportedAttributeTypeException.java
- *    Copyright (C) 2001 Webmind Corp.
+ *    UnsuppotedAttributeTypeException.java
+ *    Copyright (C) 2002 Richard Kirkby
+ *
  */
 
 package weka.core;
 
 /**
- * <code>UnsupportedAttributeTypeException</code> is used in situations
- * where the throwing object is not able to accept Instances with the
- * supplied structure, because one or more of the Attributes in the
- * Instances are of the wrong type.
+ * Exception that is raised by an object that is unable to process some of the
+ * attribute types it has been passed.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class UnsupportedAttributeTypeException extends WekaException {
 
   /**
-   * Creates a new <code>UnsupportedAttributeTypeException</code> instance
-   * with no detail message.
+   * Creates a new UnsupportedAttributeTypeException with no message.
+   *
    */
-  public UnsupportedAttributeTypeException() { 
-    super(); 
+  public UnsupportedAttributeTypeException() {
+
+    super();
   }
 
   /**
-   * Creates a new <code>UnsupportedAttributeTypeException</code> instance
-   * with a specified message.
+   * Creates a new UnsupportedAttributeTypeException.
    *
-   * @param messagae a <code>String</code> containing the message.
+   * @param message the reason for raising an exception.
    */
-  public UnsupportedAttributeTypeException(String message) { 
-    super(message); 
+  public UnsupportedAttributeTypeException(String message) {
+
+    super(message);
   }
 }

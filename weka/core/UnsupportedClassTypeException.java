@@ -15,37 +15,38 @@
  */
 
 /*
- *    UnsupportedClassTypeException.java
- *    Copyright (C) 2001 Webmind Corp.
+ *    UnsuppotedClassTypeException.java
+ *    Copyright (C) 2002 Richard Kirkby
+ *
  */
 
 package weka.core;
 
 /**
- * <code>UnsupportedClassTypeException</code> is used in situations
- * where the throwing object is not able to accept Instances with the
- * supplied structure, because the class Attribute is of the wrong type.
+ * Exception that is raised by an object that is unable to process the
+ * class type of the data it has been passed.
  *
- * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class UnsupportedClassTypeException extends WekaException {
 
   /**
-   * Creates a new <code>UnsupportedClassTypeException</code> instance
-   * with no detail message.
+   * Creates a new UnsupportedClassTypeException with no message.
+   *
    */
-  public UnsupportedClassTypeException() { 
-    super(); 
+  public UnsupportedClassTypeException() {
+
+    super();
   }
 
   /**
-   * Creates a new <code>UnsupportedClassTypeException</code> instance
-   * with a specified message.
+   * Creates a new UnsupportedClassTypeException.
    *
-   * @param messagae a <code>String</code> containing the message.
+   * @param message the reason for raising an exception.
    */
-  public UnsupportedClassTypeException(String message) { 
-    super(message); 
+  public UnsupportedClassTypeException(String message) {
+
+    super(message);
   }
 }
