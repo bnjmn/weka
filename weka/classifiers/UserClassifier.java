@@ -27,9 +27,10 @@ import weka.core.*;
 import weka.filters.*;
 import weka.classifiers.*;
 import weka.classifiers.j48.*;
-import weka.gui.VisualizePanel;
-import weka.gui.VisualizePanelListener;
-import weka.gui.VisualizePanelEvent;
+import weka.gui.visualize.*;
+/*import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizePanelListener;
+import weka.gui.visualize.VisualizePanelEvent; */
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyDialog;
 
@@ -44,7 +45,7 @@ import java.beans.PropertyChangeSupport;
  *
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -265,10 +266,10 @@ TreeDisplayListener, VisualizePanelListener {
 	/////////////reps.setComponentAt(0, m_tView);
 	m_tView.setHighlight(m_focus.m_identity);
       }
-      else if (e.getCommand() == e.SEND_INSTANCES) {
+      /*else if (e.getCommand() == e.SEND_INSTANCES) {
 	TreeClass source = m_top.getNode(e.getID());
 	m_iView.setExtInstances(source.m_training);
-      }
+	}*/
       else if (e.getCommand() == e.ACCEPT) {
 	
 	int well = JOptionPane.showConfirmDialog(m_mainWin, 
