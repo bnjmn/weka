@@ -50,7 +50,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  **/
 public class Resample extends Filter implements UnsupervisedFilter,
 						OptionHandler {
@@ -63,6 +63,17 @@ public class Resample extends Filter implements UnsupervisedFilter,
 
   /** True if the first batch has been done */
   private boolean m_FirstBatchDone = false;
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Produces a random subsample of a dataset. The original dataset must "
+      +"fit entirely in memory. The number of instances in the generated "
+      +"dataset may be specified.";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -138,7 +149,16 @@ public class Resample extends Filter implements UnsupervisedFilter,
     }
     return options;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String randomSeedTipText() {
+    return "The seed used for random sampling.";
+  }
+
   /**
    * Gets the random number seed.
    *
@@ -159,6 +179,15 @@ public class Resample extends Filter implements UnsupervisedFilter,
     m_RandomSeed = newSeed;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String sampleSizePercentTipText() {
+    return "Size of the subsample as a percentage of the original dataset.";
+  }
+
   /**
    * Gets the subsample size as a percentage of the original set.
    *
