@@ -69,7 +69,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -461,15 +461,8 @@ public class PreprocessPanel extends JPanel {
 	if (!sFile.getName().toLowerCase().endsWith(".arff")) {
 	  sFile = new File(sFile.getParent(), sFile.getName() + ".arff");
 	}
-	final File selected = sFile;
-	m_IOThread = new Thread() {
-	  public void run() {
-	    saveInstancesToFile(selected, m_WorkingInstances);
-	    m_IOThread = null;
-	  }
-	};
-	m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-	m_IOThread.start();
+	File selected = sFile;
+	saveInstancesToFile(selected, m_WorkingInstances);
       }
     } else {
       JOptionPane.showMessageDialog(this,
@@ -490,15 +483,8 @@ public class PreprocessPanel extends JPanel {
     if (m_IOThread == null) {
       int returnVal = m_FileChooser.showOpenDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
-	final File selected = m_FileChooser.getSelectedFile();
-	m_IOThread = new Thread() {
-	  public void run() {
-	    setBaseInstancesFromFile(selected);
-	    m_IOThread = null;
-	  }
-	};
-	m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-	m_IOThread.start();
+	File selected = m_FileChooser.getSelectedFile();
+	setBaseInstancesFromFile(selected);
       }
     } else {
       JOptionPane.showMessageDialog(this,
@@ -527,15 +513,8 @@ public class PreprocessPanel extends JPanel {
 			m_LastURL);
 	if (urlName != null) {
 	  m_LastURL = urlName;
-	  final URL url = new URL(urlName);
-	  m_IOThread = new Thread() {
-	    public void run() {
-	      setBaseInstancesFromURL(url);
-	      m_IOThread = null;
-	    }
-	  };
-	  m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-	  m_IOThread.start();
+	  URL url = new URL(urlName);
+	  setBaseInstancesFromURL(url);
 	}
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
@@ -560,46 +539,77 @@ public class PreprocessPanel extends JPanel {
    * @param f a value of type 'File'
    * @param inst the instances to save
    */
-  protected void saveInstancesToFile(File f, Instances inst) {
+  protected void saveInstancesToFile(final File f, final Instances inst) {
       
-    try {
-      m_Log.statusMessage("Saving to file...");
-      Writer w = new BufferedWriter(new FileWriter(f));
-      Instances h = new Instances(inst, 0);
-      w.write(h.toString());
-      w.write("\n");
-      for (int i = 0; i < inst.numInstances(); i++) {
-	w.write(inst.instance(i).toString());
-	w.write("\n");
-      }
-      w.close();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      m_Log.logMessage(ex.getMessage());
+    if (m_IOThread != null) {
+      m_IOThread = new Thread() {
+	public void run() {
+	  try {
+	    m_Log.statusMessage("Saving to file...");
+	    Writer w = new BufferedWriter(new FileWriter(f));
+	    Instances h = new Instances(inst, 0);
+	    w.write(h.toString());
+	    w.write("\n");
+	    for (int i = 0; i < inst.numInstances(); i++) {
+	      w.write(inst.instance(i).toString());
+	      w.write("\n");
+	    }
+	    w.close();
+	  } catch (Exception ex) {
+	    ex.printStackTrace();
+	    m_Log.logMessage(ex.getMessage());
+	  }
+	  m_IOThread = null;
+	}
+      };
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    } else {
+      JOptionPane.showMessageDialog(this,
+				    "Can't save at this time,\n"
+				    + "currently busy with other IO",
+				    "Save Instances",
+				    JOptionPane.WARNING_MESSAGE);
     }
   }
 
   /**
    * Loads results from a set of instances contained in the supplied
-   * file.
+   * file. This is started in the IO thread, and a dialog is popped up
+   * if there's a problem.
    *
    * @param f a value of type 'File'
    */
-  protected void setBaseInstancesFromFile(File f) {
+  public void setBaseInstancesFromFile(final File f) {
       
-    try {
-      m_Log.statusMessage("Reading from file...");
-      Reader r = new BufferedReader(new FileReader(f));
-      setBaseInstances(new Instances(r));
-      r.close();
-    } catch (Exception ex) {
-      m_Log.statusMessage("Problem reading " + f.getName());
+    if (m_IOThread == null) {
+      m_IOThread = new Thread() {
+	public void run() {
+	  try {
+	    m_Log.statusMessage("Reading from file...");
+	    Reader r = new BufferedReader(new FileReader(f));
+	    setBaseInstances(new Instances(r));
+	    r.close();
+	  } catch (Exception ex) {
+	    m_Log.statusMessage("Problem reading " + f.getName());
+	    JOptionPane.showMessageDialog(PreprocessPanel.this,
+					  "Couldn't read from file:\n"
+					  + f.getName() + "\n"
+					  + ex.getMessage(),
+					  "Load Instances",
+					  JOptionPane.ERROR_MESSAGE);
+	  }
+	  m_IOThread = null;
+	}
+      };
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    } else {
       JOptionPane.showMessageDialog(this,
-				    "Couldn't read from file:\n"
-				    + f.getName() + "\n"
-				    + ex.getMessage(),
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
 				    "Load Instances",
-				    JOptionPane.ERROR_MESSAGE);
+				    JOptionPane.WARNING_MESSAGE);
     }
   }
 
@@ -608,21 +618,39 @@ public class PreprocessPanel extends JPanel {
    *
    * @param u the URL to load from.
    */
-  protected void setBaseInstancesFromURL(URL u) {
+  public void setBaseInstancesFromURL(final URL u) {
 
-    try {
-      m_Log.statusMessage("Reading from URL...");
-      Reader r = new BufferedReader(new InputStreamReader(u.openStream()));
-      setBaseInstances(new Instances(r));
-      r.close();
-    } catch (Exception ex) {
-      m_Log.statusMessage("Problem reading " + u);
+    if (m_IOThread == null) {
+      m_IOThread = new Thread() {
+	public void run() {
+
+	  try {
+	    m_Log.statusMessage("Reading from URL...");
+	    Reader r = new BufferedReader(
+		       new InputStreamReader(u.openStream()));
+	    setBaseInstances(new Instances(r));
+	    r.close();
+	  } catch (Exception ex) {
+	    m_Log.statusMessage("Problem reading " + u);
+	    JOptionPane.showMessageDialog(PreprocessPanel.this,
+					  "Couldn't read from URL:\n"
+					  + u + "\n"
+					  + ex.getMessage(),
+					  "Load Instances",
+					  JOptionPane.ERROR_MESSAGE);
+	  }
+
+	  m_IOThread = null;
+	}
+      };
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    } else {
       JOptionPane.showMessageDialog(this,
-				    "Couldn't read from URL:\n"
-				    + u + "\n"
-				    + ex.getMessage(),
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
 				    "Load Instances",
-				    JOptionPane.ERROR_MESSAGE);
+				    JOptionPane.WARNING_MESSAGE);
     }
   }
   
