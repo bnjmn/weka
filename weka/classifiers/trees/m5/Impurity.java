@@ -29,7 +29,7 @@ import weka.core.*;
 /**
  * Class for handling the impurity values when spliting the instances
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public final class Impurity{
   double n;                   // number of total instances 
@@ -135,7 +135,7 @@ public final class Impurity{
       break;
     case 0:
       break;
-    default: M5Utils.errorMsg("wrong type in Impurity.incremental().");
+    default: System.err.println("wrong type in Impurity.incremental().");
     }
 
     if(nl<=0.0){
@@ -157,7 +157,7 @@ public final class Impurity{
       sdr = Math.sqrt(vr);
     }
 
-    if(order <= 0)M5Utils.errorMsg("Impurity order less than zero in Impurity.incremental()");
+    if(order <= 0)System.err.println("Impurity order less than zero in Impurity.incremental()");
     else if(order == 1) {
       y = va; yl = vl; yr = vr;
     } else {
