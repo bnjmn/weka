@@ -66,7 +66,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -134,7 +134,16 @@ public class Attribute implements Copyable, Serializable {
       m_Values = (FastVector) attributeValues.copy();
       m_Hashtable = new Hashtable(m_Values.size());
       for (int i = 0; i < m_Values.size(); i++) {
-	m_Hashtable.put(m_Values.elementAt(i), new Integer(i));
+	Object store = m_Values.elementAt(i);
+	if (((String)store).length() > STRING_COMPRESS_THRESHOLD) {
+	  try {
+	    store = new SerializedObject(m_Values.elementAt(i), true);
+	  } catch (Exception ex) {
+	    System.err.println("Couldn't compress nominal attribute value -"
+			       + " storing uncompressed.");
+	  }
+	}
+	m_Hashtable.put(store, new Integer(i));
       }
       m_Type = NOMINAL;
     }
