@@ -83,7 +83,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -400,7 +400,7 @@ public class VisualizePanel extends JPanel {
     int pturbX(double xvalP, double xj) {
       int xpturb = 0;
       if (m_JitterVal > 0) {
-	xpturb = (int)((double)m_JitterVal * xj);
+	xpturb = (int)((double)m_JitterVal * (xj / 2.0));
 	if (((xvalP + xpturb) < m_XaxisStart) || 
 	    ((xvalP + xpturb) > m_XaxisEnd)) {
 	  xpturb *= -1;
@@ -433,7 +433,7 @@ public class VisualizePanel extends JPanel {
     int pturbY(double yvalP, double yj) {
       int ypturb = 0;
       if (m_JitterVal > 0) {
-	ypturb = (int)((double)m_JitterVal * yj);
+	ypturb = (int)((double)m_JitterVal * (yj / 2.0));
 	if (((yvalP + ypturb) < m_YaxisStart) || 
 	    ((yvalP + ypturb) > m_YaxisEnd)) {
 	  ypturb *= -1;
@@ -494,8 +494,8 @@ public class VisualizePanel extends JPanel {
 	    m_plotInstances.instance(i).isMissing(m_yIndex)) {
 	} else {
 	  if (m_JitterVal > 0) {
-	    xj = m_JRand.nextDouble();
-	    yj = m_JRand.nextDouble();
+	    xj = m_JRand.nextGaussian();
+	    yj = m_JRand.nextGaussian();
 	  }
 	  m_pointLookup[i][3] = pturbX(m_pointLookup[i][0],xj);
 	  m_pointLookup[i][4] = pturbY(m_pointLookup[i][1],yj);
@@ -590,8 +590,8 @@ public class VisualizePanel extends JPanel {
 	    m_plotInstances.instance(i).isMissing(m_yIndex)) {
 	} else {
 	  if (m_JitterVal > 0) {
-	    xj = m_JRand.nextDouble();
-	    yj = m_JRand.nextDouble();
+	    xj = m_JRand.nextGaussian();
+	    yj = m_JRand.nextGaussian();
 	  }
 	  /*	  double x = convertToPanelX(m_plotInstances.
 				     instance(i).value(m_xIndex),xj);
