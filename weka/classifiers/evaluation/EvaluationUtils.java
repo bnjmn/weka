@@ -17,7 +17,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class EvaluationUtils {
 
@@ -44,15 +44,13 @@ public class EvaluationUtils {
                                      int numFolds) 
     throws Exception {
 
-    if (!data.classAttribute().isNominal()) {
-      throw new Exception("Class must be nominal.");
-    }
-
     FastVector predictions = new FastVector();
     Instances runInstances = new Instances(data);
     Random random = new Random(m_Seed);
     runInstances.randomize(random);
-    runInstances.stratify(numFolds);
+    if (runInstances.classAttribute().isNominal() && (numFolds > 1)) {
+      runInstances.stratify(numFolds);
+    }
     int inst = 0;
     for (int fold = 0; fold < numFolds; fold++) {
       Instances train = runInstances.trainCV(numFolds, fold);
@@ -108,13 +106,17 @@ public class EvaluationUtils {
    * @param test the test instance
    * @exception Exception if an error occurs
    */
-  public NominalPrediction getPrediction(DistributionClassifier classifier,
-                                         Instance test)
+  public Prediction getPrediction(DistributionClassifier classifier,
+                                  Instance test)
     throws Exception {
    
     int actual = (int) test.classValue();
     double [] dist = classifier.distributionForInstance(test);
-    return new NominalPrediction(actual, dist, test.weight());
+    if (test.classAttribute().isNominal()) {
+      return new NominalPrediction(actual, dist, test.weight());
+    } else {
+      return new NumericPrediction(actual, dist[0], test.weight());
+    }
   }
 }
 
