@@ -49,7 +49,7 @@ import java.io.*;
  * No pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable {
@@ -854,7 +854,7 @@ public class REPTree extends DistributionClassifier
 
     // Check for non-nominal classes
     if (!data.classAttribute().isNominal()) {
-      throw new Exception("REPTree: nominal class, please.");
+      throw new UnsupportedClassTypeException("REPTree: nominal class, please.");
     }
 
     // Delete instances with missing class
@@ -969,7 +969,10 @@ public class REPTree extends DistributionClassifier
    * Outputs the decision tree.
    */
   public String toString() {
-    
+
+    if ((m_Tree == null)) {
+      return "REPTree: No model built yet.";
+    } 
     return     
       "\nREPTree\n============\n" + m_Tree.toString(0, null) + "\n" +
       "\nSize of the tree : " + numNodes();

@@ -32,7 +32,7 @@ import weka.classifiers.*;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class MakeDecList implements Serializable {
 
@@ -94,7 +94,7 @@ public class MakeDecList implements Serializable {
     if (data.classAttribute().isNumeric())
       throw new UnsupportedClassTypeException("Class is numeric!");
     if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     
     theRules = new Vector();

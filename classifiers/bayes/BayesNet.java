@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class BayesNet extends DistributionClassifier implements OptionHandler, 
 	WeightedInstancesHandler {
@@ -119,7 +119,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       Attribute attribute = (Attribute) enum.nextElement();
 
       if (attribute.type() != Attribute.NOMINAL) {
-	throw new Exception("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
+	throw new UnsupportedAttributeTypeException("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
       } 
     } 
 

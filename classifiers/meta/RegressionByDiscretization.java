@@ -60,7 +60,7 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -92,7 +92,7 @@ public class RegressionByDiscretization extends Classifier
   public void buildClassifier(Instances instances) throws Exception {
 
     if (!instances.classAttribute().isNumeric()) {
-      throw new Exception ("Class attribute has to be numeric");
+      throw new UnsupportedClassTypeException ("Class attribute has to be numeric");
     }
 
     // Discretize the training data
@@ -377,7 +377,7 @@ public class RegressionByDiscretization extends Classifier
     int attIndex;
 
     text.append("Regression by discretization");
-    if (m_Classifier == null) {
+    if (m_ClassMeans == null) {
       text.append(": No model built yet.");
     } else {
       text.append("\n\nClass attribute discretized into " 

@@ -40,7 +40,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -553,7 +553,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.9 $
    */
   class ControlPanel extends JPanel {
     
@@ -1569,7 +1569,7 @@ public class NeuralNetwork extends DistributionClassifier
   public void buildClassifier(Instances i) throws Exception {
 
     if (i.checkForStringAttributes()) {
-      throw new IllegalArgumentException("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
 
     if (i.numInstances() == 0) {

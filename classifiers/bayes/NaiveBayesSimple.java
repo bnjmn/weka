@@ -38,7 +38,7 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
 */
 public class NaiveBayesSimple extends DistributionClassifier {
 
@@ -72,10 +72,10 @@ public class NaiveBayesSimple extends DistributionClassifier {
     double sum;
     
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     if (instances.classAttribute().isNumeric()) {
-      throw new Exception("Naive Bayes: Class is numeric!");
+      throw new UnsupportedClassTypeException("Naive Bayes: Class is numeric!");
     }
     
     m_Instances = new Instances(instances, 0);

@@ -71,7 +71,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -547,7 +547,7 @@ public class IBk extends DistributionClassifier implements
       throw new Exception ("No class attribute assigned to instances");
     }
     if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     try {
       m_NumClasses = instances.numClasses();

@@ -117,7 +117,7 @@ import weka.classifiers.meta.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -446,7 +446,7 @@ public class AdditiveRegression extends Classifier
       throw new Exception("No base classifiers have been set!");
     }
     if (data.classAttribute().isNominal()) {
-      throw new Exception("Class must be numeric!");
+      throw new UnsupportedClassTypeException("Class must be numeric!");
     }
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();

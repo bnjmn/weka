@@ -27,6 +27,7 @@ import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.Evaluation;
 import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Classifier;
+import weka.core.UnsupportedClassTypeException;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.OptionHandler;
@@ -34,6 +35,7 @@ import weka.core.SelectedTag;
 import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.Option;
+import weka.core.UnsupportedAttributeTypeException;
 import weka.filters.Filter;
 import weka.filters.AttributeFilter;
 import weka.filters.NominalToBinaryFilter;
@@ -63,7 +65,7 @@ import java.util.Vector;
  * (default 200)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class Logistic extends DistributionClassifier 
   implements OptionHandler {
@@ -180,10 +182,10 @@ public class Logistic extends DistributionClassifier
   public void buildClassifier(Instances data) throws Exception {
 
     if (data.classAttribute().type() != Attribute.NOMINAL) {
-      throw new Exception("Class attribute must be nominal.");
+      throw new UnsupportedClassTypeException("Class attribute must be nominal.");
     }
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     data = new Instances(data);
     data.deleteWithMissingClass();

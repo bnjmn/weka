@@ -46,7 +46,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
 */
 public class ClassificationViaRegression extends DistributionClassifier 
   implements OptionHandler {
@@ -72,8 +72,7 @@ public class ClassificationViaRegression extends DistributionClassifier
     Instances newInsts;
 
     if (insts.classAttribute().isNumeric()) {
-      throw new Exception("ClassificationViaRegression can't handle a"
-			  + " numeric class!");
+      throw new UnsupportedClassTypeException("ClassificationViaRegression can't handle a numeric class!");
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, insts.numClasses());
     m_ClassFilters = new MakeIndicatorFilter[insts.numClasses()];

@@ -37,7 +37,7 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class Prism extends Classifier {
 
@@ -258,23 +258,22 @@ public class Prism extends Classifier {
     int bestCorrect, bestCovers, attUsed;
 
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     if (data.classAttribute().isNumeric()) {
-      throw new Exception("Prism can't handle a numeric class!");
+      throw new UnsupportedClassTypeException("Prism can't handle a numeric class!");
     }
     data = new Instances(data);
     Enumeration enumAtt = data.enumerateAttributes();
     while (enumAtt.hasMoreElements()) {
       Attribute attr = (Attribute) enumAtt.nextElement();
-      if (attr.isNumeric()) {
-	throw new Exception("Prism can't handle numeric attributes!");
+      if (!attr.isNominal()) {
+	throw new UnsupportedAttributeTypeException("Prism can only deal with nominal attributes!");
       }
       Enumeration enum = data.enumerateInstances();
       while (enum.hasMoreElements()) {
 	if (((Instance) enum.nextElement()).isMissing(attr)) {
-	  throw new 
-	    Exception("Prism can't handle attributes with missing values!");
+	  throw new NoSupportForMissingValuesException("Prism can't handle attributes with missing values!");
 	}
       }
     }

@@ -31,7 +31,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -100,7 +100,7 @@ public class ClassifierTree implements Drawable, Serializable {
   public void buildClassifier(Instances data) throws Exception{
 
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     data = new Instances(data);
     data.deleteWithMissingClass();

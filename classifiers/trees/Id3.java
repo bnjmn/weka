@@ -37,7 +37,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class Id3 extends DistributionClassifier {
 
@@ -66,18 +66,18 @@ public class Id3 extends DistributionClassifier {
 
 
     if (!data.classAttribute().isNominal()) {
-      throw new Exception("Id3: nominal class, please.");
+      throw new UnsupportedClassTypeException("Id3: nominal class, please.");
     }
     Enumeration enumAtt = data.enumerateAttributes();
     while (enumAtt.hasMoreElements()) {
       Attribute attr = (Attribute) enumAtt.nextElement();
       if (!attr.isNominal()) {
-        throw new Exception("Id3: only nominal attributes, please.");
+        throw new UnsupportedAttributeTypeException("Id3: only nominal attributes, please.");
       }
       Enumeration enum = data.enumerateInstances();
       while (enum.hasMoreElements()) {
         if (((Instance) enum.nextElement()).isMissing(attr)) {
-          throw new Exception("Id3: no missing values, please.");
+          throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
         }
       }
     }

@@ -80,7 +80,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
@@ -579,7 +579,7 @@ public class LogitBoost extends DistributionClassifier
     int classIndex = data.classIndex();
 
     if (data.classAttribute().isNumeric()) {
-      throw new Exception("LogitBoost can't handle a numeric class!");
+      throw new UnsupportedClassTypeException("LogitBoost can't handle a numeric class!");
     }
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
@@ -590,7 +590,7 @@ public class LogitBoost extends DistributionClassifier
       m_UseResampling = true;
     }
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     if (m_Debug) {
       System.err.println("Creating copy of the training data");

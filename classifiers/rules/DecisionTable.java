@@ -57,7 +57,7 @@ import weka.filters.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -1071,7 +1071,7 @@ public class DecisionTable
       throw new Exception("No training instances without missing class!");
     }
     if (m_theInstances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     
     m_disTransform = new DiscretizeFilter();

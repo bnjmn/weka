@@ -38,7 +38,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -91,11 +91,11 @@ public class LeastMedSq extends Classifier implements OptionHandler {
   public void buildClassifier(Instances data)throws Exception{
 
     if (!data.classAttribute().isNumeric())
-      throw new Exception("Class attribute has to be numeric for regression!");
+      throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
     if (data.numInstances() == 0)
       throw new Exception("No instances in training file!");
     if (data.checkForStringAttributes())
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
 
     cleanUpData(data);
 

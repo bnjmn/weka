@@ -114,7 +114,7 @@ public class KStar extends DistributionClassifier
     if (instances.classIndex() < 0)
       throw new Exception ("No class attribute assigned to instances");
     if (instances.checkForStringAttributes())
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     m_Train = new Instances(instances, 0, instances.numInstances());
     // Throw away training instances with missing class
     m_Train.deleteWithMissingClass();

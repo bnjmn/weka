@@ -35,6 +35,7 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.Utils;
+import weka.core.UnsupportedAttributeTypeException;
 
 /**
  * Class for bagging a classifier. For more information, see<p>
@@ -61,7 +62,7 @@ import weka.core.Utils;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
@@ -299,7 +300,7 @@ public class Bagging extends DistributionClassifier
       throw new Exception("A base classifier has not been specified!");
     }
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
     int bagSize = data.numInstances() * m_BagSizePercent / 100;

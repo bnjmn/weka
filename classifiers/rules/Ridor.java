@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 
 public class Ridor extends Classifier
@@ -463,7 +463,7 @@ public class Ridor extends Classifier
     public void buildClassifier(Instances instances) throws Exception{
       m_ClassAttribute = instances.classAttribute();
       if (!m_ClassAttribute.isNominal()) 
-	throw new Exception(" Only nominal class, please.");
+	throw new UnsupportedClassTypeException(" Only nominal class, please.");
       if(instances.numClasses() != 2)
 	throw new Exception(" Only 2 classes, please.");
 	    
@@ -1118,7 +1118,7 @@ public class Ridor extends Classifier
 
     Instances data = new Instances(instances);
     if (data.checkForStringAttributes())
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
 	
     if(Utils.eq(data.sumOfWeights(),0))
       throw new Exception("No training data.");
@@ -1133,7 +1133,7 @@ public class Ridor extends Classifier
     m_Class = instances.classAttribute();     // The original class label
 	
     if(!m_Class.isNominal())
-      throw new Exception("Only nominal class, please.");
+      throw new UnsupportedClassTypeException("Only nominal class, please.");
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();

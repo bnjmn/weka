@@ -36,8 +36,11 @@ import java.util.Vector;
  * Attribute type to delete.
  * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
  *
+ * -V<br>
+ * Invert matching sense (i.e. only keep specified columns)<p>
+ *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
@@ -46,6 +49,9 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
 
   /** The type of attribute to delete */
   protected int m_attTypeToDelete = Attribute.STRING;
+
+  /** Whether to invert selection */
+  protected boolean m_invert = false;
   
   /** Tag allowing selection of attribute type to delete */
   public static final Tag [] TAGS_ATTRIBUTETYPE = {
@@ -79,7 +85,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
     System.arraycopy(attsToDelete, 0, finalAttsToDelete, 0, numToDelete);
     
     m_attributeFilter.setAttributeIndicesArray(finalAttsToDelete);
-    m_attributeFilter.setInvertSelection(false);
+    m_attributeFilter.setInvertSelection(m_invert);
     
     boolean result = m_attributeFilter.setInputFormat(instanceInfo);
     Instances afOutputFormat = m_attributeFilter.getOutputFormat();
@@ -163,12 +169,15 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
 				    "\tAttribute type to delete. Valid options are \"nominal\", "
 				    + "\"numeric\", \"string\" and \"date\". (default \"string\")",
 				    "T", 1, "-T <nominal|numeric|string|date>"));
+    newVector.addElement(new Option(
+	      "\tInvert matching sense (i.e. only keep specified columns)",
+              "V", 0, "-V"));
 
 
     return newVector.elements();
@@ -181,6 +190,10 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    * Attribute type to delete.
    * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
    *
+   * -V<br>
+   * Invert matching sense (i.e. only keep specified columns)<p>
+   *
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -188,6 +201,7 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
     
     String tString = Utils.getOption('T', options);
     if (tString.length() != 0) setAttributeTypeString(tString);
+    setInvertSelection(Utils.getFlag('V', options));
 
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
@@ -201,9 +215,12 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [2];
+    String [] options = new String [3];
     int current = 0;
 
+    if (getInvertSelection()) {
+      options[current++] = "-V";
+    }
     options[current++] = "-T";
     options[current++] = getAttributeTypeString();
     
@@ -255,6 +272,41 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
   public SelectedTag getAttributeType() {
 
     return new SelectedTag(m_attTypeToDelete, TAGS_ATTRIBUTETYPE);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+
+    return "Determines whether action is to select or delete."
+      + " If set to true, only the specified attributes will be kept;"
+      + " If set to false, specified attributes will be deleted.";
+  }
+
+  /**
+   * Get whether the supplied columns are to be removed or kept
+   *
+   * @return true if the supplied columns will be kept
+   */
+  public boolean getInvertSelection() {
+
+    return m_invert;
+  }
+
+  /**
+   * Set whether selected columns should be removed or kept. If true the 
+   * selected columns are kept and unselected columns are deleted. If false
+   * selected columns are deleted and unselected columns are kept.
+   *
+   * @param invert the new invert setting
+   */
+  public void setInvertSelection(boolean invert) {
+
+    m_invert = invert;
   }
 
   /**
