@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Set the minimum chunk size (default 500). <p>
  *
  * -M num <br>
- * Set the maximum chunk size (default 16000). <p>
+ * Set the maximum chunk size (default 8000). <p>
  *
  * -V num <br>
  * Set the validation set size (default 5000). <p>
@@ -62,7 +62,7 @@ import java.io.Serializable;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class RacedIncrementalLogitBoost extends DistributionClassifier
   implements OptionHandler, UpdateableClassifier {
@@ -106,7 +106,7 @@ public class RacedIncrementalLogitBoost extends DistributionClassifier
   protected int m_minChunkSize = 500;
 
   /** The maimum chunk size used for training */
-  protected int m_maxChunkSize = 20000;
+  protected int m_maxChunkSize = 8000;
 
   /** The size of the validation set */
   protected int m_validationChunkSize = 5000;
@@ -712,7 +712,7 @@ public class RacedIncrementalLogitBoost extends DistributionClassifier
 
     newVector.addElement(new Option(
 	      "\tCommittee pruning to perform.\n"
-	      +"\t0=none, 1=log liklihood (default)n",
+	      +"\t0=none, 1=log likelihood (default)",
 	      "P", 1, "-P <pruning type>"));
 
     newVector.addElement(new Option(
