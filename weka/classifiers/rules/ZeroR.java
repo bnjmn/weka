@@ -34,7 +34,7 @@ import weka.core.*;
  * (for a numeric class) or the mode (for a nominal class).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ZeroR extends DistributionClassifier 
   implements WeightedInstancesHandler {
@@ -56,6 +56,8 @@ public class ZeroR extends DistributionClassifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    double sumOfWeights = 0;
+
     m_Class = instances.classAttribute();
     m_ClassValue = 0;
     switch (instances.classAttribute().type()) {
@@ -67,6 +69,7 @@ public class ZeroR extends DistributionClassifier
       for (int i = 0; i < m_Counts.length; i++) {
 	m_Counts[i] = 1;
       }
+      sumOfWeights = instances.numClasses();
       break;
     default:
       throw new Exception("ZeroR can only handle nominal and numeric class"
@@ -81,15 +84,16 @@ public class ZeroR extends DistributionClassifier
 	} else {
 	  m_ClassValue += instance.weight() * instance.classValue();
 	}
+	sumOfWeights += instance.weight();
       }
     }
     if (instances.classAttribute().isNumeric()) {
-      if (Utils.gr(instances.sumOfWeights(), 0)) {
-	m_ClassValue /= instances.sumOfWeights();
+      if (Utils.gr(sumOfWeights, 0)) {
+	m_ClassValue /= sumOfWeights;
       }
     } else {
       m_ClassValue = Utils.maxIndex(m_Counts);
-      Utils.normalize(m_Counts);
+      Utils.normalize(m_Counts, sumOfWeights);
     }
   }
 
