@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58 $ 
+ * @version $Revision: 1.58.2.1 $ 
  */
 public class Instances implements Serializable {
  
@@ -1162,8 +1162,7 @@ public class Instances implements Serializable {
 
   /**
    * Creates the training set for one fold of a cross-validation 
-   * on the dataset. The data is subsequently randomized based
-   * on the given random number generator.
+   * on the dataset. 
    *
    * @param numFolds the number of folds in the cross-validation. Must
    * be greater than 1.
