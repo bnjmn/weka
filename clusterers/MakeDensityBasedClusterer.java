@@ -30,15 +30,18 @@ import java.util.Vector;
 /**
  * Class for wrapping a Clusterer to make it return a distribution and density. Fits
  * normal distributions and discrete distributions within each cluster produced by
- * the wrapped clusterer.
+ * the wrapped clusterer. Supports the NumberOfClustersRequestable interface only
+ * if the wrapped Clusterer does.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MakeDensityBasedClusterer extends DensityBasedClusterer
-  implements OptionHandler, WeightedInstancesHandler {
+  implements NumberOfClustersRequestable, 
+	     OptionHandler, 
+	     WeightedInstancesHandler {
 
   /** holds training instances header information */
   private Instances m_theInstances;
@@ -69,6 +72,26 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
   public MakeDensityBasedClusterer(Clusterer toWrap) {
 
     setClusterer(toWrap);
+  }
+
+  /**
+   * Set the number of clusters to generate.
+   *
+   * @param n the number of clusters to generate
+   * @exception Exception if the wrapped clusterer has not been set, or if
+   * the wrapped clusterer does not implement this facility.
+   */
+  public void setNumClusters(int n) throws Exception {
+    if (m_wrappedClusterer == null) {
+      throw new Exception("Can't set the number of clusters to generate - "
+			  +"no clusterer has been set yet.");
+    }
+    if (!(m_wrappedClusterer instanceof NumberOfClustersRequestable)) {
+      throw new Exception("Can't set the number of clusters to generate - "
+			  +"wrapped clusterer does not support this facility.");
+    }
+
+    ((NumberOfClustersRequestable)m_wrappedClusterer).setNumClusters(n);
   }
   
   /**

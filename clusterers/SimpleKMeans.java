@@ -41,12 +41,13 @@ import weka.experiment.Stats;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see Clusterer
  * @see OptionHandler
  */
-public class SimpleKMeans extends Clusterer implements OptionHandler, 
-						       WeightedInstancesHandler {
+public class SimpleKMeans extends Clusterer 
+  implements NumberOfClustersRequestable,
+	     OptionHandler, WeightedInstancesHandler {
 
   /**
    * replace missing values in training instances
@@ -411,7 +412,10 @@ public class SimpleKMeans extends Clusterer implements OptionHandler,
    *
    * @param n the number of clusters to generate
    */
-  public void setNumClusters(int n) {
+  public void setNumClusters(int n) throws Exception {
+    if (n <= 0) {
+      throw new Exception("Number of clusters must be > 0");
+    }
     m_NumClusters = n;
   }
 

@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.23 $
+ * @version  $Revision: 1.24 $
  */
 public class ClusterEvaluation {
 
@@ -70,15 +70,6 @@ public class ClusterEvaluation {
   
   /** the clusterer */
   private Clusterer m_Clusterer;
-
-  /** do cross validation (DensityBasedClusterers only) */
-  private boolean m_doXval;
-
-  /** the number of folds to use for cross validation */
-  private int m_numFolds;
-
-  /** seed to use for cross validation */
-  private int m_seed;
 
   /** holds a string describing the results of clustering the training data */
   private StringBuffer m_clusteringResults;
@@ -90,6 +81,10 @@ public class ClusterEvaluation {
       dataset */
   private double [] m_clusterAssignments;
 
+  /* holds the average log likelihood for a particular testing dataset
+     if the clusterer is a DensityBasedClusterer */
+  private double m_logL;
+
   /** will hold the mapping of classes to clusters (for class based 
       evaluation) */
   private int [] m_classToCluster = null;
@@ -100,30 +95,6 @@ public class ClusterEvaluation {
    */
   public void setClusterer(Clusterer clusterer) {
     m_Clusterer = clusterer;
-  }
-
-  /**
-   * set whether or not to do cross validation
-   * @param x true if cross validation is to be done
-   */
-  public void setDoXval(boolean x) {
-    m_doXval = x;
-  }
-
-  /**
-   * set the number of folds to use for cross validation
-   * @param folds the number of folds
-   */
-  public void setFolds(int folds) {
-    m_numFolds = folds;
-  }
-
-  /**
-   * set the seed to use for cross validation
-   * @param s the seed.
-   */
-  public void setSeed(int s) {
-    m_seed = s;
   }
 
   /**
@@ -162,13 +133,20 @@ public class ClusterEvaluation {
   }
 
   /**
+   * Return the log likelihood corresponding to the most recent
+   * set of instances clustered.
+   *
+   * @return a <code>double</code> value
+   */
+  public double getLogLikelihood() {
+    return m_logL;
+  }
+
+  /**
    * Constructor. Sets defaults for each member variable. Default Clusterer
    * is EM.
    */
   public ClusterEvaluation () {
-    setFolds(10);
-    setDoXval(false);
-    setSeed(1);
     setClusterer(new EM());
     m_trainInstances = null;
     m_clusteringResults = new StringBuffer();
@@ -263,6 +241,7 @@ public class ClusterEvaluation {
 
     double sum = Utils.sum(instanceStats);
     loglk /= sum;
+    m_logL = loglk;
     
     m_clusteringResults.append(m_Clusterer.toString());
     m_clusteringResults.append("Clustered Instances\n\n");
@@ -685,10 +664,49 @@ public class ClusterEvaluation {
     return  text.toString();
   }
 
+  /**
+   * Perform a cross-validation for DensityBasedClusterer on a set of instances.
+   *
+   * @param clusterer the clusterer to use
+   * @param data the training data
+   * @param numFolds number of folds of cross validation to perform
+   * @param random random number seed for cross-validation
+   * @return the cross-validated log-likelihood
+   * @exception Exception if an error occurs
+   */
+  public static double crossValidateModel(DensityBasedClusterer clusterer,
+					  Instances data,
+					  int numFolds,
+					  Random random) throws Exception {
+    Instances train, test;
+    double foldAv = 0;;
+    double[] tempDist;
+    //    double sumOW = 0;
+    for (int i = 0; i < numFolds; i++) {
+      // Build and test clusterer
+      train = data.trainCV(numFolds, i, random);
+      clusterer.buildClusterer(train);
+      test = data.testCV(numFolds, i);
+      
+      for (int j = 0; j < test.numInstances(); j++) {
+	try {
+	  foldAv += ((DensityBasedClusterer)clusterer).
+	    logDensityForInstance(test.instance(j));
+	  //	  sumOW += test.instance(j).weight();
+	  //	double temp = Utils.sum(tempDist);
+	} catch (Exception ex) {
+	  // unclustered instances
+	}
+      }
+    }
+   
+    //    return foldAv / sumOW;
+    return foldAv / data.numInstances();
+  }
 
   /**
    * Performs a cross-validation 
-   * for a distribution clusterer on a set of instances.
+   * for a DensityBasedClusterer clusterer on a set of instances.
    *
    * @param clustererString a string naming the class of the clusterer
    * @param data the data on which the cross-validation is to be 
@@ -719,59 +737,39 @@ public class ClusterEvaluation {
 
     data = new Instances(data);
 
-    for (int i = 0; i < numFolds; i++) {
-      // create clusterer
-      try {
-	clusterer = (Clusterer)Class.forName(clustererString).newInstance();
-      }
-      catch (Exception e) {
-	throw  new Exception("Can't find class with name " 
-			     + clustererString + '.');
-      }
-
-      if (!(clusterer instanceof DensityBasedClusterer)) {
-	throw  new Exception(clustererString 
-			     + " must be a distrinbution " 
-			     + "clusterer.");
-      }
-
-      // Save options
-      if (options != null) {
-	System.arraycopy(options, 0, savedOptions, 0, options.length);
-      }
-
-      // Parse options
-      if (clusterer instanceof OptionHandler) {
-	try {
-	  ((OptionHandler)clusterer).setOptions(savedOptions);
-	  Utils.checkForRemainingOptions(savedOptions);
-	}
-	catch (Exception e) {
-	  throw  new Exception("Can't parse given options in " 
-			       + "cross-validation!");
-	}
-      }
-
-      // Build and test classifier 
-      train = data.trainCV(numFolds, i, random);
-      clusterer.buildClusterer(train);
-      test = data.testCV(numFolds, i);
-      foldAv = 0.0;
-
-      for (int j = 0; j < test.numInstances(); j++) {
-	try {
-	  foldAv += ((DensityBasedClusterer)clusterer).
-	    logDensityForInstance(test.instance(j));
-	  //	double temp = Utils.sum(tempDist);
-	} catch (Exception ex) {
-	  // unclustered instances
-	}
-      }
-
-      CvAv += (foldAv/test.numInstances());
+    // create clusterer
+    try {
+      clusterer = (Clusterer)Class.forName(clustererString).newInstance();
+    }
+    catch (Exception e) {
+      throw  new Exception("Can't find class with name " 
+			   + clustererString + '.');
     }
 
-    CvAv /= numFolds;
+    if (!(clusterer instanceof DensityBasedClusterer)) {
+      throw  new Exception(clustererString 
+			   + " must be a distrinbution " 
+			   + "clusterer.");
+    }
+
+    // Save options
+    if (options != null) {
+      System.arraycopy(options, 0, savedOptions, 0, options.length);
+    }
+
+    // Parse options
+    if (clusterer instanceof OptionHandler) {
+      try {
+	((OptionHandler)clusterer).setOptions(savedOptions);
+	Utils.checkForRemainingOptions(savedOptions);
+      }
+      catch (Exception e) {
+	throw  new Exception("Can't parse given options in " 
+			     + "cross-validation!");
+      }
+    }
+    CvAv = crossValidateModel((DensityBasedClusterer)clusterer, data, numFolds, random);
+
     CvString.append("\n" + numFolds 
 		    + " fold CV Log Likelihood: " 
 		    + Utils.doubleToString(CvAv, 6, 4) 

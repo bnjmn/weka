@@ -70,11 +70,12 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class EM
   extends DensityBasedClusterer
-  implements OptionHandler, WeightedInstancesHandler {
+  implements NumberOfClustersRequestable,
+	     OptionHandler, WeightedInstancesHandler {
 
   /** hold the discrete estimators for each cluster */
   private Estimator m_model[][];
