@@ -67,7 +67,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ */
+ * @version $Revision: 1.7 $ */
 public class LWL extends DistributionClassifier 
   implements OptionHandler, UpdateableClassifier, 
   WeightedInstancesHandler {
@@ -562,48 +562,90 @@ public class LWL extends DistributionClassifier
    */          
   private double distance(Instance first, Instance second) {  
 
-    double diff, distance = 0;
+    double distance = 0;
+    int firstI, secondI;
 
-    for(int i = 0; i < m_Train.numAttributes(); i++) { 
-      if (i == m_Train.classIndex()) {
-	continue;
+    for (int p1 = 0, p2 = 0; 
+	 p1 < first.numValues() || p2 < second.numValues();) {
+      if (p1 >= first.numValues()) {
+	firstI = m_Train.numAttributes();
+      } else {
+	firstI = first.index(p1); 
       }
-      switch (m_Train.attribute(i).type()) {
-      case Attribute.NOMINAL:
-	// If attribute is nominal
-	if (first.isMissing(i) || second.isMissing(i) ||
-	    ((int)first.value(i) != (int)second.value(i))) {
-	  diff = 1;
-	} else {
-	  diff = 0;
-	}
-	break;
-      case Attribute.NUMERIC:
-	// If attribute is numeric
-	if (first.isMissing(i) || second.isMissing(i)) {
-	  if (first.isMissing(i) && second.isMissing(i)) {
-	    diff = 1;
-	  } else {
-	    if (second.isMissing(i)) {
-	      diff = norm(first.value(i),i);
-	    } else {
-	      diff = norm(second.value(i),i);
-	    }
-	    if (diff < 0.5) {
-	      diff = 1.0-diff;
-	    }
-	  }
-	} else {
-	  diff = norm(first.value(i),i) - norm(second.value(i),i);
-	}
-	break;
-      default:
-	diff = 0;
-	break;
+      if (p2 >= second.numValues()) {
+	secondI = m_Train.numAttributes();
+      } else {
+	secondI = second.index(p2);
+      }
+      if (firstI == m_Train.classIndex()) {
+	p1++; continue;
+      } 
+      if (secondI == m_Train.classIndex()) {
+	p2++; continue;
+      } 
+      double diff;
+      if (firstI == secondI) {
+	diff = difference(firstI, 
+			  first.valueSparse(p1),
+			  second.valueSparse(p2));
+	p1++; p2++;
+      } else if (firstI > secondI) {
+	diff = difference(secondI, 
+			  0, second.valueSparse(p2));
+	p2++;
+      } else {
+	diff = difference(firstI, 
+			  first.valueSparse(p1), 0);
+	p1++;
       }
       distance += diff * diff;
     }
-    return Math.sqrt(distance);
+    distance = Math.sqrt(distance);
+    return distance;
+  }
+   
+  /**
+   * Computes the difference between two given attribute
+   * values.
+   */
+  private double difference(int index, double val1, double val2) {
+
+    switch (m_Train.attribute(index).type()) {
+    case Attribute.NOMINAL:
+      
+      // If attribute is nominal
+      if (Instance.isMissingValue(val1) || 
+	  Instance.isMissingValue(val2) ||
+	  ((int)val1 != (int)val2)) {
+	return 1;
+      } else {
+	return 0;
+      }
+    case Attribute.NUMERIC:
+      // If attribute is numeric
+      if (Instance.isMissingValue(val1) || 
+	  Instance.isMissingValue(val2)) {
+	if (Instance.isMissingValue(val1) && 
+	    Instance.isMissingValue(val2)) {
+	  return 1;
+	} else {
+	  double diff;
+	  if (Instance.isMissingValue(val2)) {
+	    diff = norm(val1, index);
+	  } else {
+	    diff = norm(val2, index);
+	  }
+	  if (diff < 0.5) {
+	    diff = 1.0 - diff;
+	  }
+	  return diff;
+	}
+      } else {
+	return norm(val1, index) - norm(val2, index);
+      }
+    default:
+      return 0;
+    }
   }
 
   /**
