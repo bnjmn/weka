@@ -1,6 +1,6 @@
 /*
- *    SparseInstance.java
- *    Copyright (C) 2000 Eibe Frank
+ *    BinarySparseInstance.java
+ *    Copyright (C) 2000 Webmind Corp.
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -22,26 +22,17 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Class for storing an instance as a sparse vector. A sparse instance
- * only requires storage for those attribute values that are non-zero.
- * Since the objective is to reduce storage requirements for datasets
- * with large numbers of default values, this also includes nominal
- * attributes -- the first nominal value (i.e. that which has index 0)
- * will not require explicit storage, so rearrange your nominal attribute
- * value orderings if necessary. Missing values will be stored
- * explicitly.
+ * Class for storing a binary-data-only instance as a sparse vector. A
+ * sparse instance only requires storage for those attribute values
+ * that are non-zero.  Since the objective is to reduce storage
+ * requirements for datasets with large numbers of default values,
+ * this also includes nominal attributes -- the first nominal value
+ * (i.e. that which has index 0) will not require explicit storage, so
+ * rearrange your nominal attribute value orderings if
+ * necessary. Missing values are not supported, and will be treated as 
+ * 1 (true).
  */
-public class SparseInstance extends Instance {
-
-  /** The index of the attribute associated with each stored value. */
-  protected int[] m_Indices;
-
-  /** The maximum number of values that can be stored. */
-  protected int m_NumAttributes;
-
-  protected SparseInstance() {
-
-  }
+public class BinarySparseInstance extends SparseInstance {
 
   /**
    * Constructor that generates a sparse instance from the given
@@ -52,32 +43,29 @@ public class SparseInstance extends Instance {
    * @param instance the instance from which the attribute values
    * and the weight are to be copied
    */
-  public SparseInstance(Instance instance) {
+  public BinarySparseInstance(Instance instance) {
     
     m_Weight = instance.m_Weight;
     m_Dataset = null;
     m_NumAttributes = instance.numAttributes();
     if (instance instanceof SparseInstance) {
-      m_AttValues = ((SparseInstance)instance).m_AttValues;
+      m_AttValues = null;
       m_Indices = ((SparseInstance)instance).m_Indices;
     } else {
-      double[] tempValues = new double[instance.numAttributes()];
       int[] tempIndices = new int[instance.numAttributes()];
       int vals = 0;
       for (int i = 0; i < instance.numAttributes(); i++) {
 	if (instance.value(i) != 0) {
-	  tempValues[vals] = instance.value(i);
 	  tempIndices[vals] = i;
 	  vals++;
 	}
       }
-      m_AttValues = new double[vals];
+      m_AttValues = null;
       m_Indices = new int[vals];
-      System.arraycopy(tempValues, 0, m_AttValues, 0, vals);
       System.arraycopy(tempIndices, 0, m_Indices, 0, vals);
     }
   }
-
+  
   /**
    * Constructor that copies the info from the given instance. 
    * Reference to the dataset is set to null.
@@ -87,9 +75,9 @@ public class SparseInstance extends Instance {
    * @param instance the instance from which the attribute
    * info is to be copied 
    */
-  public SparseInstance(SparseInstance instance) {
+  public BinarySparseInstance(SparseInstance instance) {
     
-    m_AttValues = instance.m_AttValues;
+    m_AttValues = null;
     m_Indices = instance.m_Indices;
     m_Weight = instance.m_Weight;
     m_NumAttributes = instance.m_NumAttributes;
@@ -105,24 +93,21 @@ public class SparseInstance extends Instance {
    * @param weight the instance's weight
    * @param attValues a vector of attribute values 
    */
-  public SparseInstance(double weight, double[] attValues) {
+  public BinarySparseInstance(double weight, double[] attValues) {
     
     m_Weight = weight;
     m_Dataset = null;
     m_NumAttributes = attValues.length;
-    double[] tempValues = new double[m_NumAttributes];
     int[] tempIndices = new int[m_NumAttributes];
     int vals = 0;
     for (int i = 0; i < m_NumAttributes; i++) {
       if (attValues[i] != 0) {
-	tempValues[vals] = attValues[i];
 	tempIndices[vals] = i;
 	vals++;
       }
     }
-    m_AttValues = new double[vals];
+    m_AttValues = null;
     m_Indices = new int[vals];
-    System.arraycopy(tempValues, 0, m_AttValues, 0, vals);
     System.arraycopy(tempIndices, 0, m_Indices, 0, vals);
   }
   
@@ -132,32 +117,14 @@ public class SparseInstance extends Instance {
    * doesn't have access to information about the attribute types)
    *
    * @param weight the instance's weight
-   * @param attValues a vector of attribute values (just the ones to be stored)
    * @param indices the indices of the given values in the full vector
    * @param maxNumValues the maximium number of values that can be stored
    */
-  public SparseInstance(double weight, double[] attValues,
-			int[] indices, int maxNumValues){
+  public BinarySparseInstance(double weight,
+                              int[] indices, int maxNumValues) {
     
-    int vals = 0; 
-    m_AttValues = new double [attValues.length];
-    m_Indices = new int [indices.length];
-    for (int i = 0; i < attValues.length; i++) {
-      if (attValues[i] != 0) {
-        m_AttValues[vals] = attValues[i];
-        m_Indices[vals] = indices[i];
-        vals++;
-      }
-    }
-    if (vals != attValues.length) {
-      // Need to truncate.
-      double [] newVals = new double[vals];
-      System.arraycopy(m_AttValues, 0, newVals, 0, vals);
-      m_AttValues = newVals;
-      int [] newIndices = new int[vals];
-      System.arraycopy(m_Indices, 0, newIndices, 0, vals);
-      m_Indices = newIndices;
-    }
+    m_AttValues = null;
+    m_Indices = indices;
     m_Weight = weight;
     m_NumAttributes = maxNumValues;
     m_Dataset = null;
@@ -165,38 +132,21 @@ public class SparseInstance extends Instance {
 
   /**
    * Constructor of an instance that sets weight to one, all values to
-   * be missing, and the reference to the dataset to null. (ie. the instance
+   * 1, and the reference to the dataset to null. (ie. the instance
    * doesn't have access to information about the attribute types)
    *
    * @param numAttributes the size of the instance 
    */
-  public SparseInstance(int numAttributes) {
+  public BinarySparseInstance(int numAttributes) {
     
-    m_AttValues = new double[numAttributes];
+    m_AttValues = null;
     m_NumAttributes = numAttributes;
     m_Indices = new int[numAttributes];
-    for (int i = 0; i < m_AttValues.length; i++) {
-      m_AttValues[i] = MISSING_VALUE;
+    for (int i = 0; i < m_Indices.length; i++) {
       m_Indices[i] = i;
     }
     m_Weight = 1;
     m_Dataset = null;
-  }
-
-  /**
-   * Returns the attribute associated with the internal index. 
-   *
-   * @param indexOfIndex the index of the attribute's index 
-   * @return the attribute at the given position
-   * @exception Exception if instance doesn't have access to a
-   * dataset
-   */ 
-  public Attribute attributeSparse(int indexOfIndex) throws Exception {
-   
-    if (m_Dataset == null) {
-      throw new Exception("Instance doesn't have access to a dataset!");
-    }
-    return m_Dataset.attribute(m_Indices[indexOfIndex]);
   }
 
   /**
@@ -207,56 +157,7 @@ public class SparseInstance extends Instance {
    */
   public Object copy() {
 
-    return new SparseInstance(this);
-  }
-
-  /**
-   * Returns the index of the attribute stored at the given position.
-   *
-   * @param position the position 
-   * @return the index of the attribute stored at the given position
-   */
-  public int index(int position) {
-
-    return m_Indices[position];
-  }
-
-  /**
-   * Tests if a specific value is "missing".
-   *
-   * @param attIndex the attribute's index
-   */
-  public boolean isMissing(int attIndex) {
-
-    if (Double.isNaN(value(attIndex))) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Locates the greatest index that is not greater than the
-   * given index.
-   *
-   * @return the internal index of the attribute index. Returns
-   * -1 if no index with this property couldn't be found
-   */
-  public int locateIndex(int index) {
-
-    int min = 0, max = m_Indices.length - 1;
-
-    // Binary search
-    while (max >= min) {
-      int current = (max + min) / 2;
-      if (m_Indices[current] > index) {
-	max = current - 1;
-      } else if (m_Indices[current] < index) {
-	min = current + 1;
-      } else {
-	return current;
-      }
-    }
-    return max;
+    return new BinarySparseInstance(this);
   }
 
   /**
@@ -268,48 +169,30 @@ public class SparseInstance extends Instance {
    */
   public Instance mergeInstance(Instance inst) {
 
-    double[] values = new double[numValues() + inst.numValues()];
-    int[] indices = new int[numValues() + inst.numValues()];
+    int [] indices = new int [numValues() + inst.numValues()];
 
     int m = 0;
-    for (int j = 0; j < numValues(); j++, m++) {
-      values[m] = valueSparse(j);
-      indices[m] = index(j);
+    for (int j = 0; j < numValues(); j++) {
+      indices[m++] = index(j);
     }
-    for (int j = 0; j < inst.numValues(); j++, m++) {
-      values[m] = inst.valueSparse(j);
-      indices[m] = inst.index(j) + inst.numAttributes();
+    for (int j = 0; j < inst.numValues(); j++) {
+      if (inst.valueSparse(j) != 0) {
+        indices[m++] = inst.index(j) + inst.numAttributes();
+      }
     }
-    
-    return new SparseInstance(1.0, values, indices, numAttributes() +
-			      inst.numAttributes());
-  }
 
-  /**
-   * Returns the number of attributes.
-   *
-   * @return the number of attributes as an integer
-   */
-  public int numAttributes() {
-
-    return m_NumAttributes;
-  }
-
-  /**
-   * Returns the number of values in the sparse vector.
-   *
-   * @return the number of values
-   */
-  public int numValues() {
-
-    return m_Indices.length;
+    if (m != indices.length) {
+      // Need to truncate
+      int [] newInd = new int [m];
+      System.arraycopy(indices, 0, newInd, 0, m);
+      indices = newInd;
+    }
+    return new BinarySparseInstance(1.0, indices, numAttributes() +
+                                    inst.numAttributes());
   }
 
   /** 
-   * Replaces all missing values in the instance with the 
-   * values contained in the given array. A deep copy of
-   * the vector of attribute values is performed before the
-   * values are replaced.
+   * Does nothing, since we don't support missing values.
    *
    * @param array containing the means and modes
    * @exception Exception if numbers of attributes are unequal
@@ -317,29 +200,7 @@ public class SparseInstance extends Instance {
   public void replaceMissingValues(double[] array) 
        throws Exception {
 	 
-    if ((array == null) || (array.length != m_NumAttributes)) {
-      throw new Exception("Unequal number of attributes!");
-    }
-    double[] tempValues = new double[m_AttValues.length];
-    int[] tempIndices = new int[m_AttValues.length];
-    int vals = 0;
-    for (int i = 0; i < m_AttValues.length; i++) {
-      if (isMissingValue(m_AttValues[i])) {
-	if (array[m_Indices[i]] != 0) {
-	  tempValues[vals] = array[m_Indices[i]];
-	  tempIndices[vals] = m_Indices[i];
-	  vals++;
-	} 
-      } else {
-	tempValues[vals] = m_AttValues[i];
-	tempIndices[vals] = m_Indices[i];
-	vals++;
-      }
-    }
-    m_AttValues = new double[vals];
-    m_Indices = new int[vals];
-    System.arraycopy(tempValues, 0, m_AttValues, 0, vals);
-    System.arraycopy(tempIndices, 0, m_Indices, 0, vals);
+    // Does nothing, since we don't store missing values.
   }
 
   /**
@@ -357,36 +218,20 @@ public class SparseInstance extends Instance {
     int index = locateIndex(attIndex);
     
     if ((index >= 0) && (m_Indices[index] == attIndex)) {
-      if (value != 0) {
-	double[] tempValues = new double[m_AttValues.length];
-	System.arraycopy(m_AttValues, 0, tempValues, 0, m_AttValues.length);
-	tempValues[index] = value;
-	m_AttValues = tempValues;
-      } else {
-	double[] tempValues = new double[m_AttValues.length - 1];
+      if (value == 0) {
 	int[] tempIndices = new int[m_Indices.length - 1];
-	System.arraycopy(m_AttValues, 0, tempValues, 0, index);
 	System.arraycopy(m_Indices, 0, tempIndices, 0, index);
-	System.arraycopy(m_AttValues, index + 1, tempValues, index, 
-			 m_AttValues.length - index - 1);
 	System.arraycopy(m_Indices, index + 1, tempIndices, index, 
 			 m_Indices.length - index - 1);
-	m_AttValues = tempValues;
 	m_Indices = tempIndices;
       }
     } else {
       if (value != 0) {
-	double[] tempValues = new double[m_AttValues.length + 1];
 	int[] tempIndices = new int[m_Indices.length + 1];
-	System.arraycopy(m_AttValues, 0, tempValues, 0, index + 1);
 	System.arraycopy(m_Indices, 0, tempIndices, 0, index + 1);
 	tempIndices[index + 1] = attIndex;
-	tempValues[index + 1] = value;
-	System.arraycopy(m_AttValues, index + 1, tempValues, index + 2, 
-			 m_AttValues.length - index - 1);
 	System.arraycopy(m_Indices, index + 1, tempIndices, index + 2, 
 			 m_Indices.length - index - 1);
-	m_AttValues = tempValues;
 	m_Indices = tempIndices;
       }
     }
@@ -404,21 +249,11 @@ public class SparseInstance extends Instance {
    */
   public void setValueSparse(int indexOfIndex, double value) {
 
-    if (value != 0) {
-      double[] tempValues = new double[m_AttValues.length];
-      System.arraycopy(m_AttValues, 0, tempValues, 0, m_AttValues.length);
-      m_AttValues = tempValues;
-      m_AttValues[indexOfIndex] = value;
-    } else {
-      double[] tempValues = new double[m_AttValues.length - 1];
+    if (value == 0) {
       int[] tempIndices = new int[m_Indices.length - 1];
-      System.arraycopy(m_AttValues, 0, tempValues, 0, indexOfIndex);
       System.arraycopy(m_Indices, 0, tempIndices, 0, indexOfIndex);
-      System.arraycopy(m_AttValues, indexOfIndex + 1, tempValues, indexOfIndex, 
-		       m_AttValues.length - indexOfIndex - 1);
       System.arraycopy(m_Indices, indexOfIndex + 1, tempIndices, indexOfIndex, 
 		       m_Indices.length - indexOfIndex - 1);
-      m_AttValues = tempValues;
       m_Indices = tempIndices;
     }
   }
@@ -432,7 +267,7 @@ public class SparseInstance extends Instance {
 
     double[] newValues = new double[m_NumAttributes];
     for (int i = 0; i < m_AttValues.length; i++) {
-      newValues[m_Indices[i]] = m_AttValues[i];
+      newValues[m_Indices[i]] = 1.0;
     }
     return newValues;
   }
@@ -451,28 +286,24 @@ public class SparseInstance extends Instance {
     
     text.append('{');
     for (int i = 0; i < m_Indices.length; i++) {
-      if (i > 0) text.append(",");
-      if (isMissingValue(m_AttValues[i])) {
-	text.append(m_Indices[i] + " ?");
+      if (i > 0) {
+        text.append(",");
+      }
+      if (m_Dataset == null) {
+        text.append(m_Indices[i] + " 1");
       } else {
-	if (m_Dataset == null) {
-	  text.append(m_Indices[i] + " " + 
-		      Utils.doubleToString(m_AttValues[i],6));
-	} else {
-	  if (m_Dataset.attribute(m_Indices[i]).isNominal() || 
-	      m_Dataset.attribute(m_Indices[i]).isString()) {
-	    try {
-	      text.append(m_Indices[i] + " " +
-			  Utils.quote(m_Dataset.attribute(m_Indices[i]).
-				      value((int)valueSparse(i))));
-	    } catch (Exception e) {
-	      throw new Error("This should never happen!");
-	    }
-	  } else {
-	    text.append(m_Indices[i] + " " +
-			Utils.doubleToString(m_AttValues[i],6));
-	  }
-	}
+        if (m_Dataset.attribute(m_Indices[i]).isNominal() || 
+            m_Dataset.attribute(m_Indices[i]).isString()) {
+          try {
+            text.append(m_Indices[i] + " " +
+                        Utils.quote(m_Dataset.attribute(m_Indices[i]).
+                                    value(1)));
+          } catch (Exception e) {
+            throw new Error("This should never happen!");
+          }
+        } else {
+          text.append(m_Indices[i] + " 1");
+        }
       }
     }
     text.append('}');
@@ -491,10 +322,25 @@ public class SparseInstance extends Instance {
 
     int index = locateIndex(attIndex);
     if ((index >= 0) && (m_Indices[index] == attIndex)) {
-      return m_AttValues[index];
+      return 1.0;
     } else {
       return 0.0;
     }
+  }  
+
+  /**
+   * Returns an instance's attribute value in internal format.
+   * Does exactly the same thing as value() if applied to an Instance.
+   *
+   * @param indexOfIndex the index of the attribute's index
+   * @return the specified value as a double (If the corresponding
+   * attribute is nominal (or a string) then it returns the value's index as a 
+   * double).
+   */
+  public final double valueSparse(int indexOfIndex) {
+
+    int index = m_Indices[indexOfIndex]; // Throws if out of bounds
+    return 1;
   }  
 
   /**
@@ -510,32 +356,24 @@ public class SparseInstance extends Instance {
     m_NumAttributes--;
     if ((index >= 0) && (m_Indices[index] == position)) {
       int[] tempIndices = new int[m_Indices.length - 1];
-      double[] tempValues = new double[m_AttValues.length - 1];
       System.arraycopy(m_Indices, 0, tempIndices, 0, index);
-      System.arraycopy(m_AttValues, 0, tempValues, 0, index);
       for (int i = index; i < m_Indices.length - 1; i++) {
 	tempIndices[i] = m_Indices[i + 1] - 1;
-	tempValues[i] = m_AttValues[i + 1];
       }
       m_Indices = tempIndices;
-      m_AttValues = tempValues;
     } else {
       int[] tempIndices = new int[m_Indices.length];
-      double[] tempValues = new double[m_AttValues.length];
       System.arraycopy(m_Indices, 0, tempIndices, 0, index + 1);
-      System.arraycopy(m_AttValues, 0, tempValues, 0, index + 1);
       for (int i = index + 1; i < m_Indices.length - 1; i++) {
 	tempIndices[i] = m_Indices[i] - 1;
-	tempValues[i] = m_AttValues[i];
       }
       m_Indices = tempIndices;
-      m_AttValues = tempValues;
     }
   }
 
   /**
    * Inserts an attribute at the given position
-   * (0 to numAttributes()) and sets its value to be missing. 
+   * (0 to numAttributes()) and sets its value to 1. 
    *
    * @param pos the attribute's position
    */
@@ -546,30 +384,20 @@ public class SparseInstance extends Instance {
     m_NumAttributes++;
     if ((index >= 0) && (m_Indices[index] == position)) {
       int[] tempIndices = new int[m_Indices.length + 1];
-      double[] tempValues = new double[m_AttValues.length + 1];
       System.arraycopy(m_Indices, 0, tempIndices, 0, index);
-      System.arraycopy(m_AttValues, 0, tempValues, 0, index);
       tempIndices[index] = position;
-      tempValues[index] = MISSING_VALUE;
       for (int i = index; i < m_Indices.length; i++) {
 	tempIndices[i + 1] = m_Indices[i] + 1;
-	tempValues[i + 1] = m_AttValues[i];
       }
       m_Indices = tempIndices;
-      m_AttValues = tempValues;
     } else {
       int[] tempIndices = new int[m_Indices.length + 1];
-      double[] tempValues = new double[m_AttValues.length + 1];
       System.arraycopy(m_Indices, 0, tempIndices, 0, index + 1);
-      System.arraycopy(m_AttValues, 0, tempValues, 0, index + 1);
       tempIndices[index + 1] = position;
-      tempValues[index + 1] = MISSING_VALUE;
       for (int i = index + 1; i < m_Indices.length; i++) {
 	tempIndices[i + 1] = m_Indices[i] + 1;
-	tempValues[i + 1] = m_AttValues[i];
       }
       m_Indices = tempIndices;
-      m_AttValues = tempValues;
     }
   }
 
@@ -588,7 +416,6 @@ public class SparseInstance extends Instance {
       FastVector my_nominal_values = new FastVector(3); 
       my_nominal_values.addElement("first"); 
       my_nominal_values.addElement("second"); 
-      my_nominal_values.addElement("third"); 
       
       // Create nominal attribute "position" 
       Attribute position = new Attribute("position", my_nominal_values);
@@ -606,7 +433,7 @@ public class SparseInstance extends Instance {
       race.setClassIndex(position.index());
       
       // Create empty instance with three attribute values
-      SparseInstance inst = new SparseInstance(3);
+      BinarySparseInstance inst = new BinarySparseInstance(3);
       
       // Set instance's values for the attributes "length", "weight", and "position"
       inst.setValue(length, 5.3);
@@ -732,8 +559,8 @@ public class SparseInstance extends Instance {
       System.out.println("Copy with missing class: " + copy);
       copy.setClassValue(0);
       System.out.println("Copy with class value set to first value: " + copy);
-      copy.setClassValue("third");
-      System.out.println("Copy with class value set to \"third\": " + copy);
+      copy.setClassValue("second");
+      System.out.println("Copy with class value set to \"second\": " + copy);
       copy.setMissing(1);
       System.out.println("Copy with second attribute set to be missing: " + copy);
       copy.setMissing(length);

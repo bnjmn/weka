@@ -58,7 +58,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -134,7 +134,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if instance doesn't have access to a
    * dataset
    */ 
-  public final Attribute attribute(int index) throws Exception {
+  public Attribute attribute(int index) throws Exception {
    
     if (m_Dataset == null) {
       throw new Exception("Instance doesn't have access to a dataset!");
@@ -166,7 +166,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if the class is not set or the
    * instance doesn't have access to a dataset
    */
-  public final Attribute classAttribute() throws Exception {
+  public Attribute classAttribute() throws Exception {
 
     if (m_Dataset == null) {
       throw new Exception("Instance doesn't have access to a dataset!");
@@ -180,7 +180,7 @@ public class Instance implements Copyable, Serializable {
    * @return the class index as an integer 
    * @exception Exception if instance doesn't have access to a dataset 
    */
-  public final int classIndex() throws Exception {
+  public int classIndex() throws Exception {
     
     if (m_Dataset == null) {
       throw new Exception("Instance doesn't have access to a dataset!");
@@ -195,7 +195,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if the class is not set or the instance doesn't
    * have access to a dataset
    */
-  public final boolean classIsMissing() throws Exception {
+  public boolean classIsMissing() throws Exception {
 
     if (classIndex() < 0) {
       throw new Exception("Class is not set!");
@@ -213,7 +213,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if the class is not set or the instance doesn't
    * have access to a dataset 
    */
-  public final double classValue() throws Exception {
+  public double classValue() throws Exception {
     
     if (classIndex() < 0) {
       throw new Exception("Class is not set!");
@@ -239,7 +239,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the dataset the instance has accesss to
    */
-  public final Instances dataset() {
+  public Instances dataset() {
 
     return m_Dataset;
   }
@@ -254,7 +254,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if the instance has access to a
    * dataset 
    */
-  public final void deleteAttributeAt(int position) 
+  public void deleteAttributeAt(int position) 
        throws Exception {
 
     if (m_Dataset != null) {
@@ -287,7 +287,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if instance doesn't have access to any
    * dataset
    */
-  public final boolean equalHeaders(Instance inst) 
+  public boolean equalHeaders(Instance inst) 
        throws Exception {
 
     if (m_Dataset == null) {
@@ -318,7 +318,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if the instance has accesss to a
    * dataset, or the position is out of range
    */
-  public final void insertAttributeAt(int position) 
+  public void insertAttributeAt(int position) 
        throws Exception {
 
     if (m_Dataset != null) {
@@ -351,7 +351,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @param indexOfIndex the index of the attribute's index 
    */
-  public final boolean isMissingSparse(int indexOfIndex) {
+  public boolean isMissingSparse(int indexOfIndex) {
 
     if (Double.isNaN(m_AttValues[indexOfIndex])) {
       return true;
@@ -365,7 +365,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @param att the attribute
    */
-  public final boolean isMissing(Attribute att) {
+  public boolean isMissing(Attribute att) {
 
     return isMissing(att.index());
   }
@@ -390,16 +390,15 @@ public class Instance implements Copyable, Serializable {
    */
   public Instance mergeInstance(Instance inst) {
 
-    Instance newInstance = new Instance(numAttributes() + 
-					inst.numAttributes());
     int m = 0;
+    double [] newVals = new double[numAttributes() + inst.numAttributes()];
     for (int j = 0; j < numAttributes(); j++, m++) {
-      newInstance.setValue(m, value(j));
+      newVals[m] = value(j);
     }
     for (int j = 0; j < inst.numAttributes(); j++, m++) {
-      newInstance.setValue(m, inst.value(j));
+      newVals[m] = inst.value(j);
     }
-    return newInstance;
+    return new Instance(1.0, newVals);
   }
 
   /**
@@ -430,7 +429,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if instance doesn't have access to any
    * dataset
    */
-  public final int numClasses() throws Exception {
+  public int numClasses() throws Exception {
     
     if (m_Dataset == null) {
       throw new Exception("Instance doesn't have access to a dataset!");
@@ -439,7 +438,7 @@ public class Instance implements Copyable, Serializable {
   }
 
   /**
-   * Returns the number of present. Always the same as numAttributes().
+   * Returns the number of values present. Always the same as numAttributes().
    *
    * @return the number of values
    */
@@ -480,7 +479,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if the class is not set or the instance doesn't
    * have access to a dataset
    */
-  public final void setClassMissing() throws Exception {
+  public void setClassMissing() throws Exception {
 
     if (classIndex() < 0) {
       throw new Exception("Class is not set!");
@@ -499,7 +498,7 @@ public class Instance implements Copyable, Serializable {
    * @exception Exception if the class is not set or the instance doesn't
    * have access to a dataset 
    */
-  public final void setClassValue(double value) throws Exception {
+  public void setClassValue(double value) throws Exception {
 
     if (classIndex() < 0) {
       throw new Exception("Class is not set!");
@@ -837,7 +836,7 @@ public class Instance implements Copyable, Serializable {
    * attribute is nominal (or a string) then it returns the value's index as a 
    * double).
    */
-  public final double valueSparse(int indexOfIndex) {
+  public double valueSparse(int indexOfIndex) {
 
     return m_AttValues[indexOfIndex];
   }  
@@ -851,7 +850,7 @@ public class Instance implements Copyable, Serializable {
    * attribute is nominal (or a string) then it returns the value's index as a
    * double).
    */
-  public final double value(Attribute att) {
+  public double value(Attribute att) {
 
     return value(att.index());
   }
