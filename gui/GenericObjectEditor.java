@@ -104,7 +104,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -195,6 +195,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       treeView.setLayout(new BorderLayout());
       treeView.add(m_tree, BorderLayout.NORTH);
       
+      // make backgrounds look the same
+      treeView.setBackground(m_tree.getBackground());
+
       m_scroller = new JScrollPane(treeView);
       
       m_scroller.setPreferredSize(new Dimension(300, 400));
@@ -877,7 +880,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   protected JButton createChooseClassButton() {
 
-    JButton setButton = new JButton("Set");
+    JButton setButton = new JButton("Choose");
 
     // anonymous action listener shows a JTree popup and allows the user
     // to choose the class they want
