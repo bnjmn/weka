@@ -155,4 +155,9 @@ weka.associations.Associator=\
 weka.clusterers.Clusterer=\
  weka.clusterers.EM, \
  weka.clusterers.Cobweb
+
+# Lists the Converters I want to choose from
+weka.converters.Converter =\
+ weka.converters.CsvToArff
+# weka.converters.C5ToArff
  
