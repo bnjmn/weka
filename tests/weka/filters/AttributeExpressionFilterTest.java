@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.AttributeExpressionFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision:
+ * @version $Revision: 1.2 $
  */
 public class AttributeExpressionFilterTest extends AbstractFilterTest {
   
@@ -73,9 +73,14 @@ public class AttributeExpressionFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     for (int i = 0; i < result.numInstances(); i++) {
       Instance inst = result.instance(i);
-      assertEquals("Instance " + (i + 1),
-                   inst.value(0) / inst.value(1), 
-                   inst.value(inst.numAttributes() - 1), EXPR_DELTA);
+      if (inst.value(1) == 0) {
+        assert("Instance " + (i + 1) + " should have been ?" , 
+               inst.isMissing(inst.numAttributes() - 1));
+      } else {
+        assertEquals("Instance " + (i + 1),
+                     inst.value(0) / inst.value(1), 
+                     inst.value(inst.numAttributes() - 1), EXPR_DELTA);
+      }
     }
   }
 
@@ -95,9 +100,11 @@ public class AttributeExpressionFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     for (int i = 0; i < result.numInstances(); i++) {
       Instance inst = result.instance(i);
-      assertEquals("Instance " + (i + 1),
-                   Math.log(inst.value(1)/5), 
-                   inst.value(inst.numAttributes() - 1), EXPR_DELTA);
+      if (inst.value(1) != 0) {
+        assertEquals("Instance " + (i + 1),
+                     Math.log(inst.value(1)/5), 
+                     inst.value(inst.numAttributes() - 1), EXPR_DELTA);
+      }
     }
   }
 
@@ -205,10 +212,16 @@ public class AttributeExpressionFilterTest extends AbstractFilterTest {
     Instances result = useFilter();
     for (int i = 0; i < result.numInstances(); i++) {
       Instance inst = result.instance(i);
-      assertEquals("Instance " + (i + 1),
-                   (inst.value(3) + inst.value(2)) * 
-                   ((inst.value(1) - inst.value(0))/5), 
-                   inst.value(inst.numAttributes() - 1), EXPR_DELTA);
+      if (inst.isMissing(0) || inst.isMissing(1) ||
+          inst.isMissing(2) || inst.isMissing(3)) {
+        assert("Instance " + (i + 1) + " should have been ?" , 
+               inst.isMissing(inst.numAttributes() - 1));
+      } else {
+        assertEquals("Instance " + (i + 1),
+                     (inst.value(3) + inst.value(2)) * 
+                     ((inst.value(1) - inst.value(0))/5), 
+                     inst.value(inst.numAttributes() - 1), EXPR_DELTA);
+      }
     }
   }
 
