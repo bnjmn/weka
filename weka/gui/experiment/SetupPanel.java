@@ -35,12 +35,7 @@ import weka.gui.GenericArrayEditor;
 import weka.gui.PropertyPanel;
 import weka.gui.FileEditor;
 
-import weka.experiment.Experiment;
-import weka.experiment.RemoteExperiment;
-import weka.experiment.ResultProducer;
-import weka.experiment.ResultListener;
-import weka.experiment.CrossValidationResultProducer;
-import weka.experiment.DatabaseResultListener;
+import weka.experiment.*;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -90,7 +85,7 @@ import javax.swing.ButtonGroup;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class SetupPanel extends JPanel {
 
@@ -432,7 +427,7 @@ public class SetupPanel extends JPanel {
    * @param exp a value of type 'Experiment'
    */
   public void setExperiment(Experiment exp) {
-    
+
     m_Exp = exp;
     m_SaveBut.setEnabled(true);
     m_RPEditor.setValue(m_Exp.getResultProducer());
@@ -448,8 +443,8 @@ public class SetupPanel extends JPanel {
     m_advanceIteratorFirst.setSelected(!m_Exp.getAdvanceDataSetFirst());
     m_advanceDataSetFirst.setEnabled(true);
     m_advanceIteratorFirst.setEnabled(true);
-   
-    m_GeneratorPropertyPanel.setExperiment(m_Exp);
+
+    m_GeneratorPropertyPanel.setExperiment(m_Exp);   
     m_RunNumberPanel.setExperiment(m_Exp);
     m_DatasetListPanel.setExperiment(m_Exp);
     m_DistributeExperimentPanel.setExperiment(m_Exp);
@@ -486,7 +481,14 @@ public class SetupPanel extends JPanel {
 			     new BufferedInputStream(fi));
       Experiment exp = (Experiment)oi.readObject();
       oi.close();
+      boolean iteratorOn = exp.getUsePropertyIterator();
+      Object propArray = exp.getPropertyArray();
+      PropertyNode [] propPath = exp.getPropertyPath();
       setExperiment(exp);
+      exp.setPropertyPath(propPath);
+      exp.setPropertyArray(propArray);
+      exp.setUsePropertyIterator(iteratorOn);
+      m_GeneratorPropertyPanel.setExperiment(m_Exp);
       System.err.println("Opened experiment:\n" + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();
