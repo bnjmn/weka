@@ -29,6 +29,8 @@ import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.InputEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.*;
 import java.io.Serializable;
 import java.io.Reader;
@@ -39,18 +41,20 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.io.IOException;
+import java.beans.beancontext.*;
+import javax.swing.JButton;
 
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.*;
-import java.io.IOException;
 
 
 /**
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -156,6 +160,39 @@ public class Loader extends AbstractDataSource
   public Loader() {
     super();
     setLoader(m_Loader);
+    appearanceFinal();
+  }
+
+  protected void appearanceFinal() {
+    removeAll();
+    setLayout(new BorderLayout());
+    JButton goButton = new JButton("Start...");
+    add(goButton, BorderLayout.CENTER);
+    goButton.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  startLoading();
+	}
+      });
+  }
+
+  protected void appearanceDesign() {
+    removeAll();
+    setLayout(new BorderLayout());
+    add(m_visual, BorderLayout.CENTER);
+  }
+
+  /**
+   * Set a bean context for this bean
+   *
+   * @param bc a <code>BeanContext</code> value
+   */
+  public void setBeanContext(BeanContext bc) {
+    super.setBeanContext(bc);
+    if (m_design) {
+      appearanceDesign();
+    } else {
+      appearanceFinal();
+    }
   }
 
   /**
@@ -374,6 +411,27 @@ public class Loader extends AbstractDataSource
   public synchronized void removeInstanceListener(InstanceListener dsl) {
     super.removeInstanceListener(dsl);
     m_instanceEventTargets --;
+  }
+  
+  public static void main(String [] args) {
+    try {
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
+
+      final Loader tv = new Loader();
+
+      jf.getContentPane().add(tv, java.awt.BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
+      });
+      jf.setSize(800,600);
+      jf.setVisible(true);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 }
 
