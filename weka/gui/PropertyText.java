@@ -1,22 +1,52 @@
+/*
+ *    PropertyText.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.gui;
 
+import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusAdapter;
-import javax.swing.JTextField;
 import java.beans.PropertyEditor;
-import java.awt.Graphics;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import javax.swing.JTextField;
 
-// Support for a PropertyEditor that uses text.
-// Isn't going to work well if the property gets changed
-// somewhere other than this field simultaneously
+/** 
+ * Support for a PropertyEditor that uses text.
+ * Isn't going to work well if the property gets changed
+ * somewhere other than this field simultaneously
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 class PropertyText extends JTextField {
 
+  /** The property editor */
   private PropertyEditor m_Editor;
 
+  /**
+   * Sets up the editing component with the supplied editor.
+   *
+   * @param pe the PropertyEditor
+   */
   PropertyText(PropertyEditor pe) {
 
     super(pe.getAsText());
@@ -41,6 +71,9 @@ class PropertyText extends JTextField {
     });
   }
 
+  /**
+   * Attempts to update the textfield value from the editor.
+   */
   protected void updateUs() {
     try {
       setText(m_Editor.getAsText());
@@ -48,6 +81,10 @@ class PropertyText extends JTextField {
       // Quietly ignore.
     }
   }
+
+  /**
+   * Attempts to update the editor value from the textfield.
+   */
   protected void updateEditor() {
     try {
       m_Editor.setAsText(getText());

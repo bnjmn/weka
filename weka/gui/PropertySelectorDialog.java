@@ -1,3 +1,22 @@
+/*
+ *    PropertySelectorDialog.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.gui;
 
 import weka.experiment.PropertyNode;
@@ -40,19 +59,48 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 
+/** 
+ * Allows the user to select any (supported) property of an object, including
+ * properties that any of it's property values may have.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class PropertySelectorDialog extends JDialog {
   
+  /** Click to choose the currently selected property */
   protected JButton m_SelectBut = new JButton("Select");
+
+  /** Click to cancel the property selection */
   protected JButton m_CancelBut = new JButton("Cancel");
+
+  /** The root of the property tree */
   protected DefaultMutableTreeNode m_Root;
+
+  /** The object at the root of the tree */
   protected Object m_RootObject;
+
+  /** Whether the selection was made or cancelled */
   protected int m_Result;
+
+  /** Stores the path to the selected property */
   protected Object [] m_ResultPath;
+
+  /** The component displaying the property tree */
   protected JTree m_Tree;
-  
+
+  /** Signifies an OK property selection */
   public static final int APPROVE_OPTION = 0;
+
+  /** Signifies a cancelled property selection */
   public static final int CANCEL_OPTION = 1;
   
+  /**
+   * Create the property selection dialog.
+   *
+   * @param parentFrame the parent frame of the dialog
+   * @param rootObject the object containing properties to select from
+   */
   public PropertySelectorDialog(Frame parentFrame, Object rootObject) {
     
     super(parentFrame, "Select a property", true);
@@ -99,6 +147,11 @@ public class PropertySelectorDialog extends JDialog {
     pack();
   }
 
+  /**
+   * Pops up the modal dialog and waits for cancel or a selection.
+   *
+   * @return either APPROVE_OPTION, or CANCEL_OPTION
+   */
   public int showDialog() {
 
     m_Result = CANCEL_OPTION;
@@ -106,6 +159,11 @@ public class PropertySelectorDialog extends JDialog {
     return m_Result;
   }
 
+  /**
+   * Gets the path of property nodes to the selected property.
+   *
+   * @return an array of PropertyNodes
+   */
   public PropertyNode [] getPath() {
 
     PropertyNode [] result = new PropertyNode [m_ResultPath.length - 1];
@@ -116,6 +174,11 @@ public class PropertySelectorDialog extends JDialog {
     return result;
   }
 
+  /**
+   * Creates the property tree below the current node.
+   *
+   * @param localNode a value of type 'DefaultMutableTreeNode'
+   */
   protected void createNodes(DefaultMutableTreeNode localNode) {
 
     PropertyNode pNode = (PropertyNode)localNode.getUserObject();
@@ -186,9 +249,9 @@ public class PropertySelectorDialog extends JDialog {
 
   
   /**
-   * Tests out the classifier editor from the command line.
+   * Tests out the property selector from the command line.
    *
-   * @param args may contain the class name of a classifier to edit
+   * @param args ignored
    */
   public static void main(String [] args) {
 

@@ -1,26 +1,49 @@
+/*
+ *    FileEditor.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.gui;
 
-
-import weka.core.Tag;
-import weka.core.SelectedTag;
-
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorSupport;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import java.awt.BorderLayout;
-import java.io.File;
 import java.awt.FontMetrics;
-import javax.swing.JFileChooser;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorSupport;
+import java.io.File;
+import javax.swing.JFileChooser;
 
+
+/** 
+ * A PropertyEditor for File objects that lets the user select a file.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class FileEditor extends PropertyEditorSupport {
 
+  /** The file chooser used for selecting files */
   protected JFileChooser m_FileChooser;
   
+  /**
+   * Returns a representation of the current property value as java source.
+   *
+   * @return a value of type 'String'
+   */
   public String getJavaInitializationString() {
 
     File f = (File) getValue();
@@ -38,6 +61,12 @@ public class FileEditor extends PropertyEditorSupport {
   public boolean supportsCustomEditor() {
     return true;
   }
+  
+  /**
+   * Gets the custom editor component.
+   *
+   * @return a value of type 'java.awt.Component'
+   */
   public java.awt.Component getCustomEditor() {
 
     if (m_FileChooser == null) {
@@ -57,6 +86,11 @@ public class FileEditor extends PropertyEditorSupport {
     return m_FileChooser;
   }
 
+  /**
+   * Returns true since this editor is paintable.
+   *
+   * @return true.
+   */
   public boolean isPaintable() {
     return true;
   }

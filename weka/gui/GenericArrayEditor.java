@@ -1,3 +1,22 @@
+/*
+ *    GenericArrayEditor.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.gui;
 
 import weka.core.SelectedTag;
@@ -26,8 +45,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.ListCellRenderer;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JPanel;
@@ -36,7 +53,17 @@ import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
+
+/** 
+ * A PropertyEditor for arrays of objects that themselves have
+ * property editors.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
 
@@ -57,11 +84,14 @@ public class GenericArrayEditor extends JPanel
 
   /** The property editor for the class we are editing */
   private PropertyEditor m_ElementEditor;
-  
+
+  /** Click this to delete the selected array values */
   private JButton m_DeleteBut = new JButton("Delete");
 
+  /** Click to add the current object configuration to the array */
   private JButton m_AddBut = new JButton("Add");
-  
+
+  /** Listens to buttons being pressed and taking the appropriate action */
   private ActionListener m_InnerActionListener =
     new ActionListener() {
 
@@ -91,6 +121,7 @@ public class GenericArrayEditor extends JPanel
     }
   };
 
+  /** Listens to list items being selected and takes appropriate action */
   private ListSelectionListener m_InnerSelectionListener =
     new ListSelectionListener() {
 
@@ -118,16 +149,38 @@ public class GenericArrayEditor extends JPanel
     m_ElementList.addListSelectionListener(m_InnerSelectionListener);
   }
 
-  private class EditorListCellRenderer
-    implements ListCellRenderer {
-    
+  /* This class handles the creation of list cell renderers from the 
+   * property editors.
+   */
+  private class EditorListCellRenderer implements ListCellRenderer {
+
+    /** The class of the property editor for array objects */
     private Class m_EditorClass;
+
+    /** The class of the array values */
     private Class m_ValueClass;
+
+    /**
+     * Creates the list cell renderer.
+     *
+     * @param editorClass The class of the property editor for array objects
+     * @param valueClass The class of the array values
+     */
     public EditorListCellRenderer(Class editorClass, Class valueClass) {
       m_EditorClass = editorClass;
       m_ValueClass = valueClass;
     }
 
+    /**
+     * Creates a cell rendering component.
+     *
+     * @param JList the list that will be rendered in
+     * @param Object the cell value
+     * @param int which element of the list to render
+     * @param boolean true if the cell is selected
+     * @param boolean true if the cell has the focus
+     * @return the rendering component
+     */
     public Component getListCellRendererComponent(final JList list,
 						  final Object value,
 						  final int index,
@@ -171,6 +224,12 @@ public class GenericArrayEditor extends JPanel
     }
   }
 
+  /**
+   * Updates the type of object being edited, so attempts to find an
+   * appropriate propertyeditor.
+   *
+   * @param o a value of type 'Object'
+   */
   private void updateEditorType(Object o) {
 
     // Determine if the current object is an array
@@ -313,14 +372,31 @@ public class GenericArrayEditor extends JPanel
     gfx.drawString(rep, 2, box.height - vpad);
   }
 
-  /* We don't support get/set as text methods */
+  /**
+   * Returns null as we don't support getting/setting values as text.
+   *
+   * @return null
+   */
   public String getAsText() {
     return null;
   }
+
+  /**
+   * Returns null as we don't support getting/setting values as text. 
+   *
+   * @param text the text value
+   * @exception IllegalArgumentException as we don't support
+   * getting/setting values as text.
+   */
   public void setAsText(String text) throws IllegalArgumentException {
     throw new IllegalArgumentException(text);
   }
-  /* We don't support setting from tags either */
+
+  /**
+   * Returns null as we don't support getting values as tags.
+   *
+   * @return null
+   */
   public String[] getTags() {
     return null;
   }
@@ -333,22 +409,38 @@ public class GenericArrayEditor extends JPanel
   public boolean supportsCustomEditor() {
     return true;
   }
+  
+  /**
+   * Returns the array editing component.
+   *
+   * @return a value of type 'java.awt.Component'
+   */
   public java.awt.Component getCustomEditor() {
     return this;
   }
 
-  // For propertyChange "Producing"
+  /**
+   * Adds a PropertyChangeListener who will be notified of value changes.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
   public void addPropertyChangeListener(PropertyChangeListener l) {
     m_Support.addPropertyChangeListener(l);
   }
+
+  /**
+   * Removes a PropertyChangeListener.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
   public void removePropertyChangeListener(PropertyChangeListener l) {
     m_Support.removePropertyChangeListener(l);
   }
 
   /**
-   * Tests out the classifier editor from the command line.
+   * Tests out the array editor from the command line.
    *
-   * @param args may contain the class name of a classifier to edit
+   * @param args ignored
    */
   public static void main(String [] args) {
 

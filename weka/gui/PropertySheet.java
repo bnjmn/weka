@@ -1,3 +1,22 @@
+/*
+ *    PropertySheet.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.gui;
 
 import java.util.Hashtable;
@@ -32,10 +51,24 @@ import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 
+/** 
+ * Displays a property sheet where (supported) properties of the target
+ * object may be edited.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class PropertySheet extends JFrame implements PropertyChangeListener {
 
+  /** The panel displaying the properties */
   private PropertySheetPanel panel;
 
+  /**
+   * Creates the propertysheet frame at a given location.
+   *
+   * @param x the initial x coord
+   * @param y the initial y coord
+   */
   public PropertySheet(int x, int y) {
     
     super("Properties - <initializing...>");
@@ -48,6 +81,11 @@ public class PropertySheet extends JFrame implements PropertyChangeListener {
     panel = new PropertySheetPanel(this);
   }
 
+  /**
+   * Sets a new target object for the property sheet.
+   *
+   * @param targ a value of type 'Object'
+   */
   public void setTarget(Object targ) {
 
     panel.setTarget(targ);
@@ -55,20 +93,44 @@ public class PropertySheet extends JFrame implements PropertyChangeListener {
     pack();
   }
 
+  /**
+   * Gets a count of the number of properties in the propertysheet.
+   *
+   * @return the number of editable properties.
+   */
   public int editableProperties() {
 
     return panel.editableProperties();
   }
 
-  
+  /** A support object for handling property change listeners */ 
   private PropertyChangeSupport support = new PropertyChangeSupport(this);
+
+  /**
+   * Updates the property sheet panel with a changed property and also passed
+   * the event along.
+   *
+   * @param evt a value of type 'PropertyChangeEvent'
+   */
   public void propertyChange(PropertyChangeEvent evt) {
     panel.wasModified(evt); // Let our panel update before guys downstream
     support.firePropertyChange("", null, null);
   }
+
+  /**
+   * Adds a PropertyChangeListener.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
   public void addPropertyChangeListener(PropertyChangeListener l) {
     support.addPropertyChangeListener(l);
   }
+
+  /**
+   * Removes a PropertyChangeListener.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
   public void removePropertyChangeListener(PropertyChangeListener l) {
     support.removePropertyChangeListener(l);
   }
@@ -77,31 +139,51 @@ public class PropertySheet extends JFrame implements PropertyChangeListener {
 
 
 
+/**
+ * Displays the editable properties in a panel.
+ */
 class PropertySheetPanel extends JPanel {
 
+  /** The parent frame we are embedded in */
   private PropertySheet m_Frame;
 
-  // We need to cache the targets' wrapper so we can annoate it with
-  // information about what target properties have changed during design
-  // time.
+  /** The target object being edited */
   private Object m_Target;
-  private PropertyDescriptor m_Properties[];
-  private PropertyEditor m_Editors[];
-  private Object m_Values[];
-  private Component m_Views[];
-  private JLabel m_Labels[];
-  private int m_NumEditable = 0;
-  private static int hPad = 4;
-  private static int vPad = 4;
-  private int maxHeight = 500;
-  private int maxWidth = 300;
 
+  /** Holds properties of the target */
+  private PropertyDescriptor m_Properties[];
+
+  /** Holds property editors of the object */
+  private PropertyEditor m_Editors[];
+
+  /** Holds current object values for each property */
+  private Object m_Values[];
+
+  /** Stores GUI components containing each editing component */
+  private Component m_Views[];
+
+  /** The labels for each property */
+  private JLabel m_Labels[];
+
+  /** A count of the number of properties we have an editor for */
+  private int m_NumEditable = 0;
+
+  /**
+   * Creates the property sheet with the given parent frame.
+   *
+   * @param frame a value of type 'PropertySheet'
+   */
   PropertySheetPanel(PropertySheet frame) {
     this.m_Frame = frame;
     //    setBorder(BorderFactory.createLineBorder(Color.red));
     setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
   }
 
+  /**
+   * Sets a new target object for customisation.
+   *
+   * @param targ a value of type 'Object'
+   */
   synchronized void setTarget(Object targ) {
 	
     m_Frame.getContentPane().removeAll();	
@@ -249,18 +331,22 @@ class PropertySheetPanel extends JPanel {
     setVisible(true);	
   }
 
+  /**
+   * Gets the number of editable properties for the current target.
+   *
+   * @return the number of editable properties.
+   */
   public int editableProperties() {
 
     return m_NumEditable;
   }
   
-  synchronized void setCustomizer(Customizer c) {
-    
-    if (c != null) {
-      c.addPropertyChangeListener(m_Frame);
-    }
-  }
-
+  /**
+   * Updates the propertysheet when a value has been changed (from outside
+   * the propertysheet?).
+   *
+   * @param evt a value of type 'PropertyChangeEvent'
+   */
   synchronized void wasModified(PropertyChangeEvent evt) {
 
     //    System.err.println("wasModified");
@@ -276,20 +362,9 @@ class PropertySheetPanel extends JPanel {
 	    Object args[] = { value };
 	    args[0] = value;
 	    setter.invoke(m_Target, args);
-		        
-	    // We add the changed property to the targets wrapper
-	    // so that we know precisely what bean properties have
-	    // changed for the target bean and we're able to
-	    // generate initialization statements for only those
-	    // modified properties at code generation time.	    
-// targetWrapper.getChangedProperties().addElement(m_Properties[i]);
-
 	  } catch (InvocationTargetException ex) {
 	    if (ex.getTargetException()
 		instanceof PropertyVetoException) {
-	      //warning("Vetoed; reason is: " 
-	      //        + ex.getTargetException().getMessage());
-	      // temp dealock fix...I need to remove the deadlock.
 	      System.err.println("WARNING: Vetoed; reason is: " 
 				 + ex.getTargetException().getMessage());
 	    } else {
