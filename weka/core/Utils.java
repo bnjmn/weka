@@ -16,7 +16,7 @@
 
 /*
  *    Utils.java
- *    Copyright (C) 1999 Eibe Frank,Len Trigg,Yong Wang
+ *    Copyright (C) 1999-2004 University of Waikato
  *
  */
 
@@ -32,10 +32,11 @@ import java.util.Random;
 /**
  * Class implementing some simple utility methods.
  *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @author Eibe Frank 
+ * @author Yong Wang 
+ * @author Len Trigg 
+ * @author Julien Prados
+ * @version $Revision: 1.40 $
  */
 public final class Utils {
 
@@ -631,7 +632,45 @@ public final class Utils {
     }
     return new String [0];
   }
+    
+  /**
+   * The inverse operation of backQuoteChars().
+   * Converts back-quoted carriage returns and new lines in a string 
+   * to the corresponding character ('\r' and '\n').
+   * Also "un"-back-quotes the following characters: ` " \ \t and %
+   * @param string the string
+   * @return the converted string
+   */
+  public static String unbackQuoteChars(String string) {
 
+    int index;
+    StringBuffer newStringBuffer;
+    
+    // replace each of the following characters with the backquoted version
+    String charsFind[]    = {"\\\\", "\\'", "\\t", "\\\"", "\\%"};
+    char   charsReplace[] = {'\\',   '\'',  '\t',  '"',    '%'};
+    
+    for(int i = 0; i < charsFind.length; i++) {
+      if (string.indexOf(charsFind[i]) != -1 ) {
+	newStringBuffer = new StringBuffer();
+	while ((index = string.indexOf(charsFind[i])) != -1) {
+	  if (index > 0) {
+	    newStringBuffer.append(string.substring(0, index));
+	  }
+	  newStringBuffer.append(charsReplace[i]);
+	  if ((index + charsFind[i].length()) < string.length()) {
+	    string = string.substring(index + charsFind[i].length());
+	  } else {
+	    string = "";
+	  }
+	}
+	newStringBuffer.append(string);
+	string = newStringBuffer.toString();
+      }
+    }
+    return Utils.convertNewLines(string);
+  }    
+  
   /**
    * Split up a string containing options into an array of strings,
    * one for each option.
@@ -639,19 +678,64 @@ public final class Utils {
    * @param optionString the string containing the options
    * @return the array of options
    */
-  public static String [] splitOptions(String optionString) {
+  public static String [] splitOptions(String quotedOptionString) throws Exception{
 
     FastVector optionsVec = new FastVector();
-    StringTokenizer st = new StringTokenizer(optionString);
-    while (st.hasMoreTokens())
-      optionsVec.addElement(st.nextToken());
+    String str = new String(quotedOptionString);
+    int i;
+    
+    while (true){
 
+      //trimLeft 
+      i = 0;
+      while ((i < str.length()) && (Character.isWhitespace(str.charAt(i)))) i++;
+      str = str.substring(i);
+      
+      //stop when str is empty
+      if (str.length() == 0) break;
+      
+      //if str start with a double quote
+      if (str.charAt(0) == '"'){
+	
+	//find the first not anti-slached double quote
+	i = 1;
+	while(i < str.length()){
+	  if (str.charAt(i) == str.charAt(0)) break;
+	  if (str.charAt(i) == '\\'){
+	    i += 1;
+	    if (i >= str.length()) 
+	      throw new Exception("String should not finish with \\");
+	    if (str.charAt(i) != '\\' &&  str.charAt(i) != '"') 
+	      throw new Exception("Unknow character \\" + str.charAt(i));
+	  }
+	  i += 1;
+	}
+	if (i >= str.length()) throw new Exception("Quote parse error.");
+	
+	//add the founded string to the option vector (without quotes)
+	String optStr = str.substring(1,i);
+	optStr = unbackQuoteChars(optStr);
+	optionsVec.addElement(optStr);
+	str = str.substring(i+1);
+      } else {
+	//find first whiteSpace
+	i=0;
+	while((i < str.length()) && (!Character.isWhitespace(str.charAt(i)))) i++;
+	
+	//add the founded string to the option vector
+	String optStr = str.substring(0,i);
+	optionsVec.addElement(optStr);
+	str = str.substring(i);
+      }
+    }
+    
+    //convert optionsVec to an array of String
     String [] options = new String[optionsVec.size()];
-    for (int i = 0; i < optionsVec.size(); i++) {
+    for (i = 0; i < optionsVec.size(); i++) {
       options[i] = (String)optionsVec.elementAt(i);
     }
     return options;
-  }
+  }    
 
   /**
    * Joins all the options in an option array into a single string,
