@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -546,10 +546,10 @@ public class PairedTTester implements OptionHandler {
     int biggest = Math.max(wins[Utils.maxIndex(wins)],
 			   losses[Utils.maxIndex(losses)]);
     int width = Math.max(2 + (int)(Math.log(biggest) / Math.log(10)),
-			 "<".length());
+			 ">-<".length());
     String result = Utils.padLeft(">-<", width) + ' '
       + Utils.padLeft(">", width) + ' '
-      + Utils.padLeft("<", width) + " Scheme\n";
+      + Utils.padLeft("<", width) + " Resultset\n";
     int [] ranking = Utils.sort(diff);
     for (int i = numResultsets - 1; i >= 0; i--) {
       int curr = ranking[i];
