@@ -98,7 +98,7 @@ import javax.swing.event.DocumentEvent;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.6.2.2 $
+ * @version $Revision: 1.6.2.3 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -220,8 +220,14 @@ public class SimpleSetupPanel extends JPanel {
   /** The panel for configuring selected algorithms */
   protected AlgorithmListPanel m_AlgorithmListPanel = new AlgorithmListPanel();
 
-  /** Area for user notes Default of 5 rows */
-  protected JTextArea m_NotesText = new JTextArea(null, 5, 0);
+  /** A button for bringing up the notes */
+  protected JButton m_NotesButton =  new JButton("Notes");
+
+  /** Frame for the notes */
+  protected JFrame m_NotesFrame = new JFrame("Notes");
+
+  /** Area for user notes Default of 10 rows */
+  protected JTextArea m_NotesText = new JTextArea(null, 10, 0);
 
   /**
    * Manages sending notifications to people when we change the experiment,
@@ -355,9 +361,24 @@ public class SimpleSetupPanel extends JPanel {
 	public void changedUpdate(DocumentEvent e) {numRepetitionsChanged();}
       });
 
-    m_NotesText.setEnabled(false);
+    m_NotesFrame.addWindowListener(new WindowAdapter() {
+	public void windowClosing(WindowEvent e) {
+	  m_NotesButton.setEnabled(true);
+	}
+      });
+    m_NotesFrame.getContentPane().add(new JScrollPane(m_NotesText));
+    m_NotesFrame.setSize(600, 400);
+
+    m_NotesButton.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_NotesButton.setEnabled(false);
+	  m_NotesFrame.setVisible(true);
+	}
+      });
+    m_NotesButton.setEnabled(false);
+
     m_NotesText.setEditable(true);
-    m_NotesText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    //m_NotesText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_NotesText.addKeyListener(new KeyAdapter() {
 	public void keyReleased(KeyEvent e) {
 	  m_Exp.setNotes(m_NotesText.getText());
@@ -486,8 +507,7 @@ public class SimpleSetupPanel extends JPanel {
 
     JPanel notes = new JPanel();
     notes.setLayout(new BorderLayout());
-    notes.setBorder(BorderFactory.createTitledBorder("Notes"));
-    notes.add(new JScrollPane(m_NotesText), BorderLayout.CENTER);
+    notes.add(m_NotesButton, BorderLayout.CENTER);
 
     JPanel top1 = new JPanel();
     top1.setLayout(new BorderLayout());
@@ -518,6 +538,13 @@ public class SimpleSetupPanel extends JPanel {
     add(notes, BorderLayout.SOUTH);
   }
   
+  /**
+   * Deletes the notes frame.
+   */
+  protected void removeNotesFrame() {
+    m_NotesFrame.setVisible(false);
+  }
+
   /**
    * Gets te users consent for converting the experiment to a simpler form.
    *
@@ -690,7 +717,7 @@ public class SimpleSetupPanel extends JPanel {
     m_OrderAlgorithmsFirstRBut.setEnabled(true);
 
     m_NotesText.setText(exp.getNotes());
-    m_NotesText.setEnabled(true);
+    m_NotesButton.setEnabled(true);
 
     if (!exp.getUsePropertyIterator() || !(exp.getPropertyArray() instanceof Classifier[])) {
       // unknown property iteration
