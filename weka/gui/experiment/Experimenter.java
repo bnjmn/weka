@@ -36,6 +36,7 @@ import javax.swing.UIManager;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
 
 
 /** 
@@ -43,7 +44,7 @@ import javax.swing.JPanel;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Experimenter extends JPanel {
 
@@ -95,6 +96,18 @@ public class Experimenter extends JPanel {
     add(m_TabbedPane, BorderLayout.CENTER);
   }
 
+
+  /** variable for the Experimenter class which would be set to null by the memory 
+      monitoring thread to free up some memory if we running out of memory
+   */
+  private static Experimenter m_experimenter;
+  /** 
+   * The size in bytes of the java virtual machine at the start. This 
+   * represents the critical amount of memory that is necessary for the  
+   * program to run. If our free memory falls below (or is very close) to this 
+   * critical amount then the virtual machine throws an OutOfMemoryError.
+   */
+  private static long m_initialJVMSize;  
   /**
    * Tests out the experiment environment.
    *
@@ -106,14 +119,16 @@ public class Experimenter extends JPanel {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {}
     try {
-      
+      m_initialJVMSize = Runtime.getRuntime().totalMemory();
+
       boolean classFirst = false;
       if (args.length > 0) {
 	classFirst = args[0].equals("CLASS_FIRST");
       }
+      m_experimenter = new Experimenter(classFirst);
       final JFrame jf = new JFrame("Weka Experiment Environment");
       jf.getContentPane().setLayout(new BorderLayout());
-      jf.getContentPane().add(new Experimenter(classFirst), BorderLayout.CENTER);
+      jf.getContentPane().add(m_experimenter, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
 	  jf.dispose();
@@ -123,6 +138,67 @@ public class Experimenter extends JPanel {
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
+
+      Thread memMonitor = new Thread() {
+        public void run() {
+          while(true) {
+            try {
+              this.sleep(4000);
+              
+              System.gc();
+              if((Runtime.getRuntime().maxMemory() - 
+                  Runtime.getRuntime().totalMemory())  < 
+                                      m_initialJVMSize+200000) {
+
+                jf.dispose();
+                m_experimenter = null;
+                System.gc();
+
+                Thread [] thGroup = new Thread[Thread.activeCount()];
+                Thread.enumerate(thGroup);
+                //System.out.println("No of threads in the ThreadGroup:"+
+                //                   thGroup.length);
+                for(int i=0; i<thGroup.length; i++) {
+                  Thread t = thGroup[i];
+                  if(t!=null) {
+                    //System.out.println("Thread "+(i+1)+": "+t.getName());
+                    if(t!=Thread.currentThread()) {
+                      if(t.getName().startsWith("Thread")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                      else if(t.getName().startsWith("AWT-EventQueue")) {
+                        //System.out.println("Stopping: "+t.toString());
+                        t.stop();
+                      }
+                    }
+                  }
+                  //else
+                  //  System.out.println("Thread "+(i+1)+" is null.");
+                }
+                thGroup=null;
+                //System.gc();
+
+                JOptionPane.showMessageDialog(null,
+                                              "Not enough memory. Please load "+
+                                              "a smaller dataset or use "+
+                                              "larger heap size.", 
+                                              "OutOfMemory",
+                                              JOptionPane.WARNING_MESSAGE);
+                System.err.println("displayed message");
+                System.err.println("Not enough memory. Please load a smaller "+
+                                   "dataset or use larger heap size.");
+                System.err.println("exiting");
+                System.exit(-1);
+              }
+
+            } catch(InterruptedException ex) { ex.printStackTrace(); }
+          }
+        }
+      };
+
+      memMonitor.setPriority(Thread.NORM_PRIORITY);
+      memMonitor.start();
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
