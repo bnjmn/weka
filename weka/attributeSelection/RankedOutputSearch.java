@@ -29,20 +29,37 @@ import weka.core.*;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version 1.0 March 1999 (Mark)
  */
-public abstract class RankedOutputSearch extends ASSearch {
+public interface RankedOutputSearch {
 
 
-    // ===============
-    // Public methods.
-    // ===============
+  // ===============
+  // Public methods.
+  // ===============
+  
+  /**
+   * Returns a X by 2 list of attribute indexes and corresponding
+   * evaluations from best (highest) to worst.
+   * @return the ranked list of attribute indexes in an array of ints
+   * @exception Exception if the ranking can't be produced
+   */
+  public abstract double[][] rankedAttributes() throws Exception;
 
-    /**
-     * Returns a X by 2 list of attribute indexes and corresponding
-     * evaluations from best (highest) to worst.
-     * @return the ranked list of attribute indexes in an array of ints
-     * @exception Exception if the ranking can't be produced
-     */
-    public abstract double[][] rankedAttributes() throws Exception;
+  /**
+   * Sets a threshold by which attributes can be discarded from the
+   * ranking. This threshold is used by the AttributeSelection module
+   * which does the actual discarding of attributes---the implementer
+   * of this method needs only to provide a variable in which to store the
+   * supplied threshold.
+   * @param threshold the threshold.
+   */
+  public abstract void setThreshold(double threshold);
 
+  /**
+   * Gets the threshold by which attributes can be discarded. Discarding
+   * of attributes is done by the AttributeSelection module using the
+   * threshold returned by this method.
+   * @return a threshold by which to discard attributes
+   */
+  public abstract double getThreshold();
 
 }
