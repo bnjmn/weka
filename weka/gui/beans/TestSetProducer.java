@@ -29,7 +29,7 @@ import weka.core.Instances;
  * Interface to something that can produce test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface TestSetProducer {
 
@@ -38,13 +38,13 @@ public interface TestSetProducer {
    *
    * @param tsl a <code>TestSetListener</code> value
    */
-  public void addTestSetListener(TestSetListener tsl);
+  void addTestSetListener(TestSetListener tsl);
 
   /**
    * Remove a listener for test set events
    *
    * @param tsl a <code>TestSetListener</code> value
    */
-  public void removeTestSetListener(TestSetListener tsl);
+  void removeTestSetListener(TestSetListener tsl);
 
 }

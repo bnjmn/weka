@@ -42,7 +42,7 @@ import java.util.Vector;
  * The range of attributes the clusterer should ignore.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AddCluster extends Filter implements UnsupervisedFilter, OptionHandler {
 
@@ -94,7 +94,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
 	removeAttributes.input(toFilter.instance(i));
       }
       removeAttributes.batchFinished();
-      toFilterIgnoringAttributes = removeAttributes.outputFormat();
+      toFilterIgnoringAttributes = removeAttributes.getOutputFormat();
       Instance tempInst;
       while ((tempInst = removeAttributes.output()) != null) {
 	toFilterIgnoringAttributes.add(tempInst);

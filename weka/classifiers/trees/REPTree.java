@@ -49,7 +49,7 @@ import java.io.*;
  * No pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable {
@@ -137,15 +137,15 @@ public class REPTree extends DistributionClassifier
       
       num++;
       if (m_Attribute == -1) {
-	text.append("N" + Integer.toHexString(hashCode()) +
+	text.append("N" + Integer.toHexString(Tree.this.hashCode()) +
 		    " [label=\"" + num + leafString(parent) +"\"" +
 		    "shape=box]\n");
       } else {
-	text.append("N" + Integer.toHexString(hashCode()) +
+	text.append("N" + Integer.toHexString(Tree.this.hashCode()) +
 		    " [label=\"" + num + ": " + m_Info.attribute(m_Attribute).name() + 
 		    "\"]\n");
 	for (int i = 0; i < m_Successors.length; i++) {
-	  text.append("N" + Integer.toHexString(hashCode()) 
+	  text.append("N" + Integer.toHexString(Tree.this.hashCode()) 
 		      + "->" + 
 		      "N" + Integer.toHexString(m_Successors[i].hashCode())  +
 		      " [label=\"");

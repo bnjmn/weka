@@ -28,7 +28,7 @@ import java.util.EventListener;
  * Interface to something that can accpet test set events
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface TestSetListener extends EventListener {
 
@@ -37,5 +37,5 @@ public interface TestSetListener extends EventListener {
    *
    * @param e a <code>TestSetEvent</code> value
    */
-  public void acceptTestSet(TestSetEvent e);
+  void acceptTestSet(TestSetEvent e);
 }

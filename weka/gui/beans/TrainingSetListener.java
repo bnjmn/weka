@@ -37,5 +37,5 @@ public interface TrainingSetListener extends EventListener {
    *
    * @param e a <code>TrainingSetEvent</code> value
    */
-  public void acceptTrainingSet(TrainingSetEvent e);
+  void acceptTrainingSet(TrainingSetEvent e);
 }
