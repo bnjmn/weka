@@ -68,7 +68,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class MultiClassClassifier extends Classifier 
   implements OptionHandler {
@@ -173,8 +173,9 @@ public class MultiClassClassifier extends Classifier
 
   /** Constructs a random code assignment */
   private class RandomCode extends Code {
-    Random r = new Random(m_Seed);
-    public RandomCode(int numClasses, int numCodes) {
+    Random r = null;
+    public RandomCode(int numClasses, int numCodes, Instances data) {
+      r = data.getRandomNumberGenerator(m_Seed);
       numCodes = Math.max(numClasses, numCodes);
       m_Codebits = new boolean[numCodes][numClasses];
       int i = 0;
@@ -337,7 +338,8 @@ public class MultiClassClassifier extends Classifier
         break;
       case METHOD_ERROR_RANDOM:
         code = new RandomCode(numClassifiers, 
-                              (int)(numClassifiers * m_RandomWidthFactor));
+                              (int)(numClassifiers * m_RandomWidthFactor),
+			      insts);
         break;
       case METHOD_1_AGAINST_ALL:
         code = new StandardCode(numClassifiers);
