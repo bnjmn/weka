@@ -46,8 +46,10 @@ PACKAGE = weka.experiment
 #-----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
-# generate the _Stub.class and _Skel.class for remote engine
-#	rmic weka.experiment.RemoteEngine
+# generate the _Stub.class and _Skel.class for remote engine. The behaviour
+# of rmic between jdk1.1 and jdk1.2 is different. Replace -d ../../ with 
+# -d . for jdk1.1
+	rmic -d ../../ weka.experiment.RemoteEngine
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
