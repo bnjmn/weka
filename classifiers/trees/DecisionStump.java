@@ -31,7 +31,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler {
@@ -46,7 +46,7 @@ public class DecisionStump extends DistributionClassifier
   private double[][] m_Distribution;
 
   /** The instances used for training. */
-  private Instances theInstances;
+  private Instances m_Instances;
 
   /**
    * Generates the classifier.
@@ -66,24 +66,24 @@ public class DecisionStump extends DistributionClassifier
 
     double[][] bestDist = new double[3][instances.numClasses()];
 
-    theInstances = new Instances(instances);
-    theInstances.deleteWithMissingClass();
-    if (theInstances.classAttribute().isNominal()) {
-      numClasses = theInstances.numClasses();
+    m_Instances = new Instances(instances);
+    m_Instances.deleteWithMissingClass();
+    if (m_Instances.classAttribute().isNominal()) {
+      numClasses = m_Instances.numClasses();
     } else {
       numClasses = 1;
     }
 
     // For each attribute
     boolean first = true;
-    for (int i = 0; i < theInstances.numAttributes(); i++) {
-      if (i != theInstances.classIndex()) {
+    for (int i = 0; i < m_Instances.numAttributes(); i++) {
+      if (i != m_Instances.classIndex()) {
 
 	// Reserve space for distribution.
 	m_Distribution = new double[3][numClasses];
 
 	// Compute value of criterion for best split on attribute
-	if (theInstances.attribute(i).isNominal()) {
+	if (m_Instances.attribute(i).isNominal()) {
 	  currVal = findSplitNominal(i);
 	} else {
 	  currVal = findSplitNumeric(i);
@@ -107,14 +107,14 @@ public class DecisionStump extends DistributionClassifier
     m_AttIndex = bestAtt;
     m_SplitPoint = bestPoint;
     m_Distribution = bestDist;
-    if (theInstances.classAttribute().isNominal()) {
+    if (m_Instances.classAttribute().isNominal()) {
       for (int i = 0; i < m_Distribution.length; i++) {
 	Utils.normalize(m_Distribution[i]);
       }
     }
     
     // Save memory
-    theInstances = new Instances(theInstances, 0);
+    m_Instances = new Instances(m_Instances, 0);
   }
 
   /**
@@ -136,7 +136,7 @@ public class DecisionStump extends DistributionClassifier
    */
   public String toString(){
 
-    if (theInstances == null) {
+    if (m_Instances == null) {
       return "Decision Stump: No model built yet.";
     }
     try {
@@ -144,7 +144,7 @@ public class DecisionStump extends DistributionClassifier
       
       text.append("Decision Stump\n\n");
       text.append("Classifications\n\n");
-      Attribute att = theInstances.attribute(m_AttIndex);
+      Attribute att = m_Instances.attribute(m_AttIndex);
       if (att.isNominal()) {
 	text.append(att.name() + " = " + att.value((int)m_SplitPoint) + 
 		    " : ");
@@ -161,7 +161,7 @@ public class DecisionStump extends DistributionClassifier
       text.append(att.name() + " is missing : ");
       text.append(printClass(m_Distribution[2]));
 
-      if (theInstances.classAttribute().isNominal()) {
+      if (m_Instances.classAttribute().isNominal()) {
 	text.append("\nClass distributions\n\n");
 	if (att.isNominal()) {
 	  text.append(att.name() + " = " + att.value((int)m_SplitPoint) + 
@@ -197,12 +197,12 @@ public class DecisionStump extends DistributionClassifier
 
     StringBuffer text = new StringBuffer();
     
-    if (theInstances.classAttribute().isNominal()) {
-      for (int i = 0; i < theInstances.numClasses(); i++) {
-	text.append(theInstances.classAttribute().value(i) + "\t");
+    if (m_Instances.classAttribute().isNominal()) {
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
+	text.append(m_Instances.classAttribute().value(i) + "\t");
       }
       text.append("\n");
-      for (int i = 0; i < theInstances.numClasses(); i++) {
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
 	text.append(dist[i] + "\t");
       }
       text.append("\n");
@@ -222,8 +222,8 @@ public class DecisionStump extends DistributionClassifier
 
     StringBuffer text = new StringBuffer();
     
-    if (theInstances.classAttribute().isNominal()) {
-      text.append(theInstances.classAttribute().value(Utils.maxIndex(dist)));
+    if (m_Instances.classAttribute().isNominal()) {
+      text.append(m_Instances.classAttribute().value(Utils.maxIndex(dist)));
     } else {
       text.append(dist[0]);
     }
@@ -240,7 +240,7 @@ public class DecisionStump extends DistributionClassifier
    */
   private double findSplitNominal(int index) throws Exception {
 
-    if (theInstances.classAttribute().isNominal()) {
+    if (m_Instances.classAttribute().isNominal()) {
       return findSplitNominalNominal(index);
     } else {
       return findSplitNominalNumeric(index);
@@ -258,18 +258,18 @@ public class DecisionStump extends DistributionClassifier
   private double findSplitNominalNominal(int index) throws Exception {
 
     double bestVal = Double.MAX_VALUE, currVal;
-    double[][] counts = new double[theInstances.attribute(index).numValues() 
-				  + 1][theInstances.numClasses()];
-    double[] sumCounts = new double[theInstances.numClasses()];
-    double[][] bestDist = new double[3][theInstances.numClasses()];
+    double[][] counts = new double[m_Instances.attribute(index).numValues() 
+				  + 1][m_Instances.numClasses()];
+    double[] sumCounts = new double[m_Instances.numClasses()];
+    double[][] bestDist = new double[3][m_Instances.numClasses()];
     int numMissing = 0;
 
     // Compute counts for all the values
-    for (int i = 0; i < theInstances.numInstances(); i++) {
-      Instance inst = theInstances.instance(i);
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      Instance inst = m_Instances.instance(i);
       if (inst.isMissing(index)) {
 	numMissing++;
-	counts[theInstances.attribute(index).numValues()]
+	counts[m_Instances.attribute(index).numValues()]
 	  [(int)inst.classValue()] += inst.weight();
       } else {
 	counts[(int)inst.value(index)][(int)inst.classValue()] += inst
@@ -278,17 +278,17 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Compute sum of counts
-    for (int i = 0; i < theInstances.attribute(index).numValues() + 1; i++) {
-      for (int j = 0; j < theInstances.numClasses(); j++) {
+    for (int i = 0; i < m_Instances.attribute(index).numValues() + 1; i++) {
+      for (int j = 0; j < m_Instances.numClasses(); j++) {
 	sumCounts[j] += counts[i][j];
       }
     }
     
     // Make split counts for each possible split and evaluate
-    System.arraycopy(counts[theInstances.attribute(index).numValues()], 0,
-		     m_Distribution[2], 0, theInstances.numClasses());
-    for (int i = 0; i < theInstances.attribute(index).numValues(); i++) {
-      for (int j = 0; j < theInstances.numClasses(); j++) {
+    System.arraycopy(counts[m_Instances.attribute(index).numValues()], 0,
+		     m_Distribution[2], 0, m_Instances.numClasses());
+    for (int i = 0; i < m_Instances.attribute(index).numValues(); i++) {
+      for (int j = 0; j < m_Instances.numClasses(); j++) {
 	m_Distribution[0][j] = counts[i][j];
 	m_Distribution[1][j] = sumCounts[j] - counts[i][j];
       }
@@ -298,7 +298,7 @@ public class DecisionStump extends DistributionClassifier
 	m_SplitPoint = (double)i;
 	for (int j = 0; j < 3; j++) {
 	  System.arraycopy(m_Distribution[j], 0, bestDist[j], 0, 
-			   theInstances.numClasses());
+			   m_Instances.numClasses());
 	}
       }
     }
@@ -306,7 +306,7 @@ public class DecisionStump extends DistributionClassifier
     // No missing values in training data.
     if (numMissing == 0) {
       System.arraycopy(sumCounts, 0, bestDist[2], 0, 
-		       theInstances.numClasses());
+		       m_Instances.numClasses());
     }
    
     m_Distribution = bestDist;
@@ -325,17 +325,17 @@ public class DecisionStump extends DistributionClassifier
 
     double bestVal = Double.MAX_VALUE, currVal;
     double[] sumsSquaresPerValue = 
-      new double[theInstances.attribute(index).numValues()], 
-      sumsPerValue = new double[theInstances.attribute(index).numValues()], 
-      weightsPerValue = new double[theInstances.attribute(index).numValues()];
+      new double[m_Instances.attribute(index).numValues()], 
+      sumsPerValue = new double[m_Instances.attribute(index).numValues()], 
+      weightsPerValue = new double[m_Instances.attribute(index).numValues()];
     double totalSumSquaresW = 0, totalSumW = 0, totalSumOfWeightsW = 0,
       totalSumOfWeights = 0, totalSum = 0;
     double[] sumsSquares = new double[3], sumOfWeights = new double[3];
     double[][] bestDist = new double[3][1];
 
     // Compute counts for all the values
-    for (int i = 0; i < theInstances.numInstances(); i++) {
-      Instance inst = theInstances.instance(i);
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      Instance inst = m_Instances.instance(i);
       if (inst.isMissing(index)) {
 	m_Distribution[2][0] += inst.classValue() * inst.weight();
 	sumsSquares[2] += inst.classValue() * inst.classValue() 
@@ -358,14 +358,14 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Compute sum of counts without missing ones
-    for (int i = 0; i < theInstances.attribute(index).numValues(); i++) {
+    for (int i = 0; i < m_Instances.attribute(index).numValues(); i++) {
       totalSumOfWeightsW += weightsPerValue[i];
       totalSumSquaresW += sumsSquaresPerValue[i];
       totalSumW += sumsPerValue[i];
     }
     
     // Make split counts for each possible split and evaluate
-    for (int i = 0; i < theInstances.attribute(index).numValues(); i++) {
+    for (int i = 0; i < m_Instances.attribute(index).numValues(); i++) {
       
       m_Distribution[0][0] = sumsPerValue[i];
       sumsSquares[0] = sumsSquaresPerValue[i];
@@ -402,7 +402,7 @@ public class DecisionStump extends DistributionClassifier
    */
   private double findSplitNumeric(int index) throws Exception {
 
-    if (theInstances.classAttribute().isNominal()) {
+    if (m_Instances.classAttribute().isNominal()) {
       return findSplitNumericNominal(index);
     } else {
       return findSplitNumericNumeric(index);
@@ -421,12 +421,12 @@ public class DecisionStump extends DistributionClassifier
 
     double bestVal = Double.MAX_VALUE, currVal, currCutPoint;
     int numMissing = 0;
-    double[] sum = new double[theInstances.numClasses()];
-    double[][] bestDist = new double[3][theInstances.numClasses()];
+    double[] sum = new double[m_Instances.numClasses()];
+    double[][] bestDist = new double[3][m_Instances.numClasses()];
 
     // Compute counts for all the values
-    for (int i = 0; i < theInstances.numInstances(); i++) {
-      Instance inst = theInstances.instance(i);
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      Instance inst = m_Instances.instance(i);
       if (!inst.isMissing(index)) {
 	m_Distribution[1][(int)inst.classValue()] += inst.weight();
       } else {
@@ -434,15 +434,15 @@ public class DecisionStump extends DistributionClassifier
 	numMissing++;
       }
     }
-    System.arraycopy(m_Distribution[1], 0, sum, 0, theInstances.numClasses());
+    System.arraycopy(m_Distribution[1], 0, sum, 0, m_Instances.numClasses());
 
     // Sort instances
-    theInstances.sort(index);
+    m_Instances.sort(index);
     
     // Make split counts for each possible split and evaluate
-    for (int i = 0; i < theInstances.numInstances() - (numMissing + 1); i++) {
-      Instance inst = theInstances.instance(i);
-      Instance instPlusOne = theInstances.instance(i + 1);
+    for (int i = 0; i < m_Instances.numInstances() - (numMissing + 1); i++) {
+      Instance inst = m_Instances.instance(i);
+      Instance instPlusOne = m_Instances.instance(i + 1);
       m_Distribution[0][(int)inst.classValue()] += inst.weight();
       m_Distribution[1][(int)inst.classValue()] -= inst.weight();
       if (Utils.sm(inst.value(index), instPlusOne.value(index))) {
@@ -453,7 +453,7 @@ public class DecisionStump extends DistributionClassifier
 	  bestVal = currVal;
 	  for (int j = 0; j < 3; j++) {
 	    System.arraycopy(m_Distribution[j], 0, bestDist[j], 0, 
-			     theInstances.numClasses());
+			     m_Instances.numClasses());
 	  }
 	}
       }
@@ -461,7 +461,7 @@ public class DecisionStump extends DistributionClassifier
 
     // No missing values in training data.
     if (numMissing == 0) {
-      System.arraycopy(sum, 0, bestDist[2], 0, theInstances.numClasses());
+      System.arraycopy(sum, 0, bestDist[2], 0, m_Instances.numClasses());
     }
  
     m_Distribution = bestDist;
@@ -485,8 +485,8 @@ public class DecisionStump extends DistributionClassifier
     double totalSum = 0, totalSumOfWeights = 0;
 
     // Compute counts for all the values
-    for (int i = 0; i < theInstances.numInstances(); i++) {
-      Instance inst = theInstances.instance(i);
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      Instance inst = m_Instances.instance(i);
       if (!inst.isMissing(index)) {
 	m_Distribution[1][0] += inst.classValue() * inst.weight();
 	sumsSquares[1] += inst.classValue() * inst.classValue() 
@@ -509,12 +509,12 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Sort instances
-    theInstances.sort(index);
+    m_Instances.sort(index);
     
     // Make split counts for each possible split and evaluate
-    for (int i = 0; i < theInstances.numInstances() - (numMissing + 1); i++) {
-      Instance inst = theInstances.instance(i);
-      Instance instPlusOne = theInstances.instance(i + 1);
+    for (int i = 0; i < m_Instances.numInstances() - (numMissing + 1); i++) {
+      Instance inst = m_Instances.instance(i);
+      Instance instPlusOne = m_Instances.instance(i + 1);
       m_Distribution[0][0] += inst.classValue() * inst.weight();
       sumsSquares[0] += inst.classValue() * inst.classValue() * inst.weight();
       sumOfWeights[0] += inst.weight();

@@ -31,7 +31,7 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
 */
 public class Prism extends Classifier {
 
@@ -43,7 +43,7 @@ public class Prism extends Classifier {
     /** The classification */
     private int m_classification;
 
-    /** The instances */
+    /** The instance */
     private Instances m_instances;
 
     /** First test of this rule */
@@ -245,7 +245,7 @@ public class Prism extends Classifier {
   public void buildClassifier(Instances data) throws Exception {
 
     int cl; // possible value of theClass
-    Instances E, ruleE;
+    Instances E, ruleE, emptyDataset;
     PrismRule rule = null;
     Test test = null, oldTest = null;
     int bestCorrect, bestCovers, attUsed;
@@ -275,10 +275,11 @@ public class Prism extends Classifier {
     if (data.numInstances() == 0) {
       throw new Exception("No instances with a class value!");
     }
+    emptyDataset = new Instances(data, 0);
     for (cl = 0; cl < data.numClasses(); cl++) { // for each class cl
       E = data; // initialize E to the instance set
       while (contains(E, cl)) { // while E contains examples in class cl
-        rule = addRule(rule, new PrismRule(E, cl)); // make a new rule
+        rule = addRule(rule, new PrismRule(emptyDataset, cl)); // make a new rule
         ruleE = E; // examples covered by this rule
         while (rule.m_errors != 0) { // until the rule is perfect
           test = new Test(); // make a new test

@@ -27,7 +27,7 @@ import weka.core.*;
  * (for a numeric class) or the mode (for a nominal class).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ZeroR extends DistributionClassifier 
   implements WeightedInstancesHandler {
@@ -38,8 +38,8 @@ public class ZeroR extends DistributionClassifier
   /** The number of instances in each class (null if class numeric). */
   private double [] m_Counts;
   
-  /** The instances used for "training". */
-  private Instances m_Instances;
+  /** The class attribute. */
+  private Attribute m_Class;
 
   /**
    * Generates the classifier.
@@ -49,7 +49,7 @@ public class ZeroR extends DistributionClassifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    m_Instances = instances;
+    m_Class = instances.classAttribute();
     m_ClassValue = 0;
     switch (instances.classAttribute().type()) {
     case Attribute.NUMERIC:
@@ -123,15 +123,13 @@ public class ZeroR extends DistributionClassifier
    */
   public String toString() {
 
-    try { 
-      if (m_Counts == null) {
-	return "ZeroR predicts class value: " + m_ClassValue;
-      } else {
-	return "ZeroR predicts class value: " +
-	  m_Instances.classAttribute().value((int) m_ClassValue);
-      }
-    } catch (Exception e) {
-      return "Can't print classifier!";
+    if (m_Class ==  null) {
+      return "ZeroR: No model built yet.";
+    }
+    if (m_Counts == null) {
+      return "ZeroR predicts class value: " + m_ClassValue;
+    } else {
+      return "ZeroR predicts class value: " + m_Class.value((int) m_ClassValue);
     }
   }
 
