@@ -2,7 +2,7 @@
  * Copyright 2001 Malcolm Ware. 
  */
 
-package weka.classifiers.nn;
+package weka.classifiers.neural;
 
 import java.util.Random;
 import junit.framework.Test;
@@ -20,7 +20,7 @@ import weka.classifiers.*;
  * java weka.classifiers.nn.NeuralNetworkTest
  *
  * @author <a href="mailto:mfw4@cs.waikato.ac.nz">Malcolm Ware</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NeuralNetworkTest extends AbstractClassifierTest {
 
