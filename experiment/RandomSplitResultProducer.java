@@ -42,7 +42,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 
 public class RandomSplitResultProducer 
@@ -275,16 +275,67 @@ public class RandomSplitResultProducer
     key[1] = "" + run;
     System.arraycopy(seKey, 0, key, 2, seKey.length);
     if (m_ResultListener.isResultRequired(this, key)) {
+
       // Randomize on a copy of the original dataset
       Instances runInstances = new Instances(m_Instances);
+
+      Instances train;
+      Instances test;
+
       if (m_randomize) {
 	runInstances.randomize(new Random(run));
       }
+      if (m_randomize && runInstances.classAttribute().isNominal()) {
 
-      int trainSize = Utils.round(runInstances.numInstances() * m_TrainPercent / 100);
-      int testSize = runInstances.numInstances() - trainSize;
-      Instances train = new Instances(runInstances, 0, trainSize);
-      Instances test = new Instances(runInstances, trainSize, testSize);
+	// stratify the train and test sets
+
+	int numClasses = runInstances.numClasses();
+
+	// create the subsets
+	Instances[] subsets = new Instances[numClasses + 1];
+	for (int i=0; i<numClasses+1; i++) {
+	  subsets[i] = new Instances(runInstances, 10);
+	}
+	
+	// divide instances into subsets
+	Enumeration e = runInstances.enumerateInstances();
+	while(e.hasMoreElements()) {
+	  Instance inst = (Instance) e.nextElement();
+	  if (inst.classIsMissing()) {
+	    subsets[numClasses].add(inst);
+	  } else {
+	    subsets[(int) inst.classValue()].add(inst);
+	  }
+	}
+
+	// merge into train and test sets
+	int trainSize = Utils.round(runInstances.numInstances() * m_TrainPercent / 100);
+	int testSize = runInstances.numInstances() - trainSize;
+	train = new Instances(runInstances, trainSize);
+	test = new Instances(runInstances, testSize);
+	for (int i=0; i<numClasses+1; i++) {
+	  trainSize = Utils.round(subsets[i].numInstances() * m_TrainPercent / 100);
+	  for (int j=0; j<trainSize; j++) {
+	    train.add(subsets[i].instance(j));
+	  }
+	  for (int j=trainSize; j<subsets[i].numInstances(); j++) {
+	    test.add(subsets[i].instance(j));
+	  }
+	  // free the memory
+	  subsets[i] = null;
+	}
+
+	// randomize the final sets
+	train.randomize(new Random(run));
+	test.randomize(new Random(run));
+
+      } else {
+
+	int trainSize = Utils.round(runInstances.numInstances() * m_TrainPercent / 100);
+	int testSize = runInstances.numInstances() - trainSize;
+	train = new Instances(runInstances, 0, trainSize);
+	test = new Instances(runInstances, trainSize, testSize);
+      }
       try {
 	Object [] seResults = m_SplitEvaluator.getResult(train, test);
 	Object [] results = new Object [seResults.length + 1];
