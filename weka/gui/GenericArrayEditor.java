@@ -52,7 +52,7 @@ import javax.swing.JOptionPane;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -240,7 +240,7 @@ public class GenericArrayEditor extends JPanel
   private void updateEditorType(Object o) {
 
     // Determine if the current object is an array
-    m_ElementEditor = null;
+    m_ElementEditor = null; m_ListModel = null;
     removeAll();
     if ((o != null) && (o.getClass().isArray())) {
       Class elementClass = o.getClass().getComponentType();    

@@ -64,7 +64,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -551,6 +551,8 @@ public class GenericObjectEditor implements PropertyEditor {
    */
   private void setObject(Object c) {
 
+    // This should really call equals() for comparison.
+    boolean trueChange = (c != getValue());
     /*
     System.err.println("Didn't even try to make a Object copy!! "
 		       + "(using original)");
@@ -560,7 +562,9 @@ public class GenericObjectEditor implements PropertyEditor {
 
     if (m_EditorComponent != null) {
       m_EditorComponent.updateChildPropertySheet();
-      m_Support.firePropertyChange("", null, null);
+      if (trueChange) {
+	m_Support.firePropertyChange("", null, null);
+      }
     }
   }
 
