@@ -90,7 +90,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -984,6 +984,7 @@ public class VisualizePanel extends JPanel {
       }
       m_xIndex = x;
       m_plot2D.setXindex(x);
+      m_attrib.setX(x);
       //      this.repaint();
     }
     
@@ -1000,6 +1001,7 @@ public class VisualizePanel extends JPanel {
       }
       m_yIndex = y;
       m_plot2D.setYindex(y);
+      m_attrib.setY(y);
       //      this.repaint();
     }
 
