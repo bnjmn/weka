@@ -49,7 +49,7 @@ import  weka.core.*;
  * be performed if the test file is missing.
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.6 $
+ * @version  $Revision: 1.7 $
  */
 public class ClusterEvaluation {
 
@@ -182,7 +182,7 @@ public class ClusterEvaluation {
       instanceStats[cnum]++;
     }
 
-    // count the actual number of used clusters
+    /* // count the actual number of used clusters
     int count = 0;
     for (i = 0; i < cc; i++) {
       if (instanceStats[i] > 0) {
@@ -205,22 +205,24 @@ public class ClusterEvaluation {
       for (i=0;i<m_clusterAssignments.length;i++) {
 	m_clusterAssignments[i] = map[(int)m_clusterAssignments[i]];
       }
-    }
+      } */ 
 
     double sum = Utils.sum(instanceStats);
     loglk /= sum;
     m_clusteringResults.append("Cluster Instances\n");
     int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
     for (i = 0; i < cc; i++) {
-      m_clusteringResults.append(Utils.doubleToString((double)i, 
-						      clustFieldWidth, 0) 
-				 + "      " 
-				 + Utils.doubleToString(instanceStats[i],
-							numInstFieldWidth, 0) 
-				 + " (" 
-				 + Utils.doubleToString((instanceStats[i] / 
-							 sum * 100.0)
-							, 3, 0) + "%)\n");
+      if (instanceStats[i] > 0) {
+	m_clusteringResults.append(Utils.doubleToString((double)i, 
+							clustFieldWidth, 0) 
+				   + "      " 
+				   + Utils.doubleToString(instanceStats[i],
+							  numInstFieldWidth, 0) 
+				   + " (" 
+				   + Utils.doubleToString((instanceStats[i] / 
+							   sum * 100.0)
+							  , 3, 0) + "%)\n");
+      }
     }
     
     if (m_Clusterer instanceof DistributionClusterer) {
