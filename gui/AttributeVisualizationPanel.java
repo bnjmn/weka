@@ -65,7 +65,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -310,13 +310,19 @@ public class AttributeVisualizationPanel extends JPanel {
     public void run() {
       synchronized (m_locker) {
 	if(m_data.attribute(classIndex).isNominal()) {
-	  int tempVal = AttributeVisualizationPanel.this.getWidth()-4;
-	  if (tempVal < 1) {
-	    tempVal = 1;
+
+	  int intervals = as.totalCount>10 ? 
+	                  (int)(as.totalCount*0.1):(int)as.totalCount;  //At the time of this coding the
+	                                                //possibility of datasets with zero instances 
+	                                                //was being dealt with in the 
+	                                                //PreProcessPanel of weka Explorer.
+	                                       
+	  if(intervals > AttributeVisualizationPanel.this.getWidth()) {
+	      intervals = AttributeVisualizationPanel.this.getWidth()-4;
+	      if(intervals<1)
+		  intervals = 1;
 	  }
-	  int histClassCounts[][]  = (AttributeVisualizationPanel.this.getWidth()<(int)(as.totalCount*0.1)) ?
-	    new int[tempVal][m_data.attribute(classIndex).numValues()+1] : 
-	    new int[(int)(as.totalCount*0.1)][m_data.attribute(classIndex).numValues()+1];
+	  int histClassCounts[][]  = new int[intervals][m_data.attribute(classIndex).numValues()+1];
 	  double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histClassCounts.length;
 	  double currentBar = as.numericStats.min; // + barRange;
 	  maxValue = 0;
@@ -357,15 +363,15 @@ public class AttributeVisualizationPanel extends JPanel {
 	      }
 	    }
 	    catch(ArrayIndexOutOfBoundsException ae) { 
-	      System.out.println("t:"+(t)+
-				 " barRange:"+barRange+
-				 " histLength:"+histClassCounts.length+
-				 " value:"+m_data.instance(k).value(attribIndex)+
-				 " min:"+as.numericStats.min+
-				 " sumResult:"+(m_data.instance(k).value(attribIndex)-as.numericStats.min)+
-				 " divideResult:"+(float)((m_data.instance(k).value(attribIndex)-as.numericStats.min)/barRange)+
-				 " finalResult:"+
-				 Math.ceil((float)((m_data.instance(k).value(attribIndex)-as.numericStats.min)/barRange)) ); }
+	    	System.out.println("t:"+(t)+
+	    			 " barRange:"+barRange+
+	    			 " histLength:"+histClassCounts.length+
+	    			 " value:"+m_data.instance(k).value(attribIndex)+
+	    			 " min:"+as.numericStats.min+
+	    			 " sumResult:"+(m_data.instance(k).value(attribIndex)-as.numericStats.min)+
+	    			 " divideResult:"+(float)((m_data.instance(k).value(attribIndex)-as.numericStats.min)/barRange)+
+	    			 " finalResult:"+
+	    			 Math.ceil((float)((m_data.instance(k).value(attribIndex)-as.numericStats.min)/barRange)) ); }
 	  }
 	  for(int i=0; i<histClassCounts.length; i++) {
 	    int sum=0;
@@ -379,12 +385,20 @@ public class AttributeVisualizationPanel extends JPanel {
 	  
 	}
 	else { //else if the class attribute is numeric
-	  int tempVal = AttributeVisualizationPanel.this.getWidth()-4;
-	  if (tempVal < 1) {
-	    tempVal = 1;
+
+	  int intervals =  as.totalCount>10 ? 
+	                  (int)(as.totalCount*0.1):(int)as.totalCount;//At the time of this coding the
+	                                       //possibility of datasets with zero instances 
+	                                       //was being dealt with in the 
+	                                       //PreProcessPanel of weka Explorer.
+
+	  if(intervals > AttributeVisualizationPanel.this.getWidth()) {
+	      intervals = AttributeVisualizationPanel.this.getWidth()-4;
+	      if(intervals<1)
+		  intervals = 1;
 	  }
-	  int histCounts[]  = (AttributeVisualizationPanel.this.getWidth()<(int)(as.totalCount*0.1)) ?
-	    new int[tempVal] : new int[(int)(as.totalCount*0.1)];
+
+	  int histCounts[]  = new int[intervals];
 	  double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histCounts.length;
 	  double currentBar = as.numericStats.min; // + barRange;
 	  maxValue = 0;
@@ -641,7 +655,7 @@ public class AttributeVisualizationPanel extends JPanel {
 		int sum = 0;
 		for(int j=0; j<histBarClassCounts[i].length; j++) {
 		  y = y-Math.round(histBarClassCounts[i][j]*heightRatio);
-				//System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+" height:"+(histBarCounts[i]*heightRatio));
+		  //System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+" height:"+(histBarClassCounts[i][j]*heightRatio));
 		  g.setColor( (Color)m_colorList.elementAt(j) );
 		  if(barWidth>1)
 		    g.fillRect(x, y, barWidth, Math.round(histBarClassCounts[i][j]*heightRatio));
