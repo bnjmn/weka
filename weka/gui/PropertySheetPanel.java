@@ -32,6 +32,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
+import java.awt.Dimension;
 import java.beans.Customizer;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
@@ -65,7 +66,7 @@ import javax.swing.JScrollPane;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -167,6 +168,9 @@ public class PropertySheetPanel extends JPanel
       return;
     }
 
+    int rowHeight = 12;
+    JTextArea jt = new JTextArea();
+    JScrollPane js = null;
     // Look for a globalInfo method that returns a string
     // describing the target
     for (int i = 0;i < m_Methods.length; i++) {
@@ -176,7 +180,7 @@ public class PropertySheetPanel extends JPanel
 	if (meth.getReturnType().equals(String.class)) {
 	  try {
 	    Object args[] = { };
-	    final String globalInfo = (String)(meth.invoke(m_Target, args));
+	    String globalInfo = (String)(meth.invoke(m_Target, args));
 	    final String className = targ.getClass().getName();
 	    /*	    m_globalAboutBut = new JButton("About");
 	    m_globalAboutBut.setToolTipText("Click for information about "
@@ -189,21 +193,35 @@ public class PropertySheetPanel extends JPanel
 		}
 	      });
 	    */
-	    JTextArea jt = new JTextArea();
+
 	    jt.setFont(new Font("SansSerif", Font.PLAIN,12));
 	    jt.setEditable(false);
+	    jt.setLineWrap(true);
+	    jt.setWrapStyleWord(true);
 	    jt.setText(globalInfo);
+	    rowHeight = 12;
 	    JPanel jp = new JPanel();
 	    jp.setBorder(BorderFactory.createCompoundBorder(
 			 BorderFactory.createTitledBorder("About"),
 			 BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		 ));
 	    jp.setLayout(new BorderLayout());
-	    jp.add(jt);
+	    js = new JScrollPane();
+	    //js.setLayout(new BorderLayout());
+	    js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	    js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+	    
+	    js.setViewportView(jt);
+	    Dimension d = jt.getPreferredScrollableViewportSize();
+	    js.setMinimumSize(new Dimension(300, d.height));
+	    js.setPreferredSize(new Dimension(300, d.height));
+
+
+	    jp.add(js,BorderLayout.CENTER);
 	    GridBagConstraints gbConstraints = new GridBagConstraints();
 	    //	    gbConstraints.anchor = GridBagConstraints.EAST;
 	    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-	    gbConstraints.gridy = 0;     gbConstraints.gridx = 0;
+	    //	    gbConstraints.gridy = 0;     gbConstraints.gridx = 0;
 	    gbConstraints.gridwidth = 2;
 	    gbConstraints.insets = new Insets(0,5,0,5);
 	    gbLayout.setConstraints(jp, gbConstraints);
@@ -297,7 +315,17 @@ public class PropertySheetPanel extends JPanel
 	  if (mname.startsWith(name)) {
 	    if (meth.getReturnType().equals(String.class)) {
 	      try {
-		m_TipTexts[i] = (String)(meth.invoke(m_Target, args));
+		String tempTip = (String)(meth.invoke(m_Target, args));
+		int ci = tempTip.indexOf('.');
+		if (ci < 0) {
+		  m_TipTexts[i] = tempTip;
+		} else {
+		  m_TipTexts[i] = tempTip.substring(0,ci);
+		  String info = jt.getText();
+		  info += "\n"+name+" : \n"
+		    +tempTip.substring(0,tempTip.length())+"\n";
+		  jt.setText(info);
+		}
 	      } catch (Exception ex) {
 
 	      }
@@ -306,6 +334,7 @@ public class PropertySheetPanel extends JPanel
 	  }
 	}	  
 
+	
 	// Now figure out how to display it...
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
@@ -360,9 +389,21 @@ public class PropertySheetPanel extends JPanel
       add(newPanel);
       m_NumEditable ++;
     }
+    if (js != null) {
+      Dimension d = jt.getPreferredScrollableViewportSize();
+      if (d.height > (10*rowHeight)) {
+	js.setMinimumSize(new Dimension(d.width, (10*rowHeight)));
+	js.setPreferredSize(new Dimension(d.width, (10*rowHeight)));
+      }
+    }
     if (m_NumEditable == 0) {
       JLabel empty = new JLabel("No editable properties");
       empty.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
+      GridBagConstraints gbConstraints = new GridBagConstraints();
+      gbConstraints.anchor = GridBagConstraints.EAST;
+      gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+      gbConstraints.gridy = componentOffset;     gbConstraints.gridx = 0;
+      gbLayout.setConstraints(empty, gbConstraints);
       add(empty);
     }
 
