@@ -84,7 +84,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -323,8 +323,10 @@ public class AttributeSelectionPanel extends JPanel {
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(2, 1));
     buttons.add(m_ClassCombo);
+    m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
-    ssButs.setLayout(new GridLayout(1, 2));
+    ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
     buttons.add(ssButs);

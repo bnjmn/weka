@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
 */
 public class Instances implements Serializable {
  
@@ -207,88 +207,6 @@ public class Instances implements Serializable {
     m_Instances.addElement(newInstance);
   }
 
-  /** 
-   * Changes the dataset to reflect a given set of costs.
-   * Sets the weights of instances according to a misclassification
-   * cost matrix, or does resampling according to the cost matrix (if
-   * a random number generator is provided). Returns a new dataset.
-   *
-   * @param matrix the matrix containing the misclassification costs
-   * @param random a random number generator 
-   * @return the new dataset
-   * @exception Exception if the cost matrix does not have the right
-   * format 
-   */
-  public Instances applyCostMatrix(double[][] weights, Random random) 
-       throws Exception {
-
-    double sumOfWeightFactors = 0, sumOfMissClassWeights,
-      sumOfWeights;
-    double [] weightOfInstancesInClass, weightFactor, weightOfInstances;
-    Instances newData;
-
-    if (m_ClassIndex < 0) {
-      throw new Exception("Class index is not set!");
-    }
-    if (weights.length != numClasses()) {
-      throw new Exception("Misclassification cost matrix has "+
-			  "wrong format!");
-    }
-    weightFactor = new double [numClasses()];
-    weightOfInstancesInClass = new double [numClasses()];
-    for (int j = 0; j < numInstances(); j++) {
-      weightOfInstancesInClass[(int)instance(j).classValue()] += 
-	instance(j).weight();
-    }
-    sumOfWeights = Utils.sum(weightOfInstancesInClass);
-    for (int i = 0; i < numClasses(); i++) {
-      if (weights[i].length != numClasses()) {
-	throw new Exception("Misclassification cost matrix has "+
-			    "wrong format!");
-      }
-      if (!Utils.eq(weights[i][i],0)) {
-	throw new Exception("Diagonal of misclassification cost "+
-			    "matrix not zero!");
-      }
-
-      // Using Kai Ming Ting's formula for deriving weights for 
-      // the classes and Breiman's heuristic for multiclass 
-      // problems.
-      sumOfMissClassWeights = 0;
-      for (int j = 0; j < numClasses(); j++) {
-	if (Utils.sm(weights[i][j],0)) {
-	  throw new Exception("Neg. weights in misclassification "+
-			      "cost matrix!"); 
-	}
-	sumOfMissClassWeights += weights[i][j];
-      }
-      weightFactor[i] = sumOfMissClassWeights * sumOfWeights;
-      sumOfWeightFactors += sumOfMissClassWeights * 
-	weightOfInstancesInClass[i];
-    }
-    for (int i = 0; i < numClasses(); i++) {
-      weightFactor[i] /= sumOfWeightFactors;
-    }
-    
-    // Store new weights
-    weightOfInstances = new double[numInstances()];
-    for (int i = 0; i < numInstances(); i++) {
-      weightOfInstances[i] =instance(i).weight()*
-	weightFactor[(int)instance(i).classValue()];
-    } 
-
-    // Change instances weight or do resampling
-    if (random != null) {
-      return resampleWithWeights(random, weightOfInstances);
-    } else { 
-      Instances instances = new Instances(this);
-      for (int i = 0; i < numInstances(); i++) {
-	instances.instance(i).setWeight(weightOfInstances[i]);
-      }
-      return instances;
-    }
-  }
-
   /**
    * Returns an attribute.
    *
@@ -376,7 +294,7 @@ public class Instances implements Serializable {
   public final Attribute classAttribute() throws Exception {
 
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negativ (not set)!");
+      throw new Exception("Class index is negative (not set)!");
     }
     return attribute(m_ClassIndex);
   }
@@ -501,7 +419,7 @@ public class Instances implements Serializable {
   public final void deleteWithMissingClass() throws Exception {
 
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negativ (not set)!");
+      throw new Exception("Class index is negative (not set)!");
     }
     deleteWithMissing(m_ClassIndex);
   }
@@ -687,7 +605,7 @@ public class Instances implements Serializable {
   public final int numClasses() throws Exception {
     
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negativ (not set)!");
+      throw new Exception("Class index is negative (not set)!");
     }
     if (!classAttribute().isNominal()) {
       return 1;
@@ -761,106 +679,6 @@ public class Instances implements Serializable {
 
     for (int j = numInstances() - 1; j > 0; j--)
       swap(j,(int)(random.nextDouble()*(double)j));
-  }
-
-  /**
-   * Reads misclassification cost matrix from given reader. 
-   * Each line has to contain three numbers: the index of the true 
-   * class, the index of the incorrectly assigned class, and the 
-   * weight, separated by white space characters. Comments can be 
-   * appended to the end of a line by using the '%' character.
-   *
-   * @param reader the reader from which the cost 
-   * matrix is to be read
-   * @return the matrix containing the misclassification costs
-   * @exception Exception if the cost matrix does not have the 
-   * right format or the class is not set
-   */
-  public final double[][] readCostMatrix(Reader reader) 
-       throws Exception {
-
-    StreamTokenizer tokenizer;
-    double [][] costMatrix = 
-      new double [numClasses()][numClasses()];
-    int currentToken;
-    double firstIndex, secondIndex, weight;
-
-    tokenizer = new StreamTokenizer(reader);
-    if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negativ (not set)!");
-    }
-    for (int i = 0; i < numClasses(); i++) {
-      for (int j = 0; j < numClasses(); j++) {
-	if (i != j) costMatrix[i][j] = 1.0;
-      }
-    }
-    tokenizer.commentChar('%');
-    tokenizer.eolIsSignificant(true);
-    while (StreamTokenizer.TT_EOF != 
-	   (currentToken = tokenizer.nextToken())) {
-
-      // Skip empty lines 
-      if (currentToken == StreamTokenizer.TT_EOL) {
-	continue;
-      }
-
-      // Get index of first class.
-      if (currentToken != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("Only numbers and comments allowed "+
-			    "in cost file!");
-      }
-      firstIndex = tokenizer.nval;
-      if (!Utils.eq((double)(int)firstIndex,firstIndex)) {
-	throw new Exception("First number in line has to be "+
-			    "index of a class!");
-      }
-      if ((int)firstIndex >= numClasses()) {
-	throw new Exception("Class index out of range!");
-      }
-
-      // Get index of second class.
-      if (StreamTokenizer.TT_EOF == 
-	  (currentToken = tokenizer.nextToken())) {
-	throw new Exception("Premature end of file!");
-      }
-      if (currentToken == StreamTokenizer.TT_EOL) {
-	throw new Exception("Premature end of line!");
-      }
-      if (currentToken != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("Only numbers and comments allowed "+
-			    "in cost file!");
-      }
-      secondIndex = tokenizer.nval;
-      if (!Utils.eq((double)(int)secondIndex,secondIndex)) {
-	throw new Exception("Second number in line has to be "+
-			    "index of a class!");
-      }
-      if ((int)secondIndex >= numClasses()) {
-	throw new Exception("Class index out of range!");
-      }
-      if ((int)secondIndex == (int)firstIndex) {
-	throw new Exception("Diagonal of cost matrix non-zero!");
-      }
-
-      // Get cost factor.
-      if (StreamTokenizer.TT_EOF == 
-	  (currentToken = tokenizer.nextToken())) {
-	throw new Exception("Premature end of file!");
-      }
-      if (currentToken == StreamTokenizer.TT_EOL) {
-	throw new Exception("Premature end of line!");
-      }
-      if (currentToken != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("Only numbers and comments allowed "+
-			    "in cost file!");
-      }
-      weight = tokenizer.nval;
-      if (!Utils.gr(weight,0)) {
-	throw new Exception("Only positive weights allowed!");
-      }
-      costMatrix[(int)firstIndex][(int)secondIndex] = weight;
-    }
-    return costMatrix;
   }
 
   /**
@@ -1434,13 +1252,6 @@ public class Instances implements Serializable {
     for (int i = 0; i < numAttributes(); i++) {
       Attribute a = attribute(i);
       AttributeStats as = attributeStats(i);
-      if (a.isNominal()) {
-	for (int j = 0; j < as.distinctCount; j++) {
-	  System.err.println("" + (j + 1) + ": " + as.nominalCounts[j]);
-	}
-      } else if (a.isNumeric()) {
-	System.err.println(as.numericStats.toString());
-      }
       result.append(Utils.padLeft("" + (i + 1), 4)).append(' ');
       result.append(Utils.padRight(a.name(), 25)).append(' ');
       long percent;
@@ -2062,13 +1873,15 @@ public class Instances implements Serializable {
       secondInstances.insertAttributeAt(testAtt, 0);
       System.out.println("\nSet with inserted attribute:\n");
       System.out.println(secondInstances);
-      System.out.println("\nClass name: "+secondInstances.classAttribute().name());
+      System.out.println("\nClass name: "
+			 + secondInstances.classAttribute().name());
       
       // Delete the attribute
       secondInstances.deleteAttributeAt(0);
       System.out.println("\nSet with attribute deleted:\n");
       System.out.println(secondInstances);
-      System.out.println("\nClass name: "+secondInstances.classAttribute().name());
+      System.out.println("\nClass name: "
+			 + secondInstances.classAttribute().name());
       
       // Test if headers are equal
       System.out.println("\nHeaders equal: "+
@@ -2111,7 +1924,8 @@ public class Instances implements Serializable {
       System.out.println(num + " instances from " + (start + 1) 
 			 + ". instance");
       secondInstances = new Instances(instances, start, num);
-      System.out.println("\nClass name: "+secondInstances.classAttribute().name());
+      System.out.println("\nClass name: "
+			 + secondInstances.classAttribute().name());
 
       // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");

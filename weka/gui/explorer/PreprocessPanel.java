@@ -69,7 +69,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -222,7 +222,8 @@ public class PreprocessPanel extends JPanel {
     instInfo.add(m_WorkingInstPanel);
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(1, 5));
+    buttons.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    buttons.setLayout(new GridLayout(1, 5, 5, 5));
     buttons.add(m_OpenFileBut);
     buttons.add(m_OpenURLBut);
     buttons.add(m_ApplyBut);

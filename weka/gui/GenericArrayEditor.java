@@ -69,7 +69,7 @@ import java.io.ObjectInputStream;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -406,9 +406,9 @@ public class GenericArrayEditor extends JPanel
   public void paintValue(java.awt.Graphics gfx, java.awt.Rectangle box) {
 
     FontMetrics fm = gfx.getFontMetrics();
-    int vpad = (box.height - fm.getAscent()) /* /2 */;
+    int vpad = (box.height - fm.getAscent()) / 2;
     String rep = m_ListModel.getSize() + " " + m_ElementClass.getName();
-    gfx.drawString(rep, 2, box.height - vpad);
+    gfx.drawString(rep, 2, fm.getHeight() + vpad);
   }
 
   /**
