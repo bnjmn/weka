@@ -1,6 +1,6 @@
 /*
  *    SaveBuffer.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 2000 Mark Hall
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
