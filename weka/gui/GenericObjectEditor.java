@@ -93,7 +93,7 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class GenericObjectEditor implements PropertyEditor {
     
@@ -539,16 +539,16 @@ public class GenericObjectEditor implements PropertyEditor {
 	    }
 	}
 
-      /**
-       * Enables/disables the cancel button.
-       *
-       * @param flag true to enable cancel button, false
-       * to disable it
-       */
-      protected void setCancelButton(boolean flag) {
-
-	m_cancelBut.setEnabled(flag);
-      }
+	/**
+	 * Enables/disables the cancel button.
+	 *
+	 * @param flag true to enable cancel button, false
+	 * to disable it
+	 */
+	protected void setCancelButton(boolean flag) {
+	    if(m_cancelBut != null)
+		m_cancelBut.setEnabled(flag);
+	}
 	
 	/**
 	 * Opens an object from a file selected by the user.
@@ -627,14 +627,12 @@ public class GenericObjectEditor implements PropertyEditor {
 	    try {
 		SerializedObject so = new SerializedObject(source);
 		result = so.getObject();
-		if (m_EditorComponent != null)
-		  m_EditorComponent.setCancelButton(true);
-
+		setCancelButton(true);
+		
 	    } catch (Exception ex) {
-	      if (m_EditorComponent != null)
-		m_EditorComponent.setCancelButton(false);
+		setCancelButton(false);
 		System.err.println("GenericObjectEditor: Problem making backup object");
-		System.err.print(ex);
+		System.err.println(ex);
 	    }
 	    return result;
 	}
