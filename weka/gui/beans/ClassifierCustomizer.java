@@ -38,7 +38,7 @@ import weka.classifiers.Classifier;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassifierCustomizer extends JPanel
   implements Customizer {
@@ -58,6 +58,9 @@ public class ClassifierCustomizer extends JPanel
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier [].class,
+		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(Object [].class,
 		      weka.gui.GenericArrayEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
