@@ -37,7 +37,7 @@ import  weka.filters.*;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class GainRatioAttributeEval
   extends AttributeEvaluator
@@ -173,7 +173,7 @@ public class GainRatioAttributeEval
     throws Exception
   {
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     m_trainInstances = data;

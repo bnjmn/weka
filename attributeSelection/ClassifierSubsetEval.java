@@ -51,7 +51,7 @@ import weka.filters.AttributeFilter;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -318,7 +318,7 @@ public class ClassifierSubsetEval
     throws Exception
   {
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     m_trainingInstances = data;

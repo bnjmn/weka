@@ -42,7 +42,7 @@ import  weka.filters.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -321,7 +321,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     m_sumOfEigenValues = 0.0;
 
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
     m_trainInstances = data;
 

@@ -40,7 +40,7 @@ import  weka.filters.*;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator
@@ -206,7 +206,7 @@ public class InfoGainAttributeEval
     throws Exception {
     
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
     
     int classIndex = data.classIndex();

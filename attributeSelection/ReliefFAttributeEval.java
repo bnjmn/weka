@@ -68,7 +68,7 @@ import  weka.core.*;
  * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -511,7 +511,7 @@ public class ReliefFAttributeEval
     Random r = new Random(m_seed);
 
     if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
 
     m_trainInstances = data;

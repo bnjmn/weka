@@ -56,7 +56,7 @@ import weka.attributeSelection.*;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class SVMAttributeEval extends AttributeEvaluator 
   implements OptionHandler {
@@ -349,7 +349,7 @@ public class SVMAttributeEval extends AttributeEvaluator
    */
   public void buildEvaluator(Instances data) throws Exception {
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
     } 
 
     if (!data.classAttribute().isNominal()) {
