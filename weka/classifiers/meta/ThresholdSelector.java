@@ -53,9 +53,9 @@ import weka.core.Utils;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
-public class ThresholdSelector extends Classifier 
+public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
 
   /** The evaluation modes */
@@ -373,22 +373,32 @@ public class ThresholdSelector extends Classifier
     return false;
   }
 
+
   /**
-   * Predicts the class value for the given test instance.
+   * Calculates the class membership probabilities for the given test instance.
    *
    * @param instance the instance to be classified
-   * @return the predicted class value
-   * @exception Exception if an error occurred during the prediction
+   * @return predicted class probability distribution
+   * @exception Exception if instance could not be classified
+   * successfully
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double [] distributionForInstance(Instance instance) 
+    throws Exception {
     
-    double prob = 
-      m_Classifier.distributionForInstance(instance)[m_DesignatedClass];
+    double [] pred = m_Classifier.distributionForInstance(instance);
+    double prob = pred[m_DesignatedClass];
+
+    // Warp probability
     if (prob > m_BestThreshold) {
-      return m_DesignatedClass;
+      prob = 0.5 + (prob - m_BestThreshold) / ((1 - m_BestThreshold) * 2);
     } else {
-      return (int) 1 - m_DesignatedClass;
+      prob = prob / (m_BestThreshold * 2);
     }
+
+    // Alter the distribution
+    pred[m_DesignatedClass] = prob;
+    pred[(m_DesignatedClass + 1) % 2] = 1.0 - prob;
+    return pred;
   }
   
   /**
