@@ -7,7 +7,6 @@ SOURCES = \
 	AttributeSelectionPanel.java \
 	AssociationsPanel.java \
 	ClustererPanel.java \
-	VisualizePanel.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../../..
@@ -23,15 +22,12 @@ PACKAGE = weka.gui.explorer
 #----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
-	(cd treevisualizer; make all JAVAC=$(JAVAC))
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
-	(cd treevisualizer; make debug JAVAC=$(JAVAC))
 
 optimized : clean
 	$(JAVAC) -O $(SOURCES)
-	(cd treevisualizer; make optimized JAVAC=$(JAVAC))
 
 fulljar : all
 	(cd $(TOPDIR) ; \
