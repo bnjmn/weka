@@ -54,7 +54,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RaceSearch extends ASSearch implements OptionHandler {
 
@@ -539,6 +539,10 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     }
 
     m_Instances = data;
+    m_Instances.deleteWithMissingClass();
+    if (m_Instances.numInstances() == 0) {
+      throw new Exception("All instances have missing class!");
+    }
     m_theEvaluator = (HoldOutSubsetEvaluator)ASEval;
     m_numAttribs = data.numAttributes();
     m_classIndex = data.classIndex();
