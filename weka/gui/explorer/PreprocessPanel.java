@@ -85,7 +85,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -300,11 +300,12 @@ public class PreprocessPanel extends JPanel {
     attVis.add(m_AttSummaryPanel);
 
     JComboBox colorBox = m_AttVisualizePanel.getColorBox();
-    JButton visAllBut = new JButton("Visualize All");
+    final JButton visAllBut = new JButton("Visualize All");
     visAllBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent ae) {
 	  if (m_Instances != null) {
 	    try {
+	      visAllBut.setEnabled(false);
 	      final weka.gui.beans.AttributeSummarizer as = 
 		new weka.gui.beans.AttributeSummarizer();
 	      as.setColoringIndex(m_AttVisualizePanel.getColoringIndex());
@@ -316,6 +317,7 @@ public class PreprocessPanel extends JPanel {
 	      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
 	      jf.addWindowListener(new java.awt.event.WindowAdapter() {
 		  public void windowClosing(java.awt.event.WindowEvent e) {
+		    visAllBut.setEnabled(true);
 		    jf.dispose();
 		  }
 		});
