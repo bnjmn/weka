@@ -57,10 +57,11 @@ import weka.classifiers.*;
  * Do not clean up after the tree has been built.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
-  Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable {
+  Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
+  AdditionalMeasureProducer {
 
   /** The decision tree */
   private ClassifierTree m_root;
@@ -390,6 +391,37 @@ public class J48 extends DistributionClassifier implements OptionHandler,
     return m_root.numLeaves();
   }
   
+  /**
+   * Returns an enumeration of the additional measure names
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(3);
+    newVector.addElement("measureTreeSize");
+    newVector.addElement("measureNumLeaves");
+    newVector.addElement("measureNumRules");
+    return newVector.elements();
+  }
+
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+      return measureNumRules();
+    } else if (additionalMeasureName.compareTo("measureTreeSize") == 0) {
+      return measureTreeSize();
+    } else if (additionalMeasureName.compareTo("measureNumLeaves") == 0) {
+      return measureNumLeaves();
+    } else {
+      throw new Exception(additionalMeasureName 
+			  + " not supported (j48)");
+    }
+  }
+
   /**
    * Get the value of unpruned.
    *

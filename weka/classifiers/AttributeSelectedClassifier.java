@@ -20,12 +20,6 @@ package weka.classifiers;
 
 import java.io.*;
 import java.util.*;
-import java.beans.MethodDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 import weka.core.*;
 import weka.attributeSelection.*;
@@ -55,7 +49,7 @@ import weka.attributeSelection.*;
  * @version $Revision 1.0 $
  */
 public class AttributeSelectedClassifier extends DistributionClassifier 
-implements OptionHandler {
+implements OptionHandler, AdditionalMeasureProducer {
 
   /** The classifier */
   protected Classifier m_Classifier = new weka.classifiers.ZeroR();
@@ -76,16 +70,15 @@ implements OptionHandler {
   /** The number of class vals in the training data (1 if class is numeric) */
   protected int m_numClasses;
 
+  /** The number of attributes selected by the attribute selection phase */
+  protected double m_numAttributesSelected;
+
   /** The time taken to select attributes in milliseconds */
   protected double m_selectionTime;
 
   /** The time taken to select attributes AND build the classifier */
   protected double m_totalTime;
-  
-  private final int MAX_MEASURES = 4;
-  /** The values from the classifier's additionalMeasures (if any) */
-  protected double [] m_additionalMeasures;
-
+ 
   /**
    * Returns a string describing this search method
    * @return a description of the search method suitable for
@@ -352,59 +345,6 @@ implements OptionHandler {
   }
 
   /**
-   * Looks for a fixed set of additional measures in the supplied
-   * classifier. If a classifier doesn't support a particular additional
-   * measure its value is set to -9999.
-   */
-  private void determineAdditionalMeasures() {
-    m_additionalMeasures = new double [MAX_MEASURES];
-    for (int i = 0;i < MAX_MEASURES; i++) {
-      m_additionalMeasures[i] = -9999;
-    }
-    MethodDescriptor methods[];
-    try {
-      BeanInfo bi = Introspector.getBeanInfo(m_Classifier.getClass());
-      methods = bi.getMethodDescriptors();
-    } catch (IntrospectionException ex) {
-      System.err.println("AttributeSelectedClassifier: Couldn't "
-			 +"introspect");
-      return;
-    }
-    Class args [] = { };
-    int index;
-    for (int i = 0; i < methods.length; i++) {
-      String name = methods[i].getDisplayName();
-      Method meth = methods[i].getMethod();
-      if (name.startsWith("measure")) {
-	if (meth.getReturnType().equals(double.class)) {
-	  if (name.compareTo("measureTreeSize") == 0) {
-	    index = 0;
-	  } else if (name.compareTo("measureNumRules") == 0) {
-	    index = 1;
-	  } else if (name.compareTo("measureNumLeaves") == 0) {
-	    index = 2;
-	  } else if (name.compareTo("measureNumLinearModels") == 0) {
-	    index = 3;
-	  } else {
-	    System.err.println("AttributeSelectedClassifier: Unrecognized "
-			       +"additional measure (skipping).");
-	    index = MAX_MEASURES;
-	  }
-	  if (index < MAX_MEASURES) {
-	    try {
-	      Double value = (Double)(meth.invoke(m_Classifier, args));
-	      m_additionalMeasures[index] = value.doubleValue();
-	    } catch (Exception ex) {
-	      System.err.println("AttributeSelectedClassifier: Problem "
-				 +"invoking method.");
-	    }
-	  }
-	}
-      }
-    }
-  }
-
-  /**
    * Build the classifier on the dimensionally reduced data.
    *
    * @param data the training data
@@ -433,19 +373,17 @@ implements OptionHandler {
 
     m_AttributeSelection = new AttributeSelection();
     m_AttributeSelection.setEvaluator(m_Evaluator);
-    //    m_AttributeSelection.setEvaluator(new CfsSubsetEval());
     m_AttributeSelection.setSearch(m_Search);
-    //    m_AttributeSelection.setSearch(new BestFirst());
     long start = System.currentTimeMillis();
     m_AttributeSelection.SelectAttributes(newData);
     long end = System.currentTimeMillis();
     newData = m_AttributeSelection.reduceDimensionality(newData);
     m_Classifier.buildClassifier(newData);
     long end2 = System.currentTimeMillis();
+    m_numAttributesSelected = m_AttributeSelection.numberAttributesSelected();
     m_ReducedHeader = new Instances(newData, 0);
     m_selectionTime = (double)(end - start);
     m_totalTime = (double)(end2 - start);
-    determineAdditionalMeasures();
   }
 
   /**
@@ -504,6 +442,14 @@ implements OptionHandler {
   }
 
   /**
+   * Additional measure --- number of attributes selected
+   * @return the number of attributes selected
+   */
+  public double measureNumAttributesSelected() {
+    return m_numAttributesSelected;
+  }
+
+  /**
    * Additional measure --- time taken (milliseconds) to select the attributes
    * @return the time taken to select attributes
    */
@@ -521,42 +467,45 @@ implements OptionHandler {
   }
 
   /**
-   * Additional measure tree size. If classifier does not support then
-   * -9999 is returned.
-   * @return the tree size or -9999 if classifier does not produce a tree
+   * Returns an enumeration of the additional measure names
+   * @return an enumeration of the measure names
    */
-  public double measureTreeSize() {
-    return m_additionalMeasures[0];
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(3);
+    newVector.addElement("measureNumAttributesSelected");
+    newVector.addElement("measureSelectionTime");
+    newVector.addElement("measureTime");
+    if (m_Classifier instanceof AdditionalMeasureProducer) {
+      Enumeration en = ((AdditionalMeasureProducer)m_Classifier).
+	enumerateMeasures();
+      while (en.hasMoreElements()) {
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
+      }
+    }
+    return newVector.elements();
   }
-
+  
   /**
-   * Additional measure number of rules. If classifier does not support then
-   * -9999 is returned.
-   * @return the number of rules or -9999 if classifier does not produce 
-   * a rule set
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
    */
-  public double measureNumRules() {
-    return m_additionalMeasures[1];
-  }
-
-  /**
-   * Additional measure number of leaves. If classifier does not support then
-   * -9999 is returned.
-   * @return the number of leaves or -9999 if classifier does not produce 
-   * a tree
-   */
-  public double measureNumLeaves() {
-    return m_additionalMeasures[2];
-  }
-
-  /**
-   * Additional measure number of linear models. If classifier does not 
-   * support then -9999 is returned.
-   * @return the number of linear models or -9999 if classifier does not 
-   * produce a model tree
-   */
-  public double measureNumLinearModels() {
-    return m_additionalMeasures[3];
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (additionalMeasureName.compareTo("measureNumAttributesSelected") == 0) {
+      return measureNumAttributesSelected();
+    } else if (additionalMeasureName.compareTo("measureSelectionTime") == 0) {
+      return measureSelectionTime();
+    } else if (additionalMeasureName.compareTo("measureTime") == 0) {
+      return measureTime();
+    } else if (m_Classifier instanceof AdditionalMeasureProducer) {
+      return ((AdditionalMeasureProducer)m_Classifier).
+	getMeasure(additionalMeasureName);
+    } else {
+      throw new Exception(additionalMeasureName 
+			  + " not supported (AttributeSelectedClassifier)");
+    }
   }
 
   /**

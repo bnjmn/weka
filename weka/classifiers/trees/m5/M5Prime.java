@@ -48,9 +48,10 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public final class  M5Prime extends Classifier implements OptionHandler {
+public final class  M5Prime extends Classifier implements OptionHandler,
+ AdditionalMeasureProducer {
   
   /** The root node */
   private Node m_root[];
@@ -363,6 +364,37 @@ public final class  M5Prime extends Classifier implements OptionHandler {
    */
   public double measureNumRules() {
     return measureNumLinearModels();
+  }
+
+  /**
+   * Returns an enumeration of the additional measure names
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(3);
+    newVector.addElement("measureNumLinearModels");
+    newVector.addElement("measureNumLeaves");
+    newVector.addElement("measureNumRules");
+    return newVector.elements();
+  }
+
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception Exception if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) throws Exception {
+    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+      return measureNumRules();
+    } else if (additionalMeasureName.compareTo("measureNumLinearModels") == 0){
+      return measureNumLinearModels();
+    } else if (additionalMeasureName.compareTo("measureNumLeaves") == 0) {
+      return measureNumLeaves();
+    } else {
+      throw new Exception(additionalMeasureName 
+			  + " not supported (M5)");
+    }
   }
   
   /**
