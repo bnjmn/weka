@@ -23,7 +23,8 @@ SOURCES = \
 	SetInstancesPanel.java \
 	SysErrLog.java \
 	TaskLogger.java \
-	WekaTaskMonitor.java
+	WekaTaskMonitor.java \
+	SaveBuffer.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
