@@ -31,14 +31,19 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 import java.beans.PropertyEditor;
+import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.BorderFactory;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 /** 
  * Support for drawing a property value in a component.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.8 $
  */
 public class PropertyPanel extends JPanel {
 
@@ -47,6 +52,9 @@ public class PropertyPanel extends JPanel {
 
   /** The currently displayed property dialog, if any */
   private PropertyDialog m_PD;
+
+  /** Whether the editor has provided its own panel */
+  private boolean m_HasCustomPanel = false;
   
   /**
    * Create the panel with the supplied property editor.
@@ -55,31 +63,78 @@ public class PropertyPanel extends JPanel {
    */
   public PropertyPanel(PropertyEditor pe) {
 
-    //    System.err.println("PropertyPanel::PropertyPanel()");
+    this(pe, false);
+  }
+
+  /**
+   * Create the panel with the supplied property editor,
+   * optionally ignoring any custom panel the editor can provide.
+   *
+   * @param pe the PropertyEditor
+   * @param ignoreCustomPanel whether to make use of any available custom panel
+   */
+  public PropertyPanel(PropertyEditor pe, boolean ignoreCustomPanel) {
+
+    m_Editor = pe;
+    
+    if (!ignoreCustomPanel && m_Editor instanceof CustomPanelSupplier) {
+      setLayout(new BorderLayout());
+      add(((CustomPanelSupplier)m_Editor).getCustomPanel(), BorderLayout.CENTER);
+      m_HasCustomPanel = true;
+    } else {
+      createDefaultPanel();
+    }
+  }
+
+  /**
+   * Creates the default style of panel for editors that do not
+   * supply their own.
+   */
+  protected void createDefaultPanel() {
+
     setBorder(BorderFactory.createEtchedBorder());
     setToolTipText("Click to edit properties for this object");
     setOpaque(true);
-    m_Editor = pe;
     addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent evt) {
-	if (m_Editor.getValue() != null) {
-	  if (m_PD == null) {
-	    int x = getLocationOnScreen().x;
-	    int y = getLocationOnScreen().y;
-	    m_PD = new PropertyDialog(m_Editor, x, y);
-	  } else {
-	    m_PD.setVisible(true);
-	  }
+	public void mouseClicked(MouseEvent evt) {
+
+	  showPropertyDialog();
 	}
-      }
-    });
+      });
     Dimension newPref = getPreferredSize();
     newPref.height = getFontMetrics(getFont()).getHeight() * 5 / 4;
     newPref.width = newPref.height * 5;
     setPreferredSize(newPref);
+
+    m_Editor.addPropertyChangeListener(new PropertyChangeListener () {
+	public void propertyChange(PropertyChangeEvent evt) {
+	  repaint();
+	}
+      });
   }
 
+  /**
+   * Displays the property edit dialog for the panel.
+   */
+  public void showPropertyDialog() {
+
+    if (m_Editor.getValue() != null) {
+      if (m_PD == null) {
+	int x = getLocationOnScreen().x;
+	int y = getLocationOnScreen().y;
+	m_PD = new PropertyDialog(m_Editor, x, y);
+      } else {
+	m_PD.setVisible(true);
+      }
+    }
+  }
+
+  /**
+   * Cleans up when the panel is destroyed.
+   */
   public void removeNotify() {
+
+    super.removeNotify();
     if (m_PD != null) {
       m_PD.dispose();
       m_PD = null;
@@ -93,15 +148,17 @@ public class PropertyPanel extends JPanel {
    */
   public void paintComponent(Graphics g) {
 
-    Insets i = getInsets();
-    Rectangle box = new Rectangle(i.left, i.top,
-				  getSize().width - i.left - i.right - 1,
-				  getSize().height - i.top - i.bottom - 1);
-    
-    g.clearRect(i.left, i.top,
-		getSize().width - i.right - i.left,
-		getSize().height - i.bottom - i.top);
-    m_Editor.paintValue(g, box);
+    if (!m_HasCustomPanel) {
+      Insets i = getInsets();
+      Rectangle box = new Rectangle(i.left, i.top,
+				    getSize().width - i.left - i.right - 1,
+				    getSize().height - i.top - i.bottom - 1);
+      
+      g.clearRect(i.left, i.top,
+		  getSize().width - i.right - i.left,
+		  getSize().height - i.bottom - i.top);
+      m_Editor.paintValue(g, box);
+    }
   }
 
 }
