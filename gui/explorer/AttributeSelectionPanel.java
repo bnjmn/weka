@@ -93,7 +93,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -647,7 +647,7 @@ public class AttributeSelectionPanel extends JPanel {
   }
   
   /**
-   * Save the currently selected classifier output to a file.
+   * Save the currently selected attribute selection output to a file.
    */
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();

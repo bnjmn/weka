@@ -96,7 +96,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -817,7 +817,7 @@ public class ClustererPanel extends JPanel {
   }
 
   /**
-   * Save the currently selected classifier output to a file.
+   * Save the currently selected clusterer output to a file.
    */
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();
