@@ -31,7 +31,7 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for boosting any classifier that can handle weighted instances.
+ * Class for performing additive logistic regression..
  * This class performs classification using a regression scheme as the 
  * base learner, and can handle multi-class problems.  For more
  * information, see<p>
@@ -82,28 +82,20 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
  */
-public class LogitBoost extends Classifier 
-  implements OptionHandler, Sourcable, WeightedInstancesHandler {
+public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
+  implements Sourcable, WeightedInstancesHandler {
 
-  // To maintain the same version number after adding m_ClassAttribute
-  static final long serialVersionUID = -2177331683936258888L;
-
-  /** Array for storing the generated base classifiers. */
+  /** Array for storing the generated base classifiers. 
+   Note: we are hiding the variable from IteratedSingleClassifierEnhancer*/
   protected Classifier [][] m_Classifiers;
-
-  /** An instantiated base classifier used for getting and testing options */
-  protected Classifier m_Classifier = new weka.classifiers.trees.DecisionStump();
-
-  /** The maximum number of boost iterations */
-  protected int m_MaxIterations = 10;
 
   /** The number of classes */
   protected int m_NumClasses;
 
   /** The number of successfully generated base classifiers. */
-  protected int m_NumIterations;
+  protected int m_NumGenerated;
 
   /** The number of folds for the internal cross-validation. */
   protected int m_NumFolds = 0;
@@ -113,9 +105,6 @@ public class LogitBoost extends Classifier
 
   /** Weight thresholding. The percentage of weight mass used in training */
   protected int m_WeightThreshold = 100;
-
-  /** Debugging mode, gives extra output if true */
-  protected boolean m_Debug;
 
   /** A threshold for responses (Friedman suggests between 2 and 4) */
   protected static final double Z_MAX = 3;
@@ -128,9 +117,6 @@ public class LogitBoost extends Classifier
 
   /** Use boosting with reweighting? */
   protected boolean m_UseResampling;
-  
-  /** Seed for boosting with resampling. */
-  protected int m_Seed = 1;
 
   /** The threshold on the improvement of the likelihood */   
   protected double m_Precision = -Double.MAX_VALUE;
@@ -144,6 +130,24 @@ public class LogitBoost extends Classifier
   /** The value by which the actual target value for the
       true class is offset. */
   protected double m_Offset = 0.0;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "Class for performing additive logistic regression. "
+      + "This class performs classification using a regression scheme as the "
+      + "base learner, and can handle multi-class problems.  For more "
+      + "information, see\n\n"
+      + "Friedman, J., T. Hastie and R. Tibshirani (1998) \"Additive Logistic "
+      + "Regression: a Statistical View of Boosting\". Technical report. " 
+      + "Stanford University.\n\n"
+      + "Can do efficient internal cross-validation to determine "
+      + "appropriate number of iterations.";
+  }
 
   /**
    * Select only instances with weights that contribute to 
@@ -194,29 +198,15 @@ public class LogitBoost extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(10);
-    
-    newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
-    newVector.addElement(new Option(
-	      "\tMaximum number of boost iterations.\n"
-	      +"\t(default 10)",
-	      "I", 1, "-I <num>"));
+    Vector newVector = new Vector(6);
+
     newVector.addElement(new Option(
 	      "\tUse resampling for boosting.",
 	      "Q", 0, "-Q"));
     newVector.addElement(new Option(
-	      "\tSeed for resampling. (Default 1)",
-	      "S", 1, "-S <num>"));
-    newVector.addElement(new Option(
 	      "\tPercentage of weight mass to base training on.\n"
 	      +"\t(default 100, reduce to around 90 speed up)",
 	      "P", 1, "-P <percent>"));
-    newVector.addElement(new Option(
-	      "\tFull name of 'weak' learner to boost.\n"
-	      +"\teg: weka.classifiers.trees.DecisionStump",
-	      "W", 1, "-W <learner class name>"));
     newVector.addElement(new Option(
 	      "\tNumber of folds for internal cross-validation.\n"
 	      +"\t(default 0 -- no cross-validation)",
@@ -234,16 +224,9 @@ public class LogitBoost extends Classifier
 	      +"\t(default 1)",
 	      "H", 1, "-H <num>"));
 
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to weak learner "
-	  + m_Classifier.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
-      }
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
     }
     return newVector.elements();
   }
@@ -264,6 +247,7 @@ public class LogitBoost extends Classifier
    *
    * -Q <br>
    * Use resampling instead of reweighting.<p>
+   *
    * -S seed <br>
    * Random number seed for resampling (default 1).<p>
    *
@@ -292,15 +276,6 @@ public class LogitBoost extends Classifier
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
-    setDebug(Utils.getFlag('D', options));
-    
-    String boostIterations = Utils.getOption('I', options);
-    if (boostIterations.length() != 0) {
-      setMaxIterations(Integer.parseInt(boostIterations));
-    } else {
-      setMaxIterations(10);
-    }
     
     String numFolds = Utils.getOption('F', options);
     if (numFolds.length() != 0) {
@@ -345,20 +320,7 @@ public class LogitBoost extends Classifier
 			  "not allowed.");
     }
 
-    String seedString = Utils.getOption('S', options);
-    if (seedString.length() != 0) {
-      setSeed(Integer.parseInt(seedString));
-    } else {
-      setSeed(1);
-    }
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
+    super.setOptions(options);
   }
 
   /**
@@ -368,46 +330,38 @@ public class LogitBoost extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 10];
 
-    String [] options = new String [classifierOptions.length + 17];
     int current = 0;
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
-    
     if (getUseResampling()) {
       options[current++] = "-Q";
     } else {
       options[current++] = "-P"; 
       options[current++] = "" + getWeightThreshold();
     }
-    if (getSeed() != 1) {
-      options[current++] = "-S"; options[current++] = "" + getSeed();
-    }
-    options[current++] = "-I"; options[current++] = "" + getMaxIterations();
     options[current++] = "-F"; options[current++] = "" + getNumFolds();
     options[current++] = "-R"; options[current++] = "" + getNumRuns();
     options[current++] = "-L"; options[current++] = "" + getLikelihoodThreshold();
     options[current++] = "-H"; options[current++] = "" + getShrinkage();
 
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
-
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+    current += superOptions.length;
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String shrinkageTipText() {
+    return "Shrinkage parameter (use small value like 0.1 to reduce "
+      + "overfitting).";
   }
 			 
   /**
@@ -428,6 +382,15 @@ public class LogitBoost extends Classifier
   public void setShrinkage(double newShrinkage) {
     
     m_Shrinkage = newShrinkage;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String likelihoodThresholdTipText() {
+    return "Threshold on improvement in likelihood.";
   }
 			 
   /**
@@ -451,6 +414,15 @@ public class LogitBoost extends Classifier
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numRunsTipText() {
+    return "Number of runs for internal cross-validation.";
+  }
+  
+  /**
    * Get the value of NumRuns.
    *
    * @return Value of NumRuns.
@@ -468,6 +440,16 @@ public class LogitBoost extends Classifier
   public void setNumRuns(int newNumRuns) {
     
     m_NumRuns = newNumRuns;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "Number of folds for internal cross-validation (default 0 "
+      + "means no cross-validation is performed).";
   }
   
   /**
@@ -491,6 +473,15 @@ public class LogitBoost extends Classifier
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useResamplingTipText() {
+    return "Whether resampling is used instead of reweighting.";
+  }
+  
+  /**
    * Set resampling mode
    *
    * @param resampling true if resampling should be done
@@ -509,69 +500,16 @@ public class LogitBoost extends Classifier
     
     return m_UseResampling;
   }
-
+  
   /**
-   * Set seed for resampling.
-   *
-   * @param seed the seed for resampling
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
+  public String weightThresholdTipText() {
+    return "Weight threshold for weight pruning (reduce to 90 "
+      + "for speeding up learning process).";
   }
-
-  /**
-   * Get seed for resampling.
-   *
-   * @return the seed for resampling
-   */
-  public int getSeed() {
-
-    return m_Seed;
-  }
-
-  /**
-   * Set the classifier for boosting. The learner should be able to
-   * handle numeric class attributes.
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
-
-  /**
-   * Set the maximum number of boost iterations
-   *
-   * @param maxIterations the maximum number of boost iterations
-   */
-  public void setMaxIterations(int maxIterations) {
-
-    m_MaxIterations = maxIterations;
-  }
-
-  /**
-   * Get the maximum number of boost iterations
-   *
-   * @return the maximum number of boost iterations
-   */
-  public int getMaxIterations() {
-
-    return m_MaxIterations;
-  }
-
 
   /**
    * Set weight thresholding
@@ -591,26 +529,6 @@ public class LogitBoost extends Classifier
   public int getWeightThreshold() {
 
     return m_WeightThreshold;
-  }
-
-  /**
-   * Set debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-
-    m_Debug = debug;
-  }
-
-  /**
-   * Get whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
   }
 
   /**
@@ -654,19 +572,19 @@ public class LogitBoost extends Classifier
     m_Classifiers = new Classifier [m_NumClasses][];
     for (int j = 0; j < m_NumClasses; j++) {
       m_Classifiers[j] = Classifier.makeCopies(m_Classifier,
-					       getMaxIterations());
+					       getNumIterations());
     }
 
     // Do we want to select the appropriate number of iterations
     // using cross-validation?
-    int bestNumIterations = getMaxIterations();
+    int bestNumIterations = getNumIterations();
     if (m_NumFolds > 1) {
       if (m_Debug) {
 	System.err.println("Processing first fold.");
       }
 
       // Array for storing the results
-      double[] results = new double[getMaxIterations()];
+      double[] results = new double[getNumIterations()];
 
       // Iterate throught the cv-runs
       for (int r = 0; r < m_NumRuns; r++) {
@@ -703,9 +621,9 @@ public class LogitBoost extends Classifier
 	  
 	  // Perform iterations
 	  double[][] probs = initialProbs(numInstances);
-	  m_NumIterations = 0;
+	  m_NumGenerated = 0;
 	  double sumOfWeights = train.sumOfWeights();
-	  for (int j = 0; j < getMaxIterations(); j++) {
+	  for (int j = 0; j < getNumIterations(); j++) {
 	    performIteration(trainYs, trainFs, probs, trainN, sumOfWeights);
 	    Evaluation eval = new Evaluation(train);
 	    eval.evaluateModel(this, test);
@@ -716,7 +634,7 @@ public class LogitBoost extends Classifier
       
       // Find the number of iterations with the lowest error
       double bestResult = -Double.MAX_VALUE;
-      for (int j = 0; j < getMaxIterations(); j++) {
+      for (int j = 0; j < getNumIterations(); j++) {
 	if (results[j] > bestResult) {
 	  bestResult = results[j];
 	  bestNumIterations = j;
@@ -750,7 +668,7 @@ public class LogitBoost extends Classifier
     // Perform iterations
     double[][] probs = initialProbs(numInstances);
     double logLikelihood = logLikelihood(trainYs, probs);
-    m_NumIterations = 0;
+    m_NumGenerated = 0;
     if (m_Debug) {
       System.err.println("Avg. log-likelihood: " + logLikelihood);
     }
@@ -809,7 +727,7 @@ public class LogitBoost extends Classifier
 				double origSumOfWeights) throws Exception {
 
     if (m_Debug) {
-      System.err.println("Training classifier " + (m_NumIterations + 1));
+      System.err.println("Training classifier " + (m_NumGenerated + 1));
     }
 
     // Build the new models
@@ -873,7 +791,7 @@ public class LogitBoost extends Classifier
       }
       
       // Build the classifier
-      m_Classifiers[j][m_NumIterations].buildClassifier(trainData);
+      m_Classifiers[j][m_NumGenerated].buildClassifier(trainData);
     }      
     
     // Evaluate / increment trainFs from the classifier
@@ -881,7 +799,7 @@ public class LogitBoost extends Classifier
       double [] pred = new double [m_NumClasses];
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	pred[j] = m_Shrinkage * m_Classifiers[j][m_NumIterations]
+	pred[j] = m_Shrinkage * m_Classifiers[j][m_NumGenerated]
 	  .classifyInstance(data.instance(i));
 	predSum += pred[j];
       }
@@ -891,7 +809,7 @@ public class LogitBoost extends Classifier
 	  / m_NumClasses;
       }
     }
-    m_NumIterations++;
+    m_NumGenerated++;
     
     // Compute the current probability estimates
     for (int i = 0; i < trainYs.length; i++) {
@@ -905,9 +823,9 @@ public class LogitBoost extends Classifier
   public Classifier[][] classifiers() {
 
     Classifier[][] classifiers = 
-      new Classifier[m_NumClasses][m_NumIterations];
+      new Classifier[m_NumClasses][m_NumGenerated];
     for (int j = 0; j < m_NumClasses; j++) {
-      for (int i = 0; i < m_NumIterations; i++) {
+      for (int i = 0; i < m_NumGenerated; i++) {
 	classifiers[j][i] = m_Classifiers[j][i];
       }
     }
@@ -950,7 +868,7 @@ public class LogitBoost extends Classifier
     instance.setDataset(m_NumericClassData);
     double [] pred = new double [m_NumClasses];
     double [] Fs = new double [m_NumClasses]; 
-    for (int i = 0; i < m_NumIterations; i++) {
+    for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
 	pred[j] = m_Classifiers[j][i].classifyInstance(instance);
@@ -974,7 +892,7 @@ public class LogitBoost extends Classifier
    */
   public String toSource(String className) throws Exception {
 
-    if (m_NumIterations == 0) {
+    if (m_NumGenerated == 0) {
       throw new Exception("No model built yet");
     }
     if (!(m_Classifiers[0][0] instanceof Sourcable)) {
@@ -1009,7 +927,7 @@ public class LogitBoost extends Classifier
     text.append("    double [] Fs = new double [" + m_NumClasses + "];\n");
     text.append("    double [] Fi = new double [" + m_NumClasses + "];\n");
     text.append("    double Fsum;\n");
-    for (int i = 0; i < m_NumIterations; i++) {
+    for (int i = 0; i < m_NumGenerated; i++) {
       text.append("    Fsum = 0;\n");
       for (int j = 0; j < m_NumClasses; j++) {
 	text.append("    Fi[" + j + "] = " + className + '_' +j + '_' + i 
@@ -1045,12 +963,12 @@ public class LogitBoost extends Classifier
     
     StringBuffer text = new StringBuffer();
     
-    if (m_NumIterations == 0) {
+    if (m_NumGenerated == 0) {
       text.append("LogitBoost: No model built yet.");
       //      text.append(m_Classifiers[0].toString()+"\n");
     } else {
       text.append("LogitBoost: Base classifiers and their weights: \n");
-      for (int i = 0; i < m_NumIterations; i++) {
+      for (int i = 0; i < m_NumGenerated; i++) {
 	text.append("\nIteration "+(i+1));
 	for (int j = 0; j < m_NumClasses; j++) {
 	  text.append("\n\tClass " + (j + 1) 
@@ -1060,7 +978,7 @@ public class LogitBoost extends Classifier
 	}
       }
       text.append("Number of performed iterations: " +
-		    m_NumIterations + "\n");
+		    m_NumGenerated + "\n");
     }
     
     return text.toString();

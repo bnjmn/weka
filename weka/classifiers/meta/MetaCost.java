@@ -63,7 +63,7 @@ import weka.filters.Filter;
  * is the relation name of the training data plus ".cost", and the
  * path to the on-demand file is specified with the -D option.<p>
  *
- * -D directory <br>
+ * -N directory <br>
  * Name of a directory to search for cost files when loading costs on demand
  * (default current directory). <p>
  *
@@ -79,10 +79,9 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
-public class MetaCost extends Classifier
-  implements OptionHandler {
+public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
   /* Specify possible sources of the cost matrix */
   public static final int MATRIX_ON_DEMAND = 1;
@@ -104,17 +103,11 @@ public class MetaCost extends Classifier
   /** The name of the cost file, for command line options */
   protected String m_CostFile;
 
-  /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
-
   /** The cost matrix */
   protected CostMatrix m_CostMatrix = new CostMatrix(1);
 
   /** The number of iterations. */
   protected int m_NumIterations = 10;
-
-  /** Seed for reweighting using resampling. */
-  protected int m_Seed = 1;
 
   /** The size of each bag sample, as a percentage of the training size */
   protected int m_BagSizePercent = 100;
@@ -133,10 +126,6 @@ public class MetaCost extends Classifier
 	      + "\t(default 10)",
 	      "I", 1, "-I <num>"));
     newVector.addElement(new Option(
-	      "\tFull class name of classifier to use. (required)\n"
-	      + "\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W <class name>"));
-    newVector.addElement(new Option(
 	      "\tFile name of a cost matrix to use. If this is not supplied,\n"
               +"\ta cost matrix will be loaded on demand. The name of the\n"
               +"\ton-demand file is the relation name of the training data\n"
@@ -146,14 +135,16 @@ public class MetaCost extends Classifier
     newVector.addElement(new Option(
               "\tName of a directory to search for cost files when loading\n"
               +"\tcosts on demand (default current directory).",
-              "D", 1, "-D <directory>"));
-    newVector.addElement(new Option(
-	      "\tSeed used when reweighting via resampling. (Default 1)",
-	      "S", 1, "-S <num>"));
+              "N", 1, "-N <directory>"));
     newVector.addElement(new Option(
               "\tSize of each bag, as a percentage of the\n" 
               + "\ttraining set size. (default 100)",
               "P", 1, "-P"));
+
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -169,7 +160,7 @@ public class MetaCost extends Classifier
    * is the relation name of the training data plus ".cost", and the
    * path to the on-demand file is specified with the -D option.<p>
    *
-   * -D directory <br>
+   * -N directory <br>
    * Name of a directory to search for cost files when loading costs on demand
    * (default current directory). <p>
    *
@@ -196,27 +187,12 @@ public class MetaCost extends Classifier
       setNumIterations(10);
     }
 
-    String seedString = Utils.getOption('S', options);
-    if (seedString.length() != 0) {
-      setSeed(Integer.parseInt(seedString));
-    } else {
-      setSeed(1);
-    }
-
     String bagSize = Utils.getOption('P', options);
     if (bagSize.length() != 0) {
       setBagSizePercent(Integer.parseInt(bagSize));
     } else {
       setBagSizePercent(100);
     }
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
 
     String costFile = Utils.getOption('C', options);
     if (costFile.length() != 0) {
@@ -230,12 +206,13 @@ public class MetaCost extends Classifier
                                           TAGS_MATRIX_SOURCE));
     }
     
-    String demandDir = Utils.getOption('D', options);
+    String demandDir = Utils.getOption('N', options);
     if (demandDir.length() != 0) {
       setOnDemandDirectory(new File(demandDir));
     }
-  }
 
+    super.setOptions(options);
+  }
 
   /**
    * Gets the current settings of the Classifier.
@@ -244,13 +221,15 @@ public class MetaCost extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
 
-    String [] options = new String [classifierOptions.length + 12];
+    String [] superOptions = super.getOptions();
+    String [] options;
+
+    if ((m_MatrixSource == MATRIX_SUPPLIED) && (m_CostFile == null)) {
+      options = new String [superOptions.length + 4];
+    } else {
+      options = new String [superOptions.length + 6];
+    }
     int current = 0;
 
     if (m_MatrixSource == MATRIX_SUPPLIED) {
@@ -259,26 +238,25 @@ public class MetaCost extends Classifier
         options[current++] = "" + m_CostFile;
       }
     } else {
-      options[current++] = "-D";
+      options[current++] = "-N";
       options[current++] = "" + getOnDemandDirectory();
     }
     options[current++] = "-I"; options[current++] = "" + getNumIterations();
-    options[current++] = "-S"; options[current++] = "" + getSeed();
     options[current++] = "-P"; options[current++] = "" + getBagSizePercent();
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
 
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
     return options;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String costMatrixSourceTipText() {
+    return "Gets the source location method of the cost matrix. Will "
+      + "be one of MATRIX_ON_DEMAND or MATRIX_SUPPLIED.";
   }
 
   /**
@@ -303,6 +281,16 @@ public class MetaCost extends Classifier
     if (newMethod.getTags() == TAGS_MATRIX_SOURCE) {
       m_MatrixSource = newMethod.getSelectedTag().getID();
     }
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String onDemandDirectoryTipText() {
+    return "Name of directory to search for cost files when loading "
+      + "costs on demand.";
   }
 
   /**
@@ -331,45 +319,16 @@ public class MetaCost extends Classifier
     }
     m_MatrixSource = MATRIX_ON_DEMAND;
   }
-
   
   /**
-   * Sets the distribution classifier
-   *
-   * @param classifier the distribution classifier with all options set.
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public void setClassifier(Classifier classifier) {
-
-    m_Classifier = classifier;
+  public String bagSizePercentTipText() {
+    return "The size of each bag, as a percentage of the training set "
+      + "size.";
   }
-
-  /**
-   * Gets the distribution classifier used.
-   *
-   * @return the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-  
-
-  /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @return the classifier string.
-   */
-  protected String getClassifierSpec() {
-    
-    Classifier c = getClassifier();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
-  }
-
 
   /**
    * Gets the size of each bag, as a percentage of the training set size.
@@ -392,6 +351,15 @@ public class MetaCost extends Classifier
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numIterationsTipText() {
+    return "The number of bagging iterations.";
+  }
+  
+  /**
    * Sets the number of bagging iterations
    */
   public void setNumIterations(int numIterations) {
@@ -408,7 +376,15 @@ public class MetaCost extends Classifier
     
     return m_NumIterations;
   }
-
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String costMatrixTipText() {
+    return "A misclassification cost matrix.";
+  }
 
   /**
    * Gets the misclassification cost matrix.
@@ -430,27 +406,6 @@ public class MetaCost extends Classifier
     m_CostMatrix = newCostMatrix;
     m_MatrixSource = MATRIX_SUPPLIED;
   }
-  
-  /**
-   * Set seed for resampling.
-   *
-   * @param seed the seed for resampling
-   */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Get seed for resampling.
-   *
-   * @return the seed for resampling
-   */
-  public int getSeed() {
-
-    return m_Seed;
-  }
-
 
   /**
    * Builds the model of the base learner.
@@ -460,9 +415,6 @@ public class MetaCost extends Classifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (m_Classifier == null) {
-      throw new Exception("No base classifier has been set!");
-    }
     if (!data.classAttribute().isNominal()) {
       throw new UnsupportedClassTypeException("Class attribute must be nominal!");
     }
@@ -508,6 +460,18 @@ public class MetaCost extends Classifier
   public double classifyInstance(Instance instance) throws Exception {
 
     return m_Classifier.classifyInstance(instance);
+  }
+
+  /**
+   * Gets the classifier specification string, which contains the
+   * class name of the classifier and any options to the classifier
+   *
+   * @return the classifier string.  */
+  protected String getClassifierSpec() {
+    
+    Classifier c = getClassifier();
+    return c.getClass().getName() + " "
+      + Utils.joinOptions(((OptionHandler)c).getOptions());
   }
 
   /**

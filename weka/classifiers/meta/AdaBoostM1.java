@@ -65,7 +65,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -87,6 +87,22 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
   /** The number of classes */
   protected int m_NumClasses;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+ 
+    return "Class for boosting a nominal class classifier using the Adaboost "
+      + "M1 method. Only nominal class problems can be tackled. Often "
+      + "dramatically improves performance, but sometimes overfits. For more "
+      + "information, see\n\n"
+      + "Yoav Freund and Robert E. Schapire (1996). \"Experiments with a new boosting "
+      + "algorithm\".  Proc International Conference on Machine Learning, "
+      + "pages 148-156, Morgan Kaufmann, San Francisco.";
+  }
 
   /**
    * Select only instances with weights that contribute to 
@@ -223,6 +239,15 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 		     superOptions.length);
     return options;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String weightThresholdTipText() {
+    return "Weight threshold for weight pruning.";
+  }
 
   /**
    * Set weight threshold
@@ -242,6 +267,15 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   public int getWeightThreshold() {
 
     return m_WeightThreshold;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useResamplingTipText() {
+    return "Whether resampling is used instead of reweighting.";
   }
 
   /**
