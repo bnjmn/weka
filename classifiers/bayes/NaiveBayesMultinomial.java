@@ -23,6 +23,7 @@
 package weka.classifiers.bayes;
 
 import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.SpecialFunctions;
 import weka.core.Utils;
 
@@ -33,7 +34,7 @@ import weka.core.Utils;
  * Andrew Mccallum, Kamal Nigam (1998)<i>A Comparison of Event Models for Naive Bayes Text Classification </i>
  
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz) and Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifier 
@@ -54,17 +55,21 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
     //number of class values
     private int numClasses;
     
-    // cache lnFactorial computations (BP)
+    //cache lnFactorial computations (BP)
     private double[] lnFactorialCache = new double[]{0.0,0.0};
-    
+
+    //copy of header information for use in toString method
+    Instances headerInfo;
+
     /**
      * Generates the classifier.
      *
      * @param instances set of instances serving as training data 
      * @exception Exception if the classifier has not been generated successfully
      */
-    public void buildClassifier(weka.core.Instances instances) throws Exception 
+    public void buildClassifier(Instances instances) throws Exception 
     {
+        headerInfo = new Instances(instances, 0);
 	numClasses = instances.numClasses();
 	numAttributes = instances.numAttributes();
 	probOfWordGivenClass = new double[numClasses][];
@@ -129,7 +134,8 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
 						      / (wordsPerClass[c] + numAttributes - 1));
 	
 	//calculating Pr(H)
-	//NOTE: Laplace estimator introduced in case a class does not get mentioned in the set of instances
+	//NOTE: Laplace estimator introduced in case a class does not get mentioned in the set of
+	//test instances
 	final double numDocs = instances.sumOfWeights() + numClasses;
 	probOfClass = new double[numClasses];
 	for(int h=0; h<numClasses; h++)
@@ -230,6 +236,31 @@ public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifi
 	return lnFactorialCache[n];
     }
     
+    public String toString()
+    {
+	String result = new String("The independent probability of a class\n--------------------------------------\n");
+	
+	for(int c = 0; c<numClasses; c++)
+	    result = result.concat(headerInfo.classAttribute().value(c)).concat("\t").concat(Double.toString(probOfClass[c])).concat("\n");
+	
+	result = result.concat("\nThe probability of a word given the class\n-----------------------------------------\n\t");
+
+	for(int c = 0; c<numClasses; c++)
+	    result = result.concat(headerInfo.classAttribute().value(c)).concat("\t");
+	
+	result = result.concat("\n");
+
+	for(int w = 0; w<numAttributes; w++)
+	    {
+		result = result.concat(headerInfo.attribute(w).name()).concat("\t");
+		for(int c = 0; c<numClasses; c++)
+		    result = result.concat(Double.toString(Math.pow(10.0, probOfWordGivenClass[c][w]))).concat("\t");
+		result = result.concat("\n");
+	    }
+
+	return result;
+    }
+
     /**
      * Main method for testing this class.
      *
