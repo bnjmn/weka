@@ -83,7 +83,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -358,34 +358,44 @@ public class VisualizePanel extends JPanel {
 	// x bounds
 	min=Double.POSITIVE_INFINITY;
 	max=Double.NEGATIVE_INFINITY;
-	for (int i=0;i<m_plotInstances.numInstances();i++) {
-	  if (!m_plotInstances.instance(i).isMissing(m_xIndex)) {
-	    value = m_plotInstances.instance(i).value(m_xIndex);
-	    if (value < min) {
-	      min = value;
-	    }
-	    if (value > max) {
-	      max = value;
+	if (m_plotInstances.attribute(m_xIndex).isNominal()) {
+	  m_minX = 0;
+	  m_maxX = m_plotInstances.attribute(m_xIndex).numValues()-1;
+	} else {
+	  for (int i=0;i<m_plotInstances.numInstances();i++) {
+	    if (!m_plotInstances.instance(i).isMissing(m_xIndex)) {
+	      value = m_plotInstances.instance(i).value(m_xIndex);
+	      if (value < min) {
+		min = value;
+	      }
+	      if (value > max) {
+		max = value;
+	      }
 	    }
 	  }
+	  m_minX = min; m_maxX = max;
 	}
-	m_minX = min; m_maxX = max;
 
 	// y bounds
 	min=Double.POSITIVE_INFINITY;
 	max=Double.NEGATIVE_INFINITY;
-	for (int i=0;i<m_plotInstances.numInstances();i++) {
-	  if (!m_plotInstances.instance(i).isMissing(m_yIndex)) {
-	    value = m_plotInstances.instance(i).value(m_yIndex);
-	    if (value < min) {
-	      min = value;
-	    }
-	    if (value > max) {
-	      max = value;
+	if (m_plotInstances.attribute(m_yIndex).isNominal()) {
+	  m_minY = 0;
+	  m_maxY = m_plotInstances.attribute(m_yIndex).numValues()-1;
+	} else {
+	  for (int i=0;i<m_plotInstances.numInstances();i++) {
+	    if (!m_plotInstances.instance(i).isMissing(m_yIndex)) {
+	      value = m_plotInstances.instance(i).value(m_yIndex);
+	      if (value < min) {
+		min = value;
+	      }
+	      if (value > max) {
+		max = value;
+	      }
 	    }
 	  }
+	  m_minY = min; m_maxY = max;
 	}
-	m_minY = min; m_maxY = max;
       
 	// colour bounds
 	min=Double.POSITIVE_INFINITY;
@@ -730,27 +740,36 @@ public class VisualizePanel extends JPanel {
       String maxStringY = Utils.doubleToString(m_maxY,
 					       fieldWidthY+1+precisionY
 					       ,precisionY);
-      mswy = m_labelMetrics.stringWidth(maxStringY);
+
+      if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
+	mswy = m_labelMetrics.stringWidth(maxStringY);
+      } else {
+	mswy = m_labelMetrics.stringWidth("MM");
+      }
 
       m_YaxisStart = m_axisPad;
       m_XaxisStart = 0+m_axisPad+m_tickSize+mswy;
 
       m_XaxisEnd = w-m_axisPad-(mswx/2);
       
-      m_YaxisEnd = h-m_axisPad-hf-m_tickSize;
+      m_YaxisEnd = h-m_axisPad-(2 * hf)-m_tickSize;
 
       if ((!m_colourUsingPreds) && 
 	  m_plotInstances.attribute(m_cIndex).isNumeric()) {
-	m_YaxisEnd -= (m_spectrumHeight+hf+m_tickSize+m_axisPad);
+	int nomSpacer = (m_plotInstances.attribute(m_xIndex).isNumeric())
+	  ? 1
+	  : 2;
+	m_YaxisEnd -= (m_spectrumHeight+(nomSpacer*hf)+m_tickSize+m_axisPad);
 	// draw spectrum
 	double rs = 15;
 	double incr = 240.0 / (double)(m_XaxisEnd-m_XaxisStart);
+
 	for (int i=m_XaxisStart;i<
 	       (m_XaxisStart+(m_XaxisEnd-m_XaxisStart));i++) {
 	  Color c = new Color((int)rs,0,(int)(255-rs));
 	  gx.setColor(c);
-	  gx.drawLine(i,(m_YaxisEnd+hf+m_tickSize+m_axisPad),
-		   i,(m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight));
+	  gx.drawLine(i,(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+m_axisPad),
+		   i,(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+m_axisPad+m_spectrumHeight));
 	  rs += incr;
 	}
 
@@ -769,24 +788,31 @@ public class VisualizePanel extends JPanel {
 	if (w > (2 * tmsc)) {
 	  gx.setColor(Color.black);
 	  gx.drawLine(m_XaxisStart,
-		      (m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5),
+		      (m_YaxisEnd+(nomSpacer*hf)+
+		       m_tickSize+m_axisPad+m_spectrumHeight+5),
 		      m_XaxisEnd,
-		      (m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5));
+		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
+		       m_axisPad+m_spectrumHeight+5));
 
 	  gx.drawLine(m_XaxisEnd,
-		      (m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5),
+		      (m_YaxisEnd+(hf*nomSpacer)+m_tickSize+
+		       m_axisPad+m_spectrumHeight+5),
 		      m_XaxisEnd,
-		      (m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5+m_tickSize));
+		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
+		       m_axisPad+m_spectrumHeight+5+m_tickSize));
 
 	  gx.drawString(maxStringC, 
 			m_XaxisEnd-(mswc/2),
 			(m_YaxisEnd+hf+m_tickSize+
-			m_axisPad+m_spectrumHeight+5+m_tickSize+hf));
+			m_axisPad+m_spectrumHeight+5+
+			 m_tickSize+(nomSpacer*hf)));
 
 	  gx.drawLine(m_XaxisStart,
-		      (m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5),
+		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
+		       m_axisPad+m_spectrumHeight+5),
 		      m_XaxisStart,
-		      (m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5+m_tickSize));
+		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
+		       m_axisPad+m_spectrumHeight+5+m_tickSize));
 	  fieldWidthC = (int)((Math.log(m_minC)/Math.log(10)))+1;
 	  maxStringC = Utils.doubleToString(m_minC,
 					    fieldWidthC+1+precisionC,
@@ -795,15 +821,18 @@ public class VisualizePanel extends JPanel {
 	  gx.drawString(maxStringC, 
 			m_XaxisStart-(mswc/2),
 			(m_YaxisEnd+hf+m_tickSize+
-			m_axisPad+m_spectrumHeight+5+m_tickSize+hf));
+			m_axisPad+m_spectrumHeight+5+
+			 m_tickSize+(nomSpacer*hf)));
 
 	  // draw the middle value if there is space
 	  if (w > (3 * tmsc)) {
 	    double mid = m_minC+((m_maxC-m_minC)/2.0);
 	    gx.drawLine(m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2),
-			(m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5),
+			(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
+			 m_axisPad+m_spectrumHeight+5),
 			m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2),
-			(m_YaxisEnd+hf+m_tickSize+m_axisPad+m_spectrumHeight+5+m_tickSize));
+			(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
+			 m_axisPad+m_spectrumHeight+5+m_tickSize));
 	    fieldWidthC = (int)((Math.log(mid)/Math.log(10)))+1;
 	    maxStringC = Utils.doubleToString(mid,
 					      fieldWidthC+1+precisionC,
@@ -811,15 +840,16 @@ public class VisualizePanel extends JPanel {
 	    mswc = m_labelMetrics.stringWidth(maxStringC);
 	    gx.drawString(maxStringC,
 			  m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2)-(mswc/2),
-			  (m_YaxisEnd+hf+m_tickSize+
-			   m_axisPad+m_spectrumHeight+5+m_tickSize+hf));
+			  (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
+			   m_axisPad+m_spectrumHeight+5+
+			   m_tickSize+hf));
 	  }
 	}
       }
 
       // draw axis
       gx.setColor(Color.black);
-      //      if (m_plotInstances.attribute(m_xIndex).isNumeric()) {
+      if (m_plotInstances.attribute(m_xIndex).isNumeric()) {
 	if (w > (2 * mswx)) {
 	  gx.drawString(maxStringX, 
 			m_XaxisEnd-(mswx/2),
@@ -850,9 +880,58 @@ public class VisualizePanel extends JPanel {
 	    gx.drawLine((int)mx,m_YaxisEnd,(int)mx,m_YaxisEnd+m_tickSize);
 	  }
 	}
-	//}
+      } else {
+	int numValues = m_plotInstances.attribute(m_xIndex).numValues();
+	int div = (numValues % 2 > 0) ? (numValues/2)+1 : (numValues/2);
+	int maxXStringWidth = (m_XaxisEnd - m_XaxisStart) / numValues;
 
-	//      if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
+	for (int i=0;i<numValues;i++) {
+	  String val = m_plotInstances.attribute(m_xIndex).value(i);
+	  int sw = m_labelMetrics.stringWidth(val);
+	  int rm;
+	  // truncate string if necessary
+	  if (sw > maxXStringWidth) {
+	    int incr = (sw / val.length());
+	    rm = (sw - maxXStringWidth) / incr;
+	    if (rm == 0) {
+	      rm = 1;
+	    }
+	    val = val.substring(0,val.length()-rm);
+	    sw = m_labelMetrics.stringWidth(val);
+	  }
+	  if (i == 0) {
+	    gx.drawString(val,(int)convertToPanelX(i),
+			  m_YaxisEnd+hf+m_tickSize);
+	  } else if (i == numValues -1) {
+	    if ((i % 2) == 0) {
+	      gx.drawString(val,
+			    m_XaxisEnd-sw,
+			    m_YaxisEnd+hf+m_tickSize);
+	    } else {
+	       gx.drawString(val,
+			    m_XaxisEnd-sw,
+			    m_YaxisEnd+(2*hf)+m_tickSize);
+	    }
+	  } else {
+	    if ((i % 2) == 0) {
+	      gx.drawString(val,
+			    (int)convertToPanelX(i)-(sw/2),
+			    m_YaxisEnd+hf+m_tickSize);
+	    } else {
+	      gx.drawString(val,
+			    (int)convertToPanelX(i)-(sw/2),
+			    m_YaxisEnd+(2*hf)+m_tickSize);
+	    }
+	  }
+	  gx.drawLine((int)convertToPanelX(i),
+		      m_YaxisEnd,
+		      (int)convertToPanelX(i),
+		      m_YaxisEnd+m_tickSize);
+	}
+	
+      }
+
+      if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
 	if (h > (2 * hf)) {
 	  gx.drawString(maxStringY, 
 			m_XaxisStart-mswy-m_tickSize,
@@ -880,7 +959,65 @@ public class VisualizePanel extends JPanel {
 	    gx.drawLine(m_XaxisStart-m_tickSize,(int)mx,m_XaxisStart,(int)mx);
 	  }
 	}
-	//      }
+      } else {
+	int numValues = m_plotInstances.attribute(m_yIndex).numValues();
+	int div = ((numValues % 2) == 0) ? (numValues/2) : (numValues/2+1);
+	int maxYStringHeight = (m_YaxisEnd - m_XaxisStart) / div;
+	int sw = m_labelMetrics.stringWidth("M");
+	for (int i=0;i<numValues;i++) {
+	  // can we at least print 2 characters
+	  if (maxYStringHeight >= (2*hf)) {
+	    String val = m_plotInstances.attribute(m_yIndex).value(i);
+	    int numPrint = ((maxYStringHeight/hf) > val.length()) ?
+	      val.length() :
+	      (maxYStringHeight/hf);
+	    
+	    for (int j=0;j<numPrint;j++) {
+	      String ll = val.substring(j,j+1);
+	      if (val.charAt(j) == '_' || val.charAt(j) == '-') {
+		ll = "|";
+	      }
+	      if (i == 0) {
+		gx.drawString(ll,m_XaxisStart-sw-m_tickSize-1,
+			      (int)convertToPanelY(i)
+			      -((numPrint-1)*hf)
+			      +(j*hf)
+			      +(hf/2));
+	      } else if (i == (numValues-1)) {
+		if ((i % 2) == 0) {
+		  gx.drawString(ll,m_XaxisStart-sw-m_tickSize-1,
+				(int)convertToPanelY(i)
+				+(j*hf)
+				+(hf/2));
+		} else {
+		  gx.drawString(ll,m_XaxisStart-(2*sw)-m_tickSize-1,
+				(int)convertToPanelY(i)
+				+(j*hf)
+				+(hf/2));
+		}
+	      } else {
+		if ((i % 2) == 0) {
+		  gx.drawString(ll,m_XaxisStart-sw-m_tickSize-1,
+				(int)convertToPanelY(i)
+				-(((numPrint-1)*hf)/2)
+				+(j*hf)
+				+(hf/2));
+		} else {
+		  gx.drawString(ll,m_XaxisStart-(2*sw)-m_tickSize-1,
+				(int)convertToPanelY(i)
+				-(((numPrint-1)*hf)/2)
+				  +(j*hf)
+				+(hf/2));
+		}
+	      }
+	    }
+	  }
+	  gx.drawLine(m_XaxisStart-m_tickSize,
+		      (int)convertToPanelY(i),
+		      m_XaxisStart,
+		      (int)convertToPanelY(i));
+	}
+      }
 
       gx.drawLine(m_XaxisStart,
 		  m_YaxisStart,
