@@ -32,7 +32,7 @@ import  weka.filters.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class PrincipalComponents extends AttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -617,7 +617,7 @@ public class PrincipalComponents extends AttributeEvaluator
    */
   private Instance convertInstanceToOriginal(Instance inst)
     throws Exception {
-    double[] newVals;
+    double[] newVals = null;
 
     if (m_hasClass) {
       newVals = new double[m_numAttribs+1];
@@ -627,16 +627,16 @@ public class PrincipalComponents extends AttributeEvaluator
 
     if (m_hasClass) {
       // class is always appended as the last attribute
-      newVals[m_numAttribs] = inst.value(inst.numAttributes());
+      newVals[m_numAttribs] = inst.value(inst.numAttributes() - 1);
     }
 
-    for (int i = 1; i < m_eTranspose[0].length; i++) {
+    for (int i = 0; i < m_eTranspose[0].length; i++) {
       double tempval = 0.0;
-      for (int j=1;j<m_eTranspose.length;j++) {
+      for (int j = 1; j < m_eTranspose.length; j++) {
 	tempval += (m_eTranspose[j][i] * 
-		    inst.value(j));
+		    inst.value(j - 1));
        }
-      newVals[i - 1] = tempval;
+      newVals[i] = tempval;
     }
     
     if (inst instanceof SparseInstance) {
