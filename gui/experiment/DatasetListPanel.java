@@ -21,6 +21,8 @@ package weka.gui.experiment;
 
 import weka.experiment.Experiment;
 
+import weka.gui.ExtensionFileFilter;
+import java.io.File;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -41,7 +43,6 @@ import javax.swing.JList;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
-import java.io.File;
 
 
 /** 
@@ -49,7 +50,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -66,21 +67,8 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   protected JButton m_DeleteBut = new JButton("Delete selected");
 
   /** A filter to ensure only arff files get selected */
-  protected FileFilter m_ArffFilter = new FileFilter() {
-    public String getDescription() {
-      return "Arff data files";
-    }
-    public boolean accept(File file) {
-      String name = file.getName().toLowerCase();
-      if (file.isDirectory()) {
-	return true;
-      }
-      if (name.endsWith(".arff")) {
-	return true;
-      }
-      return false;
-    }
-  };
+  protected FileFilter m_ArffFilter =
+    new ExtensionFileFilter(".arff", "Arff data files");
 
   /** The file chooser component */
   protected JFileChooser m_FileChooser = new JFileChooser();

@@ -19,7 +19,9 @@
 
 package weka.gui.experiment;
 
+import weka.gui.ExtensionFileFilter;
 import weka.gui.ListSelectorDialog;
+import weka.gui.ResultHistoryPanel;
 import weka.experiment.Experiment;
 import weka.experiment.InstancesResultListener;
 import weka.experiment.DatabaseResultListener;
@@ -60,13 +62,20 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.JOptionPane;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.awt.Insets;
+import java.awt.Dimension;
+import javax.swing.SwingUtilities;
 
 
 /** 
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -85,11 +94,34 @@ public class ResultsPanel extends JPanel {
   /** Displays a message about the current result set */
   protected JLabel m_FromLab = new JLabel(NO_SOURCE);
 
+  /**
+   * This is needed to get around a bug in Swing <= 1.1 -- Once everyone
+   * is using Swing 1.1.1 or higher just remove this variable and use the
+   * no-arg constructor to DefaultComboBoxModel
+   */
+  static private String [] FOR_JFC_1_1_DCBM_BUG = {""};
+
+  /** The model embedded in m_DatasetCombo */
+  protected DefaultComboBoxModel m_DatasetModel =
+    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
+  
+  /** The model embedded in m_RunCombo */
+  protected DefaultComboBoxModel m_RunModel =
+    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
+  
+  /** The model embedded in m_CompareCombo */
+  protected DefaultComboBoxModel m_CompareModel = 
+    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
+  
+  /** The model embedded in m_TestsCombo */
+  protected DefaultComboBoxModel m_TestsModel = 
+    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
+  
   /** Lets the user select which column contains the datset name */
-  protected JComboBox m_DatasetCombo = new JComboBox();
+  protected JComboBox m_DatasetCombo = new JComboBox(m_DatasetModel);
 
   /** Lets the user select which column contains the run number */
-  protected JComboBox m_RunCombo = new JComboBox();
+  protected JComboBox m_RunCombo = new JComboBox(m_RunModel);
 
   /** Displays the currently selected column names for the scheme & options */
   protected JLabel m_ResultKeyLabel = new JLabel("Result key fields",
@@ -105,45 +137,33 @@ public class ResultsPanel extends JPanel {
   protected JList m_ResultKeyList = new JList(m_ResultKeyModel);
 
   /** Lets the user select which performance measure to analyze */
-  protected JComboBox m_CompareCombo = new JComboBox();
+  protected JComboBox m_CompareCombo = new JComboBox(m_CompareModel);
 
   /** Lets the user edit the test significance */
   protected JTextField m_SigTex = new JTextField("0.05");
 
   /** Lets the user select which scheme to base comparisons against */
-  protected JComboBox m_TestsCombo = new JComboBox();
+  protected JComboBox m_TestsCombo = new JComboBox(m_TestsModel);
 
   /** Click to start the test */
   protected JButton m_PerformBut = new JButton("Perform test");
 
   /** Displays the output of tests */
-  protected JTextArea m_OutputTex = new JTextArea();
+  protected JTextArea m_OutText = new JTextArea();
+
+  /** A panel controlling results viewing */
+  protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
 
   /** Filter to ensure only arff files are selected for result files */  
-  protected FileFilter m_ArffFilter = new FileFilter() {
-    public String getDescription() {
-      return "Arff data files";
-    }
-    public boolean accept(File file) {
-      String name = file.getName().toLowerCase();
-      if (file.isDirectory()) {
-	return true;
-      }
-      if (name.endsWith(".arff")) {
-	return true;
-      }
-      return false;
-    }
-  };
+  protected FileFilter m_ArffFilter =
+    new ExtensionFileFilter(".arff", "Arff data files");
+
   
   /** The file chooser for selecting result files */
   protected JFileChooser m_FileChooser = new JFileChooser();
 
   /** The PairedTTester object */
   protected PairedTTester m_TTester = new PairedTTester();
-  
-  /** The names of the attributes in the instance set */
-  protected String [] m_AttributeNames;
   
   /** The instances we're extracting results from */
   protected Instances m_Instances;
@@ -164,6 +184,8 @@ public class ResultsPanel extends JPanel {
     }
   };
   
+  private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut
+					       .getPreferredSize().height);
   /**
    * Creates the results panel with no initial experiment.
    */
@@ -216,6 +238,7 @@ public class ResultsPanel extends JPanel {
 	}
       }
     });
+    setComboSizes();
     m_DatasetCombo.setEnabled(false);
     m_DatasetCombo.addActionListener(m_ConfigureListener);
     m_RunCombo.setEnabled(false);
@@ -237,9 +260,10 @@ public class ResultsPanel extends JPanel {
 	performTest();
       }
     });
-    m_OutputTex.setFont(new Font("Dialoginput", Font.PLAIN, 10));
-    m_OutputTex.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    m_OutputTex.setEditable(false);
+    m_OutText.setFont(new Font("Dialoginput", Font.PLAIN, 10));
+    m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    m_OutText.setEditable(false);
+    m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
 
 
     // Set up the GUI layout
@@ -255,49 +279,146 @@ public class ResultsPanel extends JPanel {
     p1.add(p2, BorderLayout.EAST);
 
     JPanel p3 = new JPanel();
-    p3.setBorder(BorderFactory.createTitledBorder("Configure fields"));
-    p3.setLayout(new GridLayout(3, 2, 10, 5));
-    p3.add(new JLabel("Dataset field", SwingConstants.RIGHT));
+    p3.setBorder(BorderFactory.createTitledBorder("Configure test"));
+    GridBagLayout gbL = new GridBagLayout();
+    p3.setLayout(gbL);
+    JLabel lab = new JLabel("Dataset field", SwingConstants.RIGHT);
+    GridBagConstraints gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 0;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.gridy = 0;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbL.setConstraints(m_DatasetCombo, gbC);
     p3.add(m_DatasetCombo);
-    p3.add(new JLabel("Run field", SwingConstants.RIGHT));
+
+    lab = new JLabel("Run field", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 1;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.gridy = 1;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbL.setConstraints(m_RunCombo, gbC);
     p3.add(m_RunCombo);
-    p3.add(m_ResultKeyLabel);
-    p3.add(m_ResultKeyBut);
-
-    JPanel p4 = new JPanel();
-    p4.setBorder(BorderFactory.createTitledBorder("Configure test"));
-    p4.setLayout(new GridLayout(3, 2, 10, 5));
-    p4.add(new JLabel("Comparison field", SwingConstants.RIGHT));
-    p4.add(m_CompareCombo);
-    p4.add(new JLabel("Significance", SwingConstants.RIGHT));
-    p4.add(m_SigTex);
-    p4.add(new JLabel("Test base", SwingConstants.RIGHT));
-    p4.add(m_TestsCombo);
-
-    JPanel p5 = new JPanel();
-    p5.setLayout(new GridLayout(1,2));
-    p5.add(p3, BorderLayout.NORTH);
-    p5.add(p4, BorderLayout.SOUTH);
-
-    JPanel p6 = new JPanel();
-    p6.setLayout(new BorderLayout());
-    p6.add(p1, BorderLayout.NORTH);
-    p6.add(p5, BorderLayout.SOUTH);
-
-    JPanel p7 = new JPanel();
-    p7.setLayout(new BorderLayout());
-    p7.add(p6, BorderLayout.NORTH);
-    p7.add(m_PerformBut, BorderLayout.SOUTH);
     
-    setLayout(new BorderLayout());
-    add(p7, BorderLayout.NORTH);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 2;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(m_ResultKeyLabel, gbC);
+    p3.add(m_ResultKeyLabel);
+    gbC = new GridBagConstraints();
+    gbC.gridy = 2;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbL.setConstraints(m_ResultKeyBut, gbC);
+    p3.add(m_ResultKeyBut);
+    
+    lab = new JLabel("Comparison field", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 3;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.gridy = 3;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbL.setConstraints(m_CompareCombo, gbC);
+    p3.add(m_CompareCombo);
+    
+    lab = new JLabel("Significance", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 4;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.gridy = 4;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbL.setConstraints(m_SigTex, gbC);
+    p3.add(m_SigTex);
+    
+    lab = new JLabel("Test base", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = 5;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(lab, gbC);
+    p3.add(lab);
+    gbC = new GridBagConstraints();
+    gbC.gridy = 5;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbL.setConstraints(m_TestsCombo, gbC);
+    p3.add(m_TestsCombo);
+
     JPanel output = new JPanel();
     output.setLayout(new BorderLayout());
     output.setBorder(BorderFactory.createTitledBorder("Test output"));
-    output.add(new JScrollPane(m_OutputTex), BorderLayout.CENTER);
-    add(output , BorderLayout.CENTER);
+    output.add(new JScrollPane(m_OutText), BorderLayout.CENTER);
+
+    JPanel mondo = new JPanel();
+    gbL = new GridBagLayout();
+    mondo.setLayout(gbL);
+    gbC = new GridBagConstraints();
+    //    gbC.anchor = GridBagConstraints.WEST;
+    //    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = 0;     gbC.gridx = 0;
+    gbL.setConstraints(p3, gbC);
+    mondo.add(p3);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.NORTH;
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = 1;     gbC.gridx = 0;
+    gbL.setConstraints(m_PerformBut, gbC);
+    mondo.add(m_PerformBut);
+    gbC = new GridBagConstraints();
+    //gbC.anchor = GridBagConstraints.NORTH;
+    gbC.fill = GridBagConstraints.BOTH;
+    gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
+    gbL.setConstraints(m_History, gbC);
+    mondo.add(m_History);
+    gbC = new GridBagConstraints();
+    gbC.fill = GridBagConstraints.BOTH;
+    gbC.gridy = 0;     gbC.gridx = 1;
+    gbC.gridheight = 3;
+    gbC.weightx = 100; gbC.weighty = 100;
+    gbL.setConstraints(output, gbC);
+    mondo.add(output);
+
+    setLayout(new BorderLayout());
+    add(p1, BorderLayout.NORTH);
+    add(mondo , BorderLayout.CENTER);
   }
 
+  /**
+   * Sets the combo-boxes to a fixed size so they don't take up too much room
+   * that would be better devoted to the test output box
+   */
+  protected void setComboSizes() {
+    
+    m_DatasetCombo.setPreferredSize(COMBO_SIZE);
+    m_RunCombo.setPreferredSize(COMBO_SIZE);
+    m_ResultKeyBut.setPreferredSize(COMBO_SIZE);
+    m_CompareCombo.setPreferredSize(COMBO_SIZE);
+    m_SigTex.setPreferredSize(COMBO_SIZE);
+    m_TestsCombo.setPreferredSize(COMBO_SIZE);
+
+    m_DatasetCombo.setMaximumSize(COMBO_SIZE);
+    m_RunCombo.setMaximumSize(COMBO_SIZE);
+    m_ResultKeyBut.setMaximumSize(COMBO_SIZE);
+    m_CompareCombo.setMaximumSize(COMBO_SIZE);
+    m_SigTex.setMaximumSize(COMBO_SIZE);
+    m_TestsCombo.setMaximumSize(COMBO_SIZE);
+
+    m_DatasetCombo.setMinimumSize(COMBO_SIZE);
+    m_RunCombo.setMinimumSize(COMBO_SIZE);
+    m_ResultKeyBut.setMinimumSize(COMBO_SIZE);
+    m_CompareCombo.setMinimumSize(COMBO_SIZE);
+    m_SigTex.setMinimumSize(COMBO_SIZE);
+    m_TestsCombo.setMinimumSize(COMBO_SIZE);
+  }
   
   /**
    * Tells the panel to use a new experiment.
@@ -430,8 +551,13 @@ public class ResultsPanel extends JPanel {
 
     try {
       m_FromLab.setText("Reading from database, please wait...");
-      setInstances(m_InstanceQuery.getInstances("SELECT * FROM "
-						      + tableName));
+      final Instances i = m_InstanceQuery.getInstances("SELECT * FROM "
+						      + tableName);
+      SwingUtilities.invokeAndWait(new Runnable() {
+	public void run() {
+	  setInstances(i);
+	}
+      });
       m_InstanceQuery.disconnectFromDatabase();
     } catch (Exception ex) {
       m_FromLab.setText(ex.getMessage());
@@ -451,6 +577,7 @@ public class ResultsPanel extends JPanel {
       Reader r = new BufferedReader(new FileReader(f));
       setInstances(new Instances(r));
     } catch (Exception ex) {
+      ex.printStackTrace();
       m_FromLab.setText(ex.getMessage());
     }
   }
@@ -472,45 +599,51 @@ public class ResultsPanel extends JPanel {
     m_RunCombo.removeActionListener(m_ConfigureListener);
     
     // Do other stuff
-    m_AttributeNames = new String [m_Instances.numAttributes()];
-    for (int i = 0; i < m_AttributeNames.length; i++) {
-      m_AttributeNames[i] = m_Instances.attribute(i).name();
-    }
-
-    m_DatasetCombo.setModel(new DefaultComboBoxModel(m_AttributeNames));
-    int datasetCol = 0;
-    for (int i = 0; i < m_AttributeNames.length; i++) {
-      if (m_AttributeNames[i].toLowerCase().indexOf("dataset") != -1) {
+    m_DatasetModel.removeAllElements();
+    m_RunModel.removeAllElements();
+    m_ResultKeyModel.removeAllElements();
+    m_CompareModel.removeAllElements();
+    int datasetCol = -1;
+    int runCol = -1;
+    String selectedList = "";
+    for (int i = 0; i < m_Instances.numAttributes(); i++) {
+      String name = m_Instances.attribute(i).name();
+      m_DatasetModel.addElement(name);
+      m_RunModel.addElement(name);
+      m_ResultKeyModel.addElement(name);
+      m_CompareModel.addElement(name);
+      if ((datasetCol == -1)
+	  && (name.toLowerCase().indexOf("dataset") != -1)) {
 	m_DatasetCombo.setSelectedIndex(i);
 	datasetCol = i;
-	break;
       }
-    }
-    m_DatasetCombo.setEnabled(true);
-
-    m_RunCombo.setModel(new DefaultComboBoxModel(m_AttributeNames));
-    int runCol = 0;
-    for (int i = 0; i < m_AttributeNames.length; i++) {
-      if (m_AttributeNames[i].toLowerCase().indexOf("run") != -1) {
+      if ((runCol == -1)
+	  && (name.toLowerCase().indexOf("run") != -1)) {
 	m_RunCombo.setSelectedIndex(i);
 	runCol = i;
-	break;
       }
-    }
-    m_RunCombo.setEnabled(true);
-
-    m_ResultKeyModel.removeAllElements();
-    String selectedList = "";
-    for (int i = 0; i < m_AttributeNames.length; i++) {
-      m_ResultKeyModel.addElement(m_AttributeNames[i]);
-      if (m_AttributeNames[i].toLowerCase().startsWith("key_")) {
+      m_ResultKeyModel.addElement(name);
+      if (name.toLowerCase().startsWith("key_")) {
 	if ((i != datasetCol) && (i != runCol)) {
 	  m_ResultKeyList.addSelectionInterval(i, i);
 	  selectedList += "," + (i + 1);
 	}
       }
+      if (name.toLowerCase().indexOf("percent_correct") != -1) {
+	m_CompareCombo.setSelectedIndex(i);
+	break;
+      }
     }
+    if (datasetCol == -1) {
+      datasetCol = 0;
+    }
+    if (runCol == -1) {
+      runCol = 0;
+    }
+    m_DatasetCombo.setEnabled(true);
+    m_RunCombo.setEnabled(true);
     m_ResultKeyBut.setEnabled(true);
+    m_CompareCombo.setEnabled(true);
     
     // Reconnect the configuration listener
     m_DatasetCombo.addActionListener(m_ConfigureListener);
@@ -530,16 +663,6 @@ public class ResultsPanel extends JPanel {
     }
     m_TTester.setResultsetKeyColumns(generatorRange);
 
-    // Default test configurations
-    m_CompareCombo.setModel(new DefaultComboBoxModel(m_AttributeNames));
-    for (int i = 0; i < m_AttributeNames.length; i++) {
-      if (m_AttributeNames[i].toLowerCase().indexOf("percent_correct") != -1) {
-	m_CompareCombo.setSelectedIndex(i);
-	break;
-      }
-    }
-    m_CompareCombo.setEnabled(true);
-
     m_SigTex.setEnabled(true);
 
     setTTester();
@@ -550,15 +673,26 @@ public class ResultsPanel extends JPanel {
    */
   protected void setTTester() {
     
-    m_OutputTex.append("Available resultsets\n"
-		       + m_TTester.resultsetKey() + "\n\n");
+    String name = (new SimpleDateFormat("HH:mm:ss - "))
+      .format(new Date())
+      + "Available resultsets";
+    StringBuffer outBuff = new StringBuffer();
+    outBuff.append("Available resultsets\n"
+		   + m_TTester.resultsetKey() + "\n\n");
+    m_History.addResult(name, outBuff);
+    m_History.setSingle(name);
 
-    String [] testTypes = new String[m_TTester.getNumResultsets() + 1];
+    m_TestsModel.removeAllElements();
     for (int i = 0; i < m_TTester.getNumResultsets(); i++) {
-      testTypes[i] = m_TTester.getResultsetName(i);
+      String tname = m_TTester.getResultsetName(i);
+      if (tname.length() > 20) {
+	tname = tname.substring(0, 20);
+      }
+      m_TestsModel.addElement(tname);
     }
-    testTypes[testTypes.length - 1] = "Summary";
-    m_TestsCombo.setModel(new DefaultComboBoxModel(testTypes));
+    m_TestsModel.addElement("Summary");
+    m_TestsModel.addElement("Ranking");
+    m_TestsCombo.setSelectedIndex(0);
     m_TestsCombo.setEnabled(true);
 
     m_PerformBut.setEnabled(true);
@@ -579,20 +713,30 @@ public class ResultsPanel extends JPanel {
     }
 
     // Carry out the test chosen and biff the results to the output area
+    int compareCol = m_CompareCombo.getSelectedIndex();
+    int tType = m_TestsCombo.getSelectedIndex();
+    String name = (new SimpleDateFormat("HH:mm:ss - "))
+      .format(new Date())
+      + (String) m_CompareCombo.getSelectedItem() + " - "
+      + (String) m_TestsCombo.getSelectedItem();
+    StringBuffer outBuff = new StringBuffer();
+    outBuff.append(m_TTester.header(compareCol));
+    outBuff.append("\n");
+    m_History.addResult(name, outBuff);
+    m_History.setSingle(name);
     try {
-      int compareCol = m_CompareCombo.getSelectedIndex();
-      int tType = m_TestsCombo.getSelectedIndex();
-      m_OutputTex.append(m_TTester.header(compareCol));
-      m_OutputTex.append("\n");
       if (tType < m_TTester.getNumResultsets()) {
-	m_OutputTex.append(m_TTester.multiResultsetFull(tType, compareCol));
+	outBuff.append(m_TTester.multiResultsetFull(tType, compareCol));
+      } else if (tType == m_TTester.getNumResultsets()) {
+	outBuff.append(m_TTester.multiResultsetSummary(compareCol));
       } else {
-	m_OutputTex.append(m_TTester.multiResultsetSummary(compareCol));
+	outBuff.append(m_TTester.multiResultsetRanking(compareCol));
       }
-      m_OutputTex.append("\n");
+      outBuff.append("\n");
     } catch (Exception ex) {
-      m_OutputTex.append(ex.getMessage() + "\n");
+      outBuff.append(ex.getMessage() + "\n");
     }
+    m_History.updateResult(name);
   }
 
   
@@ -645,6 +789,7 @@ public class ResultsPanel extends JPanel {
 	}
       });
       jf.pack();
+      jf.setSize(700, 550);
       jf.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();

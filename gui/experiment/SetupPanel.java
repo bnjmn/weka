@@ -24,6 +24,7 @@ import weka.core.Tag;
 import weka.core.SelectedTag;
 import weka.core.Utils;
 
+import weka.gui.ExtensionFileFilter;
 import weka.gui.SelectedTagEditor;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericArrayEditor;
@@ -36,6 +37,16 @@ import weka.experiment.ResultListener;
 import weka.experiment.CrossValidationResultProducer;
 import weka.experiment.DatabaseResultListener;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.BufferedInputStream;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -50,7 +61,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JFrame;
@@ -61,28 +71,38 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.BufferedInputStream;
-import java.beans.PropertyChangeSupport;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
 
 
 /** 
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SetupPanel extends JPanel {
 
   /** The experiment being configured */
   protected Experiment m_Exp;
+
+  /** Click to load an experiment */
+  protected JButton m_OpenBut = new JButton("Open...");
+
+  /** Click to save an experiment */
+  protected JButton m_SaveBut = new JButton("Save...");
+
+  /** Click to create a new experiment with default settings */
+  protected JButton m_NewBut = new JButton("New");
+
+  /** A filter to ensure only experiment files get shown in the chooser */
+  protected FileFilter m_ExpFilter = 
+    new ExtensionFileFilter(".exp", "Experiment configuration files");
+
+  /** The file chooser for selecting experiments */
+  protected JFileChooser m_FileChooser = new JFileChooser();
 
   /** The ResultProducer editor */
   protected GenericObjectEditor m_RPEditor = new GenericObjectEditor();
@@ -157,6 +177,25 @@ public class SetupPanel extends JPanel {
    */
   public SetupPanel() {
 
+    m_NewBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	setExperiment(new Experiment());
+      }
+    });
+    m_SaveBut.setEnabled(false);
+    m_SaveBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	saveExperiment();
+      }
+    });
+    m_OpenBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	openExperiment();
+      }
+    });
+    m_FileChooser.setFileFilter(m_ExpFilter);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    
     m_RPEditor.setClassType(ResultProducer.class);
     m_RPEditor.setEnabled(false);
     m_RPEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -195,6 +234,12 @@ public class SetupPanel extends JPanel {
     });
 
     // Set up the GUI layout
+    JPanel buttons = new JPanel();
+    buttons.setLayout(new GridLayout(1, 3));
+    buttons.add(m_OpenBut);
+    buttons.add(m_SaveBut);
+    buttons.add(m_NewBut);
+    
     JPanel src = new JPanel();
     src.setLayout(new BorderLayout());
     src.setBorder(BorderFactory.createCompoundBorder(
@@ -235,8 +280,12 @@ public class SetupPanel extends JPanel {
     p2.add(iterators);
     p2.add(notes);
 
+    JPanel p3 = new JPanel();
+    p3.setLayout(new BorderLayout());
+    p3.add(buttons, BorderLayout.NORTH);
+    p3.add(top, BorderLayout.SOUTH);
     setLayout(new BorderLayout());
-    add(top, BorderLayout.NORTH);
+    add(p3, BorderLayout.NORTH);
     add(p2, BorderLayout.CENTER);
   }
   
@@ -248,6 +297,7 @@ public class SetupPanel extends JPanel {
   public void setExperiment(Experiment exp) {
 
     m_Exp = exp;
+    m_SaveBut.setEnabled(true);
     m_RPEditor.setValue(m_Exp.getResultProducer());
     m_RPEditor.setEnabled(true);
     m_RPEditorPanel.repaint();
@@ -260,9 +310,77 @@ public class SetupPanel extends JPanel {
     m_GeneratorPropertyPanel.setExperiment(m_Exp);
     m_RunNumberPanel.setExperiment(m_Exp);
     m_DatasetListPanel.setExperiment(m_Exp);
+    m_Support.firePropertyChange("", null, null);
   }
 
+  /**
+   * Gets the currently configured experiment.
+   *
+   * @return the currently configured experiment.
+   */
+  public Experiment getExperiment() {
+
+    return m_Exp;
+  }
   
+  /**
+   * Prompts the user to select an experiment file and loads it.
+   */
+  private void openExperiment() {
+    
+    int returnVal = m_FileChooser.showOpenDialog(this);
+    if (returnVal != JFileChooser.APPROVE_OPTION) {
+      return;
+    }
+    File expFile = m_FileChooser.getSelectedFile();
+    try {
+      FileInputStream fi = new FileInputStream(expFile);
+      ObjectInputStream oi = new ObjectInputStream(
+			     new BufferedInputStream(fi));
+      Experiment exp = (Experiment)oi.readObject();
+      oi.close();
+      setExperiment(exp);
+      System.err.println("Opened experiment:\n" + m_Exp);
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(this, "Couldn't open experiment file:\n"
+				    + expFile
+				    + "\nReason:\n" + ex.getMessage(),
+				    "Open Experiment",
+				    JOptionPane.ERROR_MESSAGE);
+      // Pop up error dialog
+    }
+  }
+
+  /**
+   * Prompts the user for a filename to save the experiment to, then saves
+   * the experiment.
+   */
+  private void saveExperiment() {
+
+    int returnVal = m_FileChooser.showSaveDialog(this);
+    if (returnVal != JFileChooser.APPROVE_OPTION) {
+      return;
+    }
+    File expFile = m_FileChooser.getSelectedFile();
+    if (!expFile.getName().toLowerCase().endsWith(".exp")) {
+      expFile = new File(expFile.getParent(), expFile.getName() + ".exp");
+    }
+    try {
+      FileOutputStream fo = new FileOutputStream(expFile);
+      ObjectOutputStream oo = new ObjectOutputStream(
+			      new BufferedOutputStream(fo));
+      oo.writeObject(m_Exp);
+      oo.close();
+      System.err.println("Saved experiment:\n" + m_Exp);
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(this, "Couldn't save experiment file:\n"
+				    + expFile
+				    + "\nReason:\n" + ex.getMessage(),
+				    "Save Experiment",
+				    JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
   /**
    * Adds a PropertyChangeListener who will be notified of value changes.
    *

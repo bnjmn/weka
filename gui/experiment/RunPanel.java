@@ -19,6 +19,7 @@
 
 package weka.gui.experiment;
 
+import weka.gui.LogPanel;
 import weka.experiment.Experiment;
 import weka.core.Utils;
 
@@ -54,7 +55,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -67,12 +68,7 @@ public class RunPanel extends JPanel implements ActionListener {
   /** Click to signal the running experiment to halt */
   protected JButton m_StopBut = new JButton("Stop");
 
-  /** Shows current status of the run */
-  protected JLabel m_StatusLab = new JLabel(NOT_RUNNING,
-					    SwingConstants.CENTER);
-
-  /** Displays error and some status messages */
-  protected JTextArea m_ErrorLog = new JTextArea();
+  protected LogPanel m_Log = new LogPanel();
 
   /** The experiment to run */
   protected Experiment m_Exp;
@@ -121,10 +117,10 @@ public class RunPanel extends JPanel implements ActionListener {
       m_StopBut.setEnabled(true);
       try {
 	logMessage("Started");
-	m_StatusLab.setText("Initializing...");
+	statusMessage("Initializing...");
 	m_ExpCopy.initialize();
 	int errors = 0;
-	m_StatusLab.setText("Iterating...");
+	statusMessage("Iterating...");
 	while (m_RunThread != null && m_ExpCopy.hasMoreIterations()) {
 	  try {
 	    String current = "Iteration:";
@@ -139,7 +135,7 @@ public class RunPanel extends JPanel implements ActionListener {
 	      .elementAt(m_ExpCopy.getCurrentDatasetNumber())).getName();
 	    current += " Dataset=" + dname
 	      + " Run=" + (m_ExpCopy.getCurrentRunNumber());
-	    m_StatusLab.setText(current);
+	    statusMessage(current);
 	    m_ExpCopy.nextIteration();
 	  } catch (Exception ex) {
 	    errors ++;
@@ -152,7 +148,7 @@ public class RunPanel extends JPanel implements ActionListener {
 	    }
 	  }
 	}
-	m_StatusLab.setText("Postprocessing...");
+	statusMessage("Postprocessing...");
 	m_ExpCopy.postProcess();
 	if (m_RunThread == null) {
 	  logMessage("Interrupted");
@@ -164,11 +160,11 @@ public class RunPanel extends JPanel implements ActionListener {
 	} else {
 	  logMessage("There were " + errors + " errors");
 	}
-	m_StatusLab.setText(NOT_RUNNING);
+	statusMessage(NOT_RUNNING);
       } catch (Exception ex) {
 	ex.printStackTrace();
 	System.err.println(ex.getMessage());
-	m_StatusLab.setText(ex.getMessage());
+	statusMessage(ex.getMessage());
       } finally {
 	m_RunThread = null;
 	m_StartBut.setEnabled(true);
@@ -188,31 +184,16 @@ public class RunPanel extends JPanel implements ActionListener {
     m_StopBut.addActionListener(this);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
-    m_StatusLab.setBorder(BorderFactory.createCompoundBorder(
-			  BorderFactory.createTitledBorder("Status"),
-			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));
-    m_ErrorLog.setEditable(false);
-    m_ErrorLog.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
+    m_Log.statusMessage(NOT_RUNNING);
 
     // Set the GUI layout
     JPanel controls = new JPanel();
     controls.setLayout(new GridLayout(1,2));
     controls.add(m_StartBut);
     controls.add(m_StopBut);
-
-    JPanel output = new JPanel();
-    output.setLayout(new BorderLayout());
-    output.add(m_StatusLab, BorderLayout.NORTH);
-    JPanel outputText = new JPanel();
-    outputText.setLayout(new BorderLayout());
-    outputText.setBorder(BorderFactory.createTitledBorder("Log"));
-    outputText.add(new JScrollPane(m_ErrorLog), BorderLayout.CENTER);
-    output.add(outputText, BorderLayout.CENTER);
-
     setLayout(new BorderLayout());
     add(controls, BorderLayout.NORTH);
-    add(output, BorderLayout.CENTER);
+    add(m_Log, BorderLayout.CENTER);
   }
     
   /**
@@ -234,9 +215,8 @@ public class RunPanel extends JPanel implements ActionListener {
   public void setExperiment(Experiment exp) {
     
     m_Exp = exp;
-    m_StartBut.setEnabled(true);
-    m_StopBut.setEnabled(false);
-    m_RunThread = null;
+    m_StartBut.setEnabled(m_RunThread == null);
+    m_StopBut.setEnabled(m_RunThread != null);
   }
   
   /**
@@ -264,24 +244,23 @@ public class RunPanel extends JPanel implements ActionListener {
   }
   
   /**
-   * Gets a string containing current date and time.
+   * Sends the supplied message to the log panel log area.
    *
-   * @return a string containing the date and time.
+   * @param message the message to log
    */
-  protected static String getTimestamp() {
+  protected void logMessage(String message) {
 
-    return (new SimpleDateFormat("yyyy.MM.dd hh:mm:ss")).format(new Date());
+    m_Log.logMessage(message);
   }
 
   /**
-   * Sends the supplied message to the log area. The current timestamp will
-   * be prepended.
+   * Sends the supplied message to the log panel status line.
    *
-   * @param message a value of type 'String'
+   * @param message the status message
    */
-  protected void logMessage(String message) {
+  protected void statusMessage(String message) {
     
-    m_ErrorLog.append(RunPanel.getTimestamp() + ' ' + message + '\n');
+    m_Log.statusMessage(message);
   }
   
   /**
