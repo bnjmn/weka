@@ -51,7 +51,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class Filter implements Serializable {
 
@@ -79,7 +79,7 @@ public abstract class Filter implements Serializable {
    */
   protected void setOutputFormat(Instances outputFormat) {
 
-    m_OutputFormat = outputFormat;
+    m_OutputFormat = new Instances(outputFormat);
     m_OutputQueue = new Queue();
   }
 
