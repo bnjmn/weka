@@ -56,7 +56,8 @@ import java.util.Vector;
  * the class attribute (if set) is automatically ignored during clustering.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @author Eibe Frank
+ * @version $Revision: 1.7 $
  */
 public class ClusterMembership extends Filter implements UnsupervisedFilter, 
 							 OptionHandler {
@@ -129,7 +130,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
 	toFilterIgnoringAttributes = new Instances[1];
 	toFilterIgnoringAttributes[0] = toFilter;
 	m_priors = new double[1];
-	m_priors[1] = 1;
+	m_priors[0] = 1;
       }
 
       // filter out attributes if necessary
