@@ -16,7 +16,7 @@ import weka.test.Regression;
  * Abstract Test class for Filters.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractFilterTest extends TestCase {
 
@@ -247,6 +247,43 @@ public abstract class AbstractFilterTest extends TestCase {
         System.err.println("Warning: No reference available, creating."); 
       } else if (!diff.equals("")) {
         fail("Regression test failed. Difference:\n" + diff);
+      }
+    } catch (java.io.IOException ex) {
+      fail("Problem during regression testing.\n" + ex);
+    }
+
+    reg = new Regression(this.getClass());
+
+    // Run the filter using deprecated calls to check it still works the same
+    Instances icopy = new Instances(m_Instances);
+    try {
+      m_Filter.inputFormat(icopy);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
+    }
+    try {
+      for (int i = 0; i < icopy.numInstances(); i++) {
+        m_Filter.input(icopy.instance(i));
+      }
+      m_Filter.batchFinished();
+      result = m_Filter.outputFormat();
+      weka.core.Instance processed;
+      while ((processed = m_Filter.output()) != null) {
+        result.add(processed);
+      }
+      assertNotNull(result);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on useFilter(): \n" + ex.getMessage());
+    }
+    reg.println(result.toString());
+    try {
+      String diff = reg.diff();
+      if (diff == null) {
+        System.err.println("Warning: No reference available, creating."); 
+      } else if (!diff.equals("")) {
+        fail("Regression test failed when using deprecated methods. Difference:\n" + diff);
       }
     } catch (java.io.IOException ex) {
       fail("Problem during regression testing.\n" + ex);
