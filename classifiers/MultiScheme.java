@@ -28,22 +28,25 @@ import weka.core.*;
  * Class for selecting a classifier from among several using cross 
  * validation on the training data.<p>
  *
- * Valid options are:<p>
+ * Valid options from the command line are:<p>
  *
  * -D <br>
  * Turn on debugging output.<p>
  *
- * -S learnerstring <br>
+ * -S seed <br>
+ * Random number seed (default 1).<p>
+ *
+ * -B learnerstring <br>
  * Learnerstring should contain the full class name of a scheme
  * included for selection followed by options to the learner
  * (required, option should be used once for each learner).<p>
  *
- * -X <br>
+ * -X num_folds <br>
  * Use cross validation error as the basis for learner selection.
- * The default is to use error on the training data instead.<p>
+ * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0 - 20 Dec 1998 - Initial version (Len)
+ * @version $Revision: 1.2 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -63,12 +66,17 @@ public class MultiScheme extends Classifier implements OptionHandler {
   /** The index into the vector for the selected scheme (and options) */
   protected int m_ClassifierIndex;
 
-  /** Use cross validation rather than training error for selection */
-  protected boolean b_SelectByXVal;
+  /**
+   * Number of folds to use for cross validation (0 means use training
+   * error for selection)
+   */
+  protected int m_NumXValFolds;
 
   /** Debugging mode, gives extra output if true */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
+  /** Random number seed */
+  protected int m_Seed = 1;
 
   // ===============
   // Public methods.
@@ -81,21 +89,25 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
 	      "\tTurn on debugging output.",
 	      "D", 0, "-D"));
     newVector.addElement(new Option(
-	      "\tFull class name of learner to include, followed "
-	      + "by scheme options\n"
-	      + "\t(may be specified multiple times).\n"
+	      "\tFull class name of learner to include, followed\n"
+	      + "\tby scheme options. May be specified multiple times,\n"
+	      + "\trequired at least twice.\n"
 	      + "\teg: \"weka.classifiers.NaiveBayes -D\"",
-	      "S", 1, "-S"));
+	      "B", 1, "-B <learner specification>"));
     newVector.addElement(new Option(
-	      "\tUse cross validation for model selection (default is to use\n"
-	      + "\ttraining error).",
-	      "X", 0, "-X"));
+	      "\tSets the random number seed (default 1).",
+	      "S", 1, "-S <random number seed>"));
+    newVector.addElement(new Option(
+	      "\tUse cross validation for model selection using the\n"
+	      + "\tgiven number of folds. (default 0, is to\n"
+	      + "\tuse training error)",
+	      "X", 1, "-X <number of folds>"));
     return newVector.elements();
   }
 
@@ -105,14 +117,17 @@ public class MultiScheme extends Classifier implements OptionHandler {
    * -D <br>
    * Turn on debugging output.<p>
    *
-   * -S learnerstring <br>
+   * -S seed <br>
+   * Random number seed (default 1).<p>
+   *
+   * -B learnerstring <br>
    * Learnerstring should contain the full class name of a scheme
    * included for selection followed by options to the learner
    * (required, option should be used once for each learner).<p>
    *
-   * -X <br>
+   * -X num_folds <br>
    * Use cross validation error as the basis for learner selection.
-   * The default is to use error on the training data instead.<p>
+   * (default 0, is to use error on the training data instead)<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -121,13 +136,25 @@ public class MultiScheme extends Classifier implements OptionHandler {
 
     setDebug(Utils.getFlag('D', options));
     
-    setSelectByXVal(Utils.getFlag('X', options));
+    String numFoldsString = Utils.getOption('X', options);
+    if (numFoldsString.length() != 0) {
+      setNumFolds(Integer.parseInt(numFoldsString));
+    } else {
+      setNumFolds(0);
+    }
     
+    String randomString = Utils.getOption('S', options);
+    if (randomString.length() != 0) {
+      setSeed(Integer.parseInt(randomString));
+    } else {
+      setSeed(1);
+    }
+
     // Iterate through the schemes
     m_ClassifierNames = null;
     m_ClassifierOptions = null;
     while (true) {
-      String learnerString = Utils.getOption('S', options);
+      String learnerString = Utils.getOption('B', options);
       if (learnerString.length() == 0) {
 	break;
       }
@@ -135,7 +162,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
     if ((m_ClassifierNames == null) || (m_ClassifierNames.size() <= 1)) {
       throw new Exception("At least two learners must be specified"
-			  + " with the -S option.");
+			  + " with the -B option.");
     }
   }
 
@@ -146,18 +173,19 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [2];
+    String [] options = new String [5];
     int current = 0;
 
     if (m_ClassifierNames != null) {
-      options = new String [m_ClassifierNames.size() * 2 + 2];
+      options = new String [m_ClassifierNames.size() * 2 + 5];
       for (int i = 0; i < m_ClassifierNames.size(); i++) {
-	options[current++] = "-S"; options[current++] = "" + getLearner(i);
+	options[current++] = "-B"; options[current++] = "" + getLearner(i);
       }
     }
-    if (getSelectByXVal()) {
-      options[current++] = "-X";
+    if (getNumFolds() > 1) {
+      options[current++] = "-X"; options[current++] = "" + getNumFolds();
     }
+    options[current++] = "-S"; options[current++] = "" + getSeed();
     if (getDebug()) {
       options[current++] = "-D";
     }
@@ -195,7 +223,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
 			  + learnerName);
     }
     if (tempClassifier instanceof OptionHandler) {
-      String [] options = splitOptions(learnerOptions);
+      String [] options = Utils.splitOptions(learnerOptions);
       ((OptionHandler)tempClassifier).setOptions(options);
     }
     // Everything good, so add the learner to the set.
@@ -211,7 +239,8 @@ public class MultiScheme extends Classifier implements OptionHandler {
    * Gets the learner string, which contains the class name of
    * the learner and any options to the learner
    *
-   * @param index the learner string to retrieve
+   * @param index the index of the learner string to retrieve, starting from
+   * 0.
    * @return the learner string, or the empty string if no learner
    * has been assigned (or the index given is out of range).
    */
@@ -222,7 +251,8 @@ public class MultiScheme extends Classifier implements OptionHandler {
       return "";
     }
     if ((m_ClassifierOptions == null) 
-	|| (m_ClassifierOptions.size() < index)) {
+	|| (m_ClassifierOptions.size() < index)
+	|| ((String)m_ClassifierOptions.elementAt(index)).equals("")) {
       return (String)m_ClassifierNames.elementAt(index);
     }
     return (String)m_ClassifierNames.elementAt(index) 
@@ -230,23 +260,45 @@ public class MultiScheme extends Classifier implements OptionHandler {
   }
 
   /**
-   * Set whether cross validation is used for model selection
+   * Sets the seed for random number generation.
    *
-   * @param selectByXVal true if cross validation is used
+   * @param seed the random number seed
    */
-  public void setSelectByXVal(boolean selectByXVal) {
-
-    b_SelectByXVal = selectByXVal;
+  public void setSeed(int seed) {
+    
+    m_Seed = seed;;
   }
 
   /**
-   * Get whether selection is by cross validation
-   *
-   * @return true if selection is by cross validation
+   * Gets the random number seed.
+   * 
+   * @return the random number seed
    */
-  public boolean getSelectByXVal() {
+  public int getSeed() {
 
-    return b_SelectByXVal;
+    return m_Seed;
+  }
+
+  /** 
+   * Gets the number of folds for cross-validation. A number less
+   * than 2 specifies using training error rather than cross-validation.
+   *
+   * @return the number of folds for cross-validation
+   */
+  public int getNumFolds() {
+
+    return m_NumXValFolds;
+  }
+
+  /**
+   * Sets the number of folds for cross-validation. A number less
+   * than 2 specifies using training error rather than cross-validation.
+   *
+   * @param numFolds the number of folds for cross-validation
+   */
+  public void setNumFolds(int numFolds) {
+    
+    m_NumXValFolds = numFolds;
   }
 
   /**
@@ -256,7 +308,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
 
   /**
@@ -266,7 +318,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
    */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
   /**
@@ -282,11 +334,11 @@ public class MultiScheme extends Classifier implements OptionHandler {
     if (m_ClassifierNames == null) {
       throw new Exception("No base learners have been set!");
     }
-    int numFolds = 10;
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
-    if (newData.classAttribute().isNominal())
-      newData.stratify(numFolds);
+    newData.randomize(new Random(m_Seed));
+    if (newData.classAttribute().isNominal() && (m_NumXValFolds > 1))
+      newData.stratify(m_NumXValFolds);
     Instances train = newData;               // train on all data by default
     Instances test = newData;               // test on training data by default
     Classifier bestClassifier = null;
@@ -299,17 +351,17 @@ public class MultiScheme extends Classifier implements OptionHandler {
       Classifier currentClassifier = (Classifier)Class.forName(learnerName)
 	.newInstance();
       if (currentClassifier instanceof OptionHandler) {
-	String [] options = splitOptions((String)m_ClassifierOptions
+	String [] options = Utils.splitOptions((String)m_ClassifierOptions
 					 .elementAt(i));
 	((OptionHandler)currentClassifier).setOptions(options);
       }
 
       Evaluation evaluation;
-      if (b_SelectByXVal) {
+      if (m_NumXValFolds > 1) {
 	evaluation = new Evaluation(newData);
-	for (int j = 0; j < numFolds; j++) {
-	  train = newData.trainCV(numFolds, j);
-	  test = newData.testCV(numFolds, j);
+	for (int j = 0; j < m_NumXValFolds; j++) {
+	  train = newData.trainCV(m_NumXValFolds, j);
+	  test = newData.testCV(m_NumXValFolds, j);
 	  currentClassifier.buildClassifier(train);
 	  evaluation.setPriors(train);
 	  evaluation.evaluateModel(currentClassifier, test);
@@ -321,7 +373,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
       }
 
       double error = evaluation.errorRate();
-      if (b_Debug) {
+      if (m_Debug) {
 	System.err.println("Error rate: " + Utils.doubleToString(error, 6, 4)
 			   + " for classifier " + learnerName);
       }
@@ -334,7 +386,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
     m_ClassifierIndex = bestIndex;
     m_Classifier = bestClassifier;
-    if (b_SelectByXVal) {
+    if (m_NumXValFolds > 1) {
       m_Classifier.buildClassifier(newData);
     }
   }
@@ -361,7 +413,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
 
     String result = "MultiScheme selection using";
-    if (b_SelectByXVal) {
+    if (m_NumXValFolds > 1) {
       result += " cross validation error";
     } else {
       result += " error on training data";
@@ -373,7 +425,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
 
     if (m_Classifier == null) {
-      return result + "no scheme selected yet";
+      return result + "No scheme selected yet";
     }
     result += "Selected scheme: "
       + (String)m_ClassifierNames.elementAt(m_ClassifierIndex)
@@ -399,28 +451,4 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
   }
 
-  // =================
-  // Protected Methods
-  // =================
-
-  /**
-   * Split up a string containing options into an array of strings,
-   * one for each option.
-   *
-   * @param optionString the string containing the options
-   * @return the array of options
-   */
-  protected String [] splitOptions(String optionString) {
-
-    FastVector optionsVec = new FastVector();
-    StringTokenizer st = new StringTokenizer(optionString);
-    while (st.hasMoreTokens())
-      optionsVec.addElement(st.nextToken());
-
-    String [] options = new String[optionsVec.size()];
-    for (int i = 0; i < optionsVec.size(); i++) {
-      options[i] = (String)optionsVec.elementAt(i);
-    }
-    return options;
-  }
 }
