@@ -23,47 +23,146 @@ package weka.classifiers.evaluation;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class NominalPrediction {
+public class NominalPrediction implements Prediction {
 
   /** The predicted probabilities */
   private double [] m_Distribution;
 
   /** The actual class value */
-  private int m_Actual;
+  private double m_Actual = MISSING_VALUE;
+
+  /** The predicted class value */
+  private double m_Predicted = MISSING_VALUE;
 
   /** The weight assigned to this prediction */
   private double m_Weight = 1;
 
-  public NominalPrediction(int actual, double [] distribution) {
+  /**
+   * Creates the NominalPrediction object with a default weight of 1.0.
+   *
+   * @param actual the actual value, or MISSING_VALUE.
+   * @param distribution the predicted probability distribution. Use 
+   * NominalPrediction.makeDistribution() if you only know the predicted value.
+   */
+  public NominalPrediction(double actual, double [] distribution) {
 
     this(actual, distribution, 1);
   }
 
-  public NominalPrediction(int actual, double [] distribution, double weight) {
+  /**
+   * Creates the NominalPrediction object.
+   *
+   * @param actual the actual value, or MISSING_VALUE.
+   * @param distribution the predicted probability distribution. Use 
+   * NominalPrediction.makeDistribution() if you only know the predicted value.
+   * @param weight the weight assigned to the prediction.
+   */
+  public NominalPrediction(double actual, double [] distribution, 
+                           double weight) {
 
     m_Actual = actual;
     m_Distribution = distribution;
     m_Weight = weight;
+    updatePredicted();
   }
 
   /** Gets the predicted probabilities */
-  public double [] distribution() { return m_Distribution; }
+  public double [] distribution() { 
 
-  /** Gets the actual class value */
-  public int actual() { return m_Actual; }
+    return m_Distribution; 
+  }
 
-  /** Gets the weight assigned to this prediction */
-  public double weight() { return m_Weight; }
+  /** 
+   * Gets the actual class value.
+   *
+   * @return the actual class value, or MISSING_VALUE if no
+   * prediction was made.  
+   */
+  public double actual() { 
+
+    return m_Actual; 
+  }
 
   /**
-   * Determine the predicted class (doesn't detect multiple 
-   * classifications).
+   * Gets the predicted class value.
    *
-   * @return the predicted class value, or -1 if no prediction was made.
+   * @return the predicted class value, or MISSING_VALUE if no
+   * prediction was made.  
    */
-  public int predicted() {
+  public double predicted() { 
+
+    return m_Predicted; 
+  }
+
+  /** 
+   * Gets the weight assigned to this prediction. This is typically the weight
+   * of the test instance the prediction was made for.
+   *
+   * @return the weight assigned to this prediction.
+   */
+  public double weight() { 
+
+    return m_Weight; 
+  }
+
+  /**
+   * Calculates the prediction margin. This is defined as the difference
+   * between the probability predicted for the actual class and the highest
+   * predicted probability of the other classes.
+   *
+   * @return the margin for this prediction, or
+   * MISSING_VALUE if either the actual or predicted value
+   * is missing.  
+   */
+  public double margin() {
+
+    if ((m_Actual == MISSING_VALUE) ||
+        (m_Predicted == MISSING_VALUE)) {
+      return MISSING_VALUE;
+    }
+    double probActual = m_Distribution[(int)m_Actual];
+    double probNext = 0;
+    for(int i = 0; i < m_Distribution.length; i++)
+      if ((i != m_Actual) &&
+	  (m_Distribution[i] > probNext))
+	probNext = m_Distribution[i];
+
+    return probActual - probNext;
+  }
+
+  /**
+   * Convert a single prediction into a probability distribution
+   * with all zero probabilities except the predicted value which
+   * has probability 1.0. If no prediction was made, all probabilities
+   * are zero.
+   *
+   * @param predictedClass the index of the predicted class, or 
+   * MISSING_VALUE if no prediction was made.
+   * @param numClasses the number of possible classes for this nominal
+   * prediction.
+   * @return the probability distribution.  
+   */
+  public static double [] makeDistribution(double predictedClass, 
+                                           int numClasses) {
+
+    double [] dist = new double [numClasses];
+    if (predictedClass == MISSING_VALUE) {
+      return dist;
+    }
+    dist[(int)predictedClass] = 1.0;
+    return dist;
+  }
+ 
+  /**
+   * Determines the predicted class (doesn't detect multiple 
+   * classifications). If no prediction was made (i.e. all zero
+   * probababilities in the distribution), m_Prediction is set to
+   * MISSING_VALUE.
+   */
+  private void updatePredicted() {
+
     int predictedClass = -1;
     double bestProb = 0.0;
     for(int i = 0; i < m_Distribution.length; i++) {
@@ -72,26 +171,12 @@ public class NominalPrediction {
         bestProb = m_Distribution[i];
       }
     }
-    return predictedClass;
-  }
 
-  /**
-   * Calculates the prediction margin. This is defined as the difference
-   * between the probability predicted for the actual class and the highest
-   * predicted probability of the other classes.
-   *
-   * @return the margin for this prediction.
-   */
-  public double margin() {
-
-    double probActual = m_Distribution[m_Actual];
-    double probNext = 0;
-    for(int i = 0; i < m_Distribution.length; i++)
-      if ((i != m_Actual) &&
-	  (m_Distribution[i] > probNext))
-	probNext = m_Distribution[i];
-
-    return probActual - probNext;
+    if (predictedClass != -1) {
+      m_Predicted = predictedClass;
+    } else {
+      m_Predicted = MISSING_VALUE;
+    }
   }
 }
 
