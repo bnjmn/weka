@@ -28,6 +28,7 @@ import java.util.*;
 import weka.core.*;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
+import weka.classifiers.UpdateableClassifier;
 
 /**
  * AODE achieves highly accurate classification by averaging over all
@@ -50,11 +51,11 @@ import weka.classifiers.Classifier;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  *  this version resolves errors in the handling of missing attribute values.
  */
 public class AODE extends Classifier
-                  implements OptionHandler, WeightedInstancesHandler {
+    implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier {
     
   /**
    * 3D array (m_NumClasses * m_TotalAttValues * m_TotalAttValues)
@@ -205,12 +206,22 @@ public class AODE extends Classifier
  
 
   /**
-   * Puts an instance's values into m_CondiCounts, m_ClassCounts and 
-   * m_SumInstances.
+   * Updates the classifier with the given instance.
    *
-   * @param instance the instance whose values are to be put into the counts variables
-   *
+   * @param instance the new training instance to include in the model 
+   * @exception Exception if the instance could not be incorporated in
+   * the model.
    */
+    public void updateClassifier(Instance instance) {
+	this.addToCounts(instance);
+    }
+
+    /** Puts an instance's values into m_CondiCounts, m_ClassCounts and 
+     * m_SumInstances.
+     *
+     * @param instance the instance whose values are to be put into the counts variables
+     *
+     */
   private void addToCounts(Instance instance) {
  
     double [] countsPointer;
