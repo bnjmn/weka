@@ -32,7 +32,6 @@ import weka.classifiers.bayes.net.search.*;
 import weka.classifiers.bayes.net.search.score.*;
 import weka.classifiers.bayes.net.estimate.*;
 
-
 /**
  * Base class for a Bayes Network classifier. Provides datastructures (network structure,
  * conditional probability distributions, etc.) and facilities common to Bayes Network
@@ -40,9 +39,9 @@ import weka.classifiers.bayes.net.estimate.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler {
+public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable {
 
     static {
         try {
@@ -513,6 +512,27 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
         return text.toString();
     } // toString
+
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+	  return Drawable.BayesNet;
+  }
+
+  /**
+	 Returns a BayesNet graph in XMLBIF ver
+	 0.3 format.
+	 @return - String representing this
+			   BayesNet in XMLBIF ver  0.3
+  */
+  public String graph() throws Exception {
+	  return toXMLBIF03();
+  }
+
 
     /**
      * Returns a description of the classifier in XML BIF 0.3 format.
