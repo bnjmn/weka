@@ -40,7 +40,9 @@ import weka.gui.CostMatrixEditor;
 import weka.gui.PropertyDialog;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
-import weka.gui.VisualizePanel;
+//import weka.gui.VisualizePanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
 import weka.gui.treevisualizer.*;
 
@@ -108,7 +110,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1085,10 +1087,22 @@ public class ClassifierPanel extends JPanel {
 	  } finally {
 	    if (predInstances != null) {
 	      m_CurrentVis = new VisualizePanel();
-	      m_CurrentVis.setInstances(predInstances);
-	      m_CurrentVis.setPredictions(predictions);
 	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
-	      m_CurrentVis.setColourIndex(predInstances.classIndex());
+	      PlotData2D tempd = new PlotData2D(predInstances);
+	      tempd.setPlotName(name+" ("+inst.relationName()+")");
+	      try {
+		tempd.setPredictions(predictions);
+		if (predInstances.
+		  attribute(predInstances.classIndex()).isNumeric()) {
+		    tempd.setPredictionsNumeric(true);
+		} else {
+		    tempd.setPredictionsNumeric(false);
+		}
+		m_CurrentVis.addPlot(tempd);
+		m_CurrentVis.setColourIndex(predInstances.classIndex());
+	      } catch (Exception ex) {
+		ex.printStackTrace();
+	      }
 	      try {
 		m_CurrentVis.setXIndex(m_visXIndex); 
 		m_CurrentVis.setYIndex(m_visYIndex);
@@ -1106,12 +1120,7 @@ public class ClassifierPanel extends JPanel {
 		}
 	      });
 	      
-	      if (predInstances.
-		  attribute(predInstances.classIndex()).isNumeric()) {
-		    m_CurrentVis.setPredictionsNumeric(true);
-		  } else {
-		    m_CurrentVis.setPredictionsNumeric(false);
-		  }
+	     
 	      if (saveVis) {
 		if (classifier instanceof Drawable && grph != null) {
 		  Object [] vv = new Object [2];

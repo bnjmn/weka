@@ -34,8 +34,10 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
-import weka.gui.VisualizePanel;
 import weka.filters.Filter;
+//import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
 import java.util.Random;
 import java.util.Date;
@@ -97,7 +99,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -726,11 +728,19 @@ public class ClustererPanel extends JPanel {
 	  } finally {
 	    if (predInstances != null) {
 	      m_CurrentVis = new VisualizePanel();
-	      m_CurrentVis.setPredictions(predictions);
-	      m_CurrentVis.setPredictionsNumeric(false);
 	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
+	      PlotData2D tempd = new PlotData2D(predInstances);
+	      tempd.setPlotName(name+" ("+inst.relationName()+")");
+	      try {
+		tempd.setPredictions(predictions);
+		m_CurrentVis.addPlot(tempd);
+	      } catch (Exception ex) {
+		ex.printStackTrace();
+	      }
+	      /*m_CurrentVis.setInstances(predInstances);
 	      m_CurrentVis.setColourIndex(-1);
-	      m_CurrentVis.setInstances(predInstances);
+	      m_CurrentVis.setPredictionsNumeric(false);
+	      m_CurrentVis.setPredictions(predictions); */
 	      try {
 		m_CurrentVis.setXIndex(m_visXIndex); m_CurrentVis.setYIndex(m_visYIndex);
 	      } catch (Exception ex) {
