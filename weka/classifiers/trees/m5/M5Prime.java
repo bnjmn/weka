@@ -67,6 +67,9 @@ public final class  M5Prime extends Classifier implements OptionHandler {
    */
   public final void buildClassifier(Instances inst) throws Exception{
 
+    if (inst.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     options = new Options(inst);
 
     options.model = m_Model;
@@ -74,7 +77,8 @@ public final class  M5Prime extends Classifier implements OptionHandler {
     options.pruningFactor = m_PruningFactor;
     options.verbosity = m_Verbosity;
 
-    if(inst.classAttribute().isNominal()) throw new Exception("class is nominal."); 
+    if(!inst.classAttribute().isNumeric()) 
+      throw new Exception("Class has to be numeric."); 
 
     inst = new Instances(inst);
     inst.deleteWithMissingClass();
@@ -309,7 +313,6 @@ public final class  M5Prime extends Classifier implements OptionHandler {
     try {
       System.out.println(Evaluation.evaluateModel(new M5Prime(), argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }

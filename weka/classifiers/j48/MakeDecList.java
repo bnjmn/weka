@@ -113,6 +113,9 @@ public class MakeDecList {
     
     if (data.classAttribute().isNumeric())
       throw new Exception("Class is numeric!");
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     
     theRules = new Vector();
     data = new Instances(data);

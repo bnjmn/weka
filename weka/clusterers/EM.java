@@ -565,8 +565,12 @@ public class EM extends DistributionClusterer implements OptionHandler
    */
   public void buildClusterer(Instances data) throws Exception
   {
+
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     theInstances = data;
-    
     doEM();
   }
 
@@ -704,7 +708,6 @@ public class EM extends DistributionClusterer implements OptionHandler
     }
     catch (Exception e)
     {
-      e.printStackTrace();
       System.out.println(e.getMessage());
     }
   }

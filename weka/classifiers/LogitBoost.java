@@ -409,7 +409,6 @@ public class LogitBoost extends DistributionClassifier
 
     Instances boostData, trainData;
     int classIndex = data.classIndex();
-    m_NumClasses = data.numClasses();
 
     if (data.classAttribute().isNumeric()) {
       throw new Exception("LogitBoost can't handle a numeric class!");
@@ -417,9 +416,14 @@ public class LogitBoost extends DistributionClassifier
     if (m_Classifiers == null) {
       throw new Exception("A weak learner has not been specified!");
     }
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     if (b_Debug) {
       System.err.println("Creating copy of the training data");
     }
+
+    m_NumClasses = data.numClasses();
     // Create a copy of the data with the class transformed into numeric
     boostData = new Instances(data);
     boostData.deleteWithMissingClass();

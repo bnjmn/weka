@@ -462,6 +462,9 @@ public class CVParameterSelection extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     m_Train = new Instances(instances);
     m_Train.deleteWithMissingClass();
     m_Train.randomize(new Random(m_Seed));
@@ -661,7 +664,6 @@ public class CVParameterSelection extends Classifier
       System.out.println(Evaluation.evaluateModel(new CVParameterSelection(), 
 						  argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }

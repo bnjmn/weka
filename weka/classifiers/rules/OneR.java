@@ -143,6 +143,9 @@ public class OneR extends Classifier implements OptionHandler {
     
     boolean noRule = true;
 
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     if (instances.classAttribute().isNumeric()) {
       throw new Exception("Can't handle numeric class!");
     }

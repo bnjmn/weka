@@ -75,19 +75,25 @@ public class MultiClassClassifier extends DistributionClassifier
     if (m_BaseClassifier == null) {
       throw new Exception("No base classifier has been set!");
     }
-    if (insts.classAttribute().isNumeric()) {
+    if (!insts.classAttribute().isNominal()) {
       throw new 
-	Exception("MultiClassClassifier can't handle a numeric class!");
+	Exception("MultiClassClassifier needs a nominal class!");
     }
     if (Class.forName(m_BaseClassifier).newInstance() instanceof 
 	WeightedInstancesHandler) {
       insts = new Instances(insts);
     } else {
       double[] weights = new double[insts.numInstances()];
+      boolean foundOne = false;
       for (int i = 0; i < weights.length; i++) {
 	weights[i] = insts.instance(i).weight();
+	if (!Utils.eq(weights[i], weights[0])) {
+	  foundOne = true;
+	}
       }
-      insts = insts.resampleWithWeights(new Random(42), weights);
+      if (foundOne) {
+	insts = insts.resampleWithWeights(new Random(42), weights);
+      }
     }     
     insts.deleteWithMissingClass();
     if (insts.numInstances() == 0) {

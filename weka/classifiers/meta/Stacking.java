@@ -373,6 +373,10 @@ public class Stacking extends Classifier implements OptionHandler {
     if (m_MetaClassifierName == null) {
       throw new Exception("No meta learner has been set");
     }
+    if (!(data.classAttribute().isNominal() ||
+	  data.classAttribute().isNumeric())) {
+      throw new Exception("Class attribute has to be nominal or numeric!");
+    }
     Instances newData = new Instances(data);
     m_BaseFormat = new Instances(data, 0);
     newData.deleteWithMissingClass();
@@ -479,7 +483,6 @@ public class Stacking extends Classifier implements OptionHandler {
     try {
       System.out.println(Evaluation.evaluateModel(new Stacking(), argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }

@@ -64,6 +64,9 @@ public class ClassifierTree implements Drawable, Serializable {
 
   public void buildClassifier(Instances data) throws Exception{
 
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     data = new Instances(data);
     data.deleteWithMissingClass();
     buildTree(data, false);

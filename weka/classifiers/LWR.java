@@ -271,6 +271,10 @@ public class LWR extends Classifier
       throw new Exception("Class attribute must be numeric");
     }
 
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     // Throw away training instances with missing class
     m_Train = new Instances(instances, 0, instances.numInstances());
     m_Train.deleteWithMissingClass();

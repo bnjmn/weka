@@ -68,6 +68,9 @@ public class NaiveBayesSimple extends DistributionClassifier {
     int attIndex = 0;
     double sum;
     
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     if (instances.classAttribute().isNumeric()) {
       throw new Exception("Naive Bayes: Class is numeric!");
     }
