@@ -33,14 +33,7 @@ import java.awt.event.MouseAdapter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -88,7 +81,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -135,6 +128,11 @@ public class PreprocessPanel extends JPanel {
   /** The file chooser for selecting arff files */
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
+
+  /** File filters for various file types */
+  protected ExtensionFileFilter m_bsiFileFilter = 
+    new ExtensionFileFilter(Instances.SERIALIZED_OBJ_FILE_EXTENSION,
+			    "Binary serialized instances");
 
   protected ExtensionFileFilter m_c45FileFilter = 
     new ExtensionFileFilter(C45Loader.FILE_EXTENSION,
@@ -228,6 +226,8 @@ public class PreprocessPanel extends JPanel {
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
 
+    m_FileChooser.
+      addChoosableFileFilter(m_bsiFileFilter);
     m_FileChooser.
       addChoosableFileFilter(m_c45FileFilter);
     m_FileChooser.
@@ -562,6 +562,14 @@ public class PreprocessPanel extends JPanel {
 	} else if (m_FileChooser.getFileFilter() == m_c45FileFilter) {	 
 	  File selected = sFile;
 	  saveInstancesToC45File(selected, m_Instances);
+	} else if (m_FileChooser.getFileFilter() == m_bsiFileFilter) {
+	  if (!sFile.getName().toLowerCase().
+	      endsWith(Instances.SERIALIZED_OBJ_FILE_EXTENSION)) {
+	    sFile = new File(sFile.getParent(), sFile.getName() 
+			     + Instances.SERIALIZED_OBJ_FILE_EXTENSION);
+	  }
+	  File selected = sFile;
+	  saveSerializedInstancesToFile(selected, m_Instances);
 	}
       }
       FileFilter temp = m_FileChooser.getFileFilter();
@@ -676,6 +684,12 @@ public class PreprocessPanel extends JPanel {
   }
   
 
+  /**
+   * Saves the current instances in C45 names and data file format
+   *
+   * @param f a value of type 'File'
+   * @param inst the instances to save
+   */
   protected void saveInstancesToC45File(final File f, final Instances inst) {
     if (m_IOThread == null) {
       final int classIndex = m_AttVisualizePanel.getColoringIndex();
@@ -770,9 +784,51 @@ public class PreprocessPanel extends JPanel {
       JOptionPane.showMessageDialog(this,
 				    "Can't save at this time,\n"
 				    + "currently busy with other IO",
-				    "Save Instances",
+				    "Save c45 format",
 				    JOptionPane.WARNING_MESSAGE);
     }
+  }
+
+  /**
+   * Saves the current instances in binary serialized form to a file
+   *
+   * @param f a value of type 'File'
+   * @param inst the instances to save
+   */
+  protected void saveSerializedInstancesToFile(final File f, 
+					       final Instances inst) {
+    if (m_IOThread == null) {
+      m_IOThread = new Thread() {
+	  public void run() {
+	    try {
+	      m_Log.statusMessage("Saving to file...");
+
+	      ObjectOutputStream oos = 
+		  new ObjectOutputStream(
+		  new BufferedOutputStream(
+		  new FileOutputStream(f)));
+
+	      oos.writeObject(inst);
+	      oos.flush();
+	      oos.close();
+
+	      m_Log.statusMessage("OK");
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	      m_Log.logMessage(ex.getMessage());
+	    }
+	    m_IOThread = null;
+	  }
+	};
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    } else {
+      JOptionPane.showMessageDialog(this,
+				    "Can't save at this time,\n"
+				    + "currently busy with other IO",
+				    "Save binary serialized instances",
+				    JOptionPane.WARNING_MESSAGE);
+    } 
   }
 
   /**
@@ -920,6 +976,12 @@ public class PreprocessPanel extends JPanel {
 	      cnv.setSource(f);
 	      Instances inst = cnv.getDataSet();
 	      setInstances(inst);
+	    } else if (f.getName().toLowerCase().
+		       endsWith(Instances.SERIALIZED_OBJ_FILE_EXTENSION)) {
+	      ObjectInputStream ois = 
+		new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
+	      setInstances((Instances)ois.readObject());
+	      ois.close();
 	    } else {
 	      throw new Exception("Unrecognized file type");
 	    }
