@@ -63,7 +63,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -91,6 +91,9 @@ public class GenericObjectEditor implements PropertyEditor {
   /** Loads the configuration property file */
   static {
 
+    boolean noUserProps = false;
+    boolean noLocalProps = false;
+    
     // Global properties
     Properties systemProps = System.getProperties();
 
@@ -101,6 +104,7 @@ public class GenericObjectEditor implements PropertyEditor {
 			 + systemProps.getProperty("file.separator")
 			 + PROPERTY_FILE));
     } catch (Exception ex) {
+      noUserProps = true;
       System.err.println(ex.getMessage());
     }
 
@@ -109,7 +113,20 @@ public class GenericObjectEditor implements PropertyEditor {
     try {
       EDITOR_PROPERTIES.load(new FileInputStream(PROPERTY_FILE));
     } catch (Exception ex) {
+      noLocalProps = true;
       System.err.println(ex.getMessage());
+    }
+
+    if (noUserProps && noLocalProps) {
+      JOptionPane.showMessageDialog(null,
+	  "Could not read a configuration file for the generic object\n"
+         +"editor. An example file is included with the Weka distribution.\n"
+	 +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+	 +"should be placed either in your user home (which is set\n"
+	 + "to \"" + systemProps.getProperty("user.home") + "\")\n"
+	 + "or the directory that java was started from\n",
+	 "GenericObjectEditor",
+	 JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -402,7 +419,7 @@ public class GenericObjectEditor implements PropertyEditor {
     FontMetrics fm = gfx.getFontMetrics();
     int vpad = (box.height - fm.getHeight()) / 2 ;
 
-    if (m_Enabled) {
+    if (m_Enabled && m_Object != null) {
       String rep = m_Object.getClass().getName();
       int dotPos = rep.lastIndexOf('.');
       if (dotPos != -1) {
