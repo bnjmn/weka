@@ -30,6 +30,7 @@ import weka.gui.SaveBuffer;
 import weka.experiment.Experiment;
 import weka.experiment.InstancesResultListener;
 import weka.experiment.DatabaseResultListener;
+import weka.experiment.PairedCorrectedTTester;
 import weka.experiment.PairedTTester;
 import weka.experiment.InstanceQuery;
 import weka.core.Utils;
@@ -81,7 +82,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -192,7 +193,7 @@ public class ResultsPanel extends JPanel {
   protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
 
   /** The PairedTTester object */
-  protected PairedTTester m_TTester = new PairedTTester();
+  protected PairedTTester m_TTester = new PairedCorrectedTTester();
   
   /** The instances we're extracting results from */
   protected Instances m_Instances;
@@ -304,6 +305,9 @@ public class ResultsPanel extends JPanel {
 	m_SaveOutBut.setEnabled(true);
       }
     });
+
+    m_PerformBut.setToolTipText("Performs test using corrected resampled t-test statistic (Nadeau and Bengio)");
+
     m_SaveOutBut.setEnabled(false);
     m_SaveOutBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
