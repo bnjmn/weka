@@ -61,7 +61,7 @@ import weka.filters.UnsupervisedFilter;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -88,6 +88,17 @@ public class StringToWordVector extends Filter
       The counts are stored with the same indexing as given by m_Dictionary.  */
   private int [] docsCounts;
   
+  /** Contains the number of documents (instances) in the input format from 
+      which the dictionary is created. It is used in IDF transform. */
+  private int numInstances = -1;
+
+  /**
+   * Contains the average length of documents (among the first batch of 
+   * instances aka training data). This is used in length normalization of 
+   * documents which will be normalized to average document length.
+   */
+  private double avgDocLength = -1;
+  
   /**
    * The default number of words (per class if there is a class attribute
    * assigned) to attempt to keep.
@@ -99,7 +110,9 @@ public class StringToWordVector extends Filter
    */
   private boolean m_TFTransform;
   
-  /** True if document's (instance's) word frequencies are to be normalized */
+  /** True if document's (instance's) word frequencies are to be normalized. 
+      The are normalized to average length of documents specified as input 
+      format. */
   private boolean m_normalizeDocLength;
   
   /** True if word frequencies should be transformed into 
@@ -161,8 +174,9 @@ public class StringToWordVector extends Filter
                                     " jth document(instance)",
 				    "I", 0, "-I"));
     newVector.addElement(new Option(
-				    "\tNormalize word frequencies over each "+
-                                    "document(instance)",
+				    "\tNormalize word frequencies of each "+
+                                    "document(instance) to average length of "+
+                                    "documents.",
 				    "N", 0, "-N"));
     newVector.addElement(new Option(
 				    "\tOnly form tokens from contiguous "+
@@ -223,7 +237,9 @@ public class StringToWordVector extends Filter
    * where fij is frequency of word i in document j. <p>
    *
    * -N <br>
-   * Normalize word frequencies for each document(instance). <p>
+   * Normalize word frequencies for each document(instance). The frequencies
+   * are normalized to average length of the documents specified in input 
+   * format. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -373,7 +389,7 @@ public class StringToWordVector extends Filter
    * collected with output().
    * @exception IllegalStateException if no input structure has been defined.
    */
-  public boolean input(Instance instance) {
+  public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -399,7 +415,7 @@ public class StringToWordVector extends Filter
    * @return true if there are instances pending output.
    * @exception IllegalStateException if no input structure has been defined.
    */
-  public boolean batchFinished() {
+  public boolean batchFinished() throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -411,10 +427,82 @@ public class StringToWordVector extends Filter
     }
 
     // Convert pending input instances.
-    for(int i = 0; i < getInputFormat().numInstances(); i++) {
-      convertInstance(getInputFormat().instance(i));
+    if(this.m_normalizeDocLength==false || m_FirstBatchDone==true) {
+      for(int i = 0; i < getInputFormat().numInstances(); i++) {
+          convertInstance(getInputFormat().instance(i));
+      }
+      flushInput();
     }
-    flushInput();
+    else {
+      FastVector fv = new FastVector();
+      int firstCopy=0;
+      Instances inputFormat = getInputFormat();
+      avgDocLength = 0;
+      for(int i=0; i<inputFormat.numInstances(); i++)
+          firstCopy = convertInstancewoDocNorm(inputFormat.instance(i), fv);
+      
+      //Now normalizing document length
+      for(int i=0; i<fv.size(); i++) {
+        
+        Instance inst = (Instance) fv.elementAt(i);
+        
+        double docLength = 0;
+        double val=0;
+        for(int j=0; j<inst.numValues(); j++) {
+          if(inst.index(j)>=firstCopy) {
+            val = inst.valueSparse(j);
+            docLength += val*val;
+          }
+        }        
+        docLength = Math.sqrt(docLength);
+        avgDocLength += docLength;
+        for(int j=0; j<inst.numValues(); j++) {
+          if(inst.index(j)>=firstCopy) {
+            val = inst.valueSparse(j);
+            val /= docLength;
+//            if(i==0)
+//              System.err.println("Instance "+i+
+//              ": "+
+//              "length: "+docLength+
+//              " setting value "+inst.index(j)+
+//              " from "+inst.valueSparse(j)+
+//              " to "+val);
+            inst.setValueSparse(j, val);
+            if(val==0){
+              System.err.println("setting value "+inst.index(j)+" to zero.");
+              j--;
+            }
+          }
+        }
+        
+      }
+      avgDocLength /= inputFormat.numInstances();
+      
+      for(int i=0; i<fv.size(); i++) {
+        Instance inst = (Instance) fv.elementAt(i);
+        double val=0;
+        for(int j=0; j<inst.numValues(); j++) {
+          if(inst.index(j)>=firstCopy) {
+            val = inst.valueSparse(j);
+            val = val * avgDocLength;
+//            if(i==0)
+//              System.err.println("Instance "+i+
+//              ": "+
+//              "avgDocLength: "+avgDocLength+
+//              " setting value "+inst.index(j)+
+//              " from "+inst.valueSparse(j)+
+//              " to "+val);            
+            inst.setValueSparse(j, val);
+            if(val==0) {
+              System.err.println("setting value "+inst.index(j)+" to zero.");
+              j--;
+            }
+          }
+        }
+        push(inst);
+      }
+      flushInput();
+    }
 
     m_NewBatch = true;
     m_FirstBatchDone = true;
@@ -886,7 +974,6 @@ public class StringToWordVector extends Filter
       
     }
 
-
     int totalsize = 0;
     int prune[] = new int[values];
     for (int z = 0; z < values; z++) {
@@ -969,7 +1056,8 @@ public class StringToWordVector extends Filter
       }
     }
     
-    //Calculating the number of documents a word has occurred in
+    
+    
     docsCounts = new int[attributes.size()];
     Iterator it = newDictionary.keySet().iterator();
     while(it.hasNext()) {
@@ -988,7 +1076,8 @@ public class StringToWordVector extends Filter
     m_Dictionary = newDictionary;
 
     //System.err.println("done: " + index + " words in total.");
-
+    
+    numInstances = getInputFormat().numInstances();
     
     // Set the filter's output format
     Instances outputFormat = new Instances(getInputFormat().relationName(), 
@@ -998,7 +1087,7 @@ public class StringToWordVector extends Filter
   }
 
 
-  private void convertInstance(Instance instance) {
+  private void convertInstance(Instance instance) throws Exception {
 
     // Convert the instance into a sorted set of indexes
     TreeMap contained = new TreeMap();
@@ -1079,7 +1168,8 @@ public class StringToWordVector extends Filter
             if( index.intValue() >= firstCopy ) { 
                 double val = ((Double)contained.get(index)).doubleValue();
                 val = Math.log(val+1);
-//                System.out.println("Instance "+instance.toString()+
+//                if(printInstance==true)
+//                  System.out.println("Instance 0"+ //instance.toString()+
 //                                   ": setting value "+index.intValue()+
 //                                   " from "+((Double)contained.get(index)).doubleValue()+
 //                                   " to "+val);                
@@ -1093,15 +1183,16 @@ public class StringToWordVector extends Filter
         Iterator it = contained.keySet().iterator();
         for(int i=0; it.hasNext(); i++) {
             Integer index = (Integer)it.next();
-            int num = getInputFormat().numInstances();
+            //int num = getInputFormat().numInstances();
             if( index.intValue() >= firstCopy ) {
                 double val = ((Double)contained.get(index)).doubleValue();
-                val = val*Math.log( num /
-                                    this.docsCounts[index.intValue()] );
-//                System.out.println("Instance "+instance.toString()+
-//                                   ":\n"+
-//                                   "num: "+num+" index.intValue(): "+index.intValue()+
-//                                   "docsCounts: "+this.docsCounts[index.intValue()]+"\n"+
+                val = val*Math.log( numInstances /    //num /
+                                    (double)docsCounts[index.intValue()] );
+//                if(printInstance==true)
+//                  System.out.println("Instance 0"+ //instance.toString()+
+//                                   ": "+
+//                                   "num: "+numInstances+" index.intValue(): "+index.intValue()+
+//                                   " docsCounts: "+this.docsCounts[index.intValue()]+ //"\n"+
 //                                   "setting value "+index.intValue()+
 //                                   " from "+((Double)contained.get(index)).doubleValue()+
 //                                   " to "+val);                
@@ -1112,29 +1203,32 @@ public class StringToWordVector extends Filter
     
     //Doing length normalization
     if(m_normalizeDocLength==true) {
-        double sumSq = 0;
-        Iterator it = contained.keySet().iterator();
-        for(int i=0; it.hasNext(); i++) {
-            Integer index = (Integer)it.next();
-            if( index.intValue() >= firstCopy ) { 
-                double val = ((Double)contained.get(index)).doubleValue();
-                sumSq += val*val;
-            }
+      if(avgDocLength<0)
+        throw new Exception("Error. Average Doc Length not defined yet.");
+      
+      double sumSq = 0;
+      Iterator it = contained.keySet().iterator();
+      for(int i=0; it.hasNext(); i++) {
+        Integer index = (Integer)it.next();
+        if( index.intValue() >= firstCopy ) {
+          double val = ((Double)contained.get(index)).doubleValue();
+          sumSq += val*val;
         }
-        
-        it = contained.keySet().iterator();
-        for(int i=0; it.hasNext(); i++) {
-            Integer index = (Integer)it.next();
-            if( index.intValue() >= firstCopy ) { 
-                double val = ((Double)contained.get(index)).doubleValue();
-                val = val/Math.sqrt(sumSq);
+      }
+      it = contained.keySet().iterator();
+      for(int i=0; it.hasNext(); i++) {
+        Integer index = (Integer)it.next();
+        if( index.intValue() >= firstCopy ) {
+          double val = ((Double)contained.get(index)).doubleValue();
+          val = val/Math.sqrt(sumSq);
+          val = val*avgDocLength;
 //                System.out.println("Instance "+instance.toString()+
 //                                   ": setting value "+index.intValue()+
 //                                   " from "+((Double)contained.get(index)).doubleValue()+
-//                                   " to "+val);                
-                contained.put(index, new Double(val));
-            }
+//                                   " to "+val);
+          contained.put(index, new Double(val));
         }
+      }
     }
     
     
@@ -1153,9 +1247,174 @@ public class StringToWordVector extends Filter
                                        outputFormatPeek().numAttributes());
     inst.setDataset(outputFormatPeek());
     push(inst);
+    
     //System.err.print("#"); System.err.flush();
   }
 
+
+  private int convertInstancewoDocNorm(Instance instance, FastVector v) {
+
+    // Convert the instance into a sorted set of indexes
+    TreeMap contained = new TreeMap();
+
+    // Copy all non-converted attributes from input to output
+    int firstCopy = 0;
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      if (!m_SelectedRange.isInRange(i)) { 
+	if (getInputFormat().attribute(i).type() != Attribute.STRING) {
+	  // Add simple nominal and numeric attributes directly
+	  if (instance.value(i) != 0.0) {
+	    contained.put(new Integer(firstCopy), 
+			  new Double(instance.value(i)));
+	  } 
+	} else {
+	  if (instance.isMissing(i)) {
+	    contained.put(new Integer(firstCopy),
+			  new Double(Instance.missingValue()));
+	  } else {
+
+	    // If this is a string attribute, we have to first add
+	    // this value to the range of possible values, then add
+	    // its new internal index.
+	    if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
+	      // Note that the first string value in a
+	      // SparseInstance doesn't get printed.
+	      outputFormatPeek().attribute(firstCopy)
+		.addStringValue("Hack to defeat SparseInstance bug");
+	    }
+	    int newIndex = outputFormatPeek().attribute(firstCopy)
+	      .addStringValue(instance.stringValue(i));
+	    contained.put(new Integer(firstCopy), 
+			  new Double(newIndex));
+	  }
+	}
+	firstCopy++;
+      }     
+    }
+    
+    for (int j = 0; j < instance.numAttributes(); j++) { 
+      //if ((getInputFormat().attribute(j).type() == Attribute.STRING) 
+      if (m_SelectedRange.isInRange(j)
+	  && (instance.isMissing(j) == false)) {          
+        Enumeration st;
+        
+        if(this.m_onlyAlphabeticTokens==false)
+            st = new StringTokenizer(instance.stringValue(j),
+                                                 delimiters);
+        else
+            st = new AlphabeticStringTokenizer(instance.stringValue(j));
+        
+        while (st.hasMoreElements()) {
+          String word = (String)st.nextElement(); 
+          if(this.m_lowerCaseTokens==true)
+              word = word.toLowerCase();
+          Integer index = (Integer) m_Dictionary.get(word);
+          if (index != null) {
+            if (m_OutputCounts) { // Separate if here rather than two lines down to avoid hashtable lookup
+              Double count = (Double)contained.get(index);
+              if (count != null) {
+                contained.put(index, new Double(count.doubleValue() + 1.0));
+              } else {
+                contained.put(index, new Double(1));
+              }
+            } else {
+              contained.put(index, new Double(1));
+            }                
+          }
+        }
+      }
+    }
+    
+    //Doing TFTransform
+    if(m_TFTransform==true) {
+        Iterator it = contained.keySet().iterator();
+        for(int i=0; it.hasNext(); i++) {
+            Integer index = (Integer)it.next();
+            if( index.intValue() >= firstCopy ) { 
+                double val = ((Double)contained.get(index)).doubleValue();
+                val = Math.log(val+1);
+//                if(printInstance==true)
+//                  System.out.println("Instance 0"+ //instance.toString()+
+//                                   ": setting value "+index.intValue()+
+//                                   " from "+((Double)contained.get(index)).doubleValue()+
+//                                   " to "+val);                
+                contained.put(index, new Double(val));
+            }
+        }
+    }
+    
+    //Doing IDFTransform
+    if(m_IDFTransform==true) {
+        Iterator it = contained.keySet().iterator();
+        for(int i=0; it.hasNext(); i++) {
+            Integer index = (Integer)it.next();
+            //int num = getInputFormat().numInstances();
+            if( index.intValue() >= firstCopy ) {
+                double val = ((Double)contained.get(index)).doubleValue();
+                val = val*Math.log( numInstances /    //num /
+                                    (double) docsCounts[index.intValue()] );
+//                if(printInstance==true)
+//                  System.out.println("Instance 0"+ //instance.toString()+
+//                                   ": "+
+//                                   "num: "+numInstances+" index.intValue(): "+index.intValue()+
+//                                   " docsCounts: "+this.docsCounts[index.intValue()]+ //"\n"+
+//                                   "setting value "+index.intValue()+
+//                                   " from "+((Double)contained.get(index)).doubleValue()+
+//                                   " to "+val);                
+                contained.put(index, new Double(val));
+            }
+        }        
+    }
+    
+    //Doing length normalization
+    //if(m_normalizeDocLength==true) {
+    //    double sumSq = 0;
+    //    Iterator it = contained.keySet().iterator();
+    //    for(int i=0; it.hasNext(); i++) {
+    //        Integer index = (Integer)it.next();
+    //        if( index.intValue() >= firstCopy ) { 
+    //            double val = ((Double)contained.get(index)).doubleValue();
+    //            sumSq += val*val;
+    //        }
+    //    }
+    //    it = contained.keySet().iterator();
+    //    for(int i=0; it.hasNext(); i++) {
+    //        Integer index = (Integer)it.next();
+    //        if( index.intValue() >= firstCopy ) { 
+    //            double val = ((Double)contained.get(index)).doubleValue();
+    //            val = val/Math.sqrt(sumSq);
+//                System.out.println("Instance "+instance.toString()+
+//                                   ": setting value "+index.intValue()+
+//                                   " from "+((Double)contained.get(index)).doubleValue()+
+//                                   " to "+val);                
+    //            contained.put(index, new Double(val));
+    //        }
+    //    }
+    //}
+    
+    
+    // Convert the set to structures needed to create a sparse instance.
+    double [] values = new double [contained.size()];
+    int [] indices = new int [contained.size()];
+    Iterator it = contained.keySet().iterator();
+    for (int i = 0; it.hasNext(); i++) {
+      Integer index = (Integer)it.next();
+      Double value = (Double)contained.get(index);
+      values[i] = value.doubleValue();
+      indices[i] = index.intValue();
+    }
+
+    Instance inst = new SparseInstance(instance.weight(), values, indices, 
+                                       outputFormatPeek().numAttributes());
+    inst.setDataset(outputFormatPeek());
+    //push(inst);
+    v.addElement(inst);
+    
+    return firstCopy;    
+    //System.err.print("#"); System.err.flush();
+  }
+  
+  
   /**
    * Main method for testing this class.
    *
