@@ -58,15 +58,15 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler {
 
   /** The evaluation modes */
-  public final static int CROSS_VALIDATION = 0;
-  public final static int TUNING_DATA = 1;
-  public final static int TRAINING_DATA = 2;
+  protected final static int CROSS_VALIDATION = 0;
+  protected final static int TUNING_DATA = 1;
+  protected final static int TRAINING_DATA = 2;
 
   /** The generated base classifier */
   protected DistributionClassifier m_Classifier = 
@@ -98,6 +98,10 @@ public class ThresholdSelector extends Classifier
 
   /** The evaluation mode */
   protected int m_Mode = ThresholdSelector.CROSS_VALIDATION;
+
+  /** The minimum value for the criterion. If threshold adjustment
+      yields less than that, the default threshold of 0.5 is used. */
+  protected final static double MIN_VALUE = 0.01;
 
   /**
    * Collects the predicted probabilities.
@@ -137,10 +141,9 @@ public class ThresholdSelector extends Classifier
   protected void findThreshold() throws Exception {
 
     double[] probabilities = collectProbabilities();
-    int[] sortedIndices = Utils.sortUnsafe(probabilities);
+    int[] sortedIndices = Utils.sort(probabilities);
 
     double[][] confusionMatrix = new double[2][2];
-    m_BestThreshold = -Double.MAX_VALUE;
     for (int i = 0; i < sortedIndices.length; i++) {
       Instance inst = m_EvalData.instance(sortedIndices[i]);
       if ((int) inst.classValue() == m_DesignatedClass) {
@@ -150,6 +153,14 @@ public class ThresholdSelector extends Classifier
       }
     }
     m_BestValue = computeValue(confusionMatrix);
+
+    // Use 0.5 threshold if there is no other sensible threshold
+    if (m_BestValue > MIN_VALUE) {
+      m_BestThreshold = -Double.MAX_VALUE;
+    } else {
+      m_BestValue = MIN_VALUE;
+      m_BestThreshold = 0.5;
+    }
     for (int i = 0; i < sortedIndices.length; i++) {
       Instance inst = m_EvalData.instance(sortedIndices[i]);
       if ((int) inst.classValue() == m_DesignatedClass) {
@@ -401,8 +412,8 @@ public class ThresholdSelector extends Classifier
       data = new Instances(instances);
       data.randomize(new Random(m_Seed));
       data.stratify(m_NumFolds);
-      m_Data = instances.trainCV(m_NumFolds, 0);
-      m_EvalData = instances.testCV(m_NumFolds, 0);
+      m_Data = data.trainCV(m_NumFolds, 0);
+      m_EvalData = data.testCV(m_NumFolds, 0);
       findThreshold();
       m_Classifier.buildClassifier(instances);
       break;
