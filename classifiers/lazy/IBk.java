@@ -70,7 +70,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class IBk extends Classifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -92,16 +92,16 @@ public class IBk extends Classifier implements
   /*
    * A class for storing data about a neighboring instance
    */
-  private class NeighborNode {
+  protected class NeighborNode {
 
     /** The neighbor instance */
-    private Instance m_Instance;
+    protected Instance m_Instance;
 
     /** The distance from the current instance to this neighbor */
-    private double m_Distance;
+    protected double m_Distance;
 
     /** A link to the next neighbor instance */
-    private NeighborNode m_Next;
+    protected NeighborNode m_Next;
     
     /**
      * Create a new neighbor node.
@@ -134,16 +134,16 @@ public class IBk extends Classifier implements
    * cases where multiple neighbours are the same distance away.
    * i.e. the minimum length of the list is k.
    */
-  private class NeighborList {
+  protected class NeighborList {
 
     /** The first node in the list */
-    private NeighborNode m_First;
+    protected NeighborNode m_First;
 
     /** The last node in the list */
-    private NeighborNode m_Last;
+    protected NeighborNode m_Last;
 
     /** The number of nodes to attempt to maintain in the list */
-    private int m_Length = 1;
+    protected int m_Length = 1;
     
     /**
      * Creates the neighborlist with a desired length
