@@ -64,7 +64,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Plot2D extends JPanel {
 
@@ -1032,9 +1032,10 @@ public class Plot2D extends JPanel {
 		    }
 		  } else {
 		    if (temp_plot.m_connectPoints[i] == true) {
-
+		       drawDataPoint(x,y,prevx,prevy,temp_plot.m_shapeSize[i],
+				     temp_plot.m_shapeType[i],gx);
 		    } else {
-		      drawDataPoint(x,y,prevx,prevy,temp_plot.m_shapeSize[i],
+		      drawDataPoint(x,y,temp_plot.m_shapeSize[i],
 				    temp_plot.m_shapeType[i],gx);
 		    }
 		  }
