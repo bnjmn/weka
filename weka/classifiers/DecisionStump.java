@@ -31,7 +31,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler {
@@ -75,9 +75,10 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // For each attribute
+    boolean first = true;
     for (int i = 0; i < theInstances.numAttributes(); i++) {
       if (i != theInstances.classIndex()) {
-	
+
 	// Reserve space for distribution.
 	m_Distribution = new double[3][numClasses];
 
@@ -87,7 +88,7 @@ public class DecisionStump extends DistributionClassifier
 	} else {
 	  currVal = findSplitNumeric(i);
 	}
-	if (Utils.sm(currVal, bestVal)) {
+	if ((first) || (Utils.sm(currVal, bestVal))) {
 	  bestVal = currVal;
 	  bestAtt = i;
 	  bestPoint = m_SplitPoint;
@@ -96,6 +97,9 @@ public class DecisionStump extends DistributionClassifier
 			     numClasses);
 	  }
 	}
+	
+	// First attribute has been investigated
+	first = false;
       }
     }
     
@@ -111,22 +115,6 @@ public class DecisionStump extends DistributionClassifier
     
     // Save memory
     theInstances = new Instances(theInstances, 0);
-  }
-
-  /**
-   * Classifies a given instance.
-   *
-   * @param instance the instance to be classified
-   * @return index of the predicted class
-   * @exception Exception if the instance can't be classified
-   */
-  public double classifyInstance(Instance instance) throws Exception {
-
-    if (theInstances.classAttribute().isNominal()) {
-      return Utils.maxIndex(distributionForInstance(instance));
-    } else {
-      return m_Distribution[whichSubset(instance)][0];
-    }
   }
 
   /**
@@ -337,7 +325,8 @@ public class DecisionStump extends DistributionClassifier
       new double[theInstances.attribute(index).numValues()], 
       sumsPerValue = new double[theInstances.attribute(index).numValues()], 
       weightsPerValue = new double[theInstances.attribute(index).numValues()];
-    double totalSumSquares = 0, totalSum = 0, totalSumOfWeights = 0;
+    double totalSumSquaresW = 0, totalSumW = 0, totalSumOfWeightsW = 0,
+      totalSumOfWeights = 0, totalSum = 0;
     double[] sumsSquares = new double[3], sumOfWeights = new double[3];
     double[][] bestDist = new double[3][1];
 
@@ -356,13 +345,20 @@ public class DecisionStump extends DistributionClassifier
 	sumsSquaresPerValue[(int)inst.value(index)] += 
 	  inst.classValue() * inst.classValue() * inst.weight();
       }
+      totalSumOfWeights += inst.weight();
+      totalSum += inst.classValue() * inst.weight();
+    }
+
+    // Check if the total weight is zero
+    if (Utils.eq(totalSumOfWeights, 0)) {
+      return bestVal;
     }
 
     // Compute sum of counts without missing ones
     for (int i = 0; i < theInstances.attribute(index).numValues(); i++) {
-      totalSumOfWeights += weightsPerValue[i];
-      totalSumSquares += sumsSquaresPerValue[i];
-      totalSum += sumsPerValue[i];
+      totalSumOfWeightsW += weightsPerValue[i];
+      totalSumSquaresW += sumsSquaresPerValue[i];
+      totalSumW += sumsPerValue[i];
     }
     
     // Make split counts for each possible split and evaluate
@@ -371,9 +367,9 @@ public class DecisionStump extends DistributionClassifier
       m_Distribution[0][0] = sumsPerValue[i];
       sumsSquares[0] = sumsSquaresPerValue[i];
       sumOfWeights[0] = weightsPerValue[i];
-      m_Distribution[1][0] = totalSum - sumsPerValue[i];
-      sumsSquares[1] = totalSumSquares - sumsSquaresPerValue[i];
-      sumOfWeights[1] = totalSumOfWeights - weightsPerValue[i];
+      m_Distribution[1][0] = totalSumW - sumsPerValue[i];
+      sumsSquares[1] = totalSumSquaresW - sumsSquaresPerValue[i];
+      sumOfWeights[1] = totalSumOfWeightsW - weightsPerValue[i];
 
       currVal = variance(m_Distribution, sumsSquares, sumOfWeights);
       
@@ -502,6 +498,11 @@ public class DecisionStump extends DistributionClassifier
       }
       totalSumOfWeights += inst.weight();
       totalSum += inst.classValue() * inst.weight();
+    }
+
+    // Check if the total weight is zero
+    if (Utils.eq(totalSumOfWeights, 0)) {
+      return bestVal;
     }
 
     // Sort instances

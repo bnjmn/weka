@@ -51,7 +51,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler {
@@ -85,6 +85,9 @@ public class LogitBoost extends DistributionClassifier
 
   /** A threshold for responses (Friedman suggests between 2 and 4) */
   protected static final double Z_MAX = 4;
+
+  /** Dummy dataset with a numeric class */
+  protected Instances m_NumericClassData;
 
   /**
    * Select only instances with weights that contribute to 
@@ -419,6 +422,7 @@ public class LogitBoost extends DistributionClassifier
     boostData.deleteAttributeAt(classIndex);
     boostData.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
     boostData.setClassIndex(classIndex);
+    m_NumericClassData = new Instances(boostData, 0);
     double [][] trainFs = new double [numInstances][m_NumClasses];
     double [][] trainYs = new double [numInstances][m_NumClasses];
     for (int j = 0; j < m_NumClasses; j++) {
@@ -531,6 +535,8 @@ public class LogitBoost extends DistributionClassifier
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
 
+    instance = new Instance(instance);
+    instance.setDataset(m_NumericClassData);
     double [] Fs = new double [m_NumClasses]; 
     for (int i = 0; i < m_NumIterations; i++) {
       double [] Fi = new double [m_NumClasses];
