@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -415,11 +415,15 @@ public class Classifier extends JPanel
 	if (m_textListeners.size() > 0) {
 	  String modelString = m_Classifier.toString();
 	  String titleString = m_Classifier.getClass().getName();
+
 	  titleString = titleString.
 	    substring(titleString.lastIndexOf('.') + 1,
 		      titleString.length());
-	  titleString = "( "+m_trainingSet.relationName() + ") " + titleString
-	    + " model";
+	  modelString = "=== Classifier model ===\n\n" +
+	    "Scheme:   " +titleString+"\n" +
+	    "Relation: "  + m_trainingSet.relationName() + "\n\n"
+	    + modelString;
+	  titleString = "Model: " + titleString;
 	  TextEvent nt = new TextEvent(this,
 				       modelString,
 				       titleString);
