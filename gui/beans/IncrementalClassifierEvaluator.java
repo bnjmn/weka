@@ -44,7 +44,7 @@ import java.awt.*;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -56,6 +56,7 @@ public class IncrementalClassifierEvaluator
   private transient Classifier m_classifier;
   
   private Vector m_listeners = new Vector();
+  private Vector m_textListeners = new Vector();
 
   private Vector m_dataLegend = new Vector();
 
@@ -103,97 +104,109 @@ public class IncrementalClassifierEvaluator
       } else {
 	Instance inst = ce.getCurrentInstance();
 	//	if (inst.attribute(inst.classIndex()).isNominal()) {
-	  double [] dist = null;
-	  double pred = 0;
-	  if (ce.getClassifier() instanceof DistributionClassifier) {
-	    dist = ((DistributionClassifier)ce.getClassifier())
-	      .distributionForInstance(inst);
-	  }
-	  if (dist == null) {
-	    if (!inst.isMissing(inst.classIndex())) {
-	      m_eval.evaluateModelOnce(ce.getClassifier(), inst);
-	    } else {
-	      pred = ce.getClassifier().classifyInstance(inst);
-	    }
+	double [] dist = null;
+	double pred = 0;
+	if (ce.getClassifier() instanceof DistributionClassifier) {
+	  dist = ((DistributionClassifier)ce.getClassifier())
+	    .distributionForInstance(inst);
+	}
+	if (dist == null) {
+	  if (!inst.isMissing(inst.classIndex())) {
+	    m_eval.evaluateModelOnce(ce.getClassifier(), inst);
 	  } else {
-	    if (!inst.isMissing(inst.classIndex())) {
+	    pred = ce.getClassifier().classifyInstance(inst);
+	  }
+	} else {
+	  if (!inst.isMissing(inst.classIndex())) {
 	      m_eval.evaluateModelOnce(dist, inst);
-	    } else {
-	      pred = ce.getClassifier().classifyInstance(inst);
-	    }
+	  } else {
+	    pred = ce.getClassifier().classifyInstance(inst);
 	  }
-	  if (inst.classIndex() >= 0) {
-	    // need to check that the class is not missing
-	    if (inst.attribute(inst.classIndex()).isNominal()) {
-	      if (dist != null && !inst.isMissing(inst.classIndex())) {
-		if (m_dataPoint.length < 2) {
-		  m_dataPoint = new double[2];
-		  m_dataLegend.addElement("RMSE (prob)");
-		}
-		//		int classV = (int) inst.value(inst.classIndex());
-		m_dataPoint[1] = m_eval.rootMeanSquaredError();
-//  		int maxO = Utils.maxIndex(dist);
-//  		if (maxO == classV) {
-//  		  dist[classV] = -1;
-//  		  maxO = Utils.maxIndex(dist);
-//  		}
-//  		m_dataPoint[1] -= dist[maxO];
+	}
+	if (inst.classIndex() >= 0) {
+	  // need to check that the class is not missing
+	  if (inst.attribute(inst.classIndex()).isNominal()) {
+	    if (dist != null && !inst.isMissing(inst.classIndex())) {
+	      if (m_dataPoint.length < 2) {
+		m_dataPoint = new double[2];
+		m_dataLegend.addElement("RMSE (prob)");
 	      }
-	      double primaryMeasure = 0;
+	      //		int classV = (int) inst.value(inst.classIndex());
+	      m_dataPoint[1] = m_eval.rootMeanSquaredError();
+	      //  		int maxO = Utils.maxIndex(dist);
+	      //  		if (maxO == classV) {
+	      //  		  dist[classV] = -1;
+	      //  		  maxO = Utils.maxIndex(dist);
+	      //  		}
+	      //  		m_dataPoint[1] -= dist[maxO];
+	    }
+	    double primaryMeasure = 0;
+	    if (!inst.isMissing(inst.classIndex())) {
+	      primaryMeasure = 1.0 - m_eval.errorRate();
+	    } else if (dist != null) {
+	      // record confidence as the primary measure
+	      // (another possibility would be entropy of
+	      // the distribution, or perhaps average
+	      // confidence)
+	      primaryMeasure = dist[Utils.maxIndex(dist)];
+	    } else {
+	      // need something for non distribution classifiers when the
+	      // actual class is missing!
+	    }
+	    //	    double [] dataPoint = new double[1];
+	    m_dataPoint[0] = primaryMeasure;
+	    //	    double min = 0; double max = 100;
+	    /*	    ChartEvent e = 
+		    new ChartEvent(IncrementalClassifierEvaluator.this, 
+		    m_dataLegend, min, max, dataPoint); */
+	    m_ce.setLegendText(m_dataLegend);
+	    m_ce.setMin(0); m_ce.setMax(1);
+	    m_ce.setDataPoint(m_dataPoint);
+	    m_ce.setReset(m_reset);
+	    m_reset = false;
+	  } else {
+	    // numeric class
+	    if (dist != null && !inst.isMissing(inst.classIndex())) {
+	      double update;
 	      if (!inst.isMissing(inst.classIndex())) {
-		primaryMeasure = 1.0 - m_eval.errorRate();
-	      } else if (dist != null) {
-		// record confidence as the primary measure
-		// (another possibility would be entropy of
-		// the distribution, or perhaps average
-		// confidence)
-		primaryMeasure = dist[Utils.maxIndex(dist)];
+		update = m_eval.rootRelativeSquaredError();
 	      } else {
-		// need something for non distribution classifiers when the
-		// actual class is missing!
+		update = pred;
 	      }
-	      //	    double [] dataPoint = new double[1];
-	      m_dataPoint[0] = primaryMeasure;
-	      //	    double min = 0; double max = 100;
-	      /*	    ChartEvent e = 
-			    new ChartEvent(IncrementalClassifierEvaluator.this, 
-			    m_dataLegend, min, max, dataPoint); */
-	      m_ce.setLegendText(m_dataLegend);
-	      m_ce.setMin(0); m_ce.setMax(1);
-	      m_ce.setDataPoint(m_dataPoint);
-	      m_ce.setReset(m_reset);
-	      m_reset = false;
-	    } else {
-	      // numeric class
-	      if (dist != null && !inst.isMissing(inst.classIndex())) {
-		double update;
-		if (!inst.isMissing(inst.classIndex())) {
-		  update = m_eval.rootRelativeSquaredError();
-		} else {
-		  update = pred;
-		}
-		m_dataPoint[0] = update;
-		if (update > m_max) {
+	      m_dataPoint[0] = update;
+	      if (update > m_max) {
 		  m_max = update;
-		}
-		if (update < m_min) {
-		  m_min = update;
-		}
 	      }
-
-
-	      m_ce.setLegendText(m_dataLegend);
-	      m_ce.setMin((inst.isMissing(inst.classIndex()) 
-			   ? m_min
-			   : 0)); 
-	      m_ce.setMax(m_max);
-	      m_ce.setDataPoint(m_dataPoint);
-	      m_ce.setReset(m_reset);
-	      m_reset = false;
+	      if (update < m_min) {
+		m_min = update;
+	      }
 	    }
-	    notifyChartListeners(m_ce);
+	    
+	    m_ce.setLegendText(m_dataLegend);
+	    m_ce.setMin((inst.isMissing(inst.classIndex()) 
+			 ? m_min
+			 : 0)); 
+	    m_ce.setMax(m_max);
+	    m_ce.setDataPoint(m_dataPoint);
+	    m_ce.setReset(m_reset);
+	    m_reset = false;
 	  }
-	  //	}
+	  notifyChartListeners(m_ce);
+
+	  if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED) {
+	    if (m_textListeners.size() > 0) {
+	      String textTitle = ce.getClassifier().getClass().getName();
+	      textTitle = 
+		textTitle.substring(textTitle.lastIndexOf('.')+1,
+				    textTitle.length());
+	      TextEvent te = 
+		new TextEvent(this, 
+			      m_eval.toSummaryString(),
+			    textTitle);
+	      notifyTextListeners(te);
+	    }
+	  }
+	}
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -243,6 +256,25 @@ public class IncrementalClassifierEvaluator
   }
 
   /**
+   * Notify all text listeners of a TextEvent
+   *
+   * @param te a <code>TextEvent</code> value
+   */
+  private void notifyTextListeners(TextEvent te) {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_textListeners.clone();
+    }
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+	//	System.err.println("Notifying text listeners "
+	//			   +"(ClassifierPerformanceEvaluator)");
+	((TextListener)l.elementAt(i)).acceptText(te);
+      }
+    }
+  }
+
+  /**
    * Add a chart listener
    *
    * @param cl a <code>ChartListener</code> value
@@ -258,5 +290,23 @@ public class IncrementalClassifierEvaluator
    */
   public synchronized void removeChartListener(ChartListener cl) {
     m_listeners.remove(cl);
+  }
+
+  /**
+   * Add a text listener
+   *
+   * @param cl a <code>TextListener</code> value
+   */
+  public synchronized void addTextListener(TextListener cl) {
+    m_textListeners.addElement(cl);
+  }
+
+  /**
+   * Remove a text listener
+   *
+   * @param cl a <code>TextListener</code> value
+   */
+  public synchronized void removeTextListener(TextListener cl) {
+    m_textListeners.remove(cl);
   }
 }

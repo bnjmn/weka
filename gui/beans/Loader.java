@@ -50,7 +50,7 @@ import java.io.IOException;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -76,6 +76,12 @@ public class Loader extends AbstractDataSource
 
   private InstanceEvent m_ie = new InstanceEvent(this);
 
+  /**
+   * Keep track of how many listeners for different types of events there are.
+   */
+  private int m_instanceEventTargets = 0;
+  private int m_dataSetEventTargets = 0;
+  
   private class LoadThread extends Thread {
     private DataSource m_DP;
 
@@ -88,11 +94,14 @@ public class Loader extends AbstractDataSource
 	m_visual.setAnimated();
 	boolean instanceGeneration = true;
 	// determine if we are going to produce data set or instance events
-	for (int i = 0; i < m_listeners.size(); i++) {
+	/*	for (int i = 0; i < m_listeners.size(); i++) {
 	  if (m_listeners.elementAt(i) instanceof DataSourceListener) {
 	    instanceGeneration = false;
 	    break;
 	  }
+	  } */
+	if (m_dataSetEventTargets > 0) {
+	  instanceGeneration = false;
 	}
 
 	if (instanceGeneration) {
@@ -118,10 +127,13 @@ public class Loader extends AbstractDataSource
 	    }
 	    m_ie.setInstance(nextInstance);
 	    start = false;
-	    notifyInstanceLoaded(m_ie);
-	    z++;
 	    //	    System.err.println(z);
 	    nextInstance = m_Loader.getNextInstance();
+	    if (nextInstance == null) {
+	      m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
+	    }
+	    notifyInstanceLoaded(m_ie);
+	    z++;
 	  }
 	  m_visual.setStatic();
 	} else {
@@ -298,24 +310,70 @@ public class Loader extends AbstractDataSource
       if (!(m_Loader instanceof weka.core.converters.IncrementalLoader)) {
 	return false;
       }
-      for (int i = 0; i < m_listeners.size(); i++) {
+      if (m_dataSetEventTargets > 0) {
+	return false;
+      }
+      /*      for (int i = 0; i < m_listeners.size(); i++) {
 	if (m_listeners.elementAt(i) instanceof DataSourceListener) {
 	  return false;
 	}
-      }
+	} */
     }
 
     if (eventName.compareTo("dataSet") == 0) {
       if (!(m_Loader instanceof weka.core.converters.BatchLoader)) {
 	return false;
       }
-      for (int i = 0; i < m_listeners.size(); i++) {
+      if (m_instanceEventTargets > 0) {
+	return false;
+      }
+      /*      for (int i = 0; i < m_listeners.size(); i++) {
 	if (m_listeners.elementAt(i) instanceof InstanceListener) {
 	  return false;
 	}
-      }
+	} */
     }
     return true;
+  }
+
+  /**
+   * Add a listener
+   *
+   * @param dsl a <code>DataSourceListener</code> value
+   */
+  public synchronized void addDataSourceListener(DataSourceListener dsl) {
+    super.addDataSourceListener(dsl);
+    m_dataSetEventTargets ++;
+  }
+  
+  /**
+   * Remove a listener
+   *
+   * @param dsl a <code>DataSourceListener</code> value
+   */
+  public synchronized void removeDataSourceListener(DataSourceListener dsl) {
+    super.removeDataSourceListener(dsl);
+    m_dataSetEventTargets --;
+  }
+
+  /**
+   * Add an instance listener
+   *
+   * @param dsl a <code>InstanceListener</code> value
+   */
+  public synchronized void addInstanceListener(InstanceListener dsl) {
+    super.addInstanceListener(dsl);
+    m_instanceEventTargets ++;
+  }
+  
+  /**
+   * Remove an instance listener
+   *
+   * @param dsl a <code>InstanceListener</code> value
+   */
+  public synchronized void removeInstanceListener(InstanceListener dsl) {
+    super.removeInstanceListener(dsl);
+    m_instanceEventTargets --;
   }
 }
 

@@ -43,13 +43,15 @@ import java.awt.*;
 public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
 	     DataSource, TrainingSetProducer, TestSetProducer,
-	     BeanCommon, EventConstraints, Serializable {
+	     BeanCommon, EventConstraints, Serializable,
+	     InstanceListener {
   
   private String m_classColumn = "last";
 
   private Object m_trainingProvider;
   private Object m_testProvider;
   private Object m_dataProvider;
+  private Object m_instanceProvider;
 
   private Vector m_trainingListeners = new Vector();
   private Vector m_testListeners = new Vector();
@@ -76,11 +78,6 @@ public class ClassAssigner extends JPanel
     return m_classColumn;
   }
 
-  public void acceptInstance(InstanceEvent e) {
-    assignClass(e.getInstance().dataset());
-    notifyInstanceListeners(e);
-  }
-
   public void acceptDataSet(DataSetEvent e) {
     Instances dataSet = e.getDataSet();
     assignClass(dataSet);
@@ -97,6 +94,21 @@ public class ClassAssigner extends JPanel
     Instances testSet = e.getTestSet();
     assignClass(testSet);
     notifyTestListeners(e);
+  }
+
+  /* 
+  public void acceptInstance(InstanceEvent e) {
+    assignClass(e.getInstance().dataset());
+    notifyInstanceListeners(e);
+    } */
+
+  public void acceptInstance(InstanceEvent e) {
+    if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+      Instances dataSet = e.getInstance().dataset();
+      //      System.err.println("Assigning class column...");
+      assignClass(dataSet);
+    }
+    notifyInstanceListeners(e);
   }
 
   private void assignClass(Instances dataSet) {
@@ -163,12 +175,12 @@ public class ClassAssigner extends JPanel
   protected void notifyInstanceListeners(InstanceEvent tse) {
     Vector l;
     synchronized (this) {
-      l = (Vector)m_dataListeners.clone();
+      l = (Vector)m_instanceListeners.clone();
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying instance listeners "
-			   +"(ClassAssigner)");
+	//	System.err.println("Notifying instance listeners "
+	//			   +"(ClassAssigner)");
 	((InstanceListener)l.elementAt(i)).acceptInstance(tse);
       }
     }
@@ -229,7 +241,8 @@ public class ClassAssigner extends JPanel
    */
   public boolean connectionAllowed(String eventName) {
     if (eventName.compareTo("trainingSet") == 0 && 
-	(m_trainingProvider != null || m_dataProvider != null)) { 
+	(m_trainingProvider != null || m_dataProvider != null ||
+	 m_instanceProvider != null)) { 
       return false;
     }
     
@@ -237,6 +250,12 @@ public class ClassAssigner extends JPanel
 	m_testProvider != null) { 
       return false;
     }
+
+     if (eventName.compareTo("instance") == 0 &&
+	m_instanceProvider != null || m_trainingProvider != null ||
+	 m_dataProvider != null) {
+       return false;
+     } 
     return true;
   }
 
@@ -257,6 +276,8 @@ public class ClassAssigner extends JPanel
 	m_testProvider = source;
       } else if (eventName.compareTo("dataSet") == 0) {
 	m_dataProvider = source;
+      } else if (eventName.compareTo("instance") == 0) {
+	m_instanceProvider = source;
       }
     }
   }
@@ -284,6 +305,12 @@ public class ClassAssigner extends JPanel
     if (eventName.compareTo("dataSet") == 0) {
       if (m_dataProvider == source) {
 	m_dataProvider = null;
+      }
+    }
+
+    if (eventName.compareTo("instance") == 0) {
+      if (m_instanceProvider == source) {
+	m_instanceProvider = null;
       }
     }
   }
@@ -333,11 +360,11 @@ public class ClassAssigner extends JPanel
     }
 
     if (eventName.compareTo("instance") == 0) { 
-      if (m_dataProvider == null) {
+      if (m_instanceProvider == null) {
 	return false;
       } else {
-	if (m_dataProvider instanceof EventConstraints) {
-	  if (!((EventConstraints)m_dataProvider).
+	if (m_instanceProvider instanceof EventConstraints) {
+	  if (!((EventConstraints)m_instanceProvider).
 	      eventGeneratable("instance")) {
 	    return false;
 	  }

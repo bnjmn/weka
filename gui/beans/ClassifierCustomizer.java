@@ -26,7 +26,9 @@ import weka.core.Utils;
 import weka.core.OptionHandler;
 import java.beans.*;
 import java.awt.BorderLayout;
+import java.awt.event.*;
 import javax.swing.JPanel;
+import javax.swing.JCheckBox;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
 import weka.classifiers.Classifier;
@@ -36,7 +38,7 @@ import weka.classifiers.Classifier;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassifierCustomizer extends JPanel
   implements Customizer {
@@ -71,7 +73,12 @@ public class ClassifierCustomizer extends JPanel
   private weka.gui.beans.Classifier m_dsClassifier;
   private GenericObjectEditor m_ClassifierEditor = 
     new GenericObjectEditor(true);
- 
+
+  private JPanel m_incrementalPanel = new JPanel();
+  private JCheckBox m_updateIncrementalClassifier 
+    = new JCheckBox("Update classifier on incoming instance stream");
+  private boolean m_panelVisible = false;
+
   public ClassifierCustomizer() {
     try {
       m_ClassifierEditor.
@@ -87,6 +94,7 @@ public class ClassifierCustomizer extends JPanel
 	      // listeners
 	      //	      System.err.println("--> "+Utils.joinOptions(((OptionHandler)editedC).getOptions()));
 	      //	      System.err.println("Setting classifier in weka.gui.Classifier");
+	      checkOnClassifierType();
 	    }
 	  }
 	});
@@ -96,10 +104,40 @@ public class ClassifierCustomizer extends JPanel
       ex.printStackTrace();
     }
 
+    m_updateIncrementalClassifier.
+      setToolTipText("Train the classifier on "
+		     +"each individual incoming streamed instance.");
+    m_updateIncrementalClassifier.
+      addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    if (m_dsClassifier != null) {
+	      m_dsClassifier.
+		setUpdateIncrementalClassifier(m_updateIncrementalClassifier.
+					       isSelected());
+	    }
+	  }
+	});
+    m_incrementalPanel.add(m_updateIncrementalClassifier);
     setLayout(new BorderLayout());
     add(m_ClassifierEditor.getCustomEditor(), BorderLayout.CENTER);
+    checkOnClassifierType();
   }
   
+  private void checkOnClassifierType() {
+    Classifier editedC = (Classifier)m_ClassifierEditor.getValue();
+    if (editedC instanceof weka.classifiers.UpdateableClassifier) {
+      if (!m_panelVisible) {
+	add(m_incrementalPanel, BorderLayout.SOUTH);
+	m_panelVisible = true;
+      }
+    } else {
+      if (m_panelVisible) {
+	remove(m_incrementalPanel);
+	m_panelVisible = false;
+      }
+    }
+  }
+
   /**
    * Set the classifier object to be edited
    *
@@ -110,6 +148,9 @@ public class ClassifierCustomizer extends JPanel
     //    System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
     m_ClassifierEditor.setValue(m_dsClassifier.getClassifier());
     //    m_ClassifierEditor.setValue(m_dsClassifier.getClassifier());
+    m_updateIncrementalClassifier.
+      setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
+    checkOnClassifierType();
   }
 
   /**
