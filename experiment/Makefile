@@ -15,7 +15,8 @@ SOURCES = InstanceQuery.java \
 	DatabaseUtils.java \
 	DatabaseResultListener.java \
 	DatabaseResultProducer.java \
-	PairedTTester.java
+	PairedTTester.java \
+	CostSensitiveClassifierSplitEvaluator.java
 #	LearningRateResultProducer.java \
 #	TreeMatchingEvaluator.java
 
