@@ -50,8 +50,8 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
-*/
+ * @version $Revision: 1.21 $ 
+ */
 public class Instances implements Serializable {
  
   /** The filename extension that should be used for arff files */
