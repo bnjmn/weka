@@ -109,7 +109,8 @@ weka.filters.Filter = \
  weka.filters.SwapAttributeValuesFilter, \
  weka.filters.TimeSeriesDeltaFilter, \
  weka.filters.TimeSeriesTranslateFilter, \
- weka.filters.NonsparseToSparseFilter
+ weka.filters.NonsparseToSparseFilter, \
+ weka.filters.NumericToBinaryFilter
 
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
