@@ -94,7 +94,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.3 $
+ * @version  $Revision: 1.4 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -187,8 +187,22 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  newV.addElement(toolBarName);
 	  // Name of bean capable of handling this class of algorithm
 	  newV.addElement(beanCompName);
+
+	  // add the root package for this key
+	  String rootPackage = geoKey.substring(0, geoKey.lastIndexOf('.'));
+	  newV.addElement(rootPackage);
+
 	  // All the weka algorithms of this class of algorithm
 	  String wekaAlgs = GEOProps.getProperty(geoKey);
+
+	  //------ test the HierarchyPropertyParser
+	  weka.gui.HierarchyPropertyParser hpp = 
+	    new weka.gui.HierarchyPropertyParser();
+	  hpp.build(wekaAlgs, ", ");
+	  //	  System.err.println(hpp.showTree());
+	  // ----- end test the HierarchyPropertyParser
+	  newV.addElement(hpp); // add the hierarchical property parser
+
 	  StringTokenizer st = new StringTokenizer(wekaAlgs, ", ");
 	  while (st.hasMoreTokens()) {
 	    String current = st.nextToken().trim();
@@ -215,7 +229,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    * @since 1.0
    * @see JPanel
    */
@@ -596,14 +610,22 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       String tempBarName = (String)tempBarSpecs.elementAt(0);
       // name of the bean component to handle this class of weka algorithms
       String tempBeanCompName = (String)tempBarSpecs.elementAt(1);
-      Object tempBean;
-      
+      // a JPanel holding an instantiated bean + label ready to be added
+      // to the current toolbar
+      JPanel tempBean;
+
+      // the root package for weka algorithms
+      String rootPackage = "";
+      weka.gui.HierarchyPropertyParser hpp = null;
+
       // Is this a wrapper toolbar?
       if (tempBeanCompName.compareTo("null") != 0) {
 	tempBean = null;
 	toolBarType = WEKAWRAPPER_TOOLBAR;
+	rootPackage = (String)tempBarSpecs.elementAt(2);
+	hpp = (weka.gui.HierarchyPropertyParser)tempBarSpecs.elementAt(3);
 	try {
-	  tempBean = Beans.instantiate(null, tempBeanCompName);
+	  Beans.instantiate(null, tempBeanCompName);
 	} catch (Exception ex) {
 	  // ignore
 	  System.err.println("Failed to instantiate: "+tempBeanCompName);
@@ -614,101 +636,50 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       }
       // a toolbar to hold buttons---one for each algorithm
       JToolBar tempToolBar = new JToolBar();
-
-      for (int j = 2; j < tempBarSpecs.size(); j++) {
-	tempBean = null;
-	String algName = "";
-	if (toolBarType == WEKAWRAPPER_TOOLBAR) {
-	  try {
-	    tempBean = Beans.instantiate(null, tempBeanCompName);
-	  } catch (Exception ex) {
-	    System.err.println("Failed to instantiate :"+tempBeanCompName
-			       +"KnowledgeFlow.setUpToolBars()");
-	    break;
-	  }
-	  if (tempBean instanceof WekaWrapper) {
-	    algName = (String)tempBarSpecs.elementAt(j);
-	    Class c = null;
-	    try {
-	      c = Class.forName(algName);
-	    } catch (Exception ex) {
-	      System.err.println("Can't find class called: "+algName);
+      int z = 2;
+      if (toolBarType == WEKAWRAPPER_TOOLBAR) {
+	if (!hpp.goTo(rootPackage)) {
+	  System.err.println("**** Failed to locate root package in tree ");
+	  System.exit(1);
+	}
+	String [] primaryPackages = hpp.childrenValues();
+	for (int kk = 0; kk < primaryPackages.length; kk++) {
+	  hpp.goToChild(primaryPackages[kk]);
+	  // check to see if this is a leaf - if so then there are no
+	  // sub packages
+	  if (hpp.isLeafReached()) {
+	    // add this bean directly to the tempToolBar
+	    String algName = hpp.fullValue();
+	    tempBean = instantiateToolBarBean(true,
+					       tempBeanCompName, algName);
+	    if (tempBean != null) {
+	      tempToolBar.add(tempBean);
 	    }
-	    try {
-	      Object o = c.newInstance();
-	      ((WekaWrapper)tempBean).setWrappedAlgorithm(o);
-	    } catch (Exception ex) {
-	      System.err.println("Failed to configure "+tempBeanCompName
-				 +" with "+algName);
-	      tempBean = null;
-	    }
-	  }
-	} else {
-	  tempBeanCompName = (String)tempBarSpecs.elementAt(j);
-	  try {
-	    tempBean = Beans.instantiate(null, tempBeanCompName);
-	  } catch (Exception ex) {
-	    System.err.println("Failed to instantiate :"+tempBeanCompName
-			       +"KnowledgeFlow.setUpToolBars()");
-	    break;
+	    hpp.goToParent();
+	  } else {
+	    // make a titledborder JPanel to hold all the schemes in this
+	    // package
+	    JPanel holderPanel = new JPanel();
+	    holderPanel.setBorder(javax.swing.BorderFactory.
+				  createTitledBorder(primaryPackages[kk]));
+	    processPackage(holderPanel, tempBeanCompName, hpp);
+	    tempToolBar.add(holderPanel);
 	  }
 	}
+      } else {
+	for (int j = z; j < tempBarSpecs.size(); j++) {
+	  tempBean = null;
+	  tempBeanCompName = (String)tempBarSpecs.elementAt(j);
+	  tempBean = 
+	    instantiateToolBarBean((toolBarType == WEKAWRAPPER_TOOLBAR),
+				   tempBeanCompName, "");
 
-	if (tempBean != null) {
-	  // add a button with the bean's visual to the toolbar
-	  JToggleButton tempButton;
-	  JPanel tempP = new JPanel();
-	  JLabel tempL = new JLabel();
-	  tempL.setFont(new Font("Monospaced", Font.PLAIN, 10));
-	  String labelName = (toolBarType == WEKAWRAPPER_TOOLBAR) ?
-	    algName :
-	    tempBeanCompName;
-	  tempL.setText(" "+labelName.
-			substring(labelName.lastIndexOf('.')+1, 
-				  labelName.length())+" ");
-	  tempL.setHorizontalAlignment(JLabel.CENTER);
-	  tempP.setLayout(new BorderLayout());
-	  if (tempBean instanceof Visible) {
-	    BeanVisual bv = ((Visible)tempBean).getVisual();
-	    tempButton = 
-	      new JToggleButton(bv.getStaticIcon());
-	  } else {
-	    tempButton = new JToggleButton();
-	  }
-	  tempP.add(tempButton, BorderLayout.CENTER);
-	  tempP.add(tempL, BorderLayout.SOUTH);
-	  //	  tempToolBar.add(tempButton);
-	  tempToolBar.add(tempP);
-	  m_toolBarGroup.add(tempButton);
-
-	  // add an action listener for the button here
-	  final String tempName = tempBeanCompName;
-	  final Object tempBN = tempBean;
-	  //	  final JToggleButton tempButton2 = tempButton;
-	  tempButton.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
-		try {
-		  m_toolBarBean = null;
-		  m_toolBarBean = Beans.instantiate(null, tempName);
-		  if (m_toolBarBean instanceof WekaWrapper) {
-		    Object wrappedAlg = 
-		      ((WekaWrapper)tempBN).getWrappedAlgorithm();
-		    
-		    ((WekaWrapper)m_toolBarBean).setWrappedAlgorithm(wrappedAlg.getClass().newInstance());
-		    //		    tempButton2.setSelected(false);
-		  }
-		  setCursor(Cursor.
-			    getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-		  m_mode = ADDING;
-		} catch (Exception ex) {
-		  System.err.
-		    println("Problem adding bean to data flow layout");
-		}
-	      }
-	    });
+	  if (tempBean != null) {
+	    tempToolBar.add(tempBean);
+	  } 
 	}
       }
-
+      
       // ok, now create tabbed pane to hold this toolbar
       JScrollPane tempJScrollPane = new JScrollPane(tempToolBar, 
 					JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -728,6 +699,136 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 
     //    add(m_toolBars, BorderLayout.NORTH);
     add(toolBarPanel, BorderLayout.NORTH);
+  }
+
+  private void processPackage(JPanel holderPanel,
+			      String tempBeanCompName,
+			      weka.gui.HierarchyPropertyParser hpp) {
+    if (hpp.isLeafReached()) {
+      // instantiate a bean and add it to the holderPanel
+      //      System.err.println("Would add "+hpp.fullValue());
+      String algName = hpp.fullValue();
+      JPanel tempBean = 
+	instantiateToolBarBean(true, tempBeanCompName, algName);
+      if (tempBean != null) {
+	holderPanel.add(tempBean);
+      }
+      hpp.goToParent();
+      return;
+    }
+    String [] children = hpp.childrenValues();
+    for (int i = 0; i < children.length; i++) {
+      hpp.goToChild(children[i]);
+      processPackage(holderPanel, tempBeanCompName, hpp);
+    }
+    hpp.goToParent();
+  }
+
+  /**
+   * Instantiates a bean for display in the toolbars
+   *
+   * @param wekawrapper true if the bean to be instantiated is a wekawrapper
+   * @param tempBeanCompName the name of the bean to instantiate
+   * @param algName holds the name of a weka algorithm to configure the
+   * bean with if it is a wekawrapper bean
+   * @return a JPanel holding the instantiated (and configured bean)
+   */
+  private JPanel instantiateToolBarBean(boolean wekawrapper, 
+					String tempBeanCompName,
+					String algName) {
+    Object tempBean;
+    if (wekawrapper) {
+      try {
+	tempBean = Beans.instantiate(null, tempBeanCompName);
+      } catch (Exception ex) {
+	System.err.println("Failed to instantiate :"+tempBeanCompName
+			   +"KnowledgeFlow.instantiateToolBarBean()");
+	return null;
+      }
+      if (tempBean instanceof WekaWrapper) {
+	//	algName = (String)tempBarSpecs.elementAt(j);
+	Class c = null;
+	try {
+	  c = Class.forName(algName);
+	} catch (Exception ex) {
+	  System.err.println("Can't find class called: "+algName);
+	  return null;
+	}
+	try {
+	  Object o = c.newInstance();
+	  ((WekaWrapper)tempBean).setWrappedAlgorithm(o);
+	} catch (Exception ex) {
+	  System.err.println("Failed to configure "+tempBeanCompName
+			     +" with "+algName);
+	  return null;
+	}
+      }
+    } else {
+      try {
+	tempBean = Beans.instantiate(null, tempBeanCompName);
+      } catch (Exception ex) {
+	System.err.println("Failed to instantiate :"+tempBeanCompName
+			   +"KnowledgeFlow.setUpToolBars()");
+	return null;
+      }
+    }
+    
+    // ---------------------------------------
+    JToggleButton tempButton;
+    JPanel tempP = new JPanel();
+    JLabel tempL = new JLabel();
+    tempL.setFont(new Font("Monospaced", Font.PLAIN, 10));
+    String labelName = (wekawrapper == true) 
+      ? algName 
+      : tempBeanCompName;
+    tempL.setText(" "+labelName.
+		  substring(labelName.lastIndexOf('.')+1, 
+			    labelName.length())+" ");
+    tempL.setHorizontalAlignment(JLabel.CENTER);
+    tempP.setLayout(new BorderLayout());
+    if (tempBean instanceof Visible) {
+      BeanVisual bv = ((Visible)tempBean).getVisual();
+      tempButton = 
+	new JToggleButton(bv.getStaticIcon());
+    } else {
+      tempButton = new JToggleButton();
+    }
+    tempP.add(tempButton, BorderLayout.CENTER);
+    tempP.add(tempL, BorderLayout.SOUTH);
+    
+    //  holderPanel.add(tempP);
+    //    tempToolBar.add(tempP);
+    m_toolBarGroup.add(tempButton);
+    
+    // add an action listener for the button here
+    final String tempName = tempBeanCompName;
+    final Object tempBN = tempBean;
+    //	  final JToggleButton tempButton2 = tempButton;
+    tempButton.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  try {
+	    m_toolBarBean = null;
+	    m_toolBarBean = Beans.instantiate(null, tempName);
+	    if (m_toolBarBean instanceof WekaWrapper) {
+	      Object wrappedAlg = 
+		((WekaWrapper)tempBN).getWrappedAlgorithm();
+	      
+	      ((WekaWrapper)m_toolBarBean).setWrappedAlgorithm(wrappedAlg.getClass().newInstance());
+	      //		    tempButton2.setSelected(false);
+	    }
+	    setCursor(Cursor.
+		      getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+	    m_mode = ADDING;
+	  } catch (Exception ex) {
+	    System.err.
+	      println("Problem adding bean to data flow layout");
+	  }
+	}
+      });
+    
+
+    //return tempBean;
+    return tempP;
   }
 
   /**
@@ -767,11 +868,11 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       if (compInfo == null) {
 	System.err.println("Error");
       } else {
-	System.err.println("Got bean info");
+	//	System.err.println("Got bean info");
 	final Class custClass = 
 	  compInfo.getBeanDescriptor().getCustomizerClass();
 	if (custClass != null) {
-	  System.err.println("Got customizer class");
+	  //	  System.err.println("Got customizer class");
 	  //	  popupCustomizer(custClass, bc);
 	  JMenuItem custItem = new JMenuItem("Configure...");
 	  custItem.addActionListener(new ActionListener() {
@@ -817,7 +918,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     } catch (IntrospectionException ie) {
       ie.printStackTrace();
     }
-    System.err.println("Just before look for other options");
+    //    System.err.println("Just before look for other options");
     // now look for other options for this bean
     if (bc instanceof UserRequestAcceptor) {
       Enumeration req = ((UserRequestAcceptor)bc).enumerateRequests();
@@ -840,7 +941,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	menuItemCount++;
       }
     }
-    System.err.println("Just before showing menu");
+    //    System.err.println("Just before showing menu");
     // popup the menu
     if (menuItemCount > 0) {
       beanContextMenu.show(m_beanLayout, x, y);
