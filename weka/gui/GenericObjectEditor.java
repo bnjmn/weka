@@ -43,7 +43,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.GridLayout;
 import javax.swing.JPanel;
+import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.DefaultComboBoxModel;
@@ -64,12 +66,16 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
   /** The classifier being configured */
   private Object m_Object;
+
+  /** Holds a copy of the current classifier that can be reverted to
+      if the user decides to cancel */
+  private Object m_Backup;
   
   /** Handles property change notification */
   private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
@@ -161,6 +167,12 @@ public class GenericObjectEditor implements PropertyEditor {
     /** The model containing the list of names to select from */
     private DefaultComboBoxModel m_ObjectNames;
 
+    /** ok button */
+    private JButton m_okBut;
+    
+    /** cancel button */
+    private JButton m_cancelBut;
+
     /** Creates the GUI editor component */
     public GOEPanel() {
 
@@ -177,9 +189,49 @@ public class GenericObjectEditor implements PropertyEditor {
 	}
       });
 
+      m_okBut = new JButton("OK");
+      m_okBut.setEnabled(true);
+      m_okBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_Backup = m_Object;
+	  if ((getTopLevelAncestor() != null)
+	      && (getTopLevelAncestor() instanceof Window)) {
+	    Window w = (Window) getTopLevelAncestor();
+	    w.dispose();
+	  }
+	}
+      });
+
+      m_cancelBut = new JButton("Cancel");
+      m_cancelBut.setEnabled(true);
+      m_cancelBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  if (m_Backup != null) {
+	    setObject(m_Backup);
+	    m_Backup=null;
+	  }
+	  if ((getTopLevelAncestor() != null)
+	      && (getTopLevelAncestor() instanceof Window)) {
+	    Window w = (Window) getTopLevelAncestor();
+	    w.dispose();
+	    updateClassType();
+	    updateChooser();
+	    updateChildPropertySheet();
+	  }
+	}
+      });
+      //m_cancelBut
+      
       setLayout(new BorderLayout());
       add(m_ObjectChooser, BorderLayout.NORTH);
       add(new JScrollPane(m_ChildPropertySheet), BorderLayout.CENTER);
+
+      JPanel okcButs = new JPanel();
+      okcButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      okcButs.setLayout(new GridLayout(1, 2, 5, 5));
+      okcButs.add(m_okBut);
+      okcButs.add(m_cancelBut);
+      add(okcButs, BorderLayout.SOUTH);
       
       if (m_ClassType != null) {
 	updateClassType();
@@ -383,6 +435,7 @@ public class GenericObjectEditor implements PropertyEditor {
     System.err.println("Didn't even try to make a Object copy!! "
 		       + "(using original)");
     */
+    m_Backup = m_Object;
     m_Object = c;
 
     if (m_EditorComponent != null) {
