@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.24 $
+ * @version  $Revision: 1.25 $
  */
 public class ClusterEvaluation {
 
@@ -681,11 +681,15 @@ public class ClusterEvaluation {
     Instances train, test;
     double foldAv = 0;;
     double[] tempDist;
+    data = new Instances(data);
+    data.randomize(random);
     //    double sumOW = 0;
     for (int i = 0; i < numFolds; i++) {
       // Build and test clusterer
       train = data.trainCV(numFolds, i, random);
+
       clusterer.buildClusterer(train);
+
       test = data.testCV(numFolds, i);
       
       for (int j = 0; j < test.numInstances(); j++) {
