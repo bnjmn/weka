@@ -62,7 +62,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class StackingC extends Stacking implements OptionHandler {
   
@@ -94,7 +94,9 @@ public class StackingC extends Stacking implements OptionHandler {
    */
   public StackingC() {
     m_MetaClassifier = new weka.classifiers.functions.LinearRegression();
-    ((LinearRegression)(getMetaClassifier())).setAttributeSelectionMethod(new weka.core.SelectedTag(1,LinearRegression.TAGS_SELECTION));
+    ((LinearRegression)(getMetaClassifier())).
+      setAttributeSelectionMethod(new 
+	weka.core.SelectedTag(1, LinearRegression.TAGS_SELECTION));
   }  
 
   /**
@@ -118,7 +120,9 @@ public class StackingC extends Stacking implements OptionHandler {
       classifierSpec[0] = "";
       setMetaClassifier(Classifier.forName(classifierName, classifierSpec));
     } else {
-        ((LinearRegression)(getMetaClassifier())).setAttributeSelectionMethod(new weka.core.SelectedTag(1,LinearRegression.TAGS_SELECTION));
+        ((LinearRegression)(getMetaClassifier())).
+	  setAttributeSelectionMethod(new 
+	    weka.core.SelectedTag(1,LinearRegression.TAGS_SELECTION));
     }
   }
 
@@ -130,11 +134,11 @@ public class StackingC extends Stacking implements OptionHandler {
     m_MetaClassifiers = Classifier.makeCopies(m_MetaClassifier,
 					      m_BaseFormat.numClasses());
     
-    int [] arrIdc = new int[m_BaseClassifiers.length + 1];
-    arrIdc[m_BaseClassifiers.length] = metaData.numAttributes() - 1;
+    int [] arrIdc = new int[m_Classifiers.length + 1];
+    arrIdc[m_Classifiers.length] = metaData.numAttributes() - 1;
     Instances newInsts;
-    for (int i = 0; i<m_MetaClassifiers.length; i++) {
-      for (int j = 0; j<m_BaseClassifiers.length; j++) {
+    for (int i = 0; i < m_MetaClassifiers.length; i++) {
+      for (int j = 0; j < m_Classifiers.length; j++) {
 	arrIdc[j] = m_BaseFormat.numClasses() * j + i;
       }
       m_makeIndicatorFilter = new weka.filters.unsupervised.attribute.MakeIndicator();
@@ -165,14 +169,14 @@ public class StackingC extends Stacking implements OptionHandler {
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
-    int [] arrIdc = new int[m_BaseClassifiers.length+1];
-    arrIdc[m_BaseClassifiers.length] = m_MetaFormat.numAttributes() - 1;
+    int [] arrIdc = new int[m_Classifiers.length+1];
+    arrIdc[m_Classifiers.length] = m_MetaFormat.numAttributes() - 1;
     double [] classProbs = new double[m_BaseFormat.numClasses()];
     Instance newInst;
     double sum = 0;
 
     for (int i = 0; i < m_MetaClassifiers.length; i++) {
-      for (int j = 0; j < m_BaseClassifiers.length; j++) {
+      for (int j = 0; j < m_Classifiers.length; j++) {
           arrIdc[j] = m_BaseFormat.numClasses() * j + i;
       }
       m_makeIndicatorFilter.setAttributeIndex("" + (m_MetaFormat.classIndex() + 1));
@@ -206,18 +210,12 @@ public class StackingC extends Stacking implements OptionHandler {
    */
   public String toString() {
 
-    if (m_BaseClassifiers.length == 0) {
-      return "StackingC: No base schemes entered.";
-    }
-    if ((m_MetaClassifier == null) || (m_MetaClassifiers.length == 0)) {
-      return "StackingC: No meta scheme selected or no trained meta classifiers available.";
-    }
     if (m_MetaFormat == null) {
       return "StackingC: No model built yet.";
     }
     String result = "StackingC\n\nBase classifiers\n\n";
-    for (int i = 0; i < m_BaseClassifiers.length; i++) {
-      result += getBaseClassifier(i).toString() +"\n\n";
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      result += getClassifier(i).toString() +"\n\n";
     }
    
     result += "\n\nMeta classifiers (one for each class)\n\n";

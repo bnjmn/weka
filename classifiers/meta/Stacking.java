@@ -53,17 +53,12 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
-public class Stacking extends Classifier implements OptionHandler {
+public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /** The meta classifier */
-  protected Classifier m_MetaClassifier = new weka.classifiers.rules.ZeroR();
-
-  /** The base classifiers. */
-  protected Classifier [] m_BaseClassifiers = {
-     new weka.classifiers.rules.ZeroR()
-  };
+  protected Classifier m_MetaClassifier = new ZeroR();
  
   /** Format for meta data */
   protected Instances m_MetaFormat = null;
@@ -73,9 +68,6 @@ public class Stacking extends Classifier implements OptionHandler {
 
   /** Set the number of folds for the cross-validation */
   protected int m_NumFolds = 10;
-
-  /** Random number seed */
-  protected int m_Seed = 1;
     
   /**
    * Returns a string describing classifier
@@ -90,7 +82,6 @@ public class Stacking extends Classifier implements OptionHandler {
       + "David H. Wolpert (1992). \"Stacked "
       + "generalization\". Neural Networks, 5:241-259, Pergamon Press.";
   }
-
   
   /**
    * Returns an enumeration describing the available options.
@@ -99,23 +90,18 @@ public class Stacking extends Classifier implements OptionHandler {
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(4);
-    newVector.addElement(new Option(
-	      "\tFull class name of base classifiers to include, followed "
-	      + "by scheme options\n"
-	      + "\t(may be specified multiple times).\n"
-	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -K\"",
-	      "B", 1, "-B <scheme specification>"));
+    Vector newVector = new Vector(2);
     newVector.addElement(new Option(
 	      metaOption(),
 	      "M", 0, "-M <scheme specification>"));
     newVector.addElement(new Option(
 	      "\tSets the number of cross-validation folds.",
 	      "X", 1, "-X <number of folds>"));
-    newVector.addElement(new Option(
-	      "\tSets the random number seed.",
-	      "S", 1, "-S <random number seed>"));
 
+    Enumeration enum = super.listOptions();
+    while (enum.hasMoreElements()) {
+      newVector.addElement(enum.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -124,7 +110,8 @@ public class Stacking extends Classifier implements OptionHandler {
    */
   protected String metaOption() {
 
-    return "\tFull name of meta classifier, followed by options.";
+    return "\tFull name of meta classifier, followed by options.\n" +
+      "\t(default: \"weka.classifiers.rules.Zero\")";
   }
 
   /**
@@ -143,7 +130,7 @@ public class Stacking extends Classifier implements OptionHandler {
    *
    * -M classifierstring <br>
    * Classifierstring for the meta classifier. Same format as for base
-   * classifiers. (required) <p>
+   * classifiers. (default: weka.classifiers.rules.ZeroR) <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -156,40 +143,8 @@ public class Stacking extends Classifier implements OptionHandler {
     } else {
       setNumFolds(10);
     }
-    String randomString = Utils.getOption('S', options);
-    if (randomString.length() != 0) {
-      setSeed(Integer.parseInt(randomString));
-    } else {
-      setSeed(1);
-    }
-
-    // Iterate through the schemes
-    FastVector classifiers = new FastVector();
-    while (true) {
-      String classifierString = Utils.getOption('B', options);
-      if (classifierString.length() == 0) {
-	break;
-      }
-      String [] classifierSpec = Utils.splitOptions(classifierString);
-      if (classifierSpec.length == 0) {
-	throw new Exception("Invalid classifier specification string");
-      }
-      String classifierName = classifierSpec[0];
-      classifierSpec[0] = "";
-      classifiers.addElement(Classifier.forName(classifierName,
-						classifierSpec));
-    }
-    if (classifiers.size() == 0) {
-      throw new Exception("At least one base classifier must be specified"
-			  + " with the -B option.");
-    } else {
-      Classifier [] classifiersArray = new Classifier [classifiers.size()];
-      for (int i = 0; i < classifiersArray.length; i++) {
-	classifiersArray[i] = (Classifier) classifiers.elementAt(i);
-      }
-      setBaseClassifiers(classifiersArray);
-    }
     processMetaOptions(options);
+    super.setOptions(options);
   }
 
   /**
@@ -199,11 +154,13 @@ public class Stacking extends Classifier implements OptionHandler {
 
     String classifierString = Utils.getOption('M', options);
     String [] classifierSpec = Utils.splitOptions(classifierString);
+    String classifierName;
     if (classifierSpec.length == 0) {
-      throw new Exception("Meta classifier has to be provided.");
+      classifierName = "weka.classifiers.rules.ZeroR";
+    } else {
+      classifierName = classifierSpec[0];
+      classifierSpec[0] = "";
     }
-    String classifierName = classifierSpec[0];
-    classifierSpec[0] = "";
     setMetaClassifier(Classifier.forName(classifierName, classifierSpec));
   }
 
@@ -214,57 +171,18 @@ public class Stacking extends Classifier implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String[6];
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 4];
+
     int current = 0;
-
-    if (m_BaseClassifiers.length != 0) {
-      options = new String [m_BaseClassifiers.length * 2 + 6];
-      for (int i = 0; i < m_BaseClassifiers.length; i++) {
-	options[current++] = "-B";
-	options[current++] = "" + getBaseClassifierSpec(i);
-      }
-    }
     options[current++] = "-X"; options[current++] = "" + getNumFolds();
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-    if (getMetaClassifier() != null) {
-      options[current++] = "-M";
-      options[current++] = getClassifierSpec(getMetaClassifier());
-    }
+    options[current++] = "-M";
+    options[current++] = getMetaClassifier().getClass().getName() + " "
+      + Utils.joinOptions(((OptionHandler)getMetaClassifier()).getOptions());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
     return options;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-    return "The seed used for randomizing the data " +
-      "for cross-validation.";
-  }
-
-  /**
-   * Sets the seed for random number generation.
-   *
-   * @param seed the random number seed
-   */
-  public void setSeed(int seed) {
-    
-    m_Seed = seed;;
-  }
-
-  /**
-   * Gets the random number seed.
-   * 
-   * @return the random number seed
-   */
-  public int getSeed() {
-
-    return m_Seed;
   }
   
   /**
@@ -295,50 +213,10 @@ public class Stacking extends Classifier implements OptionHandler {
   public void setNumFolds(int numFolds) throws Exception {
     
     if (numFolds < 0) {
-      throw new Exception("Stacking: Number of cross-validation " +
-			  "folds must be positive.");
+      throw new IllegalArgumentException("Stacking: Number of cross-validation " +
+					 "folds must be positive.");
     }
     m_NumFolds = numFolds;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String baseClassifiersTipText() {
-    return "The base classifiers to be used.";
-  }
-
-  /**
-   * Sets the list of possible classifers to choose from.
-   *
-   * @param classifiers an array of classifiers with all options set.
-   */
-  public void setBaseClassifiers(Classifier [] classifiers) {
-
-    m_BaseClassifiers = classifiers;
-  }
-
-  /**
-   * Gets the list of possible classifers to choose from.
-   *
-   * @return the array of Classifiers
-   */
-  public Classifier [] getBaseClassifiers() {
-
-    return m_BaseClassifiers;
-  }
-
-  /**
-   * Gets the specific classifier from the set of base classifiers.
-   *
-   * @param index the index of the classifier to retrieve
-   * @return the classifier
-   */
-  public Classifier getBaseClassifier(int index) {
-    
-    return m_BaseClassifiers[index];
   }
   
   /**
@@ -380,27 +258,27 @@ public class Stacking extends Classifier implements OptionHandler {
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (m_BaseClassifiers.length == 0) {
-      throw new IllegalArgumentException("No base classifiers have been set");
-    }
     if (m_MetaClassifier == null) {
       throw new IllegalArgumentException("No meta classifier has been set");
     }
     if (!(data.classAttribute().isNominal() ||
 	  data.classAttribute().isNumeric())) {
-      throw new UnsupportedClassTypeException("Class attribute has to be nominal or numeric!");
+      throw new UnsupportedClassTypeException("Class attribute has to be nominal " +
+					      "or numeric!");
     }
     Instances newData = new Instances(data);
     m_BaseFormat = new Instances(data, 0);
     newData.deleteWithMissingClass();
     if (newData.numInstances() == 0) {
-      throw new IllegalArgumentException("No training instances without missing class!");
+      throw new IllegalArgumentException("No training instances without missing " +
+					 "class!");
     }
     Random random = new Random(m_Seed);
     newData.randomize(random);
-    if (newData.classAttribute().isNominal())
+    if (newData.classAttribute().isNominal()) {
       newData.stratify(m_NumFolds);
-    int numClassifiers = m_BaseClassifiers.length;
+    }
+    int numClassifiers = m_Classifiers.length;
     // Create meta data
     Instances metaData = metaFormat(newData);
     m_MetaFormat = new Instances(metaData, 0);
@@ -408,8 +286,8 @@ public class Stacking extends Classifier implements OptionHandler {
       Instances train = newData.trainCV(m_NumFolds, j, random);
 
       // Build base classifiers
-      for (int i = 0; i < m_BaseClassifiers.length; i++) {
-	getBaseClassifier(i).buildClassifier(train);
+      for (int i = 0; i < m_Classifiers.length; i++) {
+	getClassifier(i).buildClassifier(train);
       }
 
       // Classify test instances and add to meta data
@@ -421,7 +299,7 @@ public class Stacking extends Classifier implements OptionHandler {
 
     // Rebuilt all the base classifiers on the full training data
     for (int i = 0; i < numClassifiers; i++) {
-      getBaseClassifier(i).buildClassifier(newData);
+      getClassifier(i).buildClassifier(newData);
     }
    
     // Build meta classifier
@@ -453,7 +331,7 @@ public class Stacking extends Classifier implements OptionHandler {
    */
   public String toString() {
 
-    if (m_BaseClassifiers.length == 0) {
+    if (m_Classifiers.length == 0) {
       return "Stacking: No base schemes entered.";
     }
     if (m_MetaClassifier == null) {
@@ -463,29 +341,14 @@ public class Stacking extends Classifier implements OptionHandler {
       return "Stacking: No model built yet.";
     }
     String result = "Stacking\n\nBase classifiers\n\n";
-    for (int i = 0; i < m_BaseClassifiers.length; i++) {
-      result += getBaseClassifier(i).toString() +"\n\n";
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      result += getClassifier(i).toString() +"\n\n";
     }
    
     result += "\n\nMeta classifier\n\n";
     result += m_MetaClassifier.toString();
 
     return result;
-  }
-
-  /**
-   * Main method for testing this class.
-   *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
-   */
-  public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new Stacking(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
   }
 
   /**
@@ -501,8 +364,8 @@ public class Stacking extends Classifier implements OptionHandler {
     Attribute attribute;
     int i = 0;
 
-    for (int k = 0; k < m_BaseClassifiers.length; k++) {
-      Classifier classifier = (Classifier) getBaseClassifier(k);
+    for (int k = 0; k < m_Classifiers.length; k++) {
+      Classifier classifier = (Classifier) getClassifier(k);
       String name = classifier.getClass().getName();
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	attributes.addElement(new Attribute(name));
@@ -521,38 +384,6 @@ public class Stacking extends Classifier implements OptionHandler {
   }
 
   /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @param index the index of the classifier string to retrieve, starting from
-   * 0.
-   * @return the classifier string, or the empty string if no classifier
-   * has been assigned (or the index given is out of range).
-   */
-  protected String getBaseClassifierSpec(int index) {
-    
-    if (m_BaseClassifiers.length < index) {
-      return "";
-    }
-    return getClassifierSpec(getBaseClassifier(index));
-  }
-  /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @param c the classifier
-   * @return the classifier specification string.
-   */
-  protected String getClassifierSpec(Classifier c) {
-    
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
-  }
-
-  /**
    * Makes a level-1 instance from the given instance.
    * 
    * @param instance the instance to be transformed
@@ -563,8 +394,8 @@ public class Stacking extends Classifier implements OptionHandler {
     double[] values = new double[m_MetaFormat.numAttributes()];
     Instance metaInstance;
     int i = 0;
-    for (int k = 0; k < m_BaseClassifiers.length; k++) {
-      Classifier classifier = getBaseClassifier(k);
+    for (int k = 0; k < m_Classifiers.length; k++) {
+      Classifier classifier = getClassifier(k);
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	values[i++] = classifier.classifyInstance(instance);
       } else {
@@ -578,6 +409,21 @@ public class Stacking extends Classifier implements OptionHandler {
     metaInstance = new Instance(1, values);
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
+  }
+
+  /**
+   * Main method for testing this class.
+   *
+   * @param argv should contain the following arguments:
+   * -t training file [-T test file] [-c class index]
+   */
+  public static void main(String [] argv) {
+
+    try {
+      System.out.println(Evaluation.evaluateModel(new Stacking(), argv));
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+    }
   }
 }
 
