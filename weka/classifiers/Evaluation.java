@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.46 $
+ * @version  $Revision: 1.47 $
   */
 public class Evaluation implements Summarizable {
 
@@ -2579,7 +2579,7 @@ public class Evaluation implements Summarizable {
     }
     m_PriorErrorEstimator = new KernelEstimator(numPrecision);
     m_ErrorEstimator = new KernelEstimator(numPrecision);
-    m_ClassPriors[0] = m_ClassPriorsSum = 0.0001; // zf correction
+    m_ClassPriors[0] = m_ClassPriorsSum = 0;
     for (int i = 0; i < m_NumTrainClassVals; i++) {
       m_ClassPriors[0] += m_TrainClassVals[i] * m_TrainClassWeights[i];
       m_ClassPriorsSum += m_TrainClassWeights[i];
