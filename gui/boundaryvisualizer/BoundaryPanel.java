@@ -92,8 +92,9 @@ public class BoundaryPanel extends JPanel {
   private int m_panelWidth;
   private int m_panelHeight;
 
-  // number of samples to use for generating the colour of each plotted pixel
-  private int m_samplesPerPixel;
+  // the number of samples to take from each generating model for each
+  // pixel
+  private int m_numberOfSamplesFromEachGeneratingModel = 2;
   
   // listeners to be notified when plot is complete
   private Vector m_listeners = new Vector();
@@ -274,7 +275,9 @@ public class BoundaryPanel extends JPanel {
 	      m_dataGenerator.setWeightingDimensions(attsToWeightOn);
 
 	      m_dataGenerator.buildGenerator(trainNoClass);
-	      m_samplesPerPixel = 2 * m_dataGenerator.getNumGeneratingModels();
+	      int samplesPerPixel = 
+		m_numberOfSamplesFromEachGeneratingModel * 
+		m_dataGenerator.getNumGeneratingModels();
 	      
 	      // generate samples
 	      Add addF = new Add();
@@ -298,7 +301,7 @@ public class BoundaryPanel extends JPanel {
 		  double sumOfWeights = 0;
 		  double [] sumOfProbs = 
 		    new double [m_trainingData.classAttribute().numValues()];
-		  for (int z = 0; z < m_samplesPerPixel; z++) {
+		  for (int z = 0; z < samplesPerPixel; z++) {
 
 		    weightingAttsValues[m_xAttribute] = pixelMidX;
 		    weightingAttsValues[m_yAttribute] = pixelMidY;
@@ -372,6 +375,18 @@ public class BoundaryPanel extends JPanel {
 	};
       m_plotThread.setPriority(Thread.MIN_PRIORITY);
       m_plotThread.start();
+    }
+  }
+
+  /**
+   * Set how many samples to take from each generating model for use in
+   * computing the colour of a pixel
+   *
+   * @param ns the number of samples to use from each generating model
+   */
+  public void setNumberOfSamplesFromEachGeneratingModel(int ns) {
+    if (ns >= 1) {
+      m_numberOfSamplesFromEachGeneratingModel = ns;
     }
   }
 
