@@ -11,7 +11,7 @@ SOURCES = \
 	PlotData2D.java \
 	VisualizePanel.java \
 	VisualizePanelEvent.java \
-	VisualizePanelUtils.java \
+	VisualizeUtils.java \
 	VisualizePanelListener.java
 
 
