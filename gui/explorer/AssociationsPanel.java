@@ -72,7 +72,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -116,8 +116,8 @@ public class AssociationsPanel extends JPanel {
       .registerEditor(weka.filters.Filter.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
-      .registerEditor(weka.associations.Associator [].class,
-		      weka.gui.GenericArrayEditor.class);
+      .registerEditor(weka.associations.Associator.class,
+		      weka.gui.GenericObjectEditor.class);
   }
   
   /**
