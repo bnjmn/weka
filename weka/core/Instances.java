@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.57 $ 
+ * @version $Revision: 1.58 $ 
  */
 public class Instances implements Serializable {
  
@@ -2006,7 +2006,7 @@ public class Instances implements Serializable {
    */
   //@ requires 0 <= i && i < numInstances();
   //@ requires 0 <= j && j < numInstances();
-  protected void swap(int i, int j){
+  public void swap(int i, int j){
     
     m_Instances.swap(i, j);
   }
