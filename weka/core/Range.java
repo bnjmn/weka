@@ -23,17 +23,19 @@ import java.util.*;
 
 /** 
  * Class representing a range of cardinal numbers. The range is set by a 
- * string  representation such as: <P>
+ * string representation such as: <P>
  *
  * <code>
  *   all
  *   first-last
  *   1,2,3,4
  * </code> <P>
- * or combinations thereof.
+ * or combinations thereof. The range is internally converted from
+ * 1-based to 0-based (so methods that set or get numbers not in string
+ * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Range implements Serializable {
 
@@ -41,7 +43,7 @@ public class Range implements Serializable {
   Vector m_RangeStrings = new Vector();
 
   /** Whether matching should be inverted */
-  boolean b_Invert;
+  boolean m_Invert;
 
   /** The array of flags for whether an column is selected */
   boolean [] m_SelectFlags;
@@ -50,7 +52,7 @@ public class Range implements Serializable {
   int m_Upper;
 
   /**
-   * Sets the value of "last"
+   * Sets the value of "last".
    *
    * @param newUpper the value of "last"
    */
@@ -70,7 +72,7 @@ public class Range implements Serializable {
    */
   public boolean getInvert() {
 
-    return b_Invert;
+    return m_Invert;
   }
 
   /**
@@ -81,7 +83,7 @@ public class Range implements Serializable {
    */
   public void setInvert(boolean newSetting) {
 
-    b_Invert = newSetting;
+    m_Invert = newSetting;
   }
 
   /**
@@ -106,7 +108,8 @@ public class Range implements Serializable {
   /**
    * Sets the ranges from a string representation.
    *
-   * @param rangeList the comma separated list of ranges
+   * @param rangeList the comma separated list of ranges. The empty
+   * string sets the range to empty.
    * @exception Exception if the rangeList was not well formed
    */
   public void setRanges(String rangeList) throws Exception {
@@ -114,27 +117,23 @@ public class Range implements Serializable {
     Vector ranges = new Vector (10);
 
     // Split the rangeList up into the vector
-    int commaLoc;
-    while ((commaLoc = rangeList.indexOf(',')) >= 0) {
-      String range = rangeList.substring(0, commaLoc).trim();
-      if (!range.equals("") && isValidRange(range)) {
-	ranges.addElement(range);
+    while (!rangeList.equals("")) {
+      String range = rangeList.trim();
+      int commaLoc = rangeList.indexOf(',');
+      if (commaLoc != -1) {
+	range = rangeList.substring(0, commaLoc).trim();
+	rangeList = rangeList.substring(commaLoc + 1).trim();
       } else {
-	throw new Exception("Invalid range list at " + range
-			    + rangeList.substring(commaLoc));
+	rangeList = "";
       }
-      rangeList = rangeList.substring(commaLoc + 1);
-    }
-    String range = rangeList.trim();
-    if (!range.equals("") && isValidRange(range)) {
-      ranges.addElement(range);
-    } else {
-      throw new Exception("Invalid range list at "+range);
-    }
-
-    // If everything is OK, make the type change
-    if (ranges.size() == 0) {
-      throw new Exception("Empty range list");
+      if (!range.equals("")) {
+	if (isValidRange(range)) {
+	  ranges.addElement(range);
+	} else {
+	  throw new Exception("Invalid range list at " + range
+			      + rangeList);
+	}
+      }
     }
     m_RangeStrings = ranges;
     
@@ -156,7 +155,7 @@ public class Range implements Serializable {
     if (m_Upper == 0) {
       throw new Exception("No upper limit has been specified for range");
     }
-    if (b_Invert) {
+    if (m_Invert) {
       return !m_SelectFlags[index];
     } else {
       return m_SelectFlags[index];
@@ -164,7 +163,8 @@ public class Range implements Serializable {
   }
 
   /**
-   * Constructs a representation of the current range.
+   * Constructs a representation of the current range. Being a string
+   * representation, the numbers are based from 1.
    * 
    * @return the string representation of the current range
    */
@@ -180,7 +180,7 @@ public class Range implements Serializable {
     }
     result += "\n";
 
-    result += "Invert: " + b_Invert + "\n";
+    result += "Invert: " + m_Invert + "\n";
 
     try {
       if (m_Upper == 0) {
@@ -219,7 +219,7 @@ public class Range implements Serializable {
     }
     int [] selectIndices = new int [m_Upper + 1];
     int numSelected = 0;
-    if (b_Invert)
+    if (m_Invert)
     {
       for (int i = 0; i <= m_Upper; i++) {
 	if (!m_SelectFlags[i]) {
@@ -246,9 +246,7 @@ public class Range implements Serializable {
     return result;
   }
 
-  /**
-   * Sets the flags.
-   */
+  /** Sets the flags array. */
   protected void setFlags() {
 
     m_SelectFlags = new boolean [m_Upper + 1];
@@ -265,7 +263,7 @@ public class Range implements Serializable {
 
 
   /**
-   * Translates a single selection into it's cardinal equivalent
+   * Translates a single string selection into it's internal 0-based equivalent
    *
    * @param single the string representing the selection (eg: 1 first last)
    * @return the number corresponding to the selected value
@@ -372,10 +370,10 @@ public class Range implements Serializable {
       }
       Range range = new Range();
       range.setRanges(argv[0]);
-      range.setUpper(10);
+      range.setUpper(9);
       range.setInvert(false);
-      System.out.println("Input: "+argv[0]
-			 +"\n"+range.toString());
+      System.out.println("Input: " + argv[0] + "\n"
+			 + range.toString());
       int [] rangeIndices = range.getSelection();
       for (int i = 0; i < rangeIndices.length; i++)
 	System.out.print(" " + (rangeIndices[i] + 1));
@@ -385,11 +383,5 @@ public class Range implements Serializable {
     }
   }
 }
-
-
-
-
-
-
 
 
