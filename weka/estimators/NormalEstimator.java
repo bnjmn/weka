@@ -26,7 +26,7 @@ import weka.core.*;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NormalEstimator implements Estimator {
 
@@ -93,7 +93,7 @@ public class NormalEstimator implements Estimator {
     data = round(data);
     m_SumOfWeights += weight;
     m_SumOfValues += data * weight;
-    m_SumOfValuesSq += data * data * weight * weight;
+    m_SumOfValuesSq += data * data * weight;
 
     if (m_SumOfWeights > 0) {
       m_Mean = m_SumOfValues / m_SumOfWeights;
