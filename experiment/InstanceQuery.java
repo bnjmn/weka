@@ -36,7 +36,8 @@ import weka.core.*;
  * Convert the results of a database query into instances. The jdbc
  * driver and database to be used default to "jdbc.idbDriver" and
  * "jdbc:idb=experiments.prp". These may be changed by creating
- * a java properties file called .weka.experimentrc in user.home. eg:<p>
+ * a java properties file called DatabaseUtils.props in user.home or
+ * the current directory. eg:<p>
  *
  * <code><pre>
  * jdbcDriver=jdbc.idbDriver
@@ -46,7 +47,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
