@@ -28,10 +28,15 @@ import weka.core.Statistics;
 /**
  * A class for storing stats on a paired comparison. This version is
  * based on the corrected resampled t-test statistic, which uses the
- * ratio of the number of test examples/the number of training examples.
+ * ratio of the number of test examples/the number of training examples.<p>
+ *
+ * For more information see:<p>
+ *
+ * Claude Nadeau and Yoshua Bengio, "Inference for the Generalization Error,"
+ * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PairedStatsCorrected extends PairedStats {
 
