@@ -25,6 +25,7 @@ package weka.gui.beans;
 import weka.core.Utils;
 import weka.gui.ListSelectorDialog;
 import weka.gui.LogPanel;
+import weka.gui.visualize.PrintablePanel;
 
 import java.io.OutputStream;
 import java.io.InputStream;
@@ -106,7 +107,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.23 $
+ * @version  $Revision: 1.24 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -240,11 +241,11 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.23 $
+   * @version $Revision: 1.24 $
    * @since 1.0
-   * @see JPanel
+   * @see PrintablePanel
    */
-  protected class BeanLayout extends JPanel {
+  protected class BeanLayout extends PrintablePanel {
     public void paintComponent(Graphics gx) {
       super.paintComponent(gx);
       BeanInstance.paintLabels(gx);
