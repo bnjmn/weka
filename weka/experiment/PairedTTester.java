@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -104,6 +104,9 @@ public class PairedTTester implements OptionHandler {
 
   /** Indicates whether standard deviations should be displayed */
   protected boolean m_ShowStdDevs = false;
+
+  /** Produce tables in latex format */
+  protected boolean m_latexOutput = false;
   
   /* A list of unique "dataset" specifiers that have been observed */
   private class DatasetSpecifiers {
@@ -342,6 +345,22 @@ public class PairedTTester implements OptionHandler {
       result = result.substring("weka.classifiers.".length());
     }
     return result.trim();
+  }
+
+  /**
+   * Set whether latex is output
+   * @param l true if tables are to be produced in Latex format
+   */
+  public void setProduceLatex(boolean l) {
+    m_latexOutput = l;
+  }
+
+  /**
+   * Get whether latex is output
+   * @return true if Latex is to be output
+   */
+  public boolean getProduceLatex() {
+    return m_latexOutput;
   }
 
   /**
@@ -723,6 +742,161 @@ public class PairedTTester implements OptionHandler {
   }
 
   /**
+   * Generates a comparison table in latex table format
+   * @param baseResultset the index of the base resultset
+   * @param comparisonColumn the index of the column to compare over
+   * @param maxWidthMean width for the mean
+   * @param maxWidthStdDev width for the standard deviation
+   * @return the comparison table string
+   */
+  private String multiResultsetFullLatex(int baseResultset,
+				     int comparisonColumn,
+				     int maxWidthMean,
+				     int maxWidthStdDev) {
+
+    StringBuffer result = new StringBuffer(1000);
+    int numcols = getNumResultsets() * 2;
+    if (m_ShowStdDevs) {
+      numcols += getNumResultsets();
+    }
+
+    result.append("\\begin{table}[thb]\n\\caption{\\label{labelname}"
+		  +"Table Caption}\n");
+    if (!m_ShowStdDevs) {
+      result.append("\\footnotesize\n");
+    } else {
+      result.append("\\scriptsize\n");
+    }
+
+    // output the column alignment characters
+    // one for the dataset name and one for the comparison column
+    if (!m_ShowStdDevs) {
+      result.append("{\\centering \\begin{tabular}{ll");
+    } else {
+      // dataset, mean, std dev
+      result.append("{\\centering \\begin{tabular}{lr@{\\hspace{0cm}}l");
+    }
+
+    for (int j = 0; j < getNumResultsets(); j++) {
+      if (j != baseResultset) {
+	if (!m_ShowStdDevs) {
+	  result.append("l@{\\hspace{0.1cm}}l");
+	} else {
+	  result.append("r@{\\hspace{0cm}}l@{\\hspace{0cm}}r");
+	}
+      }
+    }
+    result.append("}\n\\\\\n\\hline\n");
+    if (!m_ShowStdDevs) {
+      result.append("Data Set & ("+(baseResultset+1)+")");
+    } else {
+      result.append("Data Set & \\multicolumn{2}{c}{("+(baseResultset+1)+")}");
+    }
+
+    // now do the column names (numbers)
+    for (int j = 0; j < getNumResultsets(); j++) {
+      if (j != baseResultset) {
+	if (!m_ShowStdDevs) {
+	  result.append("& (" + (j + 1) + ") & ");
+	} else {
+	  result.append("& \\multicolumn{3}{c}{(" + (j + 1) + ")} ");
+	}
+      }
+    }
+    result.append("\\\\\n\\hline\n");
+    
+    int datasetLength = 25;
+    int resultsetLength = maxWidthMean + 7;
+    if (m_ShowStdDevs) {
+      resultsetLength += (maxWidthStdDev + 5);
+    }
+
+    for (int i = 0; i < getNumDatasets(); i++) {
+      // Print the name of the dataset
+      String datasetName = 
+	templateString(m_DatasetSpecifiers.specifier(i)).replace('_','-');
+      try {
+	PairedStats pairedStats = 
+	  calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+			      baseResultset, baseResultset,
+			      comparisonColumn);
+	datasetName = Utils.padRight(datasetName, datasetLength);
+	result.append(datasetName);
+
+	
+	if (!m_ShowStdDevs) {
+	  result.append("& "+Utils.doubleToString(pairedStats.xStats.mean,
+			       resultsetLength - 2, 2));
+	} else {
+	  result.append("& "+Utils.doubleToString(pairedStats.xStats.mean,
+					     (maxWidthMean+5), 2)+"$\\pm$");
+	  if (Utils.eq(pairedStats.xStats.stdDev, Double.NaN)) {
+	    result.append("&"+Utils.doubleToString(0.0,
+						  (maxWidthStdDev+3),2)+" ");
+	  } else {
+	    result.append("&"+Utils.doubleToString(pairedStats.xStats.stdDev,
+						   (maxWidthStdDev+3),2)+" ");
+	  }
+	}
+	// Iterate over the resultsets
+	for (int j = 0; j < getNumResultsets(); j++) {
+	  if (j != baseResultset) {
+	    try {
+	      pairedStats = 
+		calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+				    baseResultset, j, comparisonColumn);
+	      String sigString = "";
+	      if (pairedStats.differencesSignificance < 0) {
+		sigString = "$\\circ$";
+	      } else if (pairedStats.differencesSignificance > 0) {
+		sigString = "$\\bullet$";
+	      } 
+	      if (!m_ShowStdDevs) {
+		result.append(" & "+Utils.doubleToString(pairedStats.yStats.mean,
+						   resultsetLength - 2,
+						   2)).append(" & "+sigString);
+	      } else {
+		result.append(" & "
+			      +Utils.doubleToString(pairedStats.yStats.mean,
+						   (maxWidthMean+5),
+						   2)+"$\\pm$");
+		if (Utils.eq(pairedStats.yStats.stdDev, Double.NaN)) {
+		  result.append("&"+Utils.doubleToString(0.0, 
+				(maxWidthStdDev+3),2)+" ");
+		} else {
+		  result.append("&"+Utils.doubleToString(pairedStats.
+				  yStats.stdDev, (maxWidthStdDev+3),2)+" ");
+		}
+		result.append(" & ").append(sigString);
+	      }
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	      result.append(Utils.padLeft("", resultsetLength + 1));
+	    }
+	  }
+	}
+	result.append("\\\\\n");
+      } catch (Exception ex) {
+	ex.printStackTrace();
+      }
+    }
+
+    result.append("\\hline\n\\multicolumn{"+numcols+"}{c}{$\\circ$, $\\bullet$"
+		  +" statistically significant improvement or degradation}"
+		  +"\\\\\n\\end{tabular} ");
+    if (!m_ShowStdDevs) {
+      result.append("\\footnotesize ");
+      } else {
+	result.append("\\scriptsize ");
+      }
+    
+    result.append("\\par}\n\\end{table}"
+		  +"\n");
+    System.out.println(result.toString()+"\n\n");
+    return result.toString();
+  }
+				    
+  /**
    * Creates a comparison table where a base resultset is compared to the
    * other resultsets. Results are presented for every dataset.
    *
@@ -763,139 +937,155 @@ public class PairedTTester implements OptionHandler {
     }
 
     StringBuffer result = new StringBuffer(1000);
-    int datasetLength = 25;
-    //    int resultsetLength = 9;
-    //    int resultsetLength = 16;
-    int resultsetLength = maxWidthMean + 7;
-    if (m_ShowStdDevs) {
-      resultsetLength += (maxWidthStdDev + 5);
-    }
 
-    // Set up the titles
-    StringBuffer titles = new StringBuffer(Utils.padRight("Dataset",
-							  datasetLength));
-    titles.append(' ');
-    StringBuffer label = new StringBuffer(
-			     Utils.padLeft("("
-					   + (baseResultset + 1)
-					   + ") "
-					   + getResultsetName(baseResultset),
-					   resultsetLength + 3));
+    if (m_latexOutput) {
+      result = new StringBuffer(multiResultsetFullLatex(baseResultset, 
+							comparisonColumn, 
+							maxWidthMean,
+							maxWidthStdDev));
 
-    titles.append(label);
-    StringBuffer separator = new StringBuffer(Utils.padRight("",
-							     datasetLength));
-    while (separator.length() < titles.length()) {
-      separator.append('-');
-    }
-    separator.append("---");
-    titles.append(" | ");
-    for (int j = 0; j < getNumResultsets(); j++) {
-      if (j != baseResultset) {
-	label = new StringBuffer(Utils.padLeft("(" + (j + 1) + ") "
-			      + getResultsetName(j), resultsetLength));
-	titles.append(label).append(' ');
-	for (int i = 0; i < label.length(); i++) {
-	  separator.append('-');
-	}
+    } else {
+      int datasetLength = 25;
+      //    int resultsetLength = 9;
+      //    int resultsetLength = 16;
+      int resultsetLength = maxWidthMean + 7;
+      if (m_ShowStdDevs) {
+	resultsetLength += (maxWidthStdDev + 5);
+      }
+
+      // Set up the titles
+      StringBuffer titles = new StringBuffer(Utils.padRight("Dataset",
+							    datasetLength));
+      titles.append(' ');
+      StringBuffer label = new StringBuffer(
+					    Utils.padLeft("("
+							  + (baseResultset + 1)
+							  + ") "
+							  + getResultsetName(baseResultset),
+							  resultsetLength + 3));
+
+      titles.append(label);
+      StringBuffer separator = new StringBuffer(Utils.padRight("",
+							       datasetLength));
+      while (separator.length() < titles.length()) {
 	separator.append('-');
       }
-    }
-    result.append(titles).append('\n').append(separator).append('\n');
-    
-    // Iterate over datasets
-    int [] win = new int [getNumResultsets()];
-    int [] loss = new int [getNumResultsets()];
-    int [] tie = new int [getNumResultsets()];
-    StringBuffer skipped = new StringBuffer("");
-    for (int i = 0; i < getNumDatasets(); i++) {
-      // Print the name of the dataset
-      String datasetName = 
-	templateString(m_DatasetSpecifiers.specifier(i));
-      try {
-	PairedStats pairedStats = 
-	  calculateStatistics(m_DatasetSpecifiers.specifier(i), 
-			      baseResultset, baseResultset,
-			      comparisonColumn);
-	datasetName = Utils.padRight(datasetName, datasetLength);
-	result.append(datasetName);
-	result.append(Utils.padLeft('('
-				+ Utils.doubleToString(pairedStats.count, 0)
-				+ ')', 5)).append(' ');
-	if (!m_ShowStdDevs) {
-	  result.append(Utils.doubleToString(pairedStats.xStats.mean,
-	       			     resultsetLength - 2, 2)).append(" | ");
-	} else {
-	  result.append(Utils.doubleToString(pairedStats.xStats.mean,
-					     (maxWidthMean+5), 2));
-	  if (Utils.eq(pairedStats.xStats.stdDev, Double.NaN)) {
-	    result.append('('+Utils.doubleToString(0.0,
-						  (maxWidthStdDev+3),2)+')').append(" | ");
-	  } else {
-	    result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
-						   (maxWidthStdDev+3),2)+')').append(" | ");
+      separator.append("---");
+      titles.append(" | ");
+      for (int j = 0; j < getNumResultsets(); j++) {
+	if (j != baseResultset) {
+	  label = new StringBuffer(Utils.padLeft("(" + (j + 1) + ") "
+						 + getResultsetName(j), resultsetLength));
+	  titles.append(label).append(' ');
+	  for (int i = 0; i < label.length(); i++) {
+	    separator.append('-');
 	  }
+	  separator.append('-');
 	}
-	// Iterate over the resultsets
-	for (int j = 0; j < getNumResultsets(); j++) {
-	  if (j != baseResultset) {
-	    try {
-	      pairedStats = 
-		calculateStatistics(m_DatasetSpecifiers.specifier(i), 
-				    baseResultset, j, comparisonColumn);
-	      char sigChar = ' ';
-	      if (pairedStats.differencesSignificance < 0) {
-		sigChar = 'v';
-		win[j]++;
-	      } else if (pairedStats.differencesSignificance > 0) {
-		sigChar = '*';
-		loss[j]++;
-	      } else {
-		tie[j]++;
-	      }
-	      if (!m_ShowStdDevs) {
-		result.append(Utils.doubleToString(pairedStats.yStats.mean,
-						   resultsetLength - 2,
-						   2)).append(' ')
-		  .append(sigChar).append(' ');
-	      } else {
-		result.append(Utils.doubleToString(pairedStats.yStats.mean,
-						    (maxWidthMean+5),
-						   2));
-		if (Utils.eq(pairedStats.yStats.stdDev, Double.NaN)) {
-		  result.append('('+Utils.doubleToString(0.0, 
-				(maxWidthStdDev+3),2)+')');
-		} else {
-		  result.append('('+Utils.doubleToString(pairedStats.
-				  yStats.stdDev, (maxWidthStdDev+3),2)+')');
-		}
-		result.append(' ').append(sigChar).append(' ');
-	      }
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	      result.append(Utils.padLeft("", resultsetLength + 1));
+      }
+      result.append(titles).append('\n').append(separator).append('\n');
+    
+      // Iterate over datasets
+      int [] win = new int [getNumResultsets()];
+      int [] loss = new int [getNumResultsets()];
+      int [] tie = new int [getNumResultsets()];
+      StringBuffer skipped = new StringBuffer("");
+      for (int i = 0; i < getNumDatasets(); i++) {
+	// Print the name of the dataset
+	String datasetName = 
+	  templateString(m_DatasetSpecifiers.specifier(i));
+	try {
+	  PairedStats pairedStats = 
+	    calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+				baseResultset, baseResultset,
+				comparisonColumn);
+	  datasetName = Utils.padRight(datasetName, datasetLength);
+	  result.append(datasetName);
+	  result.append(Utils.padLeft('('
+				      + Utils.doubleToString(pairedStats.count,
+							     0)
+				      + ')', 5)).append(' ');
+	  if (!m_ShowStdDevs) {
+	    result.append(Utils.doubleToString(pairedStats.xStats.mean,
+					       resultsetLength - 2, 2)).
+	      append(" | ");
+	  } else {
+	    result.append(Utils.doubleToString(pairedStats.xStats.mean,
+					       (maxWidthMean+5), 2));
+	    if (Utils.eq(pairedStats.xStats.stdDev, Double.NaN)) {
+	      result.append('('+Utils.doubleToString(0.0,
+						     (maxWidthStdDev+3),2)
+			    +')').append(" | ");
+	    } else {
+	      result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
+						     (maxWidthStdDev+3),2)
+			    +')').append(" | ");
 	    }
 	  }
+	  // Iterate over the resultsets
+	  for (int j = 0; j < getNumResultsets(); j++) {
+	    if (j != baseResultset) {
+	      try {
+		pairedStats = 
+		  calculateStatistics(m_DatasetSpecifiers.specifier(i), 
+				      baseResultset, j, comparisonColumn);
+		char sigChar = ' ';
+		if (pairedStats.differencesSignificance < 0) {
+		  sigChar = 'v';
+		  win[j]++;
+		} else if (pairedStats.differencesSignificance > 0) {
+		  sigChar = '*';
+		  loss[j]++;
+		} else {
+		  tie[j]++;
+		}
+		if (!m_ShowStdDevs) {
+		  result.append(Utils.doubleToString(pairedStats.yStats.mean,
+						     resultsetLength - 2,
+						     2)).append(' ')
+		    .append(sigChar).append(' ');
+		} else {
+		  result.append(Utils.doubleToString(pairedStats.yStats.mean,
+						     (maxWidthMean+5),
+						     2));
+		  if (Utils.eq(pairedStats.yStats.stdDev, Double.NaN)) {
+		    result.append('('+Utils.doubleToString(0.0, 
+							   (maxWidthStdDev+3),
+							   2)+')');
+		  } else {
+		    result.append('('+Utils.doubleToString(pairedStats.
+							   yStats.stdDev, 
+							   (maxWidthStdDev+3),
+							   2)+')');
+		  }
+		  result.append(' ').append(sigChar).append(' ');
+		}
+	      } catch (Exception ex) {
+		ex.printStackTrace();
+		result.append(Utils.padLeft("", resultsetLength + 1));
+	      }
+	    }
+	  }
+	  result.append('\n');
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  skipped.append(datasetName).append(' ');
 	}
-	result.append('\n');
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	skipped.append(datasetName).append(' ');
       }
-    }
-    result.append(separator).append('\n');
-    result.append(Utils.padLeft("(v/ /*)", datasetLength + 4 +
-				resultsetLength)).append(" | ");
-    for (int j = 0; j < getNumResultsets(); j++) {
-      if (j != baseResultset) {
-	result.append(Utils.padLeft("(" + win[j] + '/' + tie[j]
-				    + '/' + loss[j] + ')',
-				    resultsetLength)).append(' ');
+      result.append(separator).append('\n');
+      result.append(Utils.padLeft("(v/ /*)", datasetLength + 4 +
+				  resultsetLength)).append(" | ");
+      for (int j = 0; j < getNumResultsets(); j++) {
+	if (j != baseResultset) {
+	  result.append(Utils.padLeft("(" + win[j] + '/' + tie[j]
+				      + '/' + loss[j] + ')',
+				      resultsetLength)).append(' ');
+	}
       }
-    }
-    result.append('\n');
-    if (!skipped.equals("")) {
-      result.append("Skipped: ").append(skipped).append('\n');
+      result.append('\n');
+      if (!skipped.equals("")) {
+	result.append("Skipped: ").append(skipped).append('\n');
+      }
     }
 
     // append a key so that we can tell the difference between long
@@ -915,7 +1105,7 @@ public class PairedTTester implements OptionHandler {
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
              "\tSpecify list of columns that specify a unique\n"
@@ -933,6 +1123,12 @@ public class PairedTTester implements OptionHandler {
     newVector.addElement(new Option(
 	      "\tSet the significance level for comparisons (default 0.05)",
               "S", 1, "-S <significance level>"));
+    newVector.addElement(new Option(
+	      "\tShow standard deviations",
+              "V", 0, "-V"));
+    newVector.addElement(new Option(
+	      "\tProduce table comparisons in Latex table format",
+              "L", 0, "-L"));
 
     return newVector.elements();
   }
@@ -957,10 +1153,19 @@ public class PairedTTester implements OptionHandler {
    * scheme name plus options).
    * (default last) <p>
    *
+   * -V <br>
+   * Show standard deviations <p>
+   *
+   * -L <br>
+   * Produce comparison tables in Latex table format <p>
+   *
    * @param options an array containing options to set.
    * @exception Exception if invalid options are given
    */
   public void setOptions(String[] options) throws Exception {
+
+    setShowStdDevs(Utils.getFlag('V', options));
+    setProduceLatex(Utils.getFlag('L', options));
 
     String datasetList = Utils.getOption('D', options);
     Range datasetRange = new Range();
@@ -1004,7 +1209,7 @@ public class PairedTTester implements OptionHandler {
    */
   public String[] getOptions() {
 
-    String [] options = new String [8];
+    String [] options = new String [10];
     int current = 0;
 
     if (!getResultsetKeyColumns().getRanges().equals("")) {
@@ -1019,6 +1224,14 @@ public class PairedTTester implements OptionHandler {
     options[current++] = "" + (getRunColumn() + 1);
     options[current++] = "-S";
     options[current++] = "" + getSignificanceLevel();
+    
+    if (getShowStdDevs()) {
+      options[current++] = "-V";
+    }
+
+    if (getProduceLatex()) {
+      options[current++] = "-L";
+    }
 
     while (current < options.length) {
       options[current++] = "";
