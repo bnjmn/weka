@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -66,7 +66,7 @@ public class DecisionTable
   private DiscretizeFilter m_disTransform;
 
   /** Filter used to remove columns discarded by feature selection */
-  private DeleteFilter m_delTransform;
+  private AttributeFilter m_delTransform;
 
   /** IB1 used to classify non matching instances rather than majority class */
   private IBk m_ibk;
@@ -1100,7 +1100,7 @@ public class DecisionTable
     best_first();
     
     // reduce instances to selected features
-    m_delTransform = new DeleteFilter();
+    m_delTransform = new AttributeFilter();
     m_delTransform.setInvertSelection(true);
     
     // set features to keep
