@@ -93,7 +93,7 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class GenericObjectEditor implements PropertyEditor {
     
@@ -212,14 +212,17 @@ public class GenericObjectEditor implements PropertyEditor {
 			}			
 		    });
 		
-		m_ObjectNames.goToRoot();
-		try{		
-		    build();	
-		}catch(Exception e){
+		if(m_ObjectNames.depth() > 0){
+		    try{
+			m_ObjectNames.goToRoot();
+			build();	
+		    }catch(Exception e){
+			e.printStackTrace();
+			System.err.println(e.getMessage());
+		    }	    
+		    if(m_Object != null)
+			setLabel(m_Object.getClass().getName());
 		}
-		
-		if(m_Object != null)
-		    setLabel(m_Object.getClass().getName());
 	    }
 	    
 	    /** 
@@ -246,10 +249,9 @@ public class GenericObjectEditor implements PropertyEditor {
 		JMenuItem menu;
 		int singleItem = 0;
 		boolean isFromRoot = m_ObjectNames.isRootReached();
-		String delim = m_ObjectNames.getSeperator();
-		
-		StringBuffer sb = 
-		    new StringBuffer(m_ObjectNames.getValue());
+		String delim = m_ObjectNames.getSeperator();		
+		StringBuffer sb=new StringBuffer(m_ObjectNames.getValue());
+
 		while(m_ObjectNames.numChildren() == 1){
 		    try{
 			m_ObjectNames.goToChild(0);
@@ -258,7 +260,7 @@ public class GenericObjectEditor implements PropertyEditor {
 		    singleItem++;
 		}		    		    		
 		
-		if(isFromRoot){
+		if(isFromRoot && (!m_ObjectNames.isLeafReached())){
 		    String[] kids = m_ObjectNames.childrenValues();
 		    for(int i=0; i < kids.length; i++){
 			String child = kids[i];
@@ -481,8 +483,8 @@ public class GenericObjectEditor implements PropertyEditor {
 	    m_MenuBar = new JMenuBar();
 	    m_MenuBar.setLayout(new BorderLayout());	
 	    m_ObjectNames = new HierarchyPropertyParser();
-	    if(m_ObjectChooser == null)
-		m_ObjectChooser = new CascadedComboBox();		
+	    //if(m_ObjectChooser == null)
+	    m_ObjectChooser = new CascadedComboBox();		
 	    m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER);
 	    m_MenuBar.setSelected(m_ObjectChooser.getLabel());
 
@@ -814,6 +816,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	if (m_EditorComponent != null) {
 	    m_EditorComponent.updateClassType();
 	}
+
     }
     
     /**
@@ -839,7 +842,9 @@ public class GenericObjectEditor implements PropertyEditor {
 		setValue(Class.forName(defaultValue).newInstance());
 	    }
 	}catch(Exception ex){
-	    System.err.println("Problem loading the first class");
+	    System.err.println("Problem loading the first class: "+
+			       hpp.fullValue());
+	    ex.printStackTrace();
 	}
     }
     
