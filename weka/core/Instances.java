@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $ 
+ * @version $Revision: 1.30 $ 
  */
 public class Instances implements Serializable {
  
@@ -69,10 +69,10 @@ public class Instances implements Serializable {
    * attribute be undefined (negative).
    *
    * @param reader the reader
-   * @exception Exception if the ARFF file is not read 
+   * @exception IOException if the ARFF file is not read 
    * successfully
    */
-  public Instances(Reader reader) throws Exception {
+  public Instances(Reader reader) throws IOException {
 
     StreamTokenizer tokenizer;
 
@@ -93,7 +93,7 @@ public class Instances implements Serializable {
    * @param reader the reader
    * @param capacity the capacity
    * @exception IllegalArgumentException if the header is not read successfully
-   * or the capacity is not positive or zero
+   * or the capacity is negative.
    * @exception IOException if there is a problem with the reader.
    */
    public Instances(Reader reader, int capacity) throws IOException {
@@ -306,12 +306,12 @@ public class Instances implements Serializable {
    * Returns the class attribute.
    *
    * @return the class attribute
-   * @exception Exception if the class is not set
+   * @exception UnassignedClassException if the class is not set
    */
-  public final Attribute classAttribute() throws Exception {
+  public final Attribute classAttribute() {
 
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negative (not set)!");
+      throw new UnassignedClassException("Class index is negative (not set)!");
     }
     return attribute(m_ClassIndex);
   }
@@ -437,12 +437,12 @@ public class Instances implements Serializable {
    * Removes all instances with a missing class value
    * from the dataset.
    *
-   * @exception Exception if class is not set
+   * @exception UnassignedClassException if class is not set
    */
-  public final void deleteWithMissingClass() throws Exception {
+  public final void deleteWithMissingClass() {
 
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negative (not set)!");
+      throw new UnassignedClassException("Class index is negative (not set)!");
     }
     deleteWithMissing(m_ClassIndex);
   }
@@ -511,8 +511,7 @@ public class Instances implements Serializable {
    * @param pos the attribute's position
    * @exception IllegalArgumentException if the given index is out of range
    */
-  public void insertAttributeAt(Attribute att, int position) 
-       throws Exception {
+  public void insertAttributeAt(Attribute att, int position) {
 	 
     if ((position < 0) ||
 	(position > m_Attributes.size())) {
@@ -622,12 +621,12 @@ public class Instances implements Serializable {
    *
    * @return the number of class labels as an integer if the class 
    * attribute is nominal, 1 otherwise.
-   * @exception Exception if the class is not set
+   * @exception UnassignedClassException if the class is not set
    */
-  public final int numClasses() throws Exception {
+  public final int numClasses() {
     
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negative (not set)!");
+      throw new UnassignedClassException("Class index is negative (not set)!");
     }
     if (!classAttribute().isNominal()) {
       return 1;
@@ -774,10 +773,8 @@ public class Instances implements Serializable {
    * @param att the attribute's index
    * @param val the value's index
    * @param name the new name 
-   * @exception Exception if renaming fails
    */
-  public final void renameAttributeValue(int att, int val, String name) 
-    throws Exception {
+  public final void renameAttributeValue(int att, int val, String name) {
 
     Attribute newAtt = (Attribute)attribute(att).copy();
     FastVector newVec = new FastVector(numAttributes());
@@ -800,10 +797,9 @@ public class Instances implements Serializable {
    * @param att the attribute
    * @param val the value
    * @param name the new name
-   * @exception Exception if renaming fails
    */
-  public final void renameAttributeValue(Attribute att, String val, String name) 
-    throws Exception {
+  public final void renameAttributeValue(Attribute att, String val, 
+                                         String name) {
 
     renameAttributeValue(att.index(), att.indexOfValue(val), name);
   }
@@ -832,10 +828,8 @@ public class Instances implements Serializable {
    *
    * @param random a random number generator
    * @return the new dataset
-   * @exception Exception if something goes wrong
    */
-  public final Instances resampleWithWeights(Random random) 
-    throws Exception {
+  public final Instances resampleWithWeights(Random random) {
 
     double [] weights = new double[numInstances()];
     boolean foundOne = false;
@@ -988,15 +982,15 @@ public class Instances implements Serializable {
    * stratified cross-validation can be performed).
    *
    * @param numFolds the number of folds in the cross-validation
-   * @exception Exception if the class is not set
+   * @exception UnassignedClassException if the class is not set
    */
-  public final void stratify(int numFolds) throws Exception {
+  public final void stratify(int numFolds) {
     
     if (numFolds <= 0) {
       throw new IllegalArgumentException("Number of folds must be greater than 1");
     }
     if (m_ClassIndex < 0) {
-      throw new Exception("Class index is negative (not set)!");
+      throw new UnassignedClassException("Class index is negative (not set)!");
     }
     if (classAttribute().isNominal()) {
 
@@ -1105,8 +1099,7 @@ public class Instances implements Serializable {
    * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
-  public Instances trainCV(int numFolds, int numFold) 
-       throws Exception {
+  public Instances trainCV(int numFolds, int numFold) {
 
     int numInstForFold, first, offset;
     Instances train;
@@ -1169,9 +1162,9 @@ public class Instances implements Serializable {
    *
    * @param att the numeric attribute
    * @return the variance if the attribute is numeric
-   * @exception Exception if the attribute is not numeric
+   * @exception IllegalArgumentException if the attribute is not numeric
    */
-  public final double variance(Attribute att) throws Exception {
+  public final double variance(Attribute att) {
     
     return variance(att.index());
   }
@@ -1871,8 +1864,7 @@ public class Instances implements Serializable {
    * @return the merged set of Instances
    * @exception IllegalArgumentException if the datasets are not the same size
    */
-  public static Instances mergeInstances(Instances first, Instances second)
-    throws Exception {
+  public static Instances mergeInstances(Instances first, Instances second) {
 
     if (first.numInstances() != second.numInstances()) {
       throw new IllegalArgumentException("Instance sets must be of the same size");
