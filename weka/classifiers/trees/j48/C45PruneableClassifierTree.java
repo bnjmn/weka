@@ -29,7 +29,7 @@ import weka.core.*;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class C45PruneableClassifierTree extends ClassifierTree{
@@ -295,6 +295,12 @@ public class C45PruneableClassifierTree extends ClassifierTree{
 	(Instances [])localModel().split(data);
       for (int i = 0; i < m_sons.length; i++)
 	son(i).newDistribution(localInstances[i]);
+    } else {
+
+      // Check whether there are some instances at the leaf now!
+      if (!Utils.eq(data.sumOfWeights(), 0)) {
+	m_isEmpty = false;
+      }
     }
   }
 
