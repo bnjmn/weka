@@ -66,7 +66,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -986,7 +986,7 @@ public class PairedTTester implements OptionHandler {
       res += "0";
     }
     while (res.length() < width) {
-      res += " ";
+      res = " " + res;
     }
     return res;
   }
