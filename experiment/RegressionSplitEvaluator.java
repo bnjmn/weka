@@ -43,13 +43,13 @@ import java.io.ObjectStreamClass;
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
   
   /** The classifier used for evaluation */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
   
   /** The names of any additional measures to look for in SplitEvaluators */
   protected String [] m_AdditionalMeasures = null;
@@ -103,7 +103,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
 
     newVector.addElement(new Option(
 	     "\tThe full class name of the classifier.\n"
-	      +"\teg: weka.classifiers.NaiveBayes", 
+	      +"\teg: weka.classifiers.bayes.NaiveBayes", 
 	     "W", 1, 
 	     "-W <class name>"));
 
