@@ -24,6 +24,7 @@ import weka.core.OptionHandler;
 import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.Range;
+import weka.core.FastVector;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeTransformer;
@@ -89,6 +90,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.Point;
 import java.awt.Dimension;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 /** 
  * This panel allows the user to select and configure an attribute
@@ -101,7 +105,7 @@ import java.awt.Dimension;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -154,13 +158,6 @@ public class AttributeSelectionPanel extends JPanel {
 
   /** The field where the seed value is entered */
   protected JTextField m_SeedText = new JTextField("1");
-  
-  /** Click to save the output associated with the currently selected result */
-  protected JButton m_SaveOutBut = new JButton("Save Output");
-
-  /** Stop the class combo from taking up to much space */
-  private Dimension COMBO_SIZE = new Dimension(150, m_SaveOutBut
-					       .getPreferredSize().height);
 
   /**
    * Alters the enabled/disabled status of elements associated with each
@@ -178,8 +175,9 @@ public class AttributeSelectionPanel extends JPanel {
   /** Click to stop a running classifier */
   protected JButton m_StopBut = new JButton("Stop");
 
-  /** Click to visualize data transformed by attribute transformers */
-  protected JButton m_VisualizeBut = new JButton("Visualize");
+ /** Stop the class combo from taking up to much space */
+  private Dimension COMBO_SIZE = new Dimension(150, m_StartBut
+					       .getPreferredSize().height);
 
   /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
@@ -263,9 +261,6 @@ public class AttributeSelectionPanel extends JPanel {
 
     m_StartBut.setToolTipText("Starts attribute selection");
     m_StopBut.setToolTipText("Stops a attribute selection task");
-    m_SaveOutBut.setToolTipText("Save the selected attribute selection output "
-				+"to a file");
-    m_VisualizeBut.setToolTipText("Visualize transformed data");
     
     m_ClassCombo.setPreferredSize(COMBO_SIZE);
     m_ClassCombo.setMaximumSize(COMBO_SIZE);
@@ -281,10 +276,9 @@ public class AttributeSelectionPanel extends JPanel {
     m_TrainBut.addActionListener(m_RadioListener);
     m_CVBut.addActionListener(m_RadioListener);
 
-    m_VisualizeBut.setEnabled(false);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
-    m_SaveOutBut.setEnabled(false);
+
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startAttributeSelection();
@@ -295,30 +289,22 @@ public class AttributeSelectionPanel extends JPanel {
 	stopAttributeSelection();
       }
     });
-    m_SaveOutBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveBuffer();
-	}
-      });
-    m_VisualizeBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  visualize();
-	}
-      });
-
-    m_History.getSelectionModel()
-      .addListSelectionListener(new ListSelectionListener() {
-	  public void valueChanged(ListSelectionEvent e) {
-	    if (!e.getValueIsAdjusting()) {
-	      ListSelectionModel lm = (ListSelectionModel) e.getSource();
-	      if (m_History.getSelectedObject() != null) {
-		m_VisualizeBut.setEnabled(true);
-	      } else {
-		m_VisualizeBut.setEnabled(false);
-	      }
+    
+    m_History.setHandleRightClicks(false);
+    // see if we can popup a menu for the selected result
+    m_History.getList().addMouseListener(new MouseAdapter() {
+	public void mouseClicked(MouseEvent e) {
+	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	      == InputEvent.BUTTON1_MASK) {
+	  } else {
+	    int index = m_History.getList().locationToIndex(e.getPoint());
+	    if (index != -1) {
+	      String name = m_History.getNameAtIndex(index);
+	      visualize(name, e.getX(), e.getY());
 	    }
 	  }
-	});
+	}
+      });
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -395,7 +381,7 @@ public class AttributeSelectionPanel extends JPanel {
 
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(3, 2));
+    buttons.setLayout(new GridLayout(2, 2));
     buttons.add(m_ClassCombo);
     m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
@@ -404,13 +390,6 @@ public class AttributeSelectionPanel extends JPanel {
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
     buttons.add(ssButs);
-
-    JPanel vPl = new JPanel();
-    vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    vPl.setLayout(new GridLayout(1,2,5,5));
-    vPl.add(m_VisualizeBut);
-    vPl.add(m_SaveOutBut);
-    buttons.add(vPl);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.
@@ -521,9 +500,7 @@ public class AttributeSelectionPanel extends JPanel {
 	type = "(???) ";
       }
       String attnm = m_Instances.attribute(i).name();
-      /* if (attnm.length() > 25) {
-	attnm = attnm.substring(0,25)+"...";
-	} */
+     
       attribNames[i] = type + attnm;
     }
     m_StartBut.setEnabled(m_RunThread == null);
@@ -696,8 +673,9 @@ public class AttributeSelectionPanel extends JPanel {
 		  ex.printStackTrace();
 		}
 		m_CurrentVis.setName(name+" ("+transformed.relationName()+")");
-		m_History.addObject(name, m_CurrentVis);
-		m_VisualizeBut.setEnabled(true);
+		FastVector vv = new FastVector();
+		vv.addElement(m_CurrentVis);
+		m_History.addObject(name, vv);
 	      } catch (Exception ex) {
 		System.err.println(ex);
 		ex.printStackTrace();
@@ -707,7 +685,6 @@ public class AttributeSelectionPanel extends JPanel {
 	      m_Log.logMessage("Interrupted " + ename+" "+sname);
 	      m_Log.statusMessage("See error log");
 	    }
-	    m_SaveOutBut.setEnabled(true);
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -737,10 +714,11 @@ public class AttributeSelectionPanel extends JPanel {
   }
   
   /**
-   * Save the currently selected attribute selection output to a file.
+   * Save the named buffer to a file.
+   * @param name the name of the buffer to be saved.
    */
-  protected void saveBuffer() {
-    StringBuffer sb = m_History.getSelectedBuffer();
+  protected void saveBuffer(String name) {
+    StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
 	m_Log.logMessage("Save succesful.");
@@ -748,10 +726,11 @@ public class AttributeSelectionPanel extends JPanel {
     }
   }
 
-  protected void visualize() {
-    final VisualizePanel sp;
-    sp = (VisualizePanel)m_History.getSelectedObject();
-
+  /**
+   * Popup a visualize panel for viewing transformed data
+   * @param sp the VisualizePanel to display
+   */
+  protected void visualizeTransformedData(VisualizePanel sp) {
     if (sp != null) {
       String plotName = sp.getName();
       final javax.swing.JFrame jf = 
@@ -768,6 +747,71 @@ public class AttributeSelectionPanel extends JPanel {
 
       jf.setVisible(true);
     }
+  }
+
+  /**
+   * Handles constructing a popup menu with visualization options
+   * @param name the name of the result history list entry clicked on by
+   * the user.
+   * @param x the x coordinate for popping up the menu
+   * @param y the y coordinate for popping up the menu
+   */
+  protected void visualize(String name, int x, int y) {
+    final String selectedName = name;
+    JPopupMenu resultListMenu = new JPopupMenu();
+
+    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    visMainBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.setSingle(selectedName);
+	}
+      });
+    resultListMenu.add(visMainBuffer);
+
+    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    visSepBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.openFrame(selectedName);
+	}
+      });
+    resultListMenu.add(visSepBuffer);
+
+    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    saveOutput.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer(selectedName);
+	}
+      });
+
+    resultListMenu.add(saveOutput);
+    resultListMenu.addSeparator();
+
+    FastVector o = (FastVector)m_History.getNamedObject(selectedName);
+    
+    if (o != null) {
+      VisualizePanel temp_vp = null;
+      String temp_grph = null;
+     
+      for (int i = 0; i < o.size(); i++) {
+	Object temp = o.elementAt(i);
+	if (temp instanceof VisualizePanel) {
+	  temp_vp = (VisualizePanel)temp;
+	} 
+      }
+
+      final VisualizePanel vp = temp_vp;
+
+      JMenuItem visTrans = new JMenuItem("Visualize transformed data");
+      if (vp != null) {
+	visTrans.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      visualizeTransformedData(vp);
+	    }
+	  });
+	resultListMenu.add(visTrans);
+      }
+    }
+    resultListMenu.show(m_History.getList(), x, y);
   }
 
   /**
