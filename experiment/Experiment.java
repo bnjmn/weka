@@ -29,6 +29,9 @@ import weka.core.Option;
 import weka.core.Instances;
 import weka.core.FastVector;
 import weka.core.AdditionalMeasureProducer;
+import weka.core.xml.KOML;
+import weka.core.xml.XMLOptions;
+import weka.experiment.xml.XMLExperiment;
 
 import java.io.Serializable;
 import java.io.File;
@@ -63,7 +66,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -529,7 +532,6 @@ public class Experiment implements Serializable, OptionHandler {
    * @return the datasets in the experiment.
    */
   public DefaultListModel getDatasets() {
-
     return m_Datasets;
   }
 
@@ -689,9 +691,9 @@ public class Experiment implements Serializable, OptionHandler {
 	     "",
 	     "", 0, "\nOptions specific to result producer "
 	     + m_ResultProducer.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler)m_ResultProducer).listOptions();
-      while (enu.hasMoreElements()) {
-	newVector.addElement(enu.nextElement());
+      Enumeration enm = ((OptionHandler)m_ResultProducer).listOptions();
+      while (enm.hasMoreElements()) {
+	newVector.addElement(enm.nextElement());
       }
     }
     return newVector.elements();
@@ -912,6 +914,11 @@ public class Experiment implements Serializable, OptionHandler {
 
     try {
       Experiment exp = null;
+      // get options from XML?
+      String xmlOption = Utils.getOption("xml", args);
+      if (!xmlOption.equals(""))
+         args = new XMLOptions(xmlOption).toArray();
+      
       String expFile = Utils.getOption('l', args);
       String saveFile = Utils.getOption('s', args);
       boolean runExp = Utils.getFlag('r', args);
@@ -929,21 +936,37 @@ public class Experiment implements Serializable, OptionHandler {
 	    + "\tSave experiment to file after setting other options\n"
 	    + "\t(default don't save)\n"
 	    + "-r\n"
-	    + "\tRun experiment (default don't run)\n\n";
-	  Enumeration enu = ((OptionHandler)exp).listOptions();
-	  while (enu.hasMoreElements()) {
-	    Option option = (Option) enu.nextElement();
+	    + "\tRun experiment (default don't run)\n"
+	    + "-xml <filename | xml-string>\n"
+	    + "\tget options from XML-Data instead from parameters\n"
+            + "\n";
+	  Enumeration enm = ((OptionHandler)exp).listOptions();
+	  while (enm.hasMoreElements()) {
+	    Option option = (Option) enm.nextElement();
 	    result += option.synopsis() + "\n";
 	    result += option.description() + "\n";
 	  }
 	  throw new Exception(result + "\n" + ex.getMessage());
 	}
       } else {
-	FileInputStream fi = new FileInputStream(expFile);
-	ObjectInputStream oi = new ObjectInputStream(
-			       new BufferedInputStream(fi));
-	exp = (Experiment)oi.readObject();
-	oi.close();
+         // KOML?
+         if ( (KOML.isPresent()) && (expFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+            exp = (Experiment) KOML.read(expFile);
+         }
+         else
+         // XML?
+         if (expFile.toLowerCase().endsWith(".xml")) {
+            XMLExperiment xml = new XMLExperiment(); 
+            exp = (Experiment) xml.read(expFile);
+         }
+         // binary
+         else {
+            FileInputStream fi = new FileInputStream(expFile);
+            ObjectInputStream oi = new ObjectInputStream(
+                                   new BufferedInputStream(fi));
+            exp = (Experiment)oi.readObject();
+            oi.close();
+         }
 
 	// allow extra datasets to be added to pre-loaded experiment from command line
 	String dataName;
@@ -959,11 +982,24 @@ public class Experiment implements Serializable, OptionHandler {
       System.err.println("Experiment:\n" + exp.toString());
 
       if (saveFile.length() != 0) {
-	FileOutputStream fo = new FileOutputStream(saveFile);
-	ObjectOutputStream oo = new ObjectOutputStream(
-				new BufferedOutputStream(fo));
-	oo.writeObject(exp);
-	oo.close();
+         // KOML?
+         if ( (KOML.isPresent()) && (saveFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+            KOML.write(saveFile, exp);
+         }
+         else
+         // XML?
+         if (saveFile.toLowerCase().endsWith(".xml")) {
+            XMLExperiment xml = new XMLExperiment(); 
+            xml.write(saveFile, exp);
+         }
+         // binary
+         else {
+            FileOutputStream fo = new FileOutputStream(saveFile);
+            ObjectOutputStream oo = new ObjectOutputStream(
+                                    new BufferedOutputStream(fo));
+            oo.writeObject(exp);
+            oo.close();
+         }
       }
       
       if (runExp) {
