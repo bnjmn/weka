@@ -252,7 +252,8 @@ weka.attributeSelection.ASSearch = \
 
 # Lists the Associators I want to choose from
 weka.associations.Associator=\
- weka.associations.Apriori
+ weka.associations.Apriori, \
+ weka.associations.tertius.Tertius
 
 # Lists the Clusterers I want to choose from
 weka.clusterers.Clusterer=\
