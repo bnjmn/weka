@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1286,7 +1286,7 @@ public class REPTree extends DistributionClassifier
     String [] options = new String [12];
     int current = 0;
     options[current++] = "-M"; 
-    options[current++] = "" + getMinNum();
+    options[current++] = "" + (int)getMinNum();
     options[current++] = "-V"; 
     options[current++] = "" + getMinVarianceProp();
     options[current++] = "-N"; 
