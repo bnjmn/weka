@@ -62,7 +62,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class UserClassifier extends Classifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -554,7 +554,7 @@ TreeDisplayListener, VisualizePanelListener {
     //tree_frame = new JFrame();
     //tree_frame.getContentPane().add(m_tView);
     //tree_frame.setSize(800,600);
-    //tree_frame.show();
+    //tree_frame.setVisible(true);
     
     m_tView.setHighlight(m_top.m_identity);
     m_iView = new VisualizePanel(this);
@@ -564,10 +564,10 @@ TreeDisplayListener, VisualizePanelListener {
     //vis_frame = new JFrame();
     //vis_frame.getContentPane().add(m_iView);
     //vis_frame.setSize(400, 300);
-    //vis_frame.show();
+    //vis_frame.setVisible(true);
     m_reps.add("Data Visualizer", m_iView);
     m_mainWin.setSize(560, 420);
-    m_mainWin.show();
+    m_mainWin.setVisible(true);
     blocker(true);          //a call so that the main thread of 
     //execution has to wait for the all clear message from the user.
     

@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 
@@ -270,7 +270,7 @@ public class MatrixPanel extends JPanel{
 					
 	  jd.setLocation( m_selAttrib.getLocationOnScreen().x,
 			  m_selAttrib.getLocationOnScreen().y-jd.getHeight() );
-	  jd.show();
+	  jd.setVisible(true);
 	}
       });
       
@@ -378,7 +378,7 @@ public class MatrixPanel extends JPanel{
 	  jd.pack();
 	  jd.setLocation( m_resampleBt.getLocationOnScreen().x,
 			  m_resampleBt.getLocationOnScreen().y-jd.getHeight() );
-	  jd.show();
+	  jd.setVisible(true);
 	}
       });
 
@@ -766,7 +766,7 @@ public class MatrixPanel extends JPanel{
     jf.getContentPane().setFont( new java.awt.Font( "SansSerif", java.awt.Font.PLAIN, 11) );
     jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     jf.setSize(800, 600);
-    jf.show();
+    jf.setVisible(true);
     jf.repaint();
   }
 
@@ -949,7 +949,7 @@ public class MatrixPanel extends JPanel{
       catch(Exception ex) { ex.printStackTrace(); }
       jf.getContentPane().add(vp);
       jf.setSize(800,600);
-      jf.show();
+      jf.setVisible(true);
     } 
 
     public void mouseEntered(MouseEvent e){ }

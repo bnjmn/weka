@@ -95,7 +95,7 @@ public class DatabaseConnectionDialog extends JDialog {
    * @return Password string
    */
   public String getPassword(){
-    return(m_PasswordText.getText());
+    return(new String(m_PasswordText.getPassword()));
   }
 
   /**

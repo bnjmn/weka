@@ -41,7 +41,7 @@ import weka.filters.Filter;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MultilayerPerceptron extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -555,7 +555,7 @@ public class MultilayerPerceptron extends Classifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   class ControlPanel extends JPanel {
     
@@ -1680,7 +1680,7 @@ public class MultilayerPerceptron extends Classifier
       m_win.getContentPane().add(sp, BorderLayout.CENTER);
       m_win.getContentPane().add(m_controlPanel, BorderLayout.SOUTH);
       m_win.setSize(640, 480);
-      m_win.show();
+      m_win.setVisible(true);
     }
    
     //This sets up the initial state of the gui
