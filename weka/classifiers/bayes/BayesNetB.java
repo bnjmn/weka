@@ -36,7 +36,7 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class BayesNetB extends BayesNet {
 
@@ -208,6 +208,15 @@ public class BayesNetB extends BayesNet {
     return true;
   }    // AddArcMakesCycle
  
+  /**
+   * This will return a string describing the classifier.
+   * @return The string.
+   */
+  public String globalInfo() {
+    return "This Bayes Network learning algorithm uses a hill climbing algorithm" +
+    " without restriction on the order of variables";
+  }
+
   /**
    * Main method for testing this class.
    * 
