@@ -44,13 +44,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import java.awt.*;
+import java.awt.image.*;
+
+
 
 /** 
  * The main class for the Weka explorer. Lets the user create,
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Explorer extends JPanel {
 
@@ -170,6 +174,9 @@ public class Explorer extends JPanel {
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
+      Image icon = Toolkit.getDefaultToolkit().
+	getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.jpg"));
+      jf.setIconImage(icon);
 
       if (args.length == 1) {
 	System.err.println("Loading instances from " + args[0]);
