@@ -54,7 +54,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $ 
+ * @version $Revision: 1.32 $ 
  */
 public class Instances implements Serializable {
  
@@ -62,22 +62,22 @@ public class Instances implements Serializable {
   public static String FILE_EXTENSION = ".arff";
 
   /** The dataset's name. */
-  private String m_RelationName;         
+  protected String m_RelationName;         
 
   /** The attribute information. */
-  private FastVector m_Attributes;
+  protected FastVector m_Attributes;
 
   /** The instances. */
-  private FastVector m_Instances;
+  protected FastVector m_Instances;
 
   /** The class attribute's index */
-  private int m_ClassIndex;
+  protected int m_ClassIndex;
 
   /** Buffer of values for sparse instance */
-  private double[] m_ValueBuffer;
+  protected double[] m_ValueBuffer;
 
   /** Buffer of indices for sparse instance */
-  private int[] m_IndicesBuffer;
+  protected int[] m_IndicesBuffer;
 
   /**
    * Reads an ARFF file from a reader, and assigns a weight of
