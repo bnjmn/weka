@@ -16,7 +16,7 @@
 
 /*
  *    Matrix.java
- *    Copyright (C) 1999 Yong Wang, Eibe Frank, Len Trigg
+ *    Copyright (C) 1999 Yong Wang, Eibe Frank, Len Trigg, Gabi Schmidberger
  *
  */
 
@@ -32,10 +32,11 @@ import java.util.StringTokenizer;
  * Class for performing operations on a matrix of floating-point values.
  * Some of the code is adapted from Numerical Recipes in C.
  *
+ * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Matrix implements Cloneable, Serializable {
 
@@ -52,6 +53,22 @@ public class Matrix implements Cloneable, Serializable {
 
     m_Elements = new double[nr][nc];
     initialize();
+  }
+
+  /**
+   * Constructs a matrix using a given array.
+   *
+   * @param nr the number of rows
+   * @param nc the number of columns
+   */
+  public Matrix(double[][] array) throws Exception {
+    
+    m_Elements = new double[array.length][array[0].length];
+    for (int i = 0; i < array.length; i++) {
+      for (int j = 0; j < array[0].length; j++) {
+	m_Elements[i][j] = array[i][j];
+      }
+    } 
   }
 
   /**
@@ -388,7 +405,7 @@ public class Matrix implements Cloneable, Serializable {
 	b[i] = bb.m_Elements[i][0];
       }
       try {
-	ss.lubksb(ss.ludcmp(), b);
+	ss.solve(b);
 	success = true;
       } catch (Exception ex) {
 	ridge *= 10;
@@ -425,107 +442,194 @@ public class Matrix implements Cloneable, Serializable {
   }
 
   /**
-   * Performs LU backward substitution.  Adapted from Numerical Recipes in C.
+   * Returns the L part of the matrix.
+   * This does only make sense after LU decomposition.
+   * Warning: The matrix object doesn't hold information if LU decomposition
+   * is performed beforehand.
    *
-   * @param indx the indices of the permutation
-   * @param b the double vector, storing constant terms in the equation set; 
-   * it later stores the computed coefficients' values
+   * @return L part of a matrix; 
    */
-  public final void lubksb(int[] indx, double b[]) {
+  public Matrix getL() throws Exception {
+
+    int nr = m_Elements.length;    // num of rows
+    int nc = m_Elements[0].length; // num of columns
+    double[][] ld = new double[nr][nc];
     
-    int nc = m_Elements[0].length;
-    int ii = -1, ip;
-    double sum;
+    for (int i = 0; i < nr; i++) {
+      for (int j = 0; (j < i) && (j < nc); j++) {
+	ld[i][j] = m_Elements[i][j];
+      }
+      if (i < nc) ld[i][i] = 1;
+    }
+    Matrix l = new Matrix(ld);
+    return l;
+  }
+
+  /**
+   * Returns the U part of the matrix.
+   * This does only make sense after LU decomposition.
+   * Warning: The matrix object doesn't hold information if LU decomposition
+   * is performed beforehand.
+   *
+   * @return U part of a matrix; 
+   */
+  public Matrix getU() throws Exception {
+
+    int nr = m_Elements.length;    // num of rows
+    int nc = m_Elements[0].length; // num of columns
+    double[][] ud = new double[nr][nc];
     
-    for (int i = 0; i < nc; i++) {
-      ip = indx[i];
-      sum = b[ip];
-      b[ip] = b[i];
-      if (ii != -1) {
-	for (int j = ii; j < i; j++) {
-	  sum -= m_Elements[i][j] * b[j];
-	}
-      } else if (sum != 0.0) {
-	ii = i;
+    for (int i = 0; i < nr; i++) {
+      for (int j = i; j < nc ; j++) {
+	ud[i][j] = m_Elements[i][j];
       }
-      b[i] = sum;
     }
-    for (int i = nc - 1; i >= 0; i--) {
-      sum = b[i];
-      for (int j = i + 1; j < nc; j++) {
-	sum -= m_Elements[i][j] * b[j];
-      }
-      b[i] = sum / m_Elements[i][i];
-    }
+    Matrix u = new Matrix(ud);
+    return u;
   }
   
   /**
-   * Performs LU decomposition. Adapted from Numerical Recipes in C.
+   * Performs a LUDecomposition on the matrix.
+   * It changes the matrix into its LU decomposition using the
+   * Crout algorithm
    *
-   * @return the indices of the permutation
-   * @exception Exception if the matrix is singular
+   * @return the indices of the row permutation
+   * @exception Exception if the matrix is singular 
    */
-  public final int[] ludcmp() throws Exception {
-
-    int nc = m_Elements[0].length;
-    int[] indx = new int[m_Elements.length];
-    int imax = -1;
-    double big, dum, sum, temp;
-    double vv[];
+  public int [] LUDecomposition() throws Exception{
     
-    vv = new double[nc];
-    for (int i = 0; i < nc; i++) {
-      big = 0.0;
-      for (int j = 0; j < nc; j++) {
-	if ((temp = Math.abs(m_Elements[i][j])) > big) {
-	  big = temp;
-	}
+    int nr = m_Elements.length;    // num of rows
+    int nc = m_Elements[0].length; // num of columns
+
+    int [] piv = new int[nr];
+
+    double [] factor = new double[nr];
+    double dd;
+    for (int row = 0; row < nr; row++) {
+      double max = Math.abs(m_Elements[row][0]);
+      for (int col = 1; col < nc; col++) {
+	if ((dd = Math.abs(m_Elements[row][col])) > max)
+	  max = dd;
       }
-      if (big < 0.000000001) {
+      if (max < 0.000000001) {
 	throw new Exception("Matrix is singular!");
       }
-      vv[i] = 1.0 / big;
+      factor[row] = 1 / max;
     }
-    for (int j = 0; j < nc; j++) {
-      for (int i = 0; i < j; i++) {
-	sum = m_Elements[i][j];
-	for (int k = 0; k < i; k++) {
-	  sum -= m_Elements[i][k] * m_Elements[k][j];
+
+    for (int i = 1; i < nr; i++) piv[i] = i;
+
+    for (int col = 0; col < nc; col++) {
+
+      // compute beta i,j
+      for (int row = 0; (row <= col) && (row < nr); row ++) {
+	double sum = 0.0;
+
+	for (int k = 0; k < row; k++) {
+	  sum += m_Elements[row][k] * m_Elements[k][col];
 	}
-	m_Elements[i][j] = sum;
+	m_Elements[row][col] = m_Elements[row][col] - sum; // beta i,j
+;
       }
-      big = 0.0;
-      for (int i = j; i < nc; i++) {
-	sum = m_Elements[i][j];
-	for (int k = 0; k < j; k++) {
-	  sum -= m_Elements[i][k] * m_Elements[k][j];
+
+      // compute alpha i,j
+      for (int row = col + 1; row < nr; row ++) {
+	double sum = 0.0;
+	for (int k = 0; k < col; k++) {
+
+	  sum += m_Elements[row][k] * m_Elements[k][col];
 	}
-	m_Elements[i][j] = sum;
-	if ((dum = vv[i] * Math.abs(sum)) >= big) {
-	  big = dum;
-	  imax = i;
-	}
-      } 
-      if (j != imax) {
-	for (int k = 0; k < nc; k++) {
-	  dum = m_Elements[imax][k];
-	  m_Elements[imax][k] = m_Elements[j][k];
-	  m_Elements[j][k] = dum;
-	}
-	vv[imax] = vv[j];
+        // alpha i,j before division
+	m_Elements[row][col] = (m_Elements[row][col] - sum);
+
       }
-      indx[j] = imax;
-      if (m_Elements[j][j] == 0.0) {
+      
+      // find row for division:see if any of the alphas are larger then b j,j
+      double maxFactor = Math.abs(m_Elements[col][col]) * factor[col];
+      int newrow = col;
+
+      for (int ii = col + 1; ii < nr; ii++) {
+	if ((Math.abs(m_Elements[ii][col]) * factor[ii]) > maxFactor) {
+	  newrow = ii; // new row
+	  maxFactor = Math.abs(m_Elements[ii][col]) * factor[ii];
+	}  
+      }
+      if (newrow != col) {
+        // swap the rows
+	for (int kk = 0; kk < nc; kk++) {
+	  double hh = m_Elements[col][kk];
+	  m_Elements[col][kk] = m_Elements[newrow][kk];
+	  m_Elements[newrow][kk] = hh;
+	}
+	// remember pivoting
+	int help = piv[col]; piv[col] = piv[newrow]; piv[newrow] = help;
+	double hh  = factor[col]; factor[col] = factor[newrow]; factor[newrow] = help;
+      }
+      double b_jj = m_Elements[col][col];
+
+      if (b_jj == 0.0) {
 	throw new Exception("Matrix is singular");
       }
-      if (j != nc - 1) {
-	dum = 1.0 / (m_Elements[j][j]);
-	for (int i = j + 1; i < nc; i++) {
-	  m_Elements[i][j] *= dum;
-	}
+
+      for (int row = col + 1; row < nr; row ++) {
+	// divide all 
+	m_Elements[row][col] = m_Elements[row][col] / b_jj;
       }
+   }
+
+    return piv;
+  }
+  
+  /**
+   * Solve A*X = B using backward substitution
+   *
+   *  @param  b   A Vector with as many rows as this (=A).
+   *  @return     X so that L*U*X = B(piv,:)
+   *  @exception matrix is singulaer
+   */
+  public void solve(double [] bb) throws Exception{
+
+    int nr = m_Elements.length;
+    int nc = m_Elements[0].length;
+
+    double [] b = new double[bb.length];
+    double [] x = new double[bb.length];
+    double [] y = new double[bb.length];
+
+    int [] piv = this.LUDecomposition();
+
+    // change b according to pivot vector
+    for (int i = 0; i < piv.length; i++) {
+      b[i] = bb[piv[i]];
     }
-    return indx;
+    
+    y[0] = b[0];
+
+    for (int row = 1; row < nr; row++) {
+      double sum = 0.0;
+      for (int col = 0; col < row; col++) {
+
+	sum += m_Elements[row][col] * y[col];
+      }
+      y[row] = b[row] - sum;
+    }
+
+    x[nc - 1] = y[nc - 1] / m_Elements[nc - 1][nc - 1];
+    for (int row = nc - 2; row >= 0; row--) {
+      double sum = 0.0;
+      for (int col = row + 1; col < nc; col++) {
+
+	sum += m_Elements[row][col] * x[col];
+      }
+      x[row] = (y[row] - sum) / m_Elements[row][row];
+    }
+
+    // change x according to pivot vector
+    for (int i = 0; i < piv.length; i++) {
+
+      //bb[piv[i]] = x[i];
+      bb[i] = x[i];
+    }
   }
 
   /**
@@ -583,9 +687,3 @@ public class Matrix implements Cloneable, Serializable {
     }
   }
 }
-
-
-
-
-
-
