@@ -54,7 +54,7 @@ import weka.core.Attribute;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -63,7 +63,7 @@ public class FilteredClassifier extends DistributionClassifier
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** The filter */
-  protected Filter m_Filter = new weka.filters.AllFilter();
+  protected Filter m_Filter = new weka.filters.supervised.attribute.AttributeSelection();
 
   /** The instance structure of the filtered instances */
   protected Instances m_FilteredInstances;
@@ -75,7 +75,7 @@ public class FilteredClassifier extends DistributionClassifier
    */
   public FilteredClassifier() {
 
-    this(new weka.classifiers.rules.ZeroR(), new weka.filters.AllFilter());
+    this(new weka.classifiers.rules.ZeroR(), new weka.filters.supervised.attribute.AttributeSelection());
   }
 
   /**
