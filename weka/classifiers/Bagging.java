@@ -18,9 +18,15 @@
  */
 package weka.classifiers;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Vector;
+import java.util.Random;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Option;
+import weka.core.Utils;
 
 /**
  * Class for bagging a classifier. For more information, see<p>
@@ -32,7 +38,7 @@ import weka.core.*;
  *
  * -W classname <br>
  * Specify the full class name of a weak classifier as the basis for 
- * boosting (required).<p>
+ * bagging (required).<p>
  *
  * -I num <br>
  * Set the number of bagging iterations (default 10). <p>
@@ -40,10 +46,14 @@ import weka.core.*;
  * -S seed <br>
  * Random number seed for resampling (default 1). <p>
  *
+ * -P num <br>
+ * Size of each bag, as a percentage of the training size (default 100). <p>
+ *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @author Len Trigg (len@intelligenesis.net)
+ * @version $Revision: 1.9 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {
@@ -60,6 +70,9 @@ public class Bagging extends DistributionClassifier
   /** The seed for random number generation. */
   protected int m_Seed = 1;
 
+  /** The size of each bag sample, as a percentage of the training size */
+  protected int m_BagSizePercent = 100;
+
   /**
    * Returns an enumeration describing the available options
    *
@@ -67,19 +80,24 @@ public class Bagging extends DistributionClassifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
 	      "\tNumber of bagging iterations.\n"
 	      + "\t(default 10)",
-	      "I", 1, "-I"));
+	      "I", 1, "-I <num>"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to bag.\n"
 	      + "\teg: weka.classifiers.NaiveBayes",
 	      "W", 1, "-W"));
-    newVector.addElement(new Option("\tSeed for random number generator.\n" +
-				    "\t(default 1)",
-				    "S", 1, "-S"));
+    newVector.addElement(new Option(
+              "\tSeed for random number generator.\n"
+              + "\t(default 1)",
+              "S", 1, "-S"));
+    newVector.addElement(new Option(
+              "\tSize of each bag, as a percentage of the\n" 
+              + "\ttraining set size. (default 100)",
+              "P", 1, "-P"));
 
     if ((m_Classifier != null) &&
 	(m_Classifier instanceof OptionHandler)) {
@@ -101,13 +119,16 @@ public class Bagging extends DistributionClassifier
    *
    * -W classname <br>
    * Specify the full class name of a weak classifier as the basis for 
-   * boosting (required).<p>
+   * bagging (required).<p>
    *
    * -I num <br>
    * Set the number of bagging iterations (default 10). <p>
    *
    * -S seed <br>
    * Random number seed for resampling (default 1).<p>
+   *
+   * -P num <br>
+   * Size of each bag, as a percentage of the training size (default 100). <p>
    *
    * Options after -- are passed to the designated classifier.<p>
    *
@@ -128,6 +149,13 @@ public class Bagging extends DistributionClassifier
       setSeed(Integer.parseInt(seed));
     } else {
       setSeed(1);
+    }
+
+    String bagSize = Utils.getOption('P', options);
+    if (bagSize.length() != 0) {
+      setBagSizePercent(Integer.parseInt(bagSize));
+    } else {
+      setBagSizePercent(100);
     }
 
     String classifierName = Utils.getOption('W', options);
@@ -151,10 +179,11 @@ public class Bagging extends DistributionClassifier
 	(m_Classifier instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
-    String [] options = new String [classifierOptions.length + 7];
+    String [] options = new String [classifierOptions.length + 9];
     int current = 0;
     options[current++] = "-S"; options[current++] = "" + getSeed();
     options[current++] = "-I"; options[current++] = "" + getNumIterations();
+    options[current++] = "-P"; options[current++] = "" + getBagSizePercent();
 
     if (getClassifier() != null) {
       options[current++] = "-W";
@@ -171,7 +200,7 @@ public class Bagging extends DistributionClassifier
   }
 
   /**
-   * Set the classifier for boosting. 
+   * Set the classifier for bagging. 
    *
    * @param newClassifier the Classifier to use.
    */
@@ -190,6 +219,27 @@ public class Bagging extends DistributionClassifier
     return m_Classifier;
   }
 
+
+  /**
+   * Gets the size of each bag, as a percentage of the training set size.
+   *
+   * @return the bag size, as a percentage.
+   */
+  public int getBagSizePercent() {
+
+    return m_BagSizePercent;
+  }
+  
+  /**
+   * Sets the size of each bag, as a percentage of the training set size.
+   *
+   * @param newBagSizePercent the bag size, as a percentage.
+   */
+  public void setBagSizePercent(int newBagSizePercent) {
+
+    m_BagSizePercent = newBagSizePercent;
+  }
+  
   /**
    * Sets the number of bagging iterations
    */
@@ -237,9 +287,6 @@ public class Bagging extends DistributionClassifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    Instances baggData;
-    int i, j;
-
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
@@ -247,15 +294,16 @@ public class Bagging extends DistributionClassifier
       throw new Exception("Can't handle string attributes!");
     }
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
+    int bagSize = data.numInstances() * 100 / m_BagSizePercent;
     Random random = new Random(m_Seed);
-    for (j = 0; j < m_Classifiers.length; j++) {
-      baggData = new Instances(data, data.numInstances());
-      while (baggData.numInstances() < data.numInstances()) {
-	i = (int) (random.nextDouble() * 
+    for (int j = 0; j < m_Classifiers.length; j++) {
+      Instances bagData = new Instances(data, bagSize);
+      while (bagData.numInstances() < bagSize) {
+	int i = (int) (random.nextDouble() * 
 		   (double) data.numInstances());
-	baggData.add(data.instance(i));
+	bagData.add(data.instance(i));
       }
-      m_Classifiers[j].buildClassifier(baggData);
+      m_Classifiers[j].buildClassifier(bagData);
     }
   }
 
