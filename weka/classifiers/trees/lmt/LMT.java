@@ -58,7 +58,7 @@ import weka.filters.supervised.attribute.NominalToBinary;
  *
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 
@@ -403,6 +403,15 @@ Drawable{
     }
     
     /**
+     *  Returns the type of graph this classifier
+     *  represents.
+     *  @return Drawable.TREE
+     */   
+    public int graphType() {
+	return Drawable.TREE;
+    }
+
+   /**
      * Returns graph describing the tree.
      *
      * @exception Exception if graph can't be computed

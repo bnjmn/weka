@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1548,6 +1548,15 @@ public class REPTree extends DistributionClassifier
     +"  }\n"
     + source[1]  // Support code
     +"}\n";
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+      return Drawable.TREE;
   }
 
   /**

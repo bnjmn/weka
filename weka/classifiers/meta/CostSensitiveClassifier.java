@@ -79,7 +79,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler, Drawable {
@@ -577,6 +577,15 @@ public class CostSensitiveClassifier extends Classifier
     */
     
     return Utils.minIndex(costs);
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+      return Drawable.TREE;
   }
 
   /**

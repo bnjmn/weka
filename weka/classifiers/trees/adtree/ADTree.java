@@ -54,7 +54,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ADTree
   extends DistributionClassifier implements OptionHandler, Drawable,
@@ -800,6 +800,15 @@ public class ADTree
       }
     }
     return text.toString();
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+      return Drawable.TREE;
   }
 
   /**

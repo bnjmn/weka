@@ -47,7 +47,7 @@ import weka.experiment.Stats;
  * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -978,6 +978,16 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 	+ m_numberOfClusters+"\n"+text.toString()+"\n\n";
      
     }
+  }
+
+    
+  /**
+   *  Returns the type of graphs this class
+   *  represents
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+      return Drawable.TREE;
   }
 
   /**

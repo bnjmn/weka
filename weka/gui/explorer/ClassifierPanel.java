@@ -58,6 +58,9 @@ import weka.gui.ExtensionFileFilter;
 
 import weka.gui.treevisualizer.*;
 
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.graphvisualizer.BIFFormatException;
+
 import java.util.Random;
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -133,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.62 $
+ * @version $Revision: 1.63 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1549,20 +1552,37 @@ public class ClassifierPanel extends JPanel {
     }
     resultListMenu.add(visErrors);
 
-    JMenuItem visTree = new JMenuItem("Visualize tree");
+    JMenuItem visGrph = new JMenuItem("Visualize tree");
     if (grph != null) {
-      visTree.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    String title;
-	    if (vp != null) title = vp.getName();
-	    else title = selectedName;
-	    visualizeTree(grph, title);
-	  }
-	});
+	if(((Drawable)temp_classifier).graphType()==Drawable.TREE) {
+	    visGrph.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			String title;
+			if (vp != null) title = vp.getName();
+			else title = selectedName;
+			visualizeTree(grph, title);
+		    }
+		});
+	}
+	else if(((Drawable)temp_classifier).graphType()==Drawable.BayesNet) {
+	    visGrph.setText("Visualize graph");
+	    visGrph.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			Thread th = new Thread() {
+				public void run() {
+				visualizeBayesNet(grph, selectedName);
+				}
+			    };
+			th.start();
+		    }
+		});
+	}
+	else
+	    visGrph.setEnabled(false);
     } else {
-      visTree.setEnabled(false);
+      visGrph.setEnabled(false);
     }
-    resultListMenu.add(visTree);
+    resultListMenu.add(visGrph);
 
     JMenuItem visMargin = new JMenuItem("Visualize margin curve");
     if (preds != null) {
@@ -1685,6 +1705,33 @@ public class ClassifierPanel extends JPanel {
     jf.setVisible(true);
     tv.fitToScreen();
   }
+
+  /**
+   * Pops up a GraphVisualizer for the BayesNet classifier from the currently
+   * selected item in the results list
+   * @param XMLBIF the description of the graph in XMLBIF ver. 0.3
+   */
+  protected void visualizeBayesNet(String XMLBIF, String graphName) {
+    final javax.swing.JFrame jf = 
+      new javax.swing.JFrame("Weka Classifier Graph Visualizer: "+graphName);
+    jf.setSize(500,400);
+    jf.getContentPane().setLayout(new BorderLayout());
+    GraphVisualizer gv = new GraphVisualizer();
+    try { gv.readBIF(XMLBIF);
+    }
+    catch(BIFFormatException be) { System.err.println("unable to visualize BayesNet"); be.printStackTrace(); }
+    gv.layoutGraph();
+
+    jf.getContentPane().add(gv, BorderLayout.CENTER);
+    jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	public void windowClosing(java.awt.event.WindowEvent e) {
+	  jf.dispose();
+	}
+      });
+    
+    jf.setVisible(true);
+  }
+
 
   /**
    * Pops up a VisualizePanel for visualizing the data and errors for 
