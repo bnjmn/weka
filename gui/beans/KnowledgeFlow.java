@@ -46,6 +46,9 @@ import java.text.SimpleDateFormat;
 import javax.swing.UIManager;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.Box;
+import javax.swing.JFrame;
+import javax.swing.JWindow;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JButton;
@@ -67,6 +70,8 @@ import javax.swing.JTextArea;
 
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -83,6 +88,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Insets;
 import java.awt.Component;
+import java.awt.FontMetrics;
 
 import java.beans.Customizer;
 import java.beans.EventSetDescriptor;
@@ -100,7 +106,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.21 $
+ * @version  $Revision: 1.22 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -123,7 +129,6 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 
   /** Loads the configuration property file */
   static {
-
     // Allow a properties file in the current directory to override
     try {
       BEAN_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
@@ -235,7 +240,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.21 $
+   * @version $Revision: 1.22 $
    * @since 1.0
    * @see JPanel
    */
@@ -262,6 +267,10 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       }
     }
   }
+
+  // Used for measuring and splitting icon labels
+  // over multiple lines
+  FontMetrics m_fontM;
 
   // constants for operations in progress
   protected static final int NONE = 0;
@@ -327,6 +336,12 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * Creates a new <code>KnowledgeFlow</code> instance.
    */
   public KnowledgeFlow() {
+    // Grab a fontmetrics object
+    JWindow temp = new JWindow();
+    temp.show();
+    temp.getGraphics().setFont(new Font("Monospaced", Font.PLAIN, 10));
+    m_fontM = temp.getGraphics().getFontMetrics();
+    temp.hide();
 
     m_bcSupport.setDesignTime(true);
     m_beanLayout.setLayout(null);
@@ -594,6 +609,10 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       
       // name for the tool bar
       String tempBarName = (String)tempBarSpecs.elementAt(0);
+      
+      // Used for weka leaf packages 
+      Box singletonHolderPanel = null;
+
       // name of the bean component to handle this class of weka algorithms
       String tempBeanCompName = (String)tempBarSpecs.elementAt(1);
       // a JPanel holding an instantiated bean + label ready to be added
@@ -622,6 +641,8 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       }
       // a toolbar to hold buttons---one for each algorithm
       JToolBar tempToolBar = new JToolBar();
+      //      System.err.println(tempToolBar.getLayout());
+      //      tempToolBar.setLayout(new FlowLayout());
       int z = 2;
       if (toolBarType == WEKAWRAPPER_TOOLBAR) {
 	if (!hpp.goTo(rootPackage)) {
@@ -634,25 +655,38 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  // check to see if this is a leaf - if so then there are no
 	  // sub packages
 	  if (hpp.isLeafReached()) {
-	    // add this bean directly to the tempToolBar
+	    if (singletonHolderPanel == null) {
+	      singletonHolderPanel = Box.createHorizontalBox();
+	      singletonHolderPanel.setBorder(javax.swing.BorderFactory.
+					     createTitledBorder(tempBarName));
+	    }
 	    String algName = hpp.fullValue();
 	    tempBean = instantiateToolBarBean(true,
 					       tempBeanCompName, algName);
 	    if (tempBean != null) {
-	      tempToolBar.add(tempBean);
+	      // tempToolBar.add(tempBean);
+	      singletonHolderPanel.add(tempBean);
 	    }
 	    hpp.goToParent();
 	  } else {
 	    // make a titledborder JPanel to hold all the schemes in this
 	    // package
-	    JPanel holderPanel = new JPanel();
+	    //	    JPanel holderPanel = new JPanel();
+	    Box holderPanel = Box.createHorizontalBox();
 	    holderPanel.setBorder(javax.swing.BorderFactory.
 				  createTitledBorder(primaryPackages[kk]));
 	    processPackage(holderPanel, tempBeanCompName, hpp);
 	    tempToolBar.add(holderPanel);
 	  }
 	}
+	if (singletonHolderPanel != null) {
+	  tempToolBar.add(singletonHolderPanel);
+	  singletonHolderPanel = null;
+	}
       } else {
+	Box holderPanel = Box.createHorizontalBox();
+	 holderPanel.setBorder(javax.swing.BorderFactory.
+			       createTitledBorder(tempBarName));
 	for (int j = z; j < tempBarSpecs.size(); j++) {
 	  tempBean = null;
 	  tempBeanCompName = (String)tempBarSpecs.elementAt(j);
@@ -663,15 +697,16 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	  if (tempBean != null) {
 	    // set tool tip text (if any)
 	    // setToolTipText(tempBean)
-	    tempToolBar.add(tempBean);
+	    holderPanel.add(tempBean);
 	  } 
 	}
+	tempToolBar.add(holderPanel);
       }
       
       // ok, now create tabbed pane to hold this toolbar
       JScrollPane tempJScrollPane = new JScrollPane(tempToolBar, 
 					JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-					JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+					JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
       Dimension d = tempToolBar.getPreferredSize();
       tempJScrollPane.setMinimumSize(new Dimension((int)d.getWidth(),
@@ -689,7 +724,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     add(toolBarPanel, BorderLayout.NORTH);
   }
 
-  private void processPackage(JPanel holderPanel,
+  private void processPackage(JComponent holderPanel,
 			      String tempBeanCompName,
 			      weka.gui.HierarchyPropertyParser hpp) {
     if (hpp.isLeafReached()) {
@@ -755,6 +790,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       try {
 	tempBean = Beans.instantiate(null, tempBeanCompName);
       } catch (Exception ex) {
+	ex.printStackTrace();
 	System.err.println("Failed to instantiate :"+tempBeanCompName
 			   +"KnowledgeFlow.setUpToolBars()");
 	return null;
@@ -763,6 +799,9 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     
     if (tempBean instanceof BeanContextChild) {
       m_bcSupport.add(tempBean);
+    }
+    if (tempBean instanceof Visible) {
+      ((Visible)tempBean).getVisual().scale(3);
     }
 
     // ---------------------------------------
@@ -773,20 +812,27 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     String labelName = (wekawrapper == true) 
       ? algName 
       : tempBeanCompName;
-    tempL.setText(" "+labelName.
-		  substring(labelName.lastIndexOf('.')+1, 
-			    labelName.length())+" ");
+    labelName = labelName.substring(labelName.lastIndexOf('.')+1, 
+				    labelName.length());
+    tempL.setText(" "+labelName+" ");
     tempL.setHorizontalAlignment(JLabel.CENTER);
     tempP.setLayout(new BorderLayout());
     if (tempBean instanceof Visible) {
       BeanVisual bv = ((Visible)tempBean).getVisual();
       tempButton = 
 	new JToggleButton(bv.getStaticIcon());
+      int width = bv.getStaticIcon().getIconWidth();
+      int height = bv.getStaticIcon().getIconHeight();
+      
+      JPanel labelPanel = 
+	multiLineLabelPanel(labelName, width);
+      tempP.add(labelPanel, BorderLayout.SOUTH);
     } else {
       tempButton = new JToggleButton();
+      tempP.add(tempL, BorderLayout.SOUTH);
     }
-    tempP.add(tempButton, BorderLayout.CENTER);
-    tempP.add(tempL, BorderLayout.SOUTH);
+    tempP.add(tempButton, BorderLayout.NORTH);
+    //    tempP.add(tempL, BorderLayout.SOUTH);
     
     //  holderPanel.add(tempP);
     //    tempToolBar.add(tempP);
@@ -831,6 +877,55 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 
     //return tempBean;
     return tempP;
+  }
+
+  private JPanel multiLineLabelPanel(String sourceL,
+				     int splitWidth) {
+    JPanel jp = new JPanel();
+    Vector v = new Vector();
+
+    int labelWidth = m_fontM.stringWidth(sourceL);
+
+    if (labelWidth < splitWidth) {
+      v.addElement(sourceL);
+    } else {
+      // find mid point
+      int mid = sourceL.length() / 2;
+      
+      // look for split point closest to the mid
+      int closest = sourceL.length();
+      int closestI = -1;
+      for (int i = 0; i < sourceL.length(); i++) {
+	if (sourceL.charAt(i) < 'a') {
+	  if (Math.abs(mid - i) < closest) {
+	    closest = Math.abs(mid - i);
+	    closestI = i;
+	  }
+	}
+      }
+      if (closestI != -1) {
+	String left = sourceL.substring(0, closestI);
+	String right = sourceL.substring(closestI, sourceL.length());
+	if (left.length() > 1 && right.length() > 1) {
+	  v.addElement(left);
+	  v.addElement(right);
+	} else {
+	  v.addElement(sourceL);
+	}
+      } else {
+	v.addElement(sourceL);
+      }
+    }
+
+    jp.setLayout(new GridLayout(v.size(), 1));
+    for (int i = 0; i < v.size(); i++) {
+      JLabel temp = new JLabel();
+      temp.setFont(new Font("Monospaced", Font.PLAIN, 10));
+      temp.setText(" "+((String)v.elementAt(i))+" ");
+      temp.setHorizontalAlignment(JLabel.CENTER);
+      jp.add(temp);
+    }
+    return jp;
   }
 
   /**
