@@ -66,7 +66,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -209,18 +209,17 @@ public class GenericObjectEditor implements PropertyEditor {
 	  if (m_Backup != null) {
 	    setObject(m_Backup);
 	    m_Backup=null;
+	    updateClassType();
+	    updateChooser();
+	    updateChildPropertySheet();
 	  }
 	  if ((getTopLevelAncestor() != null)
 	      && (getTopLevelAncestor() instanceof Window)) {
 	    Window w = (Window) getTopLevelAncestor();
 	    w.dispose();
-	    updateClassType();
-	    updateChooser();
-	    updateChildPropertySheet();
 	  }
 	}
       });
-      //m_cancelBut
       
       setLayout(new BorderLayout());
       add(m_ObjectChooser, BorderLayout.NORTH);
