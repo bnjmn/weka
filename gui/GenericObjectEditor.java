@@ -93,7 +93,7 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class GenericObjectEditor implements PropertyEditor {
     
@@ -160,7 +160,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	private PropertySheetPanel m_ChildPropertySheet;
 	
 	/** The model containing the list of names to select from */
-	private HierachyPropertyParser m_ObjectNames;
+	private HierarchyPropertyParser m_ObjectNames;
 	
 	/** Open object from disk */
 	private JButton m_OpenBut;
@@ -306,7 +306,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    }    
 	    
 	    /**
-	     * Search the HierachyPropertyParser for the given class name,
+	     * Search the HierarchyPropertyParser for the given class name,
 	     * if not found, add it into the appropriate position.  Does
 	     * nothing if already there
 	     *
@@ -328,7 +328,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    
 	    /** 
 	     * Called when a menu is selected, to update the underlying
-	     * HierachyPropertyParser, m_ObjectNames.
+	     * HierarchyPropertyParser, m_ObjectNames.
 	     * 
 	     * @param e the menuEvent concerned
 	     */
@@ -346,7 +346,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    
 	    /** 
 	     * Called when a menu is de-selected, to update the underlying
-	     * HierachyPropertyParser, m_ObjectNames.
+	     * HierarchyPropertyParser, m_ObjectNames.
 	     * 
 	     * @param e the menuEvent concerned
 	     */
@@ -371,7 +371,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    
 	    /** 
 	     * Called when a menu is cancelled, to update the underlying
-	     * HierachyPropertyParser, m_ObjectNames.
+	     * HierarchyPropertyParser, m_ObjectNames.
 	     * 
 	     * @param e the menuEvent concerned
 	     */
@@ -381,7 +381,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    
 	    /** 
 	     * Called when a leaf menu item is temporarily selected, to update
-	     * the underlying HierachyPropertyParser, m_ObjectNames and record
+	     * the underlying HierarchyPropertyParser, m_ObjectNames and record
 	     * the class in selection
 	     * 
 	     * @param e the MouseEvent concerned
@@ -402,7 +402,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    
 	    /** 
 	     * Called when a leaf menu item is no longer selected, to update the 
-	     * underlying HierachyPropertyParser, m_ObjectNames.
+	     * underlying HierarchyPropertyParser, m_ObjectNames.
 	     * 
 	     * @param e the MouseEvent concerned
 	     */
@@ -480,7 +480,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    
 	    m_MenuBar = new JMenuBar();
 	    m_MenuBar.setLayout(new BorderLayout());	
-	    m_ObjectNames = new HierachyPropertyParser();
+	    m_ObjectNames = new HierarchyPropertyParser();
 	    if(m_ObjectChooser == null)
 		m_ObjectChooser = new CascadedComboBox();		
 	    m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER);
@@ -764,8 +764,8 @@ public class GenericObjectEditor implements PropertyEditor {
         
     
     /** Called when the class of object being edited changes. */
-    protected HierachyPropertyParser getClassesFromProperties() {	    
-	HierachyPropertyParser hpp = new HierachyPropertyParser();
+    protected HierarchyPropertyParser getClassesFromProperties() {	    
+	HierarchyPropertyParser hpp = new HierarchyPropertyParser();
 	String className = m_ClassType.getName();
 	String typeOptions = EDITOR_PROPERTIES.getProperty(className);
 	if (typeOptions == null) {
@@ -828,7 +828,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    return;
 	}	
 	
-	HierachyPropertyParser hpp = getClassesFromProperties();
+	HierarchyPropertyParser hpp = getClassesFromProperties();
 	try{
 	    if(hpp.depth() > 0){		
 		hpp.goToRoot();

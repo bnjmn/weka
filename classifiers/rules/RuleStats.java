@@ -43,7 +43,7 @@ import weka.core.Utils;
  * an object of this class. <p>
  *  
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RuleStats{
 
@@ -69,12 +69,16 @@ public class RuleStats{
   /** The theory weight in the MDL calculation */
   private double MDL_THEORY_WEIGHT = 1.0;
 
+    /** The class distributions predicted by each rule */
+    private FastVector m_Distributions;
+
   /** Default constructor */
   public RuleStats(){
     m_Data = null;
     m_Ruleset = null;
     m_SimpleStats = null;
     m_Filtered = null;
+    m_Distributions = null;
     m_Total = -1;
   }
 
@@ -184,6 +188,20 @@ public class RuleStats{
     return null;
   }    
 
+    /**
+     * Get the class distribution predicted by the rule in
+     * given position
+     *
+     * @param index the position index of the rule
+     * @return the class distributions
+     */
+    public double[] getDistributions(int index){
+	
+	if((m_Distributions != null) && (index < m_Distributions.size()))
+	    return (double[])m_Distributions.elementAt(index);
+	
+	return null;
+    }    
     
   /**
    * Set the weight of theory in MDL calcualtion
@@ -232,41 +250,84 @@ public class RuleStats{
     int size = m_Ruleset.size();
     m_Filtered = new FastVector(size);
     m_SimpleStats = new FastVector(size);
+    m_Distributions = new FastVector(size);
     Instances data = new Instances(m_Data);
 	
     for(int i=0; i < size; i++){
       double[] stats = new double[6];  // 6 statistics parameters
-      Instances[] filtered = computeSimpleStats(i, data, stats);
+      double[] classCounts = new double[m_Data.classAttribute().numValues()];
+      Instances[] filtered = computeSimpleStats(i, data, stats, classCounts);
       m_Filtered.addElement(filtered);
       m_SimpleStats.addElement(stats);
+      m_Distributions.addElement(classCounts);
       data = filtered[1];  // Data not covered
-
-      /* for(int p=0; p<6; p++)
-	 System.err.print(" !!! countData: "+ stats[p]);
-	 System.err.println();*/
     }	
   }
     
+    /**
+     * Count data from the position index in the ruleset
+     * assuming that given data are not covered by the rules
+     * in position 0...(index-1), and the statistics of these
+     * rules are provided.<br>
+     * This procedure is typically useful when a temporary 
+     * object of RuleStats is constructed in order to efficiently
+     * calculate the relative DL of rule in position index, 
+     * thus all other stuff is not needed.
+     *
+     * @param index the given position
+     * @param uncovered the data not covered by rules before index
+     * @param prevRuleStats the provided stats of previous rules
+     */
+    public void countData(int index, Instances uncovered, 
+			  double[][] prevRuleStats){
+	if((m_Filtered != null) ||
+	   (m_Ruleset == null))
+	    return;
+	
+	int size = m_Ruleset.size();
+	m_Filtered = new FastVector(size);
+	m_SimpleStats = new FastVector(size);
+	Instances[] data = new Instances[2];
+	data[1] = uncovered;
+	
+	for(int i=0; i < index; i++){
+	    m_SimpleStats.addElement(prevRuleStats[i]);
+	    if(i+1 == index)
+		m_Filtered.addElement(data);
+	    else
+		m_Filtered.addElement(new Object()); // Stuff sth.
+	}
+	
+	for(int j=index; j < size; j++){
+	    double[] stats = new double[6];  // 6 statistics parameters
+	    Instances[] filtered = computeSimpleStats(j, data[1], stats, null);
+	    m_Filtered.addElement(filtered);
+	    m_SimpleStats.addElement(stats);
+	    data = filtered;  // Data not covered
+	}	
+    }
     
   /**
    * Find all the instances in the dataset covered/not covered by 
    * the rule in given index, and the correponding simple statistics
-   * are stored in the given double array, which can be got by 
-   * getSimpleStats().<br>
+   * and predicted class distributions are stored in the given double array,
+   * which can be obtained by getSimpleStats() and getDistributions().<br>
    * 
    * @param index the given index, assuming correct
    * @param insts the dataset to be covered by the rule
    * @param stats the given double array to hold stats, side-effected
+   * @param dist the given array to hold class distributions, side-effected
+   *             if null, the distribution is not necessary 
    * @return the instances covered and not covered by the rule
    */
   private Instances[] computeSimpleStats(int index, Instances insts, 
-					 double[] stats){
+					 double[] stats, double[] dist){
     Rule rule = (Rule)m_Ruleset.elementAt(index);
 	
     Instances[] data = new Instances[2];
     data[0] = new Instances(insts, insts.numInstances());
     data[1] = new Instances(insts, insts.numInstances());
-	
+
     for(int i=0; i<insts.numInstances(); i++){
       Instance datum = insts.instance(i);
       double weight = datum.weight();
@@ -277,6 +338,8 @@ public class RuleStats{
 	  stats[2] += weight;    // True positives
 	else
 	  stats[4] += weight;    // False positives
+	if(dist != null)
+	    dist[(int)datum.classValue()] += weight;
       }
       else{
 	data[1].add(datum);        // Not covered by this rule
@@ -287,7 +350,7 @@ public class RuleStats{
 	  stats[5] += weight;    // False negatives	    
       }
     }
-	
+    
     return data;
   }
     
@@ -301,20 +364,25 @@ public class RuleStats{
     if(m_Ruleset == null)
       m_Ruleset = new FastVector();
     m_Ruleset.addElement(lastRule);
-
+  
     Instances data = (m_Filtered == null) ?
       m_Data : ((Instances[])m_Filtered.lastElement())[1];
     double[] stats = new double[6];
+    double[] classCounts = new double[m_Data.classAttribute().numValues()];
     Instances[] filtered = 
-      computeSimpleStats(m_Ruleset.size()-1, data, stats);
-
+	computeSimpleStats(m_Ruleset.size()-1, data, stats, classCounts);
+    
     if(m_Filtered == null)
-      m_Filtered = new FastVector();	
+	m_Filtered = new FastVector();	
     m_Filtered.addElement(filtered);
 
     if(m_SimpleStats == null)
       m_SimpleStats = new FastVector();	
     m_SimpleStats.addElement(stats);
+
+    if(m_Distributions == null)
+	m_Distributions = new FastVector();
+    m_Distributions.addElement(classCounts);
   }
     
     
@@ -499,7 +567,7 @@ public class RuleStats{
 
     for(int j=(index+1); j<m_Ruleset.size(); j++){
       double[] stats = new double[6];
-      Instances[] split = computeSimpleStats(j, data, stats);
+      Instances[] split = computeSimpleStats(j, data, stats, null);
       indexPlus.addElement(stats);
       rulesetStat[0] += stats[0];
       rulesetStat[2] += stats[2];
@@ -660,14 +728,13 @@ public class RuleStats{
 	  +" | "+rulesetStat[4]
 	  +" | "+rulesetStat[5]);
 	*/
-	m_Ruleset.removeElementAt(k);
-		
-	if(k == (m_SimpleStats.size()-1)){
-	  m_Filtered.removeElementAt(k);
-	  m_SimpleStats.removeElementAt(k);
+	
+	if(k == (m_SimpleStats.size()-1))
+	    removeLast();
+	else{
+	    m_Ruleset.removeElementAt(k);
+	    needUpdate = true;
 	}
-	else
-	  needUpdate = true;
       }
     }
 	
@@ -688,6 +755,8 @@ public class RuleStats{
     m_Ruleset.removeElementAt(last);
     m_Filtered.removeElementAt(last);
     m_SimpleStats.removeElementAt(last);	
+    if(m_Distributions != null)
+	m_Distributions.removeElementAt(last);
   }
 
   /**

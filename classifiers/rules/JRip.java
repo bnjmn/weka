@@ -40,7 +40,7 @@ import weka.core.AdditionalMeasureProducer;
 import weka.filters.ClassOrderFilter;
 import weka.filters.Filter;
 
-import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 
 /**
@@ -122,16 +122,21 @@ import weka.classifiers.Evaluation;
  * 'Machine Learning: Proceedings of the Twelfth International Conference'
  * (ML95). <p>
  *
+ * PS.  We have compared this implementation with the original ripper 
+ * implementation in aspects of accuracy, ruleset size and running time 
+ * on both artificial data "ab+bcd+defg" and UCI datasets.  In all these
+ * aspects it seems to be quite comparable to the original ripper 
+ * implementation.  However, we didn't consider memory consumption
+ * optimization in this implementation.<p>
+ *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class JRip extends Classifier 
+public class JRip extends DistributionClassifier 
   implements OptionHandler, 
 	     AdditionalMeasureProducer, 
 	     WeightedInstancesHandler{    
-    
-  //static final long serialVersionUID = -7076124258019358000L;
 
   /** The limit of description length surplus in ruleset generation */
   private static double MAX_DL_SURPLUS = 64.0;
@@ -141,7 +146,10 @@ public class JRip extends Classifier
     
   /** The ruleset */
   private FastVector m_Ruleset;
-    
+  
+    /** The predicted class distribution */
+    private FastVector m_Distributions;
+  
   /** Runs of optimizations */
   private int m_Optimizations = 2;
     
@@ -449,7 +457,7 @@ public class JRip extends Classifier
      */
     public Instances[] splitData(Instances insts, double defAcRt, 
 				 double cl){
-      Instances data = new Instances(insts);
+	Instances data = insts;
       int total=data.numInstances();// Total number of instances without 
       // missing value for att
 	    
@@ -797,18 +805,18 @@ public class JRip extends Classifier
      * @param data the growing data used to build the rule
      * @exception if the consequent is not set yet
      */    
-    public void grow(Instances data) throws Exception{
+      public void grow(Instances data) throws Exception{
       if(m_Consequent == -1)
 	throw new Exception(" Consequent not set yet.");
 	    
-      Instances growData = new Instances(data);	         
-	    
-      if(!Utils.gr(growData.sumOfWeights(), 0.0))
+      Instances growData = data;	         
+      double sumOfWeights = growData.sumOfWeights();
+      if(!Utils.gr(sumOfWeights, 0.0))
 	return;
 	    
       /* Compute the default accurate rate of the growing data */
       double defAccu = computeDefAccu(growData);
-      double defAcRt = (defAccu+1.0)/(growData.sumOfWeights()+1.0); 
+      double defAcRt = (defAccu+1.0)/(sumOfWeights+1.0); 
 	    
       /* Keep the record of which attributes have already been used*/    
       boolean[] used=new boolean [growData.numAttributes()];
@@ -826,7 +834,7 @@ public class JRip extends Classifier
       }	    
 	    
       double maxInfoGain;	    
-      while (Utils.gr(growData.sumOfWeights(), 0.0) && 
+      while (Utils.gr(growData.numInstances(), 0.0) && 
 	     (numUnused > 0) 
 	     && Utils.sm(defAcRt, 1.0)
 	     ){   
@@ -904,7 +912,7 @@ public class JRip extends Classifier
     /** 
      * Compute the best information gain for the specified antecedent
      *  
-     * @param data the data based on which the infoGain is computed
+     * @param instances the data based on which the infoGain is computed
      * @param defAcRt the default accuracy rate of data
      * @param antd the specific antecedent
      * @param numConds the number of antecedents in the rule so far
@@ -912,8 +920,8 @@ public class JRip extends Classifier
      */
     private Instances computeInfoGain(Instances instances, double defAcRt, 
 				      Antd antd){
-      Instances data = new Instances(instances);
-	    
+	Instances data = instances;
+	
       /* Split the data into bags.
 	 The information gain of each bag is also calculated in this procedure */
       Instances[] splitData = antd.splitData(data, defAcRt, 
@@ -935,14 +943,14 @@ public class JRip extends Classifier
      *                 the whole pruning data instead of the data covered
      */    
     public void prune(Instances pruneData, boolean useWhole){
-      Instances data=new Instances(pruneData);
+	Instances data = pruneData;
 	
       double total = data.sumOfWeights();
       if(!Utils.gr(total, 0.0))
 	return;
 	
       /* The default accurate # and rate on pruning data */
-      double defAccu=computeDefAccu(pruneData);
+      double defAccu=computeDefAccu(data);
 	    
       if(m_Debug)	
 	System.err.println("Pruning with " + defAccu + 
@@ -964,7 +972,7 @@ public class JRip extends Classifier
       for(int x=0; x<size; x++){
 	Antd antd=(Antd)m_Antds.elementAt(x);
 	Attribute attr= antd.getAttr();
-	Instances newData = new Instances(data);
+	Instances newData = data;
 	data = new Instances(newData, 0); // Make data empty
 		
 	for(int y=0; y<newData.numInstances(); y++){
@@ -1035,23 +1043,14 @@ public class JRip extends Classifier
    * Builds Ripper in the order of class frequencies.  For each class
    * it's built in two stages: building and optimization 
    *
-   * @param data the training data
+   * @param instances the training data
    * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception{
-
-    instances = new Instances(instances);
-	
-    if (!instances.classAttribute().isNominal()) 
-      throw new Exception(" Only nominal class, please.");
-	
-    instances.deleteWithMissingClass();
-    if(Utils.eq(instances.sumOfWeights(),0))
-      throw new Exception(" No instances with a class value!");
-	
-    if(instances.numInstances() < m_Folds)
-      throw new Exception(" Not enough data for REP.");
-    
+     
+      if(instances.numInstances() == 0)
+	  throw new Exception(" No instances with a class value!");
+  	
     m_Random = new Random(m_Seed); 
     m_Total = RuleStats.numAllConditions(instances);
     if(m_Debug)
@@ -1071,10 +1070,21 @@ public class JRip extends Classifier
     if(data == null)
       throw new Exception(" Unable to randomize the class orders.");
 	
+    data.deleteWithMissingClass();
+    if(data.numInstances() == 0)
+      throw new Exception(" No instances with a class value!");
+    
+    if(data.numInstances() < m_Folds)
+	throw new Exception(" Not enough data for REP.");
+    
     m_Class = data.classAttribute();
+    
+    if (!m_Class.isNominal()) 
+      throw new Exception(" Only nominal class, please.");
 	
     m_Ruleset = new FastVector();
     m_RulesetStats = new FastVector();
+    m_Distributions = new FastVector();
 
     // Sort by classes frequency
     double[] orderedClasses = ((ClassOrderFilter)m_Filter).getClassCounts();
@@ -1108,7 +1118,7 @@ public class JRip extends Classifier
       // DL of default rule, no theory DL, only data DL
       double defDL = RuleStats.dataDL(expFPRate, 
 				      0.0,
-				      data.sumOfWeights(),
+				      Utils.sum(orderedClasses),
 				      0.0,
 				      orderedClasses[y]);	    
       if(Double.isNaN(defDL) || Double.isInfinite(defDL))
@@ -1129,30 +1139,41 @@ public class JRip extends Classifier
     defRuleStat.setData(data);
     defRuleStat.setNumAllConds(m_Total);
     defRuleStat.addAndUpdate(defRule);
-    m_RulesetStats.addElement(defRuleStat);	
+    m_RulesetStats.addElement(defRuleStat);
+
+    for(int z=0; z < m_RulesetStats.size(); z++){
+	RuleStats oneClass = (RuleStats)m_RulesetStats.elementAt(z);
+	for(int xyz=0; xyz < oneClass.getRulesetSize(); xyz++){
+	    double[] classDist = oneClass.getDistributions(xyz);
+	    Utils.normalize(classDist);
+	    if(classDist != null)
+		m_Distributions.addElement(((ClassOrderFilter)m_Filter).distributionsByOriginalIndex(classDist));
+	}	
+    }    
   }
     
   /**
-   * Classify the test instance with the rule learner 
+   * Classify the test instance with the rule learner and provide
+   * the class distributions 
    *
-   * @param instance the instance to be classified
-   * @return the classification
+   * @param datum the instance to be classified
+   * @return the distribution
    */
-  public double classifyInstance(Instance datum){
-    try{
-      for(int i=0; i < m_Ruleset.size(); i++){
-	RipperRule rule = (RipperRule)m_Ruleset.elementAt(i);
-	if(rule.covers(datum))
-	  return ((ClassOrderFilter)m_Filter).originalValue(rule.getConsequent()); 
-      }
-    }catch(Exception e){
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
+    public double[] distributionForInstance(Instance datum){
+	try{
+	    for(int i=0; i < m_Ruleset.size(); i++){
+		RipperRule rule = (RipperRule)m_Ruleset.elementAt(i);
+		if(rule.covers(datum))
+		    return (double[])m_Distributions.elementAt(i); 
+	    }
+	}catch(Exception e){
+	    System.err.println(e.getMessage());
+	    e.printStackTrace();
+	}
 	
-    System.err.println("Should never happen!");
-    return -1;
-  }
+	System.err.println("Should never happen!");
+	return new double[datum.classAttribute().numValues()];
+    }
 
   /** Build a ruleset for the given class according to the given data
    *
@@ -1168,7 +1189,7 @@ public class JRip extends Classifier
 					 double defDL)
     throws Exception{
 	
-    Instances newData = new Instances(data), growData, pruneData;  	
+    Instances newData = data, growData, pruneData;  	
     boolean stop = false;
     FastVector ruleset = new FastVector();		
 	
@@ -1295,7 +1316,7 @@ public class JRip extends Classifier
 	  System.err.println("\n*** Optimization: run #"
 			     +z+" ***");
 		
-	newData = new Instances(data);		    
+	newData = data;		    
 	finalRulesetStat = new RuleStats();
 	finalRulesetStat.setData(newData);
 	finalRulesetStat.setNumAllConds(m_Total);
@@ -1384,13 +1405,18 @@ public class JRip extends Classifier
 	    revision.grow(newGrowData);	      
 	    revision.prune(pruneData, true);
 			
+	    double[][] prevRuleStats = new double[position][6];
+	    for(int c=0; c < position; c++)
+		prevRuleStats[c] = finalRulesetStat.getSimpleStats(c);
+
 	    // Now compare the relative DL of variants
 	    FastVector tempRules = (FastVector)ruleset.copyElements();
 	    tempRules.setElementAt(replace, position);
 			
 	    RuleStats repStat = new RuleStats(data, tempRules);
 	    repStat.setNumAllConds(m_Total);
-	    repStat.countData();
+	    repStat.countData(position, newData, prevRuleStats);
+	    //repStat.countData();
 	    rst = repStat.getSimpleStats(position);	    
 	    if(m_Debug)
 	      System.err.println("Replace rule covers: "+rst[0]+
@@ -1414,7 +1440,8 @@ public class JRip extends Classifier
 	    tempRules.setElementAt(revision, position);
 	    RuleStats revStat = new RuleStats(data, tempRules);
 	    revStat.setNumAllConds(m_Total);
-	    revStat.countData();
+	    revStat.countData(position, newData, prevRuleStats);
+	    //revStat.countData();
 	    double revDL = revStat.relativeDL(position, expFPRate,
 					      m_CheckErr);
 			
@@ -1430,7 +1457,8 @@ public class JRip extends Classifier
 			
 	    rstats = new RuleStats(data, ruleset);
 	    rstats.setNumAllConds(m_Total);
-	    rstats.countData();
+	    rstats.countData(position, newData, prevRuleStats);
+	    //rstats.countData();
 	    double oldDL = rstats.relativeDL(position, expFPRate,
 					     m_CheckErr);
 			
@@ -1511,7 +1539,7 @@ public class JRip extends Classifier
 	finalRulesetStat.reduceDL(expFPRate, m_CheckErr);
 	if(m_Debug){
 	  int del = ruleset.size() -
-	    finalRulesetStat.getRuleset().size(); 
+	    finalRulesetStat.getRulesetSize(); 
 	  System.err.println(del+" rules are deleted"+
 			     " after DL reduction procedure");
 	}
