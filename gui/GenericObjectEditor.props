@@ -36,6 +36,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions.Logistic,\
  weka.classifiers.functions.MultilayerPerceptron,\
  weka.classifiers.functions.PaceRegression,\
+ weka.classifiers.functions.RBFNetwork,\
  weka.classifiers.functions.SMO,\
  weka.classifiers.functions.SMOreg,\
  weka.classifiers.functions.SimpleLinearRegression,\
