@@ -35,7 +35,7 @@ import javax.swing.JTextField;
  * somewhere other than this field simultaneously
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class PropertyText extends JTextField {
 
@@ -52,16 +52,16 @@ class PropertyText extends JTextField {
     super(pe.getAsText());
     m_Editor = pe;
     
-    m_Editor.addPropertyChangeListener(new PropertyChangeListener() {
+    /*    m_Editor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
 	updateUs();
       }
-    });
+      }); */
     addKeyListener(new KeyAdapter() {
       public void keyReleased(KeyEvent e) {
-	if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-	  updateEditor();
-	}
+	//	if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+	updateEditor();
+	//	}
       }
     });
     addFocusListener(new FocusAdapter() {
