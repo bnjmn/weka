@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.4 $
+ * @version  $Revision: 1.5 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1497,10 +1497,6 @@ public class Evaluation implements Summarizable {
 	  text.append(Utils.doubleToString(incorrect(), 12, 4) + "     " +
 		      Utils.doubleToString(pctIncorrect(),
 					   12, 4) + " %\n");
-	  text.append("UnClassified Instances             ");
-	  text.append(Utils.doubleToString(unclassified(), 12,4) +  "     " +
-		      Utils.doubleToString(pctUnclassified(),
-					   12, 4) + " %\n");
 	  if (m_CostMatrix != null) {
 	    text.append("Correctly Classified With Cost     ");
 	    text.append(Utils.doubleToString(m_CorrectWithCost, 12 ,4) + 
@@ -1567,6 +1563,10 @@ public class Evaluation implements Summarizable {
 	text.append(Utils.doubleToString(rootRelativeSquaredError(), 
 					 12, 4) + " %\n");
       }
+      text.append("UnClassified Instances             ");
+      text.append(Utils.doubleToString(unclassified(), 12,4) +  "     " +
+		  Utils.doubleToString(pctUnclassified(),
+				       12, 4) + " %\n");
       text.append("Total Number of Instances          ");
       text.append(Utils.doubleToString(m_WithClass, 12, 4));
       if (m_CostMatrix != null) {
@@ -2069,8 +2069,10 @@ public class Evaluation implements Summarizable {
 
       // Update stats
       m_WithClass += instance.weight();
-      if (Instance.isMissingValue(predictedValue))
+      if (Instance.isMissingValue(predictedValue)) {
+	m_Unclassified += instance.weight();
 	return;
+      }
       m_SumClass += instance.weight() * instance.classValue();
       m_SumSqrClass += instance.weight() * instance.classValue()
       *	instance.classValue();
