@@ -32,7 +32,7 @@ import weka.core.OptionHandler;
  * class association rules implemement this interface.
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public interface CARuleMiner extends OptionHandler {
     
@@ -68,6 +68,6 @@ public interface CARuleMiner extends OptionHandler {
   * Sets the class index for the class association rule miner
   * @param index the class index
   */ 
- public void setClass(int index);
+ public void setClassIndex(int index);
  
 }

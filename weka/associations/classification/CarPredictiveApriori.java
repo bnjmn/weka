@@ -63,7 +63,7 @@ import weka.associations.RuleGeneration;
  * The required number of rules (default: 100). <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 
 
 public class CarPredictiveApriori extends PredictiveApriori implements OptionHandler, CARuleMiner {
@@ -361,7 +361,7 @@ public class CarPredictiveApriori extends PredictiveApriori implements OptionHan
    * Sets the class index
    * @param index the index of the class attribute
    */  
-  public void setClass(int index){
+  public void setClassIndex(int index){
       
       m_classIndex = index;
   }
@@ -370,7 +370,7 @@ public class CarPredictiveApriori extends PredictiveApriori implements OptionHan
    * Gets the index of the class attribute
    * @return the index of the class attribute
    */  
-  public int classIndex(){
+  public int getClassIndex(){
       
       return m_classIndex;
   }
@@ -381,7 +381,7 @@ public class CarPredictiveApriori extends PredictiveApriori implements OptionHan
    * displaying in the explorer/experimenter gui
    */
   public String classIndexTipText() {
-    return "Index of the class attribute.";
+    return "Index of the class attribute.\n If set to -1, the last attribute will be taken as the class attribute.\nIf used in classification, the class attribute of the classifier overrides this option.";
   }
 
 

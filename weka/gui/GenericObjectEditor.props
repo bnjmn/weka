@@ -218,6 +218,11 @@ weka.associations.Associator=\
  weka.associations.classification.CarPredictiveApriori, \
  weka.associations.Tertius
 
+# Lists the CARuleMiners I want to choose from
+weka.associations.classification.CARuleMiner=\
+ weka.associations.classification.CarApriori, \
+ weka.associations.classification.CarPredictiveApriori
+
 # Lists the Clusterers I want to choose from
 weka.clusterers.Clusterer=\
  weka.clusterers.EM, \
