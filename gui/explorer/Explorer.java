@@ -56,7 +56,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Explorer extends JPanel {
 
@@ -185,7 +185,7 @@ public class Explorer extends JPanel {
       jf.setSize(800, 600);
       jf.setVisible(true);
       Image icon = Toolkit.getDefaultToolkit().
-	getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.jpg"));
+	getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
       jf.setIconImage(icon);
 
       if (args.length == 1) {
