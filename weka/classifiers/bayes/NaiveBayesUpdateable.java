@@ -23,6 +23,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.Evaluation;
 
 /**
  * Class for a Naive Bayes classifier using estimator classes. This is the
@@ -45,9 +46,24 @@ import weka.classifiers.UpdateableClassifier;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NaiveBayesUpdateable extends NaiveBayes 
   implements UpdateableClassifier {
+
+  /**
+   * Main method for testing this class.
+   *
+   * @param argv the options
+   */
+  public static void main(String [] argv) {
+    
+    try {
+      System.out.println(Evaluation.evaluateModel(new NaiveBayesUpdateable(), argv));
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.err.println(e.getMessage());
+    }
+  }
 
 }
