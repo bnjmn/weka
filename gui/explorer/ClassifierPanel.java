@@ -56,6 +56,13 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -87,7 +94,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -188,6 +195,9 @@ public class ClassifierPanel extends JPanel {
   /** Click to visualize the current classifier's predictions */
   protected JButton m_VisualizeBut = new JButton("Visualize");
 
+  /** Click to save the output associated with the currently selected result */
+  protected JButton m_SaveOutBut = new JButton("Save Output");
+
   /** The cost matrix editor for evaluation costs */
   protected CostMatrixEditor m_CostMatrixEditor = new CostMatrixEditor();
 
@@ -254,7 +264,8 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
-    m_VisualizeBut.setToolTipText("Visualize the current classifier");
+    m_VisualizeBut.setToolTipText("Visualize the selected classifier result");
+    m_SaveOutBut.setToolTipText("Save the selected classifier output to a file");
     m_ClassCombo.setToolTipText("Select the attribute to use as the class");
     m_TrainBut.setToolTipText("Test on the same set that the classifier"
 			      + " is trained on");
@@ -325,6 +336,7 @@ public class ClassifierPanel extends JPanel {
       }
     });
     m_VisualizeBut.setEnabled(false);
+    m_SaveOutBut.setEnabled(false);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
@@ -338,10 +350,15 @@ public class ClassifierPanel extends JPanel {
       }
     });
     m_VisualizeBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	visualizeClassifier();
-      }
-    });
+	public void actionPerformed(ActionEvent e) {
+	  visualizeClassifier();
+	}
+      });
+    m_SaveOutBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer();
+	}
+      });
     m_ClassCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	int selected = m_ClassCombo.getSelectedIndex();
@@ -523,8 +540,9 @@ public class ClassifierPanel extends JPanel {
     buttons.add(ssButs);
     JPanel vPl = new JPanel();
     vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    vPl.setLayout(new GridLayout(1,1,5,5));
+    vPl.setLayout(new GridLayout(1,2,5,5));
     vPl.add(m_VisualizeBut);
+    vPl.add(m_SaveOutBut);
     buttons.add(vPl);
     
     JPanel p3 = new JPanel();
@@ -933,6 +951,7 @@ public class ClassifierPanel extends JPanel {
 	      m_Log.logMessage("Interrupted " + cname);
 	      m_Log.statusMessage("See error log");
 	    }
+	    m_SaveOutBut.setEnabled(true);
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -943,7 +962,8 @@ public class ClassifierPanel extends JPanel {
 	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
 	      m_CurrentVis.setColourIndex(predInstances.classIndex());
 	      try {
-		m_CurrentVis.setXIndex(m_visXIndex); m_CurrentVis.setYIndex(m_visYIndex);
+		m_CurrentVis.setXIndex(m_visXIndex); 
+		m_CurrentVis.setYIndex(m_visYIndex);
 	      } catch (Exception ex) {
 		System.err.println(ex);
 	      }
@@ -1006,6 +1026,32 @@ public class ClassifierPanel extends JPanel {
 	});
 
     jf.setVisible(true);
+    }
+  }
+
+  /**
+   * Save the currently selected classifier output to a file.
+   */
+  protected void saveBuffer() {
+    StringBuffer sb = m_History.getSelectedBuffer();
+    if (sb != null) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      int returnVal = fileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File sFile = fileChooser.getSelectedFile();
+	try {
+	  m_Log.statusMessage("Saving to file...");
+	  PrintWriter out
+	    = new PrintWriter(new BufferedWriter(new FileWriter(sFile)));
+	  out.write(sb.toString(),0,sb.toString().length());
+	  out.close();
+	  m_Log.statusMessage("OK");
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  m_Log.logMessage(ex.getMessage());
+	}
+      }
     }
   }
   

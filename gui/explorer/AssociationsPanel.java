@@ -51,6 +51,13 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -75,7 +82,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -100,6 +107,9 @@ public class AssociationsPanel extends JPanel {
 
   /** Click to stop a running associator */
   protected JButton m_StopBut = new JButton("Stop");
+  
+  /** Click to save the output associated with the currently selected result */
+  protected JButton m_SaveOutBut = new JButton("Save Output");
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -151,9 +161,10 @@ public class AssociationsPanel extends JPanel {
 
     m_StartBut.setToolTipText("Starts the associator");
     m_StopBut.setToolTipText("Stops the associator");
-
+    m_SaveOutBut.setToolTipText("Save the selected associator output to a file");
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
+    m_SaveOutBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startAssociator();
@@ -164,6 +175,11 @@ public class AssociationsPanel extends JPanel {
 	startAssociator();
       }
     });
+    m_SaveOutBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer();
+	}
+      });
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -174,11 +190,20 @@ public class AssociationsPanel extends JPanel {
     p1.setLayout(new BorderLayout());
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
+    JPanel buttons = new JPanel();
+    buttons.setLayout(new GridLayout(2,2));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
+    buttons.add(ssButs);
+
+    JPanel vPl = new JPanel();
+    vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    vPl.setLayout(new GridLayout(1,1,5,5));
+    vPl.add(m_SaveOutBut);
+    buttons.add(vPl);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Associator output"));
@@ -207,8 +232,8 @@ public class AssociationsPanel extends JPanel {
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 1;     gbC.gridx = 0;
-    gbL.setConstraints(ssButs, gbC);
-    mondo.add(ssButs);
+    gbL.setConstraints(buttons, gbC);
+    mondo.add(buttons);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
@@ -335,6 +360,7 @@ public class AssociationsPanel extends JPanel {
 	      m_Log.logMessage("Interrupted " + cname);
 	      m_Log.statusMessage("See error log");
 	    }
+	    m_SaveOutBut.setEnabled(true);
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -357,6 +383,32 @@ public class AssociationsPanel extends JPanel {
       // This is deprecated (and theoretically the interrupt should do).
       m_RunThread.stop();
       
+    }
+  }
+
+  /**
+   * Save the currently selected classifier output to a file.
+   */
+  protected void saveBuffer() {
+    StringBuffer sb = m_History.getSelectedBuffer();
+    if (sb != null) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      int returnVal = fileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File sFile = fileChooser.getSelectedFile();
+	try {
+	  m_Log.statusMessage("Saving to file...");
+	  PrintWriter out
+	    = new PrintWriter(new BufferedWriter(new FileWriter(sFile)));
+	  out.write(sb.toString(),0,sb.toString().length());
+	  out.close();
+	  m_Log.statusMessage("OK");
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  m_Log.logMessage(ex.getMessage());
+	}
+      }
     }
   }
   
