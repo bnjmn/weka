@@ -16,7 +16,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ReplaceMissingValuesFilter extends Filter {
 
@@ -150,49 +150,52 @@ public class ReplaceMissingValuesFilter extends Filter {
    */
   private void convertInstance(Instance instance) throws Exception {
   
-    if (!(instance instanceof SparseInstance)) {
-      double[] newVals = new double[getInputFormat().numAttributes()];
-      for(int j = 0; j < instance.numAttributes(); j++) {
-	if (instance.isMissing(j) &&
-	    (getInputFormat().attribute(j).isNominal() ||
-	     getInputFormat().attribute(j).isNumeric())) {
-	  newVals[j] = m_ModesAndMeans[j]; 
-	} else {
-	  newVals[j] = instance.value(j);
-	}
-      } 
-      push(new Instance(instance.weight(), newVals));
-    } else {
-      double[] newVals = new double[instance.numValues()];
-      int[] newIndices = new int[instance.numValues()];
+    Instance inst = null;
+    if (instance instanceof SparseInstance) {
+      double []vals = new double[instance.numValues()];
+      int []indices = new int[instance.numValues()];
       int num = 0;
-      for(int j = 0; j < instance.numValues(); j++) {
+      for (int j = 0; j < instance.numValues(); j++) {
 	if (instance.isMissingSparse(j) &&
 	    (instance.attributeSparse(j).isNominal() ||
 	     instance.attributeSparse(j).isNumeric())) {
 	  if (m_ModesAndMeans[instance.index(j)] != 0.0) {
-	    newVals[num] = m_ModesAndMeans[instance.index(j)];
-	    newIndices[num] = instance.index(j);
+	    vals[num] = m_ModesAndMeans[instance.index(j)];
+	    indices[num] = instance.index(j);
 	    num++;
 	  } 
 	} else {
-	  newVals[num] = instance.valueSparse(j);
-	  newIndices[num] = instance.index(j);
+	  vals[num] = instance.valueSparse(j);
+	  indices[num] = instance.index(j);
 	  num++;
 	}
       } 
       if (num == instance.numValues()) {
-	push(new SparseInstance(instance.weight(), newVals, newIndices,
-			      instance.numAttributes()));
+	inst = new SparseInstance(instance.weight(), vals, indices,
+                                  instance.numAttributes());
       } else {
-	double[] tempVals = new double[num];
-	int[] tempInd = new int[num];
-	System.arraycopy(newVals, 0, tempVals, 0, num);
-	System.arraycopy(newIndices, 0, tempInd, 0, num);
-	push(new SparseInstance(instance.weight(), tempVals, tempInd,
-				instance.numAttributes()));
+	double []tempVals = new double[num];
+	int []tempInd = new int[num];
+	System.arraycopy(vals, 0, tempVals, 0, num);
+	System.arraycopy(indices, 0, tempInd, 0, num);
+	inst = new SparseInstance(instance.weight(), tempVals, tempInd,
+                                  instance.numAttributes());
       }
-    }
+    } else {
+      double []vals = new double[getInputFormat().numAttributes()];
+      for (int j = 0; j < instance.numAttributes(); j++) {
+	if (instance.isMissing(j) &&
+	    (getInputFormat().attribute(j).isNominal() ||
+	     getInputFormat().attribute(j).isNumeric())) {
+	  vals[j] = m_ModesAndMeans[j]; 
+	} else {
+	  vals[j] = instance.value(j);
+	}
+      } 
+      inst = new Instance(instance.weight(), vals);
+    } 
+    inst.setDataset(instance.dataset());
+    push(inst);
   }
 
   /**

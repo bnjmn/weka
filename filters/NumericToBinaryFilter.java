@@ -20,7 +20,7 @@ import weka.core.*;
  * attribute will be one. The new attributes will nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class NumericToBinaryFilter extends Filter {
 
@@ -99,42 +99,45 @@ public class NumericToBinaryFilter extends Filter {
    *
    * @param instance the instance to convert
    */
-  private void convertInstance(Instance inst) throws Exception {
+  private void convertInstance(Instance instance) throws Exception {
   
-    if (!(inst instanceof SparseInstance)) {
-      double[] newVals = new double[outputFormatPeek().numAttributes()];
+    Instance inst = null;
+    if (instance instanceof SparseInstance) {
+      double[] vals = new double[instance.numValues()];
+      int[] newIndices = new int[instance.numValues()];
+      for (int j = 0; j < instance.numValues(); j++) {
+	Attribute att = getInputFormat().attribute(instance.index(j));
+	if ((!att.isNumeric()) || (instance.index(j) == getInputFormat().classIndex())) {
+	  vals[j] = instance.valueSparse(j);
+	} else {
+	  if (instance.isMissingSparse(j)) {
+	    vals[j] = instance.valueSparse(j);
+	  } else {
+	    vals[j] = 1;
+	  }
+	} 
+	newIndices[j] = instance.index(j);
+      }
+      inst = new SparseInstance(instance.weight(), vals, newIndices, 
+                                outputFormatPeek().numAttributes());
+    } else {
+      double[] vals = new double[outputFormatPeek().numAttributes()];
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	Attribute att = getInputFormat().attribute(j);
 	if ((!att.isNumeric()) || (j == getInputFormat().classIndex())) {
-	  newVals[j] = inst.value(j);
+	  vals[j] = instance.value(j);
 	} else {
-	  if (inst.isMissing(j) || (inst.value(j) == 0)) {
-	    newVals[j] = inst.value(j);
+	  if (instance.isMissing(j) || (instance.value(j) == 0)) {
+	    vals[j] = instance.value(j);
 	  } else {
-	    newVals[j] = 1;
+	    vals[j] = 1;
 	  }
 	} 
       }
-      push(new Instance(inst.weight(), newVals));
-    } else {
-      double[] newVals = new double[inst.numValues()];
-      int[] newIndices = new int[inst.numValues()];
-      for (int j = 0; j < inst.numValues(); j++) {
-	Attribute att = getInputFormat().attribute(inst.index(j));
-	if ((!att.isNumeric()) || (inst.index(j) == getInputFormat().classIndex())) {
-	  newVals[j] = inst.valueSparse(j);
-	} else {
-	  if (inst.isMissingSparse(j)) {
-	    newVals[j] = inst.valueSparse(j);
-	  } else {
-	    newVals[j] = 1;
-	  }
-	} 
-	newIndices[j] = inst.index(j);
-      }
-      push(new SparseInstance(inst.weight(), newVals, newIndices, 
-			      outputFormatPeek().numAttributes()));
+      inst = new Instance(instance.weight(), vals);
     }
+    inst.setDataset(instance.dataset());
+    push(inst);
   }
 
   /**
