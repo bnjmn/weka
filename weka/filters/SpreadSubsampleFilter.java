@@ -42,8 +42,13 @@ import java.util.Hashtable;
  *  (default 0 = unlimited)
  *  <p>
  *
+ * -W <br>
+ *  Adjust weights so that total weight per class is maintained. Individual
+ *  instance weighting is not preserved. (default no weights adjustment)
+ *  <p>
+ *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  **/
 public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
@@ -60,13 +65,42 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
   private double m_DistributionSpread = 0;
 
   /**
+   * True if instance weights will be adjusted to maintain
+   * total weight per class.
+   */
+  private boolean m_AdjustWeights = false;
+  
+  /**
+   * Returns true if instance  weights will be adjusted to maintain
+   * total weight per class.
+   *
+   * @return true if instance weights will be adjusted to maintain
+   * total weight per class.
+   */
+  public boolean getAdjustWeights() {
+
+    return m_AdjustWeights;
+  }
+  
+  /**
+   * Sets whether the instance weights will be adjusted to maintain
+   * total weight per class.
+   *
+   * @param newAdjustWeights
+   */
+  public void setAdjustWeights(boolean newAdjustWeights) {
+
+    m_AdjustWeights = newAdjustWeights;
+  }
+  
+  /**
    * Returns an enumeration describing the available options
    *
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
               "\tSpecify the random number seed (default 1)",
@@ -76,6 +110,11 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
               +"\t0 = no maximum spread, 1 = uniform distribution, 10 = allow at most\n"
 	      +"\ta 10:1 ratio between the classes (default 0)",
               "M", 1, "-M <num>"));
+    newVector.addElement(new Option(
+              "\tAdjust weights so that total weight per class is maintained.\n"
+              +"\tIndividual instance weighting is not preserved. (default no\n"
+              +"\tweights adjustment",
+              "W", 0, "-W"));
     newVector.addElement(new Option(
 	      "\tThe maximum count for any class value (default 0 = unlimited).\n",
               "X", 0, "-X <num>"));
@@ -101,6 +140,10 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    *  (default 0 = unlimited)
    *  <p>
    *
+   * -W <br>
+   *  Adjust weights so that total weight per class is maintained. Individual
+   *  instance weighting is not preserved. (default no weights adjustment)
+   *  <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -128,6 +171,8 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
       setMaxCount(0);
     }
 
+    setAdjustWeights(Utils.getFlag('W', options));
+
     if (m_InputFormat != null) {
       inputFormat(m_InputFormat);
     }
@@ -140,7 +185,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [6];
+    String [] options = new String [7];
     int current = 0;
 
     options[current++] = "-M"; 
@@ -151,6 +196,10 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
     options[current++] = "-S"; 
     options[current++] = "" + getRandomSeed();
+
+    if (getAdjustWeights()) {
+      options[current++] = "-W";
+    }
 
     while (current < options.length) {
       options[current++] = "";
@@ -301,10 +350,8 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
     int classI = m_InputFormat.classIndex();
     if (classI == -1) {
-      classI = m_InputFormat.numAttributes()-1;
+      throw new Exception("No class attribute is set");
     }
-
-    m_InputFormat.setClassIndex(classI);
 
     if (m_InputFormat.classAttribute().isNominal() == false) {
       throw new Exception ("The class attribute must be nominal.");
@@ -312,6 +359,94 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
 
     // Sort according to class attribute.
     m_InputFormat.sort(classI);
+    // Determine where each class starts in the sorted dataset
+    int [] classIndices = getClassIndices();
+
+    // Get the existing class distribution
+    int [] counts = new int [m_InputFormat.numClasses()];
+    double [] weights = new double [m_InputFormat.numClasses()];
+    int min = -1;
+    for (int i = 0; i < m_InputFormat.numInstances(); i++) {
+      Instance current = m_InputFormat.instance(i);
+      if (current.classIsMissing() == false) {
+        counts[(int)current.classValue()]++;
+        weights[(int)current.classValue()]+= current.weight();
+      }
+    }
+
+    // Convert from total weight to average weight
+    for (int i = 0; i < counts.length; i++) {
+      if (counts[i] > 0) {
+        weights[i] = weights[i] / counts[i];
+      }
+      //System.err.println("Avg weight for class " + i + ": " + weights[i]);
+    }
+
+    // find the class with the minimum number of instances
+    for (int i = 0; i < counts.length; i++) {
+      if ( (min < 0) && (counts[i] > 0) ) {
+        min = counts[i];
+      } else if ((counts[i] < min) && (counts[i] > 0)) {
+        min = counts[i];
+      }
+    }
+
+    if (min < 0) { 
+	System.err.println("SpreadSubsampleFilter: *warning* none of the classes have any values in them.");
+	return;
+    }
+
+    // determine the new distribution 
+    int [] new_counts = new int [m_InputFormat.numClasses()];
+    for (int i = 0; i < counts.length; i++) {
+      new_counts[i] = (int)Math.abs(Math.min(counts[i],
+                                             min * m_DistributionSpread));
+      if (m_DistributionSpread == 0) {
+        new_counts[i] = counts[i];
+      }
+
+      if (m_MaxCount > 0) {
+	  new_counts[i] = Math.min(new_counts[i], m_MaxCount);
+      }
+    }
+
+    // Sample without replacement
+    Random random = new Random(m_RandomSeed);
+    Hashtable t = new Hashtable();
+    for (int j = 0; j < new_counts.length; j++) {
+      double newWeight = 1.0;
+      if (m_AdjustWeights && (new_counts[j] > 0)) {
+        newWeight = weights[j] * counts[j] / new_counts[j];
+        //System.err.println("Adjusted avg weight for class " + j + ": " + newWeight);
+      }
+      for (int k = 0; k < new_counts[j]; k++) {
+        boolean ok = false;
+        do {
+	  int index = classIndices[j] + (Math.abs(random.nextInt()) 
+                                         % (classIndices[j + 1] - classIndices[j])) ;
+	  // Have we used this instance before?
+          if (t.get("" + index) == null) {
+            // if not, add it to the hashtable and use it
+            t.put("" + index, "");
+            ok = true;
+	    if(index >= 0) {
+              Instance newInst = (Instance)m_InputFormat.instance(index).copy();
+              if (m_AdjustWeights) {
+                newInst.setWeight(newWeight);
+              }
+              push(newInst);
+            }
+          }
+        } while (!ok);
+      }
+    }
+  }
+
+  /**
+   * Creates an index containing the position where each class starts in 
+   * the m_InputFormat. m_InputFormat must be sorted on the class attribute.
+   */
+  private int []getClassIndices() throws Exception {
 
     // Create an index of where each class value starts
     int [] classIndices = new int [m_InputFormat.numClasses() + 1];
@@ -336,68 +471,7 @@ public class SpreadSubsampleFilter extends Filter implements OptionHandler {
         classIndices[j] = m_InputFormat.numInstances();
       }
     }
-
-    Random random = new Random(m_RandomSeed);
-
-    // Create the new distribution
-
-    int [] counts = new int [m_InputFormat.numClasses()];
-    int [] new_counts = new int [m_InputFormat.numClasses()];
-    int min = -1;
-	
-    for (int i = 0; i < m_InputFormat.numInstances(); i++) {
-      Instance current = m_InputFormat.instance(i);
-      if (current.classIsMissing() == false) {
-        counts[(int)current.classValue()]++;
-      }
-    }
-
-    // find the class with the minimum number of instances
-    for (int i = 0; i < counts.length; i++) {
-      if ( (min < 0) && (counts[i] > 0) ) {
-        min = counts[i];
-      } else if ((counts[i] < min) && (counts[i] > 0)) {
-        min = counts[i];
-      }
-    }
-
-    if (min < 0) { 
-	System.err.println("SpreadSubsampleFilter: *warning* none of the classes have any values in them.");
-	return;
-    }
-
-    // determine the new distribution 
-    for (int i = 0; i < counts.length; i++) {
-      new_counts[i] = (int)Math.abs(Math.min(counts[i],
-                                             min * m_DistributionSpread));
-      if (m_DistributionSpread == 0) {
-        new_counts[i] = counts[i];
-      }
-
-      if (m_MaxCount > 0) {
-	  new_counts[i] = Math.min(new_counts[i], m_MaxCount);
-      }
-    }
-
-    // Sample without replacement
-    Hashtable t = new Hashtable();
-    for(int j = 0; j < new_counts.length; j++) {
-      for(int k = 0; k < new_counts[j]; k++) {
-        boolean ok = false;
-        do{
-	  int index = classIndices[j] + (Math.abs(random.nextInt()) 
-					   % (classIndices[j + 1] - classIndices[j])) ;
-	  // Have we used this instance before?
-          if (t.get("" + index) == null) {
-            // if not, add it to the hashtable and use it
-            t.put("" + index, "");
-            ok = true;
-	    if(index>=0)
-		push((Instance)m_InputFormat.instance(index).copy());
-          }
-        } while (!ok);
-      }
-    }
+    return classIndices;
   }
 
 
