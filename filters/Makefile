@@ -14,7 +14,7 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	StringToNominalFilter.java ObfuscateFilter.java \
 	NonSparseToSparseFilter.java SparseToNonSparseFilter.java \
 	EmptyAttributeFilter.java SpreadSubsampleFilter.java \
-	StringToWordVectorFilter.java \
+#	StringToWordVectorFilter.java \
 	AttributeExpressionFilter.java
 
 # Filters To Do:

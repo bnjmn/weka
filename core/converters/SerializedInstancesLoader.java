@@ -20,7 +20,7 @@ import weka.core.Instances;
  * Reads a source that contains serialized Instances.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Loader
  */
 public class SerializedInstancesLoader extends AbstractLoader {
@@ -65,10 +65,9 @@ public class SerializedInstancesLoader extends AbstractLoader {
    * the supplied InputStream.
    *
    * @param in the source InputStream.
-   * @exception UnsupportedOperationException always thrown.
+   * @exception IOException if there is a problem with IO
    */
-  public void setSource(InputStream in) throws IOException, 
-  UnsupportedOperationException {
+  public void setSource(InputStream in) throws IOException {
 
     ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(in));
     try {
