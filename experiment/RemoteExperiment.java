@@ -101,7 +101,7 @@ import java.io.BufferedOutputStream;
  * file. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RemoteExperiment extends Experiment {
 
@@ -194,7 +194,7 @@ public class RemoteExperiment extends Experiment {
   /**
    * Construct a new RemoteExperiment using a base Experiment
    * @param base the base experiment to use
-   * @exeception Exception if the base experiment is null
+   * @exception Exception if the base experiment is null
    */
   public RemoteExperiment(Experiment base) throws Exception {
     setBaseExperiment(base);
@@ -321,7 +321,7 @@ public class RemoteExperiment extends Experiment {
    * Sets the path of properties taken to get to the custom property
    * to iterate over.
    *
-   * @newPropertyPath an array of PropertyNodes
+   * @param newPropertyPath an array of PropertyNodes
    */
   public void setPropertyPath(PropertyNode [] newPropertyPath) {
     

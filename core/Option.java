@@ -30,7 +30,7 @@ package weka.core;
  * <code>Option myOption = new Option("Uses extended mode.", "E", 0, "-E")); </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Option {
 
@@ -49,9 +49,9 @@ public class Option {
   /**
    * Creates new option with the given parameters.
    *
-   * @String description the option's description
-   * @String name the option's name
-   * @String numArguments the number of arguments
+   * @param description the option's description
+   * @param name the option's name
+   * @param numArguments the number of arguments
    */
   public Option(String description, String name, 
 		int numArguments, String synopsis) {
