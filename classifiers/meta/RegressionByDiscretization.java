@@ -56,7 +56,7 @@ import weka.filters.unsupervised.attribute.PotentialClassIgnorer;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -72,6 +72,20 @@ public class RegressionByDiscretization extends Classifier
 
   /** Whether debugging output will be printed */
   protected boolean m_Debug;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "A regression scheme that employs any "
+      + "classifier on a copy of the data that has the class attribute "
+      + "discretized. The predicted value is the expected value of the "
+      + "mean class value for each discretized interval (based on the "
+      + "predicted probabilities for each interval).";
+  }
 
   /**
    * Default constructor.
@@ -267,6 +281,16 @@ public class RegressionByDiscretization extends Classifier
     }
     return options;
   }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String discretizerTipText() {
+    return "The discretizer to use. Chosen class must extend PotentialClassIgnorer.";
+  }
+
   /**
    * Sets the discretizer
    *
@@ -307,6 +331,15 @@ public class RegressionByDiscretization extends Classifier
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classifierTipText() {
+    return "The classifiers to be used.";
+  }
+  
+  /**
    * Set the classifier for boosting. 
    *
    * @param newClassifier the Classifier to use.
@@ -340,6 +373,15 @@ public class RegressionByDiscretization extends Classifier
 	+ Utils.joinOptions(((OptionHandler)c).getOptions());
     }
     return c.getClass().getName();
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Whether debug information is output to console.";
   }
 
   /**

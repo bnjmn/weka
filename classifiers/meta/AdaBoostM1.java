@@ -65,7 +65,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class AdaBoostM1 extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Sourcable {
@@ -467,7 +467,6 @@ public class AdaBoostM1 extends Classifier
 
     Instances trainData, sample, training;
     double epsilon, reweight, beta = 0, sumProbs;
-    double oldSumOfWeights, newSumOfWeights;
     Evaluation evaluation;
     int numInstances = data.numInstances();
     Random randomInstance = new Random(m_Seed);
@@ -538,22 +537,34 @@ public class AdaBoostM1 extends Classifier
       }
  
       // Update instance weights
-      oldSumOfWeights = training.sumOfWeights();
-      Enumeration enum = training.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	Instance instance = (Instance) enum.nextElement();
-	if (!Utils.eq(m_Classifiers[m_NumIterations].classifyInstance(instance), 
-		     instance.classValue()))
-	  instance.setWeight(instance.weight() * reweight);
-      }
-      // Renormalize weights
-      newSumOfWeights = training.sumOfWeights();
-      enum = training.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	Instance instance = (Instance) enum.nextElement();
-	instance.setWeight(instance.weight() * oldSumOfWeights 
-			   / newSumOfWeights);
-      }
+      setWeights(training, reweight);
+    }
+  }
+
+  /**
+   * Sets the weights for the next iteration.
+   */
+  protected void setWeights(Instances training, double reweight) 
+    throws Exception {
+
+    double oldSumOfWeights, newSumOfWeights;
+
+    oldSumOfWeights = training.sumOfWeights();
+    Enumeration enum = training.enumerateInstances();
+    while (enum.hasMoreElements()) {
+      Instance instance = (Instance) enum.nextElement();
+      if (!Utils.eq(m_Classifiers[m_NumIterations].classifyInstance(instance), 
+		    instance.classValue()))
+	instance.setWeight(instance.weight() * reweight);
+    }
+    
+    // Renormalize weights
+    newSumOfWeights = training.sumOfWeights();
+    enum = training.enumerateInstances();
+    while (enum.hasMoreElements()) {
+      Instance instance = (Instance) enum.nextElement();
+      instance.setWeight(instance.weight() * oldSumOfWeights 
+			 / newSumOfWeights);
     }
   }
 
@@ -620,23 +631,7 @@ public class AdaBoostM1 extends Classifier
       }
  
       // Update instance weights
-      oldSumOfWeights = training.sumOfWeights();
-      Enumeration enum = training.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	Instance instance = (Instance) enum.nextElement();
-	if (!Utils.eq(m_Classifiers[m_NumIterations]
-		      .classifyInstance(instance), 
-		      instance.classValue()))
-	  instance.setWeight(instance.weight() * reweight);
-      }
-      // Renormalize weights
-      newSumOfWeights = training.sumOfWeights();
-      enum = training.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	Instance instance = (Instance) enum.nextElement();
-	instance.setWeight(instance.weight() * oldSumOfWeights
-			   / newSumOfWeights);
-      }
+      setWeights(training, reweight);
     }
   }
   
