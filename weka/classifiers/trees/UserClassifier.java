@@ -60,7 +60,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class UserClassifier extends Classifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -117,6 +117,12 @@ TreeDisplayListener, VisualizePanelListener {
 		      weka.gui.GenericArrayEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.NearestNeighbourSearch.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.DistanceFunction.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.CostMatrix.class,
