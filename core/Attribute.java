@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -76,8 +76,8 @@ public class Attribute implements Copyable, Serializable {
   public final static int STRING = 2;
 
   /** Strings longer than this will be stored compressed. */
-  //private final static int STRING_COMPRESS_THRESHOLD = 200;
-  private final static int STRING_COMPRESS_THRESHOLD = Integer.MAX_VALUE;
+  private final static int STRING_COMPRESS_THRESHOLD = 200;
+  //private final static int STRING_COMPRESS_THRESHOLD = Integer.MAX_VALUE;
 
   /** The attribute's name. */
   private String m_Name;
@@ -406,6 +406,7 @@ public class Attribute implements Copyable, Serializable {
       return -1;
     }
     Object store = value;
+
     if (value.length() > STRING_COMPRESS_THRESHOLD) {
       try {
         store = new SerializedObject(value, true);
