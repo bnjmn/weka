@@ -58,7 +58,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
@@ -70,7 +70,7 @@ public class LogitBoost extends DistributionClassifier
   protected Classifier [][] m_Classifiers;
 
   /** An instantiated base classifier used for getting and testing options */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.DecisionStump();
 
   /** The maximum number of boost iterations */
   protected int m_MaxIterations = 10;
