@@ -18,7 +18,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AllTests extends TestSuite {
 
@@ -27,9 +27,6 @@ public class AllTests extends TestSuite {
     TestSuite suite = new TestSuite();
 
     suite.addTest(BayesNetTest.suite());
-    suite.addTest(BayesNetBTest.suite());
-    suite.addTest(BayesNetB2Test.suite());
-    suite.addTest(BayesNetK2Test.suite());
     suite.addTest(NaiveBayesTest.suite());
     suite.addTest(NaiveBayesSimpleTest.suite());
     suite.addTest(NaiveBayesUpdateableTest.suite());
