@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.21 $
+   $Revision: 1.22 $
   ===========================================================================
 -->
 
@@ -281,6 +281,7 @@
   <!-- Initialization for build from cvs checkout -->
   <target name = "init_build_from_cvs_checkout"
    depends="init_compile, init_dist">
+     <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
      <cvspass cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password=""/>
      <cvs command="checkout -P -r ${tag}" 
       cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="weka" dest="."/>
@@ -291,6 +292,7 @@
   <!-- Initialization for build from cvs export. User must supply revision tag to export by specifying -Dtag=tag_name_of_release when starting ant -->
   <target name = "init_build_from_cvs_export"
    depends="init_compile, init_dist">
+     <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
      <cvspass cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password=""/>
      <cvs command="export -r ${tag}" 
       cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="weka" dest="."/>
@@ -302,6 +304,7 @@
   <target name="release_from_cvs" 
    depends="init_build_from_cvs_checkout, release"
    description="Makes a release from a cvs checkout (needs ant to be run with -Dtag=&lt;REVISION_TO_CHECKOUT&gt;, -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changelog generation (eg. 20 Aug 2004)&gt;).">
+      <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
   </target>
 
   <!-- This target could be used for an automated nightly/weekly build job -->
