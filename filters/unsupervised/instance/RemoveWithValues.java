@@ -66,7 +66,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -259,6 +259,7 @@ public class RemoveWithValues extends Filter
     }
     m_Values.setUpper(instanceInfo.attribute(m_Attribute).numValues() - 1);
     if (isNominal() && m_ModifyHeader) {
+      instanceInfo = new Instances(instanceInfo, 0); // copy before modifying
       Attribute oldAtt = instanceInfo.attribute(m_Attribute);
       int [] selection = m_Values.getSelection();
       FastVector newVals = new FastVector();
