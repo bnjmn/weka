@@ -58,7 +58,7 @@ import weka.filters.supervised.attribute.NominalToBinary;
  *
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 
@@ -66,7 +66,7 @@ public class LMT extends DistributionClassifier implements OptionHandler, Additi
 Drawable{
     
     //format of serial: 1**date## (** = algorithm id, ##= version)
-    static final long serialVersionUID = 1010506200300L;
+    //static final long serialVersionUID = 1010506200300L;
     
     /** Filter to replace missing values*/
     protected ReplaceMissingValues m_replaceMissing;
@@ -263,7 +263,7 @@ Drawable{
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-	String[] options = new String[6];
+	String[] options = new String[8];
 	int current = 0;
 
 	if (getConvertNominal()) {
@@ -459,6 +459,88 @@ Drawable{
     }    
     
     /**
+     * Returns a string describing classifier
+     * @return a description suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String globalInfo() {
+	return "Classifier for building 'logistic model trees', which are classification trees with "
+	    +"logistic regression functions at the leaves. The algorithm can deal with binary and multi-class "
+	    +"target variables, numeric and nominal attributes and missing values. "
+	    +"For more information see: N.Landwehr, M.Hall, E. Frank 'Logistic Model Trees' (ECML 2003).";	    
+    }
+
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String convertNominalTipText() {
+	return "Convert all nominal attributes to binary ones before building the tree. "
+	    +"This means that all splits in the final tree will be binary.";
+    }
+    
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String splitOnResidualsTipText() {
+	return "Set splitting criterion based on the residuals of LogitBoost. "
+	    +"There are two possible splitting criteria for LMT: the default is to use the C4.5 "
+	    +"splitting criterion that uses information gain on the class variable. The other splitting "
+	    +"criterion tries to improve the purity in the residuals produces when fitting the logistic "
+	    +"regression functions. The choice of the splitting criterion does not usually affect classification "
+	    +"accuracy much, but can produce different trees.";
+    }  
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String fastRegressionTipText() {
+	return "Use heuristic that avoids cross-validating the number of Logit-Boost iterations at every node. "
+	   +"When fitting the logistic regression functions at a node, LMT has to determine the number of LogitBoost "
+	    +"iterations to run. Originally, this number was cross-validated at every node in the tree. "
+	    +"To save time, this heuristic cross-validates the number only once and then uses that number at every "
+	    +"node in the tree. Usually this does not decrease accuracy but improves runtime considerably.";
+    }  
+
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String errorOnProbabilitiesTipText() {
+	return "Minimize error on probabilities instead of misclassification error when cross-validating the number "
+	    +"of LogitBoost iterations. When set, the number of LogitBoost iterations is chosen that minimizes "
+	    +"the root mean squared error instead of the misclassification error.";	   
+    }  
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String numBoostingIterationsTipText() {
+	return "Set a fixed number of iterations for LogitBoost. If >= 0, this sets a fixed number of LogitBoost "
+	    +"iterations that is used everywhere in the tree. If < 0, the number is cross-validated.";
+    }  
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String minNumInstancesTipText() {
+	return "Set the minimum number of instances at which a node is considered for splitting. "
+	    +"The default value is 15.";
+    }  
+
+    /**
      * Main method for testing this class
      *
      * @param String options 
@@ -469,4 +551,7 @@ Drawable{
     }  
 
 }
+
+
+
 
