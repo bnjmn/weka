@@ -40,6 +40,18 @@ public class NBTree extends Classifier
   implements WeightedInstancesHandler, Drawable, Summarizable,
 	     AdditionalMeasureProducer {
 
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class for generating a decision tree with naive Bayes classifiers at "
+      +"the leaves. For more information, see\n\nRon Kohavi (1996). Scaling up "
+      +"the accuracy of naive-Bayes classifiers: a decision tree hybrid. Procedings "
+      +"of the Second Internaltional Conference on Knoledge Discovery and Data Mining.";
+  }
+
   /** Minimum number of instances */
   private int m_minNumObj = 30;
 
