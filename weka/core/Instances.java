@@ -49,7 +49,8 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.13 $ 
 */
 public class Instances implements Serializable {
  
@@ -1992,11 +1993,14 @@ public class Instances implements Serializable {
   public static void main(String [] args) {
 
     try {
-      if (args.length != 1) {
+      Reader r = null;
+      if (args.length > 1) {
 	throw (new Exception("Usage: Instances <filename>"));
+      } else if (args.length == 0) {
+        r = new BufferedReader(new InputStreamReader(System.in));
+      } else {
+        r = new BufferedReader(new FileReader(args[0]));
       }
-      Reader r = new BufferedReader(
-		 new FileReader(args[0]));
       Instances i = new Instances(r);
       System.out.println(i.toSummaryString());
     } catch (Exception ex) {
