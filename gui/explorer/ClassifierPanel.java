@@ -100,7 +100,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -152,7 +152,11 @@ public class ClassifierPanel extends JPanel {
   protected JCheckBox m_OutputConfusionBut =
     new JCheckBox("Output confusion matrix");
 
-  /** Check to output a confusion matrix */
+  /** Check to output entropy statistics */
+  protected JCheckBox m_OutputEntropyBut =
+    new JCheckBox("Output entropy evaluation measures");
+
+  /** Check to evaluate w.r.t a cost matrix */
   protected JCheckBox m_EvalWRTCostsBut =
     new JCheckBox("Cost-sensitive evaluation");
 
@@ -300,6 +304,10 @@ public class ClassifierPanel extends JPanel {
 				    + " positives for each class");
     m_OutputConfusionBut
       .setToolTipText("Output the matrix displaying class confusions");
+    m_OutputEntropyBut
+      .setToolTipText("Output entropy-based evaluation measures");
+    m_EvalWRTCostsBut
+      .setToolTipText("Evaluate errors with respect to a cost matrix");
     m_StorePredictionsBut.setSelected(true);
     m_OutputModelBut.setSelected(true);
     m_OutputTFPosBut.setSelected(true);
@@ -405,9 +413,10 @@ public class ClassifierPanel extends JPanel {
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-	moreOptionsPanel.setLayout(new GridLayout(5, 1));
+	moreOptionsPanel.setLayout(new GridLayout(6, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputTFPosBut);	  
+	moreOptionsPanel.add(m_OutputEntropyBut);	  
 	moreOptionsPanel.add(m_OutputConfusionBut);	  
 	moreOptionsPanel.add(m_StorePredictionsBut);
 	JPanel costMatrixOption = new JPanel();
@@ -808,6 +817,7 @@ public class ClassifierPanel extends JPanel {
 	  boolean outputConfusion = m_OutputConfusionBut.isSelected();
 	  boolean outputTFPos = m_OutputTFPosBut.isSelected();
 	  boolean outputSummary = true;
+          boolean outputEntropy = m_OutputEntropyBut.isSelected();
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
 
 	  int testMode = 0;
@@ -1001,7 +1011,7 @@ public class ClassifierPanel extends JPanel {
 	    }
 	    
 	    if (outputSummary) {
-	      outBuff.append(eval.toSummaryString() + "\n");
+	      outBuff.append(eval.toSummaryString(outputEntropy) + "\n");
 	    }
 
 
