@@ -1,5 +1,5 @@
 #
-# $Revision: 1.29 $
+# $Revision: 1.30 $
 #
 
 # Java Compiler to use
@@ -147,6 +147,22 @@ install : all
 	weka/gui/streams/*.java \
 	;\
 	rm manifest.tmp ;\
+	jar cvf remoteEngine.jar \
+	weka/core/Queue*.class \
+	weka/experiment/*_*.class \
+	weka/experiment/RemoteEngine*.class \
+	weka/experiment/Compute.class \
+	weka/experiment/Task.class \
+	weka/experiment/TaskStatusInfo.class \
+	;\
+	cp weka/experiment/remote.policy . ; \
+	cp weka/experiment/DatabaseUtils.props . ; \
+	jar cvf $(WEKAHOME)/remoteExperimentServer.jar \
+	remoteEngine.jar \
+	remote.policy \
+	DatabaseUtils.props \
+	;\
+	rm remoteEngine.jar remote.policy DatabaseUtils.props ;\
 	(mkdir $(WEKAHOME)/doc 2>&1 ) >/dev/null ; \
 	javadoc -J-mx100m -public -author -version -1.1 -d $(WEKAHOME)/doc \
 	weka.core \
