@@ -19,7 +19,7 @@
  *    Copyright (C) 2000 Malcolm Ware
  */
 
-package weka.classifiers.neural;
+package weka.classifiers.functions.neural;
 
 import java.util.*;
 import java.awt.*;
@@ -40,7 +40,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -553,7 +553,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    */
   class ControlPanel extends JPanel {
     

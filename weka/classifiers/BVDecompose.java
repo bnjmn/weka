@@ -22,6 +22,8 @@
 
 package weka.classifiers;
 
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -63,7 +65,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class BVDecompose implements OptionHandler {
 
@@ -71,7 +73,7 @@ public class BVDecompose implements OptionHandler {
   protected boolean m_Debug;
 
   /** An instantiated base classifier used for getting and testing options. */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** The options to be passed to the base classifier. */
   protected String [] m_ClassifierOptions;
@@ -135,7 +137,7 @@ public class BVDecompose implements OptionHandler {
 	      "D", 0, "-D"));
     newVector.addElement(new Option(
 	      "\tFull class name of the learner used in the decomposition.\n"
-	      +"\teg: weka.classifiers.NaiveBayes",
+	      +"\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W <classifier class name>"));
 
     if ((m_Classifier != null) &&

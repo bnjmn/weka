@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 
@@ -56,13 +60,13 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
 
   /** The subclassifier. */
-  protected DistributionClassifier m_Classifier = new weka.classifiers.ZeroR();
+  protected DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
   
   /** The discretization filter. */
   protected DiscretizeFilter m_Discretizer;
@@ -195,7 +199,7 @@ public class RegressionByDiscretization extends Classifier
 				    "O", 0,"-O"));
     newVector.addElement(new Option("\tFull class name of sub-classifier to"
 				    + " use for the regression.\n"
-				    + "\teg: weka.classifiers.NaiveBayes",
+				    + "\teg: weka.classifiers.bayes.NaiveBayes",
 				    "W", 1,"-W"));
     return newVector.elements();
   }

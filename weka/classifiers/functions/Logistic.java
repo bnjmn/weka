@@ -20,8 +20,11 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.functions;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
 import java.util.*;
 import java.io.*;
 import weka.core.*;
@@ -97,7 +100,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Tony Voyle (tv6@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class Logistic extends DistributionClassifier implements OptionHandler {
     

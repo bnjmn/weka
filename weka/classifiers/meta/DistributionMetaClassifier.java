@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.rules.ZeroR;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -45,13 +49,13 @@ import weka.core.Utils;
  * Specify the full class name of a sub-classifier (required).<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DistributionMetaClassifier extends DistributionClassifier 
   implements OptionHandler {
 
   /** The classifier. */
-  private Classifier m_Classifier = new weka.classifiers.ZeroR();
+  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** Default constructor */
   public DistributionMetaClassifier() { }

@@ -3,8 +3,12 @@
  *    Copyright (C) 2001 Malcolm Ware
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
 import weka.core.*;
 import java.util.Vector;
 import java.util.Enumeration;
@@ -15,13 +19,13 @@ import java.util.Enumeration;
  * the training set.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Cleanser extends DistributionClassifier
   implements OptionHandler, Drawable {
   
   /** The classifier to build the model. */
-  protected Classifier m_classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_classifier = new weka.classifiers.rules.ZeroR();
   
   /** A copy of the instances header used to build the current model. */
   protected Instances m_dataHeader;
@@ -42,7 +46,7 @@ public class Cleanser extends DistributionClassifier
    * classifier.
    */
   public Cleanser() {
-    this(new weka.classifiers.ZeroR());
+    this(new weka.classifiers.rules.ZeroR());
   }
   
   /** 
@@ -308,7 +312,7 @@ public class Cleanser extends DistributionClassifier
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use, followed\n"
 	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.classifiers.NaiveBayes -D\"",
+	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
 	      "C", 1, "-C <classifier specification>"));
   
     

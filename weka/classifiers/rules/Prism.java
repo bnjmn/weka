@@ -20,8 +20,10 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.rules;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -35,7 +37,7 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
 */
 public class Prism extends Classifier {
 

@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.rules.part;
 
+import weka.classifiers.trees.j48.BinC45ModelSelection;
+import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.trees.j48.Distribution;
+import weka.classifiers.trees.j48.ModelSelection;
 import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
@@ -55,7 +59,7 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {

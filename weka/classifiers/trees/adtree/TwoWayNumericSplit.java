@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.adtree;
+package weka.classifiers.trees.adtree;
 
 import weka.core.*;
 import java.util.*;
@@ -30,7 +30,7 @@ import java.util.*;
  * either 'is < some_value' or 'is >= some_value'.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TwoWayNumericSplit extends Splitter {
 

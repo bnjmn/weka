@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.adtree;
+package weka.classifiers.trees.adtree;
 
 import weka.core.*;
 import java.io.*;
@@ -29,7 +29,7 @@ import java.io.*;
  * Abstract class representing a splitter node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class Splitter implements Serializable, Cloneable {
 

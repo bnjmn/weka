@@ -20,14 +20,14 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 /**
  * "Abstract" class for computing splitting criteria
  * based on the entropy of a class distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class EntropyBasedSplitCrit extends SplitCriterion{
 
@@ -37,7 +37,7 @@ public abstract class EntropyBasedSplitCrit extends SplitCriterion{
   /**
    * Help method for computing entropy.
    */
-  protected final double logFunc(double num) {
+  public final double logFunc(double num) {
 
     // Constant hard coded for efficiency reasons
     if (num < 1e-6)

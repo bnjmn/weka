@@ -23,89 +23,89 @@ weka.experiment.SplitEvaluator=\
 
 # Lists the Classifiers I want to choose from
 weka.classifiers.Classifier=\
- weka.classifiers.ZeroR,\
- weka.classifiers.DecisionStump,\
- weka.classifiers.DecisionTable,\
- weka.classifiers.HyperPipes,\
- weka.classifiers.IB1,\
- weka.classifiers.IBk,\
- weka.classifiers.Id3,\
- weka.classifiers.j48.J48,\
- weka.classifiers.j48.PART,\
- weka.classifiers.KernelDensity,\
- weka.classifiers.kstar.KStar,\
- weka.classifiers.LinearRegression,\
- weka.classifiers.Logistic,\
- weka.classifiers.LWR,\
- weka.classifiers.m5.M5Prime,\
- weka.classifiers.NaiveBayesSimple,\
- weka.classifiers.NaiveBayes,\
+ weka.classifiers.rules.ZeroR,\
+ weka.classifiers.trees.DecisionStump,\
+ weka.classifiers.rules.DecisionTable,\
+ weka.classifiers.misc.HyperPipes,\
+ weka.classifiers.lazy.IB1,\
+ weka.classifiers.lazy.IBk,\
+ weka.classifiers.trees.Id3,\
+ weka.classifiers.trees.j48.J48,\
+ weka.classifiers.rules.part.PART,\
+ weka.classifiers.lazy.KernelDensity,\
+ weka.classifiers.lazy.kstar.KStar,\
+ weka.classifiers.functions.LinearRegression,\
+ weka.classifiers.functions.Logistic,\
+ weka.classifiers.lazy.LWR,\
+ weka.classifiers.trees.m5.M5Prime,\
+ weka.classifiers.bayes.NaiveBayesSimple,\
+ weka.classifiers.bayes.NaiveBayes,\
  weka.classifiers.bayes.BayesNet,\
  weka.classifiers.bayes.BayesNetB,\
  weka.classifiers.bayes.BayesNetB2,\
- weka.classifiers.OneR,\
- weka.classifiers.Prism,\
- weka.classifiers.SMO,\
- weka.classifiers.VotedPerceptron,\
- weka.classifiers.VFI,\
- weka.classifiers.AdaBoostM1,\
- weka.classifiers.AdditiveRegression,\
- weka.classifiers.AttributeSelectedClassifier,\
- weka.classifiers.Bagging, \
- weka.classifiers.ClassificationViaRegression,\
- weka.classifiers.CostSensitiveClassifier,\
- weka.classifiers.CVParameterSelection,\
- weka.classifiers.DistributionMetaClassifier,\
- weka.classifiers.FilteredClassifier,\
- weka.classifiers.LogitBoost,\
- weka.classifiers.MetaCost,\
- weka.classifiers.MultiClassClassifier,\
- weka.classifiers.OrdinalClassClassifier,\
- weka.classifiers.MultiScheme,\
- weka.classifiers.RegressionByDiscretization,\
- weka.classifiers.Stacking,\
- weka.classifiers.ThresholdSelector,\
- weka.classifiers.UserClassifier,\
- weka.classifiers.neural.NeuralNetwork,\
- weka.classifiers.adtree.ADTree,\
- weka.classifiers.Cleanser,\
- weka.classifiers.LeastMedSq
+ weka.classifiers.rules.OneR,\
+ weka.classifiers.rules.Prism,\
+ weka.classifiers.functions.SMO,\
+ weka.classifiers.functions.VotedPerceptron,\
+ weka.classifiers.misc.VFI,\
+ weka.classifiers.meta.AdaBoostM1,\
+ weka.classifiers.meta.AdditiveRegression,\
+ weka.classifiers.meta.AttributeSelectedClassifier,\
+ weka.classifiers.meta.Bagging, \
+ weka.classifiers.meta.ClassificationViaRegression,\
+ weka.classifiers.meta.CostSensitiveClassifier,\
+ weka.classifiers.meta.CVParameterSelection,\
+ weka.classifiers.meta.DistributionMetaClassifier,\
+ weka.classifiers.meta.FilteredClassifier,\
+ weka.classifiers.meta.LogitBoost,\
+ weka.classifiers.meta.MetaCost,\
+ weka.classifiers.meta.MultiClassClassifier,\
+ weka.classifiers.meta.OrdinalClassClassifier,\
+ weka.classifiers.meta.MultiScheme,\
+ weka.classifiers.meta.RegressionByDiscretization,\
+ weka.classifiers.meta.Stacking,\
+ weka.classifiers.meta.ThresholdSelector,\
+ weka.classifiers.trees.UserClassifier,\
+ weka.classifiers.functions.neural.NeuralNetwork,\
+ weka.classifiers.trees.adtree.ADTree,\
+ weka.classifiers.meta.Cleanser,\
+ weka.classifiers.functions.LeastMedSq
 
 # Lists the DistributionClassifiers I want to choose from
 weka.classifiers.DistributionClassifier=\
- weka.classifiers.ZeroR,\
- weka.classifiers.DecisionStump,\
- weka.classifiers.DecisionTable,\
- weka.classifiers.HyperPipes,\
- weka.classifiers.IBk,\
- weka.classifiers.kstar.KStar,\
- weka.classifiers.Id3,\
- weka.classifiers.j48.J48,\
- weka.classifiers.j48.PART,\
- weka.classifiers.KernelDensity,\
- weka.classifiers.Logistic,\
- weka.classifiers.NaiveBayesSimple,\
- weka.classifiers.NaiveBayes,\
+ weka.classifiers.rules.ZeroR,\
+ weka.classifiers.trees.DecisionStump,\
+ weka.classifiers.rules.DecisionTable,\
+ weka.classifiers.misc.HyperPipes,\
+ weka.classifiers.lazy.IBk,\
+ weka.classifiers.lazy.kstar.KStar,\
+ weka.classifiers.trees.Id3,\
+ weka.classifiers.trees.j48.J48,\
+ weka.classifiers.rules.part.PART,\
+ weka.classifiers.lazy.KernelDensity,\
+ weka.classifiers.functions.Logistic,\
+ weka.classifiers.bayes.NaiveBayesSimple,\
+ weka.classifiers.bayes.NaiveBayes,\
  weka.classifiers.bayes.BayesNet,\
  weka.classifiers.bayes.BayesNetB,\
  weka.classifiers.bayes.BayesNetB2,\
- weka.classifiers.SMO,\
- weka.classifiers.VotedPerceptron,\
- weka.classifiers.VFI,\
- weka.classifiers.AdaBoostM1,\
- weka.classifiers.Bagging,\
- weka.classifiers.ClassificationViaRegression,\
- weka.classifiers.DistributionMetaClassifier,\
- weka.classifiers.FilteredClassifier,\
- weka.classifiers.LogitBoost,\
- weka.classifiers.MultiClassClassifier,\
- weka.classifiers.OrdinalClassClassifier,\
- weka.classifiers.ThresholdSelector,\
- weka.classifiers.UserClassifier,\
- weka.classifiers.AttributeSelectedClassifier,\
- weka.classifiers.neural.NeuralNetwork,\
- weka.classifiers.adtree.ADTree,\
- weka.classifiers.Cleanser
+ weka.classifiers.functions.SMO,\
+ weka.classifiers.functions.VotedPerceptron,\
+ weka.classifiers.misc.VFI,\
+ weka.classifiers.meta.AdaBoostM1,\
+ weka.classifiers.meta.Bagging,\
+ weka.classifiers.meta.ClassificationViaRegression,\
+ weka.classifiers.meta.DistributionMetaClassifier,\
+ weka.classifiers.meta.FilteredClassifier,\
+ weka.classifiers.meta.LogitBoost,\
+ weka.classifiers.meta.MultiClassClassifier,\
+ weka.classifiers.meta.OrdinalClassClassifier,\
+ weka.classifiers.meta.ThresholdSelector,\
+ weka.classifiers.trees.UserClassifier,\
+ weka.classifiers.meta.AttributeSelectedClassifier,\
+ weka.classifiers.functions.neural.NeuralNetwork,\
+ weka.classifiers.trees.adtree.ADTree,\
+ weka.classifiers.meta.Cleanser
 
 # Lists the Filters I want to choose from
 weka.filters.Filter = \

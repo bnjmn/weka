@@ -20,8 +20,11 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.misc;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -29,8 +32,6 @@ import weka.core.Utils;
 import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.WeightedInstancesHandler;
-import weka.classifiers.DistributionClassifier;
-import weka.classifiers.Evaluation;
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -108,7 +109,7 @@ import java.util.Vector;
  * Set exponential bias towards confident intervals. default = 1.0 <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class VFI extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {

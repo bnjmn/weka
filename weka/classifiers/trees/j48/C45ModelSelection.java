@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.trees.j48;
 
 import java.util.*;
 import weka.core.*;
@@ -29,7 +29,7 @@ import weka.core.*;
  * Class for selecting a C4.5-type split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $y
+ * @version $Revision: 1.7 $y
  */
 public class C45ModelSelection extends ModelSelection {
 

@@ -20,17 +20,22 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.trees;
 
-
+import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
+import weka.classifiers.lazy.IB1;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
 import weka.gui.treevisualizer.*;
 import weka.core.*;
 import weka.filters.*;
-import weka.classifiers.*;
-import weka.classifiers.j48.*;
+import weka.classifiers.trees.j48.*;
 import weka.gui.visualize.*;
 /*import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.VisualizePanelListener;
@@ -57,7 +62,7 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class UserClassifier extends DistributionClassifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
@@ -459,7 +464,7 @@ TreeDisplayListener, VisualizePanelListener {
     
     m_classifiers = new GenericObjectEditor();
     m_classifiers.setClassType(Classifier.class);
-    m_classifiers.setValue(new weka.classifiers.ZeroR());
+    m_classifiers.setValue(new weka.classifiers.rules.ZeroR());
     
     ((GenericObjectEditor.GOEPanel)m_classifiers.getCustomEditor())
       .addOkListener(new ActionListener() {
@@ -474,7 +479,7 @@ TreeDisplayListener, VisualizePanelListener {
 	      m_focus.setClassifier((Classifier)m_classifiers.getValue());
 	      m_classifiers = new GenericObjectEditor();
 	      m_classifiers.setClassType(Classifier.class);
-	      m_classifiers.setValue(new weka.classifiers.ZeroR());
+	      m_classifiers.setValue(new weka.classifiers.rules.ZeroR());
 	      ((GenericObjectEditor.GOEPanel)m_classifiers.getCustomEditor())
 		.addOkListener(this);
 	      m_tView = new TreeVisualizer(UserClassifier.this, graph(), 

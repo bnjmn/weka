@@ -20,12 +20,16 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.trees.DecisionStump;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.meta.*;
 
 /**
  * Meta classifier that enhances the performance of a regression base
@@ -43,7 +47,7 @@ import weka.classifiers.*;
  *
  *
  * Dataset                   (1) m5.M5Prim | (2) AdditiveRegression -S 0.7 \
- *                                         |    -B weka.classifiers.m5.M5Prime 
+ *                                         |    -B weka.classifiers.meta.m5.M5Prime 
  *                          ----------------------------
  * auto93.names              (10)    54.4  |    49.41 * 
  * autoHorse.names           (10)    32.76 |    26.34 * 
@@ -113,7 +117,7 @@ import weka.classifiers.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -122,7 +126,7 @@ public class AdditiveRegression extends Classifier
   /**
    * Base classifier.
    */
-  protected Classifier m_Classifier = new weka.classifiers.DecisionStump();
+  protected Classifier m_Classifier = new weka.classifiers.trees.DecisionStump();
 
   /**
    * Class index.
@@ -173,7 +177,7 @@ public class AdditiveRegression extends Classifier
    */
   public AdditiveRegression() {
 
-    this(new weka.classifiers.DecisionStump());
+    this(new weka.classifiers.trees.DecisionStump());
   }
 
   /**
@@ -198,7 +202,7 @@ public class AdditiveRegression extends Classifier
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use, followed\n"
 	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.classifiers.NaiveBayes -D\"",
+	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
 	      "B", 1, "-B <classifier specification>"));
 
     newVector.addElement(new Option(

@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.m5;
+package weka.classifiers.trees.m5;
 
 import java.io.*;
 import java.util.*;
@@ -30,7 +30,7 @@ import weka.core.*;
 /**
  * Class for some small methods used in M5Java
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public final class M5Utils {

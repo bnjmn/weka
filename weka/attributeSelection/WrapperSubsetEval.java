@@ -26,6 +26,7 @@ import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.classifiers.*;
+import  weka.classifiers.rules.ZeroR;
 import  weka.filters.*;
 
 /** 
@@ -41,7 +42,7 @@ import  weka.filters.*;
  * -B <base learner> <br>
  * Class name of base learner to use for accuracy estimation.
  * Place any classifier options last on the command line following a
- * "--". Eg  -B weka.classifiers.NaiveBayes ... -- -K <p>
+ * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
  *
  * -F <num> <br>
  * Number of cross validation folds to use for estimating accuracy.
@@ -52,7 +53,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -111,7 +112,7 @@ public class WrapperSubsetEval
 				    + "\n\taccuracy estimation. Place any" 
 				    + "\n\tclassifier options LAST on the" 
 				    + "\n\tcommand line following a \"--\"." 
-				    + "\n\teg. -B weka.classifiers.NaiveBayes ... " 
+				    + "\n\teg. -B weka.classifiers.bayes.NaiveBayes ... " 
 				    + "-- -K", "B", 1, "-B <base learner>"));
     newVector.addElement(new Option("\tnumber of cross validation folds to " 
 				    + "use\n\tfor estimating accuracy." 
@@ -151,7 +152,7 @@ public class WrapperSubsetEval
    * -B <base learner> <br>
    * Class name of base learner to use for accuracy estimation.
    * Place any classifier options last on the command line following a
-   * "--". Eg  -B weka.classifiers.NaiveBayes ... -- -K <p>
+   * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
    *
    * -F <num> <br>
    * Number of cross validation folds to use for estimating accuracy.

@@ -20,7 +20,7 @@
  */
 
 
-package weka.classifiers.neural;
+package weka.classifiers.functions.neural;
 
 import java.io.*;
 
@@ -31,7 +31,7 @@ import java.io.*;
  * neuralnode to perform all it's computations.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface NeuralMethod extends Serializable {
 

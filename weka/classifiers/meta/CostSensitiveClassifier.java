@@ -20,8 +20,13 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -73,7 +78,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler, Drawable {
@@ -102,7 +107,7 @@ public class CostSensitiveClassifier extends Classifier
   protected CostMatrix m_CostMatrix = new CostMatrix(1);
 
   /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** Seed for reweighting using resampling. */
   protected int m_Seed = 1;
@@ -130,7 +135,7 @@ public class CostSensitiveClassifier extends Classifier
 	      "M", 0, "-M"));
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use. (required)\n"
-	      + "\teg: weka.classifiers.NaiveBayes",
+	      + "\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W <class name>"));
     newVector.addElement(new Option(
 	      "\tFile name of a cost matrix to use. If this is not supplied,\n"

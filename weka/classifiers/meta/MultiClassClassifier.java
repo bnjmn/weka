@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.rules.ZeroR;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
@@ -57,7 +61,7 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
@@ -69,7 +73,7 @@ public class MultiClassClassifier extends DistributionClassifier
   private MakeIndicatorFilter[] m_ClassFilters;
 
   /** The class name of the base classifier. */
-  private DistributionClassifier m_Classifier = new weka.classifiers.ZeroR();
+  private DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;

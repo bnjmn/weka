@@ -20,7 +20,7 @@
  *
  */
 
-package weka.classifiers.m5;
+package weka.classifiers.trees.m5;
 
 import java.io.*;
 import java.util.*;
@@ -52,7 +52,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler,
  AdditionalMeasureProducer {

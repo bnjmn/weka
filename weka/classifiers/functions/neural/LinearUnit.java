@@ -20,7 +20,7 @@
  */
 
 
-package weka.classifiers.neural;
+package weka.classifiers.functions.neural;
 
 
 
@@ -30,7 +30,7 @@ package weka.classifiers.neural;
  * neuralnode to perform all it's computations (as a Linear unit).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class LinearUnit implements NeuralMethod {
 

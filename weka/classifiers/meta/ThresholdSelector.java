@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.rules.ZeroR;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -83,7 +87,7 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -122,7 +126,7 @@ public class ThresholdSelector extends DistributionClassifier
 
   /** The generated base classifier */
   protected DistributionClassifier m_Classifier = 
-    new weka.classifiers.ZeroR();
+    new weka.classifiers.rules.ZeroR();
 
   /** The upper threshold used as the basis of correction */
   protected double m_HighThreshold = 1;
@@ -264,7 +268,7 @@ public class ThresholdSelector extends DistributionClassifier
 	      "C", 1, "-C <integer>"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to perform parameter selection on.\n"
-	      + "\teg: weka.classifiers.NaiveBayes",
+	      + "\teg: weka.classifiers.bayes.NaiveBayes",
 	      "W", 1, "-W <classifier class name>"));
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation. If just a\n" +

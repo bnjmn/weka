@@ -20,8 +20,13 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 
@@ -50,13 +55,13 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AttributeSelectedClassifier extends DistributionClassifier 
 implements OptionHandler, AdditionalMeasureProducer {
 
   /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;
@@ -104,7 +109,7 @@ implements OptionHandler, AdditionalMeasureProducer {
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use, followed\n"
 	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.classifiers.NaiveBayes -D\"",
+	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
 	      "B", 1, "-B <classifier specification>"));
     
     newVector.addElement(new Option(

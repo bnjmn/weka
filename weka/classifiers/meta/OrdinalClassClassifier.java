@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.rules.ZeroR;
 import java.io.Serializable;
 import weka.core.*;
 import weka.filters.Filter;
@@ -59,7 +63,7 @@ implements OptionHandler {
   private MakeIndicatorFilter[] m_ClassFilters;
 
   /** The class name of the base classifier. */
-  private DistributionClassifier m_Classifier = new weka.classifiers.ZeroR();
+  private DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** Internal copy of the class attribute for output purposes */
   private Attribute m_ClassAttribute;

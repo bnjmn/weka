@@ -20,14 +20,15 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.misc;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.classifiers.DistributionClassifier;
-import weka.classifiers.Evaluation;
 import java.io.*;
 
 /**
@@ -42,7 +43,7 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */ 
 public class HyperPipes extends DistributionClassifier {
 

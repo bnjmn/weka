@@ -20,8 +20,12 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.rules.part;
 
+import weka.classifiers.trees.j48.ClassifierSplitModel;
+import weka.classifiers.trees.j48.Distribution;
+import weka.classifiers.trees.j48.ModelSelection;
+import weka.classifiers.trees.j48.NoSplit;
 import weka.core.*;
 import java.io.*;
 
@@ -29,7 +33,7 @@ import java.io.*;
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClassifierDecList implements Serializable {
 

@@ -20,8 +20,11 @@
  *    Copyright (C) 2001 Tony Voyle
  */
 
-package weka.classifiers;
+package weka.classifiers.functions;
 
+import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.core.*;
 import weka.filters.*;
 import java.io.*;
@@ -35,7 +38,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   

@@ -1,21 +1,9 @@
 JAVAC = javac
 
-SOURCES = Classifier.java DistributionClassifier.java \
-	Evaluation.java  UpdateableClassifier.java \
-	ZeroR.java IB1.java Id3.java Prism.java NaiveBayesSimple.java \
-	KernelDensity.java OneR.java LinearRegression.java DecisionStump.java \
-	NaiveBayes.java IBk.java SMO.java Logistic.java LWR.java \
-	DecisionTable.java VotedPerceptron.java HyperPipes.java \
-	Bagging.java LogitBoost.java AdaBoostM1.java Stacking.java \
-	MultiClassClassifier.java MultiScheme.java CVParameterSelection.java \
-	RegressionByDiscretization.java \
-	CostSensitiveClassifier.java MetaCost.java \
-	ClassificationViaRegression.java FilteredClassifier.java \
-	Sourcable.java UserClassifier.java AttributeSelectedClassifier.java \
-	ThresholdSelector.java CostMatrix.java VFI.java AdditiveRegression.java \
-	CheckClassifier.java DistributionMetaClassifier.java \
-	IterativeClassifier.java Cleanser.java LeastMedSq.java \
-	OrdinalClassClassifier.java BVDecompose.java
+SOURCES = BVDecompose.java CheckClassifier.java Classifier.java \
+	CostMatrix.java DistributionClassifier.java Evaluation.java \
+	IterativeClassifier.java Sourcable.java UpdateableClassifier.java
+
 
 CLASSFILES = $(SOURCES:.java=.class)
 
@@ -27,37 +15,45 @@ CLASSFILES = $(SOURCES:.java=.class)
 #--------------------------------------------------------------------
 
 all :   $(CLASSFILES) 
-	(cd j48; make all JAVAC=$(JAVAC))
-	(cd m5; make all JAVAC=$(JAVAC))
-	(cd kstar; make all JAVAC=$(JAVAC))
+	(cd bayes; make all JAVAC=$(JAVAC))
 	(cd evaluation; make all JAVAC=$(JAVAC))
-	(cd neural; make all JAVAC=$(JAVAC))
-	(cd adtree; make all JAVAC=$(JAVAC))
+	(cd functions; make all JAVAC=$(JAVAC))
+	(cd lazy; make all JAVAC=$(JAVAC))
+	(cd meta; make all JAVAC=$(JAVAC))
+	(cd misc; make all JAVAC=$(JAVAC))
+	(cd rules; make all JAVAC=$(JAVAC))
+	(cd trees; make all JAVAC=$(JAVAC))
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
-	(cd j48; make debug JAVAC=$(JAVAC))
-	(cd m5; make debug JAVAC=$(JAVAC))
-	(cd kstar; make debug JAVAC=$(JAVAC))
+	(cd bayes; make debug JAVAC=$(JAVAC))
 	(cd evaluation; make debug JAVAC=$(JAVAC))
-	(cd neural; make debug JAVAC=$(JAVAC))
-	(cd adtree; make debug JAVAC=$(JAVAC))
+	(cd functions; make debug JAVAC=$(JAVAC))
+	(cd lazy; make debug JAVAC=$(JAVAC))
+	(cd meta; make debug JAVAC=$(JAVAC))
+	(cd misc; make debug JAVAC=$(JAVAC))
+	(cd rules; make debug JAVAC=$(JAVAC))
+	(cd trees; make debug JAVAC=$(JAVAC))
 
 optimized : clean
 	$(JAVAC) -O $(SOURCES)
-	(cd j48; make optimized JAVAC=$(JAVAC))
-	(cd m5; make optimized JAVAC=$(JAVAC))
-	(cd kstar; make optimized JAVAC=$(JAVAC))
+	(cd bayes; make optimized JAVAC=$(JAVAC))
 	(cd evaluation; make optimized JAVAC=$(JAVAC))
-	(cd neural; make optimized JAVAC=$(JAVAC))
-	(cd adtree; make optimized JAVAC=$(JAVAC))
+	(cd functions; make optimized JAVAC=$(JAVAC))
+	(cd lazy; make optimized JAVAC=$(JAVAC))
+	(cd meta; make optimized JAVAC=$(JAVAC))
+	(cd misc; make optimized JAVAC=$(JAVAC))
+	(cd rules; make optimized JAVAC=$(JAVAC))
+	(cd trees; make optimized JAVAC=$(JAVAC))
 
 clean : 
 	$(RM) *.class *~
-	(cd j48; make clean)
-	(cd m5; make clean)
-	(cd kstar; make clean)
+	(cd bayes; make clean)
 	(cd evaluation; make clean)
-	(cd neural; make clean)
-	(cd adtree; make clean)
+	(cd functions; make clean)
+	(cd lazy; make clean)
+	(cd meta; make clean)
+	(cd misc; make clean)
+	(cd rules; make clean)
+	(cd trees; make clean)
 

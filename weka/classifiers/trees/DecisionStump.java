@@ -20,8 +20,14 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.trees;
 
+import weka.classifiers.meta.LogitBoost;
+import weka.classifiers.Classifier;
+import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.meta.LogitBoost;
+import weka.classifiers.Sourcable;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -31,11 +37,11 @@ import weka.core.*;
  * with a boosting algorithm.
  *
  * Typical usage: <p>
- * <code>java weka.classifiers.LogitBoost -I 100 -W weka.classifiers.DecisionStump 
+ * <code>java weka.classifiers.trees.LogitBoost -I 100 -W weka.classifiers.trees.DecisionStump 
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler, Sourcable {

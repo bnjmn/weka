@@ -20,8 +20,13 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.lazy;
 
+import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.UpdateableClassifier;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -50,7 +55,7 @@ import weka.core.*;
  * (default 0 = Linear) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 

@@ -20,8 +20,13 @@
  *
  */
 
-package weka.classifiers.j48;
+package weka.classifiers.rules.part;
 
+import weka.classifiers.trees.j48.ClassifierSplitModel;
+import weka.classifiers.trees.j48.EntropySplitCrit;
+import weka.classifiers.trees.j48.ModelSelection;
+import weka.classifiers.trees.j48.NoSplit;
+import weka.classifiers.trees.j48.Stats;
 import weka.core.*;
 
 /**
@@ -29,7 +34,7 @@ import weka.core.*;
  * pruning heuristic.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class C45PruneableDecList extends ClassifierDecList{
     
