@@ -144,37 +144,20 @@ implements OptionHandler {
       
     }
 
-    int z = 0;
     for (int i = 0; i < inst.numClasses(); i++) {
-      double prob = 1.0;
       if (i == 0) {
-	prob *= distributions[0][0];
+	probs[i] = distributions[0][0];
       } else if (i == inst.numClasses() - 1) {
-	prob *= distributions[z][1];
+	probs[i] = distributions[i - 1][1];
       } else {
-	prob *= distributions[z][1];
-	prob *= distributions[z+1][0];
-	z++;
+	probs[i] = distributions[i - 1][1] - distributions[i][1];
+	if (!(probs[i] > 0)) {
+	  System.err.println("Warning: estimated probability " + probs[i] +
+			     ". Rounding to 0.");
+	  probs[i] = 0;
+	}
       }
-      probs[i] = prob;
     }
-    
-    // calculate the probability of each vector
-    /*boolean [] bs = new boolean[distributions.length];
-    int z = 0;
-    for (int i = 0; i < inst.numClasses(); i++) {
-      double prob = 1.0;
-      
-      for (int j = 0; j < distributions.length; j++) {
-	prob *= distributions[j][(bs[j] == true) ? 1 : 0];
-      }
-
-      if (z < distributions.length) {
-	bs[z] = true;
-      }
-      probs[z++] = prob;
-      }*/
-    
 
     if (Utils.gr(Utils.sum(probs), 0)) {
       Utils.normalize(probs);
