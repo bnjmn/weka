@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Plot2D extends JPanel {
 
@@ -74,7 +74,7 @@ public class Plot2D extends JPanel {
   public static final int DIAMOND_SHAPE = 2;
   public static final int TRIANGLEUP_SHAPE = 3;
   public static final int TRIANGLEDOWN_SHAPE = 4;
-  public static final double DEFAULT_SHAPE_SIZE = 2;
+  public static final int DEFAULT_SHAPE_SIZE = 2;
 
   /** The plots to display */
   protected FastVector m_plots = new FastVector();
@@ -776,7 +776,7 @@ public class Plot2D extends JPanel {
    * 4 = triangle (down).
    * @param gx the graphics context
    */
-  protected void drawDataPoint(double x, 
+  protected static void drawDataPoint(double x, 
 			       double y,
 			       double xprev,
 			       double yprev,
@@ -801,12 +801,15 @@ public class Plot2D extends JPanel {
    * 4 = triangle (down).
    * @param gx the graphics context
    */
-  protected void drawDataPoint(double x, 
+  protected static void drawDataPoint(double x, 
 				      double y,
 				      int size,
 				      int shape,
 				      Graphics gx) {
-    
+
+    Font lf = new Font("Monospaced", Font.PLAIN, 12);
+    FontMetrics fm = gx.getFontMetrics(lf);
+
     if (size == 0) {
       size = 1;
     }
@@ -835,8 +838,8 @@ public class Plot2D extends JPanel {
       gx.drawRect((int)(x-size),(int)(y-size),(size*2),(size*2));
       break;
     case MISSING_SHAPE:
-      int hf = m_labelMetrics.getAscent();
-      int width = m_labelMetrics.stringWidth("M");
+      int hf = fm.getAscent();
+      int width = fm.stringWidth("M");
       gx.drawString("M",(int)(x-(width / 2)), (int)(y+(hf / 2)));
       break;
     }

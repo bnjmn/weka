@@ -33,7 +33,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PlotData2D {
 
@@ -181,7 +181,7 @@ public class PlotData2D {
     System.err.println("Setting shape sizes ");
     m_shapeSize = new int [ss.size()];
     for (int i = 0; i < ss.size(); i++) {
-      m_shapeSize[i] = (int)((Double)ss.elementAt(i)).doubleValue();
+      m_shapeSize[i] = ((Integer)ss.elementAt(i)).intValue();
     }
   }
 
