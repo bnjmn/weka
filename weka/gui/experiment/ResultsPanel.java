@@ -82,7 +82,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -711,6 +711,8 @@ public class ResultsPanel extends JPanel {
 		 && (name.toLowerCase().equals("key_run"))) {
 	m_RunCombo.setSelectedIndex(i);
 	runCol = i;
+      } else if (name.toLowerCase().equals("key_fold")) {
+	m_TTester.setFoldColumn(i);
       } else if (name.toLowerCase().equals("key_scheme") ||
 		 name.toLowerCase().equals("key_scheme_options") ||
 		 name.toLowerCase().equals("key_scheme_version_id")) {
