@@ -45,6 +45,9 @@ import java.awt.Insets;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
@@ -77,7 +80,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -181,6 +184,14 @@ public class ClassifierPanel extends JPanel {
     m_OutText.setEditable(false);
     m_OutText.setFont(new Font("Dialoginput", Font.PLAIN, 10));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    m_OutText.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	    != InputEvent.BUTTON1_MASK) {
+	  m_OutText.selectAll();
+	}
+      }
+    });
     m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_ClassifierEditor.setClassType(Classifier.class);
     m_ClassifierEditor.setValue(new weka.classifiers.ZeroR());
