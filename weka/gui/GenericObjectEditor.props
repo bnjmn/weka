@@ -234,15 +234,21 @@ weka.core.converters.Loader =\
 
 # Lists the Search algorithm for Bayes net structure learning I want to choose from
 weka.classifiers.bayes.net.search.SearchAlgorithm =\
- weka.classifiers.bayes.net.search.score.SearchAlgorithmK2, \
- weka.classifiers.bayes.net.search.score.SearchAlgorithmTAN, \
- weka.classifiers.bayes.net.search.score.SearchAlgorithmB, \
- weka.classifiers.bayes.net.search.score.SearchAlgorithmB2, \
- weka.classifiers.bayes.net.search.score.SimulatedAnnealing, \
- weka.classifiers.bayes.net.search.score.TabuSearch, \
+ weka.classifiers.bayes.net.search.local.K2, \
+ weka.classifiers.bayes.net.search.local.HillClimber, \
+ weka.classifiers.bayes.net.search.local.RepeatedHillClimber, \
+ weka.classifiers.bayes.net.search.local.TAN, \
+ weka.classifiers.bayes.net.search.local.SimulatedAnnealing, \
+ weka.classifiers.bayes.net.search.local.TabuSearch, \
+ weka.classifiers.bayes.net.search.local.GeneticSearch, \
  weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm, \
- weka.classifiers.bayes.net.search.cv.SearchAlgorithmK2, \
- weka.classifiers.bayes.net.search.cv.SearchAlgorithmB, \
+ weka.classifiers.bayes.net.search.global.K2, \
+ weka.classifiers.bayes.net.search.global.HillClimber, \
+ weka.classifiers.bayes.net.search.global.RepeatedHillClimber, \
+ weka.classifiers.bayes.net.search.global.TAN, \
+ weka.classifiers.bayes.net.search.global.SimulatedAnnealing, \
+ weka.classifiers.bayes.net.search.global.TabuSearch, \
+ weka.classifiers.bayes.net.search.global.GeneticSearch, \
  weka.classifiers.bayes.net.search.fixed.FromFile, \
  weka.classifiers.bayes.net.search.fixed.NaiveBayes
 
