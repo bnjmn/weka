@@ -31,7 +31,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler, Sourcable {
@@ -320,7 +320,7 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Compute sum of counts
-    for (int i = 0; i < m_Instances.attribute(index).numValues() + 1; i++) {
+    for (int i = 0; i < m_Instances.attribute(index).numValues(); i++) {
       for (int j = 0; j < m_Instances.numClasses(); j++) {
 	sumCounts[j] += counts[i][j];
       }
