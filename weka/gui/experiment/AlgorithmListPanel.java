@@ -32,6 +32,7 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyDialog;
 
 import weka.core.Instances;
+import weka.core.SerializedObject;
 import weka.experiment.Experiment;
 
 import java.util.Vector;
@@ -58,7 +59,6 @@ import javax.swing.JList;
 import javax.swing.JButton;
 import javax.swing.DefaultListCellRenderer;
 
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -69,7 +69,7 @@ import java.beans.PropertyEditor;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -167,7 +167,9 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
       });
     ((GenericObjectEditor.GOEPanel) m_ClassifierEditor.getCustomEditor()).addOkListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  addNewAlgorithm((Classifier)m_ClassifierEditor.getValue());
+	  Classifier newCopy =
+	    (Classifier) copyObject(m_ClassifierEditor.getValue());
+	  addNewAlgorithm(newCopy);
 	}
       });
     
@@ -277,6 +279,24 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     }
   }
 
+  /**
+   * Makes a copy of an object using serialization
+   * @param source the object to copy
+   * @return a copy of the source object
+   */
+  protected Object copyObject(Object source) {
+    
+    Object result = null;
+    try {
+      SerializedObject so = new SerializedObject(source);
+      result = so.getObject();
+    } catch (Exception ex) {
+      System.err.println("AlgorithmListPanel: Problem copying object");
+      System.err.println(ex);
+    }
+    return result;
+  }
+  
   /**
    * Tests out the algorithm list panel from the command line.
    *
