@@ -36,7 +36,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
@@ -110,6 +110,7 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
        new DiscreteEstimator[m_wrappedClusterer.numberOfClusters()][data.numAttributes()];
     m_modelNormal = 
       new double[m_wrappedClusterer.numberOfClusters()][data.numAttributes()][2];
+    double[][] weights =  new double[m_wrappedClusterer.numberOfClusters()][data.numAttributes()];
     m_priors = new double[m_wrappedClusterer.numberOfClusters()]; 
      for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
        for (int j = 0; j < data.numAttributes(); j++) {
@@ -134,6 +135,7 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 	     m_model[cluster][j].addValue(inst.value(j),inst.weight());
 	   } else {
 	     m_modelNormal[cluster][j][0] += inst.weight() * inst.value(j);
+	     weights[cluster][j] += inst.weight();
 	   }
 	 }
        }
@@ -143,8 +145,8 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
      for (int j = 0; j < data.numAttributes(); j++) {
        if (data.attribute(j).isNumeric()) {
 	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
-	   if (m_priors[i] > 0) {
-	     m_modelNormal[i][j][0] /= m_priors[i];
+	   if (weights[i][j] > 0) {
+	     m_modelNormal[i][j][0] /= weights[i][j];
 	   }
 	 }
        }
@@ -166,10 +168,10 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
      for (int j = 0; j < data.numAttributes(); j++) {
        if (data.attribute(j).isNumeric()) {
 	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
-	   if (m_priors[i] > 0) {
+	   if (weights[i][j] > 0) {
 	     m_modelNormal[i][j][1] = 
-	       Math.sqrt(m_modelNormal[i][j][1] / m_priors[i]);
-	   } else if (m_priors[i] <= 0) {
+	       Math.sqrt(m_modelNormal[i][j][1] / weights[i][j]);
+	   } else if (weights[i][j] <= 0) {
 	     m_modelNormal[i][j][1] = Double.MAX_VALUE;
 	   }
 	   if (m_modelNormal[i][j][1] <= m_minStdDev) {
