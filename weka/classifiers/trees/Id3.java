@@ -35,7 +35,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.14.2.1 $ 
  */
 public class Id3 extends Classifier {
 
@@ -141,7 +141,7 @@ public class Id3 extends Classifier {
       m_Successors = new Id3[m_Attribute.numValues()];
       for (int j = 0; j < m_Attribute.numValues(); j++) {
         m_Successors[j] = new Id3();
-        m_Successors[j].buildClassifier(splitData[j]);
+        m_Successors[j].makeTree(splitData[j]);
       }
     }
   }
@@ -264,6 +264,9 @@ public class Id3 extends Classifier {
     while (instEnum.hasMoreElements()) {
       Instance inst = (Instance) instEnum.nextElement();
       splitData[(int) inst.value(att)].add(inst);
+    }
+    for (int i = 0; i < splitData.length; i++) {
+      splitData[i].compactify();
     }
     return splitData;
   }
