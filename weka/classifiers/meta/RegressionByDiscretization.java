@@ -22,8 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
@@ -50,7 +49,7 @@ import weka.filters.Filter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class RegressionByDiscretization extends SingleClassifierEnhancer {
   

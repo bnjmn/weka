@@ -22,8 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import weka.classifiers.*;
 import weka.classifiers.trees.RandomTree;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -58,7 +57,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler {

@@ -15,35 +15,51 @@
  */
 
 /*
- *    RandomizableMultipleClassifiersCombiner.java
+ *    IteratedSingleClassifierEnhancer.java
  *    Copyright (C) 2004 Eibe Frank
  *
  */
 
-package weka.classifiers.meta;
+package weka.classifiers;
 
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.Option;
 import weka.core.Instances;
-import weka.core.Randomizable;
 import java.util.Vector;
 import java.util.Enumeration;
 
 /**
- * Abstract utility class for handling settings common to randomizable
- * meta classifiers that build an ensemble from multiple classifiers based
- * on a given random number seed.  
+ * Abstract utility class for handling settings common to
+ * meta classifiers that build an ensemble from a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 1.1 $
  */
-public abstract class RandomizableMultipleClassifiersCombiner 
-  extends MultipleClassifiersCombiner implements Randomizable {
+public abstract class IteratedSingleClassifierEnhancer 
+  extends SingleClassifierEnhancer {
   
-  /** The random number seed. */
-  protected int m_Seed = 1;
+  /** Array for storing the generated base classifiers. */
+  protected Classifier[] m_Classifiers;
+  
+  /** The number of iterations. */
+  protected int m_NumIterations = 10;
+
+  /** 
+   * Stump method for building the classifiers.
+   *
+   * @param data the training data to be used for generating the
+   * bagged classifier.
+   * @exception Exception if the classifier could not be built successfully
+   */
+  public void buildClassifier(Instances data) throws Exception {
+
+    if (m_Classifier == null) {
+      throw new Exception("A base classifier has not been specified!");
+    }
+    m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -55,9 +71,9 @@ public abstract class RandomizableMultipleClassifiersCombiner
     Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
-	      "\tRandom number seed.\n"
-	      + "\t(default 1)",
-	      "S", 1, "-S <num>"));
+	      "\tNumber of iterations.\n"
+	      + "\t(default 10)",
+	      "I", 1, "-I <num>"));
 
     Enumeration enum = super.listOptions();
     while (enum.hasMoreElements()) {
@@ -69,24 +85,24 @@ public abstract class RandomizableMultipleClassifiersCombiner
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -B classifierstring <br>
-   * Classifierstring should contain the full class name of a scheme
-   * included for selection followed by options to the classifier
-   * (required, option should be used once for each classifier).<p>
+   * -W classname <br>
+   * Specify the full class name of the base learner.<p>
    *
-   * -S num <br>
-   * Set the random number seed (default 1). <p>
+   * -I num <br>
+   * Set the number of iterations (default 10). <p>
+   *
+   * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
-    String seed = Utils.getOption('S', options);
-    if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
+    String iterations = Utils.getOption('I', options);
+    if (iterations.length() != 0) {
+      setNumIterations(Integer.parseInt(iterations));
     } else {
-      setSeed(1);
+      setNumIterations(10);
     }
 
     super.setOptions(options);
@@ -103,8 +119,8 @@ public abstract class RandomizableMultipleClassifiersCombiner
     String [] options = new String [superOptions.length + 2];
 
     int current = 0;
-    options[current++] = "-S"; 
-    options[current++] = "" + getSeed();
+    options[current++] = "-I"; 
+    options[current++] = "" + getNumIterations();
 
     System.arraycopy(superOptions, 0, options, current, 
 		     superOptions.length);
@@ -117,27 +133,25 @@ public abstract class RandomizableMultipleClassifiersCombiner
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String seedTipText() {
-    return "The random number seed to be used.";
+  public String numIterationsTipText() {
+    return "The number of iterations to be performed.";
+  }
+  
+  /**
+   * Sets the number of bagging iterations
+   */
+  public void setNumIterations(int numIterations) {
+
+    m_NumIterations = numIterations;
   }
 
   /**
-   * Set the seed for random number generation.
+   * Gets the number of bagging iterations
    *
-   * @param seed the seed 
+   * @return the maximum number of bagging iterations
    */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Gets the seed for the random number generations
-   *
-   * @return the seed for the random number generation
-   */
-  public int getSeed() {
+  public int getNumIterations() {
     
-    return m_Seed;
+    return m_NumIterations;
   }
 }

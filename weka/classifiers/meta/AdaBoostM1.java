@@ -22,9 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.Sourcable;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
@@ -65,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {

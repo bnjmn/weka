@@ -22,8 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
@@ -53,7 +52,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
