@@ -36,7 +36,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeFilter extends Filter implements OptionHandler {
 
@@ -280,12 +280,24 @@ public class AttributeFilter extends Filter implements OptionHandler {
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
 
     String rangeList = "";
+    int last = -2;
+    boolean range = false;
     for(int i = 0; i < attributes.length; i++) {
       if (i == 0) {
 	rangeList = "" + (attributes[i] + 1);
+      } else if (attributes[i] == last) {
+        range = true;
       } else {
+        if (range) {
+          rangeList += "-" + last;
+          range = false;
+        }
 	rangeList += "," + (attributes[i] + 1);
       }
+      last = attributes[i] + 1;
+    }
+    if (range) {
+      rangeList += "-" + last;
     }
     setAttributeIndices(rangeList);
   }
