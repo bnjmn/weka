@@ -31,7 +31,7 @@ import java.io.*;
  * instances based on a supplied set of instances.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see DataGenerator
  * @see Serializable
@@ -60,9 +60,6 @@ public class KDDataGenerator implements DataGenerator, Serializable {
   // random number generator
   private Random m_random;
 
-  // the kernel estimator from which to generate the next instance from
-  private int m_KDToGenerateFrom;
-
   // which dimensions to use for computing a weight for each generated
   // instance
   private boolean [] m_weightingDimensions;
@@ -70,11 +67,6 @@ public class KDDataGenerator implements DataGenerator, Serializable {
   // the values for the weighting dimensions to use for computing the weight
   // for the next instance to be generated
   private double [] m_weightingValues;
-  
-  // created once only - for generating instances fast
-  private Instance m_instance;
-
-  private double [] m_instanceVals;
 
   private static double m_normConst = Math.sqrt(2*Math.PI);
 
@@ -87,7 +79,6 @@ public class KDDataGenerator implements DataGenerator, Serializable {
   public void buildGenerator(Instances inputInstances) throws Exception {
     m_random = new Random(m_seed);
     
-    m_KDToGenerateFrom = 0;
     m_instances = inputInstances;
     m_standardDeviations = new double [m_instances.numAttributes()];
     m_globalMeansOrModes = new double [m_instances.numAttributes()];
@@ -95,27 +86,58 @@ public class KDDataGenerator implements DataGenerator, Serializable {
       m_weightingDimensions = new boolean[m_instances.numAttributes()];
     }
     for (int i = 0; i < m_instances.numAttributes(); i++) {
-      if (m_instances.attribute(i).isNumeric()) {
-	// global standard deviations
-	double var = m_instances.variance(i);
-	if (var == 0) {
-	  var = m_minStdDev;
+      if (i != m_instances.classIndex()) {
+	if (m_instances.attribute(i).isNumeric()) {
+	  // global standard deviations
+	  double var = m_instances.variance(i);
+	  if (var == 0) {
+	    var = m_minStdDev;
+	  } else {
+	    var = Math.sqrt(var);
+	    //  heuristic to take into account # instances and dimensions
+	    double adjust = Math.pow((double) m_instances.numInstances(), 
+				     1.0 / m_instances.numAttributes());
+	    //	  double adjust = m_instances.numInstances();
+	    var /= adjust;
+	  }
+	  m_standardDeviations[i] = var;
 	} else {
-	  var = Math.sqrt(var);
-	  //  heuristic to take into account # instances and dimensions
-	  double adjust = Math.pow((double) m_instances.numInstances(), 
-				   1.0 / m_instances.numAttributes());
-		  //	  double adjust = m_instances.numInstances();
-	  var /= adjust;
+	  m_globalMeansOrModes[i] = m_instances.meanOrMode(i);
 	}
-	m_standardDeviations[i] = var;
-      } else {
-	m_globalMeansOrModes[i] = m_instances.meanOrMode(i);
       }
     }
-    m_instanceVals = new double [m_instances.numAttributes()];
-    m_instance = new Instance(1.0, m_instanceVals);
-  }  
+  }
+
+  public double [] getWeights() {
+
+    double [] weights = new double[m_instances.numInstances()];
+
+    for (int k = 0; k < m_instances.numInstances(); k++) {
+      double weight = 1;
+      for (int i = 0; i < m_instances.numAttributes(); i++) {
+	if (m_weightingDimensions[i]) {
+	  double mean = 0;
+	  if (!m_instances.instance(k).isMissing(i)) {
+	    mean = m_instances.instance(k).value(i);
+	  } else {
+	    mean = m_globalMeansOrModes[i];
+	  }
+	  double wm = 1.0;
+	  if (m_instances.attribute(i).isNumeric()) {
+	    wm = normalDens(m_weightingValues[i], mean, m_standardDeviations[i]);
+	  } else {
+	    wm = (1.0 + m_laplaceConst) / 
+	      (m_instances.attribute(i).numValues() * m_laplaceConst); 
+	  }
+	  if (wm > 0) {
+	    weight *= wm;
+	  }
+	}
+      }
+      weights[k] = weight;
+    }
+    return weights;
+  }
 
   /**
    * Return a cumulative distribution from a discrete distribution
@@ -124,6 +146,7 @@ public class KDDataGenerator implements DataGenerator, Serializable {
    * @return the cumulative distribution
    */
   private double [] computeCumulativeDistribution(double [] dist) {
+
     double [] cumDist = new double[dist.length];
     double sum = 0;
     for (int i = 0; i < dist.length; i++) {
@@ -135,28 +158,6 @@ public class KDDataGenerator implements DataGenerator, Serializable {
   }
 
   /**
-   * Generate a new instance. Returns the instance in an brand new
-   * Instance object.
-   *
-   * @return an <code>Instance</code> value
-   * @exception Exception if an error occurs
-   */
-  public Instance generateInstance() throws Exception {
-    return generateInstance(false);
-  }
-  
-  /**
-   * Generate a new instance. Reuses an existing instance object to
-   * speed up the process.
-   *
-   * @return an <code>Instance</code> value
-   * @exception Exception if an error occurs
-   */
-  public Instance generateInstanceFast() throws Exception {
-    return generateInstance(true);
-  }
-
-  /**
    * Generates a new instance using one kernel estimator. Each successive
    * call to this method incremets the index of the kernel to use.
    *
@@ -164,83 +165,52 @@ public class KDDataGenerator implements DataGenerator, Serializable {
    * @return the new random instance
    * @exception Exception if an error occurs
    */
-  private Instance generateInstance(boolean fast) throws Exception {
-    if (m_weightingDimensions.length != m_instances.numAttributes()) {
-      throw new Exception("Weighting dimension array != num attributes!");
-    }
-
-    Instance newInst;
-
-    if (fast) {
-      newInst = m_instance;
-    } else {
-      m_instanceVals = new double [m_instances.numAttributes()];
-      newInst = new Instance(1.0, m_instanceVals);
-    }
+  public double [][] generateInstances(int [] indices) throws Exception {
     
-    double weight = 1;
-    for (int i = 0; i < m_instances.numAttributes(); i++) {
-      if (!m_weightingDimensions[i]) {
-	if (m_instances.attribute(i).isNumeric()) {
-	  double mean = 0;
-	  double val = m_random.nextGaussian();
-	  if (!m_instances.instance(m_KDToGenerateFrom).isMissing(i)) {
-	    mean = m_instances.instance(m_KDToGenerateFrom).value(i);
-	  } else {
-	    mean = m_globalMeansOrModes[i];
-	  }
-	  val *= m_standardDeviations[i];
-	  val += mean;
-	  m_instanceVals[i] = val;
-	} else {
-	  // nominal attribute
-	  double [] dist = new double[m_instances.attribute(i).numValues()];
-	  for (int j = 0; j < dist.length; j++) {
-	    dist[j] = m_laplaceConst;
-	  }
-	  if (!m_instances.instance(m_KDToGenerateFrom).isMissing(i)) {
-	    dist[(int)m_instances.instance(m_KDToGenerateFrom).value(i)]++;
-	  } else {
-	    dist[(int)m_globalMeansOrModes[i]]++;
-	  }
-	  Utils.normalize(dist);
-	  double [] cumDist = computeCumulativeDistribution(dist);
-	  double randomVal = m_random.nextDouble();
-	  int instVal = 0;
-	  for (int j = 0; j < cumDist.length; j++) {
-	    if (randomVal <= cumDist[j]) {
-	      instVal = j;
-	      break;
+    double [][] values = new double[m_instances.numInstances()][];
+
+    for (int k = 0; k < indices.length; k++) {
+      values[indices[k]] = new double[m_instances.numAttributes()];
+      for (int i = 0; i < m_instances.numAttributes(); i++) {
+	if ((!m_weightingDimensions[i]) && (i != m_instances.classIndex())) {
+	  if (m_instances.attribute(i).isNumeric()) {
+	    double mean = 0;
+	    double val = m_random.nextGaussian();
+	    if (!m_instances.instance(indices[k]).isMissing(i)) {
+	      mean = m_instances.instance(indices[k]).value(i);
+	    } else {
+	      mean = m_globalMeansOrModes[i];
 	    }
+	    val *= m_standardDeviations[i];
+	    val += mean;
+	    values[indices[k]][i] = val;
+	  } else {
+	    // nominal attribute
+	    double [] dist = new double[m_instances.attribute(i).numValues()];
+	    for (int j = 0; j < dist.length; j++) {
+	      dist[j] = m_laplaceConst;
+	    }
+	    if (!m_instances.instance(indices[k]).isMissing(i)) {
+	      dist[(int)m_instances.instance(indices[k]).value(i)]++;
+	    } else {
+	      dist[(int)m_globalMeansOrModes[i]]++;
+	    }
+	    Utils.normalize(dist);
+	    double [] cumDist = computeCumulativeDistribution(dist);
+	    double randomVal = m_random.nextDouble();
+	    int instVal = 0;
+	    for (int j = 0; j < cumDist.length; j++) {
+	      if (randomVal <= cumDist[j]) {
+		instVal = j;
+		break;
+	      }
+	    }
+	    values[indices[k]][i] = (double)instVal;
 	  }
-	  m_instanceVals[i] = (double)instVal;
 	}
-      } else {
-	double mean = 0;
-	if (!m_instances.instance(m_KDToGenerateFrom).isMissing(i)) {
-	  mean = m_instances.instance(m_KDToGenerateFrom).value(i);
-	} else {
-	  mean = m_globalMeansOrModes[i];
-	}
-	double wm = 1.0;
-	if (m_instances.attribute(i).isNumeric()) {
-	  wm = normalDens(m_weightingValues[i], mean,
-				 m_standardDeviations[i]);
-	} else {
-	  wm = (1.0 + m_laplaceConst) / 
-	    (m_instances.attribute(i).numValues() * m_laplaceConst); 
-	}
-	if (wm > 0) {
-	  weight *= wm;
-	}
-	m_instanceVals[i] = m_weightingValues[i];
       }
     }
-    newInst.setWeight(weight);
-    // next kernel to generate from
-    m_KDToGenerateFrom++;
-    m_KDToGenerateFrom %= m_instances.numInstances();
-    return newInst;
+    return values;
   }
 
   /**
@@ -300,7 +270,7 @@ public class KDDataGenerator implements DataGenerator, Serializable {
       if (args.length != 1) {
 	throw new Exception("Usage: KDDataGenerator <filename>");
       } else {
-	r = new BufferedReader(new FileReader(args[0]));
+	/*	r = new BufferedReader(new FileReader(args[0]));
 	Instances insts = new Instances(r);
 	KDDataGenerator dg = new KDDataGenerator();
 	dg.buildGenerator(insts);
@@ -310,10 +280,12 @@ public class KDDataGenerator implements DataGenerator, Serializable {
 	  Instance newInst = dg.generateInstance();
 	  newInst.setDataset(header);
 	  System.out.println(newInst);
-	}
+	  } */
       }
     } catch (Exception ex) {
       ex.printStackTrace();
     }
   }
 }
+
+
