@@ -85,13 +85,13 @@ public class KStarCache implements Serializable {
    * A custom hashtable class to support the caching system.
    *
    */
-  public class CacheTable {
+  public class CacheTable implements Serializable {
 
     /** The hash table data. */
-    private transient TableEntry [] m_Table;
+    private TableEntry [] m_Table;
 
     /** The total number of entries in the hash table. */
-    private transient int m_Count;
+    private int m_Count;
 
     /** Rehashes the table when count exceeds this threshold. */
     private int m_Threshold;

@@ -24,18 +24,20 @@
 
 package weka.classifiers.lazy.kstar;
 
+import java.io.Serializable;
+
 /*
  * @author Len Trigg (len@intelligenesis.net)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $
  */
-public class LightHashTable {
+public class LightHashTable implements Serializable {
 
   /** The hash table data. */
-  private transient TableEntry [] m_Table;
+  private TableEntry [] m_Table;
 
   /** The total number of entries in the hash table. */
-  private transient int m_Count;
+  private int m_Count;
 
   /** Rehashes the table when count exceeds this threshold. */
   private int m_Threshold;
