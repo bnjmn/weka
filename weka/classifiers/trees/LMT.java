@@ -20,8 +20,9 @@
  *
  */
 
-package weka.classifiers.trees.lmt;
+package weka.classifiers.trees;
 
+import weka.classifiers.trees.lmt.*;
 import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
@@ -58,7 +59,7 @@ import weka.filters.supervised.attribute.NominalToBinary;
  *
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1 $
  */
 
 

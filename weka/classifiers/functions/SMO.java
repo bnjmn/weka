@@ -20,8 +20,9 @@
  *
  */
 
-package weka.classifiers.functions.supportVector;
+package weka.classifiers.functions;
 
+import weka.classifiers.functions.supportVector.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.Logistic;
@@ -113,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.8 $ */
+ * @version $Revision: 1.50 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**

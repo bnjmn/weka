@@ -20,8 +20,9 @@
  *
  */
 
-package weka.classifiers.functions.supportVector;
+package weka.classifiers.functions;
 
+import weka.classifiers.functions.supportVector.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.filters.unsupervised.attribute.NominalToBinary;

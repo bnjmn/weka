@@ -37,7 +37,7 @@ import weka.core.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayesSimple;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.j48.J48;
+import weka.classifiers.trees.J48;
 import weka.classifiers.lazy.IBk;
 import weka.classifiers.functions.Logistic;
 import weka.clusterers.EM;
@@ -51,7 +51,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @since 1.0
  * @see JPanel
  */

@@ -28,7 +28,7 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Rule {
 
@@ -239,6 +239,14 @@ public class Rule {
     // the linear model's prediction for this rule
     return m_ruleModel.classifyInstance(instance);
   } 
+
+  /**
+   * Returns the top of the tree.
+   */
+  public RuleNode topOfTree() {
+
+    return m_topOfTree;
+  }
 
   /**
    * Make the single best rule from a pruned m5 model tree
