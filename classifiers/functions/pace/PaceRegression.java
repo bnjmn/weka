@@ -66,10 +66,6 @@ import weka.core.*;
  * -S <threshold value <br>
  * Threshold for the olsc estimator<p>
  *
- * TODOs: <br>
- * -options <br>
- * -make a javaBean out of it <br>
- *
  * <p>
  * REFERENCES <p>
  * 
@@ -82,7 +78,7 @@ import weka.core.*;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 public class PaceRegression extends Classifier implements OptionHandler,
 					       WeightedInstancesHandler {
 
@@ -135,31 +131,32 @@ public class PaceRegression extends Classifier implements OptionHandler,
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    /**
-     *  Checks on data model and instances
-     */
+    //  Checks on data model and instances
+    try {
     if (!data.classAttribute().isNumeric()) {
-      throw new Exception("Class attribute has to be numeric"+
-                          " for pace regression!");
+      throw new UnsupportedClassTypeException("Class attribute has to be numeric"+
+					      " for pace regression!");
+    }
+    } catch (UnassignedClassException e) {
+      System.err.println(data);
+      System.err.println(data.classIndex());
     }
     if (data.numInstances() == 0) {
       throw new Exception("No instances in training file!");
     }
     if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
     if (checkForNonBinary(data)) {
-      throw new Exception("Can only handle binary nominal attributes!");
+      throw new UnsupportedAttributeTypeException("Can only deal with numeric and binary attributes!");
     }
-    for (int i = 0; i < data.numAttributes(); i++) {
-      // check for missing data and throw exception if some are found
-      if (checkForMissing(data)) {
-	throw new Exception("Can't handle missing values!");
-      }
+    // check for missing data and throw exception if some are found
+    if (checkForMissing(data)) {
+      throw new NoSupportForMissingValuesException("Can't handle missing values!");
     }
     // n - k should be >= 20
     if (data.numInstances() - data.numAttributes() < 20) {
-      throw new Exception("Ratio of number of instances (n) to number of "
+      throw new IllegalArgumentException("Not enough instances. Ratio of number of instances (n) to number of "
                           + "attributes (k) is too small (n - k < 20).");
     }
     
@@ -358,7 +355,7 @@ public class PaceRegression extends Classifier implements OptionHandler,
     
     // check for missing data and throw exception if some are found
     if (checkForMissing(instance, m_Model)) {
-      throw new Exception("Can't handle missing values!");
+      throw new NoSupportForMissingValuesException("Can't handle missing values!");
     }
 
     // Calculate the dependent variable from the regression model
