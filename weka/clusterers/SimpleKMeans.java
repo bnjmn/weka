@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.1 $
+ * @version $Revision: 1.19.2.2 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -150,7 +150,7 @@ public class SimpleKMeans extends Clusterer
     HashMap initC = new HashMap();
     DecisionTable.hashKey hk = null;
 
-    for (int j = instances.numInstances() - 1; j > 0; j--) {
+    for (int j = instances.numInstances() - 1; j >= 0; j--) {
       instIndex = RandomO.nextInt(j+1);
       hk = new DecisionTable.hashKey(instances.instance(instIndex), 
 				     instances.numAttributes());
