@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	
@@ -356,7 +356,7 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 				1,
 				"-S [LOO-CV|k-Fold-CV|Cumulative-CV]"));
 
-		newVector.addElement(new Option("\tUse probabilistic scoring.\n\t(default true)", "Q", 0, "-Q"));
+		newVector.addElement(new Option("\tUse probabilistic or 0/1 scoring.\n\t(default probabilistic scoring)", "Q", 0, "-Q"));
 
 		Enumeration enum = super.listOptions();
 		while (enum.hasMoreElements()) {
@@ -386,7 +386,7 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 		if (sScore.compareTo("Cumulative-CV") == 0) {
 			setCVType(new SelectedTag(CUMCV, TAGS_CV_TYPE));
 		}
-		setUseProb(Utils.getFlag('Q', options));		
+		setUseProb(!Utils.getFlag('Q', options));		
 		super.setOptions(options);
 	} // setOptions
 
