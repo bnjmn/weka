@@ -63,7 +63,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -787,14 +787,16 @@ public class Experiment implements Serializable, OptionHandler {
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // RP.
+    //GHF -- nice idea, but it prevents you from using result producers that
+    //       have *required* parameters
     setResultProducer((ResultProducer)Utils.forName(
 		      ResultProducer.class,
 		      rpName,
-		      null));
-    if (getResultProducer() instanceof OptionHandler) {
-      ((OptionHandler) getResultProducer())
-	.setOptions(Utils.partitionOptions(options));
-    }
+		      Utils.partitionOptions(options) )); //GHF
+    //GHF if (getResultProducer() instanceof OptionHandler) {
+    //GHF  ((OptionHandler) getResultProducer())
+    //GHF  .setOptions(Utils.partitionOptions(options));
+    //GHF }
   }
 
   /**
