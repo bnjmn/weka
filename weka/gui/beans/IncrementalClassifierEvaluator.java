@@ -43,7 +43,7 @@ import java.awt.*;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -208,9 +208,14 @@ public class IncrementalClassifierEvaluator
 	      textTitle = 
 		textTitle.substring(textTitle.lastIndexOf('.')+1,
 				    textTitle.length());
+	      String results = "=== Performance information ===\n\n"
+		+  "Scheme:   " + textTitle + "\n"
+		+  "Relation: "+ inst.dataset().relationName() + "\n\n"
+		+ m_eval.toSummaryString();
+	      textTitle = "Results: " + textTitle;
 	      TextEvent te = 
 		new TextEvent(this, 
-			      m_eval.toSummaryString(),
+			      results,
 			    textTitle);
 	      notifyTextListeners(te);
 	    }
