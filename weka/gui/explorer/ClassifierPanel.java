@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.49 $
+ * @version $Revision: 1.50 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -231,6 +231,13 @@ public class ClassifierPanel extends JPanel {
 
   /** Button for further output/visualize options */
   JButton m_MoreOptions = new JButton("More options...");
+
+  /**
+   * User specified random seed for cross validation or % split
+   */
+  protected JTextField m_RandomSeedText = new JTextField("1      ");
+  protected JLabel m_RandomLab = new JLabel("Random seed for XVal / % Split", 
+					    SwingConstants.RIGHT);
 
   /** Click to start running the classifier */
   protected JButton m_StartBut = new JButton("Start");
@@ -459,7 +466,7 @@ public class ClassifierPanel extends JPanel {
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-	moreOptionsPanel.setLayout(new GridLayout(6, 1));
+	moreOptionsPanel.setLayout(new GridLayout(7, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputPerClassBut);	  
 	moreOptionsPanel.add(m_OutputEntropyBut);	  
@@ -470,6 +477,11 @@ public class ClassifierPanel extends JPanel {
 	costMatrixOption.add(m_EvalWRTCostsBut, BorderLayout.WEST);
 	costMatrixOption.add(m_SetCostsBut, BorderLayout.EAST);
 	moreOptionsPanel.add(costMatrixOption);
+	JPanel seedPanel = new JPanel();
+	seedPanel.setLayout(new BorderLayout());
+	seedPanel.add(m_RandomLab, BorderLayout.WEST);
+	seedPanel.add(m_RandomSeedText, BorderLayout.EAST);
+	moreOptionsPanel.add(seedPanel);
 
 	JPanel all = new JPanel();
 	all.setLayout(new BorderLayout());	
@@ -1175,7 +1187,15 @@ public class ClassifierPanel extends JPanel {
 
 	      case 1: // CV mode
 	      m_Log.statusMessage("Randomizing instances...");
-	      inst.randomize(new Random(1));
+	      int rnd = 1;
+	      try {
+		rnd = Integer.parseInt(m_RandomSeedText.getText().trim());
+		System.err.println("Using random seed "+rnd);
+	      } catch (Exception ex) {
+		m_Log.logMessage("Trouble parsing random seed value");
+		rnd = 1;
+	      }
+	      inst.randomize(new Random(rnd));
 	      if (inst.attribute(classIndex).isNominal()) {
 		m_Log.statusMessage("Stratifying instances...");
 		inst.stratify(numFolds);
@@ -1209,7 +1229,13 @@ public class ClassifierPanel extends JPanel {
 		
 	      case 2: // Percent split
 	      m_Log.statusMessage("Randomizing instances...");
-	      inst.randomize(new Random(1));
+	      try {
+		rnd = Integer.parseInt(m_RandomSeedText.getText().trim());
+	      } catch (Exception ex) {
+		m_Log.logMessage("Trouble parsing random seed value");
+		rnd = 1;
+	      }
+	      inst.randomize(new Random(rnd));
 	      int trainSize = inst.numInstances() * percent / 100;
 	      int testSize = inst.numInstances() - trainSize;
 	      Instances train = new Instances(inst, 0, trainSize);
