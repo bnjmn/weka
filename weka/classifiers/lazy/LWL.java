@@ -16,7 +16,7 @@
 
 /*
  *    LWL.java
- *    Copyright (C) 1999, 2002, 2003 Len Trigg, Eibe Frank
+ *    Copyright (C) 1999, 2002, 2003 Len Trigg, Eibe Frank, Ashraf M. Kibriya
  *
  */
 
@@ -52,12 +52,16 @@ import weka.core.*;
  * -D <br>
  * Produce debugging output. <p>
  *
+ * -N <br>
+ * Do not normalize numeric attributes' values in distance calculation.<p>
+ *
  * -K num <br>
  * Set the number of neighbours used for setting kernel bandwidth.
  * (default all) <p>
  *
  * -U num <br>
- * Set the weighting kernel shape to use. 1 = Inverse, 2 = Gaussian.
+ * Set the weighting kernel shape to use. 0 = Linear, 1 = Epnechnikov, 
+ * 2 = Tricube, 3 = Inverse, 4 = Gaussian and 5 = Constant.
  * (default 0 = Linear) <p>
  *
  * -W classname <br>
@@ -66,10 +70,13 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ */
-public class LWL extends SingleClassifierEnhancer 
+ * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
+ * @version $Revision: 1.11 $ 
+ */
+public class LWL extends SingleClassifierEnhancer
   implements UpdateableClassifier, WeightedInstancesHandler {
-  
+
+
   /** The training instances used for classification. */
   protected Instances m_Train;
 
@@ -78,6 +85,10 @@ public class LWL extends SingleClassifierEnhancer
 
   /** The maximum values for numeric attributes. */
   protected double [] m_Max;
+    
+  /** True if numeric attributes' values should not be normalized in distance 
+      calculation. */
+  protected boolean m_NoAttribNorm=false;
 
   /** The number of neighbours used to select the kernel bandwidth */
   protected int m_kNN = -1;
@@ -89,10 +100,13 @@ public class LWL extends SingleClassifierEnhancer
   protected boolean m_UseAllK = true;
 
   /** The available kernel weighting methods */
-  protected static final int LINEAR  = 0;
-  protected static final int INVERSE = 1;
-  protected static final int GAUSS   = 2;
-    
+  protected static final int LINEAR       = 0;
+  protected static final int EPANECHNIKOV = 1;
+  protected static final int TRICUBE      = 2;  
+  protected static final int INVERSE      = 3;
+  protected static final int GAUSS        = 4;
+  protected static final int CONSTANT     = 5;
+
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -133,16 +147,21 @@ public class LWL extends SingleClassifierEnhancer
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(2);
-    newVector.addElement(new Option("\tSet the number of neighbors used to set"
-				    + " the kernel bandwidth.\n"
-				    + "\t(default all)",
+    Vector newVector = new Vector(3);
+    newVector.addElement(new Option("\tDo not normalize numeric attributes' "
+                                    +"values in distance calculation.\n"
+                                    +"\t(default DO normalization)",
+				    "N", 0, "-N"));
+    newVector.addElement(new Option("\tSet the number of neighbours used to set"
+				    +" the kernel bandwidth.\n"
+				    +"\t(default all)",
 				    "K", 1, "-K <number of neighbours>"));
     newVector.addElement(new Option("\tSet the weighting kernel shape to use."
-				    + " 1 = Inverse, 2 = Gaussian.\n"
-				    + "\t(default 0 = Linear)",
+				    +" 0=Linear, 1=Epanechnikov,\n"
+				    +"\t2=Tricube, 3=Inverse, 4=Gaussian.\n"
+				    +"\t(default 0 = Linear)",
 				    "U", 1,"-U <number of weighting method>"));
-
+    
     Enumeration enum = super.listOptions();
     while (enum.hasMoreElements()) {
       newVector.addElement(enum.nextElement());
@@ -157,12 +176,17 @@ public class LWL extends SingleClassifierEnhancer
    * -D <br>
    * Produce debugging output. <p>
    *
+   * -N <br>
+   * Do not normalize numeric attributes' values in distance calculation.
+   * (default DO normalization)<p>
+   *
    * -K num <br>
    * Set the number of neighbours used for setting kernel bandwidth.
    * (default all) <p>
    *
    * -U num <br>
-   * Set the weighting kernel shape to use. 1 = Inverse, 2 = Gaussian.
+   * Set the weighting kernel shape to use. 0 = Linear, 1 = Epnechnikov, 
+   * 2 = Tricube, 3 = Inverse, 4 = Gaussian and 5 = Constant.
    * (default 0 = Linear) <p>
    *
    * -W classname <br>
@@ -187,6 +211,7 @@ public class LWL extends SingleClassifierEnhancer
     } else {
       setWeightingKernel(LINEAR);
     }
+    setDontNormalize(Utils.getFlag('N', options));
     super.setOptions(options);
   }
 
@@ -198,15 +223,22 @@ public class LWL extends SingleClassifierEnhancer
   public String [] getOptions() {
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 4];
+    String [] options = new String [superOptions.length + 5];
 
     int current = 0;
 
     options[current++] = "-U"; options[current++] = "" + getWeightingKernel();
-    options[current++] = "-K"; options[current++] = "" + getKNN();
-    
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    //if (!m_UseAllK) {
+      options[current++] = "-K"; options[current++] = "" + getKNN();
+    //}
+    if (getDontNormalize()) {
+      options[current++] = "-N";
+    }
+    else
+      options[current++] = "";
+
+    System.arraycopy(superOptions, 0, options, current,
+                     superOptions.length);
 
     return options;
   }
@@ -250,29 +282,34 @@ public class LWL extends SingleClassifierEnhancer
 
     return m_kNN;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String weightingKernelTipText() {
-    return "Determines weighting function (0: linear, 1: inverse distance, 2: "
-      + "Gaussian).";
+    return "Determines weighting function. [0 = Linear, 1 = Epnechnikov,"+
+	   "2 = Tricube, 3 = Inverse, 4 = Gaussian and 5 = Constant. "+
+	   "(default 0 = Linear)].";
   }
 
   /**
-   * Sets the kernel weighting method to use. Must be one of LINEAR,
-   * INVERSE, or GAUSS, other values are ignored.
+   * Sets the kernel weighting method to use. Must be one of LINEAR, 
+   * EPANECHNIKOV,  TRICUBE, INVERSE, GAUSS or CONSTANT, other values
+   * are ignored.
    *
    * @param kernel the new kernel method to use. Must be one of LINEAR,
-   * INVERSE, or GAUSS
+   * EPANECHNIKOV,  TRICUBE, INVERSE, GAUSS or CONSTANT.
    */
   public void setWeightingKernel(int kernel) {
 
     if ((kernel != LINEAR)
+	&& (kernel != EPANECHNIKOV)
+	&& (kernel != TRICUBE)
 	&& (kernel != INVERSE)
-	&& (kernel != GAUSS)) {
+	&& (kernel != GAUSS)
+	&& (kernel != CONSTANT)) {
       return;
     }
     m_WeightKernel = kernel;
@@ -282,11 +319,41 @@ public class LWL extends SingleClassifierEnhancer
    * Gets the kernel weighting method to use.
    *
    * @return the new kernel method to use. Will be one of LINEAR,
-   * INVERSE, or GAUSS
+   * EPANECHNIKOV,  TRICUBE, INVERSE, GAUSS or CONSTANT.
    */
   public int getWeightingKernel() {
 
     return m_WeightKernel;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String dontNormalizeTipText() {
+    return "Turns off normalization for attribute values in distance "+
+	   "calculation.";
+  }
+
+  /** 
+   * Gets whether if the numeric attribute values are not to be normalized for 
+   * calculating the distances.
+   *
+   * @return true if normalization is not to be performed
+   */
+  public boolean getDontNormalize() {
+      return m_NoAttribNorm;
+  }  
+  
+  /** 
+   * Sets whether if the numeric attribute values are not to be normalized for 
+   * calculating the distances between them.
+   *
+   * @param dontNormalize true if normalization is not to be performed
+   */
+  public void setDontNormalize(boolean normalize) {
+      m_NoAttribNorm = normalize;
   }
 
   /**
@@ -329,7 +396,8 @@ public class LWL extends SingleClassifierEnhancer
     }
 
     if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Cannot handle string "+
+                                                  "attributes!");
     }
 
     // Throw away training instances with missing class
@@ -380,40 +448,70 @@ public class LWL extends SingleClassifierEnhancer
 
     updateMinMax(instance);
 
-    // Get the distances to each training instance
+    //Get the distances to each training instance
     double [] distance = new double [m_Train.numInstances()];
-    for (int i = 0; i < m_Train.numInstances(); i++) {
-      distance[i] = distance(instance, m_Train.instance(i));
+    MyHeap h;
+    int k = distance.length-1; //sortKey.length - 1;
+    if (!m_UseAllK && (m_kNN < k)) {
+        k = m_kNN;
+        h = new MyHeap(k);
     }
-    int [] sortKey = Utils.sort(distance);
-
+    else
+        h = new MyHeap(distance.length);
+    
+    for(int i=0, insCount=0; i < m_Train.numInstances(); i++) {
+        switch(m_WeightKernel) {
+          case LINEAR:
+          case EPANECHNIKOV:
+          case TRICUBE:      
+              if(insCount<k) {
+                  distance[i] = distance(instance, m_Train.instance(i));
+                  h.put(i, distance[i]);
+              }
+              else {
+                  MyHeapElement temp = h.peek();
+                  distance[i] = distance(instance, m_Train.instance(i), 
+                                         temp.distance);
+                  if(distance[i]<temp.distance) {
+                      h.get();
+                      h.put(i, distance[i]);
+                  }
+              }
+              break;
+          default:
+              distance[i] = distance(instance, m_Train.instance(i));
+              break;
+        }
+        insCount++;
+    }
+    
+    int [] sortKey;
+    sortKey = Utils.sort(distance);
+    
     if (m_Debug) {
       System.out.println("Instance Distances");
-      for (int i = 0; i < distance.length; i++) {
+      for (int i = 0; i < sortKey.length; i++) {
 	System.out.println("" + distance[sortKey[i]]);
       }
     }
-
+    
     // Determine the bandwidth
-    int k = sortKey.length - 1;
-    if (!m_UseAllK && (m_kNN < k)) {
-      k = m_kNN;
-    }
-    double bandwidth = distance[sortKey[k]];
+    double bandwidth = distance[sortKey[k-1]];
 
     // Check for bandwidth zero
     if (bandwidth <= 0) {
-      for (int i = k + 1; i < sortKey.length; i++) {
+      for (int i = k; i < sortKey.length; i++) {
 	if (distance[sortKey[i]] > bandwidth) {
 	  bandwidth = distance[sortKey[i]];
 	  break;
 	}
-      }
-      if (bandwidth <= 0) {
-	throw new Exception("All training instances coincide with test instance!");
+      }    
+      if(bandwidth <= 0) {
+	throw new Exception("All training instances coincide with test "+
+                            "instance!");
       }
     }
-
+    
     // Rescale the distances by the bandwidth
     for (int i = 0; i < distance.length; i++) {
       distance[i] = distance[i] / bandwidth;
@@ -425,6 +523,25 @@ public class LWL extends SingleClassifierEnhancer
       case LINEAR:
 	distance[i] = Math.max(1.0001 - distance[i], 0);
 	break;
+      case EPANECHNIKOV:
+          if(distance[i]<=1)
+              distance[i] = 3/4D*(1.0001 - distance[i]*distance[i]);
+          else
+              distance[i] = 0;
+          break;
+      case TRICUBE:
+          if(distance[i]<=1)
+              distance[i] = Math.pow( (1.0001 - Math.pow(distance[i], 3)), 3 );
+          else
+              distance[i] = 0;
+          break;
+      case CONSTANT:
+          //System.err.println("using constant kernel");
+          if(distance[i]<=1)
+            distance[i] = 1;
+          else
+            distance[i] = 0;
+          break;
       case INVERSE:
 	distance[i] = 1.0 / (1.0 + distance[i]);
 	break;
@@ -436,15 +553,15 @@ public class LWL extends SingleClassifierEnhancer
 
     if (m_Debug) {
       System.out.println("Instance Weights");
-      for (int i = 0; i < distance.length; i++) {
-	System.out.println("" + distance[i]);
+      for (int i = 0; i < sortKey.length; i++) {
+	System.out.println("" + distance[sortKey[i]]);
       }
     }
 
     // Set the weights on a copy of the training data
     Instances weightedTrain = new Instances(m_Train, 0);
     double sumOfWeights = 0, newSumOfWeights = 0;
-    for (int i = 0; i < distance.length; i++) {
+    for (int i = 0; i < sortKey.length; i++) {
       double weight = distance[sortKey[i]];
       if (weight < 1e-20) {
 	break;
@@ -498,11 +615,20 @@ public class LWL extends SingleClassifierEnhancer
     case LINEAR:
       result += "Using linear weighting kernels\n";
       break;
+    case EPANECHNIKOV:
+      result += "Using epanechnikov weighting kernels\n";
+      break;
+    case TRICUBE:
+      result += "Using tricube weighting kernels\n";
+      break;
     case INVERSE:
       result += "Using inverse-distance weighting kernels\n";
       break;
     case GAUSS:
       result += "Using gaussian weighting kernels\n";
+      break;
+    case CONSTANT:
+      result += "Using constant weighting kernels\n";
       break;
     }
     result += "Using " + (m_UseAllK ? "all" : "" + m_kNN) + " neighbours";
@@ -516,11 +642,40 @@ public class LWL extends SingleClassifierEnhancer
    * @param train the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
-  protected double distance(Instance first, Instance second) {  
+  private double distance(Instance first, Instance second) throws Exception {
+      return distance(first, second, Math.sqrt(Double.MAX_VALUE));
+  }
+  
+  /**
+   * Calculates the distance between two instances
+   *
+   * @param test the first instance
+   * @param train the second instance
+   * @param cutOffValue skips the rest of the calculations and returns Double.Max
+   * if distance is going to become larger than this cutOffValue.
+   * @return the distance between the two given instances, between 0 and 1
+   */          
+  private double distance(Instance first, Instance second, double cutOffValue) 
+          throws Exception {
+    return euclideanDistance(first, second, cutOffValue);
+  }    
+  
+  /**
+   * Calculates the euclidean distance between two instances
+   *
+   * @param test the first instance
+   * @param train the second instance
+   * @param cutOffValue skips the rest of the calculations and returns Double.Max
+   * if distance is going to become larger than this cutOffValue.
+   * @return the distance between the two given instances, between 0 and 1
+   */
+  private double euclideanDistance(Instance first, Instance second, 
+                                   double cutOffValue) {
 
     double distance = 0;
     int firstI, secondI;
-
+    cutOffValue = cutOffValue*cutOffValue;
+    
     for (int p1 = 0, p2 = 0; 
 	 p1 < first.numValues() || p2 < second.numValues();) {
       if (p1 >= first.numValues()) {
@@ -555,6 +710,8 @@ public class LWL extends SingleClassifierEnhancer
 	p1++;
       }
       distance += diff * diff;
+      if(distance>cutOffValue)
+          return Double.MAX_VALUE; //distance;
     }
     distance = Math.sqrt(distance);
     return distance;
@@ -565,42 +722,53 @@ public class LWL extends SingleClassifierEnhancer
    * values.
    */
   private double difference(int index, double val1, double val2) {
-
+    
     switch (m_Train.attribute(index).type()) {
-    case Attribute.NOMINAL:
-      
-      // If attribute is nominal
-      if (Instance.isMissingValue(val1) || 
-	  Instance.isMissingValue(val2) ||
-	  ((int)val1 != (int)val2)) {
-	return 1;
-      } else {
-	return 0;
-      }
-    case Attribute.NUMERIC:
-      // If attribute is numeric
-      if (Instance.isMissingValue(val1) || 
-	  Instance.isMissingValue(val2)) {
-	if (Instance.isMissingValue(val1) && 
-	    Instance.isMissingValue(val2)) {
-	  return 1;
-	} else {
-	  double diff;
-	  if (Instance.isMissingValue(val2)) {
-	    diff = norm(val1, index);
-	  } else {
-	    diff = norm(val2, index);
-	  }
-	  if (diff < 0.5) {
-	    diff = 1.0 - diff;
-	  }
-	  return diff;
-	}
-      } else {
-	return norm(val1, index) - norm(val2, index);
-      }
-    default:
-      return 0;
+      case Attribute.NOMINAL:
+        
+        // If attribute is nominal
+        if(Instance.isMissingValue(val1) ||
+           Instance.isMissingValue(val2) ||
+           ((int)val1 != (int)val2)) {
+          return 1;
+        } else {
+          return 0;
+        }
+      case Attribute.NUMERIC:
+        // If attribute is numeric
+        if (Instance.isMissingValue(val1) ||
+        Instance.isMissingValue(val2)) {
+          if(Instance.isMissingValue(val1) &&
+             Instance.isMissingValue(val2)) {
+            if(m_NoAttribNorm==false)  //We are doing normalization
+              return 1;
+            else
+              return (m_Max[index] - m_Min[index]);
+          } else {
+            double diff;
+            if (Instance.isMissingValue(val2)) {
+              diff = (m_NoAttribNorm==false) ? norm(val1, index) : val1;
+            } else {
+              diff = (m_NoAttribNorm==false) ? norm(val2, index) : val2;
+            }
+            if (m_NoAttribNorm==false && diff < 0.5) {
+              diff = 1.0 - diff;
+            }
+            else if (m_NoAttribNorm==true) {
+              if((m_Max[index]-diff) > (diff-m_Min[index]))
+                return m_Max[index]-diff;
+              else
+                return diff-m_Min[index];
+            }
+            return diff;
+          }
+        } else {
+          return (m_NoAttribNorm==false) ? 
+                                  (norm(val1, index) - norm(val2, index)) :
+                                  (val1 - val2);
+        }
+      default:
+        return 0;
     }
   }
 
@@ -640,7 +808,9 @@ public class LWL extends SingleClassifierEnhancer
       }
     }
   }
+  
 
+  
   /**
    * Main method for testing this class.
    *
@@ -656,9 +826,93 @@ public class LWL extends SingleClassifierEnhancer
       System.err.println(e.getMessage());
     }
   }
+  
+  
+  private class MyHeap {
+    //m_heap[0].index containts the current size of the heap
+    //m_heap[0].distance is unused.
+    MyHeapElement m_heap[] = null;
+    public MyHeap(int maxSize) {
+        if((maxSize%2)==0)
+            maxSize++;
+        
+        m_heap = new MyHeapElement[maxSize+1];
+        m_heap[0] = new MyHeapElement(0, 0);
+        //System.err.println("m_heap size is: "+m_heap.length);
+    }
+    public int size() {
+        return m_heap[0].index;
+    }
+    public MyHeapElement peek() {
+        return m_heap[1];
+    }
+    public MyHeapElement get() throws Exception  {
+        if(m_heap[0].index==0)
+            throw new Exception("No elements present in the heap");
+        MyHeapElement r = m_heap[1];
+        m_heap[1] = m_heap[m_heap[0].index];
+        m_heap[0].index--;
+        downheap();
+        return r;
+    }
+    public void put(int i, double d) throws Exception {
+        if((m_heap[0].index+1)>(m_heap.length-1))
+            throw new Exception("the number of elements cannot exceed the "+
+                                "initially set maximum limit");
+        m_heap[0].index++;
+        m_heap[m_heap[0].index] = new MyHeapElement(i, d);
+        //m_heap[m_heap[0].index].index = i;
+        //m_heap[m_heap[0].index].distance = d;        
+        //System.err.print("new size: "+(int)m_heap[0]+", ");
+        upheap();
+    }
+    private void upheap() {
+        int i = m_heap[0].index;
+        MyHeapElement temp;
+        while( i > 1  && m_heap[i].distance>m_heap[i/2].distance) {
+            temp = m_heap[i];
+            m_heap[i] = m_heap[i/2];
+            i = i/2;
+            m_heap[i] = temp; //this is i/2 done here to avoid another division.
+        }
+    }
+    private void downheap() {
+        int i = 1;
+        MyHeapElement temp;
+        while( (2*i) <= m_heap[0].index && 
+                  (m_heap[i].distance < m_heap[2*i].distance || 
+                   m_heap[i].distance<m_heap[2*i+1].distance )) {
+            if((2*i+1)<=m_heap[0].index) {
+                if(m_heap[2*i].distance>m_heap[2*i+1].distance) {
+                    temp = m_heap[i];
+                    m_heap[i] = m_heap[2*i];
+                    i = 2*i;
+                    m_heap[i] = temp;
+                }
+                else {
+                    temp = m_heap[i];
+                    m_heap[i] = m_heap[2*i+1];
+                    i = 2*i+1;
+                    m_heap[i] = temp;
+                }
+            }
+            else {
+                temp = m_heap[i];
+                m_heap[i] = m_heap[2*i];
+                i = 2*i;
+                m_heap[i] = temp;
+            }
+        }
+    }    
+    
+  }
+  
+  private class MyHeapElement {
+      int index;
+      double distance; 
+      public MyHeapElement(int i, double d) {
+          distance = d; index = i;
+      }
+  }
+  
 }
-
-
-
-
-
