@@ -34,7 +34,7 @@ import  weka.core.*;
  * search is used to produce a ranked list of attributes.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RankSearch extends ASSearch implements OptionHandler {
 
@@ -236,6 +236,10 @@ public class RankSearch extends ASSearch implements OptionHandler {
     m_Instances = data;
     m_numAttribs = m_Instances.numAttributes();
 
+    if (m_ASEval instanceof AttributeTransformer) {
+      throw new Exception("Can't use an attribute transformer "
+			  +"with RankSearch");
+    }
     if (m_ASEval instanceof UnsupervisedAttributeEvaluator || 
 	m_ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;

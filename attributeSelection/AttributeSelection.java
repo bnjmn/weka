@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.13 $
+ * @version  $Revision: 1.14 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -488,8 +488,11 @@ public class AttributeSelection implements Serializable {
     int [] attributeSet;
     
     m_trainInstances = data;
-    int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
     
+    if (m_doXval == true && (m_ASEvaluator instanceof AttributeTransformer)) {
+      throw new Exception("Can't cross validate an attribute transformer.");
+    }
+
     if (m_ASEvaluator instanceof SubsetEvaluator &&
 	m_searchMethod instanceof Ranker) {
       throw new Exception(m_ASEvaluator.getClass().getName()
@@ -522,6 +525,12 @@ public class AttributeSelection implements Serializable {
 
     // Initialize the attribute evaluator
     m_ASEvaluator.buildEvaluator(m_trainInstances);
+    if (m_ASEvaluator instanceof AttributeTransformer) {
+      m_trainInstances = 
+	((AttributeTransformer)m_ASEvaluator).getTransformedData();
+    }
+    int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
+
     // Do the search
     attributeSet = m_searchMethod.search(m_ASEvaluator, 
 					 m_trainInstances);
@@ -561,8 +570,10 @@ public class AttributeSelection implements Serializable {
 	  }
 	  if ((Math.abs((Math.log(Math.abs(m_attributeRanking[i][1])) 
 		/ Math.log(10)))+1) > w_p) {
+	    if (m_attributeRanking[i][1] > 0) {
 	    w_p = (int)Math.abs((Math.log(Math.abs(m_attributeRanking[i][1]))
-		    / Math.log(10)))+1;
+				 / Math.log(10)))+1;
+	    }
 	  }
 	}
       }

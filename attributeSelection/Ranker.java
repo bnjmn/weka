@@ -36,7 +36,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -359,6 +359,10 @@ public class Ranker extends ASSearch
 			   + " is not a" 
 			   + "Attribute evaluator!");
     }
+    
+    if (ASEval instanceof AttributeTransformer) {
+      data = ((AttributeTransformer)ASEval).getTransformedData();
+    }
 
     m_numAttribs = data.numAttributes();
 
@@ -370,11 +374,12 @@ public class Ranker extends ASSearch
       m_classIndex = data.classIndex();
     }
 
+
     m_startRange.setUpper(m_numAttribs - 1);
     if (!(getStartSet().equals(""))) {
       m_starting = m_startRange.getSelection();
     }
-
+    
     int sl=0;
     if (m_starting != null) {
       sl = m_starting.length;
@@ -383,14 +388,14 @@ public class Ranker extends ASSearch
       // see if the supplied list contains the class index
       boolean ok = false;
       for (i = 0; i < sl; i++) {
-        if (m_starting[i] == m_classIndex) {
-          ok = true;
-          break;
-        }
+	if (m_starting[i] == m_classIndex) {
+	  ok = true;
+	  break;
+	}
       }
-
+      
       if (ok == false) {
-        sl++;
+	sl++;
       }
     }
     else {
@@ -398,6 +403,7 @@ public class Ranker extends ASSearch
 	sl++;
       }
     }
+
 
     m_attributeList = new int[m_numAttribs - sl];
     m_attributeMerit = new double[m_numAttribs - sl];
