@@ -6,15 +6,18 @@
 
 package weka.associations;
 
-import java.io.*;
-import weka.core.*;
+import java.io.Serializable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 
 /** 
  * Abstract scheme for learning associations. All schemes for learning
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public abstract class Associator implements Cloneable, Serializable {
  
@@ -52,12 +55,15 @@ public abstract class Associator implements Cloneable, Serializable {
   }
 
   /**
-   * Creates copies of the current associator.
+   * Creates copies of the current associator. Note that this method
+   * now uses Serialization to perform a deep copy, so the Associator
+   * object must be fully Serializable. Any currently built model will
+   * now be copied as well.
    *
    * @param model an example associator to copy
    * @param num the number of associators copies to create.
    * @return an array of associators.
-   * @exception Exception if an error occurs
+   * @exception Exception if an error occurs 
    */
   public static Associator [] makeCopies(Associator model,
 					 int num) throws Exception {
@@ -66,17 +72,9 @@ public abstract class Associator implements Cloneable, Serializable {
       throw new Exception("No model associator set");
     }
     Associator [] associators = new Associator [num];
-    String [] options = null;
-    if (model instanceof OptionHandler) {
-      options = ((OptionHandler)model).getOptions();
-    }
+    SerializedObject so = new SerializedObject(model);
     for(int i = 0; i < associators.length; i++) {
-      associators[i] = (Associator) model.getClass().newInstance();
-      if (options != null) {
-	String [] tempOptions = (String [])options.clone();
-	((OptionHandler)associators[i]).setOptions(tempOptions);
-	Utils.checkForRemainingOptions(tempOptions);
-      }
+      associators[i] = (Associator) so.getObject();
     }
     return associators;
   }

@@ -6,8 +6,12 @@
 
 package weka.classifiers;
 
-import java.io.*;
-import weka.core.*;
+import java.io.Serializable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+
 
 /** 
  * Abstract classifier. All schemes for numeric or nominal prediction in
@@ -15,7 +19,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class Classifier implements Cloneable, Serializable {
  
@@ -67,9 +71,10 @@ public abstract class Classifier implements Cloneable, Serializable {
 
   /**
    * Creates copies of the current classifier, which can then
-   * be used for boosting etc. Note that this is not
-   * designed to copy any currently built <i>model</i>, just the
-   * option settings.
+   * be used for boosting etc. Note that this method now uses
+   * Serialization to perform a deep copy, so the Classifier
+   * object must be fully Serializable. Any currently built model
+   * will now be copied as well.
    *
    * @param model an example classifier to copy
    * @param num the number of classifiers copies to create.
@@ -83,17 +88,9 @@ public abstract class Classifier implements Cloneable, Serializable {
       throw new Exception("No model classifier set");
     }
     Classifier [] classifiers = new Classifier [num];
-    String [] options = null;
-    if (model instanceof OptionHandler) {
-      options = ((OptionHandler)model).getOptions();
-    }
+    SerializedObject so = new SerializedObject(model);
     for(int i = 0; i < classifiers.length; i++) {
-      classifiers[i] = (Classifier) model.getClass().newInstance();
-      if (options != null) {
-	String [] tempOptions = (String [])options.clone();
-	((OptionHandler)classifiers[i]).setOptions(tempOptions);
-	Utils.checkForRemainingOptions(tempOptions);
-      }
+      classifiers[i] = (Classifier) so.getObject();
     }
     return classifiers;
   }
