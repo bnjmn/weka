@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $ 
+ * @version $Revision: 1.40 $ 
  */
 public class Instances implements Serializable {
  
@@ -843,8 +843,7 @@ public class Instances implements Serializable {
 
     Instances newData = new Instances(this, numInstances());
     while (newData.numInstances() < numInstances()) {
-      int i = (int) (random.nextDouble() * (double) numInstances());
-      newData.add(instance(i));
+      newData.add(instance(random.nextInt(numInstances())));
     }
     return newData;
   }
@@ -860,18 +859,10 @@ public class Instances implements Serializable {
   public final Instances resampleWithWeights(Random random) {
 
     double [] weights = new double[numInstances()];
-    boolean foundOne = false;
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
-      if (!Utils.eq(weights[i], weights[0])) {
-        foundOne = true;
-      }
     }
-    if (foundOne) {
-      return resampleWithWeights(random, weights);
-    } else {
-      return new Instances(this);
-    }
+    return resampleWithWeights(random, weights);
   }
 
 
