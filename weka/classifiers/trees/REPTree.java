@@ -25,6 +25,7 @@ package weka.classifiers.trees;
 import weka.classifiers.*;
 import weka.core.*;
 import java.util.*;
+import java.io.*;
 
 /**
  * Fast decision tree learner. Builds a decision tree using
@@ -48,13 +49,13 @@ import java.util.*;
  * No pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable {
 
   /** An inner class for building and storing the tree structure */
-  private class Tree {
+  private class Tree implements Serializable {
 
     /** The subtrees of this tree. */ 
     private Tree[] m_Successors;
@@ -131,26 +132,23 @@ public class REPTree extends DistributionClassifier
     /**
      * Outputs one node for graph.
      */
-    private int toGraph(StringBuffer text, int num) throws Exception {
-      
-      int maxIndex = Utils.maxIndex(m_ClassProbs);
-      String classValue = m_Info.classAttribute().value(maxIndex);
-      double errors = Utils.sum(m_HoldOutDist) - m_HoldOutDist[maxIndex];
-      String err = Utils.doubleToString(errors, 2);
+    private int toGraph(StringBuffer text, int num,
+			Tree parent) throws Exception {
       
       num++;
       if (m_Attribute == -1) {
 	text.append("N" + Integer.toHexString(hashCode()) +
-		    " [label=\"" + num + ": " + classValue + " (" + err +")\"" +
+		    " [label=\"" + num + leafString(parent) +"\"" +
 		    "shape=box]\n");
-      }else {
+      } else {
 	text.append("N" + Integer.toHexString(hashCode()) +
-		    " [label=\"" + num + ": " + classValue + " (" + err +")\"]\n");
+		    " [label=\"" + num + ": " + m_Info.attribute(m_Attribute).name() + 
+		    "\"]\n");
 	for (int i = 0; i < m_Successors.length; i++) {
 	  text.append("N" + Integer.toHexString(hashCode()) 
 		      + "->" + 
 		      "N" + Integer.toHexString(m_Successors[i].hashCode())  +
-		      " [label=\"" + m_Info.attribute(m_Attribute).name());
+		      " [label=\"");
 	  if (m_Info.attribute(m_Attribute).isNumeric()) {
 	    if (i == 0) {
 	      text.append(" < " +
@@ -163,7 +161,7 @@ public class REPTree extends DistributionClassifier
 	    text.append(" = " + m_Info.attribute(m_Attribute).value(i));
 	  }
 	  text.append("\"]\n");
-	  num = m_Successors[i].toGraph(text, num);
+	  num = m_Successors[i].toGraph(text, num, this);
 	}
       }
       
@@ -173,10 +171,14 @@ public class REPTree extends DistributionClassifier
     /**
      * Outputs a leaf.
      */
-    private String leafString() throws Exception {
+    private String leafString(Tree parent) throws Exception {
     
-      int maxIndex = Utils.maxIndex(m_Distribution[0]);
-
+      int maxIndex;
+      if (Utils.eq(Utils.sum(m_Distribution[0]), 0)) {
+	maxIndex = Utils.maxIndex(parent.m_ClassProbs);
+      } else {
+	maxIndex = Utils.maxIndex(m_ClassProbs);
+      }
       return " : " + m_Info.classAttribute().value(maxIndex) + 
 	" (" + Utils.doubleToString(Utils.sum(m_Distribution[0]), 2) + "/" + 
 	Utils.doubleToString((Utils.sum(m_Distribution[0]) - 
@@ -189,7 +191,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Recursively outputs the tree.
      */
-    private String toString(int level) {
+    private String toString(int level, Tree parent) {
 
       try {
 	StringBuffer text = new StringBuffer();
@@ -197,7 +199,7 @@ public class REPTree extends DistributionClassifier
 	if (m_Attribute == -1) {
 	
 	  // Output leaf info
-	  return leafString();
+	  return leafString(parent);
 	} else if (m_Info.attribute(m_Attribute).isNominal()) {
 	
 	  // For nominal attributes
@@ -208,7 +210,7 @@ public class REPTree extends DistributionClassifier
 	    }
 	    text.append(m_Info.attribute(m_Attribute).name() + " = " +
 			m_Info.attribute(m_Attribute).value(i));
-	    text.append(m_Successors[i].toString(level + 1));
+	    text.append(m_Successors[i].toString(level + 1, this));
 	  }
 	} else {
 	
@@ -219,14 +221,14 @@ public class REPTree extends DistributionClassifier
 	  }
 	  text.append(m_Info.attribute(m_Attribute).name() + " < " +
 		      Utils.doubleToString(m_SplitPoint, 2));
-	  text.append(m_Successors[0].toString(level + 1));
+	  text.append(m_Successors[0].toString(level + 1, this));
 	  text.append("\n");
 	  for (int j = 0; j < level; j++) {
 	    text.append("|   ");
 	  }
 	  text.append(m_Info.attribute(m_Attribute).name() + " >= " +
 		      Utils.doubleToString(m_SplitPoint, 2));
-	  text.append(m_Successors[1].toString(level + 1));
+	  text.append(m_Successors[1].toString(level + 1, this));
 	}
       
 	return text.toString();
@@ -954,17 +956,13 @@ public class REPTree extends DistributionClassifier
   /**
    * Outputs the decision tree as a graph
    */
-  public String graph() {
+  public String graph() throws Exception {
 
-    try {
-      StringBuffer resultBuff = new StringBuffer();
-      m_Tree.toGraph(resultBuff, 0);
-      String result = "digraph Tree {\n" + "edge [style=bold]\n" + resultBuff.toString()
-	+ "\n}\n";
-      return result;
-    } catch (Exception e) {
-      return null;
-    }
+    StringBuffer resultBuff = new StringBuffer();
+    m_Tree.toGraph(resultBuff, 0, null);
+    String result = "digraph Tree {\n" + "edge [style=bold]\n" + resultBuff.toString()
+      + "\n}\n";
+    return result;
   }
   
   /**
@@ -973,7 +971,7 @@ public class REPTree extends DistributionClassifier
   public String toString() {
     
     return     
-      "\nREPTree\n============\n" + m_Tree.toString(0) + "\n" +
+      "\nREPTree\n============\n" + m_Tree.toString(0, null) + "\n" +
       "\nSize of the tree : " + numNodes();
   }
 
