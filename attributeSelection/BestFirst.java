@@ -27,6 +27,9 @@ import  weka.core.*;
  *
  * Valid options are: <p>
  *
+ * -P <start set> <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
  * -D <-1 = backward | 0 = bidirectional | 1 = forward> <br>
  * Direction of the search. (default = 1). <p>
  *
@@ -35,11 +38,10 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class BestFirst
-  extends ASSearch
-  implements OptionHandler
+public class BestFirst extends ASSearch 
+  implements OptionHandler, StartSetHandler
 {
 
   // Inner classes
@@ -189,7 +191,6 @@ public class BestFirst
 
   }
 
-
   // member variables
   /** maximum number of stale nodes before terminating search */
   private int m_maxStale;
@@ -207,8 +208,11 @@ public class BestFirst
     new Tag(SELECTION_BIDIRECTIONAL, "Bi-directional"),
   };
 
-  /** holds a starting set (if one is supplied) */
+  /** holds an array of starting attributes */
   private int[] m_starting;
+
+  /** holds the start set for the search as a Range */
+  private Range m_startRange;
 
   /** does the data have a class */
   private boolean m_hasClass;
@@ -235,14 +239,18 @@ public class BestFirst
     resetOptions();
   }
 
-
   /**
    * Returns an enumeration describing the available options
    * @return an enumeration of all the available options
    *
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(3);
+    
+    newVector.addElement(new Option("\tSpecify a starting set of attributes." 
+				    + "\n\tEg. 1,3,5-7."
+				    ,"P",1
+				    , "-P <start set>"));
     newVector.addElement(new Option("\tDirection of search. (default = 1)."
 				    , "D", 1
 				    , "-D <0 = backward | 1 = forward " 
@@ -259,6 +267,9 @@ public class BestFirst
    *
    * Valid options are: <p>
    *
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+   *
    * -D <-1 = backward | 0 = bidirectional | 1 = forward> <br>
    * Direction of the search. (default = 1). <p>
    *
@@ -274,6 +285,12 @@ public class BestFirst
   {
     String optionString;
     resetOptions();
+
+    optionString = Utils.getOption('P', options);
+    if (optionString.length() != 0) {
+      setStartSet(optionString);
+    }
+
     optionString = Utils.getOption('D', options);
 
     if (optionString.length() != 0) {
@@ -292,6 +309,25 @@ public class BestFirst
     m_debug = Utils.getFlag('Z', options);
   }
 
+  /**
+   * Sets a starting set of attributes for the search. It is the
+   * search method's responsibility to report this start set (if any)
+   * in its toString() method.
+   * @param startSet a string containing a list of attributes (and or ranges),
+   * eg. 1,2,6,10-15.
+   * @exception if start set can't be set.
+   */
+  public void setStartSet (String startSet) throws Exception {
+    m_startRange.setRanges(startSet);
+  }
+
+  /**
+   * Returns a list of attributes (and or attribute ranges) as a String
+   * @return a list of attributes (and or attribute ranges)
+   */
+  public String getStartSet () {
+    return m_startRange.getRanges();
+  }
 
   /**
    * Set the numnber of non-improving nodes to consider before terminating
@@ -353,8 +389,13 @@ public class BestFirst
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[4];
+    String[] options = new String[6];
     int current = 0;
+
+    if (!(getStartSet().equals(""))) {
+      options[current++] = "-P";
+      options[current++] = ""+startSetToString();
+    }
     options[current++] = "-D";
     options[current++] = "" + m_searchDirection;
     options[current++] = "-N";
@@ -367,6 +408,43 @@ public class BestFirst
     return  options;
   }
 
+  /**
+   * converts the array of starting attributes to a string. This is
+   * used by getOptions to return the actual attributes specified
+   * as the starting set. This is better than using m_startRanges.getRanges()
+   * as the same start set can be specified in different ways from the
+   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
+   * is stored in a database is comparable.
+   * @return a comma seperated list of individual attribute numbers as a String
+   */
+  private String startSetToString() {
+    StringBuffer FString = new StringBuffer();
+    boolean didPrint;
+
+    if (m_starting == null) {
+      return getStartSet();
+    }
+    for (int i = 0; i < m_starting.length; i++) {
+      didPrint = false;
+      
+      if ((m_hasClass == false) || 
+	  (m_hasClass == true && i != m_classIndex)) {
+	FString.append((m_starting[i] + 1));
+	didPrint = true;
+      }
+      
+      if (i == (m_starting.length - 1)) {
+	FString.append("");
+      }
+      else {
+	if (didPrint) {
+	  FString.append(",");
+	  }
+      }
+    }
+
+    return FString.toString();
+  }
 
   /**
    * returns a description of the search as a String
@@ -380,33 +458,15 @@ public class BestFirst
       BfString.append("no attributes\n");
     }
     else {
-      boolean didPrint;
-
-      for (int i = 0; i < m_starting.length; i++) {
-	didPrint = false;
-
-	if ((m_hasClass == false) || 
-	    (m_hasClass == true && i != m_classIndex)) {
-	  BfString.append((m_starting[i] + 1));
-	  didPrint = true;
-	}
-
-	if (i == (m_starting.length - 1)) {
-	  BfString.append("\n");
-	}
-	else {if (didPrint) {
-	  BfString.append(",");
-	}
-	}
-      }
+      BfString.append(startSetToString()+"\n");
     }
 
     BfString.append("\tSearch direction: ");
 
-    if (m_searchDirection == -1) {
+    if (m_searchDirection == SELECTION_BACKWARD) {
       BfString.append("backward\n");
     }
-    else {if (m_searchDirection == 1) {
+    else {if (m_searchDirection == SELECTION_FORWARD) {
       BfString.append("forward\n");
     }
     else {
@@ -440,25 +500,18 @@ public class BestFirst
   /**
    * Searches the attribute subset space by best first search
    *
-   * @param startSet a (possibly) ordered array of attribute indexes from
-   * which to start the search from. Set to null if no explicit start
-   * point.
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @exception Exception if the search can't be completed
    */
-  public int[] search (int[] startSet, ASEvaluation ASEval, Instances data)
+  public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception
   {
     if (!(ASEval instanceof SubsetEvaluator)) {
       throw  new Exception(ASEval.getClass().getName() 
 			   + " is not a " 
 			   + "Subset evaluator!");
-    }
-
-    if (startSet != null) {
-      m_starting = startSet;
     }
 
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
@@ -491,6 +544,10 @@ public class BestFirst
     stale = 0;
     best_group = new BitSet(m_numAttribs);
 
+    m_startRange.setUpper(m_numAttribs-1);
+    if (!(getStartSet().equals(""))) {
+      m_starting = m_startRange.getSelection();
+    }
     // If a starting subset has been supplied, then initialise the bitset
     if (m_starting != null) {
       for (i = 0; i < m_starting.length; i++) {
@@ -502,20 +559,22 @@ public class BestFirst
       best_size = m_starting.length;
       m_totalEvals++;
     }
-    else {if (m_searchDirection == -1) {
-      m_starting = new int[m_numAttribs];
+    else {
+      if (m_searchDirection == SELECTION_BACKWARD) {
+	setStartSet("1-last");
+	m_starting = new int[m_numAttribs];
 
-      // init initial subset to all attributes
-      for (i = 0, j = 0; i < m_numAttribs; i++) {
-	if (i != m_classIndex) {
-	  best_group.set(i);
-	  m_starting[j++] = i;
+	// init initial subset to all attributes
+	for (i = 0, j = 0; i < m_numAttribs; i++) {
+	  if (i != m_classIndex) {
+	    best_group.set(i);
+	    m_starting[j++] = i;
+	  }
 	}
-      }
 
-      best_size = m_numAttribs - 1;
-      m_totalEvals++;
-    }
+	best_size = m_numAttribs - 1;
+	m_totalEvals++;
+      }
     }
 
     // evaluate the initial subset
@@ -528,10 +587,10 @@ public class BestFirst
     while (stale < m_maxStale) {
       added = false;
 
-      if (m_searchDirection == 0) // bi-directional search
-	{
+      if (m_searchDirection == SELECTION_BIDIRECTIONAL) {
+	// bi-directional search
 	  done = 2;
-	  sd = 1;
+	  sd = SELECTION_FORWARD;
 	}
       else {
 	done = 1;
@@ -559,7 +618,7 @@ public class BestFirst
 
       do {
 	for (i = 0; i < m_numAttribs; i++) {
-	  if (sd == 1) {
+	  if (sd == SELECTION_FORWARD) {
 	    z = ((i != m_classIndex) && (!temp_group.get(i)));
 	  }
 	  else {
@@ -568,7 +627,7 @@ public class BestFirst
 
 	  if (z) {
 	    // set the bit (attribute to add/delete)
-	    if (sd == 1) {
+	    if (sd == SELECTION_FORWARD) {
 	      temp_group.set(i);
 	    }
 	    else {
@@ -590,11 +649,11 @@ public class BestFirst
 	      }
 
 	      // is this better than the best?
-	      if (sd == 1) {
+	      if (sd == SELECTION_FORWARD) {
 		z = ((merit - best_merit) > 0.00001);
 	      }
 	      else {
-		z = ((merit >= best_merit) && ((size + sd) < best_size));
+		z = ((merit >= best_merit) && ((size) < best_size));
 	      }
 
 	      if (z) {
@@ -611,7 +670,7 @@ public class BestFirst
 	    }
 
 	    // unset this addition(deletion)
-	    if (sd == 1) {
+	    if (sd == SELECTION_FORWARD) {
 	      temp_group.clear(i);
 	    }
 	    else {
@@ -621,7 +680,7 @@ public class BestFirst
 	}
 
 	if (done == 2) {
-	  sd = -1;
+	  sd = SELECTION_BACKWARD;
 	}
 
 	done--;
@@ -644,8 +703,9 @@ public class BestFirst
    */
   protected void resetOptions () {
     m_maxStale = 5;
-    m_searchDirection = 1;
+    m_searchDirection = SELECTION_FORWARD;
     m_starting = null;
+    m_startRange = new Range();
     m_classIndex = -1;
     m_totalEvals = 0;
     m_debug = false;

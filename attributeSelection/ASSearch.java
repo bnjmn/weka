@@ -25,7 +25,7 @@ import weka.core.*;
  * Abstract attribute selection search class.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class ASSearch implements Serializable {
 
@@ -36,16 +36,12 @@ public abstract class ASSearch implements Serializable {
   /**
    * Searches the attribute subset/ranking space.
    *
-   * @param startSet an (possibly) ordered array of attribute indexes
-   * from which to start the search from. Set to null if no explicit start
-   * point.
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @exception Exception if the search can't be completed
    */
-  public abstract int [] search(int [] startSet,
-				ASEvaluation ASEvaluator,
+  public abstract int [] search(ASEvaluation ASEvaluator,
 				Instances data) throws Exception;
 
   /**
