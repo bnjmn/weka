@@ -23,12 +23,15 @@ PACKAGE = weka.gui.explorer
 #----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
+	(cd treevisualizer; make all JAVA=$(JAVA))
 
 debug : clean
 	$(JAVA) -g $(SOURCES)
+	(cd treevisualizer; make debug JAVA=$(JAVA))
 
 optimized : clean
 	$(JAVA) -O $(SOURCES)
+	(cd treevisualizer; make optimized JAVA=$(JAVA))
 
 fulljar : all
 	(cd $(TOPDIR) ; \

@@ -70,6 +70,7 @@ classjar :  all
 	$(PACKAGEDIR)/*.props \
 	$(PACKAGEDIR)/experiment/*.class \
 	$(PACKAGEDIR)/explorer/*.class \
+	$(PACKAGEDIR)/explorer/treevisualizer/*.class \
 	$(PACKAGEDIR)/streams/*.class; \
 	rm -f $(PACKAGE).jar; \
 	ln -s archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar $(PACKAGE).jar)
