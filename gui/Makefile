@@ -21,7 +21,9 @@ SOURCES = \
 	ResultHistoryPanel.java \
 	SelectedTagEditor.java \
 	SetInstancesPanel.java \
-	SysErrLog.java
+	SysErrLog.java \
+	TaskLogger.java \
+	WekaTaskMonitor.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
