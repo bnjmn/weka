@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 
@@ -209,6 +209,14 @@ public class MatrixPanel extends JPanel{
 						   new Color(0, 255, 0),
 						   Color.black};
 
+  /** color for the font used in column and row names */
+  private final Color fontColor = new Color(98, 101, 156);
+
+  /** font used in column and row names */
+  private final java.awt.Font f = new java.awt.Font("Dialog", java.awt.Font.BOLD, 11);
+
+
+
   /** Constructor
       @param ins The instances object for the matrix
   */
@@ -269,11 +277,10 @@ public class MatrixPanel extends JPanel{
 	  initInternalFields();
 					
 	  Plot a = m_plotsPanel;
-	  java.awt.FontMetrics fm = a.getFontMetrics(a.getFont());
 	  a.setCellSize( m_plotSize.getValue() );					
-	  Dimension d = new Dimension((m_selectedAttribs.length)*(a.cellSize+a.extpad)+100, 
-				      (m_selectedAttribs.length)*(a.cellSize+a.extpad)
-				      +2*fm.getHeight()+a.extpad);
+	  Dimension d = new Dimension((m_selectedAttribs.length)*(a.cellSize+a.extpad)+2, 
+				      (m_selectedAttribs.length)*(a.cellSize+a.extpad)+2
+				     );
 	  //System.out.println("Size: "+a.cellSize+" Extpad: "+
 	  //		   a.extpad+" selected: "+
 	  //		   m_selectedAttribs.length+' '+d); 
@@ -445,12 +452,18 @@ public class MatrixPanel extends JPanel{
       m_colorList.addElement(m_defaultColors[i]);
       
     /** Initializing internal fields and components **/
+    m_selectedAttribs = m_attribList.getSelectedIndices();
     m_plotsPanel = new Plot();
     m_plotsPanel.setLayout(null);
-    m_plotsPanel.setFont( new java.awt.Font("Dialog", java.awt.Font.BOLD, 11) );
     m_js.getHorizontalScrollBar().setUnitIncrement( 10 );
     m_js.getVerticalScrollBar().setUnitIncrement( 10 ); 
     m_js.setViewportView( m_plotsPanel );
+    m_js.setColumnHeaderView( m_plotsPanel.getColHeader() );
+    m_js.setRowHeaderView( m_plotsPanel.getRowHeader() );
+    final JLabel lb = new JLabel(" Plot Matrix");
+    lb.setFont(f); lb.setForeground(fontColor);
+    lb.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    m_js.setCorner(JScrollPane.UPPER_LEFT_CORNER, lb);
     m_cp.setInstances(m_data);
     m_cp.setBorder(BorderFactory.createEmptyBorder(15,10,10,10));
     m_cp.addRepaintNotify(m_plotsPanel);
@@ -739,10 +752,11 @@ public class MatrixPanel extends JPanel{
   private class Plot extends JPanel implements MouseMotionListener, MouseListener {
 
     int extpad=3, intpad=4, cellSize=100, cellRange=100, lastx=0, lasty=0, jitter=0;
-    Color fontColor = new Color(98, 101, 156);
     java.awt.Rectangle r;
-    java.awt.FontMetrics fm = this.getFontMetrics(this.getFont());
+    java.awt.FontMetrics fm;
     int lastxpos, lastypos;
+    JPanel jPlColHeader, jPlRowHeader;
+
 
     /** Constructor 
      */
@@ -754,16 +768,96 @@ public class MatrixPanel extends JPanel{
       initialize();
     }
 
-
     /** Initializes the internal fields */
     public void initialize() {
       lastxpos = lastypos = 0;	  
       cellRange = cellSize; cellSize = cellRange + 2*intpad;
+
+      jPlColHeader = new JPanel() {
+	      java.awt.Rectangle r;     
+	      public void paint(Graphics g) {
+		  r = g.getClipBounds();
+		  g.clearRect(r.x, r.y, r.width, r.height);
+		  g.setFont( f );
+		  fm = g.getFontMetrics();
+		  int xpos = 0, ypos = 0, attribWidth=0;
+		  
+		  g.setColor(fontColor);
+		  xpos = extpad;
+		  ypos=extpad+fm.getHeight();
+
+		  for(int i=0; i<m_selectedAttribs.length; i++) {
+		      if( xpos+cellSize < r.x)
+			  { xpos += cellSize+extpad; continue; }
+		      else if(xpos > r.x+r.width)
+			  { break; }
+		      else {
+			  attribWidth = fm.stringWidth(m_data.attribute(m_selectedAttribs[i]).name());
+			  g.drawString(m_data.attribute(m_selectedAttribs[i]).name(), 
+				       (attribWidth<cellSize) ? (xpos + (cellSize/2 - attribWidth/2)):xpos, 
+				       ypos);
+		      }
+		      xpos += cellSize+extpad;
+		  }
+		  fm = null; r=null;
+	      }
+	      
+	      public Dimension getPreferredSize() {
+		  fm = this.getFontMetrics(this.getFont());
+		  return new Dimension( m_selectedAttribs.length*(cellSize+extpad),
+						       2*extpad + fm.getHeight() );
+	      }
+	  };
+
+      jPlRowHeader = new JPanel() {
+	      java.awt.Rectangle r; 	      
+	      public void paint(Graphics g) {
+		  r = g.getClipBounds();
+		  g.clearRect(r.x, r.y, r.width, r.height);
+		  g.setFont( f );
+		  fm = g.getFontMetrics();
+		  int xpos = 0, ypos = 0, attribWidth=0;
+		  
+		  g.setColor(fontColor);
+		  xpos = extpad;
+		  ypos=extpad; 
+		  
+		  for(int j=m_selectedAttribs.length-1; j>=0; j--) {
+		      if( ypos+cellSize < r.y )
+			  { ypos += cellSize+extpad;  continue; }
+		      else if( ypos > r.y+r.height )
+			  break;
+		      else {
+			  g.drawString(m_data.attribute(m_selectedAttribs[j]).name(), xpos+extpad, ypos+cellSize/2);
+		      }
+		      xpos = extpad;
+		      ypos += cellSize+extpad;
+		  }		 
+		  r=null; 
+	      }
+	      
+	      public Dimension getPreferredSize() {
+		  return new Dimension( 100+extpad,
+					m_selectedAttribs.length*(cellSize+extpad)
+					);
+	      }
+	  };      
+      jPlColHeader.setFont(f);
+      jPlRowHeader.setFont(f);
+      this.setFont(f);
     }      
+
+    public JPanel getRowHeader() {
+	  return jPlRowHeader;
+    }
+
+    public JPanel getColHeader() {
+	return jPlColHeader;
+    }
 
     public void mouseMoved(MouseEvent e) {
       Graphics g = this.getGraphics();
-      int xpos=100+extpad, ypos=extpad+2*fm.getHeight();
+      int xpos=extpad, ypos=extpad;
 
       for(int j=m_selectedAttribs.length-1; j>=0; j--) {
 	for(int i=0; i<m_selectedAttribs.length; i++) {
@@ -781,7 +875,7 @@ public class MatrixPanel extends JPanel{
 	    }
 	  xpos+=cellSize+extpad;
 	}
-	xpos=100+extpad;
+	xpos=extpad;
 	ypos+=cellSize+extpad;
       }
       if(lastxpos!=0 && lastypos!=0) {
@@ -795,7 +889,7 @@ public class MatrixPanel extends JPanel{
     public void mouseClicked(MouseEvent e) {
       int i=0, j=0, found=0;
 	  
-      int xpos=100+extpad, ypos=extpad+2*fm.getHeight();
+      int xpos=extpad, ypos=extpad;
       for(j=m_selectedAttribs.length-1; j>=0; j--) {
 	for(i=0; i<m_selectedAttribs.length; i++) {
 	  if(e.getX()>=xpos && e.getX()<=xpos+cellSize+extpad)
@@ -806,7 +900,7 @@ public class MatrixPanel extends JPanel{
 	}
 	if(found==1)
 	  break;
-	xpos=100+extpad;
+	xpos=extpad;
 	ypos+=cellSize+extpad;
       }
       if(found==0)
@@ -851,7 +945,7 @@ public class MatrixPanel extends JPanel{
 	on
     */
     public String getToolTipText(MouseEvent event) {
-      int xpos=100+extpad, ypos=extpad+2*fm.getHeight();
+      int xpos=extpad, ypos=extpad;
 	  
       for(int j=m_selectedAttribs.length-1; j>=0; j--) {
 	for(int i=0; i<m_selectedAttribs.length; i++) {
@@ -862,7 +956,7 @@ public class MatrixPanel extends JPanel{
 		     " (click to enlarge)");
 	  xpos+=cellSize+extpad;
 	}
-	xpos=100+extpad;
+	xpos=extpad;
 	ypos+=cellSize+extpad;
       }
       return ("Matrix Panel");
@@ -933,26 +1027,8 @@ public class MatrixPanel extends JPanel{
       int xpos = 0, ypos = 0, attribWidth=0;
 	  
       xpos = extpad;
-      ypos=extpad+fm.getHeight();
-	  
-      if(r.y < (ypos+cellSize+extpad)) {
-	g.drawString("Plot Matrix", xpos, ypos);
-	xpos += 100;
-	for(int i=0; i<m_selectedAttribs.length; i++) {
-	  if( xpos+cellSize < r.x)
-	    { xpos += cellSize+extpad; continue; }
-	  else if(xpos > r.x+r.width)
-	    { break; }
-	  else {
-	    attribWidth = fm.stringWidth(m_data.attribute(m_selectedAttribs[i]).name());
-	    g.drawString(m_data.attribute(m_selectedAttribs[i]).name(), 
-			 (attribWidth<cellSize) ? (xpos + (cellSize/2 - attribWidth/2)):xpos, 
-			 ypos);
-	  }
-	  xpos += cellSize+extpad;
-	}
-      }
-      xpos = extpad; ypos += fm.getHeight();
+      ypos=extpad;
+	
 	  
       for(int j=m_selectedAttribs.length-1; j>=0; j--) {
 	if( ypos+cellSize < r.y )
@@ -960,18 +1036,15 @@ public class MatrixPanel extends JPanel{
 	else if( ypos > r.y+r.height )
 	  break;
 	else {
-	  if(r.x < (xpos+cellSize+extpad))
-	    {g.drawString(m_data.attribute(m_selectedAttribs[j]).name(), xpos+extpad, ypos+cellSize/2); }
-	  xpos += 100;
-	  for(int i=0; i<m_selectedAttribs.length; i++) {
-	    if( xpos+cellSize < r.x) {
-	      xpos += cellSize+extpad; continue; }
-	    else if(xpos > r.x+r.width)
-	      break;
-	    else
-	      paintGraph(g, m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
-	    xpos += cellSize+extpad;
-	  }
+	    for(int i=0; i<m_selectedAttribs.length; i++) {
+		if( xpos+cellSize < r.x) {
+		    xpos += cellSize+extpad; continue; }
+		else if(xpos > r.x+r.width)
+		    break;
+		else
+		    paintGraph(g, m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
+		xpos += cellSize+extpad;
+	    }
 	}
 	xpos = extpad;
 	ypos += cellSize+extpad;
@@ -985,3 +1058,4 @@ public class MatrixPanel extends JPanel{
     }
   }
 }
+
