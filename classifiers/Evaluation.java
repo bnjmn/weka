@@ -124,7 +124,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.54 $
+ * @version  $Revision: 1.55 $
  */
 public class Evaluation implements Summarizable {
 
@@ -2335,9 +2335,9 @@ public class Evaluation implements Summarizable {
       optionsText.append("\nOptions specific to "
 			  + classifier.getClass().getName()
 			  + ":\n\n");
-      Enumeration enum = ((OptionHandler)classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	Option option = (Option) enum.nextElement();
+      Enumeration enu = ((OptionHandler)classifier).listOptions();
+      while (enu.hasMoreElements()) {
+	Option option = (Option) enu.nextElement();
 	optionsText.append(option.synopsis() + '\n');
 	optionsText.append(option.description() + "\n");
       }
