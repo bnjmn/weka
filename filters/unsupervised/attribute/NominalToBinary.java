@@ -39,11 +39,21 @@ import weka.core.*;
  * -N <br>
  * If binary attributes are to be coded as nominal ones.<p>
  *
+ * -R col1,col2-col4,... <br>
+ * Specifies list of columns to convert. First
+ * and last are valid indexes. (default: first-last) <p>
+ *
+ * -V <br>
+ * Invert matching sense.<p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class NominalToBinary extends Filter implements UnsupervisedFilter,
 						       OptionHandler {
+
+  /** Stores which columns to act on */
+  protected Range m_Columns = new Range();
 
   /** The sorted indices of the attribute values. */
   private int[][] m_Indices = null;
@@ -81,6 +91,9 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
        throws Exception {
 
     super.setInputFormat(instanceInfo);
+
+    m_Columns.setUpper(instanceInfo.numAttributes() - 1);
+
     setOutputFormat();
     m_Indices = null;
     return true;
@@ -116,11 +129,21 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
 	      "\tSets if binary attributes are to be coded as nominal ones.",
 	      "N", 0, "-N"));
+
+    newVector.addElement(new Option(
+              "\tSpecifies list of columns to act on. First"
+	      + " and last are valid indexes.\n"
+	      + "\t(default: first-last)",
+              "R", 1, "-R <col1,col2-col4,...>"));
+
+    newVector.addElement(new Option(
+              "\tInvert matching sense of column indexes.",
+              "V", 0, "-V"));
 
     return newVector.elements();
   }
@@ -132,12 +155,27 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * -N <br>
    * If binary attributes are to be coded as nominal ones.<p>
    *
+   * -R col1,col2-col4,... <br>
+   * Specifies list of columns to convert. First
+   * and last are valid indexes. (default none) <p>
+   *
+   * -V <br>
+   * Invert matching sense.<p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
     setBinaryAttributesNominal(Utils.getFlag('N', options));
+    
+    String convertList = Utils.getOption('R', options);
+    if (convertList.length() != 0) {
+      setAttributeIndices(convertList);
+    } else {
+      setAttributeIndices("first-last");
+    }
+    setInvertSelection(Utils.getFlag('V', options));
 
     if (getInputFormat() != null)
       setInputFormat(getInputFormat());
@@ -150,11 +188,18 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    */
   public String [] getOptions() {
 
-    String [] options = new String [1];
+    String [] options = new String [4];
     int current = 0;
 
     if (getBinaryAttributesNominal()) {
       options[current++] = "-N";
+    }
+
+    if (!getAttributeIndices().equals("")) {
+      options[current++] = "-R"; options[current++] = getAttributeIndices();
+    }
+    if (getInvertSelection()) {
+      options[current++] = "-V";
     }
 
     while (current < options.length) {
@@ -194,6 +239,78 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+
+    return "Set attribute selection mode. If false, only selected"
+      + " (numeric) attributes in the range will be discretized; if"
+      + " true, only non-selected attributes will be discretized.";
+  }
+
+  /**
+   * Gets whether the supplied columns are to be removed or kept
+   *
+   * @return true if the supplied columns will be kept
+   */
+  public boolean getInvertSelection() {
+
+    return m_Columns.getInvert();
+  }
+
+  /**
+   * Sets whether selected columns should be removed or kept. If true the 
+   * selected columns are kept and unselected columns are deleted. If false
+   * selected columns are deleted and unselected columns are kept.
+   *
+   * @param invert the new invert setting
+   */
+  public void setInvertSelection(boolean invert) {
+
+    m_Columns.setInvert(invert);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndicesTipText() {
+    return "Specify range of attributes to act on."
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
+  }
+
+  /**
+   * Gets the current range selection
+   *
+   * @return a string containing a comma separated list of ranges
+   */
+  public String getAttributeIndices() {
+
+    return m_Columns.getRanges();
+  }
+
+  /**
+   * Sets which attributes are to be acted on.
+   *
+   * @param rangeList a string representing the list of attributes. Since
+   * the string will typically come from a user, attributes are indexed from
+   * 1. <br>
+   * eg: first-3,5,6-last
+   * @exception IllegalArgumentException if an invalid range list is supplied 
+   */
+  public void setAttributeIndices(String rangeList) {
+
+    m_Columns.setRanges(rangeList);
+  }
+
+  /**
    * Set the output format if the class is nominal.
    */
   private void setOutputFormat() {
@@ -210,7 +327,8 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     newAtts = new FastVector();
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
-      if (!att.isNominal() || (j == getInputFormat().classIndex())) {
+      if (!att.isNominal() || (j == getInputFormat().classIndex()) ||
+	  !m_Columns.isInRange(j)) {
 	newAtts.addElement(att.copy());
       } else {
 	if (att.numValues() <= 2) {
@@ -262,7 +380,8 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 
     for(int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
-      if (!att.isNominal() || (j == getInputFormat().classIndex())) {
+      if (!att.isNominal() || (j == getInputFormat().classIndex()) ||
+	  !m_Columns.isInRange(j)) {
 	vals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
