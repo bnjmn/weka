@@ -38,7 +38,7 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
@@ -199,6 +199,13 @@ implements BatchLoader, IncrementalLoader {
     setRetrieval(INCREMENTAL);
 
     if (!m_structure.readInstance(m_sourceReader)) {
+      // try to reset the loader if the source is a file
+      if (m_File != null) {
+	File temp = new File(m_File);
+	if (temp.exists()) {
+	  setSource(temp);
+	}
+      }
       return null;
     }
    
