@@ -71,7 +71,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -216,6 +216,7 @@ public class PropertySheetPanel extends JPanel
               }
             });
 
+	    jt.setColumns(30);
 	    jt.setFont(new Font("SansSerif", Font.PLAIN,12));
 	    jt.setEditable(false);
 	    jt.setLineWrap(true);
