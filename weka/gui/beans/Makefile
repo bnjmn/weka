@@ -33,7 +33,9 @@ SOURCES = AbstractDataSource.java AbstractDataSourceBeanInfo.java \
 	TrainTestSplitMakerCustomizer.java TrainingSetEvent.java \
 	TrainingSetListener.java TrainingSetMaker.java \
 	TrainingSetMakerBeanInfo.java TrainingSetProducer.java \
-	UserRequestAcceptor.java Visible.java WekaWrapper.java
+	UserRequestAcceptor.java Visible.java WekaWrapper.java \
+	AttributeSummarizer.java AttributeSummarizerBeanInfo.java \
+	ScatterPlotMatrix.java ScatterPlotMatrixBeanInfo.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
