@@ -81,7 +81,7 @@ import javax.swing.JCheckBox;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -301,7 +301,7 @@ public class ClassifierPanel extends JPanel {
     m_ClassCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	int selected = m_ClassCombo.getSelectedIndex();
-	if (selected > 0) {
+	if (selected != -1) {
 	  boolean isNominal = m_Instances.attribute(selected).isNominal();
 	  m_OutputTFPosBut.setEnabled(isNominal);
 	  m_OutputConfusionBut.setEnabled(isNominal);	
