@@ -43,7 +43,7 @@ import java.awt.*;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ScatterPlotMatrix extends DataVisualizer {
 
@@ -132,6 +132,9 @@ public class ScatterPlotMatrix extends DataVisualizer {
 	      }
 	    });
 	  jf.setVisible(true);
+	  m_popupFrame = jf;
+	} else {
+	  m_popupFrame.toFront();
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();

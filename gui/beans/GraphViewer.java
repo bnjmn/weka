@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GraphViewer 
   extends JPanel
@@ -163,6 +163,8 @@ public class GraphViewer
 	});
       m_resultsFrame.pack();
       m_resultsFrame.setVisible(true);
+    } else {
+      m_resultsFrame.toFront();
     }
   }
 
@@ -194,9 +196,8 @@ public class GraphViewer
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
-    if (m_resultsFrame == null) {
-      newVector.addElement("Show results");
-    }
+    newVector.addElement("Show results");
+
     return newVector.elements();
   }
 

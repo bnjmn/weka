@@ -32,6 +32,7 @@ import java.util.Enumeration;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.JFrame;
 import java.awt.BorderLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
@@ -44,7 +45,7 @@ import java.beans.beancontext.*;
  * curves).
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ModelPerformanceChart extends JPanel
   implements ThresholdDataListener, Visible, UserRequestAcceptor,
@@ -53,6 +54,8 @@ public class ModelPerformanceChart extends JPanel
   protected BeanVisual m_visual;
 
   protected transient PlotData2D m_masterPlot;
+  
+  protected transient JFrame m_popupFrame;
 
   protected boolean m_framePoppedUp = false;
 
@@ -169,7 +172,7 @@ public class ModelPerformanceChart extends JPanel
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
-    if (m_masterPlot != null && !m_framePoppedUp) {
+    if (m_masterPlot != null) {
       newVector.addElement("Show plot");
     }
     return newVector.elements();
@@ -255,16 +258,7 @@ public class ModelPerformanceChart extends JPanel
 	// popup visualize panel
 	if (!m_framePoppedUp) {
 	  m_framePoppedUp = true;
-	  /*	  final VisualizePanel vis = new VisualizePanel();
-	  PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-	  pd1.setPlotName(m_visualizeDataSet.relationName());
-	  try {
-	    vis.setMasterPlot(pd1);
-	  } catch (Exception ex) {
-	    System.err.println("Problem setting up "
-			       +"visualization (DataVisualizer)");
-	    ex.printStackTrace();
-	    } */
+
 	  final javax.swing.JFrame jf = 
 	    new javax.swing.JFrame("Model Performance Chart");
 	  jf.setSize(800,600);
@@ -277,6 +271,9 @@ public class ModelPerformanceChart extends JPanel
 	      }
 	    });
 	  jf.setVisible(true);
+	  m_popupFrame = jf;
+	} else {
+	  m_popupFrame.toFront();
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();

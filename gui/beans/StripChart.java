@@ -54,7 +54,7 @@ import weka.core.Instance;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class StripChart 
   extends JPanel 
@@ -405,6 +405,8 @@ public class StripChart
 	System.err.println("Starting handler");
 	startHandler();
       }
+    } else {
+      m_outputFrame.toFront();
     }
   }
 
@@ -729,9 +731,7 @@ public class StripChart
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
-    if (m_outputFrame == null) {
-      newVector.addElement("Show chart");
-    }
+    newVector.addElement("Show chart");
     return newVector.elements();
   }
 
