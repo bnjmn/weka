@@ -29,7 +29,7 @@ import weka.core.*;
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class BinC45Split extends ClassifierSplitModel{
@@ -135,13 +135,7 @@ public class BinC45Split extends ClassifierSplitModel{
       if (Utils.gr(m_distribution.perBag(theSubset), 0)) {
 	return m_distribution.prob(classIndex, theSubset);
       } else {
-	
-	// This doesn't make much sense to me but it
-	// appears to be what C4.5 does.
-	if (m_distribution.maxClass() == classIndex)
-	  return 1;
-	else
-	  return 0;
+	return m_distribution.prob(classIndex);
       }
     }
   }
