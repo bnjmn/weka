@@ -26,7 +26,7 @@ package weka.core;
  * Class implementing some statistical routines for contingency tables.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ContingencyTables {
 
@@ -537,26 +537,38 @@ public class ContingencyTables {
       return num * Math.log(num);
     }
   }
-  
-  /**
-   * Computes chi-value for one cell in matrix.
-   * From Gary Perlman's unixstat.
-   */
-  private static double chiCell(double freq, double expect, boolean yates){
 
-    double  diff = freq - expect;
-       
+  /**
+   * Computes chi-value for one cell in a contingency table.
+   *
+   * @param freq the observed frequency in the cell
+   * @param expected the expected frequency in the cell
+   * @return the chi-value for that cell; 0 if the expected value is
+   * too close to zero 
+   */
+  private static double chiCell(double freq, double expected, 
+                                boolean yates){
+
+    // Cell in empty row and column?
+    if (Utils.smOrEq(expected, 0)) {
+      return 0;
+    }
+
+    // Compute difference between observed and expected value
+    double diff = Math.abs(freq - expected);
     if (yates) {
-      diff = Math.abs (diff) - 0.5;
-      if (diff < 0.0) { // over-correction
-	diff = 0.0;
+
+      // Apply Yates' correction if wanted
+      diff -= 0.5;
+
+      // The difference should never be negative
+      if (diff < 0) {
+        diff = 0;
       }
     }
-    if (Math.abs(expect) < 10e-10) {
-      return (0.0);
-    } else {
-      return (diff * diff / expect);
-    }
+
+    // Return chi-value for the cell
+    return (diff * diff / expected);
   }
 
   /**
