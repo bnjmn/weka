@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -981,7 +981,9 @@ public class VisualizePanel extends JPanel {
       }
       m_xIndex = x;
       m_plot2D.setXindex(x);
-      m_attrib.setX(x);
+      if (m_showAttBars) {
+	m_attrib.setX(x);
+      }
       //      this.repaint();
     }
     
@@ -998,7 +1000,9 @@ public class VisualizePanel extends JPanel {
       }
       m_yIndex = y;
       m_plot2D.setYindex(y);
-      m_attrib.setY(y);
+      if (m_showAttBars) {
+	m_attrib.setY(y);
+      }
       //      this.repaint();
     }
 
@@ -1009,7 +1013,9 @@ public class VisualizePanel extends JPanel {
     public void setCindex(int c) {
       m_cIndex = c;
       m_plot2D.setCindex(c);
-      m_attrib.setCindex(c, m_plot2D.getMaxC(), m_plot2D.getMinC());
+      if (m_showAttBars) {
+	m_attrib.setCindex(c, m_plot2D.getMaxC(), m_plot2D.getMinC());
+      }
       m_classPanel.setCindex(c);
       this.repaint();
     }
@@ -1047,8 +1053,39 @@ public class VisualizePanel extends JPanel {
     public void addPlot(PlotData2D newPlot) throws Exception {
       if (m_plot2D.getPlots().size() == 0) {
 	m_plot2D.addPlot(newPlot);
-	m_attrib.setInstances(newPlot.m_plotInstances);
-	m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
+	if (m_plotSurround.getComponentCount() > 1 && 
+	    m_plotSurround.getComponent(1) == m_attrib &&
+	    m_showAttBars) {
+	  try {
+	    m_attrib.setInstances(newPlot.m_plotInstances);
+	    m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
+	  } catch (Exception ex) {
+	    // more attributes than the panel can handle?
+	    // Due to hard coded constraints in GridBagLayout
+	    m_plotSurround.remove(m_attrib);
+	    System.err.println("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
+	    m_Log.logMessage("Warning : data contains more attributes "
+			     +"than can be displayed as attribute bars.");
+	  }
+	} else if (m_showAttBars) {
+	  try {
+	    m_attrib.setInstances(newPlot.m_plotInstances);
+	    m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
+	    GridBagConstraints constraints = new GridBagConstraints();
+	    constraints.fill = constraints.BOTH;
+	    constraints.insets = new Insets(0, 0, 0, 0);
+	    constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
+	    constraints.gridwidth=1;constraints.gridheight=1;
+	    constraints.weighty=5;
+	    m_plotSurround.add(m_attrib, constraints);
+	  } catch (Exception ex) {
+	    System.err.println("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
+	    m_Log.logMessage("Warning : data contains more attributes "
+			     +"than can be displayed as attribute bars.");
+	  }
+	}
 	m_classPanel.setInstances(newPlot.m_plotInstances);
 
 	plotReset(newPlot.m_plotInstances, newPlot.getCindex());
@@ -1075,19 +1112,26 @@ public class VisualizePanel extends JPanel {
      * Remove the attibute panel and replace it with the legend panel
      */
     protected void switchToLegend() {
-      if (m_plotSurround.getComponent(1) == m_attrib) {
+
+      if (m_plotSurround.getComponentCount() > 1 && 
+	  m_plotSurround.getComponent(1) == m_attrib) {
 	m_plotSurround.remove(m_attrib);
-	
-	GridBagConstraints constraints = new GridBagConstraints();
-	constraints.fill = constraints.BOTH;
-	constraints.insets = new Insets(0, 0, 0, 0);
-	constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
-	constraints.gridwidth=1;constraints.gridheight=1;
-	constraints.weighty=5;
-	m_plotSurround.add(m_legendPanel, constraints);
-	setSindex(0);
-	m_ShapeCombo.setEnabled(false);
       }
+	
+      if (m_plotSurround.getComponentCount() > 1 &&
+	  m_plotSurround.getComponent(1) == m_legendPanel) {
+	return;
+      }
+
+      GridBagConstraints constraints = new GridBagConstraints();
+      constraints.fill = constraints.BOTH;
+      constraints.insets = new Insets(0, 0, 0, 0);
+      constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
+      constraints.gridwidth=1;constraints.gridheight=1;
+      constraints.weighty=5;
+      m_plotSurround.add(m_legendPanel, constraints);
+      setSindex(0);
+      m_ShapeCombo.setEnabled(false);
     }
 
     /**
@@ -1600,6 +1644,21 @@ public class VisualizePanel extends JPanel {
   protected String m_preferredYDimension = null;
   protected String m_preferredColourDimension = null;
 
+  /** Show the attribute bar panel */
+  protected boolean m_showAttBars = true;
+
+  /** the logger */
+  protected Logger m_Log;
+  
+  /**
+   * Sets the Logger to receive informational messages
+   *
+   * @param newLog the Logger that will now get info messages
+   */
+  public void setLog(Logger newLog) {
+    m_Log = newLog;
+  }
+
   /** This constructor allows a VisualizePanelListener to be set. */
   public VisualizePanel(VisualizePanelListener ls) {
     this();
@@ -1611,42 +1670,61 @@ public class VisualizePanel extends JPanel {
    */
   private void setProperties(String relationName) {
     if (VisualizeUtils.VISUALIZE_PROPERTIES != null) {
-      System.err.println("Looking for preferred visualization dimensions for "
-			 +relationName);
       String thisClass = this.getClass().getName();
-      String xcolKey = thisClass+"."+relationName+".XDimension";
-      String ycolKey = thisClass+"."+relationName+".YDimension";
-      String ccolKey = thisClass+"."+relationName+".ColourDimension";
+      if (relationName == null) {
+	
+	String showAttBars = thisClass+".displayAttributeBars";
 
-      m_preferredXDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
-	      getProperty(xcolKey);
-      if (m_preferredXDimension == null) {
-	System.err.println("No preferred X dimension found in "
-			   +VisualizeUtils.PROPERTY_FILE
-			   +" for "+xcolKey);
+	String val = VisualizeUtils.VISUALIZE_PROPERTIES.
+	  getProperty(showAttBars);
+	if (val == null) {
+	  System.err.println("Displaying attribute bars ");
+	  m_showAttBars = true;
+	} else {
+	  if (val.compareTo("true") == 0 || val.compareTo("on") == 0) {
+	    System.err.println("Displaying attribute bars ");
+	    m_showAttBars = true;
+	  } else {
+	    m_showAttBars = false;
+	  }
+	}
       } else {
-	System.err.println("Setting preferred X dimension to "
-			   +m_preferredXDimension);
-      }
-      m_preferredYDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
-	getProperty(ycolKey);
-      if (m_preferredYDimension == null) {
-	System.err.println("No preferred Y dimension found in "
-			   +VisualizeUtils.PROPERTY_FILE
-			   +" for "+ycolKey);
-      } else {
-	System.err.println("Setting preferred dimension Y to "
-			   +m_preferredYDimension);
-      }
-      m_preferredColourDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
-	getProperty(ccolKey);
-      if (m_preferredColourDimension == null) {
-	System.err.println("No preferred Colour dimension found in "
-			   +VisualizeUtils.PROPERTY_FILE
-			   +" for "+ycolKey);
-      } else {
-	System.err.println("Setting preferred Colour dimension to "
-			   +m_preferredColourDimension);
+	System.err.println("Looking for preferred visualization dimensions for "
+			   +relationName);
+	String xcolKey = thisClass+"."+relationName+".XDimension";
+	String ycolKey = thisClass+"."+relationName+".YDimension";
+	String ccolKey = thisClass+"."+relationName+".ColourDimension";
+      
+	m_preferredXDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
+	  getProperty(xcolKey);
+	if (m_preferredXDimension == null) {
+	  System.err.println("No preferred X dimension found in "
+			     +VisualizeUtils.PROPERTY_FILE
+			     +" for "+xcolKey);
+	} else {
+	  System.err.println("Setting preferred X dimension to "
+			     +m_preferredXDimension);
+	}
+	m_preferredYDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
+	  getProperty(ycolKey);
+	if (m_preferredYDimension == null) {
+	  System.err.println("No preferred Y dimension found in "
+			     +VisualizeUtils.PROPERTY_FILE
+			     +" for "+ycolKey);
+	} else {
+	  System.err.println("Setting preferred dimension Y to "
+			     +m_preferredYDimension);
+	}
+	m_preferredColourDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
+	  getProperty(ccolKey);
+	if (m_preferredColourDimension == null) {
+	  System.err.println("No preferred Colour dimension found in "
+			     +VisualizeUtils.PROPERTY_FILE
+			     +" for "+ycolKey);
+	} else {
+	  System.err.println("Setting preferred Colour dimension to "
+			     +m_preferredColourDimension);
+	}
       }
     }
   }
@@ -1655,6 +1733,7 @@ public class VisualizePanel extends JPanel {
    * Constructor
    */
   public VisualizePanel() {
+    setProperties(null);
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -1838,10 +1917,12 @@ public class VisualizePanel extends JPanel {
     constraints.gridwidth=4;constraints.gridheight=1;constraints.weighty=5;
     m_plotSurround.add(m_plot, constraints);
     
-    constraints.insets = new Insets(0, 0, 0, 0);
-    constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
-    constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
-    m_plotSurround.add(m_attrib, constraints);
+    if (m_showAttBars) {
+      constraints.insets = new Insets(0, 0, 0, 0);
+      constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
+      constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
+      m_plotSurround.add(m_attrib, constraints);
+    }
 
     setLayout(new BorderLayout());
     add(combos, BorderLayout.NORTH);
