@@ -1,6 +1,6 @@
 /*
  *    SetupPanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 Len Trigg, Mark Hall
  *
  */
 
@@ -65,13 +65,15 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
 
 /** 
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class SetupPanel extends JPanel {
 
@@ -121,14 +123,29 @@ public class SetupPanel extends JPanel {
   /** The panel for configuring selected datasets */
   protected DatasetListPanel m_DatasetListPanel = new DatasetListPanel();
 
-  /** Area for user notes */
-  protected JTextArea m_NotesText = new JTextArea();
+  /** Area for user notes Default of 5 rows */
+  protected JTextArea m_NotesText = new JTextArea(null, 5, 0);
 
   /**
    * Manages sending notifications to people when we change the experiment,
    * at this stage, only the resultlistener so the resultpanel can update.
    */
   protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
+
+  /** Click to set primary iteration over runs */
+  protected JRadioButton m_advanceDataSetFirst = 
+    new JRadioButton("Data sets first");
+
+  /** Click to set primary iteration over data sets */
+  protected JRadioButton m_advanceIteratorFirst = 
+    new JRadioButton("Custom iterator first");
+
+  /** Handle radio buttons */
+  ActionListener m_RadioListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	updateRadioLinks();
+      }
+    };
   
   // Registers the appropriate property editors
   static {
@@ -229,6 +246,12 @@ public class SetupPanel extends JPanel {
     m_FileChooser.setFileFilter(m_ExpFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     
+    m_GeneratorPropertyPanel.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  updateRadioLinks();
+	}
+      });
+
     m_RPEditor.setClassType(ResultProducer.class);
     m_RPEditor.setEnabled(false);
     m_RPEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -301,13 +324,40 @@ public class SetupPanel extends JPanel {
 		   ));
     dest.add(m_RLEditorPanel, BorderLayout.NORTH);
 
+    m_advanceDataSetFirst.setEnabled(false);
+    m_advanceIteratorFirst.setEnabled(false);
+    m_advanceDataSetFirst.
+      setToolTipText("Advance data set before custom iterator");
+    m_advanceIteratorFirst.
+      setToolTipText("Advance custom iterator before data set");
+    m_advanceDataSetFirst.setSelected(true);
+    ButtonGroup bg = new ButtonGroup();
+    bg.add(m_advanceDataSetFirst);
+    bg.add(m_advanceIteratorFirst);
+    m_advanceDataSetFirst.addActionListener(m_RadioListener);
+    m_advanceIteratorFirst.addActionListener(m_RadioListener);
+
+    JPanel radioButs = new JPanel();
+    radioButs.setBorder(BorderFactory.
+			createTitledBorder("Iteration control"));
+    radioButs.setLayout(new GridLayout(1, 2));
+    radioButs.add(m_advanceDataSetFirst);
+    radioButs.add(m_advanceIteratorFirst);
+
     JPanel simpleIterators = new JPanel();
     simpleIterators.setLayout(new BorderLayout());
     JPanel tmp = new JPanel();
     tmp.setLayout(new GridLayout(1, 2));
     tmp.add(m_RunNumberPanel);
     tmp.add(m_DistributeExperimentPanel);
-    simpleIterators.add(tmp, BorderLayout.NORTH);
+
+    JPanel tmp2 = new JPanel();
+    tmp2.setLayout(new GridLayout(2, 1));
+    tmp2.add(tmp);
+    tmp2.add(radioButs);
+		   
+
+    simpleIterators.add(tmp2, BorderLayout.NORTH);
     simpleIterators.add(m_DatasetListPanel, BorderLayout.CENTER);
     JPanel iterators = new JPanel();
     iterators.setLayout(new GridLayout(1, 2));
@@ -325,9 +375,10 @@ public class SetupPanel extends JPanel {
     notes.add(new JScrollPane(m_NotesText), BorderLayout.CENTER);
     
     JPanel p2 = new JPanel();
-    p2.setLayout(new GridLayout(2, 1));
-    p2.add(iterators);
-    p2.add(notes);
+    //    p2.setLayout(new GridLayout(2, 1));
+    p2.setLayout(new BorderLayout());
+    p2.add(iterators, BorderLayout.CENTER);
+    p2.add(notes, BorderLayout.SOUTH);
 
     JPanel p3 = new JPanel();
     p3.setLayout(new BorderLayout());
@@ -344,7 +395,7 @@ public class SetupPanel extends JPanel {
    * @param exp a value of type 'Experiment'
    */
   public void setExperiment(Experiment exp) {
-
+    
     m_Exp = exp;
     m_SaveBut.setEnabled(true);
     m_RPEditor.setValue(m_Exp.getResultProducer());
@@ -355,7 +406,12 @@ public class SetupPanel extends JPanel {
     m_RLEditorPanel.repaint();
     m_NotesText.setText(m_Exp.getNotes());
     m_NotesText.setEnabled(true);
-    
+
+    m_advanceDataSetFirst.setSelected(m_Exp.getAdvanceDataSetFirst());
+    m_advanceIteratorFirst.setSelected(!m_Exp.getAdvanceDataSetFirst());
+    m_advanceDataSetFirst.setEnabled(true);
+    m_advanceIteratorFirst.setEnabled(true);
+   
     m_GeneratorPropertyPanel.setExperiment(m_Exp);
     m_RunNumberPanel.setExperiment(m_Exp);
     m_DatasetListPanel.setExperiment(m_Exp);
@@ -454,6 +510,25 @@ public class SetupPanel extends JPanel {
    */
   public void removePropertyChangeListener(PropertyChangeListener l) {
     m_Support.removePropertyChangeListener(l);
+  }
+
+  /**
+   * Updates the primary loop iteration control of the experiment
+   */
+  private void updateRadioLinks() {
+    
+    m_advanceDataSetFirst.
+      setEnabled(m_GeneratorPropertyPanel.getEditorActive());
+    m_advanceIteratorFirst.
+      setEnabled(m_GeneratorPropertyPanel.getEditorActive());
+
+    if (m_Exp != null) {
+      if (!m_GeneratorPropertyPanel.getEditorActive()) {
+	m_Exp.setAdvanceDataSetFirst(true);
+      } else {
+	m_Exp.setAdvanceDataSetFirst(m_advanceDataSetFirst.isSelected());
+      }
+    }
   }
 
   /**
