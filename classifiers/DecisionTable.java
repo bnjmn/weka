@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers;
 
 import java.io.*;
@@ -39,6 +38,13 @@ import weka.classifiers.j48.*;
  * before terminating a best first search. Use in conjunction with -B. 
  * (Default = 5) <p>
  *
+ * -X num <br>
+ * Use cross validation to evaluate features. Use number of folds = 1 for
+ * leave one out CV. (Default = leave one out CV) <p>
+ * 
+ * -I <br>
+ * Use nearest neighbour instead of global table majority. <p>
+ *
  * -C <br>
  * Use C45 style error estimate to evaluate features (nominal class 
  * only). <p>
@@ -50,21 +56,14 @@ import weka.classifiers.j48.*;
  * -M <br>
  * Use MDL to evaluate features (nominal class only). <p>
  *
- * -X num <br>
- * Use cross validation to evaluate features. Use number of folds = 1 for
- * leave one out CV. (Default = leave one out CV) <p>
- *
  * -D <br>
  * Make binary attributes when discretising. <p>
- * 
- * -I <br>
- * Use nearest neighbour instead of global table majority. <p>
  * 
  * -R <br>
  * Display decision table rules. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 - 19 Nov 1998 - Initial version (Mark)
+ * @version $Revision: 1.3 $
  */
 public class DecisionTable extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -75,18 +74,16 @@ public class DecisionTable extends DistributionClassifier
   /** Holds the final feature set */
   private int [] decisionFeatures;
 
-  /** discrestisation filter */
+  /** Discretization filter */
   private DiscretizeFilter disTransform;
+
+  /** Filter for generating binary attributes. */
   private NominalToBinaryFilter bTransform;
 
   /** Filter used to remove columns discarded by feature selection */
   private DeleteFilter delTransform;
 
-  /**
-   * IB1 classifier
-   * used to classify non matiching instances rather than assigning
-   * majority class
-   */
+  /** IB1 used to classify non matching instances rather than majority class */
   private IBk ibk;
 
   /** Holds the training instances */
@@ -105,10 +102,7 @@ public class DecisionTable extends DistributionClassifier
   private boolean evalCV;
   private boolean evalMDL;
 
-  /**
-   * maximum number of fully expanded non improving subsets
-   * for a best first search.
-   */
+  /** maximum number of fully expanded non improving subsets for a best first search. */
   private int maxStale;
 
   /** pruning confidence when using c45 error estimate */
@@ -129,8 +123,6 @@ public class DecisionTable extends DistributionClassifier
 
   /**
    * Class for a node in a linked list. Used in best first search.
-   * @version 1.0
-   * @author Mark Hall (mhall@cs.waikato.ac.nz)
    */
   public class Link2 {
 
@@ -157,15 +149,8 @@ public class DecisionTable extends DistributionClassifier
   /**
    * Class for handling a linked list. Used in best first search.
    * Extends the Vector class.
-   *
-   * @version 1.0
-   * @author Mark Hall (mhall@cs.waikato.ac.nz)
    */
   public class LinkedList2 extends FastVector {
-
-    // ================
-    // Public methods
-    // ================
 
     /**
      * Removes an element (Link) at a specific index from the list.
@@ -232,19 +217,13 @@ public class DecisionTable extends DistributionClassifier
 
   /**
    * Class providing keys to the hash table
-   *
-   * @version 1.0
-   * @author Mark Hall (mhall@cs.waikato.ac.nz)
    */
   public class hashKey {
   
     /** Array of attribute values for an instance */
     private double [] attributes;
 
-    /**
-     * Array boolean. Set true for an index if the corresponding
-     * attribute value is missing.
-     */
+    /** Array boolean. Set true for an index if attribute value is missing. */
     private boolean [] missing;
     
     private String [] values;
@@ -406,13 +385,6 @@ public class DecisionTable extends DistributionClassifier
     }
   }
 
-  // *******************************************************************
-
-
-  // ==============
-  // Private methods
-  // ==============
-
   /**
    * Inserts an instance into the hash table
    *
@@ -439,29 +411,34 @@ public class DecisionTable extends DistributionClassifier
 	newDist = new double [theInstances.classAttribute().numValues()];
 	
 	newDist[(int)inst.classValue()] = inst.weight();
+
 	// add to the table
 	entries.put(thekey, newDist);
       } else {
 	newDist = new double [2];
 	newDist[0] = inst.classValue() * inst.weight();
 	newDist[1] = inst.weight();
+
 	// add to the table
 	entries.put(thekey, newDist);
       }
-    } else { // update the distribution for this instance
+    } else { 
+
+      // update the distribution for this instance
       if (classIsNominal) {
 	tempClassDist2[(int)inst.classValue()]+=inst.weight();
+	
 	// update the table
 	entries.put(thekey, tempClassDist2);
       } else {
 	tempClassDist2[0] += (inst.classValue() * inst.weight());
 	tempClassDist2[1] += inst.weight();
+	
 	// update the table
 	entries.put(thekey, tempClassDist2);
       }
     }
   }
-
 
   /**
    * Classifies an instance for internal leave one out cross validation
@@ -481,6 +458,7 @@ public class DecisionTable extends DistributionClassifier
     thekey = new hashKey(instA);
       
     if (classIsNominal) {
+
       // if this one is not in the table
       if ((tempDist = (double [])entries.get(thekey)) == null) {
 	System.out.println("Shouldnt get here!");
@@ -490,6 +468,7 @@ public class DecisionTable extends DistributionClassifier
 	System.arraycopy(tempDist, 0, normDist, 0, tempDist.length);
 
 	normDist[(int)instance.classValue()] -= instance.weight();
+
 	// update the table
 	// first check to see if the class counts are all zero now
 	boolean ok = false;
@@ -508,6 +487,7 @@ public class DecisionTable extends DistributionClassifier
       }
       return Utils.maxIndex(tempDist);
     } else {
+
       // see if this one is already in the table
       if ((tempDist = (double[])entries.get(thekey)) != null) {
 	normDist = new double [tempDist.length];
@@ -640,7 +620,6 @@ public class DecisionTable extends DistributionClassifier
     return acc;
   }
 
-
   /**
    * Evaluates a feature subset either by cross validation, c45 error
    * estimates, or an MDL criterion.
@@ -713,6 +692,7 @@ public class DecisionTable extends DistributionClassifier
     }
     else { // cross validation
       if (CVFolds == 1) {
+
 	// calculate leave one out error
 	for (i = 0; i < numInstances; i++) {
 	  Instance inst = theInstances.instance(i);
@@ -741,6 +721,7 @@ public class DecisionTable extends DistributionClassifier
       } else {
 	theInstances.randomize(rr);
 	theInstances.stratify(CVFolds);
+
 	// calculate 10 fold cross validation error
 	for (i = 0; i < CVFolds; i++) {
 	  Instances insts = theInstances.testCV(CVFolds, i);
@@ -908,7 +889,6 @@ public class DecisionTable extends DistributionClassifier
     return -mdl;
   }
 
-  
   /**
    * Returns a String representation of a feature subset
    *
@@ -930,7 +910,6 @@ public class DecisionTable extends DistributionClassifier
     return s;
   }
 
-
   /**
    * Calculates the log of a double
    *
@@ -940,7 +919,6 @@ public class DecisionTable extends DistributionClassifier
   private static double lnFunc(double num) {
 
     // Constant hard coded for efficiency reasons
-    
     if (num < 1e-6) {
       return 0;
     } else {
@@ -1254,10 +1232,8 @@ public class DecisionTable extends DistributionClassifier
     decisionFeatures[j] = td[0];
   }
       
-    
   /**
-   * Does a best first search 
-   *
+   * Does a best first search. 
    */
   private void best_first() throws Exception {
 
@@ -1291,6 +1267,7 @@ public class DecisionTable extends DistributionClassifier
 
     // add the initial group to the list
     bfList.addToList(best_group, best_merit[0]);
+
     // add initial subset to the hashtable
     lookup.put(best_group, "");
       
@@ -1311,10 +1288,12 @@ public class DecisionTable extends DistributionClassifier
       bfList.removeLinkAt(0);
       
       for (i = 0; i < numAttributes; i++) {
+
 	// if (search_direction == 1)
 	z = ((i != classI) && (!temp_group.get(i)));
 
 	if (z) {
+
 	  // set the bit (feature to add/delete) */
 	  temp_group.set(i);
 	  
@@ -1361,6 +1340,7 @@ public class DecisionTable extends DistributionClassifier
 	    lookup.put(tt, "");
 	    count++;
 	  }
+
 	  // unset this addition(deletion)
 	  temp_group.clear(i);
 	}
@@ -1387,20 +1367,18 @@ public class DecisionTable extends DistributionClassifier
       }
     }
   }
- 
-
-
-  // ==============
-  // Public methods
-  // ==============
 
   /**
    * Constructor for a DecisionTable
    */
   public DecisionTable() {
+
     resetOptions();
   }
-
+  
+  /**
+   * Resets the options.
+   */
   protected void resetOptions() {
 
     entries = null;
@@ -1447,6 +1425,19 @@ public class DecisionTable extends DistributionClassifier
 				    + "(Default = 5)",
 				    "S", 1, 
 				    "-S <number of non improving nodes>"));
+
+    newVector.addElement(new Option(
+				    "\tUse cross validation to "
+				    + "evaluate features.\n"
+				    + "\tUse number of folds = 1 for "
+				    + "leave one out CV. "
+				    + "(Default = leave one out CV)",
+				    "X", 1, "-X <number of folds>"));
+
+    newVector.addElement(new Option(
+				    "\tUse nearest neighbour instead of "
+				    + "global table majority.",
+				    "I", 0, "-I"));
     
     newVector.addElement(new Option(
 				    "\tUse C45 style error estimate to "
@@ -1467,22 +1458,9 @@ public class DecisionTable extends DistributionClassifier
 				    "M", 0, "-M"));
 
     newVector.addElement(new Option(
-				    "\tUse cross validation to "
-				    + "evaluate features.\n"
-				    + "\tUse number of folds = 1 for "
-				    + "leave one out CV. "
-				    + "(Default = leave one out CV)",
-				    "X", 1, "-X <number of folds>"));
-
-    newVector.addElement(new Option(
 				    "\tMake binary attributes when "
 				    + "discretising.",
 				    "D", 0, "-D"));
-
-    newVector.addElement(new Option(
-				    "\tUse nearest neighbour instead of "
-				    + "global table majority.",
-				    "I", 0, "-I"));
 
     newVector.addElement(new Option(
 				    "\tDisplay decision table rules.",
@@ -1503,6 +1481,13 @@ public class DecisionTable extends DistributionClassifier
    * before terminating a best first search. Use in conjunction with -B. 
    * (Default = 5) <p>
    *
+   * -X num <br>
+   * Use cross validation to evaluate features. Use number of folds = 1 for
+   * leave one out CV. (Default = leave one out CV) <p>
+   * 
+   * -I <br>
+   * Use nearest neighbour instead of global table majority. <p>
+   *
    * -C <br>
    * Use C45 style error estimate to evaluate features (nominal class 
    * only). <p>
@@ -1514,15 +1499,8 @@ public class DecisionTable extends DistributionClassifier
    * -M <br>
    * Use MDL to evaluate features (nominal class only). <p>
    *
-   * -X num <br>
-   * Use cross validation to evaluate features. Use number of folds = 1 for
-   * leave one out CV. (Default = leave one out CV) <p>
-   *
    * -D <br>
    * Make binary attributes when discretising. <p>
-   * 
-   * -I <br>
-   * Use nearest neighbour instead of global table majority. <p>
    * 
    * -R <br>
    * Display decision table rules. <p>
@@ -1534,10 +1512,31 @@ public class DecisionTable extends DistributionClassifier
 
     resetOptions();
 
+    entries = null;
+    decisionFeatures = null;
+
+    useBinaryAtts = false;
+    debug = false;
+
+    useIBK = false;
+
+    evalC45 = false;
+    evalCV = true;
+    evalMDL = false;
+    CVFolds = 1;
+    searchBF = true;
+
+    c45PF = 0.65;
+
+    maxStale = 5;
+    displayRules = false;
+
     String optionString = Utils.getOption('X',options);
     if (optionString.length() != 0) {
       evalCV = true;
       CVFolds = Integer.parseInt(optionString);
+    } else {
+      CVFolds = 10;
     }
 
     searchBF = !Utils.getFlag('O', options);
@@ -1545,11 +1544,15 @@ public class DecisionTable extends DistributionClassifier
     if (optionString.length() != 0) {
       searchBF = true;
       maxStale = Integer.parseInt(optionString);
+    } else {
+      maxStale = 5;
     }
 
     optionString = Utils.getOption('P',options);
     if (optionString.length() != 0) {
       c45PF = Double.valueOf(optionString).doubleValue();
+    } else {
+      c45PF = 0.65;
     }
 
     evalC45 = Utils.getFlag('C', options);
@@ -1756,6 +1759,7 @@ public class DecisionTable extends DistributionClassifier
       throw new Exception("Class is numeric!");
     } else {
       thekey = new hashKey(instance, instance.numAttributes());
+
       // if this one is not in the table
       if ((tempDist = (double [])entries.get(thekey)) == null) {
 	if (useIBK) {
@@ -1765,6 +1769,7 @@ public class DecisionTable extends DistributionClassifier
 	  tempDist[(int)majority] = 1.0;
 	}
       } else {
+
 	// normalise distribution
 	normDist = new double [tempDist.length];
 	System.arraycopy(tempDist, 0, normDist, 0, tempDist.length);
@@ -1891,15 +1896,10 @@ public class DecisionTable extends DistributionClassifier
     }
   }
 
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file [-T test file] [-c class index]
+   * @param argv the options
    */
   public static void main(String [] argv) {
 
