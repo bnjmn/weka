@@ -46,7 +46,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * <code> 0.1, 0.2, 0.3, 0.1, 0.3 </code> <P>
  *
  * New attribute values <BR>
- * <code> 0.1, 0.1, 0.1, -0.2, -0.2 </code> <P>
+ * <code> 0.1, 0.1, -0.2, 0.2 </code> <P>
  *
  * The range of attributes used is taken in numeric order. That is, a range
  * spec of 7-11,3-5 will use the attribute ordering 3,4,5,7,8,9,10,11 for the
@@ -60,7 +60,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FirstOrder extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -82,7 +82,7 @@ public class FirstOrder extends Filter
       + "Original attribute values\n\n"
       + "   0.1, 0.2, 0.3, 0.1, 0.3\n\n"
       + "New attribute values\n\n"
-      + "   0.1, 0.1, 0.1, -0.2, -0.2\n\n"
+      + "   0.1, 0.1, -0.2, 0.2\n\n"
       + "The range of attributes used is taken in numeric order. That is, a range "
       + "spec of 7-11,3-5 will use the attribute ordering 3,4,5,7,8,9,10,11 for the "
       + "differences, NOT 7,8,9,10,11,3,4,5.";
