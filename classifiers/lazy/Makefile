@@ -1,6 +1,6 @@
 JAVAC = javac
 
-SOURCES = IB1.java IBk.java LBR.java LWR.java
+SOURCES = IB1.java IBk.java LBR.java LWR.java LWL.java
 
 
 
