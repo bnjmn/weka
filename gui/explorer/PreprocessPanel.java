@@ -61,6 +61,7 @@ import weka.core.SerializedObject;
 import weka.core.converters.Loader;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 import weka.gui.AttributeSelectionPanel;
 import weka.gui.AttributeSummaryPanel;
 import weka.gui.ExtensionFileFilter;
@@ -81,7 +82,7 @@ import weka.core.UnassignedClassException;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -166,7 +167,7 @@ public class PreprocessPanel extends JPanel {
       .registerEditor(weka.core.SelectedTag.class,
 		      weka.gui.SelectedTagEditor.class);
     java.beans.PropertyEditorManager
-      .registerEditor(weka.filters.Filter.class,
+      .registerEditor(weka.filters.UnsupervisedFilter.class,
 		      weka.gui.GenericObjectEditor.class);
      java.beans.PropertyEditorManager
       .registerEditor(weka.attributeSelection.ASSearch.class,
@@ -263,7 +264,7 @@ public class PreprocessPanel extends JPanel {
     m_Filters.setBorder(BorderFactory.createTitledBorder("Filters"));
     m_AttSummaryPanel.setBorder(BorderFactory
 		    .createTitledBorder("Attribute info for base relation"));
-    m_Filters.setValue(new Filter [0]);
+    m_Filters.setValue(new UnsupervisedFilter [0]);
     m_ReplaceBut.setEnabled(false);
     m_ApplyBut.setEnabled(false);
     m_SaveBut.setEnabled(false);
@@ -419,11 +420,11 @@ public class PreprocessPanel extends JPanel {
    *
    * @return an array containing all the filters
    */
-  protected Filter [] getFilters() {
+  protected UnsupervisedFilter [] getFilters() {
 
-    Filter [] extras = (Filter [])m_Filters.getValue();
+    UnsupervisedFilter [] extras = (UnsupervisedFilter [])m_Filters.getValue();
     if (extras == null) {
-      extras = new Filter [0];
+      extras = new UnsupervisedFilter [0];
     }
     weka.filters.unsupervised.attribute.Remove af = null;
     try {
@@ -441,7 +442,7 @@ public class PreprocessPanel extends JPanel {
     if (af == null) {
       return extras;
     }
-    Filter [] result = new Filter[extras.length + 1];
+    UnsupervisedFilter [] result = new UnsupervisedFilter[extras.length + 1];
     result[0] = af;
     System.arraycopy(extras, 0, result, 1, extras.length);
     return result;
@@ -456,7 +457,7 @@ public class PreprocessPanel extends JPanel {
    */
   protected Instances filterInstances(Instances instances) {
 
-    Filter [] filters = getFilters();
+    UnsupervisedFilter [] filters = getFilters();
     Instances temp = instances;
     try {
       if (m_Log instanceof TaskLogger) {
@@ -465,8 +466,8 @@ public class PreprocessPanel extends JPanel {
       for (int i = 0; i < filters.length; i++) {
 	m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
 			    + filters[i].getClass().getName());
-	filters[i].setInputFormat(temp);
-	temp = Filter.useFilter(temp, filters[i]);
+	((Filter)filters[i]).setInputFormat(temp);
+	temp = Filter.useFilter(temp, (Filter) filters[i]);
       }
       if (m_Log instanceof TaskLogger) {
 	((TaskLogger)m_Log).taskFinished();
