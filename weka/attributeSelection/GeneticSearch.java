@@ -58,7 +58,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class GeneticSearch extends ASSearch implements 
   StartSetHandler, OptionHandler {
@@ -863,7 +863,6 @@ public class GeneticSearch extends ASSearch implements
     for (j=2;j<m_popSize;j+=2) {
       parent1 = select();
       parent2 = select();
-
       newPop[j] = (GABitSet)(m_population[parent1].clone());
       newPop[j+1] = (GABitSet)(m_population[parent2].clone());
       // if parents are equal mutate one bit
@@ -882,29 +881,30 @@ public class GeneticSearch extends ASSearch implements
 	else {
 	  newPop[j].set(r);
 	}
-      }
-      else {
+      } else {
 	// crossover
 	double r = m_random.nextDouble();
-	if (r < m_pCrossover) {
-	  // cross point
-	  int cp = Math.abs(m_random.nextInt());
-	  
-	  cp %= (m_numAttribs-2);
-	  cp ++;
-	  
-	  for (i=0;i<cp;i++) {
-	    if (m_population[parent1].get(i)) {
-	      newPop[j+1].set(i);
-	    }
-	    else {
-	      newPop[j+1].clear(i);
-	    }
-	    if (m_population[parent2].get(i)) {
-	      newPop[j].set(i);
-	    }
-	    else {
-	      newPop[j].clear(i);
+	if (m_numAttribs >= 3) {
+	  if (r < m_pCrossover) {
+	    // cross point
+	    int cp = Math.abs(m_random.nextInt());
+	    
+	    cp %= (m_numAttribs-2);
+	    cp ++;
+	    
+	    for (i=0;i<cp;i++) {
+	      if (m_population[parent1].get(i)) {
+		newPop[j+1].set(i);
+	      }
+	      else {
+		newPop[j+1].clear(i);
+	      }
+	      if (m_population[parent2].get(i)) {
+		newPop[j].set(i);
+	      }
+	      else {
+		newPop[j].clear(i);
+	      }
 	    }
 	  }
 	}
@@ -1090,8 +1090,13 @@ public class GeneticSearch extends ASSearch implements
     // scalepop
     m_sumFitness = 0;
     for (j=0;j<m_popSize;j++) {
-      m_population[j].
-	setFitness(Math.abs((a * m_population[j].getObjective() + b)));
+      if (a == Double.POSITIVE_INFINITY || a == Double.NEGATIVE_INFINITY ||
+	  b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY) {
+	m_population[j].setFitness(m_population[j].getObjective());
+      } else {
+	m_population[j].
+	  setFitness(Math.abs((a * m_population[j].getObjective() + b)));
+      }
       m_sumFitness += m_population[j].getFitness();
     }
   }
