@@ -59,7 +59,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -94,6 +94,20 @@ public class Experiment implements Serializable, OptionHandler {
       custom property iterator. Only methods names beginning with "measure"
       and returning doubles are recognised */
   protected String [] m_AdditionalMeasures = null;
+
+  /** True if the class attribute is the first attribute for all
+      datasets involved in this experiment. */
+  protected boolean m_ClassFirst = false;
+
+  /**
+   * Sets whether the first attribute is treated as the class
+   * for all datasets involved in the experiment. This information
+   * is not output with the result of the experiments!
+   */
+  public void classFirst(boolean flag) {
+    
+    m_ClassFirst = flag;
+  }
 
   /**
    * Gets whether the custom property iterator should be used.
@@ -386,7 +400,11 @@ public class Experiment implements Serializable, OptionHandler {
       File currentFile = (File) getDatasets().elementAt(m_DatasetNumber);
       Reader reader = new FileReader(currentFile);
       Instances data = new Instances(new BufferedReader(reader));
-      data.setClassIndex(data.numAttributes() - 1);
+      if (m_ClassFirst) {
+	data.setClassIndex(0);
+      } else {
+	data.setClassIndex(data.numAttributes() - 1);
+      }
       m_CurrentInstances = data;
       m_ResultProducer.setInstances(m_CurrentInstances);
     }

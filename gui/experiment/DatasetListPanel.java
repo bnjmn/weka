@@ -55,7 +55,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -146,15 +146,22 @@ public class DatasetListPanel extends JPanel implements ActionListener {
    */
   protected void getFilesRecursively(File directory, Vector files) {
 
-    File[] currentDirFiles = directory.listFiles();
-    for (int i = 0; i < currentDirFiles.length; i++) {
-      if (m_FileChooser.getFileFilter().accept(currentDirFiles[i])) {
-	if (currentDirFiles[i].isDirectory()) {
-	  getFilesRecursively(currentDirFiles[i], files);
-	} else {
-	  files.addElement(currentDirFiles[i]);
+    try {
+      String[] currentDirFiles = directory.list();
+      for (int i = 0; i < currentDirFiles.length; i++) {
+	currentDirFiles[i] = directory.getCanonicalPath() + File.separator + 
+	  currentDirFiles[i];
+	File current = new File(currentDirFiles[i]);
+	if (m_FileChooser.getFileFilter().accept(current)) {
+	  if (current.isDirectory()) {
+	    getFilesRecursively(current, files);
+	  } else {
+	    files.addElement(current);
+	  }
 	}
       }
+    } catch (Exception e) {
+      System.err.println("IOError occured when reading list of files");
     }
   }
   

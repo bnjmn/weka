@@ -38,7 +38,7 @@ import javax.swing.JPanel;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Experimenter extends JPanel {
 
@@ -54,25 +54,32 @@ public class Experimenter extends JPanel {
   /** The tabbed pane that controls which sub-pane we are working with */
   protected JTabbedPane m_TabbedPane = new JTabbedPane();
 
+  /** True if the class attribute is the first attribute for all
+      datasets involved in this experiment. */
+  protected boolean m_ClassFirst = false;
+
   /**
    * Creates the experiment environment gui with no initial experiment
    */
-  public Experimenter() {
+  public Experimenter(boolean classFirst) {
 
     m_SetupPanel = new SetupPanel();
     m_RunPanel = new RunPanel();
     m_ResultsPanel = new ResultsPanel();
 
+    m_ClassFirst = classFirst;
+
     m_TabbedPane.addTab("Setup", null, m_SetupPanel, "Set up the experiment");
     m_TabbedPane.addTab("Run", null, m_RunPanel, "Run the experiment");
     m_TabbedPane.addTab("Analyse", null, m_ResultsPanel,
-		      "Analyse experiment results");
+			"Analyse experiment results");
     m_TabbedPane.setSelectedIndex(0);
     m_TabbedPane.setEnabledAt(1, false);
     m_SetupPanel.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	System.err.println("Updated experiment");
 	Experiment exp = m_SetupPanel.getExperiment();
+	exp.classFirst(m_ClassFirst);
 	m_RunPanel.setExperiment(exp);
 	m_ResultsPanel.setExperiment(exp);
 	m_TabbedPane.setEnabledAt(1, true);
@@ -92,9 +99,14 @@ public class Experimenter extends JPanel {
   public static void main(String [] args) {
 
     try {
+      
+      boolean classFirst = false;
+      if (args.length > 0) {
+	classFirst = args[0].equals("CLASS_FIRST");
+      }
       final JFrame jf = new JFrame("Weka Experiment Environment");
       jf.getContentPane().setLayout(new BorderLayout());
-      jf.getContentPane().add(new Experimenter(), BorderLayout.CENTER);
+      jf.getContentPane().add(new Experimenter(classFirst), BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
 	  jf.dispose();
