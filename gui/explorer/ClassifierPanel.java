@@ -81,7 +81,7 @@ import javax.swing.JCheckBox;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -145,6 +145,12 @@ public class ClassifierPanel extends JPanel {
 
   /** The frame used to show the test set selection panel */
   protected JFrame m_SetTestFrame;
+
+  /** The predictions of the most recently excecuted classifier */
+  protected double [] m_predictions=null;
+  
+  /** The instances that the most recently excecuted classifier predicted */
+  protected Instances m_predInstances=null;
   
   /**
    * Alters the enabled/disabled status of elements associated with each
@@ -161,6 +167,9 @@ public class ClassifierPanel extends JPanel {
 
   /** Click to stop a running classifier */
   protected JButton m_StopBut = new JButton("Stop");
+
+  /** Click to visualize the current classifier's predictions */
+  protected JButton m_VisualizeBut = new JButton("Visualize");
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -216,6 +225,7 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
+    m_VisualizeBut.setToolTipText("Visualize the current classifier");
     m_ClassCombo.setToolTipText("Select the attribute to use as the class");
     m_TrainBut.setToolTipText("Test on the same set that the classifier"
 			      + " is trained on");
@@ -252,6 +262,7 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
+    m_VisualizeBut.setEnabled(false);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
@@ -262,6 +273,12 @@ public class ClassifierPanel extends JPanel {
     m_StopBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	stopClassifier();
+      }
+    });
+    m_VisualizeBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_VisualizeBut.setEnabled(false);
+	visualizeClassifier();
       }
     });
     m_ClassCombo.addActionListener(new ActionListener() {
@@ -377,10 +394,12 @@ public class ClassifierPanel extends JPanel {
     m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    ssButs.setLayout(new GridLayout(1, 2, 5, 5));
+    ssButs.setLayout(new GridLayout(1, 3, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
+    ssButs.add(m_VisualizeBut);
     buttons.add(ssButs);
+
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Classifier output"));
@@ -468,6 +487,9 @@ public class ClassifierPanel extends JPanel {
   public void setInstances(Instances inst) {
     
     m_Instances = inst;
+    m_predictions = null;
+    m_predInstances = null;
+    m_VisualizeBut.setEnabled(false);
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
       String type = "";
@@ -655,7 +677,13 @@ public class ClassifierPanel extends JPanel {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
 	      eval = new Evaluation(inst);
-	      eval.evaluateModel(classifier, inst);
+	      m_predInstances = new Instances(inst,inst.numInstances());
+	      m_predictions = new double [inst.numInstances()];
+	      for (int jj=0;jj<inst.numInstances();jj++) {
+		m_predictions[jj] = 
+		  eval.evaluateModelOnce(classifier, inst.instance(jj));
+		m_predInstances.add(inst.instance(jj));
+	      }
 	      outBuff.append("=== Evaluation on training set ===\n");
 	      break;
 
@@ -667,6 +695,9 @@ public class ClassifierPanel extends JPanel {
 		inst.stratify(numFolds);
 	      }
 	      eval = new Evaluation(inst);
+	      int p_index = 0;
+	      m_predInstances = new Instances(inst,inst.numInstances());
+	      m_predictions = new double [inst.numInstances()];
 	      // Make some splits and do a CV
 	      for (int fold = 0; fold < numFolds; fold++) {
 		m_Log.statusMessage("Creating splits for fold "
@@ -678,7 +709,12 @@ public class ClassifierPanel extends JPanel {
 		classifier.buildClassifier(train);
 		m_Log.statusMessage("Evaluating model for fold "
 				    + (fold + 1) + "...");
-		eval.evaluateModel(classifier, test);
+		for (int jj=0;jj<test.numInstances();jj++) {
+		  m_predictions[p_index++] = 
+		    eval.evaluateModelOnce(classifier, test.instance(jj));
+		  m_predInstances.add(test.instance(jj));
+		}
+		//		eval.evaluateModel(classifier, test);
 	      }
 	      if (inst.attribute(classIndex).isNominal()) {
 		outBuff.append("=== Stratified cross-validation ===\n");
@@ -698,14 +734,29 @@ public class ClassifierPanel extends JPanel {
 	      classifier.buildClassifier(train);
 	      eval = new Evaluation(train);
 	      m_Log.statusMessage("Evaluating on test split...");
-	      eval.evaluateModel(classifier, test);
+	      m_predictions = new double [test.numInstances()];
+	      m_predInstances = new Instances(test,test.numInstances());
+	      for (int jj=0;jj<test.numInstances();jj++) {
+		m_predictions[jj] = 
+		  eval.evaluateModelOnce(classifier, test.instance(jj));
+		m_predInstances.add(test.instance(jj));
+	      }
+	      //	      eval.evaluateModel(classifier, test);
 	      outBuff.append("=== Evaluation on test split ===\n");
 	      break;
 		
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
 	      eval = new Evaluation(inst);
-	      eval.evaluateModel(classifier, userTest);
+	      m_predictions = new double [userTest.numInstances()];
+	      m_predInstances = new Instances(userTest,
+					      userTest.numInstances());
+	      for (int jj=0;jj<userTest.numInstances();jj++) {
+		m_predictions[jj] = 
+		  eval.evaluateModelOnce(classifier, userTest.instance(jj));
+		m_predInstances.add(userTest.instance(jj));
+	      }
+	      //	      eval.evaluateModel(classifier, userTest);
 	      outBuff.append("=== Evaluation on test set ===\n");
 	      break;
 
@@ -743,6 +794,7 @@ public class ClassifierPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
+	    m_VisualizeBut.setEnabled(true);
 	  }
 	}
       };
@@ -751,6 +803,34 @@ public class ClassifierPanel extends JPanel {
     }
   }
   
+  /**
+   * Pops up a VisualizePanel for the most recently run classifier.
+   */
+  protected void visualizeClassifier() {
+    final javax.swing.JFrame jf = 
+      new javax.swing.JFrame("Weka Knowledge Explorer: Visualize");
+    jf.setSize(500,400);
+    jf.getContentPane().setLayout(new BorderLayout());
+    final VisualizePanel sp = new VisualizePanel();
+    jf.getContentPane().add(sp, BorderLayout.CENTER);
+    jf.addWindowListener(new java.awt.event.WindowAdapter() {
+      public void windowClosing(java.awt.event.WindowEvent e) {
+	jf.dispose();
+      }
+    });
+    //      jf.pack();
+    jf.setVisible(true);
+    sp.setInstances(m_predInstances);
+    sp.setPredictions(m_predictions);
+    sp.setColourIndex(m_predInstances.classIndex());
+
+    if (m_predInstances.attribute(m_predInstances.classIndex()).isNumeric()) {
+      sp.setPredictionsNumeric(true);
+    } else {
+      sp.setPredictionsNumeric(false);
+    }
+  }
+
   /**
    * Stops the currently running classifier (if any).
    */
