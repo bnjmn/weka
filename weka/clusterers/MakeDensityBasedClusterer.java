@@ -36,7 +36,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
@@ -168,7 +168,7 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
 	   if (m_priors[i] > 0) {
 	     m_modelNormal[i][j][1] = 
-	       Math.sqrt(m_modelNormal[i][j][1] / (m_priors[i]));
+	       Math.sqrt(m_modelNormal[i][j][1] / m_priors[i]);
 	   } else if (m_priors[i] <= 0) {
 	     m_modelNormal[i][j][1] = Double.MAX_VALUE;
 	   }
@@ -230,7 +230,7 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
   }
 
   /** Constant for normal distribution. */
-  private static double m_normConst = Math.log(Math.sqrt(2*Math.PI));
+  private static double m_normConst = 0.5 * Math.log(2 * Math.PI);
 
   /**
    * Density function of normal distribution.
@@ -363,9 +363,9 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 				      "",
 				      "", 0, "\nOptions specific to clusterer "
 				      + m_wrappedClusterer.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_wrappedClusterer).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_wrappedClusterer).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     
@@ -393,13 +393,16 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
     }
      
     String wString = Utils.getOption('W', options);
-    if (wString.length() != 0) {
-      setClusterer(Clusterer.forName(wString,
-				       Utils.partitionOptions(options)));
-
-    } else {
+    if (wString.length() == 0) {
       throw new Exception("A clusterer must be specified with the -W option.");
     }
+    String[] spec = Utils.splitOptions(wString);
+    if (spec.length == 0) {
+      throw new IllegalArgumentException("Invalid clusterer specification string");
+    }
+    String name = spec[0];
+    spec[0] = "";
+    setClusterer(Clusterer.forName(name, spec));
   }
 
   /**
