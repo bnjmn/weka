@@ -16,14 +16,11 @@
 
 /*
  *    PreprocessPanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 2003 Richard Kirkby, Len Trigg
  *
  */
 
-
 package weka.gui.explorer;
-
-
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -62,7 +59,7 @@ import weka.core.converters.Loader;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
-import weka.gui.AttributeSelectionPanel;
+import weka.gui.AttributeListPanel;
 import weka.gui.AttributeSummaryPanel;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.FileEditor;
@@ -73,25 +70,24 @@ import weka.gui.Logger;
 import weka.gui.PropertyDialog;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
+import weka.gui.PropertyPanel;
+import weka.gui.AttributeVisualizationPanel;
 import weka.core.UnassignedClassException;
 
 /** 
- * This panel controls simple preprocessing of instances. Attributes may be
- * selected for inclusion/exclusion, summary information on instances and
- * attributes is shown. A sequence of filters may be configured to alter the
- * set of instances. Altered instances may also be saved.
+ * This panel controls simple preprocessing of instances. Summary
+ * information on instances and attributes is shown. Filters may be
+ * configured to alter the set of instances. Altered instances may
+ * also be saved.
  *
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class PreprocessPanel extends JPanel {
-
-  /** Displays simple stats on the base instances */
-  protected InstancesSummaryPanel m_BaseInstPanel =
-    new InstancesSummaryPanel();
   
   /** Displays simple stats on the working instances */
-  protected InstancesSummaryPanel m_WorkingInstPanel =
+  protected InstancesSummaryPanel m_InstSummaryPanel =
     new InstancesSummaryPanel();
 
   /** Click to load base instances from a file */
@@ -103,28 +99,33 @@ public class PreprocessPanel extends JPanel {
   /** Click to load base instances from a Database */
   protected JButton m_OpenDBBut = new JButton("Open DB...");
 
+  /** Lets the user enter a DB query */
   protected GenericObjectEditor m_DatabaseQueryEditor = 
     new GenericObjectEditor();
 
-  /** Click to apply filters and replace the working dataset */
-  protected JButton m_ApplyBut = new JButton("Apply Filters");
-
-  /** Click to replace the base dataset with the working dataset */
-  protected JButton m_ReplaceBut = new JButton("Replace");
+  /** Click to revert back to the last saved point */
+  protected JButton m_UndoBut = new JButton("Undo");
 
   /** Click to apply filters and save the results */
   protected JButton m_SaveBut = new JButton("Save...");
   
   /** Panel to let the user toggle attributes */
-  protected AttributeSelectionPanel m_AttPanel = new AttributeSelectionPanel();
-
-  /** Lets the user add a series of filters */
-  protected GenericArrayEditor m_Filters = new GenericArrayEditor();
+  protected AttributeListPanel m_AttPanel = new AttributeListPanel();
 
   /** Displays summary stats on the selected attribute */
   protected AttributeSummaryPanel m_AttSummaryPanel =
     new AttributeSummaryPanel();
-  
+
+  /** Lets the user configure the filter */
+  protected GenericObjectEditor m_FilterEditor =
+    new GenericObjectEditor();
+
+  /** Filter configuration */
+  protected PropertyPanel m_FilterPanel = new PropertyPanel(m_FilterEditor);
+
+  /** Click to apply filters and save the results */
+  protected JButton m_ApplyFilterBut = new JButton("Apply");
+
   /** Filter to ensure only arff files are selected */  
   protected FileFilter m_ArffFilter =
     new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
@@ -138,12 +139,18 @@ public class PreprocessPanel extends JPanel {
   
   /** Stores the last sql query executed */
   protected String m_SQLQ = new String("SELECT * FROM ?");
-  
-  /** The unadulterated instances */
-  protected Instances m_BaseInstances;
+ 
+  /** The working instances */
+  protected Instances m_Instances;
 
-  /** The working (filtered) copy */
-  protected Instances m_WorkingInstances;
+  /** The visualization of the attribute values */
+  protected AttributeVisualizationPanel m_AttVisualizePanel = new AttributeVisualizationPanel();
+
+  /** Keeps track of undo points */
+  protected File[] m_tempUndoFiles = new File[20]; // set number of undo ops here
+
+  /** The next available slot for an undo point */
+  protected int m_tempUndoIndex = 0;
   
   /**
    * Manages sending notifications to people when we change the set of
@@ -151,13 +158,11 @@ public class PreprocessPanel extends JPanel {
    */
   protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
-  /** A thread to loading/saving instances from a file or URL */
+  /** A thread for loading/saving instances from a file or URL */
   protected Thread m_IOThread;
 
+  /** The message logger */
   protected Logger m_Log = new SysErrLog();
-
-  /** A copy of the most recently applied filters */
-  protected SerializedObject m_FiltersCopy = null;
   
   static {
     java.beans.PropertyEditorManager
@@ -195,45 +200,38 @@ public class PreprocessPanel extends JPanel {
     ((GenericObjectEditor.GOEPanel)m_DatabaseQueryEditor.getCustomEditor())
       .addOkListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
-	    setBaseInstancesFromDBQ();
+	    setInstancesFromDBQ();
 	  }
 	});
     } catch (Exception ex) {
     }
+    m_FilterEditor.setClassType(weka.filters.UnsupervisedFilter.class);
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_OpenDBBut.setToolTipText("Open a set of instances from a database");
-    m_ReplaceBut
-      .setToolTipText("Replace the base relation with the working relation");
-    m_ApplyBut.setToolTipText("Update working relation with current filters");
+    m_UndoBut.setToolTipText("Undo the last change to the dataset");
     m_SaveBut.setToolTipText("Save the working relation to a file");
-    m_Filters.setToolTipText("Edit a list of filters to transform instances");
+    m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	setBaseInstancesFromURLQ();
+	setInstancesFromURLQ();
       }
     });
     m_OpenDBBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	PropertyDialog pd = new PropertyDialog(m_DatabaseQueryEditor,100,100);
-	//setBaseInstancesFromDBQ();
       }
     });
     m_OpenFileBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	setBaseInstancesFromFileQ();
+	setInstancesFromFileQ();
       }
     });
-    m_ReplaceBut.addActionListener(new ActionListener() {
+    m_UndoBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	setBaseInstances(m_WorkingInstances);
-      }
-    });
-    m_ApplyBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	setWorkingInstancesFromFilters();
+	undo();
       }
     });
     m_SaveBut.addActionListener(new ActionListener() {
@@ -241,6 +239,11 @@ public class PreprocessPanel extends JPanel {
 	saveWorkingInstancesToFileQ();
       }
     });
+    m_ApplyFilterBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  applyFilter();
+	}
+      });
     m_AttPanel.getSelectionModel()
       .addListSelectionListener(new ListSelectionListener() {
 	public void valueChanged(ListSelectionEvent e) {
@@ -249,67 +252,72 @@ public class PreprocessPanel extends JPanel {
 	    for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
 	      if (lm.isSelectedIndex(i)) {
 		m_AttSummaryPanel.setAttribute(i);
+		m_AttVisualizePanel.setAttribute(i);
 		break;
 	      }
 	    }
 	  }
 	}
     });
-    m_BaseInstPanel.setBorder(BorderFactory
-			      .createTitledBorder("Base relation"));
-    m_WorkingInstPanel.setBorder(BorderFactory
-				 .createTitledBorder("Working relation"));
+
+    m_InstSummaryPanel.setBorder(BorderFactory
+				 .createTitledBorder("Current relation"));
     m_AttPanel.setBorder(BorderFactory
-		    .createTitledBorder("Attributes in base relation"));
-    m_Filters.setBorder(BorderFactory.createTitledBorder("Filters"));
+		    .createTitledBorder("Attributes"));
     m_AttSummaryPanel.setBorder(BorderFactory
-		    .createTitledBorder("Attribute information for base relation"));
-    m_Filters.setValue(new UnsupervisedFilter [0]);
-    m_ReplaceBut.setEnabled(false);
-    m_ApplyBut.setEnabled(false);
-    m_SaveBut.setEnabled(false);
+		    .createTitledBorder("Selected attribute"));
+    m_UndoBut.setEnabled(false);
+    m_ApplyFilterBut.setEnabled(false);
     
     // Set up the GUI layout
-    JPanel instInfo = new JPanel();
-    instInfo.setLayout(new GridLayout(1, 2));
-    instInfo.add(m_BaseInstPanel);
-    instInfo.add(m_WorkingInstPanel);
-
     JPanel buttons = new JPanel();
     buttons.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
     buttons.setLayout(new GridLayout(1, 6, 5, 5));
     buttons.add(m_OpenFileBut);
     buttons.add(m_OpenURLBut);
     buttons.add(m_OpenDBBut);
-    buttons.add(m_ApplyBut);
-    buttons.add(m_ReplaceBut);
+    buttons.add(m_UndoBut);
     buttons.add(m_SaveBut);
 
-    JPanel filterNAttInfo = new JPanel();
-    filterNAttInfo.setLayout(new GridLayout(2, 1));
-    filterNAttInfo.add(m_Filters);
-    filterNAttInfo.add(m_AttSummaryPanel);
-    JPanel filters = new JPanel();
-    filters.setLayout(new GridLayout(1, 2));
-    filters.add(m_AttPanel);
-    filters.add(filterNAttInfo);
+    JPanel attInfo = new JPanel();
 
-    JPanel p3 = new JPanel();
-    p3.setLayout(new BorderLayout());
-    p3.add(instInfo, BorderLayout.NORTH);
-    p3.add(filters, BorderLayout.CENTER);
-    
+    attInfo.setLayout(new BorderLayout());
+    attInfo.add(m_AttPanel, BorderLayout.CENTER);
+
+    JPanel filter = new JPanel();
+    filter.setBorder(BorderFactory
+		    .createTitledBorder("Filter"));
+    filter.setLayout(new BorderLayout());
+    filter.add(m_FilterPanel, BorderLayout.CENTER);
+    filter.add(m_ApplyFilterBut, BorderLayout.EAST); 
+
+    JPanel attVis = new JPanel();
+    attVis.setLayout( new GridLayout(2,1) );
+    attVis.add(m_AttSummaryPanel);
+    attVis.add(m_AttVisualizePanel);
+
+    JPanel lhs = new JPanel();
+    lhs.setLayout(new BorderLayout());
+    lhs.add(m_InstSummaryPanel, BorderLayout.NORTH);
+    lhs.add(attInfo, BorderLayout.CENTER);
+
+    JPanel rhs = new JPanel();
+    rhs.setLayout(new BorderLayout());
+    rhs.add(attVis, BorderLayout.CENTER);
+
+    JPanel relation = new JPanel();
+    relation.setLayout(new GridLayout(1, 2));
+    relation.add(lhs);
+    relation.add(rhs);
+
+    JPanel middle = new JPanel();
+    middle.setLayout(new BorderLayout());
+    middle.add(filter, BorderLayout.NORTH);
+    middle.add(relation, BorderLayout.CENTER);
+
     setLayout(new BorderLayout());
     add(buttons, BorderLayout.NORTH);
-    add(p3, BorderLayout.CENTER);
-  }
-
-  /**
-   * gets a copy of the most recently applied filters.
-   * @return a serialized array of the most recently applied filters
-   */
-  protected synchronized SerializedObject getMostRecentFilters() {
-    return m_FiltersCopy;
+    add(middle, BorderLayout.CENTER);
   }
 
   /**
@@ -327,27 +335,31 @@ public class PreprocessPanel extends JPanel {
    *
    * @param inst a set of Instances
    */
-  public void setBaseInstances(Instances inst) {
+  public void setInstances(Instances inst) {
 
-    m_BaseInstances = inst;
+    m_Instances = inst;
     try {
       Runnable r = new Runnable() {
 	public void run() {
-	  m_BaseInstPanel.setInstances(m_BaseInstances);
-	  m_AttPanel.setInstances(m_BaseInstances);
-	  m_AttSummaryPanel.setInstances(m_BaseInstances);
+	  m_InstSummaryPanel.setInstances(m_Instances);
+	  m_AttPanel.setInstances(m_Instances);
+	  m_AttSummaryPanel.setInstances(m_Instances);
+	  m_AttVisualizePanel.setInstances(m_Instances);
+
+	  // select the first attribute in the list
+	  m_AttPanel.getSelectionModel().setSelectionInterval(0, 0);
+	  m_AttSummaryPanel.setAttribute(0);
+	  m_AttVisualizePanel.setAttribute(0);
+
+	  m_ApplyFilterBut.setEnabled(true);
+
 	  m_Log.logMessage("Base relation is now "
-			   + m_BaseInstances.relationName()
-			   + " (" + m_BaseInstances.numInstances()
+			   + m_Instances.relationName()
+			   + " (" + m_Instances.numInstances()
 			   + " instances)");
 	  m_Log.statusMessage("OK");
-
-	  // clear most recently applied filters
-	  m_FiltersCopy = null;
-	  setWorkingInstances(m_BaseInstances);
-	  m_ApplyBut.setEnabled(true);
-	  m_ReplaceBut.setEnabled(false);
-	  m_SaveBut.setEnabled(false);
+	  // Fire a propertychange event
+	  m_Support.firePropertyChange("", null, null);
 	}
       };
       if (SwingUtilities.isEventDispatchThread()) {
@@ -365,36 +377,13 @@ public class PreprocessPanel extends JPanel {
   }
 
   /**
-   * Tells the panel to use a new working set of instances.
-   *
-   * @param inst a set of Instances
-   */
-  public void setWorkingInstances(Instances inst) {
-
-    if (m_WorkingInstances != inst) {
-      m_WorkingInstances = inst;
-      m_WorkingInstPanel.setInstances(m_WorkingInstances);
-      m_Log.logMessage("Working relation is now "
-		       + m_WorkingInstances.relationName()
-		       + " (" + m_WorkingInstances.numInstances()
-		       + " instances)");
-      m_Log.statusMessage("OK");
-      m_ReplaceBut.setEnabled(true);
-      m_SaveBut.setEnabled(true);
-      
-      // Fire a propertychange event
-      m_Support.firePropertyChange("", null, null);
-    }
-  }
-
-  /**
    * Gets the working set of instances.
    *
    * @return the working instances
    */
-  public Instances getWorkingInstances() {
+  public Instances getInstances() {
 
-    return m_WorkingInstances;
+    return m_Instances;
   }
   
   /**
@@ -403,6 +392,7 @@ public class PreprocessPanel extends JPanel {
    * @param l a value of type 'PropertyChangeListener'
    */
   public void addPropertyChangeListener(PropertyChangeListener l) {
+
     m_Support.addPropertyChangeListener(l);
   }
 
@@ -412,136 +402,63 @@ public class PreprocessPanel extends JPanel {
    * @param l a value of type 'PropertyChangeListener'
    */
   public void removePropertyChangeListener(PropertyChangeListener l) {
+
     m_Support.removePropertyChangeListener(l);
-  }
-
-  /**
-   * Gets an array of all the filters that have been configured for use.
-   *
-   * @return an array containing all the filters
-   */
-  protected UnsupervisedFilter [] getFilters() {
-
-    UnsupervisedFilter [] extras = (UnsupervisedFilter [])m_Filters.getValue();
-    if (extras == null) {
-      extras = new UnsupervisedFilter [0];
-    }
-    weka.filters.unsupervised.attribute.Remove af = null;
-    try {
-      // Configure the attributeFilter from the current attribute panel
-      int [] selectedAttributes = m_AttPanel.getSelectedAttributes();
-      if (selectedAttributes.length < m_BaseInstances.numAttributes()) {
-	af = new weka.filters.unsupervised.attribute.Remove();
-	af.setInvertSelection(true);
-	af.setAttributeIndicesArray(selectedAttributes);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      m_Log.logMessage(ex.getMessage());
-    }
-    if (af == null) {
-      return extras;
-    }
-    UnsupervisedFilter [] result = new UnsupervisedFilter[extras.length + 1];
-    result[0] = af;
-    System.arraycopy(extras, 0, result, 1, extras.length);
-    return result;
   }
   
   /**
-   * Passes the supplied instances through all the filters that have
-   * been configured for use.
-   *
-   * @param instances the input instances
-   * @return the filtered instances
+   * Passes the dataset through the filter that has been configured for use.
    */
-  protected Instances filterInstances(Instances instances) {
+  protected void applyFilter() {
 
-    UnsupervisedFilter [] filters = getFilters();
-    Instances temp = instances;
-    try {
-      if (m_Log instanceof TaskLogger) {
-	((TaskLogger)m_Log).taskStarted();
-      }
-      for (int i = 0; i < filters.length; i++) {
-	m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
-			    + filters[i].getClass().getName());
-	((Filter)filters[i]).setInputFormat(temp);
-	temp = Filter.useFilter(temp, (Filter) filters[i]);
-      }
-      if (m_Log instanceof TaskLogger) {
-	((TaskLogger)m_Log).taskFinished();
-      }
-      // try to save a copy of the filters using serialization
-      try {
-	m_FiltersCopy = new SerializedObject(filters);
-      } catch (Exception ex) {
-	JOptionPane.showMessageDialog(this,
-				      "Could not create copy of filters",
-				      null,
-				      JOptionPane.ERROR_MESSAGE);
-      }
-      return temp;
-    } catch (Exception ex) {
-      // the the weka sleep
-      if (m_Log instanceof TaskLogger) {
-	((TaskLogger)m_Log).taskFinished();
-      }
-      // Pop up an error optionpane
-      JOptionPane.showMessageDialog(this,
-				    "Problem filtering instances:\n"
-				    + ex.getMessage(),
-				    "Instance Filter",
-				    JOptionPane.ERROR_MESSAGE);
-      ex.printStackTrace();
-      m_Log.logMessage(ex.getMessage());
-      return null;
-    }
-  }
-
-  /**
-   * Applies the current filters and attribute selection settings and
-   * sets the result as the working dataset. This is done in the IO
-   * thread, and an error message is popped up if the IO thread is busy.
-   */
-  public void setWorkingInstancesFromFilters() {
     if (m_IOThread == null) {
-      int res = 0;
-      if (m_AttPanel.getSelectedAttributes().length == 0) {
-	Object[] options = { "OK", "CANCEL" };
-	res = JOptionPane.showOptionDialog(null, 
-				     "Unselecting all attributes will result "
-				     +"in an empty dataset.\nDo you want to "
-				     +"continue?", "Warning", 
-				     JOptionPane.DEFAULT_OPTION, 
-				     JOptionPane.WARNING_MESSAGE,
-				     null, options, options[1]);
-	
-      }
-      if (res == 0) {
-	m_IOThread = new Thread() {
-	    public void run() {
-	      Instances f = filterInstances(m_BaseInstances);
-	      if (f != null) {
-		if ((f == m_BaseInstances) && (f == m_WorkingInstances)) {
-		  m_Log.logMessage("No changes from base relation");
-		} else {
-		  setWorkingInstances(f);
-		}
+      m_IOThread = new Thread() {
+	public void run() {
+	  try {
+
+	    Filter filter = (Filter) m_FilterEditor.getValue();
+	    if (filter != null) {
+	    
+	      if (m_Log instanceof TaskLogger) {
+		((TaskLogger)m_Log).taskStarted();
 	      }
-	      m_IOThread = null;
+	      m_Log.statusMessage("Saving undo information");
+	      addUndoPoint();
+	      m_Log.statusMessage("Passing dataset through filter "
+				  + filter.getClass().getName());
+	      filter.setInputFormat(m_Instances);
+	      m_Instances = filter.useFilter(m_Instances, filter);
+	      setInstances(m_Instances);
+	      if (m_Log instanceof TaskLogger) {
+		((TaskLogger)m_Log).taskFinished();
+	      }
 	    }
-	  };
-	m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-	m_IOThread.start();
-      }
+	    
+	  } catch (Exception ex) {
+	
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskFinished();
+	    }
+	    // Pop up an error optionpane
+	    JOptionPane.showMessageDialog(PreprocessPanel.this,
+					  "Problem filtering instances:\n"
+					  + ex.getMessage(),
+					  "Apply Filter",
+					  JOptionPane.ERROR_MESSAGE);
+	    ex.printStackTrace();
+	    m_Log.logMessage("Problem filtering instances: " + ex.getMessage());
+	  }
+	  m_IOThread = null;
+	}
+      };
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
     } else {
       JOptionPane.showMessageDialog(this,
-				    "Can't apply filters at this time,\n"
+				    "Can't apply filter at this time,\n"
 				    + "currently busy with other IO",
-				    "Apply filters",
+				    "Apply Filter",
 				    JOptionPane.WARNING_MESSAGE);
-
     }
   }
 
@@ -561,7 +478,7 @@ public class PreprocessPanel extends JPanel {
                            + Instances.FILE_EXTENSION);
 	}
 	File selected = sFile;
-	saveInstancesToFile(selected, m_WorkingInstances);
+	saveInstancesToFile(selected, m_Instances);
       }
     } else {
       JOptionPane.showMessageDialog(this,
@@ -577,13 +494,16 @@ public class PreprocessPanel extends JPanel {
    * instances in a background process. This is done in the IO
    * thread, and an error message is popped up if the IO thread is busy.
    */
-  public void setBaseInstancesFromFileQ() {
+  public void setInstancesFromFileQ() {
     
     if (m_IOThread == null) {
       int returnVal = m_FileChooser.showOpenDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
 	File selected = m_FileChooser.getSelectedFile();
-	setBaseInstancesFromFile(selected);
+	try {
+	  addUndoPoint();
+	} catch (Exception ignored) {}
+	setInstancesFromFile(selected);
       }
     } else {
       JOptionPane.showMessageDialog(this,
@@ -599,15 +519,15 @@ public class PreprocessPanel extends JPanel {
    * then loads the instances in a background process. This is done in the IO
    * thread, and an error message is popped up if the IO thread is busy.
    */
-  public void setBaseInstancesFromDBQ() {
+  public void setInstancesFromDBQ() {
     if (m_IOThread == null) {
       try {
 	InstanceQuery InstQ = 
 	  (InstanceQuery)m_DatabaseQueryEditor.getValue();
 	
 	InstQ.connectToDatabase();      
-
-	setBaseInstancesFromDB(InstQ);
+	addUndoPoint();
+	setInstancesFromDB(InstQ);
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
 				      "Problem connecting to database:\n"
@@ -630,7 +550,7 @@ public class PreprocessPanel extends JPanel {
    * instances in a background process. This is done in the IO
    * thread, and an error message is popped up if the IO thread is busy.
    */
-  public void setBaseInstancesFromURLQ() {
+  public void setInstancesFromURLQ() {
     
     if (m_IOThread == null) {
       try {
@@ -644,7 +564,8 @@ public class PreprocessPanel extends JPanel {
 	if (urlName != null) {
 	  m_LastURL = urlName;
 	  URL url = new URL(urlName);
-	  setBaseInstancesFromURL(url);
+	  addUndoPoint();
+	  setInstancesFromURL(url);
 	}
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
@@ -662,9 +583,8 @@ public class PreprocessPanel extends JPanel {
     }
   }
   
-  
   /**
-   * Saves the filtered instances to the supplied file.
+   * Saves the current instances to the supplied file.
    *
    * @param f a value of type 'File'
    * @param inst the instances to save
@@ -710,7 +630,7 @@ public class PreprocessPanel extends JPanel {
    * @param f the File
    */
   private void converterQuery(final File f) {
-    final GenericObjectEditor convEd = new GenericObjectEditor();
+    final GenericObjectEditor convEd = new GenericObjectEditor(true);
 
     try {
       convEd.setClassType(weka.core.converters.Loader.class);
@@ -741,10 +661,16 @@ public class PreprocessPanel extends JPanel {
 	    try {
 	      cnv.setSource(f);
 	      Instances inst = cnv.getDataSet();
-	      setBaseInstances(inst);
+	      setInstances(inst);
 	    } catch (Exception ex) {
 	      m_Log.statusMessage(cnv.getClass().getName()+" failed to load "
 				 +f.getName());
+	      JOptionPane.showMessageDialog(PreprocessPanel.this,
+					    cnv.getClass().getName()+" failed to load '"
+					    + f.getName() + "'.\n"
+					    + "Reason:\n" + ex.getMessage(),
+					    "Convert File",
+					    JOptionPane.ERROR_MESSAGE);
 	      m_IOThread = null;
 	      converterQuery(f);
 	    }
@@ -763,7 +689,7 @@ public class PreprocessPanel extends JPanel {
    *
    * @param f a value of type 'File'
    */
-  public void setBaseInstancesFromFile(final File f) {
+  public void setInstancesFromFile(final File f) {
       
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
@@ -771,19 +697,24 @@ public class PreprocessPanel extends JPanel {
 	  try {
 	    m_Log.statusMessage("Reading from file...");
 	    Reader r = new BufferedReader(new FileReader(f));
-	    setBaseInstances(new Instances(r));
+	    setInstances(new Instances(r));
 	    r.close();
 	  } catch (Exception ex) {
-	    m_Log.statusMessage("Problem reading " + f.getName() 
-				+ " as an arff file.");
-	    JOptionPane.showMessageDialog(PreprocessPanel.this,
-					  "Couldn't read '"
-					  + f.getName() + "' as an arff file.\n"
-					  + "Reason:\n" + ex.getMessage(),
-					  "Load Instances",
-					  JOptionPane.ERROR_MESSAGE); 
+	    m_Log.statusMessage("File '" + f.getName() + "' not recognised as an arff file.");
 	    m_IOThread = null;
-	    converterQuery(f);
+	    if (JOptionPane.showOptionDialog(PreprocessPanel.this,
+					     "File '" + f.getName()
+					     + "' not recognised as an arff file.\n"
+					     + "Reason:\n" + ex.getMessage(),
+					     "Load Instances",
+					     0,
+					     JOptionPane.ERROR_MESSAGE,
+					     null,
+					     new String[] {"OK", "Use Converter"},
+					     null) == 1) {
+	    
+	      converterQuery(f);
+	    }
 	  }
 	  m_IOThread = null;
 	}
@@ -805,7 +736,7 @@ public class PreprocessPanel extends JPanel {
    * @param iq the InstanceQuery object to load from (this is assumed
    * to have been already connected to a valid database).
    */
-  public void setBaseInstancesFromDB(final InstanceQuery iq) {
+  public void setInstancesFromDB(final InstanceQuery iq) {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
 	public void run() {
@@ -815,12 +746,12 @@ public class PreprocessPanel extends JPanel {
 	    final Instances i = iq.retrieveInstances();
 	    SwingUtilities.invokeAndWait(new Runnable() {
 	      public void run() {
-		setBaseInstances(new Instances(i));
+		setInstances(new Instances(i));
 	      }
 	    });
 	    iq.disconnectFromDatabase();
 	  } catch (Exception ex) {
-	    m_Log.statusMessage("Probelm executing DB query "+m_SQLQ);
+	    m_Log.statusMessage("Problem executing DB query "+m_SQLQ);
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
 					  "Couldn't read from database:\n"
 					  + ex.getMessage(),
@@ -848,7 +779,7 @@ public class PreprocessPanel extends JPanel {
    *
    * @param u the URL to load from.
    */
-  public void setBaseInstancesFromURL(final URL u) {
+  public void setInstancesFromURL(final URL u) {
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
@@ -858,7 +789,7 @@ public class PreprocessPanel extends JPanel {
 	    m_Log.statusMessage("Reading from URL...");
 	    Reader r = new BufferedReader(
 		       new InputStreamReader(u.openStream()));
-	    setBaseInstances(new Instances(r));
+	    setInstances(new Instances(r));
 	    r.close();
 	  } catch (Exception ex) {
 	    m_Log.statusMessage("Problem reading " + u);
@@ -882,6 +813,66 @@ public class PreprocessPanel extends JPanel {
 				    "Load Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
+  }
+
+  /**
+   * Backs up the current state of the dataset, so the changes can be undone.
+   */
+  public void addUndoPoint() throws Exception {
+
+    // create temporary file
+    File tempFile = File.createTempFile("weka", null);
+    tempFile.deleteOnExit();
+
+    // write current dataset to file
+    Writer w = new BufferedWriter(new FileWriter(tempFile));
+    Instances h = new Instances(m_Instances, 0);
+    w.write(h.toString());
+    w.write("\n");
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      w.write(m_Instances.instance(i).toString());
+      w.write("\n");
+    }
+    w.close();
+
+    // update undo file list
+    if (m_tempUndoFiles[m_tempUndoIndex] != null) {
+      // remove undo points that are too old
+      m_tempUndoFiles[m_tempUndoIndex].delete();
+    }
+    m_tempUndoFiles[m_tempUndoIndex] = tempFile;
+    if (++m_tempUndoIndex >= m_tempUndoFiles.length) {
+      // wrap pointer around
+      m_tempUndoIndex = 0;
+    }
+
+    m_UndoBut.setEnabled(true);
+  }
+
+  /**
+   * Reverts to the last backed up version of the dataset.
+   */
+  public void undo() {
+
+    if (--m_tempUndoIndex < 0) {
+      // wrap pointer around
+      m_tempUndoIndex = m_tempUndoFiles.length-1;
+    }
+    
+    if (m_tempUndoFiles[m_tempUndoIndex] != null) {
+      // load instances from the temporary file
+      setInstancesFromFile(m_tempUndoFiles[m_tempUndoIndex]);
+
+      // update undo file list
+      m_tempUndoFiles[m_tempUndoIndex] = null;
+    }
+    
+    // update undo button
+    int temp = m_tempUndoIndex-1;
+    if (temp < 0) {
+      temp = m_tempUndoFiles.length-1;
+    }
+    m_UndoBut.setEnabled(m_tempUndoFiles[temp] != null);
   }
   
   /**
