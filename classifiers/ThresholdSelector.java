@@ -6,9 +6,19 @@
 
 package weka.classifiers;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import weka.classifiers.evaluation.EvaluationUtils;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
 
 /**
  * Class for selecting a threshold on a probability output by a
@@ -23,9 +33,6 @@ import weka.core.*;
  * The class for which treshold is determined. Based on
  * this designated class the problem is treated as a two-class
  * problem (default 1). <p>
- *
- * -D <br>
- * Turn on debugging output.<p>
  *
  * -W classname <br>
  * Specify the full class name of the base classifier. <p>
@@ -46,15 +53,20 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler {
 
   /** The evaluation modes */
-  protected final static int CROSS_VALIDATION = 0;
-  protected final static int TUNING_DATA = 1;
-  protected final static int TRAINING_DATA = 2;
+  public final static int EVAL_TRAINING_SET = 2;
+  public final static int EVAL_TUNED_SPLIT = 1;
+  public final static int EVAL_CROSS_VALIDATION = 0;
+  public static final Tag [] TAGS_EVAL = {
+    new Tag(EVAL_TRAINING_SET, "Entire training set"),
+    new Tag(EVAL_TUNED_SPLIT, "Single tuned fold"),
+    new Tag(EVAL_CROSS_VALIDATION, "N-Fold cross validation")
+  };
 
   /** The generated base classifier */
   protected DistributionClassifier m_Classifier = 
@@ -67,7 +79,7 @@ public class ThresholdSelector extends Classifier
   protected double m_BestValue = - Double.MAX_VALUE;
   
   /** The number of folds used in cross-validation */
-  protected int m_NumFolds = 3;
+  protected int m_NumXValFolds = 3;
 
   /** Random number seed */
   protected int m_Seed = 1;
@@ -75,119 +87,70 @@ public class ThresholdSelector extends Classifier
   /** Designated class value */
   protected int m_DesignatedClass = 0;
 
-  /** Debugging mode, gives extra output if true */
-  protected boolean m_Debug;
-
-  /** The data used for training */
-  protected Instances m_Data;
-
-  /** The data used for evaluation */
-  protected Instances m_EvalData;
-
   /** The evaluation mode */
-  protected int m_Mode = ThresholdSelector.TUNING_DATA;
+  protected int m_Mode = EVAL_TUNED_SPLIT;
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
   protected final static double MIN_VALUE = 0.05;
 
   /**
-   * Collects the predicted probabilities.
+   * Collects the classifier predictions using the specified evaluation method.
    */
-  protected double[] collectProbabilities() throws Exception {
+  protected FastVector getPredictions(Instances instances, int mode) 
+    throws Exception {
 
-    double[] probs = new double[m_EvalData.numInstances()];
+    EvaluationUtils eu = new EvaluationUtils();
+    eu.setSeed(m_Seed);
     
-    if ((m_Mode == ThresholdSelector.TRAINING_DATA) ||
-	(m_Mode == ThresholdSelector.TUNING_DATA)) {
-      m_Classifier.buildClassifier(m_Data);
-      for (int i = 0; i < m_EvalData.numInstances(); i++) {
-	Instance inst = m_EvalData.instance(i);
-	probs[i] = 
-	  m_Classifier.distributionForInstance(inst)[m_DesignatedClass];
+    switch (mode) {
+    case EVAL_TUNED_SPLIT:
+      Instances trainData = null, evalData = null;
+      Instances data = new Instances(instances);
+      data.randomize(new Random(m_Seed));
+      data.stratify(m_NumXValFolds);
+      
+      // Make sure that both subsets contain at least one positive instance
+      for (int subsetIndex = 0; subsetIndex < m_NumXValFolds; subsetIndex++) {
+        trainData = data.trainCV(m_NumXValFolds, subsetIndex);
+        evalData = data.testCV(m_NumXValFolds, subsetIndex);
+        if (checkForInstance(trainData) && checkForInstance(evalData)) {
+          break;
+        }
       }
-      return probs;
-    } else {
-      int index = 0;
-      for (int j = 0; j < m_NumFolds; j++) {
-	Instances train = m_EvalData.trainCV(m_NumFolds, j);
-	m_Classifier.buildClassifier(train);
-	Instances test = m_EvalData.testCV(m_NumFolds, j);
-	for (int i = 0; i < test.numInstances(); i++) {
-	  Instance inst = test.instance(i);
-	  probs[index++] = 
-	    m_Classifier.distributionForInstance(inst)[m_DesignatedClass];
-	}
-      }
-      return probs;
+      return eu.getTrainTestPredictions(m_Classifier, trainData, evalData);
+    case EVAL_TRAINING_SET:
+    default:
+      return eu.getTrainTestPredictions(m_Classifier, instances, instances);
+    case EVAL_CROSS_VALIDATION:
+      return eu.getCVPredictions(m_Classifier, instances, m_NumXValFolds);
     }
   }
 
   /**
-   * Finds the best threshold.
+   * Finds the best threshold, this implementation searches for the
+   * highest FMeasure. If no FMeasure higher than MIN_VALUE is found,
+   * the default threshold of 0.5 is used.
    */
-  protected void findThreshold() throws Exception {
+  protected void findThreshold(FastVector predictions) throws Exception {
 
-    double[] probabilities = collectProbabilities();
-    int[] sortedIndices = Utils.sort(probabilities);
-
-    double[][] confusionMatrix = new double[2][2];
-    for (int i = 0; i < sortedIndices.length; i++) {
-      Instance inst = m_EvalData.instance(sortedIndices[i]);
-      if ((int) inst.classValue() == m_DesignatedClass) {
-	confusionMatrix[0][0] += inst.weight();
-      } else {
-	confusionMatrix[1][0] += inst.weight();
+    Instances curve = (new ThresholdCurve()).getCurve(predictions, m_DesignatedClass);
+    
+    m_BestThreshold = 0.5;
+    m_BestValue = MIN_VALUE;
+    if (curve.numInstances() > 0) {
+      Instance maxFM = curve.instance(0);
+      int indexFM = curve.attribute(ThresholdCurve.FMEASURE_NAME).index();
+      int indexThreshold = curve.attribute(ThresholdCurve.THRESHOLD_NAME).index();
+      for (int i = 1; i < curve.numInstances(); i++) {
+        Instance current = curve.instance(i);
+        if (current.value(indexFM) > maxFM.value(indexFM)) {
+          maxFM = current;
+        }
       }
-    }
-    m_BestValue = computeValue(confusionMatrix);
-
-    // Use 0.5 threshold if there is no other sensible threshold
-    if (m_BestValue > MIN_VALUE) {
-      m_BestThreshold = -Double.MAX_VALUE;
-    } else {
-      m_BestValue = MIN_VALUE;
-      m_BestThreshold = 0.5;
-    }
-    for (int i = 0; i < sortedIndices.length; i++) {
-      Instance inst = m_EvalData.instance(sortedIndices[i]);
-      if ((int) inst.classValue() == m_DesignatedClass) {
-	confusionMatrix[0][0] -= inst.weight();
-	confusionMatrix[0][1] += inst.weight();
-      } else {
-	confusionMatrix[1][0] -= inst.weight();
-	confusionMatrix[1][1] += inst.weight();
-      }
-      if (m_Debug) {
-	for (int j = 0; j < confusionMatrix.length; j++) {
-	  for (int k = 0; k < confusionMatrix[j].length; k++) 
-	    System.err.print(confusionMatrix[j][k] + " ");
-	  System.err.println();
-	}
-	System.err.println();
-      }
-      if ((i + 1) == sortedIndices.length) {
-	double curr = computeValue(confusionMatrix);
-	if (m_Debug) {
-	  System.err.println(probabilities[sortedIndices[i]] + " " + curr);
-	}
-	if (curr > m_BestValue) {
-	  m_BestValue = curr;
-	  m_BestThreshold = probabilities[sortedIndices[i]];
-	}
-      } else {
-	double prob1 = probabilities[sortedIndices[i]];
-	double prob2 = probabilities[sortedIndices[i + 1]];
-	if (prob2 > prob1) {
-	  double curr = computeValue(confusionMatrix);
-	  if (m_Debug) {
-	    System.err.println(prob1 + " " + curr);
-	  }
-	  if (curr > m_BestValue) {
-	    m_BestValue = curr;
-	    m_BestThreshold = prob1;
-	  }
-	}
+      if (maxFM.value(indexFM) > MIN_VALUE) {
+        m_BestThreshold = maxFM.value(indexThreshold);
+        m_BestValue = maxFM.value(indexFM);
       }
     }
   }
@@ -199,16 +162,13 @@ public class ThresholdSelector extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
 	      "\tThe class for which treshold is determined. Based on\n" +
 	      "\tthis designated class the problem is treated as a two-class problem\n" +
 	      "\t(default 1).\n",
 	      "C", 1, "-C <integer>"));
-    newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
     newVector.addElement(new Option(
 	      "\tFull name of classifier to perform parameter selection on.\n"
 	      + "\teg: weka.classifiers.NaiveBayes",
@@ -252,9 +212,6 @@ public class ThresholdSelector extends Classifier
    * this designated class the problem is treated as a two-class
    * problem (default 1).<p>
    *
-   * -D <br>
-   * Turn on debugging output.<p>
-   *
    * -W classname <br>
    * Specify the full class name of classifier to perform cross-validation
    * selection on.<p>
@@ -279,8 +236,6 @@ public class ThresholdSelector extends Classifier
    */
   public void setOptions(String[] options) throws Exception {
     
-    setDebug(Utils.getFlag('D', options));
-
     String classString = Utils.getOption('C', options);
     if (classString.length() != 0) {
       m_DesignatedClass = Integer.parseInt(classString) - 1;
@@ -290,9 +245,9 @@ public class ThresholdSelector extends Classifier
 
     String foldsString = Utils.getOption('X', options);
     if (foldsString.length() != 0) {
-      setNumFolds(Integer.parseInt(foldsString));
+      setNumXValFolds(Integer.parseInt(foldsString));
     } else {
-      setNumFolds(3);
+      setNumXValFolds(3);
     }
 
     String randomString = Utils.getOption('S', options);
@@ -312,7 +267,7 @@ public class ThresholdSelector extends Classifier
     if (modeString.length() != 0) {
       m_Mode = Integer.parseInt(modeString);
     } else {
-      m_Mode = ThresholdSelector.TUNING_DATA;
+      m_Mode = EVAL_TUNED_SPLIT;
     }
 
     setDistributionClassifier((DistributionClassifier)Classifier.
@@ -337,20 +292,17 @@ public class ThresholdSelector extends Classifier
     }
 
     int current = 0;
-    String [] options = new String [classifierOptions.length + 12];
+    String [] options = new String [classifierOptions.length + 11];
 
     options[current++] = "-C"; options[current++] = "" + (m_DesignatedClass + 1);
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
-    options[current++] = "-X"; options[current++] = "" + getNumFolds();
+    options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
     options[current++] = "-S"; options[current++] = "" + getSeed();
 
     if (getDistributionClassifier() != null) {
       options[current++] = "-W";
       options[current++] = getDistributionClassifier().getClass().getName();
     }
-    options[current++] = "-E"; options[current++] = "" + getEvaluationMode();
+    options[current++] = "-E"; options[current++] = "" + m_Mode;
     options[current++] = "--";
 
     System.arraycopy(classifierOptions, 0, options, current, 
@@ -370,8 +322,6 @@ public class ThresholdSelector extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    Instances data;
-
     if (instances.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
@@ -383,7 +333,7 @@ public class ThresholdSelector extends Classifier
     if (instances.numInstances() == 0) {
       throw new Exception("No training instances without missing class.");
     }
-    if (instances.numInstances() < m_NumFolds) {
+    if (instances.numInstances() < m_NumXValFolds) {
       throw new Exception("Number of training instances smaller than number of folds.");
     }
 
@@ -396,57 +346,24 @@ public class ThresholdSelector extends Classifier
       }
     }
     if (numPosInstances == 0) {
-      System.err.println("NO POSITIVE INSTANCE FOUND");
+      System.err.println("NO POSITIVES FOUND");
       m_BestThreshold = Double.MAX_VALUE;
       m_BestValue = 0;
     } else if (numPosInstances == 1) {
-      System.err.println("OPTIMIZING ON TRAINING DATA");
-      m_Data = instances;
-      m_EvalData = instances;
-      findThreshold();
-    } else {    
-      switch (m_Mode) {
-      case CROSS_VALIDATION: 
-	data = new Instances(instances);
-	data.randomize(new Random(m_Seed));
-	data.stratify(m_NumFolds);
-	m_Data = data;
-	m_EvalData = data;
-	findThreshold();
+      System.err.println("ONLY 1 POSITIVE FOUND: OPTIMIZING ON TRAINING DATA");
+      findThreshold(getPredictions(instances, EVAL_TRAINING_SET));
+    } else {
+      findThreshold(getPredictions(instances, m_Mode));
+      if (m_Mode != EVAL_TRAINING_SET) {
 	m_Classifier.buildClassifier(instances);
-	break;
-      case TUNING_DATA:
-	data = new Instances(instances);
-	data.randomize(new Random(m_Seed));
-	data.stratify(m_NumFolds);
-      
-	// Make sure that both subsets contain at least one positive instance
-	Instances evalData = null;
-	int subsetIndex = 0;
-	while (subsetIndex < m_NumFolds) {
-	  m_Data = data.trainCV(m_NumFolds, subsetIndex);
-	  m_EvalData = data.testCV(m_NumFolds, subsetIndex);
-	  if (checkForInstance(m_Data) && checkForInstance(m_EvalData)) {
-	    break;
-	  }
-	  subsetIndex++;
-	}
-	findThreshold();
-	m_Classifier.buildClassifier(instances);
-	break;
-      default:
-	m_Data = instances;
-	m_EvalData = instances;
-	findThreshold();
       }
     }
-    m_Data = null; m_EvalData = null;
   }
 
   /**
    * Checks whether instance of designated class is in subset.
    */
-  public boolean checkForInstance(Instances data) throws Exception {
+  private boolean checkForInstance(Instances data) throws Exception {
 
     for (int i = 0; i < data.numInstances(); i++) {
       if (((int)data.instance(i).classValue()) == m_DesignatedClass) {
@@ -473,30 +390,6 @@ public class ThresholdSelector extends Classifier
       return (int) 1 - m_DesignatedClass;
     }
   }
-
-  /**
-   * Computes the value of the optimization criterion for the
-   * given confusion matrix.
-   */
-  public double computeValue(double[][] table) {
-
-    double precision = 0, recall = 0, fMeasure = 0;
-
-    double predictedPos = (table[0][0] + table[1][0]);
-    double truePos = (table[0][0] + table[0][1]);
-    
-    if (Utils.gr(predictedPos, 0)) {
-      precision = table[0][0] / predictedPos;
-    } 
-    if (Utils.gr(truePos, 0)) {
-      recall = table[0][0] / truePos;
-    }
-    if (Utils.gr(precision + recall, 0)) {
-      fMeasure = (2 * precision * recall) / (precision + recall);
-    }
-
-    return fMeasure;
-  }
   
   /**
    * Get the value of designatedClass.
@@ -517,25 +410,33 @@ public class ThresholdSelector extends Classifier
   }
   
   /**
-   * Sets the evaluation mode.
+   * Gets the evaluation mode used. Will be one of
+   * EVAL_TRAINING, EVAL_TUNED_SPLIT, or EVAL_CROSS_VALIDATION
    *
-   * @param mode the evaluation mode
+   * @return the evaluation mode.
    */
-  public void setEvaluationMode(int mode) {
-    
-    m_Mode = mode;
-  }
+  public SelectedTag getEvaluationMode() {
 
-  /**
-   * Gets the evaluation mode.
-   * 
-   * @return the evaluation mode
-   */
-  public int getEvaluationMode() {
-
-    return m_Mode;
+    try {
+      return new SelectedTag(m_Mode, TAGS_EVAL);
+    } catch (Exception ex) {
+      return null;
+    }
   }
   
+  /**
+   * Sets the evaluation mode used. Will be one of
+   * EVAL_TRAINING, EVAL_TUNED_SPLIT, or EVAL_CROSS_VALIDATION
+   *
+   * @param newMethod the new evaluation mode.
+   */
+  public void setEvaluationMode(SelectedTag newMethod) {
+    
+    if (newMethod.getTags() == TAGS_EVAL) {
+      m_Mode = newMethod.getSelectedTag().getID();
+    }
+  }
+
   /**
    * Sets the seed for random number generation.
    *
@@ -557,33 +458,13 @@ public class ThresholdSelector extends Classifier
   }
 
   /**
-   * Sets debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-
-    m_Debug = debug;
-  }
-
-  /**
-   * Gets whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
-  }
-
-  /**
    * Get the number of folds used for cross-validation.
    *
    * @return the number of folds used for cross-validation.
    */
-  public int getNumFolds() {
+  public int getNumXValFolds() {
     
-    return m_NumFolds;
+    return m_NumXValFolds;
   }
   
   /**
@@ -591,9 +472,9 @@ public class ThresholdSelector extends Classifier
    *
    * @param newNumFolds the number of folds used for cross-validation.
    */
-  public void setNumFolds(int newNumFolds) {
+  public void setNumXValFolds(int newNumFolds) {
     
-    m_NumFolds = newNumFolds;
+    m_NumXValFolds = newNumFolds;
   }
 
   /**
@@ -634,12 +515,13 @@ public class ThresholdSelector extends Classifier
 
     result += "Evaluation mode: ";
     switch (m_Mode) {
-    case ThresholdSelector.CROSS_VALIDATION:
-      result += m_NumFolds + "-fold cross-validation";
+    case EVAL_CROSS_VALIDATION:
+      result += m_NumXValFolds + "-fold cross-validation";
       break;
-    case ThresholdSelector.TUNING_DATA:
-      result += "tuning on 1/" + m_NumFolds + " of the data";
+    case EVAL_TUNED_SPLIT:
+      result += "tuning on 1/" + m_NumXValFolds + " of the data";
       break;
+    case EVAL_TRAINING_SET:
     default:
       result += "tuning on the training data";
     }
@@ -667,6 +549,3 @@ public class ThresholdSelector extends Classifier
     }
   }
 }
-
-
-  
