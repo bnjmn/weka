@@ -32,7 +32,7 @@ import java.io.FileReader;
  * algorithm for Bayes Network structure learning.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */ 
 public class ICSSearchAlgorithm extends CISearchAlgorithm {
 

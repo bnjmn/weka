@@ -39,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 

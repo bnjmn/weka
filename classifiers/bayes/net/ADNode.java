@@ -35,7 +35,7 @@ import java.io.Serializable;
  * Journal of Artificial Intelligence Research 8 (1998) 67-91
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ADNode implements Serializable {
         final static int MIN_RECORD_SIZE = 0;

@@ -35,7 +35,7 @@ import weka.estimators.*;
  * Bayes networks and random instances based on a Bayes network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class BayesNetGenerator extends BayesNet {
 	int m_nSeed = 1;

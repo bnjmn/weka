@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
@@ -196,7 +196,7 @@ public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 
 		Enumeration enum = super.listOptions();
 		while (enum.hasMoreElements()) {
-	  newVector.addElement(enum.nextElement());
+	    	newVector.addElement(enum.nextElement());
 		}
 	  return newVector.elements();
 	}
@@ -242,8 +242,7 @@ public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 	  } 
 	  if (!m_bInitAsNaiveBayes) {
 		options[current++] = "-N";
-	  } 
-	  if (getRandomOrder()) {
+	  }	  if (getRandomOrder()) {
 		options[current++] = "-R";
 	  }
 

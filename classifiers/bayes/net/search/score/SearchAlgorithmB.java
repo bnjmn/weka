@@ -37,7 +37,7 @@ import weka.core.Option;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SearchAlgorithmB extends ScoreSearchAlgorithm {
 

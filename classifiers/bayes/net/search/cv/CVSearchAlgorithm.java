@@ -35,7 +35,7 @@ import weka.core.SelectedTag;
  * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CVSearchAlgorithm extends SearchAlgorithm {
 	BayesNet m_BayesNet;

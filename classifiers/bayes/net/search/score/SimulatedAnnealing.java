@@ -36,7 +36,7 @@ import java.util.*;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.3 $
+ * Version: $Revision: 1.4 $
  */
 
 public class SimulatedAnnealing extends ScoreSearchAlgorithm {
@@ -192,6 +192,10 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
 		newVector.addElement(new Option("\tDelta temperature\n", "D", 1, "-D <float>"));
 
+		Enumeration enum = super.listOptions();
+		while (enum.hasMoreElements()) {
+			newVector.addElement(enum.nextElement());
+		}
 		return newVector.elements();
 	}
 
