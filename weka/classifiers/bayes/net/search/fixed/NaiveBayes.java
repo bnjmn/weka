@@ -29,14 +29,14 @@ import weka.core.Instances;
  * with arrows from the class variable to each of the attribute variables.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NaiveBayes extends SearchAlgorithm {
 	
 	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
         	if (iAttribute != instances.classIndex()) {
-        		bayesNet.getParentSet(iAttribute).AddParent(instances.classIndex(), instances);
+        		bayesNet.getParentSet(iAttribute).addParent(instances.classIndex(), instances);
         	}
         }
 	} // buildStructure

@@ -32,7 +32,7 @@ import weka.core.Instances;
  * Works with nominal variables only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SearchAlgorithmB2 extends SearchAlgorithmB {
 
@@ -49,7 +49,7 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 	  int      nNrOfAtts = instances.numAttributes();
 
 	  for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
-		fBaseScores[iAttribute] = CalcNodeScore(iAttribute);
+		fBaseScores[iAttribute] = calcNodeScore(iAttribute);
 	  } 
 
 	  // Determine initial structure by finding a good parent-set for classification
@@ -65,14 +65,14 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 	  boolean bProgress = true;
 
 	  while (bProgress 
-		 && bayesNet.getParentSet(iAttribute).GetNrOfParents() 
+		 && bayesNet.getParentSet(iAttribute).getNrOfParents() 
 			< m_nMaxNrOfClassifierParents) {
 		int nBestAttribute = -1;
 
 		for (int iAttribute2 = 0; iAttribute2 < instances.numAttributes(); 
 		 iAttribute2++) {
 	  if (iAttribute != iAttribute2) {
-		double fScore = CalcScoreWithExtraParent(iAttribute, iAttribute2);
+		double fScore = calcScoreWithExtraParent(iAttribute, iAttribute2);
 
 		if (fScore > fBestScore) {
 		  fBestScore = fScore;
@@ -82,7 +82,7 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 		} 
 
 		if (nBestAttribute != -1) {
-	  bayesNet.getParentSet(iAttribute).AddParent(nBestAttribute, instances);
+	  bayesNet.getParentSet(iAttribute).addParent(nBestAttribute, instances);
 
 	  fBaseScores[iAttribute] = fBestScore;
 		} else {
@@ -93,15 +93,15 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 	  // Recalc Base scores
 	  // Correction for Naive Bayes structures: delete arcs from classification node to children
 	  for (int iParent = 0; 
-	   iParent < bayesNet.getParentSet(iAttribute).GetNrOfParents(); iParent++) {
-		int nParentNode = bayesNet.getParentSet(iAttribute).GetParent(iParent);
+	   iParent < bayesNet.getParentSet(iAttribute).getNrOfParents(); iParent++) {
+		int nParentNode = bayesNet.getParentSet(iAttribute).getParent(iParent);
 
-		if (IsArc(bayesNet, nParentNode, iAttribute)) {
-	  bayesNet.getParentSet(nParentNode).DeleteLastParent(instances);
+		if (isArc(bayesNet, nParentNode, iAttribute)) {
+	  bayesNet.getParentSet(nParentNode).deleteLastParent(instances);
 		} 
 
 		// recalc base scores
-		fBaseScores[nParentNode] = CalcNodeScore(nParentNode);
+		fBaseScores[nParentNode] = calcNodeScore(nParentNode);
 	  } 
 
 	  // super.buildStructure();
@@ -112,17 +112,17 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 
 	  for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; 
 	   iAttributeHead++) {
-		if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() < m_nMaxNrOfParents) {
+		if (bayesNet.getParentSet(iAttributeHead).getNrOfParents() < m_nMaxNrOfParents) {
 
 	  // only bother maintaining scores if adding parent does not violate the upper bound on nr of parents
 	  for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; 
 		   iAttributeTail++) {
 		bAddArcMakesSense[iAttributeHead][iAttributeTail] = 
-		  AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail);
+		  addArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail);
 
 		if (bAddArcMakesSense[iAttributeHead][iAttributeTail]) {
 		  fScore[iAttributeHead][iAttributeTail] = 
-			CalcScoreWithExtraParent(iAttributeHead, iAttributeTail);
+			calcScoreWithExtraParent(iAttributeHead, iAttributeTail);
 		} 
 	  } 
 		} 
@@ -141,7 +141,7 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 		// find best arc to add
 		for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; 
 		 iAttributeHead++) {
-	  if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() 
+	  if (bayesNet.getParentSet(iAttributeHead).getNrOfParents() 
 		  < m_nMaxNrOfParents) {
 		for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; 
 			 iAttributeTail++) {
@@ -150,7 +150,7 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 			// System.out.println("gain " +  iAttributeTail + " -> " + iAttributeHead + ": "+ (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead]));
 			if (fScore[iAttributeHead][iAttributeTail] 
 				- fBaseScores[iAttributeHead] > fBestDeltaScore) {
-		  if (AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
+		  if (addArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
 			fBestDeltaScore = fScore[iAttributeHead][iAttributeTail] 
 					  - fBaseScores[iAttributeHead];
 			nBestAttributeTail = iAttributeTail;
@@ -168,10 +168,10 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 
 	  // update network structure
 	  // System.out.println("Added " + nBestAttributeTail + " -> " + nBestAttributeHead);
-	  bayesNet.getParentSet(nBestAttributeHead).AddParent(nBestAttributeTail, 
+	  bayesNet.getParentSet(nBestAttributeHead).addParent(nBestAttributeTail, 
 							 instances);
 
-	  if (bayesNet.getParentSet(nBestAttributeHead).GetNrOfParents() 
+	  if (bayesNet.getParentSet(nBestAttributeHead).getNrOfParents() 
 		  < m_nMaxNrOfParents) {
 
 		// only bother updating scores if adding parent does not violate the upper bound on nr of parents
@@ -181,11 +181,11 @@ public class SearchAlgorithmB2 extends SearchAlgorithmB {
 		for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; 
 			 iAttributeTail++) {
 		  bAddArcMakesSense[nBestAttributeHead][iAttributeTail] = 
-			AddArcMakesSense(bayesNet, instances, nBestAttributeHead, iAttributeTail);
+			addArcMakesSense(bayesNet, instances, nBestAttributeHead, iAttributeTail);
 
 		  if (bAddArcMakesSense[nBestAttributeHead][iAttributeTail]) {
 			fScore[nBestAttributeHead][iAttributeTail] = 
-			CalcScoreWithExtraParent(nBestAttributeHead, iAttributeTail);
+			calcScoreWithExtraParent(nBestAttributeHead, iAttributeTail);
 
 			// System.out.println(iAttributeTail + " -> " + nBestAttributeHead + ": " + fScore[nBestAttributeHead][iAttributeTail]);
 		  } 

@@ -36,7 +36,7 @@ import weka.core.OptionHandler;
  * and should not be used by itself.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
@@ -67,7 +67,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * @param iAttributeTail index of the attribute that becomes tail of the arrow
      * @return true if adding arc is allowed, otherwise false
      */
-    protected boolean AddArcMakesSense(
+    protected boolean addArcMakesSense(
         BayesNet bayesNet,
         Instances instances,
         int iAttributeHead,
@@ -77,7 +77,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
 
         // sanity check: arc should not be in parent set already
-        if (IsArc(bayesNet, iAttributeHead, iAttributeTail)) {
+        if (isArc(bayesNet, iAttributeHead, iAttributeTail)) {
                return false;
         }
 
@@ -90,7 +90,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
 
         // check for cycles
-        bayesNet.getParentSet(iAttributeHead).AddParent(iAttributeTail, instances);
+        bayesNet.getParentSet(iAttributeHead).addParent(iAttributeTail, instances);
 
         for (int iNode = 0; iNode < nNodes; iNode++) {
 
@@ -101,8 +101,8 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
                 if (!bDone[iNode2]) {
                     boolean bHasNoParents = true;
 
-                    for (int iParent = 0; iParent < bayesNet.getParentSet(iNode2).GetNrOfParents(); iParent++) {
-                        if (!bDone[bayesNet.getParentSet(iNode2).GetParent(iParent)]) {
+                    for (int iParent = 0; iParent < bayesNet.getParentSet(iNode2).getNrOfParents(); iParent++) {
+                        if (!bDone[bayesNet.getParentSet(iNode2).getParent(iParent)]) {
                             bHasNoParents = false;
                         }
                     }
@@ -115,13 +115,13 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
             }
 
             if (!bFound) {
-                bayesNet.getParentSet(iAttributeHead).DeleteLastParent(instances);
+                bayesNet.getParentSet(iAttributeHead).deleteLastParent(instances);
 
                 return false;
             }
         }
 
-        bayesNet.getParentSet(iAttributeHead).DeleteLastParent(instances);
+        bayesNet.getParentSet(iAttributeHead).deleteLastParent(instances);
 
         return true;
     } // AddArcMakesCycle
@@ -133,7 +133,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * @param index of the attribute that is head of the arrow
      * @param index of the attribute that is tail of the arrow
      */
-    protected boolean ReverseArcMakesCycle(
+    protected boolean reverseArcMakesCycle(
         BayesNet bayesNet,
         Instances instances,
         int iAttributeHead,
@@ -143,7 +143,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
 
         // sanity check: arc should be in parent set already
-        if (!IsArc(bayesNet, iAttributeHead, iAttributeTail)) {
+        if (!isArc(bayesNet, iAttributeHead, iAttributeTail)) {
             return false;
         }
 
@@ -156,7 +156,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
 
         // check for cycles
-        bayesNet.getParentSet(iAttributeTail).AddParent(iAttributeHead, instances);
+        bayesNet.getParentSet(iAttributeTail).addParent(iAttributeHead, instances);
 
         for (int iNode = 0; iNode < nNodes; iNode++) {
 
@@ -167,12 +167,12 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
                 if (!bDone[iNode2]) {
                     boolean bHasNoParents = true;
 
-                    for (int iParent = 0; iParent < bayesNet.getParentSet(iNode2).GetNrOfParents(); iParent++) {
-                        if (!bDone[bayesNet.getParentSet(iNode2).GetParent(iParent)]) {
+                    for (int iParent = 0; iParent < bayesNet.getParentSet(iNode2).getNrOfParents(); iParent++) {
+                        if (!bDone[bayesNet.getParentSet(iNode2).getParent(iParent)]) {
 
                             // this one has a parent which is not 'done' UNLESS it is the arc to be reversed
                             if (iNode2 != iAttributeHead
-                                || bayesNet.getParentSet(iNode2).GetParent(iParent) != iAttributeTail) {
+                                || bayesNet.getParentSet(iNode2).getParent(iParent) != iAttributeTail) {
                                 bHasNoParents = false;
                             }
                         }
@@ -186,13 +186,13 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
             }
 
             if (!bFound) {
-                bayesNet.getParentSet(iAttributeTail).DeleteLastParent(instances);
+                bayesNet.getParentSet(iAttributeTail).deleteLastParent(instances);
 
                 return false;
             }
         }
 
-        bayesNet.getParentSet(iAttributeTail).DeleteLastParent(instances);
+        bayesNet.getParentSet(iAttributeTail).deleteLastParent(instances);
 
         return true;
     } // ReverseArcMakesCycle
@@ -203,9 +203,9 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * @param index of the attribute that becomes head of the arrow
      * @param index of the attribute that becomes tail of the arrow
      */
-    protected boolean IsArc(BayesNet bayesNet, int iAttributeHead, int iAttributeTail) {
-        for (int iParent = 0; iParent < bayesNet.getParentSet(iAttributeHead).GetNrOfParents(); iParent++) {
-            if (bayesNet.getParentSet(iAttributeHead).GetParent(iParent) == iAttributeTail) {
+    protected boolean isArc(BayesNet bayesNet, int iAttributeHead, int iAttributeTail) {
+        for (int iParent = 0; iParent < bayesNet.getParentSet(iAttributeHead).getNrOfParents(); iParent++) {
+            if (bayesNet.getParentSet(iAttributeHead).getParent(iParent) == iAttributeTail) {
                 return true;
             }
         }
@@ -257,7 +257,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
             // each of the other nodes
             for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
                 if (iAttribute != iClass) {
-                    bayesNet.getParentSet(iAttribute).AddParent(iClass, instances);
+                    bayesNet.getParentSet(iAttribute).addParent(iClass, instances);
                 }
             }
         }
@@ -282,15 +282,15 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         int iClass = instances.classIndex();
         ParentSet ancestors = new ParentSet();
         int nOldSize = 0;
-        ancestors.AddParent(iClass, instances);
-        while (nOldSize != ancestors.GetNrOfParents()) {
-            nOldSize = ancestors.GetNrOfParents();
+        ancestors.addParent(iClass, instances);
+        while (nOldSize != ancestors.getNrOfParents()) {
+            nOldSize = ancestors.getNrOfParents();
             for (int iNode = 0; iNode < nOldSize; iNode++) {
-                int iCurrent = ancestors.GetParent(iNode);
+                int iCurrent = ancestors.getParent(iNode);
                 ParentSet p = bayesNet.getParentSet(iCurrent);
-                for (int iParent = 0; iParent < p.GetNrOfParents(); iParent++) {
-                    if (!ancestors.Contains(p.GetParent(iParent))) {
-                        ancestors.AddParent(p.GetParent(iParent), instances);
+                for (int iParent = 0; iParent < p.getNrOfParents(); iParent++) {
+                    if (!ancestors.contains(p.getParent(iParent))) {
+                        ancestors.addParent(p.getParent(iParent), instances);
                     }
                 }
             }
@@ -299,18 +299,18 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
             boolean bIsInMarkovBoundary = (iAttribute == iClass);
             bIsInMarkovBoundary =
-                bayesNet.getParentSet(iAttribute).Contains(iClass)
-                    || bayesNet.getParentSet(iClass).Contains(iAttribute);
+                bayesNet.getParentSet(iAttribute).contains(iClass)
+                    || bayesNet.getParentSet(iClass).contains(iAttribute);
             for (int iAttribute2 = 0; !bIsInMarkovBoundary && iAttribute2 < instances.numAttributes(); iAttribute2++) {
                 bIsInMarkovBoundary =
-                    bayesNet.getParentSet(iAttribute2).Contains(iAttribute)
-                        && bayesNet.getParentSet(iAttribute2).Contains(iClass);
+                    bayesNet.getParentSet(iAttribute2).contains(iAttribute)
+                        && bayesNet.getParentSet(iAttribute2).contains(iClass);
             }
             if (!bIsInMarkovBoundary) {
-                if (ancestors.Contains(iAttribute) && bayesNet.getParentSet(iClass).GetCardinalityOfParents() < 1024) {
-                    bayesNet.getParentSet(iClass).AddParent(iAttribute, instances);
+                if (ancestors.contains(iAttribute) && bayesNet.getParentSet(iClass).getCardinalityOfParents() < 1024) {
+                    bayesNet.getParentSet(iClass).addParent(iAttribute, instances);
                 } else {
-                    bayesNet.getParentSet(iAttribute).AddParent(iClass, instances);
+                    bayesNet.getParentSet(iAttribute).addParent(iClass, instances);
                 }
             }
         }

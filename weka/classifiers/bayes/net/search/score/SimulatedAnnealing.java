@@ -36,7 +36,7 @@ import java.util.*;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.2 $
+ * Version: $Revision: 1.3 $
  */
 
 public class SimulatedAnnealing extends ScoreSearchAlgorithm {
@@ -59,11 +59,19 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 
         // determine base scores
         double [] fBaseScores = new double [instances.numAttributes()];
+		double fCurrentScore = 0;
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            fBaseScores[iAttribute] = CalcNodeScore(iAttribute);
+            fBaseScores[iAttribute] = calcNodeScore(iAttribute);
+			fCurrentScore += fBaseScores[iAttribute];
         }
 
-      
+		// keep track of best scoring network
+		double fBestScore = fCurrentScore;
+		BayesNet bestBayesNet = new BayesNet();
+		bestBayesNet.m_Instances = instances;
+		bestBayesNet.initStructure();
+		copyParentSets(bestBayesNet, bayesNet);
+
         double fTemp = m_fTStart;
         for (int iRun = 0; iRun < m_nRuns; iRun++) {
             boolean bRunSucces = false;
@@ -75,40 +83,58 @@ public class SimulatedAnnealing extends ScoreSearchAlgorithm {
 	            while (iTailNode == iHeadNode) {
 		            iHeadNode = Math.abs(random.nextInt()) % instances.numAttributes();
 	            }
-	            if (IsArc(bayesNet, iHeadNode, iTailNode)) {
+	            if (isArc(bayesNet, iHeadNode, iTailNode)) {
                     bRunSucces = true;
 	                // either try a delete
-                    bayesNet.getParentSet(iHeadNode).DeleteParent(iTailNode, instances);
-                    double fScore = CalcNodeScore(iHeadNode);
+                    bayesNet.getParentSet(iHeadNode).deleteParent(iTailNode, instances);
+                    double fScore = calcNodeScore(iHeadNode);
                     fDeltaScore = fScore - fBaseScores[iHeadNode];
 //System.out.println("Try delete " + iTailNode + "->" + iHeadNode + " dScore = " + fDeltaScore);                    
                     if (fTemp * Math.log((Math.abs(random.nextInt()) % 10000)/10000.0  + 1e-100) < fDeltaScore) {
 //System.out.println("success!!!");                    
+						fCurrentScore += fDeltaScore;
                         fBaseScores[iHeadNode] = fScore;
                     } else {
                         // roll back
-                        bayesNet.getParentSet(iHeadNode).AddParent(iTailNode, instances);
+                        bayesNet.getParentSet(iHeadNode).addParent(iTailNode, instances);
                     }
 	            } else {
 	                // try to add an arc
-	                if (AddArcMakesSense(bayesNet, instances, iHeadNode, iTailNode)) {
+	                if (addArcMakesSense(bayesNet, instances, iHeadNode, iTailNode)) {
                         bRunSucces = true;
-                        double fScore = CalcScoreWithExtraParent(iHeadNode, iTailNode);
+                        double fScore = calcScoreWithExtraParent(iHeadNode, iTailNode);
                         fDeltaScore = fScore - fBaseScores[iHeadNode];
 //System.out.println("Try add " + iTailNode + "->" + iHeadNode + " dScore = " + fDeltaScore);                    
                         if (fTemp * Math.log((Math.abs(random.nextInt()) % 10000)/10000.0  + 1e-100) < fDeltaScore) {
 //System.out.println("success!!!");                    
-                            bayesNet.getParentSet(iHeadNode).AddParent(iTailNode, instances);
+                            bayesNet.getParentSet(iHeadNode).addParent(iTailNode, instances);
                             fBaseScores[iHeadNode] = fScore;
+							fCurrentScore += fDeltaScore;
                         }
 	                }
 	            }
             }
-
+			if (fCurrentScore > fBestScore) {
+				copyParentSets(bestBayesNet, bayesNet);				
+			}
             fTemp = fTemp * m_fDelta;
         }
+
+		copyParentSets(bayesNet, bestBayesNet);
     } // buildStructure 
 	
+	/** CopyParentSets copies parent sets of source to dest BayesNet
+	 * @param dest: destination network
+	 * @param source: source network
+	 */
+	void copyParentSets(BayesNet dest, BayesNet source) {
+		int nNodes = source.getNrOfNodes();
+		// clear parent set first
+		for (int iNode = 0; iNode < nNodes; iNode++) {
+			dest.getParentSet(iNode).copy(source.getParentSet(iNode));
+		}		
+	} // CopyParentSets
+
     /**
      * @return double
      */

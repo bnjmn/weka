@@ -32,7 +32,7 @@ import java.io.FileReader;
  * algorithm for Bayes Network structure learning.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */ 
 public class ICSSearchAlgorithm extends CISearchAlgorithm {
 
@@ -84,20 +84,20 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
             sepsets[iNode] = new SeparationSet[maxn()];
         }
 
-        CalcDependencyGraph(edges, sepsets);
-        CalcVeeNodes(edges, arrows, sepsets);
-        CalcArcDirections(edges, arrows);
+        calcDependencyGraph(edges, sepsets);
+        calcVeeNodes(edges, arrows, sepsets);
+        calcArcDirections(edges, arrows);
 
 		// transfrom into BayesNet datastructure 
 		for (int iNode = 0; iNode < maxn(); iNode++) {
 			// clear parent set of AttributeX
 			ParentSet oParentSet = m_BayesNet.getParentSet(iNode);
-			while (oParentSet.GetNrOfParents() > 0) {
-				oParentSet.DeleteLastParent(m_instances);
+			while (oParentSet.getNrOfParents() > 0) {
+				oParentSet.deleteLastParent(m_instances);
 			}
 			for (int iParent = 0; iParent < maxn(); iParent++) {
 				if (arrows[iParent][iNode]) {
-					oParentSet.AddParent(iParent, m_instances);
+					oParentSet.addParent(iParent, m_instances);
 				}
 			}
 		}
@@ -113,7 +113,7 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	 * @param edges : boolean matrix representing the edges
 	 * @param sepsets : set of separating sets
 	 */
-	void CalcDependencyGraph(boolean[][] edges, SeparationSet[][] sepsets) {
+	void calcDependencyGraph(boolean[][] edges, SeparationSet[][] sepsets) {
 		/*calc undirected graph a-b iff D(a,S,b) for all S)*/
 		SeparationSet oSepSet;
 
@@ -131,7 +131,7 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 			for (int iNode1 = 0; iNode1 <= maxn() - 2; iNode1++) {
 				for (int iNode2 = iNode1 + 1; iNode2 < maxn(); iNode2++) {
 					if (edges[iNode1][iNode2]) {
-						oSepSet = ExistsSepSet(iNode1, iNode2, iCardinality, edges);
+						oSepSet = existsSepSet(iNode1, iNode2, iCardinality, edges);
 						if (oSepSet != null) {
 							edges[iNode1][iNode2] = false;
 							edges[iNode2][iNode1] = false;
@@ -176,7 +176,7 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	 * @param deparc : skeleton
 	 * @return SeparationSet containing set that separates iNode1 and iNode2 or null if no such set exists
 	 */
-    SeparationSet ExistsSepSet(int iNode1, int iNode2, int nCardinality, boolean [] [] edges)
+    SeparationSet existsSepSet(int iNode1, int iNode2, int nCardinality, boolean [] [] edges)
     {
         /*Test if a separating set of node d and e exists of cardiniality k*/
 //        int iNode1_, iNode2_;
@@ -207,7 +207,7 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
         while (iZ >= 0)
         {  
         	//check if candidate separating set makes iNode2_ and iNode1_ independent
-            if (IsConditionalIndependent(iNode2, iNode1, Z.m_set, nCardinality))	{
+            if (isConditionalIndependent(iNode2, iNode1, Z.m_set, nCardinality))	{
                 return Z;
             }
 			// calc next candidate separating set
@@ -262,7 +262,7 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	 * have been identified
 	 * @param sepsets : separating sets
 	 */
-	void CalcVeeNodes(
+	void calcVeeNodes(
 		boolean[][] edges,
 		boolean[][] arrows,
 		SeparationSet[][] sepsets) {
@@ -312,7 +312,7 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	 * @param edges : skeleton
 	 * @param arrows : resulting fully directed DAG
 	 */
-	void CalcArcDirections(boolean[][] edges, boolean[][] arrows) {
+	void calcArcDirections(boolean[][] edges, boolean[][] arrows) {
 		/*give direction to remaining arcs*/
 		int i, j, k, m;
 		boolean bFound;

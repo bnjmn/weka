@@ -35,7 +35,7 @@ import weka.core.SelectedTag;
  * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CVSearchAlgorithm extends SearchAlgorithm {
 	BayesNet m_BayesNet;
@@ -69,9 +69,9 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 	public double performCV(BayesNet bayesNet) throws Exception {
 		switch (m_nCVType) {
 			case LOOCV: 
-				return LeaveOneOutCV(bayesNet);
+				return leaveOneOutCV(bayesNet);
 			case CUMCV: 
-				return CumulativeCV(bayesNet);
+				return cumulativeCV(bayesNet);
 			case KFOLDCV: 
 				return kFoldCV(bayesNet, m_nNrOfFolds);
 			default:
@@ -91,26 +91,26 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 		Instances instances = m_BayesNet.m_Instances;
 
 		// sanity check: nCandidateParent should not be in parent set already
-		for (int iParent = 0; iParent < oParentSet.GetNrOfParents(); iParent++) {
-			if (oParentSet.GetParent(iParent) == nCandidateParent) {
+		for (int iParent = 0; iParent < oParentSet.getNrOfParents(); iParent++) {
+			if (oParentSet.getParent(iParent) == nCandidateParent) {
 				return -1e100;
 			}
 		}
 
 		// determine cardinality of parent set & reserve space for frequency counts
 		int nCardinality =
-			oParentSet.GetCardinalityOfParents() * instances.attribute(nCandidateParent).numValues();
+			oParentSet.getCardinalityOfParents() * instances.attribute(nCandidateParent).numValues();
 		int numValues = instances.attribute(nNode).numValues();
 		int[][] nCounts = new int[nCardinality][numValues];
 
 		// set up candidate parent
-		oParentSet.AddParent(nCandidateParent, instances);
+		oParentSet.addParent(nCandidateParent, instances);
 
 		// calculate the score
 		double fAccuracy = performCV(m_BayesNet);
 
 		// delete temporarily added parent
-		oParentSet.DeleteLastParent(instances);
+		oParentSet.deleteLastParent(instances);
 
 		return fAccuracy;
 	} // performCVWithExtraParent
@@ -123,7 +123,7 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 	 * @return accuracy (in interval 0..1) measured using leave one out cv.
 	 * @throws Exception passed on by updateClassifier
 	 */
-	public double LeaveOneOutCV(BayesNet bayesNet) throws Exception {
+	public double leaveOneOutCV(BayesNet bayesNet) throws Exception {
 		m_BayesNet = bayesNet;
 		double fAccuracy = 0.0;
 		double fWeight = 0.0;
@@ -151,7 +151,7 @@ public class CVSearchAlgorithm extends SearchAlgorithm {
 	 * @return accuracy (in interval 0..1) measured using leave one out cv.
 	 * @throws Exception passed on by updateClassifier
 	 */
-	public double CumulativeCV(BayesNet bayesNet) throws Exception {
+	public double cumulativeCV(BayesNet bayesNet) throws Exception {
 		m_BayesNet = bayesNet;
 		double fAccuracy = 0.0;
 		double fWeight = 0.0;

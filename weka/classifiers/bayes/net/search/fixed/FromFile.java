@@ -32,7 +32,7 @@ import java.util.*;
  * in BIFF format.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FromFile extends SearchAlgorithm {
 	/** name of file to read structure from **/
@@ -46,8 +46,8 @@ public class FromFile extends SearchAlgorithm {
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
         	ParentSet parentSet = bifReader.getParentSet(iAttribute);
         	bayesNet.getParentSet(iAttribute);
-        	for (int iParent = 0; iParent < parentSet.GetNrOfParents(); iParent++) {
-        		bayesNet.getParentSet(iAttribute).AddParent(parentSet.GetParent(iParent), instances);
+        	for (int iParent = 0; iParent < parentSet.getNrOfParents(); iParent++) {
+        		bayesNet.getParentSet(iAttribute).addParent(parentSet.getParent(iParent), instances);
         	}
         }
 	} // buildStructure

@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	BayesNet m_BayesNet;
@@ -81,7 +81,7 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
         double fLogScore = 0.0;
 
         for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-            for (int iParent = 0; iParent < m_BayesNet.getParentSet(iAttribute).GetCardinalityOfParents(); iParent++) {
+            for (int iParent = 0; iParent < m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents(); iParent++) {
                 fLogScore += ((Scoreable) m_BayesNet.m_Distributions[iAttribute][iParent]).logScore(nType);
             }
 
@@ -89,14 +89,14 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
                 case (Scoreable.MDL) :
                     {
                         fLogScore -= 0.5
-                            * m_BayesNet.getParentSet(iAttribute).GetCardinalityOfParents()
+                            * m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents()
                             * (m_Instances.attribute(iAttribute).numValues() - 1)
                             * Math.log(m_Instances.numInstances());
                     }
                     break;
                 case (Scoreable.AIC) :
                     {
-                        fLogScore -= m_BayesNet.getParentSet(iAttribute).GetCardinalityOfParents()
+                        fLogScore -= m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents()
                             * (m_Instances.attribute(iAttribute).numValues() - 1);
                     }
                     break;
@@ -123,11 +123,11 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	 * @param nNode node for which the score is calculate
 	 * @return log score
 	 */
-	public double CalcNodeScore(int nNode) {
+	public double calcNodeScore(int nNode) {
 		if (m_BayesNet.getUseADTree() && m_BayesNet.getADTree() != null) {
-			return CalcNodeScoreADTree(nNode, m_Instances);
+			return calcNodeScoreADTree(nNode, m_Instances);
 		} else {
-			return CalcNodeScore(nNode, m_Instances);
+			return calcNodeScore(nNode, m_Instances);
 		}
 	}
 
@@ -137,13 +137,13 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	 * @param instances used to calculate score with
 	 * @return log score
 	 */
-	private double CalcNodeScoreADTree(int nNode, Instances instances) {
+	private double calcNodeScoreADTree(int nNode, Instances instances) {
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
 		// get set of parents, insert iNode
-		int nNrOfParents = oParentSet.GetNrOfParents();
+		int nNrOfParents = oParentSet.getNrOfParents();
 		int[] nNodes = new int[nNrOfParents + 1];
 		for (int iParent = 0; iParent < nNrOfParents; iParent++) {
-			nNodes[iParent] = oParentSet.GetParent(iParent);
+			nNodes[iParent] = oParentSet.getParent(iParent);
 		}
 		nNodes[nNrOfParents] = nNode;
 
@@ -172,21 +172,21 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 		}
 
 		// get counts from ADTree
-		int nCardinality = oParentSet.GetCardinalityOfParents();
+		int nCardinality = oParentSet.getCardinalityOfParents();
 		int numValues = instances.attribute(nNode).numValues();
 		int[] nCounts = new int[nCardinality * numValues];
 		//if (nNrOfParents > 1) {
 
 		m_BayesNet.getADTree().getCounts(nCounts, nNodes, nOffsets, 0, 0, false);
 
-		return CalcScoreOfCounts(nCounts, nCardinality, numValues, instances);
+		return calcScoreOfCounts(nCounts, nCardinality, numValues, instances);
 	} // CalcNodeScore
 
-	private double CalcNodeScore(int nNode, Instances instances) {
+	private double calcNodeScore(int nNode, Instances instances) {
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
 
 		// determine cardinality of parent set & reserve space for frequency counts
-		int nCardinality = oParentSet.GetCardinalityOfParents();
+		int nCardinality = oParentSet.getCardinalityOfParents();
 		int numValues = instances.attribute(nNode).numValues();
 		int[] nCounts = new int[nCardinality * numValues];
 
@@ -204,8 +204,8 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 			// updateClassifier;
 			double iCPT = 0;
 
-			for (int iParent = 0; iParent < oParentSet.GetNrOfParents(); iParent++) {
-				int nParent = oParentSet.GetParent(iParent);
+			for (int iParent = 0; iParent < oParentSet.getNrOfParents(); iParent++) {
+				int nParent = oParentSet.getParent(iParent);
 
 				iCPT = iCPT * instances.attribute(nParent).numValues() + instance.value(nParent);
 			}
@@ -213,7 +213,7 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 			nCounts[numValues * ((int) iCPT) + (int) instance.value(nNode)]++;
 		}
 
-		return CalcScoreOfCounts(nCounts, nCardinality, numValues, instances);
+		return calcScoreOfCounts(nCounts, nCardinality, numValues, instances);
 	} // CalcNodeScore
 
 	/**
@@ -226,7 +226,7 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	 * @param instances to calc score with
 	 * @return log score
 	 */
-	protected double CalcScoreOfCounts(int[] nCounts, int nCardinality, int numValues, Instances instances) {
+	protected double calcScoreOfCounts(int[] nCounts, int nCardinality, int numValues, Instances instances) {
 
 		// calculate scores using the distributions
 		double fLogScore = 0.0;
@@ -323,7 +323,7 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 		return fLogScore;
 	} // CalcNodeScore
 
-	protected double CalcScoreOfCounts2(int[][] nCounts, int nCardinality, int numValues, Instances instances) {
+	protected double calcScoreOfCounts2(int[][] nCounts, int nCardinality, int numValues, Instances instances) {
 
 		// calculate scores using the distributions
 		double fLogScore = 0.0;
@@ -429,34 +429,63 @@ public class ScoreSearchAlgorithm extends SearchAlgorithm {
 	 * @param nCandidateParent candidate parent to add to the existing parent set
 	 * @return log score
 	 */
-	public double CalcScoreWithExtraParent(int nNode, int nCandidateParent) {
+	public double calcScoreWithExtraParent(int nNode, int nCandidateParent) {
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
 
 		// sanity check: nCandidateParent should not be in parent set already
-		for (int iParent = 0; iParent < oParentSet.GetNrOfParents(); iParent++) {
-			if (oParentSet.GetParent(iParent) == nCandidateParent) {
+		if (oParentSet.contains(nCandidateParent)) {
 				return -1e100;
-			}
 		}
 
-		// determine cardinality of parent set & reserve space for frequency counts
-		int nCardinality =
-			oParentSet.GetCardinalityOfParents() * m_Instances.attribute(nCandidateParent).numValues();
-		int numValues = m_Instances.attribute(nNode).numValues();
-		int[][] nCounts = new int[nCardinality][numValues];
-
 		// set up candidate parent
-		oParentSet.AddParent(nCandidateParent, m_Instances);
+		oParentSet.addParent(nCandidateParent, m_Instances);
+
+		// determine cardinality of parent set & reserve space for frequency counts
+		int nCardinality = oParentSet.getCardinalityOfParents();
+		int numValues = m_Instances.attribute(nNode).numValues();
+		int [][] nCounts = new int[nCardinality][numValues];
 
 		// calculate the score
-		double logScore = CalcNodeScore(nNode);
+		double logScore = calcNodeScore(nNode);
 
 		// delete temporarily added parent
-		oParentSet.DeleteLastParent(m_Instances);
+		oParentSet.deleteLastParent(m_Instances);
 
 		return logScore;
 	} // CalcScoreWithExtraParent
 
+
+	/**
+	 * Calc Node Score With Parent Deleted
+	 * 
+	 * @param nNode node for which the score is calculate
+	 * @param nCandidateParent candidate parent to delete from the existing parent set
+	 * @return log score
+	 */
+	public double calcScoreWithMissingParent(int nNode, int nCandidateParent) {
+		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
+
+		// sanity check: nCandidateParent should be in parent set already
+		if (!oParentSet.contains( nCandidateParent)) {
+				return -1e100;
+		}
+
+		// set up candidate parent
+		oParentSet.deleteParent(nCandidateParent, m_Instances);
+
+		// determine cardinality of parent set & reserve space for frequency counts
+		int nCardinality = oParentSet.getCardinalityOfParents();
+		int numValues = m_Instances.attribute(nNode).numValues();
+		int [][] nCounts = new int[nCardinality][numValues];
+
+		// calculate the score
+		double logScore = calcNodeScore(nNode);
+
+		// delete temporarily added parent
+		oParentSet.addParent(nCandidateParent, m_Instances);
+
+		return logScore;
+	} // CalcScoreWithMissingParent
 
 	/**
 	 * set quality measure to be used in searching for networks.

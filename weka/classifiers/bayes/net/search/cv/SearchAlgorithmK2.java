@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
@@ -91,8 +91,8 @@ public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 			int iAttribute = nOrder[iOrder];
 			double fBestScore = fBaseScore;
 
-			boolean bProgress = (bayesNet.getParentSet(iAttribute).GetNrOfParents() < getMaxNrOfParents());
-			while (bProgress && (bayesNet.getParentSet(iAttribute).GetNrOfParents() < getMaxNrOfParents())) {
+			boolean bProgress = (bayesNet.getParentSet(iAttribute).getNrOfParents() < getMaxNrOfParents());
+			while (bProgress && (bayesNet.getParentSet(iAttribute).getNrOfParents() < getMaxNrOfParents())) {
 				int nBestAttribute = -1;
 				for (int iOrder2 = 0; iOrder2 < iOrder; iOrder2++) {
 					int iAttribute2 = nOrder[iOrder2];
@@ -103,7 +103,7 @@ public class SearchAlgorithmK2 extends CVSearchAlgorithm {
 					}
 				}
 				if (nBestAttribute != -1) {
-					bayesNet.getParentSet(iAttribute).AddParent(nBestAttribute, instances);
+					bayesNet.getParentSet(iAttribute).addParent(nBestAttribute, instances);
 					fBaseScore = fBestScore;
 					bProgress = true;
 				} else {

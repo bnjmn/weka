@@ -35,7 +35,7 @@ import java.io.Serializable;
  * Journal of Artificial Intelligence Research 8 (1998) 67-91
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ADNode implements Serializable {
         final static int MIN_RECORD_SIZE = 0;
@@ -61,7 +61,7 @@ public class ADNode implements Serializable {
 	 * @param instances: data set
          * @return VaryNode representing part of an ADTree
  	 **/
-	public static VaryNode MakeVaryNode(int iNode, FastVector nRecords, Instances instances) {
+	public static VaryNode makeVaryNode(int iNode, FastVector nRecords, Instances instances) {
 		VaryNode _VaryNode = new VaryNode(iNode);
 		int nValues = instances.attribute(iNode).numValues();
                 
@@ -94,7 +94,7 @@ public class ADNode implements Serializable {
 			if (iChild == nMCV || nChildRecords[iChild].size() == 0) {
 				_VaryNode.m_ADNodes[iChild] = null;
 			} else {
-				_VaryNode.m_ADNodes[iChild] = MakeADTree(iNode + 1, nChildRecords[iChild], instances);
+				_VaryNode.m_ADNodes[iChild] = makeADTree(iNode + 1, nChildRecords[iChild], instances);
 			}
 		}
 		return _VaryNode;
@@ -106,7 +106,7 @@ public class ADNode implements Serializable {
 	 * @param instances: data set
          * @return ADNode representing an ADTree
 	 **/
-	public static ADNode MakeADTree(int iNode, FastVector nRecords, Instances instances) {
+	public static ADNode makeADTree(int iNode, FastVector nRecords, Instances instances) {
 		ADNode _ADNode = new ADNode();
                 _ADNode.m_nCount = nRecords.size();
                 _ADNode.m_nStartNode = iNode;
@@ -118,7 +118,7 @@ public class ADNode implements Serializable {
                 } else {
                   _ADNode.m_VaryNodes = new VaryNode[instances.numAttributes() - iNode];
                   for (int iNode2 = iNode; iNode2 < instances.numAttributes(); iNode2++) {
-                          _ADNode.m_VaryNodes[iNode2 - iNode] = MakeVaryNode(iNode2, nRecords, instances);
+                          _ADNode.m_VaryNodes[iNode2 - iNode] = makeVaryNode(iNode2, nRecords, instances);
                   }
                 }
 		return _ADNode;
@@ -128,12 +128,12 @@ public class ADNode implements Serializable {
 	 * @param instances: data set
          * @return ADNode representing an ADTree
 	 **/
-	public static ADNode MakeADTree(Instances instances) {
+	public static ADNode makeADTree(Instances instances) {
           FastVector nRecords = new FastVector(instances.numInstances());
           for (int iRecord = 0; iRecord < instances.numInstances(); iRecord++) {
             nRecords.addElement(new Integer(iRecord));
           }
-          return MakeADTree(0, nRecords, instances);
+          return makeADTree(0, nRecords, instances);
         } // MakeADTree
         
           /** get counts for specific instantiation of a set of nodes
@@ -204,7 +204,7 @@ public class ADNode implements Serializable {
         public static void main(String [] argv) {
             try {
                 Instances instances = new Instances(new FileReader("\\iris.2.arff"));
-                ADNode ADTree = ADNode.MakeADTree(instances);
+                ADNode ADTree = ADNode.makeADTree(instances);
                 int [] nCounts = new int[12];
                 int [] nNodes = new int[3];
                 int [] nOffsets = new int[3];
