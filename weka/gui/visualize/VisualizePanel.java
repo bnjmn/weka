@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1048,7 +1048,7 @@ public class VisualizePanel extends JPanel {
       if (m_plot2D.getPlots().size() == 0) {
 	m_plot2D.addPlot(newPlot);
 	m_attrib.setInstances(newPlot.m_plotInstances);
-	m_attrib.setX(0); m_attrib.setY(0);
+	m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
 	m_classPanel.setInstances(newPlot.m_plotInstances);
 
 	plotReset(newPlot.m_plotInstances, newPlot.getCindex());

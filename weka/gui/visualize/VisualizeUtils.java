@@ -29,7 +29,7 @@ import javax.swing.JOptionPane;
  * This class contains utility routines for visualization
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class VisualizeUtils {
@@ -39,6 +39,9 @@ public class VisualizeUtils {
 
   /** Contains the visualization properties */
   protected static Properties VISUALIZE_PROPERTIES;
+
+  /** Default maximum precision for the display of numeric values */
+  protected static int MAX_PRECISION = 10;
 
   static {
     boolean noDefaultProps = false;
@@ -93,6 +96,18 @@ public class VisualizeUtils {
        +"or the directory that java was started from\n",
        "Plot2D",
        JOptionPane.ERROR_MESSAGE);
+    } else {
+      String precision = 
+	VISUALIZE_PROPERTIES.getProperty("weka.gui.visualize.precision");
+      if (precision == null) {
+	System.err.println("Warning: no configuration property found in"
+			   +PROPERTY_FILE
+			   +" for weka.gui.visualize.precision. Using"
+			   +" default instead.");
+      } else {
+	MAX_PRECISION = Integer.parseInt(precision);
+	System.err.println("Setting numeric precision to: "+precision);
+      }
     }
   }
 
