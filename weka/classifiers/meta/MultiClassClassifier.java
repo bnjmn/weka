@@ -68,7 +68,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class MultiClassClassifier extends Classifier 
   implements OptionHandler {
@@ -357,19 +357,14 @@ public class MultiClassClassifier extends Classifier
       m_ClassFilters = new MakeIndicator[numClassifiers];
       AttributeStats classStats = insts.attributeStats(insts.classIndex());
       for (int i = 0; i < m_Classifiers.length; i++) {
-        if ((m_Method == METHOD_1_AGAINST_ALL) && 
-            (classStats.nominalCounts[i] == 0)) {
-          m_Classifiers[i] = null;
-        } else {
-          m_ClassFilters[i] = new MakeIndicator();
-	  MakeIndicator classFilter = (MakeIndicator) m_ClassFilters[i];
-          classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
-          classFilter.setValueIndices(code.getIndices(i));
-          classFilter.setNumeric(false);
-          classFilter.setInputFormat(insts);
-          newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
-          m_Classifiers[i].buildClassifier(newInsts);
-        }
+	m_ClassFilters[i] = new MakeIndicator();
+	MakeIndicator classFilter = (MakeIndicator) m_ClassFilters[i];
+	classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
+	classFilter.setValueIndices(code.getIndices(i));
+	classFilter.setNumeric(false);
+	classFilter.setInputFormat(insts);
+	newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
+	m_Classifiers[i].buildClassifier(newInsts);
       }
     }
     m_ClassAttribute = insts.classAttribute();
@@ -440,17 +435,15 @@ public class MultiClassClassifier extends Classifier
     } else {
       // error correcting style methods
       for(int i = 0; i < m_ClassFilters.length; i++) {
-	if (m_Classifiers[i] != null) {
-	  m_ClassFilters[i].input(inst);
-	  m_ClassFilters[i].batchFinished();
-	  double [] current = m_Classifiers[i].
-	    distributionForInstance(m_ClassFilters[i].output());
-	  for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
-	    if (((MakeIndicator)m_ClassFilters[i]).getValueRange().isInRange(j)) {
-	      probs[j] += current[1];
-	    } else {
-	      probs[j] += current[0];
-	    }
+	m_ClassFilters[i].input(inst);
+	m_ClassFilters[i].batchFinished();
+	double [] current = m_Classifiers[i].
+	  distributionForInstance(m_ClassFilters[i].output());
+	for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
+	  if (((MakeIndicator)m_ClassFilters[i]).getValueRange().isInRange(j)) {
+	    probs[j] += current[1];
+	  } else {
+	    probs[j] += current[0];
 	  }
 	}
       }
