@@ -24,7 +24,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AllTests extends TestSuite {
 
@@ -47,7 +47,6 @@ public class AllTests extends TestSuite {
     suite.addTest(WinnowTest.suite());
     suite.addTest(IB1Test.suite());
     suite.addTest(IBkTest.suite());
-    suite.addTest(KernelDensityTest.suite());
     suite.addTest(LWRTest.suite());
     suite.addTest(AdaBoostM1Test.suite());
     suite.addTest(AdditiveRegressionTest.suite());
@@ -55,7 +54,6 @@ public class AllTests extends TestSuite {
     suite.addTest(BaggingTest.suite());
     suite.addTest(CVParameterSelectionTest.suite());
     suite.addTest(ClassificationViaRegressionTest.suite());
-    suite.addTest(CleanserTest.suite());
     suite.addTest(CostSensitiveClassifierTest.suite());
     suite.addTest(DistributionMetaClassifierTest.suite());
     suite.addTest(FilteredClassifierTest.suite());
