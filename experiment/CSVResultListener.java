@@ -39,7 +39,7 @@ import weka.core.Option;
  * a Writer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class CSVResultListener implements ResultListener, OptionHandler {
 
@@ -47,10 +47,30 @@ public class CSVResultListener implements ResultListener, OptionHandler {
   protected ResultProducer m_RP;
 
   /** The destination output file, null sends to System.out */
-  protected File m_OutputFile = new File("-");
+  protected File m_OutputFile = null;
+
+  /** The name of the output file. Empty for temporary file. */
+  protected String m_OutputFileName = "";
 
   /** The destination for results (typically connected to the output file) */
   protected transient PrintWriter m_Out = new PrintWriter(System.out, true);
+
+  /** 
+   * Sets temporary file.
+   */
+  public CSVResultListener() {
+
+    File resultsFile;
+    try {
+      resultsFile = File.createTempFile("weka_experiment", null);
+      resultsFile.deleteOnExit();
+    } catch (Exception e) {
+      System.err.println("Cannot create temp file, writing to standard out.");
+      resultsFile = new File("-");
+    }
+    setOutputFile(resultsFile);
+    setOutputFileName("");
+  }
 
   /**
    * Returns a string describing this result listener
@@ -73,7 +93,7 @@ public class CSVResultListener implements ResultListener, OptionHandler {
 
     newVector.addElement(new Option(
 	     "\tThe filename where output will be stored. Use - for stdout.\n"
-	      +"\t(default stdout)", 
+	      +"\t(default temp file)", 
 	     "O", 1, 
 	     "-O <file name>"));
 
@@ -85,7 +105,7 @@ public class CSVResultListener implements ResultListener, OptionHandler {
    *
    * -O filename <br>
    * The filename where output will be stored. Use - for stdout.
-   * (default stdout)
+   * (default temp file)
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -96,7 +116,16 @@ public class CSVResultListener implements ResultListener, OptionHandler {
     if (fName.length() != 0) {
       setOutputFile(new File(fName));
     } else {
-      setOutputFile(new File("-"));
+      File resultsFile;
+      try {
+	resultsFile = File.createTempFile("weka_experiment", null);
+	resultsFile.deleteOnExit();
+      } catch (Exception e) {
+	System.err.println("Cannot create temp file, writing to standard out.");
+	resultsFile = new File("-");
+      }
+      setOutputFile(resultsFile);
+      setOutputFileName("");
     }
   }
 
@@ -138,13 +167,36 @@ public class CSVResultListener implements ResultListener, OptionHandler {
   }
   
   /**
-   * Set the value of OutputFile.
+   * Set the value of OutputFile. Also sets the
+   * OutputFileName.
    *
    * @param newOutputFile Value to assign to OutputFile.
    */
   public void setOutputFile(File newOutputFile) {
     
     m_OutputFile = newOutputFile;
+    setOutputFileName(newOutputFile.getName());
+  }
+
+  /**
+   * Get the value of OutputFileName.
+   *
+   * @return Value of OutputFile.
+   */
+  public String outputFileName() {
+    
+    return m_OutputFileName;
+  }
+
+  /**
+   * Set the value of OutputFileName. Must be used
+   * AFTER setOutputFile.
+   *
+   * @return Value of OutputFile.
+   */
+  public void setOutputFileName(String name) {
+    
+    m_OutputFileName = name;
   }
   
   /**
