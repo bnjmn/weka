@@ -33,7 +33,7 @@ import javax.swing.filechooser.FileFilter;
  * javax.swing.filechooser.FileFilter (why there are two I have no idea).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
 
@@ -66,7 +66,7 @@ public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
   }
   
   /**
-   * Returns true if the supplied file should be accepted (i.e. if it
+   * Returns true if the supplied file should be accepted (i.e.: if it
    * has the required extension or is a directory).
    *
    * @param file the file of interest.
