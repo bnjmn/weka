@@ -39,7 +39,7 @@ import  weka.filters.ReplaceMissingValuesFilter;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -86,6 +86,11 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
   private double [] m_Max;
 
   /**
+   * Keep track of the number of iterations completed before convergence
+   */
+  private int m_Iterations = 0;
+
+  /**
    * Returns a string describing this clusterer
    * @return a description of the evaluator suitable for
    * displaying in the explorer/experimenter gui
@@ -103,7 +108,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
-    
+    m_Iterations = 0;
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
     }
@@ -126,14 +131,21 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
     m_ClusterAssignments = new int [m_instances.numInstances()];
 
     Random RandomO = new Random(m_Seed);
-
+    boolean [] selected = new boolean[m_instances.numInstances()];
+    int instIndex;
     for (int i = 0; i < m_NumClusters; i++) {
-      int instIndex = Math.abs(RandomO.nextInt()) % m_instances.numInstances();
+      do {
+	instIndex = Math.abs(RandomO.nextInt()) % 
+	  m_instances.numInstances();
+      } while (selected[instIndex]);
       m_ClusterCentroids.add(m_instances.instance(instIndex));
+      selected[instIndex] = true;
     }
+    selected = null;
 
     boolean converged = false;
     while (!converged) {
+      m_Iterations++;
       converged = true;
       for (int i = 0; i < m_instances.numInstances(); i++) {
 	Instance toCluster = m_instances.instance(i);
@@ -142,6 +154,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
 	  converged = false;
 	}
 	m_ClusterAssignments[i] = newC;
+	//	System.out.println(newC);
       }
       
       Instances [] tempI = new Instances[m_NumClusters];
@@ -482,6 +495,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
     StringBuffer temp = new StringBuffer();
 
     temp.append("\nkMeans\n======\n");
+    temp.append("\nNumber of iterations: " + m_Iterations+"\n");
 
     temp.append("\nCluster centroids:\n");
     for (int i = 0; i < m_NumClusters; i++) {
