@@ -39,7 +39,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PlotData2D {
 
@@ -351,6 +351,9 @@ public class PlotData2D {
 	  }
 	}
 	
+	// handle case where all values are missing
+	if (min == Double.POSITIVE_INFINITY) min = max = 0.0;
+	
 	m_minX = min; m_maxX = max;
 	if (min == max) {
 	  m_maxX += 0.05;
@@ -377,6 +380,9 @@ public class PlotData2D {
 	  }
 	}
 	
+	// handle case where all values are missing
+	if (min == Double.POSITIVE_INFINITY) min = max = 0.0;
+
 	m_minY = min; m_maxY = max;
 	if (min == max) {
 	  m_maxY += 0.05;
@@ -399,6 +405,10 @@ public class PlotData2D {
 	  }
 	}
       }
+
+      // handle case where all values are missing
+      if (min == Double.POSITIVE_INFINITY) min = max = 0.0;
+
       m_minC = min; m_maxC = max;
     }
   }
