@@ -27,7 +27,7 @@ import java.io.*;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -355,6 +355,7 @@ public class FastVector implements Copyable, Serializable {
 
     setCapacity(size() + toAppend.size());
     System.arraycopy(toAppend.m_Objects, 0, m_Objects, size(), toAppend.size());
+    m_Size = m_Objects.length;
   }
 
   /** 
@@ -378,7 +379,7 @@ public class FastVector implements Copyable, Serializable {
 
     Object[] newObjects = new Object[capacity];
    
-    System.arraycopy(m_Objects, 0, newObjects, 0, capacity);
+    System.arraycopy(m_Objects, 0, newObjects, 0, Math.min(capacity, m_Size));
     m_Objects = newObjects;
     if (m_Objects.length < m_Size)
       m_Size = m_Objects.length;
