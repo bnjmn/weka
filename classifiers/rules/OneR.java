@@ -41,7 +41,7 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
     
@@ -202,10 +202,10 @@ public class OneR extends Classifier implements OptionHandler {
     }
 
     // for each attribute ...
-    Enumeration enum = instances.enumerateAttributes();
-    while (enum.hasMoreElements()) {
+    Enumeration enu = instances.enumerateAttributes();
+    while (enu.hasMoreElements()) {
       try {
-	OneRRule r = newRule((Attribute) enum.nextElement(), data);
+	OneRRule r = newRule((Attribute) enu.nextElement(), data);
 
 	// if this attribute is the best so far, replace the rule
 	if (noRule || r.m_correct > m_rule.m_correct) {
@@ -262,9 +262,9 @@ public class OneR extends Classifier implements OptionHandler {
                              [data.classAttribute().numValues()];
       
     // ... calculate the counts
-    Enumeration enum = data.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      Instance i = (Instance) enum.nextElement();
+    Enumeration enu = data.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      Instance i = (Instance) enu.nextElement();
       if (i.isMissing(attr)) {
 	missingValueCounts[(int) i.classValue()]++; 
       } else {

@@ -38,7 +38,7 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
 */
 public class Prism extends Classifier {
 
@@ -90,9 +90,9 @@ public class Prism extends Classifier {
       m_test = null;
       m_next = null;
       m_errors = 0;
-      Enumeration enum = data.enumerateInstances();
-      while (enum.hasMoreElements()) {
-        if ((int) ((Instance) enum.nextElement()).classValue() != cl) {
+      Enumeration enu = data.enumerateInstances();
+      while (enu.hasMoreElements()) {
+        if ((int) ((Instance) enu.nextElement()).classValue() != cl) {
 	  m_errors++;
 	}
       }
@@ -140,9 +140,9 @@ public class Prism extends Classifier {
     public Instances coveredBy(Instances data) {
 
       Instances r = new Instances(data, data.numInstances());
-      Enumeration enum = data.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	Instance i = (Instance) enum.nextElement();
+      Enumeration enu = data.enumerateInstances();
+      while (enu.hasMoreElements()) {
+	Instance i = (Instance) enu.nextElement();
 	if (resultRule(i) != -1) {
 	  r.add(i);
 	}
@@ -160,9 +160,9 @@ public class Prism extends Classifier {
     public Instances notCoveredBy(Instances data) {
 
       Instances r = new Instances(data, data.numInstances());
-      Enumeration enum = data.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	Instance i = (Instance) enum.nextElement();
+      Enumeration enu = data.enumerateInstances();
+      while (enu.hasMoreElements()) {
+	Instance i = (Instance) enu.nextElement();
 	if (resultRule(i) == -1) {
 	  r.add(i);
 	}
@@ -285,9 +285,9 @@ public class Prism extends Classifier {
       if (!attr.isNominal()) {
 	throw new UnsupportedAttributeTypeException("Prism can only deal with nominal attributes!");
       }
-      Enumeration enum = data.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	if (((Instance) enum.nextElement()).isMissing(attr)) {
+      Enumeration enu = data.enumerateInstances();
+      while (enu.hasMoreElements()) {
+	if (((Instance) enu.nextElement()).isMissing(attr)) {
 	  throw new NoSupportForMissingValuesException("Prism can't handle attributes with missing values!");
 	}
       }
@@ -322,9 +322,9 @@ public class Prism extends Classifier {
 	    }
 
             // ... calculate the counts for this class
-            Enumeration enum = ruleE.enumerateInstances();
-            while (enum.hasMoreElements()) {
-              Instance i = (Instance) enum.nextElement();
+            Enumeration enu = ruleE.enumerateInstances();
+            while (enu.hasMoreElements()) {
+              Instance i = (Instance) enu.nextElement();
               covers[(int) i.value(attr)]++;
               if ((int) i.classValue() == cl) {
                 correct[(int) i.value(attr)]++;
@@ -406,9 +406,9 @@ public class Prism extends Classifier {
    */
   private static boolean contains(Instances E, int C) throws Exception {
 
-    Enumeration enum = E.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      if ((int) ((Instance) enum.nextElement()).classValue() == C) {
+    Enumeration enu = E.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      if ((int) ((Instance) enu.nextElement()).classValue() == C) {
 	return true;
       }
     }

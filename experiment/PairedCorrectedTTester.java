@@ -39,7 +39,7 @@ import java.util.Enumeration;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -168,9 +168,9 @@ public class PairedCorrectedTTester extends PairedTTester {
 	Utils.checkForRemainingOptions(args);
       } catch (Exception ex) {
 	String result = "";
-	Enumeration enum = tt.listOptions();
-	while (enum.hasMoreElements()) {
-	  Option option = (Option) enum.nextElement();
+	Enumeration enu = tt.listOptions();
+	while (enu.hasMoreElements()) {
+	  Option option = (Option) enu.nextElement();
 	  result += option.synopsis() + '\n'
 	    + option.description() + '\n';
 	}

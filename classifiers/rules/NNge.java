@@ -544,15 +544,15 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
      */
     private String toString2(){
       String s;
-      Enumeration enum = null;
+      Enumeration enu = null;
       s = "Exemplar[";
       if (numInstances() == 0) {
 	return s + "Empty]";
       }
       s += "{";
-      enum = enumerateInstances();
-      while(enum.hasMoreElements()){
-	s = s + "<" + enum.nextElement().toString() + "> ";
+      enu = enumerateInstances();
+      while(enu.hasMoreElements()){
+	s = s + "<" + enu.nextElement().toString() + "> ";
       }
       s = s.substring(0, s.length()-1);
       s = s + "} {" + toRules() + "} p=" + m_PositiveCount + " n=" + m_NegativeCount + "]";
@@ -750,9 +750,9 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
     }
 
     /* update the classifier with data */
-    Enumeration enum = data.enumerateInstances();
-    while(enum.hasMoreElements()){
-      update((Instance) enum.nextElement());
+    Enumeration enu = data.enumerateInstances();
+    while(enu.hasMoreElements()){
+      update((Instance) enu.nextElement());
     }	
   }
 
@@ -1004,9 +1004,9 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
 
 	/* compute the size of the biggest Exemplar which would be created */
 	n = m = 0;
-	Enumeration enum = predictedExemplar.enumerateInstances();
-	while(enum.hasMoreElements()){
-	  Instance ins = (Instance) enum.nextElement();
+	Enumeration enu = predictedExemplar.enumerateInstances();
+	while(enu.hasMoreElements()){
+	  Instance ins = (Instance) enu.nextElement();
 	  if(ins.value(i) < newInst.value(i))
 	    n++;
 	  else if(ins.value(i) > newInst.value(i))
@@ -1027,10 +1027,10 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
       } else {
 
 	/* compute the size of the Exemplar which would be created */
-	Enumeration enum = predictedExemplar.enumerateInstances();
+	Enumeration enu = predictedExemplar.enumerateInstances();
 	n = 0;
-	while(enum.hasMoreElements()){
-	  if(((Instance) enum.nextElement()).value(i) != newInst.value(i))
+	while(enu.hasMoreElements()){
+	  if(((Instance) enu.nextElement()).value(i) != newInst.value(i))
 	    n++;
 	}
 	if(n > biggest_N_Nom){
@@ -1061,10 +1061,10 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
     a = new Exemplar(this, m_Train, 10, predictedExemplar.classValue());
     b = new Exemplar(this, m_Train, 10, predictedExemplar.classValue());
     LinkedList leftAlone = new LinkedList();
-    Enumeration enum = predictedExemplar.enumerateInstances();
+    Enumeration enu = predictedExemplar.enumerateInstances();
     if(m_Train.attribute(attrToCut).isNumeric()){
-      while(enum.hasMoreElements()){
-	curInst = (Instance) enum.nextElement();
+      while(enu.hasMoreElements()){
+	curInst = (Instance) enu.nextElement();
 	if(curInst.value(attrToCut) > newInst.value(attrToCut)){
 	  a.generalise(curInst);
 	} else if (curInst.value(attrToCut) < newInst.value(attrToCut)){
@@ -1074,8 +1074,8 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
 	}
       }
     } else {
-      while(enum.hasMoreElements()){
-	curInst = (Instance) enum.nextElement();
+      while(enu.hasMoreElements()){
+	curInst = (Instance) enu.nextElement();
 	if(curInst.value(attrToCut) != newInst.value(attrToCut)){
 	  a.generalise(curInst);
 	} else if (notEqualFeatures(curInst, newInst)){
@@ -1226,9 +1226,9 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
 	      m_MI_NumAttrClassInter[attrIndex][cclass][inter] = 0;
 
 	      /* count */
-	      Enumeration enum = m_Train.enumerateInstances();
-	      while(enum.hasMoreElements()){
-		Instance cur = (Instance) enum.nextElement();
+	      Enumeration enu = m_Train.enumerateInstances();
+	      while(enu.hasMoreElements()){
+		Instance cur = (Instance) enu.nextElement();
 		if(( (m_MI_MinArray[attrIndex] + inter * delta) <= cur.value(attrIndex)       ) &&
 		   ( cur.value(attrIndex) <= (m_MI_MinArray[attrIndex] + (inter + 1) * delta) ) &&
 		   ( cur.classValue() == cclass ) ){

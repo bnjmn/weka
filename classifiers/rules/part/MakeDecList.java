@@ -32,7 +32,7 @@ import weka.classifiers.*;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class MakeDecList implements Serializable {
 
@@ -156,9 +156,9 @@ public class MakeDecList implements Serializable {
       // Remove instances from growing data
       newGrowData = new Instances(oldGrowData,
 				  oldGrowData.numInstances());
-      Enumeration enum = oldGrowData.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	Instance instance = (Instance) enum.nextElement();
+      Enumeration enu = oldGrowData.enumerateInstances();
+      while (enu.hasMoreElements()) {
+	Instance instance = (Instance) enu.nextElement();
 	currentWeight = currentRule.weight(instance);
 	if (Utils.sm(currentWeight,1)) {
 	  instance.setWeight(instance.weight()*(1-currentWeight));
@@ -172,9 +172,9 @@ public class MakeDecList implements Serializable {
       if ((reducedErrorPruning) && !(unpruned)) {
 	newPruneData = new Instances(oldPruneData,
 					     oldPruneData.numInstances());
-	enum = oldPruneData.enumerateInstances();
-	while (enum.hasMoreElements()) {
-	  Instance instance = (Instance) enum.nextElement();
+	enu = oldPruneData.enumerateInstances();
+	while (enu.hasMoreElements()) {
+	  Instance instance = (Instance) enu.nextElement();
 	  currentWeight = currentRule.weight(instance);
 	  if (Utils.sm(currentWeight,1)) {
 	    instance.setWeight(instance.weight()*(1-currentWeight));

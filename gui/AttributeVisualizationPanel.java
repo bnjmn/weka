@@ -66,7 +66,7 @@ import weka.core.FastVector;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {

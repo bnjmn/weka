@@ -77,7 +77,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
@@ -163,9 +163,9 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
               + "\ttraining set size. (default 100)",
               "P", 1, "-P"));
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

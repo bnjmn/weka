@@ -68,7 +68,7 @@ import weka.experiment.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.3 $ */
 public class Decorate extends Classifier implements OptionHandler{
 
     /** Set to true to get debugging output. */
@@ -139,9 +139,9 @@ public class Decorate extends Classifier implements OptionHandler{
 					    "",
 					    "", 0, "\nOptions specific to classifier "
 					    + m_Classifier.getClass().getName() + ":"));
-	    Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-	    while (enum.hasMoreElements()) {
-		newVector.addElement(enum.nextElement());
+	    Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+	    while (enu.hasMoreElements()) {
+		newVector.addElement(enu.nextElement());
 	    }
 	}
 	

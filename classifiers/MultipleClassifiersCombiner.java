@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * meta classifiers that build an ensemble from multiple classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class MultipleClassifiersCombiner extends Classifier {
   
@@ -59,9 +59,9 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
 	      + "\t(default: \"weka.classifiers.rules.ZeroR\")",
 	      "B", 1, "-B <classifier specification>"));
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

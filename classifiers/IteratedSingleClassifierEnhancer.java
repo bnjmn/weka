@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * meta classifiers that build an ensemble from a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class IteratedSingleClassifierEnhancer 
   extends SingleClassifierEnhancer {
@@ -75,9 +75,9 @@ public abstract class IteratedSingleClassifierEnhancer
 	      + "\t(default 10)",
 	      "I", 1, "-I <num>"));
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

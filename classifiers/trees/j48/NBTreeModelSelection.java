@@ -29,7 +29,7 @@ import weka.core.*;
  * Class for selecting a NB tree split.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NBTreeModelSelection extends ModelSelection {
 
@@ -106,9 +106,9 @@ public class NBTreeModelSelection extends ModelSelection {
       // Check if all attributes are nominal and have a 
       // lot of values.
       if (m_allData != null) {
-	Enumeration enum = data.enumerateAttributes();
-	while (enum.hasMoreElements()) {
-	  attribute = (Attribute) enum.nextElement();
+	Enumeration enu = data.enumerateAttributes();
+	while (enu.hasMoreElements()) {
+	  attribute = (Attribute) enu.nextElement();
 	  if ((attribute.isNumeric()) ||
 	      (Utils.sm((double)attribute.numValues(),
 			(0.3*(double)m_allData.numInstances())))){

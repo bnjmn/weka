@@ -39,7 +39,7 @@ import java.io.Serializable;
  * Because every item set knows its class label the training set can be splitted up virtually.
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class LabeledItemSet extends ItemSet implements Serializable{
@@ -342,9 +342,9 @@ public class LabeledItemSet extends ItemSet implements Serializable{
    public static void upDateCounters(FastVector itemSets, Instances instancesNoClass, Instances instancesClass){
 
     for (int i = 0; i < instancesNoClass.numInstances(); i++) {
-        Enumeration enum = itemSets.elements();
-	while (enum.hasMoreElements())
-            ((LabeledItemSet)enum.nextElement()).upDateCounter(instancesNoClass.instance(i),instancesClass.instance(i));
+        Enumeration enu = itemSets.elements();
+	while (enu.hasMoreElements())
+            ((LabeledItemSet)enu.nextElement()).upDateCounter(instancesNoClass.instance(i),instancesClass.instance(i));
     }
 
   }

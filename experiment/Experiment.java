@@ -63,7 +63,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -689,9 +689,9 @@ public class Experiment implements Serializable, OptionHandler {
 	     "",
 	     "", 0, "\nOptions specific to result producer "
 	     + m_ResultProducer.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_ResultProducer).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_ResultProducer).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();
@@ -930,9 +930,9 @@ public class Experiment implements Serializable, OptionHandler {
 	    + "\t(default don't save)\n"
 	    + "-r\n"
 	    + "\tRun experiment (default don't run)\n\n";
-	  Enumeration enum = ((OptionHandler)exp).listOptions();
-	  while (enum.hasMoreElements()) {
-	    Option option = (Option) enum.nextElement();
+	  Enumeration enu = ((OptionHandler)exp).listOptions();
+	  while (enu.hasMoreElements()) {
+	    Option option = (Option) enu.nextElement();
 	    result += option.synopsis() + "\n";
 	    result += option.description() + "\n";
 	  }

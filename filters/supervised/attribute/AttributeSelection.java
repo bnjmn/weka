@@ -42,7 +42,7 @@ import weka.attributeSelection.*;
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeSelection extends Filter
   implements SupervisedFilter, OptionHandler {
@@ -102,22 +102,22 @@ public class AttributeSelection extends Filter
 				    + "options]\">"));
     
     if ((m_ASEvaluator != null) && (m_ASEvaluator instanceof OptionHandler)) {
-      Enumeration enum = ((OptionHandler)m_ASEvaluator).listOptions();
+      Enumeration enu = ((OptionHandler)m_ASEvaluator).listOptions();
       
       newVector.addElement(new Option("", "", 0, "\nOptions specific to "
 	   + "evaluator " + m_ASEvaluator.getClass().getName() + ":"));
-      while (enum.hasMoreElements()) {
-	newVector.addElement((Option)enum.nextElement());
+      while (enu.hasMoreElements()) {
+	newVector.addElement((Option)enu.nextElement());
       }
     }
   
     if ((m_ASSearch != null) && (m_ASSearch instanceof OptionHandler)) {
-      Enumeration enum = ((OptionHandler)m_ASSearch).listOptions();
+      Enumeration enu = ((OptionHandler)m_ASSearch).listOptions();
     
       newVector.addElement(new Option("", "", 0, "\nOptions specific to "
 	      + "search " + m_ASSearch.getClass().getName() + ":"));
-      while (enum.hasMoreElements()) {
-	newVector.addElement((Option)enum.nextElement());
+      while (enu.hasMoreElements()) {
+	newVector.addElement((Option)enu.nextElement());
       }
     }
     return newVector.elements();

@@ -62,7 +62,7 @@ import java.io.Serializable;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class RacedIncrementalLogitBoost extends Classifier
   implements OptionHandler, UpdateableClassifier {
@@ -728,9 +728,9 @@ public class RacedIncrementalLogitBoost extends Classifier
 	  "",
 	  "", 0, "\nOptions specific to weak learner "
 	  + m_Classifier.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();

@@ -36,7 +36,7 @@ import weka.core.*;
  * association rules.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AprioriItemSet extends ItemSet implements Serializable {
 
@@ -391,9 +391,9 @@ public class AprioriItemSet extends ItemSet implements Serializable {
       newConsequences = mergeAllItemSets(rules[1], 
 					 numItemsInConsequence - 1,
 					 m_totalTransactions);
-      Enumeration enum = newConsequences.elements();
-      while (enum.hasMoreElements()) {
-	AprioriItemSet current = (AprioriItemSet)enum.nextElement();
+      Enumeration enu = newConsequences.elements();
+      while (enu.hasMoreElements()) {
+	AprioriItemSet current = (AprioriItemSet)enu.nextElement();
 	current.m_counter = m_counter;
 	newPremise = subtract(current);
 	newPremise.m_counter = ((Integer)hashtable.get(newPremise)).intValue();

@@ -74,7 +74,7 @@ import weka.core.FastVector;
  *
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class ClusterGenerator implements Serializable {
 
@@ -405,9 +405,9 @@ public abstract class ClusterGenerator implements Serializable {
     String optionString = "";
     if (generator instanceof OptionHandler) {
       optionString += "\nData Generator options:\n\n";
-      Enumeration enum = ((OptionHandler)generator).listOptions();
-      while (enum.hasMoreElements()) {
-        Option option = (Option) enum.nextElement();
+      Enumeration enu = ((OptionHandler)generator).listOptions();
+      while (enu.hasMoreElements()) {
+        Option option = (Option) enu.nextElement();
 	optionString += option.synopsis() + '\n'
 	    + option.description() + "\n";
 	}

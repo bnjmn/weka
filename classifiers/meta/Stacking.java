@@ -52,7 +52,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
  */
 public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
@@ -97,9 +97,9 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 	      "\tSets the number of cross-validation folds.",
 	      "X", 1, "-X <number of folds>"));
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

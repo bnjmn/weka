@@ -39,7 +39,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Range implements Serializable {
 
@@ -117,12 +117,12 @@ public class Range implements Serializable {
   public /*@non_null pure@*/String getRanges() {
 
     String result = null;
-    Enumeration enum = m_RangeStrings.elements();
-    while (enum.hasMoreElements()) {
+    Enumeration enu = m_RangeStrings.elements();
+    while (enu.hasMoreElements()) {
       if (result == null) {
-	result = (String)enum.nextElement();
+	result = (String)enu.nextElement();
       } else {
-	result += ',' + (String)enum.nextElement();
+	result += ',' + (String)enu.nextElement();
       }
     }
     return (result == null) ? "" : result;
@@ -194,9 +194,9 @@ public class Range implements Serializable {
       return "Empty";
     }
     String result ="Strings: ";
-    Enumeration enum = m_RangeStrings.elements();
-    while (enum.hasMoreElements()) {
-      result += (String)enum.nextElement() + " ";
+    Enumeration enu = m_RangeStrings.elements();
+    while (enu.hasMoreElements()) {
+      result += (String)enu.nextElement() + " ";
     }
     result += "\n";
 
@@ -250,9 +250,9 @@ public class Range implements Serializable {
     }
     else
     {
-      Enumeration enum = m_RangeStrings.elements();
-      while (enum.hasMoreElements()) {
-	String currentRange = (String)enum.nextElement();
+      Enumeration enu = m_RangeStrings.elements();
+      while (enu.hasMoreElements()) {
+	String currentRange = (String)enu.nextElement();
 	int start = rangeLower(currentRange);
 	int end = rangeUpper(currentRange);
 	for (int i = start; (i <= m_Upper) && (i <= end); i++) {
@@ -303,9 +303,9 @@ public class Range implements Serializable {
   protected void setFlags() {
 
     m_SelectFlags = new boolean [m_Upper + 1];
-    Enumeration enum = m_RangeStrings.elements();
-    while (enum.hasMoreElements()) {
-      String currentRange = (String)enum.nextElement();
+    Enumeration enu = m_RangeStrings.elements();
+    while (enu.hasMoreElements()) {
+      String currentRange = (String)enu.nextElement();
       if (!isValidRange(currentRange)) {
 	throw new IllegalArgumentException("Invalid range list at " + currentRange);
       }

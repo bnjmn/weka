@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.26 $
+ * @version  $Revision: 1.27 $
  */
 public class ClusterEvaluation implements Serializable {
 
@@ -1019,10 +1019,10 @@ public class ClusterEvaluation implements Serializable {
     if (clusterer instanceof OptionHandler) {
       optionsText.append("\nOptions specific to " 
 			 + clusterer.getClass().getName() + ":\n\n");
-      Enumeration enum = ((OptionHandler)clusterer).listOptions();
+      Enumeration enu = ((OptionHandler)clusterer).listOptions();
 
-      while (enum.hasMoreElements()) {
-	Option option = (Option)enum.nextElement();
+      while (enu.hasMoreElements()) {
+	Option option = (Option)enu.nextElement();
 	optionsText.append(option.synopsis() + '\n');
 	optionsText.append(option.description() + "\n");
       }

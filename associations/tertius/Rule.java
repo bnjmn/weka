@@ -132,9 +132,9 @@ public class Rule implements Serializable, Cloneable {
     m_singleHead = classRule || horn;
     m_numInstances = instances.numInstances();
     m_counterInstances = new ArrayList(m_numInstances);
-    Enumeration enum = instances.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      m_counterInstances.add(enum.nextElement());
+    Enumeration enu = instances.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      m_counterInstances.add(enu.nextElement());
     }
   }
 
@@ -185,11 +185,11 @@ public class Rule implements Serializable, Cloneable {
    */
   public void upDate(Instances instances) {
 
-    Enumeration enum = instances.enumerateInstances();
+    Enumeration enu = instances.enumerateInstances();
     m_numInstances = instances.numInstances();
     m_counter = 0;
-    while (enum.hasMoreElements()) {
-      if (this.counterInstance((Instance) enum.nextElement())) {
+    while (enu.hasMoreElements()) {
+      if (this.counterInstance((Instance) enu.nextElement())) {
 	m_counter++;
       }
     }

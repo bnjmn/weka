@@ -68,7 +68,7 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class MultiClassClassifier extends Classifier 
   implements OptionHandler {
@@ -521,9 +521,9 @@ public class MultiClassClassifier extends Classifier
 	vec.addElement(new Option("",
 				  "", 0, "\nOptions specific to classifier "
 				  + m_Classifier.getClass().getName() + ":"));
-	Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-	while (enum.hasMoreElements()) {
-	  vec.addElement(enum.nextElement());
+	Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+	while (enu.hasMoreElements()) {
+	  vec.addElement(enu.nextElement());
 	}
       } catch (Exception e) {
       }

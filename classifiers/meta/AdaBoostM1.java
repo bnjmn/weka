@@ -63,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -178,9 +178,9 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 	      "Q", 0, "-Q"));
 
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }
@@ -439,9 +439,9 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     double oldSumOfWeights, newSumOfWeights;
 
     oldSumOfWeights = training.sumOfWeights();
-    Enumeration enum = training.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      Instance instance = (Instance) enum.nextElement();
+    Enumeration enu = training.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      Instance instance = (Instance) enu.nextElement();
       if (!Utils.eq(m_Classifiers[m_NumIterationsPerformed].classifyInstance(instance), 
 		    instance.classValue()))
 	instance.setWeight(instance.weight() * reweight);
@@ -449,9 +449,9 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     
     // Renormalize weights
     newSumOfWeights = training.sumOfWeights();
-    enum = training.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      Instance instance = (Instance) enum.nextElement();
+    enu = training.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      Instance instance = (Instance) enu.nextElement();
       instance.setWeight(instance.weight() * oldSumOfWeights 
 			 / newSumOfWeights);
     }

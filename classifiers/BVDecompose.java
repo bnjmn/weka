@@ -65,7 +65,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class BVDecompose implements OptionHandler {
 
@@ -147,9 +147,9 @@ public class BVDecompose implements OptionHandler {
 				      "", 0, "\nOptions specific to learner "
 				      + m_Classifier.getClass().getName()
 				      + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();
@@ -590,9 +590,9 @@ public class BVDecompose implements OptionHandler {
 	Utils.checkForRemainingOptions(args);
       } catch (Exception ex) {
 	String result = ex.getMessage() + "\nBVDecompose Options:\n\n";
-	Enumeration enum = bvd.listOptions();
-	while (enum.hasMoreElements()) {
-	  Option option = (Option) enum.nextElement();
+	Enumeration enu = bvd.listOptions();
+	while (enu.hasMoreElements()) {
+	  Option option = (Option) enu.nextElement();
 	  result += option.synopsis() + "\n" + option.description() + "\n";
 	}
 	throw new Exception(result);

@@ -70,7 +70,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class IBk extends Classifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -627,9 +627,9 @@ public class IBk extends Classifier implements
       for (int i = 0; i < m_Train.numAttributes(); i++) {
 	m_Min[i] = m_Max[i] = Double.NaN;
       }
-      Enumeration enum = m_Train.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	updateMinMax((Instance) enum.nextElement());
+      Enumeration enu = m_Train.enumerateInstances();
+      while (enu.hasMoreElements()) {
+	updateMinMax((Instance) enu.nextElement());
       }
     }
 
@@ -1036,11 +1036,11 @@ public class IBk extends Classifier implements
 
     double distance;
     NeighborList neighborlist = new NeighborList(m_kNN);
-    Enumeration enum = m_Train.enumerateInstances();
+    Enumeration enu = m_Train.enumerateInstances();
     int i = 0;
 
-    while (enum.hasMoreElements()) {
-      Instance trainInstance = (Instance) enum.nextElement();
+    while (enu.hasMoreElements()) {
+      Instance trainInstance = (Instance) enu.nextElement();
       if (instance != trainInstance) { // for hold-one-out cross-validation
 	distance = distance(instance, trainInstance);
 	if (neighborlist.isEmpty() || (i < m_kNN) || 

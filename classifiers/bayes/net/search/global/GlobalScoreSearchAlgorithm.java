@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	
@@ -358,9 +358,9 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 
 		newVector.addElement(new Option("\tUse probabilistic or 0/1 scoring.\n\t(default probabilistic scoring)", "Q", 0, "-Q"));
 
-		Enumeration enum = super.listOptions();
-		while (enum.hasMoreElements()) {
-			newVector.addElement(enum.nextElement());
+		Enumeration enu = super.listOptions();
+		while (enu.hasMoreElements()) {
+			newVector.addElement(enu.nextElement());
 		}
 		return newVector.elements();
 	} // listOptions

@@ -31,7 +31,7 @@ import java.util.*;
  * Bayesian network structures. 
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.1 $
+ * Version: $Revision: 1.2 $
  */
 public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 
@@ -383,9 +383,9 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 		newVector.addElement(new Option("\tUse tournament selection (true) or maximum subpopulatin (false).\n\t(default false)", "O", 0, "-O"));
 		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
 
-		Enumeration enum = super.listOptions();
-		while (enum.hasMoreElements()) {
-			newVector.addElement(enum.nextElement());
+		Enumeration enu = super.listOptions();
+		while (enu.hasMoreElements()) {
+			newVector.addElement(enu.nextElement());
 		}
 		return newVector.elements();
 	} // listOptions

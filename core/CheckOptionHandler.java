@@ -41,7 +41,7 @@ import java.util.*;
  * OptionHandler <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CheckOptionHandler {
   
@@ -106,9 +106,9 @@ public class CheckOptionHandler {
     
     System.out.println("OptionHandler: " + oh.getClass().getName());
     System.out.println("ListOptions:");
-    Enumeration enum = oh.listOptions();
-    while (enum.hasMoreElements()) {
-      Option option = (Option) enum.nextElement();
+    Enumeration enu = oh.listOptions();
+    while (enu.hasMoreElements()) {
+      Option option = (Option) enu.nextElement();
       System.out.println(option.synopsis());
       System.out.println(option.description());
     }

@@ -58,7 +58,7 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class NaiveBayes extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -157,9 +157,9 @@ public class NaiveBayes extends Classifier
     m_ClassDistribution = new DiscreteEstimator(m_Instances.numClasses(), 
 						true);
     int attIndex = 0;
-    Enumeration enum = m_Instances.enumerateAttributes();
-    while (enum.hasMoreElements()) {
-      Attribute attribute = (Attribute) enum.nextElement();
+    Enumeration enu = m_Instances.enumerateAttributes();
+    while (enu.hasMoreElements()) {
+      Attribute attribute = (Attribute) enu.nextElement();
 
       // If the attribute is numeric, determine the estimator 
       // numeric precision from differences between adjacent values

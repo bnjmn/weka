@@ -71,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -550,10 +550,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 				       + "evaluator " 
 				       + m_ASEval.getClass().getName() 
 				       + ":"));
-       Enumeration enum = ((OptionHandler)m_ASEval).listOptions();
+       Enumeration enu = ((OptionHandler)m_ASEval).listOptions();
        
-       while (enum.hasMoreElements()) {
-	 newVector.addElement(enum.nextElement());
+       while (enu.hasMoreElements()) {
+	 newVector.addElement(enu.nextElement());
        }
      }
      return newVector.elements();
