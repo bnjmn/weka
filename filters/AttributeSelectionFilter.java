@@ -36,16 +36,8 @@ import weka.attributeSelection.*;
  * Set the attribute/subset evaluator. <br>
  * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
- * -P <range> <br>
- * Specify a (optional) set of attributes to start the search from. <br>
- * eg. -P 1,2,5-9 <p>
- *
- * -T <threshold> <br>
- * Specify a threshold by which to discard attributes for attribute evaluators
- * <p>
- *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision 1.0 $
+ * @version $Revision: 1.11 $
  */
 public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
@@ -63,12 +55,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
 
   /** holds the selected attributes  */
   private int [] m_SelectedAttributes;
-
-  /** Range object for starting set of attributes */
-  private Range m_StartSet;
-
-  /** set to true for attribute evaluators */
-  private boolean m_doRank;
 
   /**
    * Constructor
@@ -95,10 +81,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
 				    "-E <\"Name of attribute/subset "
 				    + "evaluation class [evaluator "
 				    + "options]\">"));
-    newVector.addElement(new Option("\tSpecify a (optional) set of attributes"
-				    + "\n\tto start the search from, eg "
-				    + "1,2,5-9.",
-				    "P", 1, "-P <range>"));
     
     if ((m_ASEvaluator != null) && (m_ASEvaluator instanceof OptionHandler)) {
       Enumeration enum = ((OptionHandler)m_ASEvaluator).listOptions();
@@ -133,14 +115,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    * Set the attribute/subset evaluator. <br>
    * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
    *
-   * -P <range> <br>
-   * Specify a (optional) set of attributes to start the search from. <br>
-   * eg. -P 1,2,5-9 <p>
-   *
-   * -T <threshold> <br>
-   * Specify a threshold by which to discard attributes for attribute 
-   * evaluators. <p>
-   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -152,11 +126,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
     if (Utils.getFlag('X',options)) {
 	throw new Exception("Cross validation is not a valid option"
 			    + " when using attribute selection as a Filter.");
-    }
-
-    optionString = Utils.getOption('P',options);
-    if (optionString.length() != 0) {
-      setStartSet(optionString);
     }
 
     optionString = Utils.getOption('E',options);
@@ -194,7 +163,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
       setSearch(ASSearch.forName(SearchClassName, SearchOptions));
     }
 
-    // makeOptions();
     Utils.checkForRemainingOptions(options);
   }
 
@@ -227,11 +195,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
     setOptions[current++]=getSearch().getClass().getName() 
       + " "+Utils.joinOptions(SearchOptions);
 
-    if (!(getStartSet().equals(""))) {
-      setOptions[current++] = "-P";
-      setOptions[current++] = "" + getStartSet();
-    }
-
     while (current < setOptions.length) {
       setOptions[current++] = "";
     }
@@ -240,21 +203,10 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Set the starting set
-   */
-  public void setStartSet(String startSet) throws Exception{
-   
-      m_StartSet.setRanges(startSet);
-  }
-
-  /**
    * set a string holding the name of a attribute/subset evaluator
    */
   public void setEvaluator(ASEvaluation evaluator) {
     m_ASEvaluator = evaluator;
-    if (m_ASEvaluator instanceof AttributeEvaluator) {
-      m_doRank = true;
-    }
   }
 
   /**
@@ -262,16 +214,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
    */
   public void setSearch(ASSearch search) {
     m_ASSearch = search;
-  }
-
-  /**
-   * Get the start set
-   *
-   * @return a starting set of features as a string
-   */
-  public String getStartSet() {
-    
-    return m_StartSet.getRanges();
   }
 
   /**
@@ -342,8 +284,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
     if (outputFormatPeek() == null) {
       m_trainSelector.setEvaluator(m_ASEvaluator);
       m_trainSelector.setSearch(m_ASSearch);
-      m_trainSelector.setStartSet(m_StartSet);
-      m_trainSelector.setRanking(m_doRank);
       m_trainSelector.SelectAttributes(m_InputFormat);
       //      System.out.println(m_trainSelector.toResultsString());
 
@@ -427,8 +367,6 @@ public class AttributeSelectionFilter extends Filter implements OptionHandler {
     setSearch(new BestFirst());
     m_SelectedAttributes = null;
     m_FilterOptions = null;
-    m_StartSet = new Range();
-    m_doRank = false;
   }
 
   /**
