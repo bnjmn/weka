@@ -34,7 +34,7 @@ import weka.core.*;
  * -C integer <br>
  * The class for which treshold is determined. Based on
  * this designated class the problem is treated as a two-class
- * problem (default 0). <p>
+ * problem (default 1). <p>
  *
  * -D <br>
  * Turn on debugging output.<p>
@@ -58,7 +58,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler {
@@ -205,7 +205,7 @@ public class ThresholdSelector extends Classifier
     newVector.addElement(new Option(
 	      "\tThe class for which treshold is determined. Based on\n" +
 	      "\tthis designated class the problem is treated as a two-class problem\n" +
-	      "\t(default 0).\n",
+	      "\t(default 1).\n",
 	      "C", 1, "-C <integer>"));
     newVector.addElement(new Option(
 	      "\tTurn on debugging output.",
@@ -251,7 +251,7 @@ public class ThresholdSelector extends Classifier
    * -C integer <br>
    * The class for which treshold is determined. Based on
    * this designated class the problem is treated as a two-class
-   * problem (default 0).<p>
+   * problem (default 1).<p>
    *
    * -D <br>
    * Turn on debugging output.<p>
@@ -284,7 +284,7 @@ public class ThresholdSelector extends Classifier
 
     String classString = Utils.getOption('C', options);
     if (classString.length() != 0) {
-      m_DesignatedClass = Integer.parseInt(classString);
+      m_DesignatedClass = Integer.parseInt(classString) - 1;
     } else {
       m_DesignatedClass = 0;
     }
@@ -340,7 +340,7 @@ public class ThresholdSelector extends Classifier
     int current = 0;
     String [] options = new String [classifierOptions.length + 12];
 
-    options[current++] = "-C"; options[current++] = "" + getClass();
+    options[current++] = "-C"; options[current++] = "" + (m_DesignatedClass + 1);
     if (getDebug()) {
       options[current++] = "-D";
     }
@@ -456,7 +456,25 @@ public class ThresholdSelector extends Classifier
 
     return fMeasure;
   }
-
+  
+  /**
+   * Get the value of designatedClass.
+   * @return Value of designatedClass.
+   */
+  public int getDesignatedClass() {
+    
+    return m_DesignatedClass;
+  }
+  
+  /**
+   * Set the value of designatedClass.
+   * @param v  Value to assign to designatedClass.
+   */
+  public void setDesignatedClass(int v) {
+    
+    m_DesignatedClass = v;
+  }
+  
   /**
    * Sets the evaluation mode.
    *
