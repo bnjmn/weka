@@ -66,7 +66,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Sourcable {
@@ -662,7 +662,8 @@ public class AdaBoostM1 extends DistributionClassifier
 	return ((DistributionClassifier)m_Classifiers[0]).
 	distributionForInstance(instance);
       } else {
-	sums[(int)m_Classifiers[0].classifyInstance(instance)] ++;
+	sums[(int)m_Classifiers[0].classifyInstance(instance)] = 1;
+	return sums;
       }
     } else {
       for (int i = 0; i < m_NumIterations; i++) {
@@ -670,11 +671,10 @@ public class AdaBoostM1 extends DistributionClassifier
 	m_Betas[i];
       }
       for (int i = 0; i < instance.numClasses(); i++) {
-	sums[i] = Math.exp(sums[i]);
+	sums[i] = sums[i];
       }
+      return Utils.logs2probs(sums);
     }
-    Utils.normalize(sums);
-    return sums;
   }
 
   /**
