@@ -28,20 +28,8 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
 import java.io.*;
 import java.util.*;
-import weka.core.KDTree;
-import weka.core.DistanceFunction;
-import weka.core.EuclideanDistance;
-import weka.core.Utils;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.WeightedInstancesHandler;
+import weka.core.*;
+
 
 /**
  * <i>K</i>-nearest neighbour classifier. For more information, see <p>
@@ -52,7 +40,7 @@ import weka.core.WeightedInstancesHandler;
  * Valid options are:<p>
  *
  * -K num <br>
- * Set the number of nearest neighbours to use in prediction
+ * Set the number of nearest neighbors to use in prediction
  * (default 1) <p>
  *
  * -W num <br>
@@ -62,15 +50,15 @@ import weka.core.WeightedInstancesHandler;
  * (default no window) <p>
  *
  * -D <br>
- * Neighbours will be weighted by the inverse of their distance
+ * Neighbors will be weighted by the inverse of their distance
  * when voting. (default equal weighting) <p>
  *
  * -F <br>
- * Neighbours will be weighted by their similarity when voting.
+ * Neighbors will be weighted by their similarity when voting.
  * (default equal weighting) <p>
  *
  * -X <br>
- * Selects the number of neighbours to use by hold-one-out cross
+ * Selects the number of neighbors to use by hold-one-out cross
  * validation, with an upper limit given by the -K option. <p>
  *
  * -S <br>
@@ -80,53 +68,48 @@ import weka.core.WeightedInstancesHandler;
  * -N <br>
  * Turns off normalization. <p>
  *
- * -E <kdtree class><br>
- * KDTrees class and its options (can only use the same distance function
- * as XMeans).<p>
- *
- * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
 
   /*
-   * A class for storing data about a neighbouring instance
+   * A class for storing data about a neighboring instance
    */
-  private class NeighbourNode {
+  private class NeighborNode {
 
-    /** The neighbour instance */
+    /** The neighbor instance */
     private Instance m_Instance;
 
-    /** The distance from the current instance to this neighbour */
+    /** The distance from the current instance to this neighbor */
     private double m_Distance;
 
-    /** A link to the next neighbour instance */
-    private NeighbourNode m_Next;
+    /** A link to the next neighbor instance */
+    private NeighborNode m_Next;
     
     /**
-     * Create a new neighbour node.
+     * Create a new neighbor node.
      *
-     * @param distance the distance to the neighbour
-     * @param instance the neighbour instance
-     * @param next the next neighbour node
+     * @param distance the distance to the neighbor
+     * @param instance the neighbor instance
+     * @param next the next neighbor node
      */
-    public NeighbourNode(double distance, Instance instance, 
-			 NeighbourNode next) {
+    public NeighborNode(double distance, Instance instance, NeighborNode next){
       m_Distance = distance;
       m_Instance = instance;
       m_Next = next;
     }
 
     /**
-     * Create a new neighbour node that doesn't link to any other nodes.
-     * @param distance the distance to the neighbour
-     * @param instance the neighbour instance
+     * Create a new neighbor node that doesn't link to any other nodes.
+     *
+     * @param distance the distance to the neighbor
+     * @param instance the neighbor instance
      */
-    public NeighbourNode(double distance, Instance instance) {
+    public NeighborNode(double distance, Instance instance) {
 
       this(distance, instance, null);
     }
@@ -138,29 +121,30 @@ public class IBk extends DistributionClassifier implements
    * cases where multiple neighbours are the same distance away.
    * i.e. the minimum length of the list is k.
    */
-  private class NeighbourList {
+  private class NeighborList {
 
     /** The first node in the list */
-    private NeighbourNode m_First;
+    private NeighborNode m_First;
 
     /** The last node in the list */
-    private NeighbourNode m_Last;
+    private NeighborNode m_Last;
 
     /** The number of nodes to attempt to maintain in the list */
     private int m_Length = 1;
     
     /**
-     * Creates the neighbourlist with a desired length
+     * Creates the neighborlist with a desired length
      *
      * @param length the length of list to attempt to maintain
      */
-    public NeighbourList(int length) {
+    public NeighborList(int length) {
 
       m_Length = length;
     }
 
     /**
      * Gets whether the list is empty.
+     *
      * @return true if so
      */
     public boolean isEmpty() {
@@ -170,12 +154,13 @@ public class IBk extends DistributionClassifier implements
 
     /**
      * Gets the current length of the list.
+     *
      * @return the current length of the list
      */
     public int currentLength() {
 
       int i = 0;
-      NeighbourNode current = m_First;
+      NeighborNode current = m_First;
       while (current != null) {
 	i++;
 	current = current.m_Next;
@@ -184,25 +169,25 @@ public class IBk extends DistributionClassifier implements
     }
 
     /**
-     * Inserts an instance neighbour into the list, maintaining the list
+     * Inserts an instance neighbor into the list, maintaining the list
      * sorted by distance.
      *
      * @param distance the distance to the instance
-     * @param instance the neighbouring instance
+     * @param instance the neighboring instance
      */
     public void insertSorted(double distance, Instance instance) {
 
       if (isEmpty()) {
-	m_First = m_Last = new NeighbourNode(distance, instance);
+	m_First = m_Last = new NeighborNode(distance, instance);
       } else {
-	NeighbourNode current = m_First;
+	NeighborNode current = m_First;
 	if (distance < m_First.m_Distance) {// Insert at head
-	  m_First = new NeighbourNode(distance, instance, m_First);
+	  m_First = new NeighborNode(distance, instance, m_First);
 	} else { // Insert further down the list
 	  for( ;(current.m_Next != null) && 
 		 (current.m_Next.m_Distance < distance); 
 	       current = current.m_Next);
-	  current.m_Next = new NeighbourNode(distance, instance,
+	  current.m_Next = new NeighborNode(distance, instance,
 					    current.m_Next);
 	  if (current.equals(m_Last)) {
 	    m_Last = current.m_Next;
@@ -226,10 +211,10 @@ public class IBk extends DistributionClassifier implements
     }
 
     /**
-     * Prunes the list to contain the k nearest neighbours. If there are
-     * multiple neighbours at the k'th distance, all will be kept.
+     * Prunes the list to contain the k nearest neighbors. If there are
+     * multiple neighbors at the k'th distance, all will be kept.
      *
-     * @param k the number of neighbours to keep in the list.
+     * @param k the number of neighbors to keep in the list.
      */
     public void pruneToK(int k) {
 
@@ -241,7 +226,7 @@ public class IBk extends DistributionClassifier implements
       }
       int currentK = 0;
       double currentDist = m_First.m_Distance;
-      NeighbourNode current = m_First;
+      NeighborNode current = m_First;
       for(; current.m_Next != null; current = current.m_Next) {
 	currentK++;
 	currentDist = current.m_Distance;
@@ -254,28 +239,23 @@ public class IBk extends DistributionClassifier implements
     }
 
     /**
-     * Prints out the contents of the neighbourlist
+     * Prints out the contents of the neighborlist
      */
     public void printList() {
 
       if (isEmpty()) {
 	System.out.println("Empty list");
       } else {
-	NeighbourNode current = m_First;
-	//System.out.print("Node:");
+	NeighborNode current = m_First;
 	while (current != null) {
 	  System.out.println("Node: instance " + current.m_Instance 
-	  	     + ", distance " + current.m_Distance);
-	  //System.out.print("distance " + current.m_Distance);
+			     + ", distance " + current.m_Distance);
 	  current = current.m_Next;
 	}
 	System.out.println();
       }
     }
   }
-
-  /** KDTrees class if KDTrees are used */
-  private KDTree m_KDTree = null;
 
   /** The training instances used for classification. */
   protected Instances m_Train;
@@ -286,11 +266,14 @@ public class IBk extends DistributionClassifier implements
   /** The class attribute type */
   protected int m_ClassType;
 
+  /** The minimum values for numeric attributes. */
+  protected double [] m_Min;
+
+  /** The maximum values for numeric attributes. */
+  protected double [] m_Max;
+
   /** The number of neighbours to use for classification (currently) */
   protected int m_kNN;
-
-  /** Distance functions */
-  protected DistanceFunction m_DistanceF = null;
 
   /**
    * The value of kNN provided by the user. This may differ from
@@ -342,21 +325,13 @@ public class IBk extends DistributionClassifier implements
 
   /** The number of attributes the contribute to a prediction */
   protected double m_NumAttributesUsed;
-				
-  /** Ranges of the universe of data, lowest value, highest value and width */
-  protected double [][] m_Ranges;
-
-  /** Index in ranges for LOW and HIGH and WIDTH */
-  protected static int R_MIN = 0;
-  protected static int R_MAX = 1;
-  protected static int R_WIDTH = 2;
-		   
+								   
   /**
    * IBk classifier. Simple instance-based learner that uses the class
    * of the nearest k training instances for the class of the test
    * instances.
    *
-   * @param k the number of nearest neighbours to use for prediction
+   * @param k the number of nearest neighbors to use for prediction
    */
   public IBk(int k) {
 
@@ -373,8 +348,10 @@ public class IBk extends DistributionClassifier implements
     init();
   }
 
- /**
+  
+  /**
    * Get the value of Debug.
+   *
    * @return Value of Debug.
    */
   public boolean getDebug() {
@@ -384,6 +361,7 @@ public class IBk extends DistributionClassifier implements
   
   /**
    * Set the value of Debug.
+   *
    * @param newDebug Value to assign to Debug.
    */
   public void setDebug(boolean newDebug) {
@@ -392,38 +370,8 @@ public class IBk extends DistributionClassifier implements
   }
   
   /**
-   * Sets the KDTree class.
-   * @param k a KDTree object with all options set
-   */
-  public void setKDTree(KDTree k) {
-    m_KDTree = k;
-  }
-
-  /**
-   * Gets the KDTree class.
-   * @return flag if KDTrees are used
-   */
-  public KDTree getKDTree() {
-    return m_KDTree;
-  }
-
-  /**
-   * Gets the KDTree specification string, which contains the class name of
-   * the KDTree class and any options to the KDTree
-   * @return the KDTree string.
-   */
-  protected String getKDTreeSpec() {
-    
-    KDTree c = getKDTree();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
-  }
-
-  /**
    * Set the number of neighbours the learner is to use.
+   *
    * @param k the number of neighbours.
    */
   public void setKNN(int k) {
@@ -436,7 +384,7 @@ public class IBk extends DistributionClassifier implements
   /**
    * Gets the number of neighbours the learner will use.
    *
-   * @return the number of neighbours
+   * @return the number of neighbours.
    */
   public int getKNN() {
 
@@ -449,7 +397,7 @@ public class IBk extends DistributionClassifier implements
    * in old instances being removed. A value of 0 signifies no limit
    * to the number of training instances.
    *
-   * @return Value of WindowSize
+   * @return Value of WindowSize.
    */
   public int getWindowSize() {
     
@@ -551,10 +499,10 @@ public class IBk extends DistributionClassifier implements
    */
   public double getAttributeMin(int index) throws Exception {
 
-    if (m_Ranges == null) {
+    if (m_Min == null) {
       throw new Exception("Minimum value for attribute not available!");
     }
-    return m_Ranges[index][R_MIN];
+    return m_Min[index];
   }
 
   /**
@@ -562,10 +510,10 @@ public class IBk extends DistributionClassifier implements
    */
   public double getAttributeMax(int index) throws Exception {
 
-    if (m_Ranges == null) {
+    if (m_Max == null) {
       throw new Exception("Maximum value for attribute not available!");
     }
-    return m_Ranges[index][R_MAX];
+    return m_Max[index];
   }
   
   /**
@@ -588,11 +536,13 @@ public class IBk extends DistributionClassifier implements
   
   /**
    * Generates the classifier.
+   *
    * @param instances set of instances serving as training data 
    * @exception Exception if the classifier has not been generated successfully
    */
+
   public void buildClassifier(Instances instances) throws Exception {
-    
+
     if (instances.classIndex() < 0) {
       throw new Exception ("No class attribute assigned to instances");
     }
@@ -605,35 +555,33 @@ public class IBk extends DistributionClassifier implements
     } catch (Exception ex) {
       throw new Error("This should never be reached");
     }
-    
+
     // Throw away training instances with missing class
     m_Train = new Instances(instances, 0, instances.numInstances());
     m_Train.deleteWithMissingClass();
-    
+
     // Throw away initial instances until within the specified window size
     if ((m_WindowSize > 0) && (instances.numInstances() > m_WindowSize)) {
       m_Train = new Instances(m_Train, 
 			      m_Train.numInstances()-m_WindowSize, 
 			      m_WindowSize);
     }
-        
-    // make ranges if needed for normalization and/or for the KDTree
-    if ((!m_DontNormalize) || (m_KDTree != null)) {
-      
-      // Initializes and calculates the ranges for the training instances
-      m_Ranges = m_Train.initializeRanges();
-      // Instances.printRanges(m_Ranges);
+
+    // Calculate the minimum and maximum values
+    if (m_DontNormalize) {
+      m_Min = null; m_Max = null;
+    } else {
+      m_Min = new double [m_Train.numAttributes()];
+      m_Max = new double [m_Train.numAttributes()];
+      for (int i = 0; i < m_Train.numAttributes(); i++) {
+	m_Min[i] = m_Max[i] = Double.NaN;
+      }
+      Enumeration enum = m_Train.enumerateInstances();
+      while (enum.hasMoreElements()) {
+	updateMinMax((Instance) enum.nextElement());
+      }
     }
-    
-    // if already some instances here, then build KDTree
-    if ((m_KDTree != null) && (m_Train.numInstances() > 0)) {
-      
-      m_KDTree.buildKDTree(m_Train);
-      OOPS("KDTree build in buildclassifier");
-      OOPS(" " + m_KDTree.toString());      
-      
-    }
-    
+
     // Compute the number of attributes that contribute
     // to each prediction
     m_NumAttributesUsed = 0.0;
@@ -644,7 +592,7 @@ public class IBk extends DistributionClassifier implements
 	m_NumAttributesUsed += 1.0;
       }
     }
-    
+
     // Invalidate any currently cross-validation selected k
     m_kNNValid = false;
   }
@@ -664,31 +612,19 @@ public class IBk extends DistributionClassifier implements
     if (instance.classIsMissing()) {
       return;
     }
-
-    // update ranges 
-    // but only if normalize flag is on or KDTree is chosen
-    if ((!m_DontNormalize) || (m_KDTree != null)) {
-      m_Ranges = Instances.updateRanges(instance, m_Ranges);
+    if (!m_DontNormalize) {
+      updateMinMax(instance);
     }
-    // add instance to training set
     m_Train.add(instance);
-
-    // update KDTree
-    if (m_KDTree != null) {
-      if (m_KDTree.isValid() && (m_KDTree.numInstances() > 0))
-	m_KDTree.updateKDTree(instance);
-    }    
-
     m_kNNValid = false;
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       while (m_Train.numInstances() > m_WindowSize) {
 	m_Train.delete(0);
-	if (m_KDTree != null)
-	  m_KDTree.setValid(false);
       }
     }
   }
 
+  
   /**
    * Calculates the class membership probabilities for the given test instance.
    *
@@ -696,49 +632,28 @@ public class IBk extends DistributionClassifier implements
    * @return predicted class probability distribution
    * @exception Exception if an error occurred during the prediction
    */
-  public double [] distributionForInstance(Instance instance) 
-  throws Exception {
+  public double [] distributionForInstance(Instance instance) throws Exception{
 
     if (m_Train.numInstances() == 0) {
       throw new Exception("No training instances!");
     }
-
-    // cut instances to windowsize
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       m_kNNValid = false;
       while (m_Train.numInstances() > m_WindowSize) {
 	m_Train.delete(0);
-        m_KDTree.setValid(false);
       }
     }
-    
-    if ((m_KDTree != null) && (!m_KDTree.isValid())) {
-
-      m_KDTree.buildKDTree(m_Train);
-
-      //OOPS("KDTree build in distributionForInstance");
-      //OOPS(" " + m_KDTree.toString());      
-    }
-
 
     // Select k by cross validation
     if (!m_kNNValid && (m_CrossValidate) && (m_kNNUpper >= 1)) {
       crossValidate();
     }
-
-    // update ranges - for norm()-method 
     if (!m_DontNormalize) {
-      m_Ranges = Instances.updateRanges(instance, m_Ranges);
+      updateMinMax(instance);
     }
 
-    // update ranges for norm()-methode in Distance class of KDTree
-    if (m_KDTree != null) {
-      m_KDTree.addLooslyInstance(instance);
-    }
-
-    // find neighbours and make distribution
-    NeighbourList neighbourlist = findNeighbours(instance);
-    return makeDistribution(neighbourlist);
+    NeighborList neighborlist = findNeighbors(instance);
+    return makeDistribution(neighborlist);
   }
  
 
@@ -749,7 +664,7 @@ public class IBk extends DistributionClassifier implements
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(9);
+    Vector newVector = new Vector(8);
 
     newVector.addElement(new Option(
 	      "\tWeight neighbours by the inverse of their distance\n"
@@ -762,7 +677,7 @@ public class IBk extends DistributionClassifier implements
     newVector.addElement(new Option(
 	      "\tNumber of nearest neighbours (k) used in classification.\n"
 	      +"\t(Default = 1)",
-	      "K", 1,"-K <number of neighbours>"));
+	      "K", 1,"-K <number of neighbors>"));
     newVector.addElement(new Option(
               "\tMinimise mean squared error rather than mean absolute\n"
 	      +"\terror when using -X option with numeric prediction.",
@@ -779,13 +694,6 @@ public class IBk extends DistributionClassifier implements
     newVector.addElement(new Option(
 	      "\tDon't normalize the data.\n",
 	      "N", 0, "-N"));
-    newVector.addElement(new Option(
-	      "\tFull class name of KDTree class to use, followed\n" +
-	      "\tby scheme options.\n" +
-	      "\teg: \"weka.core.KDTree -P\"\n" +
-	      "(default = no KDTree class used).",
-	      "E", 1, "-E <KDTree class specification>"));
-
     return newVector.elements();
   }
 
@@ -793,7 +701,7 @@ public class IBk extends DistributionClassifier implements
    * Parses a given list of options. Valid options are:<p>
    *
    * -K num <br>
-   * Set the number of nearest neighbours to use in prediction
+   * Set the number of nearest neighbors to use in prediction
    * (default 1) <p>
    *
    * -W num <br>
@@ -803,15 +711,15 @@ public class IBk extends DistributionClassifier implements
    * (default no window) <p>
    *
    * -D <br>
-   * Neighbours will be weighted by the inverse of their distance
+   * Neighbors will be weighted by the inverse of their distance
    * when voting. (default equal weighting) <p>
    *
    * -F <br>
-   * Neighbours will be weighted by their similarity when voting.
+   * Neighbors will be weighted by their similarity when voting.
    * (default equal weighting) <p>
    *
    * -X <br>
-   * Select the number of neighbours to use by hold-one-out cross
+   * Select the number of neighbors to use by hold-one-out cross
    * validation, with an upper limit given by the -K option. <p>
    *
    * -S <br>
@@ -846,19 +754,6 @@ public class IBk extends DistributionClassifier implements
     setMeanSquared(Utils.getFlag('S', options));
     setNoNormalization(Utils.getFlag('N', options));
 
-    String funcString = Utils.getOption('E', options);
-    if (funcString.length() != 0) {
-      String [] funcSpec = Utils.splitOptions(funcString);
-      if (funcSpec.length == 0) {
-	throw new Exception("Invalid function specification string");
-      }
-      String funcName = funcSpec[0];
-      funcSpec[0] = "";
-      Class cl = KDTree.class;
-      setKDTree((KDTree) Utils.forName(KDTree.class, funcName, funcSpec));
-    }
-
-
     Utils.checkForRemainingOptions(options);
   }
 
@@ -887,11 +782,6 @@ public class IBk extends DistributionClassifier implements
     if (m_DontNormalize) {
       options[current++] = "-N";
     }
-    if (getKDTree() != null) {
-      options[current++] = "-E";
-      options[current++] = "" + getKDTreeSpec();
-    }
-
     while (current < options.length) {
       options[current++] = "";
     }
@@ -955,12 +845,6 @@ public class IBk extends DistributionClassifier implements
    */          
   protected double distance(Instance first, Instance second) {  
 
-    if (!m_DontNormalize) {
-      if (!Instances.inRanges(first,m_Ranges))
-	OOPS("Not in ranges");
-      if (!Instances.inRanges(second,m_Ranges))
-	OOPS("Not in ranges");
-    }
     double distance = 0;
     int firstI, secondI;
 
@@ -999,8 +883,8 @@ public class IBk extends DistributionClassifier implements
       }
       distance += diff * diff;
     }
-    distance = Math.sqrt(distance / m_NumAttributesUsed);
-    return distance;
+    
+    return Math.sqrt(distance / m_NumAttributesUsed);
   }
    
   /**
@@ -1021,6 +905,7 @@ public class IBk extends DistributionClassifier implements
 	return 0;
       }
     case Attribute.NUMERIC:
+
       // If attribute is numeric
       if (Instance.isMissingValue(val1) || 
 	  Instance.isMissingValue(val2)) {
@@ -1057,12 +942,10 @@ public class IBk extends DistributionClassifier implements
 
     if (m_DontNormalize) {
       return x;
-    } else if (Double.isNaN(m_Ranges[i][R_MIN]) || 
-			    Utils.eq(m_Ranges[i][R_MAX],m_Ranges[i][R_MIN])) {
+    } else if (Double.isNaN(m_Min[i]) || Utils.eq(m_Max[i],m_Min[i])) {
       return 0;
     } else {
-
-      return (x - m_Ranges[i][R_MIN]) / (m_Ranges[i][R_MAX] - m_Ranges[i][R_MIN]);
+      return (x - m_Min[i]) / (m_Max[i] - m_Min[i]);
     }
   }
                       
@@ -1076,15 +959,15 @@ public class IBk extends DistributionClassifier implements
 
     for (int j = 0;j < m_Train.numAttributes(); j++) {
       if (!instance.isMissing(j)) {
-	if (Double.isNaN(m_Ranges[j][R_MIN])) {
-	  m_Ranges[j][R_MIN] = instance.value(j);
-	  m_Ranges[j][R_MAX] = instance.value(j);
+	if (Double.isNaN(m_Min[j])) {
+	  m_Min[j] = instance.value(j);
+	  m_Max[j] = instance.value(j);
 	} else {
-	  if (instance.value(j) < m_Ranges[j][R_MIN]) {
-	    m_Ranges[j][R_MIN] = instance.value(j);
+	  if (instance.value(j) < m_Min[j]) {
+	    m_Min[j] = instance.value(j);
 	  } else {
-	    if (instance.value(j) > m_Ranges[j][R_MAX]) {
-	      m_Ranges[j][R_MAX] = instance.value(j);
+	    if (instance.value(j) > m_Max[j]) {
+	      m_Max[j] = instance.value(j);
 	    }
 	  }
 	}
@@ -1093,59 +976,40 @@ public class IBk extends DistributionClassifier implements
   }
     
   /**
-   * Build the list of nearest k neighbours to the given test instance.
+   * Build the list of nearest k neighbors to the given test instance.
    *
    * @param instance the instance to search for neighbours of
-   * @return a list of neighbours
+   * @return a list of neighbors
    */
-  protected NeighbourList findNeighbours(Instance instance) throws Exception {
+  protected NeighborList findNeighbors(Instance instance) {
 
     double distance;
-    NeighbourList neighbourlist = new NeighbourList(m_kNN);
+    NeighborList neighborlist = new NeighborList(m_kNN);
+    Enumeration enum = m_Train.enumerateInstances();
+    int i = 0;
 
-    // dont work with kdtree
-    if (m_KDTree == null) {
-      Enumeration enum = m_Train.enumerateInstances();
-      int i = 0;
-      
-      while (enum.hasMoreElements()) {
-	Instance trainInstance = (Instance) enum.nextElement();
-	if (instance != trainInstance) { // for hold-one-out cross-validation
- 
-	  distance = distance(instance, trainInstance);
-	  if (neighbourlist.isEmpty() || (i < m_kNN) || 
-	      (distance <= neighbourlist.m_Last.m_Distance)) {
-	    neighbourlist.insertSorted(distance, trainInstance);
-	  }
-	  i++;
+    while (enum.hasMoreElements()) {
+      Instance trainInstance = (Instance) enum.nextElement();
+      if (instance != trainInstance) { // for hold-one-out cross-validation
+	distance = distance(instance, trainInstance);
+	if (neighborlist.isEmpty() || (i < m_kNN) || 
+	    (distance <= neighborlist.m_Last.m_Distance)) {
+	  neighborlist.insertSorted(distance, trainInstance);
 	}
+	i++;
       }
     }
-    else {
-      // work with KDTree
-      double[] distanceList = new double[m_KDTree.numInstances()];
-      int[] instanceList = new int[m_KDTree.numInstances()];
-      int numOfNearest = m_KDTree.findKNearestNeighbour(instance, m_kNN,
-							instanceList, distanceList);
-      for (int i = 0; i < numOfNearest; i++) {
-	neighbourlist.insertSorted(distanceList[i], 
-				   m_KDTree.getInstances().instance(instanceList[i]));
-      }
-    }
-    //debug
-    //OOPS("Target: "+instance+" found "+neighbourlist.currentLength() + " neighbours\n");
-    //neighbourlist.printList();
-  
-    return neighbourlist;
+
+    return neighborlist;
   }
 
   /**
-   * Turn the list of nearest neighbours into a probability distribution
+   * Turn the list of nearest neighbors into a probability distribution
    *
-   * @param neighbourlist the list of nearest neighbouring instances
+   * @param neighborlist the list of nearest neighboring instances
    * @return the probability distribution
    */
-  protected double [] makeDistribution(NeighbourList neighbourlist) 
+  protected double [] makeDistribution(NeighborList neighborlist) 
     throws Exception {
 
     double total = 0, weight;
@@ -1159,9 +1023,9 @@ public class IBk extends DistributionClassifier implements
       total = (double)m_NumClasses / Math.max(1,m_Train.numInstances());
     }
 
-    if (!neighbourlist.isEmpty()) {
+    if (!neighborlist.isEmpty()) {
       // Collect class counts
-      NeighbourNode current = neighbourlist.m_First;
+      NeighborNode current = neighborlist.m_First;
       while (current != null) {
 	switch (m_DistanceWeighting) {
 	case WEIGHT_INVERSE:
@@ -1197,8 +1061,6 @@ public class IBk extends DistributionClassifier implements
     if (total > 0) {
       Utils.normalize(distribution, total);
     }
-
-    //    double [] distribution = new double [m_NumClasses];
     return distribution;
   }
 
@@ -1222,18 +1084,18 @@ public class IBk extends DistributionClassifier implements
 
       m_kNN = m_kNNUpper;
       Instance instance;
-      NeighbourList neighbourlist;
+      NeighborList neighborlist;
       for(int i = 0; i < m_Train.numInstances(); i++) {
 	if (m_Debug && (i % 50 == 0)) {
 	  System.err.print("Cross validating "
 			   + i + "/" + m_Train.numInstances() + "\r");
 	}
 	instance = m_Train.instance(i);
-	neighbourlist = findNeighbours(instance);
+	neighborlist = findNeighbors(instance);
 
 	for(int j = m_kNNUpper - 1; j >= 0; j--) {
 	  // Update the performance stats
-	  double [] distribution = makeDistribution(neighbourlist);
+	  double [] distribution = makeDistribution(neighborlist);
 	  double thisPrediction = Utils.maxIndex(distribution);
 	  if (m_Train.classAttribute().isNumeric()) {
 	    double err = thisPrediction - instance.classValue();
@@ -1245,7 +1107,7 @@ public class IBk extends DistributionClassifier implements
 	    }
 	  }
 	  if (j >= 1) {
-	    neighbourlist.pruneToK(j);
+	    neighborlist.pruneToK(j);
 	  }
 	}
       }
@@ -1254,7 +1116,7 @@ public class IBk extends DistributionClassifier implements
       for(int i = 0; i < m_kNNUpper; i++) {
 	if (m_Debug) {
 	  System.err.print("Hold-one-out performance of " + (i + 1)
-			   + " neighbours " );
+			   + " neighbors " );
 	}
 	if (m_Train.classAttribute().isNumeric()) {
 	  if (m_Debug) {
@@ -1306,14 +1168,6 @@ public class IBk extends DistributionClassifier implements
   }
 
   /**
-   * Used for debug println's.
-   * @param output string that is printed
-   */
-  protected void OOPS(String output) {
-    System.out.println(output);
-  }
-
-  /**
    * Main method for testing this class.
    *
    * @param argv should contain command line options (see setOptions)
@@ -1328,4 +1182,8 @@ public class IBk extends DistributionClassifier implements
     }
   }
 }
+
+
+
+
 
