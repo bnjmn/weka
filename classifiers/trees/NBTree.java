@@ -151,11 +151,11 @@ public class NBTree extends Classifier
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareTo("measureNumRules") == 0) {
+    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
       return measureNumRules();
-    } else if (additionalMeasureName.compareTo("measureTreeSize") == 0) {
+    } else if (additionalMeasureName.compareToIgnoreCase("measureTreeSize") == 0) {
       return measureTreeSize();
-    } else if (additionalMeasureName.compareTo("measureNumLeaves") == 0) {
+    } else if (additionalMeasureName.compareToIgnoreCase("measureNumLeaves") == 0) {
       return measureNumLeaves();
     } else {
       throw new IllegalArgumentException(additionalMeasureName 

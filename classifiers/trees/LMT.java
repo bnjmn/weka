@@ -59,7 +59,7 @@ import weka.filters.supervised.attribute.NominalToBinary;
  *
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 
@@ -467,9 +467,9 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
    * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareTo("measureTreeSize") == 0) {
+    if (additionalMeasureName.compareToIgnoreCase("measureTreeSize") == 0) {
       return measureTreeSize();
-    } else if (additionalMeasureName.compareTo("measureNumLeaves") == 0) {
+    } else if (additionalMeasureName.compareToIgnoreCase("measureNumLeaves") == 0) {
       return measureNumLeaves();
     } else {
       throw new IllegalArgumentException(additionalMeasureName 
