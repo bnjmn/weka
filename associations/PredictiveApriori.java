@@ -60,10 +60,16 @@ import weka.associations.RuleGeneration;
  * -N required number of rules <br>
  * The required number of rules (default: 100). <p>
  *
+ * -A <br>
+ * If set class association rules are mined. <p>
+ *
+ * -c class index for class association rule mining <br>
+ * Sets the class attribute (default last). <p>
+ *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 
-public class PredictiveApriori extends Associator implements OptionHandler {
+public class PredictiveApriori extends Associator implements OptionHandler, CARuleMiner {
   
   /** The minimum support. */
   protected int m_premiseCount;
@@ -110,6 +116,12 @@ public class PredictiveApriori extends Associator implements OptionHandler {
   
   /** The prior estimator. */
   protected PriorEstimation m_priorEstimator;
+  
+   /** The class index. */  
+  protected int m_classIndex;
+  
+  /** Flag indicating whether class association rules are mined. */
+  protected boolean m_car;
 
   /**
    * Returns a string describing this associator
@@ -141,6 +153,10 @@ public class PredictiveApriori extends Associator implements OptionHandler {
     m_bestChanged = false;
     m_expectation = 0;
     m_count = 1;
+    m_car = false;
+    m_classIndex = -1;
+    m_priors = new Hashtable();
+    
     
    
   }
@@ -156,14 +172,27 @@ public class PredictiveApriori extends Associator implements OptionHandler {
       
     int temp = m_premiseCount, exactNumber = m_numRules-5; 
 
+    if(instances == null)
+      throw new Exception("No instances."); 
     if (instances.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
+    m_premiseCount = 1;
+    m_best = new TreeSet();
+    m_bestChanged = false;
+    m_expectation = 0;
+    m_count = 1;
     m_instances = instances;
-    m_instances.setClassIndex(m_instances.numAttributes()-1);
+    if(m_classIndex == -1)
+        m_instances.setClassIndex(m_instances.numAttributes()-1);     
+    else
+        if(m_classIndex < m_instances.numAttributes() && m_classIndex >= 0)
+            m_instances.setClassIndex(m_classIndex);
+        else
+            throw new Exception("Invalid class index.");
     
     //prior estimation
-    m_priorEstimator = new PriorEstimation(m_instances,m_numRandRules,m_numIntervals,false);
+    m_priorEstimator = new PriorEstimation(m_instances,m_numRandRules,m_numIntervals,m_car);
     m_priors = m_priorEstimator.estimatePrior();
     m_midPoints = m_priorEstimator.getMidPoints();
     
@@ -172,12 +201,17 @@ public class PredictiveApriori extends Associator implements OptionHandler {
     
     for(int i =1; i < m_instances.numAttributes();i++){
       m_bestChanged = false;
+      if(!m_car){
+        // find large item sets
+        findLargeItemSets(i);
       
-      // find large item sets
-      findLargeItemSets(i);
-      
-      //find association rules (rule generation procedure)
-      findRulesQuickly();
+        //find association rules (rule generation procedure)
+        findRulesQuickly();
+      }
+      else{
+        findLargeCarItemSets(i);
+        findCaRulesQuickly();
+      }
       
       if(m_bestChanged){
         temp =m_premiseCount;
@@ -231,6 +265,84 @@ public class PredictiveApriori extends Associator implements OptionHandler {
         exactNumber--;
     }
   }
+  
+  /**
+     * Method that mines the n best class association rules.
+     * @return an sorted array of FastVector (depending on the expected predictive accuracy) containing the rules and metric information
+     * @param data the instances for which class association rules should be mined
+     * @exception Exception if rules can't be built successfully
+     */
+    public FastVector[] mineCARs(Instances data) throws Exception{
+	 
+        m_car = true;
+        m_best = new TreeSet();
+        m_premiseCount = 1;
+        m_bestChanged = false;
+        m_expectation = 0;
+        m_count = 1;
+	buildAssociations(data);
+        FastVector[] allCARRules = new FastVector[3];
+        allCARRules[0] = new FastVector();
+        allCARRules[1] = new FastVector();
+        allCARRules[2] = new FastVector();
+        for(int k =0; k < m_allTheRules[0].size();k++){
+            int[] newPremiseArray = new int[m_instances.numAttributes()-1];
+            int help = 0;
+            for(int j = 0;j < m_instances.numAttributes();j++){
+                if(j != m_instances.classIndex()){
+                    newPremiseArray[help] = ((ItemSet)m_allTheRules[0].elementAt(k)).itemAt(j);
+                    help++;
+                }
+            }
+            ItemSet newPremise = new ItemSet(m_instances.numInstances(), newPremiseArray);
+            newPremise.setCounter (((ItemSet)m_allTheRules[0].elementAt(k)).counter());
+            allCARRules[0].addElement(newPremise);
+            int[] newConsArray = new int[1];
+            newConsArray[0] =((ItemSet)m_allTheRules[1].elementAt(k)).itemAt(m_instances.classIndex());
+            ItemSet newCons = new ItemSet(m_instances.numInstances(), newConsArray);
+            newCons.setCounter(((ItemSet)m_allTheRules[1].elementAt(k)).counter());
+            allCARRules[1].addElement(newCons);
+            allCARRules[2].addElement(m_allTheRules[2].elementAt(k));
+        }
+        
+	return allCARRules;
+    }
+    
+    /**
+     * Gets the instances without the class attribute
+     * @return instances without class attribute
+     */    
+    public Instances getInstancesNoClass() {
+      
+      Instances noClass = null;
+      try{
+        noClass = LabeledItemSet.divide(m_instances,false);
+      } 
+      catch(Exception e){
+        e.printStackTrace();
+        System.out.println("\n"+e.getMessage());
+      }
+      //System.out.println(noClass);
+      return noClass;
+  }  
+  
+    /**
+     * Gets the class attribute of all instances
+     * @return Instances containing only the class attribute
+     */    
+  public Instances getInstancesOnlyClass() {
+      
+      Instances onlyClass = null;
+      try{
+        onlyClass = LabeledItemSet.divide(m_instances,true);
+      } 
+      catch(Exception e){
+        e.printStackTrace();
+        System.out.println("\n"+e.getMessage());
+      }
+      return onlyClass;
+      
+  }  
 
   /**
    * Returns an enumeration describing the available options.
@@ -239,11 +351,17 @@ public class PredictiveApriori extends Associator implements OptionHandler {
    */
   public Enumeration listOptions() {
 
-    String string1 = "\tThe required number of rules. (default = " + (m_numRules-5) + ")";
-    FastVector newVector = new FastVector(1);
+    String string1 = "\tThe required number of rules. (default = " + (m_numRules-5) + ")",
+      string2 = "\tIf set class association rules are mined. (default = no)",
+      string3 = "\tThe class index. (default = last)";
+    FastVector newVector = new FastVector(3);
 
     newVector.addElement(new Option(string1, "N", 1, 
 				    "-N <required number of rules output>"));
+    newVector.addElement(new Option(string2, "A", 0,
+				    "-A"));
+    newVector.addElement(new Option(string3, "c", 1,
+				    "-c <the class index>"));
     return newVector.elements();
   }
 
@@ -253,6 +371,12 @@ public class PredictiveApriori extends Associator implements OptionHandler {
    *   
    * -N required number of rules <br>
    * The required number of rules (default: 10). <p>
+   * 
+   * -A <br>
+   * If set class association rules are mined. <p>
+   *
+   * -c class index for class association rule mining <br>
+   * Sets the class attribute (default last). <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported 
@@ -260,12 +384,16 @@ public class PredictiveApriori extends Associator implements OptionHandler {
   public void setOptions(String[] options) throws Exception {
     
     resetOptions();
-    String numRulesString = Utils.getOption('N', options);
+    String numRulesString = Utils.getOption('N', options),
+           classIndexString = Utils.getOption('c',options);
     
     if (numRulesString.length() != 0) 
 	m_numRules = Integer.parseInt(numRulesString)+5;
     else
         m_numRules = Integer.MAX_VALUE;
+    if (classIndexString.length() != 0) 
+	m_classIndex = Integer.parseInt(numRulesString);
+    m_car = Utils.getFlag('A', options);
   }
 
   /**
@@ -278,6 +406,8 @@ public class PredictiveApriori extends Associator implements OptionHandler {
     String [] options = new String [10];
     int current = 0;
     options[current++] = "-N"; options[current++] = "" + (m_numRules-5);
+    options[current++] = "-A"; options[current++] = "" + m_car;
+    options[current++] = "-c"; options[current++] = "" + m_classIndex;
     while (current < options.length) {
       options[current++] = "";
     }
@@ -342,6 +472,71 @@ public class PredictiveApriori extends Associator implements OptionHandler {
   public void setNumRules(int v) {
 	 
       m_numRules = v+5;
+  }
+  
+    /**
+   * Sets the class index
+   * @param index the index of the class attribute
+   */  
+  public void setClassIndex(int index){
+      
+      m_classIndex = index;
+  }
+  
+  /**
+   * Gets the index of the class attribute
+   * @return the index of the class attribute
+   */  
+  public int getClassIndex(){
+      
+      return m_classIndex;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String classIndexTipText() {
+    return "Index of the class attribute.\n If set to -1, the last attribute will be taken as the class attribute.";
+  }
+
+    /**
+   * Sets class association rule mining
+   * @param irue if class association rules are mined, false otherwise
+   */  
+  public void setCar(boolean flag){
+      
+      m_car = flag;
+  }
+  
+  /**
+   * Gets whether class association ruels are mined
+   * @return true if class association rules are mined, false otherwise
+   */  
+  public boolean getCar(){
+      
+      return m_car;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String carTipText() {
+    return "If enabled class association rules are mined instead of (general) association rules.";
+  }
+  
+    /**
+   * Returns the metric string for the chosen metric type.
+   * Predictive apriori uses the estimated predictive accuracy.
+   * Therefore the metric string is "acc".
+   * @return string "acc"
+   */
+  public String metricString() {
+      
+      return "acc";
   }
 
  
@@ -417,6 +612,74 @@ public class PredictiveApriori extends Associator implements OptionHandler {
       }
     }
   }
+  
+  
+    /**
+   * Method that finds all large itemsets for class association rule mining for the given set of instances.
+   * @param index the size of the large item sets
+   * @exception Exception if an attribute is numeric
+   */
+  private void findLargeCarItemSets(int index) throws Exception {
+    
+    FastVector kMinusOneSets, kSets = new FastVector();
+    Hashtable hashtable;
+    int i = 0;
+    // Find large itemsets
+    if(index == 1){
+        kSets = CaRuleGeneration.singletons(m_instances);
+        ItemSet.upDateCounters(kSets, m_instances);
+        kSets = ItemSet.deleteItemSets(kSets, m_premiseCount,Integer.MAX_VALUE);
+        if (kSets.size() == 0)
+            return;
+        m_Ls.addElement(kSets);
+    }
+    
+    if(index >1){
+        if(m_Ls.size() > 0)
+            kSets = (FastVector)m_Ls.lastElement();
+        m_Ls.removeAllElements();
+        i = index-2;
+        kMinusOneSets = kSets;
+        kSets = ItemSet.mergeAllItemSets(kMinusOneSets, i, m_instances.numInstances());
+        hashtable = ItemSet.getHashtable(kMinusOneSets, kMinusOneSets.size());
+        m_hashtables.addElement(hashtable);
+        kSets = ItemSet.pruneItemSets(kSets, hashtable);
+        ItemSet.upDateCounters(kSets, m_instances);
+        kSets = ItemSet.deleteItemSets(kSets, m_premiseCount,Integer.MAX_VALUE);
+        if(kSets.size() == 0)
+          return;
+        m_Ls.addElement(kSets);
+    }
+  } 
+  
+    /** 
+   * Method that finds all class association rules.
+   *
+   * @exception Exception if an attribute is numeric
+   */
+  private void findCaRulesQuickly() throws Exception {
+
+    FastVector[] rules;
+    
+    CaRuleGeneration currentLItemSet;
+    // Build rules
+    for (int j = 0; j < m_Ls.size(); j++) {
+      FastVector currentItemSets = (FastVector)m_Ls.elementAt(j);
+      Enumeration enumItemSets = currentItemSets.elements();
+      while (enumItemSets.hasMoreElements()) {
+        currentLItemSet = new CaRuleGeneration((ItemSet)enumItemSets.nextElement());
+        m_best = currentLItemSet.generateRules(m_numRules, m_midPoints,m_priors,m_expectation,
+                                        m_instances,m_best,m_count);
+        m_count = currentLItemSet.count();
+        if(!m_bestChanged && currentLItemSet.change())
+                m_bestChanged = true;
+        if(m_best.size() >0)
+            m_expectation = ((RuleItem)m_best.first()).accuracy();
+        else 
+            m_expectation =0;
+      }
+    }
+  }
 
 
   /**
@@ -444,7 +707,10 @@ public class PredictiveApriori extends Associator implements OptionHandler {
 	throw new Exception("No training file given!");
       apriori.setOptions(options);
       reader = new BufferedReader(new FileReader(trainFileString));
-      apriori.buildAssociations(new Instances(reader));
+      if(!apriori.getCar())
+        apriori.buildAssociations(new Instances(reader));
+      else
+        apriori.mineCARs(new Instances(reader));
       System.out.println(apriori);
     } catch(Exception e) {
       e.printStackTrace();

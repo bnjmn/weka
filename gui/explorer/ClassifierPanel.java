@@ -31,6 +31,7 @@ import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.Drawable;
 import weka.core.SerializedObject;
+import weka.associations.CARuleMiner;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.CostMatrix;
@@ -136,7 +137,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.76 $
+ * @version $Revision: 1.77 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -309,11 +310,12 @@ public class ClassifierPanel extends JPanel {
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
+      .registerEditor(weka.associations.CARuleMiner.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.CostMatrix.class,
 		      weka.gui.CostMatrixEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.associations.classification.CARuleMiner.class,
-		      weka.gui.GenericObjectEditor.class);
+    
   }
   
   /**
@@ -827,7 +829,10 @@ public class ClassifierPanel extends JPanel {
       }
 
       double [] values = new double[plotInstances.numAttributes()];
+      System.out.println(plotInstances);
       for (int i = 0; i < plotInstances.numAttributes(); i++) {
+          System.out.println(toPredict.classIndex());
+          System.out.println(toPredict.dataset());
 	if (i < toPredict.classIndex()) {
 	  values[i] = toPredict.value(i);
 	} else if (i == toPredict.classIndex()) {
