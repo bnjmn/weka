@@ -27,7 +27,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -51,6 +51,31 @@ public class ClassifierTree implements Drawable, Serializable {
 
   /** The pruning instances. */
   protected Distribution m_test;                
+
+  /** 
+   * For getting a unique ID when outputting the tree (hashcode isn't
+   * guaranteed unique) 
+   */
+  private static long PRINTED_NODES = 0;
+
+  /**
+   * Gets the next unique node ID.
+   *
+   * @return the next unique node ID.
+   */
+  protected static long nextID() {
+
+    return PRINTED_NODES ++;
+  }
+
+  /**
+   * Resets the unique node ID counter (e.g.
+   * between repeated separate print types)
+   */
+  protected static void resetID() {
+
+    PRINTED_NODES = 0;
+  }
 
   /**
    * Constructor. 
@@ -276,8 +301,10 @@ public class ClassifierTree implements Drawable, Serializable {
       String nextIndent = "      ";
       StringBuffer atEnd = new StringBuffer();
 
+      long printID = ClassifierTree.nextID();
+
       text.append("  static double N") 
-	.append(Integer.toHexString(m_localModel.hashCode()))
+	.append(Integer.toHexString(m_localModel.hashCode()) + printID)
 	.append("(Object []i) {\n")
 	.append("    double p = Double.NaN;\n");
 
@@ -308,7 +335,7 @@ public class ClassifierTree implements Drawable, Serializable {
       text.append("    return p;\n  }\n");
 
       result[0] = new StringBuffer("    p = " + className + ".N");
-      result[0].append(Integer.toHexString(m_localModel.hashCode()))
+      result[0].append(Integer.toHexString(m_localModel.hashCode()) +  printID)
 	.append("(i);\n");
       result[1] = text.append(atEnd);
     }
