@@ -169,7 +169,28 @@ public class SMOreg extends Classifier implements OptionHandler,
   private double[] m_sparseWeights;
   private int[] m_sparseIndices;
 
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
 
+    return  "Implements Alex Smola and Bernhard Scholkopf's sequential minimal "
+      + "optimization algorithm for training a support vector regression model. "
+      + "This implementation globally replaces all missing values and "
+      + "transforms nominal attributes into binary ones. It also "
+      + "normalizes all attributes by default. (Note that the coefficients "
+      + "in the output are based on the normalized/standardized data, not the "
+      + "original data.) "
+      + "For more information on the SMO algorithm, see\n\n"
+      + "Alex J. Smola, Bernhard Scholkopf (1998). \"A Tutorial on Support Vector "
+      + "Regression\".  NeuroCOLT2 Technical Report Series - NC2-TR-1998-030.\n\n"
+      + "S.K. Shevade, S.S. Keerthi, C. Bhattacharyya, K.R.K. Murthy,  "
+      + "\"Improvements to SMO Algorithm for SVM Regression\".  "
+      + "Technical Report CD-99-16, Control Division Dept of Mechanical and "
+      + "Production Engineering, National University of Singapore. ";
+  }
 
   /**
    * Method for building the classifier. 
@@ -186,7 +207,9 @@ public class SMOreg extends Classifier implements OptionHandler,
 	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
       }
       if (insts.classAttribute().isNominal()) {
-	throw new UnsupportedClassTypeException("SMOreg can't handle a nominal class! Use SMO for performing classification.");
+	throw new UnsupportedClassTypeException("SMOreg can't handle a nominal class! "
+						+ "Use SMO for performing "
+						+ "classification.");
       }
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
@@ -528,7 +551,8 @@ public class SMOreg extends Classifier implements OptionHandler,
     }
 
     else{
-      throw new Exception("Inconsistent state ! I0, I1, I2 and I3 must cover the whole set of indices.");
+      throw new RuntimeException("Inconsistent state ! I0, I1, I2 and I3 " +
+				 "must cover the whole set of indices.");
     }
 
     if(optimality){
@@ -881,7 +905,8 @@ public class SMOreg extends Classifier implements OptionHandler,
 	}
       }
       if(m_iLow == -1 || m_iUp == -1){
-	throw new Exception("Fatal error! The program failled to initialize i_Low, iUp.");
+	throw new RuntimeException("Fatal error! The program failled to "
+				   + "initialize i_Low, iUp.");
       }
       return true;
     } else {
@@ -972,7 +997,8 @@ public class SMOreg extends Classifier implements OptionHandler,
 	
     Vector newVector = new Vector(11);
 
-    newVector.addElement(new Option("\tThe amount up to which deviation are tolerated (epsilon). (default 1e-3)",
+    newVector.addElement(new Option("\tThe amount up to which deviations are\n"
+				    + "\ttolerated (epsilon). (default 1e-3)",
 				    "S", 1, "-S <double>"));
     newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
 				    "C", 1, "-C <double>"));
@@ -985,9 +1011,11 @@ public class SMOreg extends Classifier implements OptionHandler,
     newVector.addElement(new Option("\tWhether to 0=normalize/1=standardize/2=neither. " +
 				    "(default 0=normalize)",
 				    "N", 1, "-N"));
-    newVector.addElement(new Option("\tFeature-space normalization (only for non-linear polynomial kernels).",
+    newVector.addElement(new Option("\tFeature-space normalization (only for\n"
+				    +"\tnon-linear polynomial kernels).",
 				    "F", 0, "-F"));
-    newVector.addElement(new Option("\tUse lower-order terms (only for non-linear polynomial kernels).",
+    newVector.addElement(new Option("\tUse lower-order terms (only for non-linear\n"
+				    +"\tpolynomial kernels).",
 				    "O", 0, "-O"));
     newVector.addElement(new Option("\tUse RBF kernel. " +
 				    "(default poly)",
@@ -1144,7 +1172,15 @@ public class SMOreg extends Classifier implements OptionHandler,
     }
     return options;
   }
-
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String filterTypeTipText() {
+    return "Determines how/if the data will be transformed.";
+  }
 
   /**
    * Gets how the training data will be transformed. Will be one of
@@ -1170,7 +1206,15 @@ public class SMOreg extends Classifier implements OptionHandler,
       m_filterType = newType.getSelectedTag().getID();
     }
   }
-    
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String exponentTipText() {
+    return "The exponent for the polynomial kernel.";
+  }
   
   /**
    * Get the value of exponent. 
@@ -1182,7 +1226,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     return m_exponent;
   }
 
-  
   /**
    * Set the value of exponent. If linear kernel
    * is used, rescaling and lower-order terms are
@@ -1198,7 +1241,15 @@ public class SMOreg extends Classifier implements OptionHandler,
     }
     m_exponent = v;
   }
-
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String gammaTipText() {
+    return "The value of the gamma parameter for RBF kernels.";
+  }
   
   /**
    * Get the value of gamma. 
@@ -1209,7 +1260,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     return m_gamma;
   }
-
   
   /**
    * Set the value of gamma. 
@@ -1220,7 +1270,15 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     m_gamma = v;
   }
-
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String cTipText() {
+    return "The complexity parameter C.";
+  }
   
   /**
    * Get the value of C.
@@ -1231,7 +1289,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     return m_C;
   }
-
   
   /**
    * Set the value of C.
@@ -1243,7 +1300,15 @@ public class SMOreg extends Classifier implements OptionHandler,
     m_C = v;
   }
 
-  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String toleranceParameterTipText() {
+    return "The tolerance parameter (shouldn't be changed).";
+  }
+
   /**
    * Get the value of tolerance parameter.
    * @return Value of tolerance parameter.
@@ -1252,7 +1317,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     return m_tol;
   }
-
   
   /**
    * Set the value of tolerance parameter.
@@ -1263,6 +1327,14 @@ public class SMOreg extends Classifier implements OptionHandler,
     m_tol = v;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String epsTipText() {
+    return "The epsilon for round-off error (shouldn't be changed).";
+  }
   
   /**
    * Get the value of eps.
@@ -1272,7 +1344,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     return m_eps;
   }
-
   
   /**
    * Set the value of eps.
@@ -1283,6 +1354,16 @@ public class SMOreg extends Classifier implements OptionHandler,
     m_eps = v;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String epsilonTipText() {
+    return "The amount up to which deviations are tolerated. " 
+      + "Watch out, the value of epsilon is used with the (normalized/standardized) "
+      + "data.";
+  }
 
   /**
    * Get the value of epsilon.
@@ -1292,7 +1373,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     return m_epsilon;
   }
-
   
   /**
    * Set the value of epsilon.
@@ -1303,6 +1383,14 @@ public class SMOreg extends Classifier implements OptionHandler,
     m_epsilon = v;
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String cacheSizeTipText() {
+    return "The size of the kernel cache (should be a prime number).";
+  }
   
   /**
    * Get the size of the kernel cache
@@ -1312,7 +1400,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     return m_cacheSize;
   }
-
   
   /**
    * Set the value of the kernel cache.
@@ -1322,7 +1409,15 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     m_cacheSize = v;
   }
-
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useRBFTipText() {
+    return "Whether to use an RBF kernel instead of a polynomial one.";
+  }
   
   /**
    * Check if the RBF kernel is to be used.
@@ -1346,7 +1441,16 @@ public class SMOreg extends Classifier implements OptionHandler,
     }
     m_useRBF = v;
   }
-
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String featureSpaceNormalizationTipText() {
+    return "Whether feature-space normalization is performed (only "
+      + "available for non-linear polynomial kernels).";
+  }
   
   /**
    * Check whether feature spaces is being normalized.
@@ -1370,8 +1474,17 @@ public class SMOreg extends Classifier implements OptionHandler,
       m_featureSpaceNormalization = v;
     }
   }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String lowerOrderTermsTipText() {
+    return "Whether lower order polyomials are also used (only "
+      + "available for non-linear polynomial kernels).";
+  }
 
-  
   /**
    * Check whether lower-order terms are being used.
    * @return Value of lowerOrder.
@@ -1381,7 +1494,6 @@ public class SMOreg extends Classifier implements OptionHandler,
     return m_lowerOrder;
   }
 
-  
   /**
    * Set whether lower-order terms are to be used. Defaults
    * to false if a linear machine is built.

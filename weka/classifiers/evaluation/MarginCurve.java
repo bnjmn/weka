@@ -37,7 +37,7 @@ import weka.core.Instances;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class MarginCurve {
 
@@ -148,7 +148,7 @@ public class MarginCurve {
       EvaluationUtils eu = new EvaluationUtils();
       weka.classifiers.meta.LogitBoost classifier 
         = new weka.classifiers.meta.LogitBoost();
-      classifier.setMaxIterations(20);
+      classifier.setNumIterations(20);
       FastVector predictions 
         = eu.getTrainTestPredictions(classifier, inst, inst);
       Instances result = tc.getCurve(predictions);

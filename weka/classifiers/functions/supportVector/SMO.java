@@ -113,7 +113,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.6 $ */
+ * @version $Revision: 1.7 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -1827,7 +1827,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
    * displaying in the explorer/experimenter gui
    */
   public String filterTypeTipText() {
-    return "Determines how the training data will be transformed.";
+    return "Determines how/if the data will be transformed.";
   }
   
   /**
