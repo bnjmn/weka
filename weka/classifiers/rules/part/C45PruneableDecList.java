@@ -16,58 +16,40 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import weka.core.*;
 
 /**
  * Class for handling a partial tree structure pruned using C4.5's
- * pruning heuristic..
+ * pruning heuristic.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public class C45PruneableDecList extends ClassifierDecList{
-  
-  // =================
-  // Private variables
-  // =================
     
-  /**
-   * CF
-   */
-
+  /** CF */
   private double CF = 0.25;
 
-  /**
-   * Minimum number of objects
-   */
-
+  /** Minimum number of objects */
   private int minNumObj;
 
-  /**
-   * To compute the entropy.
-   */
-  
+  /** To compute the entropy. */
   private static EntropySplitCrit splitCrit = new EntropySplitCrit();
- 
-  // ===============
-  // Public methods.
-  // ===============
   
   /**
    * Constructor for pruneable tree structure. Stores reference
    * to associated training data at each node.
+   *
    * @param toSelectLocModel selection method for local splitting model
    * @param cf the confidence factor for pruning
    * @param minNum the minimum number of objects in a leaf
    * @exception Exception if something goes wrong
    */
-  
   public C45PruneableDecList(ModelSelection toSelectLocModel, 
 			     double cf, int minNum) 
-       throws Exception{
+       throws Exception {
 			       
     super(toSelectLocModel);
     
@@ -77,10 +59,10 @@ public class C45PruneableDecList extends ClassifierDecList{
   
   /**
    * Method for building a pruned partial tree.
+   *
    * @exception Exception if something goes wrong
    */
-  
-  public void buildRule(Instances data) throws Exception{
+  public void buildRule(Instances data) throws Exception {
     
     buildDecList(data, false);
 
@@ -90,15 +72,14 @@ public class C45PruneableDecList extends ClassifierDecList{
   /**
    * Method for choosing a subset to expand.
    */
-
-  public final int chooseIndex(){
+  public final int chooseIndex() {
     
     int minIndex = -1;
     double estimated, min = Double.MAX_VALUE;
     int i, j;
 
-    for (i = 0; i < sonS.length; i++)
-      if (son(i) == null){
+    for (i = 0; i < m_sons.length; i++)
+      if (son(i) == null) {
 	if (Utils.sm(localModel().distribution().perBag(i),
 		     (double)minNumObj))
 	  estimated = Double.MAX_VALUE;
@@ -113,7 +94,7 @@ public class C45PruneableDecList extends ClassifierDecList{
 	}
 	if (Utils.smOrEq(estimated,0))
 	  return i;
-	if (Utils.sm(estimated,min)){
+	if (Utils.sm(estimated,min)) {
 	  min = estimated;
 	  minIndex = i;
 	}
@@ -123,21 +104,20 @@ public class C45PruneableDecList extends ClassifierDecList{
   }
   
   /**
-   * Choose last index.
+   * Choose last index (ie. choose rule).
    */
-  
-  public final int chooseLastIndex(){
+  public final int chooseLastIndex() {
     
     int minIndex = 0;
     double estimated, min = Double.MAX_VALUE;
     
-    if (!isLeaF) 
-      for (int i = 0; i < sonS.length; i++)
-	if (son(i) != null){
+    if (!m_isLeaf) 
+      for (int i = 0; i < m_sons.length; i++)
+	if (son(i) != null) {
 	  if (Utils.grOrEq(localModel().distribution().perBag(i),
 			   (double)minNumObj)) {
 	    estimated = son(i).getSizeOfBranch();
-	    if (Utils.sm(estimated,min)){
+	    if (Utils.sm(estimated,min)) {
 	      min = estimated;
 	      minIndex = i;
 	    }
@@ -147,20 +127,16 @@ public class C45PruneableDecList extends ClassifierDecList{
     return minIndex;
   }
   
-  // ==================
-  // Protected methods.
-  // ==================
-  
   /**
    * Returns a newly created tree.
+   *
    * @exception Exception if something goes wrong
    */
-  
   protected ClassifierDecList getNewDecList(Instances data, boolean leaf) 
-       throws Exception{
+       throws Exception {
 	 
     C45PruneableDecList newDecList = 
-      new C45PruneableDecList(toSelectModeL,CF, minNumObj);
+      new C45PruneableDecList(m_toSelectModel,CF, minNumObj);
     
     newDecList.buildDecList((Instances)data, leaf);
     
@@ -170,35 +146,29 @@ public class C45PruneableDecList extends ClassifierDecList{
   /**
    * Prunes the end of the rule.
    */
-  
   protected void pruneEnd() {
     
     double errorsLeaf, errorsTree;
     
     errorsTree = getEstimatedErrorsForTree();
     errorsLeaf = getEstimatedErrorsForLeaf();
-    if (Utils.smOrEq(errorsLeaf,errorsTree+0.1)){ // +0.1 like C4.5 does
-      isLeaF = true;
-      sonS = null;
-      localModeL = new NoSplit(localModel().distribution());
+    if (Utils.smOrEq(errorsLeaf,errorsTree+0.1)) { // +0.1 as in C4.5
+      m_isLeaf = true;
+      m_sons = null;
+      m_localModel = new NoSplit(localModel().distribution());
     }
   }
-   
-  // ================
-  // Private methods.
-  // ================
   
   /**
    * Computes estimated errors for tree.
    */
- 
   private double getEstimatedErrorsForTree() {
 
-    if (isLeaF)
+    if (m_isLeaf)
       return getEstimatedErrorsForLeaf();
     else {
       double error = 0;
-      for (int i = 0; i < sonS.length; i++) 
+      for (int i = 0; i < m_sons.length; i++) 
 	if (!Utils.eq(son(i).localModel().distribution().total(),0))
 	  error += son(i).getEstimatedErrorsForTree();
       return error;
@@ -208,8 +178,7 @@ public class C45PruneableDecList extends ClassifierDecList{
   /**
    * Computes estimated errors for leaf.
    */
-
-  public double getEstimatedErrorsForLeaf(){
+  public double getEstimatedErrorsForLeaf() {
   
     double errors = localModel().distribution().numIncorrect();
 
@@ -220,10 +189,9 @@ public class C45PruneableDecList extends ClassifierDecList{
   /**
    * Returns the number of instances covered by a branch
    */
-
-  private double getSizeOfBranch(){
+  private double getSizeOfBranch() {
     
-    if (isLeaF) {
+    if (m_isLeaf) {
       return -localModel().distribution().total();
     } else
       return son(indeX).getSizeOfBranch();
@@ -232,19 +200,17 @@ public class C45PruneableDecList extends ClassifierDecList{
   /**
    * Method just exists to make program easier to read.
    */
-  
-  private ClassifierSplitModel localModel(){
+  private ClassifierSplitModel localModel() {
     
-    return (ClassifierSplitModel)localModeL;
+    return (ClassifierSplitModel)m_localModel;
   }
   
   /**
    * Method just exists to make program easier to read.
    */
-  
-  private C45PruneableDecList son(int index){
+  private C45PruneableDecList son(int index) {
     
-    return (C45PruneableDecList)sonS[index];
+    return (C45PruneableDecList)m_sons[index];
   }
 }
 

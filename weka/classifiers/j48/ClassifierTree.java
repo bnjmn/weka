@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import weka.core.*;
@@ -26,42 +25,46 @@ import java.io.*;
 /**
  * Class for handling a tree structure used for
  * classification.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.1 September 1998 (Eibe)
+ * @version $Revision: 1.4 $
  */
-
 public class ClassifierTree implements Drawable, Serializable {
-  
-  // ====================
-  // Protected variables.
-  // ====================
-  
-  protected ModelSelection toSelectModeL;    // The model selection method.
-  protected ClassifierSplitModel localModeL; // Local model at node.
-  protected ClassifierTree [] sonS;          // References to sons.
-  protected boolean isLeaF;                  // True if node is leaf.
-  protected boolean isEmptY;                 // True if node is empty.
-  protected Instances traiN;                 // The training instances.
-  protected Distribution tesT;               // The pruning instances.
-  
-  // ===============
-  // Public methods.
-  // ===============
+
+  /** The model selection method. */  
+  protected ModelSelection m_toSelectModel;     
+
+  /** Local model at node. */
+  protected ClassifierSplitModel m_localModel;  
+
+  /** References to sons. */
+  protected ClassifierTree [] m_sons;           
+
+  /** True if node is leaf. */
+  protected boolean m_isLeaf;                   
+
+  /** True if node is empty. */
+  protected boolean m_isEmpty;                  
+
+  /** The training instances. */
+  protected Instances m_train;                  
+
+  /** The pruning instances. */
+  protected Distribution m_test;                
 
   /**
-   * Constructor 
+   * Constructor. 
    */
-
-  public ClassifierTree(ModelSelection toSelectLocModel){
+  public ClassifierTree(ModelSelection toSelectLocModel) {
     
-    toSelectModeL = toSelectLocModel;
+    m_toSelectModel = toSelectLocModel;
   }
 
   /**
    * Method for building a classifier tree.
+   *
    * @exception Exception if something goes wrong
    */
-
   public void buildClassifier(Instances data) throws Exception{
 
     if (data.checkForStringAttributes()) {
@@ -73,49 +76,50 @@ public class ClassifierTree implements Drawable, Serializable {
   }
 
   /**
-   * Builds the tree structure
+   * Builds the tree structure.
+   *
    * @param data the data for which the tree structure is to be
    * generated.
    * @param keepData is training data to be kept?
    * @exception Exception if something goes wrong
    */
-
   public void buildTree(Instances data, boolean keepData) throws Exception{
     
     Instances [] localInstances;
 
     if (keepData) {
-      traiN = data;
+      m_train = data;
     }
-    tesT = null;
-    isLeaF = false;
-    isEmptY = false;
-    sonS = null;
-    localModeL = toSelectModeL.selectModel(data);
-    if (localModeL.numSubsets() > 1){
-      localInstances = localModeL.split(data);
+    m_test = null;
+    m_isLeaf = false;
+    m_isEmpty = false;
+    m_sons = null;
+    m_localModel = m_toSelectModel.selectModel(data);
+    if (m_localModel.numSubsets() > 1) {
+      localInstances = m_localModel.split(data);
       data = null;
-      sonS = new ClassifierTree [localModeL.numSubsets()];
-      for (int i = 0; i < sonS.length; i++) {
-	sonS[i] = getNewTree(localInstances[i]);
+      m_sons = new ClassifierTree [m_localModel.numSubsets()];
+      for (int i = 0; i < m_sons.length; i++) {
+	m_sons[i] = getNewTree(localInstances[i]);
 	localInstances[i] = null;
       }
     }else{
-      isLeaF = true;
+      m_isLeaf = true;
       if (Utils.eq(data.sumOfWeights(), 0))
-	isEmptY = true;
+	m_isEmpty = true;
       data = null;
     }
   }
 
   /**
    * Builds the tree structure with hold out set
-   * @param traiN the data for which the tree structure is to be
+   *
+   * @param train the data for which the tree structure is to be
    * generated.
+   * @param test the test data for potential pruning
    * @param keepData is training Data to be kept?
    * @exception Exception if something goes wrong
    */
-
   public void buildTree(Instances train, Instances test, boolean keepData)
        throws Exception{
     
@@ -123,36 +127,36 @@ public class ClassifierTree implements Drawable, Serializable {
     int i;
     
     if (keepData) {
-      traiN = train;
+      m_train = train;
     }
-    isLeaF = false;
-    isEmptY = false;
-    sonS = null;
-    localModeL = toSelectModeL.selectModel(train, test);
-    tesT = new Distribution(test, localModeL);
-    if (localModeL.numSubsets() > 1){
-      localTrain = localModeL.split(train);
-      localTest = localModeL.split(test);
+    m_isLeaf = false;
+    m_isEmpty = false;
+    m_sons = null;
+    m_localModel = m_toSelectModel.selectModel(train, test);
+    m_test = new Distribution(test, m_localModel);
+    if (m_localModel.numSubsets() > 1) {
+      localTrain = m_localModel.split(train);
+      localTest = m_localModel.split(test);
       train = test = null;
-      sonS = new ClassifierTree [localModeL.numSubsets()];
-      for (i=0;i<sonS.length;i++) {
-	sonS[i] = getNewTree(localTrain[i], localTest[i]);
+      m_sons = new ClassifierTree [m_localModel.numSubsets()];
+      for (i=0;i<m_sons.length;i++) {
+	m_sons[i] = getNewTree(localTrain[i], localTest[i]);
 	localTrain[i] = null;
 	localTest[i] = null;
       }
     }else{
-      isLeaF = true;
+      m_isLeaf = true;
       if (Utils.eq(train.sumOfWeights(), 0))
-	isEmptY = true;
+	m_isEmpty = true;
       train = test = null;
     }
   }
 
   /** 
-   * Classifies a weighted instance.
+   * Classifies an instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   public double classifyInstance(Instance instance) throws Exception {
 
     double maxProb = -1;
@@ -161,9 +165,9 @@ public class ClassifierTree implements Drawable, Serializable {
     int j;
 
     for (j = 0; j < instance.numClasses(); 
-	 j++){
+	 j++) {
       currentProb = getProbs(j,instance,1);
-      if (Utils.gr(currentProb,maxProb)){
+      if (Utils.gr(currentProb,maxProb)) {
 	maxIndex = j;
 	maxProb = currentProb;
       }
@@ -175,21 +179,20 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Cleanup in order to save memory.
    */
-
   public final void cleanup(Instances justHeaderInfo) {
 
-    traiN = justHeaderInfo;
-    tesT = null;
-    if (!isLeaF)
-      for (int i = 0; i < sonS.length; i++)
-	sonS[i].cleanup(justHeaderInfo);
+    m_train = justHeaderInfo;
+    m_test = null;
+    if (!m_isLeaf)
+      for (int i = 0; i < m_sons.length; i++)
+	m_sons[i].cleanup(justHeaderInfo);
   }
 
   /** 
    * Returns class probabilities for a weighted instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   public final double [] distributionForInstance(Instance instance) 
        throws Exception {
 
@@ -205,9 +208,9 @@ public class ClassifierTree implements Drawable, Serializable {
 
   /**
    * Returns graph describing the tree.
+   *
    * @exception Exception if something goes wrong
    */
-
   public String graph() throws Exception {
 
     StringBuffer text = new StringBuffer();
@@ -215,15 +218,15 @@ public class ClassifierTree implements Drawable, Serializable {
     text.append("digraph J48Tree {\n" +
 		"node [fontsize=10]\n" +
 		"edge [fontsize=10 style=bold]\n");
-    if (isLeaF){
-      text.append("N" + Integer.toHexString(localModeL.hashCode())
+    if (m_isLeaf) {
+      text.append("N" + Integer.toHexString(m_localModel.hashCode())
 		  + " [label=\"" + 
-		  localModeL.dumpLabel(0,traiN) + "\" "+ 
+		  m_localModel.dumpLabel(0,m_train) + "\" "+ 
 		  "shape=box style=filled color=gray95]\n");
     }else {
-      text.append("N" + Integer.toHexString(localModeL.hashCode())
+      text.append("N" + Integer.toHexString(m_localModel.hashCode())
 		  + " [label=\"" + 
-		  localModeL.leftSide(traiN) + "\"]\n");
+		  m_localModel.leftSide(m_train) + "\"]\n");
       graphTree(text);
     }
     
@@ -232,16 +235,16 @@ public class ClassifierTree implements Drawable, Serializable {
 
   /**
    * Returns tree in prefix order.
+   *
    * @exception Exception if something goes wrong
    */
-
   public String prefix() throws Exception {
     
     StringBuffer text;
 
     text = new StringBuffer();
-    if (isLeaF){
-      text.append("["+localModeL.dumpLabel(0,traiN)+"]");
+    if (m_isLeaf) {
+      text.append("["+m_localModel.dumpLabel(0,m_train)+"]");
     }else {
       prefixTree(text);
     }
@@ -253,17 +256,16 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Returns number of leaves in tree structure.
    */
-  
-  public int numLeaves(){
+  public int numLeaves() {
     
     int num = 0;
     int i;
     
-    if (isLeaF)
+    if (m_isLeaf)
       return 1;
     else
-      for (i=0;i<sonS.length;i++)
-	num = num+sonS[i].numLeaves();
+      for (i=0;i<m_sons.length;i++)
+	num = num+m_sons[i].numLeaves();
         
     return num;
   }
@@ -271,15 +273,14 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Returns number of nodes in tree structure.
    */
-  
-  public int numNodes(){
+  public int numNodes() {
     
     int no = 1;
     int i;
     
-    if (!isLeaF)
-      for (i=0;i<sonS.length;i++)
-	no = no+sonS[i].numNodes();
+    if (!m_isLeaf)
+      for (i=0;i<m_sons.length;i++)
+	no = no+m_sons[i].numNodes();
     
     return no;
   }
@@ -287,15 +288,14 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Prints tree structure.
    */
-
-  public String toString(){
+  public String toString() {
 
     try {
       StringBuffer text = new StringBuffer();
       
-      if (isLeaF){
+      if (m_isLeaf) {
 	text.append(": ");
-	text.append(localModeL.dumpLabel(0,traiN));
+	text.append(m_localModel.dumpLabel(0,m_train));
       }else
 	dumpTree(0,text);
       text.append("\n\nNumber of Leaves  : \t"+numLeaves()+"\n");
@@ -307,19 +307,15 @@ public class ClassifierTree implements Drawable, Serializable {
     }
   }
 
-  // ==================
-  // Protected methods.
-  // ==================
-
   /**
    * Returns a newly created tree.
-   * @param data and selection method for local models.
+   *
+   * @param data the training data
    * @exception Exception if something goes wrong
    */
-
   protected ClassifierTree getNewTree(Instances data) throws Exception{
 	 
-    ClassifierTree newTree = new ClassifierTree(toSelectModeL);
+    ClassifierTree newTree = new ClassifierTree(m_toSelectModel);
     newTree.buildTree(data, false);
     
     return newTree;
@@ -327,68 +323,65 @@ public class ClassifierTree implements Drawable, Serializable {
 
   /**
    * Returns a newly created tree.
-   * @param data and selection method for local models.
+   *
+   * @param data the training data
+   * @param test the pruning data.
    * @exception Exception if something goes wrong
    */
-
   protected ClassifierTree getNewTree(Instances train, Instances test) 
        throws Exception{
 	 
-    ClassifierTree newTree = new ClassifierTree(toSelectModeL);
+    ClassifierTree newTree = new ClassifierTree(m_toSelectModel);
     newTree.buildTree(train, test, false);
     
     return newTree;
   }
 
-  // ================
-  // Private methods.
-  // ================
-
   /**
    * Help method for printing tree structure.
+   *
    * @exception Exception if something goes wrong
    */
-
   private void dumpTree(int depth,StringBuffer text) 
        throws Exception {
     
     int i,j;
     
-    for (i=0;i<sonS.length;i++){
+    for (i=0;i<m_sons.length;i++) {
       text.append("\n");;
       for (j=0;j<depth;j++)
 	text.append("|   ");
-      text.append(localModeL.leftSide(traiN));
-      text.append(localModeL.rightSide(i, traiN));
-      if (sonS[i].isLeaF){
+      text.append(m_localModel.leftSide(m_train));
+      text.append(m_localModel.rightSide(i, m_train));
+      if (m_sons[i].m_isLeaf) {
 	text.append(": ");
-	text.append(localModeL.dumpLabel(i,traiN));
+	text.append(m_localModel.dumpLabel(i,m_train));
       }else
-	sonS[i].dumpTree(depth+1,text);
+	m_sons[i].dumpTree(depth+1,text);
     }
   }
 
   /**
-   * Help method for printing tree structure.
+   * Help method for printing tree structure as a graph.
+   *
    * @exception Exception if something goes wrong
    */
-
   private void graphTree(StringBuffer text) throws Exception {
     
-    for (int i = 0; i < sonS.length; i++) {
-      text.append("N" + Integer.toHexString(localModeL.hashCode()) 
+    for (int i = 0; i < m_sons.length; i++) {
+      text.append("N" + Integer.toHexString(m_localModel.hashCode()) 
 		  + "->" + 
-		  "N" + Integer.toHexString(sonS[i].localModeL.hashCode())  +
-		  " [label=\"" + localModeL.rightSide(i,traiN).trim() + 
+		  "N" + Integer.toHexString(m_sons[i].m_localModel.hashCode())  +
+		  " [label=\"" + m_localModel.rightSide(i,m_train).trim() + 
 		  "\"]\n");
-      if (sonS[i].isLeaF) {
-	text.append("N" + Integer.toHexString(sonS[i].localModeL.hashCode()) +
-		    " [label=\""+localModeL.dumpLabel(i,traiN)+"\" "+ 
+      if (m_sons[i].m_isLeaf) {
+	text.append("N" + Integer.toHexString(m_sons[i].m_localModel.hashCode()) +
+		    " [label=\""+m_localModel.dumpLabel(i,m_train)+"\" "+ 
 		    "shape=box style=filled color=gray95]\n");
       } else {
-	text.append("N" + Integer.toHexString(sonS[i].localModeL.hashCode()) +
-		    " [label=\""+sonS[i].localModeL.leftSide(traiN)+"\"]\n");
-	sonS[i].graphTree(text);
+	text.append("N" + Integer.toHexString(m_sons[i].m_localModel.hashCode()) +
+		    " [label=\""+m_sons[i].m_localModel.leftSide(m_train)+"\"]\n");
+	m_sons[i].graphTree(text);
       }
     }
   }
@@ -396,24 +389,23 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Prints the tree in prefix form
    */
-
   private void prefixTree(StringBuffer text) throws Exception {
 
     text.append("[");
-    text.append(localModeL.leftSide(traiN)+":");
-    for (int i = 0; i < sonS.length; i++) {
+    text.append(m_localModel.leftSide(m_train)+":");
+    for (int i = 0; i < m_sons.length; i++) {
       if (i > 0) {
 	text.append(",");
       }
-      text.append(localModeL.rightSide(i, traiN));
+      text.append(m_localModel.rightSide(i, m_train));
     }
-    for (int i = 0; i < sonS.length; i++){
-      if (sonS[i].isLeaF){
+    for (int i = 0; i < m_sons.length; i++) {
+      if (m_sons[i].m_isLeaf) {
 	text.append("[");
-	text.append(localModeL.dumpLabel(i,traiN));
+	text.append(m_localModel.dumpLabel(i,m_train));
 	text.append("]");
       } else {
-	sonS[i].prefixTree(text);
+	m_sons[i].prefixTree(text);
       }
     }
     text.append("]");
@@ -422,9 +414,9 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Help method for computing class probabilities of 
    * a given instance.
+   *
    * @exception Exception if something goes wrong
    */
-
   private double getProbs(int classIndex, Instance instance, 
 			  double weight) throws Exception {
     
@@ -433,18 +425,18 @@ public class ClassifierTree implements Drawable, Serializable {
     int treeIndex;
     int i,j;
     
-    if (isLeaF){
+    if (m_isLeaf) {
       return weight*localModel().classProb(classIndex,instance);
     }else{
       treeIndex = localModel().whichSubset(instance);
-      if (treeIndex == -1){
+      if (treeIndex == -1) {
 	weights = localModel().weights(instance);
-	for (i=0;i<sonS.length;i++)
-	  if (!son(i).isEmptY){
+	for (i=0;i<m_sons.length;i++)
+	  if (!son(i).m_isEmpty) {
 	    prob += son(i).getProbs(classIndex, instance, weights[i]*weight);}
 	return prob;
       }else
-	if (son(treeIndex).isEmptY)
+	if (son(treeIndex).m_isEmpty)
 	  return weight*localModel().classProb(classIndex, instance);
 	else
 	  return son(treeIndex).getProbs(classIndex, instance, weight);
@@ -454,19 +446,17 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Method just exists to make program easier to read.
    */
-  
-  private ClassifierSplitModel localModel(){
+  private ClassifierSplitModel localModel() {
     
-    return (ClassifierSplitModel)localModeL;
+    return (ClassifierSplitModel)m_localModel;
   }
   
   /**
    * Method just exists to make program easier to read.
    */
-
-  private ClassifierTree son(int index){
+  private ClassifierTree son(int index) {
     
-    return (ClassifierTree)sonS[index];
+    return (ClassifierTree)m_sons[index];
   }
 }
 

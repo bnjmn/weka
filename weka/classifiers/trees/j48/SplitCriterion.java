@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import java.io.*;
@@ -24,20 +23,17 @@ import java.io.*;
 /**
  * Abstract class for computing splitting criteria
  * with respect to distributions of class values.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public abstract class SplitCriterion implements Serializable {
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Computes result of splitting criterion for given distribution.
+   *
+   * @return value of splitting criterion. 0 by default
    */
-
   public double splitCritValue(Distribution bags){
 
     return 0;
@@ -46,9 +42,10 @@ public abstract class SplitCriterion implements Serializable {
   /**
    * Computes result of splitting criterion for given training and
    * test distributions.
+   *
+   * @return value of splitting criterion. 0 by default
    */
-
-  public double splitCritValue(Distribution train,Distribution test){
+  public double splitCritValue(Distribution train, Distribution test){
 
     return 0;
   }
@@ -56,9 +53,10 @@ public abstract class SplitCriterion implements Serializable {
   /**
    * Computes result of splitting criterion for given training and
    * test distributions and given number of classes.
+   *
+   * @return value of splitting criterion. 0 by default
    */
-
-  public double splitCritValue(Distribution train,Distribution test,
+  public double splitCritValue(Distribution train, Distribution test,
 			       int noClassesDefault){
 
     return 0;
@@ -67,9 +65,10 @@ public abstract class SplitCriterion implements Serializable {
   /**
    * Computes result of splitting criterion for given training and
    * test distributions and given default distribution.
+   *
+   * @return value of splitting criterion. 0 by default
    */
-
-  public double splitCritValue(Distribution train,Distribution test,
+  public double splitCritValue(Distribution train, Distribution test,
 			       Distribution defC){
 
     return 0;

@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import java.util.*;
@@ -24,7 +23,15 @@ import weka.core.*;
 import weka.classifiers.*;
 
 /**
- * Class for generating a PART decision list
+ * Class for generating a PART decision list.
+ *
+ * Reference:
+ * Eibe Frank and Ian H. Witten (1998).  <a
+ * href="http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz">Generating
+ * Accurate Rule Sets Without Global Optimization.</a> In Shavlik, J.,
+ * ed., <i>Machine Learning: Proceedings of the Fifteenth
+ * International Conference</i>, Morgan Kaufmann Publishers, San
+ * Francisco, CA.
  *
  * Valid options are: <p>
  *
@@ -45,92 +52,70 @@ import weka.classifiers.*;
  * Use binary splits for nominal attributes. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.3 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler {
-  
-  // =================
-  // Private variables
-  // =================
 
-  /**
-   * The decision list
-   */
+  /** The decision list */
+  private MakeDecList m_root;
 
-  private MakeDecList root;
+  /** Confidence level */
+  private float m_CF = 0.25f;
 
-  /**
-   * Confidence level
-   */
+  /** Minimum number of objects */
+  private int m_minNumObj = 2;
 
-  private float CF = 0.25f;
+  /** Use reduced error pruning? */
+  private boolean m_reducedErrorPruning = false;
 
-  /**
-   * Minimum number of objects
-   */
+  /** Number of folds for reduced error pruning. */
+  private int m_numFolds = 3;
 
-  private int minNumObj = 2;
-
-  /**
-   * Use reduced error pruning?
-   */
-
-  private boolean reducedErrorPruning = false;
-
-  /**
-   * Number of folds for reduced error pruning.
-   */
-
-  private int numFolds = 3;
-
-  /**
-   * Binary splits on nominal attributes?
-   */
-
+  /** Binary splits on nominal attributes? */
   private boolean binarySplits = false;
   
   /**
    * Generates the classifier.
+   *
    * @exception Exception if classifier can't be built successfully
    */
- 
   public void buildClassifier(Instances instances) 
        throws Exception{
 
     ModelSelection modSelection;	 
 
     if (binarySplits)
-      modSelection = new BinC45ModelSelection(minNumObj, instances);
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances);
     else
-      modSelection = new C45ModelSelection(minNumObj, instances);
-    if (reducedErrorPruning) 
-      root = new MakeDecList(modSelection, numFolds, minNumObj);
+      modSelection = new C45ModelSelection(m_minNumObj, instances);
+    if (m_reducedErrorPruning) 
+      m_root = new MakeDecList(modSelection, m_numFolds, m_minNumObj);
     else
-      root = new MakeDecList(modSelection, CF, minNumObj);
-    root.buildClassifier(instances);
+      m_root = new MakeDecList(modSelection, m_CF, m_minNumObj);
+    m_root.buildClassifier(instances);
   }
 
   /**
    * Classifies an instance.
+   *
    * @exception Exception if instance can't be classified successfully
    */
- 
   public double classifyInstance(Instance instance) 
        throws Exception {
 
-    return root.classifyInstance(instance);
+    return m_root.classifyInstance(instance);
   }
 
   /** 
    * Returns class probabilities for an instance.
+   *
    * @exception Exception if the distribution can't be computed successfully
    */
-
   public final double [] distributionForInstance(Instance instance) 
        throws Exception {
 
-    return root.distributionForInstance(instance);
+    return m_root.distributionForInstance(instance);
   }
 
   /**
@@ -156,23 +141,25 @@ public class PART extends DistributionClassifier implements OptionHandler,
    *
    * @return an enumeration of all the available options
    */
-
   public Enumeration listOptions() {
 
     Vector newVector = new Vector(5);
 
     newVector.
-	addElement(new Option("\tSet confidence threshold for pruning.",
+	addElement(new Option("\tSet confidence threshold for pruning.\n" +
+			      "\t(default 0.25)",
 			      "C", 1, "-C <pruning confidence>"));
     newVector.
-	addElement(new Option("\tSet minimum number of objects per leaf.",
+	addElement(new Option("\tSet minimum number of objects per leaf.\n" +
+			      "\t(default 2)",
 			      "M", 1, "-M <minimum number of objects>"));
     newVector.
 	addElement(new Option("\tUse reduced error pruning.",
 			      "R", 0, "-R"));
     newVector.
-	addElement(new Option("\tSet number of folds for reduced error" +
-			      "\tpruning. One fold is used as pruning set.",
+	addElement(new Option("\tSet number of folds for reduced error\n" +
+			      "\tpruning. One fold is used as pruning set.\n" +
+			      "\t(default 3)",
 			      "N", 1, "-N <number of folds>"));
     newVector.
 	addElement(new Option("\tUse binary splits only.",
@@ -183,37 +170,49 @@ public class PART extends DistributionClassifier implements OptionHandler,
 
   /**
    * Parses a given list of options.
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-
   public void setOptions(String[] options) throws Exception{
-    
-    String confidenceString = Utils.getOption('C', options);
-    String minNumString = Utils.getOption('M', options);
-    String numFoldsString = Utils.getOption('N', options);
 
-    reducedErrorPruning = Utils.getFlag('R', options);
+    // Pruning options
+    m_reducedErrorPruning = Utils.getFlag('R', options);
     binarySplits = Utils.getFlag('B', options);
-    if (confidenceString.length() != 0)
-      if (reducedErrorPruning)
-	throw new Exception("Setting CF doesn't make sense" +
-			    " for reduced error pruning.");
-      else {
-	CF = (new Float(confidenceString)).floatValue();
-	if ((CF <= 0) || (CF >= 1)) {
+    String confidenceString = Utils.getOption('C', options);
+    if (confidenceString.length() != 0) {
+      if (m_reducedErrorPruning) {
+	throw new Exception("Setting CF doesn't make sense " +
+			    "for reduced error pruning.");
+      } else {
+	m_CF = (new Float(confidenceString)).floatValue();
+	if ((m_CF <= 0) || (m_CF >= 1)) {
 	  throw new Exception("CF has to be greater than zero and smaller than one!");
-	}
+	} 
       }
-    if (numFoldsString.length() != 0)
-      if (!reducedErrorPruning)
+    } else {
+      m_CF = 0.25f;
+    }
+    String numFoldsString = Utils.getOption('N', options);
+    if (numFoldsString.length() != 0) {
+      if (!m_reducedErrorPruning) {
 	throw new Exception("Setting the number of folds" +
-			    " doesn't make sense for" +
-			    " pessimistic pruning.");
-      else
-	numFolds = Integer.parseInt(numFoldsString);
-    if (minNumString.length() != 0)
-      minNumObj = Integer.parseInt(minNumString);
+			    " does only make sense for" +
+			    " reduced error pruning.");
+      } else {
+	m_numFolds = Integer.parseInt(numFoldsString);
+      }
+    } else {
+      m_numFolds = 3;
+    }
+
+    // Other options
+    String minNumString = Utils.getOption('M', options);
+    if (minNumString.length() != 0) {
+      m_minNumObj = Integer.parseInt(minNumString);
+    } else {
+      m_minNumObj = 2;
+    }
   }
 
   /**
@@ -226,16 +225,16 @@ public class PART extends DistributionClassifier implements OptionHandler,
     String [] options = new String [6];
     int current = 0;
 
-    if (reducedErrorPruning) {
+    if (m_reducedErrorPruning) {
       options[current++] = "-R";
-      options[current++] = "-N"; options[current++] = "" + numFolds;
+      options[current++] = "-N"; options[current++] = "" + m_numFolds;
     } else {
-      options[current++] = "-C"; options[current++] = "" + CF;
+      options[current++] = "-C"; options[current++] = "" + m_CF;
     }
     if (binarySplits) {
       options[current++] = "-B";
     }
-    options[current++] = "-M"; options[current++] = "" + minNumObj;
+    options[current++] = "-M"; options[current++] = "" + m_minNumObj;
 
     while (current < options.length) {
       options[current++] = "";
@@ -246,27 +245,16 @@ public class PART extends DistributionClassifier implements OptionHandler,
   /**
    * Returns a description of the classifier
    */
-
   public String toString() {
     
-    return "PART decision list\n------------------\n\n"+root.toString();
+    return "PART decision list\n------------------\n\n" + m_root.toString();
   }
-
-  
-
-  // ===============
-  // Public methods.
-  // ===============
   
   /**
-   * Generates a PART decision list.
-   * @param String with options: -c <index of class>, 
-   * -t <name of file with training data>, -T <name of file with test data>, 
-   * -M <minimum number of instances in subset> (default 2),
-   * -C <confidence factor> (default 0.25)
-   * -m <name of file with cost matrix>.
+   * Main method for testing this class.
+   *
+   * @param String options 
    */
-  
   public static void main(String [] argv){
 
     try {

@@ -16,83 +16,79 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import java.util.*;
 import weka.core.*;
 
 /**
- * Class implementing a binary C4.5-type split on an attribute.
+ * Class implementing a binary C4.5-like split on an attribute.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 public class BinC45Split extends ClassifierSplitModel{
 
-  // ==================
-  // Private variables.
-  // ==================
+  /** Attribute to split on. */
+  private int m_attIndex;        
 
-  private int attIndeX;         // Attribute to split on.
-  private int minNoObJ;         // Minimum number of objects in a split.  
-  private double splitPoinT;    // Value of split point.
-  private double infoGaiN;      // InfoGain of split.
-  private double gainRatiO;     // GainRatio of split. 
-  private double sumOfWeightS;  // The sum of the weights of the instances.
+  /** Minimum number of objects in a split.   */ 
+  private int m_minNoObj;         
 
-  /**
-   * Static references to splitting criteria.
-   */
+  /** Value of split point. */
+  private double m_splitPoint;  
 
-  private static InfoGainSplitCrit infoGainCrit = new InfoGainSplitCrit();
-  private static GainRatioSplitCrit gainRatioCrit = new GainRatioSplitCrit();
+  /** InfoGain of split. */
+  private double m_infoGain; 
 
-  // ===============
-  // Public methods.
-  // ===============
+  /** GainRatio of split.  */
+  private double m_gainRatio;  
+
+  /** The sum of the weights of the instances. */
+  private double m_sumOfWeights;  
+
+  /** Static reference to splitting criterion. */
+  private static InfoGainSplitCrit m_infoGainCrit = new InfoGainSplitCrit();
+
+  /** Static reference to splitting criterion. */
+  private static GainRatioSplitCrit m_gainRatioCrit = new GainRatioSplitCrit();
 
   /**
    * Initializes the split model.
    */
-
   public BinC45Split(int attIndex,int minNoObj,double sumOfWeights){
 
     // Get index of attribute to split on.
-    
-    attIndeX = attIndex;
+    m_attIndex = attIndex;
         
     // Set minimum number of objects.
-
-    minNoObJ = minNoObj;
+    m_minNoObj = minNoObj;
 
     // Set sum of weights;
-
-    sumOfWeightS = sumOfWeights;
+    m_sumOfWeights = sumOfWeights;
   }
 
   /**
    * Creates a C4.5-type split on the given data.
+   *
    * @exception Exception if something goes wrong
    */
-
   public void buildClassifier(Instances trainInstances)
        throws Exception {
 
     // Initialize the remaining instance variables.
-    
-    numSubsetS = 0;
-    splitPoinT = Double.MAX_VALUE;
-    infoGaiN = 0;
-    gainRatiO = 0;
+    m_numSubsets = 0;
+    m_splitPoint = Double.MAX_VALUE;
+    m_infoGain = 0;
+    m_gainRatio = 0;
 
     // Different treatment for enumerated and numeric
     // attributes.
-    
-    if (trainInstances.attribute(attIndeX).isNominal()){
+    if (trainInstances.attribute(m_attIndex).isNominal()){
       handleEnumeratedAttribute(trainInstances);
     }else{
-      trainInstances.sort(trainInstances.attribute(attIndeX));
+      trainInstances.sort(trainInstances.attribute(m_attIndex));
       handleNumericAttribute(trainInstances);
     }
   }    
@@ -100,29 +96,28 @@ public class BinC45Split extends ClassifierSplitModel{
   /**
    * Returns index of attribute for which split was generated.
    */
-
   public final int attIndex(){
 
-    return attIndeX;
+    return m_attIndex;
   }
 
   /**
    * Gets class probability for instance.
+   *
    * @exception Exception if something goes wrong
    */
-  
   public final double classProb(int classIndex,Instance instance) 
        throws Exception {
 
     int theSubset = whichSubset(instance);
     
     if (theSubset <= -1)
-      return distributioN.prob(classIndex);
+      return m_distribution.prob(classIndex);
     else
-      if (Utils.gr(distributioN.perBag(theSubset),0))
-	return distributioN.prob(classIndex,theSubset);
+      if (Utils.gr(m_distribution.perBag(theSubset),0))
+	return m_distribution.prob(classIndex,theSubset);
       else
-	if (distributioN.maxClass() == classIndex)
+	if (m_distribution.maxClass() == classIndex)
 	  return 1;
 	else
 	  return 0;
@@ -131,16 +126,15 @@ public class BinC45Split extends ClassifierSplitModel{
   /**
    * Returns (C4.5-type) gain ratio for the generated split.
    */
-
   public final double gainRatio(){
-    return gainRatiO;
+    return m_gainRatio;
   }
 
   /**
    * Creates split on enumerated attribute.
+   *
    * @exception Exception if something goes wrong
    */
-
   private void handleEnumeratedAttribute(Instances trainInstances)
        throws Exception {
     
@@ -150,43 +144,39 @@ public class BinC45Split extends ClassifierSplitModel{
     Instance instance;
     int i;
 
-    numAttValues = trainInstances.attribute(attIndeX).numValues();
+    numAttValues = trainInstances.attribute(m_attIndex).numValues();
     newDistribution = new Distribution(numAttValues,
 				       trainInstances.numClasses());
     
     // Only Instances with known values are relevant.
-    
-    
     Enumeration enum = trainInstances.enumerateInstances();
     while (enum.hasMoreElements()) {
       instance = (Instance) enum.nextElement();
-      if (!instance.isMissing(attIndeX))
-	newDistribution.add((int)instance.value(attIndeX),instance);
+      if (!instance.isMissing(m_attIndex))
+	newDistribution.add((int)instance.value(m_attIndex),instance);
     }
-    distributioN = newDistribution;
+    m_distribution = newDistribution;
 
     // For all values
-
     for (i = 0; i < numAttValues; i++){
 
-      if (Utils.grOrEq(newDistribution.perBag(i),minNoObJ)){
+      if (Utils.grOrEq(newDistribution.perBag(i),m_minNoObj)){
 	secondDistribution = new Distribution(newDistribution,i);
 	
 	// Check if minimum number of Instances in the two
 	// subsets.
-	
-	if (secondDistribution.check(minNoObJ)){
-	  numSubsetS = 2;
-	  currIG = infoGainCrit.splitCritValue(secondDistribution,
-					       sumOfWeightS);
-	  currGR = gainRatioCrit.splitCritValue(secondDistribution,
-						sumOfWeightS,
+	if (secondDistribution.check(m_minNoObj)){
+	  m_numSubsets = 2;
+	  currIG = m_infoGainCrit.splitCritValue(secondDistribution,
+					       m_sumOfWeights);
+	  currGR = m_gainRatioCrit.splitCritValue(secondDistribution,
+						m_sumOfWeights,
 						currIG);
-	  if ((i == 0) || Utils.gr(currGR,gainRatiO)){
-	    gainRatiO = currGR;
-	    infoGaiN = currIG;
-	    splitPoinT = (double)i;
-	    distributioN = secondDistribution;
+	  if ((i == 0) || Utils.gr(currGR,m_gainRatio)){
+	    m_gainRatio = currGR;
+	    m_infoGain = currIG;
+	    m_splitPoint = (double)i;
+	    m_distribution = secondDistribution;
 	  }
 	}
       }
@@ -195,9 +185,9 @@ public class BinC45Split extends ClassifierSplitModel{
   
   /**
    * Creates split on numeric attribute.
+   *
    * @exception Exception if something goes wrong
    */
-
   private void handleNumericAttribute(Instances trainInstances)
        throws Exception {
   
@@ -213,66 +203,55 @@ public class BinC45Split extends ClassifierSplitModel{
     int i;
 
     // Current attribute is a numeric attribute.
-
-    distributioN = new Distribution(2,trainInstances.numClasses());
+    m_distribution = new Distribution(2,trainInstances.numClasses());
     
     // Only Instances with known values are relevant.
-
     Enumeration enum = trainInstances.enumerateInstances();
     i = 0;
     while (enum.hasMoreElements()) {
       instance = (Instance) enum.nextElement();
-      if (instance.isMissing(attIndeX))
+      if (instance.isMissing(m_attIndex))
 	break;
-      distributioN.add(1,instance);
+      m_distribution.add(1,instance);
       i++;
     }
     firstMiss = i;
-	
-    //System.out.println("No of known values: "+firstMiss);
 
     // Compute minimum number of Instances required in each
     // subset.
-
-    minSplit =  0.1*(distributioN.total())/
+    minSplit =  0.1*(m_distribution.total())/
       ((double)trainInstances.numClasses());
-    if (Utils.smOrEq(minSplit,minNoObJ)) 
-      minSplit = minNoObJ;
+    if (Utils.smOrEq(minSplit,m_minNoObj)) 
+      minSplit = m_minNoObj;
     else
       if (Utils.gr(minSplit,25)) 
 	minSplit = 25;
-	
-    //System.out.println("Min no of Instances: "+minSplit);
 
     // Enough Instances with known values?
-
     if (Utils.sm((double)firstMiss,2*minSplit))
       return;
     
     // Compute values of criteria for all possible split
     // indices.
-
-    defaultEnt = infoGainCrit.oldEnt(distributioN);
+    defaultEnt = m_infoGainCrit.oldEnt(m_distribution);
     while (next < firstMiss){
 	  
-      if (trainInstances.instance(next-1).value(attIndeX)+1e-5 < 
-	  trainInstances.instance(next).value(attIndeX)){ 
+      if (trainInstances.instance(next-1).value(m_attIndex)+1e-5 < 
+	  trainInstances.instance(next).value(m_attIndex)){ 
 	
 	// Move class values for all Instances up to next 
 	// possible split point.
-	
-	distributioN.shiftRange(1,0,trainInstances,last,next);
+	m_distribution.shiftRange(1,0,trainInstances,last,next);
 	
 	// Check if enough Instances in each subset and compute
 	// values for criteria.
-	
-	if (Utils.grOrEq(distributioN.perBag(0),minSplit) && 
-	    Utils.grOrEq(distributioN.perBag(1),minSplit)){
-	  currentInfoGain = infoGainCrit.
-	    splitCritValue(distributioN,sumOfWeightS,
+	if (Utils.grOrEq(m_distribution.perBag(0),minSplit) && 
+	    Utils.grOrEq(m_distribution.perBag(1),minSplit)){
+	  currentInfoGain = m_infoGainCrit.
+	    splitCritValue(m_distribution,m_sumOfWeights,
 			   defaultEnt);
-	  if (Utils.gr(currentInfoGain,infoGaiN)){
-	    infoGaiN = currentInfoGain;
+	  if (Utils.gr(currentInfoGain,m_infoGain)){
+	    m_infoGain = currentInfoGain;
 	    splitIndex = next-1;
 	  }
 	  index++;
@@ -283,82 +262,71 @@ public class BinC45Split extends ClassifierSplitModel{
     }
     
     // Was there any useful split?
-
     if (index == 0)
       return;
     
     // Compute modified information gain for best split.
-
-    infoGaiN = infoGaiN-(Utils.log2(index)/sumOfWeightS);
-    if (Utils.smOrEq(infoGaiN,0))
+    m_infoGain = m_infoGain-(Utils.log2(index)/m_sumOfWeights);
+    if (Utils.smOrEq(m_infoGain,0))
       return;
     
     // Set instance variables' values to values for
     // best split.
-
-    numSubsetS = 2;
-    splitPoinT = 
-      (trainInstances.instance(splitIndex+1).value(attIndeX)+
-       trainInstances.instance(splitIndex).value(attIndeX))/2;
+    m_numSubsets = 2;
+    m_splitPoint = 
+      (trainInstances.instance(splitIndex+1).value(m_attIndex)+
+       trainInstances.instance(splitIndex).value(m_attIndex))/2;
 
     // Restore distributioN for best split.
-
-    distributioN = new Distribution(2,trainInstances.numClasses());
-    distributioN.addRange(0,trainInstances,0,splitIndex+1);
-    distributioN.addRange(1,trainInstances,splitIndex+1,firstMiss);
+    m_distribution = new Distribution(2,trainInstances.numClasses());
+    m_distribution.addRange(0,trainInstances,0,splitIndex+1);
+    m_distribution.addRange(1,trainInstances,splitIndex+1,firstMiss);
 
     // Compute modified gain ratio for best split.
-
-    gainRatiO = gainRatioCrit.
-      splitCritValue(distributioN,sumOfWeightS,
-		     infoGaiN);
-
-    //System.out.println("Values for best split on attribute:");
-    //System.out.print("Split point: "+splitPoinT+" ");
-    //System.out.print("infoGaiN: "+infoGaiN+" ");
-    //System.out.println("Gain ratio: "+gainRatiO);
+    m_gainRatio = m_gainRatioCrit.
+      splitCritValue(m_distribution,m_sumOfWeights,
+		     m_infoGain);
   }
 
   /**
    * Returns (C4.5-type) information gain for the generated split.
    */
-
   public final double infoGain(){
-    return infoGaiN;
+
+    return m_infoGain;
   }
 
   /**
    * Prints left side of condition..
    * @param index of subset and training set.
    */
-
   public final String leftSide(Instances data){
 
-    return data.attribute(attIndeX).name();
+    return data.attribute(m_attIndex).name();
   }
 
   /**
    * Prints the condition satisfied by instances in a subset.
+   *
    * @param index of subset and training set.
    */
-
   public final String rightSide(int index,Instances data){
 
     StringBuffer text;
 
     text = new StringBuffer();
-    if (data.attribute(attIndeX).isNominal()){
+    if (data.attribute(m_attIndex).isNominal()){
       if (index == 0)
 	text.append(" = "+
-		    data.attribute(attIndeX).value((int)splitPoinT));
+		    data.attribute(m_attIndex).value((int)m_splitPoint));
       else
 	text.append(" != "+
-		    data.attribute(attIndeX).value((int)splitPoinT));
+		    data.attribute(m_attIndex).value((int)m_splitPoint));
     }else
       if (index == 0)
-	text.append(" <= "+splitPoinT);
+	text.append(" <= "+m_splitPoint);
       else
-	text.append(" > "+splitPoinT);
+	text.append(" > "+m_splitPoint);
     
     return text.toString();
   }
@@ -368,26 +336,25 @@ public class BinC45Split extends ClassifierSplitModel{
    * old split point.
    * (C4.5 does this for some strange reason).
    */
-
   public final void setSplitPoint(Instances allInstances){
     
     double newSplitPoint = -Double.MAX_VALUE;
     double tempValue;
     Instance instance;
     
-    if ((!allInstances.attribute(attIndeX).isNominal()) &&
-	(numSubsetS > 1)){
+    if ((!allInstances.attribute(m_attIndex).isNominal()) &&
+	(m_numSubsets > 1)){
       Enumeration enum = allInstances.enumerateInstances();
       while (enum.hasMoreElements()) {
 	instance = (Instance) enum.nextElement();
-	if (!instance.isMissing(attIndeX)){
-	  tempValue = instance.value(attIndeX);
+	if (!instance.isMissing(m_attIndex)){
+	  tempValue = instance.value(m_attIndex);
 	  if (Utils.gr(tempValue,newSplitPoint) && 
-	      Utils.smOrEq(tempValue,splitPoinT))
+	      Utils.smOrEq(tempValue,m_splitPoint))
 	    newSplitPoint = tempValue;
 	}
       }
-      splitPoinT = newSplitPoint;
+      m_splitPoint = newSplitPoint;
     }
   }
 
@@ -395,63 +362,40 @@ public class BinC45Split extends ClassifierSplitModel{
    * Returns weights if instance is assigned to more than one subset.
    * Returns null if instance is only assigned to one subset.
    */
-
-  //public static double rate = 0.75;
-
   public final double [] weights(Instance instance){
     
     double [] weights;
     int i;
     
-    if (instance.isMissing(attIndeX)){
-      weights = new double [numSubsetS];
-      for (i=0;i<numSubsetS;i++)
-	weights [i] = distributioN.perBag(i)/distributioN.total();
+    if (instance.isMissing(m_attIndex)){
+      weights = new double [m_numSubsets];
+      for (i=0;i<m_numSubsets;i++)
+	weights [i] = m_distribution.perBag(i)/m_distribution.total();
       return weights;
     }else{
-
       return null;
-
-      /* Prob. splitting
-
-      weights = new double [numSubsetS];
-      for (i=0;i<numSubsetS;i++){
-	if (data.attribute(attIndeX).isNominal()){
-	  if (i == (int)data.attribute(attIndeX).value(index))
-	    weights[i] = rate;
-	}else{
-	  if (Utils.smOrEq(data.attribute(attIndeX).value(index),splitPoinT)){
-	    if (i == 0)
-	      weights[i] = rate;
-	  }else
-	    if (i == 1)
-	      weights[i] = rate;
-	}
-	weights[i] = weights[i]+(1-rate)*distributioN.perBag(i)/
-	             distributioN.total();
-      }
-      return weights;*/
     }
   }
   
   /**
    * Returns index of subset instance is assigned to.
    * Returns -1 if instance is assigned to more than one subset.
+   *
    * @exception Exception if something goes wrong
    */
 
   public final int whichSubset(Instance instance) throws Exception {
     
-    if (instance.isMissing(attIndeX))
+    if (instance.isMissing(m_attIndex))
       return -1;
     else{
-      if (instance.attribute(attIndeX).isNominal()){
-	if ((int)splitPoinT == (int)instance.value(attIndeX))
+      if (instance.attribute(m_attIndex).isNominal()){
+	if ((int)m_splitPoint == (int)instance.value(m_attIndex))
 	  return 0;
 	else
 	  return 1;
       }else
-	if (Utils.smOrEq(instance.value(attIndeX),splitPoinT))
+	if (Utils.smOrEq(instance.value(m_attIndex),m_splitPoint))
 	  return 0;
 	else
 	  return 1;

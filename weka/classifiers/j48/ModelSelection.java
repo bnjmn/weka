@@ -16,33 +16,31 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.classifiers.j48;
 
 import java.io.*;
-
 import weka.core.*;
 
 /**
  * Abstract class for model selection criteria.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
-
 public abstract class ModelSelection implements Serializable {
 
   /**
    * Selects a model for the given dataset.
+   *
    * @exception Exception if model can't be selected
    */
-
   public abstract ClassifierSplitModel selectModel(Instances data) throws Exception;
 
   /**
-   * Selects a model for the given train data using the test data
+   * Selects a model for the given train data using the given test data
+   *
    * @exception Exception if model can't be selected
    */
-
   public ClassifierSplitModel selectModel(Instances train, Instances test) 
        throws Exception {
 
