@@ -44,7 +44,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class GreedyStepwise extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -144,6 +144,9 @@ public class GreedyStepwise extends ASSearch
    */
   public void setSearchBackwards(boolean back) {
     m_backward = back;
+    if (m_backward) {
+      setGenerateRanking(false);
+    }
   }
 
   /**
@@ -447,10 +450,17 @@ public class GreedyStepwise extends ASSearch
    */
   public String toString() {
     StringBuffer FString = new StringBuffer();
-    FString.append("\tForward Selection.\n\tStart set: ");
+    FString.append("\tGreedy Stepwise ("
+		   + ((m_backward)
+		      ? "backwards)"
+		      : "forwards)")+".\n\tStart set: ");
 
     if (m_starting == null) {
-      FString.append("no attributes\n");
+      if (m_backward) {
+	FString.append("all attributes\n");
+      } else {
+	FString.append("no attributes\n");
+      }
     }
     else {
       FString.append(startSetToString()+"\n");
