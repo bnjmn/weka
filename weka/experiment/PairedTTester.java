@@ -58,7 +58,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -102,7 +102,7 @@ public class PairedTTester implements OptionHandler {
   protected boolean m_ResultsetsValid;
 
   /** Indicates whether standard deviations should be displayed */
-  protected boolean m_ShowStdDevs = true;
+  protected boolean m_ShowStdDevs = false;
   
   /* Utility class to store the instances in a resultset */
   private class Resultset {
@@ -593,25 +593,30 @@ public class PairedTTester implements OptionHandler {
 
     int maxWidthMean = 2;
     int maxWidthStdDev = 2;
-    // determine max field width
+     // determine max field width
     for (int i = 0; i < getNumDatasets(); i++) {
       for (int j = 0; j < getNumResultsets(); j++) {
-	PairedStats pairedStats = calculateStatistics(i, baseResultset,
-						      j,
-						      comparisonColumn);
-	double width = ((Math.log(Math.abs(pairedStats.yStats.mean)) / 
-			 Math.log(10))+1);
-	if (width > maxWidthMean) {
-	  maxWidthMean = (int)width;
-	}
-
-	if (m_ShowStdDevs) {
-	  width = ((Math.log(Math.abs(pairedStats.yStats.stdDev)) / 
-		    Math.log(10))+1);
-	  if (width > maxWidthStdDev) {
-	    maxWidthStdDev = (int)width;
+	  try {
+	    PairedStats pairedStats = calculateStatistics(i, baseResultset,
+							  j,
+							  comparisonColumn);
+	    double width = ((Math.log(Math.abs(pairedStats.yStats.mean)) / 
+			     Math.log(10))+1);
+	    if (width > maxWidthMean) {
+	      maxWidthMean = (int)width;
+	    }
+	  
+	    if (m_ShowStdDevs) {
+	      width = ((Math.log(Math.abs(pairedStats.yStats.stdDev)) / 
+			Math.log(10))+1);
+	      if (width > maxWidthStdDev) {
+		maxWidthStdDev = (int)width;
+	      }
+	    }
+	  }  catch (Exception ex) {
+	  
 	  }
-	}
+       
       }
     }
 
@@ -678,8 +683,13 @@ public class PairedTTester implements OptionHandler {
 	} else {
 	  result.append(Utils.doubleToString(pairedStats.xStats.mean,
 					     (maxWidthMean+5), 2));
-	  result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
-						 (maxWidthStdDev+3),2)+')').append(" | ");
+	  if (Utils.eq(pairedStats.xStats.stdDev, Double.NaN)) {
+	    result.append('('+Utils.doubleToString(0.0,
+						  (maxWidthStdDev+3),2)+')').append(" | ");
+	  } else {
+	    result.append('('+Utils.doubleToString(pairedStats.xStats.stdDev,
+						   (maxWidthStdDev+3),2)+')').append(" | ");
+	  }
 	}
 	// Iterate over the resultsets
 	for (int j = 0; j < getNumResultsets(); j++) {
@@ -706,8 +716,13 @@ public class PairedTTester implements OptionHandler {
 		result.append(Utils.doubleToString(pairedStats.yStats.mean,
 						    (maxWidthMean+5),
 						   2));
-		result.append('('+Utils.doubleToString(pairedStats.
-				   yStats.stdDev, (maxWidthStdDev+3),2)+')');
+		if (Utils.eq(pairedStats.yStats.stdDev, Double.NaN)) {
+		  result.append('('+Utils.doubleToString(0.0, 
+				(maxWidthStdDev+3),2)+')');
+		} else {
+		  result.append('('+Utils.doubleToString(pairedStats.
+				  yStats.stdDev, (maxWidthStdDev+3),2)+')');
+		}
 		result.append(' ').append(sigChar).append(' ');
 	      }
 	    } catch (Exception ex) {
