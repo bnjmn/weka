@@ -36,7 +36,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -304,9 +304,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	  
 	  for (int k = 0; k < att.numValues(); k++) {
 	    attributeName = 
-	      new StringBuffer("'"+removeQuotes(att.name())+"=");
-	    attributeName.append(removeQuotes(att.value(k)));
-	    attributeName.append("'");
+	      new StringBuffer(att.name() + "=");
+	    attributeName.append(att.value(k));
 	    if (m_Numeric) {
 	      newAtts.
 	      addElement(new Attribute(attributeName.toString()));
@@ -361,15 +360,13 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	  
 	  for (int k = 1; k < att.numValues(); k++) {
 	    attributeName = 
-	      new StringBuffer("'" + removeQuotes(att.name()) + "=");
+	      new StringBuffer(att.name() + "=");
 	    for (int l = k; l < att.numValues(); l++) {
 	      if (l > k) {
 		attributeName.append(',');
 	      }
-	      attributeName.append(removeQuotes(att.
-						value(m_Indices[j][l])));
+	      attributeName.append(att.value(m_Indices[j][l]));
 	    }
-	    attributeName.append("'");
 	    if (m_Numeric) {
 	      newAtts.
 	      addElement(new Attribute(attributeName.toString()));
@@ -468,15 +465,6 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     }
     newInstance.setWeight(instance.weight());
     push(newInstance);
-  }
-
-  /** Removes quotes from a string. */
-  private static final String removeQuotes(String string) {
-
-    if (string.endsWith("'") || string.endsWith("\"")) {
-      return string.substring(1, string.length() - 1);
-    }
-    return string;
   }
 
   /**

@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -258,30 +258,33 @@ public class Attribute implements Copyable, Serializable {
   }
 
   /**
-   * Returns a description of this attribute in ARFF format.
+   * Returns a description of this attribute in ARFF format. Quotes
+   * strings if they contain whitespace characters, or if they
+   * are a question mark.
    *
    * @return a description of this attribute as a string
    */
   public final String toString() {
-
+    
     StringBuffer text = new StringBuffer();
-
-    text.append("@attribute "+m_Name+" ");
+    
+    text.append("@attribute " + Utils.quote(m_Name) + " ");
     if (isNominal()) {
       text.append('{');
       Enumeration enum = enumerateValues();
       while (enum.hasMoreElements()) {
-	text.append((String) enum.nextElement());
+	text.append(Utils.quote((String) enum.nextElement()));
 	if (enum.hasMoreElements())
 	  text.append(',');
       }
       text.append('}');
-    } else 
-      if (isNumeric())
+    } else {
+      if (isNumeric()) {
 	text.append("numeric");
-      else
+      } else {
 	text.append("string");
-    
+      }
+    }
     return text.toString();
   }
 

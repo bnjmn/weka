@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public final class Utils {
 
@@ -310,6 +310,23 @@ public final class Utils {
       }
     }
     return "";
+  }
+
+  /**
+   * Quotes a string if it contains whitespace characters.
+   *
+   * @param string the string to be quoted
+   * @return the string (quoted if it contains whitespace characters)
+   */
+  public static String quote(String string) {
+
+    if ((string.indexOf(' ') != -1) ||
+	(string.indexOf('\t') != -1) ||
+	(string.indexOf('\n') != -1) ||
+	(string.equals("?"))) {
+      string = ("'".concat(string)).concat("'");
+    }
+    return string;
   }
 
   /**

@@ -57,7 +57,7 @@ import java.io.*;
  * vector before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
 */
 public class Instance implements Copyable, Serializable {
   
@@ -183,21 +183,6 @@ public class Instance implements Copyable, Serializable {
       throw new Exception("Class is not set!");
     }
     return isMissing(classIndex());
-  }
-
-  /**
-   * Returns the class label of an instance.
-   *
-   * @return the instance's class as a string
-   * @exception Exception if the class is not set or the instance doesn't
-   * have access to a dataset
-   */
-  public final String classLabel() throws Exception {
-    
-    if (classIndex() < 0) {
-      throw new Exception("Class is not set!");
-    }
-    return toString(classIndex());
   }
 
   /**
@@ -618,10 +603,49 @@ public class Instance implements Copyable, Serializable {
     m_Weight = weight;
   }
 
+  /** 
+   * Returns the value of a nominal (or string) attribute
+   * for the instance.
+   *
+   * @param attIndex the attribute's index
+   * @return the value as a string
+   * @exception Exception if the attribute is not a nominal
+   * (or string) attribute, or the instance doesn't belong
+   * to a dataset.
+   */
+  public final String stringValue(int attIndex) throws Exception {
+
+    if (m_Dataset == null) {
+      throw new Exception("Instance doesn't have access to a dataset!");
+    } 
+    if (!m_Dataset.attribute(attIndex).isNominal() &&
+	!m_Dataset.attribute(attIndex).isString()) {
+      throw new Exception("Attribute neither nominal nor string!");
+    }
+    return m_Dataset.attribute(attIndex).
+      value((int) m_AttValues[attIndex]);
+  }
+
+  /** 
+   * Returns the value of a nominal (or string) attribute
+   * for the instance.
+   *
+   * @param att the attribute
+   * @return the value as a string
+   * @exception Exception if the attribute is not a nominal
+   * (or string) attribute, or the instance doesn't belong
+   * to a dataset.
+   */
+  public final String stringValue(Attribute att) throws Exception {
+
+    return stringValue(att.index());
+  }
+
   /**
    * Returns the description of one instance. If the instance
    * doesn't have access to a dataset, it returns the internal
-   * floating-point values.
+   * floating-point values. Quotes string
+   * values that contain whitespace characters.
    *
    * @return the instance's description as a string
    */
@@ -640,7 +664,9 @@ public class Instance implements Copyable, Serializable {
   /**
    * Returns the description of one value of the instance as a 
    * string. If the instance doesn't have access to a dataset, it 
-   * returns the internal floating-point value.
+   * returns the internal floating-point value. Quotes string
+   * values that contain whitespace characters, or if they
+   * are a question mark.
    *
    * @param attIndex the attribute's index
    * @return the value's description as a string
@@ -657,8 +683,11 @@ public class Instance implements Copyable, Serializable {
      } else {
        if (m_Dataset.attribute(attIndex).isNominal() || 
 	   m_Dataset.attribute(attIndex).isString()) {
-	 text.append(m_Dataset.attribute(attIndex).
-		     value((int) m_AttValues[attIndex]));
+	 try {
+	   text.append(Utils.quote(stringValue(attIndex)));
+	 } catch (Exception e) {
+	   throw new Error("This should never happen!");
+	 }
        } else {
 	 text.append(Utils.doubleToString(m_AttValues[attIndex],6));
        }
@@ -670,7 +699,9 @@ public class Instance implements Copyable, Serializable {
   /**
    * Returns the description of one value of the instance as a 
    * string. If the instance doesn't have access to a dataset it 
-   * returns the internal floating-point value.
+   * returns the internal floating-point value. Quotes string
+   * values that contain whitespace characters, or if they
+   * are a question mark.
    * The given attribute has to belong to a dataset.
    *
    * @param att the attribute
@@ -826,9 +857,6 @@ public class Instance implements Copyable, Serializable {
       
       // Say if class is missing
       System.out.println("Class is missing: " + inst.classIsMissing());
-      
-      // Print the instance's class label
-      System.out.println("Class label: " + inst.classLabel());
       
       // Print the instance's class value in internal format
       System.out.println("Class value (internal format): " + inst.classValue());
