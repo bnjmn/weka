@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
@@ -339,9 +339,9 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 	      "P", 1, "-P <classifier parameter>"));
 
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

@@ -61,7 +61,7 @@ import weka.classifiers.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class AdditiveRegression extends IteratedSingleClassifierEnhancer 
   implements OptionHandler,
@@ -141,9 +141,9 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer
 	      +"(default = 1.0, ie. no shrinkage)\n", 
 	      "S", 1, "-S"));
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

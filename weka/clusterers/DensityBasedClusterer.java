@@ -31,7 +31,7 @@ import weka.core.*;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.3 $
+ * @version  $Revision: 1.4 $
  */
 public abstract class DensityBasedClusterer extends Clusterer {
 
@@ -99,7 +99,7 @@ public abstract class DensityBasedClusterer extends Clusterer {
    * @return the array of values
    * @exception Exception if values could not be computed
    */
-  protected double[] logJointDensitiesForInstance(Instance inst)
+  public double[] logJointDensitiesForInstance(Instance inst)
     throws Exception {
 
     double[] weights = logDensityPerClusterForInstance(inst);

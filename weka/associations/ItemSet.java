@@ -35,7 +35,7 @@ import weka.core.*;
  * standard association rule mining.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ItemSet implements Serializable {
 
@@ -370,9 +370,9 @@ public class ItemSet implements Serializable {
   public static void upDateCounters(FastVector itemSets, Instances instances) {
 
     for (int i = 0; i < instances.numInstances(); i++) {
-      Enumeration enum = itemSets.elements();
-      while (enum.hasMoreElements()) 
-	((ItemSet)enum.nextElement()).upDateCounter(instances.instance(i));
+      Enumeration enu = itemSets.elements();
+      while (enu.hasMoreElements()) 
+	((ItemSet)enu.nextElement()).upDateCounter(instances.instance(i));
     }
   }
 

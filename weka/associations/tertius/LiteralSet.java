@@ -84,9 +84,9 @@ public abstract class LiteralSet implements Serializable, Cloneable {
     this();
     m_numInstances = instances.numInstances();
     m_counterInstances = new ArrayList(m_numInstances);
-    Enumeration enum = instances.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      m_counterInstances.add(enum.nextElement());
+    Enumeration enu = instances.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      m_counterInstances.add(enu.nextElement());
     }
   }
 
@@ -124,11 +124,11 @@ public abstract class LiteralSet implements Serializable, Cloneable {
    */
   public void upDate(Instances instances) {
 
-    Enumeration enum = instances.enumerateInstances();
+    Enumeration enu = instances.enumerateInstances();
     m_numInstances = instances.numInstances();
     m_counter = 0;
-    while (enum.hasMoreElements()) {
-      if (this.counterInstance((Instance) enum.nextElement())) {
+    while (enu.hasMoreElements()) {
+      if (this.counterInstance((Instance) enu.nextElement())) {
 	m_counter++;
       }
     }
@@ -323,10 +323,10 @@ public abstract class LiteralSet implements Serializable, Cloneable {
        * an instance satisfying the set.
        * It satisfies the set if there exists a part satisfying the set.
        */
-      Enumeration enum 
+      Enumeration enu 
 	= ((IndividualInstance) instance).getParts().enumerateInstances();
-      while (enum.hasMoreElements()) {
-	if (counterInstance(instance, (Instance) enum.nextElement())) {
+      while (enu.hasMoreElements()) {
+	if (counterInstance(instance, (Instance) enu.nextElement())) {
 	  return true;
 	}
       }

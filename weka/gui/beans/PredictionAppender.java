@@ -43,7 +43,7 @@ import weka.clusterers.DensityBasedClusterer;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
@@ -457,10 +457,10 @@ public class PredictionAppender extends JPanel
     addF.setAttributeName("class_predicted_by: "+classifierName);
     if (format.classAttribute().isNominal()) {
       String classLabels = "";
-      Enumeration enum = format.classAttribute().enumerateValues();
-      classLabels += (String)enum.nextElement();
-      while (enum.hasMoreElements()) {
-	classLabels += ","+(String)enum.nextElement();
+      Enumeration enu = format.classAttribute().enumerateValues();
+      classLabels += (String)enu.nextElement();
+      while (enu.hasMoreElements()) {
+	classLabels += ","+(String)enu.nextElement();
       }
       addF.setNominalLabels(classLabels);
     }
@@ -506,10 +506,10 @@ public class PredictionAppender extends JPanel
     addF.setAttributeName("assigned_cluster: "+clustererName);
     //if (format.classAttribute().isNominal()) {
     String clusterLabels = "0";
-      /*Enumeration enum = format.classAttribute().enumerateValues();
-      clusterLabels += (String)enum.nextElement();
-      while (enum.hasMoreElements()) {
-	clusterLabels += ","+(String)enum.nextElement();
+      /*Enumeration enu = format.classAttribute().enumerateValues();
+      clusterLabels += (String)enu.nextElement();
+      while (enu.hasMoreElements()) {
+	clusterLabels += ","+(String)enu.nextElement();
       }*/
     for(int i = 1; i <= clusterer.numberOfClusters()-1; i++)
         clusterLabels += ","+i;

@@ -67,7 +67,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -127,9 +127,9 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
               "\tCalculate the out of bag error.",
               "O", 0, "-O"));
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

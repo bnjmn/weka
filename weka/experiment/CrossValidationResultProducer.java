@@ -44,7 +44,7 @@ import weka.core.AdditionalMeasureProducer;
  * AveragingResultProducer to obtain averages for each run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
@@ -581,9 +581,9 @@ public class CrossValidationResultProducer
 	     "",
 	     "", 0, "\nOptions specific to split evaluator "
 	     + m_SplitEvaluator.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_SplitEvaluator).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_SplitEvaluator).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();

@@ -33,7 +33,7 @@ import weka.core.*;
  * (for a numeric class) or the mode (for a nominal class).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ZeroR extends Classifier implements WeightedInstancesHandler {
 
@@ -83,9 +83,9 @@ public class ZeroR extends Classifier implements WeightedInstancesHandler {
       throw new Exception("ZeroR can only handle nominal and numeric class"
 			  + " attributes.");
     }
-    Enumeration enum = instances.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      Instance instance = (Instance) enum.nextElement();
+    Enumeration enu = instances.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      Instance instance = (Instance) enu.nextElement();
       if (!instance.classIsMissing()) {
 	if (instances.classAttribute().isNominal()) {
 	  m_Counts[(int)instance.classValue()] += instance.weight();

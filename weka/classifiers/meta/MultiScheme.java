@@ -52,7 +52,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 
@@ -95,9 +95,9 @@ public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 	      + "\tuse training error)",
 	      "X", 1, "-X <number of folds>"));
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

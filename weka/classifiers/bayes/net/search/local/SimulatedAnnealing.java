@@ -36,7 +36,7 @@ import java.util.*;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.1 $
+ * Version: $Revision: 1.2 $
  */
 
 public class SimulatedAnnealing extends LocalScoreSearchAlgorithm {
@@ -214,9 +214,9 @@ public class SimulatedAnnealing extends LocalScoreSearchAlgorithm {
 		newVector.addElement(new Option("\tDelta temperature\n", "D", 1, "-D <float>"));
 		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
 
-		Enumeration enum = super.listOptions();
-		while (enum.hasMoreElements()) {
-			newVector.addElement(enum.nextElement());
+		Enumeration enu = super.listOptions();
+		while (enu.hasMoreElements()) {
+			newVector.addElement(enu.nextElement());
 		}
 		return newVector.elements();
 	}

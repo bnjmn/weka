@@ -43,7 +43,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
 
@@ -92,9 +92,9 @@ public class IB1 extends Classifier implements UpdateableClassifier {
     for (int i = 0; i < m_Train.numAttributes(); i++) {
       m_MinArray[i] = m_MaxArray[i] = Double.NaN;
     }
-    Enumeration enum = m_Train.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      updateMinMax((Instance) enum.nextElement());
+    Enumeration enu = m_Train.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      updateMinMax((Instance) enu.nextElement());
     }
   }
 
@@ -131,9 +131,9 @@ public class IB1 extends Classifier implements UpdateableClassifier {
 
     double distance, minDistance = Double.MAX_VALUE, classValue = 0;
     updateMinMax(instance);
-    Enumeration enum = m_Train.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      Instance trainInstance = (Instance) enum.nextElement();
+    Enumeration enu = m_Train.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      Instance trainInstance = (Instance) enu.nextElement();
       if (!trainInstance.classIsMissing()) {
 	distance = distance(instance, trainInstance);
 	if (distance < minDistance) {

@@ -88,7 +88,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ */
+ * @version $Revision: 1.19 $ */
 public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   
   /** The minimum support. */
@@ -1271,9 +1271,9 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
       text.append("\n\nApriori options:\n\n");
       text.append("-t <training file>\n");
       text.append("\tThe name of the training file.\n");
-      Enumeration enum = apriori.listOptions();
-      while (enum.hasMoreElements()) {
-	Option option = (Option)enum.nextElement();
+      Enumeration enu = apriori.listOptions();
+      while (enu.hasMoreElements()) {
+	Option option = (Option)enu.nextElement();
 	text.append(option.synopsis()+'\n');
 	text.append(option.description()+'\n');
       }

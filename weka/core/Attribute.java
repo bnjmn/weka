@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -522,10 +522,10 @@ public class Attribute implements Copyable, Serializable {
     switch (m_Type) {
     case NOMINAL:
       text.append('{');
-      Enumeration enum = enumerateValues();
-      while (enum.hasMoreElements()) {
-	text.append(Utils.quote((String) enum.nextElement()));
-	if (enum.hasMoreElements())
+      Enumeration enu = enumerateValues();
+      while (enu.hasMoreElements()) {
+	text.append(Utils.quote((String) enu.nextElement()));
+	if (enu.hasMoreElements())
 	  text.append(',');
       }
       text.append('}');
@@ -763,9 +763,9 @@ public class Attribute implements Copyable, Serializable {
       m_Values = (FastVector)m_Values.copy();
       m_Values.removeElementAt(index);
       Hashtable hash = new Hashtable(m_Hashtable.size());
-      Enumeration enum = m_Hashtable.keys();
-      while (enum.hasMoreElements()) {
-	Object string = enum.nextElement();
+      Enumeration enu = m_Hashtable.keys();
+      while (enu.hasMoreElements()) {
+	Object string = enu.nextElement();
 	Integer valIndexObject = (Integer)m_Hashtable.get(string);
 	int valIndex = valIndexObject.intValue();
 	if (valIndex > index) {

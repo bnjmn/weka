@@ -66,7 +66,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -1521,9 +1521,9 @@ public class PairedTTester implements OptionHandler {
 	Utils.checkForRemainingOptions(args);
       } catch (Exception ex) {
 	String result = "";
-	Enumeration enum = tt.listOptions();
-	while (enum.hasMoreElements()) {
-	  Option option = (Option) enum.nextElement();
+	Enumeration enu = tt.listOptions();
+	while (enu.hasMoreElements()) {
+	  Option option = (Option) enu.nextElement();
 	  result += option.synopsis() + '\n'
 	    + option.description() + '\n';
 	}

@@ -29,7 +29,7 @@ import weka.core.*;
  * Class for selecting a C4.5-type split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $y
+ * @version $Revision: 1.8 $y
  */
 public class C45ModelSelection extends ModelSelection {
 
@@ -92,9 +92,9 @@ public class C45ModelSelection extends ModelSelection {
       // Check if all attributes are nominal and have a 
       // lot of values.
       if (m_allData != null) {
-	Enumeration enum = data.enumerateAttributes();
-	while (enum.hasMoreElements()) {
-	  attribute = (Attribute) enum.nextElement();
+	Enumeration enu = data.enumerateAttributes();
+	while (enu.hasMoreElements()) {
+	  attribute = (Attribute) enu.nextElement();
 	  if ((attribute.isNumeric()) ||
 	      (Utils.sm((double)attribute.numValues(),
 			(0.3*(double)m_allData.numInstances())))){

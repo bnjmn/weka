@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 
@@ -59,9 +59,9 @@ public abstract class SingleClassifierEnhancer extends Classifier {
 
     Vector newVector = new Vector(3);
 
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
 
     newVector.addElement(new Option(
@@ -73,9 +73,9 @@ public abstract class SingleClassifierEnhancer extends Classifier {
 	     "",
 	     "", 0, "\nOptions specific to classifier "
 	     + m_Classifier.getClass().getName() + ":"));
-    enum = ((OptionHandler)m_Classifier).listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    enu = ((OptionHandler)m_Classifier).listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
 
     return newVector.elements();

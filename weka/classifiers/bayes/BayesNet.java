@@ -44,7 +44,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -171,9 +171,9 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 		boolean bHasNonNominal = false;
 		boolean bHasMissingValues = false;
 
-		Enumeration enum = instances.enumerateAttributes();		
-		while (enum.hasMoreElements()) {
-			Attribute attribute = (Attribute) enum.nextElement();
+		Enumeration enu = instances.enumerateAttributes();		
+		while (enu.hasMoreElements()) {
+			Attribute attribute = (Attribute) enu.nextElement();
 			if (attribute.type() == Attribute.STRING) {
 				throw new UnsupportedAttributeTypeException("BayesNet does not handle string variables, only nominal and continuous.");
 			}

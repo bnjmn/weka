@@ -101,7 +101,7 @@ import java.io.BufferedOutputStream;
  * file. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RemoteExperiment extends Experiment {
 
@@ -768,9 +768,9 @@ public class RemoteExperiment extends Experiment {
 	    +"\tfor multiple remote hosts)\n"
 	    + "-r \n"
 	    + "\tRun experiment on (default don't run)\n\n";
-	  Enumeration enum = ((OptionHandler)base).listOptions();
-	  while (enum.hasMoreElements()) {
-	    Option option = (Option) enum.nextElement();
+	  Enumeration enu = ((OptionHandler)base).listOptions();
+	  while (enu.hasMoreElements()) {
+	    Option option = (Option) enu.nextElement();
 	    result += option.synopsis() + "\n";
 	    result += option.description() + "\n";
 	  }

@@ -41,7 +41,7 @@ import weka.core.AdditionalMeasureProducer;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
@@ -375,9 +375,9 @@ public class DatabaseResultProducer extends DatabaseResultListener
 	     "",
 	     "", 0, "\nOptions specific to result producer "
 	     + m_ResultProducer.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_ResultProducer).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_ResultProducer).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();

@@ -67,7 +67,7 @@ import java.util.*;
  * Random seed to shuffle the input. (default 1), -1 == no shuffling<p>
  *
  * @author J. Lindgren (jtlindgr<at>cs.helsinki.fi)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
 */
 public class Winnow extends Classifier implements UpdateableClassifier {
   
@@ -243,9 +243,9 @@ public class Winnow extends Classifier implements UpdateableClassifier {
     if (insts.classAttribute().isNumeric()) {
       throw new UnsupportedClassTypeException("Can't handle a numeric class!");
     }
-    Enumeration enum = insts.enumerateAttributes();
-    while (enum.hasMoreElements()) {
-      Attribute attr = (Attribute) enum.nextElement();
+    Enumeration enu = insts.enumerateAttributes();
+    while (enu.hasMoreElements()) {
+      Attribute attr = (Attribute) enu.nextElement();
       if (!attr.isNominal()) {
         throw new UnsupportedAttributeTypeException("Winnow: only nominal attributes, "
 						    + "please.");

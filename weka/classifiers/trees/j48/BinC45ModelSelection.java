@@ -29,7 +29,7 @@ import weka.core.*;
  * Class for selecting a C4.5-like binary (!) split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class BinC45ModelSelection extends ModelSelection{
 
@@ -90,9 +90,9 @@ public class BinC45ModelSelection extends ModelSelection{
 
       // Check if all attributes are nominal and have a 
       // lot of values.
-      Enumeration enum = data.enumerateAttributes();
-      while (enum.hasMoreElements()) {
-	Attribute attribute = (Attribute) enum.nextElement();
+      Enumeration enu = data.enumerateAttributes();
+      while (enu.hasMoreElements()) {
+	Attribute attribute = (Attribute) enu.nextElement();
 	if ((attribute.isNumeric()) ||
 	    (Utils.sm((double)attribute.numValues(),
 		      (0.3*(double)m_allData.numInstances())))){

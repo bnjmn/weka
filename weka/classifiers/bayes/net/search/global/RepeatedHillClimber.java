@@ -32,7 +32,7 @@ import java.util.*;
  * The best network found is returned.  
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.1 $
+ * Version: $Revision: 1.2 $
  */
 public class RepeatedHillClimber extends HillClimber {
 
@@ -177,9 +177,9 @@ public class RepeatedHillClimber extends HillClimber {
 		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
 		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
 
-		Enumeration enum = super.listOptions();
-		while (enum.hasMoreElements()) {
-			newVector.addElement(enum.nextElement());
+		Enumeration enu = super.listOptions();
+		while (enu.hasMoreElements()) {
+			newVector.addElement(enu.nextElement());
 		}
 		return newVector.elements();
 	} // listOptions

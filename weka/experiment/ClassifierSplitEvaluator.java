@@ -51,7 +51,7 @@ import weka.classifiers.rules.ZeroR;
  * Add the prediction and target columns to the result file for each fold.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -156,9 +156,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 	     "",
 	     "", 0, "\nOptions specific to classifier "
 	     + m_Classifier.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();

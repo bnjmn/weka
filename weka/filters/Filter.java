@@ -68,7 +68,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public abstract class Filter implements Serializable {
 
@@ -643,9 +643,9 @@ public abstract class Filter implements Serializable {
       // Output the error and also the valid options
       if (filter instanceof OptionHandler) {
 	filterOptions += "\nFilter options:\n\n";
-	Enumeration enum = ((OptionHandler)filter).listOptions();
-	while (enum.hasMoreElements()) {
-	  Option option = (Option) enum.nextElement();
+	Enumeration enu = ((OptionHandler)filter).listOptions();
+	while (enu.hasMoreElements()) {
+	  Option option = (Option) enu.nextElement();
 	  filterOptions += option.synopsis() + '\n'
 	    + option.description() + "\n";
 	}
@@ -821,9 +821,9 @@ public abstract class Filter implements Serializable {
       // Output the error and also the valid options
       if (filter instanceof OptionHandler) {
 	filterOptions += "\nFilter options:\n\n";
-	Enumeration enum = ((OptionHandler)filter).listOptions();
-	while (enum.hasMoreElements()) {
-	  Option option = (Option) enum.nextElement();
+	Enumeration enu = ((OptionHandler)filter).listOptions();
+	while (enu.hasMoreElements()) {
+	  Option option = (Option) enu.nextElement();
 	  filterOptions += option.synopsis() + '\n'
 	    + option.description() + "\n";
 	}

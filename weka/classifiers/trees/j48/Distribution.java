@@ -30,7 +30,7 @@ import weka.core.*;
  * Class for handling a distribution of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Distribution implements Cloneable, Serializable {
 
@@ -93,9 +93,9 @@ public class Distribution implements Cloneable, Serializable {
     totaL = 0;
     m_perClass = new double [source.numClasses()];
     m_perClassPerBag[0] = new double [source.numClasses()];
-    Enumeration enum = source.enumerateInstances();
-    while (enum.hasMoreElements())
-      add(0,(Instance) enum.nextElement());
+    Enumeration enu = source.enumerateInstances();
+    while (enu.hasMoreElements())
+      add(0,(Instance) enu.nextElement());
   }
 
   /**
@@ -119,9 +119,9 @@ public class Distribution implements Cloneable, Serializable {
     m_perClass = new double [source.numClasses()];
     for (int i = 0; i < modelToUse.numSubsets(); i++)
       m_perClassPerBag[i] = new double [source.numClasses()];
-    Enumeration enum = source.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      instance = (Instance) enum.nextElement();
+    Enumeration enu = source.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      instance = (Instance) enu.nextElement();
       index = modelToUse.whichSubset(instance);
       if (index != -1)
 	add(index, instance);
@@ -296,9 +296,9 @@ public class Distribution implements Cloneable, Serializable {
 	probs[j] = m_perBag[j]/totaL;
       }
     }
-    Enumeration enum = source.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      instance = (Instance) enum.nextElement();
+    Enumeration enu = source.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      instance = (Instance) enu.nextElement();
       if (instance.isMissing(attIndex)) {
 	classIndex = (int)instance.classValue();
 	weight = instance.weight();

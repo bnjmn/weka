@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class K2 extends GlobalScoreSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
@@ -190,9 +190,9 @@ public class K2 extends GlobalScoreSearchAlgorithm {
 			+ "\t(default false)",
 			"R", 0, "-R"));
 
-		Enumeration enum = super.listOptions();
-		while (enum.hasMoreElements()) {
-	  newVector.addElement(enum.nextElement());
+		Enumeration enu = super.listOptions();
+		while (enu.hasMoreElements()) {
+	  newVector.addElement(enu.nextElement());
 		}
 	  return newVector.elements();
 	}

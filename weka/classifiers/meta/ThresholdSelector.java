@@ -87,7 +87,7 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $ 
+ * @version $Revision: 1.30 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler, Drawable {
@@ -300,9 +300,9 @@ public class ThresholdSelector extends Classifier
 		"\nOptions specific to sub-classifier "
 	        + m_Classifier.getClass().getName()
 		+ ":\n(use -- to signal start of sub-classifier options)"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
+      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();

@@ -71,7 +71,7 @@ import weka.core.*;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class LWL extends SingleClassifierEnhancer
   implements UpdateableClassifier, WeightedInstancesHandler {
@@ -162,9 +162,9 @@ public class LWL extends SingleClassifierEnhancer
 				    +"\t(default 0 = Linear)",
 				    "U", 1,"-U <number of weighting method>"));
     
-    Enumeration enum = super.listOptions();
-    while (enum.hasMoreElements()) {
-      newVector.addElement(enum.nextElement());
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
 
     return newVector.elements();

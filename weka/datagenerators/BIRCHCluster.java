@@ -103,7 +103,7 @@ import java.util.Vector;
  * Random number seed for random function used (default 1). <p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  **/
 public class BIRCHCluster extends ClusterGenerator
   implements OptionHandler,
@@ -875,9 +875,9 @@ public class BIRCHCluster extends ClusterGenerator
 
     // generate examples for one cluster after another
     int cNum = 0;
-    for (Enumeration enum = m_ClusterList.elements();
-	 enum.hasMoreElements(); cNum++) {
-      Cluster cl  = (Cluster) enum.nextElement();
+    for (Enumeration enu = m_ClusterList.elements();
+	 enu.hasMoreElements(); cNum++) {
+      Cluster cl  = (Cluster) enu.nextElement();
       double stdDev = cl.getStdDev();
       int instNum = cl.getInstNum();
       double [] center = cl.getCenter();
@@ -1045,9 +1045,9 @@ public class BIRCHCluster extends ClusterGenerator
 
     int sumInst = 0;
     int cNum = 0;
-    for (Enumeration enum = m_ClusterList.elements();
-	 enum.hasMoreElements(); cNum++) {
-      Cluster cl  = (Cluster) enum.nextElement();
+    for (Enumeration enu = m_ClusterList.elements();
+	 enu.hasMoreElements(); cNum++) {
+      Cluster cl  = (Cluster) enu.nextElement();
       docu.append("%\n");
       docu.append("% Cluster: c"+ cNum + "\n");
       docu.append("% ----------------------------------------------\n");

@@ -115,7 +115,7 @@ import java.awt.event.ActionEvent;
  * Set output of current values. (default: 0) <p>
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class Tertius extends Associator implements OptionHandler, Runnable {
@@ -1848,9 +1848,9 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
       text.append("\n\nTertius options:\n\n");
       text.append("-t <name of training file>\n");
       text.append("\tSet training file.\n");
-      Enumeration enum = tertius.listOptions();
-      while (enum.hasMoreElements()) {
-	Option option = (Option) enum.nextElement();
+      Enumeration enu = tertius.listOptions();
+      while (enu.hasMoreElements()) {
+	Option option = (Option) enu.nextElement();
 	text.append(option.synopsis() + "\n");
 	text.append(option.description() + "\n");
       }

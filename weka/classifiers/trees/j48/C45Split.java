@@ -29,7 +29,7 @@ import weka.core.*;
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class C45Split extends ClassifierSplitModel{
 
@@ -172,9 +172,9 @@ public class C45Split extends ClassifierSplitModel{
 			      trainInstances.numClasses());
     
     // Only Instances with known values are relevant.
-    Enumeration enum = trainInstances.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      instance = (Instance) enum.nextElement();
+    Enumeration enu = trainInstances.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      instance = (Instance) enu.nextElement();
       if (!instance.isMissing(m_attIndex))
 	m_distribution.add((int)instance.value(m_attIndex),instance);
     }
@@ -213,10 +213,10 @@ public class C45Split extends ClassifierSplitModel{
     m_distribution = new Distribution(2,trainInstances.numClasses());
     
     // Only Instances with known values are relevant.
-    Enumeration enum = trainInstances.enumerateInstances();
+    Enumeration enu = trainInstances.enumerateInstances();
     i = 0;
-    while (enum.hasMoreElements()) {
-      instance = (Instance) enum.nextElement();
+    while (enu.hasMoreElements()) {
+      instance = (Instance) enu.nextElement();
       if (instance.isMissing(m_attIndex))
 	break;
       m_distribution.add(1,instance);
@@ -381,9 +381,9 @@ public class C45Split extends ClassifierSplitModel{
     
     if ((allInstances.attribute(m_attIndex).isNumeric()) &&
 	(m_numSubsets > 1)) {
-      Enumeration enum = allInstances.enumerateInstances();
-      while (enum.hasMoreElements()) {
-	instance = (Instance) enum.nextElement();
+      Enumeration enu = allInstances.enumerateInstances();
+      while (enu.hasMoreElements()) {
+	instance = (Instance) enu.nextElement();
 	if (!instance.isMissing(m_attIndex)) {
 	  tempValue = instance.value(m_attIndex);
 	  if (Utils.gr(tempValue,newSplitPoint) && 

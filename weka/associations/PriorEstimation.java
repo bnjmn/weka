@@ -40,7 +40,7 @@ import java.io.Serializable;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 
  public class PriorEstimation implements Serializable{
     

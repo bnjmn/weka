@@ -37,7 +37,7 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
 */
 public class NaiveBayesSimple extends Classifier {
 
@@ -100,9 +100,9 @@ public class NaiveBayesSimple extends Classifier {
     m_Devs = new double[instances.numClasses()]
       [instances.numAttributes() - 1];
     m_Priors = new double[instances.numClasses()];
-    Enumeration enum = instances.enumerateAttributes();
-    while (enum.hasMoreElements()) {
-      Attribute attribute = (Attribute) enum.nextElement();
+    Enumeration enu = instances.enumerateAttributes();
+    while (enu.hasMoreElements()) {
+      Attribute attribute = (Attribute) enu.nextElement();
       if (attribute.isNominal()) {
 	for (int j = 0; j < instances.numClasses(); j++) {
 	  m_Counts[j][attIndex] = new double[attribute.numValues()];
@@ -254,9 +254,11 @@ public class NaiveBayesSimple extends Classifier {
 	}
 	attIndex++;
       }
+      System.out.println(probs[j] + " ");
       probs[j] *= m_Priors[j];
     }
-    
+    System.out.println();
+
     // Normalize probabilities
     Utils.normalize(probs);
 

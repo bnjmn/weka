@@ -192,9 +192,9 @@ implements OptionHandler {
 	vec.addElement(new Option("",
 				  "", 0, "\nOptions specific to classifier "
 				  + m_Classifier.getClass().getName() + ":"));
-	Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-	while (enum.hasMoreElements()) {
-	  vec.addElement(enum.nextElement());
+	Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+	while (enu.hasMoreElements()) {
+	  vec.addElement(enu.nextElement());
 	}
       } catch (Exception e) {
       }

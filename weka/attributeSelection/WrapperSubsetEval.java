@@ -58,7 +58,7 @@ import  weka.filters.Filter;
  * (default = 1) <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -138,10 +138,10 @@ public class WrapperSubsetEval
 				      + "scheme " 
 				      + m_BaseClassifier.getClass().getName() 
 				      + ":"));
-      Enumeration enum = ((OptionHandler)m_BaseClassifier).listOptions();
+      Enumeration enu = ((OptionHandler)m_BaseClassifier).listOptions();
 
-      while (enum.hasMoreElements()) {
-        newVector.addElement(enum.nextElement());
+      while (enu.hasMoreElements()) {
+        newVector.addElement(enu.nextElement());
       }
     }
 

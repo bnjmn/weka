@@ -34,7 +34,7 @@ import weka.filters.Filter;
  * Class implementing a NBTree split on an attribute.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NBTreeSplit extends ClassifierSplitModel{
 
@@ -173,9 +173,9 @@ public class NBTreeSplit extends ClassifierSplitModel{
 
     /*
     // Only Instances with known values are relevant.
-    Enumeration enum = trainInstances.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      instance = (Instance) enum.nextElement();
+    Enumeration enu = trainInstances.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      instance = (Instance) enu.nextElement();
       if (!instance.isMissing(m_attIndex)) {
 	//	m_distribution.add((int)instance.value(m_attIndex),instance);
 	trainingSets[(int)instances.value(m_attIndex)].add(instance);

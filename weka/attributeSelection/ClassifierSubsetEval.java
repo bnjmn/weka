@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -137,10 +137,10 @@ public class ClassifierSubsetEval
 				      + "scheme " 
 				      + m_Classifier.getClass().getName() 
 				      + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
+      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
 
-      while (enum.hasMoreElements()) {
-        newVector.addElement(enum.nextElement());
+      while (enu.hasMoreElements()) {
+        newVector.addElement(enu.nextElement());
       }
     }
 

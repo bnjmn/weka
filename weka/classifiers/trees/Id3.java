@@ -35,7 +35,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class Id3 extends Classifier {
 
@@ -86,9 +86,9 @@ public class Id3 extends Classifier {
                                                     "attributes, please.");
       }
     }
-    Enumeration enum = data.enumerateInstances();
-    while (enum.hasMoreElements()) {
-      if (((Instance) enum.nextElement()).hasMissingValue()) {
+    Enumeration enu = data.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      if (((Instance) enu.nextElement()).hasMissingValue()) {
         throw new NoSupportForMissingValuesException("Id3: no missing values, "
                                                      + "please.");
       }

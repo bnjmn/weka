@@ -527,9 +527,9 @@ public class BinarySparseInstance extends SparseInstance {
       
       // Enumerate attributes (leaving out the class attribute)
       System.out.println("Enumerating attributes (leaving out class):");
-      Enumeration enum = inst.enumerateAttributes();
-      while (enum.hasMoreElements()) {
-	Attribute att = (Attribute) enum.nextElement();
+      Enumeration enu = inst.enumerateAttributes();
+      while (enu.hasMoreElements()) {
+	Attribute att = (Attribute) enu.nextElement();
 	System.out.println(att);
       }
       

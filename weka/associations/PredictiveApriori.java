@@ -67,7 +67,7 @@ import weka.associations.RuleGeneration;
  * Sets the class attribute (default last). <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.3 $ */
 
 public class PredictiveApriori extends Associator implements OptionHandler, CARuleMiner {
   
@@ -696,9 +696,9 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
       text.append("\n\nPredictiveApriori options:\n\n");
       text.append("-t <training file>\n");
       text.append("\tThe name of the training file.\n");
-      Enumeration enum = apriori.listOptions();
-      while (enum.hasMoreElements()) {
-	Option option = (Option)enum.nextElement();
+      Enumeration enu = apriori.listOptions();
+      while (enu.hasMoreElements()) {
+	Option option = (Option)enu.nextElement();
 	text.append(option.synopsis()+'\n');
 	text.append(option.description()+'\n');
       }

@@ -36,7 +36,7 @@ import java.util.*;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.1 $
+ * Version: $Revision: 1.2 $
  */
 public class TabuSearch extends HillClimber {
 
@@ -190,9 +190,9 @@ public class TabuSearch extends HillClimber {
 		newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
 		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
 
-		Enumeration enum = super.listOptions();
-		while (enum.hasMoreElements()) {
-			newVector.addElement(enum.nextElement());
+		Enumeration enu = super.listOptions();
+		while (enu.hasMoreElements()) {
+			newVector.addElement(enu.nextElement());
 		}
 		return newVector.elements();
 	} // listOptions

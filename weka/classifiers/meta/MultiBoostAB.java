@@ -100,7 +100,7 @@ import weka.core.*;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 `*/
 public class MultiBoostAB extends AdaBoostM1 {
 
@@ -141,14 +141,14 @@ public class MultiBoostAB extends AdaBoostM1 {
    */
   public Enumeration listOptions() {
 
-    Enumeration enum = super.listOptions();
+    Enumeration enu = super.listOptions();
     Vector vec = new Vector(1);
 
     vec.addElement(new Option(
 	      "\tNumber of sub-committees. (Default 10)",
 	      "C", 1, "-C <num>"));
-    while (enum.hasMoreElements()) {
-      vec.addElement(enum.nextElement());
+    while (enu.hasMoreElements()) {
+      vec.addElement(enu.nextElement());
     }
     return vec.elements();
   }

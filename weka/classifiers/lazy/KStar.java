@@ -192,9 +192,9 @@ public class KStar extends Classifier
     }
     // init done.
     Instance trainInstance;
-    Enumeration enum = m_Train.enumerateInstances();
-    while ( enum.hasMoreElements() ) {
-      trainInstance = (Instance)enum.nextElement();
+    Enumeration enu = m_Train.enumerateInstances();
+    while ( enu.hasMoreElements() ) {
+      trainInstance = (Instance)enu.nextElement();
       transProb = instanceTransformationProbability(instance, trainInstance);      
       switch ( m_ClassType )
 	{
