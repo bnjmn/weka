@@ -57,7 +57,7 @@ import weka.classifiers.*;
  * Do not clean up after the tree has been built.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -570,20 +570,20 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   }
   
   /**
-   * Check whether instance data is to be safed.
+   * Check whether instance data is to be saved.
    *
-   * @return true if instance data is safed
+   * @return true if instance data is saved
    */
-  public boolean getSafeInstanceData() {
+  public boolean getSaveInstanceData() {
     
     return m_noCleanup;
   }
   
   /**
-   * Set whether instance data is to be safed.
-   * @param v true if instance data is to be safed
+   * Set whether instance data is to be saved.
+   * @param v true if instance data is to be saved
    */
-  public void setSafeInstanceData(boolean v) {
+  public void setSaveInstanceData(boolean v) {
     
     m_noCleanup = v;
   }
