@@ -38,7 +38,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class RandomSplitResultProducer 
@@ -393,11 +393,14 @@ public class RandomSplitResultProducer
    */
   public String getCompatibilityState() {
 
-    String result = "-P " + m_TrainPercent + " " ;
+    String result = "-P " + m_TrainPercent;
+    if (!getRandomizeData()) {
+      result += " -R";
+    }
     if (m_SplitEvaluator == null) {
-      result += "<null SplitEvaluator>";
+      result += " <null SplitEvaluator>";
     } else {
-      result += "-W " + m_SplitEvaluator.getClass().getName();
+      result += " -W " + m_SplitEvaluator.getClass().getName();
     }
     return result + " --";
   }
