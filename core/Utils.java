@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public final class Utils {
 
@@ -938,6 +938,29 @@ public final class Utils {
       doubles[i] /= sum;
     }
   }
+
+  /**
+   * Converts an array containing the natural logarithms of
+   * probabilities stored in a vector back into probabilities.
+   * The probabilities are assumed to sum to one.
+   *
+   * @param a an array holding the natural logarithms of the probabilities
+   * @return the converted array 
+   */
+  static public double[] logs2probs(double[] a) {
+
+    double max = a[maxIndex(a)];
+    double sum = 0.0;
+
+    for(int i = 0; i < a.length; i++) {
+      a[i] = Math.exp(a[i] - max);
+      sum += a[i];
+    }
+
+    normalize(a, sum);
+
+    return a;
+  } 
 
   /**
    * Rounds a double to the next nearest integer value. The JDK version
