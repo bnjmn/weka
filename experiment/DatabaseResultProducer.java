@@ -36,7 +36,7 @@ import weka.core.Option;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler {
@@ -131,6 +131,7 @@ public class DatabaseResultProducer extends DatabaseResultListener
     if (m_ResultProducer == null) {
       throw new Exception("No ResultProducer set");
     }
+    m_ResultProducer.setResultListener(this);
     m_ResultProducer.preProcess();
   }
   

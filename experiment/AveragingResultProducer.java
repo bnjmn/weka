@@ -35,7 +35,7 @@ import weka.core.Option;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler {
@@ -110,14 +110,12 @@ public class AveragingResultProducer
    * @exception Exception if a problem occurs while getting the results
    */
   public void doRun(int run) throws Exception {
-
+    
     if (m_Instances == null) {
       throw new Exception("No Instances set");
     }
-    // Tell the resultproducer to send results to us
-    m_ResultProducer.setResultListener(this);
     m_ResultProducer.setInstances(m_Instances);
-    
+
     // Clear the collected results
     m_Keys.removeAllElements();
     m_Results.removeAllElements();
@@ -182,9 +180,6 @@ public class AveragingResultProducer
     System.arraycopy(template, m_KeyIndex + 1,
 		     newKey, m_KeyIndex,
 		     template.length - m_KeyIndex - 1);
-    /*
-    System.err.println("new key: " + DatabaseUtils.arrayToString(newKey));
-    */
     if (m_ResultListener.isResultRequired(this, newKey)) {
       Object [] resultTypes = m_ResultProducer.getResultTypes();
       Stats [] stats = new Stats [resultTypes.length];
@@ -202,11 +197,6 @@ public class AveragingResultProducer
 	// Add the results to the stats accumulator
 	Object [] currentResult = (Object [])m_Results.elementAt(i);
 	numMatches++;
-	/*
-	System.err.println("Match: " + DatabaseUtils.arrayToString(currentKey)
-			   + " -- "
-			   + DatabaseUtils.arrayToString(currentResult));
-	*/
 	for (int j = 0; j < resultTypes.length; j++) {
 	  if (resultTypes[j] instanceof Double) {
 	    if (currentResult[j] == null) {
@@ -330,6 +320,14 @@ public class AveragingResultProducer
     
     if (m_ResultProducer == null) {
       throw new Exception("No ResultProducer set");
+    }
+    // Tell the resultproducer to send results to us
+    m_ResultProducer.setResultListener(this);
+    findKeyIndex();
+    if (m_KeyIndex == -1) {
+      throw new Exception("No key field called " + m_KeyFieldName
+			  + " produced by "
+			  + m_ResultProducer.getClass().getName());
     }
     m_ResultProducer.preProcess();
   }
@@ -789,8 +787,9 @@ public class AveragingResultProducer
    * @param newResultProducer new ResultProducer to use.
    */
   public void setResultProducer(ResultProducer newResultProducer) {
-    
+
     m_ResultProducer = newResultProducer;
+    m_ResultProducer.setResultListener(this);
     findKeyIndex();
   }
 
