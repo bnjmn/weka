@@ -46,7 +46,7 @@ import  weka.core.*;
  * of the number of attributes in the data set. (default = 1). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -59,25 +59,27 @@ public class BestFirst extends ASSearch
    **/
   public class Link2 implements Serializable {
 
-    BitSet group;
-    double merit;
+    /*    BitSet group; */
+    Object [] m_data;
+    double m_merit;
 
 
     // Constructor
-    public Link2 (BitSet gr, double mer) {
-      group = (BitSet)gr.clone();
-      merit = mer;
+    public Link2 (Object [] data, double mer) {
+      //      group = (BitSet)gr.clone();
+      m_data = data;
+      m_merit = mer;
     }
 
 
     /** Get a group */
-    public BitSet getGroup () {
-      return  group;
+    public Object [] getData () {
+      return  m_data;
     }
 
 
     public String toString () {
-      return  ("Node: " + group.toString() + "  " + merit);
+      return  ("Node: " + m_data.toString() + "  " + m_merit);
     }
 
   }
@@ -142,14 +144,14 @@ public class BestFirst extends ASSearch
      * @param gr the attribute set specification
      * @param mer the "merit" of this attribute set
      **/
-    public void addToList (BitSet gr, double mer)
+    public void addToList (Object [] data, double mer)
       throws Exception {
-      Link2 newL = new Link2(gr, mer);
+      Link2 newL = new Link2(data, mer);
 
       if (size() == 0) {
 	addElement(newL);
       }
-      else {if (mer > ((Link2)(firstElement())).merit) {
+      else {if (mer > ((Link2)(firstElement())).m_merit) {
 	if (size() == m_MaxSize) {
 	  removeLinkAt(m_MaxSize - 1);
 	}
@@ -165,13 +167,13 @@ public class BestFirst extends ASSearch
 	//------------
 	// don't insert if list contains max elements an this
 	// is worst than the last
-	if ((size == m_MaxSize) && (mer <= ((Link2)(lastElement())).merit)) {
+	if ((size == m_MaxSize) && (mer <= ((Link2)(lastElement())).m_merit)) {
 
 	}
 	//---------------
 	else {
 	  while ((!done) && (i < size)) {
-	    if (mer > ((Link2)(elementAt(i))).merit) {
+	    if (mer > ((Link2)(elementAt(i))).m_merit) {
 	      if (size == m_MaxSize) {
 		removeLinkAt(m_MaxSize - 1);
 	      }
@@ -198,15 +200,15 @@ public class BestFirst extends ASSearch
 
   // member variables
   /** maximum number of stale nodes before terminating search */
-  private int m_maxStale;
+  protected int m_maxStale;
 
   /** 0 == backward search, 1 == forward search, 2 == bidirectional */
-  private int m_searchDirection;
+  protected int m_searchDirection;
 
   /** search directions */
-  private static final int SELECTION_BACKWARD = 0;
-  private static final int SELECTION_FORWARD = 1;
-  private static final int SELECTION_BIDIRECTIONAL = 2;
+  protected static final int SELECTION_BACKWARD = 0;
+  protected static final int SELECTION_FORWARD = 1;
+  protected static final int SELECTION_BIDIRECTIONAL = 2;
   public static final Tag [] TAGS_SELECTION = {
     new Tag(SELECTION_BACKWARD, "Backward"),
     new Tag(SELECTION_FORWARD, "Forward"),
@@ -214,31 +216,31 @@ public class BestFirst extends ASSearch
   };
 
   /** holds an array of starting attributes */
-  private int[] m_starting;
+  protected int[] m_starting;
 
   /** holds the start set for the search as a Range */
-  private Range m_startRange;
+  protected Range m_startRange;
 
   /** does the data have a class */
-  private boolean m_hasClass;
+  protected boolean m_hasClass;
 
   /** holds the class index */
-  private int m_classIndex;
+  protected int m_classIndex;
 
   /** number of attributes in the data */
-  private int m_numAttribs;
+  protected int m_numAttribs;
 
   /** total number of subsets evaluated during a search */
-  private int m_totalEvals;
+  protected int m_totalEvals;
 
   /** for debugging */
-  private boolean m_debug;
+  protected boolean m_debug;
 
   /** holds the merit of the best subset found */
-  private double m_bestMerit;
+  protected double m_bestMerit;
 
   /** holds the maximum size of the lookup cache for evaluated subsets */
-  private int m_cacheSize;
+  protected int m_cacheSize;
   
   /**
    * Returns a string describing this search method
@@ -581,7 +583,7 @@ public class BestFirst extends ASSearch
   }
 
 
-  private void printGroup (BitSet tt, int numAttribs) {
+  protected void printGroup (BitSet tt, int numAttribs) {
     int i;
 
     for (i = 0; i < numAttribs; i++) {
@@ -679,9 +681,12 @@ public class BestFirst extends ASSearch
     // evaluate the initial subset
     best_merit = ASEvaluator.evaluateSubset(best_group);
     // add the initial group to the list and the hash table
-    bfList.addToList(best_group, best_merit);
+    Object [] best = new Object[1];
+    best[0] = best_group.clone();
+    bfList.addToList(best, best_merit);
     BitSet tt = (BitSet)best_group.clone();
-    lookup.put(tt, "");
+    String hashC = tt.toString();
+    lookup.put(hashC, "");
 
     while (stale < m_maxStale) {
       added = false;
@@ -703,7 +708,8 @@ public class BestFirst extends ASSearch
 
       // copy the attribute set at the head of the list
       tl = bfList.getLinkAt(0);
-      temp_group = (BitSet)(tl.getGroup().clone());
+      temp_group = (BitSet)(tl.getData()[0]);
+      temp_group = (BitSet)temp_group.clone();
       // remove the head of the list
       bfList.removeLinkAt(0);
       // count the number of bits set (attributes)
@@ -736,8 +742,8 @@ public class BestFirst extends ASSearch
 	    /* if this subset has been seen before, then it is already 
 	       in the list (or has been fully expanded) */
 	    tt = (BitSet)temp_group.clone();
-
-	    if (lookup.containsKey(tt) == false) {
+	    hashC = tt.toString();
+	    if (lookup.containsKey(hashC) == false) {
 	      merit = ASEvaluator.evaluateSubset(temp_group);
 	      m_totalEvals++;
 
@@ -759,7 +765,8 @@ public class BestFirst extends ASSearch
 		added = true;
 		stale = 0;
 		best_merit = merit;
-		best_size = (size + best_size);
+		//		best_size = (size + best_size);
+		best_size = size;
 		best_group = (BitSet)(temp_group.clone());
 	      }
 
@@ -768,8 +775,11 @@ public class BestFirst extends ASSearch
 		insertCount = 0;
 	      }
 	      // insert this one in the list and in the hash table
-	      bfList.addToList(tt, merit);
-	      lookup.put(tt, "");
+	      Object [] add = new Object[1];
+	      add[0] = tt.clone();
+	      bfList.addToList(add, merit);
+	      hashC = tt.toString();
+	      lookup.put(hashC, "");
 	      insertCount++;
 	    } else {
 	      cacheHits++;
@@ -824,7 +834,7 @@ public class BestFirst extends ASSearch
    * @param group the BitSet to convert
    * @return an array of attribute indexes
    **/
-  private int[] attributeList (BitSet group) {
+  protected int[] attributeList (BitSet group) {
     int count = 0;
 
     // count how many were selected
