@@ -73,6 +73,7 @@ import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.PropertyPanel;
 import weka.gui.AttributeVisualizationPanel;
+import weka.gui.ViewerDialog;
 import weka.core.UnassignedClassException;
 
 /** 
@@ -83,7 +84,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -106,6 +107,9 @@ public class PreprocessPanel extends JPanel {
 
   /** Click to revert back to the last saved point */
   protected JButton m_UndoBut = new JButton("Undo");
+
+  /** Click to open the current instances in a viewer */
+  protected JButton m_EditBut = new JButton("Edit...");
 
   /** Click to apply filters and save the results */
   protected JButton m_SaveBut = new JButton("Save...");
@@ -231,6 +235,7 @@ public class PreprocessPanel extends JPanel {
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_OpenDBBut.setToolTipText("Open a set of instances from a database");
     m_UndoBut.setToolTipText("Undo the last change to the dataset");
+    m_EditBut.setToolTipText("Open the current dataset in a Viewer for editing");
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
 
@@ -262,6 +267,11 @@ public class PreprocessPanel extends JPanel {
     m_UndoBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	undo();
+      }
+    });
+    m_EditBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        edit();
       }
     });
     m_SaveBut.addActionListener(new ActionListener() {
@@ -344,6 +354,7 @@ public class PreprocessPanel extends JPanel {
     m_AttSummaryPanel.setBorder(BorderFactory
 		    .createTitledBorder("Selected attribute"));
     m_UndoBut.setEnabled(false);
+    m_EditBut.setEnabled(false);
     m_SaveBut.setEnabled(false);
     m_ApplyFilterBut.setEnabled(false);
     
@@ -355,6 +366,7 @@ public class PreprocessPanel extends JPanel {
     buttons.add(m_OpenURLBut);
     buttons.add(m_OpenDBBut);
     buttons.add(m_UndoBut);
+    buttons.add(m_EditBut);
     buttons.add(m_SaveBut);
 
     JPanel attInfo = new JPanel();
@@ -477,6 +489,7 @@ public class PreprocessPanel extends JPanel {
 			   + " (" + m_Instances.numInstances()
 			   + " instances)");
 	  m_SaveBut.setEnabled(true);
+	  m_EditBut.setEnabled(true);
 	  m_Log.statusMessage("OK");
 	  // Fire a propertychange event
 	  m_Support.firePropertyChange("", null, null);
@@ -1223,6 +1236,26 @@ public class PreprocessPanel extends JPanel {
       temp = m_tempUndoFiles.length-1;
     }
     m_UndoBut.setEnabled(m_tempUndoFiles[temp] != null);
+  }
+  
+  /**
+   * edits the current instances object in the viewer 
+   */
+  public void edit() {
+    ViewerDialog        dialog;
+    int                 result;
+    
+    dialog = new ViewerDialog(null);
+    result = dialog.showDialog(m_Instances);
+    if (result == ViewerDialog.APPROVE_OPTION) {
+      try {
+        addUndoPoint();
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+      }
+      setInstances(dialog.getInstances());
+    }
   }
   
   /**
