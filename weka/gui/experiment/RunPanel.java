@@ -58,7 +58,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -143,6 +143,7 @@ public class RunPanel extends JPanel implements ActionListener {
 	  } catch (Exception ex) {
 	    errors ++;
 	    logMessage(ex.getMessage());
+            ex.printStackTrace();
 	    boolean continueAfterError = false;
 	    if (continueAfterError) {
 	      m_ExpCopy.advanceCounters(); // Try to keep plowing through

@@ -100,7 +100,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -922,7 +922,7 @@ public class ClassifierPanel extends JPanel {
 	    switch (testMode) {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
-	      eval = new Evaluation(inst, costMatrix, null);
+	      eval = new Evaluation(inst, costMatrix);
 	      predInstances = new Instances(inst,inst.numInstances());
 	      predictions = new double [inst.numInstances()];
 	      for (int jj=0;jj<inst.numInstances();jj++) {
@@ -944,7 +944,7 @@ public class ClassifierPanel extends JPanel {
 		m_Log.statusMessage("Stratifying instances...");
 		inst.stratify(numFolds);
 	      }
-	      eval = new Evaluation(inst, costMatrix, null);
+	      eval = new Evaluation(inst, costMatrix);
 	      int p_index = 0;
 	      predInstances = new Instances(inst,inst.numInstances());
 	      predictions = new double [inst.numInstances()];
@@ -982,7 +982,7 @@ public class ClassifierPanel extends JPanel {
 	      Instances test = new Instances(inst, trainSize, testSize);
 	      m_Log.statusMessage("Building model on training split...");
 	      classifier.buildClassifier(train);
-	      eval = new Evaluation(train, costMatrix, null);
+	      eval = new Evaluation(train, costMatrix);
 	      m_Log.statusMessage("Evaluating on test split...");
 	      predictions = new double [test.numInstances()];
 	      predInstances = new Instances(test,test.numInstances());
@@ -1001,7 +1001,7 @@ public class ClassifierPanel extends JPanel {
 		
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
-	      eval = new Evaluation(inst, costMatrix, null);
+	      eval = new Evaluation(inst, costMatrix);
 	      predictions = new double [userTest.numInstances()];
 	      predInstances = new Instances(userTest,
 					    userTest.numInstances());

@@ -76,7 +76,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -162,7 +162,7 @@ public class ResultsPanel extends JPanel {
 
   /** Filter to ensure only arff files are selected for result files */  
   protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(".arff", "Arff data files");
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
   
   /** The file chooser for selecting result files */
