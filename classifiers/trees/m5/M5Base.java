@@ -38,7 +38,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -100,11 +100,23 @@ public abstract class M5Base extends Classifier
   protected boolean m_regressionTree;
 
   /**
+   * Do not prune tree/rules
+   */
+  protected boolean m_useUnpruned = false;
+
+  /**
+   * The minimum number of instances to allow at a leaf node
+   */
+  protected double m_minNumInstances = 4;
+
+  /**
    * Constructor
    */
   public M5Base() {
     m_generateRules = false;
     m_unsmoothedPredictions = false;
+    m_useUnpruned = false;
+    m_minNumInstances = 4;
   }
 
   /**
@@ -113,7 +125,10 @@ public abstract class M5Base extends Classifier
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(4);
+
+    newVector.addElement(new Option("\tUse unpruned tree/rules\n", 
+				    "N", 0, "-N"));
 
     newVector.addElement(new Option("\tUse unsmoothed predictions\n", 
 				    "U", 0, "-U"));
@@ -121,6 +136,10 @@ public abstract class M5Base extends Classifier
     newVector.addElement(new Option("\tBuild regression tree/rule rather "
 				    +"than a model tree/rule\n", 
 				    "R", 0, "-R"));
+
+    newVector.addElement(new Option("\tSet minimum number of instances "
+				    +"per leaf\n\t(default 4)",
+				    "M",1,"-M <minimum number of instances>"));
     return newVector.elements();
   } 
 
@@ -131,14 +150,21 @@ public abstract class M5Base extends Classifier
    * 
    * -U <br>
    * Use unsmoothed predictions. <p>
+   *
+   * -R <br>
+   * Build a regression tree rather than a model tree. <p>
    * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+    setUnpruned(Utils.getFlag('N', options));
     setUseUnsmoothed(Utils.getFlag('U', options));
     setBuildRegressionTree(Utils.getFlag('R', options));
-    
+    String optionString = Utils.getOption('M', options);
+    if (optionString.length() != 0) {
+      setMinNumInstances((new Double(optionString)).doubleValue());
+    }
     Utils.checkForRemainingOptions(options);
   } 
 
@@ -148,8 +174,12 @@ public abstract class M5Base extends Classifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[2];
-    int      current = 0;
+    String[] options = new String[5];
+    int current = 0;
+
+    if (getUnpruned()) {
+      options[current++] = "-N";
+    }
 
     if (getUseUnsmoothed()) {
       options[current++] = "-U";
@@ -159,11 +189,32 @@ public abstract class M5Base extends Classifier
       options[current++] = "-R";
     }
 
+    options[current++] = "-M"; 
+    options[current++] = ""+getMinNumInstances();
+
     while (current < options.length) {
       options[current++] = "";
     } 
     return options;
   } 
+
+  /**
+   * Use unpruned tree/rules
+   *
+   * @param unpruned true if unpruned tree/rules are to be generated
+   */
+  public void setUnpruned(boolean unpruned) {
+    m_useUnpruned = unpruned;
+  }
+
+  /**
+   * Get whether unpruned tree/rules are being generated
+   *
+   * @return true if unpruned tree/rules are to be generated
+   */
+  public boolean getUnpruned() {
+    return m_useUnpruned;
+  }
 
   /**
    * Generate rules (decision list) rather than a tree
@@ -222,6 +273,24 @@ public abstract class M5Base extends Classifier
   }
 
   /**
+   * Set the minumum number of instances to allow at a leaf node
+   *
+   * @param minNum the minimum number of instances
+   */
+  public void setMinNumInstances(double minNum) {
+    m_minNumInstances = minNum;
+  }
+
+  /**
+   * Get the minimum number of instances to allow at a leaf node
+   *
+   * @return a <code>double</code> value
+   */
+  public double getMinNumInstances() {
+    return m_minNumInstances;
+  }
+
+  /**
    * Generates the classifier.
    * 
    * @param data set of instances serving as training data
@@ -265,7 +334,9 @@ public abstract class M5Base extends Classifier
 	tempRule = new Rule();
 	tempRule.setSmoothing(!m_unsmoothedPredictions);
 	tempRule.setRegressionTree(m_regressionTree);
-
+	tempRule.setUnpruned(m_useUnpruned);
+	tempRule.setSaveInstances(false);
+	tempRule.setMinNumInstances(m_minNumInstances);
 	tempRule.buildClassifier(tempInst);
 	m_ruleSet.addElement(tempRule);
 	//	System.err.println("Built rule : "+tempRule.toString());
@@ -276,10 +347,12 @@ public abstract class M5Base extends Classifier
       tempRule = new Rule();
 
       tempRule.setUseTree(true);
-      tempRule.setGrowFullTree(true);
+      //      tempRule.setGrowFullTree(true);
       tempRule.setSmoothing(!m_unsmoothedPredictions);
       tempRule.setSaveInstances(m_saveInstances);
       tempRule.setRegressionTree(m_regressionTree);
+      tempRule.setUnpruned(m_useUnpruned);
+      tempRule.setMinNumInstances(m_minNumInstances);
 
       Instances temp_train;
 
@@ -422,7 +495,3 @@ public abstract class M5Base extends Classifier
     return ((Rule)m_ruleSet.elementAt(0)).m_topOfTree.numberOfLinearModels();
   }
 }
-
-
-
-

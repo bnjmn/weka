@@ -31,7 +31,7 @@ import weka.core.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class M5P extends M5Base 
@@ -78,6 +78,71 @@ public class M5P extends M5Base
    */
   public boolean getSaveInstances() {
     return m_saveInstances;
+  }
+
+  /**
+   * Returns an enumeration describing the available options
+   * 
+   * @return an enumeration of all the available options
+   */
+  public Enumeration listOptions() {
+    Enumeration superOpts = super.listOptions();
+    
+    Vector newVector = new Vector();
+    while (superOpts.hasMoreElements()) {
+      newVector.addElement((Option)superOpts.nextElement());
+    }
+
+    newVector.addElement(new Option("\tSave instances at the nodes in\n"
+				    +"\tthe tree (for visualization purposes)\n",
+				    "L", 0, "-L"));
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options. <p>
+   *
+   * Valid options are:<p>
+   * 
+   * -U <br>
+   * Use unsmoothed predictions. <p>
+   *
+   * -R <br>
+   * Build a regression tree rather than a model tree. <p>
+   *
+   * -L <br>
+   * Save instance data at each node (for visualization purposes). <p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    setSaveInstances(Utils.getFlag('L', options));
+    super.setOptions(options);
+  }
+
+  /**
+   * Gets the current settings of the classifier.
+   * 
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String [] getOptions() {
+    String[] superOpts = super.getOptions();
+    String [] options = new String [superOpts.length+1];
+    int current = superOpts.length;
+    for (int i = 0; i < current; i++) {
+      options[i] = superOpts[i];
+    }
+    
+    if (getSaveInstances()) {
+      options[current++] = "-L";
+    }
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+
+    return options;
   }
 
   /**

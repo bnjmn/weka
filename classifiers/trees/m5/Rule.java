@@ -28,7 +28,7 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Rule {
 
@@ -116,11 +116,6 @@ public class Rule {
   private boolean    m_useTree;
 
   /**
-   * grow and prune a full m5 tree rather than use the PART heuristic
-   */
-  private boolean    m_growFullTree;
-
-  /**
    * use the original m5 smoothing procedure
    */
   private boolean    m_smoothPredictions;
@@ -136,13 +131,24 @@ public class Rule {
   private boolean m_regressionTree;
 
   /**
+   * Build unpruned tree/rule
+   */
+  private boolean m_useUnpruned;
+
+  /**
+   * The minimum number of instances to allow at a leaf node
+   */
+  private double m_minNumInstances;
+
+  /**
    * Constructor declaration
    *
    */
   public Rule() {
     m_useTree = false;
-    m_growFullTree = true;
     m_smoothPredictions = false;
+    m_useUnpruned = false;
+    m_minNumInstances = 4;
   }
 
   /**
@@ -176,16 +182,18 @@ public class Rule {
     m_topOfTree.setSaveInstances(m_saveInstances);
     m_topOfTree.setRegressionTree(m_regressionTree);
     m_topOfTree.buildClassifier(m_instances);
+    m_topOfTree.setMinNumInstances(m_minNumInstances);
 
 
-    // m_topOfTree.numLeaves(0);
-    if (m_growFullTree) {
-	m_topOfTree.prune();
-	// m_topOfTree.printAllModels();
-	m_topOfTree.numLeaves(0);
-    } 
+    if (!m_useUnpruned) {
+      m_topOfTree.prune();
+    } else {
+      m_topOfTree.installLinearModels();
+    }
+    //m_topOfTree.printAllModels();
+    m_topOfTree.numLeaves(0);
 
-    if (!m_useTree) {      
+    if (!m_useTree) {     
       makeRule();
       // save space
       //      m_topOfTree = null;
@@ -430,6 +438,24 @@ public class Rule {
   } 
 
   /**
+   * Use unpruned tree/rules
+   *
+   * @param unpruned true if unpruned tree/rules are to be generated
+   */
+  public void setUnpruned(boolean unpruned) {
+    m_useUnpruned = unpruned;
+  }
+
+  /**
+   * Get whether unpruned tree/rules are being generated
+   *
+   * @return true if unpruned tree/rules are to be generated
+   */
+  public boolean getUnpruned() {
+    return m_useUnpruned;
+  }
+
+  /**
    * Use an m5 tree rather than generate rules
    * 
    * @param u true if m5 tree is to be used
@@ -445,25 +471,6 @@ public class Rule {
    */
   public boolean getUseTree() {
     return m_useTree;
-  } 
-
-  /**
-   * Grow a full tree instead of using the PART heuristic
-   * 
-   * @param g true if a full tree is to be grown rather than using
-   * the part heuristic
-   */
-  public void setGrowFullTree(boolean g) {
-    m_growFullTree = g;
-  } 
-
-  /**
-   * Get whether or not a full tree has been grown
-   * 
-   * @return true if a full tree has been grown
-   */
-  public boolean getGrowFullTree() {
-    return m_growFullTree;
   } 
 
   /**
@@ -586,6 +593,24 @@ public class Rule {
   public void setRegressionTree(boolean newregressionTree) {
     
     m_regressionTree = newregressionTree;
+  }
+
+  /**
+   * Set the minumum number of instances to allow at a leaf node
+   *
+   * @param minNum the minimum number of instances
+   */
+  public void setMinNumInstances(double minNum) {
+    m_minNumInstances = minNum;
+  }
+
+  /**
+   * Get the minimum number of instances to allow at a leaf node
+   *
+   * @return a <code>double</code> value
+   */
+  public double getMinNumInstances() {
+    return m_minNumInstances;
   }
 }
 

@@ -30,7 +30,7 @@ import weka.filters.Filter;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RuleNode extends Classifier {
 
@@ -112,9 +112,9 @@ public class RuleNode extends Classifier {
   private RuleNode	   m_parent;
 
   /**
-   * a node will not be split if it contains less then m_splitNum isntances
+   * a node will not be split if it contains less then m_splitNum instances
    */
-  private double	   m_splitNum = 3.5;
+  private double	   m_splitNum = 4;
 
   /**
    * a node will not be split if its class standard deviation is less
@@ -667,6 +667,31 @@ public class RuleNode extends Classifier {
   } 
 
   /**
+   * Traverses the tree and installs linear models at each node.
+   * This method must be called if pruning is not to be performed.
+   *
+   * @exception Exception if an error occurs
+   */
+  public void installLinearModels() throws Exception {
+    Evaluation nodeModelEval;
+    if (m_isLeaf) {
+      buildLinearModel(m_indices);
+    } else {
+      if (m_left != null) {
+	m_left.installLinearModels();
+      }
+
+      if (m_right != null) {
+	m_right.installLinearModels();
+      }
+      buildLinearModel(m_indices);
+    }
+    nodeModelEval = new Evaluation(m_reducedI);
+    nodeModelEval.evaluateModel(m_nodeModel, m_reducedI);
+    m_rootMeanSquaredError = nodeModelEval.rootMeanSquaredError();
+  }
+
+  /**
    * Recursively prune the tree
    *
    * @exception Exception if an error occurs
@@ -935,6 +960,24 @@ public class RuleNode extends Classifier {
     
     return m_regressionTree;
   }
+
+  /**
+   * Set the minumum number of instances to allow at a leaf node
+   *
+   * @param minNum the minimum number of instances
+   */
+  public void setMinNumInstances(double minNum) {
+    m_splitNum = minNum;
+  }
+
+  /**
+   * Get the minimum number of instances to allow at a leaf node
+   *
+   * @return a <code>double</code> value
+   */
+  public double getMinNumInstances() {
+    return m_splitNum;
+  }
   
   /**
    * Set the value of regressionTree.
@@ -945,8 +988,6 @@ public class RuleNode extends Classifier {
     
     m_regressionTree = newregressionTree;
   }
-  
-
 
   /**
    * Apply the attribute filter at this node to a set of supplied instances
