@@ -30,7 +30,7 @@ import weka.filters.Filter;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RuleNode extends Classifier {
 
@@ -72,7 +72,7 @@ public class RuleNode extends Classifier {
   /**
    * the linear model at this node
    */
-  private LinearRegression m_nodeModel;
+  private PreConstructedLinearModel m_nodeModel;
 
   /**
    * the number of paramters in the chosen model for this node---either
@@ -83,22 +83,10 @@ public class RuleNode extends Classifier {
   public int		   m_numParameters;
 
   /**
-   * A copy of the instances containing only the attributes tested
-   * below this node---used to construct the linear model for this node
-   */
-  private Instances	   m_reducedI;
-
-  /**
    * the mean squared error of the model at this node (either linear or
    * subtree)
    */
   private double	   m_rootMeanSquaredError;
-
-  /**
-   * the Attribute filter used to remove any attributes not presented to
-   * the linear regression model
-   */
-  private Remove  m_attributeFilter;
 
   /**
    * child nodes
@@ -142,18 +130,6 @@ public class RuleNode extends Classifier {
   private double	   m_globalAbsDeviation;
 
   /**
-   * Use the original m5 smoothing procedure during prediction of
-   * novel test cases
-   */
-  private boolean	   m_smoothPredictions;
-
-  /**
-   * Used to disable smoothing during pruning
-   */
-  private boolean	   m_smoothingOn;
-
-
-  /**
    * Indices of the attributes to be used in generating a linear model
    * at this node
    */
@@ -194,8 +170,6 @@ public class RuleNode extends Classifier {
     m_parent = parent;
     m_globalDeviation = globalDev;
     m_globalAbsDeviation = globalAbsDev;
-    m_attributeFilter = null;
-    m_smoothPredictions = false;
   }
 
     
@@ -206,7 +180,7 @@ public class RuleNode extends Classifier {
    * @exception Exception if an error occurs
    */
   public void buildClassifier(Instances data) throws Exception {
-    m_smoothingOn = false;
+
     m_rootMeanSquaredError = Double.MAX_VALUE;
     //    m_instances = new Instances(data);
     m_instances = data;
@@ -216,7 +190,6 @@ public class RuleNode extends Classifier {
     m_nodeModel = null;
     m_right = null;
     m_left = null;
-    m_attributeFilter = null;
 
     if ((m_numInstances < m_splitNum) 
 	|| (Rule.stdDev(m_classIndex, m_instances) 
@@ -247,45 +220,15 @@ public class RuleNode extends Classifier {
 	throw new Exception("Classifier has not been built correctly.");
       } 
 
-      m_attributeFilter.input(inst);
-
-      tempInst = m_attributeFilter.output();
-
-      return m_nodeModel.classifyInstance(tempInst);
-    } 
+      return m_nodeModel.classifyInstance(inst);
+    }
 
     if (inst.value(m_splitAtt) <= m_splitValue) {
-      if (m_left == null) {
-	m_attributeFilter.input(inst);
-
-	tempInst = m_attributeFilter.output();
-
-	return m_nodeModel.classifyInstance(tempInst);
-      } 
-      pred = m_left.classifyInstance(inst);
-      n = m_left.m_numInstances;
+      return m_left.classifyInstance(inst);
     } else {
-      if (m_right == null) {
-	m_attributeFilter.input(inst);
-
-	tempInst = m_attributeFilter.output();
-
-	return m_nodeModel.classifyInstance(tempInst);
-      } 
-
-      pred = m_right.classifyInstance(inst);
-      n = m_right.m_numInstances;
+      return m_right.classifyInstance(inst);
     } 
-
-    if (m_smoothingOn && m_smoothPredictions) {
-      m_attributeFilter.input(inst);
-      tempInst = m_attributeFilter.output();
-      double supportPred = m_nodeModel.classifyInstance(tempInst);
-      pred = smoothingOriginal(n, pred, supportPred);
-    } 
-    return pred;
   } 
-
 
   /**
    * Applies the m5 smoothing procedure to a prediction
@@ -366,18 +309,14 @@ public class RuleNode extends Classifier {
 
 	// build left and right nodes
 	m_left = new RuleNode(m_globalDeviation, m_globalAbsDeviation, this);
-
 	m_left.setMinNumInstances(m_splitNum);
 	m_left.setRegressionTree(m_regressionTree);
-	m_left.setSmoothing(m_smoothPredictions);
 	m_left.setSaveInstances(m_saveInstances);
 	m_left.buildClassifier(leftSubset);
 
 	m_right = new RuleNode(m_globalDeviation, m_globalAbsDeviation, this);
-	
 	m_right.setMinNumInstances(m_splitNum);
 	m_right.setRegressionTree(m_regressionTree);
-	m_right.setSmoothing(m_smoothPredictions);
 	m_right.setSaveInstances(m_saveInstances);
 	m_right.buildClassifier(rightSubset);
 
@@ -435,20 +374,30 @@ public class RuleNode extends Classifier {
   private void buildLinearModel(int [] indices) throws Exception {
     // copy the training instances and remove all but the tested
     // attributes
-    m_reducedI = new Instances(m_instances);
-    m_attributeFilter = new Remove();
+    Instances reducedInst = new Instances(m_instances);
+    Remove attributeFilter = new Remove();
     
-    m_attributeFilter.setInvertSelection(true);
-    m_attributeFilter.setAttributeIndicesArray(indices);
-    m_attributeFilter.setInputFormat(m_reducedI);
+    attributeFilter.setInvertSelection(true);
+    attributeFilter.setAttributeIndicesArray(indices);
+    attributeFilter.setInputFormat(reducedInst);
 
-    m_reducedI = Filter.useFilter(m_reducedI, m_attributeFilter);
+    reducedInst = Filter.useFilter(reducedInst, attributeFilter);
     
     // build a linear regression for the training data using the
     // tested attributes
-    m_nodeModel = new LinearRegression();
-    
-    m_nodeModel.buildClassifier(m_reducedI);
+    LinearRegression temp = new LinearRegression();
+    temp.buildClassifier(reducedInst);
+
+    double [] lmCoeffs = temp.coefficients();
+    double [] coeffs = new double [m_instances.numAttributes()];
+
+    for (int i = 0; i < lmCoeffs.length - 1; i++) {
+      if (indices[i] != m_classIndex) {
+	coeffs[indices[i]] = lmCoeffs[i];
+      }
+    }
+    m_nodeModel = new PreConstructedLinearModel(coeffs, lmCoeffs[lmCoeffs.length - 1]);
+    m_nodeModel.buildClassifier(m_instances);
   }
 
   /**
@@ -516,11 +465,6 @@ public class RuleNode extends Classifier {
    * @return the number of the total leaves under the node
    */
   public int numLeaves(int leafCounter) {
-
-    // turn smoothing on (if requested) once model has been built
-    if (m_smoothPredictions) {
-      m_smoothingOn = true;
-    } 
 
     if (!m_isLeaf) {
       // node
@@ -688,16 +632,72 @@ public class RuleNode extends Classifier {
       }
       buildLinearModel(m_indices);
     }
-    nodeModelEval = new Evaluation(m_reducedI);
-    nodeModelEval.evaluateModel(m_nodeModel, m_reducedI);
+    nodeModelEval = new Evaluation(m_instances);
+    nodeModelEval.evaluateModel(m_nodeModel, m_instances);
     m_rootMeanSquaredError = nodeModelEval.rootMeanSquaredError();
     // save space
     if (!m_saveInstances) {
       m_instances = new Instances(m_instances, 0);
     }
-    m_reducedI = new Instances(m_reducedI, 0);
   }
 
+  public void installSmoothedModels() throws Exception {
+
+    if (m_isLeaf) {
+      double [] coefficients = new double [m_numAttributes];
+      double intercept;
+      double  [] coeffsUsedByLinearModel = m_nodeModel.coefficients();
+      RuleNode current = this;
+      
+      // prime array with leaf node coefficients
+      for (int i = 0; i < coeffsUsedByLinearModel.length; i++) {
+	if (i != m_classIndex) {
+	  coefficients[i] = coeffsUsedByLinearModel[i];
+	}
+      }
+      // intercept
+      intercept = m_nodeModel.intercept();
+
+      do {
+	if (current.m_parent != null) {
+	  PreConstructedLinearModel thisL = current.m_parent.getModel();
+	  double n = current.m_numInstances;
+	  // contribution of the model below
+	  for (int i = 0; i < coefficients.length; i++) {
+	    coefficients[i] = ((coefficients[i] * n) / (n + SMOOTHING_CONSTANT));
+	  }
+	  intercept =  ((intercept * n) / (n + SMOOTHING_CONSTANT));
+
+	  // contribution of this model
+	  coeffsUsedByLinearModel = current.m_parent.getModel().coefficients();
+	  for (int i = 0; i < coeffsUsedByLinearModel.length; i++) {
+	    if (i != m_classIndex) {
+	      // smooth in these coefficients (at this node)
+	      coefficients[i] += 
+		((SMOOTHING_CONSTANT * coeffsUsedByLinearModel[i]) /
+		 (n + SMOOTHING_CONSTANT));
+	    }
+	  }
+	  // smooth in the intercept
+	  intercept += 
+	    ((SMOOTHING_CONSTANT * 
+	      current.m_parent.getModel().intercept()) /
+	     (n + SMOOTHING_CONSTANT));
+	  current = current.m_parent;
+	}
+      } while (current.m_parent != null);
+      m_nodeModel = 
+	new PreConstructedLinearModel(coefficients, intercept);
+      m_nodeModel.buildClassifier(m_instances);
+    }
+    if (m_left != null) {
+      m_left.installSmoothedModels();
+    }
+    if (m_right != null) {
+      m_right.installSmoothedModels();
+    }
+  }
+    
   /**
    * Recursively prune the tree
    *
@@ -708,14 +708,11 @@ public class RuleNode extends Classifier {
 
     if (m_isLeaf) {
       buildLinearModel(m_indices);
-      nodeModelEval = new Evaluation(m_reducedI);
-      if (m_reducedI == null) {
-	throw new Exception("No instances at leaf!");
-      } 
+      nodeModelEval = new Evaluation(m_instances);
 
       // count the constant term as a paramter for a leaf
       // Evaluate the model
-      nodeModelEval.evaluateModel(m_nodeModel, m_reducedI);
+      nodeModelEval.evaluateModel(m_nodeModel, m_instances);
 
       m_rootMeanSquaredError = nodeModelEval.rootMeanSquaredError();
     } else {
@@ -730,12 +727,12 @@ public class RuleNode extends Classifier {
       } 
       
       buildLinearModel(m_indices);
-      nodeModelEval = new Evaluation(m_reducedI);
+      nodeModelEval = new Evaluation(m_instances);
 
       double rmsModel;
       double adjustedErrorModel;
 
-      nodeModelEval.evaluateModel(m_nodeModel, m_reducedI);
+      nodeModelEval.evaluateModel(m_nodeModel, m_instances);
 
       rmsModel = nodeModelEval.rootMeanSquaredError();
       adjustedErrorModel = rmsModel 
@@ -782,7 +779,6 @@ public class RuleNode extends Classifier {
     if (!m_saveInstances) {
       m_instances = new Instances(m_instances, 0);
     }
-    m_reducedI = new Instances(m_reducedI, 0);
   } 
 
 
@@ -907,7 +903,7 @@ public class RuleNode extends Classifier {
    *
    * @return true if this node is a leaf
    */
-  private boolean isLeaf() {
+  public boolean isLeaf() {
     return m_isLeaf;
   } 
 
@@ -925,9 +921,21 @@ public class RuleNode extends Classifier {
    *
    * @return the linear model at this node
    */
-  protected LinearRegression getModel() {
+  /*  public LinearRegression getModel() {
     return m_nodeModel;
-  } 
+    } */
+  public PreConstructedLinearModel getModel() {
+    return m_nodeModel;
+  }
+
+  /**
+   * Return the number of instances that reach this node.
+   *
+   * @return the number of instances at this node.
+   */
+  public int getNumInstances() {
+    return m_numInstances;
+  }
 
   /**
    * Get the number of parameters in the model at this node
@@ -938,26 +946,6 @@ public class RuleNode extends Classifier {
     return m_numParameters;
   } 
 
-  /**
-   * Get if smoothing is being used
-   *
-   * @param s true if smoothing is being used
-   */
-  public void setSmoothing(boolean s) {
-    m_smoothPredictions = s;
-  } 
-
-  /**
-   * Method declaration
-   *
-   * @return true if smoothing has been selected.
-   *
-   */
-  public boolean getSmoothing() {
-    return m_smoothPredictions;
-  } 
-
-  
   /**
    * Get the value of regressionTree.
    *
@@ -994,18 +982,6 @@ public class RuleNode extends Classifier {
   public void setRegressionTree(boolean newregressionTree) {
     
     m_regressionTree = newregressionTree;
-  }
-
-  /**
-   * Apply the attribute filter at this node to a set of supplied instances
-   *
-   * @param inst the instances to apply the filter to
-   * @return a filtered set of instances
-   * @exception Exception if an error occurs
-   */
-  protected Instance applyNodeFilter(Instance inst) throws Exception {
-    m_attributeFilter.input(inst);
-    return m_attributeFilter.output();
   }
 							  
   /**
