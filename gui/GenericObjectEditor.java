@@ -66,7 +66,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -239,7 +239,41 @@ public class GenericObjectEditor implements PropertyEditor {
       }
       m_ObjectChooser.addItemListener(this);
     }
-        
+   
+
+    /** 
+     * This is used to hook an action listener to the ok button
+     * @param a The action listener.
+     */
+    public void addOkListener(ActionListener a) {
+      m_okBut.addActionListener(a);
+    }
+
+    /**
+     * This is used to hook an action listener to the cancel button
+     * @param a The action listener.
+     */
+    public void addCancelListener(ActionListener a) {
+      m_cancelBut.addActionListener(a);
+    }
+    
+    /**
+     * This is used to remove an action listener from the ok button
+     * @param a The action listener
+     */
+    public void removeOkListener(ActionListener a) {
+      m_okBut.removeActionListener(a);
+    }
+
+    /**
+     * This is used to remove an action listener from the cancel button
+     * @param a The action listener
+     */
+    public void removeCancelListener(ActionListener a) {
+      m_cancelBut.removeActionListener(a);
+    }
+
+     
     /** Called when the class of object being edited changes. */
     protected void updateClassType() {
       
