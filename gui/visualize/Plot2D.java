@@ -48,7 +48,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Plot2D extends JPanel {
 
@@ -956,12 +956,22 @@ public class Plot2D extends JPanel {
 	  double y = (temp_plot.m_pointLookup[i][1] + 
 		      temp_plot.m_pointLookup[i][3]);
 
+	  double prevx = 0;
+	  double prevy = 0;
+	  if (i > 0) {
+	    prevx = (temp_plot.m_pointLookup[i - 1][0] + 
+			temp_plot.m_pointLookup[i - 1][2]);
+	    prevy = (temp_plot.m_pointLookup[i - 1][1] + 
+			temp_plot.m_pointLookup[i - 1][3]);
+	  }
+
 	  int x_range = (int)x - m_XaxisStart;
 	  int y_range = (int)y - m_YaxisStart;
 
 	  if (x_range >= 0 && y_range >= 0) {
 	    if (m_drawnPoints[x_range][y_range] == i 
-		|| m_drawnPoints[x_range][y_range] == 0) {
+		|| m_drawnPoints[x_range][y_range] == 0
+		|| temp_plot.m_displayAllPoints == true) {
 	      m_drawnPoints[x_range][y_range] = i;
 	      if (temp_plot.m_plotInstances.attribute(m_cIndex).isNominal()) {
 		if (temp_plot.m_plotInstances.attribute(m_cIndex).numValues() >
@@ -989,14 +999,28 @@ public class Plot2D extends JPanel {
 
 		if (temp_plot.m_plotInstances.instance(i).
 		    isMissing(m_cIndex)) {
-		   drawDataPoint(x,y,temp_plot.m_shapeSize[i],
-				 MISSING_SHAPE,gx);
-		} else {
-		  if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
-		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		  if (temp_plot.m_connectPoints[i] == true) {
+		    drawDataPoint(x,y,prevx,prevy,temp_plot.m_shapeSize[i],
+				  MISSING_SHAPE,gx);
 		  } else {
 		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],
-				  temp_plot.m_shapeType[i],gx);
+				  MISSING_SHAPE,gx);
+		  }
+		} else {
+		  if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
+		    if (temp_plot.m_connectPoints[i] == true) {
+		      drawDataPoint(x,y,prevx,prevy,
+				    temp_plot.m_shapeSize[i],j,gx);
+		    } else {
+		      drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		    }
+		  } else {
+		    if (temp_plot.m_connectPoints[i] == true) {
+
+		    } else {
+		      drawDataPoint(x,y,prevx,prevy,temp_plot.m_shapeSize[i],
+				    temp_plot.m_shapeType[i],gx);
+		    }
 		  }
 		}
 	      } else {
@@ -1018,14 +1042,29 @@ public class Plot2D extends JPanel {
 		}
 		if (temp_plot.m_plotInstances.instance(i).
 		    isMissing(m_cIndex)) {
-		   drawDataPoint(x,y,temp_plot.m_shapeSize[i],
-				 MISSING_SHAPE,gx);
-		} else {
-		  if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
-		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		  if (temp_plot.m_connectPoints[i] == true) {
+		    drawDataPoint(x,y,prevx,prevy,temp_plot.m_shapeSize[i],
+				  MISSING_SHAPE,gx);
 		  } else {
 		    drawDataPoint(x,y,temp_plot.m_shapeSize[i],
-				  temp_plot.m_shapeType[i],gx);
+				  MISSING_SHAPE,gx);
+		  }
+		} else {
+		  if (temp_plot.m_shapeType[i] == CONST_AUTOMATIC_SHAPE) {
+		    if (temp_plot.m_connectPoints[i] == true) {
+		      drawDataPoint(x,y,prevx,prevy,
+				    temp_plot.m_shapeSize[i],j,gx);
+		    } else {
+		      drawDataPoint(x,y,temp_plot.m_shapeSize[i],j,gx);
+		    }
+		  } else {
+		    if (temp_plot.m_connectPoints[i] == true) {
+		      drawDataPoint(x,y,prevx,prevy,temp_plot.m_shapeSize[i],
+				    temp_plot.m_shapeType[i],gx);
+		    } else {
+		      drawDataPoint(x,y,temp_plot.m_shapeSize[i],
+				    temp_plot.m_shapeType[i],gx);
+		    }
 		  }
 		}
 	      }
