@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Explorer extends JPanel {
 
@@ -89,7 +89,7 @@ public class Explorer extends JPanel {
 
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
-    m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg");
+    m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg and Mark Hall");
     m_LogPanel.logMessage("(c) 1999 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
