@@ -31,7 +31,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Matrix implements Serializable {
 
@@ -219,12 +219,36 @@ public class Matrix implements Serializable {
    * @return the converted string
    */
   public final String toString() {
-    
-    StringBuffer text = new StringBuffer();
-   
+
+    // Determine the width required for the maximum element,
+    // and check for fractional display requirement.
+    double maxval = 0;
+    boolean fractional = false;
     for(int i = 0; i < m_Elements.length; i++) {
       for(int j = 0; j < m_Elements[i].length; j++) {
-	text.append("\t" + Utils.doubleToString(m_Elements[i][j], 5, 3));
+	double current = m_Elements[i][j];
+        if (current < 0) {
+          current *= -10;
+        }
+	if (current > maxval) {
+	  maxval = current;
+	}
+	double fract = current - Math.rint(current);
+	if (!fractional
+	    && ((Math.log(fract) / Math.log(10)) >= -2)) {
+	  fractional = true;
+	}
+      }
+    }
+    int width = (int)(Math.log(maxval) / Math.log(10) 
+                      + (fractional ? 4 : 1));
+
+    StringBuffer text = new StringBuffer();   
+    for(int i = 0; i < m_Elements.length; i++) {
+      for(int j = 0; j < m_Elements[i].length; j++) {
+        text.append(" ").append(Utils.doubleToString(m_Elements[i][j],
+                                                     width,
+                                                     (fractional ? 2 : 0)));
       }
       text.append("\n");
     }
