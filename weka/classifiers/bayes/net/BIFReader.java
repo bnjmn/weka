@@ -39,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 
@@ -79,8 +79,8 @@ public class BIFReader extends BayesNet {
         for (int iNode = 0; iNode < m_Instances.numAttributes(); iNode++) {
         	// find definition that goes with this node
         	String sName = m_Instances.attribute(iNode).name();
-			NodeList nodelist;
-	        nodelist = org.apache.xpath.XPathAPI.selectNodeList(doc, "//DEFINITION[normalize-space(FOR/text())=\"" + sName + "\"]");
+			Element definition = getDefinition(doc, sName);
+/*
 	        if (nodelist.getLength() == 0) {
 	        	throw new Exception("No definition found for node " + sName);
 	        }
@@ -88,12 +88,13 @@ public class BIFReader extends BayesNet {
 	        	System.err.println("More than one definition found for node " + sName + ". Using first definition.");
 	        }
 	        Element definition = (Element) nodelist.item(0);
+*/	        
 	        
 	        // get the parents for this node
 	        // resolve structure
-	        nodelist = org.apache.xpath.XPathAPI.selectNodeList(definition, "GIVEN");
-	        for (int iParent = 0; iParent < nodelist.getLength(); iParent++) {
-	        	Node parentName = nodelist.item(iParent).getFirstChild();
+	        FastVector nodelist = getParentNodes(definition);
+	        for (int iParent = 0; iParent < nodelist.size(); iParent++) {
+	        	Node parentName = ((Node) nodelist.elementAt(iParent)).getFirstChild();
 	        	String sParentName = ((CharacterData) (parentName)).getData();
 	        	int nParent = getNode(sParentName);
 	        	m_ParentSets[iNode].addParent(nParent, m_Instances);
@@ -106,31 +107,34 @@ public class BIFReader extends BayesNet {
 				m_Distributions[iNode][i] = new DiscreteEstimatorBayes(nValues, 0.0f);
 			}
 
-	        nodelist = org.apache.xpath.XPathAPI.selectNodeList(definition, "TABLE/text()");
+/*
 	        StringBuffer sTable = new StringBuffer();
 	        for (int iText = 0; iText < nodelist.getLength(); iText++) {
 	        	sTable.append(((CharacterData) (nodelist.item(iText))).getData());
 	        	sTable.append(' ');
 	        }
 	        StringTokenizer st = new StringTokenizer(sTable.toString());
+*/
+	        String sTable = getTable(definition);
+			StringTokenizer st = new StringTokenizer(sTable.toString());
+	        
 	        
 			for (int i = 0; i < nCardinality; i++) {
 				DiscreteEstimatorBayes d = (DiscreteEstimatorBayes) m_Distributions[iNode][i];
 				for (int iValue = 0; iValue < nValues; iValue++) {
- 					String sWeight = st.nextToken();
+					String sWeight = st.nextToken();
 					d.addValue(iValue, new Double(sWeight).doubleValue());
 				}
 			}
          }
     } // buildStructure
 
-    
     /** synchronizes the node ordering of this Bayes network with
      * those in the other network (if possible).
      * @param other: Bayes network to synchronize with
      * @throws Exception if nr of attributes differs or not all of the variables have the same name.
      */
-    private void Sync(BayesNet other) throws Exception {
+    public void Sync(BayesNet other) throws Exception {
     	int nAtts = m_Instances.numAttributes();
     	if (nAtts != other.m_Instances.numAttributes()) {
     		throw new Exception ("Cannot synchronize networks: different number of attributes.");
@@ -167,15 +171,13 @@ public class BIFReader extends BayesNet {
 	void buildInstances(Document doc, String sName) throws Exception {
 		NodeList nodelist;
         // Get the name of the network
-        nodelist = org.apache.xpath.XPathAPI.selectNodeList(doc, "//NAME");
+        nodelist = selectAllNames(doc);
         if (nodelist.getLength() > 0) {
         	sName = ((CharacterData) (nodelist.item(0).getFirstChild())).getData();
         }
 
-
         // Process variables
-        nodelist = org.apache.xpath.XPathAPI.selectNodeList(doc, "//VARIABLE");
-
+        nodelist = selectAllVariables(doc);
 		int nNodes = nodelist.getLength();
 		// initialize structure
 		FastVector attInfo = new FastVector(nNodes);
@@ -187,38 +189,38 @@ public class BIFReader extends BayesNet {
         // Process variables
         for (int iNode = 0; iNode < nodelist.getLength(); iNode++) {
             // Get element
-			NodeList valueslist;
+			FastVector valueslist;
 	        // Get the name of the network
-    	    valueslist = org.apache.xpath.XPathAPI.selectNodeList(nodelist.item(iNode), "OUTCOME");
+    	    valueslist = selectOutCome(nodelist.item(iNode));
 
-			int nValues = valueslist.getLength();
+			int nValues = valueslist.size();
 			// generate value strings
 	        FastVector nomStrings = new FastVector(nValues + 1);
 	        for (int iValue = 0; iValue < nValues; iValue++) {
-	        	Node node = valueslist.item(iValue).getFirstChild();
+	        	Node node = ((Node) valueslist.elementAt(iValue)).getFirstChild();
 	        	String sValue = ((CharacterData) (node)).getData();
 	        	if (sValue == null) {
 	        		sValue = "Value" + (iValue + 1);
 	        	}
 				nomStrings.addElement(sValue);
 	        }
-			NodeList nodelist2;
+			FastVector nodelist2;
 	        // Get the name of the network
-    	    nodelist2 = org.apache.xpath.XPathAPI.selectNodeList(nodelist.item(iNode), "NAME");
-    	    if (nodelist2.getLength() == 0) {
+    	    nodelist2 = selectName(nodelist.item(iNode));
+    	    if (nodelist2.size() == 0) {
     	    	throw new Exception ("No name specified for variable");
     	    }
-    	    String sNodeName = ((CharacterData) (nodelist2.item(0).getFirstChild())).getData();
+    	    String sNodeName = ((CharacterData) (((Node) nodelist2.elementAt(0)).getFirstChild())).getData();
 
 			weka.core.Attribute att = new weka.core.Attribute(sNodeName, nomStrings);
 			attInfo.addElement(att);
 
-    	    valueslist = org.apache.xpath.XPathAPI.selectNodeList(nodelist.item(iNode), "PROPERTY");
-			nValues = valueslist.getLength();
+    	    valueslist = selectProperty(nodelist.item(iNode));
+			nValues = valueslist.size();
 			// generate value strings
 	        for (int iValue = 0; iValue < nValues; iValue++) {
                 // parsing for strings of the form "position = (73, 165)"
-	        	Node node = valueslist.item(iValue).getFirstChild();
+	        	Node node = ((Node)valueslist.elementAt(iValue)).getFirstChild();
 	        	String sValue = ((CharacterData) (node)).getData();
                 if (sValue.startsWith("position")) {
                     int i0 = sValue.indexOf('(');
@@ -245,6 +247,91 @@ public class BIFReader extends BayesNet {
 		initStructure();
 	} // buildInstances
 
+//	/** selectNodeList selects list of nodes from document specified in XPath expression
+//	 * @param doc : document (or node) to query
+//	 * @param sXPath : XPath expression
+//	 * @return list of nodes conforming to XPath expression in doc
+//	 * @throws Exception
+//	 */
+//	private NodeList selectNodeList(Node doc, String sXPath) throws Exception {
+//		NodeList nodelist = org.apache.xpath.XPathAPI.selectNodeList(doc, sXPath);
+//		return nodelist;
+//	} // selectNodeList
+
+	NodeList selectAllNames(Document doc) throws Exception {
+		//NodeList nodelist = selectNodeList(doc, "//NAME");
+		NodeList nodelist = doc.getElementsByTagName("NAME");
+		return nodelist;
+	} // selectAllNames
+
+	NodeList selectAllVariables(Document doc) throws Exception {
+		//NodeList nodelist = selectNodeList(doc, "//VARIABLE");
+		NodeList nodelist = doc.getElementsByTagName("VARIABLE");
+		return nodelist;
+	} // selectAllVariables
+
+	Element getDefinition(Document doc, String sName) throws Exception {
+		//NodeList nodelist = selectNodeList(doc, "//DEFINITION[normalize-space(FOR/text())=\"" + sName + "\"]");
+
+		NodeList nodelist = doc.getElementsByTagName("DEFINITION");
+		for (int iNode = 0; iNode < nodelist.getLength(); iNode++) {
+			Node node = nodelist.item(iNode);
+			FastVector list = selectElements(node, "FOR");
+			if (list.size() > 0) {
+				Node forNode = (Node) list.elementAt(0);
+				if (forNode.toString().equals("<FOR>" + sName + "</FOR>")) {
+					return (Element) node;
+				}
+			}
+		}
+		throw new Exception("Could not find definition for ((" + sName + "))");
+	} // getDefinition
+
+	FastVector getParentNodes(Node definition) throws Exception {
+		//NodeList nodelist = selectNodeList(definition, "GIVEN");
+		FastVector nodelist = selectElements(definition, "GIVEN");
+		return nodelist;
+	} // getParentNodes
+
+	String getTable(Node definition) throws Exception {
+		//NodeList nodelist = selectNodeList(definition, "TABLE/text()");
+		FastVector nodelist = selectElements(definition, "TABLE");
+		String sTable = ((Node)nodelist.elementAt(0)).toString();
+		sTable = sTable.replaceFirst("<TABLE>","");
+		sTable = sTable.replaceFirst("</TABLE>","");
+		sTable = sTable.replaceAll("\\n"," ");
+		return sTable;
+	} // getTable
+
+	FastVector selectOutCome(Node item) throws Exception {
+		//NodeList nodelist = selectNodeList(item, "OUTCOME");
+		FastVector nodelist = selectElements(item, "OUTCOME");
+		return nodelist;
+	} // selectOutCome
+
+	FastVector selectName(Node item) throws Exception {
+	   //NodeList nodelist = selectNodeList(item, "NAME");
+	   FastVector nodelist = selectElements(item, "NAME");
+	   return nodelist;
+   } // selectName
+
+   FastVector selectProperty(Node item) throws Exception {
+	  // NodeList nodelist = selectNodeList(item, "PROPERTY");
+	  FastVector nodelist = selectElements(item, "PROPERTY");
+	  return nodelist;
+   } // selectProperty
+
+	FastVector selectElements(Node item, String sElement) throws Exception {
+	  NodeList children = item.getChildNodes();
+	  FastVector nodelist = new FastVector();
+	  for (int iNode = 0; iNode < children.getLength(); iNode++) {
+		Node node = children.item(iNode);
+		if ((node.getNodeType() == Node.ELEMENT_NODE) && node.getNodeName().equals(sElement)) {
+			nodelist.addElement(node);
+		}
+	  }
+	  return nodelist;
+  } // selectElements
 	/** Count nr of arcs missing from other network compared to current network
 	 * Note that an arc is not 'missing' if it is reversed.
 	 * @param other: network to compare with
@@ -390,7 +477,6 @@ public class BIFReader extends BayesNet {
 		
     public static void main(String[] args) {
         try {
-	    System.err.println("okidoki");
             BIFReader br = new BIFReader();
             br.processFile(args[0]);
 	    System.out.println(br.toString());
@@ -401,4 +487,3 @@ public class BIFReader extends BayesNet {
         }
     } // main
 } // class BIFReader 
-
