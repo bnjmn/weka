@@ -57,23 +57,23 @@ import weka.filters.AttributeFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ */
+ * @version $Revision: 1.9 $ */
 public class Apriori extends Associator implements OptionHandler {
   
   /** The minimum support. */
-  private double m_minSupport;
+  protected double m_minSupport;
 
   /** The upper bound on the support */
-  private double m_upperBoundMinSupport;
+  protected double m_upperBoundMinSupport;
 
   /** The lower bound for the minimum support. */
-  private double m_lowerBoundMinSupport;
+  protected double m_lowerBoundMinSupport;
 
   /** Metric types. */
-  private static final int CONFIDENCE = 0;
-  private static final int LIFT = 1;
-  private static final int LEVERAGE = 2;
-  private static final int CONVICTION = 3;
+  protected static final int CONFIDENCE = 0;
+  protected static final int LIFT = 1;
+  protected static final int LEVERAGE = 2;
+  protected static final int CONVICTION = 3;
   public static final Tag [] TAGS_SELECTION = {
     new Tag(CONFIDENCE, "Confidence"),
     new Tag(LIFT, "Lift"),
@@ -82,43 +82,43 @@ public class Apriori extends Associator implements OptionHandler {
       };
 
   /** The selected metric type. */
-  private int m_metricType = CONFIDENCE;
+  protected int m_metricType = CONFIDENCE;
 
   /** The minimum metric score. */
-  private double m_minMetric;
+  protected double m_minMetric;
 
   /** The maximum number of rules that are output. */
-  private int m_numRules;
+  protected int m_numRules;
 
   /** Delta by which m_minSupport is decreased in each iteration. */
-  private double m_delta;
+  protected double m_delta;
 
   /** Significance level for optional significance test. */
-  private double m_significanceLevel;
+  protected double m_significanceLevel;
 
   /** Number of cycles used before required number of rules was one. */
-  private int m_cycles;
+  protected int m_cycles;
 
   /** The set of all sets of itemsets L. */
-  private FastVector m_Ls;
+  protected FastVector m_Ls;
 
   /** The same information stored in hash tables. */
-  private FastVector m_hashtables;
+  protected FastVector m_hashtables;
 
   /** The list of all generated rules. */
-  private FastVector[] m_allTheRules;
+  protected FastVector[] m_allTheRules;
 
   /** The instances (transactions) to be used for generating 
       the association rules. */
-  private Instances m_instances;
+  protected Instances m_instances;
 
   /** Output itemsets found? */
-  private boolean m_outputItemSets;
+  protected boolean m_outputItemSets;
 
-  private boolean m_removeMissingCols;
+  protected boolean m_removeMissingCols;
 
   /** Report progress iteratively */
-  private boolean m_verbose;
+  protected boolean m_verbose;
 
   /**
    * Returns a string describing this associator
@@ -274,7 +274,7 @@ public class Apriori extends Associator implements OptionHandler {
       supports = new double[m_allTheRules[2].size()];
       for (int i = 0; i < m_allTheRules[2].size(); i++) 
 	supports[i] = (double)((ItemSet)m_allTheRules[1].elementAt(i)).support();
-      indices = Utils.sort(supports);
+      indices = Utils.stableSort(supports);
       for (int i = 0; i < m_allTheRules[2].size(); i++) {
 	sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[i]));
 	sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[i]));
@@ -301,7 +301,7 @@ public class Apriori extends Associator implements OptionHandler {
       for (int i = 0; i < sortedRuleSet[2].size(); i++) 
 	confidences[i] = 
 	  ((Double)sortedRuleSet[sortType].elementAt(i)).doubleValue();
-      indices = Utils.sort(confidences);
+      indices = Utils.stableSort(confidences);
       for (int i = sortedRuleSet[0].size() - 1; 
 	   (i >= (sortedRuleSet[0].size() - m_numRules)) && (i >= 0); i--) {
 	m_allTheRules[0].addElement(sortedRuleSet[0].elementAt(indices[i]));
