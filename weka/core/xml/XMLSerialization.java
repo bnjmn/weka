@@ -46,6 +46,8 @@ import java.util.Vector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import weka.core.Version;
+
 /**
  * With this class objects can be serialized to XML instead into a binary 
  * format. It uses introspection (cf. beans) to retrieve the data from the
@@ -87,12 +89,15 @@ import org.w3c.dom.Element;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class XMLSerialization {
    /** the tag for an object */
    public final static String TAG_OBJECT = "object";
    
+   /** the version attribute */
+   public final static String ATT_VERSION = "version";
+  
    /** the tag for the name */
    public final static String ATT_NAME = "name";
    
@@ -126,6 +131,7 @@ public class XMLSerialization {
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_CLASS + "     CDATA #REQUIRED>\n"
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_PRIMITIVE + " CDATA \"yes\">\n"
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_ARRAY + "     CDATA \"no\">\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_VERSION + "   CDATA \"" + Version.VERSION + "\">\n"
       + "]\n"
       + ">";
    
@@ -159,6 +165,50 @@ public class XMLSerialization {
       
       m_Properties    = new PropertyHandler();
       m_CustomMethods = new XMLSerializationMethodHandler(this);
+      
+      setVersion(Version.VERSION); 
+   }
+   
+   /**
+    * sets the given version string in the XML document
+    */
+   private void setVersion(String version) {
+      Document     doc;
+      
+      doc = m_Document.getDocument();
+      doc.getDocumentElement().setAttribute(ATT_VERSION, version);
+   }
+   
+   /**
+    * returns the WEKA version with which the serialized object was created
+    * @see Version 
+    */
+   public String getVersion() {
+      Document     doc;
+      String       result;
+      
+      doc    = m_Document.getDocument();
+      result = doc.getDocumentElement().getAttribute(ATT_VERSION);
+      
+      return result;
+   }
+   
+   /**
+    * Checks the version in the current Document with the one of the current
+    * release. If the version differ, a warning is printed.
+    */
+   private void checkVersion() {
+      String            versionStr;
+      Version           version;
+      
+      version    = new Version();
+      versionStr = getVersion();
+      if (versionStr.equals(""))
+         System.out.println("WARNING: has no version!");
+      else if (version.isOlder(versionStr))
+         System.out.println("WARNING: loading a newer version (" + versionStr + " > " + Version.VERSION + ")!");
+      else if (version.isNewer(versionStr))
+         System.out.println("NOTE: loading an older version (" + versionStr + " < " + Version.VERSION + ")!");
    }
    
    /**
@@ -812,6 +862,7 @@ public class XMLSerialization {
       if (!document.getDocumentElement().getNodeName().equals(ROOT_NODE))
          throw new Exception("Expected '" + ROOT_NODE + "' as root element, but found '" + document.getDocumentElement().getNodeName() + "'!");
       m_Document.setDocument(document);
+      checkVersion();
       return readPostProcess(invokeReadFromXML(m_Document.getDocument().getDocumentElement()));
    }
    
