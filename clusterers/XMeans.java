@@ -5,10 +5,10 @@
  */
 package weka.clusterers;
 import  weka.clusterers.KDTree;
+import  weka.clusterers.AlgVector;
 
 import  java.io.*;
 import  java.util.*;
-import  weka.core.AlgVector;
 import  weka.core.Instances;
 import  weka.core.Instance;
 import  weka.core.Attribute;
@@ -17,7 +17,7 @@ import  weka.core.Option;
 import  weka.core.OptionHandler;
 
 import  weka.filters.Filter;
-import  weka.filters.ReplaceMissingValuesFilter;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import  weka.clusterers.KDTree;
 
 /**
@@ -80,7 +80,7 @@ import  weka.clusterers.KDTree;
  * @author Gabi Schmidberger <gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware <mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -95,7 +95,7 @@ public class XMeans extends Clusterer implements OptionHandler {
   private Instances m_Model = null;
   
   /* replace missing values in training instances */
-  private ReplaceMissingValuesFilter m_ReplaceMissingFilter;
+  private ReplaceMissingValues m_ReplaceMissingFilter;
 
   /* BIC-Score of the current model */
   double m_Bic = Double.MIN_VALUE;
@@ -365,7 +365,7 @@ public class XMeans extends Clusterer implements OptionHandler {
 
 
     // replace missing values
-    m_ReplaceMissingFilter = new ReplaceMissingValuesFilter();
+    m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
     m_Instances = Filter.useFilter(data, m_ReplaceMissingFilter);
 
