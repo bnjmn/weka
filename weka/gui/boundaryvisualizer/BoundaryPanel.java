@@ -55,20 +55,17 @@ import weka.filters.unsupervised.attribute.Add;
 public class BoundaryPanel extends JPanel {
 
   // default colours for classes
-  protected Color [] m_Colors = {
+  public final static Color [] DEFAULT_COLORS = {
+    Color.red,
     Color.green,
     Color.blue,
-    Color.red,
-    Color.yellow,
-    Color.cyan,
-    Color.magenta,
-    Color.orange,
-    Color.pink,
-    Color.black,
-    Color.gray,
-    Color.darkGray,
-    Color.lightGray,
-    Color.white};
+    new Color(0, 255, 255), // cyan
+    new Color(255, 0, 255), // pink
+    new Color(255, 255, 0), // yellow
+    new Color(255, 255, 255), //white
+    new Color(0, 0, 0)};
+
+  protected FastVector m_Colors = new FastVector();
 
   // training data
   private Instances m_trainingData;
@@ -133,6 +130,8 @@ public class BoundaryPanel extends JPanel {
   // A random number generator 
   private Random m_random = null;
 
+  private double [][][] m_probabilityCache;
+
   /**
    * Creates a new <code>BoundaryPanel</code> instance.
    *
@@ -152,6 +151,12 @@ public class BoundaryPanel extends JPanel {
     setMinimumSize(m_plotPanel.getMinimumSize());
 
     m_random = new Random(1);
+    for (int i = 0; i < DEFAULT_COLORS.length; i++) {
+      m_Colors.addElement(new Color(DEFAULT_COLORS[i].getRed(),
+				    DEFAULT_COLORS[i].getGreen(),
+				    DEFAULT_COLORS[i].getBlue()));
+    }
+    m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
   }
 
   /**
@@ -291,6 +296,7 @@ public class BoundaryPanel extends JPanel {
 	      
 	      // train the classifier
 	      //	      System.err.println("Building classifier...");
+	      m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
 	      m_classifier.buildClassifier(m_trainingData);
 	      
 	      // build DataGenerator
@@ -377,8 +383,15 @@ public class BoundaryPanel extends JPanel {
 		
 		// average
 		Utils.normalize(sumOfProbsForRegion);
+		// cache
+		m_probabilityCache[i][j] = 
+		  new double[sumOfProbsForRegion.length];
+		System.arraycopy(sumOfProbsForRegion, 0, 
+				 m_probabilityCache[i][j], 0, 
+				 sumOfProbsForRegion.length);
 		
 		// plot the point
+		/*
 		Graphics osg = m_osi.getGraphics();
 		Graphics g = m_plotPanel.getGraphics();
 		float [] colVal = new float[3];
@@ -398,7 +411,9 @@ public class BoundaryPanel extends JPanel {
 		osg.drawLine(j,i,j,i);
 		if (j == 0) {
 		  g.drawImage(m_osi,0,0,m_plotPanel);
-		}
+		} 
+		*/
+		plotPoint(j, i, sumOfProbsForRegion);
 	      }
 	    }
 	    } catch (Exception ex) {
@@ -420,6 +435,37 @@ public class BoundaryPanel extends JPanel {
 	};
       m_plotThread.setPriority(Thread.MIN_PRIORITY);
       m_plotThread.start();
+    }
+  }
+
+  private void plotPoint(int x, int y, double [] probs) {
+    // plot the point
+    Graphics osg = m_osi.getGraphics();
+    Graphics g = m_plotPanel.getGraphics();
+    float [] colVal = new float[3];
+    
+    float [] tempCols = new float[3];
+    for (int k = 0; k < probs.length; k++) {
+      Color curr = null;
+      if (m_plotThread != null) {
+	synchronized (m_Colors) {
+	  curr = (Color)m_Colors.elementAt(k);
+	}
+      } else {
+	curr = (Color)m_Colors.elementAt(k);
+      }
+      curr.getRGBColorComponents(tempCols);
+      for (int z = 0 ; z < 3; z++) {
+	colVal[z] += probs[k] * tempCols[z];
+      }
+    }
+    
+    osg.setColor(new Color(colVal[0], 
+			   colVal[1], 
+			   colVal[2]));
+    osg.drawLine(x,y,x,y);
+    if (x == 0) {
+      g.drawImage(m_osi,0,0,m_plotPanel);
     }
   }
 
@@ -526,9 +572,27 @@ public class BoundaryPanel extends JPanel {
   }
   
   public void setColors(FastVector colors) {
-    m_Colors = new Color [colors.size()];
-    for (int i = 0; i < colors.size(); i++) {
-      m_Colors[i] = (Color)colors.elementAt(i);
+    synchronized (m_Colors) {
+      m_Colors = colors;
+    }
+    replot();
+  }
+
+  public FastVector getColors() {
+    return m_Colors;
+  }
+
+  public synchronized void replot() {
+    if (m_probabilityCache[0][0] == null) {
+      return;
+    }
+    for (int i = 0; i < m_panelHeight; i++) {
+      for (int j = 0; j < m_panelWidth; j++) {
+	if (m_probabilityCache[i][j] == null) {
+	  return;
+	}
+	plotPoint(j, i, m_probabilityCache[i][j]);
+      }
     }
   }
 
