@@ -49,6 +49,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JComboBox;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -84,7 +85,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -262,32 +263,6 @@ public class PreprocessPanel extends JPanel {
 	}
     });
 
-    m_AttVisualizePanel.addMouseListener(new MouseAdapter() {
-	public void mouseClicked(MouseEvent m) {
-	  if (m_Instances != null) {
-	    try {
-	      final weka.gui.beans.AttributeSummarizer as = 
-		new weka.gui.beans.AttributeSummarizer();
-	      as.setColoringIndex(m_AttVisualizePanel.getColoringIndex());
-	      as.setInstances(m_Instances);
-	      
-	      final javax.swing.JFrame jf = new javax.swing.JFrame();
-	      jf.getContentPane().setLayout(new java.awt.BorderLayout());
-	      
-	      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
-	      jf.addWindowListener(new java.awt.event.WindowAdapter() {
-		  public void windowClosing(java.awt.event.WindowEvent e) {
-		    jf.dispose();
-		  }
-		});
-	      jf.setSize(830,600);
-	      jf.setVisible(true);
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	    }
-	  }
-	}
-      });
 
     m_InstSummaryPanel.setBorder(BorderFactory
 				 .createTitledBorder("Current relation"));
@@ -323,7 +298,44 @@ public class PreprocessPanel extends JPanel {
     JPanel attVis = new JPanel();
     attVis.setLayout( new GridLayout(2,1) );
     attVis.add(m_AttSummaryPanel);
-    attVis.add(m_AttVisualizePanel);
+
+    JComboBox colorBox = m_AttVisualizePanel.getColorBox();
+    JButton visAllBut = new JButton("Visualize All");
+    visAllBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent ae) {
+	  if (m_Instances != null) {
+	    try {
+	      final weka.gui.beans.AttributeSummarizer as = 
+		new weka.gui.beans.AttributeSummarizer();
+	      as.setColoringIndex(m_AttVisualizePanel.getColoringIndex());
+	      as.setInstances(m_Instances);
+	      
+	      final javax.swing.JFrame jf = new javax.swing.JFrame();
+	      jf.getContentPane().setLayout(new java.awt.BorderLayout());
+	      
+	      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
+	      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+		  public void windowClosing(java.awt.event.WindowEvent e) {
+		    jf.dispose();
+		  }
+		});
+	      jf.setSize(830,600);
+	      jf.setVisible(true);
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	    }
+	  }
+	}
+      });
+    JPanel histoHolder = new JPanel();
+    histoHolder.setLayout(new BorderLayout());
+    histoHolder.add(m_AttVisualizePanel, BorderLayout.CENTER);
+    JPanel histoControls = new JPanel();
+    histoControls.setLayout(new BorderLayout());
+    histoControls.add(colorBox, BorderLayout.CENTER);
+    histoControls.add(visAllBut, BorderLayout.EAST);
+    histoHolder.add(histoControls, BorderLayout.NORTH);
+    attVis.add(histoHolder);
 
     JPanel lhs = new JPanel();
     lhs.setLayout(new BorderLayout());
