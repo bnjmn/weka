@@ -1,0 +1,9 @@
+# The comma-separated list of jdbc drivers to use
+#jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver
+jdbcDriver=jdbc.idbDriver
+
+# The url to the experiment database
+#jdbcURL=jdbc:rmi://expserver/jdbc:idb=experiments.prp
+#jdbcURL=jdbc:idb=/home/user/Experiments/experiments.prp
+jdbcURL=jdbc:idb=experiments.prp
+
