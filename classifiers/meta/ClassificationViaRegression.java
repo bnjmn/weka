@@ -45,7 +45,7 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
 */
 public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
@@ -75,7 +75,7 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
    */
   protected String defaultClassifierString() {
     
-    return "weka.classifiers.trees.m5.M5P";
+    return "weka.classifiers.trees.M5P";
   }
 
   /**
@@ -83,7 +83,7 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
    */
   public ClassificationViaRegression() {
     
-    m_Classifier = new weka.classifiers.trees.m5.M5P();
+    m_Classifier = new weka.classifiers.trees.M5P();
   }
 
   /**

@@ -20,8 +20,9 @@
  *
  */
 
-package weka.classifiers.rules.part;
+package weka.classifiers.rules;
 
+import weka.classifiers.rules.part.*;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.C45ModelSelection;
 import weka.classifiers.trees.j48.Distribution;
@@ -65,7 +66,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.1 $
  */
 public class PART extends Classifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {

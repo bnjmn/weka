@@ -25,6 +25,7 @@
 package weka.associations.tertius;
 
 import weka.core.Instance;
+import weka.associations.Tertius;
 
 public class AttributeValueLiteral extends Literal {
 

@@ -30,7 +30,7 @@ import weka.filters.Filter;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RuleNode extends Classifier {
 
@@ -1023,7 +1023,7 @@ public class RuleNode extends Classifier {
    *
    * @param text a <code>StringBuffer</code> value
    */
-  protected void graph(StringBuffer text) {
+  public void graph(StringBuffer text) {
     assignIDs(-1);
     graphTree(text);
   }

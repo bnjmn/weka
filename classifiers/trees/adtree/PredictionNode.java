@@ -22,6 +22,7 @@
 
 package weka.classifiers.trees.adtree;
 
+import weka.classifiers.trees.ADTree;
 import weka.core.*;
 import java.io.*;
 import java.util.*;
@@ -30,7 +31,7 @@ import java.util.*;
  * Class representing a prediction node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public final class PredictionNode implements Serializable, Cloneable {
 

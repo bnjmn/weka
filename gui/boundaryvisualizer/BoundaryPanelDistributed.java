@@ -38,7 +38,7 @@ import weka.core.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayesSimple;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.j48.J48;
+import weka.classifiers.trees.J48;
 import weka.classifiers.lazy.IBk;
 import weka.classifiers.functions.Logistic;
 import weka.clusterers.EM;
@@ -57,7 +57,7 @@ import weka.experiment.TaskStatusInfo;
  * processed row by row using the available remote computers.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see BoundaryPanel
  */

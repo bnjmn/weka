@@ -51,7 +51,7 @@ import weka.experiment.*;
  *
  * -W classname <br>
  * Specify the full class name of a weak classifier as the basis for 
- * Decorate (default weka.classifiers.trees.j48.J48()).<p>
+ * Decorate (default weka.classifiers.trees.J48()).<p>
  *
  * -I num <br>
  * Specify the desired size of the committee (default 15). <p>
@@ -68,14 +68,14 @@ import weka.experiment.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 public class Decorate extends Classifier implements OptionHandler{
 
     /** Set to true to get debugging output. */
     protected boolean m_Debug = false;
 
     /** The model base classifier to use. */
-    protected Classifier m_Classifier = new weka.classifiers.trees.j48.J48();
+    protected Classifier m_Classifier = new weka.classifiers.trees.J48();
       
     /** Vector of classifiers that make up the committee/ensemble. */
     protected Vector m_Committee = null;
@@ -120,7 +120,7 @@ public class Decorate extends Classifier implements OptionHandler{
 	      "M", 1, "-M"));
 	newVector.addElement(new Option(
 	      "\tFull name of base classifier.\n"
-	      + "\t(default weka.classifiers.trees.j48.J48)",
+	      + "\t(default weka.classifiers.trees.J48)",
 	      "W", 1, "-W"));
 	newVector.addElement(new Option(
               "\tSeed for random number generator.\n"

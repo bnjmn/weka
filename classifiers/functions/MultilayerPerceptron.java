@@ -15,17 +15,18 @@
  */
 
 /*
- *    NeuralConnection.java
+ *    MultilayerPerceptron.java
  *    Copyright (C) 2000 Malcolm Ware
  */
 
-package weka.classifiers.functions.neural;
+package weka.classifiers.functions;
 
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import weka.classifiers.functions.neural.*;
 import weka.classifiers.*;
 import weka.core.*;
 import weka.filters.unsupervised.attribute.NominalToBinary;
@@ -40,9 +41,9 @@ import weka.filters.Filter;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.1 $
  */
-public class NeuralNetwork extends Classifier 
+public class MultilayerPerceptron extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
   
   /**
@@ -53,7 +54,7 @@ public class NeuralNetwork extends Classifier
   public static void main(String [] argv) {
     
     try {
-      System.out.println(Evaluation.evaluateModel(new NeuralNetwork(), argv));
+      System.out.println(Evaluation.evaluateModel(new MultilayerPerceptron(), argv));
     } catch (Exception e) {
       System.err.println(e.getMessage());
       e.printStackTrace();
@@ -554,7 +555,7 @@ public class NeuralNetwork extends Classifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.1 $
    */
   class ControlPanel extends JPanel {
     
@@ -870,7 +871,7 @@ public class NeuralNetwork extends Classifier
   /**
    * The constructor.
    */
-  public NeuralNetwork() {
+  public MultilayerPerceptron() {
     m_instances = null;
     m_currentInstance = null;
     m_controlPanel = null;

@@ -20,8 +20,9 @@
  *
  */
 
-package weka.classifiers.trees.j48;
+package weka.classifiers.trees;
 
+import weka.classifiers.trees.j48.*;
 import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
@@ -67,7 +68,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.1 $
  */
 public class J48 extends Classifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,

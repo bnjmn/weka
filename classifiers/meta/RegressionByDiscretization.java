@@ -49,7 +49,7 @@ import weka.filters.Filter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class RegressionByDiscretization extends SingleClassifierEnhancer {
   
@@ -81,7 +81,7 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
    */
   protected String defaultClassifierString() {
     
-    return "weka.classifiers.trees.j48.J48";
+    return "weka.classifiers.trees.J48";
   }
 
   /**
@@ -89,7 +89,7 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
    */
   public RegressionByDiscretization() {
 
-    m_Classifier = new weka.classifiers.trees.j48.J48();
+    m_Classifier = new weka.classifiers.trees.J48();
   }
 
   /**

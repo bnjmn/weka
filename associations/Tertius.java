@@ -22,8 +22,9 @@
  *    and integrating it into Weka.
  */
 
-package weka.associations.tertius;
+package weka.associations;
 
+import weka.associations.tertius.*;
 import weka.core.Instances;
 import weka.core.Attribute;
 import weka.core.AttributeStats;
@@ -114,7 +115,7 @@ import java.awt.event.ActionEvent;
  * Set output of current values. (default: 0) <p>
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 
 public class Tertius extends Associator implements OptionHandler, Runnable {
@@ -204,9 +205,9 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
   private boolean m_subsumption;
 
   /** Ways of handling missing values.  */
-  protected static final int EXPLICIT = 0; // min counterinstances
-  protected static final int IMPLICIT = 1; // max counterinstances
-  protected static final int SIGNIFICANT = 2; // missing as a particular value
+  public static final int EXPLICIT = 0; // min counterinstances
+  public static final int IMPLICIT = 1; // max counterinstances
+  public static final int SIGNIFICANT = 2; // missing as a particular value
   private static final Tag [] TAGS_MISSING = {
     new Tag(EXPLICIT, "Matches all"),
     new Tag(IMPLICIT, "Matches none"),

@@ -16,8 +16,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package weka.classifiers.trees.m5;
+package weka.classifiers.trees;
 
+import weka.classifiers.trees.m5.*;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -31,7 +32,7 @@ import weka.core.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.1 $
  */
 
 public class M5P extends M5Base 
@@ -65,7 +66,7 @@ public class M5P extends M5Base
     
     text.append("digraph M5Tree {\n");
     Rule temp = (Rule)m_ruleSet.elementAt(0);
-    temp.m_topOfTree.graph(text);
+    temp.topOfTree().graph(text);
     text.append("}\n");
     return text.toString();
   }
