@@ -81,7 +81,7 @@ import weka.filters.unsupervised.attribute.*;
  * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ */
+ * @version $Revision: 1.28 $ */
 public class Logistic extends DistributionClassifier 
     implements OptionHandler, WeightedInstancesHandler {
   
@@ -278,14 +278,19 @@ public class Logistic extends DistributionClassifier
 	    int dim = m_NumPredictors+1; // Number of variables per class
 	    
 	    for(int i=0; i<cls.length; i++){ // ith instance
-		double denom = 1, num = 0;   // Denominator and numerator of posterior
-		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
-		    double exp=0.0;		    
+
+		double[] exp = new double[m_NumClasses-1];
+		for(int offset=0; offset<m_NumClasses-1; offset++){ 
 		    for(int j=0; j<dim; j++)
-			exp += m_Data[i][j]*x[offset*dim+j];
-		    denom += Math.exp(exp);
+			exp[offset] += m_Data[i][j]*x[offset*dim+j];
+		}
+		double max = exp[Utils.maxIndex(exp)];
+		double denom = Math.exp(-max);
+		double num = -max;
+		for(int offset=0; offset<m_NumClasses-1; offset++){
+		    denom += Math.exp(exp[offset] - max);
 		    if(cls[i] == offset)     // Class of this instance
-			num = exp;
+			num = exp[offset] - max;
 		}
 		
 		nll -= weights[i]*(num - Math.log(denom)); // Weighted NLL
@@ -310,20 +315,26 @@ public class Logistic extends DistributionClassifier
 	    int dim = m_NumPredictors+1; // Number of variables per class
 	    
 	    for(int i=0; i<cls.length; i++){ // ith instance
-		double denom=1; // Denominator of [-log(1+sum(exp))]'
 		double[] num=new double[m_NumClasses-1]; // numerator of [-log(1+sum(exp))]'
 		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
 		    double exp=0.0;		    
 		    for(int j=0; j<dim; j++)
 			exp += m_Data[i][j]*x[offset*dim+j];
-		    denom += Math.exp(exp);
-		    num[offset] = Math.exp(exp);
+		    num[offset] = exp;
 		}
+
+		double max = num[Utils.maxIndex(num)];
+		double denom = Math.exp(-max); // Denominator of [-log(1+sum(exp))]'
+		for(int offset=0; offset<m_NumClasses-1; offset++){
+		    num[offset] = Math.exp(num[offset] - max);
+		    denom += num[offset];
+		}
+		Utils.normalize(num, denom);
 		
 		// Update denominator of the gradient of -log(Posterior)
 		for(int offset=0; offset<m_NumClasses-1; offset++){ // Which part of x
 		    for(int q=0; q<dim; q++){
-			grad[offset*dim+q] += weights[i]*num[offset]*m_Data[i][q]/denom;
+			grad[offset*dim+q] += weights[i]*num[offset]*m_Data[i][q];
 		    }
 		}
 		
