@@ -22,7 +22,14 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Class for storing an instance as a sparse vector.
+ * Class for storing an instance as a sparse vector. A sparse instance
+ * only requires storage for those attribute values that are non-zero.
+ * Since the objective is to reduce storage requirements for datasets
+ * with large numbers of default values, this also includes nominal
+ * attributes -- the first nominal value (i.e. that which has index 0)
+ * will not require explicit storage, so rearrange your nominal attribute
+ * value orderings if necessary. Missing values will be stored
+ * explicitly.
  */
 public class SparseInstance extends Instance {
 
