@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.15 $
+   $Revision: 1.16 $
   ===========================================================================
 -->
 
@@ -201,7 +201,7 @@
     <!-- jar up the source -->
     <jar jarfile="${path_modifier}${dist}/weka-src.jar" 
     basedir="${path_modifier}."
-    includes="weka/**/*.java,weka/**/*.props"/>
+    includes="weka/**/*.java,weka/**/*.props,weka/**/*.gif"/>
   </target>
 
   <!-- make a jar file containing just the stuff needed for running a remote experiment server -->
