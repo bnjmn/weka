@@ -33,7 +33,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PlotData2D {
 
@@ -90,8 +90,8 @@ public class PlotData2D {
     m_shapeSize = new int [m_plotInstances.numInstances()];
     m_shapeType = new int [m_plotInstances.numInstances()];
     for (int i = 0; i < m_plotInstances.numInstances(); i++) {
-      m_shapeSize[i] = 2; //default shape size
-      m_shapeType[i] = -1; // default (automatic shape assignment)
+      m_shapeSize[i] = Plot2D.DEFAULT_SHAPE_SIZE; //default shape size
+      m_shapeType[i] = Plot2D.CONST_AUTOMATIC_SHAPE; // default (automatic shape assignment)
     }
     determineBounds();
   }
