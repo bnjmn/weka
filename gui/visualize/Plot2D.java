@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Plot2D extends JPanel {
 
@@ -293,6 +293,9 @@ public class Plot2D extends JPanel {
       ((PlotData2D)m_plots.elementAt(i)).setXindex(m_xIndex);
     }
     determineBounds();
+    if (m_JitterVal != 0) {
+      updatePturb();
+    }
     m_axisChanged = true;
     this.repaint();
   }
@@ -307,6 +310,9 @@ public class Plot2D extends JPanel {
       ((PlotData2D)m_plots.elementAt(i)).setYindex(m_yIndex);
     }
     determineBounds();
+    if (m_JitterVal != 0) {
+      updatePturb();
+    }
     m_axisChanged = true;
     this.repaint();
   }
