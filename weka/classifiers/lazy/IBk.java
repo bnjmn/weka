@@ -88,7 +88,7 @@ import weka.core.WeightedInstancesHandler;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -722,7 +722,7 @@ public class IBk extends DistributionClassifier implements
 
 
     // Select k by cross validation
-    if (!m_kNNValid && (m_CrossValidate) && (m_kNN > 1)) {
+    if (!m_kNNValid && (m_CrossValidate) && (m_kNNUpper >= 1)) {
       crossValidate();
     }
 
