@@ -26,7 +26,7 @@ package weka.attributeSelection;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.supportVector.SMO;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.attributeSelection.*;
@@ -66,7 +66,7 @@ import weka.attributeSelection.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {
