@@ -21,7 +21,8 @@ package weka.classifiers;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.classifiers.Classifier;
+import weka.core.Utils;
+import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 
 /**
@@ -36,9 +37,9 @@ import weka.classifiers.Evaluation;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */ 
-public class HyperPipes extends Classifier {
+public class HyperPipes extends DistributionClassifier {
 
   /** The index of the class attribute */
   protected int m_ClassIndex;
@@ -211,20 +212,16 @@ public class HyperPipes extends Classifier {
    * @return the predicted class for the instance 
    * @exception Exception if the instance can't be classified
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double [] distributionForInstance(Instance instance) throws Exception {
         
-    double highest = m_HyperPipes[0].partialContains(instance);
-    int classValue = 0;
+    double [] dist = new double[m_HyperPipes.length];
 
-    for (int j = 1; j < m_HyperPipes.length; j++) {
-      double current = m_HyperPipes[j].partialContains(instance);
-      if (current > highest){
-	highest = current;
-	classValue = j;
-      }
+    for (int j = 0; j < m_HyperPipes.length; j++) {
+      dist[j] = m_HyperPipes[j].partialContains(instance);
     }
 
-    return classValue;
+    Utils.normalize(dist);
+    return dist;
   }
 
 
