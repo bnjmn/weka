@@ -37,6 +37,8 @@ import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.FileEditor;
+import weka.gui.VisualizePanel;
 
 import java.util.Random;
 import java.util.Date;
@@ -98,7 +100,7 @@ import java.awt.Dimension;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -189,6 +191,9 @@ public class AttributeSelectionPanel extends JPanel {
 
   /* Register the property editors we need */
   static {
+    java.beans.PropertyEditorManager
+      .registerEditor(java.io.File.class,
+                      FileEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.core.SelectedTag.class,
 		      weka.gui.SelectedTagEditor.class);
