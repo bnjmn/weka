@@ -25,7 +25,8 @@ SOURCES = \
 	TaskLogger.java \
 	WekaTaskMonitor.java \
 	SaveBuffer.java \
-	CostMatrixEditor.java
+	CostMatrixEditor.java \
+	HierarchyPropertyParser.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../..
