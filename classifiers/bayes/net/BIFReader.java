@@ -39,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 
@@ -147,7 +147,7 @@ public class BIFReader extends BayesNet {
 	 * @param sNodeName: name of the node to get the index from
 	 * @return index of the node with name sNodeName
 	 */
-    int getNode(String sNodeName) throws Exception {
+    public int getNode(String sNodeName) throws Exception {
     	int iNode = 0;
     	while (iNode < m_Instances.numAttributes()) {
     		if (m_Instances.attribute(iNode).name().equals(sNodeName)) {
