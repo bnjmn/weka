@@ -11,6 +11,7 @@ import weka.core.Utils;
 import weka.gui.LogPanel;
 import weka.gui.WekaTaskMonitor;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,7 +45,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class Explorer extends JPanel {
 
@@ -135,8 +136,17 @@ public class Explorer extends JPanel {
 
 	m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
 					       .getWorkingInstances());
-	m_VisualizePanel.setInstances(m_PreprocessPanel
-					       .getWorkingInstances());
+	try {
+	  PlotData2D tempd = new PlotData2D(m_PreprocessPanel.
+					    getWorkingInstances());
+	  tempd.setPlotName(m_PreprocessPanel.
+			    getWorkingInstances().relationName());
+	  tempd.addInstanceNumberAttribute();
+	  m_VisualizePanel.addPlot(tempd);
+	} catch (Exception ex) {
+	  ex.printStackTrace();
+	  m_LogPanel.logMessage(ex.toString());
+	}
 	m_TabbedPane.setEnabledAt(1, true);
 	m_TabbedPane.setEnabledAt(2, true);
 	m_TabbedPane.setEnabledAt(3, true);
