@@ -88,7 +88,7 @@ import weka.core.WeightedInstancesHandler;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -936,7 +936,7 @@ public class IBk extends DistributionClassifier implements
   /**
    * Initialise scheme variables.
    */
-  private void init() {
+  protected void init() {
 
     setKNN(1);
     m_WindowSize = 0;
@@ -953,7 +953,7 @@ public class IBk extends DistributionClassifier implements
    * @param train the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
-  private double distance(Instance first, Instance second) {  
+  protected double distance(Instance first, Instance second) {  
 
     if (!Instances.inRanges(first,m_Ranges))
 	OOPS("Not in ranges");
@@ -1005,7 +1005,7 @@ public class IBk extends DistributionClassifier implements
    * Computes the difference between two given attribute
    * values.
    */
-  private double difference(int index, double val1, double val2) {
+  protected double difference(int index, double val1, double val2) {
 
     switch (m_Train.attribute(index).type()) {
     case Attribute.NOMINAL:
@@ -1051,7 +1051,7 @@ public class IBk extends DistributionClassifier implements
    * @param x the value to be normalized
    * @param i the attribute's index
    */
-  private double norm(double x, int i) {
+  protected double norm(double x, int i) {
 
     if (m_DontNormalize) {
       return x;
@@ -1070,7 +1070,7 @@ public class IBk extends DistributionClassifier implements
    *
    * @param instance the new instance
    */
-  private void updateMinMax(Instance instance) {  
+  protected void updateMinMax(Instance instance) {  
 
     for (int j = 0;j < m_Train.numAttributes(); j++) {
       if (!instance.isMissing(j)) {
@@ -1096,7 +1096,7 @@ public class IBk extends DistributionClassifier implements
    * @param instance the instance to search for neighbours of
    * @return a list of neighbours
    */
-  private NeighbourList findNeighbours(Instance instance) throws Exception {
+  protected NeighbourList findNeighbours(Instance instance) throws Exception {
 
     double distance;
     NeighbourList neighbourlist = new NeighbourList(m_kNN);
@@ -1143,7 +1143,7 @@ public class IBk extends DistributionClassifier implements
    * @param neighbourlist the list of nearest neighbouring instances
    * @return the probability distribution
    */
-  private double [] makeDistribution(NeighbourList neighbourlist) 
+  protected double [] makeDistribution(NeighbourList neighbourlist) 
     throws Exception {
 
     double total = 0, weight;
@@ -1206,7 +1206,7 @@ public class IBk extends DistributionClassifier implements
    * minimised. If the class attribute is numeric, mean absolute
    * error is minimised
    */
-  private void crossValidate() {
+  protected void crossValidate() {
 
     try {
       double [] performanceStats = new double [m_kNNUpper];
@@ -1307,7 +1307,7 @@ public class IBk extends DistributionClassifier implements
    * Used for debug println's.
    * @param output string that is printed
    */
-  private void OOPS(String output) {
+  protected void OOPS(String output) {
     System.out.println(output);
   }
 
