@@ -2,12 +2,12 @@ JAVA = javac
 JAVADOC = javadoc
 SOURCES = \
 	DatasetListPanel.java \
+	Experimenter.java \
 	GeneratorPropertyIteratorPanel.java \
-	RunNumberPanel.java \
-	SetupPanel.java \
-	RunPanel.java \
 	ResultsPanel.java \
-	Main.java
+	RunNumberPanel.java \
+	RunPanel.java \
+	SetupPanel.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../../..
