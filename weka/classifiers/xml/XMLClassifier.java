@@ -31,7 +31,7 @@ import weka.experiment.PropertyNode;
  * fro XML.<br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.3.2.1 $ 
  */
 public class XMLClassifier extends XMLBasicSerialization {
 
