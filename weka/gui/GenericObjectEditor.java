@@ -66,7 +66,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -279,6 +279,11 @@ public class GenericObjectEditor implements PropertyEditor {
       
       Vector classes = getClassesFromProperties();
       m_ObjectChooser.setModel(new DefaultComboBoxModel(classes));
+      if (classes.size() > 0) {
+	add(m_ObjectChooser, BorderLayout.NORTH);
+      } else {
+	remove(m_ObjectChooser);
+      }
     }
 
     /** Called to update the list of values to be selected from */
