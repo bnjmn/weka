@@ -54,7 +54,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class GeneticSearch extends ASSearch implements 
   StartSetHandler, OptionHandler {
@@ -142,7 +142,7 @@ public class GeneticSearch extends ASSearch implements
     /**
      * makes a copy of this GABitSet
      * @return a copy of the object
-     * @exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     public Object clone() throws CloneNotSupportedException {
       GABitSet temp = new GABitSet();
@@ -666,7 +666,7 @@ public class GeneticSearch extends ASSearch implements
    * to see if the search has converged---that is there is no difference
    * in fitness between the best and worse population member
    * @return true is the search has converged
-   * @exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private boolean checkBest() throws Exception {
     int i,j,count,lowestCount = m_numAttribs;
@@ -747,7 +747,7 @@ public class GeneticSearch extends ASSearch implements
 
   /**
    * performs a single generation---selection, crossover, and mutation
-   * @exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void generation () throws Exception {
     int i,j=0;
@@ -876,7 +876,7 @@ public class GeneticSearch extends ASSearch implements
    * ASEvaluator.
    * @param ASEvaluator the subset evaluator to use for evaluating population
    * members
-   * @exception if something goes wrong during evaluation
+   * @exception Exception if something goes wrong during evaluation
    */
   private void evaluatePopulation (SubsetEvaluator ASEvaluator)
     throws Exception {
@@ -902,7 +902,7 @@ public class GeneticSearch extends ASSearch implements
    * creates random population members for the initial population. Also
    * sets the first population member to be a start set (if any) 
    * provided by the user
-   * @exception if the population can't be created
+   * @exception Exception if the population can't be created
    */
   private void initPopulation () throws Exception {
     int i,j,bit;
