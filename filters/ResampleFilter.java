@@ -51,7 +51,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -356,14 +356,14 @@ public class ResampleFilter extends Filter implements OptionHandler {
         int index = 0;
         if (random.nextDouble() < m_BiasToUniformClass) {
           // Pick a random class (of those classes that actually appear)
-          int cIndex = random.nextInt(actualClasses);
+	  int cIndex = Math.abs(random.nextInt()) % actualClasses;
           for (int j = 0, k = 0; j < classIndices.length - 1; j++) {
             if ((classIndices[j] != classIndices[j + 1]) 
                 && (k++ >= cIndex)) {
               // Pick a random instance of the designated class
               index = classIndices[j] 
-                + random.nextInt(classIndices[j + 1]
-                                 - classIndices[j]);
+		+ (Math.abs(random.nextInt()) % (classIndices[j + 1]
+						 - classIndices[j]));
               break;
             }
           }
