@@ -108,7 +108,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -842,6 +842,8 @@ public class ClassifierPanel extends JPanel {
           boolean outputEntropy = m_OutputEntropyBut.isSelected();
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
 
+	  String grph = null;
+
 	  int testMode = 0;
 	  int numFolds = 10, percent = 66;
 	  int classIndex = m_ClassCombo.getSelectedIndex();
@@ -945,6 +947,13 @@ public class ClassifierPanel extends JPanel {
 	      outBuff.append("=== Classifier model (full training set) ===\n\n");
 	      outBuff.append(classifier.toString() + "\n\n");
 	      m_History.updateResult(name);
+	      if (classifier instanceof Drawable) {
+		grph = null;
+		try {
+		  grph = ((Drawable)classifier).graph();
+		} catch (Exception ex) {
+		}
+	      }
 	    }
 	    
 	    Evaluation eval = null;
@@ -1104,13 +1113,8 @@ public class ClassifierPanel extends JPanel {
 		    m_CurrentVis.setPredictionsNumeric(false);
 		  }
 	      if (saveVis) {
-		if (classifier instanceof Drawable) {
-		  String grph = null;
+		if (classifier instanceof Drawable && grph != null) {
 		  Object [] vv = new Object [2];
-		  try {
-		    grph = ((Drawable)classifier).graph();
-		  } catch (Exception ex) {
-		  }
 		  vv[0] = m_CurrentVis;
 		  vv[1] = grph;
 		  m_History.addObject(name, vv);
