@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 
 public class Ridor extends Classifier
@@ -1312,8 +1312,8 @@ public class Ridor extends Classifier
   public int getShuffle(){ return m_Shuffle; }
   public void setSeed(int s){ m_Seed = s; }
   public int getSeed(){ return m_Seed; }
-  public void setAllErr(boolean a){ m_IsAllErr = a; }
-  public boolean getAllErr(){ return m_IsAllErr; }
+  public void setWholeDataErr(boolean a){ m_IsAllErr = a; }
+  public boolean getWholeDataErr(){ return m_IsAllErr; }
   public void setMajorityClass(boolean m){ m_IsMajority = m; }
   public boolean getMajorityClass(){ return m_IsMajority; }
   public void setMinNo(double m){  m_MinNo = m; }
