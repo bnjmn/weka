@@ -30,7 +30,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public final class Utils {
 
@@ -156,6 +156,29 @@ public final class Utils {
     while ((loc = inString.indexOf(substring, oldLoc))!= -1) {
       result.append(inString.substring(oldLoc, loc));
       oldLoc = loc + substring.length();
+    }
+    result.append(inString.substring(oldLoc));
+    return result.toString();
+  }
+
+  /**
+   * Replaces with a new string, all occurrences of a string from 
+   * another string.
+   *
+   * @param inString the string to replace substrings in.
+   * @param substring the substring to replace.
+   * @param replaceString the replacement substring
+   * @return the input string with occurrences of substring replaced.
+   */
+  public static String replaceSubstring(String inString, String subString,
+					String replaceString) {
+
+    StringBuffer result = new StringBuffer();
+    int oldLoc = 0, loc = 0;
+    while ((loc = inString.indexOf(subString, oldLoc))!= -1) {
+      result.append(inString.substring(oldLoc, loc));
+      result.append(replaceString);
+      oldLoc = loc + subString.length();
     }
     result.append(inString.substring(oldLoc));
     return result.toString();
