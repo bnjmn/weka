@@ -19,9 +19,20 @@
 
 package weka.filters;
 
-import weka.core.*;
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Serializable;
+import java.util.Enumeration;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Queue;
+import weka.core.Utils;
 
 /** 
  * An abstract class for instance filters: objects that take instances
@@ -51,7 +62,7 @@ import java.io.*;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public abstract class Filter implements Serializable {
 
