@@ -71,7 +71,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -521,6 +521,13 @@ public class PropertySheetPanel extends JPanel
       Object o;
       try {
 	Method getter = m_Properties[i].getReadMethod();
+	Method setter = m_Properties[i].getWriteMethod();
+	
+	if (getter == null || setter == null) {
+	  // ignore set/get only properties
+	  continue;
+	}
+
 	Object args[] = { };
 	o = getter.invoke(m_Target, args);
       } catch (Exception ex) {
