@@ -50,7 +50,7 @@ import weka.core.*;
  * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NumericTransform extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -59,10 +59,10 @@ public class NumericTransform extends Filter
   private Range m_Cols = new Range();
 
   /** Class containing transformation method. */
-  private Class m_Class;
+  private String m_Class;
 
   /** Transformation method. */
-  private Method m_Method;
+  private String m_Method;
 
   /** Parameter types. */
   private static Class[] PARAM = new Class[] {Double.TYPE};
@@ -84,13 +84,8 @@ public class NumericTransform extends Filter
    */
   public NumericTransform() {
 
-    try {
-      m_Class = Math.class;
-      m_Method = Math.class.getMethod("abs", PARAM);
-    } catch (NoSuchMethodException ex) {
-      System.err.println("One of those errors that you should never see");
-      ex.printStackTrace();
-    }
+    m_Class = "Math";
+    m_Method = "abs";
   }
 
   /**
@@ -139,6 +134,8 @@ public class NumericTransform extends Filter
       m_NewBatch = false;
     }
 
+    Method m = (Class.forName(m_Class)).getMethod(m_Method, new Class[] {Double.TYPE});
+
     double []vals = new double[instance.numAttributes()];
     Double []params = new Double[1];
     Double newVal;
@@ -149,7 +146,7 @@ public class NumericTransform extends Filter
 	if (m_Cols.isInRange(i) &&
 	    instance.attribute(i).isNumeric()) {
 	  params[0] = new Double(instance.value(i));
-	  newVal = (Double) m_Method.invoke(null, params);
+	  newVal = (Double) m.invoke(null, params);
 	  if (newVal.isNaN() || newVal.isInfinite()) {
 	    vals[i] = Instance.missingValue();
 	  } else {
@@ -282,7 +279,7 @@ public class NumericTransform extends Filter
    */
   public String getClassName() {
 
-    return m_Class.getName();
+    return m_Class;
   }
  
   /**
@@ -293,7 +290,7 @@ public class NumericTransform extends Filter
    */
   public void setClassName(String name) throws ClassNotFoundException {
   
-    m_Class = Class.forName(name);
+    m_Class = name;
   }
 
   /**
@@ -313,7 +310,7 @@ public class NumericTransform extends Filter
    */
   public String getMethodName() {
 
-    return m_Method.getName();
+    return m_Method;
   }
 
   /**
@@ -324,7 +321,7 @@ public class NumericTransform extends Filter
    */
   public void setMethodName(String name) throws NoSuchMethodException {
 
-    m_Method = m_Class.getMethod(name, PARAM);
+    m_Method = name;
   }
 
   /**
