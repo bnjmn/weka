@@ -48,10 +48,16 @@ Evaluation:
     a training set and a test set
   ClassAssigner - assign a column to be the class for any data set, training
     set or test set
+  ClassValuePicker - choose a class value to be considered as the "positve"
+    class. This is useful when generating data for ROC style curves (see
+    below).
   ClassifierPerformanceEvaluator - evaluate the performance of batch
     trained/tested classifiers
   IncrementalClassifierEvaluator - evaluate the performance of incrementally
     trained classifiers
+  PredictionAppender - append classifier predictions to a test set. For
+    discrete class problems, can either append predicted class labels or
+    probability distributions.
 
 Visualization:
   DataVisualizer - component that can pop up a panel for visualizing data in
@@ -60,7 +66,11 @@ Visualization:
     small scatter plots (clicking on a small plot pops up a large scatter 
     plot)
   AttributeSummarizer - component that can pop up a panel containing a matrix
-  of histogram plots - one for each of the attributes in the input data
+    of histogram plots - one for each of the attributes in the input data
+  ModelPerformanceChart - component that can pop up a panel for visualizing
+    threshold (i.e. ROC style) curves.
+  TextViewer - component for showing textual data. Can show data sets, 
+    classification performance statistics etc.
   GraphViewer - component that can pop up a panel for visualizing tree based
     models
   StripChart - component that can pop up a panel that displays a scrolling
