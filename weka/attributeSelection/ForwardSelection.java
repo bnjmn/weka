@@ -38,7 +38,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -89,12 +89,38 @@ public class ForwardSelection extends ASSearch
   /** holds an array of starting attributes */
   private int [] m_starting;
 
+  /**
+   * Returns a string describing this search method
+   * @return a description of the search suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "ForwardSelection :\n\nPerforms a greedy forward search through "
+      +"the space of attribute subsets. May start with no attributes or from "
+      +"an arbitrary point in the space. Stops when the addition of any "
+      +"remaining attributes results in a decrease in evaluation. "
+      +"Can also produce a ranked list of "
+      +"attributes by traversing the space from one side to the other and "
+      +"recording the order that attributes are selected.\n";
+  }
+
   public ForwardSelection () {
     m_threshold = -Double.MAX_VALUE;
     m_doneRanking = false;
     m_startRange = new Range();
     m_starting = null;
     resetOptions();
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String thresholdTipText() {
+    return "Set threshold by which attributes can be discarded. Default value "
+      + "results in no attributes being discarded. Use in conjunction with "
+      + "generateRanking";
   }
 
   /**
@@ -115,6 +141,15 @@ public class ForwardSelection extends ASSearch
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String generateRankingTipText() {
+    return "Set to true if a ranked list is required.";
+  }
+  
+  /**
    * Records whether the user has requested a ranked list of attributes.
    * @param doRank true if ranking is requested
    */
@@ -130,6 +165,17 @@ public class ForwardSelection extends ASSearch
    */
   public boolean getGenerateRanking() {
     return m_rankingRequested;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String startSetTipText() {
+    return "Set the start point for the search. This is specified as a comma "
+      +"seperated list off attribute indexes starting at 1. It can include "
+      +"ranges. Eg. 1,2,5-9,17.";
   }
 
   /**

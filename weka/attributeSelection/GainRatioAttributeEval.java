@@ -33,7 +33,7 @@ import  weka.filters.*;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class GainRatioAttributeEval
   extends AttributeEvaluator
@@ -58,6 +58,17 @@ public class GainRatioAttributeEval
   /** Merge missing values */
   private boolean m_missing_merge;
 
+  /**
+   * Returns a string describing this attribute evaluator
+   * @return a description of the evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "GainRatioAttributeEval :\n\nEvaluates the worth of an attribute "
+      +"by measuring the gain ratio with respect to the class.\n\n"
+      +"GainR(Class, Attribute) = (H(Class) - H(Class | Attribute)) / "
+      +"H(Attribute).\n";
+  }
 
   /**
    * Constructor
@@ -94,7 +105,17 @@ public class GainRatioAttributeEval
     resetOptions();
     setMissingMerge(!(Utils.getFlag('M', options)));
   }
-
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String missingMergeTipText() {
+    return "Distribute counts for missing values. Counts are distributed "
+      +"across other values in proportion to their frequency. Otherwise, "
+      +"missing is treated as a separate value.";
+  }
 
   /**
    * distribute the counts for missing values across observed values

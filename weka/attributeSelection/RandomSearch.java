@@ -37,7 +37,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RandomSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -88,6 +88,22 @@ public class RandomSearch extends ASSearch
   private boolean m_verbose;
 
   /**
+   * Returns a string describing this search method
+   * @return a description of the search suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "RandomSearch : \n\nPerforms a Random search in "
+      +"the space of attribute subsets. If no start set is supplied, Random "
+      +"search starts from a random point and reports the best subset found. "
+      +"If a start set is supplied, Random searches randomly for subsets "
+      +"that are as good or better than the start point with the same or "
+      +"or fewer attributes. Using RandomSearch in conjunction with a start "
+      +"set containing all attributes equates to the LVF algorithm of Liu "
+      +"and Setiono (ICML-96).\n"
+  }
+
+  /**
    * Constructor
    */
   public RandomSearch () {
@@ -105,7 +121,7 @@ public class RandomSearch extends ASSearch
 				    + "\n\tEg. 1,3,5-7."
 				    +"\n\tIf a start point is supplied,"
 				    +"\n\trandom search evaluates the start"
-				    +"\n\tpoint and then randomlylooks for"
+				    +"\n\tpoint and then randomly looks for"
 				    +"\n\tsubsets that are as good as or better"
 				    +"\n\tthan the start point with the same"
 				    +"\n\tor lower cardinality."
@@ -161,6 +177,19 @@ public class RandomSearch extends ASSearch
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String startSetTipText() {
+    return "Set the start point for the search. This is specified as a comma "
+      +"seperated list off attribute indexes starting at 1. It can include "
+      +"ranges. Eg. 1,2,5-9,17. If specified, Random searches for subsets "
+      +"of attributes that are as good as or better than the start set with "
+      +"the same or lower cardinality.";
+  }
+
+  /**
    * Sets a starting set of attributes for the search. It is the
    * search method's responsibility to report this start set (if any)
    * in its toString() method.
@@ -184,6 +213,16 @@ public class RandomSearch extends ASSearch
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String verboseTipText() {
+    return "Print progress information. Sends progress info to the terminal "
+      +"as the search progresses.";
+  }
+
+  /**
    * set whether or not to output new best subsets as the search proceeds
    * @param v true if output is to be verbose
    */
@@ -197,6 +236,15 @@ public class RandomSearch extends ASSearch
    */
   public boolean getVerbose() {
     return m_verbose;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String searchPercentTipText() {
+    return "Percentage of the search space to explore.";
   }
 
   /**

@@ -41,7 +41,7 @@ import  weka.filters.*;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -77,10 +77,10 @@ public class CfsSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "CfsSubsetEval:\n\nEvaluates the worth of a subset of features\n"
-      +"by considering the individual predictive ability of each feature\n"
-      +"along with the degree of redundancy between them.\n"
-      +"Subsets of features that are highly correlated with the class\n"
+    return "CfsSubsetEval :\n\nEvaluates the worth of a subset of attributes "
+      +"by considering the individual predictive ability of each feature "
+      +"along with the degree of redundancy between them.\n\n"
+      +"Subsets of features that are highly correlated with the class "
       +"while having low intercorrelation are preferred.\n";
   }
 
@@ -137,7 +137,10 @@ public class CfsSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String locallyPredictiveTipText() {
-    return "Identify locally predictive attributes";
+    return "Identify locally predictive attributes. Iteratively adds "
+      +"attributes with the highest correlation with the class as long "
+      +"as there is not already an attribute in the subset that has a "
+      +"higher correlation with the attribute in question";
   }
 
   /**
@@ -165,7 +168,9 @@ public class CfsSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String missingSeperateTipText() {
-    return "Treat missing as a seperate value";
+    return "Treat missing as a separate value. Otherwise, counts for missing "
+      +"values are distributed across other values in proportion to their "
+      +"frequency.";
   }
 
   /**

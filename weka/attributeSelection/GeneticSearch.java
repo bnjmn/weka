@@ -54,7 +54,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GeneticSearch extends ASSearch implements 
   StartSetHandler, OptionHandler {
@@ -131,7 +131,7 @@ public class GeneticSearch extends ASSearch implements
     /** holds raw merit */
     private double m_objective = -Double.MAX_VALUE;
     private double m_fitness;
-
+    
     /**
      * Constructor
      */
@@ -375,6 +375,18 @@ public class GeneticSearch extends ASSearch implements
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String startSetTipText() {
+    return "Set a start point for the search. This is specified as a comma "
+      +"seperated list off attribute indexes starting at 1. It can include "
+      +"ranges. Eg. 1,2,5-9,17. The start set becomes one of the population "
+      +"members of the initial population.";
+  }
+
+  /**
    * Sets a starting set of attributes for the search. It is the
    * search method's responsibility to report this start set (if any)
    * in its toString() method.
@@ -395,6 +407,15 @@ public class GeneticSearch extends ASSearch implements
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Set the random seed.";
+  }
+
+  /**
    * set the seed for random number generation
    * @param s seed value
    */
@@ -408,6 +429,18 @@ public class GeneticSearch extends ASSearch implements
    */
   public int getSeed() {
     return m_seed;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String reportFrequencyTipText() {
+    return "Set how frequently reports are generated. Default is equal to "
+      +"the number of generations meaning that a report will be printed for "
+      +"initial and final generations. Setting the value to 5 will result in "
+      +"a report being printed every 5 generations.";
   }
 
   /**
@@ -427,6 +460,15 @@ public class GeneticSearch extends ASSearch implements
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String mutationProbTipText() {
+    return "Set the probability of mutation occuring.";
+  }
+
+  /**
    * set the probability of mutation
    * @param m the probability for mutation occuring
    */
@@ -440,6 +482,16 @@ public class GeneticSearch extends ASSearch implements
    */
   public double getMutationProb() {
     return m_pMutation;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String crossoverProbTipText() {
+    return "Set the probability of crossover. This is the probability that "
+      +"two population members will exchange genetic material."; 
   }
 
   /**
@@ -460,6 +512,15 @@ public class GeneticSearch extends ASSearch implements
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String maxGenerationsTipText() {
+    return "Set the number of generations to evaluate.";
+  }
+
+  /**
    * set the number of generations to evaluate
    * @param m the number of generations
    */
@@ -474,7 +535,17 @@ public class GeneticSearch extends ASSearch implements
   public int getMaxGenerations() {
     return m_maxGenerations;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String populationSizeTipText() {
+    return "Set the population size. This is the number of individuals "
+      +"(attribute sets) in the population.";
+  }
+
   /**
    * set the population size
    * @param p the size of the population
@@ -489,6 +560,16 @@ public class GeneticSearch extends ASSearch implements
    */
   public int getPopulationSize() {
     return m_popSize;
+  }
+
+  /**
+   * Returns a string describing this search method
+   * @return a description of the search suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "GeneticSearch :\n\nPerforms a search using the simple genetic "
+      +"algorithm described in Goldberg (1989).\n";
   }
 
   /**

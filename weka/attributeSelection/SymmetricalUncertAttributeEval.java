@@ -58,7 +58,18 @@ public class SymmetricalUncertAttributeEval
   /** Treat missing values as a seperate value */
   private boolean m_missing_merge;
 
-
+  /**
+   * Returns a string describing this attribute evaluator
+   * @return a description of the evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "GainRatioAttributeEval :\n\nEvaluates the worth of an attribute "
+      +"by measuring the symmetrical uncertainty with respect to the class. "
+      +"\n\n SymmU(Class, Attribute) = 2 * (H(Class) - H(Class | Attribute)) "
+      +"/ H(Class) + H(Attribute).\n";
+  }
+  
   /**
    * Constructor
    */
@@ -95,6 +106,16 @@ public class SymmetricalUncertAttributeEval
     setMissingMerge(!(Utils.getFlag('M', options)));
   }
 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String missingMergeTipText() {
+    return "Distribute counts for missing values. Counts are distributed "
+      +"across other values in proportion to their frequency. Otherwise, "
+      +"missing is treated as a separate value.";
+  }
 
   /**
    * distribute the counts for missing values across observed values

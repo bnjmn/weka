@@ -48,7 +48,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -84,8 +84,8 @@ public class WrapperSubsetEval
    */
   public String globalInfo() {
     return "WrapperSubsetEval:\n\n"
-      +"Evaluates attribute sets by using a learning scheme. Cross\n"
-      +"validation is used to estimate the accuracy of the learning\n"
+      +"Evaluates attribute sets by using a learning scheme. Cross "
+      +"validation is used to estimate the accuracy of the learning "
       +"scheme for a set of attributes.\n";
   }
 
@@ -206,7 +206,7 @@ public class WrapperSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String thresholdTipText() {
-    return "Repeat xval if stdev of mean exceeds this value";
+    return "Repeat xval if stdev of mean exceeds this value.";
   }
 
   /**
@@ -234,7 +234,7 @@ public class WrapperSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String foldsTipText() {
-    return "Number of xval folds to use when estimating subset accuracy";
+    return "Number of xval folds to use when estimating subset accuracy.";
   }
 
   /**
@@ -262,7 +262,7 @@ public class WrapperSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String seedTipText() {
-    return "Seed to use for randomly generating xval splits";
+    return "Seed to use for randomly generating xval splits.";
   }
 
   /**
