@@ -56,7 +56,7 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
 */
 public class VotedPerceptron extends Classifier implements OptionHandler {
   
@@ -92,6 +92,21 @@ public class VotedPerceptron extends Classifier implements OptionHandler {
 
   /** The filter used to get rid of missing values. */
   private ReplaceMissingValues m_ReplaceMissingValues;
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Implementation of the voted perceptron algorithm by Freund and "
+      +"Schapire. Globally replaces all missing values, and transforms "
+      +"nominal attributes into binary ones. For more information, see:\n\n"
+      +"Y. Freund and R. E. Schapire (1998). Large margin "
+      +"classification using the perceptron algorithm.  Proc. 11th "
+      +"Annu. Conf. on Comput. Learning Theory, pp. 209-217, ACM Press, New "
+      +"York, NY.";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -294,7 +309,16 @@ public class VotedPerceptron extends Classifier implements OptionHandler {
 
     return "VotedPerceptron: Number of perceptrons=" + m_K;
   }
-  
+ 
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String maxKTipText() {
+    return "The maximum number of alterations to the perceptron.";
+  }
+
   /**
    * Get the value of maxK.
    *
@@ -316,6 +340,15 @@ public class VotedPerceptron extends Classifier implements OptionHandler {
   }
   
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numIterationsTipText() {
+    return "Number of iterations to be performed.";
+  }
+
+  /**
    * Get the value of NumIterations.
    *
    * @return Value of NumIterations.
@@ -334,7 +367,16 @@ public class VotedPerceptron extends Classifier implements OptionHandler {
     
     m_NumIterations = v;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String exponentTipText() {
+    return "Exponent for the polynomial kernel.";
+  }
+
   /**
    * Get the value of exponent.
    *
@@ -355,6 +397,15 @@ public class VotedPerceptron extends Classifier implements OptionHandler {
     m_Exponent = v;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Seed for the random number generator.";
+  }
+
   /**
    * Get the value of Seed.
    *
