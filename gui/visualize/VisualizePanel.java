@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -2142,7 +2142,7 @@ public class VisualizePanel extends JPanel {
 	setYIndex(prefY);
       }
       if (prefC != -1) {
-	setColourIndex(prefC);
+	m_ColourCombo.setSelectedIndex(prefC);
       }
     } catch (Exception ex) {
       System.err.println("Problem setting preferred Visualization dimensions");
