@@ -62,7 +62,7 @@ import weka.core.Option;
  * (default last) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class PairedTTester implements OptionHandler {
 
@@ -526,9 +526,9 @@ public class PairedTTester implements OptionHandler {
    * @exception Exception if an error occurs
    */
   public PairedStats calculateStatistics(Instance datasetSpecifier,
-				     int resultset1Index,
-				     int resultset2Index,
-				     int comparisonColumn) throws Exception {
+					 int resultset1Index,
+					 int resultset2Index,
+					 int comparisonColumn) throws Exception {
 
     if (m_Instances.attribute(comparisonColumn).type()
 	!= Attribute.NUMERIC) {
@@ -562,7 +562,33 @@ public class PairedTTester implements OptionHandler {
     }
 
     
-    PairedStats pairedStats = new PairedStats(m_SignificanceLevel);
+    //PairedStats pairedStats = new PairedStats(m_SignificanceLevel);
+
+    // calculate the test/train ratio
+    double testTrainRatio = 0.0;
+    int trainSizeIndex = -1;
+    int testSizeIndex = -1;
+    // find the columns with the train/test sizes
+    for (int i=0; i<m_Instances.numAttributes(); i++) {
+      if (m_Instances.attribute(i).name().equals("Number_of_training_instances")) {
+	trainSizeIndex = i;
+      } else if (m_Instances.attribute(i).name().equals("Number_of_testing_instances")) {
+	testSizeIndex = i;
+      }
+    }
+    if (trainSizeIndex >= 0 && testSizeIndex >= 0) {
+      double totalTrainSize = 0.0;
+      double totalTestSize = 0.0;
+      for (int k = 0; k < dataset1.size(); k ++) {
+	Instance current = (Instance) dataset1.elementAt(k);
+	totalTrainSize += current.value(trainSizeIndex);
+	totalTestSize += current.value(testSizeIndex);
+      }
+      testTrainRatio = totalTestSize / totalTrainSize;
+      //System.err.println("testTrainRatio calculated as " + testTrainRatio);
+    }
+    PairedStats pairedStats = new PairedStatsCorrected(m_SignificanceLevel, testTrainRatio);
+
     for (int k = 0; k < dataset1.size(); k ++) {
       Instance current1 = (Instance) dataset1.elementAt(k);
       Instance current2 = (Instance) dataset2.elementAt(k);
@@ -811,9 +837,9 @@ public class PairedTTester implements OptionHandler {
    * @return the comparison table string
    */
   private String multiResultsetFullLatex(int baseResultset,
-				     int comparisonColumn,
-				     int maxWidthMean,
-				     int maxWidthStdDev) {
+					 int comparisonColumn,
+					 int maxWidthMean,
+					 int maxWidthStdDev) {
 
     StringBuffer result = new StringBuffer(1000);
     int numcols = getNumResultsets() * 2;
