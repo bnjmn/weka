@@ -80,7 +80,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
  */
 public class LogitBoost extends DistributionClassifier 
   implements OptionHandler, Sourcable {
@@ -365,6 +365,9 @@ public class LogitBoost extends DistributionClassifier
     } else {
       options[current++] = "-P"; 
       options[current++] = "" + getWeightThreshold();
+    }
+    if (getSeed() != 1) {
+      options[current++] = "-S"; options[current++] = "" + getSeed();
     }
     options[current++] = "-I"; options[current++] = "" + getMaxIterations();
     options[current++] = "-F"; options[current++] = "" + getNumFolds();
