@@ -70,10 +70,10 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class EM
-  extends DistributionClusterer
+  extends DensityBasedClusterer
   implements OptionHandler, WeightedInstancesHandler {
 
   /** hold the discrete estimators for each cluster */
@@ -590,20 +590,11 @@ public class EM
 
       Instance in = inst.instance(l);
 
-      double[] logWeights = logOfWeightsForInstance(in);
-
-      double max = logWeights[Utils.maxIndex(logWeights)];
-      double sum = 0.0;
-
-      for(int i = 0; i < logWeights.length; i++) {
-	sum += Math.exp(logWeights[i] - max);
-      }
-
-      loglk += in.weight() * (max + Math.log(sum));
+      loglk += in.weight() * logDensityForInstance(in);
       sOW += in.weight();
 
       if (change_weights) {
-	m_weights[l] = Utils.logs2probs(logWeights);
+	m_weights[l] = distributionForInstance(in);
       }
     }
     
@@ -876,48 +867,28 @@ public class EM
     // save memory
     m_theInstances = new Instances(m_theInstances,0);
   }
-  
+
   /**
-   * Computes the density for a given instance.
+   * Returns the cluster priors.
+   */
+  public double[] clusterPriors() {
+
+    double[] n = new double[m_priors.length];
+  
+    System.arraycopy(m_priors, 0, n, 0, n.length);
+    return n;
+  }
+
+  /**
+   * Computes the log of the conditional density (per cluster) for a given instance.
    * 
    * @param instance the instance to compute the density for
    * @return the density.
-   * @exception Exception if the density could not be computed successfully
+   * @return an array containing the estimated densities
+   * @exception Exception if the density could not be computed
+   * successfully
    */
-  public double logDensityForInstance(Instance instance) throws Exception {
-
-    double[] a = logOfWeightsForInstance(instance);
-    double max = a[Utils.maxIndex(a)];
-    double sum = 0.0;
-
-    for(int i = 0; i < a.length; i++) {
-      sum += Math.exp(a[i] - max);
-    }
-
-    return max + Math.log(sum);
-  }
-
-  /**
-   * Returns the cluster probability distribution for an instance. Will simply have a
-   * probability of 1 for the chosen cluster and 0 for the others.
-   *
-   * @param instance the instance to be clustered
-   * @return the probability distribution
-   */  
-  public double[] distributionForInstance(Instance instance) throws Exception {
-    
-    return Utils.logs2probs(logOfWeightsForInstance(instance));
-  }
-
-  /**
-   * Returns the weights (indicating cluster membership) for a given instance
-   * 
-   * @param inst the instance to be assigned a cluster
-   * @return an array of weights
-   * @exception Exception if weights could not be computed
-   */
-  protected double[] logOfWeightsForInstance(Instance inst)
-    throws Exception {
+  public double[] logDensityPerClusterForInstance(Instance inst) throws Exception {
 
     int i, j;
     double logprob;
@@ -939,7 +910,7 @@ public class EM
 	}
       }
 
-      wghts[i] = (logprob + Math.log(m_priors[i]));
+      wghts[i] = logprob;
     }
 
     return  wghts;
