@@ -1,3 +1,7 @@
+#
+# $Revision: 1.2 $
+#
+
 .PHONY: all optimized debug clean install archive doc
 
 all : 
@@ -36,12 +40,22 @@ clean :
 	(cd clusterers; make clean)
 	(cd attributeSelection; make clean)
 
-manifest.tmp: 
-	(cd filters; make manifest.tmp)
-
-install : manifest.tmp all
+doc :
 	(cd ..; \
-	jar -cvf $$JAWSHOME/weka.jar \
+	javadoc -public -author -version -d doc \
+	weka.core \
+	weka.classifiers \
+	weka.classifiers.j48 \
+	weka.classifiers.m5 \
+	weka.filters \
+	weka.estimators \
+	weka.associations \
+	weka.clusterers \
+	weka.attributeSelection)
+
+install : all
+	(cd ..; \
+	jar cvf $$JAWSHOME/weka.jar \
 	weka/core/*.class \
 	weka/classifiers/*.class \
 	weka/classifiers/j48/*.class \
@@ -50,9 +64,8 @@ install : manifest.tmp all
 	weka/estimators/*class \
 	weka/associations/*.class \
 	weka/clusterers/*.class \
-	weka/attributeSelection/*.class \
-	weka/filters/manifest.tmp; \
-	jar -cvf $$JAWSHOME/weka-src.jar \
+	weka/attributeSelection/*.class ; \
+	jar cvf $$JAWSHOME/weka-src.jar \
         weka/core/*.java \
         weka/classifiers/*.java \
         weka/classifiers/j48/*.java \
@@ -62,21 +75,20 @@ install : manifest.tmp all
         weka/associations/*.java \
 	weka/clusterers/*.java \
 	weka/attributeSelection/*.java)
-	javadoc -public -author -version -d $$JAWSHOME/doc weka.core \
-	weka.filters weka.classifiers weka.classifiers.j48 \
-	weka.classifiers.m5 weka.estimators weka.associations \
-	weka.clusterers weka.attributeSelection
+	javadoc -public -author -version -d $$JAWSHOME/doc \
+	weka.core \
+	weka.classifiers \
+	weka.classifiers.j48 \
+	weka.classifiers.m5 \
+	weka.filters \
+	weka.estimators \
+	weka.associations \
+	weka.clusterers \
+	weka.attributeSelection
 
 archive :
 	(cd ..; \
-	tar -czf archive/weka`date +%d%b%Y`.tar.gz  weka)
-
-doc :
-	(cd ..; \
-	javadoc -public -author -version -d doc weka.core \
-	weka.filters weka.classifiers weka.classifiers.j48 \
-	weka.classifiers.m5 weka.estimators weka.associations \
-	weka.clusterers weka.attributeSelection)
+	tar czf archive/weka`date +%d%b%Y`.tar.gz  weka)
 
 
 
