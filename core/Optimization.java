@@ -136,7 +136,7 @@ import java.io.*;
  * <p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public abstract class Optimization{
     
@@ -491,7 +491,7 @@ public abstract class Optimization{
 		    double upper = Math.min(alpha,maxalam); 
 		    if(m_Debug)
 			System.err.println("Alpha condition holds, increase alpha... ");
-		    while((alam>=upper) || (m_f>fold+m_ALF*alam*m_Slope)){
+		    while(!((alam>=upper) || (m_f>fold+m_ALF*alam*m_Slope))){
 			lo = alam;
 			flo = m_f;
 			alam *= 2.0;
