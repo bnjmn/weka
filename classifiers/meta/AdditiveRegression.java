@@ -111,13 +111,13 @@ import weka.classifiers.meta.*;
  * Set the maximum number of models to generate. Values <= 0 indicate 
  * no maximum, ie keep going until the reduction in error threshold is 
  * reached.
- * (default = -1). <p>
+ * (default = 10). <p>
  *
  * -D <br>
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AdditiveRegression extends Classifier 
   implements OptionHandler,
@@ -154,7 +154,7 @@ public class AdditiveRegression extends Classifier
    * Maximum number of models to produce. -1 indicates keep going until the error
    * threshold is met.
    */
-  protected int m_maxModels = -1;
+  protected int m_maxModels = 10;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -217,7 +217,7 @@ public class AdditiveRegression extends Classifier
 
     newVector.addElement(new Option(
 	      "\tSpecify max models to generate. "
-	      +"(default = -1, ie. no max; keep going until error reduction threshold "
+	      +"(default = 10, ie. no max; keep going until error reduction threshold "
 	      +"is reached)\n", 
 	      "M", 1, "-M"));
      
@@ -244,7 +244,7 @@ public class AdditiveRegression extends Classifier
    * Set the maximum number of models to generate. Values <= 0 indicate 
    * no maximum, ie keep going until the reduction in error threshold is 
    * reached.
-   * (default = -1). <p>
+   * (default = 10). <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -488,9 +488,6 @@ public class AdditiveRegression extends Classifier
       modelCount++;
     } while (((temp_sum - sum) > Utils.SMALL) && 
 	     (m_maxModels > 0 ? (modelCount < m_maxModels) : true));
-
-    // remove last classifier
-    m_additiveModels.removeElementAt(m_additiveModels.size()-1);
   }
 
   /**
@@ -588,6 +585,11 @@ public class AdditiveRegression extends Classifier
 		+ getClassifier().getClass().getName()
 		+ "\n\n");
     text.append(""+m_additiveModels.size()+" models generated.\n");
+
+    for (int i = 0; i < m_additiveModels.size(); i++) {
+      text.append("\nModel number " + i + "\n\n" +
+		  m_additiveModels.elementAt(i) + "\n");
+    }
 
     return text.toString();
   }
