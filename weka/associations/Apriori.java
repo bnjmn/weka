@@ -143,6 +143,10 @@ public class Apriori implements OptionHandler {
     int[] indices;
     FastVector[] sortedRuleSet;
 
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     // Decrease minimum support until desired number of rules found.
 
     cycles = 0;
@@ -463,7 +467,6 @@ public class Apriori implements OptionHandler {
       System.out.println(apriori);
     } catch(Exception e) {
       System.out.println("\n"+e.getMessage()+text);
-      e.printStackTrace();
     }
   }
 }

@@ -257,8 +257,8 @@ public class LogitBoost extends DistributionClassifier
     // Check the remaining options are valid for the specified classifier
     if ((m_ClassifierExample != null) &&
 	(m_ClassifierExample instanceof OptionHandler)) {
-      String [] classifierOptions = Utils.partitionOptions(options);
-      String [] tempOptions = (String [])classifierOptions.clone();
+      m_ClassifierOptions = Utils.partitionOptions(options);
+      String [] tempOptions = (String [])m_ClassifierOptions.clone();
       ((OptionHandler)m_ClassifierExample).setOptions(tempOptions);
       Utils.checkForRemainingOptions(tempOptions);
     }
@@ -409,17 +409,21 @@ public class LogitBoost extends DistributionClassifier
 
     Instances boostData, trainData;
     int classIndex = data.classIndex();
-    m_NumClasses = data.numClasses();
 
     if (data.classAttribute().isNumeric()) {
       throw new Exception("LogitBoost can't handle a numeric class!");
     }
-    if (m_Classifiers == null) {
+    if (m_ClassifierExample == null) {
       throw new Exception("A weak learner has not been specified!");
+    }
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
     }
     if (b_Debug) {
       System.err.println("Creating copy of the training data");
     }
+
+    m_NumClasses = data.numClasses();
     // Create a copy of the data with the class transformed into numeric
     boostData = new Instances(data);
     boostData.deleteWithMissingClass();
@@ -449,8 +453,7 @@ public class LogitBoost extends DistributionClassifier
       }
     }
     // Set the options for the classifiers
-    if ((m_ClassifierExample != null) &&
-	(m_ClassifierExample instanceof OptionHandler)) {
+    if (m_ClassifierExample instanceof OptionHandler) {
       if (b_Debug) {
 	System.err.println("Setting classifier options");
       }

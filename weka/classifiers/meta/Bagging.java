@@ -271,6 +271,10 @@ public class Bagging extends DistributionClassifier
     if (m_Classifiers == null) {
       throw new Exception("A base learner has not been specified!");
     }
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     m_Training = data;
     for (j = 0; j < m_Classifiers.length; j++) {
       baggData = new Instances(data, data.numInstances());

@@ -246,6 +246,11 @@ public class ReliefFAttributeEval
     int z, totalInstances;
     Random r = new Random(r_seed);
 
+    if (data.checkForStringAttributes()) 
+      {
+	throw new Exception("Can't handle string attributes!");
+      }
+
     trainInstances = data;
     classIndex = trainInstances.classIndex();
     numAttribs = trainInstances.numAttributes();

@@ -218,6 +218,10 @@ public class Logistic extends DistributionClassifier implements OptionHandler {
     if (train.classAttribute().numValues() != 2) {
       throw new Exception("Only 2-class problems allowed.");
     }
+    if (train.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     m_ClassIndex = train.classIndex();
     for(int i = 0; i < train.numAttributes(); i++) {
       if ((i != m_ClassIndex) &&

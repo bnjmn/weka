@@ -78,6 +78,9 @@ public class KernelDensity extends DistributionClassifier {
     if (!instances.classAttribute().isNominal()) {
       throw new Exception("Class attribute has to be nominal!");
     }
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     theInstances = instances;
     minArray = new double [theInstances.numAttributes()];
     maxArray = new double [theInstances.numAttributes()];

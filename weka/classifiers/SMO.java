@@ -104,6 +104,9 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     int numChanged = 0;
     boolean examineAll = true;
 
+    if (insts.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
     if (insts.numClasses() > 2) {
       throw new Exception("Can only handle two-class datasets!");
     }

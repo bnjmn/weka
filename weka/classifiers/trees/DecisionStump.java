@@ -67,8 +67,13 @@ public class DecisionStump extends DistributionClassifier
     
     double bestVal = Double.MAX_VALUE, currVal;
     double bestPoint = -Double.MAX_VALUE, sum;
-    double[][] bestDist = new double[3][instances.numClasses()];
     int bestAtt = -1, numClasses;
+
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
+    double[][] bestDist = new double[3][instances.numClasses()];
 
     theInstances = new Instances(instances);
     theInstances.deleteWithMissingClass();
