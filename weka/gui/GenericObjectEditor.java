@@ -93,7 +93,7 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class GenericObjectEditor implements PropertyEditor {
     
@@ -195,33 +195,28 @@ public class GenericObjectEditor implements PropertyEditor {
 	    
 	    /** The property in selection */
 	    private String selected = null;
-	    
-	    /** The class name to be loaded */
-	    private String loaded = null;
-
+	
 	    public CascadedComboBox(){
 		label = new JMenu();
 		label.addMouseListener(new MouseInputAdapter(){	  
 		// Re-define mouse listener so that drag is not available
 			public void mousePressed(MouseEvent e){
-			    //System.err.println("???mouse pressed");
 			    if((JMenu)e.getSource() == label)
 				label.setPopupMenuVisible(false);
 			}
 			
 			public void mouseReleased(MouseEvent e){
 			    if((JMenu)e.getSource() == label){ 
-				//System.err.println("???mouse released");
 				label.setPopupMenuVisible(true);
 			    }
 			}			
 		    });
-
+		
 		m_ObjectNames.goToRoot();
 		try{
 		    for(;m_ObjectNames.numChildren() == 1;
 			m_ObjectNames.goToChild(0));
-		
+		    
 		    for(int i = 0; i < m_ObjectNames.numChildren(); i++){
 			m_ObjectNames.goToChild(i);			
 			label.add(build(true));	
@@ -230,7 +225,7 @@ public class GenericObjectEditor implements PropertyEditor {
 		}
 		
 		if(m_Object != null)
-		    label.setText(m_Object.getClass().getName());
+		    setLabel(m_Object.getClass().getName());
 	    }
 	    
 	    /** 
@@ -248,6 +243,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	     * @param text the text to be set
 	     */
 	    public void setLabel(String text){
+		//System.err.println("Label text: "+text);
 		label.setText(text);
 	    }
 	    
@@ -279,7 +275,6 @@ public class GenericObjectEditor implements PropertyEditor {
 			menu.add(build(false));
 		    }
 		    m_ObjectNames.goToParent();
-		    //System.err.println("???Inside build: "+hpp.getValue());
 		    return menu;
 		}
 	    }    
@@ -305,13 +300,13 @@ public class GenericObjectEditor implements PropertyEditor {
 			}
 		    }catch(Exception e){
 		    }
-
+		    
 		    if(m_Object != null)
-			label.setText(m_Object.getClass().getName());
+			setLabel(m_Object.getClass().getName());
 		}
 	    }
-	   
-	   /** 
+	    
+	    /** 
 	     * Called when a menu is selected, to update the underlying
 	     * HierachyPropertyParser, m_ObjectNames.
 	     * 
@@ -320,14 +315,14 @@ public class GenericObjectEditor implements PropertyEditor {
 	    public void menuSelected(MenuEvent e){
 		JMenu child = (JMenu)e.getSource();
 		String value = child.getText();
-
+		
 		// Whether menu text contains context
 		if(value.startsWith(m_ObjectNames.fullValue()))
 		    value = value.substring(value.lastIndexOf(m_ObjectNames.getSeperator())+1);
 		
 		m_ObjectNames.goToChild(value);
-		label.setText(m_ObjectNames.fullValue());
-		//System.err.println("???Select menu: " + m_ObjectNames.fullValue()+ "|" + value); 
+		setLabel(m_ObjectNames.fullValue());
+		//System.err.println("Select menu: " + m_ObjectNames.fullValue()+ "|" + value); 
 	    }
 	    
 	    /** 
@@ -341,10 +336,10 @@ public class GenericObjectEditor implements PropertyEditor {
 		JMenu target = (JMenu)e.getSource();
 		
 		if(label.isMenuComponent(target)) // Top level reached 
-		    label.setText(m_Object.getClass().getName());	   
+		    setLabel(m_Object.getClass().getName());	   
 		else
-		    label.setText(m_ObjectNames.fullValue());	
-		//System.err.println("???Deselect menu: " + m_ObjectNames.fullValue()+ "|" + loaded);
+		    setLabel(m_ObjectNames.fullValue());	
+		//System.err.println("Deselect menu: " + m_ObjectNames.fullValue());
 	    }
 	    
 	    /** 
@@ -373,8 +368,8 @@ public class GenericObjectEditor implements PropertyEditor {
 		    value = value.substring(value.lastIndexOf(m_ObjectNames.getSeperator())+1);
 		m_ObjectNames.goToChild(value);
 		selected = m_ObjectNames.fullValue();
-		label.setText(selected);		
-		//System.err.println("???Mouse in: " + m_ObjectNames.fullValue() + "|" + loaded + "|" + target.getText());
+		setLabel(selected);		
+		//System.err.println("Mouse in: " + m_ObjectNames.fullValue() + target.getText());
 	    }
 	    
 	    /** 
@@ -386,8 +381,8 @@ public class GenericObjectEditor implements PropertyEditor {
 	    public void mouseExited(MouseEvent me){
 		m_ObjectNames.goToParent();
 		selected = null;
-		label.setText(m_ObjectNames.fullValue());
-		//System.err.println("???Mouse out: " + m_ObjectNames.fullValue()+ "|" + loaded);
+		setLabel(m_ObjectNames.fullValue());
+		//System.err.println("Mouse out: " + m_ObjectNames.fullValue());
 	    }
 	    
 	    /** 
@@ -397,48 +392,51 @@ public class GenericObjectEditor implements PropertyEditor {
 	     * @param e the MouseEvent concerned
 	     */
 	    public void mouseReleased(MouseEvent me){
-		String old = m_Object.getClass().getName();
-		try {
-		    if(selected != null)
-			loaded = selected;
-		    
-		    if ((m_Object != null) && old.equals(loaded)){
-			label.setText(old);
+		try {		    
+		    if ((m_Object != null) && m_Object.getClass().getName().equals(selected)){
+			setLabel(m_Object.getClass().getName());
 			return;
 		    }
 		    
 		    // System.err.println("Different class type");
-		    label.setText(loaded);
-		    setObject(Class.forName(loaded).newInstance());
-		    m_ObjectNames.goToParent();
-		    selected = null;
-		    //System.err.println("???Mouse released: " + m_ObjectNames.fullValue()+ "|" + loaded);
-		    // System.err.println("done setting object from chooser");		    
+		    setValue(Class.forName(selected).newInstance());		   
+		    // System.err.println("done setting object from chooser"); 
 		} catch (Exception ex) {
 		    JOptionPane.showMessageDialog(null,
 						  "Could not create an example of\n"
-						  + loaded + "\n"
+						  + selected + "\n"
 						  + "from the current classpath",
-						  "GenericObjectEditor",
+						  "example loaded",
 						  JOptionPane.ERROR_MESSAGE);
 		    try{
-			label.setText(old);
-			setObject(Class.forName(old).newInstance());
-			m_ObjectNames.goToParent();
-			selected = null;
-			//System.err.println("???Mouse released: " + m_ObjectNames.fullValue()+ "|" + loaded);
+			if(m_Backup != null)
+			    setValue(m_Backup);
+			else
+			    setDefaultValue();			
 		    }catch(Exception e){
 			System.err.println(ex.getMessage());
 			ex.printStackTrace();
 		    }
 		}
+		//System.err.println("Mouse released: " + m_ObjectNames.fullValue()+ "|" + selected +" |Backup: "+ m_Backup.getClass().getName()+" |Object: "+m_Object.getClass().getName());
+		m_ObjectNames.goToParent();
+		selected = null;
 	    }	    	   
 	}
 	
 	/** Creates the GUI editor component */
 	public GOEPanel() {
+	    //System.err.println("GOE(): " + m_Object);	    
 	    m_Backup = copyObject(m_Object);
-	    //System.err.println("GOE()");
+
+	    m_MenuBar = new JMenuBar();
+	    m_MenuBar.setLayout(new BorderLayout());	
+	    m_ObjectNames = new HierachyPropertyParser();
+	    if(m_ObjectChooser == null)
+		m_ObjectChooser = new CascadedComboBox();		
+	    m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER);
+	    m_MenuBar.setSelected(m_ObjectChooser.getLabel());
+
 	    m_ChildPropertySheet = new PropertySheetPanel();
 	    m_ChildPropertySheet.addPropertyChangeListener
 		(new PropertyChangeListener() {
@@ -477,6 +475,10 @@ public class GenericObjectEditor implements PropertyEditor {
 	    m_okBut.setEnabled(true);
 	    m_okBut.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+			//System.err.println("\nOK--Backup: "+
+			// m_Backup.getClass().getName()+
+			//	   "\nOK--Object: "+
+			//		   m_Object.getClass().getName());
 			m_Backup = copyObject(m_Object);
 			if ((getTopLevelAncestor() != null)
 			    && (getTopLevelAncestor() instanceof Window)) {
@@ -489,10 +491,16 @@ public class GenericObjectEditor implements PropertyEditor {
 	    m_cancelBut = new JButton("Cancel");
 	    m_cancelBut.setEnabled(true);
 	    m_cancelBut.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
+		    public void actionPerformed(ActionEvent e) {		 
 			if (m_Backup != null) {
+			    //System.err.println("\nCncl--Backup: "+
+			    // m_Backup.getClass().getName()+
+			    //	       "\nCncl--Object: "+
+			    //       m_Object.getClass().getName());
 			    m_Object = copyObject(m_Backup);
-			    setObject(m_Object);
+
+			    // To fire property change
+			    m_Support.firePropertyChange("", null, null);
 			    updateClassType();
 			    updateChooser();
 			    updateChildPropertySheet();
@@ -505,16 +513,8 @@ public class GenericObjectEditor implements PropertyEditor {
 		    }
 		});
 	    
-	    setLayout(new BorderLayout());
-	    
-	    m_MenuBar = new JMenuBar();
-	    m_MenuBar.setLayout(new BorderLayout());	
-	    if(m_ObjectNames != null){
-		if(m_ObjectChooser == null)
-		    m_ObjectChooser = new CascadedComboBox();		
-		m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER); 
-	    }
-	    
+	    setLayout(new BorderLayout());	    
+	   
 	    add(m_MenuBar, BorderLayout.NORTH);
 	    add(m_ChildPropertySheet, BorderLayout.CENTER);
 	    // Since we resize to the size of the property sheet, a scrollpane isn't
@@ -538,6 +538,17 @@ public class GenericObjectEditor implements PropertyEditor {
 		}
 	    }
 	}
+
+      /**
+       * Enables/disables the cancel button.
+       *
+       * @param flag true to enable cancel button, false
+       * to disable it
+       */
+      protected void setCancelButton(boolean flag) {
+
+	m_cancelBut.setEnabled(flag);
+      }
 	
 	/**
 	 * Opens an object from a file selected by the user.
@@ -616,7 +627,12 @@ public class GenericObjectEditor implements PropertyEditor {
 	    try {
 		SerializedObject so = new SerializedObject(source);
 		result = so.getObject();
+		if (m_EditorComponent != null)
+		  m_EditorComponent.setCancelButton(true);
+
 	    } catch (Exception ex) {
+	      if (m_EditorComponent != null)
+		m_EditorComponent.setCancelButton(false);
 		System.err.println("GenericObjectEditor: Problem making backup object");
 		System.err.print(ex);
 	    }
@@ -663,6 +679,7 @@ public class GenericObjectEditor implements PropertyEditor {
 	    m_ObjectNames = getClassesFromProperties();
 	    if(m_ObjectNames.depth() > 0){
 		m_ObjectChooser = new CascadedComboBox();
+		m_MenuBar.removeAll();
 		m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER);
 	    }
 	}
@@ -670,12 +687,17 @@ public class GenericObjectEditor implements PropertyEditor {
 	/** Called to update the cascaded combo box of the values to
 	 * to be selected from */
 	protected void updateChooser(){
-
-	    //System.err.println("GOE::updateChooser()");   	    
-	    String objectName = m_Object.getClass().getName();
-	    m_ObjectChooser.add(objectName);
-	    m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER); 
+  	    
+	    String objectName = m_Object.getClass().getName();	    	
+	    // Try to add m_0bject. If already there, simply ignore.
+ 	    m_ObjectChooser.add(objectName);	    
+	        
 	    m_ObjectChooser.setLabel(objectName);
+	    //m_MenuBar.setSelected(m_ObjectChooser.getLabel());
+	    repaint(); 
+	    //System.err.println("GOE::updateChooser(): " +
+	    //		       objectName + " |feedback: "+
+	    //		       ((JMenu)m_MenuBar.getComponent(0)).getText());
 	}	
 	
 	/** Updates the child property sheet, and creates if needed */
@@ -696,7 +718,7 @@ public class GenericObjectEditor implements PropertyEditor {
     
     /** Called when the class of object being edited changes. */
     protected HierachyPropertyParser getClassesFromProperties() {	    
-	HierachyPropertyParser hpp = null;
+	HierachyPropertyParser hpp = new HierachyPropertyParser();
 	String className = m_ClassType.getName();
 	String typeOptions = EDITOR_PROPERTIES.getProperty(className);
 	if (typeOptions == null) {
@@ -705,7 +727,7 @@ public class GenericObjectEditor implements PropertyEditor {
 			       + "for " + className);
 	} else {		    
 	    try {
-		hpp = new HierachyPropertyParser(typeOptions, ", ");
+		hpp.build(typeOptions, ", ");
 	    } catch (Exception ex) {
 		System.err.println("Invalid property: " + typeOptions);
 	    }	    
@@ -808,12 +830,20 @@ public class GenericObjectEditor implements PropertyEditor {
     private void setObject(Object c) {
 	
 	// This should really call equals() for comparison.
-	boolean trueChange = (c != getValue());
+	boolean trueChange ;
+	if(getValue() != null){
+	    trueChange = (!c.equals(getValue()));
+	    //System.err.println("GEO::setObject(): Changed? " + trueChange+ getValue().getClass().getName());
+	}
+	else
+	    trueChange = true;
+
 	/*
 	  System.err.println("Didn't even try to make a Object copy!! "
 	  + "(using original)");
 	*/
 	m_Backup = m_Object;
+
 	m_Object = c;
 	
 	if (m_EditorComponent != null) {
