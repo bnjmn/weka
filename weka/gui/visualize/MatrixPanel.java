@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 
@@ -148,15 +148,6 @@ public class MatrixPanel extends JPanel{
   /** Random seed for random subsample */
   protected JTextField m_rseed = new JTextField(5);
  
-  /** For selecting same class distribution in the subsample as in the input */
-  protected JRadioButton origDist = new JRadioButton("Class distribution as in input data");
-
-  /** For selecting uniform class distribution in the subsample */
-  protected JRadioButton unifDist = new JRadioButton("Uniform class distribution");
-
-  /** Button group for subsampling radio buttons */
-  private ButtonGroup distGroup = new ButtonGroup();
-
   /** Displays the current size beside the slider bar for cell size */
   private final JLabel m_plotSizeLb = new JLabel("PlotSize: [100]");
 
@@ -225,9 +216,6 @@ public class MatrixPanel extends JPanel{
   */
   public MatrixPanel() {
     m_rseed.setText("1");
-    origDist.setSelected(true);
-    distGroup.add(origDist);
-    distGroup.add(unifDist); 
 
     /** Setting up GUI **/
     m_selAttrib.addActionListener( new ActionListener() {
@@ -327,7 +315,7 @@ public class MatrixPanel extends JPanel{
 	  JButton doneBt = new JButton("Done");
 
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
-					 "Attribute Selection Panel",
+					 "Subsample % Panel",
 					 true) {
 	      public void dispose() { 
 		m_resamplePercent.setText(percentTxt.getText());
@@ -358,14 +346,6 @@ public class MatrixPanel extends JPanel{
 	  p1.add(percentTxt, gbc);
 	  gbc.insets = new Insets(8,2,2,2);
 
-	  if(m_data.attribute(m_classAttrib.getSelectedIndex()).isNominal()) {
-	    JPanel p2 = new JPanel( gbl );
-	    p2.add(origDist, gbc);
-	    p2.add(unifDist, gbc);
-	    p2.setBorder( BorderFactory.createTitledBorder("Class Distribution") );
-	    p1.add(p2, gbc);
-	  }
-				
 	  JPanel p3 = new JPanel( gbl );
 	  gbc.fill = gbc.HORIZONTAL; gbc.gridwidth = gbc.REMAINDER;
 	  gbc.weightx = 1;  gbc.weighty = 0;
@@ -485,34 +465,21 @@ public class MatrixPanel extends JPanel{
 
     /** Resampling  **/
     if(Double.parseDouble(m_resamplePercent.getText())<100) {
-      try {
-	if(m_data.attribute(m_classIndex).isNominal() ) {
-	  inst = new Instances(m_data); // To save class index
-	  inst.setClassIndex(m_classIndex);
-	  weka.filters.supervised.instance.Resample r = 
-	    new weka.filters.supervised.instance.Resample();
-		  
-	  r.setRandomSeed( Integer.parseInt(m_rseed.getText()) );
-	  r.setSampleSizePercent( Double.parseDouble(m_resamplePercent.getText()) );
-		  
-	  if(origDist.isSelected())
-	    r.setBiasToUniformClass(0);
-	  else
-	    r.setBiasToUniformClass(1);
-	  r.setInputFormat(inst);
-	  inst = weka.filters.Filter.useFilter(inst, r);
-	}
-	else {
-	  weka.filters.unsupervised.instance.Resample r = 
-	    new weka.filters.unsupervised.instance.Resample();
-		  
-	  r.setRandomSeed( Integer.parseInt(m_rseed.getText()) );
-	  r.setSampleSizePercent( Double.parseDouble(m_resamplePercent.getText()) );
-	  r.setInputFormat(m_data);
-	  inst = weka.filters.Filter.useFilter(m_data, r);
-	}
-      }
-      catch(Exception ex) { System.out.println("Error occurred while sampling"); ex.printStackTrace();  }
+        inst = new Instances(m_data, 0, m_data.numInstances());
+        inst.randomize( new Random(Integer.parseInt(m_rseed.getText())) );
+        
+        //System.err.println("gettingPercent: " +
+        //                   Math.round(
+        //                     Double.parseDouble(m_resamplePercent.getText())
+        //                     / 100D * m_data.numInstances()
+        //                             )
+        //                  );
+        
+        inst = new Instances(m_data, 
+                 0,
+                 (int)Math.round(Double.parseDouble(m_resamplePercent.getText())
+                 / 100D*m_data.numInstances())
+                            );
     }
     
     m_points = new int[inst.numInstances()][m_selectedAttribs.length]; //changed
@@ -686,14 +653,12 @@ public class MatrixPanel extends JPanel{
    */
   public void setPercent() {
     if(m_data.numInstances() > 700) {
-      String percnt = Double.toString(500D/m_data.numInstances()*100);
-	  
-      if( percnt.indexOf('.')+3 < percnt.length() ) {
-	m_resamplePercent.setText(percnt.substring(0, percnt.indexOf('.')-1)+
-				  percnt.substring(percnt.indexOf('.'), percnt.indexOf('.')+3) );
-      }
-      else
-	m_resamplePercent.setText(percnt);
+      double percnt = 500D/m_data.numInstances()*100;     
+      percnt *= 100;
+      percnt = Math.round(percnt);
+      percnt /= 100;
+
+      m_resamplePercent.setText(""+percnt);
     }
     else
       m_resamplePercent.setText("100");
@@ -710,7 +675,6 @@ public class MatrixPanel extends JPanel{
     setPercent();
     setupAttribLists();
     m_rseed.setText("1");
-    origDist.setSelected(true);
     initInternalFields();
     m_cp.setInstances(m_data);
     m_cp.setCindex(m_classIndex);
@@ -770,9 +734,7 @@ public class MatrixPanel extends JPanel{
     jf.repaint();
   }
 
-
-
-
+  
   /**
      Internal class responsible for displaying the actual matrix
      Requires the internal data fields of the parent class to be properly initialized
@@ -1087,4 +1049,3 @@ public class MatrixPanel extends JPanel{
     }
   }
 }
-
