@@ -52,7 +52,7 @@ import weka.core.Queue;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class StripChart 
   extends JPanel 
@@ -84,7 +84,17 @@ public class StripChart
 
   private transient JFrame m_outputFrame = null;
   private transient StripPlotter m_plotPanel = null;
+
+  /**
+   * The off screen image for rendering to
+   */
   private transient Image m_osi = null;
+  
+  /**
+   * Width and height of the off screen image
+   */
+  private int m_iheight;
+  private int m_iwidth;
 
   /**
    * Max value for the y axis
@@ -274,14 +284,6 @@ public class StripChart
     }
   }
 
-  /*  public void setXValFreq(int newFreq) {
-    m_xValFreq = newFreq;
-  }
-  
-  public int getXValFreq() {
-    return m_xValFreq;
-    }*/
-
   /**
    * Provide some necessary initialization after object has
    * been deserialized.
@@ -386,7 +388,7 @@ public class StripChart
       m_osi = m_plotPanel.createImage(iwidth, iheight);
       Graphics m = m_osi.getGraphics();
       m.fillRect(0,0,iwidth,iheight);
-      m_previousY[0] = convertToPanelY(0);
+      m_previousY[0] = -1;
       setRefreshWidth();
       if (m_updateHandler == null) {
 	System.err.println("Starting handler");
@@ -409,12 +411,16 @@ public class StripChart
    * @param dataPoint contains y values to plot
    */
   protected void updateChart(double [] dataPoint) {
-    //    int iwidth = m_plotPanel.getWidth();
-    //    int iheight = m_plotPanel.getHeight();
-    int iwidth = m_osi.getWidth(this);
-    int iheight = m_osi.getHeight(this);
+    if (m_previousY[0] == -1) {
+      int iw = m_plotPanel.getWidth();
+      int ih = m_plotPanel.getHeight();
+      m_osi = m_plotPanel.createImage(iw, ih);
+      Graphics m = m_osi.getGraphics();
+      m.fillRect(0,0,iw,ih);
+      m_previousY[0] = convertToPanelY(0);
+      m_iheight = ih; m_iwidth = iw;
+    }
 
-    //    System.err.println(dataPoint[0]);
     if (dataPoint.length-1 != m_previousY.length) {
       m_previousY = new double [dataPoint.length-1];
       //      m_plotCount = 0;
@@ -424,7 +430,6 @@ public class StripChart
     }
 
     Graphics osg = m_osi.getGraphics();
-    
     Graphics g = m_plotPanel.getGraphics();
 
     // paint the old scale onto the plot if a scale update has occured
@@ -442,24 +447,24 @@ public class StripChart
 
       int hf = m_labelMetrics.getAscent();
       osg.setColor(m_colorList[m_colorList.length-1]);
-      osg.drawString(maxVal, iwidth-wmx, hf-2);
-      osg.drawString(midVal, iwidth-wmd, (iheight / 2)+(hf / 2));
-      osg.drawString(minVal, iwidth-wmn, iheight-1);
+      osg.drawString(maxVal, m_iwidth-wmx, hf-2);
+      osg.drawString(midVal, m_iwidth-wmd, (m_iheight / 2)+(hf / 2));
+      osg.drawString(minVal, m_iwidth-wmn, m_iheight-1);
       m_yScaleUpdate = false;
       System.err.println("Here");
     }
 
-    osg.copyArea(m_refreshWidth,0,iwidth-m_refreshWidth,
-		 iheight,-m_refreshWidth,0);
+    osg.copyArea(m_refreshWidth,0,m_iwidth-m_refreshWidth,
+		 m_iheight,-m_refreshWidth,0);
     osg.setColor(Color.black);
-    osg.fillRect(iwidth-m_refreshWidth,0, iwidth, iheight);
+    osg.fillRect(m_iwidth-m_refreshWidth,0, m_iwidth, m_iheight);
 
     double pos;
     for (int i = 0; i < dataPoint.length-1; i++) {
       osg.setColor(m_colorList[(i % m_colorList.length)]);
       pos = convertToPanelY(dataPoint[i]);
-      osg.drawLine(iwidth-m_refreshWidth, (int)m_previousY[i], 
-		   iwidth-1, (int)pos);
+      osg.drawLine(m_iwidth-m_refreshWidth, (int)m_previousY[i], 
+		   m_iwidth-1, (int)pos);
       m_previousY[i] = pos;
       if (dataPoint[dataPoint.length-1] % m_xValFreq == 0) {
 	// draw the actual y value onto the plot for this curve
@@ -473,7 +478,7 @@ public class StripChart
 	}
 	int w = m_labelMetrics.stringWidth(val);
 	osg.setFont(m_labelFont);
-	osg.drawString(val, iwidth-w, (int)pos);
+	osg.drawString(val, m_iwidth-w, (int)pos);
       }
     }
     
@@ -484,7 +489,7 @@ public class StripChart
       osg.setColor(m_colorList[m_colorList.length-1]);
       int w = m_labelMetrics.stringWidth(xVal);
       osg.setFont(m_labelFont);
-      osg.drawString(xVal, iwidth-w, iheight - 1);
+      osg.drawString(xVal, m_iwidth-w, m_iheight - 1);
     }
     g.drawImage(m_osi,0,0,m_plotPanel);
     //    System.err.println("Finished");
