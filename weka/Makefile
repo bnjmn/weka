@@ -1,5 +1,5 @@
 #
-# $Revision: 1.37 $
+# $Revision: 1.38 $
 #
 
 # Java Compiler to use
@@ -80,6 +80,7 @@ doc :
 	weka.classifiers.trees \
 	weka.classifiers.trees.j48 \
 	weka.classifiers.trees.m5 \
+	weka.classifiers.trees.lmt \
 	weka.classifiers.lazy.kstar \
 	weka.classifiers.functions.neural \
 	weka.classifiers.trees.adtree \
@@ -130,6 +131,7 @@ install : all
 	weka/classifiers/trees/*.class \
 	weka/classifiers/trees/j48/*.class \
 	weka/classifiers/trees/m5/*.class \
+	weka/classifiers/trees/lmt/*.class \
 	weka/classifiers/lazy/kstar/*.class \
 	weka/classifiers/functions/neural/*.class \
 	weka/classifiers/trees/adtree/*.class \
@@ -177,6 +179,7 @@ install : all
 	weka/classifiers/trees/*.java \
 	weka/classifiers/trees/j48/*.java \
 	weka/classifiers/trees/m5/*.java \
+	weka/classifiers/trees/lmt/*.java \
 	weka/classifiers/lazy/kstar/*.java \
 	weka/classifiers/functions/neural/*.java \
 	weka/classifiers/trees/adtree/*.java \
@@ -242,6 +245,7 @@ install : all
 	weka.classifiers.trees \
 	weka.classifiers.trees.j48 \
 	weka.classifiers.trees.m5 \
+	weka.classifiers.trees.lmt \
 	weka.classifiers.lazy.kstar \
 	weka.classifiers.functions.neural \
 	weka.classifiers.trees.adtree \

@@ -17,6 +17,7 @@ all :   $(CLASSFILES)
 	(cd adtree; make all JAVAC=$(JAVAC))
 	(cd j48; make all JAVAC=$(JAVAC))
 	(cd m5; make all JAVAC=$(JAVAC))
+	(cd lmt; make all JAVAC=$(JAVAC))
 
 
 debug : clean
@@ -24,6 +25,7 @@ debug : clean
 	(cd adtree; make debug JAVAC=$(JAVAC))
 	(cd j48; make debug JAVAC=$(JAVAC))
 	(cd m5; make debug JAVAC=$(JAVAC))
+	(cd lmt; make debug JAVAC=$(JAVAC))
 
 
 optimized : clean
@@ -31,6 +33,7 @@ optimized : clean
 	(cd adtree; make optimized JAVAC=$(JAVAC))
 	(cd j48; make optimized JAVAC=$(JAVAC))
 	(cd m5; make optimized JAVAC=$(JAVAC))
+	(cd lmt; make optimized JAVAC=$(JAVAC))
 
 
 clean : 
@@ -38,5 +41,6 @@ clean :
 	(cd adtree; make clean)
 	(cd j48; make clean)
 	(cd m5; make clean)
+	(cd lmt; make clean)
 
 
