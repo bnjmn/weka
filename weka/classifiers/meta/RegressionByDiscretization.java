@@ -56,7 +56,7 @@ import weka.filters.unsupervised.attribute.PotentialClassIgnorer;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -108,9 +108,12 @@ public class RegressionByDiscretization extends Classifier
     m_ClassMeans = new double [numClasses];
     int [] classCounts = new int [numClasses];
     for (int i = 0; i < instances.numInstances(); i++) {
-      int classVal = (int) newTrain.instance(i).classValue();
-      classCounts[classVal]++;
-      m_ClassMeans[classVal] += instances.instance(i).classValue();
+      Instance inst = newTrain.instance(i);
+      if (!inst.classIsMissing()) {
+	int classVal = (int) inst.classValue();
+	classCounts[classVal]++;
+	m_ClassMeans[classVal] += instances.instance(i).classValue();
+      }
     }
 
     for (int i = 0; i < numClasses; i++) {
@@ -157,7 +160,7 @@ public class RegressionByDiscretization extends Classifier
 	prediction += probs[j] * m_ClassMeans[j];
 	probSum += probs[j];
       }
-      
+
       return prediction /  probSum;
       
     } else {
