@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.BorderFactory;
 
 /**
  * Creates a panel that displays the attributes contained in a set of
@@ -41,7 +42,7 @@ import javax.swing.table.AbstractTableModel;
  * classification).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -280,11 +281,12 @@ public class AttributeSelectionPanel extends JPanel {
 
     // Set up the layout
     JPanel p1 = new JPanel();
-    p1.setLayout(new GridLayout(1, 3));
+    p1.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+    p1.setLayout(new GridLayout(1, 3, 5, 5));
     p1.add(m_IncludeAll);
     p1.add(m_RemoveAll);
     p1.add(m_Invert);
-    
+
     setLayout(new BorderLayout());
     add(p1, BorderLayout.NORTH);
     add(new JScrollPane(m_Table), BorderLayout.CENTER);

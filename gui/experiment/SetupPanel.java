@@ -81,7 +81,7 @@ import javax.swing.filechooser.FileFilter;
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SetupPanel extends JPanel {
 
@@ -168,6 +168,9 @@ public class SetupPanel extends JPanel {
     java.beans.PropertyEditorManager
       .registerEditor(SelectedTag.class,
 		      SelectedTagEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.CostMatrix.class,
+		      weka.gui.CostMatrixEditor.class);
   }
   
   /**

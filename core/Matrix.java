@@ -18,7 +18,10 @@
  */
 package weka.core;
 
-import java.io.*;
+import java.io.Writer;
+import java.io.Reader;
+import java.io.LineNumberReader;
+import java.util.StringTokenizer;
 
 /**
  * Class for performing operations on a matrix of floating-point values.
@@ -27,22 +30,116 @@ import java.io.*;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public final class Matrix {
+public class Matrix {
 
   /** The data in the matrix. */
-  private double [][] elements;
+  protected double [][] m_Elements;
 
   /**
    * Constructs a matrix.
    *
-   * @param nr the number of the rows
-   * @param nc the number of the columns
+   * @param nr the number of rows
+   * @param nc the number of columns
    */
-  public  Matrix(int nr, int nc){
+  public Matrix(int nr, int nc) {
 
-    elements = new double[nr][nc];
+    m_Elements = new double[nr][nc];
+    initialize();
+  }
+
+  /**
+   * Reads a matrix from a reader. The first line in the file should
+   * contain the number of rows and columns. Subsequent lines
+   * contain elements of the matrix.
+   *
+   * @param r the reader containing the matrix
+   * @exception Exception if an error occurs
+   */
+  public Matrix(Reader r) throws Exception {
+
+    LineNumberReader lnr = new LineNumberReader(r);
+    String line;
+    int currentRow = -1;
+
+    while ((line = lnr.readLine()) != null) {
+
+      if (line.startsWith("%")) { // Comments
+	continue;
+      }
+      StringTokenizer st = new StringTokenizer(line);
+      if (!st.hasMoreTokens()) {  // Ignore blank lines
+	continue;
+      }
+
+      if (currentRow < 0) {
+	int rows = Integer.parseInt(st.nextToken());
+	if (!st.hasMoreTokens()) {
+	  throw new Exception("Line " + lnr.getLineNumber() 
+			      + ": expected number of columns");
+	}
+	int cols = Integer.parseInt(st.nextToken());
+	m_Elements = new double [rows][cols];
+	initialize();
+	currentRow ++;
+	continue;
+
+      } else {
+	if (currentRow == numRows()) {
+	  throw new Exception("Line " + lnr.getLineNumber() 
+			      + ": too many rows provided");
+	}
+	for (int i = 0; i < numColumns(); i++) {
+	  if (!st.hasMoreTokens()) {
+	    throw new Exception("Line " + lnr.getLineNumber() 
+				+ ": too few matrix elements provided");
+	  }
+	  m_Elements[currentRow][i] = Double.valueOf(st.nextToken())
+	    .doubleValue();
+	}
+	currentRow ++;
+      }
+    }
+    if (currentRow == -1) {
+      throw new Exception("Line " + lnr.getLineNumber() 
+			      + ": expected number of rows");
+    } else if (currentRow != numRows()) {
+      throw new Exception("Line " + lnr.getLineNumber() 
+			  + ": too few rows provided");
+    }
+  }
+
+  /**
+   * Writes out a matrix
+   *
+   * @param w the output Writer
+   * @exception Exception if an error occurs
+   */
+  public void write(Writer w) throws Exception {
+
+    w.write("% Rows\tColumns\n");
+    w.write("" + numRows() + "\t" + numColumns() + "\n");
+    w.write("% Matrix elements\n");
+    for(int i = 0; i < numRows(); i++) {
+      for(int j = 0; j < numColumns(); j++) {
+	w.write("" + m_Elements[i][j] + "\t");
+      }
+      w.write("\n");
+    }
+    w.flush();
+  }
+
+  /**
+   * Resets the elements to default values (i.e. 0).
+   */
+  protected void initialize() {
+
+    for (int i = 0; i < numRows(); i++) {
+      for (int j = 0; j < numColumns(); j++) {
+	m_Elements[i][j] = 0;
+      }
+    }
   }
 
   /**
@@ -54,7 +151,7 @@ public final class Matrix {
    */
   public final double getElement(int rowIndex, int columnIndex) {
     
-    return elements[rowIndex][columnIndex];
+    return m_Elements[rowIndex][columnIndex];
   }
 
   /**
@@ -64,7 +161,7 @@ public final class Matrix {
    */
   public final int numRows() {
   
-    return elements.length;
+    return m_Elements.length;
   }
 
   /**
@@ -74,7 +171,7 @@ public final class Matrix {
    */
   public final int numColumns() {
   
-    return elements[0].length;
+    return m_Elements[0].length;
   }
 
   /**
@@ -86,7 +183,7 @@ public final class Matrix {
    */
   public final void setElement(int rowIndex, int columnIndex, double value) {
     
-    elements[rowIndex][columnIndex] = value;
+    m_Elements[rowIndex][columnIndex] = value;
   }
 
   /**
@@ -97,8 +194,9 @@ public final class Matrix {
    */
   public final void setRow(int index, double[] newRow) {
 
-    for (int i = 0; i < newRow.length; i++)
-      elements[index][i] = newRow[i];
+    for (int i = 0; i < newRow.length; i++) {
+      m_Elements[index][i] = newRow[i];
+    }
   }
   
   /**
@@ -109,8 +207,9 @@ public final class Matrix {
    */
   public final void setColumn(int index, double[] newColumn) {
 
-    for (int i = 0; i < elements.length; i++)
-      elements[i][index] = newColumn[i];
+    for (int i = 0; i < m_Elements.length; i++) {
+      m_Elements[i][index] = newColumn[i];
+    }
   }
 
   /** 
@@ -122,9 +221,10 @@ public final class Matrix {
     
     StringBuffer text = new StringBuffer();
    
-    for(int i = 0; i < elements.length; i++) {
-      for(int j = 0; j < elements[i].length; j++)
-	text.append("\t" + Utils.doubleToString(elements[i][j],5,3));
+    for(int i = 0; i < m_Elements.length; i++) {
+      for(int j = 0; j < m_Elements[i].length; j++) {
+	text.append("\t" + Utils.doubleToString(m_Elements[i][j], 5, 3));
+      }
       text.append("\n");
     }
     
@@ -138,12 +238,12 @@ public final class Matrix {
    */
   public final Matrix transpose() {
 
-    int nr = elements.length, nc = elements[0].length;
+    int nr = m_Elements.length, nc = m_Elements[0].length;
     Matrix b = new Matrix(nc, nr);
 
     for(int i = 0;i < nc; i++) {
       for(int j = 0; j < nr; j++) {
-	b.elements[i][j] = elements[j][i];
+	b.m_Elements[i][j] = m_Elements[j][i];
       }
     }
 
@@ -158,14 +258,14 @@ public final class Matrix {
    */
   public final Matrix multiply(Matrix b) {
    
-    int nr = elements.length, nc = elements[0].length;
-    int bnr = b.elements.length, bnc = b.elements[0].length;
+    int nr = m_Elements.length, nc = m_Elements[0].length;
+    int bnr = b.m_Elements.length, bnc = b.m_Elements[0].length;
     Matrix c = new Matrix(nr, bnc);
 
     for(int i = 0; i < nr; i++) {
       for(int j = 0; j< bnc; j++) {
 	for(int k = 0; k < nc; k++) {
-	  c.elements[i][j] += elements[i][k] * b.elements[k][j];
+	  c.m_Elements[i][j] += m_Elements[i][k] * b.m_Elements[k][j];
 	}
       }
     }
@@ -185,7 +285,7 @@ public final class Matrix {
     if (y.numColumns() > 1) {
       throw new Exception("Only one dependent variable allowed");
     }
-    int nc = elements[0].length;
+    int nc = m_Elements[0].length;
     double[] b = new double[nc];
     Matrix xt = this.transpose();
 
@@ -203,7 +303,7 @@ public final class Matrix {
       // Carry out the regression
       Matrix bb = xt.multiply(y);
       for(int i = 0; i < nc; i++) {
-	b[i] = bb.elements[i][0];
+	b[i] = bb.m_Elements[i][0];
       }
       try {
 	ss.lubksb(ss.ludcmp(), b);
@@ -250,7 +350,7 @@ public final class Matrix {
    */
   public final void lubksb(int[] indx, double b[]) {
     
-    int nc = elements[0].length;
+    int nc = m_Elements[0].length;
     int ii = -1, ip;
     double sum;
     
@@ -260,19 +360,19 @@ public final class Matrix {
       b[ip] = b[i];
       if (ii != -1) {
 	for (int j = ii; j < i; j++) {
-	  sum -= elements[i][j] * b[j];
+	  sum -= m_Elements[i][j] * b[j];
 	}
       } else if (sum != 0.0) {
 	ii = i;
       }
       b[i] = sum;
     }
-    for (int i = nc-1 ; i >= 0; i--) {
+    for (int i = nc - 1; i >= 0; i--) {
       sum = b[i];
-      for (int j = i+1; j < nc; j++) {
-	sum -= elements[i][j] * b[j];
+      for (int j = i + 1; j < nc; j++) {
+	sum -= m_Elements[i][j] * b[j];
       }
-      b[i] = sum / elements[i][i];
+      b[i] = sum / m_Elements[i][i];
     }
   }
   
@@ -284,55 +384,62 @@ public final class Matrix {
    */
   public final int[] ludcmp() throws Exception {
 
-    int nc = elements[0].length;
-    int[] indx = new int[elements.length];
+    int nc = m_Elements[0].length;
+    int[] indx = new int[m_Elements.length];
     int imax = -1;
-    double big,dum,sum,temp;
+    double big, dum, sum, temp;
     double vv[];
     
     vv = new double[nc];
     for (int i = 0; i < nc; i++) {
-      big=0.0;
-      for (int j = 0; j < nc; j++)
-	if ((temp = Math.abs(elements[i][j])) > big)
+      big = 0.0;
+      for (int j = 0; j < nc; j++) {
+	if ((temp = Math.abs(m_Elements[i][j])) > big) {
 	  big = temp;
-      if (big < 0.000000001) 
+	}
+      }
+      if (big < 0.000000001) {
 	throw new Exception("Matrix is singular!");
+      }
       vv[i] = 1.0 / big;
     }
     for (int j = 0; j < nc; j++) {
       for (int i = 0; i < j; i++) {
-	sum = elements[i][j];
-	for (int k = 0; k < i; k++) 
-	  sum -= elements[i][k] * elements[k][j];
-	elements[i][j] = sum;
+	sum = m_Elements[i][j];
+	for (int k = 0; k < i; k++) {
+	  sum -= m_Elements[i][k] * m_Elements[k][j];
+	}
+	m_Elements[i][j] = sum;
       }
       big = 0.0;
       for (int i = j; i < nc; i++) {
-	sum = elements[i][j];
-	for (int k = 0; k < j; k++)
-	  sum -= elements[i][k] * elements[k][j];
-	elements[i][j] = sum;
-	if ((dum=vv[i] * Math.abs(sum)) >= big) {
-	  big=dum;
-	  imax=i;
+	sum = m_Elements[i][j];
+	for (int k = 0; k < j; k++) {
+	  sum -= m_Elements[i][k] * m_Elements[k][j];
+	}
+	m_Elements[i][j] = sum;
+	if ((dum = vv[i] * Math.abs(sum)) >= big) {
+	  big = dum;
+	  imax = i;
 	}
       } 
       if (j != imax) {
 	for (int k = 0; k < nc; k++) {
-	  dum = elements[imax][k];
-	  elements[imax][k] = elements[j][k];
-	  elements[j][k] = dum;
+	  dum = m_Elements[imax][k];
+	  m_Elements[imax][k] = m_Elements[j][k];
+	  m_Elements[j][k] = dum;
 	}
 	vv[imax] = vv[j];
       }
       indx[j] = imax;
-      if (elements[j][j] == 0.0) 
+      if (m_Elements[j][j] == 0.0) {
 	throw new Exception("Matrix is singular");
-      if (j != nc-1) {
-	dum = 1.0 / (elements[j][j]);
-	for (int i = j+1; i < nc; i++) 
-	  elements[i][j] *= dum;
+      }
+      if (j != nc - 1) {
+	dum = 1.0 / (m_Elements[j][j]);
+	for (int i = j + 1; i < nc; i++) {
+	  m_Elements[i][j] *= dum;
+	}
       }
     }
     return indx;
@@ -384,6 +491,10 @@ public final class Matrix {
       System.out.println();
       a.setElement(0, 0, 6);
       System.out.println("a with (0, 0) set to 6:\n " + a);
+      a.write(new java.io.FileWriter("main.matrix"));
+      System.out.println("wrote matrix to \"main.matrix\"\n" + a);
+      a = new Matrix(new java.io.FileReader("main.matrix"));
+      System.out.println("read matrix from \"main.matrix\"\n" + a);
     } catch (Exception e) {
       e.printStackTrace();
     }

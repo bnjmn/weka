@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.12 $
+ * @version  $Revision: 1.13 $
   */
 public class Evaluation implements Summarizable {
 
@@ -150,7 +150,7 @@ public class Evaluation implements Summarizable {
   private double m_ClassPriorsSum;
 
   /** The cost matrix (if given). */
-  private double[][] m_CostMatrix;
+  private CostMatrix m_CostMatrix;
 
   /** The weight of all correctly classified instances weighted by a cost. */
   private double m_CorrectWithCost;
@@ -268,7 +268,7 @@ public class Evaluation implements Summarizable {
    * @exception Exception if cost matrix is not compatible with 
    * data, the class is not defined or the class is numeric
    */
-  public Evaluation(Instances data, double[][] costMatrix,
+  public Evaluation(Instances data, CostMatrix costMatrix,
 		    Random random) 
        throws Exception {
     
@@ -285,13 +285,8 @@ public class Evaluation implements Summarizable {
 			  "given!");
     }
     m_CostMatrix = costMatrix;
-    if (m_CostMatrix.length != m_NumClasses) {
+    if (m_CostMatrix.size() != m_NumClasses) {
       throw new Exception("Cost matrix not compatible with data!");
-    }
-    for (int i = 0; i < m_NumClasses; i++) {
-      if (m_CostMatrix[i].length != m_NumClasses) {
-	throw new Exception("Cost matrix not compatible with data!");
-      }
     }
     m_ClassPriors = new double [m_NumClasses];
     setPriors(data);
@@ -340,7 +335,7 @@ public class Evaluation implements Summarizable {
     for (int i = 0; i < numFolds; i++) {
       Instances train = data.trainCV(numFolds, i);
       if (m_CostMatrix != null) {
-	train = train.applyCostMatrix(m_CostMatrix, m_Random);
+	train = m_CostMatrix.applyCostMatrix(train, m_Random);
       }
       setPriors(train);
       classifier.buildClassifier(train);
@@ -464,6 +459,7 @@ public class Evaluation implements Summarizable {
       args[0] = "";
       System.out.println(evaluateModel(classifier, args));
     } catch (Exception ex) {
+      ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
   }
@@ -532,7 +528,7 @@ public class Evaluation implements Summarizable {
     Instances train = null, tempTrain, test = null, 
       trainWithoutStrings = null, testWithoutStrings = null, template;
     Instance instanceWithoutStrings;
-    double[][] costMatrix = null;
+    CostMatrix costMatrix = null;
     int seed = 1, folds = 10, classIndex = -1;
     double predValue;
     double[] results;
@@ -641,13 +637,36 @@ public class Evaluation implements Summarizable {
       }
       costFileName = Utils.getOption('m', options);
       if (costFileName.length() != 0) {
+
 	try {
 	  costReader = new FileReader(costFileName);
 	} catch (Exception e) {
 	  throw new Exception("Can't open file " + e.getMessage() + '.');
 	}
-	costMatrix = 
-	  template.readCostMatrix(costReader);
+	try {
+	  // First try as a proper cost matrix format
+	  costMatrix = new CostMatrix(costReader);
+	} catch (Exception ex) {
+	  try {
+	    // Now try as the poxy old format :-)
+	    System.err.println("Attempting to read old format");
+	    try {
+	      costReader.close(); // Close the old one
+	      costReader = new FileReader(costFileName);
+	    } catch (Exception e) {
+	      throw new Exception("Can't open file " + e.getMessage() + '.');
+	    }
+	    costMatrix = new CostMatrix(template.numClasses());
+	    System.err.println("Created default cost matrix");
+	    costMatrix.readOldFormat(costReader);
+	    System.err.println("Read old format");
+	  } catch (Exception e2) {
+	    // re-throw the original exception
+	    System.err.println("Re-throwing original exception");
+	    throw ex;
+	  }
+	}
+	System.err.println(costMatrix.toString());
       }
       IRstatistics = Utils.getFlag('i', options);
       noOutput = Utils.getFlag('o', options);
@@ -747,9 +766,8 @@ public class Evaluation implements Summarizable {
       
       // Build classifier in one go
       if (costMatrix != null) {
-	tempTrain = trainWithoutStrings.
-	  applyCostMatrix(costMatrix, 
-			  trainingEvaluation.m_Random);
+	tempTrain = costMatrix.applyCostMatrix(trainWithoutStrings, 
+					       trainingEvaluation.m_Random);
       } else {
 	tempTrain = new Instances(train);
       }
@@ -846,7 +864,7 @@ public class Evaluation implements Summarizable {
 	text.append(trainingEvaluation.
 		    toSummaryString("\n=== Error on training" + 
 				    " data ===\n", printComplexityStatistics));
-	if (train.classAttribute().isNominal()) {
+	if (template.classAttribute().isNominal()) {
 	  if (ROCStatistics) {
 	    text.append("\n\n" + trainingEvaluation.toClassDetailsString());
 	  }
@@ -896,7 +914,7 @@ public class Evaluation implements Summarizable {
       trainWithoutStrings.randomize(random);
       testingEvaluation.
       crossValidateModel(classifier, trainWithoutStrings, folds);
-      if (train.classAttribute().isNumeric()) {
+      if (template.classAttribute().isNumeric()) {
 	text.append("\n\n" + testingEvaluation.
 		    toSummaryString("=== Cross-validation ===\n",
 				    printComplexityStatistics));
@@ -2096,13 +2114,6 @@ public class Evaluation implements Summarizable {
     double costFactor = 1;
 
     if (!instance.classIsMissing()) {
-      m_WithClass += instance.weight();
-      if (m_CostMatrix != null) {
-	costFactor = 
-	  m_CostMatrix[actualClass][Utils.maxIndex(m_CostMatrix[actualClass])];
-      }
-      m_WithClassWithCost += costFactor * instance.weight();
-
       updateMargins(predictedDistribution, actualClass, instance.weight());
 
       // Determine the predicted class (doesn't detect multiple 
@@ -2116,11 +2127,22 @@ public class Evaluation implements Summarizable {
 	}
       }
 
-      // Test if no class was predicted
+      // Determine misclassification cost
+      if (m_CostMatrix != null) {
+	if (predictedClass < 0) {
+	  costFactor = m_CostMatrix.getMaxCost(actualClass); 
+	} else {
+	  costFactor = m_CostMatrix.getElement(actualClass, predictedClass);
+	}
+      }
+
+      m_WithClass += instance.weight();
+      m_WithClassWithCost += costFactor * instance.weight();
+
+      // Update counts when no class was predicted
       if (predictedClass < 0) {
 	m_Unclassified += instance.weight();
-	if (m_CostMatrix != null)
-	  m_UnclassifiedWithCost += costFactor * instance.weight();
+	m_UnclassifiedWithCost += costFactor * instance.weight();
 	return;
       }
 
@@ -2151,14 +2173,10 @@ public class Evaluation implements Summarizable {
 	instance.weight();
       if (predictedClass != actualClass) {
 	m_Incorrect += instance.weight();
-	if (m_CostMatrix != null) {
-	  m_IncorrectWithCost += costFactor * instance.weight();
-	}
+	m_IncorrectWithCost += costFactor * instance.weight();
       } else {
-	if (m_CostMatrix != null) {
-	  m_CorrectWithCost += costFactor * instance.weight();
-	}
 	m_Correct += instance.weight();
+	m_CorrectWithCost += costFactor * instance.weight();
       }
     } else {
       m_MissingClass += instance.weight();

@@ -80,7 +80,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -173,6 +173,9 @@ public class ClassifierPanel extends JPanel {
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.CostMatrix.class,
+		      weka.gui.CostMatrixEditor.class);
   }
   
   /**
@@ -254,7 +257,7 @@ public class ClassifierPanel extends JPanel {
     GridBagLayout gbL = new GridBagLayout();
     p2.setLayout(gbL);
     p2.setBorder(BorderFactory.createCompoundBorder(
-		 BorderFactory.createTitledBorder("Test mode"),
+		 BorderFactory.createTitledBorder("Test options"),
 		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		 ));
     GridBagConstraints gbC = new GridBagConstraints();
@@ -324,8 +327,10 @@ public class ClassifierPanel extends JPanel {
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(2, 1));
     buttons.add(m_ClassCombo);
+    m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
-    ssButs.setLayout(new GridLayout(1, 2));
+    ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
     buttons.add(ssButs);

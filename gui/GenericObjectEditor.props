@@ -24,6 +24,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.ZeroR,\
  weka.classifiers.DecisionStump,\
  weka.classifiers.DecisionTable,\
+ weka.classifiers.HyperPipes,\
  weka.classifiers.IB1,\
  weka.classifiers.IBk,\
  weka.classifiers.Id3,\
@@ -43,6 +44,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.AdaBoostM1,\
  weka.classifiers.Bagging, \
  weka.classifiers.ClassificationViaRegression,\
+ weka.classifiers.CostSensitiveClassifier,\
  weka.classifiers.CVParameterSelection,\
  weka.classifiers.FilteredClassifier,\
  weka.classifiers.LogitBoost,\

@@ -5,10 +5,11 @@ SOURCES = Classifier.java DistributionClassifier.java \
 	ZeroR.java IB1.java Id3.java Prism.java NaiveBayesSimple.java \
 	KernelDensity.java OneR.java LinearRegression.java DecisionStump.java \
 	NaiveBayes.java IBk.java SMO.java Logistic.java LWR.java \
-	DecisionTable.java VotedPerceptron.java \
+	DecisionTable.java VotedPerceptron.java HyperPipes.java \
 	Bagging.java LogitBoost.java AdaBoostM1.java Stacking.java \
 	MultiClassClassifier.java MultiScheme.java CVParameterSelection.java \
 	BVDecompose.java RegressionByDiscretization.java \
+	CostSensitiveClassifier.java \
 	ClassificationViaRegression.java FilteredClassifier.java \
 	Sourcable.java 
 

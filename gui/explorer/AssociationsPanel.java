@@ -75,7 +75,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -175,7 +175,8 @@ public class AssociationsPanel extends JPanel {
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
     JPanel ssButs = new JPanel();
-    ssButs.setLayout(new GridLayout(1, 2));
+    ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
     

@@ -64,7 +64,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -445,7 +445,7 @@ public class GenericObjectEditor implements PropertyEditor {
 				       .getOptions());
       }
       FontMetrics fm = gfx.getFontMetrics();
-      int vpad = (box.height - fm.getHeight()) / 2 ;
+      int vpad = (box.height - fm.getHeight()) / 2;
       gfx.drawString(rep, 2, fm.getHeight() + vpad);
     } else {
     }
