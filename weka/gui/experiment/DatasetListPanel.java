@@ -48,6 +48,7 @@ import javax.swing.JList;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.JCheckBox;
 
 
 /** 
@@ -55,7 +56,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -71,12 +72,18 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   /** Click to remove the selected dataset from the list */
   protected JButton m_DeleteBut = new JButton("Delete selected");
 
+  /** Make file paths relative to the user (start) directory */
+  protected JCheckBox m_relativeCheck = new JCheckBox("Use relative paths");
+
   /** A filter to ensure only arff files get selected */
   protected FileFilter m_ArffFilter =
     new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
+  /** The user (start) directory */
+  protected File m_UserDir = new File(System.getProperty("user.dir"));
+
   /** The file chooser component */
-  protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooser = new JFileChooser(m_UserDir);
 
   
   /**
@@ -105,6 +112,9 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     m_DeleteBut.addActionListener(this);
     m_AddBut.setEnabled(false);
     m_AddBut.addActionListener(this);
+    m_relativeCheck.setSelected(false);
+    m_relativeCheck.setToolTipText("Store file paths relative to "
+				   +"the start directory");
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createTitledBorder("Datasets"));
     JPanel topLab = new JPanel();
@@ -113,6 +123,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     topLab.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
     //    topLab.setLayout(new GridLayout(1,2,5,5));
     topLab.setLayout(gb);
+   
     constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.gridwidth=1;constraints.gridheight=1;
@@ -121,6 +132,13 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
     constraints.gridwidth=1;constraints.gridheight=1;
     topLab.add(m_DeleteBut,constraints);
+
+    constraints.gridx=0;constraints.gridy=1;constraints.weightx=5;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    constraints.insets = new Insets(0,2,0,2);
+    topLab.add(m_relativeCheck,constraints);
+
     add(topLab, BorderLayout.NORTH);
     add(new JScrollPane(m_List), BorderLayout.CENTER);
   }
@@ -164,6 +182,77 @@ public class DatasetListPanel extends JPanel implements ActionListener {
       System.err.println("IOError occured when reading list of files");
     }
   }
+
+  /**
+   * Converts a File's absolute path to a path relative to the user
+   * (ie start) directory
+   * @param absolute the File to convert to relative path
+   * @return a File with a path that is relative to the user's directory
+   * @exception Exception if the path cannot be constructed
+   */
+  protected File convertToRelativePath(File absolute) throws Exception {
+    String userPath = m_UserDir.getAbsolutePath() + File.separator;
+    String targetPath = (new File(absolute.getParent())).getPath() 
+      + File.separator;
+    String fileName = absolute.getName();
+    StringBuffer relativePath = new StringBuffer();
+    relativePath.append("."+File.separator);
+    //    System.err.println("User dir "+userPath);
+    //    System.err.println("Target path "+targetPath);
+    
+    // file is in user dir (or subdir)
+    int subdir = targetPath.indexOf(userPath);
+    if (subdir == 0) {
+      if (userPath.length() == targetPath.length()) {
+	relativePath.append(fileName);
+      } else {
+	int ll = userPath.length();
+	relativePath.append(targetPath.substring(ll));
+	relativePath.append(fileName);
+      }
+    } else {
+      int sepCount = 0;
+      String temp = new String(userPath);
+      while (temp.indexOf(File.separator) != -1) {
+	int ind = temp.indexOf(File.separator);
+	sepCount++;
+	temp = temp.substring(ind+1, temp.length());
+      }
+      
+      String targetTemp = new String(targetPath);
+      String userTemp = new String(userPath);
+      int tcount = 0;
+      while (targetTemp.indexOf(File.separator) != -1) {
+	int ind = targetTemp.indexOf(File.separator);
+	int ind2 = userTemp.indexOf(File.separator);
+	String tpart = targetTemp.substring(0,ind+1);
+	String upart = userTemp.substring(0,ind2+1);
+	if (tpart.compareTo(upart) != 0) {
+	  if (tcount == 0) {
+	    tcount = -1;
+	  }
+	  break;
+	}
+	tcount++;
+	targetTemp = targetTemp.substring(ind+1, targetTemp.length());
+	userTemp = userTemp.substring(ind2+1, userTemp.length());
+      }
+      if (tcount == -1) {
+	// then target file is probably on another drive (under windows)
+	throw new Exception("Can't construct a path to file relative to user "
+			    +"dir.");
+      }
+      if (targetTemp.indexOf(File.separator) == -1) {
+	targetTemp = "";
+      }
+      for (int i = 0; i < sepCount - tcount; i++) {
+	relativePath.append(".."+File.separator);
+      }
+      relativePath.append(targetTemp + fileName);
+    }
+    //    System.err.println("new path : "+relativePath.toString());
+    return new File(relativePath.toString());
+  }
   
   /**
    * Handle actions when buttons get pressed.
@@ -171,6 +260,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
    * @param e a value of type 'ActionEvent'
    */
   public void actionPerformed(ActionEvent e) {
+    boolean useRelativePaths = m_relativeCheck.isSelected();
 
     if (e.getSource() == m_AddBut) {
       // Let the user select an arff file from a file chooser
@@ -183,10 +273,26 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	      Vector files = new Vector();
 	      getFilesRecursively(selected[i], files);
 	      for (int j = 0; j < files.size(); j++) {
-		m_Exp.getDatasets().addElement(files.elementAt(j));
+		File temp = (File)files.elementAt(j);
+		if (useRelativePaths) {
+		  try {
+		    temp = convertToRelativePath(temp);
+		  } catch (Exception ex) {
+		    ex.printStackTrace();
+		  }
+		}
+		m_Exp.getDatasets().addElement(temp);
 	      }
 	    } else {
-	      m_Exp.getDatasets().addElement(selected[i]);
+	      File temp = selected[i];
+	      if (useRelativePaths) {
+		try {
+		  temp = convertToRelativePath(temp);
+		} catch (Exception ex) {
+		  ex.printStackTrace();
+		}
+	      }
+	      m_Exp.getDatasets().addElement(temp);
 	    }
 	  }
 	  m_DeleteBut.setEnabled(true);
@@ -195,10 +301,26 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	    Vector files = new Vector();
 	    getFilesRecursively(m_FileChooser.getSelectedFile(), files);
 	    for (int j = 0; j < files.size(); j++) {
-	      m_Exp.getDatasets().addElement(files.elementAt(j));
+	      File temp = (File)files.elementAt(j);
+	      if (useRelativePaths) {
+		try {
+		  temp = convertToRelativePath(temp);
+		} catch (Exception ex) {
+		  ex.printStackTrace();
+		}
+	      }
+	      m_Exp.getDatasets().addElement(temp);
 	    }
 	  } else {
-	    m_Exp.getDatasets().addElement(m_FileChooser.getSelectedFile());
+	    File temp = m_FileChooser.getSelectedFile();
+	    if (useRelativePaths) {
+	      try {
+		temp = convertToRelativePath(temp);
+	      } catch (Exception ex) {
+		ex.printStackTrace();
+	      }
+	    }
+	    m_Exp.getDatasets().addElement(temp);
 	  }
 	  m_DeleteBut.setEnabled(true);
 	}
