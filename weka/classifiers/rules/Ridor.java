@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 
 public class Ridor extends Classifier
@@ -91,7 +91,7 @@ public class Ridor extends Classifier
    * It consists of a default class label, a set of exceptions to the default rule
    * and the exceptions to each exception
    */
-  private class Ridor_node{
+  private class Ridor_node implements Serializable {
 	
     /** The default class label */
     private double defClass = Double.NaN;
