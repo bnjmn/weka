@@ -25,7 +25,12 @@ import weka.classifiers.*;
 import weka.filters.*;
 
 /**
- * Class for contructing and evaluating model trees; M5' algorithm.<p>
+ * Class for contructing and evaluating model trees; M5' algorithm. <p>
+ *
+ * Reference: Wang, Y. and Witten, I.H. (1997). <i> Induction of model
+ * trees for predicting continuous classes.</i> Proceedings of the poster
+ * papers of the European Conference on Machine Learning. University of
+ * Economics, Faculty of Informatics and Statistics, Prague. <p>
  *
  * Valid options are: <p>
  *
@@ -43,7 +48,7 @@ import weka.filters.*;
  * Verbosity (default: 0). <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public final class  M5Prime extends Classifier implements OptionHandler {
   

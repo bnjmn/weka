@@ -23,9 +23,7 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * IB1-type classifier class. Predicts enumerated class attributes. May
- * specify <i>k</i> nearest neighbors to use for prediction.  For more
- * information, see <p>
+ * <i>K</i>-nearest neighbour classifier. For more information, see <p>
  * 
  * Aha, D., and D. Kibler (1991) "Instance-based learning algorithms",
  * <i>Machine Learning</i>, vol.6, pp. 37-66.<p>
@@ -52,7 +50,7 @@ import weka.core.*;
  *
  * -X <br>
  * Selects the number of neighbors to use by hold-one-out cross
- * validation, with an upper limit given by the -K option.
+ * validation, with an upper limit given by the -K option. <p>
  *
  * -S <br>
  * When k is selected by cross-validation for numeric class attributes,
@@ -61,7 +59,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -655,7 +653,7 @@ public class IBk extends DistributionClassifier implements
    *
    * -X <br>
    * Select the number of neighbors to use by hold-one-out cross
-   * validation, with an upper limit given by the -K option.
+   * validation, with an upper limit given by the -K option. <p>
    *
    * -S <br>
    * When k is selected by cross-validation for numeric class attributes,
