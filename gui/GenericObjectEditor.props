@@ -52,6 +52,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.MultiClassClassifier,\
  weka.classifiers.meta.MultiScheme,\
  weka.classifiers.meta.OrdinalClassClassifier,\
+ weka.classifiers.meta.RacedIncrementalLogitBoost,\
  weka.classifiers.meta.RegressionByDiscretization,\
  weka.classifiers.meta.Stacking,\
  weka.classifiers.meta.ThresholdSelector,\
@@ -95,6 +96,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.meta.LogitBoost,\
  weka.classifiers.meta.MultiClassClassifier,\
  weka.classifiers.meta.OrdinalClassClassifier,\
+ weka.classifiers.meta.RacedIncrementalLogitBoost,\
  weka.classifiers.meta.ThresholdSelector,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.VFI,\
