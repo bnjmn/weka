@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class BayesNet extends DistributionClassifier implements OptionHandler, 
 	WeightedInstancesHandler, Drawable {
@@ -65,19 +65,15 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    */
   public Instances     m_Instances;
 
+  
   ADNode m_ADTree;
-
-  BIFReader m_otherBayesNet = null;
   
   public static final Tag [] TAGS_SCORE_TYPE = {
     new Tag(Scoreable.BAYES, "BAYES"),
     new Tag(Scoreable.MDL, "MDL"),
     new Tag(Scoreable.ENTROPY, "ENTROPY"),
-    new Tag(Scoreable.AIC, "AIC"),
-    new Tag(Scoreable.RANDOMIZED, "RANDOMIZED")
+    new Tag(Scoreable.AIC, "AIC")
   };
-
-  Instances [] m_RandomizedInstances;
 
   /**
    * Holds the score type used to measure quality of network
@@ -98,11 +94,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * determines whether initial structure is an empty graph or a Naive Bayes network
    */
   boolean		  m_bInitAsNaiveBayes = true;
-  /**
-   * Determines whether after structure is found a MarkovBlanketClassifier correction should be applied
-   * If this is true, m_bInitAsNaiveBayes is overridden and interpreted as false.
-   */
-  boolean		  m_bMarkovBlanketClassifier = false;
 
   /**
    * Use the experimental ADTree datastructure for calculating contingency tables
@@ -118,27 +109,34 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    // Copy the instances
-    m_Instances = new Instances(instances);
+    // Check that class is nominal
+    if (!instances.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("BayesNet: nominal class, please.");
+    }
 
-    // check that all variables are nominal
-    Enumeration enum = m_Instances.enumerateAttributes();
+    // check that all variables are nominal and that there
+    // are no missing values
+    Enumeration enum = instances.enumerateAttributes();
 
     while (enum.hasMoreElements()) {
       Attribute attribute = (Attribute) enum.nextElement();
 
       if (attribute.type() != Attribute.NOMINAL) {
-	throw new Exception("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
+	throw new UnsupportedAttributeTypeException("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
       } 
+      Enumeration enum2 = instances.enumerateInstances();
+      while (enum2.hasMoreElements()) {
+        if (((Instance) enum2.nextElement()).isMissing(attribute)) {
+          throw new NoSupportForMissingValuesException("BayesNet: no missing values, please.");
+        }
+      }
     } 
 
-    // TODO: check that there are no missing values
+    // Copy the instances
+    m_Instances = new Instances(instances);
+
     // sanity check: need more than 1 variable in datat set
     m_NumClasses = instances.numClasses();
-
-    if (m_NumClasses < 0) {
-      throw new Exception("Dataset has no class attribute");
-    } 
 
     // initialize ADTree
     if (m_bUseADTree) {
@@ -152,64 +150,14 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
     // build the network structure
     buildStructure();
 
-    if (m_bMarkovBlanketClassifier) {
-            doMarkovBlanketCorrection();
-    }
-
     // build the set of CPTs
     estimateCPTs();
-
 
     // Save space
     // m_Instances = new Instances(m_Instances, 0);
     m_ADTree = null;
   }    // buildClassifier
-  
-
-	/* for each node in the network make sure it is in the
-	 * Markov blanket of the classifier node, and if not,
-	 * add arrows so that it is. If the node is an ancestor
-	 * of the classifier node, add arrow pointing to the classifier
-	 * node, otherwise, add arrow pointing to attribute node.
-	 */
-  protected void doMarkovBlanketCorrection() {
-        // Add class node as parent if it is not in the Markov Boundary
-        int iClass = m_Instances.classIndex();
-        ParentSet ancestors = new ParentSet();
-        int nOldSize = 0;
-        ancestors.AddParent(iClass, m_Instances);
-        while (nOldSize != ancestors.GetNrOfParents()){
-            nOldSize = ancestors.GetNrOfParents();
-            for (int iNode = 0; iNode < nOldSize; iNode++) {
-                int iCurrent = ancestors.GetParent(iNode);
-                ParentSet p = m_ParentSets[iCurrent];
-                for (int iParent = 0; iParent < p.GetNrOfParents(); iParent++) {
-                    if (!ancestors.Contains(p.GetParent(iParent))) {
-                        ancestors.AddParent(p.GetParent(iParent), m_Instances);
-                    }
-                }
-            }
-        }
-
-
-		for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-            boolean bIsInMarkovBoundary = (iAttribute == iClass);
-            bIsInMarkovBoundary = m_ParentSets[iAttribute].Contains(iClass) || 
-								  m_ParentSets[iClass].Contains(iAttribute);
-            for (int iAttribute2 = 0; !bIsInMarkovBoundary && iAttribute2 < m_Instances.numAttributes(); iAttribute2++) {
-                bIsInMarkovBoundary = m_ParentSets[iAttribute2].Contains(iAttribute) && 
-                    m_ParentSets[iAttribute2].Contains(iClass); 
-            }
-            if (!bIsInMarkovBoundary) {
-                if (ancestors.Contains(iAttribute) && m_ParentSets[iClass].GetCardinalityOfParents() < 1024) {
-			m_ParentSets[iClass].AddParent(iAttribute, m_Instances);
-                } else {
-			m_ParentSets[iAttribute].AddParent(iClass, m_Instances);
-                }
-            }
-        }
-	} // doMarkovBlanketCorrection
-
+ 
   /**
    * Init structure initializes the structure to an empty graph or a Naive Bayes
    * graph (depending on the -N flag).
@@ -238,7 +186,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       m_ParentSets[iAttribute] = new ParentSet(m_Instances.numAttributes());
     } 
 
-    if (m_bInitAsNaiveBayes && !m_bMarkovBlanketClassifier) {
+    if (m_bInitAsNaiveBayes) {
 
       // initialize parent sets to have arrow from classifier node to
       // each of the other nodes
@@ -456,7 +404,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector(7);
+    Vector newVector = new Vector(5);
 
     newVector
       .addElement(new Option("\tScore type (BAYES, MDL, ENTROPY, or AIC)\n", 
@@ -467,15 +415,10 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       .addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)\n", 
 			     "N", 0, "-N"));
     newVector
-      .addElement(new Option("\tApply Markov Blanket correction\n", 
-			     "M", 0, "-M"));
-    newVector
       .addElement(new Option("\tUse ADTree data structure\n", 
 			     "D", 0, "-D"));
     newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, 
 				    "-P <nr of parents>"));
-    newVector.addElement(new Option("\tBIF file to compare with\n", "B", 1, 
-				    "-B <BIF file>"));
 
     return newVector.elements();
   }    // listOptions
@@ -488,7 +431,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    */
   public void setOptions(String[] options) throws Exception {
     m_bInitAsNaiveBayes = !(Utils.getFlag('N', options));
-    m_bMarkovBlanketClassifier = (Utils.getFlag('M', options));
     m_bUseADTree = !(Utils.getFlag('D', options));
 
     String sScore = Utils.getOption('S', options);
@@ -528,11 +470,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
     } else {
       setMaxNrOfParents(100000);
     } 
-
-    String sBIFFile = Utils.getOption('B', options);
-    if (sBIFFile != null && !sBIFFile.equals("")) {
-		setBIFFile(sBIFFile);
-    }
 
     Utils.checkForRemainingOptions(options);
   }    // setOptions
@@ -589,6 +526,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
   public void setInitAsNaiveBayes(boolean bInitAsNaiveBayes) {
     m_bInitAsNaiveBayes = bInitAsNaiveBayes;
   } 
+
   /**
    * Method declaration
    *
@@ -597,13 +535,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    */
   public boolean getInitAsNaiveBayes() {
     return m_bInitAsNaiveBayes;
-  } 
-
-  public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
-    m_bMarkovBlanketClassifier = bMarkovBlanketClassifier;
-  } 
-  public boolean getMarkovBlanketClassifier() {
-    return m_bMarkovBlanketClassifier;
   } 
 
   /**
@@ -647,40 +578,12 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
   } 
 
   /**
-   * Method declaration
-   *
-   * @param sBIFFile
-   *
-   */
-  public void setBIFFile(String sBIFFile) {
-  	try {
-	  	m_otherBayesNet = new BIFReader().processFile(sBIFFile);
-  	} catch (Throwable t) {
-  		m_otherBayesNet = null;
-  	}
-  } 
-
-  /**
-   * Method declaration
-   *
-   * @return BIF file name
-   *
-   */
-  public String getBIFFile() {
-      if(m_otherBayesNet!=null)
-	  return m_otherBayesNet.getFileName();
-      else
-	  return "";
-  } 
-
-
-  /**
    * Gets the current settings of the classifier.
    * 
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[11];
+    String[] options = new String[8];
     int      current = 0;
 
     options[current++] = "-S";
@@ -706,11 +609,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       options[current++] = "AIC";
 
       break;
-
-    case (Scoreable.RANDOMIZED):
-      options[current++] = "RANDOMIZED";
-
-      break;
     }
 
     options[current++] = "-A";
@@ -718,10 +616,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 
     if (!m_bInitAsNaiveBayes) {
       options[current++] = "-N";
-    } 
-
-    if (!m_bMarkovBlanketClassifier) {
-      options[current++] = "-M";
     } 
 
     if (!m_bUseADTree) {
@@ -733,16 +627,10 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
       options[current++] = "" + m_nMaxNrOfParents;
     } 
 
-	if (m_otherBayesNet != null) {
-	    options[current++] = "-B";
-	    options[current++] = ((BIFReader) m_otherBayesNet).getFileName();
-	}
-
     // Fill up rest with empty strings, not nulls!
     while (current < options.length) {
       options[current++] = "";
     } 
-
 
     return options;
   }    // getOptions
@@ -802,8 +690,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 
     text.append("Bayes Network Classifier");
     text.append("\n" + (m_bUseADTree ? "Using " : "not using ") + "ADTree");
-    text.append("\n" + (m_bMarkovBlanketClassifier ? "Using " : "not using ") + "Markov optimization");
-    text.append("\nInit " + (m_bInitAsNaiveBayes && !m_bMarkovBlanketClassifier ? "Naive Bayes" : "empty"));
 
     if (m_Instances == null) {
       text.append(": No model built yet.");
@@ -831,24 +717,16 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 	text.append("\n");
 
 	// Description of distributions tends to be too much detail, so it is commented out here
-//	for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetCardinalityOfParents(); iParent++) {
-//	text.append('(' + m_Distributions[iAttribute][iParent].toString() + ')');
-//	}
-	text.append("\n");
+	// for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetCardinalityOfParents(); iParent++) {
+	// text.append('(' + m_Distributions[iAttribute][iParent].toString() + ')');
+	// }
+	// text.append("\n");
       } 
 
       text.append("LogScore Bayes: " + logScore(Scoreable.BAYES) + "\n");
       text.append("LogScore MDL: " + logScore(Scoreable.MDL) + "\n");
       text.append("LogScore ENTROPY: " + logScore(Scoreable.ENTROPY) + "\n");
       text.append("LogScore AIC: " + logScore(Scoreable.AIC) + "\n");
-
-	  if (m_otherBayesNet != null) {
-		  text.append(
-			"Missing: " + m_otherBayesNet.missingArcs(this) + 
-			" Extra: " + m_otherBayesNet.extraArcs(this) + 
-			" Reversed: " + m_otherBayesNet.reversedArcs(this) + "\n");
-		  text.append("Divergence: " + m_otherBayesNet.divergence(this) + "\n");
-	  }
 
       String[] options = getOptions();
 
@@ -866,18 +744,17 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    *  @return Drawable.TREE
    */   
   public int graphType() {
-      return Drawable.BayesNet;
+	  return Drawable.BayesNet;
   }
-    
-    
+
   /**
-     Returns a BayesNet graph in XMLBIF ver
-     0.3 format.
-     @return - String representing this
-               BayesNet in XMLBIF ver  0.3
+	 Returns a BayesNet graph in XMLBIF ver
+	 0.3 format.
+	 @return - String representing this
+			   BayesNet in XMLBIF ver  0.3
   */
   public String graph() throws Exception {
-      return toXMLBIF03();
+	  return toXMLBIF03();
   }
 
   /**
@@ -887,34 +764,34 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @return an XML BIF 0.3 description of the classifier as a string.
    */
   public String toXMLBIF03() {
-    if (m_Instances == null) {
-      return("<!--No model built yet-->");
+	if (m_Instances == null) {
+	  return("<!--No model built yet-->");
 	}
 
-    StringBuffer text = new StringBuffer();
+	StringBuffer text = new StringBuffer();
 
-    text.append("<?xml version=\"1.0\"?>\n");
-    text.append("<!-- DTD for the XMLBIF 0.3 format -->\n");
-    text.append("<!DOCTYPE BIF [\n");
-    text.append("	<!ELEMENT BIF ( NETWORK )*>\n");
-    text.append("	      <!ATTLIST BIF VERSION CDATA #REQUIRED>\n");
-    text.append("	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>\n");
-    text.append("	<!ELEMENT NAME (#PCDATA)>\n");
-    text.append("	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >\n");
-    text.append("	      <!ATTLIST VARIABLE TYPE (nature|decision|utility) \"nature\">\n");
-    text.append("	<!ELEMENT OUTCOME (#PCDATA)>\n");
-    text.append("	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >\n");
-    text.append("	<!ELEMENT FOR (#PCDATA)>\n");
-    text.append("	<!ELEMENT GIVEN (#PCDATA)>\n");
-    text.append("	<!ELEMENT TABLE (#PCDATA)>\n");
-    text.append("	<!ELEMENT PROPERTY (#PCDATA)>\n");
-    text.append("]>\n");
-    text.append("\n");
-    text.append("\n");
-    text.append("<BIF VERSION=\"0.3\">\n");
-    text.append("<NETWORK>\n");
-    text.append("<NAME>" + XMLNormalize(m_Instances.relationName()) + "</NAME>\n");
-    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+	text.append("<?xml version=\"1.0\"?>\n");
+	text.append("<!-- DTD for the XMLBIF 0.3 format -->\n");
+	text.append("<!DOCTYPE BIF [\n");
+	text.append("	<!ELEMENT BIF ( NETWORK )*>\n");
+	text.append("	      <!ATTLIST BIF VERSION CDATA #REQUIRED>\n");
+	text.append("	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>\n");
+	text.append("	<!ELEMENT NAME (#PCDATA)>\n");
+	text.append("	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >\n");
+	text.append("	      <!ATTLIST VARIABLE TYPE (nature|decision|utility) \"nature\">\n");
+	text.append("	<!ELEMENT OUTCOME (#PCDATA)>\n");
+	text.append("	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >\n");
+	text.append("	<!ELEMENT FOR (#PCDATA)>\n");
+	text.append("	<!ELEMENT GIVEN (#PCDATA)>\n");
+	text.append("	<!ELEMENT TABLE (#PCDATA)>\n");
+	text.append("	<!ELEMENT PROPERTY (#PCDATA)>\n");
+	text.append("]>\n");
+	text.append("\n");
+	text.append("\n");
+	text.append("<BIF VERSION=\"0.3\">\n");
+	text.append("<NETWORK>\n");
+	text.append("<NAME>" + XMLNormalize(m_Instances.relationName()) + "</NAME>\n");
+	for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
 		text.append("<VARIABLE TYPE=\"nature\">\n");
 		text.append("<NAME>" + XMLNormalize(m_Instances.attribute(iAttribute).name()) + "</NAME>\n");
 		for (int iValue = 0; iValue < m_Instances.attribute(iAttribute).numValues(); iValue++) {
@@ -923,13 +800,13 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 		text.append("</VARIABLE>\n");
 	}
 
-    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+	for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
 		text.append("<DEFINITION>\n");
 		text.append("<FOR>" + XMLNormalize(m_Instances.attribute(iAttribute).name()) + "</FOR>\n");
 		for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
 			text.append("<GIVEN>" 
-				    + XMLNormalize(m_Instances.attribute(m_ParentSets[iAttribute].GetParent(iParent)).name()) + 
-				    "</GIVEN>\n");
+					+ XMLNormalize(m_Instances.attribute(m_ParentSets[iAttribute].GetParent(iParent)).name()) + 
+					"</GIVEN>\n");
 		}
 		text.append("<TABLE>\n");
 		for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetCardinalityOfParents(); iParent++) {
@@ -942,9 +819,9 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 		text.append("</TABLE>\n");
 		text.append("</DEFINITION>\n");
 	}
-    text.append("</NETWORK>\n");
-    text.append("</BIF>\n");
-    return text.toString();
+	text.append("</NETWORK>\n");
+	text.append("</BIF>\n");
+	return text.toString();
   } // toXMLBIF03
 
 
@@ -954,8 +831,8 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @return normalized string
    */
   String XMLNormalize(String sStr) {
-      StringBuffer sStr2 = new StringBuffer();
-      for (int iStr = 0; iStr < sStr.length(); iStr++) {
+	  StringBuffer sStr2 = new StringBuffer();
+	  for (int iStr = 0; iStr < sStr.length(); iStr++) {
 	  char c = sStr.charAt(iStr);
 	  switch (c) {
 	  case '&': sStr2.append("&amp;"); break;
@@ -964,10 +841,10 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 	  case '<': sStr2.append("&lt;"); break;
 	  case '>': sStr2.append("&gt;"); break;
 	  default:
-	      sStr2.append(c);
+		  sStr2.append(c);
 	  }
-      }
-      return sStr2.toString();
+	  }
+	  return sStr2.toString();
   } // XMLNormalize
 
 
@@ -978,7 +855,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @param nCandidateParent candidate parent to add to the existing parent set
    * @return log score
    */
-  protected double CalcScoreWithExtraParent(int nNode, int nCandidateParent) throws Exception {
+  protected double CalcScoreWithExtraParent(int nNode, int nCandidateParent) {
 
     // sanity check: nCandidateParent should not be in parent set already
     for (int iParent = 0; iParent < m_ParentSets[nNode].GetNrOfParents(); 
@@ -1013,7 +890,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @param nNode node for which the score is calculate
    * @return log score
    */
-  protected double CalcNodeScore(int nNode) throws Exception {
+  protected double CalcNodeScore(int nNode) {
     if (m_bUseADTree && m_ADTree != null) {
       return CalcNodeScoreADTree(nNode, m_Instances);
     } else {
@@ -1027,10 +904,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
    * @param instances used to calculate score with
    * @return log score
    */
-  private double CalcNodeScoreADTree(int nNode, Instances instances) throws Exception {
-  	if (m_nScoreType == Scoreable.RANDOMIZED) {
-  		throw new Exception("Cannot combine RANDOMIZED and USEADTREE");
-  	}
+  private double CalcNodeScoreADTree(int nNode, Instances instances) {
     // get set of parents, insert iNode
     int nNrOfParents = m_ParentSets[nNode].GetNrOfParents();
     int [] nNodes = new int [nNrOfParents + 1];
@@ -1311,15 +1185,6 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
     " as the initial count on each value.";
   }
   /**
-   * @return a string to describe the MarkovBlanketClassifier option.
-   */
-  public String initMarkovBlanketClassifier() {
-    return "When set to true (default is false), after a network structure is learned" +
-    " a Markov Blanket correction is applied to the network structure. This ensures" +
-    " that all nodes in the network are part of the Markov blanket of the classifier"+
-    " node.";
-  }
-  /**
    * @return a string to describe the InitAsNaiveBayes option.
    */
   public String initAsNaiveBayesTipText() {
@@ -1353,27 +1218,13 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
   }
     
   /**
-   * @return a string to describe the BIFFile.
-   */
-  public String BIFFileTipText() {
-    return "Set the name of a file in BIF XML format. A Bayes network learned" +
-    " from data can be compared with the Bayes network represented by the BIF file." +
-    " Statistics calculated are o.a. the number of missing and extra arcs.";
-  }
-
-  /**
    * Main method for testing this class.
    * 
    * @param argv the options
    */
   public static void main(String[] argv) {
     try {
-	BayesNet bn = new BayesNet();
-	System.out.println(Evaluation.evaluateModel(bn, argv));
-	//Evaluation.evaluateModel(bn, argv);
-	System.out.println(bn.toXMLBIF03());
-	//System.out.println(bn.text);
-	
+      System.out.println(Evaluation.evaluateModel(new BayesNet(), argv));
     } catch (Exception e) {
       e.printStackTrace();
       System.err.println(e.getMessage());
@@ -1381,6 +1232,7 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
   }    // main
  
 }      // class BayesNet
+
 
 
 
