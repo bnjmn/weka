@@ -67,7 +67,7 @@ import java.util.*;
  * Random seed to shuffle the input. (default 1), -1 == no shuffling<p>
  *
  * @author J. Lindgren (jtlindgr<at>cs.helsinki.fi)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
 */
 public class Winnow extends Classifier implements OptionHandler,
 						  UpdateableClassifier
@@ -217,19 +217,19 @@ public class Winnow extends Classifier implements OptionHandler,
   public void buildClassifier(Instances insts) throws Exception {
 
     if (insts.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
     if (insts.numClasses() > 2) {
       throw new Exception("Can only handle two-class datasets!");
     }
     if (insts.classAttribute().isNumeric()) {
-      throw new Exception("Can't handle a numeric class!");
+      throw new UnsupportedClassTypeException("Can't handle a numeric class!");
     }
     Enumeration enum = insts.enumerateAttributes();
     while (enum.hasMoreElements()) {
       Attribute attr = (Attribute) enum.nextElement();
       if (!attr.isNominal()) {
-        throw new Exception("Winnow: only nominal attributes, please.");
+        throw new UnsupportedAttributeTypeException("Winnow: only nominal attributes, please.");
       }
     }
 
