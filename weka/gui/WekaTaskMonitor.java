@@ -35,7 +35,7 @@ import java.awt.image.*;
  * simple bird animation while their are active tasks
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class WekaTaskMonitor extends JPanel implements TaskLogger {
 
@@ -95,6 +95,9 @@ public class WekaTaskMonitor extends JPanel implements TaskLogger {
    */
   public void taskFinished() {
     m_ActiveTasks--;
+    if (m_ActiveTasks < 0) {
+      m_ActiveTasks = 0;
+    }
     updateMonitor();
   }
 
