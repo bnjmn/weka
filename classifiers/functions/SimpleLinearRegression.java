@@ -15,7 +15,7 @@
  */
 
 /*
- *    UnivariateLinearRegression.java
+ *    SimpleLinearRegression.java
  *    Copyright (C) 2002 Eibe Frank
  *
  */
@@ -26,14 +26,14 @@ import weka.core.*;
 import weka.classifiers.*;
 
 /**
- * Class for learning a univariate linear regression model.
+ * Class for learning a simple linear regression model.
  * Picks the attribute that results in the lowest squared error.
  * Missing values are not allowed. Can only deal with numeric attributes.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 1.1 $
  */
-public class UnivariateLinearRegression extends Classifier implements WeightedInstancesHandler {
+public class SimpleLinearRegression extends Classifier implements WeightedInstancesHandler {
 
   /** The chosen attribute */
   private Attribute m_attribute;
@@ -50,7 +50,7 @@ public class UnivariateLinearRegression extends Classifier implements WeightedIn
       return m_intercept;
     } else {
       if (inst.isMissing(m_attribute.index())) {
-	throw new Exception("UnivariateLinearRegression: No missing values!");
+	throw new Exception("SimpleLinearRegression: No missing values!");
       }
       return m_intercept + m_slope * inst.value(m_attribute.index());
     }
@@ -70,7 +70,7 @@ public class UnivariateLinearRegression extends Classifier implements WeightedIn
     for (int i = 0; i < insts.numAttributes(); i++) {
       if (i != insts.classIndex()) {
 	if (!insts.attribute(i).isNumeric()) {
-	  throw new Exception("UnivariateLinearRegression: Only numeric attributes!");
+	  throw new Exception("SimpleLinearRegression: Only numeric attributes!");
 	}
 	m_attribute = insts.attribute(i);
 
@@ -157,7 +157,7 @@ public class UnivariateLinearRegression extends Classifier implements WeightedIn
   public static void main(String [] argv){
 
     try{
-      System.out.println(Evaluation.evaluateModel(new UnivariateLinearRegression(), argv));
+      System.out.println(Evaluation.evaluateModel(new SimpleLinearRegression(), argv));
     } catch (Exception e) {
       System.out.println(e.getMessage());
       e.printStackTrace();
