@@ -56,7 +56,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class EM
   extends DistributionClusterer
@@ -597,7 +597,14 @@ public class EM
       }
 
       // normalise the weights for this instance
-      Utils.normalize(m_weights[l]);
+      try {
+	Utils.normalize(m_weights[l]);
+      } catch (Exception e) {
+	throw new Exception("An instance has zero cluster memberships. Try "
+			    +"increasing the minimum allowable "
+			    +"standard deviation for normal "
+			    +"density calculation.");
+      }
     }
 
     // reestimate priors
