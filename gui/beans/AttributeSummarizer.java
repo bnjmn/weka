@@ -47,7 +47,7 @@ import java.beans.beancontext.*;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AttributeSummarizer extends DataVisualizer {
 
@@ -73,6 +73,15 @@ public class AttributeSummarizer extends DataVisualizer {
    */
   public AttributeSummarizer() {
     appearanceFinal();
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Plot summary bar charts for incoming data/training/test sets.";
   }
 
   /**

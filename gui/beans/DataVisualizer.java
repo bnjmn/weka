@@ -43,7 +43,7 @@ import java.beans.beancontext.*;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -76,6 +76,15 @@ public class DataVisualizer extends JPanel
 
   public DataVisualizer() {
     appearanceFinal();
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Visualize incoming data/training/test sets in a 2D scatter plot.";
   }
 
   protected void appearanceDesign() {

@@ -36,7 +36,7 @@ import java.awt.*;
  * Bean that accepts a data sets and produces a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TrainingSetMaker 
   extends AbstractTrainingSetProducer 
@@ -46,6 +46,15 @@ public class TrainingSetMaker
   public TrainingSetMaker() {
     super();
     m_visual.setText("TrainingSetMaker");
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Designate an incoming data set as a training set.";
   }
 
   /**

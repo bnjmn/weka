@@ -44,7 +44,7 @@ import java.awt.*;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -70,6 +70,15 @@ public class IncrementalClassifierEvaluator
   public IncrementalClassifierEvaluator() {
     super();
     m_visual.setText("IncrementalClassifierEvaluator");
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Evaluate the performance of incrementally trained classifiers.";
   }
 
   /**

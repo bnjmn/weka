@@ -47,7 +47,7 @@ import java.util.Date;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TextViewer 
   extends JPanel
@@ -78,6 +78,15 @@ public class TextViewer
     setUpResultHistory();
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "General purpose text display.";
   }
 
   private void setUpResultHistory() {

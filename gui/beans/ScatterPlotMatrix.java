@@ -43,7 +43,7 @@ import java.awt.*;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ScatterPlotMatrix extends DataVisualizer {
 
@@ -51,6 +51,16 @@ public class ScatterPlotMatrix extends DataVisualizer {
 
   public ScatterPlotMatrix() {
     appearanceFinal();
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Visualize incoming data/training/test sets in a scatter "
+      +"plot matrix.";
   }
 
   protected void appearanceDesign() {

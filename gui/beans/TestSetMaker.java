@@ -36,7 +36,7 @@ import java.awt.*;
  * Bean that accepts data sets and produces test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TestSetMaker extends AbstractTestSetProducer 
   implements DataSourceListener, EventConstraints, Serializable {
@@ -44,6 +44,15 @@ public class TestSetMaker extends AbstractTestSetProducer
   public TestSetMaker() {
     super();
     m_visual.setText("TestSetMaker");
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Designate an incoming data set as a test set.";
   }
 
   /**
