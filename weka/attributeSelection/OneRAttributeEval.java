@@ -31,7 +31,7 @@ import  weka.filters.*;
  * No options. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator
@@ -49,6 +49,16 @@ public class OneRAttributeEval
   /** The number of instances */
   private int m_numInstances;
 
+
+  /**
+   * Returns a string describing this attribute evaluator
+   * @return a description of the evaluator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "OneRAttributeEval :\n\nEvaluates the worth of an attribute by "
+      +"using the OneR classifier.\n";
+  }
 
   /**
    * Constructor
