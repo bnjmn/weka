@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.48 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -273,12 +273,6 @@ public class ClassifierPanel extends JPanel {
   /** The instances summary panel displayed by m_SetTestFrame */
   protected InstancesSummaryPanel m_Summary = null;
 
-  /** Click to save the classifier */
-  protected JButton m_SaveBut = new JButton("Save model");
-
-  /** Click to load the classifier */
-  protected JButton m_LoadBut = new JButton("Load model");
-
   /** Filter to ensure only model files are selected */  
   protected FileFilter m_ModelFilter =
     new ExtensionFileFilter("model", "Model object files");
@@ -358,9 +352,6 @@ public class ClassifierPanel extends JPanel {
     m_EvalWRTCostsBut
       .setToolTipText("Evaluate errors with respect to a cost matrix");
 
-    m_SaveBut.setToolTipText("Saves the selected model");
-    m_LoadBut.setToolTipText("Loads a model");
-
     m_FileChooser.setFileFilter(m_ModelFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -432,18 +423,6 @@ public class ClassifierPanel extends JPanel {
 	stopClassifier();
       }
     });
-
-    m_SaveBut.setEnabled(false);
-    m_SaveBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	saveClassifier();
-      }
-    });
-    m_LoadBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	loadClassifier();
-      }
-    });
    
     m_ClassCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -462,12 +441,14 @@ public class ClassifierPanel extends JPanel {
 	public void mouseClicked(MouseEvent e) {
 	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	      == InputEvent.BUTTON1_MASK) {
-	    updateSaveButton();
+	    
 	  } else {
 	    int index = m_History.getList().locationToIndex(e.getPoint());
 	    if (index != -1) {
 	      String name = m_History.getNameAtIndex(index);
 	      visualize(name, e.getX(), e.getY());
+	    } else {
+	      loadPopup(e.getX(), e.getY());
 	    }
 	  }
 	}
@@ -615,8 +596,6 @@ public class ClassifierPanel extends JPanel {
     gbL.setConstraints(m_MoreOptions, gbC);
     p2.add(m_MoreOptions);
 
-
-
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(2, 2));
     buttons.add(m_ClassCombo);
@@ -628,12 +607,6 @@ public class ClassifierPanel extends JPanel {
     ssButs.add(m_StopBut);
 
     buttons.add(ssButs);
-
-    JPanel slButs = new JPanel();
-    slButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    slButs.setLayout(new GridLayout(1, 2, 5, 5));
-    slButs.add(m_SaveBut);
-    slButs.add(m_LoadBut);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Classifier output"));
@@ -656,39 +629,28 @@ public class ClassifierPanel extends JPanel {
     JPanel mondo = new JPanel();
     gbL = new GridBagLayout();
     mondo.setLayout(gbL);
-
-    gbC = new GridBagConstraints();
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 0;     gbC.gridx = 0; gbC.weightx = 0;
-    gbL.setConstraints(slButs, gbC);
-    mondo.add(slButs);
-
     gbC = new GridBagConstraints();
     //    gbC.anchor = GridBagConstraints.WEST;
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 1;     gbC.gridx = 0;
+    gbC.gridy = 0;     gbC.gridx = 0;
     gbL.setConstraints(p2, gbC);
     mondo.add(p2);
-
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 2;     gbC.gridx = 0;
+    gbC.gridy = 1;     gbC.gridx = 0;
     gbL.setConstraints(buttons, gbC);
     mondo.add(buttons);
-
     gbC = new GridBagConstraints();
     //gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.BOTH;
-    gbC.gridy = 3;     gbC.gridx = 0; gbC.weightx = 0;
+    gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
     gbL.setConstraints(m_History, gbC);
     mondo.add(m_History);
-
-
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;     gbC.gridx = 1;
-    gbC.gridheight = 4;
+    gbC.gridheight = 3;
     gbC.weightx = 100; gbC.weighty = 100;
     gbL.setConstraints(p3, gbC);
     mondo.add(p3);
@@ -1373,7 +1335,6 @@ public class ClassifierPanel extends JPanel {
 		  m_History.addObject(name, vv);
 		}
 	      }
-	      updateSaveButton();
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    }
@@ -1386,7 +1347,6 @@ public class ClassifierPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
-	    updateSaveButton();
             if (m_Log instanceof TaskLogger) {
               ((TaskLogger)m_Log).taskFinished();
             }
@@ -1468,8 +1428,19 @@ public class ClassifierPanel extends JPanel {
       final Classifier classifier = temp_classifier;
       final Instances trainHeader = temp_trainHeader;
 
-      JMenuItem reEvaluate = new JMenuItem("Re-evaluate model on current test set");
+      JMenuItem saveModel = new JMenuItem("Save model");
+      JMenuItem reEvaluate =
+	new JMenuItem("Re-evaluate model on current test set");
+
       if (classifier != null) {
+
+	saveModel.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      saveClassifier(selectedName, classifier, trainHeader);
+	    }
+	  });
+	resultListMenu.add(saveModel);
+
 	reEvaluate.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
 	      reevaluateModel(selectedName, classifier, trainHeader);
@@ -1589,6 +1560,25 @@ public class ClassifierPanel extends JPanel {
   }
 
   /**
+   * Handles constructing a popup menu with load option.
+   * @param x the x coordinate for popping up the menu
+   * @param y the y coordinate for popping up the menu
+   */
+  protected void loadPopup(int x, int y) {
+
+    JPopupMenu resultListMenu = new JPopupMenu();
+    
+    JMenuItem loadModel = new JMenuItem("Load model");
+    loadModel.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  loadClassifier();
+	}
+      });
+    resultListMenu.add(loadModel);
+    resultListMenu.show(m_History.getList(), x, y);
+  }
+
+  /**
    * Pops up a TreeVisualizer for the classifier from the currently
    * selected item in the results list
    * @param dottyString the description of the tree in dotty format
@@ -1666,65 +1656,40 @@ public class ClassifierPanel extends JPanel {
   }
 
   /**
-   * Determines whether saving is possible, and if so enables the save button
-   */
-  protected void updateSaveButton() {
-
-    FastVector o = (FastVector)m_History.getSelectedObject();
-    m_SaveBut.setEnabled(o != null && o.size() > 0 &&
-			 o.firstElement() instanceof Classifier);
-  }
-
-  /**
    * Saves the currently selected classifier
    */
-  protected void saveClassifier() {
+  protected void saveClassifier(String name, Classifier classifier,
+				Instances trainHeader) {
 
-    Classifier classifier = null;
-    Instances trainHeader = null;
     File sFile = null;
     boolean saveOK = true;
-    FastVector o = (FastVector)m_History.getSelectedObject();
-
-    if (o != null)
-      for (int i=0; i<o.size(); i++) {
-	Object obj = o.elementAt(i);
-	if (obj instanceof Classifier) classifier = (Classifier) obj;
-	else if (obj instanceof Instances) trainHeader = (Instances) obj;
-      }
-    
-    if (classifier != null) {
+ 
+    int returnVal = m_FileChooser.showSaveDialog(this);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      sFile = m_FileChooser.getSelectedFile();
       
-      int returnVal = m_FileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	sFile = m_FileChooser.getSelectedFile();
-
-	m_Log.statusMessage("Saving model to file...");
-
-	try {
-	  OutputStream os = new FileOutputStream(sFile);
-	  if (sFile.getName().endsWith(".gz")) {
-	    os = new GZIPOutputStream(os);
-	  }
-	  ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
-	  objectOutputStream.writeObject(classifier);
-	  if (trainHeader != null) objectOutputStream.writeObject(trainHeader);
-	  objectOutputStream.flush();
-	  objectOutputStream.close();
-	} catch (Exception e) {
-	  
-	  JOptionPane.showMessageDialog(null, e, "Save Failed",
-					JOptionPane.ERROR_MESSAGE);
-	  saveOK = false;
+      m_Log.statusMessage("Saving model to file...");
+      
+      try {
+	OutputStream os = new FileOutputStream(sFile);
+	if (sFile.getName().endsWith(".gz")) {
+	  os = new GZIPOutputStream(os);
 	}
-	if (saveOK)
-	  m_Log.logMessage("Saved model (" + m_History.getSelectedName()
-			   + ") to file '" + sFile.getName() + "'");
-	m_Log.statusMessage("OK");
+	ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
+	objectOutputStream.writeObject(classifier);
+	if (trainHeader != null) objectOutputStream.writeObject(trainHeader);
+	objectOutputStream.flush();
+	objectOutputStream.close();
+      } catch (Exception e) {
+	
+	JOptionPane.showMessageDialog(null, e, "Save Failed",
+				      JOptionPane.ERROR_MESSAGE);
+	saveOK = false;
       }
-    } else {
-      
-      System.err.println("No classifier to save!");
+      if (saveOK)
+	m_Log.logMessage("Saved model (" + name
+			 + ") to file '" + sFile.getName() + "'");
+      m_Log.statusMessage("OK");
     }
   }
 
@@ -1813,7 +1778,6 @@ public class ClassifierPanel extends JPanel {
 	m_History.addObject(name, vv);
       }
     }
-    updateSaveButton();
   }
   
   /**
