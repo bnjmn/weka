@@ -30,7 +30,7 @@ import weka.classifiers.*;
  * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -43,7 +43,7 @@ public class CostSensitiveClassifierSplitEvaluator
   protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 28;
+  private static final int RESULT_SIZE = 23;
 
   /**
    * Returns an enumeration describing the available options.
@@ -161,11 +161,6 @@ public class CostSensitiveClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
 
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -210,12 +205,7 @@ public class CostSensitiveClassifierSplitEvaluator
     resultNames[current++] = "Percent_correct";
     resultNames[current++] = "Percent_incorrect";
     resultNames[current++] = "Percent_unclassified";
-    resultNames[current++] = "Number_correct_with_cost";
-    resultNames[current++] = "Number_incorrect_with_cost";
-    resultNames[current++] = "Number_unclassified_with_cost";
-    resultNames[current++] = "Percent_correct_with_cost";
-    resultNames[current++] = "Percent_incorrect_with_cost";
-    resultNames[current++] = "Percent_unclassified_with_cost";
+    resultNames[current++] = "Total_cost";
     resultNames[current++] = "Average_cost";
 
     // Sensitive stats - certainty of predictions
@@ -266,7 +256,7 @@ public class CostSensitiveClassifierSplitEvaluator
     }
     Object [] result = new Object[RESULT_SIZE];
 
-    String costName = train.relationName() + ".cost";
+    String costName = train.relationName() + CostMatrix.FILE_EXTENSION;
     File costFile = new File(getOnDemandDirectory(), costName);
     if (!costFile.exists()) {
       throw new Exception("On-demand cost file doesn't exist: " + costFile);
@@ -274,7 +264,7 @@ public class CostSensitiveClassifierSplitEvaluator
     CostMatrix costMatrix = new CostMatrix(new BufferedReader(
                                            new FileReader(costFile)));
 
-    Evaluation eval = new Evaluation(train, costMatrix, null);
+    Evaluation eval = new Evaluation(train, costMatrix);
 
     m_Classifier.buildClassifier(train);
     eval.evaluateModel(m_Classifier, test);
@@ -289,12 +279,7 @@ public class CostSensitiveClassifierSplitEvaluator
     result[current++] = new Double(eval.pctCorrect());
     result[current++] = new Double(eval.pctIncorrect());
     result[current++] = new Double(eval.pctUnclassified());
-    result[current++] = new Double(eval.correctWithCost());
-    result[current++] = new Double(eval.incorrectWithCost());
-    result[current++] = new Double(eval.unclassifiedWithCost());
-    result[current++] = new Double(eval.pctCorrectWithCost());
-    result[current++] = new Double(eval.pctIncorrectWithCost());
-    result[current++] = new Double(eval.pctUnclassifiedWithCost());
+    result[current++] = new Double(eval.totalCost());
     result[current++] = new Double(eval.avgCost());
 
     result[current++] = new Double(eval.meanAbsoluteError());
