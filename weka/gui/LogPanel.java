@@ -39,7 +39,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -47,7 +47,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
   protected JLabel m_StatusLab = new JLabel("OK");
   
   /** Displays the log messages */
-  protected JTextArea m_LogText = new JTextArea(5, 20);
+  protected JTextArea m_LogText = new JTextArea(4, 20);
 
   /** An indicator for whether text has been output yet */
   protected boolean m_First = true;
