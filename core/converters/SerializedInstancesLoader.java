@@ -36,10 +36,11 @@ import weka.core.Instances;
  * Reads a source that contains serialized Instances.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Loader
  */
-public class SerializedInstancesLoader extends AbstractLoader {
+public class SerializedInstancesLoader extends AbstractLoader 
+  implements BatchLoader, IncrementalLoader {
 
   /** Holds the structure (header) of the data set. */
   protected Instances m_Dataset = null;
