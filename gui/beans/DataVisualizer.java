@@ -36,29 +36,69 @@ import java.awt.BorderLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.awt.*;
+import java.beans.*;
+import java.beans.beancontext.*;
 
 /**
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
-	     TestSetListener, Visible, UserRequestAcceptor, Serializable {
+	     TestSetListener, Visible, UserRequestAcceptor, Serializable,
+	     BeanContextChild {
 
-  protected BeanVisual m_visual = 
-    new BeanVisual("DataVisualizer", 
-		   BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
-		   BeanVisual.ICON_PATH+"DefaultDataVisualizer_animated.gif");
+  protected BeanVisual m_visual;
 
   protected transient Instances m_visualizeDataSet;
 
   protected boolean m_framePoppedUp = false;
 
+  /**
+   * True if this bean's appearance is the design mode appearance
+   */
+  protected boolean m_design;
+
+  /**
+   * BeanContex that this bean might be contained within
+   */
+  protected transient BeanContext m_beanContext = null;
+
+  private VisualizePanel m_visPanel;
+  
+  /**
+   * BeanContextChild support
+   */
+  protected BeanContextChildSupport m_bcSupport = 
+    new BeanContextChildSupport(this);
+
   public DataVisualizer() {
+    appearanceFinal();
+  }
+
+  protected void appearanceDesign() {
+    removeAll();
+    m_visual = new BeanVisual("DataVisualizer", 
+			      BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
+			      BeanVisual.ICON_PATH
+			      +"DefaultDataVisualizer_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  protected void appearanceFinal() {
+    setLayout(new BorderLayout());
+    setUpFinal();
+  }
+
+  protected void setUpFinal() {
+    removeAll();
+    if (m_visPanel == null) {
+      m_visPanel = new VisualizePanel();
+    }
+    add(m_visPanel, BorderLayout.CENTER);
   }
 
   /**
@@ -90,8 +130,15 @@ public class DataVisualizer extends JPanel
    */
   public synchronized void acceptDataSet(DataSetEvent e) {
     m_visualizeDataSet = new Instances(e.getDataSet());
-    if (m_visualizeDataSet.classIndex() <= 0) {
+    if (m_visualizeDataSet.classIndex() < 0) {
       m_visualizeDataSet.setClassIndex(m_visualizeDataSet.numAttributes()-1);
+    }
+    if (!m_design) {
+      try {
+	setInstances(m_visualizeDataSet);
+      } catch (Exception ex) {
+	ex.printStackTrace();
+      }
     }
   }
 
@@ -132,6 +179,98 @@ public class DataVisualizer extends JPanel
     return newVector.elements();
   }
 
+  /**
+   * Add a property change listener to this bean
+   *
+   * @param name the name of the property of interest
+   * @param pcl a <code>PropertyChangeListener</code> value
+   */
+  public void addPropertyChangeListener(String name,
+					PropertyChangeListener pcl) {
+    m_bcSupport.addPropertyChangeListener(name, pcl);
+  }
+
+  /**
+   * Remove a property change listener from this bean
+   *
+   * @param name the name of the property of interest
+   * @param pcl a <code>PropertyChangeListener</code> value
+   */
+  public void removePropertyChangeListener(String name,
+					   PropertyChangeListener pcl) {
+    m_bcSupport.removePropertyChangeListener(name, pcl);
+  }
+
+  /**
+   * Add a vetoable change listener to this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void addVetoableChangeListener(String name,
+				       VetoableChangeListener vcl) {
+    m_bcSupport.addVetoableChangeListener(name, vcl);
+  }
+  
+  /**
+   * Remove a vetoable change listener from this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void removeVetoableChangeListener(String name,
+					   VetoableChangeListener vcl) {
+    m_bcSupport.removeVetoableChangeListener(name, vcl);
+  }
+
+  /**
+   * Set a bean context for this bean
+   *
+   * @param bc a <code>BeanContext</code> value
+   */
+  public void setBeanContext(BeanContext bc) {
+    m_beanContext = bc;
+    m_design = m_beanContext.isDesignTime();
+    if (m_design) {
+      appearanceDesign();
+    }
+  }
+
+  /**
+   * Return the bean context (if any) that this bean is embedded in
+   *
+   * @return a <code>BeanContext</code> value
+   */
+  public BeanContext getBeanContext() {
+    return m_beanContext;
+  }
+
+  /**
+   * Set instances for this bean. This method is a convenience method
+   * for clients who use this component programatically
+   *
+   * @param inst an <code>Instances</code> value
+   * @exception Exception if an error occurs
+   */
+  public void setInstances(Instances inst) throws Exception {
+    if (m_design) {
+      throw new Exception("This method is not to be used during design "
+			  +"time. It is meant to be used if this "
+			  +"bean is being used programatically as as "
+			  +"stand alone component.");
+    }
+    m_visualizeDataSet = inst;
+    PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
+    pd1.setPlotName(m_visualizeDataSet.relationName());
+    try {
+      m_visPanel.setMasterPlot(pd1);
+    } catch (Exception ex) {
+      System.err.println("Problem setting up "
+			 +"visualization (DataVisualizer)");
+      ex.printStackTrace();
+    }
+  }
+  
   /**
    * Describe <code>performRequest</code> method here.
    *
@@ -174,6 +313,35 @@ public class DataVisualizer extends JPanel
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (DataVisualizer)");
+    }
+  }
+
+  public static void main(String [] args) {
+    try {
+      if (args.length != 1) {
+	System.err.println("Usage: DataVisualizer <dataset>");
+	System.exit(1);
+      }
+      java.io.Reader r = new java.io.BufferedReader(
+			 new java.io.FileReader(args[0]));
+      Instances inst = new Instances(r);
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
+      final DataVisualizer as = new DataVisualizer();
+      as.setInstances(inst);
+      
+      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
+      });
+      jf.setSize(800,600);
+      jf.setVisible(true);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println(ex.getMessage());
     }
   }
 }

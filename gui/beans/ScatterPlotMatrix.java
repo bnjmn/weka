@@ -43,19 +43,55 @@ import java.awt.*;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class ScatterPlotMatrix extends DataVisualizer
-  implements DataSourceListener, TrainingSetListener,
-	     TestSetListener, Visible, UserRequestAcceptor, Serializable {
+public class ScatterPlotMatrix extends DataVisualizer {
+
+  protected MatrixPanel m_matrixPanel;
 
   public ScatterPlotMatrix() {
+    appearanceFinal();
+  }
+
+  protected void appearanceDesign() {
+    removeAll();
     m_visual = 
       new BeanVisual("ScatterPlotMatrix", 
 		     BeanVisual.ICON_PATH+"ScatterPlotMatrix.gif",
 		     BeanVisual.ICON_PATH+"ScatterPlotMatrix_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  protected void appearanceFinal() {
+    setLayout(new BorderLayout());
+    setUpFinal();
+  }
+
+  protected void setUpFinal() {
+    removeAll();
+    if (m_matrixPanel == null) {
+      m_matrixPanel = new MatrixPanel();
+    }
+    add(m_matrixPanel, BorderLayout.CENTER);
+  }
+
+  /**
+   * Set instances for this bean. This method is a convenience method
+   * for clients who use this component programatically
+   *
+   * @param inst an <code>Instances</code> value
+   * @exception Exception if an error occurs
+   */
+  public void setInstances(Instances inst) throws Exception {
+    if (m_design) {
+      throw new Exception("This method is not to be used during design "
+			  +"time. It is meant to be used if this "
+			  +"bean is being used programatically as as "
+			  +"stand alone component.");
+    }
+    m_visualizeDataSet = inst;
+    m_matrixPanel.setInstances(m_visualizeDataSet);
   }
 
   /**
@@ -93,6 +129,35 @@ public class ScatterPlotMatrix extends DataVisualizer
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (ScatterPlotMatrix)");
+    }
+  }
+
+  public static void main(String [] args) {
+    try {
+      if (args.length != 1) {
+	System.err.println("Usage: ScatterPlotMatrix <dataset>");
+	System.exit(1);
+      }
+      java.io.Reader r = new java.io.BufferedReader(
+			 new java.io.FileReader(args[0]));
+      Instances inst = new Instances(r);
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
+      final ScatterPlotMatrix as = new ScatterPlotMatrix();
+      as.setInstances(inst);
+      
+      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
+      });
+      jf.setSize(800,600);
+      jf.setVisible(true);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println(ex.getMessage());
     }
   }
 }
