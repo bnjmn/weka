@@ -36,6 +36,7 @@ import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Drawable;
 import weka.filters.Filter;
 
 /**
@@ -72,10 +73,10 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class CostSensitiveClassifier extends Classifier
-  implements OptionHandler {
+  implements OptionHandler, Drawable {
 
   /* Specify possible sources of the cost matrix */
   public static final int MATRIX_ON_DEMAND = 1;
@@ -570,6 +571,20 @@ public class CostSensitiveClassifier extends Classifier
     */
     
     return Utils.minIndex(costs);
+  }
+
+  /**
+   * Returns graph describing the classifier (if possible).
+   *
+   * @return the graph of the classifier in dotty format
+   * @exception Exception if the classifier cannot be graphed
+   */
+  public String graph() throws Exception {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graph();
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot be graphed");
   }
 
   /**
