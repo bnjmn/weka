@@ -22,6 +22,7 @@ package weka.gui.experiment;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.ListSelectorDialog;
 import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
 import weka.experiment.Experiment;
 import weka.experiment.InstancesResultListener;
 import weka.experiment.DatabaseResultListener;
@@ -76,7 +77,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -153,6 +154,12 @@ public class ResultsPanel extends JPanel {
 
   /** Click to start the test */
   protected JButton m_PerformBut = new JButton("Perform test");
+  
+  /** Click to save test output to a file */
+  protected JButton m_SaveOutBut = new JButton("Save output");
+
+  /** The buffer saving object for saving output */
+  SaveBuffer m_SaveOut = new SaveBuffer(null, this);
 
   /** Displays the output of tests */
   protected JTextArea m_OutText = new JTextArea();
@@ -264,8 +271,15 @@ public class ResultsPanel extends JPanel {
     m_PerformBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	performTest();
+	m_SaveOutBut.setEnabled(true);
       }
     });
+    m_SaveOutBut.setEnabled(false);
+    m_SaveOutBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer();
+	}
+      });
     m_OutText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutText.setEditable(false);
@@ -404,13 +418,19 @@ public class ResultsPanel extends JPanel {
     gbC.gridy = 0;     gbC.gridx = 0;
     gbL.setConstraints(p3, gbC);
     mondo.add(p3);
+
+    JPanel bts = new JPanel();
+    bts.setLayout(new GridLayout(1,2,5,5));
+    bts.add(m_PerformBut);
+    bts.add(m_SaveOutBut);
+
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 1;     gbC.gridx = 0;
     gbC.insets = new Insets(5,5,5,5);
-    gbL.setConstraints(m_PerformBut, gbC);
-    mondo.add(m_PerformBut);
+    gbL.setConstraints(bts, gbC);
+    mondo.add(bts);
     gbC = new GridBagConstraints();
     //gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.BOTH;
@@ -805,6 +825,23 @@ public class ResultsPanel extends JPanel {
       }
       m_TTester.setResultsetKeyColumns(generatorRange);
       setTTester();
+    }
+  }
+
+  /**
+   * Save the currently selected result buffer to a file.
+   */
+  protected void saveBuffer() {
+    StringBuffer sb = m_History.getSelectedBuffer();
+    if (sb != null) {
+      if (m_SaveOut.save(sb)) {
+	JOptionPane.showMessageDialog(this,
+				      "File saved",
+				      "Results",
+				      JOptionPane.INFORMATION_MESSAGE);
+      }
+    } else {
+      m_SaveOutBut.setEnabled(false);
     }
   }
   
