@@ -56,7 +56,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractTimeSeries extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -255,7 +255,18 @@ public abstract class AbstractTimeSeries extends Filter
     m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String fillWithMissingTipText() {
+    return "For instances at the beginning or end of the dataset where the translated "
+      + "values are not known, use missing values (default is to remove those "
+      + "instances)";
+  }
+
   /**
    * Gets whether missing values should be used rather than removing instances
    * where the translated value is not known (due to border effects).
@@ -276,6 +287,16 @@ public abstract class AbstractTimeSeries extends Filter
   public void setFillWithMissing(boolean newFillWithMissing) {
     
     m_FillWithMissing = newFillWithMissing;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String instanceRangeTipText() {
+    return "The number of instances forward/backward to merge values between. "
+      + "A negative number indicates taking values from a past instance.";
   }
 
   /**
@@ -300,6 +321,15 @@ public abstract class AbstractTimeSeries extends Filter
     m_InstanceRange = newInstanceRange;
   }
   
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+    return "Invert matching sense. ie calculate for all non-specified columns.";
+  }
+
   /**
    * Get whether the supplied columns are to be removed or kept
    *
