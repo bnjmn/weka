@@ -33,15 +33,32 @@ import weka.filters.AttributeFilter;
  * Class for Evaluating attributes individually by using the SVM
  * classifier. <p>
  *
- * No options. <p>
+ * Valid options are: <p>
+ *
+ * -E <num atts to eliminate> <br>
+ * Specify the number of attributes to eliminate on each invocation
+ * of the support vector machine. <p>
+ *
+ * -P <complexity parameter> <br>
+ * Specify the value of C - the complexity parameter to be passed on
+ * to the support vecotor machine. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
-public class SVMAttributeEval extends AttributeEvaluator {
-
+public class SVMAttributeEval 
+  extends AttributeEvaluator 
+  implements OptionHandler {
+  
   /** The attribute scores */
   private double[] m_attScores;
+
+  /** The number of attributes to eliminate per iteration */
+  private int m_numToEliminate = 1;
+
+  /** Complexity parameter to pass on to SMO */
+  private double m_smoCParameter = 1.0;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -59,6 +76,140 @@ public class SVMAttributeEval extends AttributeEvaluator {
    */
   public SVMAttributeEval () {
     resetOptions();
+  }
+
+  /**
+   * Returns an enumeration describing all the available options
+   *
+   * @return an enumeration of options
+   */
+  public Enumeration listOptions() {
+    Vector newVector = new Vector(2);
+
+    newVector.addElement(new Option("\tSpecify the number of attributes to\n"
+				    + "\teliminate with each invocation of\n"
+				    + "\tthe support vector machine.\n"
+				    + "\tDefault = 1.", "E", 1,
+				    "-N <num atts to eliminate>"));
+
+    newVector.addElement(new Option("\tSpecify the value of C (complexity\n"
+				    + "\tparameter) to pass on to the\n"
+				    + "\tsupport vector machine.\n"
+				    + "\tDefault = 1.0", "P", 1,
+				    "-P <complexity>"));
+
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options
+   *
+   * Valid options are: <p>
+   *
+   * -E <num atts to eliminate> <br>
+   * Specify the number of attributes to eliminate on each invocation
+   * of the support vector machine. <p>
+   *
+   * -P <complexity parameter> <br>
+   * Specify the value of C - the complexity parameter to be passed on
+   * to the support vecotor machine. <p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an error occurs
+   */
+  public void setOptions(String [] options) throws Exception {
+    String optionString;
+
+    optionString = Utils.getOption('E', options);
+    if (optionString.length() != 0) {
+      setAttsToEliminatePerIteration(Integer.parseInt(optionString));
+    }
+    
+    optionString = Utils.getOption('P', options);
+    if (optionString.length() != 0) {
+      setSVMComplexityParameter((new Double(optionString)).doubleValue());
+    }
+
+    Utils.checkForRemainingOptions(options);
+  }
+
+  /**
+   * Gets the current settings of SVMAttributeEval
+   *
+   * @return an array of strings suitable for passing to setOptions() 
+   */
+  public String [] getOptions() {
+    String [] options = new String [4];
+    int current = 0;
+
+    options[current++] = "-E"; 
+    options[current++] = ""+getAttsToEliminatePerIteration();
+    
+    options[current++] = "-P"; 
+    options[current++] = ""+getSVMComplexityParameter();
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    
+    return options;
+  }
+
+  /**
+   * Returns a tip text for this property suitable for display in the
+   * GUI
+   *
+   * @return tip text string describing this property
+   */
+  public String svmComplexityParameterTipText() {
+    return "C complexity parameter to pass to the SVM";
+  }
+
+  /**
+   * Set the value of C for SMO
+   *
+   * @param svmC the value of C
+   */
+  public void setSVMComplexityParameter(double svmC) {
+    m_smoCParameter = svmC;
+  }
+
+  /**
+   * Get the value of C used with SMO
+   *
+   * @return the value of C
+   */
+  public double getSVMComplexityParameter() {
+    return m_smoCParameter;
+  }
+
+  /**
+   * Returns a tip text for this property suitable for display in the
+   * GUI
+   *
+   * @return tip text string describing this property
+   */
+  public String attsToEliminatePerIterationTipText() {
+    return "Number of attributes to eliminate per iteration "
+      +"(invokation of SVM)";
+  }
+
+  /**
+   * Set the number of attributes to eliminate per iteration
+   *
+   * @param numE number of attributes to eliminate per iteration
+   */
+  public void setAttsToEliminatePerIteration(int numE) {
+    m_numToEliminate = numE;
+  }
+
+  /**
+   * Get the number of attributes to eliminate per iteration
+   *
+   * @return the number of attributes to eliminate per iteration
+   */
+  public int getAttsToEliminatePerIteration() {
+    return m_numToEliminate;
   }
 
   /**
@@ -96,10 +247,16 @@ public class SVMAttributeEval extends AttributeEvaluator {
     // a weight for every attribute (excluding the class).
     m_attScores = new double[data.numAttributes() - 1];
     Instances trainCopy = new Instances(data);
-    for (int i = 0; i < m_attScores.length; i++) {
+    //    for (int i = 0; i < m_attScores.length; i++) {
+    int i = 0;
+    do {
+      int numToElim = (m_attScores.length - i >= m_numToEliminate)
+	? m_numToEliminate
+	: m_attScores.length - i;
       
       // Build the linear SVM with default parameters
       SMO smo = new SMO();
+      smo.setC(m_smoCParameter);
       smo.buildClassifier(trainCopy);
 
       // Find the attribute with maximum weight^2
@@ -111,26 +268,38 @@ public class SVMAttributeEval extends AttributeEvaluator {
 	weights[indicesSparse[j]] = weightsSparse[j] * weightsSparse[j];
       }
       weights[trainCopy.classIndex()] = Double.MAX_VALUE;
-      int minWeightIndex = Utils.minIndex(weights);
-      m_attScores[origIndices[minWeightIndex]] = weights[minWeightIndex];
+
+      int minWeightIndex;
+      int[] featArray = new int[numToElim];
+      boolean [] eliminated = new boolean [origIndices.length];
+      for (int j = 0; j <numToElim; j++) {
+	minWeightIndex = Utils.minIndex(weights);
+	m_attScores[origIndices[minWeightIndex]] = i+j+1;
+	featArray[j] = minWeightIndex;
+	eliminated[minWeightIndex] = true;
+	weights[minWeightIndex] = Double.MAX_VALUE;
+      }
       
       // Delete the best attribute. 
       AttributeFilter delTransform = new AttributeFilter();
       delTransform.setInvertSelection(false);
-      int[] featArray = new int[1];
-      featArray[0] = minWeightIndex;
+
       delTransform.setAttributeIndicesArray(featArray);
       delTransform.setInputFormat(trainCopy);
       trainCopy = Filter.useFilter(trainCopy, delTransform);
       
       // Update the array of indices
-      int[] temp = new int[origIndices.length - 1];
-      System.arraycopy(origIndices, 0, temp, 0, minWeightIndex);
-      for (int j = minWeightIndex + 1; j < origIndices.length; j++) {
-	temp[j - 1] = origIndices[j];
+      int[] temp = new int[origIndices.length - numToElim];
+      int k = 0;
+      for (int j = 0; j < origIndices.length; j++) {
+	if (!eliminated[j]) {
+	  temp[k++] = origIndices[j];
+	}
       }
+
       origIndices = temp;
-    }
+      i += numToElim;
+    } while (i < m_attScores.length);
   }
 
   /**
