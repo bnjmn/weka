@@ -101,7 +101,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -145,9 +145,9 @@ public class ClassifierPanel extends JPanel {
   /** Check to output the model built from the training data */
   protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
 
-  /** Check to output true/false positives for each class */
-  protected JCheckBox m_OutputTFPosBut =
-    new JCheckBox("Output true/false positives");
+  /** Check to output true/false positives, precision/recall for each class */
+  protected JCheckBox m_OutputPerClassBut =
+    new JCheckBox("Output per-class stats");
 
   /** Check to output a confusion matrix */
   protected JCheckBox m_OutputConfusionBut =
@@ -301,7 +301,7 @@ public class ClassifierPanel extends JPanel {
 		     +"visualization");
     m_OutputModelBut
       .setToolTipText("Output the model obtained from the full training set");
-    m_OutputTFPosBut.setToolTipText("Output the true positives and false"
+    m_OutputPerClassBut.setToolTipText("Output precision/recall & true/false"
 				    + " positives for each class");
     m_OutputConfusionBut
       .setToolTipText("Output the matrix displaying class confusions");
@@ -311,7 +311,7 @@ public class ClassifierPanel extends JPanel {
       .setToolTipText("Evaluate errors with respect to a cost matrix");
     m_StorePredictionsBut.setSelected(true);
     m_OutputModelBut.setSelected(true);
-    m_OutputTFPosBut.setSelected(true);
+    m_OutputPerClassBut.setSelected(true);
     m_OutputConfusionBut.setSelected(true);
     m_ClassCombo.setEnabled(false);
     m_CVBut.setSelected(true);
@@ -389,7 +389,7 @@ public class ClassifierPanel extends JPanel {
 	int selected = m_ClassCombo.getSelectedIndex();
 	if (selected != -1) {
 	  boolean isNominal = m_Instances.attribute(selected).isNominal();
-	  m_OutputTFPosBut.setEnabled(isNominal);
+	  m_OutputPerClassBut.setEnabled(isNominal);
 	  m_OutputConfusionBut.setEnabled(isNominal);	
 	}
       }
@@ -416,7 +416,7 @@ public class ClassifierPanel extends JPanel {
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
 	moreOptionsPanel.setLayout(new GridLayout(6, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
-	moreOptionsPanel.add(m_OutputTFPosBut);	  
+	moreOptionsPanel.add(m_OutputPerClassBut);	  
 	moreOptionsPanel.add(m_OutputEntropyBut);	  
 	moreOptionsPanel.add(m_OutputConfusionBut);	  
 	moreOptionsPanel.add(m_StorePredictionsBut);
@@ -816,7 +816,7 @@ public class ClassifierPanel extends JPanel {
 	  }
 	  boolean outputModel = m_OutputModelBut.isSelected();
 	  boolean outputConfusion = m_OutputConfusionBut.isSelected();
-	  boolean outputTFPos = m_OutputTFPosBut.isSelected();
+	  boolean outputPerClass = m_OutputPerClassBut.isSelected();
 	  boolean outputSummary = true;
           boolean outputEntropy = m_OutputEntropyBut.isSelected();
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
@@ -906,6 +906,10 @@ public class ClassifierPanel extends JPanel {
 			     + userTest.numInstances() + " instances\n");
 	      break;
 	    }
+            if (costMatrix != null) {
+               outBuff.append("Evaluation cost matrix:\n")
+               .append(costMatrix.toString()).append("\n");
+            }
 	    outBuff.append("\n");
 	    m_History.addResult(name, outBuff);
 	    m_History.setSingle(name);
@@ -1033,7 +1037,7 @@ public class ClassifierPanel extends JPanel {
 
 	    if (inst.attribute(classIndex).isNominal()) {
 
-	      if (outputTFPos) {
+	      if (outputPerClass) {
 		outBuff.append(eval.toClassDetailsString() + "\n");
 	      }
 
