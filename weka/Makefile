@@ -1,5 +1,5 @@
 #
-# $Revision: 1.20 $
+# $Revision: 1.21 $
 #
 
 JAVAC = javac
@@ -68,14 +68,12 @@ doc :
 	weka.gui.experiment \
 	weka.gui.explorer \
 	weka.gui.explorer.treevisualizer \
-	weka.gui.streams;)
-
-# \
-#	for page in `ls doc/*.html`; \
-#	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
-#	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
-#	< doc/packages.html > packages_temp.html; \
-#	mv packages_temp.html doc/packages.html)
+	weka.gui.streams \
+	for page in `ls doc/*.html`; \
+	do cat $$page | sed "s/Index<\/a><\/pre>/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a><\/pre>/g" > $$page.temp; mv $$page.temp $$page; done;\
+	sed 's/API_users_guide.html/..\/Tutorial.pdf/g' \
+	< doc/packages.html > packages_temp.html; \
+	mv packages_temp.html doc/packages.html)
 
 # Assumes any auxiliary classfiles are in the parent directory
 # One of these must be SimpleCLI.class
