@@ -133,7 +133,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class JRip extends DistributionClassifier 
   implements OptionHandler, 
@@ -852,13 +852,12 @@ public class JRip extends DistributionClassifier
 	/* Build a list of antecedents */
 	Antd oneAntd=null;
 	Instances coverData = null;
-	Enumeration enumAttr=growData.enumerateAttributes();	    
-	int index=-1;  
+	Enumeration enumAttr=growData.enumerateAttributes();	      
 		
 	/* Build one condition based on all attributes not used yet*/
 	while (enumAttr.hasMoreElements()){
 	  Attribute att= (Attribute)(enumAttr.nextElement());
-	  index++;
+	  
 	  if(m_Debug)
 	    System.err.println("\nOne condition: size = " 
 			       + growData.sumOfWeights());
@@ -869,7 +868,7 @@ public class JRip extends DistributionClassifier
 	  else
 	    antd = new NominalAntd(att);
 		    
-	  if(!used[index]){
+	  if(!used[att.index()]){
 	    /* Compute the best information gain for each attribute,
 	       it's stored in the antecedent formed by this attribute.
 	       This procedure returns the data covered by the antecedent*/
