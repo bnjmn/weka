@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1609,12 +1609,14 @@ public class VisualizePanel extends JPanel {
   /**
    * Set the properties for the VisualizePanel
    */
-  private void setProperties() {
+  private void setProperties(String relationName) {
     if (VisualizeUtils.VISUALIZE_PROPERTIES != null) {
+      System.err.println("Looking for preferred visualization dimensions for "
+			 +relationName);
       String thisClass = this.getClass().getName();
-      String xcolKey = thisClass+".XDimension";
-      String ycolKey = thisClass+".YDimension";
-      String ccolKey = thisClass+".ColourDimension";
+      String xcolKey = thisClass+"."+relationName+".XDimension";
+      String ycolKey = thisClass+"."+relationName+".YDimension";
+      String ccolKey = thisClass+"."+relationName+".ColourDimension";
 
       m_preferredXDimension = VisualizeUtils.VISUALIZE_PROPERTIES.
 	      getProperty(xcolKey);
@@ -1653,7 +1655,6 @@ public class VisualizePanel extends JPanel {
    * Constructor
    */
   public VisualizePanel() {
-    setProperties();
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -2072,6 +2073,7 @@ public class VisualizePanel extends JPanel {
   }
 
   public void setUpComboBoxes(Instances inst) {
+    setProperties(inst.relationName());
     int prefX = -1;
     int prefY = -1;
     int prefC = -1;

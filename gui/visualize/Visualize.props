@@ -10,10 +10,10 @@ weka.gui.visualize.Plot2D.backgroundColour=black
 # AttributePanel (can use R,G,B format)
 weka.gui.visualize.AttributePanel.barColour=black
 
-# If you regularly visualize datasets with the same structure
+# If you regularly visualize certain datasets with the same structure
 # you might want to define default x, y and colour dimensions (attributes)
 # to visualize on.
 # Just uncomment and set up the following
-# weka.gui.visualize.visualizePanel.XDimension=BlahBlahAttributeName
-# weka.gui.visualize.visualizePanel.YDimension=BlahBlahAttributeName
-# weka.gui.visualize.visualizePanel.ColourDimension=BlahBlahAttributeName
+# weka.gui.visualize.VisualizePanel.<relation name>.XDimension=<attribute name>
+# weka.gui.visualize.VisualizePanel.<relation name>.YDimension=<attribute name>
+# weka.gui.visualize.VisualizePanel.<relation name>.ColourDimension=<attribute name>
