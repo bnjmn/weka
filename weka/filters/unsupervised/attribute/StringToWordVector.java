@@ -26,8 +26,6 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -44,6 +42,8 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 
 
 /** 
@@ -54,8 +54,8 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version 1.8-gwp-$Revision: 1.2 $ 
- **/
+ * @version $Revision: 1.3 $ 
+ */
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {
 
@@ -70,6 +70,9 @@ public class StringToWordVector extends Filter
 
   /** True if the first batch has been done */
   private boolean m_FirstBatchDone = false;
+
+  /** True if output instances should contain word frequency rather than boolean 0 or 1. */
+  private boolean m_OutputCounts = false;
 
   /**
    * The default number of words (per class if there is a class attribute
@@ -87,6 +90,9 @@ public class StringToWordVector extends Filter
     Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
+				    "\tOutput word counts rather than boolean word presence.\n",
+				    "C", 0, "-C"));
+    newVector.addElement(new Option(
 				    "\tString containing the set of delimiter characters\n"
 				    + "\t(default: \" \\n\\t.,:'\\\"()?!\")",
 				    "D", 1, "-D <delimiter set>"));
@@ -98,7 +104,7 @@ public class StringToWordVector extends Filter
 				    "\tSpecify approximate number of word fields to create.\n"
 				    + "\tSurplus words will be discarded..\n"
 				    + "\t(default: 1000)",
-				    "w", 1, "-w <number of words to keep>"));
+				    "W", 1, "-W <number of words to keep>"));
 
     return newVector.elements();
   }
@@ -107,7 +113,10 @@ public class StringToWordVector extends Filter
    * Parses a given list of options controlling the behaviour of this object.
    * Valid options are:<p>
    *
-   * -D <delimiter charcters>
+   * -C<br>
+   * Output word counts rather than boolean word presence.<p>
+   * 
+   * -D delimiter_charcters <br>
    * Specify set of delimiter characters
    * (default: " \n\t.,:'\\\"()?!\"<p>
    *
@@ -115,7 +124,7 @@ public class StringToWordVector extends Filter
    * Specify list of string attributes to convert to words.
    * (default: all string attributes)<p>
    *
-   * -w <number of words to keep><br>
+   * -W number_of_words_to_keep <br>
    * Specify number of word fields to create.
    * Other, less useful words will be discarded.
    * (default: 1000)<p>
@@ -135,11 +144,12 @@ public class StringToWordVector extends Filter
       setSelectedRange(value);
     }
 
-    value = Utils.getOption('w', options);
+    value = Utils.getOption('W', options);
     if (value.length() != 0) {
       setWordsToKeep(Integer.valueOf(value).intValue());
     }
 
+    setOutputWordCounts(Utils.getFlag('C', options));
   }
 
   /**
@@ -149,7 +159,7 @@ public class StringToWordVector extends Filter
    */
   public String [] getOptions() {
 
-    String [] options = new String [10];
+    String [] options = new String [11];
     int current = 0;
 
     options[current++] = "-D"; 
@@ -161,8 +171,12 @@ public class StringToWordVector extends Filter
       options[current++] = getSelectedRange().getRanges();
     }
 
-    options[current++] = "-w"; 
+    options[current++] = "-W"; 
     options[current++] = String.valueOf(getWordsToKeep());
+
+    if (getOutputWordCounts()) {
+      options[current++] = "-C";
+    }
 
     while (current < options.length) {
       options[current++] = "";
@@ -269,6 +283,26 @@ public class StringToWordVector extends Filter
     m_NewBatch = true;
     m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
+  }
+
+  /**
+   * Gets whether output instances contain 0 or 1 indicating word
+   * presence, or word counts.
+   *
+   * @return true if word counts should be output.
+   */
+  public boolean getOutputWordCounts() {
+    return m_OutputCounts;
+  }
+
+  /**
+   * Sets whether output instances contain 0 or 1 indicating word
+   * presence, or word counts.
+   *
+   * @param outputWordCounts true if word counts should be output.
+   */
+  public void setOutputWordCounts(boolean outputWordCounts) {
+    m_OutputCounts = outputWordCounts;
   }
 
   /**
@@ -574,7 +608,16 @@ public class StringToWordVector extends Filter
           String word = st.nextToken();
           Integer index = (Integer) m_Dictionary.get(word);
           if (index != null) {
-            contained.put(index, new Double(1));
+            if (m_OutputCounts) { // Separate if here rather than two lines down to avoid hashtable lookup
+              Double count = (Double)contained.get(index);
+              if (count != null) {
+                contained.put(index, new Double(count.doubleValue() + 1.0));
+              } else {
+                contained.put(index, new Double(1));
+              }
+            } else {
+              contained.put(index, new Double(1));
+            }
           }
         }
       }
