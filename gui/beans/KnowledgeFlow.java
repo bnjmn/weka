@@ -94,7 +94,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.4 $
+ * @version  $Revision: 1.5 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -229,7 +229,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    * @since 1.0
    * @see JPanel
    */
@@ -331,20 +331,9 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 		bc = (JComponent)(bi.getBean());
 	      }
 	      if (bc != null && (bc instanceof Visible)) {
-		ImageIcon ic = ((Visible)bc).getVisual().getStaticIcon();
-		//		bc.setVisible(false); // hide the component
 		m_editElement = bi;
-		int width = ic.getIconWidth() / 2;
-		int height = ic.getIconHeight() / 2;
-
-		Graphics2D g = (Graphics2D)m_beanLayout.getGraphics();
-		//		g.setPaint(java.awt.Color.black);
-		g.setXORMode(java.awt.Color.white);
-		ic.paintIcon(m_beanLayout, g, me.getX()-width, 
-			     me.getY()-height);
 		m_oldX = me.getX();
 		m_oldY = me.getY();
-		g.dispose();
 		m_mode = MOVING;
 	      }
 	    }
@@ -353,22 +342,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 
 	public void mouseReleased(MouseEvent me) {
 	  if (m_editElement != null && m_mode == MOVING) {
-	    ImageIcon ic = ((Visible)m_editElement.getBean()).
-	      getVisual().getStaticIcon();
-	    int width = ic.getIconWidth() / 2;
-	    int height = ic.getIconHeight() / 2;
-	    Graphics2D g = (Graphics2D)m_beanLayout.getGraphics();
-	    //		g.setPaint(java.awt.Color.black);
-	    g.setXORMode(java.awt.Color.white);
-	    ic.paintIcon(m_beanLayout, g, me.getX()-width, me.getY()-height);
-	    //	    m_editElement.setLocation(me.getX(), me.getY());
-	    m_editElement.setX(me.getX()-width);
-	    m_editElement.setY(me.getY()-height);
-	    //	    m_editElement.validate();
-	    revalidate();
-	    //	    m_editElement.setVisible(true);
 	    m_editElement = null;
-	    g.dispose();
 	    revalidate();
 	    m_beanLayout.repaint();
 	    m_mode = NONE;
@@ -455,18 +429,12 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 	    int width = ic.getIconWidth() / 2;
 	    int height = ic.getIconHeight() / 2;
 
-	    Graphics2D g = (Graphics2D)m_beanLayout.getGraphics();
-	    
-	    // undraw the old image
-	    g.setXORMode(java.awt.Color.white);
-	    ic.paintIcon(m_beanLayout, g, m_oldX-width, m_oldY-height);
+	    m_editElement.setX(m_oldX-width);
+	    m_editElement.setY(m_oldY-height);
+	    m_beanLayout.repaint();
 	    
 	    // note the new points
 	    m_oldX = me.getX(); m_oldY = me.getY();
-
-	    // draw the image
-	    ic.paintIcon(m_beanLayout, g, m_oldX-width, m_oldY-height);
-	    g.dispose();
 	  }
 	}
 
