@@ -54,62 +54,96 @@ import weka.core.*;
  * When k is selected by cross-validation for numeric class attributes,
  * minimize mean-squared error. (default mean absolute error) <p>
  *
- * -B <br>
- * Bayes' weight all models with <i>k</i>=1 ... <i>k</i>=kmax (given by -K) <p>
- *
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision $
+ * @version $Revision: 1.5 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
 
-  /**
-   * Classes for a linked list to store the nearest k neighbours
-   * to an instance. We use a list so that we can take care of
-   *cases where multiple neighbours are the same distance away.
-   * i.e. the minimum length of the list is k.
+  
+  /*
+   * A class for storing data about a neighboring instance
    */
   private class NeighborNode {
 
-    private double m_Distance;
+    /** The neighbor instance */
     private Instance m_Instance;
+
+    /** The distance from the current instance to this neighbor */
+    private double m_Distance;
+
+    /** A link to the next neighbor instance */
     private NeighborNode m_Next;
     
+    /**
+     * Create a new neighbor node.
+     *
+     * @param distance the distance to the neighbor
+     * @param instance the neighbor instance
+     * @param next the next neighbor node
+     */
     public NeighborNode(double distance, Instance instance, NeighborNode next){
       m_Distance = distance;
       m_Instance = instance;
       m_Next = next;
     }
+
+    /**
+     * Create a new neighbor node that doesn't link to any other nodes.
+     *
+     * @param distance the distance to the neighbor
+     * @param instance the neighbor instance
+     */
     public NeighborNode(double distance, Instance instance) {
-      m_Distance = distance;
-      m_Instance = instance;
-      m_Next = null;
+
+      this(distance, instance, null);
     }
   }
 
+  /*
+   * A class for a linked list to store the nearest k neighbours
+   * to an instance. We use a list so that we can take care of
+   * cases where multiple neighbours are the same distance away.
+   * i.e. the minimum length of the list is k.
+   */
   private class NeighborList {
 
-    private NeighborNode m_First, m_Last;
-    private int m_Length;
+    /** The first node in the list */
+    private NeighborNode m_First;
+
+    /** The last node in the list */
+    private NeighborNode m_Last;
+
+    /** The number of nodes to attempt to maintain in the list */
+    private int m_Length = 1;
     
+    /**
+     * Creates the neighborlist with a desired length
+     *
+     * @param length the length of list to attempt to maintain
+     */
     public NeighborList(int length) {
 
       m_Length = length;
-      m_First = m_Last = null;
     }
 
-    public NeighborList() {
-
-      this(1);
-    }
-
+    /**
+     * Gets whether the list is empty.
+     *
+     * @return true if so
+     */
     public boolean isEmpty() {
 
       return (m_First == null);
     }
 
+    /**
+     * Gets the current length of the list.
+     *
+     * @return the current length of the list
+     */
     public int currentLength() {
 
       int i = 0;
@@ -121,6 +155,13 @@ public class IBk extends DistributionClassifier implements
       return i;
     }
 
+    /**
+     * Inserts an instance neighbor into the list, maintaining the list
+     * sorted by distance.
+     *
+     * @param distance the distance to the instance
+     * @param instance the neighboring instance
+     */
     public void insertSorted(double distance, Instance instance) {
 
       if (isEmpty()) {
@@ -156,6 +197,12 @@ public class IBk extends DistributionClassifier implements
       }
     }
 
+    /**
+     * Prunes the list to contain the k nearest neighbors. If there are
+     * multiple neighbors at the k'th distance, all will be kept.
+     *
+     * @param k the number of neighbors to keep in the list.
+     */
     public void pruneToK(int k) {
 
       if (isEmpty()) {
@@ -178,6 +225,9 @@ public class IBk extends DistributionClassifier implements
       }
     }
 
+    /**
+     * Prints out the contents of the neighborlist
+     */
     public void printList() {
 
       if (isEmpty()) {
@@ -233,7 +283,7 @@ public class IBk extends DistributionClassifier implements
   protected int m_WindowSize;
 
   /** Whether the neighbours should be distance-weighted */
-  protected int m_DistanceWeighted;
+  protected int m_DistanceWeighting;
 
   /** Whether to select k by cross validation */
   protected boolean m_CrossValidate;
@@ -248,18 +298,9 @@ public class IBk extends DistributionClassifier implements
   boolean m_Debug;
   
   /* Define possible instance weighting methods */
-  public static final int WEIGHT_NONE = 0;
-  public static final int WEIGHT_INVERSE = 1;
-  public static final int WEIGHT_SIMILARITY = 2;
-
-  /** Whether to simulate sensor validation during cross-validation */
-  protected boolean xxx_Validation;
-
-  /** Whether to perform bayesian averaging of possible k models */
-  protected boolean xxx_BayesAverage;
-
-  /** Store the model weights */
-  protected double [] xxx_BayesWeights;
+  public static final int WEIGHT_NONE = 1;
+  public static final int WEIGHT_INVERSE = 2;
+  public static final int WEIGHT_SIMILARITY = 4;
 
   /**
    * IBk classifier. Simple instance-based learner that uses the class
@@ -325,7 +366,103 @@ public class IBk extends DistributionClassifier implements
 
     return m_kNN;
   }
-
+  
+  /**
+   * Gets the maximum number of instances allowed in the training
+   * pool. The addition of new instances above this value will result
+   * in old instances being removed. A value of 0 signifies no limit
+   * to the number of training instances.
+   *
+   * @return Value of WindowSize.
+   */
+  public int getWindowSize() {
+    
+    return m_WindowSize;
+  }
+  
+  /**
+   * Sets the maximum number of instances allowed in the training
+   * pool. The addition of new instances above this value will result
+   * in old instances being removed. A value of 0 signifies no limit
+   * to the number of training instances.
+   *
+   * @param newWindowSize Value to assign to WindowSize.
+   */
+  public void setWindowSize(int newWindowSize) {
+    
+    m_WindowSize = newWindowSize;
+  }
+  
+  
+  /**
+   * Gets the distance weighting method used. Will be one of
+   * WEIGHT_NONE, WEIGHT_INVERSE, or WEIGHT_SIMILARITY
+   *
+   * @return the distance weighting method used.
+   */
+  public int getDistanceWeighting() {
+    
+    return m_DistanceWeighting;
+  }
+  
+  /**
+   * Sets the distance weighting method used. Values other than
+   * WEIGHT_NONE, WEIGHT_INVERSE, or WEIGHT_SIMILARITY will be ignored.
+   *
+   * @param newDistanceWeighting the distance weighting method to use
+   */
+  public void setDistanceWeighting(int newDistanceWeighting) {
+    
+    if ((newDistanceWeighting &
+	(WEIGHT_NONE | WEIGHT_INVERSE | WEIGHT_SIMILARITY)) != 0) {
+      m_DistanceWeighting = newDistanceWeighting;
+    }
+  }
+  
+  /**
+   * Gets whether the mean squared error is used rather than mean
+   * absolute error when doing cross-validation.
+   *
+   * @return true if so.
+   */
+  public boolean getMeanSquared() {
+    
+    return m_MeanSquared;
+  }
+  
+  /**
+   * Sets whether the mean squared error is used rather than mean
+   * absolute error when doing cross-validation.
+   *
+   * @param newMeanSquared true if so.
+   */
+  public void setMeanSquared(boolean newMeanSquared) {
+    
+    m_MeanSquared = newMeanSquared;
+  }
+  
+  /**
+   * Gets whether hold-one-out cross-validation will be used
+   * to select the best k value
+   *
+   * @return true if cross-validation will be used.
+   */
+  public boolean getCrossValidate() {
+    
+    return m_CrossValidate;
+  }
+  
+  /**
+   * Sets whether hold-one-out cross-validation will be used
+   * to select the best k value
+   *
+   * @param newCrossValidate true if cross-validation should be used.
+   */
+  public void setCrossValidate(boolean newCrossValidate) {
+    
+    m_CrossValidate = newCrossValidate;
+  }
+  
   /**
    * Get the number of training instances the classifier is currently using
    */
@@ -433,6 +570,9 @@ public class IBk extends DistributionClassifier implements
    */
   public double [] distributionForInstance(Instance instance) throws Exception{
 
+    if (m_Train.numInstances() == 0) {
+      throw new Exception("No training instances!");
+    }
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       m_kNNValid = false;
       while (m_Train.numInstances() > m_WindowSize) {
@@ -447,27 +587,7 @@ public class IBk extends DistributionClassifier implements
     updateMinMax(instance);
 
     NeighborList neighborlist = findNeighbors(instance);
-    double [] distribution;
-    if (xxx_BayesAverage) {
-      distribution = new double [m_NumClasses];
-      for(int j = m_kNNUpper-1; j >= 0; j--) {
-	double [] tempDist = makeDistribution(neighborlist);
-	for(int i = 0; i < m_NumClasses; i++) {
-	  distribution[i] += tempDist[i] * xxx_BayesWeights[j];
-	}
-	if (j >= 1) {
-	  neighborlist.pruneToK(j);
-	}
-      }
-      try {
-	Utils.normalize(distribution);
-      } catch (Exception ex) {
-	throw new Exception("Bayes weighting - couldn't normalize distribution");
-      }
-    } else {
-      distribution = makeDistribution(neighborlist);
-    }
-    return distribution;
+    return makeDistribution(neighborlist);
   }
  
 
@@ -505,12 +625,6 @@ public class IBk extends DistributionClassifier implements
 	      +"\tand the k value specified using hold-one-out evaluation\n"
 	      +"\ton the training data (use when k > 1)",
 	      "X", 0,"-X"));
-    newVector.addElement(new Option(
-              "\tCombine models from k=1 to k=<-K> with bayes weighting (experimental)\n",
-	      "B",0,"-B"));
-    newVector.addElement(new Option(
-              "\tSimulate sensor validation after cross validation (experimental)\n",
-	      "V",0,"-V"));
     return newVector.elements();
   }
 
@@ -543,10 +657,6 @@ public class IBk extends DistributionClassifier implements
    * When k is selected by cross-validation for numeric class attributes,
    * minimize mean-squared error. (default mean absolute error) <p>
    *
-   * -B <br>
-   * Bayes' weight all models with <i>k</i>=1 ... <i>k</i>=kmax
-   * (given by -K) <p>
-   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -560,24 +670,19 @@ public class IBk extends DistributionClassifier implements
     }
     String windowString = Utils.getOption('W', options);
     if (windowString.length() != 0) {
-      m_WindowSize = Integer.parseInt(windowString);
+      setWindowSize(Integer.parseInt(windowString));
     } else {
-      m_WindowSize = 0;
+      setWindowSize(0);
     }
     if (Utils.getFlag('D', options)) {
-      m_DistanceWeighted = WEIGHT_INVERSE;
+      setDistanceWeighting(WEIGHT_INVERSE);
     } else if (Utils.getFlag('F', options)) {
-      m_DistanceWeighted = WEIGHT_SIMILARITY;
+      setDistanceWeighting(WEIGHT_SIMILARITY);
     } else {
-      m_DistanceWeighted = WEIGHT_NONE;
+      setDistanceWeighting(WEIGHT_NONE);
     }
-    m_CrossValidate = Utils.getFlag('X', options);
-    m_MeanSquared = Utils.getFlag('S', options);
-    xxx_Validation = Utils.getFlag('V', options);
-    xxx_BayesAverage = Utils.getFlag('B', options);
-    if (xxx_BayesAverage) {
-      m_CrossValidate = true;
-    }
+    setCrossValidate(Utils.getFlag('X', options));
+    setMeanSquared(Utils.getFlag('S', options));
 
     Utils.checkForRemainingOptions(options);
   }
@@ -593,20 +698,15 @@ public class IBk extends DistributionClassifier implements
     int current = 0;
     options[current++] = "-K"; options[current++] = "" + getKNN();
     options[current++] = "-W"; options[current++] = "" + m_WindowSize;
-    if (xxx_BayesAverage) {
-      options[current++] = "-B";
-    } else if (m_CrossValidate) {
+    if (getCrossValidate()) {
       options[current++] = "-X";
     }
-    if (xxx_Validation) {
-      options[current++] = "-V";
-    }
-    if (m_MeanSquared) {
+    if (getMeanSquared()) {
       options[current++] = "-S";
     }
-    if (m_DistanceWeighted == WEIGHT_INVERSE) {
+    if (m_DistanceWeighting == WEIGHT_INVERSE) {
       options[current++] = "-D";
-    } else if (m_DistanceWeighted == WEIGHT_SIMILARITY) {
+    } else if (m_DistanceWeighting == WEIGHT_SIMILARITY) {
       options[current++] = "-F";
     }
     while (current < options.length) {
@@ -625,7 +725,7 @@ public class IBk extends DistributionClassifier implements
     String result = "IB1 instance-based classifier\n" +
       "using " + m_kNN;
 
-    switch (m_DistanceWeighted) {
+    switch (m_DistanceWeighting) {
     case WEIGHT_INVERSE:
       result += " inverse-distance-weighted";
       break;
@@ -653,12 +753,9 @@ public class IBk extends DistributionClassifier implements
 
     setKNN(1);
     m_WindowSize = 0;
-    m_DistanceWeighted = WEIGHT_NONE;
+    m_DistanceWeighting = WEIGHT_NONE;
     m_CrossValidate = false;
     m_MeanSquared = false;
-    xxx_Validation = false;
-    xxx_BayesAverage = false;
-    xxx_BayesWeights = null;
   }
 
   /**
@@ -810,7 +907,7 @@ public class IBk extends DistributionClassifier implements
       // Collect class counts
       NeighborNode current = neighborlist.m_First;
       while (current != null) {
-	switch (m_DistanceWeighted) {
+	switch (m_DistanceWeighting) {
 	case WEIGHT_INVERSE:
 	  weight = 1.0 / (current.m_Distance + 0.001); // to avoid div by zero
 	  break;
@@ -863,12 +960,10 @@ public class IBk extends DistributionClassifier implements
     try {
       double [] performanceStats = new double [m_kNNUpper];
       double [] performanceStatsSq = new double [m_kNNUpper];
-      xxx_BayesWeights = new double [m_kNNUpper];
 
       for(int i = 0; i < m_kNNUpper; i++) {
 	performanceStats[i] = 0;
 	performanceStatsSq[i] = 0;
-	xxx_BayesWeights[i] = 1;
       }
 
 
@@ -892,7 +987,6 @@ public class IBk extends DistributionClassifier implements
 	    performanceStatsSq[j] += err * err;   // Squared error
 	    performanceStats[j] += Math.abs(err); // Absolute error
 	  } else {
-	    xxx_BayesWeights[j] *= distribution[(int)instance.classValue()];
 	    if (thisPrediction != instance.classValue()) {
 	      performanceStats[j] ++;             // Classification error
 	    }
@@ -900,10 +994,6 @@ public class IBk extends DistributionClassifier implements
 	  if (j >= 1) {
 	    neighborlist.pruneToK(j);
 	  }
-	}
-
-	if (i % 10 == 0) { // Renormalize probabilities
-	  Utils.normalize(xxx_BayesWeights);
 	}
       }
 
@@ -926,10 +1016,7 @@ public class IBk extends DistributionClassifier implements
 	    }
 	  }
 	} else {
-	  Utils.normalize(xxx_BayesWeights);
 	  if (m_Debug) {
-	    System.err.print("(Prob) = "
-			     + xxx_BayesWeights[i] + "  ");
 	    System.err.println("(%ERR) = "
 			       + 100.0 * performanceStats[i]
 			       / m_Train.numInstances());
@@ -938,67 +1025,26 @@ public class IBk extends DistributionClassifier implements
       }
 
 
-      if (m_Debug && xxx_BayesAverage) {
-	System.err.println("Will weight the models with kMax="+m_kNN);
-      } else {
-	// Check through the performance stats and select the best
-	// k value (or the lowest k if more than one best)
-	double [] searchStats = performanceStats;
-	if (m_Train.classAttribute().isNumeric() && m_MeanSquared) {
-	  searchStats = performanceStatsSq;
-	}
-	if (m_Train.classAttribute().isNominal() && m_MeanSquared) {
-	  searchStats = new double [m_kNNUpper];
-	  for(int i = 0; i < m_kNNUpper; i++) {
-	    searchStats[i] = 1.0-xxx_BayesWeights[i];
-	  }
-	}
-	double bestPerformance = Double.NaN;
-	int bestK = 1;
-	for(int i = 0; i < m_kNNUpper; i++) {
-	  if (Double.isNaN(bestPerformance)
-	      || (bestPerformance > searchStats[i])) {
-	    bestPerformance = searchStats[i];
-	    bestK = i + 1;
-	  }
-	}
-	m_kNN = bestK;
-	if (m_Debug) {
-	  System.err.println("Selected k = " + bestK);
-	}
-
-	// Simulate sensor validation by picking out instances where
-	// a large prediction error was made
-	if (xxx_Validation && m_Train.classAttribute().isNumeric()) {
-	  double mean = performanceStats[bestK - 1] / m_Train.numInstances();
-	  double stdDev = Math.sqrt((performanceStatsSq[bestK - 1]
-				     - mean * mean * m_Train.numInstances())
-				    / m_Train.numInstances());
-	  if (m_Debug) {
-	    System.err.println("Error -- mean: " + mean +
-			       "  std dev: " + stdDev);
-	  }
-      
-	  for(int i = 0; i < m_Train.numInstances(); i++) {
-	    if (m_Debug && (i % 50 == 0)) {
-	      System.err.print("Validating " + i + "/" 
-			       + m_Train.numInstances() + "\r");
-	    }
-	    instance = m_Train.instance(i);
-	
-	    double err = Math.abs(Utils.maxIndex(makeDistribution
-						 (findNeighbors(instance)))
-				  - instance.classValue());
-	    if (err > stdDev * 3) {
-	      System.err.println("Possible sensor failure for instance " 
-				 + (i + 1) + " prediction error " + err);
-	      System.err.println(instance);
-	    }
-	  }
+      // Check through the performance stats and select the best
+      // k value (or the lowest k if more than one best)
+      double [] searchStats = performanceStats;
+      if (m_Train.classAttribute().isNumeric() && m_MeanSquared) {
+	searchStats = performanceStatsSq;
+      }
+      double bestPerformance = Double.NaN;
+      int bestK = 1;
+      for(int i = 0; i < m_kNNUpper; i++) {
+	if (Double.isNaN(bestPerformance)
+	    || (bestPerformance > searchStats[i])) {
+	  bestPerformance = searchStats[i];
+	  bestK = i + 1;
 	}
       }
-
-
+      m_kNN = bestK;
+      if (m_Debug) {
+	System.err.println("Selected k = " + bestK);
+      }
+      
       m_kNNValid = true;
     } catch (Exception ex) {
       System.err.println("Couldn't optimize by cross-validation");
