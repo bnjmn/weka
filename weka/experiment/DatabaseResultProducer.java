@@ -36,7 +36,7 @@ import weka.core.Option;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler {
@@ -50,6 +50,9 @@ public class DatabaseResultProducer extends DatabaseResultListener
   /** The ResultProducer used to generate results */
   protected ResultProducer m_ResultProducer
     = new CrossValidationResultProducer();
+
+  /** The names of any additional measures to look for in SplitEvaluators */
+  protected String [] m_AdditionalMeasures = null;
 
   /**
    * Returns a string describing this result producer
@@ -211,7 +214,11 @@ public class DatabaseResultProducer extends DatabaseResultListener
     if (isRequiredByDatabase) {
       // We could alternatively throw an exception if we only want values
       // that are already in the database
-      super.acceptResult(rp, key, result);
+      if (result != null) {
+
+	// null result could occur from a chain of doRunKeys calls
+	super.acceptResult(rp, key, result);
+      }
     }
 
     // Pass it on
@@ -435,6 +442,22 @@ public class DatabaseResultProducer extends DatabaseResultListener
     return options;
   }
 
+  /**
+   * Set a list of method names for additional measures to look for
+   * in SplitEvaluators.
+   * @param additionalMeasures an array of measure names, null if none
+   */
+  public void setAdditionalMeasures(String [] additionalMeasures) {
+    m_AdditionalMeasures = additionalMeasures;
+
+    if (m_ResultProducer != null) {
+      System.err.println("DatabaseResultProducer: setting additional "
+			 +"measures for "
+			 +"ResultProducer");
+      m_ResultProducer.setAdditionalMeasures(m_AdditionalMeasures);
+    }
+  }
+  
   /**
    * Sets the dataset that results will be obtained for.
    *

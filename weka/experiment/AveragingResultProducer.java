@@ -35,7 +35,7 @@ import weka.core.Option;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler {
@@ -50,6 +50,9 @@ public class AveragingResultProducer
   protected ResultProducer m_ResultProducer
     = new CrossValidationResultProducer();
 
+  /** The names of any additional measures to look for in SplitEvaluators */
+  protected String [] m_AdditionalMeasures = null;
+  
   /** The number of results expected to average over for each run */
   protected int m_ExpectedResultsPerAverage = 10;
 
@@ -113,6 +116,20 @@ public class AveragingResultProducer
     return m_KeyIndex;
   }
 
+  /**
+   * Determines if there are any constraints (imposed by the
+   * destination) on the result columns to be produced by
+   * resultProducers. Null should be returned if there are NO
+   * constraints, otherwise a list of column names should be
+   * returned as an array of Strings.
+   * @param rp the ResultProducer to which the constraints will apply
+   * @return an array of column names to which resutltProducer's
+   * results will be restricted.
+   */
+  public String [] determineColumnConstraints(ResultProducer rp) 
+    throws Exception {
+    return null;
+  }
 
   /**
    * Simulates a run to collect the keys the sub-resultproducer could
@@ -264,14 +281,24 @@ public class AveragingResultProducer
 	for (int j = 0; j < resultTypes.length; j++) {
 	  if (resultTypes[j] instanceof Double) {
 	    if (currentResult[j] == null) {
-	      throw new Exception("Null numeric result field found:\n"
-				  + DatabaseUtils.arrayToString(currentKey)
-				  + " -- "
-				  + DatabaseUtils
-				  .arrayToString(currentResult));
+
+	      // set the stats object for this result to null---
+	      // more than likely this is an additional measure field
+	      // not supported by the low level split evaluator
+	      if (stats[j] != null) {
+		stats[j] = null;
+	      }
+	      
+	      /* throw new Exception("Null numeric result field found:\n"
+		 + DatabaseUtils.arrayToString(currentKey)
+		 + " -- "
+		 + DatabaseUtils
+		 .arrayToString(currentResult)); */
 	    }
-	    double currentVal = ((Double)currentResult[j]).doubleValue();
-	    stats[j].add(currentVal);
+	    if (stats[j] != null) {
+	      double currentVal = ((Double)currentResult[j]).doubleValue();
+	      stats[j].add(currentVal);
+	    }
 	  }
 	}
       }
@@ -287,10 +314,18 @@ public class AveragingResultProducer
       int k = 1;
       for (int j = 0; j < resultTypes.length; j++) {
 	if (resultTypes[j] instanceof Double) {
-	  stats[j].calculateDerived();
-	  result[k++] = new Double(stats[j].mean);
+	  if (stats[j] != null) {
+	    stats[j].calculateDerived();
+	    result[k++] = new Double(stats[j].mean);
+	  } else {
+	    result[k++] = null;
+	  }
 	  if (getCalculateStdDevs()) {
-	    result[k++] = new Double(stats[j].stdDev);
+	    if (stats[j] != null) {
+	      result[k++] = new Double(stats[j].stdDev);
+	    } else {
+	      result[k++] = null;
+	    }
 	  }
 	} else {
 	  result[k++] = currentResult[j];
@@ -750,6 +785,22 @@ public class AveragingResultProducer
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Set a list of method names for additional measures to look for
+   * in SplitEvaluators.
+   * @param additionalMeasures an array of measure names, null if none
+   */
+  public void setAdditionalMeasures(String [] additionalMeasures) {
+    m_AdditionalMeasures = additionalMeasures;
+
+    if (m_ResultProducer != null) {
+      System.err.println("AveragingResultProducer: setting additional "
+			 +"measures for "
+			 +"ResultProducer");
+      m_ResultProducer.setAdditionalMeasures(m_AdditionalMeasures);
+    }
   }
 
   /**

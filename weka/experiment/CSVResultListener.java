@@ -35,7 +35,7 @@ import weka.core.Option;
  * a Writer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CSVResultListener implements ResultListener, OptionHandler {
 
@@ -156,6 +156,20 @@ public class CSVResultListener implements ResultListener, OptionHandler {
     if (!(m_OutputFile == null) && !(m_OutputFile.getName().equals("-"))) {
       m_Out.close();
     }
+  }
+
+  /**
+   * Determines if there are any constraints (imposed by the
+   * destination) on the result columns to be produced by
+   * resultProducers. Null should be returned if there are NO
+   * constraints, otherwise a list of column names should be
+   * returned as an array of Strings.
+   * @param rp the ResultProducer to which the constraints will apply
+   * @return an array of column names to which resutltProducer's
+   * results will be restricted.
+   */
+  public String [] determineColumnConstraints(ResultProducer rp) throws Exception {
+    return null;
   }
 
   /**

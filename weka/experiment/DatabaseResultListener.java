@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and submits them to a central database.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DatabaseResultListener extends DatabaseUtils
   implements ResultListener  {
@@ -98,6 +98,52 @@ public class DatabaseResultListener extends DatabaseUtils
   }
   
   /**
+   * Determines if there are any constraints (imposed by the
+   * destination) on any additional measures produced by
+   * resultProducers. Null should be returned if there are NO
+   * constraints, otherwise a list of column names should be
+   * returned as an array of Strings. In the case of
+   * DatabaseResultListener, the structure of an existing database
+   * will impose constraints.
+   * @param rp the ResultProducer to which the constraints will apply
+   * @return an array of column names to which resutltProducer's
+   * results will be restricted.
+   */
+  public String [] determineColumnConstraints(ResultProducer rp) 
+    throws Exception {
+    FastVector cNames = new FastVector();
+    updateResultsTableName(rp);
+    DatabaseMetaData dbmd = m_Connection.getMetaData();
+
+    // gets a result set where each row is info on a column
+    ResultSet rs = dbmd.getColumns(null, null, m_ResultsTableName, null);
+    boolean tableExists=false;
+    int numColumns = 0;
+
+    while (rs.next()) {
+      tableExists = true;
+      // column four contains the column name
+      if (rs.getString(4).startsWith("measure")) {
+	numColumns++;
+	cNames.addElement(rs.getString(4));
+      }
+    }
+
+    // no constraints on any additional measures if the table does not exist
+    if (!tableExists) {
+      return null;
+    }
+
+    // a zero element array indicates maximum constraint
+    String [] columnNames = new String [numColumns];
+    for (int i=0;i<numColumns;i++) {
+      columnNames[i] = (String)(cNames.elementAt(i));
+    }
+
+    return columnNames;
+  }
+
+  /**
    * Submit the result to the appropriate table of the database
    *
    * @param rp the ResultProducer that generated the result
@@ -111,7 +157,11 @@ public class DatabaseResultListener extends DatabaseUtils
     if (m_ResultProducer != rp) {
       throw new Error("Unrecognized ResultProducer calling acceptResult!!");
     }
-    putResultInTable(m_ResultsTableName, rp, key, result);
+
+    // null result could occur from a chain of doRunKeys calls
+    if (result != null) {
+      putResultInTable(m_ResultsTableName, rp, key, result);      
+    }
   }
 
   /**

@@ -33,18 +33,36 @@ import java.util.Vector;
 import java.io.Serializable;
 import java.io.ObjectStreamClass;
 
+import java.beans.MethodDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyEditorManager;
+import java.beans.PropertyVetoException;
+import java.beans.Beans;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * A SplitEvaluator that produces results for a classification scheme
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler {
   
   /** The classifier used for evaluation */
   protected Classifier m_Classifier = new weka.classifiers.ZeroR();
+  
+  /** The names of any additional measures to look for in SplitEvaluators */
+  protected String [] m_AdditionalMeasures = null;
+
+  /** Array of booleans corresponding to the measures in m_AdditionalMeasures
+      indicating which of the AdditionalMeasures the current classifier
+      can produce */
+  protected boolean [] m_doesProduce = null;
 
   /** Holds the statistics for the most recent application of the classifier */
   protected String m_result = null;
@@ -161,6 +179,49 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
   }
 
   /**
+   * Set a list of method names for additional measures to look for
+   * in SplitEvaluators.
+   * @param
+   */
+  public void setAdditionalMeasures(String [] additionalMeasures) {
+    m_AdditionalMeasures = additionalMeasures;
+
+    // determine which (if any) of the additional measures this classifier
+    // can produce
+    if (m_AdditionalMeasures != null && m_AdditionalMeasures.length > 0) {
+      MethodDescriptor methods[];
+      m_doesProduce = new boolean [m_AdditionalMeasures.length];
+
+      try {
+	BeanInfo bi = Introspector.getBeanInfo(m_Classifier.getClass());
+	methods = bi.getMethodDescriptors();
+      } catch (IntrospectionException ex) {
+	System.err.println("ClassifierSplitEvaluator: Couldn't "
+			   +"introspect");
+	return;
+      }
+
+      // look for methods that begin with "measure" indicating that the
+      // method returns auxilliary information related to the object
+      for (int i=0;i<methods.length;i++) {
+	String name = methods[i].getDisplayName();
+	Method meth = methods[i].getMethod();
+	if (name.startsWith("measure")) {
+	  if (meth.getReturnType().equals(double.class)) {
+	    for (int j=0;j<m_AdditionalMeasures.length;j++) {
+	      if (name.compareTo(m_AdditionalMeasures[j]) == 0) {
+		m_doesProduce[j] = true;
+	      }
+	    }
+	  }
+	}
+      }
+    } else {
+      m_doesProduce = null;
+    }
+  }
+  
+  /**
    * Gets the data types of each of the key columns produced for a single run.
    * The number of key fields must be constant
    * for a given SplitEvaluator.
@@ -219,8 +280,10 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
    * The objects should be Strings, or Doubles.
    */
   public Object [] getResultTypes() {
-
-    Object [] resultTypes = new Object[RESULT_SIZE];
+    int addm = (m_AdditionalMeasures != null) 
+      ? m_AdditionalMeasures.length 
+      : 0;
+    Object [] resultTypes = new Object[RESULT_SIZE+addm];
     Double doub = new Double(0);
     int current = 0;
     resultTypes[current++] = doub;
@@ -239,7 +302,12 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     resultTypes[current++] = doub;
 
     resultTypes[current++] = "";
-    if (current != RESULT_SIZE) {
+
+    // add any additional measures
+    for (int i=0;i<addm;i++) {
+      resultTypes[current++] = doub;
+    }
+    if (current != RESULT_SIZE+addm) {
       throw new Error("ResultTypes didn't fit RESULT_SIZE");
     }
     return resultTypes;
@@ -253,7 +321,9 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
    * @return an array containing the name of each result column
    */
   public String [] getResultNames() {
-
+    int addm = (m_AdditionalMeasures != null) 
+      ? m_AdditionalMeasures.length 
+      : 0;
     String [] resultNames = new String[RESULT_SIZE];
     int current = 0;
     resultNames[current++] = "Number_of_instances";
@@ -275,8 +345,11 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
 
     // Classifier defined extras
     resultNames[current++] = "Summary";
-
-    if (current != RESULT_SIZE) {
+    // add any additional measures
+    for (int i=0;i<addm;i++) {
+      resultNames[current++] = m_AdditionalMeasures[i];
+    }
+    if (current != RESULT_SIZE+addm) {
       throw new Error("ResultNames didn't fit RESULT_SIZE");
     }
     return resultNames;
@@ -300,6 +373,9 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     if (m_Classifier == null) {
       throw new Exception("No classifier has been specified");
     }
+    int addm = (m_AdditionalMeasures != null) 
+      ? m_AdditionalMeasures.length 
+      : 0;
     Object [] result = new Object[RESULT_SIZE];
     Evaluation eval = new Evaluation(train);
     m_Classifier.buildClassifier(train);
@@ -329,7 +405,24 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
       result[current++] = null;
     }
 
-    if (current != RESULT_SIZE) {
+        for (int i=0;i<addm;i++) {
+      if (m_doesProduce[i]) {
+	try {
+	  Class args [] = { };
+	  Method meth = m_Classifier.getClass()
+	    .getDeclaredMethod(m_AdditionalMeasures[i], args);
+	  Double value = (Double)(meth.invoke(m_Classifier, args));
+	  result[current++] = value;
+	} catch (Exception ex) {
+	  System.err.println("Problem with invoking method in "
+			     +"RegressionSplitEvaluator");
+	}
+      } else {
+	result[current++] = null;
+      }
+    }
+	
+    if (current != RESULT_SIZE+addm) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
     return result;
@@ -363,6 +456,8 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     
     m_Classifier = newClassifier;
     updateOptions();
+
+    System.err.println("RegressionSplitEvaluator: In set classifier");
   }
 
   /**
@@ -419,6 +514,21 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     // append the performance statistics
     if (m_result != null) {
       result.append(m_result);
+      
+      for (int i=0;i<m_doesProduce.length;i++) {
+	if (m_doesProduce[i]) {
+	  try {
+	    Class args [] = { };
+	    Method meth = m_Classifier.getClass()
+	      .getDeclaredMethod(m_AdditionalMeasures[i], args);
+	    Double value = (Double)(meth.invoke(m_Classifier, args));
+	    result.append(m_AdditionalMeasures[i]+" : "+value+'\n');
+	  } catch (Exception ex) {
+	    System.err.println("Problem with invoking method in "
+			       +"ClassifierSplitEvaluator");
+	  }
+	} 
+      }
     }
     return result.toString();
   }

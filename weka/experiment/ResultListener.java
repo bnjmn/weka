@@ -25,10 +25,24 @@ import java.io.Serializable;
  * by a ResultProducer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public interface ResultListener extends Serializable {
+
+  /**
+   * Determines if there are any constraints (imposed by the
+   * destination) on additional result columns to be produced by
+   * resultProducers. Null should be returned if there are NO
+   * constraints, otherwise a list of column names should be
+   * returned as an array of Strings.
+   * @param rp the ResultProducer to which the constraints will apply
+   * @return an array of column names to which resutltProducer's
+   * additional results will be restricted.
+   * @exception if an error occurs
+   */
+  public String [] determineColumnConstraints(ResultProducer rp) 
+    throws Exception;
 
   /**
    * Prepare for the results to be received.

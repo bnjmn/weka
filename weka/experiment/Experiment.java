@@ -23,6 +23,7 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.Option;
 import weka.core.Instances;
+import weka.core.FastVector;
 
 import java.io.Serializable;
 import java.io.File;
@@ -43,13 +44,29 @@ import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.ObjectOutputStream;
 
+import java.beans.Customizer;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyDescriptor;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyEditor;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
+import java.beans.IntrospectionException;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyEditorManager;
+import java.beans.PropertyVetoException;
+import java.beans.Beans;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Holds all the necessary configuration information for a standard
  * type experiment. This object is able to be serialized for storage
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -79,6 +96,11 @@ public class Experiment implements Serializable, OptionHandler {
 
   /** User notes about the experiment */
   protected String m_Notes = "";
+
+  /** Method names of additional measures of objects contained in the 
+      custom property iterator. Only methods names beginning with "measure"
+      and returning doubles are recognised */
+  protected String [] m_AdditionalMeasures = null;
 
   /**
    * Gets whether the custom property iterator should be used.
@@ -239,8 +261,66 @@ public class Experiment implements Serializable, OptionHandler {
     if (m_ResultListener == null) {
       throw new Exception("No ResultListener set");
     }
+
+    if (m_UsePropertyIterator && (m_PropertyArray != null)) {
+      determineAdditionalResultMeasures();
+    }
+
     m_ResultProducer.setResultListener(m_ResultListener);
+    m_ResultProducer.setAdditionalMeasures(m_AdditionalMeasures);
     m_ResultProducer.preProcess();
+
+    // constrain the additional measures to be only those allowable
+    // by the ResultListener
+    String [] columnConstraints = m_ResultListener.
+      determineColumnConstraints(m_ResultProducer);
+
+    if (columnConstraints != null) {
+      m_ResultProducer.setAdditionalMeasures(columnConstraints);
+    }
+  }
+
+  /**
+   * Iterate over the objects in the property array to determine what
+   * (if any) additional measures they support
+   */
+  private void determineAdditionalResultMeasures() {
+    m_AdditionalMeasures = null;
+    FastVector measureNames = new FastVector();
+    MethodDescriptor methods[];
+    
+    for (int i = 0; i < Array.getLength(m_PropertyArray); i++) {
+      Object current = Array.get(m_PropertyArray, i);
+      try {
+	BeanInfo bi = Introspector.getBeanInfo(current.getClass());
+	methods = bi.getMethodDescriptors();
+      } catch (IntrospectionException ex) {
+	System.err.println("determineAdditionalResultMeasures: Couldn't "
+			   +"introspect");
+	return;
+      }
+
+      // look for methods that begin with "measure" indicating that the
+      // method returns auxilliary information related to the object
+      for (int j=0; j<methods.length; j++) {
+	String name = methods[j].getDisplayName();
+	Method meth = methods[j].getMethod();
+	if (name.startsWith("measure")) {
+	
+	  if (meth.getReturnType().equals(double.class)) {
+	    if (measureNames.indexOf(name) == -1) {
+	      measureNames.addElement(name);
+	    }
+	  }
+	}
+      }
+    }
+    if (measureNames.size() > 0) {
+      m_AdditionalMeasures = new String [measureNames.size()];
+      for (int i=0;i<measureNames.size();i++) {
+	m_AdditionalMeasures[i] = (String)measureNames.elementAt(i);
+      }
+    }
   }
 
   
