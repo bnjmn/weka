@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.27 $
+ * @version  $Revision: 1.28 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -588,14 +588,14 @@ public class AttributeSelection implements Serializable {
     if (m_ASEvaluator instanceof UnsupervisedAttributeEvaluator ||
 	m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
       // unset the class index
-      m_trainInstances.setClassIndex(-1);
+      //      m_trainInstances.setClassIndex(-1);
     } else {
       // check that a class index has been set
       if (m_trainInstances.classIndex() < 0) {
 	m_trainInstances.setClassIndex(m_trainInstances.numAttributes()-1);
       }
     }
-
+    
     // Initialize the attribute evaluator
     m_ASEvaluator.buildEvaluator(m_trainInstances);
     if (m_ASEvaluator instanceof AttributeTransformer) {
@@ -842,8 +842,8 @@ public class AttributeSelection implements Serializable {
 	train.setClassIndex(classIndex - 1);
       }
       else {
-	classIndex = train.numAttributes();
-	train.setClassIndex(classIndex - 1);
+	//	classIndex = train.numAttributes();
+	//	train.setClassIndex(classIndex - 1);
       }
       
       foldsString = Utils.getOption('X', options);
