@@ -22,7 +22,7 @@ package weka.classifiers.evaluation;
  * Encapsulates performance functions for two-class problems.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TwoClassStats {
 
@@ -171,6 +171,25 @@ public class TwoClassStats {
   }
 
   /**
+   * Calculate the fallout. 
+   * This is defined as<p>
+   * <pre>
+   * incorrectly classified negatives
+   * --------------------------------
+   *   total predicted as positive
+   * </pre>
+   *
+   * @return the fallout
+   */
+  public double getFallout() { 
+    if (0 == (m_TruePos + m_FalsePos)) {
+      return 0;
+    } else {
+      return m_FalsePos / (m_TruePos + m_FalsePos); 
+    }
+  }
+
+  /**
    * Returns a string containing the various performance measures
    * for the current object 
    */
@@ -186,6 +205,7 @@ public class TwoClassStats {
     res.append(getPrecision()).append(' ');
     res.append(getRecall()).append(' ');
     res.append(getFMeasure()).append(' ');
+    res.append(getFallout()).append(' ');
     return res.toString();
   }
 }
