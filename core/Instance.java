@@ -54,10 +54,11 @@ import java.io.*;
  * All methods that change an instance are safe, ie. a change of an
  * instance does not affect any other instances. All methods that
  * change an instance's attribute values clone the attribute value
- * vector before it is changed.
+ * vector before it is changed. If your application heavily modifies
+ * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class Instance implements Copyable, Serializable {
   
@@ -548,13 +549,15 @@ public class Instance implements Copyable, Serializable {
   /**
    * Sets a specific value in the instance to the given value
    * (internal floating-point format). Performs a deep copy of the
-   * vector of attribute values before the value is set.
-   * The given attribute has to belong to a dataset.
+   * vector of attribute values before the value is set, so if you are
+   * planning on calling setValue many times it may be faster to
+   * create a new instance using toDoubleArray.  The given attribute
+   * has to belong to a dataset.
    *
    * @param att the attribute 
    * @param value the new attribute value (If the corresponding
    * attribute is nominal (or a string) then this is the new value's
-   * index as a double).
+   * index as a double).  
    */
   public final void setValue(Attribute att, double value) {
 
@@ -565,7 +568,9 @@ public class Instance implements Copyable, Serializable {
   /**
    * Sets a value of an nominal or string attribute to the given
    * value. Performs a deep copy of the vector of attribute values
-   * before the value is set. The given attribute has to belong to a dataset.
+   * before the value is set, so if you are planning on calling setValue many
+   * times it may be faster to create a new instance using toDoubleArray.
+   * The given attribute has to belong to a dataset.
    *
    * @param att the attribute
    * @param value the new attribute value (If the attribute
@@ -792,12 +797,20 @@ public class Instance implements Copyable, Serializable {
    */
   private void freshAttributeVector() {
 
-    double[] newValues;
+    m_AttValues = toDoubleArray();
+  }
 
-    newValues = new double[m_AttValues.length];
+  /**
+   * Returns the values of each attribute as an array of doubles.
+   *
+   * @return an array containing all the instance attribute values
+   */
+  public final double []toDoubleArray() {
+
+    double[] newValues = new double[m_AttValues.length];
     System.arraycopy(m_AttValues, 0, newValues, 0, 
 		     m_AttValues.length);
-    m_AttValues = newValues;
+    return newValues;
   }
 
   /**
