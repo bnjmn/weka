@@ -35,7 +35,7 @@ import weka.core.Option;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler {
@@ -500,6 +500,7 @@ public class AveragingResultProducer
    * Gets the names of each of the columns produced for a single run.
    *
    * @return an array containing the name of each column
+   * @exception Exception if key names cannot be generated
    */
   public String [] getKeyNames() throws Exception {
 
@@ -523,6 +524,8 @@ public class AveragingResultProducer
    *
    * @return an array containing objects of the type of each column. The 
    * objects should be Strings, or Doubles.
+   * @exception Exception if the key types could not be determined (perhaps
+   * because of a problem from a nested sub-resultproducer)
    */
   public Object [] getKeyTypes() throws Exception {
 
@@ -550,6 +553,8 @@ public class AveragingResultProducer
    * to each result deviation and average field respectively.
    *
    * @return an array containing the name of each column
+   * @exception Exception if the result names could not be determined (perhaps
+   * because of a problem from a nested sub-resultproducer)
    */
   public String [] getResultNames() throws Exception {
 
@@ -587,6 +592,8 @@ public class AveragingResultProducer
    *
    * @return an array containing objects of the type of each column. The 
    * objects should be Strings, or Doubles.
+   * @exception Exception if the result types could not be determined (perhaps
+   * because of a problem from a nested sub-resultproducer)
    */
   public Object [] getResultTypes() throws Exception {
 

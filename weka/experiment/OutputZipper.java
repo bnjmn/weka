@@ -37,7 +37,7 @@ import java.util.zip.ZipEntry;
  * finished() is called to close the file.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class OutputZipper {
   
@@ -48,7 +48,7 @@ public class OutputZipper {
   /**
    * Constructor.
    * @param a destination file or directory
-   * @exception if something goes wrong.
+   * @exception Exception if something goes wrong.
    */
   public OutputZipper(File destination) throws Exception { 
 
@@ -67,7 +67,7 @@ public class OutputZipper {
    * an entry in a zip file.
    * @param outString the output string to save
    * @param the name of the file/entry to save it to
-   * @exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void zipit(String outString, String name) throws Exception {
     File saveFile;
@@ -91,7 +91,7 @@ public class OutputZipper {
 
   /**
    * Closes the zip file.
-   * @exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void finished() throws Exception {
     if (m_zipOut != null) {
