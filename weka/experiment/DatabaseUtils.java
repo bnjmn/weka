@@ -37,6 +37,7 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
+import java.sql.PreparedStatement;
 
 /**
  * DatabaseUtils provides utility functions for accessing the experiment
@@ -52,7 +53,7 @@ import java.sql.ResultSetMetaData;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -80,6 +81,20 @@ public class DatabaseUtils implements Serializable {
 
   /** Properties associated with the database connection */
   protected static Properties PROPERTIES;
+
+
+
+  /* Type mapping used for reading experiment results */
+  public static final int STRING = 0;
+  public static final int BOOL = 1;
+  public static final int DOUBLE = 2;
+  public static final int BYTE = 3;
+  public static final int SHORT = 4;
+  public static final int INTEGER = 5;
+  public static final int LONG = 6;
+  public static final int FLOAT = 7;
+  public static final int DATE = 8; 
+ 
 
   /* Load the database drivers -- the properties files only get consulted
    * when the class is initially loaded, not for every object instantiated
@@ -116,17 +131,108 @@ public class DatabaseUtils implements Serializable {
   
   /** Database URL */
   protected String m_DatabaseURL;
+
   
+  /* returns key column headings in their original case. Used for
+     those databases that create uppercase column names. */
+  protected String attributeCaseFix(String columnName){
+    if (m_checkForUpperCaseNames==false){
+      return(columnName);
+    }
+    String ucname = columnName.toUpperCase();
+    if (ucname.equals(EXP_TYPE_COL.toUpperCase())){
+      return (EXP_TYPE_COL);
+    } else if (ucname.equals(EXP_SETUP_COL.toUpperCase())){
+      return (EXP_SETUP_COL);
+    } else if (ucname.equals(EXP_RESULT_COL.toUpperCase())){
+      return (EXP_RESULT_COL);
+    } else {
+      return(columnName);
+    }
+    
+    
+  }
+
+  /** Set the database username 
+   *
+   * @param username Username for Database.
+   */
+  public void setUsername(String username){
+    m_userName=username; 
+  }
+  
+  /** Get the database username 
+   *
+   * @return Database username
+   */
+  public String getUsername(){
+    return(m_userName);
+  }
+
+  /** Set the database password
+   *
+   * @param password Password for Database.
+   */
+  public void setPassword(String password){
+    m_password=password;
+  }
+  
+  /** Get the database password
+   *
+   * @return  Password for Database.
+   */
+  public String getPassword(){
+    return(m_password);
+  }
+
+ 
+  /**
+   * translates the column data type string to an integer value that indicates
+   * which data type / get()-Method to use in order to retrieve values from the
+   * database (see DatabaseUtils.Properties, InstanceQuery())
+   * @param type the column type as retrieved with java.sql.MetaData.getColumnTypeName(int)
+   * @return an integer value that indicates
+   * which data type / get()-Method to use in order to retrieve values from the
+   */
+  int translateDBColumnType(String type) {
+    return Integer.parseInt(PROPERTIES.getProperty(type));
+  }
+ 
+  /** The prepared statement used for database queries. */
+  protected PreparedStatement m_PreparedStatement;
+ 
+   
   /** The database connection */
   protected Connection m_Connection;
 
-  /** The statement used for database queries */
-  protected Statement m_Statement;
 
   /** True if debugging output should be printed */
   protected boolean m_Debug = true;
 
+ 
   
+  /** Database username */
+  protected String m_userName="";
+
+  /** Database Password */
+  protected String m_password="";
+
+  /** mappings used for creating Tables. Can be overridden in DatabaseUtils.props*/
+  protected String m_stringType="LONGVARCHAR";
+  protected String m_intType="INT";
+  protected String m_doubleType="DOUBLE";
+  
+
+  /* For databases where Tables and Columns are created in upper case */
+  protected boolean m_checkForUpperCaseNames=false;
+
+  /* setAutoCommit on the database? */
+  protected boolean m_setAutoCommit=true;
+
+  /* create index on the database? */
+  protected boolean m_createIndex=false;
+
+
   /**
    * Sets up the database drivers
    *
@@ -136,6 +242,27 @@ public class DatabaseUtils implements Serializable {
 
     m_DatabaseURL = PROPERTIES.getProperty("jdbcURL",
 					   "jdbc:idb=experiments.prp");
+    m_stringType=PROPERTIES.getProperty("CREATE_STRING");
+    m_intType=PROPERTIES.getProperty("CREATE_INT");
+    m_doubleType=PROPERTIES.getProperty("CREATE_DOUBLE");
+    String uctn=PROPERTIES.getProperty("checkUpperCaseNames");
+    if (uctn.equals("true")) {
+      m_checkForUpperCaseNames=true;
+    }else {
+      m_checkForUpperCaseNames=false;
+    }
+    uctn=PROPERTIES.getProperty("setAutoCommit");
+    if (uctn.equals("true")) {
+      m_setAutoCommit=true;
+    } else {
+      m_setAutoCommit=false;
+    }
+    uctn=PROPERTIES.getProperty("createIndex");
+    if (uctn.equals("true")) {
+      m_createIndex=true;
+    } else {
+      m_createIndex=false;
+    }
   }
 
   /**
@@ -258,8 +385,16 @@ public class DatabaseUtils implements Serializable {
       System.err.println("Connecting to " + m_DatabaseURL);
     }
     if (m_Connection == null) {
-      m_Connection = DriverManager.getConnection(m_DatabaseURL);
-      m_Statement = m_Connection.createStatement();
+      if (m_userName.equals("")) {
+	m_Connection = DriverManager.getConnection(m_DatabaseURL);
+      } else {
+	m_Connection = DriverManager.getConnection(m_DatabaseURL,m_userName,m_password);
+      }
+    }
+    if (m_setAutoCommit){
+      m_Connection.setAutoCommit(true);
+    } else {
+      m_Connection.setAutoCommit(false);
     }
   }
 
@@ -276,7 +411,6 @@ public class DatabaseUtils implements Serializable {
     if (m_Connection != null) {
       m_Connection.close();
       m_Connection = null;
-      m_Statement = null;
     }
   }
   
@@ -298,8 +432,9 @@ public class DatabaseUtils implements Serializable {
    * @exception SQLException if an error occurs
    */
   public boolean execute(String query) throws SQLException {
-
-    return m_Statement.execute(query);
+ 
+    m_PreparedStatement = m_Connection.prepareStatement(query);
+    return(m_PreparedStatement.execute());
   }
 
   /**
@@ -310,7 +445,7 @@ public class DatabaseUtils implements Serializable {
    */
   public ResultSet getResultSet() throws SQLException {
 
-    return m_Statement.getResultSet();
+    return m_PreparedStatement.getResultSet();
   }
   
   /**
@@ -326,7 +461,12 @@ public class DatabaseUtils implements Serializable {
       System.err.println("Checking if table " + tableName + " exists...");
     }
     DatabaseMetaData dbmd = m_Connection.getMetaData();
-    ResultSet rs = dbmd.getTables (null, null, tableName, null);
+    ResultSet rs;
+    if (m_checkForUpperCaseNames == true){
+      rs = dbmd.getTables (null, null, tableName.toUpperCase(), null);
+    } else {
+      rs = dbmd.getTables (null, null, tableName, null);
+    }
     boolean tableExists = rs.next();
     if (rs.next()) {
       throw new Exception("This table seems to exist more than once!");
@@ -381,8 +521,8 @@ public class DatabaseUtils implements Serializable {
       }
     }
     boolean retval = false;
-    if (m_Statement.execute(query)) {
-      ResultSet rs = m_Statement.getResultSet();
+    if (execute(query)) {
+      ResultSet rs = m_PreparedStatement.getResultSet();
       int numAttributes = rs.getMetaData().getColumnCount();
       if (rs.next()) {
 	retval = true;
@@ -435,16 +575,16 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += '"' + key[i].toString() + '"';
+	  query += "'" + key[i].toString() + "'";
 	} else {
 	  query += key[i].toString();
 	}
       }
     }
-    if (!m_Statement.execute(query)) {
+    if (!execute(query)) {
       throw new Exception("Couldn't execute query: " + query);
     }
-    ResultSet rs = m_Statement.getResultSet();
+    ResultSet rs = m_PreparedStatement.getResultSet();
     ResultSetMetaData md = rs.getMetaData();
     int numAttributes = md.getColumnCount();
     if (!rs.next()) {
@@ -453,20 +593,22 @@ public class DatabaseUtils implements Serializable {
     // Extract the columns for the result
     Object [] result = new Object [numAttributes];
     for(int i = 1; i <= numAttributes; i++) {
-      switch (md.getColumnType(i)) {
+      /* switch (md.getColumnType(i)) {
       case Types.CHAR:
       case Types.VARCHAR:
       case Types.LONGVARCHAR:
       case Types.BINARY:
       case Types.VARBINARY:
-      case Types.LONGVARBINARY:
+      case Types.LONGVARBINARY: */
+      switch (translateDBColumnType(md.getColumnTypeName(i))) {
+      case STRING : 
 	result[i - 1] = rs.getString(i);
 	if (rs.wasNull()) {
 	  result[i - 1] = null;
 	}
 	break;
-      case Types.FLOAT:
-      case Types.DOUBLE:
+      case FLOAT:
+      case DOUBLE:
 	result[i - 1] = new Double(rs.getDouble(i));
 	if (rs.wasNull()) {
 	  result[i - 1] = null;
@@ -526,21 +668,24 @@ public class DatabaseUtils implements Serializable {
       query +=  ',';
       if (result[i] != null) {
 	if (result[i] instanceof String) {
-	  query += '"' + result[i].toString() + '"';
+	  query += "'" + result[i].toString() + "'";
 	} else  if (result[i] instanceof Double) {
 	  query += safeDoubleToString((Double)result[i]);
 	} else {
 	  query += result[i].toString();
+	  //!!
+	  //System.err.println("res: "+ result[i].toString());
 	}
       } else {
 	query += "NULL";
       }
     }
     query += ')';
+    
     if (m_Debug) {
       System.err.println("Submitting result: " + query);
     }
-    if (m_Statement.execute(query)) {
+    if (execute(query)) {
       if (m_Debug) {
 	System.err.println("...acceptResult returned resultset");
       }
@@ -591,7 +736,7 @@ public class DatabaseUtils implements Serializable {
     // Workaround for MySQL (doesn't support LONGVARBINARY)
     // Also for InstantDB which attempts to interpret numbers when storing
     // in LONGVARBINARY
-    if (m_Connection.getMetaData().getDriverName().
+    /* if (m_Connection.getMetaData().getDriverName().
 	equals("Mark Matthews' MySQL Driver")
 	|| (m_Connection.getMetaData().getDriverName().
 	indexOf("InstantDB JDBC Driver") != -1)) {
@@ -599,16 +744,17 @@ public class DatabaseUtils implements Serializable {
 	+ " ( " + EXP_TYPE_COL + " TEXT,"
 	+ "  " + EXP_SETUP_COL + " TEXT,"
 	+ "  " + EXP_RESULT_COL + " INT )";
-    } else {
+	} else { */
+    
       query = "CREATE TABLE " + EXP_INDEX_TABLE 
-	+ " ( " + EXP_TYPE_COL + " LONGVARBINARY,"
-	+ "  " + EXP_SETUP_COL + " LONGVARBINARY,"
-	+ "  " + EXP_RESULT_COL + " INT )";
-    }
+	+ " ( " + EXP_TYPE_COL + " "+ m_stringType+","
+	+ "  " + EXP_SETUP_COL + " "+ m_stringType+","
+	+ "  " + EXP_RESULT_COL + " "+ m_intType+" )";
+      // }
     // Other possible fields:
     //   creator user name (from System properties)
     //   creation date
-    if (m_Statement.execute(query)) {
+    if (execute(query)) {
       if (m_Debug) {
 	System.err.println("...create returned resultset");
       }
@@ -634,21 +780,21 @@ public class DatabaseUtils implements Serializable {
     int numRows = 0;
     
     // Workaround for MySQL (doesn't support transactions)
-    if (m_Connection.getMetaData().getDriverName().
+    /*  if (m_Connection.getMetaData().getDriverName().
 	equals("Mark Matthews' MySQL Driver")) {
       m_Statement.execute("LOCK TABLES " + EXP_INDEX_TABLE + " WRITE");
       System.err.println("LOCKING TABLE");
-    } else {
-      m_Connection.setAutoCommit(false);
-    }
+      } else {*/
+      
+      //}
 
     // Get the number of rows
     String query = "SELECT COUNT(*) FROM " + EXP_INDEX_TABLE;
-    if (m_Statement.execute(query)) {
+    if (execute(query)) {
       if (m_Debug) {
 	System.err.println("...getting number of rows");
       }
-      ResultSet rs = m_Statement.getResultSet();
+      ResultSet rs = m_PreparedStatement.getResultSet();
       if (rs.next()) {
 	numRows = rs.getInt(1);
       }
@@ -659,10 +805,10 @@ public class DatabaseUtils implements Serializable {
     String expType = rp.getClass().getName();
     String expParams = rp.getCompatibilityState();
     query = "INSERT INTO " + EXP_INDEX_TABLE
-      + " VALUES ( \""
-      + expType + "\", \"" + expParams
-      + "\", " + numRows + " )";
-    if (m_Statement.execute(query)) {
+      +" VALUES ('"
+      + expType + "', '" + expParams
+      + "', " + numRows + " )"; 
+    if (execute(query)) {
       if (m_Debug) {
 	System.err.println("...create returned resultset");
       }
@@ -670,14 +816,16 @@ public class DatabaseUtils implements Serializable {
     
     // Finished compound transaction
     // Workaround for MySQL (doesn't support transactions)
-    if (m_Connection.getMetaData().getDriverName().
+    /* if (m_Connection.getMetaData().getDriverName().
 	equals("Mark Matthews' MySQL Driver")) {
       m_Statement.execute("UNLOCK TABLES");
       System.err.println("UNLOCKING TABLE");
-    } else {
+      } else { */
+    if (!m_setAutoCommit) {
       m_Connection.commit();
       m_Connection.setAutoCommit(true);
     }
+      //}
 
     String tableName = getResultsTableName(rp);
     if (tableName == null) {
@@ -692,7 +840,7 @@ public class DatabaseUtils implements Serializable {
       if (m_Debug) {
 	System.err.println(query);
       }
-      m_Statement.execute(query);
+      execute(query);
     } catch (SQLException ex) {
       System.err.println(ex.getMessage());
     }
@@ -718,11 +866,11 @@ public class DatabaseUtils implements Serializable {
     String expParams = rp.getCompatibilityState();
     String query = "SELECT " + EXP_RESULT_COL 
       + " FROM " + EXP_INDEX_TABLE
-      + " WHERE " + EXP_TYPE_COL + "=\"" + expType 
-      + "\" AND " + EXP_SETUP_COL + "=\"" + expParams + '"';
+       + " WHERE " + EXP_TYPE_COL + "='" + expType 
+      + "' AND " + EXP_SETUP_COL + "='" + expParams + "'";
     String tableName = null;
-    if (m_Statement.execute(query)) {
-      ResultSet rs = m_Statement.getResultSet();
+    if (execute(query)) {
+      ResultSet rs = m_PreparedStatement.getResultSet();
       int numAttributes = rs.getMetaData().getColumnCount();
       if (rs.next()) {
 	tableName = rs.getString(1);
@@ -766,20 +914,21 @@ public class DatabaseUtils implements Serializable {
     for (int i = 0; i < names.length; i++) {
       query += "Key_" + names[i] + " ";
       if (types[i] instanceof Double) {
-	query += "DOUBLE";
+	query += m_doubleType;
       } else if (types[i] instanceof String) {
 
 	// Workaround for MySQL (doesn't support LONGVARCHAR)
 	// Also for InstantDB which attempts to interpret numbers when storing
 	// in LONGVARBINARY
-	if (m_Connection.getMetaData().getDriverName().
+	/*if (m_Connection.getMetaData().getDriverName().
 	    equals("Mark Matthews' MySQL Driver")
 	    || (m_Connection.getMetaData().getDriverName().
 		indexOf("InstantDB JDBC Driver")) != -1) {
 	  query += "TEXT ";
-	} else {
-	  query += "LONGVARBINARY ";
-	}
+	  } else { */
+	//query += "LONGVARCHAR ";
+	  query += m_stringType+" ";
+	  //}
       } else {
 	throw new Exception("Unknown/unsupported field type in key");
       }
@@ -794,20 +943,21 @@ public class DatabaseUtils implements Serializable {
     for (int i = 0; i < names.length; i++) {
       query += names[i] + " ";
       if (types[i] instanceof Double) {
-	query += "DOUBLE";
+	query += m_doubleType;
       } else if (types[i] instanceof String) {
 	
 	// Workaround for MySQL (doesn't support LONGVARCHAR)
 	// Also for InstantDB which attempts to interpret numbers when storing
 	// in LONGVARBINARY
-	if (m_Connection.getMetaData().getDriverName().
+	/*if (m_Connection.getMetaData().getDriverName().
 	    equals("Mark Matthews' MySQL Driver")
 	    || (m_Connection.getMetaData().getDriverName().
 		equals("InstantDB JDBC Driver"))) {
 	  query += "TEXT ";
-	} else {
-	  query += "LONGVARBINARY ";
-	}
+	  } else {*/
+	//query += "LONGVARCHAR ";
+	query += m_stringType+" ";
+	  //}
       } else {
 	throw new Exception("Unknown/unsupported field type in key");
       }
@@ -816,10 +966,37 @@ public class DatabaseUtils implements Serializable {
       }
     }
     query += " )";
-    System.err.println(query);
-    if (m_Statement.execute(query)) {
+    
+    if (execute(query)) {
       if (m_Debug) {
 	System.err.println("...create returned resultset");
+      }
+    }
+    System.err.println("table created");
+
+
+    if (m_createIndex) {
+      query = "CREATE UNIQUE INDEX Key_IDX ON "+ tableName +" (";
+
+      String [] keyNames = rp.getKeyNames();
+    
+      boolean first = true;
+      for (int i = 0; i < keyNames.length; i++) {
+	if (keyNames[i] != null) {
+	  if (first) {
+	    first = false;
+	    query += "Key_" + keyNames[i];
+	  } else {
+	    query += ",Key_" + keyNames[i];
+	  } 
+	}
+      }
+      query += ")";
+    
+      if (execute(query)) {
+	if (m_Debug) {
+	  System.err.println("...create index returned resultset");
+	}
       }
     }
     return tableName;
