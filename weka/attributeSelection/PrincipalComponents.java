@@ -15,7 +15,7 @@
  */
 
 /*
- *    principalComponents.java
+ *    PrincipalComponents.java
  *    Copyright (C) 2000 Mark Hall
  *
  */
@@ -31,7 +31,8 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
+ * @version $Revision: 1.18 $
  */
 public class PrincipalComponents extends AttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -364,16 +365,26 @@ public class PrincipalComponents extends AttributeEvaluator
 
     fillCorrelation();
 
-    double [] d = new double[m_numAttribs+1]; 
-    double [][] v = new double[m_numAttribs+1][m_numAttribs+1];
+    double [] d = new double[m_numAttribs]; 
+    double [][] v = new double[m_numAttribs][m_numAttribs];
 
-    jacobi(m_correlation, m_numAttribs, d, v);
-    m_eigenvectors = (double [][])v.clone();
+
+    Matrix corr = new Matrix(m_correlation);
+    corr.eigenvalueDecomposition(v, d);
+    //if (debug) {
+    //  Matrix V = new Matrix(v);
+    //  boolean b = corr.testEigen(V, d, true);
+    //  if (!b)
+    //	System.out.println("Problem with eigenvektors!!!");
+    //  else
+    //	System.out.println("***** everything's fine !!!");
+    //  }
     
+    m_eigenvectors = (double [][])v.clone();
     m_eigenvalues = (double [])d.clone();
 
     // any eigenvalues less than 0 are not worth anything --- change to 0
-    for (int i=0;i<m_eigenvalues.length;i++) {
+    for (int i = 0; i < m_eigenvalues.length; i++) {
       if (m_eigenvalues[i] < 0) {
 	m_eigenvalues[i] = 0.0;
       }
@@ -388,15 +399,15 @@ public class PrincipalComponents extends AttributeEvaluator
       // new ordered eigenvector matrix
       int numVectors = (m_transformedFormat.classIndex() < 0) 
 	? m_transformedFormat.numAttributes()
-	: m_transformedFormat.numAttributes()-1;
+	: m_transformedFormat.numAttributes() - 1;
 
       double [][] orderedVectors = 
-	new double [m_eigenvectors.length][numVectors+1];
+	new double [m_eigenvectors.length][numVectors + 1];
       
       // try converting back to the original space
-      for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
-	for (int j=1;j<=m_numAttribs;j++) {
-	  orderedVectors[j][m_numAttribs-i+1] = 
+      for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
+	for (int j = 0; j < m_numAttribs; j++) {
+	  orderedVectors[j][m_numAttribs - i] = 
 	    m_eigenvectors[j][m_sortedEigens[i]];
 	}
       }
@@ -406,8 +417,8 @@ public class PrincipalComponents extends AttributeEvaluator
       int nc = orderedVectors[0].length;
       m_eTranspose = 
 	new double [nc][nr];
-      for (int i=0;i<nc;i++) {
-	for (int j=0;j<nr;j++) {
+      for (int i = 0; i < nc; i++) {
+	for (int j = 0; j < nr; j++) {
 	  m_eTranspose[i][j] = orderedVectors[j][i];
 	}
       }
@@ -479,30 +490,30 @@ public class PrincipalComponents extends AttributeEvaluator
 
     // return 1-cumulative variance explained for this transformed att
     double cumulative = 0.0;
-    for (int i=m_numAttribs;i>=m_numAttribs-att;i--) {
+    for (int i = m_numAttribs - 1; i >= m_numAttribs - att - 1; i--) {
       cumulative += m_eigenvalues[m_sortedEigens[i]];
     }
 
-    return 1.0-cumulative/m_sumOfEigenValues;
+    return 1.0 - cumulative / m_sumOfEigenValues;
   }
 
   /**
    * Fill the correlation matrix
    */
   private void fillCorrelation() {
-    m_correlation = new double[m_numAttribs+1][m_numAttribs+1];
+    m_correlation = new double[m_numAttribs][m_numAttribs];
     double [] att1 = new double [m_numInstances];
     double [] att2 = new double [m_numInstances];
     double corr;
 
-    for (int i=1;i<=m_numAttribs;i++) {
-      for (int j=1;j<=m_numAttribs;j++) {
+    for (int i = 0; i < m_numAttribs; i++) {
+      for (int j = 0; j < m_numAttribs; j++) {
 	if (i == j) {
 	  m_correlation[i][j] = 1.0;
 	} else {
-	  for (int k=0;k<m_numInstances;k++) {
-	    att1[k] = m_trainInstances.instance(k).value(i-1);
-	    att2[k] = m_trainInstances.instance(k).value(j-1);
+	  for (int k = 0; k < m_numInstances; k++) {
+	    att1[k] = m_trainInstances.instance(k).value(i);
+	    att2[k] = m_trainInstances.instance(k).value(j);
 	  }
 	  corr = Utils.correlation(att1,att2,m_numInstances);
 	  m_correlation[i][j] = corr;
@@ -529,11 +540,11 @@ public class PrincipalComponents extends AttributeEvaluator
 	: output.numAttributes()-1;
     } catch (Exception ex) {
     }
-
+    //tomorrow
     result.append("Correlation matrix\n"+matrixToString(m_correlation)
 		  +"\n\n");
     result.append("eigenvalue\tproportion\tcumulative\n");
-    for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
+    for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
       cumulative+=m_eigenvalues[m_sortedEigens[i]];
       result.append(Utils.doubleToString(m_eigenvalues[m_sortedEigens[i]],9,5)
 		    +"\t"+Utils.
@@ -542,22 +553,22 @@ public class PrincipalComponents extends AttributeEvaluator
 				     9,5)
 		    +"\t"+Utils.doubleToString((cumulative / 
 						m_sumOfEigenValues),9,5)
-		    +"\t"+output.attribute(m_numAttribs-i).name()+"\n");
+		    +"\t"+output.attribute(m_numAttribs - i - 1).name()+"\n");
     }
 
     result.append("\nEigenvectors\n");
-    for (int j=1;j<=numVectors;j++) {
+    for (int j = 1;j <= numVectors;j++) {
       result.append(" V"+j+'\t');
     }
     result.append("\n");
-    for (int j=1;j<=m_numAttribs;j++) {
+    for (int j = 0; j < m_numAttribs; j++) {
 
-      for (int i=m_numAttribs;i>(m_numAttribs-numVectors);i--) {
+      for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
 	result.append(Utils.
 		      doubleToString(m_eigenvectors[j][m_sortedEigens[i]],7,4)
 		      +"\t");
       }
-      result.append(m_trainInstances.attribute(j-1).name()+'\n');
+      result.append(m_trainInstances.attribute(j).name()+'\n');
     }
 
     if (m_transBackToOriginal) {
@@ -583,16 +594,17 @@ public class PrincipalComponents extends AttributeEvaluator
 
   /**
    * Return a matrix as a String
+   * @param matrix that is decribed as a string
    * @return a String describing a matrix
    */
   private String matrixToString(double [][] matrix) {
     StringBuffer result = new StringBuffer();
-    int size = matrix.length-1;
+    int last = matrix.length - 1;
 
-    for (int i=1;i<=size;i++) {
-      for (int j=1;j<=size;j++) {
+    for (int i = 0; i <= last; i++) {
+      for (int j = 0; j <= last; j++) {
 	result.append(Utils.doubleToString(matrix[i][j],6,2)+" ");
-	if (j == size) {
+	if (j == last) {
 	  result.append('\n');
 	}
       }
@@ -615,14 +627,14 @@ public class PrincipalComponents extends AttributeEvaluator
 
     if (m_hasClass) {
       // class is always appended as the last attribute
-      newVals[m_numAttribs] = inst.value(inst.numAttributes()-1);
+      newVals[m_numAttribs] = inst.value(inst.numAttributes());
     }
 
-    for (int i=1;i<m_eTranspose[0].length;i++) {
+    for (int i = 1; i < m_eTranspose[0].length; i++) {
       double tempval = 0.0;
       for (int j=1;j<m_eTranspose.length;j++) {
 	tempval += (m_eTranspose[j][i] * 
-		    inst.value(j - 1));
+		    inst.value(j));
        }
       newVals[i - 1] = tempval;
     }
@@ -680,11 +692,11 @@ public class PrincipalComponents extends AttributeEvaluator
     }
 
     double cumulative = 0;
-    for (int i = m_numAttribs; i >= 1; i--) {
+    for (int i = m_numAttribs - 1; i >= 0; i--) {
       double tempval = 0.0;
-      for (int j = 1; j <= m_numAttribs; j++) {
+      for (int j = 0; j < m_numAttribs; j++) {
 	tempval += (m_eigenvectors[j][m_sortedEigens[i]] * 
-		    tempInst.value(j - 1));
+		    tempInst.value(j));
        }
       newVals[m_numAttribs - i] = tempval;
       cumulative+=m_eigenvalues[m_sortedEigens[i]];
@@ -716,7 +728,7 @@ public class PrincipalComponents extends AttributeEvaluator
   private Instances setOutputFormatOriginal() throws Exception {
     FastVector attributes = new FastVector();
     
-    for (int i=0;i<m_numAttribs;i++) {
+    for (int i = 0; i < m_numAttribs; i++) {
       String att = m_trainInstances.attribute(i).name();
       attributes.addElement(new Attribute(att));
     }
@@ -749,14 +761,14 @@ public class PrincipalComponents extends AttributeEvaluator
 
     double cumulative = 0.0;
     FastVector attributes = new FastVector();
-     for (int i=m_numAttribs;i>=1;i--) {
+     for (int i = m_numAttribs - 1; i >= 0; i--) {
        StringBuffer attName = new StringBuffer();
-       for (int j=1;j<=m_numAttribs;j++) {
+       for (int j = 0; j < m_numAttribs; j++) {
 	 attName.append(Utils.
 			doubleToString(m_eigenvectors[j][m_sortedEigens[i]],
 				       5,3)
-			+m_trainInstances.attribute(j-1).name());
-	 if (j != m_numAttribs) {
+			+m_trainInstances.attribute(j).name());
+	 if (j != m_numAttribs - 1) {
 	   if (m_eigenvectors[j+1][m_sortedEigens[i]] >= 0) {
 	     attName.append("+");
 	   }
@@ -787,106 +799,6 @@ public class PrincipalComponents extends AttributeEvaluator
      return outputFormat;
   }
 
-  // jacobi routine adapted from numerical recipies
-  // note arrays are from 1..n inclusive
-  void jacobi(double [][] a, int n, double [] d, double [][] v) {
-    int j,iq,ip,i;
-    double tresh,theta,tau,t,sm,s,h,g,c;
-    double [] b;
-    double [] z;
-
-    b = new double [n+1];
-    z = new double [n+1];
-    for (ip=1;ip<=n;ip++) {
-      for (iq=1;iq<=n;iq++) v[ip][iq]=0.0;
-      v[ip][ip]=1.0;
-    }
-    for (ip=1;ip<=n;ip++) {
-      b[ip]=d[ip]=a[ip][ip];
-      z[ip]=0.0;
-    }
-    //    *nrot=0;
-    for (i=1;i<=50;i++) {
-      sm=0.0;
-      for (ip=1;ip<=n-1;ip++) {
-	for (iq=ip+1;iq<=n;iq++)
-	  sm += Math.abs(a[ip][iq]);
-      }
-      if (sm == 0.0) {
-	//	free_vector(z,1,n);
-	//	free_vector(b,1,n);
-	return;
-      }
-      if (i < 4)
-	tresh=0.2*sm/(n*n);
-      else
-	tresh=0.0;
-      for (ip=1;ip<=n-1;ip++) {
-	for (iq=ip+1;iq<=n;iq++) {
-	  g=100.0*Math.abs(a[ip][iq]);
-	  if (i > 4 && (double)(Math.abs(d[ip])+g) == (double)Math.abs(d[ip])
-	      && (double)(Math.abs(d[iq])+g) == (double)Math.abs(d[iq]))
-	    a[ip][iq]=0.0;
-	  else if (Math.abs(a[ip][iq]) > tresh) {
-	    h=d[iq]-d[ip];
-	    if ((double)(Math.abs(h)+g) == (double)Math.abs(h))
-	      t=(a[ip][iq])/h;
-	    else {
-	      theta=0.5*h/(a[ip][iq]);
-	      t=1.0/(Math.abs(theta)+Math.sqrt(1.0+theta*theta));
-	      if (theta < 0.0) t = -t;
-	    }
-	    c=1.0/Math.sqrt(1+t*t);
-	    s=t*c;
-	    tau=s/(1.0+c);
-	    h=t*a[ip][iq];
-	    z[ip] -= h;
-	    z[iq] += h;
-	    d[ip] -= h;
-	    d[iq] += h;
-	    a[ip][iq]=0.0;
-	    for (j=1;j<=ip-1;j++) {
-	      //	      rotate(a,j,ip,j,iq)
-	      g=a[j][ip];
-	      h=a[j][iq];
-	      a[j][ip]=g-s*(h+g*tau);
-	      a[j][iq]=h+s*(g-h*tau);
-	    }
-	    for (j=ip+1;j<=iq-1;j++) {
-	      //	      rotate(a,ip,j,j,iq)
-	      g=a[ip][j];
-	      h=a[j][iq];
-	      a[ip][j]=g-s*(h+g*tau);
-	      a[j][iq]=h+s*(g-h*tau);
-	    }
-	    for (j=iq+1;j<=n;j++) {
-	      //	      rotate(a,ip,j,iq,j)
-
-	      g=a[ip][j];
-	      h=a[iq][j];
-	      a[ip][j]=g-s*(h+g*tau);
-	      a[iq][j]=h+s*(g-h*tau);
-	    }
-	    for (j=1;j<=n;j++) {
-	      //	      rotate(v,j,ip,j,iq)
-
-	      g=v[j][ip];
-	      h=v[j][iq];
-	      v[j][ip]=g-s*(h+g*tau);
-	      v[j][iq]=h+s*(g-h*tau);
-	    }
-	    //	    ++(*nrot);
-	  }
-	}
-      }
-      for (ip=1;ip<=n;ip++) {
-	b[ip] += z[ip];
-	d[ip]=b[ip];
-	z[ip]=0.0;
-      }
-    }
-    System.err.println("Too many iterations in routine jacobi");
-  }
 
   /**
    * Main method for testing this class
@@ -903,4 +815,7 @@ public class PrincipalComponents extends AttributeEvaluator
       System.out.println(e.getMessage());
     }
   }
+  
 }
+
+
