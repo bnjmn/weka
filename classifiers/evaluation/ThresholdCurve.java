@@ -34,7 +34,7 @@ import weka.classifiers.DistributionClassifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ThresholdCurve {
 
@@ -147,7 +147,7 @@ public class ThresholdCurve {
     fv.addElement(new Attribute("Recall"));
     fv.addElement(new Attribute("Fallout"));
     fv.addElement(new Attribute("Threshold"));      
-    return new Instances("Threshold Curve", fv, 100);
+    return new Instances("ThresholdCurve", fv, 100);
   }
   
   private Instance makeInstance(TwoClassStats tc, double prob) {

@@ -33,7 +33,7 @@ import weka.classifiers.DistributionClassifier;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MarginCurve {
 
@@ -106,7 +106,7 @@ public class MarginCurve {
     fv.addElement(new Attribute("Margin"));
     fv.addElement(new Attribute("Current"));
     fv.addElement(new Attribute("Cumulative"));
-    return new Instances("Margin Curve", fv, 100);
+    return new Instances("MarginCurve", fv, 100);
   }
   
   /**
