@@ -9,7 +9,7 @@ SOURCES = ASEvaluation.java ASSearch.java AttributeEvaluator.java \
 	  UnsupervisedAttributeEvaluator.java \
 	  UnsupervisedSubsetEvaluator.java WrapperSubsetEval.java \
 	  ReliefFAttributeEval.java ForwardSelection.java \
-	  GeneticSearch.java RandomSearch.java \
+	  GeneticSearch.java RandomSearch.java ExhaustiveSearch.java \
 	  ConsistencySubsetEval.java StartSetHandler.java \
 	  RankSearch.java PrincipalComponents.java \
 	  ErrorBasedMeritEvaluator.java HoldOutSubsetEvaluator.java \
