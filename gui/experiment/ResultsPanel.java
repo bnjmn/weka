@@ -77,7 +77,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -760,9 +760,9 @@ public class ResultsPanel extends JPanel {
     m_TestsModel.removeAllElements();
     for (int i = 0; i < m_TTester.getNumResultsets(); i++) {
       String tname = m_TTester.getResultsetName(i);
-      if (tname.length() > 20) {
+      /*      if (tname.length() > 20) {
 	tname = tname.substring(0, 20);
-      }
+	} */
       m_TestsModel.addElement(tname);
     }
     m_TestsModel.addElement("Summary");
