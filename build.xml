@@ -1,7 +1,7 @@
 <project name="weka" default="compile_inline" basedir=".">
 <!-- 
   ===========================================================================
-   Ant build file for weka. Tested with ant1.4 and Junit3.7. Requires
+   Ant build file for weka. Tested with ant1.6.2 and Junit3.7. Requires
    Xalan2.x, JavaMail and the java activation framework for converting xml
    to html, and mailing unit test results respectively.
 
@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.16 $
+   $Revision: 1.17 $
   ===========================================================================
 -->
 
@@ -19,6 +19,7 @@
   <property name="dist"  value="dist"/>
   <property name="doc"  value="doc"/>
   <property name="reports"  value="reports"/>
+  <property name="path_modifier" value=""/>
 
   <target name="init_all">
      <available file="weka" type="dir" 
@@ -224,17 +225,53 @@
      <delete file="${path_modifier}${dist}/DatabaseUtils.props"/>
    </target>
 
+   <target name="changelog"
+    description="Create a changelog file for a release of Weka. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changes (eg. 20 Aug 2004)&gt;.">
+   <cvschangelog cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" 
+                dir="${path_modifier}weka"
+                destfile="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"
+		start="${start_date}"/>
+   <style in="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"
+          out="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.html"
+	  style="${ant.home}/etc/changelog.xsl">
+	  <param name="title" expression="Weka-${release} Changelog"/>
+   </style>
+   <delete file="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"/>
+   <replace dir="${path_modifier}wekadocs/changelogs" token="&#34;/" value="&#34;../doc/weka/">
+     <include name="CHANGELOG-${release}.html"/>
+   </replace>
+   <replace dir="${path_modifier}wekadocs/changelogs" token=".java" value=".html">
+     <include name="CHANGELOG-${release}.html"/>
+   </replace>
+  </target>
+    
+
   <!-- Make a release -->
-  <target name="release" depends="run_tests, exejar, remotejar, srcjar, docs"
-   description="Make a release (needs more work) in ${release}. Run with -Drelease=&lt;path to release directory&gt;.">
+  <target name="release" depends="run_tests, exejar, remotejar, srcjar, docs, changelog"
+   description="Make a release in ${release}. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
     <!-- copy the docs to dist/docs -->
 
-    <copy todir="${release}/doc" >
+    <copy todir="${path_modifier}weka-${release}/doc" >
        <fileset dir="${path_modifier}${doc}"/>
     </copy>
-    <copy todir="${release}">
+    <copy todir="${path_modifier}weka-${release}">
        <fileset dir="${path_modifier}${dist}"/>
     </copy>
+    <copy todir="${path_modifier}weka-${release}/changelogs">
+       <fileset dir="${path_modifier}wekadocs/changelogs"/>
+    </copy>
+    <copy todir="${path_modifier}weka-${release}/data">
+       <fileset dir="${path_modifier}wekadocs/data"/>
+    </copy>
+    <copy todir="${path_modifier}weka-${release}">
+       <fileset dir="${path_modifier}wekadocs">
+         <include name="README*"/>
+	 <include name="*.pdf"/>
+	 <include name="COPYING"/>
+       </fileset>
+    </copy>
+    <zip destfile="${path_modifier}weka-${release}.zip" 
+     basedir="${path_modifier}weka-${release}"/>
   </target>
 
 <!--
@@ -244,27 +281,28 @@
 -->
   <!-- Initialization for build from cvs checkout -->
   <target name = "init_build_from_cvs_checkout"
-   description="(needs ant to be run with -Dcvs_user=&lt;name&gt; -Dcvs_pass=&lt;password&gt;)" 
    depends="init_compile, init_dist">
-     <cvspass cvsroot="ext:${cvs_user}@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password="${cvs_pass}"/>
-     <cvs cvsRoot=":ext:${cvs_user}@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" cvsRsh="ssh" package="weka" dest="."/>
-     <cvs cvsRoot=":ext:${cvs_user}@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" cvsRsg="ssh" package="tests" dest="."/>
+     <cvspass cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password=""/>
+     <cvs command="checkout -r ${tag}" 
+      cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="weka" dest="."/>
+     <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="tests" dest="."/>
+      <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="wekadocs" dest="."/>
   </target>
 
   <!-- Initialization for build from cvs export. User must supply revision tag to export by specifying -Dtag=tag_name_of_release when starting ant -->
   <target name = "init_build_from_cvs_export"
-   description="(needs ant to be run with -Dcvs_user=&lt;name&gt; -Dcvs_pass=&lt;password&gt;)" 
    depends="init_compile, init_dist">
-     <cvspass cvsroot=":ext:${cvs_user}@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password="${cvs_pass}"/>
+     <cvspass cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password=""/>
      <cvs command="export -r ${tag}" 
-      cvsRoot=":ext:${cvs_user}@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" cvsRsh="ssh" package="weka" dest="."/>
-     <cvs cvsRoot=":ext:${cvs_user}@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" cvsRsh="ssh" package="tests" dest="."/>
+      cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="weka" dest="."/>
+     <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="tests" dest="."/>
+      <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="wekadocs" dest="."/>
   </target>
 
   <!-- Make a release via cvs export -->
   <target name="release_from_cvs" 
-   depends="init_build_from_cvs_export, release"
-   description="Makes a release from a cvs export">
+   depends="init_build_from_cvs_checkout, release"
+   description="Makes a release from a cvs checkout (needs ant to be run with -Dtag=&lt;REVISION_TO_CHECKOUT&gt;, -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changelog generation (eg. 20 Aug 2004)&gt;).">
   </target>
 
   <!-- This target could be used for an automated nightly/weekly build job -->
