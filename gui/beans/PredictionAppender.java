@@ -42,7 +42,7 @@ import weka.core.Instance;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,
@@ -214,12 +214,17 @@ public class PredictionAppender extends JPanel
     weka.classifiers.Classifier classifier = e.getClassifier();
     Instance currentI = e.getCurrentInstance();
     int status = e.getStatus();
-    int oldNumAtts = currentI.dataset().numAttributes();
+    int oldNumAtts = 0;
+    if (status == IncrementalClassifierEvent.NEW_BATCH) {
+      oldNumAtts = e.getStructure().numAttributes();
+    } else {
+      oldNumAtts = currentI.dataset().numAttributes();
+    }
 
     if (status == IncrementalClassifierEvent.NEW_BATCH) {
       m_instanceEvent = new InstanceEvent(this, null, 0);
       // create new header structure
-      Instances oldStructure = new Instances(currentI.dataset(), 0);
+      Instances oldStructure = new Instances(e.getStructure(), 0);
       String relationNameModifier = oldStructure.relationName()
 	+"_with predictions";
        if (!m_appendProbabilities 
@@ -243,6 +248,9 @@ public class PredictionAppender extends JPanel
 	   return;
 	 }
        }
+       // Pass on the structure
+       m_instanceEvent.setStructure(m_format);
+       notifyInstanceAvailable(m_instanceEvent);
        return;
     }
 

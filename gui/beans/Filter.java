@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -233,7 +233,7 @@ public class Filter extends JPanel
 	m_structurePassedOn = false;
 	try {
 	  if (m_Filter.isOutputFormatDefined()) {
-	    System.err.println(m_Filter.getOutputFormat());
+	    //	    System.err.println(m_Filter.getOutputFormat());
 	    m_ie.setStructure(m_Filter.getOutputFormat());
 	    notifyInstanceListeners(m_ie);
 	    m_structurePassedOn = true;

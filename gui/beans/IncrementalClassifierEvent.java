@@ -37,8 +37,8 @@ import java.util.EventObject;
  */
 public class IncrementalClassifierEvent extends EventObject {
 
-  public static final int WITHIN_BATCH = 0;
-  public static final int NEW_BATCH = 1;
+  public static final int NEW_BATCH = 0;
+  public static final int WITHIN_BATCH = 1;
   public static final int BATCH_FINISHED = 2;
 
   private Instances m_structure;
