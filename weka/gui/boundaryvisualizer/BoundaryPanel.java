@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  * @see JPanel
  */
@@ -967,8 +967,9 @@ public class BoundaryPanel extends JPanel {
 
       String [] argsR = null;
       if (args.length > 10) {
+	System.err.println(""+(args.length-10));
 	argsR = new String [args.length-10];
-	for (int j = 9; j < args.length; j++) {
+	for (int j = 10; j < args.length; j++) {
 	  argsR[j-10] = args[j];
 	}
       }
