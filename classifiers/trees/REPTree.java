@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1494,7 +1494,7 @@ public class REPTree extends Classifier
     Instances train = null;
     Instances prune = null;
     if (!m_NoPruning) {
-      train = data.trainCV(m_NumFolds, 0);
+      train = data.trainCV(m_NumFolds, 0, random);
       prune = data.testCV(m_NumFolds, 0);
     } else {
       train = data;

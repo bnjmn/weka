@@ -64,7 +64,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
 */
 public class CVParameterSelection extends Classifier 
   implements OptionHandler, Drawable, Summarizable {
@@ -251,7 +251,8 @@ public class CVParameterSelection extends Classifier
    * @param depth the index of the parameter to be optimised at this level
    * @exception Exception if an error occurs
    */
-  protected void findParamsByCrossValidation(int depth, Instances trainData)
+  protected void findParamsByCrossValidation(int depth, Instances trainData,
+					     Random random)
     throws Exception {
 
     if (depth < m_CVParams.size()) {
@@ -273,7 +274,7 @@ public class CVParameterSelection extends Classifier
       for(cvParam.m_ParamValue = cvParam.m_Lower; 
 	  cvParam.m_ParamValue <= upper; 
 	  cvParam.m_ParamValue += increment) {
-	findParamsByCrossValidation(depth + 1, trainData);
+	findParamsByCrossValidation(depth + 1, trainData, random);
       }
     } else {
       
@@ -291,7 +292,7 @@ public class CVParameterSelection extends Classifier
       }
       ((OptionHandler)m_Classifier).setOptions(options);
       for (int j = 0; j < m_NumFolds; j++) {
-	Instances train = trainData.trainCV(m_NumFolds, j);
+	Instances train = trainData.trainCV(m_NumFolds, j, random);
 	Instances test = trainData.testCV(m_NumFolds, j);
 	m_Classifier.buildClassifier(train);
 	evaluation.setPriors(train);
@@ -525,14 +526,15 @@ public class CVParameterSelection extends Classifier
        m_Classifier.buildClassifier(trainData);
        return;
     }
-    trainData.randomize(new Random(m_Seed));
+    Random random = new Random(m_Seed);
+    trainData.randomize(random);
     if (trainData.classAttribute().isNominal()) {
       trainData.stratify(m_NumFolds);
     }
     m_BestPerformance = -99;
     m_BestClassifierOptions = null;
     m_NumAttributes = trainData.numAttributes();
-    m_TrainFoldSize = trainData.trainCV(m_NumFolds, 0).numInstances();
+    m_TrainFoldSize = trainData.trainCV(m_NumFolds, 0, random).numInstances();
     
     // Set up m_ClassifierOptions -- take getOptions() and remove
     // those being optimised.
@@ -541,7 +543,7 @@ public class CVParameterSelection extends Classifier
       Utils.getOption(((CVParameter)m_CVParams.elementAt(i)).m_ParamChar,
 		      m_ClassifierOptions);
     }
-    findParamsByCrossValidation(0, trainData);
+    findParamsByCrossValidation(0, trainData, random);
 
     String [] options = (String [])m_BestClassifierOptions.clone();
     ((OptionHandler)m_Classifier).setOptions(options);

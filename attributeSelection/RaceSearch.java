@@ -71,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -759,19 +759,20 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
       m_numFolds = 10;
     }
 
-    data.randomize(new Random(1));
+    Random random = new Random(1); // I guess this should really be a parameter?
+    data.randomize(random);
     int [] bestSubset=null;
 
     switch (m_raceType) {
     case FORWARD_RACE:
     case BACKWARD_RACE: 
-      bestSubset = hillclimbRace(data);
+      bestSubset = hillclimbRace(data, random);
       break;
     case SCHEMATA_RACE:
-      bestSubset = schemataRace(data);
+      bestSubset = schemataRace(data, random);
       break;
     case RANK_RACE:
-      bestSubset = rankRace(data);
+      bestSubset = rankRace(data, random);
       break;
     }
 
@@ -832,9 +833,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
   /**
    * Performs a schemata race---a series of races in parallel.
    * @param data the instances to estimate accuracy over.
+   * @param random a random number generator
    * @return an array of selected attribute indices.
    */
-  private int [] schemataRace(Instances data) throws Exception {
+  private int [] schemataRace(Instances data, Random random) throws Exception {
     // # races, 2 (competitors in each race), # attributes
     char [][][] parallelRaces;
     int numRaces = m_numAttribs-1;
@@ -909,7 +911,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 	
 	// randomly select an instance to test on
 	int testIndex = Math.abs(r.nextInt() % numInstances);
-	trainCV = data.trainCV(numInstances, testIndex);
+	trainCV = data.trainCV(numInstances, testIndex, random);
 	testCV = data.testCV(numInstances, testIndex);
 	testInstance = testCV.instance(0);
 	sampleCount++;
@@ -1068,9 +1070,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * ranked attribute, the top two attributes etc. The initial ranking
    * is determined by an attribute evaluator.
    * @param data the instances to estimate accuracy over
+   * @param random a random number generator
    * @return an array of selected attribute indices.
    */
-  private int [] rankRace(Instances data) throws Exception {
+  private int [] rankRace(Instances data, Random random) throws Exception {
     char [] baseSet = new char [m_numAttribs];
     char [] bestSet;
     double bestSetError;
@@ -1116,7 +1119,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     }
     
     // run the race
-    double [] winnerInfo = raceSubsets(raceSets, data, true);
+    double [] winnerInfo = raceSubsets(raceSets, data, true, random);
     bestSetError = winnerInfo[1];
     bestSet = (char [])raceSets[(int)winnerInfo[0]].clone();
     m_bestMerit = bestSetError;
@@ -1129,9 +1132,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * the new base subset and the process is repeated until there is no
    * improvement in error over the base subset.
    * @param data the instances to estimate accuracy over
+   * @param random a random number generator
    * @return an array of selected attribute indices.
    */
-  private int [] hillclimbRace(Instances data) throws Exception {
+  private int [] hillclimbRace(Instances data, Random random) throws Exception {
     double baseSetError;
     char [] baseSet = new char [m_numAttribs];
     int rankCount = 0;
@@ -1171,7 +1175,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     }
     
     // race the initial sets (base set either no or all features)
-    double [] winnerInfo = raceSubsets(raceSets, data, true);
+    double [] winnerInfo = raceSubsets(raceSets, data, true, random);
     baseSetError = winnerInfo[1];
     m_bestMerit = baseSetError;
     baseSet = (char [])raceSets[(int)winnerInfo[0]].clone();
@@ -1221,7 +1225,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 	System.err.println("Next set : \n"+printSets(raceSets));
       }
       improved = false;
-      winnerInfo = raceSubsets(raceSets, data, true);
+      winnerInfo = raceSubsets(raceSets, data, true, random);
       String bs = new String(baseSet); 
       String win = new String(raceSets[(int)winnerInfo[0]]);
       if (bs.compareTo(win) == 0) {
@@ -1283,11 +1287,12 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * @param data the instances to use when cross validating
    * @param baseSetIncluded true if the first attribute set is a
    * base set generated from the previous race
+   * @param random a random number generator
    * @return the index of the winning subset
    * @exception Exception if an error occurs during cross validation
    */
   private double [] raceSubsets(char [][]raceSets, Instances data,
-				boolean baseSetIncluded) 
+				boolean baseSetIncluded, Random random) 
     throws Exception {
     // the evaluators --- one for each subset
     ASEvaluation [] evaluators = 
@@ -1338,7 +1343,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     int foldSize=1;
     processedCount = 0;
     race: for (int i=0;i<m_numFolds;i++) {
-      trainCV = data.trainCV(m_numFolds, i);
+      trainCV = data.trainCV(m_numFolds, i, random);
       testCV = data.testCV(m_numFolds, i);
       foldSize = testCV.numInstances();
       

@@ -82,7 +82,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class LogitBoost extends Classifier 
   implements OptionHandler, Sourcable, WeightedInstancesHandler {
@@ -679,7 +679,7 @@ public class LogitBoost extends Classifier
 	for (int i = 0; i < m_NumFolds; i++) {
 	  
 	  // Get train and test folds
-	  Instances train = data.trainCV(m_NumFolds, i);
+	  Instances train = data.trainCV(m_NumFolds, i, m_RandomInstance);
 	  Instances test = data.testCV(m_NumFolds, i);
 	  
 	  // Make class numeric

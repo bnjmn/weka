@@ -61,8 +61,11 @@ import weka.classifiers.*;
  * -U <br>
  * Generate unpruned decision list. <p>
  *
+ * -Q <br>
+ * The seed for reduced-error pruning. <p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class PART extends Classifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
@@ -88,6 +91,9 @@ public class PART extends Classifier implements OptionHandler,
   /** Generate unpruned list? */
   private boolean m_unpruned = false;
 
+  /** The seed for random number generation. */
+  private int m_Seed = 1;
+
   /**
    * Generates the classifier.
    *
@@ -105,7 +111,7 @@ public class PART extends Classifier implements OptionHandler,
     if (m_unpruned) 
       m_root = new MakeDecList(modSelection, m_minNumObj);
     else if (m_reducedErrorPruning) 
-      m_root = new MakeDecList(modSelection, m_numFolds, m_minNumObj);
+      m_root = new MakeDecList(modSelection, m_numFolds, m_minNumObj, m_Seed);
     else
       m_root = new MakeDecList(modSelection, m_CF, m_minNumObj);
     m_root.buildClassifier(instances);
@@ -162,11 +168,14 @@ public class PART extends Classifier implements OptionHandler,
    * -U <br>
    * Generate unpruned decision list. <p>
    *
+   * -Q <br>
+   * The seed for reduced-error pruning. <p>
+   *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(7);
 
     newVector.
 	addElement(new Option("\tSet confidence threshold for pruning.\n" +
@@ -190,6 +199,9 @@ public class PART extends Classifier implements OptionHandler,
     newVector.
 	addElement(new Option("\tGenerate unpruned decision list.",
 			      "U", 0, "-U"));
+    newVector.
+      addElement(new Option("\tSeed for random data shuffling (default 1).",
+			    "Q", 1, "-Q <seed>"));
 
     return newVector.elements();
   }
@@ -240,6 +252,12 @@ public class PART extends Classifier implements OptionHandler,
     } else {
       m_minNumObj = 2;
     }
+    String seedString = Utils.getOption('Q', options);
+    if (seedString.length() != 0) {
+      m_Seed = Integer.parseInt(seedString);
+    } else {
+      m_Seed = 1;
+    }
   }
 
   /**
@@ -249,7 +267,7 @@ public class PART extends Classifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [9];
+    String [] options = new String [11];
     int current = 0;
 
     if (m_unpruned) {
@@ -264,6 +282,7 @@ public class PART extends Classifier implements OptionHandler,
     options[current++] = "-M"; options[current++] = "" + m_minNumObj;
     options[current++] = "-C"; options[current++] = "" + m_CF;
     options[current++] = "-N"; options[current++] = "" + m_numFolds;
+    options[current++] = "-Q"; options[current++] = "" + m_Seed;
 
     while (current < options.length) {
       options[current++] = "";
@@ -421,6 +440,26 @@ public class PART extends Classifier implements OptionHandler,
   public void setNumFolds(int v) {
     
     m_numFolds = v;
+  }
+  
+  /**
+   * Get the value of Seed.
+   *
+   * @return Value of Seed.
+   */
+  public int getSeed() {
+    
+    return m_Seed;
+  }
+  
+  /**
+   * Set the value of Seed.
+   *
+   * @param newSeed Value to assign to Seed.
+   */
+  public void setSeed(int newSeed) {
+    
+    m_Seed = newSeed;
   }
   
   /**

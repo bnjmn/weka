@@ -56,7 +56,7 @@ import weka.classifiers.rules.ZeroR;
  * base classifiers. (required) <p>
  *
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class Grading extends Classifier implements OptionHandler {
 
@@ -349,7 +349,8 @@ public class Grading extends Classifier implements OptionHandler {
     if (newData.numInstances() == 0) {
       throw new Exception("No training instances without missing class!");
     }
-    newData.randomize(new Random(m_Seed));
+    Random random = new Random(m_Seed);
+    newData.randomize(random);
     if (newData.classAttribute().isNominal())
       newData.stratify(m_NumFolds);
     int numClassifiers = m_BaseClassifiers.length;
@@ -361,7 +362,7 @@ public class Grading extends Classifier implements OptionHandler {
     }
     for (int j = 0; j < m_NumFolds; j++) {
 
-      Instances train = newData.trainCV(m_NumFolds, j);
+      Instances train = newData.trainCV(m_NumFolds, j, random);
       Instances test = newData.testCV(m_NumFolds, j);
 
       // Build base classifiers

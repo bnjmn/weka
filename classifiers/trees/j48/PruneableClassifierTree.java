@@ -30,7 +30,7 @@ import java.util.*;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PruneableClassifierTree extends ClassifierTree{
 
@@ -41,7 +41,10 @@ public class PruneableClassifierTree extends ClassifierTree{
   private int numSets = 3;
 
   /** Cleanup after the tree has been built. */
-  boolean m_cleanup = true;
+  private boolean m_cleanup = true;
+
+  /** The random number seed. */
+  private int m_seed = 1;
 
   /**
    * Constructor for pruneable tree structure. Stores reference
@@ -53,7 +56,8 @@ public class PruneableClassifierTree extends ClassifierTree{
    * @exception Exception if something goes wrong
    */
   public PruneableClassifierTree(ModelSelection toSelectLocModel,
-				 boolean pruneTree, int num, boolean cleanup)
+				 boolean pruneTree, int num, boolean cleanup,
+				 int seed)
        throws Exception {
 
     super(toSelectLocModel);
@@ -61,6 +65,7 @@ public class PruneableClassifierTree extends ClassifierTree{
     pruneTheTree = pruneTree;
     numSets = num;
     m_cleanup = cleanup;
+    m_seed = seed;
   }
 
   /**
@@ -75,9 +80,10 @@ public class PruneableClassifierTree extends ClassifierTree{
       throw new Exception("Class is numeric!");
    
    data = new Instances(data);
+   Random random = new Random(m_seed);
    data.deleteWithMissingClass();
    data.stratify(numSets);
-   buildTree(data.trainCV(numSets, numSets - 1),
+   buildTree(data.trainCV(numSets, numSets - 1, random),
 	     data.testCV(numSets, numSets - 1), false);
    if (pruneTheTree) {
      prune();
@@ -122,7 +128,8 @@ public class PruneableClassifierTree extends ClassifierTree{
        throws Exception {
 
     PruneableClassifierTree newTree = 
-      new PruneableClassifierTree(m_toSelectModel, pruneTheTree, numSets, m_cleanup);
+      new PruneableClassifierTree(m_toSelectModel, pruneTheTree, numSets, m_cleanup,
+				  m_seed);
     newTree.buildTree(train, test, false);
     return newTree;
   }

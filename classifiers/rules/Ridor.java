@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 
 public class Ridor extends Classifier
@@ -253,8 +253,6 @@ public class Ridor extends Classifier
 		
 	RidorRule rule = new RidorRule();                                
 	rule.setPredictedClass(0);       // Predict the classes other than default
-	if(m_Random == null)
-	  m_Random = new Random(m_Seed);
 		
 	for(int j = 0; j < m_Shuffle; j++){
 	  if(m_Shuffle > 1)
@@ -481,8 +479,10 @@ public class Ridor extends Classifier
       m_Antds = new FastVector();	
 	    
       /* Split data into Grow and Prune*/
+      m_Random = new Random(m_Seed);
+      data.randomize(m_Random);
       data.stratify(m_Folds);
-      Instances growData=data.trainCV(m_Folds, m_Folds-1);
+      Instances growData=data.trainCV(m_Folds, m_Folds-1, m_Random);
       Instances pruneData=data.testCV(m_Folds, m_Folds-1);
 	    
       grow(growData);      // Build this rule

@@ -58,7 +58,7 @@ import  weka.filters.Filter;
  * (default = 1) <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -440,9 +440,8 @@ public class WrapperSubsetEval
 
     // max of 5 repititions ofcross validation
     for (i = 0; i < 5; i++) {
-      trainCopy.randomize(Rnd); // randomize instances
       m_Evaluation = new Evaluation(trainCopy);
-      m_Evaluation.crossValidateModel(m_BaseClassifier, trainCopy, m_folds);
+      m_Evaluation.crossValidateModel(m_BaseClassifier, trainCopy, m_folds, Rnd);
       repError[i] = m_Evaluation.errorRate();
 
       // check on the standard deviation

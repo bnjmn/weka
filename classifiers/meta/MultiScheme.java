@@ -52,7 +52,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -337,7 +337,8 @@ public class MultiScheme extends Classifier implements OptionHandler {
     }
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
-    newData.randomize(new Random(m_Seed));
+    Random random = new Random(m_Seed);
+    newData.randomize(random);
     if (newData.classAttribute().isNominal() && (m_NumXValFolds > 1))
       newData.stratify(m_NumXValFolds);
     Instances train = newData;               // train on all data by default
@@ -352,7 +353,7 @@ public class MultiScheme extends Classifier implements OptionHandler {
       if (m_NumXValFolds > 1) {
 	evaluation = new Evaluation(newData);
 	for (int j = 0; j < m_NumXValFolds; j++) {
-	  train = newData.trainCV(m_NumXValFolds, j);
+	  train = newData.trainCV(m_NumXValFolds, j, random);
 	  test = newData.testCV(m_NumXValFolds, j);
 	  currentClassifier.buildClassifier(train);
 	  evaluation.setPriors(train);

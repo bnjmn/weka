@@ -135,7 +135,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.68 $
+ * @version $Revision: 1.69 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1152,7 +1152,8 @@ public class ClassifierPanel extends JPanel {
 		m_Log.logMessage("Trouble parsing random seed value");
 		rnd = 1;
 	      }
-	      inst.randomize(new Random(rnd));
+	      Random random = new Random(rnd);
+	      inst.randomize(random);
 	      if (inst.attribute(classIndex).isNominal()) {
 		m_Log.statusMessage("Stratifying instances...");
 		inst.stratify(numFolds);
@@ -1163,7 +1164,7 @@ public class ClassifierPanel extends JPanel {
 	      for (int fold = 0; fold < numFolds; fold++) {
 		m_Log.statusMessage("Creating splits for fold "
 				    + (fold + 1) + "...");
-		Instances train = inst.trainCV(numFolds, fold);
+		Instances train = inst.trainCV(numFolds, fold, random);
 		eval.setPriors(train);
 		m_Log.statusMessage("Building model for fold "
 				    + (fold + 1) + "...");

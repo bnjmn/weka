@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.48 $
+ * @version  $Revision: 1.49 $
   */
 public class Evaluation implements Summarizable {
 
@@ -304,21 +304,23 @@ public class Evaluation implements Summarizable {
    * @param data the data on which the cross-validation is to be 
    * performed 
    * @param numFolds the number of folds for the cross-validation
+   * @param random random number generator for randomization 
    * @exception Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
   public void crossValidateModel(Classifier classifier,
-				 Instances data, int numFolds) 
+				 Instances data, int numFolds, Random random) 
     throws Exception {
     
     // Make a copy of the data we can reorder
     data = new Instances(data);
+    data.randomize(random);
     if (data.classAttribute().isNominal()) {
       data.stratify(numFolds);
     }
     // Do the folds
     for (int i = 0; i < numFolds; i++) {
-      Instances train = data.trainCV(numFolds, i);
+      Instances train = data.trainCV(numFolds, i, random);
       setPriors(train);
       classifier.buildClassifier(train);
       Instances test = data.testCV(numFolds, i);
@@ -336,17 +338,18 @@ public class Evaluation implements Summarizable {
    * performed 
    * @param numFolds the number of folds for the cross-validation
    * @param options the options to the classifier. Any options
+   * @param random the random number generator for randomizing the data
    * accepted by the classifier will be removed from this array.
    * @exception Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
   public void crossValidateModel(String classifierString,
 				 Instances data, int numFolds,
-				 String[] options) 
+				 String[] options, Random random) 
        throws Exception {
     
     crossValidateModel(Classifier.forName(classifierString, options),
-		       data, numFolds);
+		       data, numFolds, random);
   }
 
   /**
@@ -521,7 +524,6 @@ public class Evaluation implements Summarizable {
     StringBuffer text = new StringBuffer();
     BufferedReader trainReader = null, testReader = null;
     ObjectInputStream objectInputStream = null;
-    Random random;
     CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
     Range attributesToOutput = null;
@@ -836,11 +838,8 @@ public class Evaluation implements Summarizable {
     } else if (trainFileName.length() != 0) {
 
       // Testing is via cross-validation on training data
-      random = new Random(seed);
-      random.setSeed(seed);
-      train.randomize(random);
-      testingEvaluation.
-	crossValidateModel(classifier, train, folds);
+      Random random = new Random(seed);
+      testingEvaluation.crossValidateModel(classifier, train, folds, random);
       if (template.classAttribute().isNumeric()) {
 	text.append("\n\n\n" + testingEvaluation.
 		    toSummaryString("=== Cross-validation ===\n",

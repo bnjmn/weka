@@ -63,9 +63,11 @@ import weka.classifiers.*;
  * -A <br>
  * If set, Laplace smoothing is used for predicted probabilites. <p>
  *
+ * -Q <br>
+ * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class J48 extends Classifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -103,7 +105,10 @@ public class J48 extends Classifier implements OptionHandler,
   private boolean m_subtreeRaising = true;
 
   /** Cleanup after the tree has been built. */
-  boolean m_noCleanup = false;
+  private boolean m_noCleanup = false;
+
+  /** Random number seed for reduced-error pruning. */
+  private int m_Seed = 1;
   
   /**
    * Generates the classifier.
@@ -124,7 +129,7 @@ public class J48 extends Classifier implements OptionHandler,
 					    m_subtreeRaising, !m_noCleanup);
     else
       m_root = new PruneableClassifierTree(modSelection, !m_unpruned, m_numFolds,
-					   !m_noCleanup);
+					   !m_noCleanup, m_Seed);
     m_root.buildClassifier(instances);
     if (m_binarySplits) {
       ((BinC45ModelSelection)modSelection).cleanup();
@@ -238,6 +243,9 @@ public class J48 extends Classifier implements OptionHandler,
    * -A <br>
    * If set, Laplace smoothing is used for predicted probabilites. <p>
    *
+   * -Q <br>
+   * The seed for reduced-error pruning. <p>
+   *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
@@ -275,6 +283,9 @@ public class J48 extends Classifier implements OptionHandler,
    newVector.
         addElement(new Option("\tLaplace smoothing for predicted probabilities.",
 			      "A", 0, "-A"));
+    newVector.
+      addElement(new Option("\tSeed for random data shuffling (default 1).",
+			    "Q", 1, "-Q <seed>"));
 
     return newVector.elements();
   }
@@ -339,6 +350,12 @@ public class J48 extends Classifier implements OptionHandler,
     } else {
       m_numFolds = 3;
     }
+    String seedString = Utils.getOption('Q', options);
+    if (seedString.length() != 0) {
+      m_Seed = Integer.parseInt(seedString);
+    } else {
+      m_Seed = 1;
+    }
   }
 
   /**
@@ -348,7 +365,7 @@ public class J48 extends Classifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [10];
+    String [] options = new String [14];
     int current = 0;
 
     if (m_noCleanup) {
@@ -363,6 +380,7 @@ public class J48 extends Classifier implements OptionHandler,
       if (m_reducedErrorPruning) {
 	options[current++] = "-R";
 	options[current++] = "-N"; options[current++] = "" + m_numFolds;
+	options[current++] = "-Q"; options[current++] = "" + m_Seed;
       } else {
 	options[current++] = "-C"; options[current++] = "" + m_CF;
       }
@@ -381,6 +399,26 @@ public class J48 extends Classifier implements OptionHandler,
     return options;
   }
   
+  /**
+   * Get the value of Seed.
+   *
+   * @return Value of Seed.
+   */
+  public int getSeed() {
+    
+    return m_Seed;
+  }
+  
+  /**
+   * Set the value of Seed.
+   *
+   * @param newSeed Value to assign to Seed.
+   */
+  public void setSeed(int newSeed) {
+    
+    m_Seed = newSeed;
+  }
+
   /**
    * Get the value of useLaplace.
    *

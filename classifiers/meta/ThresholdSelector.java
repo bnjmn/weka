@@ -87,7 +87,7 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler, Drawable {
@@ -182,12 +182,13 @@ public class ThresholdSelector extends Classifier
     case EVAL_TUNED_SPLIT:
       Instances trainData = null, evalData = null;
       Instances data = new Instances(instances);
-      data.randomize(new Random(m_Seed));
+      Random random = new Random(m_Seed);
+      data.randomize(random);
       data.stratify(numFolds);
       
       // Make sure that both subsets contain at least one positive instance
       for (int subsetIndex = 0; subsetIndex < numFolds; subsetIndex++) {
-        trainData = data.trainCV(numFolds, subsetIndex);
+        trainData = data.trainCV(numFolds, subsetIndex, random);
         evalData = data.testCV(numFolds, subsetIndex);
         if (checkForInstance(trainData) && checkForInstance(evalData)) {
           break;

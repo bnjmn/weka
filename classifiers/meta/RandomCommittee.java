@@ -58,7 +58,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RandomCommittee extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -266,14 +266,14 @@ public class RandomCommittee extends Classifier
 
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
 
-    Random random = new Random(m_Seed);
+    Random random = data.getRandomNumberGenerator(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {
 
-	// Set the random number seed for the current classifier.
-	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
-
-	// Build the classifier.
-	m_Classifiers[j].buildClassifier(data);
+      // Set the random number seed for the current classifier.
+      ((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
+      
+      // Build the classifier.
+      m_Classifiers[j].buildClassifier(data);
     }
   }
 
