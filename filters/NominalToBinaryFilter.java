@@ -36,7 +36,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -299,23 +299,32 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	  (j == m_InputFormat.classIndex())) {
 	newAtts.addElement(att.copy());
       } else {
-	if (j < m_InputFormat.classIndex()) {
-	  newClassIndex += att.numValues() - 1;
-	}
-	// Compute values for new attributes
-	  
-	for (int k = 0; k < att.numValues(); k++) {
-	  attributeName = 
-	    new StringBuffer(att.name() + "=");
-	  attributeName.append(att.value(k));
+	if (att.numValues() <= 2) {
 	  if (m_Numeric) {
-	    newAtts.
-	      addElement(new Attribute(attributeName.toString()));
+	    newAtts.addElement(new Attribute(att.name()));
 	  } else {
-	    vals = new FastVector(2);
-	    vals.addElement("f"); vals.addElement("t");
-	    newAtts.
-	      addElement(new Attribute(attributeName.toString(), vals));
+	    newAtts.addElement(att.copy());
+	  }
+	} else {
+
+	  if (j < m_InputFormat.classIndex()) {
+	    newClassIndex += att.numValues() - 1;
+	  }
+
+	  // Compute values for new attributes
+	  for (int k = 0; k < att.numValues(); k++) {
+	    attributeName = 
+	      new StringBuffer(att.name() + "=");
+	    attributeName.append(att.value(k));
+	    if (m_Numeric) {
+	      newAtts.
+		addElement(new Attribute(attributeName.toString()));
+	    } else {
+	      vals = new FastVector(2);
+	      vals.addElement("f"); vals.addElement("t");
+	      newAtts.
+		addElement(new Attribute(attributeName.toString(), vals));
+	    }
 	  }
 	}
       }
@@ -403,20 +412,25 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 	newInstance.setValue(attSoFar, instance.value(j));
 	attSoFar++;
       } else {
-	if (instance.isMissing(j)) {
-	  for (int k = 0; k < att.numValues(); k++) {
-	    newInstance.setValue(attSoFar + k, instance.value(j));
-	  }
+	if (att.numValues() <= 2) {
+	  newInstance.setValue(attSoFar, instance.value(j));
+	  attSoFar++;
 	} else {
-	  for (int k = 0; k < att.numValues(); k++) {
-	    if (k == (int)instance.value(j)) {
-	      newInstance.setValue(attSoFar + k, 1);
-	    } else {
-	      newInstance.setValue(attSoFar + k, 0);
+	  if (instance.isMissing(j)) {
+	    for (int k = 0; k < att.numValues(); k++) {
+	      newInstance.setValue(attSoFar + k, instance.value(j));
+	    }
+	  } else {
+	    for (int k = 0; k < att.numValues(); k++) {
+	      if (k == (int)instance.value(j)) {
+		newInstance.setValue(attSoFar + k, 1);
+	      } else {
+		newInstance.setValue(attSoFar + k, 0);
+	      }
 	    }
 	  }
+	  attSoFar += att.numValues();
 	}
-	attSoFar += att.numValues();
       }
     }
     newInstance.setWeight(instance.weight());
