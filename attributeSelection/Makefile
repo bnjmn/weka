@@ -13,7 +13,8 @@ SOURCES = ASEvaluation.java ASSearch.java AttributeEvaluator.java \
 	  ConsistencySubsetEval.java StartSetHandler.java \
 	  RankSearch.java PrincipalComponents.java \
 	  ErrorBasedMeritEvaluator.java HoldOutSubsetEvaluator.java \
-	  RaceSearch.java ClassifierSubsetEval.java
+	  RaceSearch.java ClassifierSubsetEval.java \
+	  ChiSquaredAttributeEval.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
