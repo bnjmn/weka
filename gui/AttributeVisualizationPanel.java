@@ -63,14 +63,15 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
 
   Instances m_data;
   AttributeStats as;
-  int attribIndex, maxValue;
+  int attribIndex = 0;
+    int  maxValue;
   int histBarCounts[]; 
   int histBarClassCounts[][];
   double m_barRange;
@@ -110,8 +111,9 @@ public class AttributeVisualizationPanel extends JPanel {
     this.addComponentListener( new ComponentAdapter() {
 	public void componentResized(ComponentEvent ce) {
 	  if(m_data!=null)
-	    if(!m_data.attribute(attribIndex).isNominal())
+	    if(!m_data.attribute(attribIndex).isNominal()) {
 	      setAttribute(attribIndex);
+	    }
 	}
       });
 
@@ -155,7 +157,9 @@ public class AttributeVisualizationPanel extends JPanel {
 	      //if(m_comboShow!=null)
 	      //    m_comboShow.keepRunning=true;
 	      classIndex = m_colorAttrib.getSelectedIndex();
-	      setAttribute(attribIndex);
+	      if (as != null) {
+		setAttribute(attribIndex);
+	      }
 	    }
 	  }
 	});
@@ -173,7 +177,7 @@ public class AttributeVisualizationPanel extends JPanel {
    *
    * @param newins a set of Instances
    */
-  public synchronized void setInstances(Instances newins) {
+  public void setInstances(Instances newins) {
     attribIndex = 0;
     m_data = newins;
     as=null;
@@ -344,6 +348,7 @@ public class AttributeVisualizationPanel extends JPanel {
 
   private class HistCalc extends Thread {
     public void run() {
+      if (as == null) return;
       if(m_data.attribute(classIndex).isNominal()) {
 	int histClassCounts[][] = null;
 	if (AttributeVisualizationPanel.this.getWidth()<(int)(as.totalCount*0.1)) {
@@ -357,8 +362,8 @@ public class AttributeVisualizationPanel extends JPanel {
 	  histClassCounts = 
 	    new int[(int)(as.totalCount*0.1)][m_data.attribute(classIndex).numValues()+1];
 	}
-	double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histClassCounts.length;
 	double currentBar = as.numericStats.min; // + barRange;
+	double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histClassCounts.length;
 	maxValue = 0;
 	  
 	if(m_colorList.size()==0)
