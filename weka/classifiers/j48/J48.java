@@ -57,7 +57,7 @@ import weka.classifiers.*;
  * Do not clean up after the tree has been built.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable {
@@ -401,11 +401,15 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   }
   
   /**
-   * Set the value of unpruned.
+   * Set the value of unpruned. Turns reduced-error pruning
+   * off if set.
    * @param v  Value to assign to unpruned.
    */
   public void setUnpruned(boolean v) {
-    
+
+    if (v) {
+      m_reducedErrorPruning = false;
+    }
     m_unpruned = v;
   }
   
@@ -450,7 +454,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   }
   
   /**
-   * Get the value of reducedErrorPruning.
+   * Get the value of reducedErrorPruning. 
    *
    * @return Value of reducedErrorPruning.
    */
@@ -460,12 +464,16 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   }
   
   /**
-   * Set the value of reducedErrorPruning.
+   * Set the value of reducedErrorPruning. Turns
+   * unpruned trees off if set.
    *
    * @param v  Value to assign to reducedErrorPruning.
    */
   public void setReducedErrorPruning(boolean v) {
     
+    if (v) {
+      m_unpruned = false;
+    }
     m_reducedErrorPruning = v;
   }
   
@@ -527,6 +535,25 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   public void setSubtreeRaising(boolean v) {
     
     m_subtreeRaising = v;
+  }
+  
+  /**
+   * Check whether instance data is to be safed.
+   *
+   * @return true if instance data is safed
+   */
+  public boolean getSafeInstanceData() {
+    
+    return m_noCleanup;
+  }
+  
+  /**
+   * Set whether instance data is to be safed.
+   * @param v true if instance data is to be safed
+   */
+  public void setSafeInstanceData(boolean v) {
+    
+    m_noCleanup = v;
   }
  
   /**
