@@ -64,7 +64,7 @@ import weka.core.*;
  * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ReliefFAttributeEval 
   extends AttributeEvaluator 
@@ -149,12 +149,12 @@ public class ReliefFAttributeEval
    *  instance i_j in a sequence of instances ordered by the distance
    *  from r_i. sigma is a user defined parameter, default=20
    **/
-  private double [] weightsByRank;
+  private double [] m_weightsByRank;
 
   private int m_sigma;
 
   /** Weight by distance rather than equal weights */
-  private boolean weightByDistance;
+  private boolean m_weightByDistance;
 
   /**
    * Constructor
@@ -232,7 +232,7 @@ public class ReliefFAttributeEval
     String optionString;
     resetOptions();
     
-    weightByDistance = Utils.getFlag('W',options);
+    m_weightByDistance = Utils.getFlag('W',options);
 
     optionString = Utils.getOption('M',options);
     if (optionString.length() != 0)
@@ -259,10 +259,11 @@ public class ReliefFAttributeEval
     optionString = Utils.getOption('A',options);
     if (optionString.length() != 0)
       {
+	m_weightByDistance = true; // turn on weighting by distance
 	m_sigma = Integer.parseInt(optionString);
 	if (m_sigma <=0)
 	  {
-	    throw new Exception("value of sigma must bee > 0!");
+	    throw new Exception("value of sigma must be > 0!");
 	  }
       }
   }
@@ -277,7 +278,7 @@ public class ReliefFAttributeEval
     String [] options = new String [9];
     int current = 0;
 
-    if (weightByDistance)
+    if (m_weightByDistance)
       {
 	options[current++] = "-W";
       }
@@ -317,7 +318,7 @@ public class ReliefFAttributeEval
 	  }
 
 	text.append("\tNumber of nearest neighbours (k): "+m_Knn+"\n");
-	if (weightByDistance)
+	if (m_weightByDistance)
 	  {
 	    text.append("\tExponentially decreasing (with distance) "
 			+"influence for\n"
@@ -374,12 +375,12 @@ public class ReliefFAttributeEval
 	m_ndcda = new double [m_numAttribs];
       }
 
-    if (weightByDistance) // set up the rank based weights
+    if (m_weightByDistance) // set up the rank based weights
       {
-	weightsByRank = new double [m_Knn];
+	m_weightsByRank = new double [m_Knn];
 	for (int i=0;i<m_Knn;i++)
 	  {
-	    weightsByRank[i] = 
+	    m_weightsByRank[i] = 
 	      Math.exp(-((i/(double)m_sigma)*(i/(double)m_sigma)));
 	  }
       }
@@ -510,7 +511,7 @@ public class ReliefFAttributeEval
     m_sampleM = -1;
     m_Knn = 10;
     m_sigma = 2;
-    weightByDistance = false;
+    m_weightByDistance = false;
     m_seed = 1;
   }
 
@@ -682,7 +683,7 @@ public class ReliefFAttributeEval
     double distNorm = 1.0;
 
     // sort nearest neighbours and set up normalization variable
-    if (weightByDistance)
+    if (m_weightByDistance)
       {
 	tempDist = new double[m_stored[0]];
 	for (j=0, distNorm = 0;j<m_stored[0];j++) 
@@ -690,7 +691,7 @@ public class ReliefFAttributeEval
 	    // copy the distances
 	    tempDist[j] = m_karray[0][j][0];
 	    // sum normalizer
-	    distNorm += weightsByRank[j];
+	    distNorm += m_weightsByRank[j];
 	  }
 	tempSorted = Utils.sort(tempDist);
       }
@@ -698,11 +699,11 @@ public class ReliefFAttributeEval
     for (i=0;i<m_stored[0];i++)
       {
 	// P diff prediction (class) given nearest instances
-	if (weightByDistance)
+	if (m_weightByDistance)
 	  {
 	    temp = attributeDiff(m_classIndex, instNum, 
 				 (int)m_karray[0][tempSorted[i]][1]);
-	    temp *= (weightsByRank[i] / distNorm);
+	    temp *= (m_weightsByRank[i] / distNorm);
 	  }
 	else
 	  {
@@ -718,11 +719,11 @@ public class ReliefFAttributeEval
 	    if (j != m_classIndex)
 	      {
 		// P of different attribute val given nearest instances
-		if (weightByDistance)
+		if (m_weightByDistance)
 		  {
 		    temp = attributeDiff(j,instNum,
 					 (int)m_karray[0][tempSorted[i]][1]);
-		    temp *= (weightsByRank[i] / distNorm);
+		    temp *= (m_weightsByRank[i] / distNorm);
 		  }
 		else
 		  {
@@ -734,13 +735,13 @@ public class ReliefFAttributeEval
 
 		// P of different prediction and different att value given
 		// nearest instances
-		if (weightByDistance)
+		if (m_weightByDistance)
 		  {
 		    temp = attributeDiff(m_classIndex, instNum,
 					 (int)m_karray[0][tempSorted[i]][1]) *
 		      attributeDiff(j, instNum,
 				    (int)m_karray[0][tempSorted[i]][1]);
-		    temp *= (weightsByRank[i] / distNorm);
+		    temp *= (m_weightsByRank[i] / distNorm);
 		  }
 		else
 		  {
@@ -779,7 +780,7 @@ public class ReliefFAttributeEval
     cl = (int)m_trainInstances.instance(instNum).value(m_classIndex);
 
     // sort nearest neighbours and set up normalization variables
-    if (weightByDistance)
+    if (m_weightByDistance)
       {
 	// do class (hits) first
 	// sort the distances
@@ -789,7 +790,7 @@ public class ReliefFAttributeEval
 	    // copy the distances
 	    tempDistClass[j] = m_karray[cl][j][0];
 	    // sum normalizer
-	    distNormClass += weightsByRank[j];
+	    distNormClass += m_weightsByRank[j];
 	  }
 	tempSortedClass = Utils.sort(tempDistClass);
 
@@ -807,7 +808,7 @@ public class ReliefFAttributeEval
 		    // copy the distances
 		    tempDistAtt[j] = m_karray[k][j][0];
 		    // sum normalizer
-		    distNormAtt[k] += weightsByRank[j];
+		    distNormAtt[k] += m_weightsByRank[j];
 		  }
 		tempSortedAtt[k] = Utils.sort(tempDistAtt);
 	      }
@@ -828,12 +829,12 @@ public class ReliefFAttributeEval
 	    // first do k nearest hits
 	    for (j=0, temp_diff = 0.0;j < m_stored[cl]; j++)
 	      {
-		if (weightByDistance)
+		if (m_weightByDistance)
 		  {
 		    temp_diff += 
 		      attributeDiff(i, instNum, 
 				    (int)m_karray[cl][tempSortedClass[j]][1]) *
-		      (weightsByRank[j] / distNormClass);
+		      (m_weightsByRank[j] / distNormClass);
 		  }
 		else
 		  {
@@ -844,7 +845,7 @@ public class ReliefFAttributeEval
 	
 
 	    // average
-	    if ((!weightByDistance) && (m_stored[cl] > 0))
+	    if ((!m_weightByDistance) && (m_stored[cl] > 0))
 	      {
 		temp_diff /= (double)m_stored[cl];
 	      }
@@ -858,12 +859,12 @@ public class ReliefFAttributeEval
 		{
 		  for (j=0,temp=0.0;j<m_stored[k];j++)
 		    {
-		      if (weightByDistance)
+		      if (m_weightByDistance)
 			{
-			  temp_diff += 
+			  temp += 
 			    attributeDiff(i, instNum, 
 				(int)m_karray[k][tempSortedAtt[k][j]][1]) * 
-			    (weightsByRank[j] / distNormAtt[k]);
+			    (m_weightsByRank[j] / distNormAtt[k]);
 			}
 		      else
 			{
@@ -872,7 +873,7 @@ public class ReliefFAttributeEval
 			}
 		    }
 		  
-		  if ((!weightByDistance) && (m_stored[k] > 0))
+		  if ((!m_weightByDistance) && (m_stored[k] > 0))
 		    {
 		      temp /= (double)m_stored[k];
 		    }
