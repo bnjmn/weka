@@ -34,7 +34,7 @@ import weka.estimators.Estimator;
  * probabilities directly from data.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class SimpleEstimator extends BayesNetEstimator {
@@ -66,8 +66,8 @@ public class SimpleEstimator extends BayesNetEstimator {
         for (int iAttribute = 0; iAttribute < bayesNet.m_Instances.numAttributes(); iAttribute++) {
             double iCPT = 0;
 
-            for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).GetNrOfParents(); iParent++) {
-                int nParent = bayesNet.getParentSet(iAttribute).GetParent(iParent);
+            for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).getNrOfParents(); iParent++) {
+                int nParent = bayesNet.getParentSet(iAttribute).getParent(iParent);
 
                 iCPT = iCPT * bayesNet.m_Instances.attribute(nParent).numValues() + instance.value(nParent);
             }
@@ -85,8 +85,8 @@ public class SimpleEstimator extends BayesNetEstimator {
         // Reserve space for CPTs
         int nMaxParentCardinality = 1;
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            if (bayesNet.getParentSet(iAttribute).GetCardinalityOfParents() > nMaxParentCardinality) {
-                nMaxParentCardinality = bayesNet.getParentSet(iAttribute).GetCardinalityOfParents();
+            if (bayesNet.getParentSet(iAttribute).getCardinalityOfParents() > nMaxParentCardinality) {
+                nMaxParentCardinality = bayesNet.getParentSet(iAttribute).getCardinalityOfParents();
             }
         }
 	
@@ -95,7 +95,7 @@ public class SimpleEstimator extends BayesNetEstimator {
 	
         // estimate CPTs
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).GetCardinalityOfParents(); iParent++) {
+            for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).getCardinalityOfParents(); iParent++) {
                 bayesNet.m_Distributions[iAttribute][iParent] =
                     new DiscreteEstimatorBayes(instances.attribute(iAttribute).numValues(), m_fAlpha);
             }
@@ -125,8 +125,8 @@ public class SimpleEstimator extends BayesNetEstimator {
             for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
                 double iCPT = 0;
 
-                for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).GetNrOfParents(); iParent++) {
-                    int nParent = bayesNet.getParentSet(iAttribute).GetParent(iParent);
+                for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).getNrOfParents(); iParent++) {
+                    int nParent = bayesNet.getParentSet(iAttribute).getParent(iParent);
 
                     if (nParent == instances.classIndex()) {
                         iCPT = iCPT * nNumClasses + iClass;

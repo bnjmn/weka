@@ -39,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 
@@ -95,10 +95,10 @@ public class BIFReader extends BayesNet {
 	        	Node parentName = nodelist.item(iParent).getFirstChild();
 	        	String sParentName = ((CharacterData) (parentName)).getData();
 	        	int nParent = getNode(sParentName);
-	        	m_ParentSets[iNode].AddParent(nParent, m_Instances);
+	        	m_ParentSets[iNode].addParent(nParent, m_Instances);
 	        }
 	        // resolve conditional probability table
-		        int nCardinality = m_ParentSets[iNode].GetCardinalityOfParents();
+		        int nCardinality = m_ParentSets[iNode].getCardinalityOfParents();
 	        int nValues = m_Instances.attribute(iNode).numValues();
 	        m_Distributions[iNode] = new Estimator[nCardinality];
 			for (int i = 0; i < nCardinality; i++) {
@@ -234,9 +234,9 @@ public class BIFReader extends BayesNet {
 	public int missingArcs(BayesNet other) {
 		int nMissing = 0;
 		for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
-				int nParent = m_ParentSets[iAttribute].GetParent(iParent);
-				if (!other.getParentSet(iAttribute).Contains(nParent) && !other.getParentSet(nParent).Contains(iAttribute)) {
+			for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
+				int nParent = m_ParentSets[iAttribute].getParent(iParent);
+				if (!other.getParentSet(iAttribute).contains(nParent) && !other.getParentSet(nParent).contains(iAttribute)) {
 					nMissing++;
 				}
 			}
@@ -252,9 +252,9 @@ public class BIFReader extends BayesNet {
 	public int extraArcs(BayesNet other) {
 		int nExtra = 0;
 		for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < other.getParentSet(iAttribute).GetNrOfParents(); iParent++) {
-				int nParent = other.getParentSet(iAttribute).GetParent(iParent);
-				if (!m_ParentSets[iAttribute].Contains(nParent) && !m_ParentSets[nParent].Contains(iAttribute)) {
+			for (int iParent = 0; iParent < other.getParentSet(iAttribute).getNrOfParents(); iParent++) {
+				int nParent = other.getParentSet(iAttribute).getParent(iParent);
+				if (!m_ParentSets[iAttribute].contains(nParent) && !m_ParentSets[nParent].contains(iAttribute)) {
 					nExtra++;
 				}
 			}
@@ -300,8 +300,8 @@ public class BIFReader extends BayesNet {
 				double P = 1.0;
 				for (int iNode = 0; iNode < nNodes; iNode++) {
 					int iCPT = 0;
-					for (int iParent = 0; iParent < m_ParentSets[iNode].GetNrOfParents(); iParent++) {
-				    	int nParent = m_ParentSets[iNode].GetParent(iParent);
+					for (int iParent = 0; iParent < m_ParentSets[iNode].getNrOfParents(); iParent++) {
+				    	int nParent = m_ParentSets[iNode].getParent(iParent);
 					    iCPT = iCPT * nCard[nParent] + x[nParent];
 					} 
 					P = P * m_Distributions[iNode][iCPT].getProbability(x[iNode]);
@@ -310,8 +310,8 @@ public class BIFReader extends BayesNet {
 				double Q = 1.0;
 				for (int iNode = 0; iNode < nNodes; iNode++) {
 					int iCPT = 0;
-					for (int iParent = 0; iParent < other.getParentSet(iNode).GetNrOfParents(); iParent++) {
-				    	int nParent = other.getParentSet(iNode).GetParent(iParent);
+					for (int iParent = 0; iParent < other.getParentSet(iNode).getNrOfParents(); iParent++) {
+				    	int nParent = other.getParentSet(iNode).getParent(iParent);
 					    iCPT = iCPT * nCard[nParent] + x[nParent];
 					} 
 					Q = Q * other.m_Distributions[iNode][iCPT].getProbability(x[iNode]);
@@ -333,9 +333,9 @@ public class BIFReader extends BayesNet {
 	public int reversedArcs(BayesNet other) {
 		int nReversed = 0;
 	    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-			for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
-				int nParent = m_ParentSets[iAttribute].GetParent(iParent);
-				if (!other.getParentSet(iAttribute).Contains(nParent) && other.getParentSet(nParent).Contains(iAttribute)) {
+			for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
+				int nParent = m_ParentSets[iAttribute].getParent(iParent);
+				if (!other.getParentSet(iAttribute).contains(nParent) && other.getParentSet(nParent).contains(iAttribute)) {
 					nReversed++;
 				}
 			}

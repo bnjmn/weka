@@ -26,7 +26,7 @@ package weka.classifiers.bayes.net;
 import java.util.*;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.DiscreteEstimatorBayes;
+import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.core.*;
 import weka.estimators.*;
 
@@ -35,7 +35,7 @@ import weka.estimators.*;
  * Bayes networks and random instances based on a Bayes network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BayesNetGenerator extends BayesNet {
 	int m_nSeed = 1;
@@ -54,12 +54,12 @@ public class BayesNetGenerator extends BayesNet {
 	 * @param nValues: number of values each of the nodes can take
 	 * @param nArcs: number of arcs to generate. Must be between nNodes - 1 and nNodes * (nNodes-1) / 2
 	 * */
-	public void GenerateRandomNetwork () throws Exception {
+	public void generateRandomNetwork () throws Exception {
 		if (m_otherBayesNet == null) {
 			// generate from scratch
 			Init(m_nNrOfNodes, m_nCardinality);
-			GenerateRandomNetworkStructure(m_nNrOfNodes, m_nNrOfArcs);
-			GenerateRandomDistributions(m_nNrOfNodes, m_nCardinality);
+			generateRandomNetworkStructure(m_nNrOfNodes, m_nNrOfArcs);
+			generateRandomDistributions(m_nNrOfNodes, m_nCardinality);
 		} else {
 			// read from file, just copy parent sets and distributions
 			m_nNrOfNodes = m_otherBayesNet.getNrOfNodes();
@@ -124,7 +124,7 @@ public class BayesNetGenerator extends BayesNet {
 	 * @param nNodes: number of nodes in the Bayes net to generate
 	 * @param nArcs: number of arcs to generate. Must be between nNodes - 1 and nNodes * (nNodes-1) / 2
 	 */
-	void GenerateRandomNetworkStructure(int nNodes, int nArcs) 
+	void generateRandomNetworkStructure(int nNodes, int nArcs) 
 		throws Exception
 	{
 		if (nArcs < nNodes - 1) {
@@ -136,7 +136,7 @@ public class BayesNetGenerator extends BayesNet {
 		if (nArcs == 0) {return;} // deal with  patalogical case for nNodes = 1
 
 	    // first generate tree connecting all nodes
-	    GenerateTree(nNodes);
+	    generateTree(nNodes);
 	    // The tree contains nNodes - 1 arcs, so there are 
 	    // nArcs - (nNodes-1) to add at random.
 	    // All arcs point from lower to higher ordered nodes
@@ -148,8 +148,8 @@ public class BayesNetGenerator extends BayesNet {
 				int nNode2 = random.nextInt(nNodes);
 				if (nNode1 == nNode2) {nNode2 = (nNode1 + 1) % nNodes;}
 				if (nNode2 < nNode1) {int h = nNode1; nNode1 = nNode2; nNode2 = h;}
-				if (!m_ParentSets[nNode2].Contains(nNode1)) {
-					m_ParentSets[nNode2].AddParent(nNode1, m_Instances);
+				if (!m_ParentSets[nNode2].contains(nNode1)) {
+					m_ParentSets[nNode2].addParent(nNode1, m_Instances);
 					bDone = true;
 				}
 	    	}
@@ -164,14 +164,14 @@ public class BayesNetGenerator extends BayesNet {
 	 * till all nodes are connected.
 	 * @param nNodes: number of nodes in the Bayes net to generate
 	 */
-	void GenerateTree(int nNodes) {
+	void generateTree(int nNodes) {
         boolean [] bConnected = new boolean [nNodes];
         // start adding an arc at random
 		int nNode1 = random.nextInt(nNodes);
 		int nNode2 = random.nextInt(nNodes);
 		if (nNode1 == nNode2) {nNode2 = (nNode1 + 1) % nNodes;}
 		if (nNode2 < nNode1) {int h = nNode1; nNode1 = nNode2; nNode2 = h;}
-		m_ParentSets[nNode2].AddParent(nNode1, m_Instances);
+		m_ParentSets[nNode2].addParent(nNode1, m_Instances);
 		bConnected[nNode1] = true;
 		bConnected[nNode2] = true;
 		// Repeatedly, select one of the connected nodes, and one of 
@@ -198,7 +198,7 @@ public class BayesNetGenerator extends BayesNet {
 				nNode--;
 			}
 			if (nNode2 < nNode1) {int h = nNode1; nNode1 = nNode2; nNode2 = h;}
-			m_ParentSets[nNode2].AddParent(nNode1, m_Instances);
+			m_ParentSets[nNode2].addParent(nNode1, m_Instances);
 			bConnected[nNode1] = true;
 			bConnected[nNode2] = true;
 		}
@@ -209,12 +209,12 @@ public class BayesNetGenerator extends BayesNet {
 	 * @param nNodes: number of nodes in the Bayes net 
 	 * @param nValues: number of values each of the nodes can take
 	 */
-    void GenerateRandomDistributions(int nNodes, int nValues) {
+    void generateRandomDistributions(int nNodes, int nValues) {
 	    // Reserve space for CPTs
     	int nMaxParentCardinality = 1;
 	    for (int iAttribute = 0; iAttribute < nNodes; iAttribute++) {
-            if (m_ParentSets[iAttribute].GetCardinalityOfParents() > nMaxParentCardinality) {
-	             nMaxParentCardinality = m_ParentSets[iAttribute].GetCardinalityOfParents();
+            if (m_ParentSets[iAttribute].getCardinalityOfParents() > nMaxParentCardinality) {
+	             nMaxParentCardinality = m_ParentSets[iAttribute].getCardinalityOfParents();
             } 
         } 
 
@@ -226,7 +226,7 @@ public class BayesNetGenerator extends BayesNet {
         	int [] nPs = new int [nValues + 1];
         	nPs[0] = 0;
         	nPs[nValues] = 1000;
-            for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetCardinalityOfParents(); iParent++) {
+            for (int iParent = 0; iParent < m_ParentSets[iAttribute].getCardinalityOfParents(); iParent++) {
             	// fill array with random nr's
             	for (int iValue = 1; iValue < nValues; iValue++)  {
             		nPs[iValue] = random.nextInt(1000);
@@ -254,7 +254,7 @@ public class BayesNetGenerator extends BayesNet {
 	 * a Bayes network structure has been initialized
 	 * @param nInstances: nr of isntances to generate
 	 */
-	public void GenerateInstances(){
+	public void generateInstances(){
 		for (int iInstance = 0; iInstance < m_nNrOfInstances; iInstance++) {
 		    int nNrOfAtts = m_Instances.numAttributes();
 			Instance instance = new Instance(nNrOfAtts);
@@ -263,8 +263,8 @@ public class BayesNetGenerator extends BayesNet {
 
 				double iCPT = 0;
 
-				for (int iParent = 0; iParent < m_ParentSets[iAtt].GetNrOfParents(); iParent++) {
-				  int nParent = m_ParentSets[iAtt].GetParent(iParent);
+				for (int iParent = 0; iParent < m_ParentSets[iAtt].getNrOfParents(); iParent++) {
+				  int nParent = m_ParentSets[iAtt].getParent(iParent);
 				  iCPT = iCPT * m_Instances.attribute(nParent).numValues() + instance.value(nParent);
 				} 
 	
@@ -418,9 +418,9 @@ public class BayesNetGenerator extends BayesNet {
     	try {
 	    	b.setOptions(Argv);
 	    	
-	    	b.GenerateRandomNetwork();
+	    	b.generateRandomNetwork();
 	    	if (!b.m_bGenerateNet) { // skip if not required
-				b.GenerateInstances();
+				b.generateInstances();
 	    	}
 	    	System.out.println(b.toString());
     	} catch (Exception e) {

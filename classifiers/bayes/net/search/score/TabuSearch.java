@@ -23,6 +23,7 @@
 package weka.classifiers.bayes.net.search.score;
 
 import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.net.ParentSet;
 import weka.core.*;
 import java.util.*;
 import java.io.Serializable;
@@ -37,166 +38,167 @@ import java.io.Serializable;
  * 1995
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.2 $
+ * Version: $Revision: 1.3 $
  */
 public class TabuSearch extends ScoreSearchAlgorithm {
 
     /** number of runs **/
-    int m_nRuns = 10000;
+    int m_nRuns = 10;
 
     /** size of tabu list **/
-    int m_nTabuList = 100;
+    int m_nTabuList = 5;
 
     class Operation implements Serializable {
     	final static int OPERATION_ADD = 0;
-    	final static int OPERATION_DEL = 0;
+    	final static int OPERATION_DEL = 1;
+//    	final static int OPERATION_REVERSE = 2;
         public Operation() {
         }
+		public Operation(int nTail, int nHead, int nOperation) {
+			m_nHead = nHead;
+			m_nTail = nTail;
+			m_nOperation = nOperation;
+		}
+		public boolean equals(Operation other) {
+			if (other == null) {
+				return false;
+			}
+			return ((	m_nOperation == other.m_nOperation) &&
+			(m_nHead == other.m_nHead) &&
+			(m_nTail == other.m_nTail));
+		} // equals
         public int m_nTail;
         public int m_nHead;
         public int m_nOperation;
     } // class Operation
 
-    Operation[] m_oTabuList;
+	// the actual tabu list
+    Operation[] m_oTabuList = null;
 
-    /** use the arc reversal operator **/
-    boolean m_bUseArcReversal = false;
+	// cache for remembering the change in score for steps in the search space
+	class Cache {
+		double [] [] m_fDeltaScoreAdd;
+		double [] [] m_fDeltaScoreDel;
+		Cache(int nNrOfNodes) {
+			m_fDeltaScoreAdd = new double [nNrOfNodes][nNrOfNodes];
+			m_fDeltaScoreDel = new double [nNrOfNodes][nNrOfNodes];
+		}
+
+		public void put(Operation oOperation, double fValue) {
+			if (oOperation.m_nOperation == Operation.OPERATION_ADD) {
+				m_fDeltaScoreAdd[oOperation.m_nTail][oOperation.m_nHead] = fValue;
+			} else {
+				m_fDeltaScoreDel[oOperation.m_nTail][oOperation.m_nHead] = fValue;
+			}
+		}
+		public double get(Operation oOperation) {
+			if (oOperation.m_nOperation == Operation.OPERATION_ADD) {
+				return m_fDeltaScoreAdd[oOperation.m_nTail][oOperation.m_nHead];
+			}
+			return m_fDeltaScoreDel[oOperation.m_nTail][oOperation.m_nHead];
+		}
+	}
+
+	/** cache for storing score differences **/
+	Cache m_Cache = null;
+	
+//    /** use the arc reversal operator **/
+ //   boolean m_bUseArcReversal = false;
+
+    /** keeps track of score of current structure **/
+	double m_fCurrentScore;
+	/** keeps track of score pf best structure found so far **/
+	double m_fBestScore;
+	/** keeps track of best structure found so far **/
+	BayesNet m_bestBayesNet;
 
     public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
         super.buildStructure(bayesNet, instances);
         Random random = new Random();
         m_oTabuList = new Operation[m_nTabuList];
         int iCurrentTabuList = 0;
-        initBaseScores(bayesNet, instances);
+        initCache(bayesNet, instances);
 
         for (int iRun = 0; iRun < m_nRuns; iRun++) {
-            Operation oOperation = getOptimalOperation(bayesNet, instances);
+            Operation oOperation = performOptimalOperation(bayesNet, instances);
             m_oTabuList[iCurrentTabuList] = oOperation;
             iCurrentTabuList = (iCurrentTabuList + 1) % m_nTabuList;
         }
+		copyParentSets(bayesNet, m_bestBayesNet);
+		
+		// free up memory
+		m_bestBayesNet = null;
+		m_Cache = null;
     } // buildStructure
 
-    double[] fBaseScores;
-    boolean[][] bAddArcMakesSense;
-    double[][] fScore;
-
-    void initBaseScores(BayesNet bayesNet, Instances instances) {
+    void initCache(BayesNet bayesNet, Instances instances)  throws Exception {
+    	
         // determine base scores
-        fBaseScores = new double[instances.numAttributes()];
+		double[] fBaseScores = new double[instances.numAttributes()];
         int nNrOfAtts = instances.numAttributes();
 
+		m_Cache = new Cache (nNrOfAtts);
+		
+		m_fCurrentScore = 0;
         for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
-            fBaseScores[iAttribute] = CalcNodeScore(iAttribute);
+            fBaseScores[iAttribute] = calcNodeScore(iAttribute);
+			m_fCurrentScore += fBaseScores[iAttribute];
         }
-
-        // Determine initial structure by finding a good parent-set for classification
-        // node using greedy search
-        int iAttribute = instances.classIndex();
-        double fBestScore = fBaseScores[iAttribute];
-
-        // /////////////////////////////////////////////////////////////////////////////////////////
-        int m_nMaxNrOfClassifierParents = 4;
-
-        // /////////////////////////////////////////////////////////////////////////////////////////
-        // double fBestScore = CalcNodeScore(iAttribute);
-        boolean bProgress = true;
-
-        while (bProgress && bayesNet.getParentSet(iAttribute).GetNrOfParents() < m_nMaxNrOfClassifierParents) {
-            int nBestAttribute = -1;
-
-            for (int iAttribute2 = 0; iAttribute2 < instances.numAttributes(); iAttribute2++) {
-                if (iAttribute != iAttribute2) {
-                    double fScore = CalcScoreWithExtraParent(iAttribute, iAttribute2);
-
-                    if (fScore > fBestScore) {
-                        fBestScore = fScore;
-                        nBestAttribute = iAttribute2;
-                    }
-                }
-            }
-
-            if (nBestAttribute != -1) {
-                bayesNet.getParentSet(iAttribute).AddParent(nBestAttribute, instances);
-
-                fBaseScores[iAttribute] = fBestScore;
-            } else {
-                bProgress = false;
-            }
-        }
-
-        // Recalc Base scores
-        // Correction for Naive Bayes structures: delete arcs from classification node to children
-        for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).GetNrOfParents(); iParent++) {
-            int nParentNode = bayesNet.getParentSet(iAttribute).GetParent(iParent);
-
-            if (IsArc(bayesNet, nParentNode, iAttribute)) {
-                bayesNet.getParentSet(nParentNode).DeleteLastParent(instances);
-            }
-
-            // recalc base scores
-            fBaseScores[nParentNode] = CalcNodeScore(nParentNode);
-        }
-
-        // super.buildStructure();
-        // Do algorithm B from here onwards
-        // cache scores & whether adding an arc makes sense
-        bAddArcMakesSense = new boolean[nNrOfAtts][nNrOfAtts];
-        fScore = new double[nNrOfAtts][nNrOfAtts];
 
         for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
-            if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() < m_nMaxNrOfParents) {
-
-                // only bother maintaining scores if adding parent does not violate the upper bound on nr of parents
                 for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
-                    bAddArcMakesSense[iAttributeHead][iAttributeTail] =
-                        AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail);
-
-                    if (bAddArcMakesSense[iAttributeHead][iAttributeTail]) {
-                        fScore[iAttributeHead][iAttributeTail] =
-                            CalcScoreWithExtraParent(iAttributeHead, iAttributeTail);
-                    }
-                }
+                	if (iAttributeHead != iAttributeTail) {
+	                    Operation oOperation = new Operation(iAttributeTail, iAttributeHead, Operation.OPERATION_ADD);
+	                    m_Cache.put(oOperation, calcScoreWithExtraParent(iAttributeHead, iAttributeTail) - fBaseScores[iAttributeHead]);
+					}
             }
         }
-    } // initBaseScores
 
-	boolean isNotTabu(int iAttributeTail, int iAttributeHead, int eOperation) {
+		m_fBestScore = m_fCurrentScore;
+		m_bestBayesNet = new BayesNet();
+		m_bestBayesNet.m_Instances = instances;
+		m_bestBayesNet.initStructure();
+		copyParentSets(m_bestBayesNet, bayesNet);
+
+    } // initCache
+
+	/** CopyParentSets copies parent sets of source to dest BayesNet
+	 * @param dest: destination network
+	 * @param source: source network
+	 */
+	void copyParentSets(BayesNet dest, BayesNet source) {
+		int nNodes = source.getNrOfNodes();
+		// clear parent set first
+		for (int iNode = 0; iNode < nNodes; iNode++) {
+			dest.getParentSet(iNode).copy(source.getParentSet(iNode));
+		}		
+	} // CopyParentSets
+
+	boolean isNotTabu(Operation oOperation) {
 		for (int iTabu = 0; iTabu < m_nTabuList; iTabu++) {
-			Operation oOperation = m_oTabuList[iTabu];
-			if ((oOperation.m_nOperation == eOperation) &&
-				(oOperation.m_nHead == iAttributeHead) &&
-				(oOperation.m_nTail == iAttributeTail)) {
-					return true;
+			if (oOperation.equals(m_oTabuList[iTabu])) {
+					return false;
 				}
 		}
 		return true;
 	} // isNotTabu
 
-    Operation getOptimalOperation(BayesNet bayesNet, Instances instances) {
-        Operation oOperation = new Operation();
-        int nBestAttributeTail = -1;
-        int nBestAttributeHead = -1;
-        double fBestDeltaScore = 0.0;
-        int nBestOperation;
+    Operation performOptimalOperation(BayesNet bayesNet, Instances instances) throws Exception {
+        Operation oBestOperation = null;
+        double fBestDeltaScore = -1e100;
         int nNrOfAtts = instances.numAttributes();
 
         // find best arc to add
         for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
-            if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() < m_nMaxNrOfParents) {
+            if (bayesNet.getParentSet(iAttributeHead).getNrOfParents() < m_nMaxNrOfParents) {
                 for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
-                    if (bAddArcMakesSense[iAttributeHead][iAttributeTail]) {
-                        // System.out.println("gain " +  iAttributeTail + " -> " + iAttributeHead + ": "+ (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead]));
-                        if (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead] > fBestDeltaScore) {
-                            if (AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
-                            	if (isNotTabu(iAttributeTail, iAttributeHead, Operation.OPERATION_ADD)) {
-	                                fBestDeltaScore = fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead];
-	                                nBestAttributeTail = iAttributeTail;
-	                                nBestAttributeHead = iAttributeHead;
-	                                nBestOperation = Operation.OPERATION_ADD;
-								}
-                            } else {
-                                bAddArcMakesSense[iAttributeHead][iAttributeTail] = false;
-                            }
+                    if (addArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
+                        Operation oOperation = new Operation(iAttributeTail, iAttributeHead, Operation.OPERATION_ADD);
+                        if (m_Cache.get(oOperation) > fBestDeltaScore) {
+							if (isNotTabu(oOperation)) {
+                        	oBestOperation = oOperation;
+                        	fBestDeltaScore = m_Cache.get(oOperation);
+							}
                         }
                     }
                 }
@@ -204,59 +206,87 @@ public class TabuSearch extends ScoreSearchAlgorithm {
         }
 
 		// find best arc to delete
-		// TODO SORT THIS OUT
-		/*
-		for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
-				for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
-						if (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead] > fBestDeltaScore) {
-							if (AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
-								if (isNotTabu(iAttributeTail, iAttributeHead, Operation.OPERATION_DEL)) {
-									fBestDeltaScore = fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead];
-									nBestAttributeTail = iAttributeTail;
-									nBestAttributeHead = iAttributeHead;
-									nBestOperation = Operation.OPERATION_DEL;
-								}
-							} else {
-								bAddArcMakesSense[iAttributeHead][iAttributeTail] = false;
-							}
-						}
+		for (int iNode = 0; iNode < nNrOfAtts; iNode++) {
+			ParentSet parentSet = bayesNet.getParentSet(iNode);
+			for (int iParent = 0; iParent < parentSet.getNrOfParents(); iParent++) {
+				Operation oOperation = new Operation(parentSet.getParent(iParent), iNode, Operation.OPERATION_DEL);
+				if (m_Cache.get(oOperation) > fBestDeltaScore) {
+					if (isNotTabu(oOperation)) {
+					oBestOperation = oOperation;
+					fBestDeltaScore = m_Cache.get(oOperation);
+					}
 				}
-		*/
-
-        if (nBestAttributeHead >= 0) {
-
-            // update network structure
-            // System.out.println("Added " + nBestAttributeTail + " -> " + nBestAttributeHead);
-            bayesNet.getParentSet(nBestAttributeHead).AddParent(nBestAttributeTail, instances);
-
-            if (bayesNet.getParentSet(nBestAttributeHead).GetNrOfParents() < m_nMaxNrOfParents) {
-
-                // only bother updating scores if adding parent does not violate the upper bound on nr of parents
-                fBaseScores[nBestAttributeHead] += fBestDeltaScore;
-
-                // System.out.println(fScore[nBestAttributeHead][nBestAttributeTail] + " " + fBaseScores[nBestAttributeHead] + " " + fBestDeltaScore);
-                for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
-                    bAddArcMakesSense[nBestAttributeHead][iAttributeTail] =
-                        AddArcMakesSense(bayesNet, instances, nBestAttributeHead, iAttributeTail);
-
-                    if (bAddArcMakesSense[nBestAttributeHead][iAttributeTail]) {
-                        fScore[nBestAttributeHead][iAttributeTail] =
-                            CalcScoreWithExtraParent(nBestAttributeHead, iAttributeTail);
-
-                        // System.out.println(iAttributeTail + " -> " + nBestAttributeHead + ": " + fScore[nBestAttributeHead][iAttributeTail]);
-                    }
-                }
-            }
-        }
-        return oOperation;
+			}
+		}
+		
+		// sanity check
+		if (oBestOperation == null) {
+			throw new Exception("Panic: could not find any step to make. Tabu list too long?");
+		}
+		// perform operation
+		ParentSet bestParentSet = bayesNet.getParentSet(oBestOperation.m_nHead);
+		if (oBestOperation.m_nOperation == Operation.OPERATION_ADD) {
+			bestParentSet .addParent(oBestOperation.m_nTail, instances);
+			if (bayesNet.getDebug()) {
+				System.out.print("Add " + oBestOperation.m_nTail + " -> " + oBestOperation.m_nHead);
+			}
+		} else {
+			bestParentSet .deleteParent(oBestOperation.m_nTail, instances);
+			if (bayesNet.getDebug()) {
+				System.out.print("Del " + oBestOperation.m_nTail + " -> " + oBestOperation.m_nHead);
+			}
+		}
+		m_fCurrentScore += fBestDeltaScore;
+		if (m_fCurrentScore > m_fBestScore) {
+			m_fBestScore = m_fCurrentScore;
+			copyParentSets(m_bestBayesNet, bayesNet);
+		}
+		if (bayesNet.getDebug()) {
+			printTabuList();
+		}
+		updateCache(oBestOperation.m_nHead, nNrOfAtts, bestParentSet);
+	
+        return oBestOperation;
     } // getOptimalOperation
 
+	void printTabuList() {
+		for (int i = 0; i < m_nTabuList; i++) {
+			Operation o = m_oTabuList[i];
+			if (o != null) {
+				if (o.m_nOperation == 0) {System.out.print(" +(");} else {System.out.print(" -(");}
+				System.out.print(o.m_nTail + "->" + o.m_nHead + ")");
+			}
+		}
+	} // printTabuList
+
+	// update the cache
+	void updateCache(int iAttributeHead, int nNrOfAtts, ParentSet parentSet) {
+		// update cache entries for arrows heading towards iAttributeHead
+		double fBaseScore = calcNodeScore(iAttributeHead);
+		int nNrOfParents = parentSet.getNrOfParents();
+		for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
+			if (iAttributeTail != iAttributeHead) {
+				if (!parentSet.contains(iAttributeTail)) {
+					// add entries to cache for adding arcs
+					if (nNrOfParents < m_nMaxNrOfParents) {
+						Operation oOperation = new Operation(iAttributeTail, iAttributeHead, Operation.OPERATION_ADD);
+						m_Cache.put(oOperation, calcScoreWithExtraParent(iAttributeHead, iAttributeTail) - fBaseScore);
+					}
+				} else {
+					// add entries to cache for deleting arcs
+					Operation oOperation = new Operation(iAttributeTail, iAttributeHead, Operation.OPERATION_DEL);
+					m_Cache.put(oOperation, calcScoreWithMissingParent(iAttributeHead, iAttributeTail) - fBaseScore);
+				}
+			}
+		}
+	} // updateCache
+	
     /**
     * @return number of runs
     */
     public int getRuns() {
         return m_nRuns;
-    }
+    } // getRuns
 
     /**
      * Sets the number of runs
@@ -264,14 +294,14 @@ public class TabuSearch extends ScoreSearchAlgorithm {
      */
     public void setRuns(int nRuns) {
         m_nRuns = nRuns;
-    }
+    } // setRuns
 
     /**
      * @return the Tabu List length
      */
     public int getTabuList() {
         return m_nTabuList;
-    }
+    } // getTabuList
 
     /**
      * Sets the Tabu List length.
@@ -279,8 +309,27 @@ public class TabuSearch extends ScoreSearchAlgorithm {
      */
     public void setTabuList(int nTabuList) {
         m_nTabuList = nTabuList;
-    }
+    } // setTabuList
 
+	/**
+	 * Method declaration
+	 *
+	 * @param nMaxNrOfParents
+	 *
+	 */
+	public void setMaxNrOfParents(int nMaxNrOfParents) {
+	  m_nMaxNrOfParents = nMaxNrOfParents;
+	} 
+
+	/**
+	 * Method declaration
+	 *
+	 * @return
+	 *
+	 */
+	public int getMaxNrOfParents() {
+	  return m_nMaxNrOfParents;
+	} 
 
 	/**
 	 * Returns an enumeration describing the available options.
@@ -292,9 +341,10 @@ public class TabuSearch extends ScoreSearchAlgorithm {
 
 		newVector.addElement(new Option("\tTabu list length\n", "L", 1, "-L <integer>"));
 		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
+		newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
 
 		return newVector.elements();
-	}
+	} // listOptions
 
 	/**
 	 * Parses a given list of options. Valid options are:<p>
@@ -313,8 +363,15 @@ public class TabuSearch extends ScoreSearchAlgorithm {
 		if (sRuns.length() != 0) {
 			setRuns(Integer.parseInt(sRuns));
 		}
+		String sMaxNrOfParents = Utils.getOption('P', options);
+		if (sMaxNrOfParents.length() != 0) {
+		  setMaxNrOfParents(Integer.parseInt(sMaxNrOfParents));
+		} else {
+		  setMaxNrOfParents(100000);
+		}
+		
 		super.setOptions(options);
-	}
+	} // setOptions
 
 	/**
 	 * Gets the current settings of the search algorithm.
@@ -323,13 +380,18 @@ public class TabuSearch extends ScoreSearchAlgorithm {
 	 */
 	public String[] getOptions() {
 		String[] superOptions = super.getOptions();
-		String[] options = new String[4 + superOptions.length];
+		String[] options = new String[6 + superOptions.length];
 		int current = 0;
 		options[current++] = "-L";
 		options[current++] = "" + getTabuList();
 
 		options[current++] = "-U";
 		options[current++] = "" + getRuns();
+
+		if (m_nMaxNrOfParents != 10000) {
+		  options[current++] = "-P";
+		  options[current++] = "" + m_nMaxNrOfParents;
+		} 
 
 		// insert options from parent class
 		for (int iOption = 0; iOption < superOptions.length; iOption++) {
@@ -341,6 +403,6 @@ public class TabuSearch extends ScoreSearchAlgorithm {
 			options[current++] = "";
 		}
 		return options;
-	}
+	} // getOptions
 
 } // SimulatedAnnealing

@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
@@ -87,7 +87,7 @@ public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 		double [] fBaseScores = new double [instances.numAttributes()];
 		for (int iOrder = 0; iOrder < instances.numAttributes(); iOrder++) {
 			int iAttribute = nOrder[iOrder];
-			fBaseScores[iAttribute] = CalcNodeScore(iAttribute);
+			fBaseScores[iAttribute] = calcNodeScore(iAttribute);
 		}
 
 		// K2 algorithm: greedy search restricted by ordering 
@@ -95,21 +95,21 @@ public class SearchAlgorithmK2 extends ScoreSearchAlgorithm {
 			int iAttribute = nOrder[iOrder];
 			double fBestScore = fBaseScores[iAttribute];
 
-			boolean bProgress = (bayesNet.getParentSet(iAttribute).GetNrOfParents() < getMaxNrOfParents());
+			boolean bProgress = (bayesNet.getParentSet(iAttribute).getNrOfParents() < getMaxNrOfParents());
 			while (bProgress) {
 				int nBestAttribute = -1;
 				for (int iOrder2 = 0; iOrder2 < iOrder; iOrder2++) {
 					int iAttribute2 = nOrder[iOrder2];
-					double fScore = CalcScoreWithExtraParent(iAttribute, iAttribute2);
+					double fScore = calcScoreWithExtraParent(iAttribute, iAttribute2);
 					if (fScore > fBestScore) {
 						fBestScore = fScore;
 						nBestAttribute = iAttribute2;
 					}
 				}
 				if (nBestAttribute != -1) {
-					bayesNet.getParentSet(iAttribute).AddParent(nBestAttribute, instances);
+					bayesNet.getParentSet(iAttribute).addParent(nBestAttribute, instances);
 					fBaseScores[iAttribute] = fBestScore;
-					bProgress = (bayesNet.getParentSet(iAttribute).GetNrOfParents() < getMaxNrOfParents());
+					bProgress = (bayesNet.getParentSet(iAttribute).getNrOfParents() < getMaxNrOfParents());
 				} else {
 					bProgress = false;
 				}

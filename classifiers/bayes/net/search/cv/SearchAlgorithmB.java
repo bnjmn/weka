@@ -37,7 +37,7 @@ import weka.core.Option;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SearchAlgorithmB extends CVSearchAlgorithm {
 
@@ -61,11 +61,11 @@ public class SearchAlgorithmB extends CVSearchAlgorithm {
         // cache whether adding an arc makes sense
         boolean[][] bAddArcMakesSense = new boolean[nNrOfAtts][nNrOfAtts];
         for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
-            if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() < getMaxNrOfParents()) {
+            if (bayesNet.getParentSet(iAttributeHead).getNrOfParents() < getMaxNrOfParents()) {
                 // only bother maintaining scores if adding parent does not violate the upper bound on nr of parents
                 for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
                     bAddArcMakesSense[iAttributeHead][iAttributeTail] =
-                        AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail);
+                        addArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail);
 
                 }
             }
@@ -80,13 +80,13 @@ public class SearchAlgorithmB extends CVSearchAlgorithm {
 
             // find best arc to add
             for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
-                if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() < getMaxNrOfParents()) {
+                if (bayesNet.getParentSet(iAttributeHead).getNrOfParents() < getMaxNrOfParents()) {
                     for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
                         if (bAddArcMakesSense[iAttributeHead][iAttributeTail]) {
                             double fNewAccuracy = performCVWithExtraParent(iAttributeHead, iAttributeTail);
 
                             if (fNewAccuracy > fBestAccuracy) {
-                                if (AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
+                                if (addArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
                                     fBestAccuracy = fNewAccuracy;
                                     nBestAttributeTail = iAttributeTail;
                                     nBestAttributeHead = iAttributeHead;
@@ -101,7 +101,7 @@ public class SearchAlgorithmB extends CVSearchAlgorithm {
 
             if (nBestAttributeHead >= 0) {
                 // update network structure
-                bayesNet.getParentSet(nBestAttributeHead).AddParent(nBestAttributeTail, instances);
+                bayesNet.getParentSet(nBestAttributeHead).addParent(nBestAttributeTail, instances);
                 fBaseAccuracy = fBestAccuracy;
                 bProgress = true;
             }

@@ -34,7 +34,7 @@ import weka.estimators.Estimator;
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class BMAEstimator extends SimpleEstimator {
@@ -49,7 +49,7 @@ public class BMAEstimator extends SimpleEstimator {
         Instances instances = bayesNet.m_Instances;
         // sanity check to see if nodes have not more than one parent
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            if (bayesNet.getParentSet(iAttribute).GetNrOfParents() > 1) {
+            if (bayesNet.getParentSet(iAttribute).getNrOfParents() > 1) {
                 throw new Exception("Cannot handle networks with nodes with more than 1 parent (yet).");
             }
         }
@@ -80,7 +80,7 @@ public class BMAEstimator extends SimpleEstimator {
                       }
                       w1 += Statistics.lnGamma(nAttValues) - Statistics.lnGamma(nAttValues + instances.numInstances());
 
-                      for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).GetCardinalityOfParents(); iParent++) {
+                      for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).getCardinalityOfParents(); iParent++) {
                         int nTotal = 0;
                           for (int iAttValue = 0; iAttValue < nAttValues; iAttValue++) {
                             double nCount = ((DiscreteEstimatorBayes)NBNet.m_Distributions[iAttribute][iParent]).getCount(iAttValue);
@@ -98,7 +98,7 @@ public class BMAEstimator extends SimpleEstimator {
                       }
                       w1 += Statistics.lnGamma(1) - Statistics.lnGamma(1 + instances.numInstances());
 
-                      int nParentValues = bayesNet.getParentSet(iAttribute).GetCardinalityOfParents();
+                      int nParentValues = bayesNet.getParentSet(iAttribute).getCardinalityOfParents();
                       for (int iParent = 0; iParent < nParentValues; iParent++) {
                         int nTotal = 0;
                           for (int iAttValue = 0; iAttValue < nAttValues; iAttValue++) {
@@ -124,7 +124,7 @@ public class BMAEstimator extends SimpleEstimator {
                     w1 = Math.exp(w1) / (1 + Math.exp(w1));
                   }
 		
-                  for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).GetCardinalityOfParents(); iParent++) {
+                  for (int iParent = 0; iParent < bayesNet.getParentSet(iAttribute).getCardinalityOfParents(); iParent++) {
                       bayesNet.m_Distributions[iAttribute][iParent] = 
                       new DiscreteEstimatorFullBayes(
                         instances.attribute(iAttribute).numValues(), 
@@ -158,8 +158,8 @@ public class BMAEstimator extends SimpleEstimator {
         int nMaxParentCardinality = 1;
 
         for (int iAttribute = 0; iAttribute < bayesNet.m_Instances.numAttributes(); iAttribute++) {
-            if (bayesNet.getParentSet(iAttribute).GetCardinalityOfParents() > nMaxParentCardinality) {
-                nMaxParentCardinality = bayesNet.getParentSet(iAttribute).GetCardinalityOfParents();
+            if (bayesNet.getParentSet(iAttribute).getCardinalityOfParents() > nMaxParentCardinality) {
+                nMaxParentCardinality = bayesNet.getParentSet(iAttribute).getCardinalityOfParents();
             }
         }
 

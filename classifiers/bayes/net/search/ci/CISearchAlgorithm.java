@@ -32,7 +32,7 @@ import weka.core.Instances;
  * score based of cross validation based search algorithms).
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CISearchAlgorithm extends ScoreSearchAlgorithm {
 	BayesNet  m_BayesNet;
@@ -47,24 +47,24 @@ public class CISearchAlgorithm extends ScoreSearchAlgorithm {
  	 * @param nAttributesZ - cardinality of Z
  	 * @return true if X and Y conditionally independent given Z 
 	 */
-	protected boolean IsConditionalIndependent(
+	protected boolean isConditionalIndependent(
 		int iAttributeX, 
 		int iAttributeY, 
 		int [] iAttributesZ, 
 		int nAttributesZ) {
 		ParentSet oParentSetX = m_BayesNet.getParentSet(iAttributeX);
 		// clear parent set of AttributeX
-		while (oParentSetX.GetNrOfParents() > 0) {
-			oParentSetX.DeleteLastParent(m_instances);
+		while (oParentSetX.getNrOfParents() > 0) {
+			oParentSetX.deleteLastParent(m_instances);
 		}
 		
 		// insert parents in iAttributeZ
 		for (int iAttributeZ = 0; iAttributeZ < nAttributesZ; iAttributeZ++) {
-			oParentSetX.AddParent( iAttributesZ[iAttributeZ], m_instances);
+			oParentSetX.addParent( iAttributesZ[iAttributeZ], m_instances);
 		}
 		
-		double fScoreZ = CalcNodeScore(iAttributeX);
-		double fScoreZY = CalcScoreWithExtraParent(iAttributeX, iAttributeY);
+		double fScoreZ = calcNodeScore(iAttributeX);
+		double fScoreZY = calcScoreWithExtraParent(iAttributeX, iAttributeY);
 		if (fScoreZY <= fScoreZ) {
 			// the score does not improve by adding Y to the parent set of X
 			// so we conclude that nodes X and Y are conditionally independent

@@ -34,7 +34,7 @@ import weka.core.Instances;
  *      Machine Learning, 29: 131--163, 1997
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
@@ -54,7 +54,7 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 		// initialize as naive Bayes network
 		for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
 			if (iAttribute != instances.classIndex()) {
-				bayesNet.getParentSet(iAttribute).AddParent(instances.classIndex(), instances);
+				bayesNet.getParentSet(iAttribute).addParent(instances.classIndex(), instances);
 			}
 		}
 
@@ -62,7 +62,7 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 		double[] fBaseScores = new double[instances.numAttributes()];
 
 		for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
-		  fBaseScores[iAttribute] = CalcNodeScore(iAttribute);
+		  fBaseScores[iAttribute] = calcNodeScore(iAttribute);
 		} 
 
 		//		// cache scores & whether adding an arc makes sense
@@ -71,7 +71,7 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 		for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
 			for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
 				if (iAttributeHead != iAttributeTail) {
-					fScore[iAttributeHead][iAttributeTail] = CalcScoreWithExtraParent(iAttributeHead, iAttributeTail);
+					fScore[iAttributeHead][iAttributeTail] = calcScoreWithExtraParent(iAttributeHead, iAttributeTail);
 				}
 			} 
 		}
@@ -146,13 +146,13 @@ public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 		boolean [] hasParent = new boolean [nNrOfAtts];
 		for (int iLink = 0; iLink < nNrOfAtts - 2; iLink++) {
 			if (!hasParent[link1[iLink]]) {
-				bayesNet.getParentSet(link1[iLink]).AddParent(link2[iLink], instances);
+				bayesNet.getParentSet(link1[iLink]).addParent(link2[iLink], instances);
 				hasParent[link1[iLink]] = true;
 			} else {
 				if (hasParent[link2[iLink]]) {
 					throw new Exception("Bug condition found: too many arrows");
 				}
-				bayesNet.getParentSet(link2[iLink]).AddParent(link1[iLink], instances);
+				bayesNet.getParentSet(link2[iLink]).addParent(link1[iLink], instances);
 				hasParent[link2[iLink]] = true;
 			}
 		}

@@ -30,7 +30,7 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ParentSet implements Serializable {
 
@@ -44,7 +44,7 @@ public class ParentSet implements Serializable {
    * 
    * @param iParent Index of parent
    */
-  public int GetParent(int iParent) {
+  public int getParent(int iParent) {
     return m_nParents[iParent];
   } 
 
@@ -68,7 +68,7 @@ public class ParentSet implements Serializable {
    * returns number of parents
    * @return number of parents
    */
-  public int GetNrOfParents() {
+  public int getNrOfParents() {
     return m_nNrOfParents;
   } 
 
@@ -77,7 +77,7 @@ public class ParentSet implements Serializable {
    * @param iNode: node to test for
    * @return number of parents
    */
-	public boolean Contains(int iNode) {
+	public boolean contains(int iNode) {
 		for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
 			if (m_nParents[iParent] == iNode) {
 				return true;
@@ -93,7 +93,7 @@ public class ParentSet implements Serializable {
   /**
    * returns cardinality of parents
    */
-  public int GetCardinalityOfParents() {
+  public int getCardinalityOfParents() {
     return m_nCardinalityOfParents;
   } 
 
@@ -135,7 +135,7 @@ public class ParentSet implements Serializable {
    * 
    * @param nSize maximum size of parent set to reserver memory for
    */
-  public void MaxParentSetSize(int nSize) {
+  public void maxParentSetSize(int nSize) {
     m_nParents = new int[nSize];
   }    // MaxParentSetSize
  
@@ -145,7 +145,7 @@ public class ParentSet implements Serializable {
    * @param nParent parent to add
    * @param _Instances used for updating the internals
    */
-  public void AddParent(int nParent, Instances _Instances) {
+  public void addParent(int nParent, Instances _Instances) {
    if (m_nNrOfParents == 10) {
 	// reserve more memory
 	int [] nParents = new int[50];
@@ -160,7 +160,7 @@ public class ParentSet implements Serializable {
   }    // AddParent
 
 
-  public void DeleteParent(int nParent, Instances _Instances) {
+  public void deleteParent(int nParent, Instances _Instances) {
       int iParent = 0;
       while ((m_nParents[iParent] != nParent) && (iParent < m_nNrOfParents)) {
           iParent++;
@@ -180,12 +180,24 @@ public class ParentSet implements Serializable {
    * 
    * @param _Instances used for updating the internals
    */
-  public void DeleteLastParent(Instances _Instances) {
+  public void deleteLastParent(Instances _Instances) {
     m_nNrOfParents--;
     m_nCardinalityOfParents = 
       m_nCardinalityOfParents 
       / _Instances.attribute(m_nParents[m_nNrOfParents]).numValues();
   }    // DeleteLastParent
+ 
+ 	/** Copy makes current parents set equal to other parent set
+ 	 * 
+ 	 * @param other : parent set to make a copy from
+ 	 */
+ 	public void copy(ParentSet other) {
+ 		m_nCardinalityOfParents = other.m_nCardinalityOfParents;
+ 		m_nNrOfParents = other.m_nNrOfParents;
+ 		for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
+			m_nParents[iParent] = other.m_nParents[iParent];
+ 		}
+ 	} // Copy
  
 }      // class ParentSet
 

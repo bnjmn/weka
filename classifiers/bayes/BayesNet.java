@@ -40,7 +40,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable {
 
@@ -144,7 +144,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
         // initialize ADTree
         if (m_bUseADTree) {
-            m_ADTree = ADNode.MakeADTree(instances);
+            m_ADTree = ADNode.makeADTree(instances);
             //      System.out.println("Oef, done!");
         }
 
@@ -257,8 +257,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
             for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
                 double iCPT = 0;
 
-                for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
-                    int nParent = m_ParentSets[iAttribute].GetParent(iParent);
+                for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
+                    int nParent = m_ParentSets[iAttribute].getParent(iParent);
 
                     if (nParent == m_Instances.classIndex()) {
                         iCPT = iCPT * m_NumClasses + iClass;
@@ -521,8 +521,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
                         + m_Instances.attribute(iAttribute).numValues()
                         + "): ");
 
-                for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
-                    text.append(m_Instances.attribute(m_ParentSets[iAttribute].GetParent(iParent)).name() + " ");
+                for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
+                    text.append(m_Instances.attribute(m_ParentSets[iAttribute].getParent(iParent)).name() + " ");
                 }
 
                 text.append("\n");
@@ -630,14 +630,14 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
         for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
             text.append("<DEFINITION>\n");
             text.append("<FOR>" + m_Instances.attribute(iAttribute).name() + "</FOR>\n");
-            for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetNrOfParents(); iParent++) {
+            for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
                 text.append(
                     "<GIVEN>"
-                        + m_Instances.attribute(m_ParentSets[iAttribute].GetParent(iParent)).name()
+                        + m_Instances.attribute(m_ParentSets[iAttribute].getParent(iParent)).name()
                         + "</GIVEN>\n");
             }
             text.append("<TABLE>\n");
-            for (int iParent = 0; iParent < m_ParentSets[iAttribute].GetCardinalityOfParents(); iParent++) {
+            for (int iParent = 0; iParent < m_ParentSets[iAttribute].getCardinalityOfParents(); iParent++) {
                 for (int iValue = 0; iValue < m_Instances.attribute(iAttribute).numValues(); iValue++) {
                     text.append(m_Distributions[iAttribute][iParent].getProbability(iValue));
                     text.append(' ');
@@ -756,7 +756,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * @return number of parents of the specified node
      */
     public int getNrOfParents(int iNode) {
-        return m_ParentSets[iNode].GetNrOfParents();
+        return m_ParentSets[iNode].getNrOfParents();
     }
 
     /** get node index of a parent of a node in the network structure
@@ -765,7 +765,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * @return node index of the iParent's parent of the specified node
      */
     public int getParent(int iNode, int iParent) {
-        return m_ParentSets[iNode].GetParent(iParent);
+        return m_ParentSets[iNode].getParent(iParent);
     }
 
 	/** Get full set of parent sets.
@@ -787,7 +787,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * @return cardinality of the parent set of the specified node
      */
     public int getParentCardinality(int iNode) {
-        return m_ParentSets[iNode].GetCardinalityOfParents();
+        return m_ParentSets[iNode].getCardinalityOfParents();
     }
 
     /** get particular probability of the conditional probability distribtion
