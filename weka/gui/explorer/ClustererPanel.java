@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.45 $
+ * @version $Revision: 1.45.2.1 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -843,8 +843,10 @@ public class ClustererPanel extends JPanel {
 	    // remove the class attribute (if set) and build the clusterer
 	    clusterer.buildClusterer(removeClass(trainInst));
 
-	    outBuff.append("\n=== Clustering model (full training set) ===\n\n");
+	    if (testMode == 2) {
+	      outBuff.append("\n=== Clustering model (full training set) ===\n\n");
 	    outBuff.append(clusterer.toString() + '\n');
+	    }
 	    m_History.updateResult(name);
 	    if (clusterer instanceof Drawable) {
 	      try {
@@ -863,7 +865,7 @@ public class ClustererPanel extends JPanel {
 	      m_Log.statusMessage("Clustering training data...");
 	      eval.evaluateClusterer(trainInst);
 	      predData = setUpVisualizableInstances(inst,eval);
-	      outBuff.append("=== Evaluation on training set ===\n\n");
+	      outBuff.append("=== Model and evaluation on training set ===\n\n");
 	      break;
 
 	      case 2: // Percent split
@@ -880,7 +882,7 @@ public class ClustererPanel extends JPanel {
 	      m_Log.statusMessage("Evaluating on test split...");
 	      eval.evaluateClusterer(test);
 	      predData = setUpVisualizableInstances(testVis, eval);
-	      outBuff.append("=== Evaluation on test split ===\n");
+	      outBuff.append("=== Model and evaluation on test split ===\n");
 	      break;
 		
 	      case 4: // Test on user split
@@ -891,7 +893,7 @@ public class ClustererPanel extends JPanel {
 	      }
 	      eval.evaluateClusterer(userTestT);
 	      predData = setUpVisualizableInstances(userTest, eval);
-	      outBuff.append("=== Evaluation on test set ===\n");
+	      outBuff.append("=== Model and evaluation on test set ===\n");
 	      break;
 
 	      default:
