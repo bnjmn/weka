@@ -41,7 +41,7 @@ import java.awt.*;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -156,7 +156,7 @@ public class DataVisualizer extends JPanel
 	  }
 	  final javax.swing.JFrame jf = 
 	    new javax.swing.JFrame("Visualize");
-	  jf.setSize(500,400);
+	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(vis, BorderLayout.CENTER);
 	  jf.addWindowListener(new java.awt.event.WindowAdapter() {
