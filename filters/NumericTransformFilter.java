@@ -44,7 +44,7 @@ import weka.core.*;
  * Name of the method used for the transformation.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -286,6 +286,19 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
   public void setInvertSelection(boolean invert) {
 
     m_Cols.setInvert(invert);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndicesTipText() {
+    return "Specify range of attributes to act on."
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
   }
 
   /**

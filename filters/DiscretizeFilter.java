@@ -56,7 +56,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -346,7 +346,31 @@ public class DiscretizeFilter extends Filter
     return (numPendingOutput() != 0);
   }
 
+  /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "An instance filter that discretizes a range of numeric"
+      + " attributes in the dataset into nominal attributes."
+      + " Discretization can be either by simple binning, or by"
+      + " Fayyad & Irani's MDL method (the default).";
+  }
   
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String findNumBinsTipText() {
+
+    return "Optimize bins using leave-one-out.";
+  }
+
   /**
    * Get the value of FindNumBins.
    *
@@ -368,6 +392,17 @@ public class DiscretizeFilter extends Filter
   }
   
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String makeBinaryTipText() {
+
+    return "Make resulting attributes binary.";
+  }
+
+  /**
    * Gets whether binary attributes should be made for discretized ones.
    *
    * @return true if attributes will be binarized
@@ -385,6 +420,19 @@ public class DiscretizeFilter extends Filter
   public void setMakeBinary(boolean makeBinary) {
 
     m_MakeBinary = makeBinary;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useMDLTipText() {
+
+    return "Use class-based discretization. If set to false, does"
+      + " not require a class attribute, and uses a fixed number"
+      + " of bins (according to bins setting).";
   }
 
   /**
@@ -408,6 +456,18 @@ public class DiscretizeFilter extends Filter
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useKononenkoTipText() {
+
+    return "Use Kononenko's MDL criterion. If set to false"
+      + " uses the Fayyad & Irani criterion.";
+  }
+
+  /**
    * Gets whether Kononenko's MDL criterion is to be used.
    *
    * @return true if Kononenko's criterion will be used.
@@ -425,6 +485,18 @@ public class DiscretizeFilter extends Filter
   public void setUseKononenko(boolean useKon) {
 
     m_UseKononenko = useKon;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useBetterEncodingTipText() {
+
+    return "Uses a different split point encoding. Who says it's better?"
+      + " (Eibe fix this).";
   }
 
   /**
@@ -448,6 +520,18 @@ public class DiscretizeFilter extends Filter
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String binsTipText() {
+
+    return "Number of bins for class-blind discretisation. This"
+      + " setting is ignored if MDL-based discretisation is used.";
+  }
+
+  /**
    * Gets the number of bins numeric attributes will be divided into
    *
    * @return the number of bins.
@@ -465,6 +549,19 @@ public class DiscretizeFilter extends Filter
   public void setBins(int numBins) {
 
     m_NumBins = numBins;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+
+    return "Set attribute selection mode. If false, only selected"
+      + " (numeric) attributes in the range will be discretized; if"
+      + " true, only non-selected attributes will be discretized.";
   }
 
   /**
@@ -487,6 +584,19 @@ public class DiscretizeFilter extends Filter
   public void setInvertSelection(boolean invert) {
 
     m_DiscretizeCols.setInvert(invert);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndicesTipText() {
+    return "Specify range of attributes to act on."
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
   }
 
   /**
@@ -549,26 +659,6 @@ public class DiscretizeFilter extends Filter
       return null;
     }
     return m_CutPoints[attributeIndex];
-  }
-
-  /**
-   * Get if binning is to be optimized.
-   *
-   * @return if binning is to be optimized
-   */
-  public boolean getOptimzeBinning() {
-
-    return m_FindNumBins;
-  }
-
-  /**
-   * Sets if binning is to be optimized.
-   *
-   * @param bool set if binning 
-   */
-  public void setOptimizeBinning(boolean bool) {
-
-    m_FindNumBins = bool;
   }
 
   /** Generate the cutpoints for each attribute */

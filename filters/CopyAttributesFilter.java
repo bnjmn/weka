@@ -40,7 +40,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CopyAttributesFilter extends Filter implements OptionHandler {
 
@@ -194,6 +194,33 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
   }
 
   /**
+   * Returns a string describing this filter
+   *
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return "An instance filter that copies a range of attributes in the"
+      + " dataset. This is used in conjunction with other filters that"
+      + " overwrite attribute values during the course of their operation --"
+      + " this filter allows the original attributes to be kept as well"
+      + " as the new attributes.";
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+    return "Sets copy selected vs unselected action."
+      + " If set to false, only the specified attributes will be copied;"
+      + " If set to true, non-specified attributes will be copied.";
+  }
+
+  /**
    * Get whether the supplied columns are to be removed or kept
    *
    * @return true if the supplied columns will be kept
@@ -223,6 +250,19 @@ public class CopyAttributesFilter extends Filter implements OptionHandler {
   public String getAttributeIndices() {
 
     return m_CopyCols.getRanges();
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndicesTipText() {
+    return "Specify range of attributes to act on."
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
   }
 
   /**

@@ -41,7 +41,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AddFilter extends Filter implements OptionHandler {
 
@@ -59,13 +59,14 @@ public class AddFilter extends Filter implements OptionHandler {
 
   /**
    * Returns a string describing this filter
+   *
    * @return a description of the filter suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "AddFilter: \n\nAn instance filter that adds a new attribute to "
-      +"the dataset.\n"
-      +"The new attribute contains all missing values.\n";
+
+    return "An instance filter that adds a new attribute to the dataset."
+      + " The new attribute will contain all missing values.";
   }
 
   /**
@@ -226,11 +227,13 @@ public class AddFilter extends Filter implements OptionHandler {
 
   /**
    * Returns the tip text for this property
+   *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String attributeNameTipText() {
-    return "Set the new attribute's name";
+
+    return "Set the new attribute's name.";
   }
 
   /**
@@ -266,11 +269,14 @@ public class AddFilter extends Filter implements OptionHandler {
 
   /**
    * Returns the tip text for this property
+   *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String attributeIndexTipText() {
-    return "The index where the attribute will be inserted";
+
+    return "The position (from 0) where the attribute will be inserted."
+      + " Use -1 to indicate the last attribute.";
   }
 
   /**
@@ -294,11 +300,14 @@ public class AddFilter extends Filter implements OptionHandler {
 
   /**
    * Returns the tip text for this property
+   *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String nominalLabelsTipText() {
-    return "The list of labels for nominal attribute creation";
+    return "The list of value labels (nominal attribute creation only). "
+      + " The list must be comma-separated, eg: \"red,green,blue\"."
+      + " If this is empty, the created attribute will be numeric.";
   }
 
   /**
