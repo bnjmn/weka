@@ -23,12 +23,13 @@
 
 package weka.experiment;
 
-import java.sql.*;
-import java.net.InetAddress;
-import java.util.*;
-import java.math.*;
-import java.io.*;
 
+import java.io.*;
+import java.math.*;
+import java.net.InetAddress;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 import weka.core.*;
 
 /**
@@ -45,7 +46,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -271,16 +272,9 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	attributeTypes[i - 1] = Attribute.STRING;
 	break; */
       case Types.DATE:
-	//System.err.println("Date --> unsupported");
-	attributeTypes[i - 1] = Attribute.STRING;
-	break;
       case Types.TIME:
-	//System.err.println("Time --> unsupported");
-	attributeTypes[i - 1] = Attribute.STRING;
-	break;
       case Types.TIMESTAMP:
-	//System.err.println("Time --> unsupported");
-	attributeTypes[i - 1] = Attribute.STRING;
+	attributeTypes[i - 1] = Attribute.DATE;
 	break;
       default:
 	//System.err.println("Unknown column type");
@@ -395,6 +389,14 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	case Types.DATE:
 	case Types.TIME:
 	case Types.TIMESTAMP:
+          Date date = rs.getDate(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double)date.getTime();
+          }
+          break;
 	default:
 	  vals[i - 1] = Instance.missingValue();
 	}
@@ -423,7 +425,10 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	attribInfo.addElement(new Attribute(attribName));
 	break;
       case Attribute.STRING:
-	attribInfo.addElement(new Attribute(attribName, null));
+	attribInfo.addElement(new Attribute(attribName, (FastVector)null));
+	break;
+      case Attribute.DATE:
+	attribInfo.addElement(new Attribute(attribName, (String)null));
 	break;
       default:
 	throw new Exception("Unknown attribute type");

@@ -62,7 +62,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -704,13 +704,13 @@ public class Instance implements Copyable, Serializable {
   }
 
   /** 
-   * Returns the value of a nominal (or string) attribute
+   * Returns the string value of a nominal, string, or date attribute
    * for the instance.
    *
    * @param attIndex the attribute's index
    * @return the value as a string
-   * @exception IllegalArgumentException if the attribute is not a nominal
-   * (or string) attribute.
+   * @exception IllegalArgumentException if the attribute is not a nominal,
+   * string, or date attribute.
    * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
@@ -719,28 +719,32 @@ public class Instance implements Copyable, Serializable {
     if (m_Dataset == null) {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     } 
-    if (!m_Dataset.attribute(attIndex).isNominal() &&
-	!m_Dataset.attribute(attIndex).isString()) {
-      throw new IllegalArgumentException("Attribute neither nominal nor string!");
-    }
-    return m_Dataset.attribute(attIndex).
-      value((int) value(attIndex));
+    return stringValue(m_Dataset.attribute(attIndex));
   }
 
   /** 
-   * Returns the value of a nominal (or string) attribute
+   * Returns the string value of a nominal, string, or date attribute
    * for the instance.
    *
    * @param att the attribute
    * @return the value as a string
-   * @exception IllegalArgumentException if the attribute is not a nominal
-   * (or string) attribute.
+   * @exception IllegalArgumentException if the attribute is not a nominal,
+   * string, or date attribute.
    * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
   public final String stringValue(Attribute att) {
 
-    return stringValue(att.index());
+    int attIndex = att.index();
+    switch (att.type()) {
+    case Attribute.NOMINAL:
+    case Attribute.STRING:
+      return att.value((int) value(attIndex));
+    case Attribute.DATE:
+      return att.formatDate(value(attIndex));
+    default:
+      throw new IllegalArgumentException("Attribute isn't nominal, string or date!");
+    }
   }
 
   /**
@@ -796,11 +800,17 @@ public class Instance implements Copyable, Serializable {
      if (m_Dataset == null) {
        text.append(Utils.doubleToString(m_AttValues[attIndex],6));
      } else {
-       if (m_Dataset.attribute(attIndex).isNominal() || 
-	   m_Dataset.attribute(attIndex).isString()) {
+       switch (m_Dataset.attribute(attIndex).type()) {
+       case Attribute.NOMINAL:
+       case Attribute.STRING:
+       case Attribute.DATE:
          text.append(Utils.quote(stringValue(attIndex)));
-       } else {
+         break;
+       case Attribute.NUMERIC:
 	 text.append(Utils.doubleToString(value(attIndex),6));
+         break;
+       default:
+         throw new IllegalStateException("Unknown attribute type");
        }
      }
    }
