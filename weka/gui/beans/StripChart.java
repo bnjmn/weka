@@ -52,7 +52,7 @@ import weka.core.Queue;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class StripChart 
   extends JPanel 
@@ -207,6 +207,15 @@ public class StripChart
 
     // start a thread to handle plot updates
     initPlot();
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Visualize incremental classifier performance as a scrolling plot.";
   }
 
   /**

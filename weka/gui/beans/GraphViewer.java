@@ -49,7 +49,7 @@ import java.awt.event.MouseEvent;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class GraphViewer 
   extends JPanel
@@ -71,6 +71,15 @@ public class GraphViewer
     setUpResultHistory();
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  /**
+   * Global info for this bean
+   *
+   * @return a <code>String</code> value
+   */
+  public String globalInfo() {
+    return "Graphically visualize trees produced by classifiers/clusterers.";
   }
 
   private void setUpResultHistory() {

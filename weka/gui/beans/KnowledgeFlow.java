@@ -88,6 +88,7 @@ import java.beans.Customizer;
 import java.beans.EventSetDescriptor;
 import java.beans.Beans;
 import java.beans.PropertyDescriptor;
+import java.beans.MethodDescriptor;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.beancontext.*;
@@ -99,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.11 $
+ * @version  $Revision: 1.12 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -234,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    * @since 1.0
    * @see JPanel
    */
@@ -668,6 +669,8 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
 				   tempBeanCompName, "");
 
 	  if (tempBean != null) {
+	    // set tool tip text (if any)
+	    // setToolTipText(tempBean)
 	    tempToolBar.add(tempBean);
 	  } 
 	}
@@ -824,6 +827,31 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       });
     
 
+    // set tool tip text from global info if supplied
+    try {
+      BeanInfo bi = Introspector.getBeanInfo(tempBean.getClass());
+      MethodDescriptor [] methods = bi.getMethodDescriptors();
+      for (int i = 0; i < methods.length; i++) {
+	String name = methods[i].getDisplayName();
+	Method meth = methods[i].getMethod();
+	if (name.equals("globalInfo")) {
+	  if (meth.getReturnType().equals(String.class)) {
+	    Object args[] = { };
+	    String globalInfo = (String)(meth.invoke(tempBean, args));
+	    String summary = globalInfo;
+	    int ci = globalInfo.indexOf('.');
+	    if (ci != -1) {
+	      summary = globalInfo.substring(0, ci + 1);
+	    }
+	    tempButton.setToolTipText(summary);
+	    
+	    break;
+	  }
+	}
+      }
+    } catch (Exception ex) {
+      
+    }
     //return tempBean;
     return tempP;
   }
