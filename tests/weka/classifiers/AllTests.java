@@ -1,5 +1,8 @@
 package weka.classifiers;
 
+import weka.classifiers.meta.ThresholdSelectorTest;
+import weka.classifiers.rules.ZeroRTest;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;         
@@ -10,7 +13,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AllTests extends TestSuite {
 

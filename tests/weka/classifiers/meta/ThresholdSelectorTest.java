@@ -2,8 +2,9 @@
  * Copyright 2000 Webmind Inc. 
  */
 
-package weka.classifiers;
+package weka.classifiers.meta;
 
+import weka.classifiers.*;
 import java.util.Random;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -19,7 +20,7 @@ import weka.classifiers.evaluation.NominalPrediction;
  * java weka.classifiers.ThresholdSelectorTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ThresholdSelectorTest extends AbstractClassifierTest {
 

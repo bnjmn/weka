@@ -2,8 +2,9 @@
  * Copyright 2000 Webmind Inc. 
  */
 
-package weka.classifiers;
+package weka.classifiers.rules;
 
+import weka.classifiers.*;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -14,7 +15,7 @@ import weka.core.Instances;
  * java weka.classifiers.ZeroRTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ZeroRTest extends AbstractClassifierTest {
   

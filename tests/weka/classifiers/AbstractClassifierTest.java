@@ -4,6 +4,7 @@
 
 package weka.classifiers;
 
+import weka.classifiers.meta.DistributionMetaClassifier;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -22,7 +23,7 @@ import weka.core.UnsupportedClassTypeException;
  * Abstract Test class for Classifiers.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractClassifierTest extends TestCase {
 
