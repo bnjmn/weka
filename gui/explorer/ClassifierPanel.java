@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.71 $
+ * @version $Revision: 1.72 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1627,7 +1627,8 @@ public class ClassifierPanel extends JPanel {
 		Instances result = tc.getCurve(preds, classValue);
 		//VisualizePanel vmc = new VisualizePanel();
 		ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-		vmc.setROCString("(Area under ROC = "+tc.getROCArea(result)+")");
+		vmc.setROCString("(Area under ROC = " + 
+				 Utils.doubleToString(tc.getROCArea(result), 4) + ")");
 		vmc.setLog(m_Log);
 		vmc.setName(result.relationName()+". Class value "+
 			    classAtt.value(classValue)+")");
