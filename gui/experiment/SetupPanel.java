@@ -32,6 +32,7 @@ import weka.gui.PropertyPanel;
 import weka.gui.FileEditor;
 
 import weka.experiment.Experiment;
+import weka.experiment.RemoteExperiment;
 import weka.experiment.ResultProducer;
 import weka.experiment.ResultListener;
 import weka.experiment.CrossValidationResultProducer;
@@ -82,7 +83,7 @@ import javax.swing.filechooser.FileFilter;
  * This panel controls the configuration of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class SetupPanel extends JPanel {
 
@@ -124,6 +125,10 @@ public class SetupPanel extends JPanel {
 
   /** The panel for configuring run numbers */
   protected RunNumberPanel m_RunNumberPanel = new RunNumberPanel();
+
+  /** The panel for enabling a distributed experiment */
+  protected DistributeExperimentPanel m_DistributeExperimentPanel = 
+    new DistributeExperimentPanel();
 
   /** The panel for configuring selected datasets */
   protected DatasetListPanel m_DatasetListPanel = new DatasetListPanel();
@@ -196,6 +201,26 @@ public class SetupPanel extends JPanel {
    * Creates the setup panel with no initial experiment.
    */
   public SetupPanel() {
+
+    m_DistributeExperimentPanel.
+      addCheckBoxActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    if (m_DistributeExperimentPanel.distributedExperimentSelected()) {
+	      if (!(m_Exp instanceof RemoteExperiment)) {
+		try {
+		  RemoteExperiment re = new RemoteExperiment(m_Exp);
+		  setExperiment(re);
+		} catch (Exception ex) {
+		  ex.printStackTrace();
+		}
+	      }
+	    } else {
+	      if (m_Exp instanceof RemoteExperiment) {
+		setExperiment(((RemoteExperiment)m_Exp).getBaseExperiment());
+	      }
+	    }
+	  }
+	});	      
 
     m_NewBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -290,7 +315,11 @@ public class SetupPanel extends JPanel {
 
     JPanel simpleIterators = new JPanel();
     simpleIterators.setLayout(new BorderLayout());
-    simpleIterators.add(m_RunNumberPanel, BorderLayout.NORTH);
+    JPanel tmp = new JPanel();
+    tmp.setLayout(new GridLayout(1, 2));
+    tmp.add(m_RunNumberPanel);
+    tmp.add(m_DistributeExperimentPanel);
+    simpleIterators.add(tmp, BorderLayout.NORTH);
     simpleIterators.add(m_DatasetListPanel, BorderLayout.CENTER);
     JPanel iterators = new JPanel();
     iterators.setLayout(new GridLayout(1, 2));
@@ -342,6 +371,7 @@ public class SetupPanel extends JPanel {
     m_GeneratorPropertyPanel.setExperiment(m_Exp);
     m_RunNumberPanel.setExperiment(m_Exp);
     m_DatasetListPanel.setExperiment(m_Exp);
+    m_DistributeExperimentPanel.setExperiment(m_Exp);
     m_Support.firePropertyChange("", null, null);
   }
 

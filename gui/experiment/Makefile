@@ -7,7 +7,9 @@ SOURCES = \
 	ResultsPanel.java \
 	RunNumberPanel.java \
 	RunPanel.java \
-	SetupPanel.java
+	SetupPanel.java \
+	DistributeExperimentPanel.java \
+	HostListPanel.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 TOPDIR = ../../..

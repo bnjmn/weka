@@ -21,8 +21,12 @@ package weka.gui.experiment;
 
 import weka.gui.LogPanel;
 import weka.experiment.Experiment;
+import weka.experiment.RemoteExperiment;
+import weka.experiment.RemoteExperimentListener;
+import weka.experiment.RemoteExperimentEvent;
 import weka.core.Utils;
 
+import java.io.Serializable;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -58,7 +62,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -83,7 +87,7 @@ public class RunPanel extends JPanel implements ActionListener {
    * A class that handles running a copy of the experiment
    * in a separate thread
    */
-  class ExperimentRunner extends Thread {
+  class ExperimentRunner extends Thread implements Serializable {
 
     Experiment m_ExpCopy;
     
@@ -110,7 +114,16 @@ public class RunPanel extends JPanel implements ActionListener {
       oi.close();
       System.err.println("Made experiment copy");
     }
-    
+
+    public void abortExperiment() {
+      if (m_ExpCopy instanceof RemoteExperiment) {
+	((RemoteExperiment)m_ExpCopy).abortExperiment();
+	m_StartBut.setEnabled(true);
+	m_StopBut.setEnabled(false);
+	statusMessage(NOT_RUNNING);
+      }
+    }
+
     /**
      * Starts running the experiment.
      */
@@ -119,67 +132,96 @@ public class RunPanel extends JPanel implements ActionListener {
       m_StartBut.setEnabled(false);
       m_StopBut.setEnabled(true);
       try {
+	if (m_ExpCopy instanceof RemoteExperiment) {
+	  // add a listener
+	  System.err.println("Adding a listener");
+	  ((RemoteExperiment)m_ExpCopy).
+	    addRemoteExperimentListener(new RemoteExperimentListener() {
+		public void remoteExperimentStatus(RemoteExperimentEvent e) {
+		  if (e.m_statusMessage) {
+		    statusMessage(e.m_messageString);
+		  }
+		  if (e.m_logMessage) {
+		    logMessage(e.m_messageString);
+		  }
+		  if (e.m_experimentFinished) {
+		    m_RunThread = null;
+		    m_StartBut.setEnabled(true);
+		    m_StopBut.setEnabled(false);
+		    statusMessage(NOT_RUNNING);
+		  }
+		}
+	      });
+	}
 	logMessage("Started");
 	statusMessage("Initializing...");
 	m_ExpCopy.initialize();
 	int errors = 0;
-	statusMessage("Iterating...");
-	while (m_RunThread != null && m_ExpCopy.hasMoreIterations()) {
-	  try {
-	    String current = "Iteration:";
-	    if (m_ExpCopy.getUsePropertyIterator()) {
-	      int cnum = m_ExpCopy.getCurrentPropertyNumber();
-              String ctype = m_ExpCopy.getPropertyArray().getClass().getComponentType().getName();
-              int lastDot = ctype.lastIndexOf('.');
-              if (lastDot != -1) {
-                ctype = ctype.substring(lastDot + 1);
-              }
-	      String cname = " " + ctype + "="
-		+ (cnum + 1) + ":"
-		+ m_ExpCopy.getPropertyArrayValue(cnum).getClass().getName();
-	      current += cname;
-	    }
-	    String dname = ((File) m_ExpCopy.getDatasets()
-	      .elementAt(m_ExpCopy.getCurrentDatasetNumber())).getName();
-	    current += " Dataset=" + dname
-	      + " Run=" + (m_ExpCopy.getCurrentRunNumber());
-	    statusMessage(current);
-	    m_ExpCopy.nextIteration();
-	  } catch (Exception ex) {
-	    errors ++;
-	    logMessage(ex.getMessage());
-            ex.printStackTrace();
-	    boolean continueAfterError = false;
-	    if (continueAfterError) {
-	      m_ExpCopy.advanceCounters(); // Try to keep plowing through
-	    } else {
-	      m_RunThread = null;
+	if (!(m_ExpCopy instanceof RemoteExperiment)) {
+	  statusMessage("Iterating...");
+	  while (m_RunThread != null && m_ExpCopy.hasMoreIterations()) {
+	    try {
+	      String current = "Iteration:";
+	      if (m_ExpCopy.getUsePropertyIterator()) {
+		int cnum = m_ExpCopy.getCurrentPropertyNumber();
+		String ctype = m_ExpCopy.getPropertyArray().getClass().getComponentType().getName();
+		int lastDot = ctype.lastIndexOf('.');
+		if (lastDot != -1) {
+		  ctype = ctype.substring(lastDot + 1);
+		}
+		String cname = " " + ctype + "="
+		  + (cnum + 1) + ":"
+		  + m_ExpCopy.getPropertyArrayValue(cnum).getClass().getName();
+		current += cname;
+	      }
+	      String dname = ((File) m_ExpCopy.getDatasets()
+			      .elementAt(m_ExpCopy.getCurrentDatasetNumber()))
+		.getName();
+	      current += " Dataset=" + dname
+		+ " Run=" + (m_ExpCopy.getCurrentRunNumber());
+	      statusMessage(current);
+	      m_ExpCopy.nextIteration();
+	    } catch (Exception ex) {
+	      errors ++;
+	      logMessage(ex.getMessage());
+	      ex.printStackTrace();
+	      boolean continueAfterError = false;
+	      if (continueAfterError) {
+		m_ExpCopy.advanceCounters(); // Try to keep plowing through
+	      } else {
+		m_RunThread = null;
+	      }
 	    }
 	  }
-	}
-	statusMessage("Postprocessing...");
-	m_ExpCopy.postProcess();
-	if (m_RunThread == null) {
-	  logMessage("Interrupted");
+	  statusMessage("Postprocessing...");
+	  m_ExpCopy.postProcess();
+	  if (m_RunThread == null) {
+	    logMessage("Interrupted");
+	  } else {
+	    logMessage("Finished");
+	  }
+	  if (errors == 1) {
+	    logMessage("There was " + errors + " error");
+	  } else {
+	    logMessage("There were " + errors + " errors");
+	  }
+	  statusMessage(NOT_RUNNING);
 	} else {
-	  logMessage("Finished");
+	  statusMessage("Remote experiment running...");
+	  ((RemoteExperiment)m_ExpCopy).runExperiment();
 	}
-	if (errors == 1) {
-	  logMessage("There was " + errors + " error");
-	} else {
-	  logMessage("There were " + errors + " errors");
-	}
-	statusMessage(NOT_RUNNING);
       } catch (Exception ex) {
 	ex.printStackTrace();
 	System.err.println(ex.getMessage());
 	statusMessage(ex.getMessage());
       } finally {
-	m_RunThread = null;
-	m_StartBut.setEnabled(true);
-	m_StopBut.setEnabled(false);
+	if (!(m_ExpCopy instanceof RemoteExperiment)) {
+	  m_RunThread = null;
+	  m_StartBut.setEnabled(true);
+	  m_StopBut.setEnabled(false);
+	  System.err.println("Done...");
+	}
       }
-      System.err.println("Done...");
     }
   }
 
@@ -259,7 +301,8 @@ public class RunPanel extends JPanel implements ActionListener {
       }
     } else if (e.getSource() == m_StopBut) {
       m_StopBut.setEnabled(false);
-
+      logMessage("Aborting experiment.");
+      ((ExperimentRunner)m_RunThread).abortExperiment();
       // m_RunThread.stop() ??
       m_RunThread = null;
     }
@@ -303,7 +346,12 @@ public class RunPanel extends JPanel implements ActionListener {
 	FileInputStream fi = new FileInputStream(expFile);
 	ObjectInputStream oi = new ObjectInputStream(
 			       new BufferedInputStream(fi));
-	exp = (Experiment)oi.readObject();
+	Object to = oi.readObject();
+	if (to instanceof RemoteExperiment) {
+	  exp = (RemoteExperiment)to;
+	} else {
+	  exp = (Experiment)to;
+	}
 	oi.close();
       } else {
 	exp = new Experiment();
