@@ -32,16 +32,16 @@ package weka.gui.graphvisualizer;
  */
 public interface GraphConstants  {
    /** Types of Edges */
-   static final int DIRECTED=1,  REVERSED=2, DOUBLE=3;
+  int DIRECTED=1,  REVERSED=2, DOUBLE=3;
     
-   //Node types
-   /** SINGULAR_DUMMY node - node with only one outgoing edge 
-       i.e. one which represents a single edge and is inserted to close a gap */
-   static final int SINGULAR_DUMMY=1;
-   /** PLURAL_DUMMY node - node with more than one outgoing edge 
-       i.e. which represents an edge split and is inserted to close a gap */
-   static final int PLURAL_DUMMY=2;
-   /** NORMAL node - node actually contained in graphs description  */
-   static final int NORMAL=3;
+  //Node types
+  /** SINGULAR_DUMMY node - node with only one outgoing edge 
+      i.e. one which represents a single edge and is inserted to close a gap */
+  int SINGULAR_DUMMY=1;
+  /** PLURAL_DUMMY node - node with more than one outgoing edge 
+      i.e. which represents an edge split and is inserted to close a gap */
+  int PLURAL_DUMMY=2;
+  /** NORMAL node - node actually contained in graphs description  */
+  int NORMAL=3;
     
 } // GraphConstants

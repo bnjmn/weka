@@ -38,49 +38,51 @@ import javax.swing.JProgressBar;
  * @version 1.0 - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public interface LayoutEngine {
-    /**
-       This method lays out the graph for better visualization
-     */
-    public void layoutGraph();
+  /**
+     This method lays out the graph for better visualization
+  */
+  void layoutGraph();
 
-    /**
-       This method sets the nodes and edges vectors of the LayoutEngine
-     */
-    public void setNodesEdges(FastVector nodes, FastVector edges);
-    /**
-       This method sets the allowed size of the node
-     */
-    public void setNodeSize(int nodeWidth, int nodeHeight);
+  /**
+     This method sets the nodes and edges vectors of the LayoutEngine
+  */
+  void setNodesEdges(FastVector nodes, FastVector edges);
+  /**
+     This method sets the allowed size of the node
+  */
+  void setNodeSize(int nodeWidth, int nodeHeight);
 
-    /**
-       This method returns the extra controls panel 
-       for the LayoutEngine, if there is any.
-     */
-    public JPanel getControlPanel();
+  /**
+     This method returns the extra controls panel 
+     for the LayoutEngine, if there is any.
+  */
+  JPanel getControlPanel();
 
-    /**
-       This method returns the progress bar
-       for the LayoutEngine, which shows 
-       the progress of the layout process,
-       if it takes a while to layout the 
-       graph
-     */
-    public JProgressBar getProgressBar();
+  /**
+     This method returns the progress bar
+     for the LayoutEngine, which shows 
+     the progress of the layout process,
+     if it takes a while to layout the 
+     graph
+  */
+  JProgressBar getProgressBar();
     
-    /**
-       This method adds a LayoutCompleteEventListener to the
-       LayoutEngine.
-       @param e - The LayoutCompleteEventListener to add
-     */
-    public void addLayoutCompleteEventListener(LayoutCompleteEventListener e);
-    /**
-     * This method removes a LayoutCompleteEventListener from the
-     * LayoutEngine.
-     * @param e - The LayoutCompleteEventListener to remove.
-     */
-    public void removeLayoutCompleteEventListener(LayoutCompleteEventListener e);
-    /**
-     * This fires a LayoutCompleteEvent once a layout has been completed.
-     */
-    public void fireLayoutCompleteEvent(LayoutCompleteEvent e);
+  /**
+     This method adds a LayoutCompleteEventListener to the
+     LayoutEngine.
+     @param e - The LayoutCompleteEventListener to add
+  */
+  void addLayoutCompleteEventListener(LayoutCompleteEventListener e);
+
+  /**
+   * This method removes a LayoutCompleteEventListener from the
+   * LayoutEngine.
+   * @param e - The LayoutCompleteEventListener to remove.
+   */
+  void removeLayoutCompleteEventListener(LayoutCompleteEventListener e);
+
+  /**
+   * This fires a LayoutCompleteEvent once a layout has been completed.
+   */
+  void fireLayoutCompleteEvent(LayoutCompleteEvent e);
 }

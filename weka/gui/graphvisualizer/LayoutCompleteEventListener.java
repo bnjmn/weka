@@ -34,5 +34,5 @@ package weka.gui.graphvisualizer;
  */
 public interface LayoutCompleteEventListener {
 
-    public void layoutCompleted(LayoutCompleteEvent le);
+  void layoutCompleted(LayoutCompleteEvent le);
 }

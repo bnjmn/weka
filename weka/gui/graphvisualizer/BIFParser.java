@@ -91,7 +91,7 @@ public class BIFParser implements GraphConstants {
      *              char in the probability table of a node.
      * @return    - returns the name of the graph
      */
-    public String parse() throws BIFFormatException, NumberFormatException, Exception {
+    public String parse() throws Exception {
 	Document dc=null;
 
 	javax.xml.parsers.DocumentBuilderFactory dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance();
