@@ -167,7 +167,7 @@ public class CheckClassifier implements OptionHandler {
     // Check the remaining options are valid for the specified classifier
     if ((m_Classifier != null) 
 	&& (m_Classifier instanceof OptionHandler)) {
-      String [] m_ClassifierOptions = Utils.partitionOptions(options);
+      m_ClassifierOptions = Utils.partitionOptions(options);
       String [] tempOptions = (String [])m_ClassifierOptions.clone();
       ((OptionHandler)m_Classifier).setOptions(tempOptions);
       Utils.checkForRemainingOptions(tempOptions);

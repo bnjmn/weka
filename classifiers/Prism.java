@@ -229,7 +229,7 @@ public class Prism extends Classifier {
     int cl; // possible value of theClass
     Instances E, ruleE;
     PrismRule rule = null;
-    Test test = null;
+    Test test = null, oldTest = null;
     int bestCorrect, bestCovers, attUsed;
 
     if (data.checkForStringAttributes()) {
@@ -238,6 +238,7 @@ public class Prism extends Classifier {
     if (data.classAttribute().isNumeric()) {
       throw new Exception("Prism can't handle a numeric class!");
     }
+    data = new Instances(data);
     Enumeration enumAtt = data.enumerateAttributes();
     while (enumAtt.hasMoreElements()) {
       Attribute attr = (Attribute) enumAtt.nextElement();
@@ -262,7 +263,7 @@ public class Prism extends Classifier {
         rule = addRule(rule, new PrismRule(E, cl)); // make a new rule
         ruleE = E; // examples covered by this rule
         while (rule.errors != 0) { // until the rule is perfect
-          test = addTest(rule, test, new Test()); // make a new test
+          test = new Test(); // make a new test
           bestCorrect = bestCovers = attUsed = 0;
           // for every attribute not mentioned in the rule
           enumAtt = ruleE.enumerateAttributes();
@@ -304,7 +305,11 @@ public class Prism extends Classifier {
               }
             }
           }
-          ruleE = rule.coveredBy(ruleE);
+	  if (test.attr == -1) { // Couldn't find any sensible test
+	    break;
+	  }
+	  oldTest = addTest(rule, oldTest, test);
+	  ruleE = rule.coveredBy(ruleE);
 	  if (attUsed == (data.numAttributes() - 1)) { // Used all attributes.
 	    break;
 	  }
@@ -402,6 +407,7 @@ public class Prism extends Classifier {
     try {
       System.out.println(Evaluation.evaluateModel(new Prism(), args));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
