@@ -25,7 +25,8 @@ package  weka.attributeSelection;
 import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
-import  weka.filters.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.Filter;
 
 /** 
  * Consistency attribute subset evaluator. <p>
@@ -36,7 +37,7 @@ import  weka.filters.*;
  * Machine Learning (ICML'96), July 1996, pp. 319-327. Bari, Italy. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ConsistencySubsetEval extends SubsetEvaluator {
   
@@ -53,7 +54,7 @@ public class ConsistencySubsetEval extends SubsetEvaluator {
   private int m_numInstances;
 
   /** Discretise numeric attributes */
-  private DiscretizeFilter m_disTransform;
+  private Discretize m_disTransform;
 
   /** Hash table for evaluating feature subsets */
   private Hashtable m_table;
@@ -282,7 +283,7 @@ public class ConsistencySubsetEval extends SubsetEvaluator {
     m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
 
-    m_disTransform = new DiscretizeFilter();
+    m_disTransform = new Discretize();
     m_disTransform.setUseBetterEncoding(true);
     m_disTransform.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, m_disTransform);

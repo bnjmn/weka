@@ -24,10 +24,12 @@ package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.Filter;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.filters.*;
 
 /**
  * Class for using linear regression for prediction. Uses the Akaike 
@@ -51,7 +53,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -66,11 +68,11 @@ public class LinearRegression extends Classifier implements OptionHandler,
   private Instances m_TransformedData;
 
   /** The filter for removing missing values. */
-  private ReplaceMissingValuesFilter m_MissingFilter;
+  private ReplaceMissingValues m_MissingFilter;
 
   /** The filter storing the transformation from nominal to 
       binary attributes. */
-  private NominalToBinaryFilter m_TransformFilter;
+  private NominalToBinary m_TransformFilter;
 
   /** The standard deviations of the class attribute */
   private double m_ClassStdDev;
@@ -153,10 +155,10 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
     // Preprocess instances
     if (!m_checksTurnedOff) {
-      m_TransformFilter = new NominalToBinaryFilter();
+      m_TransformFilter = new NominalToBinary();
       m_TransformFilter.setInputFormat(data);
       data = Filter.useFilter(data, m_TransformFilter);
-      m_MissingFilter = new ReplaceMissingValuesFilter();
+      m_MissingFilter = new ReplaceMissingValues();
       m_MissingFilter.setInputFormat(data);
       data = Filter.useFilter(data, m_MissingFilter);
       data.deleteWithMissingClass();

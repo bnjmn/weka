@@ -25,7 +25,11 @@ package weka.attributeSelection;
 import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
-import  weka.filters.*;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import  weka.filters.unsupervised.attribute.Normalize;
+import  weka.filters.unsupervised.attribute.NominalToBinary;
+import  weka.filters.unsupervised.attribute.Remove;
+import  weka.filters.Filter;
 
 /**
  * Class for performing principal components analysis/transformation. <p>
@@ -42,7 +46,7 @@ import  weka.filters.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -88,13 +92,13 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   private double m_sumOfEigenValues = 0.0;
   
   /** Filters for original data */
-  private ReplaceMissingValuesFilter m_replaceMissingFilter;
-  private NormalizationFilter m_normalizeFilter;
-  private NominalToBinaryFilter m_nominalToBinFilter;
-  private AttributeFilter m_attributeFilter;
+  private ReplaceMissingValues m_replaceMissingFilter;
+  private Normalize m_normalizeFilter;
+  private NominalToBinary m_nominalToBinFilter;
+  private Remove m_attributeFilter;
   
   /** used to remove the class column if a class column is set */
-  private AttributeFilter m_attribFilter;
+  private Remove m_attribFilter;
 
   /** The number of attributes in the pc transformed data */
   private int m_outputNumAtts = -1;
@@ -329,18 +333,18 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     // column to append to the transformed data (if necessary)
     m_trainCopy = new Instances(m_trainInstances);
     
-    m_replaceMissingFilter = new ReplaceMissingValuesFilter();
+    m_replaceMissingFilter = new ReplaceMissingValues();
     m_replaceMissingFilter.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, 
 					m_replaceMissingFilter);
 
     if (m_normalize) {
-      m_normalizeFilter = new NormalizationFilter();
+      m_normalizeFilter = new Normalize();
       m_normalizeFilter.setInputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_normalizeFilter);
     }
 
-    m_nominalToBinFilter = new NominalToBinaryFilter();
+    m_nominalToBinFilter = new NominalToBinary();
     m_nominalToBinFilter.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, 
 					m_nominalToBinFilter);
@@ -362,7 +366,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
 
     // remove columns from the data if necessary
     if (deleteCols.size() > 0) {
-      m_attributeFilter = new AttributeFilter();
+      m_attributeFilter = new Remove();
       int [] todelete = new int [deleteCols.size()];
       for (int i=0;i<deleteCols.size();i++) {
 	todelete[i] = ((Integer)(deleteCols.elementAt(i))).intValue();

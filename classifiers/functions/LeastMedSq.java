@@ -25,8 +25,11 @@ package weka.classifiers.functions;
 import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.instance.RemoveRange;
+import weka.filters.Filter;
 import weka.core.*;
-import weka.filters.*;
 import java.io.*;
 import java.util.*;
 
@@ -38,7 +41,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -64,11 +67,11 @@ public class LeastMedSq extends Classifier implements OptionHandler {
 
   private Instances m_SubSample;
 
-  private ReplaceMissingValuesFilter m_MissingFilter;
+  private ReplaceMissingValues m_MissingFilter;
 
-  private NominalToBinaryFilter m_TransformFilter;
+  private NominalToBinary m_TransformFilter;
 
-  private SplitDatasetFilter m_SplitFilter;
+  private RemoveRange m_SplitFilter;
 
   private int m_samplesize = 4;
 
@@ -135,10 +138,10 @@ public class LeastMedSq extends Classifier implements OptionHandler {
   private void cleanUpData(Instances data)throws Exception{
 
     m_Data = data;
-    m_TransformFilter = new NominalToBinaryFilter();
+    m_TransformFilter = new NominalToBinary();
     m_TransformFilter.setInputFormat(m_Data);
     m_Data = Filter.useFilter(m_Data, m_TransformFilter);
-    m_MissingFilter = new ReplaceMissingValuesFilter();
+    m_MissingFilter = new ReplaceMissingValues();
     m_MissingFilter.setInputFormat(m_Data);
     m_Data = Filter.useFilter(m_Data, m_MissingFilter);
     m_Data.deleteWithMissingClass();
@@ -373,7 +376,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    */
   private void selectSubSample(Instances data)throws Exception{
 
-    m_SplitFilter = new SplitDatasetFilter();
+    m_SplitFilter = new RemoveRange();
     m_SubSample = data;
     m_SplitFilter.setInputFormat(m_SubSample);
     m_SplitFilter.setInstancesIndices(selectIndices(m_SubSample));
@@ -381,12 +384,11 @@ public class LeastMedSq extends Classifier implements OptionHandler {
   }
 
   /**
-   * Returns a string suitable for passing to a
-   * SplitDatasetFilter consisting of m_samplesize
-   * indices.
+   * Returns a string suitable for passing to RemoveRange consisting
+   * of m_samplesize indices.
    *
    * @param data dataset from which to take indicese
-   * @return string of indices suitable for passing to a SplitDatasetFilter
+   * @return string of indices suitable for passing to RemoveRange 
    */
   private String selectIndices(Instances data){
 

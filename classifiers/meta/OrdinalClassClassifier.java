@@ -28,8 +28,8 @@ import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import java.io.Serializable;
 import weka.core.*;
+import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.Filter;
-import weka.filters.MakeIndicatorFilter;
 import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -60,7 +60,7 @@ implements OptionHandler {
   private Classifier [] m_Classifiers;
 
   /** The filters used to transform the class. */
-  private MakeIndicatorFilter[] m_ClassFilters;
+  private MakeIndicator[] m_ClassFilters;
 
   /** The class name of the base classifier. */
   private DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -109,10 +109,10 @@ implements OptionHandler {
       m_Classifiers[0].buildClassifier(insts);
     } else {
       m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
-      m_ClassFilters = new MakeIndicatorFilter[numClassifiers];
+      m_ClassFilters = new MakeIndicator[numClassifiers];
 
       for (int i = 0; i < m_Classifiers.length; i++) {
-	m_ClassFilters[i] = new MakeIndicatorFilter();
+	m_ClassFilters[i] = new MakeIndicator();
 	m_ClassFilters[i].setAttributeIndex(insts.classIndex());
 	m_ClassFilters[i].setValueIndices(""+(i+2)+"-last");
 	m_ClassFilters[i].setNumeric(false);

@@ -22,7 +22,9 @@ import java.io.*;
 import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
-import weka.filters.*;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.Filter;
 
 /**
  * M5Base. Implements base routines
@@ -36,7 +38,7 @@ import weka.filters.*;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -80,12 +82,12 @@ public abstract class M5Base extends Classifier
   /**
    * filter to fill in missing values
    */
-  private ReplaceMissingValuesFilter m_replaceMissing;
+  private ReplaceMissingValues m_replaceMissing;
 
   /**
    * filter to convert nominal attributes to binary
    */
-  private NominalToBinaryFilter      m_nominalToBinary;
+  private NominalToBinary      m_nominalToBinary;
 
   /**
    * Save instances at each node in an M5 tree for visualization purposes.
@@ -232,13 +234,13 @@ public abstract class M5Base extends Classifier
     } 
 
     m_instances = new Instances(data);
-    m_replaceMissing = new ReplaceMissingValuesFilter();
+    m_replaceMissing = new ReplaceMissingValues();
 
     m_instances.deleteWithMissingClass();
     m_replaceMissing.setInputFormat(m_instances);
 
     m_instances = Filter.useFilter(m_instances, m_replaceMissing);
-    m_nominalToBinary = new NominalToBinaryFilter();
+    m_nominalToBinary = new NominalToBinary();
 
     m_nominalToBinary.setInputFormat(m_instances);
 

@@ -43,7 +43,7 @@ import weka.gui.SetInstancesPanel;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
 import weka.filters.Filter;
-import weka.filters.AttributeFilter;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -185,7 +185,7 @@ public class ClustererPanel extends JPanel {
   protected DefaultListModel m_ignoreKeyModel = new DefaultListModel();
   protected JList m_ignoreKeyList = new JList(m_ignoreKeyModel);
 
-  //  protected AttributeFilter m_ignoreFilter = null;
+  //  protected Remove m_ignoreFilter = null;
   
   /**
    * Alters the enabled/disabled status of elements associated with each
@@ -1030,7 +1030,7 @@ public class ClustererPanel extends JPanel {
   }
 
   private Instances removeClass(Instances inst) {
-    AttributeFilter af = new AttributeFilter();
+    Remove af = new Remove();
     Instances retI = null;
     
     try {
@@ -1060,7 +1060,7 @@ public class ClustererPanel extends JPanel {
       }
     }
     int [] selected = m_ignoreKeyList.getSelectedIndices();
-    AttributeFilter af = new AttributeFilter();
+    Remove af = new Remove();
     Instances retI = null;
 
     try {
@@ -1077,7 +1077,7 @@ public class ClustererPanel extends JPanel {
 
   private Instances removeIgnoreCols(Instances inst, int[] toIgnore) {
 
-    AttributeFilter af = new AttributeFilter();
+    Remove af = new Remove();
     Instances retI = null;
 
     try {

@@ -29,7 +29,8 @@ import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import weka.classifiers.Evaluation;
 import weka.filters.Filter;
-import weka.filters.AttributeFilter;
+import weka.filters.unsupervised.attribute.Remove;
+
 
 /**
  * Classifier subset evaluator. Uses a classifier to estimate the "merit"
@@ -51,7 +52,7 @@ import weka.filters.AttributeFilter;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -356,7 +357,7 @@ public class ClassifierSubsetEval
     Instances trainCopy=null;
     Instances testCopy=null;
 
-    AttributeFilter delTransform = new AttributeFilter();
+    Remove delTransform = new Remove();
     delTransform.setInvertSelection(true);
     // copy the training instances
     trainCopy = new Instances(m_trainingInstances);
@@ -439,7 +440,7 @@ public class ClassifierSubsetEval
       throw new Exception("evaluateSubset : Incompatable instance types.");
     }
 
-    AttributeFilter delTransform = new AttributeFilter();
+    Remove delTransform = new Remove();
     delTransform.setInvertSelection(true);
     // copy the training instances
     trainCopy = new Instances(m_trainingInstances);
@@ -511,7 +512,7 @@ public class ClassifierSubsetEval
       throw new Exception("evaluateSubset : Incompatable instance types.");
     }
 
-    AttributeFilter delTransform = new AttributeFilter();
+    Remove delTransform = new Remove();
     delTransform.setInvertSelection(true);
     // copy the training instances
     trainCopy = new Instances(m_trainingInstances);

@@ -26,7 +26,7 @@ import  java.util.*;
 import  java.io.*;
 import  weka.core.*;
 import  weka.filters.Filter;
-import  weka.filters.AttributeFilter;
+import  weka.filters.unsupervised.attribute.Remove;
 
 /**
  * Class for evaluating clustering models.<p>
@@ -61,7 +61,7 @@ import  weka.filters.AttributeFilter;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.18 $
+ * @version  $Revision: 1.19 $
  */
 public class ClusterEvaluation {
 
@@ -203,7 +203,7 @@ public class ClusterEvaluation {
       if (testCopy.classAttribute().isNumeric()) {
 	throw new Exception("ClusterEvaluation: Class must be nominal!");
       }
-      AttributeFilter removeClass = new AttributeFilter();
+      Remove removeClass = new Remove();
       removeClass.setAttributeIndices(""+(testCopy.classIndex()+1));
       removeClass.setInvertSelection(false);
       removeClass.setInputFormat(testCopy);
@@ -637,7 +637,7 @@ public class ClusterEvaluation {
       if (theClass == -1) {
 	clusterer.buildClusterer(train);
       } else {
-	AttributeFilter removeClass = new AttributeFilter();
+	Remove removeClass = new Remove();
 	removeClass.setAttributeIndices(""+theClass);
 	removeClass.setInvertSelection(false);
 	removeClass.setInputFormat(train);

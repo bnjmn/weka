@@ -23,13 +23,14 @@ import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
 import weka.classifiers.functions.LinearRegression;
-import weka.filters.*;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.Filter;
 
 /**
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RuleNode extends Classifier {
 
@@ -97,7 +98,7 @@ public class RuleNode extends Classifier {
    * the Attribute filter used to remove any attributes not presented to
    * the linear regression model
    */
-  private AttributeFilter  m_attributeFilter;
+  private Remove  m_attributeFilter;
 
   /**
    * child nodes
@@ -433,7 +434,7 @@ public class RuleNode extends Classifier {
     // copy the training instances and remove all but the tested
     // attributes
     m_reducedI = new Instances(m_instances);
-    m_attributeFilter = new AttributeFilter();
+    m_attributeFilter = new Remove();
     
     m_attributeFilter.setInvertSelection(true);
     m_attributeFilter.setAttributeIndicesArray(indices);

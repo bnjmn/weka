@@ -29,7 +29,7 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Utils;
 import weka.filters.Filter;
-import weka.filters.AddFilter;
+import weka.filters.unsupervised.attribute.Add;
 
 import java.awt.Color;
 
@@ -39,7 +39,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class PlotData2D {
 
@@ -120,7 +120,7 @@ public class PlotData2D {
   public void addInstanceNumberAttribute() {
     String originalRelationName = m_plotInstances.relationName();
     try {
-      AddFilter addF = new AddFilter();
+      Add addF = new Add();
       addF.setAttributeName("Instance_number");
       addF.setAttributeIndex(0);
       addF.setInputFormat(m_plotInstances);

@@ -25,7 +25,7 @@ import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.filters.Filter;
-import  weka.filters.ReplaceMissingValuesFilter;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
  * Simple k means clustering class.
@@ -39,7 +39,7 @@ import  weka.filters.ReplaceMissingValuesFilter;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -53,7 +53,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
   /**
    * replace missing values in training instances
    */
-  private ReplaceMissingValuesFilter m_ReplaceMissingFilter;
+  private ReplaceMissingValues m_ReplaceMissingFilter;
 
   /**
    * number of clusters to generate
@@ -113,7 +113,7 @@ public class SimpleKMeans extends Clusterer implements OptionHandler {
       throw  new Exception("Can't handle string attributes!");
     }
 
-    m_ReplaceMissingFilter = new ReplaceMissingValuesFilter();
+    m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
     m_instances = Filter.useFilter(data, m_ReplaceMissingFilter);
 

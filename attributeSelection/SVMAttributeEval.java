@@ -28,7 +28,7 @@ import java.util.*;
 import weka.core.*;
 import weka.classifiers.functions.SMO;
 import weka.filters.Filter;
-import weka.filters.AttributeFilter;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.attributeSelection.*;
 
 /**
@@ -56,7 +56,7 @@ import weka.attributeSelection.*;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class SVMAttributeEval extends AttributeEvaluator 
   implements OptionHandler {
@@ -438,7 +438,7 @@ public class SVMAttributeEval extends AttributeEvaluator
       } 
 
       // Delete the best attribute.
-      AttributeFilter delTransform = new AttributeFilter();
+      Remove delTransform = new Remove();
 
       delTransform.setInvertSelection(false);
       delTransform.setAttributeIndicesArray(featArray);

@@ -26,7 +26,7 @@ import java.io.*;
 import java.util.*; 
 import weka.core.*; 
 import weka.filters.Filter;
-import weka.filters.AddFilter;
+import weka.filters.unsupervised.attribute.Add;
 import weka.experiment.Stats;
 
 /**
@@ -47,7 +47,7 @@ import weka.experiment.Stats;
  * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -628,7 +628,7 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
       tempNode = null;
 
       StringBuffer instBuff = new StringBuffer();
-      AddFilter af = new AddFilter();
+      Add af = new Add();
       af.setAttributeName("Cluster");
       String labels = "";
       for (int i = 0; i < m_children.size(); i++) {

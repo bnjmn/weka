@@ -25,7 +25,8 @@ package  weka.attributeSelection;
 import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
-import  weka.filters.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.Filter;
 
 /** 
  * Class for Evaluating attributes individually by measuring gain ratio 
@@ -37,7 +38,7 @@ import  weka.filters.*;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class GainRatioAttributeEval
   extends AttributeEvaluator
@@ -185,7 +186,7 @@ public class GainRatioAttributeEval
       throw  new Exception("Class must be nominal!");
     }
 
-    DiscretizeFilter disTransform = new DiscretizeFilter();
+    Discretize disTransform = new Discretize();
     disTransform.setUseBetterEncoding(true);
     disTransform.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, disTransform);

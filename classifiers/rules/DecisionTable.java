@@ -30,7 +30,8 @@ import weka.classifiers.lazy.IB1;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.filters.*;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 /**
  * Class for building and using a simple decision table majority classifier.
@@ -57,7 +58,7 @@ import weka.filters.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -71,10 +72,10 @@ public class DecisionTable
   private int [] m_decisionFeatures;
 
   /** Discretization filter */
-  private DiscretizeFilter m_disTransform;
+  private Filter m_disTransform;
 
   /** Filter used to remove columns discarded by feature selection */
-  private AttributeFilter m_delTransform;
+  private Remove m_delTransform;
 
   /** IB1 used to classify non matching instances rather than majority class */
   private IBk m_ibk;
@@ -1073,25 +1074,27 @@ public class DecisionTable
     if (m_theInstances.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
-    
-    m_disTransform = new DiscretizeFilter();
 
     if (m_theInstances.classAttribute().isNumeric()) {
+      m_disTransform = new weka.filters.unsupervised.attribute.Discretize();
       m_classIsNominal = false;
       
       // use binned discretisation if the class is numeric
-      m_disTransform.setUseMDL(false);
-      m_disTransform.setBins(10);
-      m_disTransform.setInvertSelection(true);
+      ((weka.filters.unsupervised.attribute.Discretize)m_disTransform).
+	setBins(10);
+      ((weka.filters.unsupervised.attribute.Discretize)m_disTransform).
+	setInvertSelection(true);
       
       // Discretize all attributes EXCEPT the class 
       String rangeList = "";
       rangeList+=(m_theInstances.classIndex()+1);
       //System.out.println("The class col: "+m_theInstances.classIndex());
       
-      m_disTransform.setAttributeIndices(rangeList);
+      ((weka.filters.unsupervised.attribute.Discretize)m_disTransform).
+	setAttributeIndices(rangeList);
     } else {
-      m_disTransform.setUseBetterEncoding(true);
+      m_disTransform = new weka.filters.supervised.attribute.Discretize();
+      ((weka.filters.supervised.attribute.Discretize)m_disTransform).setUseBetterEncoding(true);
       m_classIsNominal = true;
     }
 
@@ -1105,7 +1108,7 @@ public class DecisionTable
     best_first();
     
     // reduce instances to selected features
-    m_delTransform = new AttributeFilter();
+    m_delTransform = new Remove();
     m_delTransform.setInvertSelection(true);
     
     // set features to keep
