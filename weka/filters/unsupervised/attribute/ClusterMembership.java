@@ -56,7 +56,7 @@ import java.util.Vector;
  * the class attribute (if set) is automatically ignored during clustering.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClusterMembership extends Filter implements UnsupervisedFilter, 
 							 OptionHandler {
@@ -68,11 +68,14 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
   protected DensityBasedClusterer[] m_clusterers;
 
   /** Range of attributes to ignore */
-  protected Range m_ignoreAttributesRange = null;
+  protected Range m_ignoreAttributesRange;
 
   /** Filter for removing attributes */
-  protected Filter m_removeAttributes = new Remove();
+  protected Filter m_removeAttributes;
 
+  /** The prior probability for each class */
+  protected double[] m_priors;
+  
   /**
    * Sets the format of the input instances.
    *
@@ -86,6 +89,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
     
     super.setInputFormat(instanceInfo);
     m_removeAttributes = null;
+    m_priors = null;
 
     return false;
   }
@@ -115,12 +119,17 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
 	for (int i = 0; i < toFilter.numInstances(); i++) {
 	  toFilterIgnoringAttributes[(int)toFilter.instance(i).classValue()].add(toFilter.instance(i));
 	}
+	m_priors = new double[toFilter.numClasses()];
 	for (int i = 0; i < toFilter.numClasses(); i++) {
 	  toFilterIgnoringAttributes[i].compactify();
+	  m_priors[i] = toFilterIgnoringAttributes[i].sumOfWeights();
 	}
+	Utils.normalize(m_priors);
       } else {
 	toFilterIgnoringAttributes = new Instances[1];
 	toFilterIgnoringAttributes[0] = toFilter;
+	m_priors = new double[1];
+	m_priors[1] = 1;
       }
 
       // filter out attributes if necessary
@@ -181,7 +190,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
       }
       setOutputFormat(filtered);
 
-      // build new daaset
+      // build new dataset
       for (int i = 0; i < toFilter.numInstances(); i++) {
 	convertInstance(toFilter.instance(i));
       }
@@ -226,10 +235,10 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    */
   protected double[] logs2densities(int j, Instance in) throws Exception {
 
-    double[] logs = m_clusterers[j].logDensityPerClusterForInstance(in);
+    double[] logs = m_clusterers[j].logJointDensitiesForInstance(in);
 
     for (int i = 0; i < logs.length; i++) {
-      logs[i] = Math.exp(logs[i]);
+      logs[i] += Math.log(m_priors[j]);
     }
     return logs;
   }
@@ -242,9 +251,14 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    */
   protected void convertInstance(Instance instance) throws Exception {
     
-    
     // set up values
     double [] instanceVals = new double[outputFormatPeek().numAttributes()];
+    double [] tempvals;
+    if (instance.classIndex() >= 0) {
+      tempvals = new double[outputFormatPeek().numAttributes() - 1];
+    } else {
+      tempvals = new double[outputFormatPeek().numAttributes()];
+    }
     int pos = 0;
     for (int j = 0; j < m_clusterers.length; j++) {
       if (m_clusterers[j] != null) {
@@ -255,10 +269,12 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
 	} else {
 	  probs = logs2densities(j, instance);
 	}
-	System.arraycopy(probs, 0, instanceVals, pos, probs.length);
+	System.arraycopy(probs, 0, tempvals, pos, probs.length);
 	pos += probs.length;
       }
     }
+    tempvals = Utils.logs2probs(tempvals);
+    System.arraycopy(tempvals, 0, instanceVals, 0, tempvals.length);
     if (instance.classIndex() >= 0) {
       instanceVals[instanceVals.length - 1] = instance.classValue();
     }
