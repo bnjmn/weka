@@ -49,7 +49,7 @@ import java.util.*;
  * information clone the dataset before it is changed.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
 */
 public class Instances implements Serializable {
  
@@ -1494,7 +1494,7 @@ public class Instances implements Serializable {
       }
     }
     if (flag) {
-      getLastToken(tokenizer);
+      getLastToken(tokenizer,true);
     }
       
     // Add instance to dataset
@@ -1524,7 +1524,7 @@ public class Instances implements Serializable {
     if (tokenizer.sval.equalsIgnoreCase("@relation")){
       getNextToken(tokenizer);
       m_RelationName = tokenizer.sval;
-      getLastToken(tokenizer);
+      getLastToken(tokenizer,false);
     } else {
       errms(tokenizer,"keyword @relation expected");
     }
@@ -1587,7 +1587,7 @@ public class Instances implements Serializable {
 	  addElement(new Attribute(attributeName, attributeValues,
 				   numAttributes()));
       }
-      getLastToken(tokenizer);
+      getLastToken(tokenizer,false);
       getFirstToken(tokenizer);
       if (tokenizer.ttype == StreamTokenizer.TT_EOF)
 	errms(tokenizer,"premature end of file");
@@ -1667,10 +1667,11 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    * @exception IOException if it doesn't find an end of line
    */
-  private void getLastToken(StreamTokenizer tokenizer) 
+  private void getLastToken(StreamTokenizer tokenizer, boolean endOfFileOk) 
        throws IOException{
 
-    if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
+    if ((tokenizer.nextToken() != StreamTokenizer.TT_EOL) &&
+	((tokenizer.nextToken() != StreamTokenizer.TT_EOF) || !endOfFileOk)) {
       errms(tokenizer,"end of line expected");
     }
   }
