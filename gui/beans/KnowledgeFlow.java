@@ -100,7 +100,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.18 $
+ * @version  $Revision: 1.19 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -235,7 +235,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18 $
+   * @version $Revision: 1.19 $
    * @since 1.0
    * @see JPanel
    */
@@ -820,6 +820,15 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     
 
     // set tool tip text from global info if supplied
+    String summary = getGlobalInfo(tempBean);
+    if (summary != null) {
+      int ci = summary.indexOf('.');
+      if (ci != -1) {
+	summary = summary.substring(0, ci + 1);
+      }
+      tempButton.setToolTipText(summary);
+    }
+    /*
     try {
       BeanInfo bi = Introspector.getBeanInfo(tempBean.getClass());
       MethodDescriptor [] methods = bi.getMethodDescriptors();
@@ -843,7 +852,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
       }
     } catch (Exception ex) {
       
-    }
+    } */
     //return tempBean;
     return tempP;
   }
@@ -1282,6 +1291,30 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
     }
     m_saveB.setEnabled(true);
     m_loadB.setEnabled(true);
+  }
+
+  public static String getGlobalInfo(Object tempBean) {
+    // set tool tip text from global info if supplied
+    String gi = null;
+    try {
+      BeanInfo bi = Introspector.getBeanInfo(tempBean.getClass());
+      MethodDescriptor [] methods = bi.getMethodDescriptors();
+      for (int i = 0; i < methods.length; i++) {
+	String name = methods[i].getDisplayName();
+	Method meth = methods[i].getMethod();
+	if (name.equals("globalInfo")) {
+	  if (meth.getReturnType().equals(String.class)) {
+	    Object args[] = { };
+	    String globalInfo = (String)(meth.invoke(tempBean, args));
+	    gi = globalInfo;
+	    break;
+	  }
+	}
+      }
+    } catch (Exception ex) {
+      
+    }
+    return gi;
   }
 
   /**
