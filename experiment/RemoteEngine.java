@@ -37,7 +37,7 @@ import weka.core.Queue;
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RemoteEngine extends UnicastRemoteObject
   implements Compute {
@@ -197,7 +197,9 @@ public class RemoteEngine extends UnicastRemoteObject
 				   +") : task failed.");
 	      System.err.println("Task id " + taskId + "Failed!");
 	    } finally {
-	      purgeClasses();
+	      if (m_TaskStatus.size() == 0) {
+		purgeClasses();
+	      }
 	      m_TaskRunning = false;
 	      // start any waiting tasks
 	      startTask();
@@ -260,7 +262,9 @@ public class RemoteEngine extends UnicastRemoteObject
 	System.err.println("ok.");
       }
     }
-    purgeClasses();
+    if (m_TaskStatus.size() == 0) {
+      purgeClasses();
+    }
   }
 
   /**
