@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -162,7 +162,7 @@ public class Attribute implements Copyable, Serializable {
    */
   public final boolean equals(Object other) {
 
-    if ((other == null) || !(other instanceof Attribute)) {
+    if ((other == null) || !(other.getClass().equals(this.getClass()))) {
       return false;
     }
     Attribute att = (Attribute) other;

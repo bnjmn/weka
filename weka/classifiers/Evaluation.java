@@ -111,7 +111,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.32 $
+ * @version  $Revision: 1.33 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1986,7 +1986,9 @@ public class Evaluation implements Summarizable {
    */
   public boolean equals(Object obj) {
 
-    if ((obj == null) || !(obj instanceof Evaluation)) return false;
+    if ((obj == null) || !(obj.getClass().equals(this.getClass()))) {
+      return false;
+    }
     Evaluation cmp = (Evaluation) obj;
     if (m_ClassIsNominal != cmp.m_ClassIsNominal) return false;
     if (m_NumClasses != cmp.m_NumClasses) return false;

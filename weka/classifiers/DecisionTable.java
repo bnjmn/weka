@@ -50,7 +50,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -355,6 +355,9 @@ public class DecisionTable
      */
     public boolean equals(Object b) {
       
+      if ((b == null) || !(b.getClass().equals(this.getClass()))) {
+        return false;
+      }
       boolean ok = true;
       boolean l;
       if (b instanceof hashKey) {
