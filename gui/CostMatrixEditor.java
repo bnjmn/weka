@@ -66,12 +66,9 @@ import javax.swing.event.TableModelEvent;
  * of the cost matrix, as well as simple operations like loading, saving.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CostMatrixEditor implements PropertyEditor {
-
-  /** The filename extension for cost files */
-  public static String COST_EXTENSION = ".cost";
 
   /** The current cost matrix */
   private CostMatrix m_CostMatrix = new CostMatrix(2);
@@ -162,7 +159,7 @@ public class CostMatrixEditor implements PropertyEditor {
     }
 
     /**
-     * Determines if a cell is editable. For our purposes, only off-diagonal
+     * Determines if a cell is editable. For our purposes, all
      * cells may be edited.
      *
      * @param row the row index
@@ -171,7 +168,7 @@ public class CostMatrixEditor implements PropertyEditor {
      */
     public boolean isCellEditable(int row, int column) {
 
-      return (row != column);
+      return true;
     }
 
     /** Resets the CostMatrix to default values */
@@ -207,7 +204,8 @@ public class CostMatrixEditor implements PropertyEditor {
 
     /** A filter to only show cost files in the filechooser */
     protected FileFilter m_CostFilter =
-      new ExtensionFileFilter(COST_EXTENSION, "Misclassification cost files");
+      new ExtensionFileFilter(CostMatrix.FILE_EXTENSION, 
+                              "Misclassification cost files");
 
     /** The filechooser for opening and saving cost files */
     private JFileChooser m_FileChooser
@@ -314,8 +312,10 @@ public class CostMatrixEditor implements PropertyEditor {
       int returnVal = m_FileChooser.showSaveDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
 	File sFile = m_FileChooser.getSelectedFile();
-	if (!sFile.getName().toLowerCase().endsWith(COST_EXTENSION)) {
-	  sFile = new File(sFile.getParent(), sFile.getName() + COST_EXTENSION);
+	if (!sFile.getName().toLowerCase()
+            .endsWith(CostMatrix.FILE_EXTENSION)) {
+	  sFile = new File(sFile.getParent(), sFile.getName() 
+                           + CostMatrix.FILE_EXTENSION);
 	}
 	Writer w = null;
 	try {
