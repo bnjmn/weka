@@ -36,6 +36,7 @@ import weka.core.OptionHandler;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Option;
 import weka.core.Utils;
+import weka.core.Randomizable;
 import weka.core.UnsupportedAttributeTypeException;
 
 /**
@@ -63,10 +64,10 @@ import weka.core.UnsupportedAttributeTypeException;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class Bagging extends DistributionClassifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler, WeightedInstancesHandler, Randomizable {
 
   /** The model base classifier to use */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -313,6 +314,9 @@ public class Bagging extends DistributionClassifier
 	bagData.randomize(random);
 	Instances newBagData = new Instances(bagData, 0, bagSize);
 	bagData = newBagData;
+      }
+      if (m_Classifier instanceof Randomizable) {
+	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
       }
       m_Classifiers[j].buildClassifier(bagData);
     }
