@@ -22,14 +22,13 @@ import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /** 
  * Abstract unsupervised attribute evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
-public abstract class UnsupervisedAttributeEvaluator extends AttributeEvaluator {
-
-
+public abstract class UnsupervisedAttributeEvaluator extends AttributeEvaluator 
+{
+   
 }

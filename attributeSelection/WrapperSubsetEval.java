@@ -25,51 +25,70 @@ import weka.classifiers.*;
 import weka.filters.*;
 
 /** 
- * Wrapper attribute subset evaluator
+ * Wrapper attribute subset evaluator. <p>
+ * For more information see: <br>
+ * 
+ * Kohavi, R., John G., Wrappers for Feature Subset Selection. 
+ * In <i>Artificial Intelligence journal</i>, special issue on relevance, 
+ * Vol. 97, Nos 1-2, pp.273-324. <p>
+ *
+ * Valid options are:<p>
+ *
+ * -B <base learner> <br>
+ * Class name of base learner to use for accuracy estimation.
+ * Place any classifier options last on the command line following a
+ * "--". Eg  -B weka.classifiers.NaiveBayes ... -- -K <p>
+ *
+ * -F <num> <br>
+ * Number of cross validation folds to use for estimating accuracy.
+ * <default=5> <p>
+ *
+ * -T <num> <br>
+ * Threshold by which to execute another cross validation (standard deviation
+ * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
-
-
 public class WrapperSubsetEval 
   extends SubsetEvaluator
   implements OptionHandler {
 
   /** training instances */
-  private Instances trainInstances;
+  private Instances m_trainInstances;
 
   /** class index */
-  private int classIndex;
+  private int m_classIndex;
   
   /** number of attributes in the training data */
-  private int numAttribs;
+  private int m_numAttribs;
 
   /** number of instances in the training data */
-  private int numInstances;
+  private int m_numInstances;
 
   /** holds an evaluation object */
-  private Evaluation w_Evaluation;
+  private Evaluation m_Evaluation;
 
   /** holds the name of the classifer to estimate accuracy with */
-  private String w_ClassifierString;
+  private String m_ClassifierString;
 
   /** holds the options to the classifier as a string */
-  private String w_ClassifierOptionsString;
+  private String m_ClassifierOptionsString;
 
   /** holds the split-up options to the classifier */
-  private String [] w_ClassifierOptions;
+  private String [] m_ClassifierOptions;
   
   /** number of folds to use for cross validation */
-  private int folds;
+  private int m_folds;
 
   /** random number seed */
-  private int seed;
+  private int m_seed;
 
-  /** the threshold by which to do further cross validations when
-   estimating the accuracy of a subset */
+  /** 
+   * the threshold by which to do further cross validations when
+   * estimating the accuracy of a subset
+   */
   private double threshold;
-
 
   /**
    * Constructor. Calls restOptions to set default options
@@ -79,11 +98,9 @@ public class WrapperSubsetEval
     resetOptions();
   }
 
-
   /**
    * Returns an enumeration describing the available options
    * @return an enumeration of all the available options
-   *
    **/
   public Enumeration listOptions() 
   {
@@ -101,7 +118,7 @@ public class WrapperSubsetEval
     
     newVector.addElement(new Option("\tnumber of cross validation folds to "
 				    +"use\n\tfor estimating accuracy."
-				    +"\n\t<default=5>", "F", 1,"-F <num>"));
+				    +"\n\t(default=5)", "F", 1,"-F <num>"));
 
     //    newVector.addElement(new Option("\tseed", "S", 1,"-S <num>"));
 
@@ -109,15 +126,15 @@ public class WrapperSubsetEval
 				    +"another cross validation"
 				    +"\n\t(standard deviation---"
 				    +"expressed as a percentage of the "
-				    +"mean).\n\t<default=0.01(1%)>",
+				    +"mean).\n\t(default=0.01(1%))",
 				    "T", 1,"-T <num>"));
 
-    if (w_ClassifierString != null)
+    if (m_ClassifierString != null)
       {
 	try
 	  {
 	    Classifier temp = (Classifier)
-	      Class.forName(w_ClassifierString).newInstance();
+	      Class.forName(m_ClassifierString).newInstance();
 	    if (temp instanceof OptionHandler)
 	      {
 		newVector.
@@ -138,12 +155,27 @@ public class WrapperSubsetEval
 	    e.printStackTrace();
 	  }
       }
-
     return newVector.elements();
   }
 
   /**
    * Parses a given list of options.
+   *
+   * Valid options are:<p>
+   *
+   * -B <base learner> <br>
+   * Class name of base learner to use for accuracy estimation.
+   * Place any classifier options last on the command line following a
+   * "--". Eg  -B weka.classifiers.NaiveBayes ... -- -K <p>
+   *
+   * -F <num> <br>
+   * Number of cross validation folds to use for estimating accuracy.
+   * <default=5> <p>
+   *
+   * -T <num> <br>
+   * Threshold by which to execute another cross validation (standard deviation
+   * ---expressed as a percentage of the mean). <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    *
@@ -160,12 +192,14 @@ public class WrapperSubsetEval
 	 throw new Exception("A learning scheme must be specified.");
        }
      else
-       addLearner(optionString, options);
+       {
+	 addLearner(optionString, options);
+       }
 
      optionString = Utils.getOption('F',options);
      if (optionString.length() != 0)
        {
-	 folds = Integer.parseInt(optionString);
+	 m_folds = Integer.parseInt(optionString);
        }
 
 //       optionString = Utils.getOption('S',options);
@@ -190,13 +224,26 @@ public class WrapperSubsetEval
    */
   public String [] getOptions()
   {
-    String [] options = new String [6];
+    int extra=0;
+    if (m_ClassifierOptions != null)
+      {
+	extra = m_ClassifierOptions.length;
+      }
+    String [] options = new String [7+extra];
     int current = 0;
 
-    options[current++] = "-C"; options[current++] = ""+w_ClassifierString+
-				 w_ClassifierOptionsString;
-    options[current++] = "-X"; options[current++] = ""+folds;
+    options[current++] = "-B"; options[current++] = ""+m_ClassifierString;
+    options[current++] = "-F"; options[current++] = ""+m_folds;
     options[current++] = "-T"; options[current++] = ""+threshold;
+
+    if (m_ClassifierOptions != null)
+      {
+	options[current++]="--";
+	for (int i=0;i<m_ClassifierOptions.length;i++)
+	  {
+	    options[current++] = ""+m_ClassifierOptions[i];
+	  }
+      }
 
      while (current < options.length) 
        {
@@ -217,17 +264,18 @@ public class WrapperSubsetEval
   public void addLearner(String learnerString, String [] options)
     throws Exception
   {
-    w_ClassifierString = learnerString;
+    m_ClassifierString = learnerString;
 
      Classifier tempClassifier;
     try 
       {
-      tempClassifier = (Classifier)Class.forName(w_ClassifierString).newInstance();
+	tempClassifier = (Classifier)Class.
+	  forName(m_ClassifierString).newInstance();
       } 
     catch (Exception ex) 
       {
-      throw new Exception("Can't find Classifier with class name: "
-                          + w_ClassifierString);
+	throw new Exception("Can't find Classifier with class name: "
+			    + m_ClassifierString);
       }
     
      if (tempClassifier instanceof OptionHandler) 
@@ -236,14 +284,17 @@ public class WrapperSubsetEval
 	if (learnerOptions.length != 0)
 	  {
 	    StringBuffer tempS = new StringBuffer();
-	    w_ClassifierOptions = new String [learnerOptions.length];
-	    for (int i=0;i<learnerOptions.length;i++)
-		tempS.append(" "+learnerOptions[i]);
+	    m_ClassifierOptions = new String [learnerOptions.length];
 
-	    System.arraycopy(learnerOptions,0,w_ClassifierOptions,
-			     0,w_ClassifierOptions.length);
+	    for (int i=0;i<learnerOptions.length;i++)
+	      {
+		tempS.append(" "+learnerOptions[i]);
+	      }
+
+	    System.arraycopy(learnerOptions,0,m_ClassifierOptions,
+			     0,m_ClassifierOptions.length);
 	    
-	    w_ClassifierOptionsString = tempS.toString();
+	    m_ClassifierOptionsString = tempS.toString();
 
 	    ((OptionHandler)tempClassifier).setOptions(learnerOptions);
 	  }
@@ -252,13 +303,13 @@ public class WrapperSubsetEval
 
   protected void resetOptions()
   {
-    trainInstances = null;
-    w_Evaluation = null;
-    w_ClassifierString = null;
-    w_ClassifierOptionsString = null;
-    w_ClassifierOptions = null;
-    folds = 5;
-    seed = 1;
+    m_trainInstances = null;
+    m_Evaluation = null;
+    m_ClassifierString = null;
+    m_ClassifierOptionsString = null;
+    m_ClassifierOptions = null;
+    m_folds = 5;
+    m_seed = 1;
     threshold = 0.01;
   }
 
@@ -277,14 +328,14 @@ public class WrapperSubsetEval
 	throw new Exception("Can't handle string attributes!");
       }
 
-    trainInstances = data;
-    classIndex = trainInstances.classIndex();
-    numAttribs = trainInstances.numAttributes();
-    numInstances = trainInstances.numInstances();
+    m_trainInstances = data;
+    m_classIndex = m_trainInstances.classIndex();
+    m_numAttribs = m_trainInstances.numAttributes();
+    m_numInstances = m_trainInstances.numInstances();
   }
   
   /**
-   * evaluates a subset of attributes
+   * Evaluates a subset of attributes
    *
    * @param subset a bitset representing the attribute subset to be 
    * evaluated 
@@ -297,25 +348,33 @@ public class WrapperSubsetEval
     boolean ok = true;
     int numAttributes=0;
     int i,j;
-    Random Rnd = new Random(seed);
+    Random Rnd = new Random(m_seed);
 
     AttributeFilter delTransform = new AttributeFilter();
     delTransform.setInvertSelection(true);
 
     // copy the instances
-    Instances trainCopy = new Instances(trainInstances);
+    Instances trainCopy = new Instances(m_trainInstances);
 
     // count attributes set in the BitSet
-    for (i=0;i<numAttribs;i++)
-      if (subset.get(i))
-	numAttributes++;
+    for (i=0;i<m_numAttribs;i++)
+      {
+	if (subset.get(i))
+	  {
+	    numAttributes++;
+	  }
+      }
 
     // set up an array of attribute indexes for the filter (+1 for the class)
     int [] featArray = new int [numAttributes+1];
-    for (i=0,j=0;i<numAttribs;i++)
-      if (subset.get(i))
-	featArray[j++] = i;
-    featArray[j] = classIndex;
+    for (i=0,j=0;i<m_numAttribs;i++)
+      {
+	if (subset.get(i))
+	  {
+	    featArray[j++] = i;
+	  }
+      }
+    featArray[j] = m_classIndex;
 
     delTransform.setAttributeIndicesArray(featArray);
     delTransform.inputFormat(trainCopy);
@@ -326,36 +385,40 @@ public class WrapperSubsetEval
       {
 	// copy the learners options
 	String [] tempOptions = null;
-	if (w_ClassifierOptions != null)
+	if (m_ClassifierOptions != null)
 	  {
-	    tempOptions = new String[w_ClassifierOptions.length];
-	    System.arraycopy(w_ClassifierOptions,0,tempOptions,
-			     0,w_ClassifierOptions.length);
+	    tempOptions = new String[m_ClassifierOptions.length];
+	    System.arraycopy(m_ClassifierOptions,0,tempOptions,
+			     0,m_ClassifierOptions.length);
 	  }
 
 	trainCopy.randomize(Rnd); // randomize instances
-	w_Evaluation = new Evaluation(trainCopy);
-	w_Evaluation.crossValidateModel(w_ClassifierString,
+	m_Evaluation = new Evaluation(trainCopy);
+	m_Evaluation.crossValidateModel(m_ClassifierString,
 					trainCopy,
-					folds,
+					m_folds,
 					tempOptions);
 
-	repError[i] = w_Evaluation.errorRate();
+	repError[i] = m_Evaluation.errorRate();
 
 	// check on the standard deviation
 	if (!repeat(repError, i+1))
-	  break;
+	  {
+	    break;
+	  }
       }
 
     for (j=0;j<i;j++)
-      errorRate += repError[j];
+      {
+	errorRate += repError[j];
+      }
     errorRate /= (double)i;
    
     return -errorRate;
   }
 
   /**
-   * returns a string describing the wrapper
+   * Returns a string describing the wrapper
    *
    * @return the description as a string
    */
@@ -363,18 +426,28 @@ public class WrapperSubsetEval
   {
     StringBuffer text = new StringBuffer();
     
-    text.append("\tWrapper Subset Evaluator\n");
-    text.append("\tLearning scheme: "+w_ClassifierString+"\n");
-    text.append("\tScheme options: ");
-    if (w_ClassifierOptions != null)
-      for (int i=0;i<w_ClassifierOptions.length;i++)
-	text.append(w_ClassifierOptions[i]+" ");
-    text.append("\n");
-
-    text.append("\tNumber of folds for accuracy estimation: "+folds+"\n");
-
+    if (m_trainInstances == null)
+      {
+	text.append("\tWrapper subset evaluator has not been built yet\n");
+      }
+    else
+      {
+	text.append("\tWrapper Subset Evaluator\n");
+	text.append("\tLearning scheme: "+m_ClassifierString+"\n");
+	text.append("\tScheme options: ");
+	if (m_ClassifierOptions != null)
+	  {
+	    for (int i=0;i<m_ClassifierOptions.length;i++)
+	      {
+		text.append(m_ClassifierOptions[i]+" ");
+	      }
+	  }
+	text.append("\n");
+	text.append("\tNumber of folds for accuracy estimation: "
+		    +m_folds
+		    +"\n");
+      }
     return text.toString();
-      
   }
 
   /**
@@ -394,40 +467,48 @@ public class WrapperSubsetEval
     double variance = 0;
 
     if (entries == 1)
-      return true;
+      {
+	return true;
+      }
 
     for (i=0;i<entries;i++)
-      mean += repError[i];
+      {
+	mean += repError[i];
+      }
 
     mean /= (double)entries;
 
     for (i=0;i<entries;i++)
-      variance += ((repError[i] - mean)*(repError[i] - mean));
+      {
+	variance += ((repError[i] - mean)*(repError[i] - mean));
+      }
 
     variance /= (double)entries;
     if (variance > 0)
-      variance = Math.sqrt(variance);
+      {
+	variance = Math.sqrt(variance);
+      }
 
     if ((variance / mean) > threshold)
-      return true;
+      {
+	return true;
+      }
     
     return false;
-    
   }
 
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file
+   * @param args the options
    */
-  
-  public static void main(String [] argv)
+  public static void main(String [] args)
   {
-    
-    try {
-      System.out.println(AttributeSelection.SelectAttributes(new WrapperSubsetEval(), argv));
-    }
+    try 
+      {
+	System.out.println(AttributeSelection.
+			   SelectAttributes(new WrapperSubsetEval(), args));
+      }
     catch (Exception e)
       {
 	e.printStackTrace();

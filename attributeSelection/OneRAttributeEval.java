@@ -26,79 +26,36 @@ import weka.filters.*;
 
 /** 
  * Class for Evaluating attributes individually by using the OneR
- * classifier.
+ * classifier. <p>
+ *
+ * No options. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision: 1.3 $
  */
 public class OneRAttributeEval 
   extends AttributeEvaluator
 {
   
-  private Instances trainInstances;
+  /** The training instances */
+  private Instances m_trainInstances;
 
-  private int classIndex;
+  /** The class index */
+  private int m_classIndex;
   
-  private int numAttribs;
+  /** The number of attributes */
+  private int m_numAttribs;
 
-  private int numInstances;
+  /** The number of instances */
+  private int m_numInstances;
 
+  /**
+   * Constructor
+   */
   public OneRAttributeEval()
   {
     resetOptions();
   }
-
-
-  /* //**
-   * Returns an enumeration describing the available options
-   * @return an enumeration of all the available options
-   *
-   **
-  public Enumeration listOptions() 
-  {
-    
-    Vector newVector = new Vector(1);
-    
-    newVector.addElement(new Option("\ttreat missing values as a seperate value.", "M", 0,"-M"));
-
-    return newVector.elements();
-  }
-
-  //**
-   * Parses a given list of options.
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   *
-   **
-  public void setOptions(String[] options) throws Exception
-  {
-    resetOptions();
-    missing_merge = !(Utils.getFlag('M',options));
-  }
-
-  /**
-   * Gets the current settings of WrapperSubsetEval.
-   *
-   * @return an array of strings suitable for passing to setOptions()
-   *
-  public String [] getOptions()
-  {
-    String [] options = new String [1];
-    int current = 0;
-
-    if (!missing_merge)
-      {
-	options[current++] = "-M";
-      }
-
-    while (current < options.length) 
-      {
-	options[current++] = "";
-      }
-
-    return options;
-
-    } */
 
   /**
    * Initializes an information gain attribute evaluator.
@@ -110,19 +67,29 @@ public class OneRAttributeEval
    */
   public void buildEvaluator(Instances data) throws Exception
   {
-    trainInstances = data;
-    classIndex = trainInstances.classIndex();
-    numAttribs = trainInstances.numAttributes();
-    numInstances = trainInstances.numInstances();
+    m_trainInstances = data;
+    
+    if (m_trainInstances.checkForStringAttributes())
+      {
+	throw new Exception("Can't handle string attributes!");
+      }
 
-    if (trainInstances.attribute(classIndex).isNumeric())
-      throw new Exception("Class must be nominal!");
+    m_classIndex = m_trainInstances.classIndex();
+    m_numAttribs = m_trainInstances.numAttributes();
+    m_numInstances = m_trainInstances.numInstances();
+
+    if (m_trainInstances.attribute(m_classIndex).isNumeric())
+      {
+	throw new Exception("Class must be nominal!");
+      }
   }
 
-
+  /**
+   * rests to defaults.
+   */
   protected void resetOptions()
   {
-    trainInstances = null;
+    m_trainInstances = null;
   }
 
   /**
@@ -141,7 +108,7 @@ public class OneRAttributeEval
     delTransform.setInvertSelection(true);
 
     // copy the instances
-    Instances trainCopy = new Instances(trainInstances);
+    Instances trainCopy = new Instances(m_trainInstances);
 
     featArray[0] = attribute;
     featArray[1] = trainCopy.classIndex();
@@ -161,14 +128,24 @@ public class OneRAttributeEval
     return (1-errorRate)*100.0;
   }
 
+  /**
+   * Return a description of the evaluator
+   * @return description as a string
+   */
   public String toString()
   {
     StringBuffer text = new StringBuffer();
-    
-    text.append("\tOneR Ranking Filter");
+
+    if (m_trainInstances == null)
+      {
+	text.append("\tOneR feature evaluator has not been built yet");
+      }
+    else
+      {
+	text.append("\tOneR feature evaluator");
+      }
 
     text.append("\n");
-
     return text.toString();
   }
 
@@ -179,22 +156,19 @@ public class OneRAttributeEval
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
-   * -t training file
+   * @param args the options
    */
-  
-  public static void main(String [] argv)
+  public static void main(String [] args)
   {
-    
-    try {
-      System.out.println(AttributeSelection.SelectAttributes(new OneRAttributeEval(), argv));
-    }
+    try 
+      {
+	System.out.println(AttributeSelection.
+			   SelectAttributes(new OneRAttributeEval(), args));
+      }
     catch (Exception e)
       {
 	e.printStackTrace();
 	System.out.println(e.getMessage());
       }
   }
-  
-
 }

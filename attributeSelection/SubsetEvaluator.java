@@ -22,27 +22,26 @@ import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-
 /** 
  * Abstract attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
-public abstract class SubsetEvaluator extends ASEvaluation {
+public abstract class SubsetEvaluator extends ASEvaluation 
+{
 
-    // ===============
-    // Public methods.
-    // ===============
-
-    /**
-     * evaluates a subset of attributes
-     *
-     * @param subset a bitset representing the attribute subset to be 
-     * evaluated 
-     * @exception Exception if the subset could not be evaluated
-     */
-    public abstract double evaluateSubset(BitSet subset) throws Exception;
-
+  // ===============
+  // Public methods.
+  // ===============
+  
+  /**
+   * evaluates a subset of attributes
+   *
+   * @param subset a bitset representing the attribute subset to be 
+   * evaluated 
+   * @exception Exception if the subset could not be evaluated
+   */
+  public abstract double evaluateSubset(BitSet subset) throws Exception;
 }
 

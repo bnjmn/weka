@@ -25,28 +25,35 @@ import weka.core.*;
 /** 
  * Class for ranking the attributes evaluated by a AttributeEvaluator
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
 class Ranker extends RankedOutputSearch {
 
-  private int [] starting;
+  /** Holds the starting set of attributes if specified */
+  private int [] m_starting;
 
-  private int [] attributeList;
+  /** Holds the ordered list of attributes */
+  private int [] m_attributeList;
 
-  private double [] attributeMerit;
+  /** Holds the list of attribute merit scores */
+  private double [] m_attributeMerit;
 
-  private boolean hasClass;
+  /** Data has class attribute---if unsupervised evaluator then no class */
+  private boolean m_hasClass;
 
-  private int classIndex;
+  /** Class index of the data if supervised evaluator */
+  private int m_classIndex;
 
-  private int numAttribs;
+  /** The number of attribtes */
+  private int m_numAttribs;
 
-
+  /**
+   * Constructor
+   */
   public Ranker()
   {
     resetOptions();
   }
-
 
   /**
    * Kind of a dummy search algorithm. Calls a Attribute evaluator to
@@ -69,71 +76,87 @@ class Ranker extends RankedOutputSearch {
     int i,j;
 
     if (!(ASEval instanceof AttributeEvaluator))
-      throw new Exception(ASEval.getClass().getName()+" is not a"+
+      {
+	throw new Exception(ASEval.getClass().getName()+" is not a"+
 			  "Attribute evaluator!");
+      }
 
-    numAttribs = data.numAttributes();
+    m_numAttribs = data.numAttributes();
 
     if (startSet != null)
       {
-	starting = startSet;
+	m_starting = startSet;
       }
 
     if (ASEval instanceof UnsupervisedSubsetEvaluator)
       {
-	hasClass = false;
+	m_hasClass = false;
       }
     else
       {
-	hasClass = true;
-	classIndex = data.classIndex();
+	m_hasClass = true;
+	m_classIndex = data.classIndex();
       }
 
     int sl = 0;
-    if (starting != null)
-      sl = starting.length;
+    if (m_starting != null)
+      {
+	sl = m_starting.length;
+      }
 
-    if ((sl != 0) && (hasClass == true))
+    if ((sl != 0) && (m_hasClass == true))
       {
 	// see if the supplied list contains the class index
 	boolean ok = false;
 	for (i=0;i<sl;i++)
-	  if (starting[i] == classIndex)
-	    {
-	      ok = true;
-	      break;
-	    }
+	  {
+	    if (m_starting[i] == m_classIndex)
+	      {
+		ok = true;
+		break;
+	      }
+	  }
 	if (ok == false)
-	  sl++;
+	  {
+	    sl++;
+	  }
       }
-    else if (hasClass == true)
-      sl++;
-
+    else if (m_hasClass == true)
+      {
+	sl++;
+      }
 	
-    attributeList = new int [numAttribs - sl];
-    attributeMerit = new double [numAttribs - sl];
+    m_attributeList = new int [m_numAttribs - sl];
+    m_attributeMerit = new double [m_numAttribs - sl];
 
     // add in those attributes not in the starting (omit list)
-    for (i=0,j=0;i<numAttribs;i++)
-      if (!inStarting(i))
-	attributeList[j++] = i;
+    for (i=0,j=0;i<m_numAttribs;i++)
+      {
+	if (!inStarting(i))
+	  {
+	    m_attributeList[j++] = i;
+	  }
+      }
 	
     AttributeEvaluator ASEvaluator = (AttributeEvaluator)ASEval;
 
-    for (i=0;i<attributeList.length;i++)
+    for (i=0;i<m_attributeList.length;i++)
       {
-	attributeMerit[i] = ASEvaluator.evaluateAttribute(attributeList[i]);
+	m_attributeMerit[i] = 
+	  ASEvaluator.evaluateAttribute(m_attributeList[i]);
       }
     
     double [][] tempRanked = rankedAttributes();
-    int [] rankedAttributes = new int [attributeList.length];
-    for (i=0;i<attributeList.length;i++)
-      rankedAttributes[i] = (int)tempRanked[i][0];
-
+    int [] rankedAttributes = new int [m_attributeList.length];
+    
+    for (i=0;i<m_attributeList.length;i++)
+      {
+	rankedAttributes[i] = (int)tempRanked[i][0];
+      }
     return rankedAttributes;
   }
 
-   /**
+  /**
    * Sorts the evaluated attribute list
    *
    * @return an array of sorted (highest eval to lowest) attribute indexes
@@ -142,25 +165,29 @@ class Ranker extends RankedOutputSearch {
   public double [][] rankedAttributes() throws Exception
   {
     int i,j;
-    if (attributeList == null || attributeMerit == null)
-      throw new Exception("Search must be performed before a ranked "+
+    if (m_attributeList == null || m_attributeMerit == null)
+      {
+	throw new Exception("Search must be performed before a ranked "+
 			  "attribute list can be obtained");
+      }
 
-    int [] ranked = Utils.sort(attributeMerit);
+    int [] ranked = Utils.sort(m_attributeMerit);
 
     // reverse the order of the ranked indexes
     double [][] bestToWorst = new double [ranked.length][2];
+
     for (i=ranked.length-1,j=0;i>=0;i--)
+      {
 	bestToWorst[j++][0] = ranked[i];
+      }
 
     // convert the indexes to attribute indexes
     for (i=0;i<bestToWorst.length;i++)
       {
 	int temp = ((int)bestToWorst[i][0]);
-	bestToWorst[i][0] = attributeList[temp];
-	bestToWorst[i][1] = attributeMerit[temp];
+	bestToWorst[i][0] = m_attributeList[temp];
+	bestToWorst[i][1] = m_attributeMerit[temp];
       }
-
     return bestToWorst;
   }
 
@@ -174,41 +201,55 @@ class Ranker extends RankedOutputSearch {
     
     BfString.append("\tAttribute ranking.\n");
 
-    if (starting != null)
+    if (m_starting != null)
       {
 	BfString.append("\tIgnored attributes: ");
-	for (int i=0;i<starting.length;i++)
-	  if (i == (starting.length-1))
-	    BfString.append((starting[i]+1)+"\n");
-	  else
-	    BfString.append((starting[i]+1)+",");
+	for (int i=0;i<m_starting.length;i++)
+	  {
+	    if (i == (m_starting.length-1))
+	      {
+		BfString.append((m_starting[i]+1)+"\n");
+	      }
+	    else
+	      {
+		BfString.append((m_starting[i]+1)+",");
+	      }
+	  }
       }
-
     return BfString.toString();
   }
 
+  /**
+   * Resets stuff to default values
+   */
   protected void resetOptions()
   {
-     starting = null;
-     attributeList = null;
-     attributeMerit = null;
+     m_starting = null;
+     m_attributeList = null;
+     m_attributeMerit = null;
   }    
 
   private boolean inStarting(int feat)
   {
     // omit the class from the evaluation
-    if ((hasClass == true) && (feat == classIndex))
-      return true;
-
-    if (starting == null)
-      return false;
-    
-    for (int i=0;i<starting.length;i++)
-      if (starting[i] == feat)
+    if ((m_hasClass == true) && (feat == m_classIndex))
+      {
 	return true;
+      }
 
+    if (m_starting == null)
+      {
+	return false;
+      }
+    
+    for (int i=0;i<m_starting.length;i++)
+      {
+	if (m_starting[i] == feat)
+	  {
+	    return true;
+	  }
+      }
     return false;
   }
-  
 }
 

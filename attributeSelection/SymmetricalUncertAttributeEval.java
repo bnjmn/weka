@@ -24,8 +24,13 @@ import weka.core.*;
 import weka.filters.*;
 
 /** 
- * Class for Evaluating attributes individually by measuring information gain 
- * with respect to the class.
+ * Class for Evaluating attributes individually by measuring symmetrical 
+ * uncertainty with respect to the class.
+ *
+ * Valid options are:<p>
+ *
+ * -M <br>
+ * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version 1.0 March 1999 (Mark)
@@ -34,56 +39,64 @@ public class SymmetricalUncertAttributeEval
   extends AttributeEvaluator
   implements OptionHandler {
 
+  /** The training instances */
+  private Instances m_trainInstances;
 
-  private Instances trainInstances;
-
-  private int classIndex;
+  /** The class index */
+  private int m_classIndex;
   
-  private int numAttribs;
+  /** The number of attributes */
+  private int m_numAttribs;
+  
+  /** The number of instances */
+  private int m_numInstances;
 
-  private int numInstances;
+  /** The number of classes */
+  private int m_numClasses;
 
-  private int numClasses;
+  /** Treat missing values as a seperate value */
+  private boolean m_missing_merge;
 
-  private boolean missing_merge;
-
-
+  /**
+   * Constructor
+   */
   public SymmetricalUncertAttributeEval ()
   {
     resetOptions();
   }
 
-
   /**
    * Returns an enumeration describing the available options
    * @return an enumeration of all the available options
-   *
    **/
   public Enumeration listOptions() 
   {
     
     Vector newVector = new Vector(1);
     
-    newVector.addElement(new Option("\ttreat missing values as a seperate value.", "M", 0,"-M"));
+    newVector.addElement(new Option("\ttreat missing values as a seperate "
+				    +"value.", "M", 0,"-M"));
 
     return newVector.elements();
   }
 
   /**
    * Parses a given list of options.
+   *
+   * -M <br>
+   * Treat missing values as a seperate value. <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
-   *
    **/
   public void setOptions(String[] options) throws Exception
   {
     resetOptions();
-    missing_merge = !(Utils.getFlag('M',options));
+    m_missing_merge = !(Utils.getFlag('M',options));
   }
 
   /**
    * Gets the current settings of WrapperSubsetEval.
-   *
    * @return an array of strings suitable for passing to setOptions()
    */
   public String [] getOptions()
@@ -91,7 +104,7 @@ public class SymmetricalUncertAttributeEval
     String [] options = new String [1];
     int current = 0;
 
-    if (!missing_merge)
+    if (!m_missing_merge)
       {
 	options[current++] = "-M";
       }
@@ -120,27 +133,29 @@ public class SymmetricalUncertAttributeEval
 	throw new Exception("Can't handle string attributes!");
       }
 
-    trainInstances = data;
-    classIndex = trainInstances.classIndex();
-    numAttribs = trainInstances.numAttributes();
-    numInstances = trainInstances.numInstances();
+    m_trainInstances = data;
+    m_classIndex = m_trainInstances.classIndex();
+    m_numAttribs = m_trainInstances.numAttributes();
+    m_numInstances = m_trainInstances.numInstances();
 
-    if (trainInstances.attribute(classIndex).isNumeric())
+    if (m_trainInstances.attribute(m_classIndex).isNumeric())
       throw new Exception("Class must be nominal!");
 
     DiscretizeFilter disTransform = new DiscretizeFilter();
     disTransform.setUseBetterEncoding(true);
-    disTransform.inputFormat(trainInstances);
-    trainInstances = Filter.useFilter(trainInstances, disTransform);
+    disTransform.inputFormat(m_trainInstances);
+    m_trainInstances = Filter.useFilter(m_trainInstances, disTransform);
 
-    numClasses = trainInstances.attribute(classIndex).numValues();
+    m_numClasses = m_trainInstances.attribute(m_classIndex).numValues();
   }
 
-
+  /**
+   * set options to default values
+   */
   protected void resetOptions()
   {
-    trainInstances = null;
-    missing_merge = true;
+    m_trainInstances = null;
+    m_missing_merge = true;
   }
 
   /**
@@ -155,8 +170,8 @@ public class SymmetricalUncertAttributeEval
     int i,j,ii,jj;
     int nnj,nni,ni,nj;
     double sum = 0.0;
-    ni = trainInstances.attribute(attribute).numValues() + 1;
-    nj = numClasses + 1;
+    ni = m_trainInstances.attribute(attribute).numValues() + 1;
+    nj = m_numClasses + 1;
     double [] sumi, sumj;
     Instance inst;
     double temp = 0.0;
@@ -179,20 +194,27 @@ public class SymmetricalUncertAttributeEval
       }
     
     // Fill the contingency table
-    for (i=0;i<numInstances;i++)
+    for (i=0;i<m_numInstances;i++)
       {
-	inst = trainInstances.instance(i);
+	inst = m_trainInstances.instance(i);
 
 	if (inst.isMissing(attribute))
-	  ii = ni-1;
+	  {
+	    ii = ni-1;
+	  }
 	else
-	  ii = (int) inst.value(attribute);
+	  {
+	    ii = (int) inst.value(attribute);
+	  }
 
-	if (inst.isMissing(classIndex))
-	  jj = nj-1;
+	if (inst.isMissing(m_classIndex))
+	  {
+	    jj = nj-1;
+	  }
 	else
-	  jj = (int) inst.value(classIndex);
-
+	  {
+	    jj = (int) inst.value(m_classIndex);
+	  }
 	counts[ii][jj]++;
       }
 
@@ -218,13 +240,16 @@ public class SymmetricalUncertAttributeEval
       }
 
     // distribute missing counts
-    if (missing_merge)
+    if (m_missing_merge)
       {
 	double [] i_copy = new double [sumi.length], 
 	  j_copy = new double [sumj.length];
 	double [][] counts_copy = new double [sumi.length][sumj.length];
+	
 	for (i=0;i<ni;i++)
-	  System.arraycopy(counts[i],0,counts_copy[i],0,sumj.length);
+	  {
+	    System.arraycopy(counts[i],0,counts_copy[i],0,sumj.length);
+	  }
 
 	System.arraycopy(sumi,0,i_copy,0,sumi.length);
 	System.arraycopy(sumj,0,j_copy,0,sumj.length);
@@ -232,61 +257,81 @@ public class SymmetricalUncertAttributeEval
      
 	// do the missing i's
 	if (sumi[ni-1] > 0.0)
-	  for (j=0;j<nj-1;j++)
-	    if (counts[ni-1][j] > 0.0)
+	  {
+	    for (j=0;j<nj-1;j++)
 	      {
-		for (i=0;i<ni-1;i++)
+		if (counts[ni-1][j] > 0.0)
 		  {
-		    temp = ((i_copy[i]/(sum-i_copy[ni-1]))*counts[ni-1][j]);
-		    counts[i][j] += temp;
-		    sumi[i] += temp;
+		    for (i=0;i<ni-1;i++)
+		      {
+			temp = ((i_copy[i]/(sum-i_copy[ni-1])) * 
+				counts[ni-1][j]);
+			counts[i][j] += temp;
+			sumi[i] += temp;
+		      }
+		    counts[ni-1][j] = 0.0;
 		  }
-		counts[ni-1][j] = 0.0;
 	      }
+	  }
 	sumi[ni-1] = 0.0;
      
 	// do the missing j's
 	if (sumj[nj-1] > 0.0)
-	  for (i=0;i<ni-1;i++)
-	    if (counts[i][nj-1] > 0.0)
+	  {
+	    for (i=0;i<ni-1;i++)
 	      {
-		for (j=0;j<nj-1;j++)
+		if (counts[i][nj-1] > 0.0)
 		  {
-		    temp = ((j_copy[j]/(sum-j_copy[nj-1]))*counts[i][nj-1]);
-		    counts[i][j] += temp;
-		    sumj[j] += temp;
+		    for (j=0;j<nj-1;j++)
+		      {
+			temp = ((j_copy[j]/(sum-j_copy[nj-1]))*counts[i][nj-1]);
+			counts[i][j] += temp;
+			sumj[j] += temp;
+		      }
+		    counts[i][nj-1] = 0.0;
 		  }
-		counts[i][nj-1] = 0.0;
 	      }
+	  }
 	sumj[nj-1] = 0.0;
 
 	// do the both missing
 	if (counts[ni-1][nj-1] > 0.0)
 	  {
 	    for (i=0;i<ni-1;i++)
-	      for (j=0;j<nj-1;j++)
-		{
-		  temp =  (counts_copy[i][j] / (sum - total_missing)) * 
-		    counts_copy[ni-1][nj-1];
-		  counts[i][j] += temp;
-		  sumi[i] += temp;
-		  sumj[j] += temp;
-		}
+	      {
+		for (j=0;j<nj-1;j++)
+		  {
+		    temp =  (counts_copy[i][j] / (sum - total_missing)) * 
+		      counts_copy[ni-1][nj-1];
+		    counts[i][j] += temp;
+		    sumi[i] += temp;
+		    sumj[j] += temp;
+		  }
+	      }
 	    counts[ni-1][nj-1] = 0.0;
 	  }
       }
-    
     return ContingencyTables.symmetricalUncertainty(counts);
   }
 
+  /**
+   * Return a description of the evaluator
+   * @return description as a string
+   */
   public String toString()
   {
     StringBuffer text = new StringBuffer();
-    
-    text.append("\tSymmetrical Uncertainty Ranking Filter");
-    if (!missing_merge)
-      text.append("\n\tMissing values treated as seperate");
 
+    if (m_trainInstances == null)
+      {
+	text.append("\tSymmetrical Uncertainty evaluator has not been built");
+      }
+    else
+      {
+	text.append("\tSymmetrical Uncertainty Ranking Filter");
+	if (!m_missing_merge)
+	  text.append("\n\tMissing values treated as seperate");
+      }
     text.append("\n");
 
     return text.toString();
@@ -302,7 +347,6 @@ public class SymmetricalUncertAttributeEval
    * @param argv should contain the following arguments:
    * -t training file
    */
-  
   public static void main(String [] argv)
   {
     
@@ -315,6 +359,4 @@ public class SymmetricalUncertAttributeEval
 	System.out.println(e.getMessage());
       }
   }
-  
-
 }

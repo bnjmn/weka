@@ -21,16 +21,15 @@ package weka.attributeSelection;
 import java.io.*;
 import weka.core.*;
 
-
 /** 
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
 
-public abstract class ASEvaluation implements Serializable {
-
+public abstract class ASEvaluation implements Serializable 
+{
   // ===============
   // Public methods.
   // ===============
@@ -57,5 +56,4 @@ public abstract class ASEvaluation implements Serializable {
   {
     return attributeSet;
   }
-
 }

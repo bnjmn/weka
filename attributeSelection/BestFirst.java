@@ -23,27 +23,32 @@ import java.util.*;
 import weka.core.*;
 
 /** 
- * Class for performing a best first search.
+ * Class for performing a best first search. <p>
+ *
+ * Valid options are: <p>
+ *
+ * -D <-1 = backward | 0 = bidirectional | 1 = forward> <br>
+ * Direction of the search. (default = 1). <p>
+ *
+ * -N <num> <br>
+ * Number of non improving nodes to consider before terminating search.
+ * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision 1.0 $
  */
 public class BestFirst extends ASSearch implements OptionHandler {
-
 
   // Inner classes
 
   /**
    * Class for a node in a linked list. Used in best first search.
-   * @version 1.0
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    **/
   public class Link2
   {
-      
     BitSet group;
     double merit;
-   
 
     // Constructor
     public Link2 (BitSet gr, double mer)
@@ -51,7 +56,8 @@ public class BestFirst extends ASSearch implements OptionHandler {
       group = (BitSet)gr.clone();
       merit = mer;
     }
-  
+
+    /** Get a group */
     public BitSet getGroup()
     {
       return group;
@@ -63,11 +69,9 @@ public class BestFirst extends ASSearch implements OptionHandler {
     }
   }
 
-    
   /**
    * Class for handling a linked list. Used in best first search.
    * Extends the Vector class.
-   * @version 1.0
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    **/
   public class LinkedList2 extends FastVector
@@ -83,9 +87,13 @@ public class BestFirst extends ASSearch implements OptionHandler {
     public void removeLinkAt(int index) throws Exception
     {
       if ((index >= 0) && (index < size()))
-	removeElementAt(index);
+	{
+	  removeElementAt(index);
+	}
       else
-	throw new Exception("index out of range (removeLinkAt)");
+	{
+	  throw new Exception("index out of range (removeLinkAt)");
+	}
     }
 
     /**
@@ -95,11 +103,17 @@ public class BestFirst extends ASSearch implements OptionHandler {
     public Link2 getLinkAt(int index) throws Exception
     {
       if (size()==0)
-	throw new Exception("List is empty (getLinkAt)");
+	{
+	  throw new Exception("List is empty (getLinkAt)");
+	}
       else if ((index >= 0) && (index < size()))
-	return ((Link2)(elementAt(index)));
+	{
+	  return ((Link2)(elementAt(index)));
+	}
       else
-	throw new Exception("index out of range (getLinkAt)");
+	{
+	  throw new Exception("index out of range (getLinkAt)");
+	}
     }
 
     /**
@@ -112,9 +126,13 @@ public class BestFirst extends ASSearch implements OptionHandler {
       Link2 newL = new Link2(gr, mer);
 	
       if (size()==0)
-	addElement(newL);
+	{
+	  addElement(newL);
+	}
       else if (mer > ((Link2)(firstElement())).merit)
-	insertElementAt(newL,0);
+	{
+	  insertElementAt(newL,0);
+	}
       else
 	{
 	  int i = 0;
@@ -133,38 +151,43 @@ public class BestFirst extends ASSearch implements OptionHandler {
 		  done = true;
 		}
 	      else
-		i++;
+		{
+		  i++;
+		}
 	    }
 	}
     }
   }
 
-    
   // member variables
 
   /** maximum number of stale nodes before terminating search */
-  private int maxStale;
+  private int m_maxStale;
 
   /** -1 == backward search, 1 == forward search, 0 == bidirectional */
-  private int searchDirection;
+  private int m_searchDirection;
 
   /** holds a starting set (if one is supplied) */
-  private int [] starting;
+  private int [] m_starting;
 
   /** does the data have a class */
-  private boolean hasClass;
+  private boolean m_hasClass;
   
   /** holds the class index */
-  private int classIndex;
+  private int m_classIndex;
 
   /** number of attributes in the data */
-  private int numAttribs;
+  private int m_numAttribs;
 
   /** total number of subsets evaluated during a search */
-  private int totalEvals=0;
-  
+  private int m_totalEvals;
 
-  /** Constructor */
+  /** for debugging */
+  private boolean m_debug;
+  
+  /** 
+   *Constructor 
+   */
   public BestFirst()
   {
     resetOptions();
@@ -180,16 +203,29 @@ public class BestFirst extends ASSearch implements OptionHandler {
 
     Vector newVector = new Vector(2);
 
-    newVector.addElement(new Option("\tdirection of search.", "D", 1,"-D <-1 = backward | 0 = bidirectional | 1 = forward>"));
+    newVector.addElement(new Option("\tDirection of search. (default = 1)."
+				    , "D", 1
+				    ,"-D <-1 = backward | 0 = bidirectional "
+				    +"| 1 = forward>"));
 
-    newVector.addElement(new Option("\tNumber of non-improving nodes to\n\tconsider before terminating search.", "S", 1,"-S <num>"));
+    newVector.addElement(new Option("\tNumber of non-improving nodes to"
+				    +"\n\tconsider before terminating search."
+				    , "N", 1,"-N <num>"));
 
     return newVector.elements();
   }
 
-    
   /**
    * Parses a given list of options.
+   *
+   * Valid options are: <p>
+   *
+   * -D <-1 = backward | 0 = bidirectional | 1 = forward> <br>
+   * Direction of the search. (default = 1). <p>
+   *
+   * -N <num> <br>
+   * Number of non improving nodes to consider before terminating search.
+   * (default = 5). <p>
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    *
@@ -203,19 +239,20 @@ public class BestFirst extends ASSearch implements OptionHandler {
     optionString = Utils.getOption('D',options);
     if (optionString.length() != 0)
       {
-	searchDirection = Integer.parseInt(optionString);
+	m_searchDirection = Integer.parseInt(optionString);
       }
 
-    optionString = Utils.getOption('S',options);
+    optionString = Utils.getOption('N',options);
     if (optionString.length() != 0)
       {
-	maxStale = Integer.parseInt(optionString);
+	m_maxStale = Integer.parseInt(optionString);
       }
+
+    m_debug = Utils.getFlag('Z',options);
   }
 
   /**
    * Gets the current settings of WrapperSubsetEval.
-   *
    * @return an array of strings suitable for passing to setOptions()
    */
   public String [] getOptions()
@@ -223,16 +260,15 @@ public class BestFirst extends ASSearch implements OptionHandler {
     String [] options = new String [4];
     int current = 0;
 
-    options[current++] = "-D"; options[current++] = ""+searchDirection;
-    options[current++] = "-S"; options[current++] = ""+maxStale;
+    options[current++] = "-D"; options[current++] = ""+m_searchDirection;
+    options[current++] = "-N"; options[current++] = ""+m_maxStale;
 
-     while (current < options.length) 
-       {
-	 options[current++] = "";
-       }
-     return options;
+    while (current < options.length) 
+      {
+	options[current++] = "";
+      }
+    return options;
   }
-
 
   /**
    * returns a description of the search as a String
@@ -244,50 +280,64 @@ public class BestFirst extends ASSearch implements OptionHandler {
 
     BfString.append("\tBest first.\n\tStart set: ");
 
-    if (starting == null)
-      BfString.append("no attributes\n");
+    if (m_starting == null)
+      {
+	BfString.append("no attributes\n");
+      }
     else
       {
 	boolean didPrint;
-	for (int i=0;i<starting.length;i++)
+	for (int i=0;i<m_starting.length;i++)
 	  {
 	    didPrint = false;
-	    if ((hasClass == false) ||
-		(hasClass == true && i != classIndex))
+	    if ((m_hasClass == false) ||
+		(m_hasClass == true && i != m_classIndex))
 	      {
-		BfString.append((starting[i]+1));
+		BfString.append((m_starting[i]+1));
 		didPrint = true;
 	      }
-	    if (i == (starting.length-1))
-	      BfString.append("\n");
+	    if (i == (m_starting.length-1))
+	      {
+		BfString.append("\n");
+	      }
 	    else if (didPrint)
-	      BfString.append(",");
+	      {
+		BfString.append(",");
+	      }
 	  }
       }
 
     BfString.append("\tSearch direction: ");
-    if (searchDirection == -1)
-      BfString.append("backward\n");
-    else if (searchDirection == 1)
-      BfString.append("forward\n");
+    if (m_searchDirection == -1)
+      {
+	BfString.append("backward\n");
+      }
+    else if (m_searchDirection == 1)
+      {
+	BfString.append("forward\n");
+      }
     else
-      BfString.append("bi-directional\n");
+      {
+	BfString.append("bi-directional\n");
+      }
 
-    BfString.append("\tStale search after "+maxStale+" node expansions\n");
-    BfString.append("\tTotal number of subsets evaluated: "+totalEvals+"\n");
+    BfString.append("\tStale search after "+m_maxStale+" node expansions\n");
+    BfString.append("\tTotal number of subsets evaluated: "+m_totalEvals+"\n");
 
     return BfString.toString();
   }
 
-
-  void printGroup(BitSet tt, int numAttribs)
+  private void printGroup(BitSet tt, int numAttribs)
   {
     int i;
     
     for (i=0;i<numAttribs;i++)
-      if (tt.get(i) == true)
-	System.out.print((i+1)+" ");
-
+      {
+	if (tt.get(i) == true)
+	  {
+	    System.out.print((i+1)+" ");
+	  }
+      }
     System.out.println();
   }
 
@@ -308,30 +358,34 @@ public class BestFirst extends ASSearch implements OptionHandler {
     throws Exception
   {
     if (!(ASEval instanceof SubsetEvaluator)) 
-      throw new Exception(ASEval.getClass().getName()+" is not a "+
-			  "Subset evaluator!");
+      {
+	throw new Exception(ASEval.getClass().getName()+" is not a "+
+			    "Subset evaluator!");
+      }
 
     if (startSet != null)
-      starting = startSet;
+      {
+	m_starting = startSet;
+      }
 
     if (ASEval instanceof UnsupervisedSubsetEvaluator)
       {
-	hasClass = false;
+	m_hasClass = false;
       }
     else
       {
-	hasClass = true;
-	classIndex = data.classIndex();
+	m_hasClass = true;
+	m_classIndex = data.classIndex();
       }
 
     SubsetEvaluator ASEvaluator = (SubsetEvaluator)ASEval;
 
-    numAttribs = data.numAttributes();
+    m_numAttribs = data.numAttributes();
     int i,j;
     int best_size = 0;
     int size = 0;
     int done;
-    int sd = searchDirection;
+    int sd = m_searchDirection;
     int evals=0;
     BitSet best_group, temp_group;
     int stale;
@@ -342,42 +396,47 @@ public class BestFirst extends ASSearch implements OptionHandler {
     boolean added;
     Link2 tl;
 
-    Hashtable lookup = new Hashtable((int)(200.0*numAttribs*1.5));
+    Hashtable lookup = new Hashtable((int)(200.0*m_numAttribs*1.5));
     LinkedList2 bfList = new LinkedList2();
     
     best_merit = -Double.MAX_VALUE;
     stale = 0;
-    best_group = new BitSet(numAttribs);
+    best_group = new BitSet(m_numAttribs);
 
-    /* If a starting subset has been supplied, then initialise the bitset*/
-    if (starting != null)
+    // If a starting subset has been supplied, then initialise the bitset
+    if (m_starting != null)
       {
-	for (i=0;i<starting.length;i++)
-	  if ((starting[i]) != classIndex)
-	    best_group.set(starting[i]);
+	for (i=0;i<m_starting.length;i++)
+	  {
+	    if ((m_starting[i]) != m_classIndex)
+	      {
+		best_group.set(m_starting[i]);
+	      }
+	  }
+
 	// evaluate the initial set
 	best_merit = ASEvaluator.evaluateSubset(best_group);
-	best_size = starting.length;
-	totalEvals++;
+	best_size = m_starting.length;
+	m_totalEvals++;
       }
     else
-      if (searchDirection == -1)
+      if (m_searchDirection == -1)
 	{
-	  starting = new int [numAttribs];
+	  m_starting = new int [m_numAttribs];
 	  // init initial subset to all attributes
-	  for (i=0,j=0;i<numAttribs;i++)
+	  for (i=0,j=0;i<m_numAttribs;i++)
 	    {
-	      if (i != classIndex)
+	      if (i != m_classIndex)
 		{
 		  best_group.set(i);
-		  starting[j++] = i;
+		  m_starting[j++] = i;
 		}
 	    }
 		
 	  // evaluate the initial set
 	  best_merit = ASEvaluator.evaluateSubset(best_group);
-	  best_size = numAttribs-1;
-	  totalEvals++;
+	  best_size = m_numAttribs-1;
+	  m_totalEvals++;
 	}
 
     // add the initial group to the list and the hash table
@@ -385,22 +444,24 @@ public class BestFirst extends ASSearch implements OptionHandler {
     BitSet tt = (BitSet)best_group.clone();
     lookup.put(tt,"");
     
-    while (stale < maxStale)
+    while (stale < m_maxStale)
       {
 	added = false;
 	
-	if (searchDirection == 0) // bi-directional search
+	if (m_searchDirection == 0) // bi-directional search
 	  {
 	    done = 2;
 	    sd = 1;
 	  }
 	else
-	  done = 1;
+	  {
+	    done = 1;
+	  }
 
 	// finished search?
 	if (bfList.size()==0)
 	  {
-	    stale = maxStale;
+	    stale = m_maxStale;
 	    break;
 	  }
 
@@ -412,85 +473,121 @@ public class BestFirst extends ASSearch implements OptionHandler {
 	bfList.removeLinkAt(0);
 	// count the number of bits set (attributes)
 	int kk;
-	for (kk=0,size=0;kk<numAttribs;kk++)
-	  if (temp_group.get(kk))
-	    size++;
+	for (kk=0,size=0;kk<m_numAttribs;kk++)
+	  {
+	    if (temp_group.get(kk))
+	      {
+		size++;
+	      }
+	  }
 
-	do {
-	  for (i=0;i<numAttribs;i++)
-	    {
-	      if (sd == 1)
-		z = ((i != classIndex) && (!temp_group.get(i)));
-	      else
-		z = ((i != classIndex) && (temp_group.get(i)));
+	do 
+	  {
+	    for (i=0;i<m_numAttribs;i++)
+	      {
+		if (sd == 1)
+		  {
+		    z = ((i != m_classIndex) && (!temp_group.get(i)));
+		  }
+		else
+		  {
+		    z = ((i != m_classIndex) && (temp_group.get(i)));
+		  }
 
-	      if (z)
-		{
-		  // set the bit (attribute to add/delete)
-		  if (sd == 1)
-		    temp_group.set(i);
-		  else
-		    temp_group.clear(i);
+		if (z)
+		  {
+		    // set the bit (attribute to add/delete)
+		    if (sd == 1)
+		      {
+			temp_group.set(i);
+		      }
+		    else
+		      {
+			temp_group.clear(i);
+		      }
 
-		  /* if this subset has been seen before, then it is already 
-		     in the list (or has been fully expanded) */
-		  tt = (BitSet)temp_group.clone();		  
+		    /* if this subset has been seen before, then it is already 
+		       in the list (or has been fully expanded) */
+		    tt = (BitSet)temp_group.clone();		  
 
-		  if (lookup.containsKey(tt) == false)
-		    {
-		      merit = ASEvaluator.evaluateSubset(temp_group);
-		      totalEvals++;
-		      //System.out.print("Group: ");
-		      //printGroup(tt, numAttribs);
-		      //System.out.println("Merit: "+merit);
-		      // is this better than the best?
-		      if (sd == 1)
-			z = ((merit - best_merit) > 0.00001);
-		      else
-			z = ((merit >= best_merit) && ((size+sd)<best_size));
+		    if (lookup.containsKey(tt) == false)
+		      {
+			merit = ASEvaluator.evaluateSubset(temp_group);
+			m_totalEvals++;
 
-		      if (z)
-			{			 
-			  added = true;
-			  stale = 0;
-			  best_merit = merit;
-			  best_size = (size+best_size);
-			  best_group = (BitSet)(temp_group.clone());
-			}
-		      // insert this one in the list and in the hash table
-		      bfList.addToList(tt, merit);
-		      lookup.put(tt,"");
-		    }
-		  // unset this addition(deletion)
-		  if (sd == 1)
-		    temp_group.clear(i);
-		  else
-		    temp_group.set(i);
-		}
-	    }
+			if (m_debug)
+			  {
+			    System.out.print("Group: ");
+			    printGroup(tt, m_numAttribs);
+			    System.out.println("Merit: "+merit);
+			  }
+			
+			// is this better than the best?
+			if (sd == 1)
+			  {
+			    z = ((merit - best_merit) > 0.00001);
+			  }
+			else
+			  {
+			    z = ((merit >= best_merit) && 
+				 ((size+sd)<best_size));
+			  }
+
+			if (z)
+			  {			 
+			    added = true;
+			    stale = 0;
+			    best_merit = merit;
+			    best_size = (size+best_size);
+			    best_group = (BitSet)(temp_group.clone());
+			  }
+			// insert this one in the list and in the hash table
+			bfList.addToList(tt, merit);
+			lookup.put(tt,"");
+		      }
+		    // unset this addition(deletion)
+		    if (sd == 1)
+		      {
+			temp_group.clear(i);
+		      }
+		    else
+		      {
+			temp_group.set(i);
+		      }
+		  }
+	      }
 	
-	  if (done == 2)
-	    sd = -1;
-	  done--;
-	} while (done > 0);
+	    if (done == 2)
+	      {
+		sd = -1;
+	      }
+	    done--;
+	  } 
+	while (done > 0);
 	/* if we haven't added a new attribute subset then full expansion 
 	   of this node hasen't resulted in anything better */
 	if (!added)
-	  stale++;
+	  {
+	    stale++;
+	  }
       }
     return attributeList(best_group);
   }
 
-  
+  /**
+   * Reset options to default values
+   */
   protected void resetOptions()
   {
-    maxStale = 5;
-    searchDirection = 1;
-    starting = null;
-    classIndex = -1;
+    m_maxStale = 5;
+    m_searchDirection = 1;
+    m_starting = null;
+    m_classIndex = -1;
+    m_totalEvals = 0;
+    m_debug = false;
   }
 
-   /**
+  /**
    * converts a BitSet into a list of attribute indexes 
    * @param group the BitSet to convert
    * @return an array of attribute indexes
@@ -499,17 +596,24 @@ public class BestFirst extends ASSearch implements OptionHandler {
   {
     int count = 0;
     // count how many were selected
-    for (int i = 0;i<numAttribs;i++)
-      if (group.get(i))
-	count++;
+    for (int i = 0;i<m_numAttribs;i++)
+      {
+	if (group.get(i))
+	  {
+	    count++;
+	  }
+      }
 
     int [] list = new int[count];
     count=0;
-    for (int i=0;i<numAttribs;i++)
-      if (group.get(i))
-	list[count++] = i;
 
+    for (int i=0;i<m_numAttribs;i++)
+      {
+	if (group.get(i))
+	  {
+	    list[count++] = i;
+	  }
+      }
     return list;
   }
-
 }
