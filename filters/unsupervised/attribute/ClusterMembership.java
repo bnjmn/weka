@@ -26,7 +26,7 @@ package weka.filters.unsupervised.attribute;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.clusterers.Clusterer;
+import weka.clusterers.DistributionClusterer;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Instance;
@@ -52,13 +52,13 @@ import java.util.Vector;
  * the class attribute (if set) is automatically ignored during clustering.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClusterMembership extends Filter implements UnsupervisedFilter, 
 							 OptionHandler {
 
   /** The clusterer */
-  protected Clusterer m_clusterer = new weka.clusterers.EM();
+  protected DistributionClusterer m_clusterer = new weka.clusterers.EM();
 
   /** Range of attributes to ignore */
   protected Range m_ignoreAttributesRange = null;
@@ -263,8 +263,9 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
       throw new Exception("A clusterer must be specified"
 			  + " with the -W option.");
     }
-    setClusterer((Clusterer)Utils.forName(Clusterer.class, clustererString,
-				Utils.partitionOptions(options)));
+    setDistributionClusterer((DistributionClusterer)Utils.
+			     forName(DistributionClusterer.class, clustererString,
+				     Utils.partitionOptions(options)));
 
     setIgnoredAttributeIndices(Utils.getOption('I', options));
     Utils.checkForRemainingOptions(options);
@@ -292,7 +293,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
     
     if (m_clusterer != null) {
       options[current++] = "-W"; 
-      options[current++] = getClusterer().getClass().getName();
+      options[current++] = getDistributionClusterer().getClass().getName();
     }
 
     options[current++] = "--";
@@ -336,7 +337,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    *
    * @param newClusterer the clusterer to use
    */
-  public void setClusterer(Clusterer newClusterer) {
+  public void setDistributionClusterer(DistributionClusterer newClusterer) {
     m_clusterer = newClusterer;
   }
 
@@ -345,7 +346,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    *
    * @return the clusterer used
    */
-  public Clusterer getClusterer() {
+  public DistributionClusterer getDistributionClusterer() {
     return m_clusterer;
   }
 
