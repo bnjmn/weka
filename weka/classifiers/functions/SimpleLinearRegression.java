@@ -31,9 +31,10 @@ import weka.classifiers.*;
  * Missing values are not allowed. Can only deal with numeric attributes.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class SimpleLinearRegression extends Classifier implements WeightedInstancesHandler {
+public class SimpleLinearRegression extends Classifier 
+  implements WeightedInstancesHandler {
 
   /** The chosen attribute */
   private Attribute m_attribute;
@@ -50,6 +51,24 @@ public class SimpleLinearRegression extends Classifier implements WeightedInstan
   /** If true, suppress error message if no useful attribute was found*/   
   private boolean m_suppressErrorMessage = false;  
 
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Learns a simple linear regression model. "
+      +"Picks the attribute that results in the lowest squared error. "
+      +"Missing values are not allowed. Can only deal with numeric attributes.";
+  }
+
+  /**
+   * Generate a prediction for the supplied instance.
+   *
+   * @param inst the instance to predict.
+   * @return the prediction
+   * @exception Exception if an error occurs
+   */
   public double classifyInstance(Instance inst) throws Exception {
     
     if (m_attribute == null) {
@@ -62,6 +81,12 @@ public class SimpleLinearRegression extends Classifier implements WeightedInstan
     }
   }
   
+  /**
+   * Builds a simple linear regression model given the supplied training data.
+   *
+   * @param insts the training data.
+   * @exception Exception if an error occurs
+   */
   public void buildClassifier(Instances insts) throws Exception {
 
     if (!insts.classAttribute().isNumeric()) {
@@ -144,26 +169,56 @@ public class SimpleLinearRegression extends Classifier implements WeightedInstan
     }
   }
 
+  /**
+   * Returns true if a usable attribute was found.
+   *
+   * @return true if a usable attribute was found.
+   */
   public boolean foundUsefulAttribute(){
       return (m_attribute != null); 
   } 
 
+  /**
+   * Returns the index of the attribute used in the regression.
+   *
+   * @return the index of the attribute.
+   */
   public int getAttributeIndex(){
       return m_attributeIndex;
   }
 
+  /**
+   * Returns the slope of the function.
+   *
+   * @return the slope.
+   */
   public double getSlope(){
       return m_slope;
   }
     
+  /**
+   * Returns the intercept of the function.
+   *
+   * @return the intercept.
+   */
   public double getIntercept(){
       return m_intercept;
   }  
 
+  /**
+   * Turn off the error message that is reported when no useful attribute is found.
+   *
+   * @param s if set to true turns off the error message
+   */
   public void setSuppressErrorMessage(boolean s){
       m_suppressErrorMessage = s;
   }   
 
+  /**
+   * Returns a description of this classifier as a string
+   *
+   * @return a description of the classifier.
+   */
   public String toString() {
 
     StringBuffer text = new StringBuffer();

@@ -49,7 +49,7 @@ import weka.classifiers.*;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AODE extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -112,6 +112,23 @@ public class AODE extends Classifier
   /** If true, outputs debugging info */
   private boolean m_Debug = false;
 
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "AODE achieves highly accurate classification by averaging over all "
+      +"of a small space of alternative naive-Bayes-like models that have "
+      +"weaker (and hence less detrimental) independence assumptions than "
+      +"naive Bayes. The resulting algorithm is computationally efficient while "
+      +"delivering highly accurate classification on many learning tasks.\n\n"
+      +"For more information, see\n\n"
+      +"G. Webb, J. Boughton & Z. Wang (2003). Not So Naive Bayes. "
+      +"Submitted for publication "
+      +"G. Webb, J. Boughton & Z. Wang (2002). <i>Averaged One-Dependence "
+      +"Estimators: Preliminary Results. AI2002 Data Mining Workshop, Canberra.";
+  }
     
   /**
    * Generates the classifier.
@@ -423,6 +440,15 @@ public class AODE extends Classifier
        options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String frequencyLimitForParentAttributesTipText() {
+    return "Minimum frequency count for parent attributes.";
   }
 
   /**
