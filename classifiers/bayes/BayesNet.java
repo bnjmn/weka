@@ -1,4 +1,3 @@
-
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +34,7 @@ import weka.classifiers.*;
  * Works with nominal variables and no missing values only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class BayesNet extends DistributionClassifier implements OptionHandler, 
 	WeightedInstancesHandler {
@@ -738,18 +737,18 @@ public class BayesNet extends DistributionClassifier implements OptionHandler,
 	for (int iSymbol = 0; iSymbol < numValues; iSymbol++) {
 	  if (m_fAlpha + nCounts[iParent][iSymbol] != 0) {
 	    fLogScore += 
-	      SpecialFunctions.lnGamma(m_fAlpha + nCounts[iParent][iSymbol]);
+	      Statistics.lnGamma(m_fAlpha + nCounts[iParent][iSymbol]);
 	    nSumOfCounts += m_fAlpha + nCounts[iParent][iSymbol];
 	  } 
 	} 
 
 	if (nSumOfCounts != 0) {
-	  fLogScore -= SpecialFunctions.lnGamma(nSumOfCounts);
+	  fLogScore -= Statistics.lnGamma(nSumOfCounts);
 	} 
 
 	if (m_fAlpha != 0) {
-	  fLogScore -= numValues * SpecialFunctions.lnGamma(m_fAlpha);
-	  fLogScore += SpecialFunctions.lnGamma(numValues * m_fAlpha);
+	  fLogScore -= numValues * Statistics.lnGamma(m_fAlpha);
+	  fLogScore += Statistics.lnGamma(numValues * m_fAlpha);
 	} 
       } 
 
