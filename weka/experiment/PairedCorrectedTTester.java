@@ -39,7 +39,7 @@ import java.util.Enumeration;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -96,9 +96,9 @@ public class PairedCorrectedTTester extends PairedTTester {
     int testSizeIndex = -1;
     // find the columns with the train/test sizes
     for (int i=0; i<m_Instances.numAttributes(); i++) {
-      if (m_Instances.attribute(i).name().equals("Number_of_training_instances")) {
+      if (m_Instances.attribute(i).name().toLowerCase().equals("number_of_training_instances")) {
 	trainSizeIndex = i;
-      } else if (m_Instances.attribute(i).name().equals("Number_of_testing_instances")) {
+      } else if (m_Instances.attribute(i).name().toLowerCase().equals("number_of_testing_instances")) {
 	testSizeIndex = i;
       }
     }
