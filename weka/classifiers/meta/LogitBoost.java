@@ -36,7 +36,7 @@ import weka.core.*;
  * 
  * Friedman, J., T. Hastie and R. Tibshirani (1998) <i>Additive Logistic
  * Regression: a Statistical View of Boosting</i> 
- * <a href="ftp://stat.stanford.edu/pub/friedman/boost.ps">download 
+ * <a href="http://www-stat.stanford.edu/~jhf/ftp/boost.ps">download 
  * postscript</a>. <p>
  *
  * Valid options are:<p>
@@ -80,7 +80,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $ 
+ * @version $Revision: 1.32 $ 
  */
 public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements Sourcable, WeightedInstancesHandler {
