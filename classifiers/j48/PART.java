@@ -201,8 +201,8 @@ public class PART extends DistributionClassifier implements OptionHandler,
 			    " for reduced error pruning.");
       else {
 	CF = (new Float(confidenceString)).floatValue();
-	if ((CF < 0) || (CF > 1)) {
-	  throw new Exception("CF has to be between zero and one!");
+	if ((CF <= 0) || (CF >= 1)) {
+	  throw new Exception("CF has to be greater than zero and smaller than one!");
 	}
       }
     if (numFoldsString.length() != 0)
