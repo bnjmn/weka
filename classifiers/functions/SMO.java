@@ -74,9 +74,12 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class SMO extends DistributionClassifier implements OptionHandler {
+
+  /** The internal version number */
+  static final long serialVersionUID = -714931895144195926L;
 
   /**
    * Stores a set of a given size.
@@ -271,9 +274,6 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   /** Only numeric attributes in the dataset? */
   private boolean m_onlyNumeric;
 
-  /** Modes and means of the input data */
-  private double[] m_ModesAndMeans;
-
   /**
    * Method for building the classifier.
    *
@@ -314,18 +314,38 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       m_Normalization = new NormalizationFilter();
       m_Normalization.inputFormat(m_data);
       m_data = Filter.useFilter(m_data, m_Normalization); 
+    } else {
+      m_Normalization = null;
     }
 
     if (!m_onlyNumeric) {
       m_NominalToBinary = new NominalToBinaryFilter();
       m_NominalToBinary.inputFormat(m_data);
       m_data = Filter.useFilter(m_data, m_NominalToBinary);
+    } else {
+      m_NominalToBinary = null;
     }
 
     // If machine is linear, reserve space for weights
     if (m_exponent == 1.0) {
       m_weights = new double[m_data.numAttributes()];
+    } else {
+      m_weights = null;
     }
+
+    // Initialize alpha array to zero
+    m_alpha = new double[m_data.numInstances()];
+
+    // Initialize thresholds
+    m_bUp = -1; m_bLow = 1; m_b = 0;
+
+    // Initialize sets
+    m_supportVectors = new SMOset(m_data.numInstances());
+    m_I0 = new SMOset(m_data.numInstances());
+    m_I1 = new SMOset(m_data.numInstances());
+    m_I2 = new SMOset(m_data.numInstances());
+    m_I3 = new SMOset(m_data.numInstances());
+    m_I4 = new SMOset(m_data.numInstances());
 
     // Set class values
     m_class = new double[m_data.numInstances()];
@@ -338,27 +358,21 @@ public class SMO extends DistributionClassifier implements OptionHandler {
       }
     }
     if ((m_iUp == -1) || (m_iLow == -1)) {
-      throw new Exception ("Only instances of one class "+
-			   "or no instances in the data!");
+      if ((m_iUp == -1) && (m_iLow == -1)) {
+	throw new Exception ("No instances without missing class values!");
+      } else {
+	if (m_iUp == -1) {
+	  m_b = 1;
+	} else {
+	  m_b = -1;
+	}
+	return;
+      }
     }
-
-    // Initialize alpha array to zero
-    m_alpha = new double[m_data.numInstances()];
-
-    // Initialize thresholds
-    m_bUp = -1; m_bLow = 1; m_b = 0;
 
     // Initialize error cache
     m_errors = new double[m_data.numInstances()];
     m_errors[m_iLow] = 1; m_errors[m_iUp] = -1;
-
-    // Initialize sets
-    m_supportVectors = new SMOset(m_data.numInstances());
-    m_I0 = new SMOset(m_data.numInstances());
-    m_I1 = new SMOset(m_data.numInstances());
-    m_I2 = new SMOset(m_data.numInstances());
-    m_I3 = new SMOset(m_data.numInstances());
-    m_I4 = new SMOset(m_data.numInstances());
 
     // The kernel calculations are cached
     m_storage = new double[m_cacheSize];
