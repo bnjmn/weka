@@ -60,7 +60,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Plot2D extends JPanel {
 
@@ -568,7 +568,7 @@ public class Plot2D extends JPanel {
 	m_maxC = value;
       }
     }
-    
+
     fillLookup();
     this.repaint();
   }
@@ -1070,34 +1070,83 @@ public class Plot2D extends JPanel {
     int mswy=0;
 
     //      determineBounds();
-    int fieldWidthX = (int)((Math.log(m_maxX)/Math.log(10)))+1;
-    int precisionX = 1;
-    if ((Math.abs(m_maxX-m_minX) < 1) && ((m_maxY-m_minX) != 0)) {
+    int precisionXmax = 1;
+    int precisionXmin = 1;
+    int precisionXmid = 1;
+    /*if ((Math.abs(m_maxX-m_minX) < 1) && ((m_maxY-m_minX) != 0)) {
       precisionX = (int)Math.abs(((Math.log(Math.abs(m_maxX-m_minX)) / 
 				   Math.log(10))))+1;
-    }
+				   } */
+    int whole = (int)Math.abs(m_maxX);
+    double decimal = Math.abs(m_maxX) - whole;
+    int nondecimal;
+    nondecimal = (whole > 0) 
+      ? (int)(Math.log(whole) / Math.log(10))
+      : 1;
+    
+    precisionXmax = (decimal > 0) 
+      ? (int)Math.abs(((Math.log(Math.abs(m_maxX)) / 
+				      Math.log(10))))+2
+      : 1;
+
     String maxStringX = Utils.doubleToString(m_maxX,
-					     fieldWidthX+1+precisionX
-					     ,precisionX);
+					     nondecimal+1+precisionXmax
+					     ,precisionXmax);
+
+    whole = (int)Math.abs(m_minX);
+    decimal = Math.abs(m_minX) - whole;
+    nondecimal = (whole > 0) 
+      ? (int)(Math.log(whole) / Math.log(10))
+      : 1;
+    precisionXmin = (decimal > 0) 
+      ? (int)Math.abs(((Math.log(Math.abs(m_minX)) / 
+				      Math.log(10))))+2
+      : 1;
+   
+    String minStringX = Utils.doubleToString(m_minX,
+					     nondecimal+1+precisionXmin,
+					     precisionXmin);
+
     mswx = m_labelMetrics.stringWidth(maxStringX);
-    int fieldWidthY = (int)((Math.log(m_maxY)/Math.log(10)))+1;
-    int precisionY = 1;
-    if (Math.abs((m_maxY-m_minY)) < 1 && ((m_maxY-m_minY) != 0)) {
-      precisionY = (int)Math.abs(((Math.log(Math.abs(m_maxY-m_minY)) / 
-				   Math.log(10))))+1;
-    }
+
+    int precisionYmax = 1;
+    int precisionYmin = 1;
+    int precisionYmid = 1;
+    whole = (int)Math.abs(m_maxY);
+    decimal = Math.abs(m_maxY) - whole;
+    nondecimal = (whole > 0) 
+      ? (int)(Math.log(whole) / Math.log(10))
+      : 1;
+    precisionYmax = (decimal > 0) 
+      ? (int)Math.abs(((Math.log(Math.abs(m_maxY)) / 
+				      Math.log(10))))+2
+      : 1;
+    
     String maxStringY = Utils.doubleToString(m_maxY,
-					     fieldWidthY+1+precisionY
-					     ,precisionY);
+					     nondecimal+1+precisionYmax
+					     ,precisionYmax);
+
+
+    whole = (int)Math.abs(m_minY);
+    decimal = Math.abs(m_minY) - whole;
+    nondecimal = (whole > 0) 
+      ? (int)(Math.log(whole) / Math.log(10))
+      : 1;
+    precisionYmin = (decimal > 0) 
+      ? (int)Math.abs(((Math.log(Math.abs(m_minY)) / 
+				      Math.log(10))))+2
+      : 1;
+   
     String minStringY = Utils.doubleToString(m_minY,
-					     fieldWidthY+1+precisionY
-					     ,precisionY);
+					     nondecimal+1+precisionYmin
+					     ,precisionYmin);
 
     if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
       mswy = (m_labelMetrics.stringWidth(maxStringY) > 
 	      m_labelMetrics.stringWidth(minStringY))
 	? m_labelMetrics.stringWidth(maxStringY)
 	: m_labelMetrics.stringWidth(minStringY);
+      mswy += m_labelMetrics.stringWidth("M");
     } else {
       mswy = m_labelMetrics.stringWidth("MM");
     }
@@ -1113,16 +1162,13 @@ public class Plot2D extends JPanel {
     gx.setColor(Color.green);
     if (m_plotInstances.attribute(m_xIndex).isNumeric()) {
       if (w > (2 * mswx)) {
+	
 	gx.drawString(maxStringX, 
 		      m_XaxisEnd-(mswx/2),
 		      m_YaxisEnd+hf+m_tickSize);
-
-	fieldWidthX = (int)((Math.log(m_minX)/Math.log(10)))+1;
-	maxStringX = Utils.doubleToString(m_minX,
-					  fieldWidthX+1+precisionX,
-					  precisionX);
-	mswx = m_labelMetrics.stringWidth(maxStringX);
-	gx.drawString(maxStringX,
+	
+	mswx = m_labelMetrics.stringWidth(minStringX);
+	gx.drawString(minStringX,
 		      (m_XaxisStart-(mswx/2)),
 		      m_YaxisEnd+hf+m_tickSize);
 
@@ -1130,10 +1176,19 @@ public class Plot2D extends JPanel {
 	if (w > (3 * mswx) && 
 	    (m_plotInstances.attribute(m_xIndex).isNumeric())) {
 	  double mid = m_minX+((m_maxX-m_minX)/2.0);
-	  int fieldWidth = (int)((Math.log(mid)/Math.log(10)))+1;
+	   whole = (int)Math.abs(mid);
+	   decimal = Math.abs(mid) - whole;
+	   nondecimal = (whole > 0) 
+	     ? (int)(Math.log(whole) / Math.log(10))
+	     : 1;
+	   precisionXmid = (decimal > 0) 
+	     ? (int)Math.abs(((Math.log(Math.abs(mid)) / 
+			       Math.log(10))))+2
+	     : 1;
+	  
 	  String maxString = Utils.doubleToString(mid,
-						  fieldWidth+1+precisionX,
-						  precisionX);
+						  nondecimal+1+precisionXmid,
+						  precisionXmid);
 	  int sw = m_labelMetrics.stringWidth(maxString);
 	  double mx = m_XaxisStart+((double)(m_XaxisEnd-m_XaxisStart)/2.0);
 	  gx.drawString(maxString,
@@ -1200,9 +1255,7 @@ public class Plot2D extends JPanel {
 		      m_XaxisStart-mswy-m_tickSize,
 		      m_YaxisStart+(hf));
 
-	gx.drawString(Utils.doubleToString(m_minY,
-					   fieldWidthY+1+precisionY,
-					   precisionY),
+	gx.drawString(minStringY,
 		      (m_XaxisStart-mswy-m_tickSize),
 		      m_YaxisEnd);
 
@@ -1210,10 +1263,19 @@ public class Plot2D extends JPanel {
 	if (w > (3 * hf) && 
 	    (m_plotInstances.attribute(m_yIndex).isNumeric())) {
 	  double mid = m_minY+((m_maxY-m_minY)/2.0);
-	  int fieldWidth = (int)((Math.log(mid)/Math.log(10)))+1;
+	  whole = (int)Math.abs(mid);
+	  decimal = Math.abs(mid) - whole;
+	  nondecimal = (whole > 0) 
+	    ? (int)(Math.log(whole) / Math.log(10))
+	    : 1;
+	  precisionYmid = (decimal > 0) 
+	    ? (int)Math.abs(((Math.log(Math.abs(mid)) / 
+			      Math.log(10))))+2
+	    : 1;
+	 
 	  String maxString = Utils.doubleToString(mid,
-						  fieldWidth+1+precisionY,
-						  precisionY);
+						  nondecimal+1+precisionYmid,
+						  precisionYmid);
 	  int sw = m_labelMetrics.stringWidth(maxString);
 	  double mx = m_YaxisStart+((double)(m_YaxisEnd-m_YaxisStart)/2.0);
 	  gx.drawString(maxString,
