@@ -1,3 +1,22 @@
+/*
+ *    GenericObjectEditor.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.gui;
 
 import weka.core.OptionHandler;
@@ -27,6 +46,20 @@ import java.util.Properties;
 import java.io.FileInputStream;
 import java.util.StringTokenizer;
 
+
+/** 
+ * A PropertyEditor for objects that themselves have been defined as
+ * editable in the GenericObjectEditor configuration file, which lists
+ * possible values that can be selected from, and themselves configured.
+ * The configuration file is called ".weka.gui.GenericObjectEditor" and
+ * may live in either the location given by "user.home" or the current
+ * directory (this last will take precedence). For speed, the properties
+ * file is read only once when the class is first loaded -- this may need
+ * to be changed if we ever end up running in a Java OS ;-).
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class GenericObjectEditor
   implements PropertyEditor {
 
@@ -36,16 +69,22 @@ public class GenericObjectEditor
   /** Handles property change notification */
   private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
+  /** The Class of objects being edited */
   private Class m_ClassType;
 
+  /** The GUI component for editing values, created when needed */
   private GOEPanel m_EditorComponent;
 
+  /** True if the GUI component is needed */
   private boolean m_Enabled = true;
   
   /** The name of the properties file */
   protected static String PROPERTY_FILE = ".weka.gui.GenericObjectEditor";
+
+  /** Contains the editor properties */
   private static Properties EDITOR_PROPERTIES;
 
+  /** Loads the configuration property file */
   static {
 
     // Global properties
@@ -68,6 +107,9 @@ public class GenericObjectEditor
     }
   }
 
+  /**
+   * Handles the GUI side of editing values.
+   */
   public class GOEPanel extends JPanel
     implements ItemListener, ActionListener {
     
@@ -83,6 +125,7 @@ public class GenericObjectEditor
     /** The model containing the list of names to select from */
     private DefaultComboBoxModel m_ObjectNames;
 
+    /** Creates the GUI editor component */
     public GOEPanel() {
 
       //System.err.println("GOE()");
@@ -106,6 +149,7 @@ public class GenericObjectEditor
 
     }
     
+    /** Called when the class of object being edited changes. */
     protected void updateClassType() {
       
       //System.err.println("GOE::updateClassType()");
@@ -137,6 +181,7 @@ public class GenericObjectEditor
       }
     }
 
+    /** Called to update the list of values to be selected from */
     protected void updateChooser() {
 
       //System.err.println("GOE::updateChooser()");
@@ -154,6 +199,7 @@ public class GenericObjectEditor
       m_ObjectChooser.setSelectedItem(objectName);
     }
 
+    /** Updates the child property sheet, and creates if needed */
     public void updateChildPropertySheet() {
 
       //System.err.println("GOE::updateChildPropertySheet()");
@@ -228,6 +274,12 @@ public class GenericObjectEditor
     }
   }
 
+  /**
+   * Sets whether the editor is "enabled", meaning that the current
+   * values will be painted.
+   *
+   * @param newVal a value of type 'boolean'
+   */
   public void setEnabled(boolean newVal) {
 
     if (newVal != m_Enabled) {
@@ -240,6 +292,11 @@ public class GenericObjectEditor
     }
   }
   
+  /**
+   * Sets the class of values that can be edited.
+   *
+   * @param type a value of type 'Class'
+   */
   public void setClassType(Class type) {
 
     //System.err.println("setClassType("
@@ -361,14 +418,32 @@ public class GenericObjectEditor
     }
   }
 
-  /* We don't support get/set as text methods */
+
+  /**
+   * Returns null as we don't support getting/setting values as text.
+   *
+   * @return null
+   */
   public String getAsText() {
     return null;
   }
+
+  /**
+   * Returns null as we don't support getting/setting values as text. 
+   *
+   * @param text the text value
+   * @exception IllegalArgumentException as we don't support
+   * getting/setting values as text.
+   */
   public void setAsText(String text) throws IllegalArgumentException {
     throw new IllegalArgumentException(text);
   }
-  /* We don't support setting from tags either */
+
+  /**
+   * Returns null as we don't support getting values as tags.
+   *
+   * @return null
+   */
   public String[] getTags() {
     return null;
   }
@@ -381,6 +456,12 @@ public class GenericObjectEditor
   public boolean supportsCustomEditor() {
     return true;
   }
+  
+  /**
+   * Returns the array editing component.
+   *
+   * @return a value of type 'java.awt.Component'
+   */
   public java.awt.Component getCustomEditor() {
 
     //System.err.println("getCustomEditor()");
@@ -391,15 +472,24 @@ public class GenericObjectEditor
     return m_EditorComponent;
   }
 
-  // For propertyChange "Producing"
+  /**
+   * Adds a PropertyChangeListener who will be notified of value changes.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
   public void addPropertyChangeListener(PropertyChangeListener l) {
     m_Support.addPropertyChangeListener(l);
   }
+
+  /**
+   * Removes a PropertyChangeListener.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
   public void removePropertyChangeListener(PropertyChangeListener l) {
     m_Support.removePropertyChangeListener(l);
   }
 
-  
   /**
    * Tests out the Object editor from the command line.
    *

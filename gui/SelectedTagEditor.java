@@ -1,19 +1,49 @@
+/*
+ *    SelectedTagEditor.java
+ *    Copyright (C) 1999 Len Trigg
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package weka.gui;
 
 
 import weka.core.Tag;
 import weka.core.SelectedTag;
 
+import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import java.awt.BorderLayout;
 
+/** 
+ * A PropertyEditor that uses tags.
+ *
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public class SelectedTagEditor extends PropertyEditorSupport {
 
+  /**
+   * Returns a description of the property value as java source.
+   *
+   * @return a value of type 'String'
+   */
   public String getJavaInitializationString() {
 
     SelectedTag s = (SelectedTag)getValue();
@@ -33,12 +63,23 @@ public class SelectedTagEditor extends PropertyEditorSupport {
     return result + "})";
   }
 
+  /**
+   * Gets the current value as text.
+   *
+   * @return a value of type 'String'
+   */
   public String getAsText() {
 
     SelectedTag s = (SelectedTag)getValue();
     return s.getSelectedTag().getReadable();
   }
 
+  /**
+   * Sets the current property value as text.
+   *
+   * @param text the text of the selected tag.
+   * @exception java.lang.IllegalArgumentException if an error occurs
+   */
   public void setAsText(String text)
     throws java.lang.IllegalArgumentException {
 
@@ -56,6 +97,11 @@ public class SelectedTagEditor extends PropertyEditorSupport {
     }
   }
 
+  /**
+   * Gets the list of tags that can be selected from.
+   *
+   * @return an array of string tags.
+   */
   public String[] getTags() {
 
     SelectedTag s = (SelectedTag)getValue();
@@ -75,7 +121,6 @@ public class SelectedTagEditor extends PropertyEditorSupport {
   public static void main(String [] args) {
 
     try {
-
       System.err.println("---Registering Weka Editors---");
       java.beans.PropertyEditorManager.registerEditor(SelectedTag.class,
 						      SelectedTagEditor.class);
