@@ -63,7 +63,7 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class GenericObjectEditor implements PropertyEditor {
 
@@ -101,6 +101,7 @@ public class GenericObjectEditor implements PropertyEditor {
 			 + systemProps.getProperty("file.separator")
 			 + PROPERTY_FILE));
     } catch (Exception ex) {
+      System.err.println(ex.getMessage());
     }
 
     // Allow a properties file in the current directory to override
@@ -108,6 +109,7 @@ public class GenericObjectEditor implements PropertyEditor {
     try {
       EDITOR_PROPERTIES.load(new FileInputStream(PROPERTY_FILE));
     } catch (Exception ex) {
+      System.err.println(ex.getMessage());
     }
   }
 
@@ -233,7 +235,7 @@ public class GenericObjectEditor implements PropertyEditor {
     String typeOptions = EDITOR_PROPERTIES.getProperty(className);
     if (typeOptions == null) {
       System.err.println("No configuration property found in\n"
-			 + ".weka.experiment.GenericObjectEditor\n"
+			 + PROPERTY_FILE + "\n"
 			 + "for " + className);
     } else {
       StringTokenizer st = new StringTokenizer(typeOptions, ", ");

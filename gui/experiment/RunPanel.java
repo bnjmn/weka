@@ -55,7 +55,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -239,6 +239,8 @@ public class RunPanel extends JPanel implements ActionListener {
       }
     } else if (e.getSource() == m_StopBut) {
       m_StopBut.setEnabled(false);
+
+      // m_RunThread.stop() ??
       m_RunThread = null;
     }
   }

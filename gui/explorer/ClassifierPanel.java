@@ -73,7 +73,7 @@ import javax.swing.JFrame;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -186,6 +186,15 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
+    m_ClassCombo.setToolTipText("Select the attribute to use as the class");
+    m_TrainBut.setToolTipText("Test on the same set that the classifier"
+			      + " is trained on");
+    m_CVBut.setToolTipText("Perform a n-fold cross-validation");
+    m_PercentBut.setToolTipText("Train on a percentage of the data and"
+				+ " test on the remainder");
+    m_TestSplitBut.setToolTipText("Test on a user-specified dataset");
+    m_StartBut.setToolTipText("Starts the classification");
+    m_StopBut.setToolTipText("Stops a running classification");
     m_ClassCombo.setEnabled(false);
     m_CVBut.setSelected(true);
     updateRadioLinks();
@@ -634,7 +643,10 @@ public class ClassifierPanel extends JPanel {
 
     if (m_RunThread != null) {
       m_RunThread.interrupt();
-      // m_RunThread.stop();
+      
+      // This is deprecated (and theoretically the interrupt should do).
+      m_RunThread.stop();
+      
     }
   }
   

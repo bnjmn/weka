@@ -69,7 +69,7 @@ import java.io.ObjectInputStream;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -178,6 +178,8 @@ public class GenericArrayEditor extends JPanel
     m_DeleteBut.addActionListener(m_InnerActionListener);
     m_AddBut.addActionListener(m_InnerActionListener);
     m_ElementList.addListSelectionListener(m_InnerSelectionListener);
+    m_AddBut.setToolTipText("Add the current item to the list");
+    m_DeleteBut.setToolTipText("Delete the selected list item");
   }
 
   /* This class handles the creation of list cell renderers from the 
