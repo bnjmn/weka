@@ -49,7 +49,7 @@ import java.beans.beancontext.*;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class TextViewer 
   extends JPanel
@@ -198,6 +198,10 @@ public class TextViewer
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date());
     name += e.getTextTitle();
+    System.err.println(name);
+    if (name.length() > 30) {
+      name = name.substring(0, 30);
+    }
 
     // see if there is an entry with this name already in the list -
     // could happen if two items with the same name arrive at the same second
