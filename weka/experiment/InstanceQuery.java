@@ -41,7 +41,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class InstanceQuery extends DatabaseUtils {
 
@@ -191,12 +191,14 @@ public class InstanceQuery extends DatabaseUtils {
 	  break;
 	case Types.NUMERIC:
 	case Types.DECIMAL:
-	  BigDecimal bd = rs.getBigDecimal(i, 4); 
+	  //	  BigDecimal bd = rs.getBigDecimal(i, 4); 
+	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
 	  if (rs.wasNull()) {
 	    newInst.setValue(i - 1, Instance.missingValue());
 	  } else {
-	    newInst.setValue(i - 1, bd.doubleValue());
+	    //	    newInst.setValue(i - 1, bd.doubleValue());
+	    newInst.setValue(i - 1, dd);
 	  }
 	  break;
 	case Types.TINYINT:

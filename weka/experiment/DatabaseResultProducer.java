@@ -36,7 +36,7 @@ import weka.core.Option;
  * to be generated, the ResultProducer is used to obtain the result.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DatabaseResultProducer extends DatabaseResultListener
   implements ResultProducer, OptionHandler {
@@ -62,6 +62,18 @@ public class DatabaseResultProducer extends DatabaseResultListener
     super();
   }
   
+  /**
+   * Gets the keys for a specified run number. Different run
+   * numbers correspond to different randomizations of the data. Keys
+   * produced should be sent to the current ResultListener
+   *
+   * @param run the run number to get keys for.
+   * @exception Exception if a problem occurs while getting the keys
+   */
+  public void doRunKeys(int run) throws Exception {
+    // not needed in this class
+  }
+
   /**
    * Gets the results for a specified run number. Different run
    * numbers correspond to different randomizations of the data. Results
