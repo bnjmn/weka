@@ -26,7 +26,7 @@ import weka.core.Instances;
  * Reads a text file that is in arff format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Converter
  * @see Serializable
  */
@@ -144,7 +144,7 @@ public class ArffToArff implements Converter, Serializable {
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @exception Exception if there is an error during parsing
+   * @exception IOException if there is an error during parsing
    */
   public Instance getNextInstance() throws IOException {
 

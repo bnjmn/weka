@@ -27,7 +27,7 @@ import weka.core.Instance;
  * format) to arff format (Instances)
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface Converter {
   
@@ -136,7 +136,7 @@ public interface Converter {
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @exception Exception if there is an error during parsing
+   * @exception IOException if there is an error during parsing
    *
    * <pre><jml>
    *    public_normal_behavior
