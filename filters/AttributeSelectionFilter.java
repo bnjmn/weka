@@ -67,9 +67,12 @@ public class AttributeSelectionFilter
 				    +"\tSets class index for"
 				    +"\n\tsupervised attribute selection."
 				    +"\n\tDefault=last column.", "C", 1,"-C"));
-    newVector.addElement(new Option("<Name of search Class>\n"
-				    +"\tSets search method.", "S", 1,"-S"));
-    newVector.addElement(new Option("<Name of attribute evaluation Class>\n"
+    newVector.addElement(new Option("<\"Name of search Class "
+				    +"[search options]\">\n"
+				    +"\tSets search method for subset "
+				    +"evaluators.", "S", 1,"-S"));
+    newVector.addElement(new Option("<\"Name of attribute/subset evaluation "
+				    +"Class [evaluation options]\">\n"
 				    +"\tSets attribute/subset evaluator.",
 				    "E", 1,"-E"));
     newVector.addElement(new Option("<range>\n"
@@ -79,6 +82,9 @@ public class AttributeSelectionFilter
     newVector.addElement(new Option("Produce a attribute ranking if the"
 				    +"\n\tspecified search method is capable of"
 				    +"\n\tdoing so.", "R", 0,"-R"));
+    newVector.addElement(new Option("Threshold by which to discard attributes"
+				    +"\n\tfor attribute evaluators.",
+				    "T",1,"-T"));
 
     if ((ASEvaluator != null) && (ASEvaluator instanceof OptionHandler))
       {
@@ -176,13 +182,21 @@ public class AttributeSelectionFilter
 
     // set up a dummy search object (if necessary) so help can be printed
     optionString = Utils.getOption('S',options);
-     if (optionString.length()==0)
+     if ((optionString.length()==0) &&
+	 (!(ASEvaluator instanceof AttributeEvaluator)))
       {
 	noSearch = true;
       }
-     else
+
+     if ((optionString.length() !=0)
+	 && (ASEvaluator instanceof AttributeEvaluator))
        {
-	 System.out.println("Here2\n");
+	 throw new Exception("Can't specify search method for "
+				 +"attribute evaluators.");
+       }
+
+     if (!(ASEvaluator instanceof AttributeEvaluator))
+       {
 	 // split a quoted evaluator name from its options (if any)
 	 optionString = optionString.trim();
 	 breakLoc = optionString.indexOf(' ');

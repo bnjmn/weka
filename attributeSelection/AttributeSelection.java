@@ -211,6 +211,7 @@ public class AttributeSelection {
     int seed = 1, folds = 10;
     String cutString, foldsString, seedString, searchName, rangeString;
     String classString;
+    String searchClassName;
     String [] searchOptions = null;
     Random random;
     ASSearch searchMethod = null;
@@ -274,21 +275,34 @@ public class AttributeSelection {
 	   ranking = true;
 
 	 searchName = Utils.getOption('S', options); 
-	 if (searchName.length() == 0)
+	 if ((searchName.length() == 0) && 
+	     (!(ASEvaluator instanceof AttributeEvaluator)))
 	   {
 	     throw new Exception("No search method given.");
 	   }
 	 
-	 searchName = searchName.trim();
-	 // split off any search options
-	 int breakLoc = searchName.indexOf(' ');
-	 String searchClassName = searchName;
-	 String searchOptionsString = "";
-	 if (breakLoc != -1) {
-	   searchClassName = searchName.substring(0, breakLoc);
-	   searchOptionsString = searchName.substring(breakLoc).trim();
-	   searchOptions = Utils.splitOptions(searchOptionsString);
-	 }
+	 if ((searchName.length() != 0) &&
+	     (ASEvaluator instanceof AttributeEvaluator))
+	   {
+	     throw new Exception("Can't specify search method for "
+				 +"attribute evaluators.");
+	   }
+
+	 if (!(ASEvaluator instanceof AttributeEvaluator))
+	   {
+	     searchName = searchName.trim();
+	     // split off any search options
+	     int breakLoc = searchName.indexOf(' ');
+	     searchClassName = searchName;
+	     String searchOptionsString = "";
+	     if (breakLoc != -1) {
+	       searchClassName = searchName.substring(0, breakLoc);
+	       searchOptionsString = searchName.substring(breakLoc).trim();
+	       searchOptions = Utils.splitOptions(searchOptionsString);
+	     }
+	   }
+	 else
+	   searchClassName = new String("weka.attributeSelection.Ranker");
 
 	 searchMethod = (ASSearch)Class.forName(searchClassName).newInstance();
 
@@ -542,7 +556,7 @@ public class AttributeSelection {
     optionsText.append("\tSets the class index for supervised attribute\n");
     optionsText.append("\tselection. Default=last column.\n");
     optionsText.append("-S <Class name>\n");
-    optionsText.append("\tSets search method.\n");
+    optionsText.append("\tSets search method for subset evaluators.\n");
     optionsText.append("-P <range>\n");
     optionsText.append("\tSpecify a (optional) set of attributes to start\n");
     optionsText.append("\tthe search from, eg 1,2,5-9.\n");
@@ -550,7 +564,8 @@ public class AttributeSelection {
     optionsText.append("\tProduce a attribute ranking if the specified\n");
     optionsText.append("\tsearch method is capable of doing so.\n");
     optionsText.append("-T <cutoff>\n");
-    optionsText.append("\tthreshold by which to discard attributes\n");
+    optionsText.append("\tThreshold by which to discard attributes\n");
+    optionsText.append("\tfor attribute evaluators\n");
     optionsText.append("\tfrom a ranked list (use with attribute evaluators\n");
     optionsText.append("\tand ranked search.\n");
     optionsText.append("-X <number of folds>\n");
