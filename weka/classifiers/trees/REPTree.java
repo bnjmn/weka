@@ -29,10 +29,10 @@ import java.io.*;
 
 /**
  * Fast decision tree learner. Builds a decision/regression tree using
- * information gain/variance and prunes it using reduced-error pruning.
- * Only sorts values for numeric attributes once. Missing values are
- * dealt with by splitting the corresponding instances into pieces
- * (i.e. as in C4.5).
+ * information gain/variance and prunes it using reduced-error pruning
+ * (with backfitting).  Only sorts values for numeric attributes
+ * once. Missing values are dealt with by splitting the corresponding
+ * instances into pieces (i.e. as in C4.5).
  *
  * Valid options are: <p>
  *
@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1046,10 +1046,10 @@ public class REPTree extends DistributionClassifier
      */
     protected void insertHoldOutInstance(Instance inst, double weight, 
 					 Tree parent) throws Exception {
-    
+      
       // Insert instance into hold-out class distribution
       if (inst.classAttribute().isNominal()) {
-
+	
 	// Nominal case
 	m_HoldOutDist[(int)inst.classValue()] += weight;
 	int predictedClass = 0;
@@ -1062,7 +1062,7 @@ public class REPTree extends DistributionClassifier
 	  m_HoldOutError += weight;
 	}
       } else {
-
+	
 	// Numeric case
 	m_HoldOutDist[0] += weight;
 	double diff = 0;
@@ -1073,10 +1073,10 @@ public class REPTree extends DistributionClassifier
 	}
 	m_HoldOutError += diff * diff * weight;
       }	
-
+      
       // The process is recursive
       if (m_Attribute != -1) {
-      
+	
 	// If node is not a leaf
 	if (inst.isMissing(m_Attribute)) {
 	  
@@ -1088,19 +1088,90 @@ public class REPTree extends DistributionClassifier
 	    }
 	  }
 	} else {
-	
+	  
 	  if (m_Info.attribute(m_Attribute).isNominal()) {
-
+	    
 	    // Treat nominal attributes
 	    m_Successors[(int)inst.value(m_Attribute)].
 	      insertHoldOutInstance(inst, weight, this);
 	  } else {
-
+	    
 	    // Treat numeric attributes
 	    if (inst.value(m_Attribute) < m_SplitPoint) {
 	      m_Successors[0].insertHoldOutInstance(inst, weight, this);
 	    } else {
 	      m_Successors[1].insertHoldOutInstance(inst, weight, this);
+	    }
+	  }
+	}
+      }
+    }
+  
+    /**
+     * Inserts hold-out set into tree.
+     */
+    protected void backfitHoldOutSet(Instances data) throws Exception {
+      
+      for (int i = 0; i < data.numInstances(); i++) {
+	backfitHoldOutInstance(data.instance(i), data.instance(i).weight(),
+			       this);
+      }
+    }
+    
+    /**
+     * Inserts an instance from the hold-out set into the tree.
+     */
+    protected void backfitHoldOutInstance(Instance inst, double weight, 
+					  Tree parent) throws Exception {
+      
+      // Insert instance into hold-out class distribution
+      if (inst.classAttribute().isNominal()) {
+	
+	// Nominal case
+	if (m_ClassProbs == null) {
+	  m_ClassProbs = new double[inst.numClasses()];
+	}
+	System.arraycopy(m_Distribution, 0, m_ClassProbs, 0, inst.numClasses());
+	m_ClassProbs[(int)inst.classValue()] += weight;
+	Utils.normalize(m_ClassProbs);
+      } else {
+	
+	// Numeric case
+	if (m_ClassProbs == null) {
+	  m_ClassProbs = new double[1];
+	}
+	m_ClassProbs[0] *= m_Distribution[1];
+	m_ClassProbs[0] += weight * inst.classValue();
+	m_ClassProbs[0] /= (m_Distribution[1] + weight);
+      }	
+      
+      // The process is recursive
+      if (m_Attribute != -1) {
+	
+	// If node is not a leaf
+	if (inst.isMissing(m_Attribute)) {
+	  
+	  // Distribute instance
+	  for (int i = 0; i < m_Successors.length; i++) {
+	    if (m_Prop[i] > 0) {
+	      m_Successors[i].backfitHoldOutInstance(inst, weight * 
+						     m_Prop[i], this);
+	    }
+	  }
+	} else {
+	  
+	  if (m_Info.attribute(m_Attribute).isNominal()) {
+	    
+	    // Treat nominal attributes
+	    m_Successors[(int)inst.value(m_Attribute)].
+	      backfitHoldOutInstance(inst, weight, this);
+	  } else {
+	    
+	    // Treat numeric attributes
+	    if (inst.value(m_Attribute) < m_SplitPoint) {
+	      m_Successors[0].backfitHoldOutInstance(inst, weight, this);
+	    } else {
+	      m_Successors[1].backfitHoldOutInstance(inst, weight, this);
 	    }
 	  }
 	}
@@ -1504,6 +1575,7 @@ public class REPTree extends DistributionClassifier
     if (!m_NoPruning) {
       m_Tree.insertHoldOutSet(prune);
       m_Tree.reducedErrorPrune();
+      m_Tree.backfitHoldOutSet(prune);
     }
   }
 
