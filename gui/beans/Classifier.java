@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -308,6 +308,7 @@ public class Classifier extends JPanel
 					 status);*/
 	m_ie.setStatus(status); m_ie.setClassifier(m_Classifier);
 	m_ie.setCurrentInstance(m_incrementalEvent.getInstance());
+	//	System.err.println("Testing incremental classifier");
 	notifyIncrementalClassifierListeners(m_ie);
 	// now update on this instance (if class is not missing and classifier
 	// is updateable)
