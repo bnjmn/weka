@@ -27,7 +27,7 @@ package weka.core;
  * seeded with an integer.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface Randomizable {
 
@@ -36,12 +36,12 @@ public interface Randomizable {
    *
    * @param seed the seed 
    */
-  public void setSeed(int seed);
+  void setSeed(int seed);
   
   /**
    * Gets the seed for the random number generations
    *
    * @return the seed for the random number generation
    */
-  public int getSeed();
+  int getSeed();
 }
