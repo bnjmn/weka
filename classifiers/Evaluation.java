@@ -73,8 +73,10 @@ import java.util.zip.GZIPOutputStream;
  * -k <br>
  * Outputs information-theoretic statistics. <p>
  *
- * -p <br>
- * Outputs predictions for test instances (and nothing else). <p>
+ * -p range <br>
+ * Outputs predictions for test instances, along with the attributes in 
+ * the specified range (and nothing else). Use '-p 0' if no attributes are
+ * desired. <p>
  *
  * -r <br>
  * Outputs cumulative margin distribution (and nothing else). <p>
@@ -115,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.39 $
+ * @version  $Revision: 1.40 $
   */
 public class Evaluation implements Summarizable {
 
@@ -390,8 +392,10 @@ public class Evaluation implements Summarizable {
    * -k <br>
    * Outputs information-theoretic statistics. <p>
    *
-   * -p <br>
-   * Outputs predictions for test instances (and nothing else). <p>
+   * -p range <br>
+   * Outputs predictions for test instances, along with the attributes in 
+   * the specified range (and nothing else). Use '-p 0' if no attributes are
+   * desired. <p>
    *
    * -r <br>
    * Outputs cumulative margin distribution (and nothing else). <p>
@@ -509,7 +513,7 @@ public class Evaluation implements Summarizable {
     int seed = 1, folds = 10, classIndex = -1;
     String trainFileName, testFileName, sourceClass, 
       classIndexString, seedString, foldsString, objectInputFileName, 
-      objectOutputFileName;
+      objectOutputFileName, attributeRangeString;
     boolean IRstatistics = false, noOutput = false,
       printClassifications = false, trainStatistics = true,
       printMargins = false, printComplexityStatistics = false,
@@ -520,6 +524,7 @@ public class Evaluation implements Summarizable {
     Random random;
     CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
+    Range attributesToOutput = null;
     
     try {
 
@@ -611,12 +616,26 @@ public class Evaluation implements Summarizable {
       noOutput = Utils.getFlag('o', options);
       trainStatistics = !Utils.getFlag('v', options);
       printComplexityStatistics = Utils.getFlag('k', options);
-      printClassifications = Utils.getFlag('p', options);
       printMargins = Utils.getFlag('r', options);
       printGraph = Utils.getFlag('g', options);
       sourceClass = Utils.getOption('z', options);
       printSource = (sourceClass.length() != 0);
       
+      // Check -p option
+      try {
+	attributeRangeString = Utils.getOption('p', options);
+      }
+      catch (Exception e) {
+	throw new Exception(e.getMessage() + "\nNOTE: the -p option has changed. " +
+			    "It now expects a parameter specifying a range of attributes " +
+			    "to list with the predictions. Use '-p 0' for none.");
+      }
+      if (attributeRangeString.length() != 0) {
+	printClassifications = true;
+	if (!attributeRangeString.equals("0")) 
+	  attributesToOutput = new Range(attributeRangeString);
+      }
+
       // If a model file is given, we can't process 
       // scheme-specific options
       if (objectInputFileName.length() != 0) {
@@ -715,7 +734,7 @@ public class Evaluation implements Summarizable {
     // Output test instance predictions only
     if (printClassifications) {
       return printClassifications(classifier, new Instances(template, 0),
-				  testFileName, classIndex);
+				  testFileName, classIndex, attributesToOutput);
     }
 
     // Output model
@@ -2077,7 +2096,8 @@ public class Evaluation implements Summarizable {
   private static String printClassifications(Classifier classifier, 
 					     Instances train,
 					     String testFileName,
-					     int classIndex) throws Exception {
+					     int classIndex,
+					     Range attributesToOutput) throws Exception {
 
     StringBuffer text = new StringBuffer();
     if (testFileName.length() != 0) {
@@ -2107,10 +2127,11 @@ public class Evaluation implements Summarizable {
 	    text.append(i + " " + predValue + " ");
 	  }
 	  if (instance.classIsMissing()) {
-	    text.append("missing\n");
+	    text.append("missing");
 	  } else {
-	    text.append(instance.classValue() + "\n");
+	    text.append(instance.classValue());
 	  }
+	  text.append(" " + attributeValuesString(withMissing, attributesToOutput) + "\n");
 	} else {
 	  if (Instance.isMissingValue(predValue)) {
 	    text.append(i + " missing ");
@@ -2127,12 +2148,38 @@ public class Evaluation implements Summarizable {
 	      	    [(int)predValue]+" ");
 	    }
 	  }
-	  text.append(instance.toString(instance.classIndex()) + "\n");
+	  text.append(instance.toString(instance.classIndex()) + " "
+		      + attributeValuesString(withMissing, attributesToOutput) + "\n");
 	}
 	test.delete(0);
 	i++;
       }
       testReader.close();
+    }
+    return text.toString();
+  }
+
+  /**
+   * Builds a string listing the attribute values in a specified range of indices,
+   * separated by commas and enclosed in brackets.
+   *
+   * @param instance the instance to print the values from
+   * @param attributes the range of the attributes to list
+   * @return a string listing values of the attributes in the range
+   */
+  private static String attributeValuesString(Instance instance, Range attRange) {
+    StringBuffer text = new StringBuffer();
+    if (attRange != null) {
+      boolean firstOutput = true;
+      attRange.setUpper(instance.numAttributes() - 1);
+      for (int i=0; i<instance.numAttributes(); i++)
+	if (attRange.isInRange(i) && i != instance.classIndex()) {
+	  if (firstOutput) text.append("(");
+	  else text.append(",");
+	  text.append(instance.toString(i));
+	  firstOutput = false;
+	}
+      if (!firstOutput) text.append(")");
     }
     return text.toString();
   }
@@ -2175,8 +2222,9 @@ public class Evaluation implements Summarizable {
     optionsText.append(" statistics for each class.\n");
     optionsText.append("-k\n");
     optionsText.append("\tOutputs information-theoretic statistics.\n");
-    optionsText.append("-p\n");
-    optionsText.append("\tOnly outputs predictions for test instances.\n");
+    optionsText.append("-p <attribute range>\n");
+    optionsText.append("\tOnly outputs predictions for test instances, along with attributes "
+		       + "(0 for none).\n");
     optionsText.append("-r\n");
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
     if (classifier instanceof Sourcable) {

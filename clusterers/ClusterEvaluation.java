@@ -45,9 +45,11 @@ import  weka.filters.AttributeFilter;
  * -l <name of file to load clustering model from> <br>
  * Specifiy input file. <p>
  *
- * -p <br>
- * Output predictions. Predicitons are for the training file if only the
- * training file is specified, otherwise they are for the test file. <p>
+ * -p <attribute range> <br>
+ * Output predictions. Predictions are for the training file if only the
+ * training file is specified, otherwise they are for the test file. The range
+ * specifies attribute values to be output with the predictions.
+ * Use '-p 0' for none. <p>
  *
  * -x <num folds> <br>
  * Set the number of folds for a cross validation of the training data.
@@ -59,7 +61,7 @@ import  weka.filters.AttributeFilter;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.16 $
+ * @version  $Revision: 1.17 $
  */
 public class ClusterEvaluation {
 
@@ -467,7 +469,7 @@ public class ClusterEvaluation {
    * cross-validation is performed (distribution clusterers only).
    * Using "-x" you can change the number of
    * folds to be used, and using "-s" the random seed.
-   * If the "-p" flag is set it outputs the classification for
+   * If the "-p" option is present it outputs the classification for
    * each test instance. If you provide the name of an object file using
    * "-l", a clusterer will be loaded from the given file. If you provide the
    * name of an object file using "-d", the clusterer built from the
@@ -487,9 +489,10 @@ public class ClusterEvaluation {
     Instances train = null;
     Instances test = null;
     Random random;
-    String trainFileName, testFileName, seedString, foldsString, objectInputFileName, objectOutputFileName;
+    String trainFileName, testFileName, seedString, foldsString, objectInputFileName, objectOutputFileName, attributeRangeString;
     String[] savedOptions = null;
     boolean printClusterAssignments = false;
+    Range attributesToOutput = null;
     ObjectInputStream objectInputStream = null;
     ObjectOutputStream objectOutputStream = null;
     StringBuffer text = new StringBuffer();
@@ -501,11 +504,26 @@ public class ClusterEvaluation {
       }
 
       // Get basic options (options the same for all clusterers
-      printClusterAssignments = Utils.getFlag('p', options);
+      //printClusterAssignments = Utils.getFlag('p', options);
       objectInputFileName = Utils.getOption('l', options);
       objectOutputFileName = Utils.getOption('d', options);
       trainFileName = Utils.getOption('t', options);
       testFileName = Utils.getOption('T', options);
+
+      // Check -p option
+      try {
+	attributeRangeString = Utils.getOption('p', options);
+      }
+      catch (Exception e) {
+	throw new Exception(e.getMessage() + "\nNOTE: the -p option has changed. " +
+			    "It now expects a parameter specifying a range of attributes " +
+			    "to list with the predictions. Use '-p 0' for none.");
+      }
+      if (attributeRangeString.length() != 0) {
+	printClusterAssignments = true;
+	if (!attributeRangeString.equals("0")) 
+	  attributesToOutput = new Range(attributeRangeString);
+      }
 
       if (trainFileName.length() == 0) {
         if (objectInputFileName.length() == 0) {
@@ -637,7 +655,7 @@ public class ClusterEvaluation {
     /* Output cluster predictions only (for the test data if specified,
        otherwise for the training data */
     if (printClusterAssignments) {
-      return  printClusterings(clusterer, train, testFileName);
+      return  printClusterings(clusterer, train, testFileName, attributesToOutput);
     }
 
     text.append(clusterer.toString());
@@ -889,7 +907,8 @@ public class ClusterEvaluation {
    * @return a string containing the instance indexes and cluster assigns.
    * @exception if cluster assignments can't be printed
    */
-  private static String printClusterings (Clusterer clusterer, Instances train, String testFileName)
+  private static String printClusterings (Clusterer clusterer, Instances train,
+					  String testFileName, Range attributesToOutput)
     throws Exception
   {
     StringBuffer text = new StringBuffer();
@@ -912,13 +931,14 @@ public class ClusterEvaluation {
 	try {
 	  cnum = clusterer.clusterInstance(test.instance(0));
 	
-
-	  text.append(i + " " + cnum + "\n");
+	  text.append(i + " " + cnum + " "
+		      + attributeValuesString(test.instance(0), attributesToOutput) + "\n");
 	}
 	catch (Exception e) {
 	  /*	  throw  new Exception('\n' + "Unable to cluster instance\n" 
 		  + e.getMessage()); */
-	  text.append(i + " Unclustered\n");
+	  text.append(i + " Unclustered "
+		      + attributeValuesString(test.instance(0), attributesToOutput) + "\n");
 	}
 	test.delete(0);
 	i++;
@@ -930,13 +950,17 @@ public class ClusterEvaluation {
 	  try {
 	    cnum = clusterer.clusterInstance(train.instance(i));
 	 
-	    text.append(i + " " + cnum + "\n");
+	    text.append(i + " " + cnum + " "
+			+ attributeValuesString(train.instance(i), attributesToOutput)
+			+ "\n");
 	  }
 	  catch (Exception e) {
 	    /*  throw  new Exception('\n' 
 				 + "Unable to cluster instance\n" 
 				 + e.getMessage()); */
-	    text.append(i + " Unclustered\n");
+	    text.append(i + " Unclustered "
+			+ attributeValuesString(train.instance(i), attributesToOutput)
+			+ "\n");
 	  }
 	}
       }
@@ -944,6 +968,30 @@ public class ClusterEvaluation {
     return  text.toString();
   }
 
+  /**
+   * Builds a string listing the attribute values in a specified range of indices,
+   * separated by commas and enclosed in brackets.
+   *
+   * @param instance the instance to print the values from
+   * @param attributes the range of the attributes to list
+   * @return a string listing values of the attributes in the range
+   */
+  private static String attributeValuesString(Instance instance, Range attRange) {
+    StringBuffer text = new StringBuffer();
+    if (attRange != null) {
+      boolean firstOutput = true;
+      attRange.setUpper(instance.numAttributes() - 1);
+      for (int i=0; i<instance.numAttributes(); i++)
+	if (attRange.isInRange(i)) {
+	  if (firstOutput) text.append("(");
+	  else text.append(",");
+	  text.append(instance.toString(i));
+	  firstOutput = false;
+	}
+      if (!firstOutput) text.append(")");
+    }
+    return text.toString();
+  }
 
   /**
    * Make up the help string giving all the command line options
@@ -962,11 +1010,13 @@ public class ClusterEvaluation {
     optionsText.append("\tSets model input file.\n");
     optionsText.append("-d <name of output file>\n");
     optionsText.append("\tSets model output file.\n");
-    optionsText.append("-p\n");
+    optionsText.append("-p <attribute range>\n");
     optionsText.append("\tOutput predictions. Predictions are for " 
 		       + "training file" 
 		       + "\n\tif only training file is specified," 
-		       + "\n\totherwise predictions are for the test file.\n");
+		       + "\n\totherwise predictions are for the test file."
+		       + "\n\tThe range specifies attribute values to be output"
+		       + "\n\twith the predictions. Use '-p 0' for none.\n");
     optionsText.append("-x <number of folds>\n");
     optionsText.append("\tOnly Distribution Clusterers can be cross " 
 		       + "validated.\n");
