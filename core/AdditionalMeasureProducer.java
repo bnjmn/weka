@@ -22,15 +22,17 @@ import java.util.*;
 
 /** 
  * Interface to something that can produce measures other than those
- * calculated by evaluation modules.
+ * calculated by evaluation modules. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface AdditionalMeasureProducer {
 
   /**
-   * Returns an enumeration of the measure names
+   * Returns an enumeration of the measure names. Additional measures
+   * must follow the naming convention of starting with "measure", eg.
+   * double measureBlah()
    * @return an enumeration of the measure names
    */
   public Enumeration enumerateMeasures();
