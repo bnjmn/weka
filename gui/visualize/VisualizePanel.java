@@ -96,7 +96,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -1065,8 +1065,10 @@ public class VisualizePanel extends JPanel {
 	    m_plotSurround.remove(m_attrib);
 	    System.err.println("Warning : data contains more attributes "
 			       +"than can be displayed as attribute bars.");
-	    m_Log.logMessage("Warning : data contains more attributes "
-			     +"than can be displayed as attribute bars.");
+	    if (m_Log != null) {
+	      m_Log.logMessage("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
+	    }
 	  }
 	} else if (m_showAttBars) {
 	  try {
@@ -1082,8 +1084,10 @@ public class VisualizePanel extends JPanel {
 	  } catch (Exception ex) {
 	    System.err.println("Warning : data contains more attributes "
 			       +"than can be displayed as attribute bars.");
-	    m_Log.logMessage("Warning : data contains more attributes "
-			     +"than can be displayed as attribute bars.");
+	    if (m_Log != null) {
+	      m_Log.logMessage("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
+	    }
 	  }
 	}
 	m_classPanel.setInstances(newPlot.m_plotInstances);
