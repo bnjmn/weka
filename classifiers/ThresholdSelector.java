@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Vector;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Attribute;
 import weka.core.AttributeStats;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -20,7 +21,7 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
-import weka.core.Attribute;
+import weka.core.UnsupportedClassTypeException;
 
 /**
  * Class for selecting a threshold on a probability output by a
@@ -66,7 +67,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -419,13 +420,14 @@ public class ThresholdSelector extends DistributionClassifier
    * @param instances set of instances serving as training data 
    * @exception Exception if the classifier has not been generated successfully
    */
-  public void buildClassifier(Instances instances) throws Exception {
+  public void buildClassifier(Instances instances) 
+    throws Exception {
 
     if (instances.numClasses() > 2) {
-      throw new Exception("Only works for two-class datasets!");
+      throw new UnsupportedClassTypeException("Only works for two-class datasets!");
     }
     if (!instances.classAttribute().isNominal()) {
-      throw new Exception("Class attribute must be nominal!");
+      throw new UnsupportedClassTypeException("Class attribute must be nominal!");
     }
     AttributeStats stats = instances.attributeStats(instances.classIndex());
     m_BestThreshold = 0.5;
