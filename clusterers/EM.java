@@ -34,6 +34,19 @@ import  weka.estimators.*;
  * indicates the probability of it belonging to each of the clusters.
  * EM can decide how many clusters to create by cross validation, or you
  * may specify apriori how many clusters to generate. <p>
+ * <br>
+ * The cross validation performed to determine the number of clusters
+ * is done in the following steps:<br>
+ * 1. the number of clusters is set to 1<br>
+ * 2. the training set is split randomly into 10 folds.<br>
+ * 3. EM is performed 10 times using the 10 folds the usual CV way.<br>
+ * 4. the loglikelihood is averaged over all 10 results.<br>
+ * 5. if loglikelihood has increased the number of clusters is increased by 1
+ * and the program continues at step 2. <br>
+ *<br>
+ * The number of folds is fixed to 10, as long as the number of instances in
+ * the training set is not smaller 10. If this is the case the number of folds
+ * is set equal to the number of instances.<p>
  *
  * Valid options are:<p>
  *
@@ -56,7 +69,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class EM
   extends DistributionClusterer
@@ -737,7 +750,7 @@ public class EM
   {
     double CVLogLikely = -Double.MAX_VALUE;
     double templl, tll;
-    boolean CVdecreased = true;
+    boolean CVincreased = true;
     int num_cl = 1;
     int i;
     Random cvr;
@@ -746,8 +759,8 @@ public class EM
       ? m_theInstances.numInstances() 
       : 10;
 
-    while (CVdecreased) {
-      CVdecreased = false;
+    while (CVincreased) {
+      CVincreased = false;
       cvr = new Random(m_rseed);
       trainCopy = new Instances(m_theInstances);
       trainCopy.randomize(cvr);
@@ -783,7 +796,7 @@ public class EM
 
       if (templl > CVLogLikely) {
 	CVLogLikely = templl;
-	CVdecreased = true;
+	CVincreased = true;
 	num_cl++;
       }
     }
