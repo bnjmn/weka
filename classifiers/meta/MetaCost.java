@@ -61,7 +61,7 @@ import weka.filters.Filter;
  * File name of a cost matrix to use. If this is not supplied, a cost
  * matrix will be loaded on demand. The name of the on-demand file
  * is the relation name of the training data plus ".cost", and the
- * path to the on-demand file is specified with the -D option.<p>
+ * path to the on-demand file is specified with the -N option.<p>
  *
  * -N directory <br>
  * Name of a directory to search for cost files when loading costs on demand
@@ -79,7 +79,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
@@ -111,6 +111,30 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
   /** The size of each bag sample, as a percentage of the training size */
   protected int m_BagSizePercent = 100;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+ 
+    return  "This metaclassifier makes its base classifier cost-sensitive using the "
+      + "method specified in\n\n"
+      + "Pedro Domingos (1999) \"MetaCost: A general method for making classifiers "
+      + "cost-sensitive\", Proceedings of the Fifth International Conference on "
+      + "Knowledge Discovery and Data Mining, pp 155-164.\n\n"
+      + "This classifier should produce similar results to one created by "
+      + "passing the base learner to Bagging, which is in turn passed to a "
+      + "CostSensitiveClassifier operating on minimum expected cost. The difference "
+      + "is that MetaCost produces a single cost-sensitive classifier of the "
+      + "base learner, giving the benefits of fast classification and interpretable "
+      + "output (if the base learner itself is interpretable). This implementation  "
+      + "uses all bagging iterations when reclassifying training data (the MetaCost "
+      + "paper reports a marginal improvement when only those iterations containing "
+      + "each training instance are used in reclassifying that instance).";
+ 
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -130,7 +154,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
               +"\ta cost matrix will be loaded on demand. The name of the\n"
               +"\ton-demand file is the relation name of the training data\n"
               +"\tplus \".cost\", and the path to the on-demand file is\n"
-              +"\tspecified with the -D option.",
+              +"\tspecified with the -N option.",
 	      "C", 1, "-C <cost file name>"));
     newVector.addElement(new Option(
               "\tName of a directory to search for cost files when loading\n"
@@ -158,7 +182,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
    * File name of a cost matrix to use. If this is not supplied, a cost
    * matrix will be loaded on demand. The name of the on-demand file
    * is the relation name of the training data plus ".cost", and the
-   * path to the on-demand file is specified with the -D option.<p>
+   * path to the on-demand file is specified with the -N option.<p>
    *
    * -N directory <br>
    * Name of a directory to search for cost files when loading costs on demand

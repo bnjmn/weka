@@ -34,9 +34,19 @@ import weka.classifiers.*;
  * Works with nominal variables only.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class BayesNetB2 extends BayesNetB {
+
+  /**
+   * This will return a string describing the classifier.
+   * @return The string.
+   */
+  public String globalInfo() {
+    return "This Bayes Network learning algorithm uses Buntine's hill climbing "
+      + "algorithm but augmented to allow arc reversal as an operation. "
+      + "Works with nominal variables only.";
+  }
 
   /**
    * buildStructure determines the network structure/graph of the network

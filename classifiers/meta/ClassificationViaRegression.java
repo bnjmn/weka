@@ -46,7 +46,7 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
 */
 public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
@@ -69,6 +69,22 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
       + "E. Frank, Y. Wang, S. Inglis, G. Holmes, and I.H. Witten (1998) "
       + "\"Using model trees for classification\", Machine Learning, "
       + "Vol.32, No.1, pp. 63-76.";
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.m5.M5P";
+  }
+
+  /**
+   * Default constructor.
+   */
+  public ClassificationViaRegression() {
+    
+    m_Classifier = new weka.classifiers.trees.m5.M5P();
   }
 
   /**
@@ -139,7 +155,8 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
     StringBuffer text = new StringBuffer();
     text.append("Classification via Regression\n\n");
     for (int i = 0; i < m_Classifiers.length; i++) {
-      text.append(m_Classifiers[i].toString() + "\n");
+      text.append("Classifier for class with index " + i + ":\n\n");
+      text.append(m_Classifiers[i].toString() + "\n\n");
     }
     return text.toString();
   }

@@ -64,9 +64,9 @@ import weka.filters.Filter;
  * File name of a cost matrix to use. If this is not supplied, a cost
  * matrix will be loaded on demand. The name of the on-demand file
  * is the relation name of the training data plus ".cost", and the
- * path to the on-demand file is specified with the -D option.<p>
+ * path to the on-demand file is specified with the -N option.<p>
  *
- * -D directory <br>
+ * -N directory <br>
  * Name of a directory to search for cost files when loading costs on demand
  * (default current directory). <p>
  *
@@ -76,7 +76,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler, Drawable {
@@ -138,12 +138,12 @@ public class CostSensitiveClassifier extends Classifier
               +"\ta cost matrix will be loaded on demand. The name of the\n"
               +"\ton-demand file is the relation name of the training data\n"
               +"\tplus \".cost\", and the path to the on-demand file is\n"
-              +"\tspecified with the -D option.",
+              +"\tspecified with the -N option.",
 	      "C", 1, "-C <cost file name>"));
     newVector.addElement(new Option(
               "\tName of a directory to search for cost files when loading\n"
               +"\tcosts on demand (default current directory).",
-              "D", 1, "-D <directory>"));
+              "N", 1, "-N <directory>"));
     newVector.addElement(new Option(
 	      "\tSeed used when reweighting via resampling. (Default 1)",
 	      "S", 1, "-S <num>"));
@@ -164,9 +164,9 @@ public class CostSensitiveClassifier extends Classifier
    * File name of a cost matrix to use. If this is not supplied, a cost
    * matrix will be loaded on demand. The name of the on-demand file
    * is the relation name of the training data plus ".cost", and the
-   * path to the on-demand file is specified with the -D option.<p>
+   * path to the on-demand file is specified with the -N option.<p>
    *
-   * -D directory <br>
+   * -N directory <br>
    * Name of a directory to search for cost files when loading costs on demand
    * (default current directory). <p>
    *
@@ -244,7 +244,7 @@ public class CostSensitiveClassifier extends Classifier
         options[current++] = "" + m_CostFile;
       }
     } else {
-      options[current++] = "-D";
+      options[current++] = "-N";
       options[current++] = "" + getOnDemandDirectory();
     }
     options[current++] = "-S"; options[current++] = "" + getSeed();

@@ -32,11 +32,10 @@ import weka.core.*;
 import weka.estimators.*;
 import weka.filters.unsupervised.attribute.Discretize;
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.PotentialClassIgnorer;
 
 /**
  * Class for a regression scheme that employs any distribution
- * classifier on a copy of the data that has the class attribute
+ * classifier on a copy of the data that has the class attribute (equal-width)
  * discretized. The predicted value is the expected value of the 
  * mean class value for each discretized interval (based on the 
  * predicted probabilities for each interval).<p>
@@ -46,31 +45,23 @@ import weka.filters.unsupervised.attribute.PotentialClassIgnorer;
  * -D <br>
  * Produce debugging output. <p>
  *
- * -W classifierstring <br>
- * Classifierstring should contain the full class name of a classifier
- * followed by options to the classifier.
- * (required).<p>
- *
- * -F discretizerstring <br>
- * Full name of discretizer (should be a discretizer), followed by options.<p>
+ * -B <int> <br>
+ * Number of bins for equal-width discretization (default 10).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
-public class RegressionByDiscretization extends Classifier {
-
-  /** The subclassifier. */
-  protected Classifier m_Classifier = new ZeroR();
+public class RegressionByDiscretization extends SingleClassifierEnhancer {
   
   /** The discretization filter. */
-  protected PotentialClassIgnorer m_Discretizer = new Discretize("last");
+  protected Discretize m_Discretizer = new Discretize();
+
+  /** The number of discretization intervals. */
+  protected int m_NumBins = 10;
 
   /** The mean values for each Discretized class interval. */
   protected double [] m_ClassMeans;
-
-  /** Whether debugging output will be printed */
-  protected boolean m_Debug;
     
   /**
    * Returns a string describing classifier
@@ -80,18 +71,26 @@ public class RegressionByDiscretization extends Classifier {
   public String globalInfo() {
 
     return "A regression scheme that employs any "
-      + "classifier on a copy of the data that has the class attribute "
+      + "classifier on a copy of the data that has the class attribute (equal-width) "
       + "discretized. The predicted value is the expected value of the "
       + "mean class value for each discretized interval (based on the "
       + "predicted probabilities for each interval).";
   }
 
   /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.j48.J48";
+  }
+
+  /**
    * Default constructor.
    */
   public RegressionByDiscretization() {
-    
-    ((Discretize)m_Discretizer).setAttributeIndices("last");
+
+    m_Classifier = new weka.classifiers.trees.j48.J48();
   }
 
   /**
@@ -108,13 +107,11 @@ public class RegressionByDiscretization extends Classifier {
 
     // Discretize the training data
     m_Discretizer.setIgnoreClass(true);
+    m_Discretizer.setAttributeIndices("" + instances.classIndex() + 1);
+    m_Discretizer.setBins(getNumBins());
     m_Discretizer.setInputFormat(instances);
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
 
-    if (!newTrain.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException ("Class attribute has to be nominal " +
-					       "after discretization");
-    }
     int numClasses = newTrain.numClasses();
 
     // Calculate the mean value for each bin of the new class attribute
@@ -189,23 +186,17 @@ public class RegressionByDiscretization extends Classifier {
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(1);
+
+    newVector.addElement(new Option(
+	      "\tNumber of bins for equal-width discretization\n"
+	      + "\t(default 10).\n",
+	      "B", 1, "-B <int>"));
 
     Enumeration enum = super.listOptions();
     while (enum.hasMoreElements()) {
       newVector.addElement(enum.nextElement());
     }
-
-    newVector.addElement(new Option(
-	      "\tFull class name of classifier to use, followed\n"
-	      + "\tby scheme options. (required)\n"
-	      + "\tdefault: \"weka.classifiers.rules.ZeroR -D\"",
-	      "W", 1, "-W <classifier specification>"));
-    newVector.addElement(new Option(
-	      "\tFull name of filter (should be a discretizer), followed\n"
-	      + "\tby options for this filter.\n"
-	      + "\teg: \"weka.filters.unsupervised.attribute.Discretize -R last\"",
-	      "F", 1, "-F <discretizer specification>"));
 
     return newVector.elements();
   }
@@ -221,39 +212,22 @@ public class RegressionByDiscretization extends Classifier {
    * followed by options to the classifier
    * (default: weka.classifiers.rules.ZeroR).<p>
    *
-   * -F discretizerstring <br>
-   * Full name of filter (should be a discretizer), followed by options.<p>
+   * -B <int> <br>
+   * Number of bins for equal-width discretization (default 10).<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
-    super.setOptions(options);
+    String binsString = Utils.getOption('B', options);
+    if (binsString.length() != 0) {
+      setNumBins(Integer.parseInt(binsString));
+    } else {
+      setNumBins(10);
+    }
 
-    String classifierString = Utils.getOption('W', options);
-    if (classifierString.length() != 0) {
-      String [] classifierSpec = Utils.splitOptions(classifierString);
-      if (classifierSpec.length == 0) {
-	throw new Exception("Invalid classifier specification string");
-      }
-      String classifierName = classifierSpec[0];
-      classifierSpec[0] = "";
-      setClassifier(Classifier.forName(classifierName, classifierSpec));
-    }
-    
-    // Same for discretizer
-    String discretizerString = Utils.getOption('F', options);
-    if (discretizerString.length() != 0) {
-      String [] discretizerSpec = Utils.splitOptions(discretizerString);
-      if (discretizerSpec.length == 0) {
-	throw new Exception("Invalid discretizer specification string");
-      }
-      String discretizerName = discretizerSpec[0];
-      discretizerSpec[0] = "";
-      setDiscretizer((Filter)Utils.
-		     forName(Filter.class, discretizerName, discretizerSpec));
-    }
+    super.setOptions(options);
   }
 
   /**
@@ -264,15 +238,11 @@ public class RegressionByDiscretization extends Classifier {
   public String [] getOptions() {
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 4];
+    String [] options = new String [superOptions.length + 2];
     int current = 0;
 
-    options[current++] = "-W";
-    options[current++] = "" + getClassifierSpec();
-
-    // Same for discretizer
-    options[current++] = "-F";
-    options[current++] = "" + getDiscretizerSpec();
+    options[current++] = "-I";
+    options[current++] = "" + getNumBins();
 
     System.arraycopy(superOptions, 0, options, current, 
 		     superOptions.length);
@@ -282,95 +252,33 @@ public class RegressionByDiscretization extends Classifier {
 
   /**
    * Returns the tip text for this property
+   *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String discretizerTipText() {
-    return "The discretizer to use. Chosen class must extend PotentialClassIgnorer.";
+  public String numBinsTipText() {
+
+    return "Number of bins for discretization.";
   }
 
   /**
-   * Sets the discretizer
+   * Gets the number of bins numeric attributes will be divided into
    *
-   * @param discretizer the discretizer with all options set.
+   * @return the number of bins.
    */
-  public void setDiscretizer(Filter discretizer) {
+  public int getNumBins() {
 
-    if (!(discretizer instanceof PotentialClassIgnorer)) {
-      throw new IllegalArgumentException("Filter must extend PotentialClassIgnorer!");
-    }
-    m_Discretizer = (PotentialClassIgnorer)discretizer;
+    return m_NumBins;
   }
 
   /**
-   * Gets the discretizer used.
+   * Sets the number of bins to divide each selected numeric attribute into
    *
-   * @return the discretizer
+   * @param numBins the number of bins
    */
-  public Filter getDiscretizer() {
+  public void setNumBins(int numBins) {
 
-    return m_Discretizer;
-  }
-  
-  /**
-   * Gets the discretizer specification string, which contains the class name of
-   * the discretizer and any options to the discretizer
-   *
-   * @return the discretizer string.
-   */
-  protected String getDiscretizerSpec() {
-    
-    Filter c = getDiscretizer();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "The classifiers to be used.";
-  }
-  
-  /**
-   * Set the classifier for boosting. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-  
-  /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @return the classifier string.
-   */
-  protected String getClassifierSpec() {
-    
-    Classifier c = getClassifier();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
+    m_NumBins = numBins;
   }
 
   /**
@@ -392,8 +300,6 @@ public class RegressionByDiscretization extends Classifier {
 
       text.append("\nClassifier spec: " + getClassifierSpec() 
 		  + "\n");
-      text.append("\nDiscretizer spec: " + getDiscretizerSpec()
-		  + "\n\n");
       text.append(m_Classifier.toString());
     }
     return text.toString();

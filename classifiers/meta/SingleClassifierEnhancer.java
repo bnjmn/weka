@@ -35,12 +35,20 @@ import java.util.Enumeration;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 
   /** The base classifier to use */
   protected Classifier m_Classifier = new ZeroR();
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.rules.ZeroR";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -58,7 +66,7 @@ public abstract class SingleClassifierEnhancer extends Classifier {
 
     newVector.addElement(new Option(
 	      "\tFull name of base classifier.\n"
-	      + "\t(default: weka.classifiers.rules.ZeroR)",
+	      + "\t(default: " + defaultClassifierString() +")",
 	      "W", 1, "-W"));
 
     newVector.addElement(new Option(
@@ -93,6 +101,8 @@ public abstract class SingleClassifierEnhancer extends Classifier {
     if (classifierName.length() > 0) { 
       setClassifier(Classifier.forName(classifierName,
 				       Utils.partitionOptions(options)));
+    } else {
+      setClassifier((Classifier)Class.forName(defaultClassifierString()).newInstance());
     }
   }
 
@@ -135,7 +145,7 @@ public abstract class SingleClassifierEnhancer extends Classifier {
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String classifiersTipText() {
+  public String classifierTipText() {
     return "The base classifier to be used.";
   }
 
@@ -157,5 +167,18 @@ public abstract class SingleClassifierEnhancer extends Classifier {
   public Classifier getClassifier() {
 
     return m_Classifier;
+  }
+  
+  /**
+   * Gets the classifier specification string, which contains the class name of
+   * the classifier and any options to the classifier
+   *
+   * @return the classifier string
+   */
+  protected String getClassifierSpec() {
+
+    Classifier c = getClassifier();
+    return c.getClass().getName() + " "
+      + Utils.joinOptions(((OptionHandler)c).getOptions());
   }
 }

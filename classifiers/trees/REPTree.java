@@ -52,11 +52,11 @@ import java.io.*;
  * -P <br>
  * No pruning. <p>
  *
- * -D <br>
+ * -T <br>
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1404,8 +1404,8 @@ public class REPTree extends Classifier
 			    "(default 2).",
 			    "M", 1, "-M <minimum number of instances>"));
     newVector.
-      addElement(new Option("\tSet minimum numeric class variance proportion " +
-			    "of train variance for split (default 1e-3).",
+      addElement(new Option("\tSet minimum numeric class variance proportion\n" +
+			    "\tof train variance for split (default 1e-3).",
 			    "V", 1, "-V <minimum variance for split>"));
     newVector.
       addElement(new Option("\tNumber of folds for reduced error pruning " +
@@ -1419,7 +1419,7 @@ public class REPTree extends Classifier
 			    "P", 0, "-P"));
     newVector.
       addElement(new Option("\tMaximum tree depth (default -1, no maximum)",
-			    "D", 1, "-D"));
+			    "T", 1, "-T"));
 
     return newVector.elements();
   } 
@@ -1439,7 +1439,7 @@ public class REPTree extends Classifier
     options[current++] = "" + getNumFolds();
     options[current++] = "-S"; 
     options[current++] = "" + getSeed();
-    options[current++] = "-D"; 
+    options[current++] = "-T"; 
     options[current++] = "" + getMaxDepth();
     if (getNoPruning()) {
       options[current++] = "-P";

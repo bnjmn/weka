@@ -58,194 +58,38 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class RandomCommittee extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, Randomizable {
-
-  /** The model base classifier to use */
-  protected Classifier m_Classifier = new weka.classifiers.trees.RandomTree();
-  
-  /** Array for storing the generated base classifiers. */
-  protected Classifier[] m_Classifiers;
-  
-  /** The number of iterations. */
-  protected int m_NumIterations = 10;
-
-  /** The seed for random number generation. */
-  protected int m_Seed = 1;
-
-  /**
-   * Returns an enumeration describing the available options.
-   *
-   * @return an enumeration of all the available options.
-   */
-  public Enumeration listOptions() {
-
-    Vector newVector = new Vector(3);
-
-    newVector.addElement(new Option(
-	      "\tNumber of bagging iterations.\n"
-	      + "\t(default 10)",
-	      "I", 1, "-I <num>"));
-    newVector.addElement(new Option(
-	      "\tFull name of classifier to bag.\n"
-	      + "\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W"));
-    newVector.addElement(new Option(
-              "\tSeed for random number generator.\n"
-              + "\t(default 1)",
-              "S", 1, "-S"));
-
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option(
-	     "",
-	     "", 0, "\nOptions specific to classifier "
-	     + m_Classifier.getClass().getName() + ":"));
-      Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-      while (enum.hasMoreElements()) {
-	newVector.addElement(enum.nextElement());
-      }
-    }
-    return newVector.elements();
-  }
-
-
-  /**
-   * Parses a given list of options. Valid options are:<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a base classifier as the basis for 
-   * the random committee (required).<p>
-   *
-   * -I num <br>
-   * Set the number of committee members (default 10). <p>
-   *
-   * -S seed <br>
-   * Random number seed for the randomization process (default 1). <p>
-   *
-   * Options after -- are passed to the designated classifier.<p>
-   *
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   */
-  public void setOptions(String[] options) throws Exception {
+public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhancer
+  implements WeightedInstancesHandler {
     
-    String iterations = Utils.getOption('I', options);
-    if (iterations.length() != 0) {
-      setNumIterations(Integer.parseInt(iterations));
-    } else {
-      setNumIterations(10);
-    }
-
-    String seed = Utils.getOption('S', options);
-    if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
-    } else {
-      setSeed(1);
-    }
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() != 0) {
-	setClassifier(Classifier.forName(classifierName,
-					 Utils.partitionOptions(options)));
-    }
-  }
-
   /**
-   * Gets the current settings of the Classifier.
-   *
-   * @return an array of strings suitable for passing to setOptions
+   * Constructor.
    */
-  public String [] getOptions() {
-
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
-    String [] options = new String [classifierOptions.length + 7];
-    int current = 0;
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-    options[current++] = "-I"; options[current++] = "" + getNumIterations();
-
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-
-    options[current++] = "--";
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
-  }
-
-  /**
-   * Set the randomizable classifier. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-      if (!(newClassifier instanceof Randomizable)) {
-	  throw new IllegalArgumentException("Classifier for RandomCommittee "+
-					     "needs to implement the " +
-					     "Randomizable interface.");
-      }
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier.
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-  
-  /**
-   * Sets the number of iterations.
-   */
-  public void setNumIterations(int numIterations) {
-
-    m_NumIterations = numIterations;
-  }
-
-  /**
-   * Gets the number of iterations.
-   *
-   * @return the maximum number of bagging iterations
-   */
-  public int getNumIterations() {
+  public RandomCommittee() {
     
-    return m_NumIterations;
+    m_Classifier = new weka.classifiers.trees.RandomTree();
   }
 
   /**
-   * Set the seed for random number generation.
-   *
-   * @param seed the seed 
+   * String describing default classifier.
    */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Gets the seed for the random number generations
-   *
-   * @return the seed for the random number generation
-   */
-  public int getSeed() {
+  protected String defaultClassifierString() {
     
-    return m_Seed;
+    return "weka.classifiers.trees.RandomTree";
+  }
+
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+ 
+    return "Class for building an ensemble of randomizable base classifiers. Each "
+      + "base classifiers is built using a different random number seed (but based "
+      + "one the same data). The final prediction is a straight average of the "
+      + "predictions generated by the individual base classifiers.";
   }
 
   /**
@@ -257,11 +101,12 @@ public class RandomCommittee extends Classifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (m_Classifier == null) {
-      throw new Exception("A base classifier has not been specified!");
-    }
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+
+    if (!(m_Classifier instanceof Randomizable)) {
+      throw new IllegalArgumentException("Base learner must implement Randomizable!");
     }
 
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);

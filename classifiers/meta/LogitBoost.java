@@ -82,7 +82,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $ 
+ * @version $Revision: 1.30 $ 
  */
 public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements Sourcable, WeightedInstancesHandler {
@@ -147,6 +147,22 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
       + "Stanford University.\n\n"
       + "Can do efficient internal cross-validation to determine "
       + "appropriate number of iterations.";
+  }
+    
+  /**
+   * Constructor.
+   */
+  public LogitBoost() {
+    
+    m_Classifier = new weka.classifiers.trees.DecisionStump();
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.DecisionStump";
   }
 
   /**
