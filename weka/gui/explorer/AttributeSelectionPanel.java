@@ -38,7 +38,8 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
 import weka.gui.SaveBuffer;
 import weka.gui.FileEditor;
-import weka.gui.VisualizePanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
 import java.util.Random;
 import java.util.Date;
@@ -100,7 +101,7 @@ import java.awt.Dimension;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -685,8 +686,15 @@ public class AttributeSelectionPanel extends JPanel {
 	      try {
 		Instances transformed = 
 		  ((AttributeTransformer)evaluator).transformedData();
-		m_CurrentVis.setInstances(transformed);
-		m_CurrentVis.setColourIndex(transformed.classIndex());
+
+		PlotData2D tempd = new PlotData2D(transformed);
+		tempd.setPlotName(name+" ("+transformed.relationName()+")");
+		try {
+		  m_CurrentVis.addPlot(tempd);
+		  m_CurrentVis.setColourIndex(transformed.classIndex());
+		} catch (Exception ex) {
+		  ex.printStackTrace();
+		}
 		m_CurrentVis.setName(name+" ("+transformed.relationName()+")");
 		m_History.addObject(name, m_CurrentVis);
 		m_VisualizeBut.setEnabled(true);
