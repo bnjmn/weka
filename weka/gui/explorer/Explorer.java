@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Explorer extends JPanel {
 
@@ -65,8 +65,7 @@ public class Explorer extends JPanel {
 						 SwingConstants.CENTER);
 
   /** Label for a panel that still need to be implemented */
-  protected JLabel m_AssociationPanel = new JLabel("Not implemented yet :-)",
-						 SwingConstants.CENTER);
+  protected AssociationsPanel m_AssociationPanel = new AssociationsPanel();
 
   /** Label for a panel that still need to be implemented */
   protected AttributeSelectionPanel m_AttributeSelectionPanel =
@@ -89,7 +88,7 @@ public class Explorer extends JPanel {
 
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
-    m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg and Mark Hall");
+    m_LogPanel.logMessage("Weka Knowledge Explorer was written by Len Trigg, Mark Hall and Eibe Frank");
     m_LogPanel.logMessage("(c) 1999 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
@@ -98,6 +97,7 @@ public class Explorer extends JPanel {
     m_LogPanel.statusMessage("Welcome to the Weka Knowledge Explorer");
     m_PreprocessPanel.setLog(m_LogPanel);
     m_ClassifierPanel.setLog(m_LogPanel);
+    m_AssociationPanel.setLog(m_LogPanel);
     m_AttributeSelectionPanel.setLog(m_LogPanel);
     m_TabbedPane.addTab("Preprocess", null, m_PreprocessPanel,
 			"Open/Edit/Save instances");
@@ -120,6 +120,8 @@ public class Explorer extends JPanel {
     m_PreprocessPanel.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	m_ClassifierPanel.setInstances(m_PreprocessPanel
+				       .getWorkingInstances());
+	m_AssociationPanel.setInstances(m_PreprocessPanel
 				       .getWorkingInstances());
 	m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
 					       .getWorkingInstances());
