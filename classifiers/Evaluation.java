@@ -22,8 +22,6 @@
 
 package weka.classifiers;
 
-import weka.classifiers.meta.MetaCost;
-import weka.classifiers.meta.CostSensitiveClassifier;
 import java.util.*;
 import java.io.*;
 import weka.core.*;
@@ -119,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.43 $
+ * @version  $Revision: 1.44 $
   */
 public class Evaluation implements Summarizable {
 
