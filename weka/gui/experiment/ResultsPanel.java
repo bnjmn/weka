@@ -27,6 +27,7 @@ import weka.gui.ExtensionFileFilter;
 import weka.gui.ListSelectorDialog;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.DatabaseConnectionDialog;
 import weka.experiment.Experiment;
 import weka.experiment.InstancesResultListener;
 import weka.experiment.DatabaseResultListener;
@@ -83,7 +84,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -554,23 +555,41 @@ public class ResultsPanel extends JPanel {
 	m_InstanceQuery = new InstanceQuery();
       }
       String dbaseURL = m_InstanceQuery.getDatabaseURL();
-      dbaseURL = (String) JOptionPane.showInputDialog(this,
+      String username = m_InstanceQuery.getUsername();
+      String passwd = m_InstanceQuery.getPassword();
+      /*dbaseURL = (String) JOptionPane.showInputDialog(this,
 					     "Enter the database URL",
 					     "Query Database",
 					     JOptionPane.PLAIN_MESSAGE,
 					     null,
 					     null,
-					     dbaseURL);
-      if (dbaseURL == null) {
+					     dbaseURL);*/
+     
+      
+      
+      DatabaseConnectionDialog dbd= new DatabaseConnectionDialog(null,dbaseURL,username);
+      dbd.setVisible(true);
+      
+      //if (dbaseURL == null) {
+      if (dbd.getReturnValue()==JOptionPane.CLOSED_OPTION) {
 	m_FromLab.setText("Cancelled");
 	return;
       }
+      dbaseURL=dbd.getURL();
+      username=dbd.getUsername();
+      passwd=dbd.getPassword();
       m_InstanceQuery.setDatabaseURL(dbaseURL);
+      
+      m_InstanceQuery.setUsername(username);
+      m_InstanceQuery.setPassword(passwd);
+      
       m_InstanceQuery.connectToDatabase();
       if (!m_InstanceQuery.experimentIndexExists()) {
+	System.err.println("not found");
 	m_FromLab.setText("No experiment index");
 	return;
       }
+      System.err.println("found");
       m_FromLab.setText("Getting experiment index");
       Instances index = m_InstanceQuery.retrieveInstances("SELECT * FROM "
 				       + InstanceQuery.EXP_INDEX_TABLE);
@@ -595,8 +614,8 @@ public class ResultsPanel extends JPanel {
       Attribute tableAttr = index.attribute(InstanceQuery.EXP_RESULT_COL);
       String table = InstanceQuery.EXP_RESULT_PREFIX
 	+ selInst.toString(tableAttr);
-
       setInstancesFromDatabaseTable(table);
+      
     } catch (Exception ex) {
       m_FromLab.setText("Problem reading database");
     }
