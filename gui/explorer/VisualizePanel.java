@@ -85,7 +85,7 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class VisualizePanel extends JPanel {
 
@@ -677,12 +677,13 @@ public class VisualizePanel extends JPanel {
 	    jt.setEditable(false);
 	    jt.setText(insts.toString());
 	    final JFrame jf = new JFrame("Weka : Instance info");
+	    final JFrame testf = m_InstanceInfo;
 	    jf.addWindowListener(new WindowAdapter() {
 		public void windowClosing(WindowEvent e) {
-		  jf.dispose();
-		  if (!newFrame) {
+		  if (!newFrame || testf == null) {
 		    m_InstanceInfo = null;
 		  }
+		  jf.dispose();
 		}
 	      });
 	    jf.getContentPane().setLayout(new BorderLayout());
