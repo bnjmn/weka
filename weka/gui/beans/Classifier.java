@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -119,6 +119,15 @@ public class Classifier extends JPanel
   private weka.classifiers.Classifier m_Classifier = new ZeroR();
   private IncrementalClassifierEvent m_ie = 
     new IncrementalClassifierEvent(this);
+
+  /**
+   * If the classifier is an incremental classifier, should we
+   * update it (ie train it on incoming instances). This makes it
+   * possible incrementally test on a separate stream of instances
+   * without updating the classifier, or mix batch training/testing
+   * with incremental training/testing
+   */
+  private boolean m_updateIncrementalClassifier = true;
 
   private transient Logger m_log = null;
 
@@ -208,6 +217,14 @@ public class Classifier extends JPanel
     return getClassifier();
   }
 
+  public boolean getUpdateIncrementalClassifier() {
+    return m_updateIncrementalClassifier;
+  }
+
+  public void setUpdateIncrementalClassifier(boolean update) {
+    m_updateIncrementalClassifier = update;
+  }
+
 //    public void acceptDataSet(DataSetEvent e) {
 //      // will wrap up data in a TrainingSetEvent and call acceptTrainingSet
 //      // then will do same for TestSetEvent
@@ -258,7 +275,11 @@ public class Classifier extends JPanel
 
     if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
       Instances dataset = m_incrementalEvent.getInstance().dataset();
-      dataset.setClassIndex(dataset.numAttributes()-1);
+      // default to the last column if no class is set
+      if (dataset.classIndex() < 0) {
+	//	System.err.println("Classifier : setting class index...");
+	dataset.setClassIndex(dataset.numAttributes()-1);
+      }
       try {
 	// initialize classifier if m_trainingSet is null
 	// otherwise assume that classifier has been pre-trained in batch
@@ -285,51 +306,66 @@ public class Classifier extends JPanel
 			       +"from data used in batch training this "
 			       +"classifier. Resetting classifier...");
 	    }
+	    m_trainingSet = null;
 	  }
-	  m_Classifier.buildClassifier(dataset);
+	  if (m_trainingSet == null) {
+	    // initialize the classifier if it hasn't been trained yet
+	    m_Classifier.buildClassifier(dataset);
+	    m_trainingSet = new Instances(dataset, 0);
+	  }
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();
       }
     }
     
-    if (m_incrementalEvent.getStatus() == 
-	InstanceEvent.INSTANCE_AVAILABLE ||
-	m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-      try {
-	// test on this instance
-	int status = IncrementalClassifierEvent.WITHIN_BATCH;
-	if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-	  status = IncrementalClassifierEvent.NEW_BATCH;
-	}
-	/*	IncrementalClassifierEvent ie = 
-	  new IncrementalClassifierEvent(this, m_Classifier, 
-					 m_incrementalEvent.getInstance(), 
-					 status);*/
-	m_ie.setStatus(status); m_ie.setClassifier(m_Classifier);
-	m_ie.setCurrentInstance(m_incrementalEvent.getInstance());
-	//	System.err.println("Testing incremental classifier");
-	notifyIncrementalClassifierListeners(m_ie);
-	// now update on this instance (if class is not missing and classifier
-	// is updateable)
-	if (m_Classifier instanceof weka.classifiers.UpdateableClassifier &&
-	    !(m_incrementalEvent.getInstance().
-	      isMissing(m_incrementalEvent.getInstance().
-			dataset().classIndex()))) {
-	  ((weka.classifiers.UpdateableClassifier)m_Classifier).
-	    updateClassifier(m_incrementalEvent.getInstance());
-	}
-      } catch (Exception ex) {
-	if (m_log != null) {
-	  m_log.logMessage(ex.toString());
-	}
-	ex.printStackTrace();
+    try {
+      // test on this instance
+      int status = IncrementalClassifierEvent.WITHIN_BATCH;
+      if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+	status = IncrementalClassifierEvent.NEW_BATCH;
+      } else if (m_incrementalEvent.getStatus() ==
+		 InstanceEvent.BATCH_FINISHED) {
+	status = IncrementalClassifierEvent.BATCH_FINISHED;
       }
-    } else { // batch finished
-      // shut down the build thread
-      if (m_buildThread != null) {
-	m_buildThread.interrupt();
+      
+      m_ie.setStatus(status); m_ie.setClassifier(m_Classifier);
+      m_ie.setCurrentInstance(m_incrementalEvent.getInstance());
+      
+      notifyIncrementalClassifierListeners(m_ie);
+      
+      // now update on this instance (if class is not missing and classifier
+      // is updateable and user has specified that classifier is to be
+      // updated)
+      if (m_Classifier instanceof weka.classifiers.UpdateableClassifier &&
+	  m_updateIncrementalClassifier == true &&
+	  !(m_incrementalEvent.getInstance().
+	    isMissing(m_incrementalEvent.getInstance().
+		      dataset().classIndex()))) {
+	((weka.classifiers.UpdateableClassifier)m_Classifier).
+	  updateClassifier(m_incrementalEvent.getInstance());
       }
+      if (m_incrementalEvent.getStatus() == 
+	  InstanceEvent.BATCH_FINISHED) {
+	if (m_textListeners.size() > 0) {
+	  String modelString = m_Classifier.toString();
+	  String titleString = m_Classifier.getClass().getName();
+	  titleString = titleString.
+	    substring(titleString.lastIndexOf('.') + 1,
+		      titleString.length());
+	  titleString = "( "+m_trainingSet.relationName() + ") " + titleString
+	    + " model";
+	  TextEvent nt = new TextEvent(this,
+				       modelString,
+				       titleString);
+	  notifyTextListeners(nt);
+	}
+      }
+    } catch (Exception ex) {
+      if (m_log != null) {
+	m_log.logMessage(ex.toString());
+      }
+      ex.printStackTrace();
     }
   }
 

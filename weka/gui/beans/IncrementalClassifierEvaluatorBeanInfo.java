@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the incremental classifier evaluator bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
   
@@ -39,7 +39,16 @@ public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
    */
   public EventSetDescriptor [] getEventSetDescriptors() {
     try {
-      EventSetDescriptor [] esds = { new EventSetDescriptor(IncrementalClassifierEvaluator.class, "chart", ChartListener.class, "acceptDataPoint") };
+      EventSetDescriptor [] esds = { 
+	new EventSetDescriptor(IncrementalClassifierEvaluator.class, 
+			       "chart", 
+			       ChartListener.class, 
+			       "acceptDataPoint"),
+	new EventSetDescriptor(IncrementalClassifierEvaluator.class,
+			       "text",
+			       TextListener.class,
+			       "acceptText") 
+      };
       return esds;
     } catch (Exception ex) {
       ex.printStackTrace();
