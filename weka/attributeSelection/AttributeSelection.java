@@ -42,15 +42,6 @@ import  weka.core.*;
  * (if any).<br>
  * Eg. -S "weka.attributeSelection.BestFirst -N 10" <p>
  *
- * -P <range> <br>
- * Specify a set of attributes from which to start a search for subset
- * evaluators, OR, a list of attributes to IGNORE for attribute evaluators.
- * <br> Eg. -P 2,3,7-9. <p>
- *
- * -T <cutoff> <br>
- * Specify a threshold by which to discard attributes for attribute evaluators.
- * <p>
- *
  * -X <number of folds> <br>
  * Perform a cross validation. <p>
  *
@@ -75,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.9 $
+ * @version  $Revision: 1.10 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -111,6 +102,12 @@ public class AttributeSelection implements Serializable {
 
   /** the attribute indexes and associated merits if a ranking is produced */
   private double [][] m_attributeRanking;
+
+  /** hold statistics for repeated feature selection, such as
+      under cross validation */
+  private double [][] m_rankResults = null;
+  private double [] m_subsetResults = null;
+  private int m_trials = 0;
 
   /**
    * get the final selected set of attributes.
@@ -151,6 +148,10 @@ public class AttributeSelection implements Serializable {
    */
   public void setSearch (ASSearch search) {
     m_searchMethod = search;
+
+    if (m_searchMethod instanceof RankedOutputSearch) {
+      setRanking(((RankedOutputSearch)m_searchMethod).getGenerateRanking());
+    }
   }
 
   /**
@@ -261,92 +262,28 @@ public class AttributeSelection implements Serializable {
     return  SelectAttributes(ASEvaluator, options, train);
   }
 
-
   /**
-   * Perform a cross validation for attribute selection. With subset
-   * evaluators the number of times each attribute is selected over
-   * the cross validation is reported. For attribute evaluators, the
-   * average merit and average ranking + std deviation is reported for
-   * each attribute.
-   *
-   * @param ASEvaluator an evaluator object
-   * @param options an array of options, not only for the evaluator
-   * but also the search method (if any) and an input data file
-   * @return the results of cross validation as a String
-   * @exception Exception if no class attribute is set for the data
+   * returns a string summarizing the results of repeated attribute
+   * selection runs on splits of a dataset.
+   * @return a summary of attribute selection results
+   * @exception if no attribute selection has been performed.
    */
-  public String CrossValidateAttributes () throws Exception {
+  public String CVResultsString () throws Exception {
     StringBuffer CvString = new StringBuffer();
-    Instances cvData = new Instances(m_trainInstances);
-    Instances train;
-    double[][] rankResults;
-    double[] subsetResults;
-    double[][] attributeRanking = null;
-
-    cvData.randomize(new Random(m_seed));
-
-    if (m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
-      subsetResults = new double[cvData.numAttributes()];
-    }
-    else {
-      subsetResults = new double[cvData.numAttributes() - 1];
+    
+    if ((m_subsetResults == null && m_rankResults == null) ||
+	( m_trainInstances == null)) {
+      throw new Exception("Attribute selection has not been performed yet!");
     }
 
-    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
-	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
-      if (cvData.classAttribute().isNominal()) {
-	cvData.stratify(m_numFolds);
-      }
-      rankResults = new double[4][cvData.numAttributes() - 1];
-    }
-    else {
-      rankResults = new double[4][cvData.numAttributes()];
-    }
-
-    for (int i = 0; i < m_numFolds; i++) {
-      // Perform attribute selection
-      train = cvData.trainCV(m_numFolds, i);
-      m_ASEvaluator.buildEvaluator(train);
-      // Do the search
-      int[] attributeSet = m_searchMethod.search(m_ASEvaluator, 
-						 train);
-      // Do any postprocessing that a attribute selection method might 
-      // require
-      attributeSet = m_ASEvaluator.postProcess(attributeSet);
-
-      if ((m_searchMethod instanceof RankedOutputSearch) && 
-	  (m_doRank == true)) {
-        attributeRanking = ((RankedOutputSearch)m_searchMethod).
-	  rankedAttributes();
-
-        // System.out.println(attributeRanking[0][1]);
-        for (int j = 0; j < attributeRanking.length; j++) {
-          // merit
-          rankResults[0][(int)attributeRanking[j][0]] += 
-	    attributeRanking[j][1];
-          // squared merit
-          rankResults[2][(int)attributeRanking[j][0]] += 
-	    (attributeRanking[j][1]*attributeRanking[j][1]);
-          // rank
-          rankResults[1][(int)attributeRanking[j][0]] += (j + 1);
-          // squared rank
-          rankResults[3][(int)attributeRanking[j][0]] += (j + 1)*(j + 1);
-          // += (attributeRanking[j][0] * attributeRanking[j][0]);
-        }
-      }
-      else {
-        for (int j = 0; j < attributeSet.length; j++) {
-	  subsetResults[attributeSet[j]]++;
-	}
-      }
-    }
+    int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
 
     CvString.append("\n\n=== Attribute selection " + m_numFolds 
 		    + " fold cross-validation ");
 
     if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
 	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator) &&
-	(cvData.classAttribute().isNominal())) {
+	(m_trainInstances.classAttribute().isNominal())) {
 	CvString.append("(stratified), seed: ");
 	CvString.append(m_seed+" ===\n\n");
     }
@@ -358,68 +295,186 @@ public class AttributeSelection implements Serializable {
       CvString.append("average merit      average rank  attribute\n");
 
       // calcualte means and std devs
-      for (int i = 0; i < attributeRanking.length; i++) {
-	rankResults[0][i] /= m_numFolds; // mean merit
-	double var = rankResults[0][i]*rankResults[0][i]*m_numFolds;
-	var = (rankResults[2][i] - var);
+      for (int i = 0; i < m_rankResults[0].length; i++) {
+	m_rankResults[0][i] /= m_numFolds; // mean merit
+	double var = m_rankResults[0][i]*m_rankResults[0][i]*m_numFolds;
+	var = (m_rankResults[2][i] - var);
 	var /= m_numFolds;
 
 	if (var <= 0.0) {
 	  var = 0.0;
-	  rankResults[2][i] = 0;
+	  m_rankResults[2][i] = 0;
 	}
 	else {
-	  rankResults[2][i] = Math.sqrt(var);
+	  m_rankResults[2][i] = Math.sqrt(var);
 	}
 
-	rankResults[1][i] /= m_numFolds; // mean rank
-	var = rankResults[1][i]*rankResults[1][i]*m_numFolds;
-	var = (rankResults[3][i] - var);
+	m_rankResults[1][i] /= m_numFolds; // mean rank
+	var = m_rankResults[1][i]*m_rankResults[1][i]*m_numFolds;
+	var = (m_rankResults[3][i] - var);
 	var /= m_numFolds;
 
 	if (var <= 0.0) {
 	  var = 0.0;
-	  rankResults[3][i] = 0;
+	  m_rankResults[3][i] = 0;
 	}
 	else {
-	  rankResults[3][i] = Math.sqrt(var);
+	  m_rankResults[3][i] = Math.sqrt(var);
 	}
       }
 
       // now sort them by mean merit
-      int[] s = Utils.sort(rankResults[0]);
+      int[] s = Utils.sort(m_rankResults[0]);
       for (int i = s.length - 1; i >= 0; i--) {
-	CvString.append(Utils.doubleToString(rankResults[0][s[i]], 6, 3) 
-			+ "+-" 
-			+ Utils.doubleToString(rankResults[2][s[i]], 6, 3) 
+	CvString.append(Utils.doubleToString(m_rankResults[0][s[i]], 6, 3) 
+			+ " +-" 
+			+ Utils.doubleToString(m_rankResults[2][s[i]], 6, 3) 
 			+ "   " 
-			+ Utils.doubleToString(rankResults[1][s[i]], 6, 1) 
-			+ "+-" 
-			+ Utils.doubleToString(rankResults[3][s[i]], 5, 2) 
-			+ "    " 
-			+ (s[i] + 1) 
+			+ Utils.doubleToString(m_rankResults[1][s[i]],
+					       fieldWidth+2, 1) 
+			+ " +-" 
+			+ Utils.doubleToString(m_rankResults[3][s[i]], 5, 2) 
+			+"  "
+			+ Utils.doubleToString(((double)(s[i] + 1)), 
+					       fieldWidth, 0)
 			+ " " 
-			+ cvData.attribute(s[i]).name() 
+			+ m_trainInstances.attribute(s[i]).name() 
 			+ "\n");
       }
     }
     else {
       CvString.append("number of folds (%)  attribute\n");
 
-      for (int i = 0; i < subsetResults.length; i++) {
-	CvString.append(Utils.doubleToString(subsetResults[i], 12, 0) 
+      for (int i = 0; i < m_subsetResults.length; i++) {
+	CvString.append(Utils.doubleToString(m_subsetResults[i], 12, 0) 
 			+ "(" 
-			+ Utils.doubleToString((subsetResults[i] / 
+			+ Utils.doubleToString((m_subsetResults[i] / 
 						m_numFolds * 100.0)
 					       , 3, 0) 
 			+ " %)  " 
-			+ (i + 1) + " " 
-			+ cvData.attribute(i).name() 
+			+ Utils.doubleToString(((double)(i + 1)),
+					       fieldWidth, 0)
+			+ " " 
+			+ m_trainInstances.attribute(i).name() 
 			+ "\n");
       }
     }
 
-    return  CvString.toString();
+    return CvString.toString();
+  }
+
+  /**
+   * Select attributes for a split of the data. Calling this function
+   * updates the statistics on attribute selection. CVResultsString()
+   * returns a string summarizing the results of repeated calls to
+   * this function. Assumes that splits are from the same dataset---
+   * ie. have the same number and types of attributes as previous
+   * splits.
+   *
+   * @param split the instances to select attributes from
+   * @exception if an error occurs
+   */
+  public void selectAttributesCVSplit(Instances split) throws Exception {
+    double[][] attributeRanking = null;
+
+    // if the train instances are null then set equal to this split.
+    // If this is the case then this function is more than likely being
+    // called from outside this class in order to obtain CV statistics
+    // and all we need m_trainIstances for is to get at attribute names
+    // and types etc.
+    if (m_trainInstances == null) {
+      m_trainInstances = split;
+    }
+
+    // create space to hold statistics
+    if (m_rankResults == null && m_subsetResults == null) {
+      if (m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
+	m_subsetResults = new double[split.numAttributes()];
+      }
+      else {
+	m_subsetResults = new double[split.numAttributes() - 1];
+      }
+      
+      if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
+	  !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+
+	m_rankResults = new double[4][split.numAttributes() - 1];
+      }
+      else {
+	m_rankResults = new double[4][split.numAttributes()];
+      }
+    }
+
+    m_ASEvaluator.buildEvaluator(split);
+    // Do the search
+    int[] attributeSet = m_searchMethod.search(m_ASEvaluator, 
+					       split);
+    // Do any postprocessing that a attribute selection method might 
+    // require
+    attributeSet = m_ASEvaluator.postProcess(attributeSet);
+    
+    if ((m_searchMethod instanceof RankedOutputSearch) && 
+	(m_doRank == true)) {
+      attributeRanking = ((RankedOutputSearch)m_searchMethod).
+	rankedAttributes();
+      
+      // System.out.println(attributeRanking[0][1]);
+      for (int j = 0; j < attributeRanking.length; j++) {
+	// merit
+	m_rankResults[0][(int)attributeRanking[j][0]] += 
+	  attributeRanking[j][1];
+	// squared merit
+	m_rankResults[2][(int)attributeRanking[j][0]] += 
+	  (attributeRanking[j][1]*attributeRanking[j][1]);
+	// rank
+	m_rankResults[1][(int)attributeRanking[j][0]] += (j + 1);
+	// squared rank
+	m_rankResults[3][(int)attributeRanking[j][0]] += (j + 1)*(j + 1);
+	// += (attributeRanking[j][0] * attributeRanking[j][0]);
+      }
+    } else {
+      for (int j = 0; j < attributeSet.length; j++) {
+	m_subsetResults[attributeSet[j]]++;
+      }
+    }
+
+    m_trials++;
+  }
+
+  /**
+   * Perform a cross validation for attribute selection. With subset
+   * evaluators the number of times each attribute is selected over
+   * the cross validation is reported. For attribute evaluators, the
+   * average merit and average ranking + std deviation is reported for
+   * each attribute.
+   *
+   * @return the results of cross validation as a String
+   * @exception Exception if an error occurs during cross validation
+   */
+  public String CrossValidateAttributes () throws Exception {
+    Instances cvData = new Instances(m_trainInstances);
+    Instances train;
+    double[][] rankResults;
+    double[] subsetResults;
+    double[][] attributeRanking = null;
+
+    cvData.randomize(new Random(m_seed));
+
+    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
+	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+      if (cvData.classAttribute().isNominal()) {
+	cvData.stratify(m_numFolds);
+      }
+
+    }
+
+    for (int i = 0; i < m_numFolds; i++) {
+      // Perform attribute selection
+      train = cvData.trainCV(m_numFolds, i);
+      selectAttributesCVSplit(train);
+    }
+
+    return  CVResultsString();
   }
 
   /**
@@ -430,8 +485,9 @@ public class AttributeSelection implements Serializable {
    */
   public void SelectAttributes (Instances data) throws Exception {
     int [] attributeSet;
-
+    
     m_trainInstances = data;
+    int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
     
     if (m_ASEvaluator instanceof SubsetEvaluator &&
 	m_searchMethod instanceof Ranker) {
@@ -491,7 +547,8 @@ public class AttributeSelection implements Serializable {
 	if (m_attributeRanking[i][1] > m_threshold) {
 	  m_selectionResults.
 	    append(Utils.doubleToString(m_attributeRanking[i][1],6,3) 
-		   + Utils.doubleToString((m_attributeRanking[i][0] + 1),5,0) 
+		   + Utils.doubleToString((m_attributeRanking[i][0] + 1),
+					  fieldWidth+1,0) 
 		   + " " 
 		   + m_trainInstances.
 		   attribute((int)m_attributeRanking[i][0]).name() 
@@ -842,9 +899,6 @@ public class AttributeSelection implements Serializable {
     optionsText.append("\tselection. Default=last column.\n");
     optionsText.append("-S <Class name>\n");
     optionsText.append("\tSets search method for subset evaluators.\n");
-    optionsText.append("-P <range>\n");
-    optionsText.append("\tSpecify a (optional) set of attributes to start\n");
-    optionsText.append("\tthe search from, eg 1,2,5-9.\n");
     optionsText.append("-X <number of folds>\n");
     optionsText.append("\tPerform a cross validation.\n");
     optionsText.append("-N <random number seed>\n");
