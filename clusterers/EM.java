@@ -28,7 +28,7 @@ import  weka.core.*;
 import  weka.estimators.*;
 
 /**
- * Simple EM (estimation maximisation) class. <p>
+ * Simple EM (expectation maximisation) class. <p>
  * 
  * EM assigns a probability distribution to each instance which
  * indicates the probability of it belonging to each of the clusters.
@@ -56,7 +56,7 @@ import  weka.estimators.*;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class EM
   extends DistributionClusterer
