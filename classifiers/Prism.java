@@ -19,7 +19,7 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
 */
 public class Prism extends Classifier {
 
@@ -63,6 +63,7 @@ public class Prism extends Classifier {
 	  m_errors++;
 	}
       }
+      m_instances = new Instances(m_instances, 0);
     }  
 
     /**
@@ -263,11 +264,11 @@ public class Prism extends Classifier {
     if (data.numInstances() == 0) {
       throw new Exception("No instances with a class value!");
     }
-    emptyDataset = new Instances(data, 0);
+
     for (cl = 0; cl < data.numClasses(); cl++) { // for each class cl
       E = data; // initialize E to the instance set
       while (contains(E, cl)) { // while E contains examples in class cl
-        rule = addRule(rule, new PrismRule(emptyDataset, cl)); // make a new rule
+        rule = addRule(rule, new PrismRule(E, cl)); // make a new rule
         ruleE = E; // examples covered by this rule
         while (rule.m_errors != 0) { // until the rule is perfect
           test = new Test(); // make a new test
