@@ -1591,7 +1591,7 @@ public class SMOreg extends Classifier implements OptionHandler,
 	// format because the classifier has been built
 	text.append(trans + m_data.classAttribute().name() + " =\n");
 	for (int i = 0; i < m_sparseWeights.length; i++) {
-	  if (i != (int)m_classIndex) {
+	  if (m_sparseIndices[i] != (int)m_classIndex) {
 	    if (printed > 0) {
 	      text.append(" + ");
 	    } else {

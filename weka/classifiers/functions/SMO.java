@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.50 $ */
+ * @version $Revision: 1.51 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -559,7 +559,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
 	  // We can assume that the weight vector is stored in sparse
 	  // format because the classifier has been built
 	  for (int i = 0; i < m_sparseWeights.length; i++) {
-	    if (i != (int)m_classIndex) {
+	    if (m_sparseIndices[i] != (int)m_classIndex) {
 	      if (printed > 0) {
 		text.append(" + ");
 	      } else {
