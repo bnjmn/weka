@@ -12,7 +12,8 @@ SOURCES = \
 	VisualizePanel.java \
 	VisualizePanelEvent.java \
 	VisualizeUtils.java \
-	VisualizePanelListener.java
+	VisualizePanelListener.java \
+	MatrixPanel.java
 
 
 CLASSFILES = $(SOURCES:.java=.class)
