@@ -24,8 +24,7 @@ weka.experiment.SplitEvaluator=\
 # Lists the Classifiers I want to choose from
 weka.classifiers.Classifier=\
  weka.classifiers.bayes.AODE,\
- weka.classifiers.bayes.BayesNetK2,\
- weka.classifiers.bayes.BayesNetB,\
+ weka.classifiers.bayes.BayesNet,\
  weka.classifiers.bayes.ComplementNaiveBayes,\
  weka.classifiers.bayes.NaiveBayes,\
  weka.classifiers.bayes.NaiveBayesMultinomial,\
@@ -226,4 +225,20 @@ weka.core.converters.Loader =\
  weka.core.converters.CSVLoader, \
  weka.core.converters.C45Loader, \
  weka.core.converters.SerializedInstancesLoader
- 
+
+
+# Lists the Search algorithm for Bayes net structure learning I want to choose from
+weka.classifiers.bayes.net.search.SearchAlgorithm =\
+ weka.classifiers.bayes.net.search.score.SearchAlgorithmK2, \
+ weka.classifiers.bayes.net.search.score.SearchAlgorithmTAN, \
+ weka.classifiers.bayes.net.search.score.SearchAlgorithmB, \
+ weka.classifiers.bayes.net.search.score.SearchAlgorithmB2, \
+ weka.classifiers.bayes.net.search.score.SimulatedAnnealing, \
+ weka.classifiers.bayes.net.search.score.TabuSearch, \
+ weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm, \
+ weka.classifiers.bayes.net.search.cv.SearchAlgorithmK2, \
+ weka.classifiers.bayes.net.search.cv.SearchAlgorithmB
+
+weka.classifiers.bayes.net.estimate.BayesNetEstimator =\
+ weka.classifiers.bayes.net.estimate.SimpleEstimator, \
+ weka.classifiers.bayes.net.estimate.BMAEstimator
