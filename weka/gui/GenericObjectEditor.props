@@ -61,7 +61,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.RegressionByDiscretization,\
  weka.classifiers.Stacking,\
  weka.classifiers.ThresholdSelector,\
- weka.classifiers.UserClassifier
+ weka.classifiers.UserClassifier,\
+ weka.classifiers.nn.NeuralNetwork
 
 # Lists the DistributionClassifiers I want to choose from
 weka.classifiers.DistributionClassifier=\
@@ -90,7 +91,8 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.MultiClassClassifier,\
  weka.classifiers.ThresholdSelector,\
  weka.classifiers.UserClassifier,\
- weka.classifiers.AttributeSelectedClassifier
+ weka.classifiers.AttributeSelectedClassifier,\
+ weka.classifiers.nn.NeuralNetwork
 
 # Lists the Filters I want to choose from
 weka.filters.Filter = \
