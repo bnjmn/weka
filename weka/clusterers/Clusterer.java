@@ -25,7 +25,7 @@ import weka.core.*;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class Clusterer implements Cloneable, Serializable {
 
@@ -82,6 +82,35 @@ public abstract class Clusterer implements Cloneable, Serializable {
     return (Clusterer)Utils.forName(Clusterer.class,
 				    clustererName,
 				    options);
+  }
+
+  /**
+   * Creates copies of the current clusterer.
+   *
+   * @param model an example clusterer to copy
+   * @param num the number of clusterer copies to create.
+   * @return an array of clusterers.
+   * @exception Exception if an error occurs
+   */
+  public static Clusterer [] makeCopies(Clusterer model,
+					int num) throws Exception {
+     if (model == null) {
+      throw new Exception("No model clusterer set");
+    }
+    Clusterer [] clusterers = new Clusterer [num];
+    String [] options = null;
+    if (model instanceof OptionHandler) {
+      options = ((OptionHandler)model).getOptions();
+    }
+    for(int i = 0; i < clusterers.length; i++) {
+      clusterers[i] = (Clusterer) model.getClass().newInstance();
+      if (options != null) {
+	String [] tempOptions = (String [])options.clone();
+	((OptionHandler)clusterers[i]).setOptions(tempOptions);
+	Utils.checkForRemainingOptions(tempOptions);
+      }
+    }
+    return clusterers;
   }
 }
 

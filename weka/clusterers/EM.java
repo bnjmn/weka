@@ -48,7 +48,7 @@ import  weka.estimators.*;
  * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class EM
   extends DistributionClusterer
@@ -411,6 +411,7 @@ public class EM
    */
   private double normalDens (double x, double mean, double stdDev) {
     double diff = x - mean;
+   
     return  (1/(m_normConst*stdDev))*Math.exp(-(diff*diff/(2*stdDev*stdDev)));
   }
 
@@ -487,7 +488,7 @@ public class EM
           }
 
           // std dev
-          if (m_modelNormal[i][j][1] <= 0.0) {
+          if (m_modelNormal[i][j][1] <= 1e-20) {
             m_modelNormal[i][j][1] = 
 	      /* m_defSds[j] / (2 * 3);*/
 	      1e-6;
@@ -680,6 +681,9 @@ public class EM
     int i;
     Random cvr;
     Instances trainCopy;
+    int numFolds = (m_theInstances.numInstances() < 10) 
+      ? m_theInstances.numInstances() 
+      : 10;
 
     while (CVdecreased) {
       CVdecreased = false;
@@ -689,9 +693,9 @@ public class EM
       // theInstances.stratify(10);
       templl = 0.0;
 
-      for (i = 0; i < 10; i++) {
-	Instances cvTrain = trainCopy.trainCV(10, i);
-	Instances cvTest = trainCopy.testCV(10, i);
+      for (i = 0; i < numFolds; i++) {
+	Instances cvTrain = trainCopy.trainCV(numFolds, i);
+	Instances cvTest = trainCopy.testCV(numFolds, i);
 	EM_Init(cvTrain, num_cl);
 	iterate(cvTrain, num_cl, false);
 	tll = E(cvTest, num_cl);
@@ -704,7 +708,7 @@ public class EM
 	templl += tll;
       }
 
-      templl /= 10.0;
+      templl /= (double)numFolds;
 
       if (m_verbose) {
 	System.out.println("===================================" 
@@ -767,8 +771,22 @@ public class EM
 
     m_theInstances = data;
     doEM();
+    
+    // save memory
+    m_theInstances = new Instances(m_theInstances,0);
   }
 
+  /**
+   * Computes the density for a given instance.
+   * 
+   * @param inst the instance to compute the density for
+   * @return the density.
+   * @exception Exception if the density could not be computed
+   * successfully
+   */
+  public double densityForInstance(Instance inst) throws Exception {
+    return Utils.sum(distributionForInstance(inst));
+  }
 
   /**
    * Predicts the cluster memberships for a given instance.
@@ -836,7 +854,11 @@ public class EM
     // setDefaultStdDevs(theInstances);
     // cross validate to determine number of clusters?
     if (m_initialNumClusters == -1) {
-      m_num_clusters = CVClusters();
+      if (m_theInstances.numInstances() > 9) {
+	m_num_clusters = CVClusters();
+      } else {
+	m_num_clusters = 1;
+      }
     }
 
     // fit full training set
@@ -907,6 +929,5 @@ public class EM
       System.out.println(e.getMessage());
     }
   }
-
 }
 

@@ -49,7 +49,7 @@ import  weka.core.*;
  * be performed if the test file is missing.
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.7 $
+ * @version  $Revision: 1.8 $
  */
 public class ClusterEvaluation {
 
@@ -159,15 +159,16 @@ public class ClusterEvaluation {
     for (i=0;i<test.numInstances();i++) {
       try {
 	if (m_Clusterer instanceof DistributionClusterer) {
-	  dist = ((DistributionClusterer)m_Clusterer).
-	    distributionForInstance(test.instance(i));
-	  temp = Utils.sum(dist);
+	  temp = ((DistributionClusterer)m_Clusterer).
+	    densityForInstance(test.instance(i));
+	  //	  temp = Utils.sum(dist);
 	  
 	  if (temp > 0) {
 	    loglk += Math.log(temp);
 	  }
-	  Utils.normalize(dist);
-	  cnum = Utils.maxIndex(dist);
+	  //	  Utils.normalize(dist);
+	  cnum = m_Clusterer.clusterInstance(test.instance(i)); 
+	  // Utils.maxIndex(dist);
 	  m_clusterAssignments[i] = (double)cnum;
 	} else {
 	  cnum = m_Clusterer.clusterInstance(test.instance(i));
@@ -469,8 +470,8 @@ public class ClusterEvaluation {
       foldAv = 0.0;
 
       for (int j = 0; j < test.numInstances(); j++) {
-	tempDist = ((DistributionClusterer)clusterer).distributionForInstance(test.instance(j));
-	double temp = Utils.sum(tempDist);
+	double temp = ((DistributionClusterer)clusterer).densityForInstance(test.instance(j));
+	//	double temp = Utils.sum(tempDist);
 
 	if (temp > 0) {
 	  foldAv += Math.log(temp);
@@ -530,9 +531,9 @@ public class ClusterEvaluation {
 	  cnum = clusterer.clusterInstance(inst.instance(0));
 
 	  if (clusterer instanceof DistributionClusterer) {
-	    dist = ((DistributionClusterer)clusterer).
-	      distributionForInstance(inst.instance(0));
-	    temp = Utils.sum(dist);
+	    temp = ((DistributionClusterer)clusterer).
+	      densityForInstance(inst.instance(0));
+	    //	    temp = Utils.sum(dist);
 
 	    if (temp > 0) {
 	      loglk += Math.log(temp);
