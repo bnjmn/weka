@@ -41,10 +41,11 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Loader
  */
-public class C45Loader extends AbstractLoader {
+public class C45Loader extends AbstractLoader 
+  implements BatchLoader, IncrementalLoader {
 
   /**
    * Holds the determined structure (header) of the data set.
@@ -109,6 +110,7 @@ public class C45Loader extends AbstractLoader {
    */
   public void reset() {
     m_structure = null;
+    setRetrieval(NONE);
   }
 
   /**
@@ -194,7 +196,10 @@ public class C45Loader extends AbstractLoader {
     if (m_sourceFile == null) {
       throw new IOException("No source has been specified");
     }
-
+    if (getRetrieval() == INCREMENTAL) {
+      throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
+    }
+    setRetrieval(BATCH);
     if (m_structure == null) {
       getStructure();
     }
@@ -231,6 +236,11 @@ public class C45Loader extends AbstractLoader {
     if (m_sourceFile == null) {
       throw new IOException("No source has been specified");
     }
+    
+    if (getRetrieval() == BATCH) {
+      throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
+    }
+    setRetrieval(INCREMENTAL);
 
     if (m_structure == null) {
       getStructure();

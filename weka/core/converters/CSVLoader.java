@@ -40,10 +40,11 @@ import java.io.StreamTokenizer;
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Loader
  */
-public class CSVLoader extends AbstractLoader {
+public class CSVLoader extends AbstractLoader 
+  implements BatchLoader {
 
   /**
    * Holds the determined structure (header) of the data set.
@@ -73,6 +74,11 @@ public class CSVLoader extends AbstractLoader {
    * Holds instances accumulated so far
    */
   private FastVector m_cumulativeInstances;
+  
+  public CSVLoader() {
+    // No instances retrieved yet
+    setRetrieval(NONE);
+  }
 
   /**
    * Returns a string describing this attribute evaluator
@@ -90,6 +96,7 @@ public class CSVLoader extends AbstractLoader {
    */
   public void reset() {
     m_structure = null;
+    setRetrieval(NONE);
   }
 
   /**
@@ -245,7 +252,7 @@ public class CSVLoader extends AbstractLoader {
       dataSet.add(new Instance(1.0, vals));
     }
     m_structure = new Instances(dataSet, 0);
-
+    setRetrieval(BATCH);
     return dataSet;
   }
 

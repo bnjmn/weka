@@ -38,17 +38,21 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Loader
  */
-public class ArffLoader extends AbstractLoader {
+public class ArffLoader extends AbstractLoader 
+implements BatchLoader, IncrementalLoader {
 
   /**
    * Holds the determined structure (header) of the data set.
    */
   //@ protected depends: model_structureDetermined -> m_structure;
   //@ protected represents: model_structureDetermined <- (m_structure != null);
-  protected Instances m_structure = null;
+  protected transient Instances m_structure = null;
+
+  protected String m_File = 
+    (new File(System.getProperty("user.dir"))).getName();
 
   /**
    * The reader for the source file.
@@ -61,7 +65,7 @@ public class ArffLoader extends AbstractLoader {
   public void reset() {
 
     m_structure = null;
-    m_sourceReader = null;
+    //    m_sourceReader = null;
     setRetrieval(NONE);
   }
 
@@ -85,6 +89,26 @@ public class ArffLoader extends AbstractLoader {
     } catch (FileNotFoundException ex) {
       throw new IOException("File not found");
     }
+  }
+
+  /**
+   * get the File specified as the source
+   *
+   * @return the source file
+   */
+  public File getFile() {
+    return new File(m_File);
+  }
+
+  /**
+   * sets the source File
+   *
+   * @param file the source file
+   * @exception IOException if an error occurs
+   */
+  public void setFile(File file) throws IOException {
+    m_File = file.getName();
+    setSource(file);
   }
 
   /**
@@ -140,7 +164,9 @@ public class ArffLoader extends AbstractLoader {
       throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
     setRetrieval(BATCH);
-    
+    if (m_structure == null) {
+      getStructure();
+    }
 
     // Read all instances
     // XXX This is inefficient because readInstance creates a new 
