@@ -48,43 +48,46 @@ import java.io.*;
  * -P <br>
  * No pruning. <p>
  *
+ * -D <br>
+ * Maximum tree depth (default -1, no maximum). <p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class REPTree extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable {
 
   /** An inner class for building and storing the tree structure */
-  private class Tree implements Serializable {
+  protected class Tree implements Serializable {
 
     /** The subtrees of this tree. */ 
-    private Tree[] m_Successors;
+    protected Tree[] m_Successors;
     
     /** The attribute to split on. */
-    private int m_Attribute = -1;
+    protected int m_Attribute = -1;
     
     /** The split point. */
-    private double m_SplitPoint = Double.NaN;
+    protected double m_SplitPoint = Double.NaN;
     
     /** The class distribution from the training data. */
-    private double[][] m_Distribution = null;
+    protected double[][] m_Distribution = null;
     
     /** The header information (for printing the tree). */
-    private Instances m_Info = null;
+    protected Instances m_Info = null;
     
     /** The proportions of training instances going down each branch. */
-    private double[] m_Prop = null;
+    protected double[] m_Prop = null;
     
     /** Class distribution of hold-out set at node. */
-    private double[] m_HoldOutDist = null;
+    protected double[] m_HoldOutDist = null;
     
     /** Class probabilities from the training data. */
-    private double[] m_ClassProbs = null;
+    protected double[] m_ClassProbs = null;
   
     /**
      * Computes class distribution of an instance using the tree.
      */
-    private double[] distributionForInstance(Instance instance) 
+    protected double[] distributionForInstance(Instance instance) 
       throws Exception {
     
       double[] returnedDist = null;
@@ -132,7 +135,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Outputs one node for graph.
      */
-    private int toGraph(StringBuffer text, int num,
+    protected int toGraph(StringBuffer text, int num,
 			Tree parent) throws Exception {
       
       num++;
@@ -171,7 +174,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Outputs a leaf.
      */
-    private String leafString(Tree parent) throws Exception {
+    protected String leafString(Tree parent) throws Exception {
     
       int maxIndex;
       if (Utils.eq(Utils.sum(m_Distribution[0]), 0)) {
@@ -191,7 +194,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Recursively outputs the tree.
      */
-    private String toString(int level, Tree parent) {
+    protected String toString(int level, Tree parent) {
 
       try {
 	StringBuffer text = new StringBuffer();
@@ -241,9 +244,10 @@ public class REPTree extends DistributionClassifier
     /**
      * Recursively generates a tree.
      */
-    private void buildTree(int[][] sortedIndices, double[][] weights,
+    protected void buildTree(int[][] sortedIndices, double[][] weights,
 			   Instances data, double[] classProbs, 
-			   Instances header, double minNum) 
+			   Instances header, double minNum,
+			   int depth, int maxDepth) 
       throws Exception {
 
       // Store structure of dataset, set minimum number of instances
@@ -258,12 +262,14 @@ public class REPTree extends DistributionClassifier
 	return;
       }
 
-      // Check if node doesn't contain enough instances or is pure
+      // Check if node doesn't contain enough instances, is pure
+      // or the maximum tree depth is reached
       m_ClassProbs = new double[classProbs.length];
       System.arraycopy(classProbs, 0, m_ClassProbs, 0, classProbs.length);
       if (Utils.sm(Utils.sum(m_ClassProbs), 2 * minNum) ||
 	  Utils.eq(m_ClassProbs[Utils.maxIndex(m_ClassProbs)],
-		   Utils.sum(m_ClassProbs))) {
+		   Utils.sum(m_ClassProbs)) ||
+	  ((m_MaxDepth >= 0) && (depth >= maxDepth))) {
 
 	// Make leaf
 	m_Attribute = -1;
@@ -322,7 +328,8 @@ public class REPTree extends DistributionClassifier
 	for (int i = 0; i < m_Distribution.length; i++) {
 	  m_Successors[i] = new Tree();
 	  m_Successors[i].buildTree(subsetIndices[i], subsetWeights[i], data, 
-				    m_Distribution[i], header, minNum);
+				    m_Distribution[i], header, minNum, 
+				    depth + 1, maxDepth);
 	}
       } else {
       
@@ -341,7 +348,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Computes size of the tree.
      */
-    private int numNodes() {
+    protected int numNodes() {
     
       if (m_Attribute == -1) {
 	return 1;
@@ -357,7 +364,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Splits instances into subsets.
      */
-    private void splitData(int[][][] subsetIndices, double[][][] subsetWeights,
+    protected void splitData(int[][][] subsetIndices, double[][][] subsetWeights,
 			   int att, double splitPoint, 
 			   int[][] sortedIndices, double[][] weights,
 			   double[][] dist, Instances data) throws Exception {
@@ -440,7 +447,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Computes class distribution for an attribute.
      */
-    private double distribution(double[][] props, double[][][] dists, int att, 
+    protected double distribution(double[][] props, double[][][] dists, int att, 
 				int[] sortedIndices,
 				double[] weights, Instances data) 
       throws Exception {
@@ -538,7 +545,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Computes value of splitting criterion before split.
      */
-    private double priorVal(double[][] dist) {
+    protected double priorVal(double[][] dist) {
 
       return ContingencyTables.entropyOverColumns(dist);
     }
@@ -546,7 +553,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Computes value of splitting criterion after split.
      */
-    private double gain(double[][] dist, double priorVal) {
+    protected double gain(double[][] dist, double priorVal) {
 
       return priorVal - ContingencyTables.entropyConditionedOnRows(dist);
     }
@@ -554,7 +561,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Prunes the tree using the hold-out data (bottom-up).
      */
-    private double reducedErrorPrune() throws Exception {
+    protected double reducedErrorPrune() throws Exception {
 
       // Compute error for leaf
       double errorLeaf = Utils.sum(m_HoldOutDist) - 
@@ -595,7 +602,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Returns the error on the pruning data for the subtree.
      */
-    private double errorTree() {
+    protected double errorTree() {
 
       // Is node leaf ? 
       if (m_Attribute == -1) {
@@ -619,7 +626,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Inserts hold-out set into tree.
      */
-    private void insertHoldOutSet(Instances data) throws Exception{
+    protected void insertHoldOutSet(Instances data) throws Exception{
 
       for (int i = 0; i < data.numInstances(); i++) {
 	insertHoldOutInstance(data.instance(i), data.instance(i).weight());
@@ -629,7 +636,7 @@ public class REPTree extends DistributionClassifier
     /**
      * Inserts an instance from the hold-out set into the tree.
      */
-    private void insertHoldOutInstance(Instance inst, double weight) 
+    protected void insertHoldOutInstance(Instance inst, double weight) 
       throws Exception {
     
       // Insert instance into hold-out class distribution
@@ -667,19 +674,22 @@ public class REPTree extends DistributionClassifier
   }
 
   /** The Tree object */
-  private Tree m_Tree = null;
+  protected Tree m_Tree = null;
     
   /** Number of folds for reduced error pruning. */
-  private int m_NumFolds = 3;
+  protected int m_NumFolds = 3;
     
   /** Seed for random data shuffling. */
-  private int m_Seed = 1;
+  protected int m_Seed = 1;
     
   /** Don't prune */
-  private boolean m_NoPruning = false;
+  protected boolean m_NoPruning = false;
 
   /** The minimum number of instances per leaf. */
-  private double m_MinNum = 2;
+  protected double m_MinNum = 2;
+
+  /** Upper bound on the tree depth */
+  protected int m_MaxDepth = -1;
   
   /**
    * Get the value of NoPruning.
@@ -762,11 +772,31 @@ public class REPTree extends DistributionClassifier
   }
   
   /**
+   * Get the value of MaxDepth.
+   *
+   * @return Value of MaxDepth.
+   */
+  public int getMaxDepth() {
+    
+    return m_MaxDepth;
+  }
+  
+  /**
+   * Set the value of MaxDepth.
+   *
+   * @param newMaxDepth Value to assign to MaxDepth.
+   */
+  public void setMaxDepth(int newMaxDepth) {
+    
+    m_MaxDepth = newMaxDepth;
+  }
+  
+  /**
    * Lists the command-line options for this classifier.
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(5);
 
     newVector.
       addElement(new Option("\tSet minimum number of instances per leaf " +
@@ -782,6 +812,9 @@ public class REPTree extends DistributionClassifier
     newVector.
       addElement(new Option("\tNo pruning.",
 			    "P", 0, "-P"));
+    newVector.
+      addElement(new Option("\tMaximum tree depth (default 1, no maximum)",
+			    "D", 1, "-D"));
 
     return newVector.elements();
   } 
@@ -791,7 +824,7 @@ public class REPTree extends DistributionClassifier
    */
   public String[] getOptions() {
     
-    String [] options = new String [7];
+    String [] options = new String [9];
     int current = 0;
     options[current++] = "-M"; 
     options[current++] = "" + getMinNum();
@@ -799,6 +832,8 @@ public class REPTree extends DistributionClassifier
     options[current++] = "" + getNumFolds();
     options[current++] = "-S"; 
     options[current++] = "" + getSeed();
+    options[current++] = "-D"; 
+    options[current++] = "" + getMaxDepth();
     if (getNoPruning()) {
       options[current++] = "-P";
     }
@@ -834,9 +869,15 @@ public class REPTree extends DistributionClassifier
       m_Seed = 1;
     }
     m_NoPruning = Utils.getFlag('P', options);
+    String depthString = Utils.getOption('D', options);
+    if (depthString.length() != 0) {
+      m_MaxDepth = Integer.parseInt(depthString);
+    } else {
+      m_MaxDepth = -1;
+    }
     Utils.checkForRemainingOptions(options);
   }
-
+  
   /**
    * Computes size of the tree.
    */
@@ -935,7 +976,7 @@ public class REPTree extends DistributionClassifier
     // Build tree
     m_Tree = new Tree();
     m_Tree.buildTree(sortedIndices, weights, train, classProbs,
-		     new Instances(train, 0), m_MinNum);
+		     new Instances(train, 0), m_MinNum, 0, m_MaxDepth);
     
     // Insert pruning data and perform reduced error pruning
     if (!m_NoPruning) {
@@ -986,7 +1027,6 @@ public class REPTree extends DistributionClassifier
     try {
       System.out.println(Evaluation.evaluateModel(new REPTree(), argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
