@@ -70,7 +70,7 @@ import java.util.Hashtable;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -191,13 +191,10 @@ public class Attribute implements Copyable, Serializable {
     Attribute copy = new Attribute(m_Name);
 
     copy.m_Index = m_Index;
-    /*
-    if (!isNominal() && !isString())
-      return copy;
-    */
     copy.m_Type = m_Type;
     copy.m_Values = m_Values;
     copy.m_Hashtable = m_Hashtable;
+    copy.m_DateFormat = m_DateFormat;
  
     return copy;
   }
@@ -324,6 +321,16 @@ public class Attribute implements Copyable, Serializable {
   public final boolean isString() {
 
     return (m_Type == STRING);
+  }
+
+  /**
+   * Tests if the attribute is a date type.
+   *
+   * @return true if the attribute is a date type
+   */
+  public final boolean isDate() {
+
+    return (m_Type == DATE);
   }
 
   /**
