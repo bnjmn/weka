@@ -56,7 +56,7 @@ import java.awt.Component;
  * be changed.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LegendPanel extends JScrollPane {
 
@@ -134,7 +134,7 @@ public class LegendPanel extends JScrollPane {
 	public void paintComponent(Graphics gx) {
 	  super.paintComponent(gx);
 	  if (!m_plotData.m_useCustomColour) {
-	    gx.setColor(Color.white);
+	    gx.setColor(Color.black);
 	  } else {
 	    gx.setColor(m_plotData.m_customColour);
 	  }
