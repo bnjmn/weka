@@ -63,7 +63,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -505,7 +505,7 @@ public class AttributeVisualizationPanel extends JPanel {
 	    return ("<html><center><font face=Dialog size=-1>"
 		    +histBarCounts[temp]+"<br>("
 		    +Utils.doubleToString(bar+m_barRange*temp,3)+", "+Utils.doubleToString((bar+m_barRange*(temp+1)),3)
-		    +", debug="+temp+"]</font></center></html>"); 
+		    +"]</font></center></html>"); 
 	}
       }
     }
