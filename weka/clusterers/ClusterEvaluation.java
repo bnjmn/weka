@@ -61,9 +61,9 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.25 $
+ * @version  $Revision: 1.26 $
  */
-public class ClusterEvaluation {
+public class ClusterEvaluation implements Serializable {
 
   /** the instances to cluster */
   private Instances m_trainInstances;
