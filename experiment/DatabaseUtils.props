@@ -1,13 +1,13 @@
 # The comma-separated list of jdbc drivers to use
 #jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver
-#jdbcDriver=jdbc.idbDriver,org.gjt.mm.mysql.Driver
-jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver,org.gjt.mm.mysql.Driver,com.mckoi.JDBCDriver,org.hsqldb.jdbcDriver
+jdbcDriver=jdbc.idbDriver
+#jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver,org.gjt.mm.mysql.Driver,com.mckoi.JDBCDriver,org.hsqldb.jdbcDriver
 #jdbcDriver=org.gjt.mm.mysql.Driver
 
 # The url to the experiment database
 #jdbcURL=jdbc:rmi://expserver/jdbc:idb=experiments.prp
-#jdbcURL=jdbc:idb=experiments.prp
-jdbcURL=jdbc:mysql://mysqlserver/username
+jdbcURL=jdbc:idb=experiments.prp
+#jdbcURL=jdbc:mysql://mysqlserver/username
 
 #the method that is used to retrieve values from the db (java datatype + RecordSet.<method>)
 #string,getString()= 0;         -->nominal
