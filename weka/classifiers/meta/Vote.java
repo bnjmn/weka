@@ -42,7 +42,7 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class Vote extends MultipleClassifiersCombiner {
@@ -68,11 +68,6 @@ public class Vote extends MultipleClassifiersCombiner {
    * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-
-    // Check for non-nominal classes
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Vote: Nominal class, please.");
-    }
 
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
