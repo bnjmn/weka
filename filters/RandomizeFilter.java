@@ -24,7 +24,7 @@ import java.util.*;
 import weka.core.*;
 
 /** 
- * This filter randomly shuffles the order of instances passed through it
+ * This filter randomly shuffles the order of instances passed through it.
  * The random number generator is reset with the seed value whenever
  * inputFormat() is called. <p>
  *
@@ -34,7 +34,7 @@ import weka.core.*;
  * Specify the random number seed (default 42).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RandomizeFilter extends Filter implements OptionHandler {
 
