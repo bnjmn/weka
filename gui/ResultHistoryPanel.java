@@ -18,6 +18,7 @@
  */
 
 package weka.gui;
+import weka.gui.explorer.VisualizePanel;
 
 import java.util.Hashtable;
 import java.awt.BorderLayout;
@@ -48,7 +49,7 @@ import java.awt.Point;
  * single-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -69,6 +70,9 @@ public class ResultHistoryPanel extends JPanel {
 
   /** A Hashtable mapping names to output text components */
   protected Hashtable m_FramedOutput = new Hashtable();
+
+  /** A hashtable mapping names to visualization objects */
+  protected Hashtable m_Vis = new Hashtable();
   
   /**
    * Create the result history object
@@ -122,6 +126,33 @@ public class ResultHistoryPanel extends JPanel {
     
     m_Model.addElement(name);
     m_Results.put(name, result);
+  }
+
+  /**
+   * Adds a visualization object to the results list
+   * @param name the name to associate with the visualization object
+   * @param vis the visualization object
+   */
+  public void addVis(String name, VisualizePanel vis) {
+    m_Vis.put(name, vis);
+  }
+
+  /**
+   * Gets the visualization object associated with the currently
+   * selected item in the list.
+   * @return the visualization object or null if there is no
+   * visualization object corresponding to the current selection in
+   * the list
+   */
+  public VisualizePanel getSelectedVis() {
+    VisualizePanel v = null;
+    int index = m_List.getSelectedIndex();
+    if (index != -1) {
+      String name = (String)(m_Model.elementAt(index));
+      v = (VisualizePanel)m_Vis.get(name);
+    }
+    
+    return v;
   }
 
   /**
