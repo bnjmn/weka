@@ -24,9 +24,9 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.*;
 import weka.core.Instances;
-import weka.gui.VisualizePanel;
-import weka.gui.VisualizePanelListener;
-import weka.gui.VisualizePanelEvent;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizePanelListener;
+import weka.gui.visualize.VisualizePanelEvent;
 
 /**
  * Class for displaying a Node structure in Swing. <p>
@@ -55,7 +55,7 @@ import weka.gui.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class TreeVisualizer extends JPanel implements MouseMotionListener,
 			       MouseListener,ActionListener,ItemListener {
