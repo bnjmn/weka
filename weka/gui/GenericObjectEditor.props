@@ -198,7 +198,7 @@ weka.attributeSelection.ASEvaluation = \
 # Lists the Attribute Selection Search methods I want to choose from
 weka.attributeSelection.ASSearch = \
  weka.attributeSelection.BestFirst, \
- weka.attributeSelection.ForwardSelection, \
+ weka.attributeSelection.GreedyStepwise, \
  weka.attributeSelection.RaceSearch, \
  weka.attributeSelection.GeneticSearch, \
  weka.attributeSelection.RandomSearch, \
