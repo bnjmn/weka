@@ -48,7 +48,7 @@ import weka.core.Utils;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class InstanceFilter extends Filter implements OptionHandler {
 
@@ -78,11 +78,8 @@ public class InstanceFilter extends Filter implements OptionHandler {
 
   /** Default constructor */
   public InstanceFilter() {
-    try {
+
       m_Values = new Range("first-last");
-    } catch (Exception ex) {
-      throw new Error("Shouldn't happen unless Range changes incompatibly");
-    }
   }
 
   /**

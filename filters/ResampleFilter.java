@@ -40,7 +40,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  **/
 public class ResampleFilter extends Filter implements OptionHandler {
 
@@ -337,9 +337,11 @@ public class ResampleFilter extends Filter implements OptionHandler {
           classIndices[j] = getInputFormat().numInstances();
         }
       }
+      /*
       for (int i = 0; i < classIndices.length; i++) {
         System.err.println("C[" + i + "] = " + classIndices[i]);
       }
+      */
       int actualClasses = 0;
       for (int i = 0; i < classIndices.length - 1; i++) {
         if (classIndices[i] != classIndices[i + 1]) {

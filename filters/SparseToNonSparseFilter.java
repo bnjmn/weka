@@ -17,7 +17,7 @@ import weka.core.Utils;
  * non-sparse format.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class SparseToNonSparseFilter extends Filter {
 
@@ -68,11 +68,14 @@ public class SparseToNonSparseFilter extends Filter {
       resetQueue();
       m_NewBatch = false;
     }
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new Instance(instance.weight(), instance.toDoubleArray()));
+      inst = new Instance(instance.weight(), instance.toDoubleArray());
+      inst.setDataset(instance.dataset());
     } else {
-      push(instance);
+      inst = instance;
     }
+    push(inst);
     return true;
   }
 
