@@ -32,6 +32,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.UIManager;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
@@ -42,7 +43,7 @@ import javax.swing.JPanel;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Experimenter extends JPanel {
 
@@ -99,7 +100,10 @@ public class Experimenter extends JPanel {
    * @param args ignored.
    */
   public static void main(String [] args) {
-
+    
+    try { // use system look & feel
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {}
     try {
       
       boolean classFirst = false;
@@ -124,20 +128,3 @@ public class Experimenter extends JPanel {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

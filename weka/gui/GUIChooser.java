@@ -39,6 +39,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Image;
 import java.awt.Toolkit;
+import javax.swing.UIManager;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -53,7 +54,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class GUIChooser extends Frame {
 
@@ -263,6 +264,9 @@ public class GUIChooser extends Frame {
    */
   public static void main(String [] args) {
 
+    try { // use system look & feel
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {}
     try {
       GUIChooser c = new GUIChooser();
       c.setVisible(true);
