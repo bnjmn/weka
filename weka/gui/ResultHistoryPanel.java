@@ -27,6 +27,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.InputEvent;
 
 import javax.swing.JPanel;
@@ -49,7 +50,7 @@ import java.awt.Point;
  * single-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -71,9 +72,17 @@ public class ResultHistoryPanel extends JPanel {
   /** A Hashtable mapping names to output text components */
   protected Hashtable m_FramedOutput = new Hashtable();
 
-  /** A hashtable mapping names to visualization objects */
-  protected Hashtable m_Vis = new Hashtable();
-  
+  /** A hashtable mapping names to arbitrary objects */
+  protected Hashtable m_Objs = new Hashtable();
+
+  /** An optional listener that we can inform when the user clicks
+      on the result history */
+  protected MouseListener m_listener=null;
+
+  public void addMouseListener(MouseListener act) {
+    m_listener = act;
+  }
+
   /**
    * Create the result history object
    *
@@ -95,6 +104,10 @@ public class ResultHistoryPanel extends JPanel {
 	  if (index != -1) {
 	    openFrame((String)m_Model.elementAt(index));
 	  }
+	}
+	// Send on an action event if anyone is listening
+	if (m_listener != null) {
+	  m_listener.mouseClicked(e);
 	}
       }
     });
@@ -129,27 +142,27 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
-   * Adds a visualization object to the results list
-   * @param name the name to associate with the visualization object
-   * @param vis the visualization object
+   * Adds an object to the results list
+   * @param name the name to associate with the object
+   * @param o the object
    */
-  public void addVis(String name, VisualizePanel vis) {
-    m_Vis.put(name, vis);
+  public void addObject(String name, Object o) {
+    m_Objs.put(name, o);
   }
 
   /**
-   * Gets the visualization object associated with the currently
+   * Gets the object associated with the currently
    * selected item in the list.
-   * @return the visualization object or null if there is no
-   * visualization object corresponding to the current selection in
+   * @return the object object or null if there is no
+   * object corresponding to the current selection in
    * the list
    */
-  public VisualizePanel getSelectedVis() {
-    VisualizePanel v = null;
+  public Object getSelectedObject() {
+    Object v = null;
     int index = m_List.getSelectedIndex();
     if (index != -1) {
       String name = (String)(m_Model.elementAt(index));
-      v = (VisualizePanel)m_Vis.get(name);
+      v = m_Objs.get(name);
     }
     
     return v;
