@@ -14,7 +14,7 @@ SOURCES = ASEvaluation.java ASSearch.java AttributeEvaluator.java \
 	  RankSearch.java PrincipalComponents.java \
 	  ErrorBasedMeritEvaluator.java HoldOutSubsetEvaluator.java \
 	  RaceSearch.java ClassifierSubsetEval.java \
-	  ChiSquaredAttributeEval.java
+	  ChiSquaredAttributeEval.java AttributeTransformer.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
