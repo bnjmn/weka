@@ -30,13 +30,12 @@ import java.util.StringTokenizer;
 
 /**
  * Class for performing operations on a matrix of floating-point values.
- * Some of the code is adapted from Numerical Recipes in C.
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Matrix implements Cloneable, Serializable {
 
