@@ -238,6 +238,7 @@ weka.clusterers.Clusterer=\
  weka.clusterers.EM, \
  weka.clusterers.SimpleKMeans, \
  weka.clusterers.Cobweb, \
+ weka.clusterers.FarthestFirst, \
  weka.clusterers.XMeans
 
 # Lists the Loaders I want to choose from
