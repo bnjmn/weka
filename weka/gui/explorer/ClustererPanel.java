@@ -78,7 +78,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -135,12 +135,21 @@ public class ClustererPanel extends JPanel {
 
   /** Click to stop a running clusterer */
   protected JButton m_StopBut = new JButton("Stop");
+
+  /** Click to visualize the current clusterer's predictions */
+  protected JButton m_VisualizeBut = new JButton("Visualize");
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
   /** The user-supplied test set (if any) */
   protected Instances m_TestInstances;
+
+  /** The predictions of the most recently excecuted clusterer */
+  protected double [] m_predictions=null;
+  
+  /** The instances that the most recently excecuted clusterer predicted */
+  protected Instances m_predInstances=null;
   
   /** A thread that clustering runs in */
   protected Thread m_RunThread;
@@ -181,6 +190,7 @@ public class ClustererPanel extends JPanel {
       }
     });
 
+    m_VisualizeBut.setToolTipText("Visualize the current classifier");
     m_TrainBut.setToolTipText("Cluster the same set that the clusterer"
 			      + " is trained on");
     m_PercentBut.setToolTipText("Train on a percentage of the data and"
@@ -206,6 +216,7 @@ public class ClustererPanel extends JPanel {
 
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
+    m_VisualizeBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startClusterer();
@@ -214,6 +225,12 @@ public class ClustererPanel extends JPanel {
     m_StopBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	stopClusterer();
+      }
+    });
+    m_VisualizeBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_VisualizeBut.setEnabled(false);
+	visualizeClusterer();
       }
     });
 
@@ -280,6 +297,7 @@ public class ClustererPanel extends JPanel {
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
+    ssButs.add(m_VisualizeBut);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Clusterer output"));
@@ -502,6 +520,8 @@ public class ClustererPanel extends JPanel {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Clustering training data...");
 	      eval.evaluateClusterer(inst);
+	      m_predInstances = inst;
+	      m_predictions = eval.getClusterAssignments();
 	      outBuff.append("=== Evaluation on training set ===\n");
 	      break;
 
@@ -516,12 +536,16 @@ public class ClustererPanel extends JPanel {
 	      clusterer.buildClusterer(train);
 	      m_Log.statusMessage("Evaluating on test split...");
 	      eval.evaluateClusterer(test);
+	      m_predInstances = test;
+	      m_predictions = eval.getClusterAssignments();
 	      outBuff.append("=== Evaluation on test split ===\n");
 	      break;
 		
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
 	      eval.evaluateClusterer(userTest);
+	      m_predInstances = userTest;
+	      m_predictions = eval.getClusterAssignments();
 	      outBuff.append("=== Evaluation on test set ===\n");
 	      break;
 
@@ -545,6 +569,7 @@ public class ClustererPanel extends JPanel {
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
+	    m_VisualizeBut.setEnabled(true);
 	  }
 	}
       };
@@ -566,6 +591,27 @@ public class ClustererPanel extends JPanel {
       
     }
   }
+
+  protected void visualizeClusterer() {
+    final javax.swing.JFrame jf = 
+      new javax.swing.JFrame("Weka Knowledge Explorer: Visualize");
+    jf.setSize(500,400);
+    jf.getContentPane().setLayout(new BorderLayout());
+    final VisualizePanel sp = new VisualizePanel();
+    jf.getContentPane().add(sp, BorderLayout.CENTER);
+    jf.addWindowListener(new java.awt.event.WindowAdapter() {
+      public void windowClosing(java.awt.event.WindowEvent e) {
+	jf.dispose();
+      }
+    });
+    //      jf.pack();
+    jf.setVisible(true);
+    sp.setInstances(m_predInstances);
+    sp.setPredictions(m_predictions);
+    sp.setColourIndex(-1); // do colouring using predictions, not dataset
+    sp.setPredictionsNumeric(false);
+  }
+
   
   /**
    * Tests out the clusterer panel from the command line.
@@ -590,6 +636,7 @@ public class ClustererPanel extends JPanel {
 	}
       });
       jf.pack();
+      jf.setSize(800, 600);
       jf.setVisible(true);
       if (args.length == 1) {
 	System.err.println("Loading instances from " + args[0]);
