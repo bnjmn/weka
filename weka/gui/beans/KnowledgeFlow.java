@@ -94,7 +94,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.6 $
+ * @version  $Revision: 1.7 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -229,7 +229,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    * @since 1.0
    * @see JPanel
    */
@@ -458,11 +458,10 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
        .format(new Date());
      m_logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
      m_logPanel.logMessage("Weka Knowledge Flow");
-     m_logPanel.logMessage("(c) 2002 Mark Hall");
+     m_logPanel.logMessage("(c) 2002-2003 Mark Hall");
      m_logPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
-     m_logPanel.logMessage("email: wekasupport@cs.waikato.ac.nz");
      m_logPanel.logMessage( date);
-     m_logPanel.statusMessage("Welcolme to the Weka Knowledge Flow");
+     m_logPanel.statusMessage("Welcome to the Weka Knowledge Flow");
     
      JPanel p1 = new JPanel();
      p1.setLayout(new BorderLayout());
