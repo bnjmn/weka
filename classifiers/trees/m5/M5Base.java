@@ -38,7 +38,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -434,10 +434,17 @@ public abstract class M5Base extends Classifier
     } 
 
     if (m_generateRules) {
-      text.append("M5 Rules  ");
+      text.append("M5 "
+		  + ((m_useUnpruned == true)
+		     ? "unpruned "
+		     : "pruned ")
+		  + ((m_regressionTree == true) 
+		     ?  "regression "
+		     : "model ")
+		  + "rules ");
 
       if (!m_unsmoothedPredictions) {
-	text.append("(smoothed) ");
+	text.append("\n(using smoothed predictions) ");
       }
 
       text.append(":\n");
