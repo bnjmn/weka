@@ -52,7 +52,7 @@ import weka.core.Queue;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class StripChart 
   extends JPanel 
@@ -409,8 +409,10 @@ public class StripChart
    * @param dataPoint contains y values to plot
    */
   protected void updateChart(double [] dataPoint) {
-    int iwidth = m_plotPanel.getWidth();
-    int iheight = m_plotPanel.getHeight();
+    //    int iwidth = m_plotPanel.getWidth();
+    //    int iheight = m_plotPanel.getHeight();
+    int iwidth = m_osi.getWidth(this);
+    int iheight = m_osi.getHeight(this);
 
     //    System.err.println(dataPoint[0]);
     if (dataPoint.length-1 != m_previousY.length) {
