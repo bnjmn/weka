@@ -41,7 +41,7 @@ import java.beans.EventSetDescriptor;
  * maintains a list of all connections
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BeanConnection implements Serializable {
 
@@ -145,6 +145,40 @@ public class BeanConnection implements Serializable {
 	}
 	gx.drawLine((int)bestSourcePt.getX(), (int)bestSourcePt.getY(),
 		    (int)bestTargetPt.getX(), (int)bestTargetPt.getY());
+
+	// paint an arrow head
+	double angle;
+	try {
+	  double a = 
+	    (double)(bestSourcePt.getY() - 
+		     bestTargetPt.getY()) / 
+	    (double)(bestSourcePt.getX() - bestTargetPt.getX());
+	  angle = Math.atan(a);
+	} catch(Exception ex) {
+	  angle = Math.PI / 2;
+	}
+	//	Point arrowstart = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+	Point arrowstart = new Point(bestTargetPt.x,
+				     bestTargetPt.y);
+	Point arrowoffset = new Point((int)(7 * Math.cos(angle)), 
+				      (int)(7 * Math.sin(angle)));
+	Point arrowend;
+	if (bestSourcePt.getX() >= bestTargetPt.getX()) {
+	  
+	  arrowend = new Point(arrowstart.x + arrowoffset.x, 
+			       arrowstart.y + arrowoffset.y);
+	} else {
+	  arrowend = new Point(arrowstart.x - arrowoffset.x, 
+			       arrowstart.y - arrowoffset.y);
+	}
+	int xs[] = { arrowstart.x,
+		     arrowend.x + (int)(7 * Math.cos(angle + (Math.PI / 2))),
+		     arrowend.x + (int)(7 * Math.cos(angle - (Math.PI / 2)))};
+	int ys[] = { arrowstart.y,
+		     arrowend.y + (int)(7 * Math.sin(angle + (Math.PI / 2))),
+		     arrowend.y + (int)(7 * Math.sin(angle - (Math.PI / 2)))};
+	gx.fillPolygon(xs, ys, 3);
+	// ----
 
 	// paint the connection name
 	int midx = (int)bestSourcePt.getX();
