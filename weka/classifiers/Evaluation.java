@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.17 $
+ * @version  $Revision: 1.18 $
   */
 public class Evaluation implements Summarizable {
 
@@ -242,19 +242,7 @@ public class Evaluation implements Summarizable {
    */
   public Evaluation(Instances data) throws Exception {
     
-    m_NumClasses = data.numClasses();
-    m_NumFolds = 1;
-    m_ClassIsNominal = data.classAttribute().isNominal();
-    if (m_ClassIsNominal) {
-      m_ConfusionMatrix = new double [m_NumClasses][m_NumClasses];
-      m_ClassNames = new String [m_NumClasses];
-      for(int i = 0; i < m_NumClasses; i++) {
-	m_ClassNames[i] = data.classAttribute().value(i);
-      }
-    }
-    m_ClassPriors = new double [m_NumClasses];
-    setPriors(data);
-    m_MarginCounts = new double [k_MarginResolution + 1];
+    this(data, null, null);
   }
 
   /**
@@ -262,7 +250,7 @@ public class Evaluation implements Summarizable {
    * cost matrix as parameter.
    *
    * @param data set of instances, to get some header information
-   * @param costMatrix the cost matrix
+   * @param costMatrix the cost matrix---if null, default costs will be used
    * @param random a random number generator for cost matrix-based
    * resampling---if set to null, no resampling is performed
    * @exception Exception if cost matrix is not compatible with 
@@ -273,20 +261,25 @@ public class Evaluation implements Summarizable {
        throws Exception {
     
     m_NumClasses = data.numClasses();
-    m_ConfusionMatrix = new double [m_NumClasses][m_NumClasses];
-    m_ClassNames = new String [m_NumClasses];
     m_NumFolds = 1;
-    for(int i = 0; i < m_NumClasses; i++) {
-      m_ClassNames[i] = data.classAttribute().value(i);
-    }
     m_ClassIsNominal = data.classAttribute().isNominal();
-    if (!m_ClassIsNominal) {
-      throw new Exception("Class has to be nominal if cost matrix " + 
-			  "given!");
+
+    if (m_ClassIsNominal) {
+      m_ConfusionMatrix = new double [m_NumClasses][m_NumClasses];
+      m_ClassNames = new String [m_NumClasses];
+      for(int i = 0; i < m_NumClasses; i++) {
+	m_ClassNames[i] = data.classAttribute().value(i);
+      }
     }
     m_CostMatrix = costMatrix;
-    if (m_CostMatrix.size() != m_NumClasses) {
-      throw new Exception("Cost matrix not compatible with data!");
+    if (m_CostMatrix != null) {
+      if (!m_ClassIsNominal) {
+	throw new Exception("Class has to be nominal if cost matrix " + 
+			    "given!");
+      }
+      if (m_CostMatrix.size() != m_NumClasses) {
+	throw new Exception("Cost matrix not compatible with data!");
+      }
     }
     m_ClassPriors = new double [m_NumClasses];
     setPriors(data);
@@ -2180,7 +2173,7 @@ public class Evaluation implements Summarizable {
 
       // Update other stats
       m_ConfusionMatrix[actualClass][predictedClass] += 
-	instance.weight();
+	instance.weight() * costFactor;
       if (predictedClass != actualClass) {
 	m_Incorrect += instance.weight();
 	m_IncorrectWithCost += costFactor * instance.weight();
