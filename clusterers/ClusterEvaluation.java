@@ -49,7 +49,7 @@ import  weka.core.*;
  * be performed if the test file is missing.
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.6 $
  */
 public class ClusterEvaluation {
 
@@ -73,7 +73,7 @@ public class ClusterEvaluation {
 
   /** holds the assigments of instances to clusters for a particular testing
       dataset */
-  private int [] m_clusterAssignments;
+  private double [] m_clusterAssignments;
 
   /**
    * set the clusterer
@@ -116,6 +116,15 @@ public class ClusterEvaluation {
   }
 
   /**
+   * Return an array of cluster assignments corresponding to the most
+   * recent set of instances clustered.
+   * @return an array of cluster assignments
+   */
+  public double [] getClusterAssignments() {
+    return m_clusterAssignments;
+  }
+
+  /**
    * Constructor. Sets defaults for each member variable. Default Clusterer
    * is EM.
    */
@@ -145,7 +154,7 @@ public class ClusterEvaluation {
     int numInstFieldWidth = (int)((Math.log(test.numInstances())/
 				   Math.log(10))+1);
     double[] instanceStats = new double[cc];
-    m_clusterAssignments = new int [test.numInstances()];
+    m_clusterAssignments = new double [test.numInstances()];
 
     for (i=0;i<test.numInstances();i++) {
       try {
@@ -159,10 +168,10 @@ public class ClusterEvaluation {
 	  }
 	  Utils.normalize(dist);
 	  cnum = Utils.maxIndex(dist);
-	  m_clusterAssignments[i] = cnum;
+	  m_clusterAssignments[i] = (double)cnum;
 	} else {
 	  cnum = m_Clusterer.clusterInstance(test.instance(i));
-	  m_clusterAssignments[i] = cnum;
+	  m_clusterAssignments[i] = (double)cnum;
 	}
       }
       catch (Exception e) {
@@ -182,14 +191,20 @@ public class ClusterEvaluation {
     }
     if (count > 0) {
       double [] tempStats = new double [count];
+      double [] map = new double [m_clusterAssignments.length];
       count=0;
       for (i=0;i<cc;i++) {
 	if (instanceStats[i] > 0) {
-	  tempStats[count++] = instanceStats[i];
+	  tempStats[count] = instanceStats[i];
+	  map[i] = count;
+	  count++;
 	}
       }
       instanceStats = tempStats;
       cc = instanceStats.length;
+      for (i=0;i<m_clusterAssignments.length;i++) {
+	m_clusterAssignments[i] = map[(int)m_clusterAssignments[i]];
+      }
     }
 
     double sum = Utils.sum(instanceStats);
