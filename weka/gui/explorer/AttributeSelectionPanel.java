@@ -108,7 +108,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -265,6 +265,9 @@ public class AttributeSelectionPanel extends JPanel {
     m_ClassCombo.setPreferredSize(COMBO_SIZE);
     m_ClassCombo.setMaximumSize(COMBO_SIZE);
     m_ClassCombo.setMinimumSize(COMBO_SIZE);
+    m_History.setPreferredSize(COMBO_SIZE);
+    m_History.setMaximumSize(COMBO_SIZE);
+    m_History.setMinimumSize(COMBO_SIZE);
     
     m_ClassCombo.setEnabled(false);
     m_TrainBut.setSelected(true);
