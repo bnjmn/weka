@@ -71,6 +71,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
 import javax.swing.JCheckBox;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /** 
  * This panel allows the user to select and configure a classifier, set the
@@ -81,7 +84,7 @@ import javax.swing.JCheckBox;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -306,15 +309,20 @@ public class ClassifierPanel extends JPanel {
       }
     });
 
-    m_History.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-	if (m_History.getSelectedObject() != null) {
-	  m_VisualizeBut.setEnabled(true);
-	} else {
-	  m_VisualizeBut.setEnabled(false);
+    m_History.getSelectionModel()
+      .addListSelectionListener(new ListSelectionListener() {
+	public void valueChanged(ListSelectionEvent e) {
+	  if (!e.getValueIsAdjusting()) {
+	    ListSelectionModel lm = (ListSelectionModel) e.getSource();
+	    if (m_History.getSelectedObject() != null) {
+	      m_VisualizeBut.setEnabled(true);
+	    } else {
+	      m_VisualizeBut.setEnabled(false);
+	    }
+	  }
 	}
-      }
-    });
+      });
+
     m_MoreOptions.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_MoreOptions.setEnabled(false);
