@@ -1,5 +1,5 @@
 #
-# $Revision: 1.36 $
+# $Revision: 1.37 $
 #
 
 # Java Compiler to use
@@ -85,6 +85,12 @@ doc :
 	weka.classifiers.trees.adtree \
 	weka.classifiers.rules.part \
 	weka.filters \
+	weka.filters.unsupervised \
+	weka.filters.unsupervised.attribute \
+	weka.filters.unsupervised.instance \
+	weka.filters.supervised \
+	weka.filters.supervised.attribute \
+	weka.filters.supervised.instance \
 	weka.estimators \
 	weka.associations \
 	weka.clusterers \
@@ -97,6 +103,7 @@ doc :
 	weka.gui.visualize \
 	weka.gui.boundaryvisualizer \
 	weka.gui.treevisualizer \
+	weka.gui.beans \
 	weka.gui.streams ; \
 	touch doc/index.html; for page in `ls doc/*.html`; \
 	do cat $$page | sed "s/Index<\/A>  <A HREF=\"help.html\"/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a>  <A HREF=\"help.html\"/g" > $$page.temp; mv $$page.temp $$page; \
@@ -128,6 +135,12 @@ install : all
 	weka/classifiers/trees/adtree/*.class \
 	weka.classifiers/rules/part/*.class \
 	weka/filters/*.class \
+	weka/filters/unsupervised/*.class \
+	weka/filters/unsupervised.attribute/*.class \
+	weka/filters/unsupervised.instance/*.class \
+	weka/filters/supervised/*.class \
+	weka/filters/supervised.attribute/*.class \
+	weka/filters/supervised.instance/*.class \
 	weka/estimators/*class \
 	weka/associations/*.class \
 	weka/clusterers/*.class \
@@ -146,6 +159,8 @@ install : all
 	weka/gui/visualize/*.props \
 	weka/gui/treevisualizer/*.class \
 	weka/gui/boundaryvisualizer/*.class \
+	weka/gui/beans/*.class \
+	weka/gui/beans/icons/*.gif \
 	weka/gui/streams/*.class \
 	; \
 	jar cvf $(WEKAHOME)/weka-src.jar \
@@ -167,6 +182,12 @@ install : all
 	weka/classifiers/trees/adtree/*.java \
 	weka/classifiers/rules/part/*.java \
 	weka/filters/*.java \
+	weka/filters/unsupervised/*.java \
+	weka/filters/unsupervised.attribute/*.java \
+	weka/filters/unsupervised.instance/*.java \
+	weka/filters/supervised/*.java \
+	weka/filters/supervised.attribute/*.java \
+	weka/filters/supervised.instance/*.java \
 	weka/estimators/*java \
 	weka/associations/*.java \
 	weka/clusterers/*.java \
@@ -185,6 +206,8 @@ install : all
 	weka/gui/visualize/*.props \
 	weka/gui/treevisualizer/*.java \
 	weka/gui/boundaryvisualizer/*.java \
+	weka/gui/beans/*.java \
+	weka/gui/beans/icons/*.gif \
 	weka/gui/streams/*.java \
 	;\
 	rm manifest.tmp ;\
@@ -224,6 +247,12 @@ install : all
 	weka.classifiers.trees.adtree \
 	weka.classifiers.rules.part \
 	weka.filters \
+	weka.filters.unsupervised \
+	weka.filters.unsupervised.attribute \
+	weka.filters.unsupervised.instance \
+	weka.filters.supervised \
+	weka.filters.supervised.attribute \
+	weka.filters.supervised.instance \
 	weka.estimators \
 	weka.associations \
 	weka.clusterers \
@@ -236,6 +265,7 @@ install : all
 	weka.gui.visualize \
 	weka.gui.boundaryvisualizer \
 	weka.gui.treevisualizer \
+	weka.gui.beans \
 	weka.gui.streams; \
 	for page in `ls $(WEKAHOME)/doc/*.html`; \
 	do cat $$page | sed "s/Index<\/A>  <A HREF=\"help.html\"/Index<\/a>  <a href=\"http:\/\/www.cs.waikato.ac.nz\/ml\/weka\/index.html\">WEKA\'s home<\/a>  <A HREF=\"help.html\"/g" > $$page.temp; mv $$page.temp $$page; \
