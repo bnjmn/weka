@@ -31,7 +31,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler, Sourcable {
@@ -142,6 +142,7 @@ public class DecisionStump extends DistributionClassifier
     text.append(className)
       .append(" {\n"
 	      +"  public static double classify(Object [] i) {\n");
+    text.append("    /* " + m_Instances.attribute(m_AttIndex).name() + " */\n");
     text.append("    if (i[").append(m_AttIndex);
     text.append("] == null) { return ");
     text.append(sourceClass(c, m_Distribution[2])).append(";");
