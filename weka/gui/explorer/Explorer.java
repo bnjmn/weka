@@ -22,6 +22,7 @@ package weka.gui.explorer;
 import weka.core.Utils;
 import weka.gui.LogPanel;
 import weka.gui.WekaTaskMonitor;
+import weka.gui.VisualizePanel;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +56,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Explorer extends JPanel {
 

@@ -34,6 +34,7 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SetInstancesPanel;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.VisualizePanel;
 import weka.filters.Filter;
 
 import java.util.Random;
@@ -96,7 +97,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ClustererPanel extends JPanel {
 

@@ -40,8 +40,9 @@ import weka.gui.CostMatrixEditor;
 import weka.gui.PropertyDialog;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.VisualizePanel;
 
-import weka.gui.explorer.treevisualizer.*;
+import weka.gui.treevisualizer.*;
 
 import java.util.Random;
 import java.util.Date;
@@ -107,7 +108,7 @@ import javax.swing.event.ListSelectionListener;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class ClassifierPanel extends JPanel {
 
