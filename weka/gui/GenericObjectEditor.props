@@ -125,6 +125,7 @@ weka.attributeSelection.ASEvaluation = \
  weka.attributeSelection.GainRatioAttributeEval, \
  weka.attributeSelection.SymmetricalUncertAttributeEval, \
  weka.attributeSelection.OneRAttributeEval, \
+ weka.attributeSelection.ChiSquaredAttributeEval, \
  weka.attributeSelection.PrincipalComponents
 
 # Lists the Attribute Selection Search methods I want to choose from
