@@ -8,7 +8,7 @@ SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
 	NominalToBinaryFilter.java SplitDatasetFilter.java \
 	CopyAttributesFilter.java TimeSeriesDeltaFilter.java \
 	TimeSeriesTranslateFilter.java RandomizeFilter.java \
-	AttributeSelectionFilter.java
+	AttributeSelectionFilter.java NormalizationFilter.java
 
 # Filters To Do:
 # TimeSeriesSmoothFilter.java    -- replace attribute values with values
