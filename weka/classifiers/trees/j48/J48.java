@@ -54,7 +54,7 @@ import weka.classifiers.*;
  * Don't perform subtree raising. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable {
@@ -350,6 +350,30 @@ public class J48 extends DistributionClassifier implements OptionHandler,
 
     return "Number of leaves: " + m_root.numLeaves() + "\n"
          + "Size of the tree: " + m_root.numNodes() + "\n";
+  }
+
+  /**
+   * Returns the size of the tree
+   * @return the size of the tree
+   */
+  public double measureTreeSize() {
+    return m_root.numNodes();
+  }
+
+  /**
+   * Returns the number of leaves
+   * @return the number of leaves
+   */
+  public double measureNumLeaves() {
+    return m_root.numLeaves();
+  }
+
+  /**
+   * Returns the number of rules (same as number of leaves)
+   * @return the number of rules
+   */
+  public double measureNumRules() {
+    return m_root.numLeaves();
   }
   
   /**
