@@ -43,96 +43,19 @@ import java.awt.*;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class ScatterPlotMatrix extends JPanel
+public class ScatterPlotMatrix extends DataVisualizer
   implements DataSourceListener, TrainingSetListener,
 	     TestSetListener, Visible, UserRequestAcceptor, Serializable {
 
-  protected BeanVisual m_visual = 
-    new BeanVisual("ScatterPlotMatrix", 
-		   BeanVisual.ICON_PATH+"ScatterPlotMatrix.gif",
-		   BeanVisual.ICON_PATH+"ScatterPlotMatrix_animated.gif");
-
-  private transient Instances m_visualizeDataSet;
-
-  private boolean m_framePoppedUp = false;
-
   public ScatterPlotMatrix() {
+    m_visual = 
+      new BeanVisual("ScatterPlotMatrix", 
+		     BeanVisual.ICON_PATH+"ScatterPlotMatrix.gif",
+		     BeanVisual.ICON_PATH+"ScatterPlotMatrix_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
-  }
-
-  /**
-   * Accept a training set
-   *
-   * @param e a <code>TrainingSetEvent</code> value
-   */
-  public void acceptTrainingSet(TrainingSetEvent e) {
-    Instances trainingSet = e.getTrainingSet();
-    DataSetEvent dse = new DataSetEvent(this, trainingSet);
-    acceptDataSet(dse);
-  }
-
-  /**
-   * Accept a test set
-   *
-   * @param e a <code>TestSetEvent</code> value
-   */
-  public void acceptTestSet(TestSetEvent e) {
-    Instances testSet = e.getTestSet();
-    DataSetEvent dse = new DataSetEvent(this, testSet);
-    acceptDataSet(dse);
-  }
-
-  /**
-   * Accept a data set
-   *
-   * @param e a <code>DataSetEvent</code> value
-   */
-  public synchronized void acceptDataSet(DataSetEvent e) {
-    m_visualizeDataSet = new Instances(e.getDataSet());
-    if (m_visualizeDataSet.classIndex() <= 0) {
-      m_visualizeDataSet.setClassIndex(m_visualizeDataSet.numAttributes()-1);
-    }
-  }
-
-  /**
-   * Set the visual appearance of this bean
-   *
-   * @param newVisual a <code>BeanVisual</code> value
-   */
-  public void setVisual(BeanVisual newVisual) {
-    m_visual = newVisual;
-  }
-
-  /**
-   * Return the visual appearance of this bean
-   */
-  public BeanVisual getVisual() {
-    return m_visual;
-  }
-
-  /**
-   * Use the default appearance for this bean
-   */
-  public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
-		       BeanVisual.ICON_PATH+"DefaultDataVisualizer_animated.gif");
-  }
-
-  /**
-   * Return an enumeration of actions that the user can ask this bean to
-   * perform
-   *
-   * @return an <code>Enumeration</code> value
-   */
-  public Enumeration enumerateRequests() {
-    Vector newVector = new Vector(0);
-    if (m_visualizeDataSet != null && !m_framePoppedUp) {
-      newVector.addElement("Show plot");
-    }
-    return newVector.elements();
   }
 
   /**
@@ -149,15 +72,7 @@ public class ScatterPlotMatrix extends JPanel
 	  m_framePoppedUp = true;
 	  final MatrixPanel vis = new MatrixPanel();
 	  vis.setInstances(m_visualizeDataSet);
-	  /*	  PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-	  pd1.setPlotName(m_visualizeDataSet.relationName());
-	  try {
-	    vis.setMasterPlot(pd1);
-	  } catch (Exception ex) {
-	    System.err.println("Problem setting up "
-			       +"visualization (DataVisualizer)");
-	    ex.printStackTrace();
-	    } */
+
 	  final javax.swing.JFrame jf = 
 	    new javax.swing.JFrame("Visualize");
 	  jf.setSize(800,600);
