@@ -25,19 +25,30 @@ import weka.core.*;
  * Abstract attribute transformer. Transforms the dataset.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AttributeTransformer extends AttributeEvaluator {
     // ===============
     // Public methods.
     // ===============
 
-    /**
-     * Returns the transformed data
-     * @return A set of instances representing the transformed data
-     * @exception Exception if the attribute could not be evaluated
-     */
-  public abstract Instances getTransformedData() throws Exception;
+  /**
+   * Returns just the header for the transformed data (ie. an empty
+   * set of instances. This is so that AttributeSelection can
+   * determine the structure of the transformed data without actually
+   * having to get all the transformed data through getTransformedData().
+   * @return the header of the transformed data.
+   * @exception Exception if the header of the transformed data can't
+   * be determined.
+   */
+  public abstract Instances transformedHeader() throws Exception;
+
+  /**
+   * Returns the transformed data
+   * @return A set of instances representing the transformed data
+   * @exception Exception if the attribute could not be evaluated
+   */
+  public abstract Instances transformedData() throws Exception;
 
   /**
    * Transforms an instance in the format of the original data to the
