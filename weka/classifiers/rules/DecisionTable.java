@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
 import weka.classifiers.lazy.IB1;
@@ -58,10 +57,9 @@ import weka.filters.unsupervised.attribute.Remove;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
  */
-public class DecisionTable 
-  extends DistributionClassifier 
+public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
 	     AdditionalMeasureProducer {
   

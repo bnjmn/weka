@@ -24,7 +24,6 @@ package weka.classifiers.misc;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -45,9 +44,9 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */ 
-public class HyperPipes extends DistributionClassifier {
+public class HyperPipes extends Classifier {
 
   /** The index of the class attribute */
   protected int m_ClassIndex;

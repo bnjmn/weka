@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.rules.ZeroR;
@@ -55,9 +54,9 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public class AttributeSelectedClassifier extends DistributionClassifier 
+public class AttributeSelectedClassifier extends Classifier 
 implements OptionHandler, AdditionalMeasureProducer {
 
   /** The classifier */
@@ -417,27 +416,7 @@ implements OptionHandler, AdditionalMeasureProducer {
       newInstance = m_AttributeSelection.reduceDimensionality(instance);
     }
 
-    if (m_Classifier instanceof DistributionClassifier) {
-      return ((DistributionClassifier)m_Classifier)
-	.distributionForInstance(newInstance);
-    }
-
-    double pred = m_Classifier.classifyInstance(newInstance);
-    double [] result = new double[m_numClasses];
-    if (Instance.isMissingValue(pred)) {
-      return result;
-    }
-    switch (instance.classAttribute().type()) {
-    case Attribute.NOMINAL:
-      result[(int) pred] = 1.0;
-      break;
-    case Attribute.NUMERIC:
-      result[0] = pred;
-      break;
-    default:
-      throw new Exception("Unknown class type");
-    }
-    return result;
+    return m_Classifier.distributionForInstance(newInstance);
   }
 
   /**

@@ -44,7 +44,6 @@ import weka.core.*;
  * <ul>
  *    <li> Classifier abilities <ul>
  *         <li> Possible command line options to the classifier
- *         <li> Whether the classifier is a distributionClassifier
  *         <li> Whether the classifier can predict nominal and/or predict 
  *              numeric class attributes. Warnings will be displayed if 
  *              performance is worse than ZeroR
@@ -89,7 +88,7 @@ import weka.core.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class CheckClassifier implements OptionHandler {
 
@@ -210,7 +209,6 @@ public class CheckClassifier implements OptionHandler {
     // Start tests
     canTakeOptions();
     boolean updateableClassifier = updateableClassifier();
-    boolean distributionClassifier = distributionClassifier();
     boolean weightedInstancesHandler = weightedInstancesHandler();
     testsPerClassType(false, updateableClassifier, weightedInstancesHandler);
     testsPerClassType(true, updateableClassifier, weightedInstancesHandler);
@@ -351,22 +349,6 @@ public class CheckClassifier implements OptionHandler {
 	}
 	System.out.println("\n");
       }
-      return true;
-    }
-    System.out.println("no");
-    return false;
-  }
-  
-  /**
-   * Checks whether the scheme is a distribution classifier.
-   *
-   * @return true if the classifier produces distributions
-   */
-  protected boolean distributionClassifier() {
-
-    System.out.print("distribution classifier...");
-    if (m_Classifier instanceof DistributionClassifier) {
-      System.out.println("yes");
       return true;
     }
     System.out.println("no");
@@ -884,21 +866,10 @@ public class CheckClassifier implements OptionHandler {
 	Instance classMissingInst = (Instance)testInst.copy();
         classMissingInst.setDataset(test);
 	classMissingInst.setClassMissing();
-	if (classifiers[0] instanceof DistributionClassifier) {
-	  double [] dist0 = ((DistributionClassifier)classifiers[0]).
-	    distributionForInstance(testInst);
-	  double [] dist1 = ((DistributionClassifier)classifiers[1]).
-	    distributionForInstance(classMissingInst);
-	  for (int j = 0; j < dist0.length; j++) {
-	    if (dist0[j] != dist1[j]) {
-	      throw new Exception("Prediction different for instance " 
-				  + (i + 1));
-	    }
-	  }
-	} else {
-	  double pred0 = classifiers[0].classifyInstance(testInst);
-	  double pred1 = classifiers[1].classifyInstance(classMissingInst);
-	  if (pred0 != pred1) {
+	double [] dist0 = classifiers[0].distributionForInstance(testInst);
+	double [] dist1 = classifiers[1].distributionForInstance(classMissingInst);
+	for (int j = 0; j < dist0.length; j++) {
+	  if (dist0[j] != dist1[j]) {
 	    throw new Exception("Prediction different for instance " 
 				+ (i + 1));
 	  }

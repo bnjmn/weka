@@ -49,10 +49,10 @@ import weka.classifiers.*;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class AODE extends DistributionClassifier
-                  implements OptionHandler, WeightedInstancesHandler {
+public class AODE extends Classifier 
+  implements OptionHandler, WeightedInstancesHandler {
     
   /**
    * 3D array (m_NumClasses * m_TotalAttValues * m_TotalAttValues)

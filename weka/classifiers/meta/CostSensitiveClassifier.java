@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import java.io.BufferedReader;
@@ -50,14 +49,12 @@ import weka.filters.Filter;
  * can be used to introduce cost-sensitivity: reweighting training instances 
  * according to the total cost assigned to each class; or predicting the class
  * with minimum expected misclassification cost (rather than the most likely 
- * class). The minimum expected cost approach requires that the base classifier
- * be a DistributionClassifier. <p>
+ * class). <p>
  *
  * Valid options are:<p>
  *
  * -M <br>
- * Minimize expected misclassification cost. The base classifier must 
- * produce probability estimates i.e. a DistributionClassifier).
+ * Minimize expected misclassification cost. 
  * (default is to reweight training instances according to costs per class)<p>
  *
  * -W classname <br>
@@ -79,7 +76,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler, Drawable {
@@ -129,9 +126,7 @@ public class CostSensitiveClassifier extends Classifier
     Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
-	      "\tMinimize expected misclassification cost. The\n"
-	      +"\tbase classifier must produce probability estimates\n"
-	      +"\t(i.e. a DistributionClassifier). Default is to\n"
+	      "\tMinimize expected misclassification cost. Default is to\n"
 	      +"\treweight training instances according to costs per class",
 	      "M", 0, "-M"));
     newVector.addElement(new Option(
@@ -159,8 +154,7 @@ public class CostSensitiveClassifier extends Classifier
    * Parses a given list of options. Valid options are:<p>
    *
    * -M <br>
-   * Minimize expected misclassification cost. The base classifier must 
-   * produce probability estimates i.e. a DistributionClassifier).
+   * Minimize expected misclassification cost.
    * (default is to reweight training instances according to costs per class)<p>
    *
    * -W classname <br>
@@ -283,10 +277,8 @@ public class CostSensitiveClassifier extends Classifier
       + "Two methods can be used to introduce cost-sensitivity: reweighting "
       + "training instances according to the total cost assigned to each "
       + "class; or predicting the class with minimum expected "
-      + "misclassification cost (rather than the most likely class). The "
-      + "minimum expected cost approach requires that the base classifier be "
-      + "a DistributionClassifier (and is optimal if given accurate "
-      + "probabilities by it's base classifier). Performance can often be "
+      + "misclassification cost (rather than the most likely class). "
+      + "Performance can often be "
       + "improved by using a Bagged classifier to improve the probability "
       + "estimates of the base classifier.";
   }
@@ -404,8 +396,7 @@ public class CostSensitiveClassifier extends Classifier
    */
   public String classifierTipText() {
     return "Sets the Classifier used as the basis for "
-      + "the cost-sensitive classification. This must be a "
-      + "DistributionClassifier if using the minimum expected cost criteria.";
+      + "the cost-sensitive classification.";
   }
 
   /**
@@ -516,11 +507,6 @@ public class CostSensitiveClassifier extends Classifier
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }
-    if (m_MinimizeExpectedCost 
-	&& !(m_Classifier instanceof DistributionClassifier)) {
-      throw new Exception("Classifier must be a DistributionClassifier to use"
-			  + " minimum expected cost method");
-    }
     if (!data.classAttribute().isNominal()) {
       throw new UnsupportedClassTypeException("Class attribute must be nominal!");
     }
@@ -550,20 +536,20 @@ public class CostSensitiveClassifier extends Classifier
   }
 
   /**
-   * Classifies a given instance by choosing the class with the minimum
-   * expected misclassification cost.
+   * Returns class probabilities. When minimum expected cost approach is chosen,
+   * returns probability one for class with the minimum expected misclassification
+   * cost. Otherwise it returns the probability distribution returned by
+   * the base classifier.
    *
    * @param instance the instance to be classified
    * @exception Exception if instance could not be classified
-   * successfully
-   */
-  public double classifyInstance(Instance instance) throws Exception {
+   * successfully */
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
     if (!m_MinimizeExpectedCost) {
-      return m_Classifier.classifyInstance(instance);
+      return m_Classifier.distributionForInstance(instance);
     }
-    double [] pred = ((DistributionClassifier) m_Classifier)
-      .distributionForInstance(instance);
+    double [] pred = m_Classifier.distributionForInstance(instance);
     double [] costs = m_CostMatrix.expectedCosts(pred);
     /*
     for (int i = 0; i < pred.length; i++) {
@@ -575,8 +561,17 @@ public class CostSensitiveClassifier extends Classifier
     }
     System.out.println("\n");
     */
-    
-    return Utils.minIndex(costs);
+
+    // This is probably not ideal
+    int classIndex = Utils.minIndex(costs);
+    for (int i = 0; i  < pred.length; i++) {
+      if (i == classIndex) {
+	pred[i] = 1.0;
+      } else {
+	pred[i] = 0.0;
+      }
+    }
+    return pred; 
   }
 
   /**

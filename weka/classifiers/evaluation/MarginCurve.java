@@ -28,7 +28,6 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.classifiers.DistributionClassifier;
 
 /**
  * Generates points illustrating the prediction margin. The margin is defined
@@ -38,7 +37,7 @@ import weka.classifiers.DistributionClassifier;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class MarginCurve {
 

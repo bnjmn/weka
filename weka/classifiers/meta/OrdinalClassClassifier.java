@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import java.io.Serializable;
 import weka.core.*;
@@ -50,10 +49,9 @@ import java.util.Vector;
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision 1.0 $
- * @see DistributionClassifier
  * @see OptionHandler
  */
-public class OrdinalClassClassifier extends DistributionClassifier 
+public class OrdinalClassClassifier extends Classifier 
 implements OptionHandler {
 
   /** The classifiers. (One for each class.) */
@@ -63,7 +61,7 @@ implements OptionHandler {
   private MakeIndicator[] m_ClassFilters;
 
   /** The class name of the base classifier. */
-  private DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
+  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** Internal copy of the class attribute for output purposes */
   private Attribute m_ClassAttribute;
@@ -137,8 +135,7 @@ implements OptionHandler {
   public double [] distributionForInstance(Instance inst) throws Exception {
     
     if (m_Classifiers.length == 1) {
-      return ((DistributionClassifier)m_Classifiers[0])
-        .distributionForInstance(inst);
+      m_Classifiers[0].distributionForInstance(inst);
     }
 
     double [] probs = new double[inst.numClasses()];
@@ -148,8 +145,8 @@ implements OptionHandler {
       m_ClassFilters[i].input(inst);
       m_ClassFilters[i].batchFinished();
       
-      distributions[i] = ((DistributionClassifier)m_Classifiers[i])
-	.distributionForInstance(m_ClassFilters[i].output());
+      distributions[i] = m_Classifiers[i].
+	distributionForInstance(m_ClassFilters[i].output());
       
     }
 
@@ -223,8 +220,7 @@ implements OptionHandler {
       throw new Exception("A classifier must be specified with"
 			  + " the -W option.");
     }
-    setDistributionClassifier((DistributionClassifier)
-                              Classifier.forName(classifierName,
+    setClassifier(Classifier.forName(classifierName,
                                                  Utils.partitionOptions(options)));
   }
 
@@ -243,9 +239,9 @@ implements OptionHandler {
     String [] options = new String [classifierOptions.length + 3];
     int current = 0;
 
-    if (getDistributionClassifier() != null) {
+    if (getClassifier() != null) {
       options[current++] = "-W";
-      options[current++] = getDistributionClassifier().getClass().getName();
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
 
@@ -262,8 +258,8 @@ implements OptionHandler {
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String distributionClassifierTipText() {
-    return "Sets the DistributionClassifier used as the basis for "
+  public String classifierTipText() {
+    return "Sets the Classifier used as the basis for "
       + "the multi-class classifier.";
   }
 
@@ -272,7 +268,7 @@ implements OptionHandler {
    *
    * @param newClassifier the Classifier to use.
    */
-  public void setDistributionClassifier(DistributionClassifier newClassifier) {
+  public void setClassifier(Classifier newClassifier) {
 
     m_Classifier = newClassifier;
   }
@@ -282,7 +278,7 @@ implements OptionHandler {
    *
    * @return the classifier used as the classifier
    */
-  public DistributionClassifier getDistributionClassifier() {
+  public Classifier getClassifier() {
 
     return m_Classifier;
   }
@@ -322,7 +318,7 @@ implements OptionHandler {
    */
   public static void main(String [] argv) {
 
-    DistributionClassifier scheme;
+    Classifier scheme;
 
     try {
       scheme = new OrdinalClassClassifier();

@@ -51,10 +51,11 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 
-public class ConjunctiveRule extends DistributionClassifier implements OptionHandler, WeightedInstancesHandler{
+public class ConjunctiveRule extends Classifier 
+  implements OptionHandler, WeightedInstancesHandler{
     
   /** The number of folds to split data into Grow and Prune for REP*/
   private int m_Folds = 3;

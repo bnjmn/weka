@@ -37,7 +37,6 @@ import java.util.Vector;
 
 import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.gui.visualize.ClassPanel;
 
 /**
@@ -63,7 +62,7 @@ import weka.gui.visualize.ClassPanel;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  * @see JPanel 
  */
@@ -215,7 +214,7 @@ public class BoundaryVisualizer extends JPanel {
   private Instances m_trainingInstances;
 
   // the classifier to use
-  private DistributionClassifier m_classifier;
+  private Classifier m_classifier;
 
   // plot area dimensions
   protected int m_plotAreaWidth = 512;
@@ -494,10 +493,8 @@ public class BoundaryVisualizer extends JPanel {
    * @exception Exception if an error occurs
    */
   public void setClassifier(Classifier newClassifier) throws Exception {
-    if (!(newClassifier instanceof DistributionClassifier)) {
-      throw new Exception("Classifier must be a distribution classifier!");
-    }
-    m_classifier = (DistributionClassifier)newClassifier;
+
+    m_classifier = newClassifier;
   }
 
   private void computeBounds() {

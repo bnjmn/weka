@@ -23,7 +23,6 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import weka.core.Instance;
@@ -44,7 +43,7 @@ import java.awt.*;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -113,29 +112,17 @@ public class IncrementalClassifierEvaluator
       } else {
 	Instance inst = ce.getCurrentInstance();
 	//	if (inst.attribute(inst.classIndex()).isNominal()) {
-	double [] dist = null;
+	double [] dist = ce.getClassifier().distributionForInstance(inst);
 	double pred = 0;
-	if (ce.getClassifier() instanceof DistributionClassifier) {
-	  dist = ((DistributionClassifier)ce.getClassifier())
-	    .distributionForInstance(inst);
-	}
-	if (dist == null) {
-	  if (!inst.isMissing(inst.classIndex())) {
-	    m_eval.evaluateModelOnce(ce.getClassifier(), inst);
-	  } else {
-	    pred = ce.getClassifier().classifyInstance(inst);
-	  }
+	if (!inst.isMissing(inst.classIndex())) {
+	  m_eval.evaluateModelOnce(dist, inst);
 	} else {
-	  if (!inst.isMissing(inst.classIndex())) {
-	      m_eval.evaluateModelOnce(dist, inst);
-	  } else {
-	    pred = ce.getClassifier().classifyInstance(inst);
-	  }
+	  pred = ce.getClassifier().classifyInstance(inst);
 	}
 	if (inst.classIndex() >= 0) {
 	  // need to check that the class is not missing
 	  if (inst.attribute(inst.classIndex()).isNominal()) {
-	    if (dist != null && !inst.isMissing(inst.classIndex())) {
+	    if (!inst.isMissing(inst.classIndex())) {
 	      if (m_dataPoint.length < 2) {
 		m_dataPoint = new double[2];
 		m_dataLegend.addElement("RMSE (prob)");
@@ -152,15 +139,12 @@ public class IncrementalClassifierEvaluator
 	    double primaryMeasure = 0;
 	    if (!inst.isMissing(inst.classIndex())) {
 	      primaryMeasure = 1.0 - m_eval.errorRate();
-	    } else if (dist != null) {
+	    } else {
 	      // record confidence as the primary measure
 	      // (another possibility would be entropy of
 	      // the distribution, or perhaps average
 	      // confidence)
 	      primaryMeasure = dist[Utils.maxIndex(dist)];
-	    } else {
-	      // need something for non distribution classifiers when the
-	      // actual class is missing!
 	    }
 	    //	    double [] dataPoint = new double[1];
 	    m_dataPoint[0] = primaryMeasure;
@@ -175,7 +159,7 @@ public class IncrementalClassifierEvaluator
 	    m_reset = false;
 	  } else {
 	    // numeric class
-	    if (dist != null && !inst.isMissing(inst.classIndex())) {
+	    if (!inst.isMissing(inst.classIndex())) {
 	      double update;
 	      if (!inst.isMissing(inst.classIndex())) {
 		update = m_eval.rootRelativeSquaredError();

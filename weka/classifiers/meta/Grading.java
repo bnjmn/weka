@@ -27,7 +27,6 @@ import java.util.*;
 import weka.core.*;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 
 /**
@@ -57,7 +56,7 @@ import weka.classifiers.rules.ZeroR;
  * base classifiers. (required) <p>
  *
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class Grading extends Classifier implements OptionHandler {
 
@@ -391,13 +390,14 @@ public class Grading extends Classifier implements OptionHandler {
   }
 
   /**
-   * Classifies a given instance using the stacked classifier.
+   * Returns class probabilities for a given instance using the stacked classifier.
+   * One class will always get all the probability mass (i.e. probabilit one).
    *
    * @param instance the instance to be classified
    * @exception Exception if instance could not be classified
    * successfully
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
     double maxConf, maxPreds;
     int numPreds=0;
@@ -407,7 +407,7 @@ public class Grading extends Classifier implements OptionHandler {
     double [] preds;
 
     for (int i=0; i<numClassifiers; i++) {
-      preds=((DistributionClassifier)m_MetaClassifiers[i]).distributionForInstance(metaInstance(instance,i));
+      preds = m_MetaClassifiers[i].distributionForInstance(metaInstance(instance,i));
       if (m_MetaClassifiers[i].classifyInstance(metaInstance(instance,i))==1)
         predConfs[i]=preds[1];
       else
@@ -446,8 +446,9 @@ public class Grading extends Classifier implements OptionHandler {
       }
     }
 
+    int predictedIndex;
     if (numPreds==1)
-      return Utils.maxIndex(preds);
+      predictedIndex = Utils.maxIndex(preds);
     else
     {
       // System.out.print("?");
@@ -457,8 +458,11 @@ public class Grading extends Classifier implements OptionHandler {
       //   System.out.print(preds[i]);
       // }
       // System.out.println(MaxClass);
-      return MaxClass;
+      predictedIndex = MaxClass;
     }
+    double[] classProbs = new double[instance.numClasses()];
+    classProbs[predictedIndex] = 1.0;
+    return classProbs;
   }
 
   /**
@@ -582,26 +586,20 @@ public class Grading extends Classifier implements OptionHandler {
 
     if (m_BaseFormat.classAttribute().isNumeric()) {
       throw new Exception("Class Attribute must not be numeric!");
-      } else {
-        if (classifier instanceof DistributionClassifier) {
-          double[] dist = ((DistributionClassifier)classifier).
-            distributionForInstance(instance);
-
-          maxIdx=0;
-          maxVal=dist[0];
-          for (int j = 1; j < dist.length; j++) {
-            if (dist[j]>maxVal) {
-              maxVal=dist[j];
-              maxIdx=j;
-            }
-          }
-          predConf= (instance.classValue()==maxIdx) ? 1:0;
-        } else {
-          predConf= (classifier.classifyInstance(instance)==
-            instance.classValue()) ? 1:0;
-        }
+    } else {
+      double[] dist = classifier.distributionForInstance(instance);
+      
+      maxIdx=0;
+      maxVal=dist[0];
+      for (int j = 1; j < dist.length; j++) {
+	if (dist[j]>maxVal) {
+	  maxVal=dist[j];
+	  maxIdx=j;
+	}
       }
-
+      predConf= (instance.classValue()==maxIdx) ? 1:0;
+    }
+    
     values[i]=predConf;
     metaInstance = new Instance(1, values);
     metaInstance.setDataset(m_MetaFormat);

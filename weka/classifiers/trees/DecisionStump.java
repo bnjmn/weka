@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
 import java.io.*;
@@ -39,9 +38,9 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
-public class DecisionStump extends DistributionClassifier 
+public class DecisionStump extends Classifier 
   implements WeightedInstancesHandler, Sourcable {
 
   /** The attribute used for classification. */

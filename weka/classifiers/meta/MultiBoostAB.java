@@ -40,7 +40,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
 import java.io.*;
@@ -92,9 +91,9 @@ import weka.core.*;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class MultiBoostAB extends DistributionClassifier
+public class MultiBoostAB extends Classifier
   implements OptionHandler, WeightedInstancesHandler, Sourcable {
 
   /** Max num iterations tried to find classifier with non-zero error. */
@@ -766,19 +765,13 @@ public class MultiBoostAB extends DistributionClassifier
     double [] sums = new double [instance.numClasses()];
     
     if (m_NumIterations == 1) {
-      if (m_Classifiers[0] instanceof DistributionClassifier) {
-	return ((DistributionClassifier)m_Classifiers[0]).
-	  distributionForInstance(instance);
-      } else {
-	sums[(int)m_Classifiers[0].classifyInstance(instance)] ++;
-      }
+      return m_Classifiers[0].distributionForInstance(instance);
     } else {
       for (int i = 0; i < m_NumIterations; i++) {
-	sums[(int)m_Classifiers[i].classifyInstance(instance)] +=m_Betas[i];
+	sums[(int)m_Classifiers[i].classifyInstance(instance)] += m_Betas[i];
       }
     }
-    Utils.normalize(sums);
-    return sums;
+    return Utils.logs2probs(sums);
   }
   
   /**

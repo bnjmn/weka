@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
 import java.io.*;
@@ -53,12 +52,12 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public class MultiScheme extends DistributionClassifier implements OptionHandler {
+public class MultiScheme extends Classifier implements OptionHandler {
 
   /** The classifier that had the best performance on training data. */
-  protected DistributionClassifier m_Classifier;
+  protected Classifier m_Classifier;
  
   /** The list of classifiers */
   protected Classifier [] m_Classifiers = {
@@ -382,12 +381,7 @@ public class MultiScheme extends DistributionClassifier implements OptionHandler
     if (m_NumXValFolds > 1) {
       bestClassifier.buildClassifier(newData);
     }
-    if (!(bestClassifier instanceof DistributionClassifier)) {
-      m_Classifier = new DistributionMetaClassifier();
-      ((DistributionMetaClassifier)m_Classifier).setClassifier(bestClassifier);
-    } else {
-      m_Classifier = (DistributionClassifier)bestClassifier;
-    }
+    m_Classifier = bestClassifier;
   }
 
   /**

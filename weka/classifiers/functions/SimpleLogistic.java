@@ -52,12 +52,11 @@ import java.util.*;
  * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
-public class SimpleLogistic extends DistributionClassifier implements OptionHandler, 
-								      AdditionalMeasureProducer, 
-								      WeightedInstancesHandler {
+public class SimpleLogistic extends Classifier 
+  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
 
   //format of serial: 1**date## (** = algorithm id, ##= version)
   //static final long serialVersionUID = 1110506200300L;

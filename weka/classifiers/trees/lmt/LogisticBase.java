@@ -33,10 +33,10 @@ import weka.filters.Filter;
  * and standalone logistic regression (weka.classifiers.functions.SimpleLogistic).
  *
  * @author Niels Landwehr
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
-public class LogisticBase extends DistributionClassifier implements WeightedInstancesHandler{
+public class LogisticBase extends Classifier implements WeightedInstancesHandler{
 
     /** Header-only version of the numeric version of the training data*/
     protected Instances m_numericDataHeader;

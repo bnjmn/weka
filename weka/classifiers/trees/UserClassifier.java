@@ -25,7 +25,6 @@ package weka.classifiers.trees;
 import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.classifiers.lazy.IB1;
@@ -63,9 +62,9 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
-public class UserClassifier extends DistributionClassifier implements Drawable,
+public class UserClassifier extends Classifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
   
 

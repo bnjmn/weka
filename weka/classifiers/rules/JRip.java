@@ -43,8 +43,8 @@ import weka.core.UnsupportedClassTypeException;
 import weka.filters.supervised.attribute.ClassOrder;
 import weka.filters.Filter;
 
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
 
 /**
  * This class implements a propositional rule learner, Repeated Incremental
@@ -134,9 +134,9 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class JRip extends DistributionClassifier 
+public class JRip extends Classifier 
   implements OptionHandler, 
 	     AdditionalMeasureProducer, 
 	     WeightedInstancesHandler{    
@@ -150,8 +150,8 @@ public class JRip extends DistributionClassifier
   /** The ruleset */
   private FastVector m_Ruleset;
   
-    /** The predicted class distribution */
-    private FastVector m_Distributions;
+  /** The predicted class distribution */
+  private FastVector m_Distributions;
   
   /** Runs of optimizations */
   private int m_Optimizations = 2;

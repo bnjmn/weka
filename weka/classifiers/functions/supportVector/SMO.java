@@ -23,7 +23,6 @@
 package weka.classifiers.functions.supportVector;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.Logistic;
 import weka.filters.unsupervised.attribute.NominalToBinary;
@@ -114,8 +113,8 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.1 $ */
-public class SMO extends DistributionClassifier implements OptionHandler, 
+ * @version $Revision: 1.2 $ */
+public class SMO extends Classifier implements OptionHandler, 
   WeightedInstancesHandler {
 
   /**

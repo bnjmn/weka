@@ -25,7 +25,7 @@ package weka.classifiers.evaluation;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Classifier;
 import java.util.Random;
 
 /**
@@ -33,7 +33,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class EvaluationUtils {
 
@@ -50,12 +50,12 @@ public class EvaluationUtils {
    * Generate a bunch of predictions ready for processing, by performing a
    * cross-validation on the supplied dataset.
    *
-   * @param classifier the DistributionClassifier to evaluate
+   * @param classifier the Classifier to evaluate
    * @param data the dataset
    * @param numFolds the number of folds in the cross-validation.
    * @exception Exception if an error occurs
    */
-  public FastVector getCVPredictions(DistributionClassifier classifier, 
+  public FastVector getCVPredictions(Classifier classifier, 
                                      Instances data, 
                                      int numFolds) 
     throws Exception {
@@ -81,12 +81,12 @@ public class EvaluationUtils {
    * Generate a bunch of predictions ready for processing, by performing a
    * evaluation on a test set after training on the given training set.
    *
-   * @param classifier the DistributionClassifier to evaluate
+   * @param classifier the Classifier to evaluate
    * @param train the training dataset
    * @param test the test dataset
    * @exception Exception if an error occurs
    */
-  public FastVector getTrainTestPredictions(DistributionClassifier classifier, 
+  public FastVector getTrainTestPredictions(Classifier classifier, 
                                             Instances train, Instances test) 
     throws Exception {
     
@@ -98,11 +98,11 @@ public class EvaluationUtils {
    * Generate a bunch of predictions ready for processing, by performing a
    * evaluation on a test set assuming the classifier is already trained.
    *
-   * @param classifier the pre-trained DistributionClassifier to evaluate
+   * @param classifier the pre-trained Classifier to evaluate
    * @param test the test dataset
    * @exception Exception if an error occurs
    */
-  public FastVector getTestPredictions(DistributionClassifier classifier, 
+  public FastVector getTestPredictions(Classifier classifier, 
                                        Instances test) 
     throws Exception {
     
@@ -120,11 +120,11 @@ public class EvaluationUtils {
    * Generate a single prediction for a test instance given the pre-trained
    * classifier.
    *
-   * @param classifier the pre-trained DistributionClassifier to evaluate
+   * @param classifier the pre-trained Classifier to evaluate
    * @param test the test instance
    * @exception Exception if an error occurs
    */
-  public Prediction getPrediction(DistributionClassifier classifier,
+  public Prediction getPrediction(Classifier classifier,
                                   Instance test)
     throws Exception {
    

@@ -25,6 +25,8 @@ package weka.classifiers.bayes;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.classifiers.Classifier;
 
 /**
  * Class for building and using a multinomial Naive Bayes classifier.
@@ -33,7 +35,7 @@ import weka.core.Utils;
  * Andrew Mccallum, Kamal Nigam (1998)<i>A Comparison of Event Models for Naive Bayes Text Classification </i>
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz) and Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 
 /**
@@ -44,8 +46,8 @@ import weka.core.Utils;
  * where Ci is class i and D is a document
  */
 
-public class NaiveBayesMultinomial extends weka.classifiers.DistributionClassifier 
-    implements weka.core.WeightedInstancesHandler {
+public class NaiveBayesMultinomial extends Classifier 
+  implements WeightedInstancesHandler {
     
     /*
       probability that a word (w) exists in a class (H) (i.e. Pr[w|H])

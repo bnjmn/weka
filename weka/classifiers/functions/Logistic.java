@@ -81,8 +81,8 @@ import weka.filters.unsupervised.attribute.*;
  * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ */
-public class Logistic extends DistributionClassifier 
+ * @version $Revision: 1.29 $ */
+public class Logistic extends Classifier 
     implements OptionHandler, WeightedInstancesHandler {
   
     /** The coefficients (optimized parameters) of the model */

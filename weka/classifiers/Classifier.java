@@ -25,17 +25,19 @@ package weka.classifiers;
 import java.io.Serializable;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Attribute;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
 
 /** 
  * Abstract classifier. All schemes for numeric or nominal prediction in
- * Weka extend this class.
+ * Weka extend this class. Note that a classifier MUST either implement
+ * distributionForInstance() or classifyInstance().
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class Classifier implements Cloneable, Serializable {
  
@@ -52,17 +54,73 @@ public abstract class Classifier implements Cloneable, Serializable {
   public abstract void buildClassifier(Instances data) throws Exception;
 
   /**
-   * Classifies a given instance.
+   * Classifies the given test instance. The instance has to belong to a
+   * dataset when it's being classified. Note that a classifier MUST
+   * implement either this or distributionForInstance().
    *
    * @param instance the instance to be classified
-   * @return index of the predicted class as a double
-   * if the class is nominal, otherwise the predicted value
-   * @exception Exception if instance could not be classified
-   * successfully
+   * @return the predicted most likely class for the instance or 
+   * Instance.missingValue() if no prediction is made
+   * @exception Exception if an error occurred during the prediction
    */
-  public abstract double classifyInstance(Instance instance) throws Exception; 
+  public double classifyInstance(Instance instance) throws Exception {
 
+    double [] dist = distributionForInstance(instance);
+    if (dist == null) {
+      throw new Exception("Null distribution predicted");
+    }
+    switch (instance.classAttribute().type()) {
+    case Attribute.NOMINAL:
+      double max = 0;
+      int maxIndex = 0;
+      
+      for (int i = 0; i < dist.length; i++) {
+	if (dist[i] > max) {
+	  maxIndex = i;
+	  max = dist[i];
+	}
+      }
+      if (max > 0) {
+	return maxIndex;
+      } else {
+	return Instance.missingValue();
+      }
+    case Attribute.NUMERIC:
+      return dist[0];
+    default:
+      return Instance.missingValue();
+    }
+  }
 
+  /**
+   * Predicts the class memberships for a given instance. If
+   * an instance is unclassified, the returned array elements
+   * must be all zero. If the class is numeric, the array
+   * must consist of only one element, which contains the
+   * predicted value. Note that a classifier MUST implement
+   * either this or classifyInstance().
+   *
+   * @param instance the instance to be classified
+   * @return an array containing the estimated membership 
+   * probabilities of the test instance in each class 
+   * or the numeric prediction
+   * @exception Exception if distribution could not be 
+   * computed successfully
+   */
+  public double[] distributionForInstance(Instance instance) throws Exception {
+
+    double[] dist = new double[instance.numClasses()];
+    switch (instance.classAttribute().type()) {
+    case Attribute.NOMINAL:
+      dist[(int)classifyInstance(instance)] = 1.0;
+      return dist;
+    case Attribute.NUMERIC:
+      dist[0] = classifyInstance(instance);
+      return dist;
+    default:
+      return dist;
+    }
+  }    
   
   /**
    * Creates a new instance of a classifier given it's class name and
@@ -110,6 +168,5 @@ public abstract class Classifier implements Cloneable, Serializable {
     }
     return classifiers;
   }
-
 }
 

@@ -52,7 +52,7 @@ import weka.classifiers.*;
  * @version $Revision 1.0 $
  */
 
-public class KStar extends DistributionClassifier
+public class KStar extends Classifier
   implements KStarConstants, OptionHandler, UpdateableClassifier {
 
   /** The training instances used for classification. */

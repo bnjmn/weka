@@ -27,7 +27,6 @@ import java.util.Random;
 
 import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.experiment.Task;
 import weka.experiment.TaskStatusInfo;
 
@@ -37,7 +36,7 @@ import weka.experiment.TaskStatusInfo;
  * in one row of the visualization.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see Task
  */
@@ -57,7 +56,7 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
   private int m_panelWidth;
 
   // the classifier to use
-  private DistributionClassifier m_classifier;
+  private Classifier m_classifier;
 
   // the kernel density estimator
   private DataGenerator m_dataGenerator;
@@ -145,7 +144,7 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
    *
    * @param dc the classifier
    */
-  public void setClassifier(DistributionClassifier dc) {
+  public void setClassifier(Classifier dc) {
     m_classifier = dc;
   }
 

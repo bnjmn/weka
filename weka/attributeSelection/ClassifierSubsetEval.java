@@ -52,7 +52,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -545,21 +545,12 @@ public class ClassifierSubsetEval
     testCopy = delTransform.output();
 
     double pred;
-    if (m_Classifier instanceof DistributionClassifier) {
-      double [] distrib;
-      distrib = ((DistributionClassifier)m_Classifier).
-	distributionForInstance(testCopy);
-      if (m_trainingInstances.classAttribute().isNominal()) {
-	pred = distrib[(int)testCopy.classValue()];
-      } else {
-	pred = distrib[0];
-      }
+    double [] distrib;
+    distrib = m_Classifier.distributionForInstance(testCopy);
+    if (m_trainingInstances.classAttribute().isNominal()) {
+      pred = distrib[(int)testCopy.classValue()];
     } else {
-      pred = m_Classifier.classifyInstance(testCopy);
-      if (m_trainingInstances.classAttribute().isNominal()) {
-	pred = (pred == testCopy.classValue()) ? 1.0 : 0.0;
-      }
-      
+      pred = distrib[0];
     }
 
     if (m_trainingInstances.classAttribute().isNominal()) {

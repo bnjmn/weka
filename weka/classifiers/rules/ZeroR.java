@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
 import java.io.*;
 import java.util.*;
@@ -34,10 +33,9 @@ import weka.core.*;
  * (for a numeric class) or the mode (for a nominal class).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class ZeroR extends DistributionClassifier 
-  implements WeightedInstancesHandler {
+public class ZeroR extends Classifier implements WeightedInstancesHandler {
 
   /** The class value 0R predicts. */
   private double m_ClassValue;

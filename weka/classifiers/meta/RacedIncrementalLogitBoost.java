@@ -62,9 +62,9 @@ import java.io.Serializable;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
-public class RacedIncrementalLogitBoost extends DistributionClassifier
+public class RacedIncrementalLogitBoost extends Classifier
   implements OptionHandler, UpdateableClassifier {
 
   /** The pruning types */

@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import java.util.*;
 import weka.core.*;
@@ -47,9 +46,9 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
 */
-public class ClassificationViaRegression extends DistributionClassifier 
+public class ClassificationViaRegression extends Classifier 
   implements OptionHandler {
 
   /** The classifiers. (One for each class.) */
@@ -240,7 +239,7 @@ public class ClassificationViaRegression extends DistributionClassifier
    */
   public static void main(String [] argv){
 
-    DistributionClassifier scheme;
+    Classifier scheme;
 
     try {
       scheme = new ClassificationViaRegression();

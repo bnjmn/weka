@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.DistributionClassifier;
 import weka.classifiers.rules.ZeroR;
 import java.util.Enumeration;
 import java.util.Random;
@@ -87,9 +86,9 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
  */
-public class ThresholdSelector extends DistributionClassifier 
+public class ThresholdSelector extends Classifier 
   implements OptionHandler {
 
   /* Type of correction applied to threshold range */ 
@@ -125,8 +124,7 @@ public class ThresholdSelector extends DistributionClassifier
   };
 
   /** The generated base classifier */
-  protected DistributionClassifier m_Classifier = 
-    new weka.classifiers.functions.Logistic();
+  protected Classifier m_Classifier = new weka.classifiers.functions.Logistic();
 
   /** The upper threshold used as the basis of correction */
   protected double m_HighThreshold = 1;
@@ -392,9 +390,8 @@ public class ThresholdSelector extends DistributionClassifier
 			  + " the -W option.");
     }
 
-    setDistributionClassifier((DistributionClassifier)Classifier.
-		  forName(classifierName,
-			  Utils.partitionOptions(options)));
+    setClassifier(Classifier.forName(classifierName,
+				     Utils.partitionOptions(options)));
   }
 
   /**
@@ -417,9 +414,9 @@ public class ThresholdSelector extends DistributionClassifier
     options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
     options[current++] = "-S"; options[current++] = "" + getSeed();
 
-    if (getDistributionClassifier() != null) {
+    if (getClassifier() != null) {
       options[current++] = "-W";
-      options[current++] = getDistributionClassifier().getClass().getName();
+      options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "-E"; options[current++] = "" + m_EvalMode;
     options[current++] = "-R"; options[current++] = "" + m_RangeMode;
@@ -574,7 +571,7 @@ public class ThresholdSelector extends DistributionClassifier
   public String globalInfo() {
 
     return "A metaclassifier that selecting a mid-point threshold on the "
-      + "probability output by a DistributionClassifier. The midpoint "
+      + "probability output by a Classifier. The midpoint "
       + "threshold is set so that a given performance measure is optimized. "
       + "Currently this is the F-measure. Performance is measured either on "
       + "the training data, a hold-out set or using cross-validation. In "
@@ -765,28 +762,28 @@ public class ThresholdSelector extends DistributionClassifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String distributionClassifierTipText() {
+  public String classifierTipText() {
 
-    return "Sets the base DistributionClassifier to which the optimization "
+    return "Sets the base Classifier to which the optimization "
       + "will be made.";
   }
 
   /**
-   * Set the DistributionClassifier for which threshold is set. 
+   * Set the Classifier for which threshold is set. 
    *
    * @param newClassifier the Classifier to use.
    */
-  public void setDistributionClassifier(DistributionClassifier newClassifier) {
+  public void setClassifier(Classifier newClassifier) {
 
     m_Classifier = newClassifier;
   }
 
   /**
-   * Get the DistributionClassifier used as the classifier.
+   * Get the Classifier used as the classifier.
    *
    * @return the classifier used as the classifier
    */
-  public DistributionClassifier getDistributionClassifier() {
+  public Classifier getClassifier() {
 
     return m_Classifier;
   }
