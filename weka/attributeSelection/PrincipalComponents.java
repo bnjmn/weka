@@ -27,7 +27,7 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PrincipalComponents extends AttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -374,7 +374,7 @@ public class PrincipalComponents extends AttributeEvaluator
 	m_eigenvalues[i] = 0.0;
       }
     }
-    m_sortedEigens = Utils.sortUnsafe(m_eigenvalues);
+    m_sortedEigens = Utils.sort(m_eigenvalues);
     m_sumOfEigenValues = Utils.sum(m_eigenvalues);
 
     m_transformedFormat = setOutputFormat();
