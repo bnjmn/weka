@@ -62,7 +62,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class StackingC extends Classifier implements OptionHandler {
 
@@ -383,26 +383,28 @@ public class StackingC extends Classifier implements OptionHandler {
     // Build meta classifiers
     m_MetaClassifiers = Classifier.makeCopies(m_MetaClassifier,newData.numClasses());
 
-    m_makeIndicatorFilter = new weka.filters.unsupervised.attribute.MakeIndicator();
-    m_makeIndicatorFilter.setInputFormat(metaData);
-    m_makeIndicatorFilter.setAttributeIndex("" + (metaData.classIndex() + 1));
-    m_makeIndicatorFilter.setNumeric(true);
-
-    m_attrFilter = new weka.filters.unsupervised.attribute.Remove();
-    m_attrFilter.setInputFormat(m_makeIndicatorFilter.getOutputFormat());
-    m_attrFilter.setInvertSelection(true);
     int [] arrIdc = new int[m_BaseClassifiers.length+1];
     arrIdc[m_BaseClassifiers.length]=metaData.numAttributes()-1;
     Instances newInsts;
     for (int i = 0; i<m_MetaClassifiers.length; i++) {
       for (int j = 0; j<m_BaseClassifiers.length; j++)
           arrIdc[j]=newData.numClasses()*j+i;
-      m_attrFilter.setAttributeIndicesArray(arrIdc);
+
+      m_makeIndicatorFilter = new weka.filters.unsupervised.attribute.MakeIndicator();
+      m_makeIndicatorFilter.setAttributeIndex("" + (metaData.classIndex() + 1));
+      m_makeIndicatorFilter.setNumeric(true);
       m_makeIndicatorFilter.setValueIndex(i);
+      m_makeIndicatorFilter.setInputFormat(metaData);
       newInsts=Filter.useFilter(metaData,m_makeIndicatorFilter);
+
+      m_attrFilter = new weka.filters.unsupervised.attribute.Remove();
+      m_attrFilter.setInvertSelection(true);
+      m_attrFilter.setAttributeIndicesArray(arrIdc);
       m_attrFilter.setInputFormat(m_makeIndicatorFilter.getOutputFormat());
       newInsts=Filter.useFilter(newInsts,m_attrFilter);
+
       newInsts.setClassIndex(newInsts.numAttributes()-1);
+
       m_MetaClassifiers[i].buildClassifier(newInsts);
     }
   }
@@ -426,12 +428,16 @@ public class StackingC extends Classifier implements OptionHandler {
       for (int j = 0; j<m_BaseClassifiers.length; j++)
           arrIdc[j]=m_BaseFormat.numClasses()*j+i;
 
-      m_attrFilter.setAttributeIndicesArray(arrIdc);
+      m_makeIndicatorFilter.setAttributeIndex("" + (m_MetaFormat.classIndex() + 1));
+      m_makeIndicatorFilter.setNumeric(true);
       m_makeIndicatorFilter.setValueIndex(i);
-
+      m_makeIndicatorFilter.setInputFormat(m_MetaFormat);
       m_makeIndicatorFilter.input(metaInstance(instance));
       m_makeIndicatorFilter.batchFinished();
       newInst = m_makeIndicatorFilter.output();
+
+      m_attrFilter.setAttributeIndicesArray(arrIdc);
+      m_attrFilter.setInvertSelection(true);
       m_attrFilter.setInputFormat(m_makeIndicatorFilter.getOutputFormat());
       m_attrFilter.input(newInst);
       m_attrFilter.batchFinished();
