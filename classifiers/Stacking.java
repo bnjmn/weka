@@ -46,7 +46,7 @@ import weka.core.*;
  * (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class Stacking extends Classifier implements OptionHandler {
 
@@ -93,16 +93,16 @@ public class Stacking extends Classifier implements OptionHandler {
 	      + "by scheme options\n"
 	      + "\t(may be specified multiple times).\n"
 	      + "\teg: \"weka.classifiers.NaiveBayes -K\"",
-	      "B", 1, "-B"));
+	      "B", 1, "-B <scheme specification>"));
     newVector.addElement(new Option(
 	      "\tFull name of meta learner, followed by options.",
-	      "M", 0, "-M"));
+	      "M", 0, "-M <scheme specification>"));
     newVector.addElement(new Option(
 	      "\tSets the number of cross-validation folds.",
-	      "X", 1, "-X"));
+	      "X", 1, "-X <number of folds>"));
     newVector.addElement(new Option(
 	      "\tSets the random number seed.",
-	      "S", 1, "-S"));
+	      "S", 1, "-S <random number seed>"));
 
     return newVector.elements();
   }
