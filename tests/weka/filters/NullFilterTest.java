@@ -10,30 +10,30 @@ import junit.framework.TestSuite;
 import weka.core.Instances;
 
 /**
- * Tests AllFilter. Run from the command line with:<p>
- * java weka.filters.AllFilterTest
+ * Tests NullFilter. Run from the command line with:<p>
+ * java weka.filters.NullFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class AllFilterTest extends AbstractFilterTest {
+public class NullFilterTest extends AbstractFilterTest {
   
-  public AllFilterTest(String name) { super(name);  }
+  public NullFilterTest(String name) { super(name);  }
 
-  /** Creates a default AllFilter */
+  /** Creates a default NullFilter */
   public Filter getFilter() {
-    return new AllFilter();
+    return new NullFilter();
   }
 
   public void testTypical() {
     Instances result = useFilter();
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
-    assertEquals(m_Instances.numInstances(), result.numInstances());
+    assertEquals(0, result.numInstances());
   }
 
   public static Test suite() {
-    return new TestSuite(AllFilterTest.class);
+    return new TestSuite(NullFilterTest.class);
   }
 
   public static void main(String[] args){

@@ -10,7 +10,7 @@ import junit.framework.TestSuite;
  * java weka.filters.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AllTests extends TestSuite {
 
@@ -28,17 +28,17 @@ public class AllTests extends TestSuite {
     suite.addTest(FirstOrderFilterTest.suite());
     suite.addTest(InstanceFilterTest.suite());
     suite.addTest(MakeIndicatorFilterTest.suite());
+    suite.addTest(MergeTwoValuesFilterTest.suite());
+    suite.addTest(NominalToBinaryFilterTest.suite());
+    suite.addTest(NonSparseToSparseFilterTest.suite());
+    suite.addTest(NormalizationFilterTest.suite());
+    suite.addTest(NullFilterTest.suite());
+    suite.addTest(NumericToBinaryFilterTest.suite());
+    suite.addTest(NumericTransformFilterTest.suite());
+    suite.addTest(ObfuscateFilterTest.suite());
+    suite.addTest(RandomizeFilterTest.suite());
+    suite.addTest(ReplaceMissingValuesFilterTest.suite());
     /*
-      suite.addTest(MergeTwoValuesFilterTest.suite());
-      suite.addTest(NominalToBinaryFilterTest.suite());
-      suite.addTest(NonSparseToSparseFilterTest.suite());
-      suite.addTest(NormalizationFilterTest.suite());
-      suite.addTest(NullFilterTest.suite());
-      suite.addTest(NumericToBinaryFilterTest.suite());
-      suite.addTest(NumericTransformFilterTest.suite());
-      suite.addTest(ObfuscateFilterTest.suite());
-      suite.addTest(RandomizeFilterTest.suite());
-      suite.addTest(ReplaceMissingValuesFilterTest.suite());
       suite.addTest(ResampleFilterTest.suite());
       suite.addTest(SparseToNonSparseFilterTest.suite());
       suite.addTest(SplitDatasetFilterTest.suite());

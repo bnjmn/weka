@@ -15,7 +15,7 @@ import weka.core.Instance;
  * java weka.filters.AttributeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision:
+ * @version $Revision: 1.2 $
  */
 public class AttributeFilterTest extends AbstractFilterTest {
   

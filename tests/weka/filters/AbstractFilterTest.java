@@ -16,7 +16,7 @@ import weka.test.Regression;
  * Abstract Test class for Filters.
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractFilterTest extends TestCase {
 
@@ -252,7 +252,81 @@ public abstract class AbstractFilterTest extends TestCase {
       fail("Problem during regression testing.\n" + ex);
     }
   }
-  
+
+  public void testThroughput() {
+
+    if (VERBOSE) {
+      Instances icopy = new Instances(m_Instances);
+      // Make a bigger dataset
+      Instances result = null;
+      for (int i = 0; i < 20000; i++) {
+        icopy.add(m_Instances.instance(i%m_Instances.numInstances()));
+      }
+      long starttime, endtime;
+      double secs, rate;
+
+
+      // Time incremental usage
+      starttime = System.currentTimeMillis();
+      boolean headerImmediate = false;
+      try {
+        headerImmediate = m_Filter.setInputFormat(icopy);
+        if (headerImmediate) {
+          result = m_Filter.getOutputFormat();
+        }
+        for (int i = 0; i < icopy.numInstances(); i++) {
+          boolean collectNow = false;
+          collectNow = m_Filter.input(icopy.instance(i));
+          if (collectNow) {
+            if (!headerImmediate) {
+              fail("Filter didn't return true from setInputFormat() earlier!");
+            }
+            result.add(m_Filter.output());
+          }
+        }
+        // Say that input has finished, and print any pending output instances
+        boolean toCollect = false;
+        toCollect = m_Filter.batchFinished();
+        if (toCollect) {
+          if (!headerImmediate) {
+            result = m_Filter.getOutputFormat();
+          }
+          while (m_Filter.numPendingOutput() > 0) {
+            result.add(m_Filter.output());
+          }
+        }
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        fail("Exception thrown during incremental filtering: \n" + ex.getMessage());
+      }
+      endtime = System.currentTimeMillis();
+      secs = (double)(endtime - starttime) / 1000;
+      rate = (double)icopy.numInstances() / secs;
+      System.err.println("\n" + m_Filter.getClass().getName() 
+                         + " incrementally processed " 
+                         + rate + " instances per sec"); 
+      
+      // Time batch usage
+      starttime = System.currentTimeMillis();
+      try {
+        m_Filter.setInputFormat(icopy);
+        result = Filter.useFilter(icopy, m_Filter);
+        assertNotNull(result);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        fail("Exception thrown during batch filtering: \n" + ex.getMessage());
+      }
+      endtime = System.currentTimeMillis();
+      secs = (double)(endtime - starttime) / 1000;
+      rate = (double)icopy.numInstances() / secs;
+      System.err.println("\n" + m_Filter.getClass().getName() 
+                         + " batch processed " 
+                         + rate + " instances per sec"); 
+
+
+    }
+  }
+
   // TODO: 
   // * Check that results between incremental and batch use are
   //   the same

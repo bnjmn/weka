@@ -25,4 +25,5 @@ horses ,r , 6.5 ,over  ,b ,-4.3
 and    ,g , 7.5 ,the   ,c ,-3.8
 all    ,b , 8.5 ,lazy  ,d ,-2.3
 the    ,r , 9.4 ,?     ,a ,-1.0
-
+{0 wall, 2 4.3, 4 d}
+{1 b, 3 lazy, 5 3.4}

@@ -19,7 +19,7 @@ import weka.core.SelectedTag;
  * java weka.filters.AttributeTypeFilterTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision:
+ * @version $Revision: 1.2 $
  */
 public class AttributeTypeFilterTest extends AbstractFilterTest {
   
