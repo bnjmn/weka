@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -540,12 +540,20 @@ public class Classifier extends JPanel
 		    if (m_textListeners.size() > 0) {
 		      String modelString = m_Classifier.toString();
 		      String titleString = m_Classifier.getClass().getName();
+		      
 		      titleString = titleString.
 			substring(titleString.lastIndexOf('.') + 1,
 				  titleString.length());
-		      titleString = "Set "+e.getSetNumber() + " ("
-			+ m_trainingSet.relationName() + ") " + titleString
-			+ " model";
+		      modelString = "=== Classifier model ===\n\n" +
+			"Scheme:   " +titleString+"\n" +
+			"Relation: "  + m_trainingSet.relationName() + 
+			((e.getMaxSetNumber() > 1) 
+			 ? "\nTraining Fold: "+e.getSetNumber()
+			 :"")
+			+ "\n\n"
+			+ modelString;
+		      titleString = "Model: " + titleString;
+
 		      TextEvent nt = new TextEvent(Classifier.this,
 						   modelString,
 						   titleString);
@@ -982,6 +990,14 @@ public class Classifier extends JPanel
       // can generate a graph!
       if (!m_listenees.containsKey("trainingSet")) {
 	return false;
+      }
+      // Source needs to be able to generate a trainingSet
+      // before we can generate a graph
+      Object source = m_listenees.get("trainingSet");
+       if (source instanceof EventConstraints) {
+	if (!((EventConstraints)source).eventGeneratable("trainingSet")) {
+	  return false;
+	}
       }
     }
 
