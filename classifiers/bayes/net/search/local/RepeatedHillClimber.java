@@ -20,44 +20,35 @@
  * 
  */
  
-package weka.classifiers.bayes.net.search.score;
+package weka.classifiers.bayes.net.search.local;
 
 import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.net.*;
 import weka.core.*;
 import java.util.*;
 
-/** TabuSearch implements tabu search for learning Bayesian network
- * structures. For details, see for example 
- * 
- * R.R. Bouckaert. 
- * Bayesian Belief Networks: from Construction to Inference. 
- * Ph.D. thesis, 
- * University of Utrecht, 
- * 1995
+/** RepeatedHillClimber searches for Bayesian network structures by
+ * repeatedly generating a random network and apply hillclimber on it.
+ * The best network found is returned.  
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.4 $
+ * Version: $Revision: 1.1 $
  */
-public class TabuSearch extends HillClimber {
+public class RepeatedHillClimber extends HillClimber {
 
     /** number of runs **/
     int m_nRuns = 10;
-	    	
-	/** size of tabu list **/
-	int m_nTabuList = 5;
-
-	/** the actual tabu list **/
-	Operation[] m_oTabuList = null;
+    /** random number seed **/
+    int m_nSeed = 1;
+    /** random number generator **/
+    Random m_random;
 
 	/**
 	* search determines the network structure/graph of the network
-	* with the Taby algorithm.
+	* with the repeated hill climbing.
 	**/
 	protected void search(BayesNet bayesNet, Instances instances) throws Exception {
-        m_oTabuList = new Operation[m_nTabuList];
-        int iCurrentTabuList = 0;
-        initCache(bayesNet, instances);
-
+		m_random = new Random(getSeed());
 		// keeps track of score pf best structure found so far 
 		double fBestScore;	
 		double fCurrentScore = 0.0;
@@ -78,25 +69,22 @@ public class TabuSearch extends HillClimber {
                 
         // go do the search        
         for (int iRun = 0; iRun < m_nRuns; iRun++) {
-            Operation oOperation = getOptimalOperation(bayesNet, instances);
-			performOperation(bayesNet, instances, oOperation);
-            // sanity check
-            if (oOperation  == null) {
-				throw new Exception("Panic: could not find any step to make. Tabu list too long?");
-            }
-            // update tabu list
-            m_oTabuList[iCurrentTabuList] = oOperation;
-            iCurrentTabuList = (iCurrentTabuList + 1) % m_nTabuList;
+        	// generate random nework
+        	generateRandomNet(bayesNet, instances);
 
-			fCurrentScore += oOperation.m_fDeltaScore;
+        	// search
+        	super.search(bayesNet, instances);
+
+			// calculate score
+			fCurrentScore = 0.0;
+			for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
+				fCurrentScore += calcNodeScore(iAttribute);
+			}
+
 			// keep track of best network seen so far
 			if (fCurrentScore > fBestScore) {
 				fBestScore = fCurrentScore;
 				copyParentSets(bestBayesNet, bayesNet);
-			}
-
-			if (bayesNet.getDebug()) {
-				printTabuList();
 			}
         }
         
@@ -108,6 +96,39 @@ public class TabuSearch extends HillClimber {
 		m_Cache = null;
     } // search
 
+	void generateRandomNet(BayesNet bayesNet, Instances instances) {
+		int nNodes = instances.numAttributes();
+		// clear network
+		for (int iNode = 0; iNode < nNodes; iNode++) {
+			ParentSet parentSet = bayesNet.getParentSet(iNode);
+			while (parentSet.getNrOfParents() > 0) {
+				parentSet.deleteLastParent(instances);
+			}
+		}
+		
+		// initialize as naive Bayes?
+		if (getInitAsNaiveBayes()) {
+			int iClass = instances.classIndex();
+			// initialize parent sets to have arrow from classifier node to
+			// each of the other nodes
+			for (int iNode = 0; iNode < nNodes; iNode++) {
+				if (iNode != iClass) {
+					bayesNet.getParentSet(iNode).addParent(iClass, instances);
+				}
+			}
+		}
+
+		// insert random arcs
+		int nNrOfAttempts = m_random.nextInt(nNodes * nNodes);
+		for (int iAttempt = 0; iAttempt < nNrOfAttempts; iAttempt++) {
+			int iTail = m_random.nextInt(nNodes);
+			int iHead = m_random.nextInt(nNodes);
+			if (bayesNet.getParentSet(iHead).getNrOfParents() < getMaxNrOfParents() &&
+			    addArcMakesSense(bayesNet, instances, iHead, iTail)) {
+					bayesNet.getParentSet(iHead).addParent(iTail, instances);
+			}
+		}
+	} // generateRandomNet
 
 	/** copyParentSets copies parent sets of source to dest BayesNet
 	 * @param dest: destination network
@@ -121,31 +142,6 @@ public class TabuSearch extends HillClimber {
 		}		
 	} // CopyParentSets
 
-	/** check whether the operation is not in the tabu list
-	 * @param oOperation: operation to be checked
-	 * @return true if operation is not in the tabu list
-	 */
-	boolean isNotTabu(Operation oOperation) {
-		for (int iTabu = 0; iTabu < m_nTabuList; iTabu++) {
-			if (oOperation.equals(m_oTabuList[iTabu])) {
-					return false;
-				}
-		}
-		return true;
-	} // isNotTabu
-
-	/** print tabu list for debugging purposes.
-	 */
-	void printTabuList() {
-		for (int i = 0; i < m_nTabuList; i++) {
-			Operation o = m_oTabuList[i];
-			if (o != null) {
-				if (o.m_nOperation == 0) {System.out.print(" +(");} else {System.out.print(" -(");}
-				System.out.print(o.m_nTail + "->" + o.m_nHead + ")");
-			}
-		}
-		System.out.println();
-	} // printTabuList
 
     /**
     * @return number of runs
@@ -162,20 +158,20 @@ public class TabuSearch extends HillClimber {
         m_nRuns = nRuns;
     } // setRuns
 
-    /**
-     * @return the Tabu List length
-     */
-    public int getTabuList() {
-        return m_nTabuList;
-    } // getTabuList
+	/**
+	* @return random number seed
+	*/
+	public int getSeed() {
+		return m_nSeed;
+	} // getSeed
 
-    /**
-     * Sets the Tabu List length.
-     * @param nTabuList The nTabuList to set
-     */
-    public void setTabuList(int nTabuList) {
-        m_nTabuList = nTabuList;
-    } // setTabuList
+	/**
+	 * Sets the random number seed
+	 * @param nSeed The number of the seed to set
+	 */
+	public void setSeed(int nSeed) {
+		m_nSeed = nSeed;
+	} // setSeed
 
 	/**
 	 * Returns an enumeration describing the available options.
@@ -185,10 +181,8 @@ public class TabuSearch extends HillClimber {
 	public Enumeration listOptions() {
 		Vector newVector = new Vector(4);
 
-		newVector.addElement(new Option("\tTabu list length\n", "L", 1, "-L <integer>"));
 		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
-		newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
-		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
+		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
 
 		Enumeration enum = super.listOptions();
 		while (enum.hasMoreElements()) {
@@ -206,23 +200,16 @@ public class TabuSearch extends HillClimber {
 	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
-//		setUseArcReversal(Utils.getFlag('R', options));
-
-		String sTabuList = Utils.getOption('L', options);
-		if (sTabuList.length() != 0) {
-			setTabuList(Integer.parseInt(sTabuList));
-		}
 		String sRuns = Utils.getOption('U', options);
 		if (sRuns.length() != 0) {
 			setRuns(Integer.parseInt(sRuns));
 		}
-//		String sMaxNrOfParents = Utils.getOption('P', options);
-//		if (sMaxNrOfParents.length() != 0) {
-//		  setMaxNrOfParents(Integer.parseInt(sMaxNrOfParents));
-//		} else {
-//		  setMaxNrOfParents(100000);
-//		}
 		
+		String sSeed = Utils.getOption('R', options);
+		if (sSeed.length() != 0) {
+			setSeed(Integer.parseInt(sSeed));
+		}
+
 		super.setOptions(options);
 	} // setOptions
 
@@ -235,20 +222,12 @@ public class TabuSearch extends HillClimber {
 		String[] superOptions = super.getOptions();
 		String[] options = new String[7 + superOptions.length];
 		int current = 0;
-//		if (getUseArcReversal()) {
-//		  options[current++] = "-R";
-//		}
-		
-		options[current++] = "-L";
-		options[current++] = "" + getTabuList();
 
 		options[current++] = "-U";
 		options[current++] = "" + getRuns();
 
-//		if (m_nMaxNrOfParents != 10000) {
-//		  options[current++] = "-P";
-//		  options[current++] = "" + m_nMaxNrOfParents;
-//		} 
+		options[current++] = "-R";
+		options[current++] = "" + getSeed();
 
 		// insert options from parent class
 		for (int iOption = 0; iOption < superOptions.length; iOption++) {
@@ -262,4 +241,29 @@ public class TabuSearch extends HillClimber {
 		return options;
 	} // getOptions
 
-} // SimulatedAnnealing
+	/**
+	 * This will return a string describing the classifier.
+	 * @return The string.
+	 */
+	public String globalInfo() {
+		return "This Bayes Network learning algorithm repeatedly uses hill climbing starting " +
+		"with a randomly generated network structure and return the best structure of the " +
+		"various runs.";
+	} // globalInfo
+	
+	/**
+	 * @return a string to describe the Runs option.
+	 */
+	public String runsTipText() {
+	  return "Sets the number of times hill climbing is performed.";
+	} // runsTipText
+
+	/**
+	 * @return a string to describe the Seed option.
+	 */
+	public String seedTipText() {
+	  return "Initialization value for random number generator." +
+	  " Setting the seed allows replicability of experiments.";
+	} // seedTipText
+
+} // RepeatedHillClimber

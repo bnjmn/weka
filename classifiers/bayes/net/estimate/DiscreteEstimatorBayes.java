@@ -22,7 +22,7 @@
  */
 package weka.classifiers.bayes.net.estimate;
 
-import weka.classifiers.bayes.net.search.score.*;
+import weka.classifiers.bayes.net.search.local.*;
 import weka.core.*;
 import weka.estimators.*;
 
@@ -30,7 +30,7 @@ import weka.estimators.*;
  * Symbolic probability estimator based on symbol counts and a prior.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DiscreteEstimatorBayes implements Estimator, Scoreable {
 

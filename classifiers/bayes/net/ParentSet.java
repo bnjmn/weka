@@ -30,7 +30,7 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ParentSet implements Serializable {
 
@@ -159,11 +159,45 @@ public class ParentSet implements Serializable {
     m_nCardinalityOfParents *= _Instances.attribute(nParent).numValues();
   }    // AddParent
 
+  /**
+   * Add parent to parent set at specific location 
+   * and update internals (specifically the cardinality of the parent set)
+   * 
+   * @param nParent: parent to add
+   * @param iParent: location to add parent in parent set
+   * @param _Instances used for updating the internals
+   */
+  public void addParent(int nParent, int iParent, Instances _Instances) {
+   if (m_nNrOfParents == 10) {
+	// reserve more memory
+	int [] nParents = new int[50];
+		for (int i = 0; i < m_nNrOfParents; i++) {
+			nParents[i] = m_nParents[i];
+		}
+		m_nParents = nParents;
+   }
+	for (int iParent2 = m_nNrOfParents; iParent2 > iParent; iParent2--) {
+		m_nParents[iParent2] = m_nParents[iParent2 - 1];		
+	}
+	m_nParents[iParent] = nParent;
+	m_nNrOfParents++;
+	m_nCardinalityOfParents *= _Instances.attribute(nParent).numValues();
+  } // AddParent
 
-  public void deleteParent(int nParent, Instances _Instances) {
+  /** delete node from parent set
+   * @param nParent: node number of the parent to delete
+   * @param _Instances: data set
+   * @return location of the parent in the parent set. This information can be 
+   * used to restore the parent set using the addParent method.
+   */
+  public int deleteParent(int nParent, Instances _Instances) {
       int iParent = 0;
       while ((m_nParents[iParent] != nParent) && (iParent < m_nNrOfParents)) {
           iParent++;
+      }
+      int iParent2 = -1;
+      if (iParent < m_nNrOfParents) {
+      	iParent2 = iParent;
       }
       if (iParent < m_nNrOfParents) {
         while (iParent < m_nNrOfParents - 1) {
@@ -173,6 +207,7 @@ public class ParentSet implements Serializable {
       	m_nNrOfParents--;
       	m_nCardinalityOfParents /= _Instances.attribute(nParent).numValues();
       }
+      return iParent2;
   } // DeleteParent
   
   /**

@@ -35,7 +35,7 @@ import weka.estimators.*;
  * Bayes networks and random instances based on a Bayes network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class BayesNetGenerator extends BayesNet {
 	int m_nSeed = 1;
@@ -91,7 +91,7 @@ public class BayesNetGenerator extends BayesNet {
 	 * @param nNodes: number of nodes in the Bayes net 
 	 * @param nValues: number of values each of the nodes can take
 	 */
-	void Init(int nNodes, int nValues) throws Exception {
+	public void Init(int nNodes, int nValues) throws Exception {
 		random = new Random(m_nSeed);
 		// initialize structure
 		FastVector attInfo = new FastVector(nNodes);
@@ -124,7 +124,7 @@ public class BayesNetGenerator extends BayesNet {
 	 * @param nNodes: number of nodes in the Bayes net to generate
 	 * @param nArcs: number of arcs to generate. Must be between nNodes - 1 and nNodes * (nNodes-1) / 2
 	 */
-	void generateRandomNetworkStructure(int nNodes, int nArcs) 
+	public void generateRandomNetworkStructure(int nNodes, int nArcs) 
 		throws Exception
 	{
 		if (nArcs < nNodes - 1) {

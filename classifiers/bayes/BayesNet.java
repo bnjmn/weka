@@ -30,7 +30,7 @@ import weka.classifiers.*;
 import weka.classifiers.bayes.net.*;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.classifiers.bayes.net.search.*;
-import weka.classifiers.bayes.net.search.score.*;
+import weka.classifiers.bayes.net.search.local.*;
 import weka.classifiers.bayes.net.estimate.*;
 
 /**
@@ -44,7 +44,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -109,7 +109,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     /**
      * Search algorithm used for learning the structure of a network.
      */
-    SearchAlgorithm m_SearchAlgorithm = new SearchAlgorithmK2();
+    SearchAlgorithm m_SearchAlgorithm = new K2();
 
     /**
      * Search algorithm used for learning the structure of a network.
@@ -934,27 +934,27 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 	  } // measureDivergence
 
   	  public double measureBayesScore() {
-  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	LocalScoreSearchAlgorithm s = new LocalScoreSearchAlgorithm(this, m_Instances);
   	  	return s.logScore(Scoreable.BAYES);
   	  } // measureBayesScore
 
   	  public double measureBDeuScore() {
-  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	LocalScoreSearchAlgorithm s = new LocalScoreSearchAlgorithm(this, m_Instances);
   	  	return s.logScore(Scoreable.BDeu);
   	  } // measureBDeuScore
 
   	  public double measureMDLScore() {
-  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	LocalScoreSearchAlgorithm s = new LocalScoreSearchAlgorithm(this, m_Instances);
   	  	return s.logScore(Scoreable.MDL);
   	  } // measureMDLScore
 
   	  public double measureAICScore() {
-  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	LocalScoreSearchAlgorithm s = new LocalScoreSearchAlgorithm(this, m_Instances);
   	  	return s.logScore(Scoreable.AIC);
   	  } // measureAICScore
 
   	  public double measureEntropyScore() {
-  	  	ScoreSearchAlgorithm s = new ScoreSearchAlgorithm(this, m_Instances);
+  	  	LocalScoreSearchAlgorithm s = new LocalScoreSearchAlgorithm(this, m_Instances);
   	  	return s.logScore(Scoreable.ENTROPY);
   	  } // measureEntropyScore
   	  
