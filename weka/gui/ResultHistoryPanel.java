@@ -18,17 +18,19 @@
  */
 
 package weka.gui;
-import weka.gui.explorer.VisualizePanel;
 
 import java.util.Hashtable;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JPanel;
 import javax.swing.DefaultListModel;
@@ -36,24 +38,23 @@ import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
 import javax.swing.text.JTextComponent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
-import javax.swing.JViewport;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.Point;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
- * box. When a name is double-clicked, a frame is popped up that contains
+ * box. When a name is right-clicked, a frame is popped up that contains
  * the string held by the stringbuffer. Optionally a text component may be
  * provided that will have it's text set to the named result text on a
- * single-click.
+ * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -103,6 +104,16 @@ public class ResultHistoryPanel extends JPanel {
 	}
       }
     });
+    m_List.addKeyListener(new KeyAdapter() {
+      public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+          int selected = m_List.getSelectedIndex();
+          if (selected != -1) {
+            removeResult((String)m_Model.elementAt(selected));
+          }
+        }
+      }
+    });
     m_List.getSelectionModel()
       .addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
@@ -120,6 +131,7 @@ public class ResultHistoryPanel extends JPanel {
 	}
       }
     });
+
 
     setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Result history"));
@@ -149,6 +161,22 @@ public class ResultHistoryPanel extends JPanel {
     
     m_Model.addElement(name);
     m_Results.put(name, result);
+  }
+
+  /**
+   * Removes one of the result buffers from the history. Any windows currently
+   * displaying the contents of the buffer are not affected.
+   *
+   * @param name the name of the buffer to remove.
+   */
+  public void removeResult(String name) {
+
+    StringBuffer buff = (StringBuffer) m_Results.get(name);
+    JTextComponent currentText = (JTextComponent) m_FramedOutput.get(name);
+    if (buff != null) {
+      m_Results.remove(name);
+      m_Model.removeElement(name);
+    } 
   }
 
   /**
