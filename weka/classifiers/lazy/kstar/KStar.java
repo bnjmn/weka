@@ -164,7 +164,7 @@ public class KStar extends DistributionClassifier
 	m_Cache[i] = new KStarCache();
       }
       m_InitFlag = OFF;
-      System.out.println("Computing...");
+      //      System.out.println("Computing...");
     }
     // init done.
     Instance trainInstance;
@@ -449,8 +449,7 @@ public class KStar extends DistributionClassifier
     st.append("KStar Beta Verion (0.1b).\n"
 	      +"Copyright (c) 1995-97 by Len Trigg (trigg@cs.waikato.ac.nz).\n"
 	      +"Java port to Weka by Abdelaziz Mahoui "
-	      +"(am14@cs.waikato.ac.nz).\nTo be used for research purposes "
-	      +"only.\n\nKStar options : ");
+	      +"(am14@cs.waikato.ac.nz).\n\nKStar options : ");
     String [] ops = getOptions();
     for (int i=0;i<ops.length;i++) {
       st.append(ops[i]+' ');
