@@ -34,7 +34,7 @@ import java.util.Vector;
  * Journal of Artificial Intelligence Research 8 (1998) 67-91
  * *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ADNode {
         static final int MIN_RECORD_SIZE = 5;
@@ -168,7 +168,11 @@ public class ADNode {
                 for (int iNode2 = iNode; iNode2 < nNodes.length; iNode2++) {
                   iOffset2 = iOffset2 + nOffsets[iNode2] * (int) instance.value(nNodes[iNode2]);
                 }
-                nCounts[iOffset2]++;
+                if (bSubStract) {
+                  nCounts[iOffset2]--;
+                } else {
+                  nCounts[iOffset2]++;
+                }
               }
             }
           }
