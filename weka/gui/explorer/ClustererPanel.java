@@ -40,6 +40,7 @@ import weka.filters.Filter;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
+import weka.gui.treevisualizer.*;
 
 import java.util.Random;
 import java.util.Date;
@@ -92,6 +93,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.Point;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 /** 
  * This panel allows the user to select and configure a clusterer, and evaluate
@@ -101,7 +105,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -162,12 +166,6 @@ public class ClustererPanel extends JPanel {
   /** Click to stop a running clusterer */
   protected JButton m_StopBut = new JButton("Stop");
 
-  /** Click to visualize the current clusterer's predictions */
-  protected JButton m_VisualizeBut = new JButton("Visualize");
-
-  /** Click to save the output associated with the currently selected result */
-  protected JButton m_SaveOutBut = new JButton("Save Output");
-  
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
@@ -237,8 +235,6 @@ public class ClustererPanel extends JPanel {
       }
     });
 
-    m_VisualizeBut.setToolTipText("Visualize the selected clusterer output");
-    m_SaveOutBut.setToolTipText("Save the selected clusterer output to a file");
     m_TrainBut.setToolTipText("Cluster the same set that the clusterer"
 			      + " is trained on");
     m_PercentBut.setToolTipText("Train on a percentage of the data and"
@@ -268,8 +264,6 @@ public class ClustererPanel extends JPanel {
 
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
-    m_VisualizeBut.setEnabled(false);
-    m_SaveOutBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startClusterer();
@@ -280,26 +274,18 @@ public class ClustererPanel extends JPanel {
 	stopClusterer();
       }
     });
-    m_VisualizeBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	visualizeClusterer();
-      }
-    });
-    m_SaveOutBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveBuffer();
-	}
-      });
-    
-    m_History.getSelectionModel()
-      .addListSelectionListener(new ListSelectionListener() {
-	public void valueChanged(ListSelectionEvent e) {
-	  if (!e.getValueIsAdjusting()) {
-	    ListSelectionModel lm = (ListSelectionModel) e.getSource();
-	    if (m_History.getSelectedObject() != null) {
-	      m_VisualizeBut.setEnabled(true);
-	    } else {
-	      m_VisualizeBut.setEnabled(false);
+   
+    m_History.setHandleRightClicks(false);
+    // see if we can popup a menu for the selected result
+    m_History.getList().addMouseListener(new MouseAdapter() {
+	public void mouseClicked(MouseEvent e) {
+	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	      == InputEvent.BUTTON1_MASK) {
+	  } else {
+	    int index = m_History.getList().locationToIndex(e.getPoint());
+	    if (index != -1) {
+	      String name = m_History.getNameAtIndex(index);
+	      visualizeClusterer(name, e.getX(), e.getY());
 	    }
 	  }
 	}
@@ -370,19 +356,13 @@ public class ClustererPanel extends JPanel {
     p2.add(m_StorePredictionsBut);
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(2,2));
+    buttons.setLayout(new GridLayout(1,2));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
     buttons.add(ssButs);
-    JPanel vPl = new JPanel();
-    vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    vPl.setLayout(new GridLayout(1,2,5,5));
-    vPl.add(m_VisualizeBut);
-    vPl.add(m_SaveOutBut);
-    buttons.add(vPl);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Clusterer output"));
@@ -801,17 +781,15 @@ public class ClustererPanel extends JPanel {
 		});
 
 	      if (saveVis) {
-		m_History.addObject(name, m_CurrentVis);
-		m_VisualizeBut.setEnabled(true);
-	      } else {
-		m_VisualizeBut.setEnabled(false);
+		FastVector vv = new FastVector();
+		vv.addElement(m_CurrentVis);
+		m_History.addObject(name, vv);
 	      }
 	    }
 	    if (isInterrupted()) {
 	      m_Log.logMessage("Interrupted " + cname);
 	      m_Log.statusMessage("See error log");
 	    }
-	    m_SaveOutBut.setEnabled(true);
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -840,10 +818,35 @@ public class ClustererPanel extends JPanel {
     }
   }
 
-  protected void visualizeClusterer() {
-    final VisualizePanel sp;
-    sp = (VisualizePanel)m_History.getSelectedObject();
-  
+  /**
+   * Pops up a TreeVisualizer for the clusterer from the currently
+   * selected item in the results list
+   * @param dottyString the description of the tree in dotty format
+   * @param treeName the title to assign to the display
+   */
+  protected void visualizeTree(String dottyString, String treeName) {
+    final javax.swing.JFrame jf = 
+      new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+treeName);
+    jf.setSize(500,400);
+    jf.getContentPane().setLayout(new BorderLayout());
+    TreeVisualizer tv = new TreeVisualizer(null,
+					   dottyString,
+					   new PlaceNode2());
+    jf.getContentPane().add(tv, BorderLayout.CENTER);
+    jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	public void windowClosing(java.awt.event.WindowEvent e) {
+	  jf.dispose();
+	}
+      });
+    
+    jf.setVisible(true);
+  }
+
+  /**
+   * Pops up a visualize panel to display cluster assignments
+   * @param sp the visualize panel to display
+   */
+  protected void visualizeClusterAssignments(VisualizePanel sp) {
     if (sp != null) {
       String plotName = sp.getName();
       final javax.swing.JFrame jf = 
@@ -856,16 +859,92 @@ public class ClustererPanel extends JPanel {
 	    jf.dispose();
 	  }
 	});
-    //      jf.pack();
+
       jf.setVisible(true);
     }
   }
 
   /**
-   * Save the currently selected clusterer output to a file.
+   * Handles constructing a popup menu with visualization options
+   * @param x the x coordinate for popping up the menu
+   * @param y the y coordinate for popping up the menu
    */
-  protected void saveBuffer() {
-    StringBuffer sb = m_History.getSelectedBuffer();
+  protected void visualizeClusterer(String name, int x, int y) {
+    final String selectedName = name;
+    JPopupMenu resultListMenu = new JPopupMenu();
+
+    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    visMainBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.setSingle(selectedName);
+	}
+      });
+    resultListMenu.add(visMainBuffer);
+
+    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    visSepBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.openFrame(selectedName);
+	}
+      });
+    resultListMenu.add(visSepBuffer);
+
+    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    saveOutput.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  saveBuffer(selectedName);
+	}
+      });
+    resultListMenu.add(saveOutput);
+    resultListMenu.addSeparator();
+
+    FastVector o = (FastVector)m_History.getNamedObject(selectedName);
+
+    if (o != null) {
+      VisualizePanel temp_vp = null;
+      String temp_grph = null;
+     
+      for (int i = 0; i < o.size(); i++) {
+	Object temp = o.elementAt(i);
+	if (temp instanceof VisualizePanel) { // normal errors
+	  temp_vp = (VisualizePanel)temp;
+	} else if (temp instanceof String) { // graphable output
+	  temp_grph = (String)temp;
+	}
+      }
+
+      final VisualizePanel vp = temp_vp;
+      final String grph = temp_grph;
+
+      JMenuItem visClusts = new JMenuItem("Visualize cluster assignments");
+      if (vp != null) {
+	visClusts.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      visualizeClusterAssignments(vp);
+	    }
+	  });
+	resultListMenu.add(visClusts);
+      }
+      JMenuItem visTree = new JMenuItem("Visualize tree");
+      if (grph != null) {
+	visTree.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      visualizeTree(grph,vp.getName());
+	    }
+	  });
+	resultListMenu.add(visTree);
+      }
+      
+    }
+    resultListMenu.show(m_History.getList(), x, y);
+  }
+
+  /**
+   * Save the currently selected clusterer output to a file.
+   * @param name the name of the buffer to save
+   */
+  protected void saveBuffer(String name) {
+    StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
 	m_Log.logMessage("Save succesful.");
