@@ -94,7 +94,7 @@ import java.awt.Point;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -811,7 +811,7 @@ public class ClustererPanel extends JPanel {
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();
     if (sb != null) {
-      JFileChooser fileChooser = new JFileChooser();
+      JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       int returnVal = fileChooser.showSaveDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {

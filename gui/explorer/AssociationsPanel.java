@@ -82,7 +82,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -392,7 +392,7 @@ public class AssociationsPanel extends JPanel {
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();
     if (sb != null) {
-      JFileChooser fileChooser = new JFileChooser();
+      JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       int returnVal = fileChooser.showSaveDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {

@@ -66,7 +66,7 @@ import javax.swing.event.TableModelEvent;
  * of the cost matrix, as well as simple operations like loading, saving.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CostMatrixEditor implements PropertyEditor {
 
@@ -210,7 +210,8 @@ public class CostMatrixEditor implements PropertyEditor {
       new ExtensionFileFilter(COST_EXTENSION, "Misclassification cost files");
 
     /** The filechooser for opening and saving cost files */
-    private JFileChooser m_FileChooser = new JFileChooser();
+    private JFileChooser m_FileChooser
+      = new JFileChooser(new File(System.getProperty("user.dir")));
 
     /** Sets up the cost matrix editor panel */
     public CostMatrixEditorPanel() {
