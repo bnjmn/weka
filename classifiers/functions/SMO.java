@@ -91,7 +91,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.35 $ 
  */
 public class SMO extends Classifier implements OptionHandler {
 
@@ -131,7 +131,7 @@ public class SMO extends Classifier implements OptionHandler {
      * Abstract kernel. 
      *
      */
-    private abstract class Kernel {
+    private abstract class Kernel implements Serializable {
     
       /**
        * Computes the result of the kernel function for two instances.
