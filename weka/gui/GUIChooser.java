@@ -32,8 +32,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Image;
+import java.awt.Toolkit;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.BorderFactory;;
 
 
 /** 
@@ -41,7 +47,8 @@ import javax.swing.JPanel;
  * which GUI they want to run.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 1.3 $
  */
 public class GUIChooser extends Frame {
 
@@ -63,6 +70,10 @@ public class GUIChooser extends Frame {
   /** The frame containing the experiment interface */
   protected JFrame m_ExperimenterFrame;
 
+  /** The weka image */
+  Image m_weka = Toolkit.getDefaultToolkit().
+    getImage(ClassLoader.getSystemResource("weka/gui/weka3.gif"));
+
   
   /**
    * Creates the experiment environment gui with no initial experiment
@@ -83,10 +94,37 @@ public class GUIChooser extends Frame {
       add(m_SimpleBut);
       add(new Label("Swing is not installed"));
     } else {
-      setLayout(new GridLayout(3, 1));
-      add(m_SimpleBut);
-      add(m_ExplorerBut);
-      add(m_ExperimenterBut);
+      setLayout(new BorderLayout());
+      JPanel wbuts = new JPanel();
+      wbuts.setBorder(BorderFactory.createTitledBorder("GUI"));
+      wbuts.setLayout(new GridLayout(1, 3));
+      wbuts.add(m_SimpleBut);
+      wbuts.add(m_ExplorerBut);
+      wbuts.add(m_ExperimenterBut);
+      add(wbuts, BorderLayout.SOUTH);
+
+      JPanel wekaPan = new JPanel();
+      wekaPan.setToolTipText("Weka, a native bird of New Zealand");
+      ImageIcon wii = new ImageIcon(m_weka);
+      JLabel wekaLab = new JLabel(wii);
+      wekaPan.add(wekaLab);
+      add(wekaPan, BorderLayout.CENTER);
+
+      JPanel titlePan = new JPanel();
+      titlePan.setLayout(new GridLayout(6,1));
+      titlePan.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+      titlePan.add(new JLabel("Waikato Environment for", 
+			      SwingConstants.CENTER));
+      titlePan.add(new JLabel("Knowledge Analysis", 
+			      SwingConstants.CENTER));
+      titlePan.add(new JLabel(""));
+      titlePan.add(new JLabel("(c) 1999 - 2000", 
+			      SwingConstants.CENTER));
+      titlePan.add(new JLabel("University of Waikato", 
+			      SwingConstants.CENTER));
+      titlePan.add(new JLabel("New Zealand",
+			      SwingConstants.CENTER));
+      add(titlePan, BorderLayout.NORTH);
     }
 
     m_SimpleBut.addActionListener(new ActionListener() {
