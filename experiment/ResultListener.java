@@ -25,7 +25,7 @@ import java.io.Serializable;
  * by a ResultProducer
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public interface ResultListener extends Serializable {
@@ -39,7 +39,7 @@ public interface ResultListener extends Serializable {
    * @param rp the ResultProducer to which the constraints will apply
    * @return an array of column names to which resutltProducer's
    * additional results will be restricted.
-   * @exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public String [] determineColumnConstraints(ResultProducer rp) 
     throws Exception;

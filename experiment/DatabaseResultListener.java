@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and submits them to a central database.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DatabaseResultListener extends DatabaseUtils
   implements ResultListener  {
@@ -118,6 +118,7 @@ public class DatabaseResultListener extends DatabaseUtils
    * @param rp the ResultProducer to which the constraints will apply
    * @return an array of column names to which resutltProducer's
    * results will be restricted.
+   * @exception Exception if an error occurs.
    */
   public String [] determineColumnConstraints(ResultProducer rp) 
     throws Exception {
