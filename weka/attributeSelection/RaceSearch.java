@@ -50,13 +50,27 @@ import weka.experiment.Stats;
  * -A <attribute evaluator> <br>
  * the attribute evaluator to use when doing a rank search <p>
  *
+ * -Q <br>
+ * produce a ranked list of attributes. Selecting this option forces
+ * the race type to be forward. Racing continues until *all* attributes
+ * have been selected, thus producing a ranked list of attributes. <p>
+ *
+ * -N <number to retain> <br>
+ * Specify the number of attributes to retain. Overides any threshold. 
+ * Use in conjunction with -Q. <p>
+ * 
+ * -J <threshold> <br>
+ * Specify a threshold by which the AttributeSelection module can discard
+ * attributes. Use in conjunction with -Q. <p>
+ *
  * -Z <br>
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class RaceSearch extends ASSearch implements OptionHandler {
+public class RaceSearch extends ASSearch implements RankedOutputSearch, 
+						    OptionHandler {
 
   /* the training instances */
   private Instances m_Instances = null;
@@ -127,6 +141,24 @@ public class RaceSearch extends ASSearch implements OptionHandler {
   /** verbose output for monitoring the search and debugging */
   private boolean m_debug = false;
 
+  /** If true then produce a ranked list of attributes by fully traversing
+      a forward hillclimb race */
+  private boolean m_rankingRequested = false;
+
+  /** The ranked list of attributes produced if m_rankingRequested is true */
+  private double [][] m_rankedAtts;
+
+  /** The number of attributes ranked so far (if ranking is requested) */
+  private int m_rankedSoFar;
+
+  /** The number of attributes to retain if a ranking is requested. -1
+      indicates that all attributes are to be retained. Has precedence over
+      m_threshold */
+  private int m_numToSelect = -1;
+
+  /** the threshold for removing attributes if ranking is requested */
+  private double m_threshold = -Double.MAX_VALUE;
+
   /**
    * Returns a string describing this search method
    * @return a description of the search method suitable for
@@ -135,7 +167,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
   public String globalInfo() {
     return "Races the cross validation error of competing "
       +"attribute subsets. Use in conjuction with a ClassifierSubsetEval. "
-      +"RaceSearch has four modes---\n\nforward selection "
+      +"RaceSearch has four modes:\n\nforward selection "
       +"races all single attribute additions to a base set (initially "
       +" no attributes), selects the winner to become the new base set "
       +"and then iterates until there is no improvement over the base set. "
@@ -153,7 +185,12 @@ public class RaceSearch extends ASSearch implements OptionHandler {
       +"new base set.\n\nRank race first ranks the attributes using an "
       +"attribute evaluator and then races the ranking. The race includes "
       +"no attributes, the top ranked attribute, the top two attributes, the "
-      +"top three attributes, etc.\n\nRacing uses paired and unpaired "
+      +"top three attributes, etc.\n\nIt is also possible to generate a "
+      +"raked list of attributes through the forward racing process. "
+      +"If generateRanking is set to true then a complete forward race will "
+      +"be run---that is, racing continues until all attributes have been "
+      +"selected. The order that they are added in determines a complete "
+      +"ranking of all the attributes.\n\nRacing uses paired and unpaired "
       +"t-tests on cross-validation errors of competing subsets. When there "
       +"is a significant difference between the means of the errors of two "
       +"competing subsets then the poorer of the two can be eliminated from "
@@ -181,7 +218,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     if (d.getTags() == TAGS_SELECTION) {
       m_raceType = d.getSelectedTag().getID();
     }
-    if (m_raceType == SCHEMATA_RACE) {
+    if (m_raceType == SCHEMATA_RACE && !m_rankingRequested) {
       try {
 	setFoldsType(new SelectedTag(LEAVE_ONE_OUT,
 				     XVALTAGS_SELECTION));
@@ -322,14 +359,14 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     return m_debug;
   }
 
-    /**
+  /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String attributeEvaluatorTipText() {
-    return "Attribute evaluator to use for generating a ranking. Use in "
-      +"conjunction with a rank race";    
+    return "Attribute evaluator to use for generating an initial ranking. "
+      +"Use in conjunction with a rank race";    
   }
 
   /**
@@ -348,12 +385,107 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     return m_ASEval;
   }
 
+    /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String generateRankingTipText() {
+    return "Use the racing process to generate a ranked list of attributes. "
+      +"Using this mode forces the race to be a forward type and then races "
+      +"until all attributes have been added, thus giving a ranked list";
+  }
+  
+  /**
+   * Records whether the user has requested a ranked list of attributes.
+   * @param doRank true if ranking is requested
+   */
+  public void setGenerateRanking(boolean doRank) {
+    m_rankingRequested = doRank;
+    if (m_rankingRequested) {
+      try {
+	setRaceType(new SelectedTag(FORWARD_RACE,
+				    TAGS_SELECTION));
+      } catch (Exception ex) {
+      }
+    }
+  }
+
+  /**
+   * Gets whether ranking has been requested. This is used by the
+   * AttributeSelection module to determine if rankedAttributes()
+   * should be called.
+   * @return true if ranking has been requested.
+   */
+  public boolean getGenerateRanking() {
+    return m_rankingRequested;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numToSelectTipText() {
+    return "Specify the number of attributes to retain. Use in conjunction "
+      +"with generateRanking. The default value "
+      +"(-1) indicates that all attributes are to be retained. Use either "
+      +"this option or a threshold to reduce the attribute set.";
+  }
+
+  /**
+   * Specify the number of attributes to select from the ranked list
+   * (if generating a ranking). -1
+   * indicates that all attributes are to be retained.
+   * @param n the number of attributes to retain
+   */
+  public void setNumToSelect(int n) {
+    m_numToSelect = n;
+  }
+
+  /**
+   * Gets the number of attributes to be retained.
+   * @return the number of attributes to retain
+   */
+  public int getNumToSelect() {
+    return m_numToSelect;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String selectionThresholdTipText() {
+    return "Set threshold by which attributes can be discarded. Default value "
+      + "results in no attributes being discarded. Use in conjunction with "
+      + "generateRanking";
+  }
+
+  /**
+   * Set the threshold by which the AttributeSelection module can discard
+   * attributes.
+   * @param threshold the threshold.
+   */
+  public void setSelectionThreshold(double threshold) {
+    m_threshold = threshold;
+  }
+
+  /**
+   * Returns the threshold so that the AttributeSelection module can
+   * discard attributes from the ranking.
+   */
+  public double getSelectionThreshold() {
+    return m_threshold;
+  }
+
+
   /**
    * Returns an enumeration describing the available options
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(8);
      newVector.addElement(new Option("\tType of race to perform.\n\t"
 				     +"(default = 0).",
 				     "R", 1 ,"-R <0 = forward | 1 = backward "
@@ -374,12 +506,32 @@ public class RaceSearch extends ASSearch implements OptionHandler {
 			   +"GainRatioAttributeEval ... " 
 			   + "-- -M.\n\t(default = GainRatioAttributeEval)", 
 			   "A", 1, "-A <attribute evaluator>"));
-     newVector.addElement(new Option("\tVerbose output for monitoring the "
-				     +"search.",
-				     "Z",0,"-Z"));
+    
      newVector.addElement(new Option("\tFolds for cross validation\n\t"
 			    +"(default = 0 (1 if schemata race)",
 			    "F",1,"-F <0 = 10 fold | 1 = leave-one-out>"));
+     newVector.addElement(new Option("\tGenerate a ranked list of attributes."
+				     +"\n\tForces the search to be forward\n."
+				     +"\tand races until all attributes have\n"
+				     +"\tselected, thus producing a ranking.",
+				     "Q",0,"-Q"));
+
+    newVector
+      .addElement(new Option("\tSpecify number of attributes to retain from "
+			     +"\n\tthe ranking. Overides -T. Use "
+			     +"in conjunction with -Q"
+			     ,"N",1
+			     , "-N <num to select>"));
+
+    newVector
+      .addElement(new Option("\tSpecify a theshold by which attributes" 
+			     + "\n\tmay be discarded from the ranking."
+			     +"\n\tUse in conjuction with -Q","T",1
+			     , "-T <threshold>"));
+
+     newVector.addElement(new Option("\tVerbose output for monitoring the "
+				     +"search.",
+				     "Z",0,"-Z"));
      if ((m_ASEval != null) && 
 	 (m_ASEval instanceof OptionHandler)) {
        newVector.addElement(new Option("", "", 0, "\nOptions specific to " 
@@ -415,6 +567,19 @@ public class RaceSearch extends ASSearch implements OptionHandler {
    *
    * -A <attribute evaluator> <br>
    * the attribute evaluator to use when doing a rank search <p>
+   *
+   * -Q <br>
+   * produce a ranked list of attributes. Selecting this option forces
+   * the race type to be forward. Racing continues until *all* attributes
+   * have been selected, thus producing a ranked list of attributes. <p>
+   *
+   * -N <number to retain> <br>
+   * Specify the number of attributes to retain. Overides any threshold. 
+   * Use in conjunction with -Q. <p>
+   * 
+   * -J <threshold> <br>
+   * Specify a threshold by which the AttributeSelection module can discard
+   * attributes. Use in conjunction with -Q. <p>
    *
    * -Z <br>
    * Turn on verbose output for monitoring the search <p>
@@ -461,6 +626,20 @@ public class RaceSearch extends ASSearch implements OptionHandler {
 			    Utils.partitionOptions(options)));
     }
 
+    setGenerateRanking(Utils.getFlag('Q', options));
+
+    optionString = Utils.getOption('T', options);
+    if (optionString.length() != 0) {
+      Double temp;
+      temp = Double.valueOf(optionString);
+      setThreshold(temp.doubleValue());
+    }
+    
+    optionString = Utils.getOption('N', options);
+    if (optionString.length() != 0) {
+      setNumToSelect(Integer.parseInt(optionString));
+    }
+
     setDebug(Utils.getFlag('Z', options));
   }
 
@@ -476,12 +655,17 @@ public class RaceSearch extends ASSearch implements OptionHandler {
 	(m_ASEval instanceof OptionHandler)) {
       evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
     }
-    String[] options = new String[12+evaluatorOptions.length];
+    String[] options = new String[17+evaluatorOptions.length];
 
     options[current++] = "-R"; options[current++] = ""+m_raceType;
     options[current++] = "-L"; options[current++] = ""+getSignificanceLevel();
     options[current++] = "-T"; options[current++] = ""+getThreshold();
     options[current++] = "-F"; options[current++] = ""+m_xvalType;
+    if (getGenerateRanking()) {
+      options[current++] = "-Q";
+    }
+    options[current++] = "-N"; options[current++] = ""+getNumToSelect();
+    options[current++] = "-J"; options[current++] = ""+getSelectionThreshold();
     if (getDebug()) {
       options[current++] = "-Z";
     }
@@ -521,31 +705,43 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     if (!(ASEval instanceof SubsetEvaluator)) {
       throw  new Exception(ASEval.getClass().getName() 
 			   + " is not a " 
-			   + "Subset evaluator!");
+			   + "Subset evaluator! (RaceSearch)");
     }
 
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
-      throw new Exception("Can't use an unsupervised subset evaluator.");
+      throw new Exception("Can't use an unsupervised subset evaluator "
+			  +"(RaceSearch).");
     }
 
     if (!(ASEval instanceof HoldOutSubsetEvaluator)) {
       throw new Exception("Must use a HoldOutSubsetEvaluator, eg. "
-			  +"weka.attributeSelection.ClassifierSubsetEval");
+			  +"weka.attributeSelection.ClassifierSubsetEval "
+			  +"(RaceSearch)");
     }
 
     if (!(ASEval instanceof ErrorBasedMeritEvaluator)) {
       throw new Exception("Only error based subset evaluators can be used, "
-			  +"eg. weka.attributeSelection.ClassifierSubsetEval");
+			  +"eg. weka.attributeSelection.ClassifierSubsetEval "
+			  +"(RaceSearch)");
     }
 
     m_Instances = data;
     m_Instances.deleteWithMissingClass();
     if (m_Instances.numInstances() == 0) {
-      throw new Exception("All instances have missing class!");
+      throw new Exception("All instances have missing class! (RaceSearch)");
+    }
+    if (m_rankingRequested && m_numToSelect > m_Instances.numAttributes()-1) {
+      throw new Exception("More attributes requested than exist in the data "
+			  +"(RaceSearch).");
     }
     m_theEvaluator = (HoldOutSubsetEvaluator)ASEval;
-    m_numAttribs = data.numAttributes();
-    m_classIndex = data.classIndex();
+    m_numAttribs = m_Instances.numAttributes();
+    m_classIndex = m_Instances.classIndex();
+
+    if (m_rankingRequested) {
+      m_rankedAtts = new double[m_numAttribs-1][2];
+      m_rankedSoFar = 0;
+    }
 
     if (m_xvalType == LEAVE_ONE_OUT) {
       m_numFolds = data.numInstances();
@@ -570,6 +766,43 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     }
 
     return bestSubset;
+  }
+
+  public double [][] rankedAttributes() throws Exception {
+    if (!m_rankingRequested) {
+      throw new Exception("Need to request a ranked list of attributes "
+			  +"before attributes can be ranked (RaceSearch).");
+    }
+    if (m_rankedAtts == null) {
+      throw new Exception("Search must be performed before attributes "
+			  +"can be ranked (RaceSearch).");
+    }
+    
+    double [][] final_rank = new double [m_rankedSoFar][2];
+    for (int i=0;i<m_rankedSoFar;i++) {
+      final_rank[i][0] = m_rankedAtts[i][0];
+      final_rank[i][1] = m_rankedAtts[i][1];
+    }
+
+    if (m_numToSelect <= 0) {
+      if (m_threshold == -Double.MAX_VALUE) {
+	m_numToSelect = final_rank.length;
+      } else {
+	determineNumToSelectFromThreshold(final_rank);
+      }
+    }
+
+    return final_rank;
+  }
+
+  private void determineNumToSelectFromThreshold(double [][] ranking) {
+    int count = 0;
+    for (int i = 0; i < ranking.length; i++) {
+      if (ranking[i][1] > m_threshold) {
+	count++;
+      }
+    }
+    m_numToSelect = count;
   }
 
   /**
@@ -1018,10 +1251,11 @@ public class RaceSearch extends ASSearch implements OptionHandler {
   private int [] hillclimbRace(Instances data) throws Exception {
     double baseSetError;
     char [] baseSet = new char [m_numAttribs];
+    int rankCount = 0;
 
     for (int i=0;i<m_numAttribs;i++) {
       if (i != m_classIndex) {
-	if (m_raceType == 0) {
+	if (m_raceType == FORWARD_RACE) {
 	  baseSet[i] = '0';
 	} else {
 	  baseSet[i] = '1';
@@ -1041,7 +1275,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     for (int i=0;i<m_numAttribs;i++) {
       if (i != m_classIndex) {
 	raceSets[count] = (char [])baseSet.clone();
-	if (m_raceType == 1) {
+	if (m_raceType == BACKWARD_RACE) {
 	  raceSets[count++][i] = '0';
 	} else {
 	  raceSets[count++][i] = '1';
@@ -1058,6 +1292,11 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     baseSetError = winnerInfo[1];
     m_bestMerit = baseSetError;
     baseSet = (char [])raceSets[(int)winnerInfo[0]].clone();
+    if (m_rankingRequested) {
+      m_rankedAtts[m_rankedSoFar][0] = (int)(winnerInfo[0]-1);
+      m_rankedAtts[m_rankedSoFar][1] = winnerInfo[1];
+      m_rankedSoFar++;
+    }
 
     boolean improved = true;
     int j;
@@ -1066,7 +1305,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     while (improved) {
       // generate the next set of competitors
       numCompetitors--;
-      if (numCompetitors == 1) { //race finished!
+      if (numCompetitors == 0) { //race finished!
 	break;
       }
       j=0;
@@ -1105,11 +1344,21 @@ public class RaceSearch extends ASSearch implements OptionHandler {
       if (bs.compareTo(win) == 0) {
 	// race finished
       } else {
-	if (winnerInfo[1] < baseSetError) {
-	improved = true;
-	baseSetError = winnerInfo[1];
-	m_bestMerit = baseSetError;
-	baseSet = (char [])raceSets[(int)winnerInfo[0]].clone();
+	if (winnerInfo[1] < baseSetError || m_rankingRequested) {
+	  improved = true;
+	  baseSetError = winnerInfo[1];
+	  m_bestMerit = baseSetError;
+	  // find which att is different
+	  if (m_rankingRequested) {
+	    for (int i = 0; i < baseSet.length; i++) {
+	      if (win.charAt(i) != bs.charAt(i)) {
+		m_rankedAtts[m_rankedSoFar][0] = i;
+		m_rankedAtts[m_rankedSoFar][1] = winnerInfo[1];
+		m_rankedSoFar++;
+	      }
+	    }
+	  }
+	  baseSet = (char [])raceSets[(int)winnerInfo[0]].clone();
 	} else {
 	  // Will get here for a subset whose error is outside the delta
 	  // threshold but is not *significantly* worse than the base
@@ -1171,6 +1420,9 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     PairedStats [][] testers = 
       new PairedStats[raceSets.length][raceSets.length];
 
+    /** do we ignore the base set or not? */
+    int startPt = m_rankingRequested ? 1 : 0;
+
     for (int i=0;i<raceSets.length;i++) {
       individualStats[i] = new Stats();
       for (int j=i+1;j<raceSets.length;j++) {
@@ -1209,7 +1461,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
       
       // loop over the surviving attribute sets building classifiers for this
       // training set
-      for (int j=0;j<raceSets.length;j++) {
+      for (int j=startPt;j<raceSets.length;j++) {
 	if (!eliminated[j]) {
 	  evaluators[j].buildEvaluator(trainCV);
 	}
@@ -1221,7 +1473,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
 
 	// loop over surviving attribute sets computing errors for this
 	// test point
-	for (int zz=0;zz<raceSets.length;zz++) {
+	for (int zz=startPt;zz<raceSets.length;zz++) {
 	  if (!eliminated[zz]) {
 	    if (z == 0) {// first test instance---make sure classifier is built
 	      errors[zz] = -((HoldOutSubsetEvaluator)evaluators[zz]).
@@ -1238,7 +1490,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
 	}
 
 	// now update the stats
-	for (int j=0;j<raceSets.length;j++) {
+	for (int j=startPt;j<raceSets.length;j++) {
 	  if (!eliminated[j]) {
 	    individualStats[j].add(errors[j]);
 	    for (int k=j+1;k<raceSets.length;k++) {
@@ -1384,7 +1636,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
 	// if there is a base set from the previous race and it's the
 	// only remaining subset then terminate the race.
 	if (eliminatedCount == raceSets.length-1 && baseSetIncluded &&
-	    !eliminated[0]) {
+	    !eliminated[0] && !m_rankingRequested) {
 	  break race;
 	}
       }
@@ -1396,7 +1648,7 @@ public class RaceSearch extends ASSearch implements OptionHandler {
     double bestError = Double.MAX_VALUE;
     int bestIndex=0;
     // return the index of the winner
-    for (int i=0;i<raceSets.length;i++) {
+    for (int i=startPt;i<raceSets.length;i++) {
       if (!eliminated[i]) {
 	individualStats[i].calculateDerived();
 	if (m_debug) {
