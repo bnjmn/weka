@@ -49,7 +49,7 @@ import weka.classifiers.*;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AODE extends DistributionClassifier
                   implements OptionHandler, WeightedInstancesHandler {
@@ -417,12 +417,31 @@ public class AODE extends DistributionClassifier
        options[current++] = "-D";
     }
         
-    options[current++] = "-F " + m_Limit;
-
+    options[current++] = "-F"; options[current++] = ""+m_Limit;
     while (current < options.length) {
        options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Set the frequency limit for parent attributes
+   *
+   * @param fl an <code>int</code> value
+   */
+  public void setFrequencyLimitForParentAttributes(int fl) {
+    if (fl > 0) {
+      m_Limit = fl;
+    }
+  }
+
+  /**
+   * Return the frequency limit for parent attributes
+   *
+   * @return an <code>int</code> value
+   */
+  public int getFrequencyLimitForParentAttributes() {
+    return m_Limit;
   }
     
   /**
