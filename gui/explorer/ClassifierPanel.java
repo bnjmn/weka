@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.63 $
+ * @version $Revision: 1.64 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -783,13 +783,13 @@ public class ClassifierPanel extends JPanel {
    * Process a classifier's prediction for an instance and update a
    * set of plotting instances and additional plotting info. plotInfo
    * for nominal class datasets holds shape types (actual data points have
-   * automatic shape type assignment; classifer error data points have
+   * automatic shape type assignment; classifier error data points have
    * box shape type). For numeric class datasets, the actual data points
    * are stored in plotInstances and plotInfo stores the error (which is
    * later converted to shape size values)
    * @param toPredict the actual data point
    * @param classifier the classifier
-   * @param eval the evaluation object to use for evaluating the classifer on
+   * @param eval the evaluation object to use for evaluating the classifier on
    * the instance to predict
    * @param predictions a fastvector to add the prediction to
    * @param plotInstances a set of plottable instances
@@ -805,7 +805,7 @@ public class ClassifierPanel extends JPanel {
 					   FastVector plotSize) {
     try {
       double pred;
-      // classifier is a distribution classifer and class is nominal
+      // classifier is a distribution classifier and class is nominal
       if (predictions != null) {
 	Instance classMissing = (Instance)toPredict.copy();
 	classMissing.setDataset(toPredict.dataset());
@@ -1540,7 +1540,7 @@ public class ClassifierPanel extends JPanel {
     
     resultListMenu.addSeparator();
     
-    JMenuItem visErrors = new JMenuItem("Visualize classifer errors");
+    JMenuItem visErrors = new JMenuItem("Visualize classifier errors");
     if (vp != null) {
       visErrors.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
