@@ -44,7 +44,7 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
@@ -53,6 +53,11 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
 
   /** Are the new attributes going to be nominal or numeric ones? */
   private boolean m_Numeric = true;
+
+  /**
+   * Are we going to do the simple thing or the more complicated M5 thing
+   */
+  private boolean m_SimpleMode = true;
 
   /**
    * Sets the format of the input instances.
@@ -68,12 +73,17 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
        throws Exception {
 
     super.setInputFormat(instanceInfo);
-    if (instanceInfo.classIndex() < 0) {
-      throw new UnassignedClassException("No class has been assigned to the instances");
+    if (instanceInfo.classIndex() < 0 
+	|| instanceInfo.classAttribute().isNominal()) {
+      //      throw new UnassignedClassException("No class has been assigned to the instances");
+      m_SimpleMode = true;
+    } else if (instanceInfo.classAttribute().isNumeric()) {
+      m_SimpleMode = false;
     }
+	  
     setOutputFormat();
     m_Indices = null;
-    if (instanceInfo.classAttribute().isNominal()) {
+    if (m_SimpleMode /*|| instanceInfo.classAttribute().isNominal()*/) {
       return true;
     } else {
       return false;
@@ -99,7 +109,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
     if ((m_Indices != null) || 
-	(getInputFormat().classAttribute().isNominal())) {
+	(m_SimpleMode == true 
+	 /* getInputFormat().classAttribute().isNominal())*/)) {
       convertInstance(instance);
       return true;
     }
@@ -121,7 +132,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
       throw new IllegalStateException("No input instance format defined");
     }
     if ((m_Indices == null) && 
-	(getInputFormat().classAttribute().isNumeric())) {
+	(getInputFormat().classIndex() >= 0 && 
+	 getInputFormat().classAttribute().isNumeric())) {
       computeAverageClassValues();
       setOutputFormat();
 
@@ -253,7 +265,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   /** Set the output format. */
   private void setOutputFormat() {
 
-    if (getInputFormat().classAttribute().isNominal()) {
+    if (getInputFormat().classIndex() < 0 || 
+	getInputFormat().classAttribute().isNominal()) {
       setOutputFormatNominal();
     } else {
       setOutputFormatNumeric();
@@ -268,7 +281,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   private void convertInstance(Instance inst) {
 
-    if (getInputFormat().classAttribute().isNominal()) {
+    if (getInputFormat().classIndex() < 0 || 
+	getInputFormat().classAttribute().isNominal()) {
       convertInstanceNominal(inst);
     } else {
       convertInstanceNumeric(inst);
@@ -276,7 +290,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Set the output format if the class is nominal.
+   * Set the output format if the class is nominal or there is no
+   * class set
    */
   private void setOutputFormatNominal() {
 
@@ -328,7 +343,9 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     }
     outputFormat = new Instances(getInputFormat().relationName(),
 				 newAtts, 0);
-    outputFormat.setClassIndex(newClassIndex);
+    if (newClassIndex >= 0) {
+      outputFormat.setClassIndex(newClassIndex);
+    }
     setOutputFormat(outputFormat);
   }
 
@@ -390,7 +407,8 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
   }
 
   /**
-   * Convert a single instance over if the class is nominal. The converted 
+   * Convert a single instance over if the class is nominal
+   * or no class is set. The converted 
    * instance is added to the end of the output queue.
    *
    * @param instance the instance to convert
@@ -502,6 +520,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
       }
     } catch (Exception ex) {
       System.out.println(ex.getMessage());
+      ex.printStackTrace();
     }
   }
 }
