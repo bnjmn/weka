@@ -37,21 +37,13 @@ import java.util.Random;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BayesNetK2 extends BayesNet {
 	/** Holds flag to indicate ordering should be random **/
-	boolean m_bRandomOrder = true;
-	/** 
-	* Set random order flag 
-	*
-	* @param bRandomOrder
-	**/
-	public void UseRandomOrder(boolean bRandomOrder) {
-		m_bRandomOrder = bRandomOrder;
-	} // SetRandomOrder
+	boolean m_bRandomOrder = false;
 
-	/**
+        /**
 	* buildStructure determines the network structure/graph of the network
 	* with the K2 algorithm, restricted by its initial structure (which can
 	* be an empty graph, or a Naive Bayes graph.
@@ -113,6 +105,105 @@ public class BayesNetK2 extends BayesNet {
 	} // buildStructure
 
 
+  	/** 
+	* Set random order flag 
+	*
+	* @param bRandomOrder
+	**/
+	public void setRandomOrder(boolean bRandomOrder) {
+		m_bRandomOrder = bRandomOrder;
+	} // SetRandomOrder
+	/** 
+	* Get random order flag 
+	*
+	* @returns m_bRandomOrder
+	**/
+	public boolean getRandomOrder() {
+		return m_bRandomOrder;
+	} // getRandomOrder
+        
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+
+    Vector newVector = new Vector(1);
+
+    newVector.addElement(new Option(
+	      "\tRandom order.\n"
+	      + "\t(default false)",
+	      "R", 0, "-R"));
+
+      Enumeration enum = super.listOptions();
+      while (enum.hasMoreElements()) {
+	newVector.addElement(enum.nextElement());
+      }
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options. Valid options are:<p>
+   *
+   * -R
+   * Set the random order to true (default false). <p>
+   *
+   * For other options see bagging.
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    
+    setRandomOrder(Utils.getFlag('R', options));
+    super.setOptions(options);
+  }
+  /**
+   * Gets the current settings of the Classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  
+  public String [] getOptions() {
+
+    String [] classifierOptions;
+    classifierOptions = super.getOptions();
+    String [] options = new String [classifierOptions.length + 1];
+    int current = 0;
+    if (getRandomOrder()) {
+      options[current++] = "-R";
+    }
+    System.arraycopy(classifierOptions, 0, options, current, 
+		     classifierOptions.length);
+    current += classifierOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
+  }
+
+  /**
+   * @return a string to describe the RandomOrder option.
+   */
+  public String randomOrderTipText() {
+    return "When set to true, the order of the nodes in the network is random." +
+    " Default random order is false and the order" +
+    " of the nodes in the dataset is used." +
+    " In any case, when the network was initialized as Naive Bayes Network, the" +
+    " class variable is first in the ordering though.";
+  } // randomOrderTipText
+
+  /**
+   * This will return a string describing the classifier.
+   * @return The string.
+   */
+  public String globalInfo() {
+    return "This Bayes Network learning algorithm uses a hill climbing algorithm" +
+    " restricted by an order on the variables";
+  }
+  
+  
   /**
    * Main method for testing this class.
    *
