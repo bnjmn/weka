@@ -38,7 +38,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -69,6 +69,10 @@ public class ForwardSelection extends ASSearch
    * AttributeSelection module
    */
   private double m_threshold;
+
+  /** The number of attributes to select. -1 indicates that all attributes
+      are to be retained. Has precedence over m_threshold */
+  private int m_numToSelect = -1;
 
   /** the merit of the best subset found */
   private double m_bestMerit;
@@ -138,6 +142,35 @@ public class ForwardSelection extends ASSearch
    */
   public double getThreshold() {
     return m_threshold;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numToSelectTipText() {
+    return "Specify the number of attributes to retain. The default value "
+      +"(-1) indicates that all attributes are to be retained. Use either "
+      +"this option or a threshold to reduce the attribute set.";
+  }
+
+  /**
+   * Specify the number of attributes to select from the ranked list
+   * (if generating a ranking). -1
+   * indicates that all attributes are to be retained.
+   * @param n the number of attributes to retain
+   */
+  public void setNumToSelect(int n) {
+    m_numToSelect = n;
+  }
+
+  /**
+   * Gets the number of attributes to be retained.
+   * @return the number of attributes to retain
+   */
+  public int getNumToSelect() {
+    return m_numToSelect;
   }
 
   /**
@@ -219,6 +252,11 @@ public class ForwardSelection extends ASSearch
 			     +"\n\tUse in conjuction with -R","T",1
 			     , "-T <threshold>"));
 
+    newVector
+      .addElement(new Option("\tSpecify number of attributes to select" 
+			     ,"N",1
+			     , "-N <num to select>"));
+
     return newVector.elements();
 
   }
@@ -235,8 +273,12 @@ public class ForwardSelection extends ASSearch
    * Produce a ranked list of attributes. <p>
    * 
    * -T <threshold> <br>
-   * Specify a threshold by which the AttributeSelection module can. <br>
+   * Specify a threshold by which the AttributeSelection module can <br>
    * discard attributes. Use in conjunction with -R <p>
+   *
+   * -N <number to retain> <br>
+   * Specify the number of attributes to retain. Overides any threshold. <br>
+   * <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -261,6 +303,11 @@ public class ForwardSelection extends ASSearch
       temp = Double.valueOf(optionString);
       setThreshold(temp.doubleValue());
     }
+
+    optionString = Utils.getOption('N', options);
+    if (optionString.length() != 0) {
+      setNumToSelect(Integer.parseInt(optionString));
+    }
   }
 
   /**
@@ -269,7 +316,7 @@ public class ForwardSelection extends ASSearch
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[5];
+    String[] options = new String[7];
     int current = 0;
     
     if (!(getStartSet().equals(""))) {
@@ -282,6 +329,9 @@ public class ForwardSelection extends ASSearch
     }
     options[current++] = "-T";
     options[current++] = "" + getThreshold();
+
+    options[current++] = "-N";
+    options[current++] = ""+getNumToSelect();
 
     while (current < options.length) {
       options[current++] = "";
@@ -498,7 +548,30 @@ public class ForwardSelection extends ASSearch
     
     resetOptions();
     m_doneRanking = true;
+
+    if (m_numToSelect > final_rank.length) {
+      throw new Exception("More attributes requested than exist in the data");
+    }
+
+    if (m_numToSelect <= 0) {
+      if (m_threshold == -Double.MAX_VALUE) {
+	m_numToSelect = final_rank.length;
+      } else {
+	determineNumToSelectFromThreshold(final_rank);
+      }
+    }
+
     return final_rank;
+  }
+
+  private void determineNumToSelectFromThreshold(double [][] ranking) {
+    int count = 0;
+    for (int i = 0; i < ranking.length; i++) {
+      if (ranking[i][1] > m_threshold) {
+	count++;
+      }
+    }
+    m_numToSelect = count;
   }
 
   /**
