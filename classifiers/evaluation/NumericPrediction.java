@@ -18,14 +18,16 @@
  */
 package weka.classifiers.evaluation;
 
+import java.io.Serializable;
+
 /**
  * Encapsulates an evaluatable numeric prediction: the predicted class value
  * plus the actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class NumericPrediction implements Prediction {
+public class NumericPrediction implements Prediction, Serializable {
 
   /** The actual class value */
   private double m_Actual = MISSING_VALUE;
