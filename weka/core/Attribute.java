@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -156,22 +156,26 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Tests if given attribute is equal to this attribute.
    *
-   * @param other the attribute to be compared to this attribute
+   * @param other the Object to be compared to this attribute
    * @return true if the given attribute is equal to this attribute
    */
-  public final boolean equals(Attribute other) {
+  public final boolean equals(Object other) {
 
-    if (!m_Name.equals(other.m_Name))
+    if ((other == null) || !(other instanceof Attribute)) {
       return false;
-    if (isNumeric() && other.isNumeric())
+    }
+    Attribute att = (Attribute) other;
+    if (!m_Name.equals(att.m_Name))
+      return false;
+    if (isNumeric() && att.isNumeric())
       return true;
-    if (isNumeric() || other.isNumeric())
+    if (isNumeric() || att.isNumeric())
       return false;
-    if (m_Values.size() != other.m_Values.size())
+    if (m_Values.size() != att.m_Values.size())
       return false;
     for (int i = 0; i < m_Values.size(); i++)
       if (!((String) m_Values.elementAt(i)).equals
-	  ((String) other.m_Values.elementAt(i)))
+	  ((String) att.m_Values.elementAt(i)))
 	return false;
     return true;
   }

@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.15 $
+ * @version  $Revision: 1.16 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1866,11 +1866,12 @@ public class Evaluation implements Summarizable {
    * Tests whether the current evaluation object is equal to another
    * evaluation object
    *
-   * @param cmp the evaluation object to compare against
+   * @param obj the object to compare against
    * @return true if the two objects are equal
    */
-  public boolean equals(Evaluation cmp) {
+  public boolean equals(Object obj) {
 
+    if ((obj == null) || !(obj instanceof Evaluation)) return false;
     if (m_ClassIsNominal != cmp.m_ClassIsNominal) return false;
     if (m_NumClasses != cmp.m_NumClasses) return false;
 
