@@ -37,7 +37,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class RandomSplitResultProducer 
@@ -50,7 +50,10 @@ public class RandomSplitResultProducer
   protected ResultListener m_ResultListener = new CSVResultListener();
 
   /** The percentage of instances to use for training */
-  protected int m_TrainPercent = 66;
+  protected double m_TrainPercent = 66;
+
+  /** Whether dataset is to be randomized */
+  protected boolean m_randomize = true;
 
   /** The SplitEvaluator used to generate results */
   protected SplitEvaluator m_SplitEvaluator = new ClassifierSplitEvaluator();
@@ -231,9 +234,11 @@ public class RandomSplitResultProducer
     if (m_ResultListener.isResultRequired(this, key)) {
       // Randomize on a copy of the original dataset
       Instances runInstances = new Instances(m_Instances);
-      runInstances.randomize(new Random(run));
+      if (m_randomize) {
+	runInstances.randomize(new Random(run));
+      }
 
-      int trainSize = runInstances.numInstances() * m_TrainPercent / 100;
+      int trainSize = Utils.round(runInstances.numInstances() * m_TrainPercent / 100);
       int testSize = runInstances.numInstances() - trainSize;
       Instances train = new Instances(runInstances, 0, trainSize);
       Instances test = new Instances(runInstances, trainSize, testSize);
@@ -392,6 +397,31 @@ public class RandomSplitResultProducer
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String randomizeDataTipText() {
+    return "Do not randomize dataset if true";
+  }
+
+  /**
+   * Get if dataset is to be randomized
+   * @return true if dataset is to be randomized
+   */
+  public boolean getRandomizeData() {
+    return m_randomize;
+  }
+  
+  /**
+   * Set to true if dataset is to be randomized
+   * @param d true if dataset is to be randomized
+   */
+  public void setRandomizeData(boolean d) {
+    m_randomize = d;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String rawOutputTipText() {
     return "Save raw output (useful for debugging). If set, then output is "
       +"sent to the destination specified by outputFile";
@@ -427,7 +457,7 @@ public class RandomSplitResultProducer
    *
    * @return Value of TrainPercent.
    */
-  public int getTrainPercent() {
+  public double getTrainPercent() {
     
     return m_TrainPercent;
   }
@@ -437,7 +467,7 @@ public class RandomSplitResultProducer
    *
    * @param newTrainPercent Value to assign to TrainPercent.
    */
-  public void setTrainPercent(int newTrainPercent) {
+  public void setTrainPercent(double newTrainPercent) {
     
     m_TrainPercent = newTrainPercent;
   }
@@ -480,7 +510,7 @@ public class RandomSplitResultProducer
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
 	     "\tThe percentage of instances to use for training.\n"
@@ -507,6 +537,11 @@ public class RandomSplitResultProducer
 	     "W", 1, 
 	     "-W <class name>"));
 
+    newVector.addElement(new Option(
+	     "Set when data is not to be randomized.",
+	     "R",0,"-R"));
+
+ 
     if ((m_SplitEvaluator != null) &&
 	(m_SplitEvaluator instanceof OptionHandler)) {
       newVector.addElement(new Option(
@@ -530,6 +565,9 @@ public class RandomSplitResultProducer
    * -D <br>
    * Specify that raw split evaluator output is to be saved. <p>
    *
+   * -R <br>
+   * Do not randomize the dataset. <p>
+   *
    * -O file/directory name <br>
    * Specify the file or directory to which raw split evaluator output
    * is to be saved. If a directory is specified, then each output string
@@ -547,6 +585,7 @@ public class RandomSplitResultProducer
   public void setOptions(String[] options) throws Exception {
     
     setRawOutput(Utils.getFlag('D', options));
+    setRandomizeData(!Utils.getFlag('R', options));
 
     String fName = Utils.getOption('O', options);
     if (fName.length() != 0) {
@@ -555,7 +594,7 @@ public class RandomSplitResultProducer
 
     String trainPct = Utils.getOption('P', options);
     if (trainPct.length() != 0) {
-      setTrainPercent(Integer.parseInt(trainPct));
+      setTrainPercent((new Double(trainPct)).doubleValue());
     } else {
       setTrainPercent(66);
     }
@@ -591,13 +630,17 @@ public class RandomSplitResultProducer
       seOptions = ((OptionHandler)m_SplitEvaluator).getOptions();
     }
     
-    String [] options = new String [seOptions.length + 8];
+    String [] options = new String [seOptions.length + 9];
     int current = 0;
 
     options[current++] = "-P"; options[current++] = "" + getTrainPercent();
-
-        if (getRawOutput()) {
+    
+    if (getRawOutput()) {
       options[current++] = "-D";
+    }
+    
+    if (!getRandomizeData()) {
+      options[current++] = "-R";
     }
 
     options[current++] = "-O"; 
