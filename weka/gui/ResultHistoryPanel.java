@@ -62,7 +62,7 @@ import weka.gui.visualize.PrintableComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -114,7 +114,9 @@ public class ResultHistoryPanel extends JPanel {
    */
   public ResultHistoryPanel(JTextComponent text) {
     m_SingleText = text;
-    m_Printer = new PrintableComponent(m_SingleText);
+    if (text != null) {
+      m_Printer = new PrintableComponent(m_SingleText);
+    }
     m_List.addMouseListener(new RMouseAdapter() {
       public void mouseClicked(MouseEvent e) {
 	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
