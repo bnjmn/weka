@@ -25,7 +25,7 @@ import weka.core.*;
 /**
  * Class for handling a linear function.
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 public final class Function implements Serializable {

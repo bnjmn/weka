@@ -25,7 +25,7 @@ import weka.core.*;
 /**
  * Class for handling the impurity values when spliting the instances
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public final class Impurity{
   double n;                   // number of total instances 

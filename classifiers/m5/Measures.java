@@ -27,7 +27,7 @@ import weka.core.*;
 /**
  * Class for performance measures
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 public final class Measures {

@@ -24,6 +24,11 @@ import java.util.*;
 
 import weka.core.*;
 
+/**
+ * Stores some statistics.
+ * @author Yong Wang (yongwang@cs.waikato.ac.nz)
+ * @version $Revision: 1.2 $
+ */
 public final class Values {
   int  numInstances;        // number of the instances
   int  missingInstances;    // number of the instances with missing values 

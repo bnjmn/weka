@@ -25,7 +25,7 @@ import weka.core.*;
 /**
  * Class for containing the evaluation results of a model
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public final class Errors implements Serializable {
   int numInstances;         // number of total instances 

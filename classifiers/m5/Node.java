@@ -26,7 +26,7 @@ import weka.core.*;
 /**
  * Class for handing a node in the tree or the subtree under this node
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 public final class Node implements Serializable {
