@@ -66,7 +66,7 @@ import weka.attributeSelection.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {
@@ -93,6 +93,9 @@ public class SVMAttributeEval extends AttributeEvaluator
 
   /** Epsilon parameter to pass on to SMO */
   private double m_smoPParameter = 1.0e-25;
+
+  /** Filter parameter to pass on to SMO */
+  private int m_smoFilterType = 0;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -180,6 +183,13 @@ public class SVMAttributeEval extends AttributeEvaluator
 				    1,
 				    "-C <complexity>"));
 
+    newVector.addElement(new Option("\tWhether the SVM should "
+				    + "0=normalize/1=standardize/2=neither. "
+				    + "(default 0=normalize)",
+				    "N",
+				    1,
+				    "-N"));
+
     return newVector.elements();
   }
 
@@ -210,6 +220,9 @@ public class SVMAttributeEval extends AttributeEvaluator
    *
    * -T <tolerance> <br>
    * Sets the tolerance parameter. (default 1.0e-10)<p>
+   *
+   * -N <0|1|2> <br>
+   * Whether the SVM should 0=normalize/1=standardize/2=neither. (default 0=normalize)<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an error occurs
@@ -247,6 +260,13 @@ public class SVMAttributeEval extends AttributeEvaluator
       setComplexityParameter((new Double(optionString)).doubleValue());
     }
 
+    optionString = Utils.getOption('N', options);
+    if (optionString.length() != 0) {
+      setFilterType(new SelectedTag(Integer.parseInt(optionString), SMO.TAGS_FILTER));
+    } else {
+      setFilterType(new SelectedTag(SMO.FILTER_NORMALIZE, SMO.TAGS_FILTER));
+    }
+
     Utils.checkForRemainingOptions(options);
   }
 
@@ -256,7 +276,7 @@ public class SVMAttributeEval extends AttributeEvaluator
    * @return an array of strings suitable for passing to setOptions() 
    */
   public String[] getOptions() {
-    String[] options = new String[12];
+    String[] options = new String[14];
     int current = 0;
 
     options[current++] = "-X";
@@ -276,6 +296,9 @@ public class SVMAttributeEval extends AttributeEvaluator
 
     options[current++] = "-C";
     options[current++] = "" + getComplexityParameter();		
+
+    options[current++] = "-N";
+    options[current++] = "" + m_smoFilterType;		
 
     while (current < options.length) {
       options[current++] = "";
@@ -344,6 +367,16 @@ public class SVMAttributeEval extends AttributeEvaluator
    */
   public String complexityParameterTipText() {
     return "C complexity parameter to pass to the SVM";
+  }
+
+  /**
+   * Returns a tip text for this property suitable for display in the
+   * GUI
+   *
+   * @return tip text string describing this property
+   */
+  public String filterTypeTipText() {
+    return "filtering used by the SVM";
   }
 
   //________________________________________________________________________
@@ -459,6 +492,28 @@ public class SVMAttributeEval extends AttributeEvaluator
     return m_smoCParameter;
   }
 
+  /**
+   * The filtering mode to pass to SMO
+   *
+   * @param newType the new filtering mode
+   */
+  public void setFilterType(SelectedTag newType) {
+    
+    if (newType.getTags() == SMO.TAGS_FILTER) {
+      m_smoFilterType = newType.getSelectedTag().getID();
+    }
+  }
+
+  /**
+   * Get the filtering mode passed to SMO
+   *
+   * @return the filtering mode
+   */
+  public SelectedTag getFilterType() {
+
+    return new SelectedTag(m_smoFilterType, SMO.TAGS_FILTER);
+  }
+
   //________________________________________________________________________
 
   /**
@@ -560,7 +615,7 @@ public class SVMAttributeEval extends AttributeEvaluator
 				
 	// SMO seems to get stuck if data not normalised when few attributes remain
 	// smo.setNormalizeData(numAttrLeft < 40);
-	smo.setStandardizeData(true);
+	smo.setFilterType(new SelectedTag(m_smoFilterType, SMO.TAGS_FILTER));
 	smo.setEpsilon(m_smoPParameter);
 	smo.setToleranceParameter(m_smoTParameter);
 	smo.setC(m_smoCParameter);
