@@ -35,7 +35,7 @@ import weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class BestFirst extends ASSearch implements OptionHandler {
 
@@ -76,10 +76,19 @@ public class BestFirst extends ASSearch implements OptionHandler {
    **/
   public class LinkedList2 extends FastVector
   {
+    // Max number of elements in the list
+    int m_MaxSize;
+
     // ================
     // Public methods
     // ================
-
+    
+    public LinkedList2(int sz)
+    {
+      super();
+      m_MaxSize = sz;
+    }
+      
     /**
      * removes an element (Link) at a specific index from the list.
      * @param index the index of the element to be removed.
@@ -121,7 +130,7 @@ public class BestFirst extends ASSearch implements OptionHandler {
      * @param gr the attribute set specification
      * @param mer the "merit" of this attribute set
      **/
-    public void addToList(BitSet gr, double mer)
+    public void addToList(BitSet gr, double mer) throws Exception
     {
       Link2 newL = new Link2(gr, mer);
 	
@@ -131,6 +140,11 @@ public class BestFirst extends ASSearch implements OptionHandler {
 	}
       else if (mer > ((Link2)(firstElement())).merit)
 	{
+	  if (size() == m_MaxSize)
+	    {
+	      removeLinkAt(m_MaxSize-1);
+	    }
+	  //----------
 	  insertElementAt(newL,0);
 	}
       else
@@ -138,21 +152,37 @@ public class BestFirst extends ASSearch implements OptionHandler {
 	  int i = 0;
 	  int size = size();
 	  boolean done = false;
-	  while ((!done) && (i < size))
+
+	  //------------
+	  // don't insert if list contains max elements an this
+	  // is worst than the last
+	  if ((size == m_MaxSize) && (mer <= ((Link2)(lastElement())).merit))
 	    {
-	      if (mer > ((Link2)(elementAt(i))).merit)
+	    }
+	  //---------------
+	  else
+	    {
+	      while ((!done) && (i < size))
 		{
-		  insertElementAt(newL,i);
-		  done = true;
-		}
-	      else if (i == size-1)
-		{
-		  addElement(newL);
-		  done = true;
-		}
-	      else
-		{
-		  i++;
+		  if (mer > ((Link2)(elementAt(i))).merit)
+		    {
+		      if (size == m_MaxSize)
+			{
+			  removeLinkAt(m_MaxSize-1);
+			}
+		      // ---------------------
+		      insertElementAt(newL,i);
+		      done = true;
+		    }
+		  else if (i == size-1)
+		    {
+		      addElement(newL);
+		      done = true;
+		    }
+		  else
+		    {
+		      i++;
+		    }
 		}
 	    }
 	}
@@ -397,7 +427,7 @@ public class BestFirst extends ASSearch implements OptionHandler {
     Link2 tl;
 
     Hashtable lookup = new Hashtable((int)(200.0*m_numAttribs*1.5));
-    LinkedList2 bfList = new LinkedList2();
+    LinkedList2 bfList = new LinkedList2(m_maxStale);
     
     best_merit = -Double.MAX_VALUE;
     stale = 0;
