@@ -34,10 +34,11 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.9 $
  */
 public class DistributionMetaClusterer extends DistributionClusterer 
-  implements OptionHandler {
+  implements OptionHandler, WeightedInstancesHandler {
 
   /** holds training instances header information */
   private Instances m_theInstances;
@@ -97,45 +98,59 @@ public class DistributionMetaClusterer extends DistributionClusterer
      }
      
      Instance inst = null;
-     // process data
+
+     // Compute mean, etc.
+     int[] clusterIndex = new int[data.numInstances()];
      for (int i = 0; i < data.numInstances(); i++) {
        inst = data.instance(i);
        int cluster = m_wrappedClusterer.clusterInstance(inst);
-       m_priors[cluster]++;
+       m_priors[cluster] += inst.weight();
        for (int j = 0; j < data.numAttributes(); j++) {
 	 if (!inst.isMissing(j)) {
 	   if (data.attribute(j).isNominal()) {
-	     m_model[cluster][j].addValue(inst.value(j),1.0);
+	     m_model[cluster][j].addValue(inst.value(j),inst.weight());
 	   } else {
-	     m_modelNormal[cluster][j][0] += inst.value(j);
-	     m_modelNormal[cluster][j][1] += (inst.value(j) * inst.value(j));
+	     m_modelNormal[cluster][j][0] += inst.weight() * inst.value(j);
 	   }
 	 }
        }
+       clusterIndex[i] = cluster;
      }
-     
-     // calculate mean and std deviation for numeric attributes
+
      for (int j = 0; j < data.numAttributes(); j++) {
        if (data.attribute(j).isNumeric()) {
 	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
 	   if (m_priors[i] > 0) {
-	     // variance
-	     m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - 
-				       (m_modelNormal[i][j][0] *
-					m_modelNormal[i][j][0] /
-					m_priors[i])) /
-	       m_priors[i];
-	     
-	     // std dev
-	     m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]);
-	     if (m_modelNormal[i][j][1] <= m_minStdDev 
-		 || Double.isNaN(m_modelNormal[i][j][1])) {
-	       m_modelNormal[i][j][1] = 
-		 m_minStdDev;
-	     }
-	     
-	     // mean
 	     m_modelNormal[i][j][0] /= m_priors[i];
+	   }
+	 }
+       }
+     }
+
+     // Compute standard deviations
+     for (int i = 0; i < data.numInstances(); i++) {
+       inst = data.instance(i);
+       for (int j = 0; j < data.numAttributes(); j++) {
+	 if (!inst.isMissing(j)) {
+	   if (data.attribute(j).isNumeric()) {
+	     double diff = m_modelNormal[clusterIndex[i]][j][0] - inst.value(j);
+	     m_modelNormal[clusterIndex[i]][j][1] += inst.weight() * diff * diff;
+	   }
+	 }
+       }
+     }
+
+     for (int j = 0; j < data.numAttributes(); j++) {
+       if (data.attribute(j).isNumeric()) {
+	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
+	   if (m_priors[i] > 1) {
+	     m_modelNormal[i][j][1] = 
+	       Math.sqrt(m_modelNormal[i][j][1] / (m_priors[i] - 1));
+	   } else if (m_priors[i] <= 0) {
+	     m_modelNormal[i][j][1] = Double.MAX_VALUE;
+	   }
+	   if (m_modelNormal[i][j][1] <= m_minStdDev) {
+	     m_modelNormal[i][j][1] = m_minStdDev;
 	   }
 	 }
        }
@@ -298,6 +313,34 @@ public class DistributionMetaClusterer extends DistributionClusterer
 
     return m_wrappedClusterer;
   }
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minStdDevTipText() {
+    return "set minimum allowable standard deviation";
+  }
+
+  /**
+   * Set the minimum value for standard deviation when calculating
+   * normal density. Reducing this value can help prevent arithmetic
+   * overflow resulting from multiplying large densities (arising from small
+   * standard deviations) when there are many singleton or near singleton
+   * values.
+   * @param m minimum value for standard deviation
+   */
+  public void setMinStdDev(double m) {
+    m_minStdDev = m;
+  }
+
+  /**
+   * Get the minimum allowable standard deviation.
+   * @return the minumum allowable standard deviation
+   */
+  public double getMinStdDev() {
+    return m_minStdDev;
+  }
 
   /**
    * Returns an enumeration describing the available options..
@@ -306,7 +349,11 @@ public class DistributionMetaClusterer extends DistributionClusterer
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(2);
+    newVector.addElement(new Option("\tminimum allowable standard deviation "
+				    +"for normal density computation "
+				    +"\n\t(default 1e-6)"
+				    ,"M",1,"-M <num>"));
     newVector.addElement(new Option(
 				    "\tClusterer to wrap. (required)\n",
 				    "W", 1,"-W <clusterer name>"));
@@ -332,11 +379,20 @@ public class DistributionMetaClusterer extends DistributionClusterer
    * -W clusterer name <br>
    * Clusterer to wrap. (required) <p>
    *
+   * -M <num> <br>
+   *  Set the minimum allowable standard deviation for normal density 
+   * calculation. <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
+
+    String optionString = Utils.getOption('M', options);
+    if (optionString.length() != 0) {
+      setMinStdDev((new Double(optionString)).doubleValue());
+    }
+     
     String wString = Utils.getOption('W', options);
     if (wString.length() != 0) {
       setClusterer(Clusterer.forName(wString,
@@ -359,8 +415,11 @@ public class DistributionMetaClusterer extends DistributionClusterer
 	(m_wrappedClusterer instanceof OptionHandler)) {
       clustererOptions = ((OptionHandler)m_wrappedClusterer).getOptions();
     }
-    String [] options = new String [clustererOptions.length + 3];
+    String [] options = new String [clustererOptions.length + 5];
     int current = 0;
+
+    options[current++] = "-M";
+    options[current++] = ""+getMinStdDev();
 
     if (getClusterer() != null) {
       options[current++] = "-W";
