@@ -57,7 +57,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -742,10 +742,6 @@ public class IBk extends DistributionClassifier implements
     return result;
   }
 
-  // ===============
-  // Private methods
-  // ===============
-
   /**
    * Initialise scheme variables.
    */
@@ -1052,11 +1048,6 @@ public class IBk extends DistributionClassifier implements
       System.exit(0);
     }
   }
-
-
-  // ============
-  // Test method.
-  // ============
 
   /**
    * Main method for testing this class.
