@@ -66,7 +66,7 @@ import  weka.core.*;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.14 $
+ * @version  $Revision: 1.15 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -527,7 +527,7 @@ public class AttributeSelection implements Serializable {
     m_ASEvaluator.buildEvaluator(m_trainInstances);
     if (m_ASEvaluator instanceof AttributeTransformer) {
       m_trainInstances = 
-	((AttributeTransformer)m_ASEvaluator).getTransformedData();
+	((AttributeTransformer)m_ASEvaluator).transformedHeader();
     }
     int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
 
