@@ -7,9 +7,17 @@
 
 package weka.filters;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Vector;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 
 /** 
  * Filters instances according to the value of an attribute.<p>
@@ -21,11 +29,16 @@ import weka.core.*;
  *
  * -S num<br>
  * Numeric value to be used for selection on numeric attribute.
- * (Instances with values smaller than given value.) <p>
+ * Instances with values smaller than given value will be selected.
+ * (default 0) <p>
  *
  * -L index1,index2-index4,...<br>
  * Range of label indices to be used for selection on nominal attribute.
- * (First and last are valid indexes.)<p>
+ * First and last are valid indexes. (default all values)<p>
+ *
+ * -M <br>
+ * Missing values count as a match. This setting is independent of
+ * the -V option. (default missing values don't match)<p>
  *
  * -V<br>
  * Invert matching sense.<p>
@@ -35,7 +48,7 @@ import weka.core.*;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class InstanceFilter extends Filter implements OptionHandler {
 
@@ -46,7 +59,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
   protected int m_Attribute;
   
   /** Stores which values of nominal attribute are to be used for filtering.*/
-  protected Range m_Values = new Range();
+  protected Range m_Values;
 
   /** Stores which value of a numeric attribute is to be used for filtering.*/
   protected double m_Value = 0;
@@ -54,12 +67,24 @@ public class InstanceFilter extends Filter implements OptionHandler {
   /** Inverse of test to be used? */
   protected boolean m_Inverse = false;
 
+  /** True if missing values should count as a match */
+  protected boolean m_MatchMissingValues = false;
+
   /** Modify header for nominal attributes? */
   protected boolean m_ModifyHeader = false;
 
   /** If m_ModifyHeader, stores a mapping from old to new indexes */
   protected int [] m_NominalMapping;
-  
+
+  /** Default constructor */
+  public InstanceFilter() {
+    try {
+      m_Values = new Range("first-last");
+    } catch (Exception ex) {
+      throw new Error("Shouldn't happen unless Range changes incompatibly");
+    }
+  }
+
   /**
    * Returns an enumeration describing the available options
    *
@@ -75,13 +100,19 @@ public class InstanceFilter extends Filter implements OptionHandler {
     newVector.addElement(new Option(
               "\tNumeric value to be used for selection on numeric\n"+
 	      "\tattribute.\n"+
-	      "\t(Instances with values smaller than given value.)",
+	      "\tInstances with values smaller than given value will\n"+
+              "\tbe selected. (default 0)",
               "S", 1, "-S <num>"));
     newVector.addElement(new Option(
               "\tRange of label indices to be used for selection on\n"+
 	      "\tnominal attribute.\n"+
-	      "\t(First and last are valid indexes.)",
+	      "\tFirst and last are valid indexes. (default all values)",
               "L", 1, "-L <index1,index2-index4,...>"));
+    newVector.addElement(new Option(
+	      "\tMissing values count as a match. This setting is\n"+
+              "\tindependent of the -V option.\n"+
+              "\t(default missing values don't match)",
+              "M", 0, "-M"));
     newVector.addElement(new Option(
 	      "\tInvert matching sense.",
               "V", 0, "-V"));
@@ -103,11 +134,16 @@ public class InstanceFilter extends Filter implements OptionHandler {
    *
    * -S num<br>
    * Numeric value to be used for selection on numeric attribute.
-   * (Instances with values smaller than given value.) <p>
+   * Instances with values smaller than given value will be selected.
+   * (default 0) <p>
    *
    * -L index1,index2-index4,...<br>
    * Range of label indices to be used for selection on nominal attribute.
-   * (First and last are valid indexes.)<p>
+   * First and last are valid indexes. (default all values)<p>
+   *
+   * -M <br>
+   * Missing values count as a match. This setting is independent of
+   * the -V option. (default missing values don't match)<p>
    *
    * -V<br>
    * Invert matching sense.<p>
@@ -148,6 +184,7 @@ public class InstanceFilter extends Filter implements OptionHandler {
       setNominalIndices("");
     }
     setInvertSelection(Utils.getFlag('V', options));
+    setMatchMissingValues(Utils.getFlag('M', options));
     setModifyHeader(Utils.getFlag('H', options));
     // Re-initialize output format according to new options
     
@@ -254,7 +291,12 @@ public class InstanceFilter extends Filter implements OptionHandler {
       m_NewBatch = false;
     }
     if (instance.isMissing(m_Attribute)) {
-      return false;
+      if (getMatchMissingValues()) {
+        push((Instance)instance.copy());
+        return true;
+      } else {
+        return false;
+      }
     }
     if (isNumeric()) {
       if (!m_Inverse) {
@@ -373,6 +415,26 @@ public class InstanceFilter extends Filter implements OptionHandler {
     m_Value = value;
   }
 
+  /**
+   * Gets whether missing values are counted as a match.
+   *
+   * @return true if missing values are counted as a match.
+   */
+  public boolean getMatchMissingValues() {
+
+    return m_MatchMissingValues;
+  }
+  
+  /**
+   * Sets whether missing values are counted as a match.
+   *
+   * @param newMatchMissingValues true if missing values are counted as a match.
+   */
+  public void setMatchMissingValues(boolean newMatchMissingValues) {
+
+    m_MatchMissingValues = newMatchMissingValues;
+  }
+  
   /**
    * Get whether the supplied columns are to be removed or kept
    *

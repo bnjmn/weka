@@ -44,7 +44,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) (Fayyad and Irani's method)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class DiscretizeFilter extends Filter 
   implements OptionHandler, WeightedInstancesHandler {
@@ -374,6 +374,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setFindNumBins(boolean newFindNumBins) {
     
+    m_UseMDL = false;
     m_FindNumBins = newFindNumBins;
   }
   
@@ -422,9 +423,9 @@ public class DiscretizeFilter extends Filter
   }
 
   /**
-   * Gets whether MDL will be used as the discretisation method
+   * Gets whether MDL will be used as the discretisation method.
    *
-   * @return true if so
+   * @return true if so, false if fixed bins should be used.
    */
   public boolean getUseMDL() {
 
@@ -432,9 +433,10 @@ public class DiscretizeFilter extends Filter
   }
 
   /** 
-   * Sets whether MDL will be used as the discretisation method
+   * Sets whether MDL will be used as the discretisation method.
    *
-   * @param useMDL true if MDL should be used
+   * @param useMDL true if MDL should be used, false if fixed bins should
+   * be used.
    */
   public void setUseMDL(boolean useMDL) {
 
@@ -470,6 +472,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setUseKononenko(boolean useKon) {
 
+    m_UseMDL = true;
     m_UseKononenko = useKon;
   }
 
@@ -502,6 +505,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setUseBetterEncoding(boolean useBetterEncoding) {
 
+    m_UseMDL = true;
     m_UseBetterEncoding = useBetterEncoding;
   }
 
@@ -534,6 +538,7 @@ public class DiscretizeFilter extends Filter
    */
   public void setBins(int numBins) {
 
+    m_UseMDL = false;
     m_NumBins = numBins;
   }
 
@@ -1091,7 +1096,7 @@ public class DiscretizeFilter extends Filter
   protected void convertInstance(Instance instance) throws Exception {
 
     int index = 0;
-    double [] newVals = new double [outputFormatPeek().numAttributes()];
+    double [] vals = new double [outputFormatPeek().numAttributes()];
     // Copy and convert the values
     for(int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (m_DiscretizeCols.isInRange(i) && 
@@ -1100,48 +1105,53 @@ public class DiscretizeFilter extends Filter
 	double currentVal = instance.value(i);
 	if (m_CutPoints[i] == null) {
 	  if (instance.isMissing(i)) {
-	    newVals[index] = Instance.missingValue();
+	    vals[index] = Instance.missingValue();
 	  } else {
-	    newVals[index] = 0;
+	    vals[index] = 0;
 	  }
 	  index++;
 	} else {
 	  if (!m_MakeBinary) {
 	    if (instance.isMissing(i)) {
-	      newVals[index] = Instance.missingValue();
+	      vals[index] = Instance.missingValue();
 	    } else {
 	      for (j = 0; j < m_CutPoints[i].length; j++) {
 		if (currentVal <= m_CutPoints[i][j]) {
 		  break;
 		}
 	      }
-              newVals[index] = j;
+              vals[index] = j;
 	    }
 	    index++;
 	  } else {
 	    for (j = 0; j < m_CutPoints[i].length; j++) {
 	      if (instance.isMissing(i)) {
-                newVals[index] = Instance.missingValue();
+                vals[index] = Instance.missingValue();
 	      } else if (currentVal <= m_CutPoints[i][j]) {
-                newVals[index] = 0;
+                vals[index] = 0;
 	      } else {
-                newVals[index] = 1;
+                vals[index] = 1;
 	      }
 	      index++;
 	    }
 	  }   
 	}
       } else {
-        newVals[index] = instance.value(i);
+        vals[index] = instance.value(i);
 	index++;
       }
     }
     
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), newVals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), newVals));
+      inst = new Instance(instance.weight(), vals);
     }
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    push(inst);
   }
 
   /**

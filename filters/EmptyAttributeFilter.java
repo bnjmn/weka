@@ -4,8 +4,8 @@
  *
  */
 
-
 package weka.filters;
+
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.FastVector;
@@ -14,11 +14,13 @@ import weka.core.Utils;
 
 
 /** 
- * Removes all attributes that do not contain more than one value. This
- * determination is made based on the first batch of instances seen.
+ * Removes all attributes that do not contain more than one distinct
+ * value.  This determination is made based on the first batch of
+ * instances seen. If an attribute contains one distinct value and
+ * missing values, this is still taken as being empty.
  *
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class EmptyAttributeFilter extends Filter {
 
@@ -89,49 +91,48 @@ public class EmptyAttributeFilter extends Filter {
     if (m_MinArray == null) {
    
       // Compute minimums and maximums
-      m_MinArray = new double[getInputFormat().numAttributes()];
-      m_MaxArray = new double[getInputFormat().numAttributes()];
-      m_Keep = new boolean[getInputFormat().numAttributes()];
-      for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      Instances in = getInputFormat();
+      m_MinArray = new double[in.numAttributes()];
+      m_MaxArray = new double[in.numAttributes()];
+      m_Keep = new boolean[in.numAttributes()];
+      for (int i = 0; i < in.numAttributes(); i++) {
 	m_MinArray[i] = Double.NaN;
       }
-      for (int j = 0; j < getInputFormat().numInstances(); j++) {
-	double[] value = getInputFormat().instance(j).toDoubleArray();
-	for (int i = 0; i < getInputFormat().numAttributes(); i++) {
-	  if (getInputFormat().attribute(i).isNumeric()) {
-	    if (!Instance.isMissingValue(value[i])) {
-	      if (Double.isNaN(m_MinArray[i])) {
-		m_MinArray[i] = m_MaxArray[i] = value[i];
-	      } else {
-		if (value[i] < m_MinArray[i]) {
-		  m_MinArray[i] = value[i];
-		}
-		if (value[i] > m_MaxArray[i]) {
-		  m_MaxArray[i] = value[i];
-		}
-	      }
-	    }
+      for (int j = 0; j < in.numInstances(); j++) {
+	double [] value = in.instance(j).toDoubleArray();
+	for (int i = 0; i < in.numAttributes(); i++) {
+          if (!in.attribute(i).isString() &&
+              !Instance.isMissingValue(value[i])) {
+            if (Double.isNaN(m_MinArray[i])) {
+              m_MinArray[i] = m_MaxArray[i] = value[i];
+            } else {
+              if (value[i] < m_MinArray[i]) {
+                m_MinArray[i] = value[i];
+              }
+              if (value[i] > m_MaxArray[i]) {
+                m_MaxArray[i] = value[i];
+              }
+            }
 	  }
 	} 
       }
 
       FastVector attributes = new FastVector();
-      for (int i = 0; i< getInputFormat().numAttributes() ; i++) {
-        if ((!getInputFormat().attribute(i).isNumeric()) || 
-            (m_MinArray[i] < m_MaxArray[i]) || (m_MaxArray[i] > 0) ) {
-          attributes.addElement(getInputFormat().attribute(i).copy());
-
+      for (int i = 0; i < in.numAttributes(); i++) {
+        if (in.attribute(i).isString() || 
+            (m_MinArray[i] < m_MaxArray[i])) {
+          attributes.addElement(in.attribute(i).copy());
           m_Keep[i] = true;
         }
       }
 
-      Instances outputFormat = new Instances(getInputFormat().relationName(),
+      Instances outputFormat = new Instances(in.relationName(),
 					     attributes, 0); 
       setOutputFormat(outputFormat);
 
       // Convert pending input instances
-      for(int i = 0; i < getInputFormat().numInstances(); i++) {
-	convertInstance(getInputFormat().instance(i));
+      for(int i = 0; i < in.numInstances(); i++) {
+	convertInstance(in.instance(i));
       }
 
       // Free memory
@@ -151,25 +152,29 @@ public class EmptyAttributeFilter extends Filter {
   private void convertInstance(Instance instance) throws Exception {
   
     int index = 0;
-    double [] newVals = new double [outputFormatPeek().numAttributes()];
+    double [] vals = new double [outputFormatPeek().numAttributes()];
 
     for(int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (m_Keep[i]) {
         if (instance.isMissing(i)) {
-          newVals[index] = Instance.missingValue();
+          vals[index] = Instance.missingValue();
         } else {
-          newVals[index] = instance.value(i);
+          vals[index] = instance.value(i);
         }
         index++;
       }
     }
 
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), newVals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), newVals));
+      inst = new Instance(instance.weight(), vals);
     }
-
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    push(inst);
   }
 
   /**

@@ -41,7 +41,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AttributeExpressionFilter extends Filter 
   implements OptionHandler {
@@ -721,11 +721,15 @@ public class AttributeExpressionFilter extends Filter
 
     evaluateExpression(vals);
 
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), vals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), vals));
+      inst = new Instance(instance.weight(), vals);
     }
+    copyStringValues(inst, false, instance.dataset(), getOutputFormat());
+    inst.setDataset(getOutputFormat());
+    push(inst);
     return true;
   }
   

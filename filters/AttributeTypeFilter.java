@@ -31,7 +31,7 @@ import weka.core.FastVector;
  * and "string". (default "string")<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributeTypeFilter extends Filter implements OptionHandler {
 
@@ -210,11 +210,18 @@ public class AttributeTypeFilter extends Filter implements OptionHandler {
 	vals[j++] = instance.value(i);
       }
     }
+    Instance inst = null;
     if (instance instanceof SparseInstance) {
-      push(new SparseInstance(instance.weight(), vals));
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      push(new Instance(instance.weight(), vals));
+      inst = new Instance(instance.weight(), vals);
     }
+    if (m_DeleteType != Attribute.STRING) {
+      copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                       getOutputFormat(), getOutputStringIndex());
+    }
+    inst.setDataset(getOutputFormat());
+    push(inst);
     return true;
   }
 
