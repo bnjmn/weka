@@ -18,6 +18,7 @@
  */
 package weka.classifiers.trees.m5;
 
+import java.io.Serializable;
 import weka.core.*;
 import weka.classifiers.Classifier;
 
@@ -29,9 +30,9 @@ import weka.classifiers.Classifier;
  * header for use in printing the model to the console.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class PreConstructedLinearModel extends Classifier {
+public class PreConstructedLinearModel extends Classifier implements Serializable {
   
   // The coefficients
   private double [] m_coefficients;
