@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public final class Utils {
 
@@ -772,7 +772,7 @@ public final class Utils {
     }
     return c * Utils.log2((double) c);
   }
- 
+
   /**
    * Implements quicksort for an array of indices.
    *
