@@ -87,6 +87,7 @@ weka.filters.Filter = \
 # Lists the Attribute Selection Evaluators I want to choose from
 weka.attributeSelection.ASEvaluation = \
  weka.attributeSelection.CfsSubsetEval, \
+ weka.attributeSelection.ClassifierSubsetEval, \
  weka.attributeSelection.WrapperSubsetEval, \
  weka.attributeSelection.ConsistencySubsetEval, \
  weka.attributeSelection.ReliefFAttributeEval, \
@@ -100,6 +101,7 @@ weka.attributeSelection.ASEvaluation = \
 weka.attributeSelection.ASSearch = \
  weka.attributeSelection.BestFirst, \
  weka.attributeSelection.ForwardSelection, \
+ weka.attributeSelection.RaceSearch, \
  weka.attributeSelection.GeneticSearch, \
  weka.attributeSelection.RandomSearch, \
  weka.attributeSelection.ExhaustiveSearch, \
