@@ -407,7 +407,6 @@ public class Prism extends Classifier {
     try {
       System.out.println(Evaluation.evaluateModel(new Prism(), args));
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }

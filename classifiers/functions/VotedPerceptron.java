@@ -181,19 +181,21 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
       throw new Exception("Can only handle two-class datasets!");
     }
     if (insts.classAttribute().isNumeric()) {
-      throw new Exception("SMO can't handle a numeric class!");
+      throw new Exception("Can't handle a numeric class!");
     }
 
     // Filter data
+    m_Train = new Instances(insts);
+    m_Train.deleteWithMissingClass();
     m_ReplaceMissingValues = new ReplaceMissingValuesFilter();
-    m_ReplaceMissingValues.inputFormat(insts);
-    insts = Filter.useFilter(insts, m_ReplaceMissingValues);
+    m_ReplaceMissingValues.inputFormat(m_Train);
+    m_Train = Filter.useFilter(m_Train, m_ReplaceMissingValues);
+    
     m_NominalToBinary = new NominalToBinaryFilter();
-    m_NominalToBinary.inputFormat(insts);
-    insts = Filter.useFilter(insts, m_NominalToBinary);
-   
+    m_NominalToBinary.inputFormat(m_Train);
+    m_Train = Filter.useFilter(m_Train, m_NominalToBinary);
+
     /** Randomize training data */
-    m_Train = insts;
     m_Train.randomize(new Random(m_Seed));
 
     /** Make space to store perceptrons */
@@ -207,18 +209,20 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
     for (int it = 0; it < m_NumIterations; it++) {
       for (int i = 0; i < m_Train.numInstances(); i++) {
 	Instance inst = m_Train.instance(i);
-	int prediction = makePrediction(m_K, inst);
-	int classValue = (int) inst.classValue();
-	if (prediction == classValue) {
-	  m_Weights[m_K]++;
-	} else {
-	  m_IsAddition[m_K] = (classValue == 1);
-	  m_Additions[m_K] = i;
-	  m_K++;
-	  m_Weights[m_K]++;
-	}
-	if (m_K == m_MaxK) {
-	  break out;
+	if (!inst.classIsMissing()) {
+	  int prediction = makePrediction(m_K, inst);
+	  int classValue = (int) inst.classValue();
+	  if (prediction == classValue) {
+	    m_Weights[m_K]++;
+	  } else {
+	    m_IsAddition[m_K] = (classValue == 1);
+	    m_Additions[m_K] = i;
+	    m_K++;
+	    m_Weights[m_K]++;
+	  }
+	  if (m_K == m_MaxK) {
+	    break out;
+	  }
 	}
       }
     }
@@ -242,16 +246,18 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
     
     // Get probabilities
     double output = 0, sumSoFar = 0;
-    for (int i = 0; i <= m_K; i++) {
-      if (sumSoFar < 0) {
-	output -= m_Weights[i];
-      } else {
-	output += m_Weights[i];
-      }
-      if (m_IsAddition[i]) {
-	sumSoFar += innerProduct(m_Train.instance(m_Additions[i]), inst);
-      } else {
-	sumSoFar -= innerProduct(m_Train.instance(m_Additions[i]), inst);
+    if (m_K > 0) {
+      for (int i = 0; i <= m_K; i++) {
+	if (sumSoFar < 0) {
+	  output -= m_Weights[i];
+	} else {
+	  output += m_Weights[i];
+	}
+	if (m_IsAddition[i]) {
+	  sumSoFar += innerProduct(m_Train.instance(m_Additions[i]), inst);
+	} else {
+	  sumSoFar -= innerProduct(m_Train.instance(m_Additions[i]), inst);
+	}
       }
     }
     double[] result = new double[2];
@@ -313,7 +319,6 @@ public class VotedPerceptron extends DistributionClassifier implements OptionHan
     try {
       System.out.println(Evaluation.evaluateModel(new VotedPerceptron(), argv));
     } catch (Exception e) {
-      e.printStackTrace();
       System.out.println(e.getMessage());
     }
   }
