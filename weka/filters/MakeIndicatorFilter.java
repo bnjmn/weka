@@ -47,7 +47,7 @@ import weka.core.*;
  * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  *
  */
 public class MakeIndicatorFilter extends Filter implements OptionHandler {
@@ -374,7 +374,10 @@ public class MakeIndicatorFilter extends Filter implements OptionHandler {
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if (j != m_AttIndex) {
-	newAtts.addElement(att.copy());
+
+	// We don't have to copy the attribute because the
+	// attribute index remains unchanged.
+	newAtts.addElement(att);
       } else {
 	if (m_Numeric) {
 	  newAtts.addElement(new Attribute(att.name()));

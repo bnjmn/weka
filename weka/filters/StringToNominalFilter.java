@@ -47,7 +47,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * Index of the attribute to be changed. (default last)<p>
  *
  * @author Len Trigg (len@intelligenesis.net) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class StringToNominalFilter extends Filter 
   implements OptionHandler {
@@ -244,7 +244,10 @@ public class StringToNominalFilter extends Filter
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if (j != m_AttIndex) {
-	newAtts.addElement(att.copy()); 
+
+	// We don't have to copy the attribute because the
+	// attribute index remains unchanged.
+	newAtts.addElement(att); 
       } else {
 	  
 	// Compute list of attribute values
