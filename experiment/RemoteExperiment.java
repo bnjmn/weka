@@ -45,11 +45,16 @@ import java.io.BufferedOutputStream;
  * Getting started:<p>
  *
  * Start InstantDB (with the RMI bridge) on some machine. If using java2
- * then specify -Djava.security.policy=weka/experiment/remote.policy to the
- * virtual machine.<p>
+ * then specify -Djava.security.policy=db.policy to the
+ * virtual machine. Where db.policy is as follows: <br>
+ * <pre>
+ * grant {
+ *   permission java.security.AllPermission;
+ * };
+ * </pre><p>
  *
- * Start RemoteEngine servers on x machines. Again specify the security
- * policy file if using java2. There must be a 
+ * Start RemoteEngine servers on x machines as per the instructons in the
+ * README_Experiment_Gui file. There must be a 
  * DatabaseUtils.props in either the HOME or current directory of each
  * machine, listing all necessary jdbc drivers.<p>
  *
@@ -61,7 +66,8 @@ import java.io.BufferedOutputStream;
  *
  * <pre>
  *
- * java weka.experiment.RemoteExperiment -L 1 -U 10 \
+ * java -Djava.rmi.server.codebase=file:/path to weka classes/ \
+ * weka.experiment.RemoteExperiment -L 1 -U 10 \
  * -T /home/ml/datasets/UCI/iris.arff \
  * -D "weka.experiment.DatabaseResultListener" \
  * -P "weka.experiment.RandomSplitResultProducer" \
@@ -69,10 +75,17 @@ import java.io.BufferedOutputStream;
  * -W weka.experiment.ClassifierSplitEvaluator -- \
  * -W weka.classifiers.NaiveBayes
  *
- * </pre>
+ * </pre> <p>
+ * The "codebase" property tells rmi where to serve up weka classes from.
+ * This can either be a file url (as long as a shared file system is being
+ * used that is accessable by the remoteEngine servers), or http url (which
+ * of course supposes that a web server is running and you have put your
+ * weka classes somewhere that is web accessable). If using a file url the
+ * trailing "/" is *most* important unless the weka classes are in a jar
+ * file. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RemoteExperiment extends Experiment {
 
