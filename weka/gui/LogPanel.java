@@ -39,7 +39,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class LogPanel extends JPanel implements Logger {
 
@@ -48,9 +48,6 @@ public class LogPanel extends JPanel implements Logger {
   
   /** Displays the log messages */
   protected JTextArea m_LogText = new JTextArea(5, 20);
-
-  /** To determine whether a change was caused by scrolling or appending */
-  protected int m_TextHeight;
 
   /** An indicator for whether text has been output yet */
   protected boolean m_First = true;
@@ -69,24 +66,20 @@ public class LogPanel extends JPanel implements Logger {
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createTitledBorder("Log"));
     p1.setLayout(new BorderLayout());
-    JScrollPane js = new JScrollPane(m_LogText);
+    final JScrollPane js = new JScrollPane(m_LogText);
     p1.add(js, BorderLayout.CENTER);
-    m_TextHeight = js.getViewport().getViewSize().height;
     js.getViewport().addChangeListener(new ChangeListener() {
+      private int lastHeight;
       public void stateChanged(ChangeEvent e) {
 	JViewport vp = (JViewport)e.getSource();
 	int h = vp.getViewSize().height; 
-	// If new content is added ViewSize changes. This event is also
-	// fired when the user moves the scrollbar - in this case we
-	// don't want to move it back to the bottom.
-	if (h != m_TextHeight) {
-	  m_TextHeight = h;
+	if (h != lastHeight) { // i.e. an addition not just a user scrolling
+	  lastHeight = h;
 	  int x = h - vp.getExtentSize().height;
 	  vp.setViewPosition(new Point(0, x));
 	}
       }
     });
-
     setLayout(new BorderLayout());
     add(p1, BorderLayout.CENTER);
     add(m_StatusLab, BorderLayout.SOUTH);

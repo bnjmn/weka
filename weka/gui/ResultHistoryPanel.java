@@ -35,6 +35,10 @@ import javax.swing.JList;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.text.JTextComponent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JViewport;
+import java.awt.Point;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
@@ -44,7 +48,7 @@ import javax.swing.text.JTextComponent;
  * single-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -92,7 +96,20 @@ public class ResultHistoryPanel extends JPanel {
     });
     setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Result history"));
-    add(new JScrollPane(m_List), BorderLayout.CENTER);
+    final JScrollPane js = new JScrollPane(m_List);
+    js.getViewport().addChangeListener(new ChangeListener() {
+      private int lastHeight;
+      public void stateChanged(ChangeEvent e) {
+	JViewport vp = (JViewport)e.getSource();
+	int h = vp.getViewSize().height; 
+	if (h != lastHeight) { // i.e. an addition not just a user scrolling
+	  lastHeight = h;
+	  int x = h - vp.getExtentSize().height;
+	  vp.setViewPosition(new Point(0, x));
+	}
+      }
+    });
+    add(js, BorderLayout.CENTER);
   }
 
   /**

@@ -63,6 +63,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JFrame;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JViewport;
+import java.awt.Point;
 
 /** 
  * This panel allows the user to select and configure a classifier, set the
@@ -73,7 +77,7 @@ import javax.swing.JFrame;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -318,8 +322,21 @@ public class ClassifierPanel extends JPanel {
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Classifier output"));
     p3.setLayout(new BorderLayout());
-    p3.add(new JScrollPane(m_OutText), BorderLayout.CENTER);
-
+    final JScrollPane js = new JScrollPane(m_OutText);
+    p3.add(js, BorderLayout.CENTER);
+    js.getViewport().addChangeListener(new ChangeListener() {
+      private int lastHeight;
+      public void stateChanged(ChangeEvent e) {
+	JViewport vp = (JViewport)e.getSource();
+	int h = vp.getViewSize().height; 
+	if (h != lastHeight) { // i.e. an addition not just a user scrolling
+	  lastHeight = h;
+	  int x = h - vp.getExtentSize().height;
+	  vp.setViewPosition(new Point(0, x));
+	}
+      }
+    });
+    
     JPanel mondo = new JPanel();
     gbL = new GridBagLayout();
     mondo.setLayout(gbL);
@@ -578,7 +595,11 @@ public class ClassifierPanel extends JPanel {
 				    + (fold + 1) + "...");
 		eval.evaluateModel(classifier, test);
 	      }
-	      outBuff.append("=== Stratified cross-validation ===\n");
+	      if (inst.attribute(classIndex).isNominal()) {
+		outBuff.append("=== Stratified cross-validation ===\n");
+	      } else {
+		outBuff.append("=== Cross-validation ===\n");
+	      }
 	      break;
 		
 	      case 2: // Percent split
