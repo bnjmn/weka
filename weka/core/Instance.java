@@ -62,7 +62,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -343,7 +343,8 @@ public class Instance implements Copyable, Serializable {
    * dataset
    * @exception IllegalArgumentException if the position is out of range
    */
-  //@ requires m_Dataset != null;
+  //@ requires m_Dataset == null;
+  //@ requires 0 <= position && position <= numAttributes();
   public void insertAttributeAt(int position) {
 
     if (m_Dataset != null) {
@@ -441,6 +442,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the number of attributes as an integer
    */
+  //@ ensures \result == m_AttValues.length;
   public /*@pure@*/ int numAttributes() {
 
     return m_AttValues.length;
@@ -468,6 +470,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the number of values
    */
+  //@ ensures \result == m_AttValues.length;
   public /*@pure@*/ int numValues() {
 
     return m_AttValues.length;
