@@ -58,7 +58,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler {
@@ -316,7 +316,7 @@ public class ThresholdSelector extends Classifier
       m_Mode = 0;
     }
 
-    setClassifier((DistributionClassifier)Classifier.
+    setDistributionClassifier((DistributionClassifier)Classifier.
 		  forName(classifierName,
 			  Utils.partitionOptions(options)));
     if (!(m_Classifier instanceof OptionHandler)) {
@@ -347,9 +347,9 @@ public class ThresholdSelector extends Classifier
     options[current++] = "-X"; options[current++] = "" + getNumFolds();
     options[current++] = "-S"; options[current++] = "" + getSeed();
 
-    if (getClassifier() != null) {
+    if (getDistributionClassifier() != null) {
       options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
+      options[current++] = getDistributionClassifier().getClass().getName();
     }
     options[current++] = "-E"; options[current++] = "" + getEvaluationMode();
     options[current++] = "--";
@@ -538,21 +538,21 @@ public class ThresholdSelector extends Classifier
   }
 
   /**
-   * Set the classifier for boosting. 
+   * Set the DistributionClassifier for which threshold is set. 
    *
    * @param newClassifier the Classifier to use.
    */
-  public void setClassifier(DistributionClassifier newClassifier) {
+  public void setDistributionClassifier(DistributionClassifier newClassifier) {
 
     m_Classifier = newClassifier;
   }
 
   /**
-   * Get the classifier used as the classifier
+   * Get the DistributionClassifier used as the classifier.
    *
    * @return the classifier used as the classifier
    */
-  public Classifier getClassifier() {
+  public DistributionClassifier getDistributionClassifier() {
 
     return m_Classifier;
   }
