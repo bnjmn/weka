@@ -48,7 +48,7 @@ import  weka.filters.*;
  * ---expressed as a percentage of the mean). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -404,6 +404,12 @@ public class WrapperSubsetEval
       }
 
       text.append("\n");
+      if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
+	text.append("\tAccuracy estimation: RMSE\n");
+      } else {
+	text.append("\tAccuracy estimation: classification error\n");
+      }
+      
       text.append("\tNumber of folds for accuracy estimation: " 
 		  + m_folds 
 		  + "\n");
