@@ -41,7 +41,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Remove extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -60,6 +60,14 @@ public class Remove extends Filter
    * that will survive the filtering process 
    */
   protected int [] m_InputStringIndex;
+
+  /**
+   * Constructor so that we can initialize the Range variable properly.
+   */
+  public Remove() {
+	
+    m_SelectCols.setInvert(true);
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -193,6 +201,9 @@ public class Remove extends Filter
       m_NewBatch = false;
     }
 
+    if (getOutputFormat().numAttributes() == 0) {
+      return false;
+    }
     double [] vals = new double[getOutputFormat().numAttributes()];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
