@@ -24,7 +24,7 @@ import weka.filters.*;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NeuralNetwork extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -532,7 +532,7 @@ public class NeuralNetwork extends DistributionClassifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   class ControlPanel extends JPanel {
     
@@ -713,13 +713,7 @@ public class NeuralNetwork extends DistributionClassifier
   }
   
 
-  
-
-
-
-  
-  
-  
+    
   /** The training instances. */
   private Instances m_instances;
   
@@ -1580,6 +1574,7 @@ public class NeuralNetwork extends DistributionClassifier
     m_instances = new Instances(i);
     m_instances.deleteWithMissingClass();
     if (m_instances.numInstances() == 0) {
+      m_instances = null;
       throw new IllegalArgumentException("All class values missing.");
     }
     m_random = new Random(m_randomSeed);
@@ -1611,15 +1606,9 @@ public class NeuralNetwork extends DistributionClassifier
     }
     ///////////
 
-
-
-
     setupInputs();
       
-    setupOutputs();
-    
-    
-    
+    setupOutputs();    
     if (m_autoBuild) {
       setupHiddenLayer();
     }
@@ -1667,17 +1656,7 @@ public class NeuralNetwork extends DistributionClassifier
       m_win.setSize(640, 480);
       m_win.show();
     }
-    
-
-
-
-
-
-
-
-
-
-    
+   
     //This sets up the initial state of the gui
     if (m_gui) {
       blocker(true);
@@ -1686,7 +1665,6 @@ public class NeuralNetwork extends DistributionClassifier
       m_controlPanel.m_changeMomentum.setEnabled(false);
     } 
     
-
     //For silly situations in which the network gets accepted before training
     //commenses
     if (m_numeric) {
@@ -1696,11 +1674,9 @@ public class NeuralNetwork extends DistributionClassifier
       m_win.dispose();
       m_controlPanel = null;
       m_nodePanel = null;
+      m_instances = new Instances(m_instances, 0);
       return;
     }
-    
-    
-
 
     //connections done.
     double right = 0;
@@ -1759,6 +1735,7 @@ public class NeuralNetwork extends DistributionClassifier
       right /= totalWeight;
       if (Double.isInfinite(right) || Double.isNaN(right)) {
 	if (!m_reset) {
+	  m_instances = null;
 	  throw new Exception("Network cannot train. Try restarting with a" +
 			      " smaller learning rate.");
 	}
@@ -1767,6 +1744,7 @@ public class NeuralNetwork extends DistributionClassifier
 	  m_learningRate /= 2;
 	  buildClassifier(i);
 	  m_learningRate = origRate;
+	  m_instances = new Instances(m_instances, 0);	  
 	  return;
 	}
       }
@@ -1777,8 +1755,6 @@ public class NeuralNetwork extends DistributionClassifier
 	for (int nob = 0; nob < valSet.numInstances(); nob++) {
 	  m_currentInstance = valSet.instance(nob);
 	  if (!m_currentInstance.classIsMissing()) {
-	
-
 	    //this is where the network updating occurs, for the validation set
 	    resetNetwork();
 	    calculateOutputs();
@@ -1807,9 +1783,6 @@ public class NeuralNetwork extends DistributionClassifier
       m_error = right;
       //shows what the neuralnet is upto if a gui exists. 
       updateDisplay();
-
-
-
       //This junction controls what state the gui is in at the end of each
       //epoch, Such as if it is paused, if it is resumable etc...
       if (m_gui) {
@@ -1845,10 +1818,12 @@ public class NeuralNetwork extends DistributionClassifier
 	  m_win.dispose();
 	  m_controlPanel = null;
 	  m_nodePanel = null;
+	  m_instances = new Instances(m_instances, 0);
 	  return;
 	}
       }
       if (m_accepted) {
+	m_instances = new Instances(m_instances, 0);
 	return;
       }
     }
@@ -1857,6 +1832,7 @@ public class NeuralNetwork extends DistributionClassifier
       m_controlPanel = null;
       m_nodePanel = null;
     }
+    m_instances = new Instances(m_instances, 0);  
   }
 
   /**
