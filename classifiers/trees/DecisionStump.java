@@ -22,11 +22,9 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.meta.LogitBoost;
 import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.meta.LogitBoost;
 import weka.classifiers.Sourcable;
 import java.io.*;
 import java.util.*;
@@ -41,7 +39,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class DecisionStump extends DistributionClassifier 
   implements WeightedInstancesHandler, Sourcable {
@@ -78,6 +76,11 @@ public class DecisionStump extends DistributionClassifier
 
     m_Instances = new Instances(instances);
     m_Instances.deleteWithMissingClass();
+
+    if (m_Instances.numInstances() == 0) {
+      throw new Exception("No instances without missing class values in training file!");
+    }
+
     if (m_Instances.classAttribute().isNominal()) {
       numClasses = m_Instances.numClasses();
     } else {
@@ -98,7 +101,7 @@ public class DecisionStump extends DistributionClassifier
 	} else {
 	  currVal = findSplitNumeric(i);
 	}
-	if ((first) || (Utils.sm(currVal, bestVal))) {
+	if ((first) || (currVal < bestVal)) {
 	  bestVal = currVal;
 	  bestAtt = i;
 	  bestPoint = m_SplitPoint;
@@ -119,7 +122,14 @@ public class DecisionStump extends DistributionClassifier
     m_Distribution = bestDist;
     if (m_Instances.classAttribute().isNominal()) {
       for (int i = 0; i < m_Distribution.length; i++) {
-	Utils.normalize(m_Distribution[i]);
+	double sumCounts = Utils.sum(m_Distribution[i]);
+	if (sumCounts == 0) { // This means there were only missing attribute values
+	  System.arraycopy(m_Distribution[2], 0, m_Distribution[i], 0, 
+			   m_Distribution[2].length);
+	  Utils.normalize(m_Distribution[i]);
+	} else {
+	  Utils.normalize(m_Distribution[i], sumCounts); 
+	}
       }
     }
     
@@ -346,7 +356,7 @@ public class DecisionStump extends DistributionClassifier
 	m_Distribution[1][j] = sumCounts[j] - counts[i][j];
       }
       currVal = ContingencyTables.entropyConditionedOnRows(m_Distribution);
-      if (Utils.sm(currVal, bestVal)) {
+      if (currVal < bestVal) {
 	bestVal = currVal;
 	m_SplitPoint = (double)i;
 	for (int j = 0; j < 3; j++) {
@@ -406,7 +416,7 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Check if the total weight is zero
-    if (Utils.eq(totalSumOfWeights, 0)) {
+    if (totalSumOfWeights <= 0) {
       return bestVal;
     }
 
@@ -429,11 +439,11 @@ public class DecisionStump extends DistributionClassifier
 
       currVal = variance(m_Distribution, sumsSquares, sumOfWeights);
       
-      if (Utils.sm(currVal, bestVal)) {
+      if (currVal < bestVal) {
 	bestVal = currVal;
 	m_SplitPoint = (double)i;
 	for (int j = 0; j < 3; j++) {
-	  if (!Utils.eq(sumOfWeights[j], 0)) {
+	  if (sumOfWeights[j] > 0) {
 	    bestDist[j][0] = m_Distribution[j][0] / sumOfWeights[j];
 	  } else {
 	    bestDist[j][0] = totalSum / totalSumOfWeights;
@@ -489,6 +499,12 @@ public class DecisionStump extends DistributionClassifier
     }
     System.arraycopy(m_Distribution[1], 0, sum, 0, m_Instances.numClasses());
 
+    // Save current distribution as best distribution
+    for (int j = 0; j < 3; j++) {
+      System.arraycopy(m_Distribution[j], 0, bestDist[j], 0, 
+		       m_Instances.numClasses());
+    }
+
     // Sort instances
     m_Instances.sort(index);
     
@@ -498,10 +514,10 @@ public class DecisionStump extends DistributionClassifier
       Instance instPlusOne = m_Instances.instance(i + 1);
       m_Distribution[0][(int)inst.classValue()] += inst.weight();
       m_Distribution[1][(int)inst.classValue()] -= inst.weight();
-      if (Utils.sm(inst.value(index), instPlusOne.value(index))) {
+      if (inst.value(index) < instPlusOne.value(index)) {
 	currCutPoint = (inst.value(index) + instPlusOne.value(index)) / 2.0;
 	currVal = ContingencyTables.entropyConditionedOnRows(m_Distribution);
-	if (Utils.sm(currVal, bestVal)) {
+	if (currVal < bestVal) {
 	  m_SplitPoint = currCutPoint;
 	  bestVal = currVal;
 	  for (int j = 0; j < 3; j++) {
@@ -557,7 +573,7 @@ public class DecisionStump extends DistributionClassifier
     }
 
     // Check if the total weight is zero
-    if (Utils.eq(totalSumOfWeights, 0)) {
+    if (totalSumOfWeights <= 0) {
       return bestVal;
     }
 
@@ -574,14 +590,14 @@ public class DecisionStump extends DistributionClassifier
       m_Distribution[1][0] -= inst.classValue() * inst.weight();
       sumsSquares[1] -= inst.classValue() * inst.classValue() * inst.weight();
       sumOfWeights[1] -= inst.weight();
-      if (Utils.sm(inst.value(index), instPlusOne.value(index))) {
+      if (inst.value(index) < instPlusOne.value(index)) {
 	currCutPoint = (inst.value(index) + instPlusOne.value(index)) / 2.0;
 	currVal = variance(m_Distribution, sumsSquares, sumOfWeights);
-	if (Utils.sm(currVal, bestVal)) {
+	if (currVal < bestVal) {
 	  m_SplitPoint = currCutPoint;
 	  bestVal = currVal;
 	  for (int j = 0; j < 3; j++) {
-	    if (!Utils.eq(sumOfWeights[j], 0)) {
+	    if (sumOfWeights[j] > 0) {
 	      bestDist[j][0] = m_Distribution[j][0] / sumOfWeights[j];
 	    } else {
 	      bestDist[j][0] = totalSum / totalSumOfWeights;
@@ -603,7 +619,7 @@ public class DecisionStump extends DistributionClassifier
     double var = 0;
 
     for (int i = 0; i < s.length; i++) {
-      if (Utils.gr(sumOfWeights[i], 0)) {
+      if (sumOfWeights[i] > 0) {
 	var += sS[i] - ((s[i][0] * s[i][0]) / (double) sumOfWeights[i]);
       }
     }
@@ -625,7 +641,7 @@ public class DecisionStump extends DistributionClassifier
 	return 1;
       }
     } else {
-      if (Utils.smOrEq(instance.value(m_AttIndex), m_SplitPoint)) {
+      if (instance.value(m_AttIndex) <= m_SplitPoint) {
 	return 0;
       } else {
 	return 1;
