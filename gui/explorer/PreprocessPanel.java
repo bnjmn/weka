@@ -23,55 +23,56 @@
 
 package weka.gui.explorer;
 
+
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.URL;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.converters.Loader;
+import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
-import weka.gui.ExtensionFileFilter;
 import weka.gui.AttributeSelectionPanel;
 import weka.gui.AttributeSummaryPanel;
-import weka.gui.GenericArrayEditor;
-import weka.gui.Logger;
-import weka.gui.SysErrLog;
-import weka.gui.InstancesSummaryPanel;
-import weka.gui.TaskLogger;
+import weka.gui.ExtensionFileFilter;
 import weka.gui.FileEditor;
+import weka.gui.GenericArrayEditor;
 import weka.gui.GenericObjectEditor;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.Logger;
 import weka.gui.PropertyDialog;
-import weka.experiment.InstanceQuery;
-
-import java.io.Reader;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.BorderFactory;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.ListSelectionModel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.core.UnassignedClassException;
 
 /** 
  * This panel controls simple preprocessing of instances. Attributes may be
@@ -80,7 +81,7 @@ import javax.swing.ListSelectionModel;
  * set of instances. Altered instances may also be saved.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class PreprocessPanel extends JPanel {
 
@@ -480,6 +481,19 @@ public class PreprocessPanel extends JPanel {
 				      JOptionPane.ERROR_MESSAGE);
       }
       return temp;
+    } catch (UnassignedClassException ex) {
+      // Pop up an error optionpane
+      JOptionPane.showMessageDialog(this,
+				    "Problem filtering instances:\n"
+				    + ex.getMessage() + "\n\n"
+                                    +"You should not use filters that require "
+                                    +"a class attribute during preprocessing,\n"
+                                    +"as this will bias any classification "
+                                    +"results you obtain. Consider using a\n"
+                                    +"FilteredClassifier instead.",
+				    "Instance Filter",
+				    JOptionPane.ERROR_MESSAGE);
+      return null;
     } catch (Exception ex) {
       // Pop up an error optionpane
       JOptionPane.showMessageDialog(this,
