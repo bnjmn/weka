@@ -495,8 +495,7 @@ implements OptionHandler {
     }
 
     StringBuffer result = new StringBuffer();
-    result.append("AttributeSelectedClassifier:\nSelection time: "
-		  +measureSelectionTime()+"\n");
+    result.append("AttributeSelectedClassifier:\n\n");
     result.append(m_AttributeSelection.toResultsString());
     result.append("\n\nHeader of reduced data:\n"+m_ReducedHeader.toString());
     result.append("\n\nClassifier Model\n"+m_Classifier.toString());
