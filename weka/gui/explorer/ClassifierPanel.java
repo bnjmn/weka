@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.56 $
+ * @version $Revision: 1.57 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -276,10 +276,6 @@ public class ClassifierPanel extends JPanel {
 
   /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
-
-  /** The preprocess panel through which filters can be applied to
-      user supplied test data sets */
-  protected PreprocessPanel m_Preprocess = null;
 
   /** The instances summary panel displayed by m_SetTestFrame */
   protected InstancesSummaryPanel m_Summary = null;
@@ -697,15 +693,6 @@ public class ClassifierPanel extends JPanel {
   }
 
   /**
-   * Sets the preprocess panel through which user selected
-   * filters can be applied to any supplied test data
-   * @param p the preprocess panel to use
-   */
-  public void setPreprocess(PreprocessPanel p) {
-    m_Preprocess = p;
-  }
-
-  /**
    * Sets the Logger to receive informational messages
    *
    * @param newLog the Logger that will now get info messages
@@ -766,51 +753,6 @@ public class ClassifierPanel extends JPanel {
   }
 
   /**
-   * Attempts to filter the user specified test set through
-   * the most currently used set of filters (if any) from the
-   * pre-process panel.
-   */
-  protected void filterUserTestInstances() {
-
-    if (m_Preprocess != null && m_TestInstances != null) {
-      m_TestInstancesCopy = new Instances(m_TestInstances);
-      SerializedObject sf = m_Preprocess.getMostRecentFilters();
-      if (sf != null) {
-	Filter [] filters = null;
-	try {
-	  filters = (Filter [])sf.getObject();
-	} catch (Exception ex) {
-	  JOptionPane.showMessageDialog(this,
-					"Could not deserialize filters",
-					null,
-					JOptionPane.ERROR_MESSAGE);
-	}
-	if (filters.length != 0) {
-	  try {
-	    m_Log.statusMessage("Applying preprocess filters to test data...");
-	    m_TestInstancesCopy = new Instances(m_TestInstances);
-	    for (int i = 0; i < filters.length; i++) {
-	      m_Log.statusMessage("Passing through filter " + (i + 1) + ": "
-				  + filters[i].getClass().getName());
-	      filters[i].setInputFormat(m_TestInstancesCopy);
-	      m_TestInstancesCopy = Filter.useFilter(m_TestInstancesCopy, 
-						     filters[i]);
-	    }
-	    m_Log.statusMessage("OK");
-	  } catch (Exception ex) {
-	    m_Log.statusMessage("See error log");
-	    m_Log.logMessage("Problem applying filters to test data "
-			     +"(Classifier Panel)");
-	  }
-	  if (m_Summary != null && m_TestInstancesCopy != null) {
-	    m_Summary.setInstances(m_TestInstancesCopy);
-	  }
-	}
-      }
-    }
-  }
-
-  /**
    * Sets the user test set. Information about the current test set
    * is displayed in an InstanceSummaryPanel and the user is given the
    * ability to load another set from a file or url.
@@ -827,7 +769,6 @@ public class ClassifierPanel extends JPanel {
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
 	  m_TestInstances = sp.getInstances();
-	  filterUserTestInstances();
 	}
       });
       // Add propertychangelistener to update m_TestInstances whenever
