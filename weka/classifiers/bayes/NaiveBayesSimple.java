@@ -37,7 +37,7 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class NaiveBayesSimple extends Classifier {
 
@@ -254,10 +254,8 @@ public class NaiveBayesSimple extends Classifier {
 	}
 	attIndex++;
       }
-      System.out.println(probs[j] + " ");
       probs[j] *= m_Priors[j];
     }
-    System.out.println();
 
     // Normalize probabilities
     Utils.normalize(probs);

@@ -92,7 +92,7 @@ import javax.swing.ButtonGroup;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class SetupPanel extends JPanel {
 
@@ -506,13 +506,21 @@ public class SetupPanel extends JPanel {
       return;
     }
     File expFile = m_FileChooser.getSelectedFile();
-    if ( !(    (expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION))
-          || (KOML.isPresent() && expFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
-          || (expFile.getName().toLowerCase().endsWith(".xml")) ) )
-    {
-       expFile = new File(expFile.getParent(), expFile.getName()
-                          + Experiment.FILE_EXTENSION);
+    
+    // add extension if necessary
+    if (m_FileChooser.getFileFilter() == m_ExpFilter) {
+      if (!expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION))
+        expFile = new File(expFile.getParent(), expFile.getName() + Experiment.FILE_EXTENSION);
     }
+    else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
+      if (!expFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
+        expFile = new File(expFile.getParent(), expFile.getName() + KOML.FILE_EXTENSION);
+    }
+    else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
+      if (!expFile.getName().toLowerCase().endsWith(".xml"))
+        expFile = new File(expFile.getParent(), expFile.getName() + ".xml");
+    }
+    
     try {
       Experiment exp; 
       
@@ -558,13 +566,21 @@ public class SetupPanel extends JPanel {
       return;
     }
     File expFile = m_FileChooser.getSelectedFile();
-    if ( !(    (expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION))
-          || (KOML.isPresent() && expFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
-          || (expFile.getName().toLowerCase().endsWith(".xml")) ) )
-    {
-       expFile = new File(expFile.getParent(), expFile.getName()
-                          + Experiment.FILE_EXTENSION);
+    
+    // add extension if necessary
+    if (m_FileChooser.getFileFilter() == m_ExpFilter) {
+      if (!expFile.getName().toLowerCase().endsWith(Experiment.FILE_EXTENSION))
+        expFile = new File(expFile.getParent(), expFile.getName() + Experiment.FILE_EXTENSION);
     }
+    else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
+      if (!expFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
+        expFile = new File(expFile.getParent(), expFile.getName() + KOML.FILE_EXTENSION);
+    }
+    else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
+      if (!expFile.getName().toLowerCase().endsWith(".xml"))
+        expFile = new File(expFile.getParent(), expFile.getName() + ".xml");
+    }
+    
     try {
       // KOML?
       if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
