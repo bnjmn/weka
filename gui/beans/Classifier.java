@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -181,6 +181,39 @@ public class Classifier extends JPanel
 			 +" is not an incremental classifier (Classifier)");
       }
     }
+  }
+
+  /**
+   * Returns true if this classifier has an incoming connection that is
+   * an instance stream
+   *
+   * @return true if has an incoming connection that is an instance stream
+   */
+  public boolean hasIncomingStreamInstances() {
+    if (m_listenees.size() == 0) {
+      return false;
+    }
+    if (m_listenees.containsKey("instance")) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if this classifier has an incoming connection that is
+   * a batch set of instances
+   *
+   * @return a <code>boolean</code> value
+   */
+  public boolean hasIncomingBatchInstances() {
+    if (m_listenees.size() == 0) {
+      return false;
+    }
+    if (m_listenees.containsKey("trainingSet") ||
+	m_listenees.containsKey("testSet")) {
+      return true;
+    }
+    return false;
   }
 
   /**

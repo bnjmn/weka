@@ -38,7 +38,7 @@ import weka.classifiers.Classifier;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClassifierCustomizer extends JPanel
   implements Customizer {
@@ -125,7 +125,8 @@ public class ClassifierCustomizer extends JPanel
   
   private void checkOnClassifierType() {
     Classifier editedC = (Classifier)m_ClassifierEditor.getValue();
-    if (editedC instanceof weka.classifiers.UpdateableClassifier) {
+    if (editedC instanceof weka.classifiers.UpdateableClassifier && 
+	m_dsClassifier.hasIncomingStreamInstances()) {
       if (!m_panelVisible) {
 	add(m_incrementalPanel, BorderLayout.SOUTH);
 	m_panelVisible = true;
