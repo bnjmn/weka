@@ -92,7 +92,7 @@ import javax.swing.ButtonGroup;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class SetupPanel extends JPanel {
 
@@ -152,8 +152,14 @@ public class SetupPanel extends JPanel {
   /** The panel for configuring selected datasets */
   protected DatasetListPanel m_DatasetListPanel = new DatasetListPanel();
 
-  /** Area for user notes Default of 5 rows */
-  protected JTextArea m_NotesText = new JTextArea(null, 5, 0);
+  /** A button for bringing up the notes */
+  protected JButton m_NotesButton =  new JButton("Notes");
+
+  /** Frame for the notes */
+  protected JFrame m_NotesFrame = new JFrame("Notes");
+
+  /** Area for user notes Default of 10 rows */
+  protected JTextArea m_NotesText = new JTextArea(null, 10, 0);
 
   /**
    * Manages sending notifications to people when we change the experiment,
@@ -314,19 +320,34 @@ public class SetupPanel extends JPanel {
       }
     });
 
-    m_NotesText.setEnabled(false);
+    m_NotesFrame.addWindowListener(new WindowAdapter() {
+	public void windowClosing(WindowEvent e) {
+	  m_NotesButton.setEnabled(true);
+	}
+      });
+    m_NotesFrame.getContentPane().add(new JScrollPane(m_NotesText));
+    m_NotesFrame.setSize(600, 400);
+
+    m_NotesButton.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_NotesButton.setEnabled(false);
+	  m_NotesFrame.setVisible(true);
+	}
+      });
+    m_NotesButton.setEnabled(false);
+
     m_NotesText.setEditable(true);
-    m_NotesText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    //m_NotesText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_NotesText.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-	m_Exp.setNotes(m_NotesText.getText());
-      }
-    });
+	public void keyReleased(KeyEvent e) {
+	  m_Exp.setNotes(m_NotesText.getText());
+	}
+      });
     m_NotesText.addFocusListener(new FocusAdapter() {
-      public void focusLost(FocusEvent e) {
-	m_Exp.setNotes(m_NotesText.getText());
-      }
-    });
+	public void focusLost(FocusEvent e) {
+	  m_Exp.setNotes(m_NotesText.getText());
+	}
+      });
 
     // Set up the GUI layout
     JPanel buttons = new JPanel();
@@ -430,8 +451,7 @@ public class SetupPanel extends JPanel {
 
     JPanel notes = new JPanel();
     notes.setLayout(new BorderLayout());
-    notes.setBorder(BorderFactory.createTitledBorder("Notes"));
-    notes.add(new JScrollPane(m_NotesText), BorderLayout.CENTER);
+    notes.add(m_NotesButton, BorderLayout.CENTER);
     
     JPanel p2 = new JPanel();
     //    p2.setLayout(new GridLayout(2, 1));
@@ -447,7 +467,14 @@ public class SetupPanel extends JPanel {
     add(p3, BorderLayout.NORTH);
     add(p2, BorderLayout.CENTER);
   }
-  
+    
+  /**
+   * Deletes the notes frame.
+   */
+  protected void removeNotesFrame() {
+    m_NotesFrame.setVisible(false);
+  }
+
   /**
    * Sets the experiment to configure.
    *
@@ -467,8 +494,9 @@ public class SetupPanel extends JPanel {
     m_RLEditor.setValue(m_Exp.getResultListener());
     m_RLEditor.setEnabled(true);
     m_RLEditorPanel.repaint();
-    m_NotesText.setText(m_Exp.getNotes());
-    m_NotesText.setEnabled(true);
+
+    m_NotesText.setText(exp.getNotes());
+    m_NotesButton.setEnabled(true);
 
     m_advanceDataSetFirst.setSelected(m_Exp.getAdvanceDataSetFirst());
     m_advanceIteratorFirst.setSelected(!m_Exp.getAdvanceDataSetFirst());
