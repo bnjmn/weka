@@ -76,7 +76,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -313,9 +313,9 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     if (e.getSource() == m_List) {
       m_DeleteBut.setEnabled(m_List.getSelectedIndex() > -1);
       m_AddBut.setEnabled(true);
-      m_EditBut.setEnabled(m_List.getSelectedIndex() > -1);
-      m_LoadOptionsBut.setEnabled(m_List.getSelectedIndex() > -1);
-      m_SaveOptionsBut.setEnabled(m_List.getSelectedIndex() > -1);
+      m_EditBut.setEnabled(m_List.getSelectedIndices().length == 1);
+      m_LoadOptionsBut.setEnabled(m_List.getSelectedIndices().length == 1);
+      m_SaveOptionsBut.setEnabled(m_List.getSelectedIndices().length == 1);
     }
   }
 
