@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.14 $
+ * @version  $Revision: 1.15 $
   */
 public class Evaluation implements Summarizable {
 
@@ -968,13 +968,15 @@ public class Evaluation implements Summarizable {
    *
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
+   * @return the prediction made by the clasifier
    * @exception Exception if model could not be evaluated 
    * successfully or the data contains string attributes
    */
-  public void evaluateModelOnce(Classifier classifier,
+  public double evaluateModelOnce(Classifier classifier,
 				Instance instance) throws Exception {
   
     Instance classMissing = new Instance(instance);				  
+    double pred=0;
     classMissing.setDataset(instance.dataset());
     classMissing.setClassMissing();
     for (int i = 0; i < classMissing.numAttributes(); i++)
@@ -983,18 +985,22 @@ public class Evaluation implements Summarizable {
 			    "attributes!");
     if (m_ClassIsNominal) {
       if (classifier instanceof DistributionClassifier) {
-	updateStatsForClassifier(((DistributionClassifier)classifier).
-				 distributionForInstance(classMissing),
+	double [] dist = ((DistributionClassifier)classifier).
+				 distributionForInstance(classMissing);
+	pred = Utils.maxIndex(dist);
+	updateStatsForClassifier(dist,
 				 instance);
       } else {
-	updateStatsForClassifier(
-	      makeDistribution(classifier.classifyInstance(classMissing)),
-	      instance);
+	pred = classifier.classifyInstance(classMissing);
+	updateStatsForClassifier(makeDistribution(pred),
+				 instance);
       }
     } else {
-      updateStatsForPredictor(classifier.classifyInstance(classMissing),
+      pred = classifier.classifyInstance(classMissing);
+      updateStatsForPredictor(pred,
 			      instance);
     }
+    return pred;
   }
 
   /**
