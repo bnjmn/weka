@@ -27,22 +27,28 @@ import  weka.core.*;
  *
  * Valid options are: <p>
  *
- * -P <percent) <br>
+ * -P <start set> <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
+ * -F <percent) <br>
  * Percentage of the search space to consider. (default = 25). <p>
  *
  * -V <br>
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class RandomSearch extends ASSearch implements OptionHandler {
+public class RandomSearch extends ASSearch 
+  implements StartSetHandler, OptionHandler {
 
   /** 
-   * holds a starting set (if one is supplied). Becomes one member of the
-   * initial random population
+   * holds a starting set as an array of attributes.
    */
   private int[] m_starting;
+  
+  /** holds the start set as a range */
+  private Range m_startRange;
 
   /** the best feature set found during the search */
   private BitSet m_bestGroup;
@@ -94,10 +100,22 @@ public class RandomSearch extends ASSearch implements OptionHandler {
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);
+    
+    newVector.addElement(new Option("\tSpecify a starting set of attributes." 
+				    + "\n\tEg. 1,3,5-7."
+				    +"\n\tIf a start point is supplied,"
+				    +"\n\trandom search evaluates the start"
+				    +"\n\tpoint and then randomlylooks for"
+				    +"\n\tsubsets that are as good as or better"
+				    +"\n\tthan the start point with the same"
+				    +"\n\tor lower cardinality."
+				    ,"P",1
+				    , "-P <start set>"));
+
     newVector.addElement(new Option("\tPercent of search space to consider."
 				    +"\n\t(default = 25%)."
-				    , "P", 1
-				    , "-P <percent> "));
+				    , "F", 1
+				    , "-F <percent> "));
     newVector.addElement(new Option("\tOutput subsets as the search progresses."
 				    +"\n\t(default = false)."
 				    , "V", 0
@@ -110,7 +128,10 @@ public class RandomSearch extends ASSearch implements OptionHandler {
    *
    * Valid options are: <p>
    *
-   * -P <percent) <br>
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+   *
+   * -F <percent) <br>
    * Percentage of the search space to consider. (default = 25). <p>
    *
    * -V <br>
@@ -126,12 +147,40 @@ public class RandomSearch extends ASSearch implements OptionHandler {
     String optionString;
     resetOptions();
     
-    optionString = Utils.getOption('P',options);
+    optionString = Utils.getOption('P', options);
+    if (optionString.length() != 0) {
+      setStartSet(optionString);
+    }
+
+    optionString = Utils.getOption('F',options);
     if (optionString.length() != 0) {
       setSearchPercent((new Double(optionString)).doubleValue());
     }
 
     setVerbose(Utils.getFlag('V',options));
+  }
+
+  /**
+   * Sets a starting set of attributes for the search. It is the
+   * search method's responsibility to report this start set (if any)
+   * in its toString() method.
+   * @param startSet a string containing a list of attributes (and or ranges),
+   * eg. 1,2,6,10-15. "" indicates no start point.
+   * If a start point is supplied, random search evaluates the
+   * start point and then looks for subsets that are as good as or better 
+   * than the start point with the same or lower cardinality.
+   * @exception if start set can't be set.
+   */
+  public void setStartSet (String startSet) throws Exception {
+    m_startRange.setRanges(startSet);
+  }
+
+  /**
+   * Returns a list of attributes (and or attribute ranges) as a String
+   * @return a list of attributes (and or attribute ranges)
+   */
+  public String getStartSet () {
+    return m_startRange.getRanges();
   }
 
   /**
@@ -180,14 +229,19 @@ public class RandomSearch extends ASSearch implements OptionHandler {
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[3];
+    String[] options = new String[5];
     int current = 0;
 
     if (m_verbose) {
       options[current++] = "-V";
     }
 
-    options[current++] = "-P";
+    if (!(getStartSet().equals(""))) {
+      options[current++] = "-P";
+      options[current++] = ""+startSetToString();
+    }
+
+    options[current++] = "-F";
     options[current++] = "" + m_searchSize;
 
     while (current < options.length) {
@@ -195,6 +249,45 @@ public class RandomSearch extends ASSearch implements OptionHandler {
     }
 
     return  options;
+  }
+
+  /**
+   * converts the array of starting attributes to a string. This is
+   * used by getOptions to return the actual attributes specified
+   * as the starting set. This is better than using m_startRanges.getRanges()
+   * as the same start set can be specified in different ways from the
+   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
+   * is stored in a database is comparable.
+   * @return a comma seperated list of individual attribute numbers as a String
+   */
+  private String startSetToString() {
+    StringBuffer FString = new StringBuffer();
+    boolean didPrint;
+    
+    if (m_starting == null) {
+      return getStartSet();
+    }
+
+    for (int i = 0; i < m_starting.length; i++) {
+      didPrint = false;
+      
+      if ((m_hasClass == false) || 
+	  (m_hasClass == true && i != m_classIndex)) {
+	FString.append((m_starting[i] + 1));
+	didPrint = true;
+      }
+      
+      if (i == (m_starting.length - 1)) {
+	FString.append("");
+      }
+      else {
+	if (didPrint) {
+	  FString.append(",");
+	  }
+      }
+    }
+
+    return FString.toString();
   }
 
   /**
@@ -209,26 +302,7 @@ public class RandomSearch extends ASSearch implements OptionHandler {
       text.append("no attributes\n");
     }
     else {
-      boolean didPrint;
-
-      for (int i = 0; i < m_starting.length; i++) {
-	didPrint = false;
-
-	if ((m_hasClass == false) || 
-	    (m_hasClass == true && i != m_classIndex)) {
-	  text.append((m_starting[i] + 1));
-	  didPrint = true;
-	}
-
-	if (i == (m_starting.length - 1)) {
-	  text.append("\n");
-	}
-	else {
-	  if (didPrint) {
-	    text.append(",");
-	  }
-	}
-      }
+      text.append(startSetToString()+"\n");
     }
     text.append("\tNumber of iterations: "+m_iterations+" ("
 		+(m_searchSize * 100.0)+"% of the search space)\n");
@@ -241,18 +315,12 @@ public class RandomSearch extends ASSearch implements OptionHandler {
   /**
    * Searches the attribute subset space using a genetic algorithm.
    *
-   * @param startSet a (possibly) ordered array of attribute indexes from
-   * which to start the search from. Set to null if no explicit start
-   * point. If a start point is supplied, random search evaluates the
-   * start point and then looks for subsets that are as good as or better 
-   * than the start point with the same or lower cardinality.
-   *
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @exception Exception if the search can't be completed
    */
-   public int[] search (int[] startSet, ASEvaluation ASEval, Instances data)
+   public int[] search (ASEvaluation ASEval, Instances data)
      throws Exception {
      double best_merit;
      int sizeOfBest = m_numAttribs;
@@ -268,10 +336,6 @@ public class RandomSearch extends ASSearch implements OptionHandler {
 
      m_random = new Random(m_seed);
      
-     if (startSet != null) {
-       m_starting = startSet;
-     }
-     
      if (ASEval instanceof UnsupervisedSubsetEvaluator) {
        m_hasClass = false;
      }
@@ -282,6 +346,11 @@ public class RandomSearch extends ASSearch implements OptionHandler {
      
      SubsetEvaluator ASEvaluator = (SubsetEvaluator)ASEval;
      m_numAttribs = data.numAttributes();
+
+     m_startRange.setUpper(m_numAttribs-1);
+     if (!(getStartSet().equals(""))) {
+       m_starting = m_startRange.getSelection();
+     }
 
      // If a starting subset has been supplied, then initialise the bitset
      if (m_starting != null) {
@@ -445,6 +514,7 @@ public class RandomSearch extends ASSearch implements OptionHandler {
    */
   private void resetOptions() {
     m_starting = null;
+    m_startRange = new Range();
     m_searchSize = 0.25;
     m_seed = 1;
     m_onlyConsiderBetterAndSmaller = false;
