@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.12 $
+   $Revision: 1.13 $
   ===========================================================================
 -->
 
@@ -47,6 +47,22 @@
       destdir="${path_modifier}"/>
       <rmic base="${path_modifier}" 
        classname="weka.experiment.RemoteEngine"/>
+  </target>
+
+  <!--
+        Compile and leave class files in source tree using jikes in super pedantic mode.
+        This takes about half the time of regular javac-based target.
+    -->
+  <target name="compile_inline_jikes" depends="init_all"
+   description="Pedantically compile weka, leaving class files in the source tree">
+     <property name="build.compiler" value="jikes"/>
+     <property name="build.compiler.pedantic" value="true"/>
+     <property name="build.compiler.emacs" value="true"/>
+     <javac srcdir="${path_modifier}weka"
+      destdir="${path_modifier}"
+      deprecation="on" />
+     <rmic base="${path_modifier}" 
+      classname="weka.experiment.RemoteEngine"/>
   </target>
 
   <!-- Compile the java code from ${path_modifier}weka into ${build}/classes -->
