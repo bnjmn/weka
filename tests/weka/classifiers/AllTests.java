@@ -10,7 +10,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.AllTests
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AllTests extends TestSuite {
 
@@ -49,11 +49,11 @@ public class AllTests extends TestSuite {
 //      suite.addTest(RegressionByDiscretizationTest.suite());
 //      suite.addTest(SMOTest.suite());
 //      suite.addTest(StackingTest.suite());
-//      suite.addTest(ThresholdSelectorTest.suite());
+    suite.addTest(ThresholdSelectorTest.suite());
 //      suite.addTest(UserClassifierTest.suite());
 //      suite.addTest(VFITest.suite());
 //      suite.addTest(VotedPerceptronTest.suite());
-//      suite.addTest(ZeroRTest.suite());
+    suite.addTest(ZeroRTest.suite());
 //      suite.addTest(weka.classifiers.evaluation.AllTests.suite());
 //      suite.addTest(weka.classifiers.j48.AllTests.suite());
 //      suite.addTest(weka.classifiers.kstar.AllTests.suite());
