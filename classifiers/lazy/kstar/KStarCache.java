@@ -252,7 +252,7 @@ public class KStarCache implements Serializable {
   /**
    * Hashtable collision list.
    */
-  public class TableEntry {
+  public class TableEntry implements Serializable {
     /** attribute value hash code */
     public int hash;
 
