@@ -73,7 +73,7 @@ import javax.swing.JFrame;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -599,6 +599,8 @@ public class ClassifierPanel extends JPanel {
 	    }
 	    outBuff.append(eval.toSummaryString());
 	    if (inst.attribute(classIndex).isNominal()) {
+	      outBuff.append("\n\n");
+	      outBuff.append(eval.toClassDetailsString());
 	      outBuff.append("\n\n");
 	      outBuff.append(eval.toMatrixString());
 	    }
