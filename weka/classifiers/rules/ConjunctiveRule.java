@@ -51,7 +51,7 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 
 public class ConjunctiveRule extends DistributionClassifier implements OptionHandler, WeightedInstancesHandler{
@@ -75,7 +75,7 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
   private int m_NumClasses = 0;
     
   /** The seed to perform randomization */
-  private long m_Seed = -1;
+  private long m_Seed = 1;
     
   /** The Random object used for randomization */
   private Random m_Random = null;
@@ -706,9 +706,12 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    *
    * -R <br>
    * Set if NOT randomize the data before split to growing and 
-   * pruning data. If NOT set, but the seed is not set, this learner
-   * will use the current system time as the seed. (Default: true) <p>
+   * pruning data. If NOT set, the seed of randomization is 
+   * specified by the -S option. (Default: randomize) <p>
    * 
+   * -S <br>
+   * Seed of randomization. (Default: 1)<p>
+   *
    * -E <br>
    * Set whether consider the exclusive expressions for nominal
    * attribute split. (Default: false) <p>
@@ -725,7 +728,7 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(6);
 	
     newVector.addElement(new Option("\tSet number of folds for REP\n" +
 				    "\tOne fold is used as pruning set.\n" +
@@ -741,11 +744,14 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
     newVector.addElement(new Option("\tSet the minimal weights of instances\n" +
 				    "\twithin a split.\n" +
 				    "\t(default 2.0)","M", 1, "-M <min. weights>"));
-	
+    
     newVector.addElement(new Option("\tSet number of antecedents for pre-pruning\n" +
 				    "\tif -1, then REP is used\n" +
 				    "\t(default -1)","P", 1, "-P <number of antecedents>"));
-	
+    
+    newVector.addElement(new Option("\tSet the seed of randomization\n" +
+				    "\t(default 1)","S", 1, "-S <seed>"));
+    
     return newVector.elements();
   }
     
@@ -769,11 +775,11 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
     else 
       m_MinNo = 2.0;
 	
-    String seedString = Utils.getOption('s', options);
+    String seedString = Utils.getOption('S', options);
     if (seedString.length() != 0) 
       m_Seed = Integer.parseInt(seedString);
     else 
-      m_Seed = -1;
+      m_Seed = 1;
 	
     String numAntdsString = Utils.getOption('P', options);
     if (numAntdsString.length() != 0) 
@@ -792,11 +798,12 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    */
   public String [] getOptions() {
 	
-    String [] options = new String [8];
+    String [] options = new String [10];
     int current = 0;
     options[current++] = "-N"; options[current++] = "" + m_Folds;
     options[current++] = "-M"; options[current++] = "" + m_MinNo;
     options[current++] = "-P"; options[current++] = "" + m_NumAntds;
+    options[current++] = "-S"; options[current++] = "" + m_Seed;
 
     if(!m_IsRandomized)
       options[current++] = "-R";
@@ -835,15 +842,20 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
   public void buildClassifier(Instances instances) throws Exception{
     if (instances.checkForStringAttributes())
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-	
-    m_ClassAttribute = instances.classAttribute();
-	
+	 
     Instances data = new Instances(instances);
+
+    if(data.numInstances() == 0)
+	throw new Exception("No training data!");
     data.deleteWithMissingClass();
-	
+    
+    if(data.numInstances() == 0)
+	throw new Exception("Not training data without missing class values.");
+
     if(data.numInstances() < m_Folds)
       throw new Exception("Not enough data for REP.");
 
+    m_ClassAttribute = data.classAttribute();
     if(m_ClassAttribute.isNominal())
       m_NumClasses = m_ClassAttribute.numValues();
     else
@@ -852,18 +864,13 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
     m_Antds = new FastVector();
     m_DefDstr = new double[m_NumClasses];
     m_Cnsqt = new double[m_NumClasses];
-    m_Targets = new FastVector();	
-	
-    if(m_IsRandomized){  // Randomize the data
-      if(m_Random == null){		    
-	if(m_Seed == -1)
-	  m_Seed = System.currentTimeMillis();
-	m_Random = new Random(m_Seed);
-      }
-	    
-      data.randomize(m_Random);
-    }		
-
+    m_Targets = new FastVector();	    
+    m_Random = new Random(m_Seed);
+    
+    if(m_IsRandomized){  // Randomize the data	
+	data.randomize(m_Random);
+    }
+    
     if(m_NumAntds != -1){
       grow(data);
     }
@@ -892,6 +899,8 @@ public class ConjunctiveRule extends DistributionClassifier implements OptionHan
    * @return the class distribution for the given instance
    */
   public double[] distributionForInstance(Instance instance) throws Exception{
+      if(instance == null)
+	  throw new Exception("Testing instance is NULL!");
 	
     if (isCover(instance))		
       return m_Cnsqt;

@@ -46,7 +46,7 @@ import weka.core.Utils;
  * using <code>originalValue(double value)</code> procedure.<p>  
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassOrderFilter extends Filter implements OptionHandler {
     
@@ -291,69 +291,71 @@ public class ClassOrderFilter extends Filter implements OptionHandler {
       
       Instances newInsts = new Instances(data, 0);
       if(m_ClassAttribute.isNominal()){
-      switch(m_ClassOrder){
-      case FREQ_ASCEND:
-      case FREQ_DESCEND:
-	  // Sort it and put into a double array
-	  int[] tmp = Utils.sort(m_ClassCounts);
-	  double[] classOrder = new double[tmp.length];
-	  for(int t=0; t < tmp.length; t++)
-	      classOrder[t] = (double)tmp[t];
-	  
-	  int lo=-1, hi=-1, max=m_Converter.length-1;
-	  for(int y=0; y<=max; y++){ // y is the new class label
-	      double next = (y==max) ? -1.0 : m_ClassCounts[(int)classOrder[y+1]];
-	      if(Utils.eq(m_ClassCounts[(int)classOrder[y]], next)){
-		  if(lo == -1)
-		      lo = y;
-	      }
-	      else if(lo != -1){ // Randomize the order of classes with same size
-		  hi = y;
-		  randomize(classOrder, lo, hi);			
-		  for(int yy=lo; yy<=hi; yy++){
+	  switch(m_ClassOrder){
+	  case FREQ_ASCEND:
+	  case FREQ_DESCEND:
+	      // Sort it and put into a double array
+	      int[] tmp = Utils.sort(m_ClassCounts);
+	      double[] classOrder = new double[tmp.length];
+	      for(int t=0; t < tmp.length; t++)
+		  classOrder[t] = (double)tmp[t];
+	      
+	      int lo=-1, hi=-1, max=m_Converter.length-1;
+	      for(int y=0; y<=max; y++){ // y is the new class label
+		  double next = (y==max) ? -1.0 : m_ClassCounts[(int)classOrder[y+1]];
+		  if(Utils.eq(m_ClassCounts[(int)classOrder[y]], next)){
+		      if(lo == -1)
+			  lo = y;
+		  }
+		  else if(lo != -1){ // Randomize the order of classes with same size
+		      hi = y;
+		      randomize(classOrder, lo, hi);			
+		      for(int yy=lo; yy<=hi; yy++){
+			  if(m_ClassOrder == FREQ_ASCEND)
+			      m_Converter[(int)classOrder[yy]] = (double)yy;
+			  else
+			      m_Converter[(int)classOrder[yy]] = (double)(max-yy);
+			  
+		      }			
+		      lo = hi = -1;
+		  }
+		  else{ // Record in the converting table
 		      if(m_ClassOrder == FREQ_ASCEND)
-			  m_Converter[(int)classOrder[yy]] = (double)yy;
+			  m_Converter[(int)classOrder[y]] = (double)y;
 		      else
-			  m_Converter[(int)classOrder[yy]] = (double)(max-yy);
-		      
-		  }			
-		  lo = hi = -1;
+			  m_Converter[(int)classOrder[y]] = (double)(max-y);
+		  }
 	      }
-	      else{ // Record in the converting table
-		  if(m_ClassOrder == FREQ_ASCEND)
-		      m_Converter[(int)classOrder[y]] = (double)y;
-		  else
-		      m_Converter[(int)classOrder[y]] = (double)(max-y);
-	      }
+	      break;
+	  case RANDOM:
+	      for(int x=0; x < m_Converter.length; x++)		    
+		  m_Converter[x] = (double)x;
+	      
+	      randomize(m_Converter, 0, m_Converter.length-1);       
+	      break;
+	  default:
+	      throw new Exception("Class order not defined!"); 
 	  }
-	  break;
-      case RANDOM:
-	  for(int x=0; x < m_Converter.length; x++)		    
-	      m_Converter[x] = (double)x;
 	  
-	  randomize(m_Converter, 0, m_Converter.length-1);       
-	break;
-      default:
-	  throw new Exception("Class order not defined!"); 
-      }
-      
-      // Reset the class values
-      int classIndex = newInsts.classIndex();
-      double[] cls = new double[m_ClassCounts.length];
-      for(int z=0; z<m_Converter.length; z++){
-	  newInsts.renameAttributeValue(classIndex, (int)m_Converter[z], m_ClassAttribute.value(z));
-	  cls[(int)m_Converter[z]] = m_ClassCounts[z];
-      }
-      m_ClassCounts = cls;
+	  // Reset the class values
+	  int classIndex = newInsts.classIndex();
+	  double[] cls = new double[m_ClassCounts.length];
+	  for(int z=0; z<m_Converter.length; z++){
+	      newInsts.renameAttributeValue(classIndex, (int)m_Converter[z], m_ClassAttribute.value(z));
+	      cls[(int)m_Converter[z]] = m_ClassCounts[z];
+	  }
+	  m_ClassCounts = cls;
       }
       
       setOutputFormat(newInsts);
-      
+
       // Process all instances
       for(int xyz=0; xyz<data.numInstances(); xyz++){
 	  Instance datum = data.instance(xyz);
 	  if(m_ClassAttribute.isNominal())
 	      datum.setClassValue(m_Converter[(int)datum.classValue()]);
+	  // Add back the String attributes
+	  copyStringValues(datum, false, data, getOutputFormat());
 	  datum.setDataset(getOutputFormat());
 	  push(datum);
       }	

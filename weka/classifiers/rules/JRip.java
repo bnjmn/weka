@@ -36,6 +36,8 @@ import weka.core.Option;
 import weka.core.Copyable;
 import weka.core.WeightedInstancesHandler;
 import weka.core.AdditionalMeasureProducer;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.UnsupportedClassTypeException;
 
 import weka.filters.ClassOrderFilter;
 import weka.filters.Filter;
@@ -131,7 +133,7 @@ import weka.classifiers.Evaluation;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class JRip extends DistributionClassifier 
   implements OptionHandler, 
@@ -1050,16 +1052,22 @@ public class JRip extends DistributionClassifier
      
       if(instances.numInstances() == 0)
 	  throw new Exception(" No instances with a class value!");
-  	
-    m_Random = new Random(m_Seed); 
-    m_Total = RuleStats.numAllConditions(instances);
-    if(m_Debug)
-      System.err.println("Number of all possible conditions = "+m_Total);
-	
-    Instances data = null;
-    m_Filter = new ClassOrderFilter();
-	
-    // Sth. to make the class order different each time in cross-validations
+      
+      if (instances.checkForStringAttributes()) 
+	  throw new UnsupportedAttributeTypeException(" Cannot handle string attributes!");
+      
+      if (!instances.classAttribute().isNominal()) 
+	  throw new UnsupportedClassTypeException(" Only nominal class, please.");
+      
+      m_Random = new Random(m_Seed); 
+      m_Total = RuleStats.numAllConditions(instances);
+      if(m_Debug)
+	  System.err.println("Number of all possible conditions = "+m_Total);
+      
+      Instances data = null;
+      m_Filter = new ClassOrderFilter();
+      
+      // Sth. to make the class order different each time in cross-validations
     Instance inst = 
       instances.instance((int)(m_Random.nextDouble()*(double)instances.numInstances()));
     ((ClassOrderFilter)m_Filter).setSeed((long)inst.toString().hashCode());	
@@ -1077,11 +1085,7 @@ public class JRip extends DistributionClassifier
     if(data.numInstances() < m_Folds)
 	throw new Exception(" Not enough data for REP.");
     
-    m_Class = data.classAttribute();
-    
-    if (!m_Class.isNominal()) 
-      throw new Exception(" Only nominal class, please.");
-	
+    m_Class = data.classAttribute();	
     m_Ruleset = new FastVector();
     m_RulesetStats = new FastVector();
     m_Distributions = new FastVector();
