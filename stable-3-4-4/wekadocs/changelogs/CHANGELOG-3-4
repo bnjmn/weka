@@ -1,0 +1,945 @@
+
+2003-11-12 11:39  eibe
+
+	* weka/classifiers/meta/Bagging.java (1.25): Changed bagging so
+	that weights are properly taken into account even if out-of-bag
+	error is calculated.
+
+2003-11-12 11:07  eibe
+
+	* weka/classifiers/functions/LeastMedSq.java (1.8): Behaviour of
+	RemoveRange has changed.
+
+2003-11-12 11:00  mhall
+
+	* weka/gui/beans/FilterBeanInfo.java (1.3): Javadoc fix
+
+2003-11-12 10:13  eibe
+
+	* weka/classifiers/: meta/CVParameterSelection.java (1.21),
+	trees/RandomTree.java (1.5): Two tiny changes.
+
+2003-11-11 18:29  eibe
+
+	* weka/classifiers/functions/supportVector/SMOreg.java (1.3):
+	Another try.
+
+2003-11-11 17:38  eibe
+
+	* weka/classifiers/meta/CVParameterSelection.java (1.20): Fixed
+	problem resulting in multiple entries in results table when
+	Experimenter is used.
+
+2003-11-11 16:38  akibriya
+
+	* weka/gui/experiment/AlgorithmListPanel.java (1.5): Added support
+	for GenericArrayEditor to be able to use "Object[]" objects.
+
+2003-11-11 16:35  eibe
+
+	* weka/classifiers/meta/StackingC.java (1.4): Fixed problem
+	resulting from changing Range.java
+
+2003-11-11 16:32  akibriya
+
+	* weka/gui/: beans/FilterCustomizer.java (1.4),
+	explorer/AttributeSelectionPanel.java (1.28): Added support for
+	GenericArrayEditor to be able to use "Object[]" objects.
+
+2003-11-11 16:26  akibriya
+
+	* weka/gui/beans/LoaderCustomizer.java (1.3): Added support for
+	GenericArrayEditor to be able to use "Object[]" objects.
+
+2003-11-11 16:18  akibriya
+
+	* weka/: classifiers/trees/UserClassifier.java (1.15),
+	gui/beans/ClassifierCustomizer.java (1.5): Added support for
+	GenericArrayEditor to be able to use "Object[]" objects.
+
+2003-11-11 16:04  akibriya
+
+	* weka/gui/experiment/SetupPanel.java (1.21): Added support for
+	GenericArrayEditor to be able to use "Object[]" objects.
+
+2003-11-11 15:17  eibe
+
+	* weka/classifiers/functions/Logistic.java (1.30): Made some small
+	changes hoping to improve speed (but they didn't really help.
+
+2003-11-10 18:26  eibe
+
+	* weka/filters/unsupervised/attribute/StringToWordVector.java
+	(1.5): Fixed bug due to new behaviour of Range.java.
+
+2003-11-10 18:13  eibe
+
+	* weka/classifiers/meta/: CVParameterSelection.java (1.19),
+	OrdinalClassClassifier.java (1.9), RegressionByDiscretization.java
+	(1.20): Fixed a couple of bugs.
+
+2003-11-10 18:13  eibe
+
+	* weka/filters/Filter.java (1.22): Fixed bug in Filter.
+	bufferInstance() changed pointer to dataset before the instance was
+	copied.
+
+2003-11-10 17:34  eibe
+
+	* weka/filters/unsupervised/attribute/RemoveType.java (1.4): Fixed
+	bug.
+
+2003-11-10 17:05  eibe
+
+	* weka/filters/unsupervised/attribute/Remove.java (1.3): Fixed bug.
+
+2003-11-10 16:13  eibe
+
+	* weka/classifiers/: DistributionClassifier.java (1.6),
+	meta/DistributionMetaClassifier.java (1.9): Forgot to actually
+	remove DistributionClassifier and DistributionMetaClassifier.
+
+2003-11-10 15:20  eibe
+
+	* weka/: attributeSelection/ClassifierSubsetEval.java (1.10),
+	classifiers/CheckClassifier.java (1.15),
+	classifiers/Classifier.java (1.9), classifiers/Evaluation.java
+	(1.48), classifiers/bayes/AODE.java (1.6),
+	classifiers/bayes/BayesNet.java (1.10),
+	classifiers/bayes/NaiveBayes.java (1.14),
+	classifiers/bayes/NaiveBayesMultinomial.java (1.5),
+	classifiers/bayes/NaiveBayesSimple.java (1.11),
+	classifiers/evaluation/CostCurve.java (1.6),
+	classifiers/evaluation/EvaluationUtils.java (1.8),
+	classifiers/evaluation/MarginCurve.java (1.8),
+	classifiers/evaluation/ThresholdCurve.java (1.17),
+	classifiers/functions/Logistic.java (1.29),
+	classifiers/functions/SimpleLogistic.java (1.4),
+	classifiers/functions/VotedPerceptron.java (1.16),
+	classifiers/functions/neural/NeuralNetwork.java (1.11),
+	classifiers/functions/supportVector/SMO.java (1.2),
+	classifiers/lazy/IBk.java (1.28), classifiers/lazy/LBR.java (1.4),
+	classifiers/lazy/LWL.java (1.8), classifiers/lazy/kstar/KStar.java
+	(1.13), classifiers/meta/AdaBoostM1.java (1.18),
+	classifiers/meta/AttributeSelectedClassifier.java (1.13),
+	classifiers/meta/Bagging.java (1.24),
+	classifiers/meta/ClassificationViaRegression.java (1.16),
+	classifiers/meta/CostSensitiveClassifier.java (1.16),
+	classifiers/meta/FilteredClassifier.java (1.18),
+	classifiers/meta/Grading.java (1.2),
+	classifiers/meta/LogitBoost.java (1.27),
+	classifiers/meta/MultiBoostAB.java (1.3),
+	classifiers/meta/MultiClassClassifier.java (1.33),
+	classifiers/meta/MultiScheme.java (1.13),
+	classifiers/meta/OrdinalClassClassifier.java (1.8),
+	classifiers/meta/RacedIncrementalLogitBoost.java (1.3),
+	classifiers/meta/RandomCommittee.java (1.2),
+	classifiers/meta/RegressionByDiscretization.java (1.19),
+	classifiers/meta/Stacking.java (1.17),
+	classifiers/meta/StackingC.java (1.3),
+	classifiers/meta/ThresholdSelector.java (1.27),
+	classifiers/meta/Vote.java (1.3), classifiers/misc/HyperPipes.java
+	(1.14), classifiers/misc/VFI.java (1.9),
+	classifiers/rules/ConjunctiveRule.java (1.8),
+	classifiers/rules/DecisionTable.java (1.26),
+	classifiers/rules/JRip.java (1.11), classifiers/rules/ZeroR.java
+	(1.9), classifiers/rules/part/PART.java (1.19),
+	classifiers/trees/DecisionStump.java (1.17),
+	classifiers/trees/Id3.java (1.10), classifiers/trees/REPTree.java
+	(1.14), classifiers/trees/RandomForest.java (1.4),
+	classifiers/trees/RandomTree.java (1.4),
+	classifiers/trees/UserClassifier.java (1.14),
+	classifiers/trees/adtree/ADTree.java (1.7),
+	classifiers/trees/j48/J48.java (1.27),
+	classifiers/trees/lmt/LMT.java (1.5),
+	classifiers/trees/lmt/LogisticBase.java (1.2),
+	gui/GenericObjectEditor.props (1.85),
+	gui/beans/BatchClassifierEvent.java (1.2),
+	gui/beans/IncrementalClassifierEvaluator.java (1.6),
+	gui/beans/IncrementalClassifierEvent.java (1.3),
+	gui/beans/PredictionAppender.java (1.2),
+	gui/boundaryvisualizer/BoundaryPanel.java (1.18),
+	gui/boundaryvisualizer/BoundaryPanelDistributed.java (1.4),
+	gui/boundaryvisualizer/BoundaryVisualizer.java (1.12),
+	gui/boundaryvisualizer/RemoteBoundaryVisualizerSubTask.java (1.2),
+	gui/experiment/AlgorithmListPanel.java (1.4),
+	gui/experiment/SetupPanel.java (1.20),
+	gui/explorer/AttributeSelectionPanel.java (1.27),
+	gui/explorer/ClassifierPanel.java (1.67): DistributionClassifier is
+	gone. Every classifier implments distributionForInstance() now. The
+	advantages simply outweigh the disadvantages.
+
+2003-11-10 12:20  eibe
+
+	* weka/classifiers/meta/AdditiveRegression.java (1.12): Made 10
+	default number of max. iterations. No longer deletes last model
+	generated. Outputs full description of classifier.
+
+2003-11-10 11:47  akibriya
+
+	* weka/gui/PropertySheetPanel.java (1.14): Now displays an error
+	dialog box if an exception occurs in changing a beans property,
+	instead of just outputting the warning to stdout.
+
+2003-11-10 11:42  akibriya
+
+	* weka/gui/PropertyText.java (1.6): Made the textfield to be blank
+	rather than displaying null if the editor of the text property
+	returns null.
+
+2003-11-10 11:37  akibriya
+
+	* weka/gui/explorer/ClassifierPanel.java (1.66): Added support for
+	GenericArrayEditor to be able to use "Object[]" objects.
+
+2003-11-10 11:33  akibriya
+
+	* weka/classifiers/meta/CVParameterSelection.java (1.18): Can use
+	the -P option from gui now.
+
+2003-11-10 09:51  eibe
+
+	* weka/: attributeSelection/SVMAttributeEval.java (1.16),
+	classifiers/functions/neural/NeuralNode.java (1.5),
+	classifiers/meta/ClassificationViaRegression.java (1.15),
+	classifiers/meta/MultiClassClassifier.java (1.32),
+	classifiers/meta/OrdinalClassClassifier.java (1.7),
+	classifiers/meta/StackingC.java (1.2), core/Range.java (1.11),
+	core/SingleIndex.java (1.1),
+	filters/unsupervised/attribute/AddNoise.java (1.2),
+	filters/unsupervised/attribute/MakeIndicator.java (1.2),
+	filters/unsupervised/attribute/MergeTwoValues.java (1.2),
+	filters/unsupervised/attribute/StringToNominal.java (1.3),
+	filters/unsupervised/attribute/SwapValues.java (1.2),
+	filters/unsupervised/instance/RemovePercentage.java (1.3),
+	filters/unsupervised/instance/RemoveRange.java (1.2),
+	filters/unsupervised/instance/RemoveWithValues.java (1.3): Indices
+	now start from 1 for (hopefully) all filters. Changed default
+	behaviour of Remove...java filters in unsupervised.instances.
+	Changed some meta classifiers accordingly.
+
+2003-11-07 19:54  mhall
+
+	* weka/classifiers/meta/AttributeSelectedClassifier.java (1.12):
+	Changed toString to say something sensible if attribute selection
+	is not possible.
+
+2003-11-07 18:20  eibe
+
+	* weka/classifiers/trees/REPTree.java (1.13): REPTree now backfits
+	the pruning data once the tree has been pruned.
+
+2003-11-07 17:02  mhall
+
+	* weka/attributeSelection/GeneticSearch.java (1.14): Fixed some
+	bugs related to pathological data sets
+
+2003-11-07 17:00  mhall
+
+	* weka/classifiers/meta/AttributeSelectedClassifier.java (1.11):
+	Now handles data sets with no instances and all missing class
+	values
+
+2003-11-07 15:53  eibe
+
+	* weka/: classifiers/functions/supportVector/SMOreg.java (1.2),
+	filters/unsupervised/attribute/Normalize.java (1.2),
+	filters/unsupervised/attribute/RemoveType.java (1.3),
+	filters/unsupervised/attribute/ReplaceMissingValues.java (1.2),
+	filters/unsupervised/attribute/Standardize.java (1.2): Made some
+	filters ignore the class attribute. Had to change SMOreg
+	accordingly. Will the change to SMOreg affect results?
+
+2003-11-07 14:40  eibe
+
+	* weka/: classifiers/meta/RegressionByDiscretization.java (1.18),
+	filters/unsupervised/attribute/Discretize.java (1.3): Discretize
+	should skip class if set. Bug fix in debug output for
+	RegressionViaDiscretization.
+
+2003-11-07 13:10  eibe
+
+	* weka/: classifiers/DistributionSequentialClassifier.java (1.2),
+	classifiers/SequentialClassifier.java (1.2),
+	classifiers/SequentialEvaluation.java (1.2),
+	classifiers/meta/RSW.java (1.2),
+	classifiers/meta/SeqCVParameterSelection.java (1.2),
+	core/Instances.java (1.46), filters/Windowise.java (1.2): Removed
+	the RSW-related code from the repository. It's a bit too
+	experimental at this stage (and it should be in a separate package
+	anyway, not in the classifiers package).
+
+2003-11-06 18:00  eibe
+
+	* weka/classifiers/bayes/AODE.java (1.5): Made AODE a proper
+	WeightedInstancesHandler.
+
+2003-11-05 16:55  eibe
+
+	* weka/: classifiers/meta/AdditiveRegression.java (1.11),
+	classifiers/meta/AttributeSelectedClassifier.java (1.10),
+	classifiers/meta/CVParameterSelection.java (1.17),
+	classifiers/meta/FilteredClassifier.java (1.17),
+	classifiers/meta/MultiClassClassifier.java (1.31),
+	classifiers/meta/MultiScheme.java (1.12),
+	classifiers/meta/OrdinalClassClassifier.java (1.6),
+	classifiers/meta/Stacking.java (1.16), classifiers/meta/Vote.java
+	(1.2), classifiers/trees/DecisionStump.java (1.16),
+	classifiers/trees/REPTree.java (1.12),
+	classifiers/trees/RandomTree.java (1.3), core/Instances.java
+	(1.45): Fixed several little bugs and made options a bit more
+	consistent.
+
+2003-11-04 17:02  eibe
+
+	* weka/classifiers/misc/: HyperPipes.java (1.13), VFI.java (1.8):
+	Fixed some bugs.
+
+2003-10-31 18:59  eibe
+
+	* weka/classifiers/lazy/kstar/KStar.java (1.12): KStar was never
+	actually a WeightedInstancesHandler. It also didn't initialize
+	correctly.
+
+2003-10-31 18:48  eibe
+
+	* weka/classifiers/trees/lmt/LMT.java (1.4): Put in some checks for
+	CheckClassifier. Also changed indentation.
+
+2003-10-31 18:45  eibe
+
+	* weka/classifiers/trees/RandomTree.java (1.2): Put some checks
+	into RandomTree (for CheckClassifier).
+
+2003-10-31 18:39  eibe
+
+	* weka/classifiers/trees/DecisionStump.java (1.15): Put in some
+	checks for CheckClassifier. Also replaced Utils.sm(), Utils.gr(),
+	etc. by <,>.
+
+2003-10-31 17:52  eibe
+
+	* weka/classifiers/functions/SimpleLogistic.java (1.3): Added check
+	for 100% missing class values.
+
+2003-10-30 17:49  eibe
+
+	* weka/classifiers/rules/Nnge.java (1.2): toString() didn't work if
+	classifier wasn't built. Classifier altered training data according
+	to CheckClassifier. Fixed.
+
+2003-10-29 10:02  mhall
+
+	* weka/gui/explorer/ClustererPanel.java (1.41): Made
+	setVisualizableInstances into a publicly available utility method
+
+2003-10-29 10:01  mhall
+
+	* weka/gui/beans/: AbstractDataSource.java (1.2), Loader.java
+	(1.4): Made bean context aware
+
+2003-10-28 14:12  eibe
+
+	* weka/gui/GenericObjectEditor.props (1.84): Removed XMeans
+	(temporarily?) in preparation for a stable release.
+
+2003-10-28 14:10  eibe
+
+	* weka/: core/AlgVector.java (1.2), core/DistanceFunction.java
+	(1.3), core/DynamicArrayOfPosInt.java (1.2),
+	core/EuclideanDistance.java (1.4), core/Instances.java (1.44),
+	core/KDTree.java (1.5), clusterers/AlgVector.java (1.2),
+	clusterers/XMeans.java (1.7): Removed some code (temporarily?) in
+	preparation for a stable release.
+
+2003-10-28 14:06  eibe
+
+	* weka/classifiers/lazy/IBk.java (1.27): Reverted IBk back to
+	revision 1.20 (but including changes made in 1.24-1.26).
+
+2003-10-28 11:14  eibe
+
+	* weka/core/Instances.java (1.43): Thanks to Gabi, Richards change
+	from revision 1.37 was undone in revision 1.38 (removing numeric
+	padding in Quicksort). I've changed it again!
+
+2003-10-21 15:51  mhall
+
+	* weka/gui/beans/KnowledgeFlow.java (1.15): Got rid of xor mode for
+	drawing rubber band lines as it doesn't work properly under Mac OS
+	X's Java
+
+2003-10-17 17:55  cvs_rrb
+
+	* weka/classifiers/bayes/ADNode.java (1.4): case sensitivity bug
+	fixed
+
+2003-10-17 15:08  mhall
+
+	* weka/attributeSelection/RandomSearch.java (1.12): Doc fix
+
+2003-10-16 10:14  cvs_rrb
+
+	* weka/classifiers/bayes/ADNode.java (1.3): [no log message]
+
+2003-10-15 11:36  akibriya
+
+	* weka/classifiers/bayes/NaiveBayesMultinomial.java (1.4): Changed
+	the String class object in toString method to StringBuffer. It
+	makes the classifier much quicker.
+
+2003-10-10 05:16  eibe
+
+	* weka/classifiers/functions/Logistic.java (1.28): Fixed numeric
+	overflow problem in Logistic.java.
+
+2003-10-10 01:13  eibe
+
+	* weka/classifiers/meta/AdaBoostM1.java (1.17): Last change could
+	produce overflows, resulting in unclassified instances. Fixed.
+	(Thanks, Bernhard!)
+
+2003-10-03 02:55  eibe
+
+	* weka/filters/unsupervised/attribute/RemoveUseless.java (1.5):
+	Fixed bug in doc.
+
+2003-10-02 22:26  eibe
+
+	* weka/associations/tertius/: AttributeValueLiteral.java (1.2),
+	Body.java (1.2), Head.java (1.2), IndividualInstance.java (1.2),
+	IndividualInstances.java (1.2), IndividualLiteral.java (1.2),
+	Literal.java (1.2), LiteralSet.java (1.2), Predicate.java (1.2),
+	Rule.java (1.2), SimpleLinkedList.java (1.2), Tertius.java (1.2):
+	Added copyright notices.
+
+2003-10-02 21:56  eibe
+
+	* weka/classifiers/Evaluation.java (1.47): Got rid of zf correction
+	0.0001. Results for relative errors for regression problems will
+	change very slightly.
+
+2003-10-02 21:39  eibe
+
+	* weka/classifiers/rules/ZeroR.java (1.8): Fixed bug in ZeroR that
+	produced incorrect results for numeric datasets with missing target
+	values. Reported by Juan Jose Rodriguez Diez (jrodriguez@ubu.es).
+	Thanks!
+
+2003-10-02 21:36  eibe
+
+	* weka/core/SparseInstance.java (1.12): The "bug fix" from
+	2003/06/05 seems to have been a "bug bite", at least it broke
+	locateIndex() and didn't seem to fix anything. People who ran
+	experiments on sparse data may have got incorrect results for some
+	learning schemes as a consequence of this. As far as I can tell
+	locateIndex() used to work fine before the "bug fix" but I have
+	changed it slightly now to make it a bit more efficient.
+
+2003-09-25 12:12  dale
+
+	* weka/classifiers/trees/m5/Rule.java (1.6): [no log message]
+
+2003-09-16 12:16  rkirkby
+
+	* weka/gui/explorer/ClustererPanel.java (1.40): Model file
+	extension is automatically added and model output is the one
+	trained on the full data.
+
+2003-09-16 10:57  rkirkby
+
+	* weka/gui/explorer/ClassifierPanel.java (1.65): Extension for
+	model files is appended automatically, and the model on the full
+	dataset is output.
+
+2003-09-15 12:12  rkirkby
+
+	* weka/classifiers/functions/SimpleLinearRegression.java (1.4):
+	Small fix to toString() method.
+
+2003-09-11 03:04  eibe
+
+	* weka/gui/explorer/ClassifierPanel.java (1.64): classifer ->
+	classifier
+
+2003-09-09 08:25  mhall
+
+	* weka/gui/GenericObjectEditor.props (1.83): Added an entry for
+	Peter Flach's Tertius
+
+2003-09-09 08:23  mhall
+
+	* weka/associations/tertius/: AttributeValueLiteral.java (1.1),
+	Body.java (1.1), Head.java (1.1), IndividualInstance.java (1.1),
+	IndividualInstances.java (1.1), IndividualLiteral.java (1.1),
+	Literal.java (1.1), LiteralSet.java (1.1), Predicate.java (1.1),
+	Rule.java (1.1), SimpleLinkedList.java (1.1), Tertius.java (1.1):
+	Initial import
+
+2003-08-15 03:54  eibe
+
+	* weka/gui/PropertySheetPanel.java (1.13): Changed message printed
+	when InvocationTargetException is thrown.
+
+2003-08-15 00:58  eibe
+
+	* weka/classifiers/rules/: ConjunctiveRule.java (1.7), JRip.java
+	(1.10), Ridor.java (1.8), RuleStats.java (1.3): Several classes
+	weren't Serializable.
+
+2003-08-15 00:30  eibe
+
+	* weka/classifiers/rules/Rule.java (1.3): Rule.java wasn't
+	serilizable.
+
+2003-08-07 16:28  akibriya
+
+	* weka/gui/AttributeVisualizationPanel.java (1.11): Fixed an
+	exception that was being thrown for datasets with fewer than 10
+	instances.
+
+2003-08-06 12:01  rkirkby
+
+	* weka/filters/Makefile (1.26): Added Windowise.
+
+2003-08-06 12:00  rkirkby
+
+	* weka/filters/Windowise.java (1.1): Initial import.
+
+2003-08-06 11:58  rkirkby
+
+	* weka/classifiers/meta/Makefile (1.7): Added RSW and
+	SeqCVParameterSelection.
+
+2003-08-06 11:52  rkirkby
+
+	* weka/classifiers/meta/: RSW.java (1.1),
+	SeqCVParameterSelection.java (1.1): Initial import.
+
+2003-08-06 11:43  rkirkby
+
+	* weka/classifiers/Makefile (1.29): Added sequential classes.
+
+2003-08-06 11:40  rkirkby
+
+	* weka/core/Instances.java (1.42): Added methods for sequential
+	train/test CV folds.
+
+2003-08-06 11:39  rkirkby
+
+	* weka/classifiers/: SequentialClassifier.java (1.1),
+	DistributionSequentialClassifier.java (1.1),
+	SequentialEvaluation.java (1.1): Initial import.
+
+2003-08-05 20:39  eibe
+
+	* weka/: classifiers/meta/Makefile (1.6),
+	classifiers/meta/RandomCommittee.java (1.1),
+	gui/GenericObjectEditor.props (1.82): Initial import of
+	RandomCommittee
+
+2003-08-05 12:13  akibriya
+
+	* weka/classifiers/bayes/BIFReader.java (1.3): No longer required,
+	as the experimental BIF file option has been removed in BayesNet
+	1.9.
+
+2003-08-05 12:04  akibriya
+
+	* weka/classifiers/bayes/Scoreable.java (1.5): Removed the changes
+	introduced in  1.4 which were necessary to support experimental
+	features (apart from graph drawing) of BayesNet 1.8.
+
+2003-08-05 12:00  akibriya
+
+	* weka/classifiers/bayes/ParentSet.java (1.5): Removed the changes
+	introduced in  1.4 which were necessary to support experimental
+	features (apart from graph drawing) of BayesNet 1.8.
+
+2003-08-04 09:30  mhall
+
+	* weka/associations/Apriori.java (1.15): Fixed bug in min support
+	output
+
+2003-07-31 02:45  eibe
+
+	* weka/classifiers/bayes/BIFReader.java (1.2): Deleted assignment
+	to variable that wasn't used or declared.
+
+2003-07-29 13:46  cvs_rrb
+
+	* weka/classifiers/bayes/BayesNet.java (1.9): Started from version
+	1.7 instead of experimental version to support graph drawing
+
+2003-07-18 16:42  rkirkby
+
+	* weka/classifiers/bayes/AODE.java (1.4): Re-applied Mark's fixes
+	to the option handling.
+
+2003-07-18 16:34  rkirkby
+
+	* weka/classifiers/bayes/AODE.java (1.3): Has been improved to be
+	more time efficient.
+
+2003-07-18 16:30  rkirkby
+
+	* weka/classifiers/lazy/LBR.java (1.3): Has been improved to be
+	more time efficient.
+
+2003-07-18 16:15  rkirkby
+
+	* weka/classifiers/bayes/NaiveBayesMultinomial.java (1.3):
+	Improvements made by Andrew.
+
+2003-07-18 12:23  akibriya
+
+	* weka/gui/visualize/MatrixPanel.java (1.6): Fixed the row and
+	column names, now they are always visible inspite of the scrolling.
+
+2003-07-17 11:21  mhall
+
+	* weka/classifiers/lazy/IBk.java (1.26): Fixed null pointer bug
+	when normalization is turned off in IBk
+
+2003-07-16 17:21  akibriya
+
+	* weka/gui/explorer/PreprocessPanel.java (1.36): Removed printing
+	of stack trace when there is an exception in setting up instances.
+
+2003-07-16 17:15  akibriya
+
+	* weka/gui/explorer/PreprocessPanel.java (1.35): Fixed handling of
+	exception, when the dataset is empty after applying a filter (e.g.
+	removal of all attributes by filters.unsupervised.attribute.Remove
+	filter).
+
+2003-07-16 13:04  akibriya
+
+	* weka/: gui/Makefile (1.21), Makefile (1.39): Includes changes to
+	accomodate addition of graphvisualizer.
+
+2003-07-16 13:03  akibriya
+
+	* weka/gui/graphvisualizer/Makefile (1.1): Initial import.
+
+2003-07-16 13:02  akibriya
+
+	* weka/classifiers/bayes/Makefile (1.7): Includes changes to
+	accomodate addition of BIFReader class
+
+2003-07-16 12:30  akibriya
+
+	* weka/classifiers/bayes/BIFReader.java (1.1): Initial import.
+
+2003-07-16 12:25  akibriya
+
+	* weka/: classifiers/bayes/BayesNet.java (1.8),
+	classifiers/bayes/ParentSet.java (1.4),
+	classifiers/bayes/Scoreable.java (1.4),
+	classifiers/meta/CostSensitiveClassifier.java (1.15),
+	classifiers/trees/REPTree.java (1.11),
+	classifiers/trees/UserClassifier.java (1.13),
+	classifiers/trees/adtree/ADTree.java (1.6),
+	classifiers/trees/j48/ClassifierTree.java (1.17),
+	classifiers/trees/j48/J48.java (1.26),
+	classifiers/trees/lmt/LMT.java (1.3), classifiers/trees/m5/M5P.java
+	(1.4), clusterers/Cobweb.java (1.16), core/Drawable.java (1.6),
+	core/FastVector.java (1.8), gui/explorer/ClassifierPanel.java
+	(1.63): Modified files to add in the graphvisualizer.
+
+2003-07-16 12:08  akibriya
+
+	* weka/gui/graphvisualizer/: BIFFormatException.java (1.1),
+	BIFParser.java (1.1), DotParser.java (1.1), GraphConstants.java
+	(1.1), GraphEdge.java (1.1), GraphNode.java (1.1),
+	GraphVisualizer.java (1.1), HierarchicalBCEngine.java (1.1),
+	LayoutCompleteEvent.java (1.1), LayoutCompleteEventListener.java
+	(1.1), LayoutEngine.java (1.1), icons/extra.gif (1.1),
+	icons/preferences.gif (1.1), icons/save.gif (1.1), icons/zoomin.gif
+	(1.1), icons/zoomout.gif (1.1): Initial import.
+
+2003-07-09 01:08  eibe
+
+	* weka/filters/unsupervised/attribute/Remove.java (1.2):
+	InvertSelection is no longer true by default in the Explorer
+
+2003-07-02 10:26  rkirkby
+
+	* weka/classifiers/Evaluation.java (1.46): Changed all private
+	fields and methods to protected to imporve inheritance
+	opportunities.
+
+2003-07-01 09:44  mhall
+
+	* weka/attributeSelection/WrapperSubsetEval.java (1.20): Fixed bug
+	that prevented serialization of trained wrapper
+
+2003-06-27 09:56  mhall
+
+	* weka/attributeSelection/: BestFirst.java (1.22),
+	ConsistencySubsetEval.java (1.10), GeneticSearch.java (1.13): Fixed
+	some serializable issues
+
+2003-06-25 10:45  mhall
+
+	* weka/classifiers/lazy/IBk.java (1.25): Bug fix to cross
+	validation code courtesy of Dietrich Wettschereck
+
+2003-06-16 10:28  rkirkby
+
+	* weka/classifiers/lazy/IBk.java (1.24): Made some private methods
+	protected to facilitate easier inheritance.
+
+2003-06-13 14:04  mhall
+
+	* weka/classifiers/trees/lmt/LMT.java (1.2): Added tip text and
+	global info
+
+2003-06-13 14:03  mhall
+
+	* weka/classifiers/functions/SimpleLogistic.java (1.2): Added
+	global info and tip text
+
+2003-06-13 14:03  mhall
+
+	* weka/gui/GenericObjectEditor.props (1.81): Added SimpleLogistic
+
+2003-06-12 14:17  rkirkby
+
+	* weka/attributeSelection/WrapperSubsetEval.java (1.19): Changed
+	seed parameter to -R so it wouldn't clash with evaluation options.
+
+2003-06-12 14:06  rkirkby
+
+	* weka/classifiers/bayes/NaiveBayesMultinomial.java (1.2): Added
+	toString() method.
+
+2003-06-12 11:11  mhall
+
+	* weka/gui/GenericObjectEditor.props (1.80): Added LMT
+
+2003-06-10 16:45  rkirkby
+
+	* weka/gui/GenericObjectEditor.props (1.79): Added
+	NaiveBayesMultinomial.
+
+2003-06-10 16:41  rkirkby
+
+	* weka/classifiers/bayes/Makefile (1.6): Added
+	NaiveBayesMultinomial.
+
+2003-06-10 16:40  rkirkby
+
+	* weka/classifiers/bayes/NaiveBayesMultinomial.java (1.1): Initial
+	import.
+
+2003-06-10 14:12  mhall
+
+	* weka/classifiers/functions/Makefile (1.7): Added SimpleLogistic
+
+2003-06-10 13:58  mhall
+
+	* weka/: classifiers/trees/Makefile (1.5), Makefile (1.38): Added
+	LMT
+
+2003-06-10 13:58  mhall
+
+	* weka/classifiers/trees/lmt/Makefile (1.1): Initial import
+
+2003-06-10 13:50  mhall
+
+	* weka/classifiers/trees/lmt/: LMT.java (1.1), LMTNode.java (1.1),
+	LogisticBase.java (1.1), ResidualModelSelection.java (1.1),
+	ResidualSplit.java (1.1): Initial import
+
+2003-06-10 13:49  mhall
+
+	* weka/classifiers/functions/: SimpleLinearRegression.java (1.3),
+	SimpleLogistic.java (1.1): Some small changes to facilitate
+	integration with LMT
+
+2003-06-05 15:55  rkirkby
+
+	* weka/core/SparseInstance.java (1.11): Made locateIndex return -1
+	when not found, as per the spec. This bug was pointed out by George
+	Forman (george_forman@hp.com).
+
+2003-06-05 15:48  rkirkby
+
+	* weka/experiment/Experiment.java (1.19): Fix submitted by George
+	Forman (george_forman@hp.com) to allow result producers with
+	required parameters.
+
+2003-06-03 11:46  mhall
+
+	* weka/clusterers/SimpleKMeans.java (1.10): Improved output
+
+2003-05-29 10:14  rkirkby
+
+	* weka/filters/unsupervised/instance/RemoveWithValues.java (1.2):
+	Fixed a bug when using the modify header option.
+
+2003-05-23 14:50  eibe
+
+	* weka/classifiers/lazy/LWL.java (1.7): Enabled LWL to deal
+	efficiently with sparse data (if the base learner does so)
+
+2003-05-22 09:15  mhall
+
+	* weka/gui/beans/Makefile (1.3): Added data sink stuff to makefile
+
+2003-05-22 09:13  mhall
+
+	* weka/gui/beans/CSVDataSink.java (1.1): Initial import
+
+2003-05-21 16:34  mhall
+
+	* weka/gui/beans/: AbstractDataSink.java (1.3), Beans.props (1.6):
+	Added some more stuff
+
+2003-05-21 16:32  mhall
+
+	* weka/gui/beans/: AbstractDataSinkBeanInfo.java (1.1),
+	CSVDataSinkBeanInfo.java (1.1): Initial import
+
+2003-05-20 16:32  mhall
+
+	* weka/gui/beans/AbstractDataSink.java (1.2): Changed default icon
+
+2003-05-20 16:32  mhall
+
+	* weka/gui/beans/icons/: DefaultDataSink.gif (1.1),
+	DefaultDataSink_animated.gif (1.1): Initial import
+
+2003-05-19 16:04  mhall
+
+	* weka/gui/beans/: AbstractDataSink.java (1.1), DataSink.java
+	(1.1): Initial import
+
+2003-05-08 15:49  mhall
+
+	* weka/gui/beans/Classifier.java (1.7): Fixed bug in incremental
+	handling
+
+2003-05-08 15:48  mhall
+
+	* weka/gui/beans/Beans.props (1.5): Added PredictionAppender
+
+2003-05-08 15:46  mhall
+
+	* weka/gui/beans/: icons/PredictionAppender.gif (1.1),
+	icons/PredictionAppender_animated.gif (1.1),
+	PredictionAppender.java (1.1), PredictionAppenderBeanInfo.java
+	(1.1), PredictionAppenderCustomizer.java (1.1): Initial Import
+
+2003-05-06 16:27  eibe
+
+	* weka/classifiers/functions/Logistic.java (1.27): Xin fixed small
+	bug.
+
+2003-05-06 12:02  mhall
+
+	* weka/gui/beans/: AttributeSummarizer.java (1.5),
+	DataVisualizer.java (1.7), ScatterPlotMatrix.java (1.5): minor
+	layout fix
+
+2003-05-06 12:01  mhall
+
+	* weka/gui/beans/TextViewer.java (1.6): Now implements
+	BeanContextChild
+
+2003-05-06 12:00  mhall
+
+	* weka/gui/beans/KnowledgeFlow.java (1.14): Fixed loading bug
+
+2003-05-06 09:33  eibe
+
+	* weka/core/Optimization.java (1.5): Xin fixed some bugs relating
+	to extreme cases.
+
+2003-05-02 11:47  rkirkby
+
+	* weka/gui/explorer/ClassifierPanel.java (1.62): Made text
+	predictions output when a model is re-evaluated on a test set.
+
+2003-05-01 14:12  mhall
+
+	* weka/core/converters/ArffLoader.java (1.5): set and get file now
+	store and return absolute paths
+
+2003-05-01 14:11  mhall
+
+	* weka/gui/FileEditor.java (1.7): small modification to allow file
+	browser to be initialized to the path of the previously edited file
+	(if any)
+
+2003-04-29 17:26  eibe
+
+	* weka/classifiers/functions/VotedPerceptron.java (1.15): Added
+	sparse vector code.
+
+2003-04-29 16:32  mhall
+
+	* weka/gui/beans/: Classifier.java (1.6), ClassifierCustomizer.java
+	(1.4): Configuration panel for incremental classifers now only
+	shows the 'update classifier on incoming instances' checkbox if the
+	classifier actually has an incoming instance stream connected to it
+
+2003-04-29 16:08  mhall
+
+	* weka/gui/beans/KnowledgeFlow.java (1.13): contextual menus can
+	now be popped up under mac OS X Java 1.4 by holding down alt key
+	and clicking mouse button
+
+2003-04-29 16:07  mhall
+
+	* weka/gui/explorer/: AssociationsPanel.java (1.16),
+	AttributeSelectionPanel.java (1.26), ClassifierPanel.java (1.61),
+	ClustererPanel.java (1.39): contextual menu on results history can
+	now be popped up under mac OS X Java 1.4 by holding down alt key
+	and clicking mouse button
+
+2003-04-28 16:33  mhall
+
+	* weka/gui/beans/: AttributeSummarizer.java (1.4),
+	ClassifierPerformanceEvaluator.java (1.4), DataVisualizer.java
+	(1.6), GraphViewer.java (1.4), IncrementalClassifierEvaluator.java
+	(1.5), KnowledgeFlow.java (1.12), ScatterPlotMatrix.java (1.4),
+	StripChart.java (1.8), TestSetMaker.java (1.2), TextViewer.java
+	(1.5), TrainingSetMaker.java (1.2): Added support for tool tip text
+	in tool bars
+
+2003-04-23 10:44  trigg
+
+	* weka/filters/unsupervised/attribute/StringToWordVector.java
+	(1.4): Added option to add a prefix to created attribute names.
+
+2003-04-17 11:54  mhall
+
+	* weka/gui/beans/README_KnowledgeFlow (1.3): removed a linefeed
+
+2003-04-17 11:52  mhall
+
+	* weka/gui/beans/README_KnowledgeFlow (1.2): Removed reference to
+	Tools toolbar
+
+2003-04-17 11:46  mhall
+
+	* weka/gui/beans/KnowledgeFlow.java (1.11): Added help button
+
+2003-04-17 11:44  mhall
+
+	* weka/gui/beans/: icons/Help24.gif (1.1), README_KnowledgeFlow
+	(1.1): Initial import
+
+2003-04-17 10:42  rkirkby
+
+	* weka/gui/AttributeVisualizationPanel.java (1.10): Performance
+	improvements by Ashraf, plus attempts to make more thread safe,
+	avoiding use of stop().
+
+2003-04-17 10:13  rkirkby
+
+	* weka/gui/explorer/PreprocessPanel.java (1.34): Prevented multiple
+	"visualize all" windows from being opened.
+
