@@ -58,8 +58,11 @@ import weka.classifiers.*;
  * -B <br>
  * Use binary splits for nominal attributes. <p>
  *
+ * -U <br>
+ * Generate unpruned decision list. <p>
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class PART extends DistributionClassifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
@@ -82,6 +85,9 @@ public class PART extends DistributionClassifier implements OptionHandler,
   /** Binary splits on nominal attributes? */
   private boolean m_binarySplits = false;
   
+  /** Generate unpruned list? */
+  private boolean m_unpruned = false;
+
   /**
    * Generates the classifier.
    *
@@ -96,7 +102,9 @@ public class PART extends DistributionClassifier implements OptionHandler,
       modSelection = new BinC45ModelSelection(m_minNumObj, instances);
     else
       modSelection = new C45ModelSelection(m_minNumObj, instances);
-    if (m_reducedErrorPruning) 
+    if (m_unpruned) 
+      m_root = new MakeDecList(modSelection, m_minNumObj);
+    else if (m_reducedErrorPruning) 
       m_root = new MakeDecList(modSelection, m_numFolds, m_minNumObj);
     else
       m_root = new MakeDecList(modSelection, m_CF, m_minNumObj);
@@ -151,11 +159,14 @@ public class PART extends DistributionClassifier implements OptionHandler,
    * -B <br>
    * Use binary splits for nominal attributes. <p>
    *
+   * -U <br>
+   * Generate unpruned decision list. <p>
+   *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(6);
 
     newVector.
 	addElement(new Option("\tSet confidence threshold for pruning.\n" +
@@ -176,6 +187,9 @@ public class PART extends DistributionClassifier implements OptionHandler,
     newVector.
 	addElement(new Option("\tUse binary splits only.",
 			      "B", 0, "-B"));
+    newVector.
+	addElement(new Option("\tGenerate unpruned decision list.",
+			      "U", 0, "-U"));
 
     return newVector.elements();
   }
@@ -189,6 +203,7 @@ public class PART extends DistributionClassifier implements OptionHandler,
   public void setOptions(String[] options) throws Exception {
 
     // Pruning options
+    m_unpruned = Utils.getFlag('U', options);
     m_reducedErrorPruning = Utils.getFlag('R', options);
     m_binarySplits = Utils.getFlag('B', options);
     String confidenceString = Utils.getOption('C', options);
@@ -234,19 +249,21 @@ public class PART extends DistributionClassifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [6];
+    String [] options = new String [9];
     int current = 0;
 
+    if (m_unpruned) {
+      options[current++] = "-U";
+    }
     if (m_reducedErrorPruning) {
       options[current++] = "-R";
-      options[current++] = "-N"; options[current++] = "" + m_numFolds;
-    } else {
-      options[current++] = "-C"; options[current++] = "" + m_CF;
     }
     if (m_binarySplits) {
       options[current++] = "-B";
     }
     options[current++] = "-M"; options[current++] = "" + m_minNumObj;
+    options[current++] = "-C"; options[current++] = "" + m_CF;
+    options[current++] = "-N"; options[current++] = "" + m_numFolds;
 
     while (current < options.length) {
       options[current++] = "";
@@ -364,6 +381,26 @@ public class PART extends DistributionClassifier implements OptionHandler,
   public void setReducedErrorPruning(boolean v) {
     
     m_reducedErrorPruning = v;
+  }
+  
+  /**
+   * Get the value of unpruned.
+   *
+   * @return Value of unpruned.
+   */
+  public boolean getUnpruned() {
+    
+    return m_unpruned;
+  }
+  
+  /**
+   * Set the value of unpruned.
+   *
+   * @param newunpruned Value to assign to unpruned.
+   */
+  public void setUnpruned(boolean newunpruned) {
+    
+    m_unpruned = newunpruned;
   }
   
   /**

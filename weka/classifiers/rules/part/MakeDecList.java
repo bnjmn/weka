@@ -32,7 +32,7 @@ import weka.classifiers.*;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class MakeDecList implements Serializable {
 
@@ -54,6 +54,21 @@ public class MakeDecList implements Serializable {
   /** Use reduced error pruning? */
   private boolean reducedErrorPruning = false;
 
+  /** Generated unpruned list? */
+  private boolean unpruned = false;
+
+  /**
+   * Constructor for unpruned dec list.
+   */
+  public MakeDecList(ModelSelection toSelectLocModel,
+		     int minNum){
+
+    toSelectModeL = toSelectLocModel;
+    reducedErrorPruning = false;
+    unpruned = true;
+    minNumObj = minNum;
+  }
+
   /**
    * Constructor for dec list pruned using C4.5 pruning.
    */
@@ -63,6 +78,7 @@ public class MakeDecList implements Serializable {
     toSelectModeL = toSelectLocModel;
     CF = cf;
     reducedErrorPruning = false;
+    unpruned = false;
     minNumObj = minNum;
   }
 
@@ -75,6 +91,7 @@ public class MakeDecList implements Serializable {
     toSelectModeL = toSelectLocModel;
     numSetS = num;
     reducedErrorPruning = true;
+    unpruned = false;
     minNumObj = minNum;
   }
 
@@ -102,7 +119,7 @@ public class MakeDecList implements Serializable {
     data.deleteWithMissingClass();
     if (data.numInstances() == 0)
       throw new Exception("No training instances/Only instances with missing class!");
-    if (reducedErrorPruning) {
+    if ((reducedErrorPruning) && !(unpruned)){ 
       data.stratify(numSetS);
       oldGrowData = data.trainCV(numSetS, numSetS - 1);
       oldPruneData = data.testCV(numSetS, numSetS - 1);
@@ -114,7 +131,11 @@ public class MakeDecList implements Serializable {
     while (Utils.gr(oldGrowData.numInstances(),0)){
 
       // Create rule
-      if (reducedErrorPruning) {
+      if (unpruned) {
+	currentRule = new ClassifierDecList(toSelectModeL,
+					    minNumObj);
+	((ClassifierDecList)currentRule).buildRule(oldGrowData);
+      } else if (reducedErrorPruning) {
 	currentRule = new PruneableDecList(toSelectModeL,
 					   minNumObj);
 	((PruneableDecList)currentRule).buildRule(oldGrowData, 
@@ -128,7 +149,7 @@ public class MakeDecList implements Serializable {
 
       // Remove instances from growing data
       newGrowData = new Instances(oldGrowData,
-					   oldGrowData.numInstances());
+				  oldGrowData.numInstances());
       Enumeration enum = oldGrowData.enumerateInstances();
       while (enum.hasMoreElements()) {
 	Instance instance = (Instance) enum.nextElement();
@@ -142,7 +163,7 @@ public class MakeDecList implements Serializable {
       oldGrowData = newGrowData;
       
       // Remove instances from pruning data
-      if (reducedErrorPruning) {
+      if ((reducedErrorPruning) && !(unpruned)) {
 	newPruneData = new Instances(oldPruneData,
 					     oldPruneData.numInstances());
 	enum = oldPruneData.enumerateInstances();

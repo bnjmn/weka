@@ -23,6 +23,7 @@
 package weka.classifiers.rules.part;
 
 import weka.classifiers.trees.j48.ClassifierSplitModel;
+import weka.classifiers.trees.j48.EntropySplitCrit;
 import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
@@ -33,9 +34,15 @@ import java.io.*;
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClassifierDecList implements Serializable {
+
+  /** Minimum number of objects */
+  protected int m_minNumObj;
+ 
+  /** To compute the entropy. */
+  protected static EntropySplitCrit m_splitCrit = new EntropySplitCrit();
 
   /** The model selection method. */
   protected ModelSelection m_toSelectModel;   
@@ -64,11 +71,24 @@ public class ClassifierDecList implements Serializable {
   /**
    * Constructor - just calls constructor of class DecList.
    */
-  public ClassifierDecList(ModelSelection toSelectLocModel){
+  public ClassifierDecList(ModelSelection toSelectLocModel, int minNum){
 
     m_toSelectModel = toSelectLocModel;
+    m_minNumObj = minNum;
    }
+  
+  /**
+   * Method for building a pruned partial tree.
+   *
+   * @exception Exception if something goes wrong
+   */
+  public void buildRule(Instances data) throws Exception {
+    
+    buildDecList(data, false);
 
+    cleanup(new Instances(data, 0));
+  }
+ 
   /**
    * Builds the partial tree without hold out set.
    *
@@ -120,87 +140,8 @@ public class ClassifierDecList implements Serializable {
 	  m_sons[ind] = getNewDecList(localInstances[ind],false);
       } while ((i < m_sons.length) && (m_sons[ind].m_isLeaf));
       
-      // Check if all successors are leaves
-      for (j = 0; j < m_sons.length; j++) 
-	if ((m_sons[j] == null) || (!m_sons[j].m_isLeaf))
-	  break;
-      if (j == m_sons.length) {
-	pruneEnd();
-	if (!m_isLeaf) 
-	  indeX = chooseLastIndex();
-      }else 
-	indeX = chooseLastIndex();
-    }else{
-      m_isLeaf = true;
-      if (Utils.eq(sumOfWeights, 0))
-	m_isEmpty = true;
-    }
-  }
-
-  /**
-   * Builds the partial tree with hold out set
-   *
-   * @exception Exception if something goes wrong
-   */
-  public void buildDecList(Instances train, Instances test, 
-			   boolean leaf) throws Exception {
-    
-    Instances [] localTrain,localTest;
-    int index,ind;
-    int i,j;
-    double sumOfWeights;
-    NoSplit noSplit;
-    
-    m_train = null;
-    m_isLeaf = false;
-    m_isEmpty = false;
-    m_sons = null;
-    indeX = 0;
-    sumOfWeights = train.sumOfWeights();
-    noSplit = new NoSplit (new Distribution((Instances)train));
-    if (leaf)
-      m_localModel = noSplit;
-    else
-      m_localModel = m_toSelectModel.selectModel(train, test);
-    m_test = new Distribution(test, m_localModel);
-    if (m_localModel.numSubsets() > 1) {
-      localTrain = m_localModel.split(train);
-      localTest = m_localModel.split(test);
-      train = null;
-      test = null;
-      m_sons = new ClassifierDecList [m_localModel.numSubsets()];
-      i = 0;
-      do {
-	i++;
-	ind = chooseIndex();
-	if (ind == -1) {
-	  for (j = 0; j < m_sons.length; j++) 
-	    if (m_sons[j] == null)
-	      m_sons[j] = getNewDecList(localTrain[j],localTest[j],true);
-	  if (i < 2) {
-	    m_localModel = noSplit;
-	    m_isLeaf = true;
-	    m_sons = null;
-	    if (Utils.eq(sumOfWeights,0))
-	      m_isEmpty = true;
-	    return;
-	  }
-	  ind = 0;
-	  break;
-	} else 
-	  m_sons[ind] = getNewDecList(localTrain[ind],localTest[ind],false);
-      } while ((i < m_sons.length) && (m_sons[ind].m_isLeaf));
-      
-      // Check if all successors are leaves
-      for (j = 0; j < m_sons.length; j++) 
-	if ((m_sons[j] == null) || (!m_sons[j].m_isLeaf))
-	  break;
-      if (j == m_sons.length) {
-	pruneEnd();
-	if (!m_isLeaf) 
-	  indeX = chooseLastIndex();
-      }else 
-	indeX = chooseLastIndex();
+      // Choose rule
+      indeX = chooseLastIndex();
     }else{
       m_isLeaf = true;
       if (Utils.eq(sumOfWeights, 0))
@@ -316,47 +257,80 @@ public class ClassifierDecList implements Serializable {
   protected ClassifierDecList getNewDecList(Instances train, boolean leaf) 
     throws Exception {
 	 
-    ClassifierDecList newDecList = new ClassifierDecList(m_toSelectModel);
+    ClassifierDecList newDecList = new ClassifierDecList(m_toSelectModel,
+							 m_minNumObj);
     newDecList.buildDecList(train,leaf);
     
     return newDecList;
   }
-
+ 
   /**
-   * Returns a newly created tree.
-   *
-   * @exception Exception if something goes wrong
+   * Method for choosing a subset to expand.
    */
-  protected ClassifierDecList getNewDecList(Instances train, Instances test,
-				  boolean leaf) 
-       throws Exception {
-	 
-    ClassifierDecList newDecList = new ClassifierDecList(m_toSelectModel);
-    newDecList.buildDecList(train, test ,leaf);
+  public final int chooseIndex() {
     
-    return newDecList;
-  }
+    int minIndex = -1;
+    double estimated, min = Double.MAX_VALUE;
+    int i, j;
 
-  /**
-   * Dummy method. Overwritten by sub classes.
-   */
-  protected int chooseLastIndex() {
+    for (i = 0; i < m_sons.length; i++)
+      if (son(i) == null) {
+	if (Utils.sm(localModel().distribution().perBag(i),
+		     (double)m_minNumObj))
+	  estimated = Double.MAX_VALUE;
+	else{
+	  estimated = 0;
+	  for (j = 0; j < localModel().distribution().numClasses(); j++) 
+	    estimated -= m_splitCrit.logFunc(localModel().distribution().
+				     perClassPerBag(i,j));
+	  estimated += m_splitCrit.logFunc(localModel().distribution().
+				   perBag(i));
+	  estimated /= localModel().distribution().perBag(i);
+	}
+	if (Utils.smOrEq(estimated,0))
+	  return i;
+	if (Utils.sm(estimated,min)) {
+	  min = estimated;
+	  minIndex = i;
+	}
+      }
 
-    return 0;
-  }
-
-  /**
-   * Dummy method. Overwritten by sub classes.
-   */
-  protected int chooseIndex() {
-
-    return 0;
+    return minIndex;
   }
   
   /**
-   * Dummy method. Overwritten by sub classes.
+   * Choose last index (ie. choose rule).
    */
-  protected void pruneEnd() throws Exception {
+  public final int chooseLastIndex() {
+    
+    int minIndex = 0;
+    double estimated, min = Double.MAX_VALUE;
+    
+    if (!m_isLeaf) 
+      for (int i = 0; i < m_sons.length; i++)
+	if (son(i) != null) {
+	  if (Utils.grOrEq(localModel().distribution().perBag(i),
+			   (double)m_minNumObj)) {
+	    estimated = son(i).getSizeOfBranch();
+	    if (Utils.sm(estimated,min)) {
+	      min = estimated;
+	      minIndex = i;
+	    }
+	  }
+	}
+
+    return minIndex;
+  }
+ 
+  /**
+   * Returns the number of instances covered by a branch
+   */
+  protected double getSizeOfBranch() {
+    
+    if (m_isLeaf) {
+      return -localModel().distribution().total();
+    } else
+      return son(indeX).getSizeOfBranch();
   }
 
   /**
@@ -434,15 +408,15 @@ public class ClassifierDecList implements Serializable {
   /**
    * Method just exists to make program easier to read.
    */
-  private ClassifierSplitModel localModel(){
+  protected ClassifierSplitModel localModel(){
     
-    return m_localModel;
+    return (ClassifierSplitModel)m_localModel;
   }
 
   /**
    * Method just exists to make program easier to read.
    */
-  private ClassifierDecList son(int index){
+  protected ClassifierDecList son(int index){
     
     return m_sons[index];
   }
