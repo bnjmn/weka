@@ -30,7 +30,7 @@ package weka.classifiers.functions.neural;
  * neuralnode to perform all it's computations (as a Linear unit).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LinearUnit implements NeuralMethod {
 
@@ -86,9 +86,7 @@ public class LinearUnit implements NeuralMethod {
     double[] weights = node.getWeights();
     
     double learnTimesError = 0;
-    try {
-      learnTimesError = learn * node.errorValue(false);
-    } catch(Exception e) {}
+    learnTimesError = learn * node.errorValue(false);
     
     double c = learnTimesError + momentum * cWeights[0];
     weights[0] += c;
