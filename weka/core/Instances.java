@@ -50,7 +50,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
 */
 public class Instances implements Serializable {
  
@@ -1368,8 +1368,7 @@ public class Instances implements Serializable {
 	    errms(tokenizer,"number expected");
 	  }
 	} else { 
-	  attribute(i).forceAddValue(tokenizer.sval);
-	  instance[i] = (double)attribute(i).numValues() - 1;
+	  instance[i] = attribute(i).addStringValue(tokenizer.sval);
 	}
       }
     }
