@@ -49,7 +49,7 @@ import weka.classifiers.*;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AODE extends DistributionClassifier
                   implements OptionHandler, WeightedInstancesHandler {
@@ -195,9 +195,10 @@ public class AODE extends DistributionClassifier
     double [] pointer;
     
     int classVal = (int)instance.classValue();
-    
-    m_ClassCounts[classVal]++;
-    m_SumInstances++;
+    double weight = instance.weight();
+
+    m_ClassCounts[classVal] += weight;
+    m_SumInstances += weight;;
         
     // store instance's att vals in an int array, b/c accessing it in the loop(s) is more efficient
     int [] attIndex = new int[m_NumAttributes];
@@ -212,15 +213,15 @@ public class AODE extends DistributionClassifier
        if(attIndex[Att1] == -1)
           continue;   // avoid pointless looping
 
-       m_Frequencies[attIndex[Att1]]++;
-       m_SumForCounts[classVal][Att1]++;
+       m_Frequencies[attIndex[Att1]] += weight;
+       m_SumForCounts[classVal][Att1] += weight;
 
        // save time by referencing this now, rather than do it repeatedly in the loop
        pointer = m_CondiCounts[classVal][attIndex[Att1]];
     
        for(int Att2 = 0; Att2 < m_NumAttributes; Att2++) {
           if((attIndex[Att2] != -1)) {
-             pointer[attIndex[Att2]]++;
+             pointer[attIndex[Att2]] += weight;
           }
        }
     }
