@@ -22,16 +22,15 @@
 
 package weka.estimators;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Utils;
+
 
 /** 
  * Simple symbolic probability estimator based on symbol counts.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-
 public class DiscreteEstimator implements Estimator {
 
   /** Hold the counts */
@@ -39,6 +38,7 @@ public class DiscreteEstimator implements Estimator {
 
   /** Hold the sum of counts */
   private double m_SumOfCounts;
+
 
   /**
    * Constructor
@@ -108,6 +108,33 @@ public class DiscreteEstimator implements Estimator {
 
     return (m_Counts == null) ? 0 : m_Counts.length;
   }
+
+
+  /**
+   * Get the count for a value
+   *
+   * @param data the value to get the count of
+   * @return the count of the supplied value
+   */
+  public double getCount(double data) {
+    
+    if (m_SumOfCounts == 0) {
+      return 0;
+    }
+    return m_Counts[(int)data];
+  }
+
+  
+  /**
+   * Get the sum of all the counts
+   *
+   * @return the total sum of counts
+   */
+  public double getSumOfCounts() {
+
+    return m_SumOfCounts;
+  }
+
 
   /**
    * Display a representation of this estimator
