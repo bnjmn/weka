@@ -1,6 +1,6 @@
 /*
  *    principalComponents.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 2000 Mark Hall
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@ import  weka.filters.*;
  * Class for performing principal components analysis/transformation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision 1.0 $
+ * @version $Revision: 1.4 $
  */
-public class PrincipalComponents extends AttributeTransformer {
+public class PrincipalComponents extends AttributeTransformer 
+  implements OptionHandler {
   
   /** The data to transform analyse/transform */
   private Instances m_trainInstances;
@@ -50,7 +51,7 @@ public class PrincipalComponents extends AttributeTransformer {
   private int m_numInstances;
 
   /** Correlation matrix for the original data */
-  private double [][] m_covariance;
+  private double [][] m_correlation;
 
   /** Will hold the unordered linear transformations of the (normalized)
       original data */
@@ -63,9 +64,9 @@ public class PrincipalComponents extends AttributeTransformer {
   private int [] m_sortedEigens;
   
   /** Filters for original data */
-  private ReplaceMissingValuesFilter m_replaceMissing;
-  private NormalizationFilter m_normalize;
-  private NominalToBinaryFilter m_nominalToBin;
+  private ReplaceMissingValuesFilter m_replaceMissingFilter;
+  private NormalizationFilter m_normalizeFilter;
+  private NominalToBinaryFilter m_nominalToBinFilter;
   private AttributeFilter m_attributeFilter;
   
   /** used to remove the class column if a class column is set */
@@ -73,6 +74,9 @@ public class PrincipalComponents extends AttributeTransformer {
 
   /** The number of attributes in the transformed data */
   private int m_outputNumAtts = -1;
+
+  /** normalize the input data? */
+  private boolean m_normalize = true;
 
   /**
    * Returns a string describing this attribute transformer
@@ -90,6 +94,82 @@ public class PrincipalComponents extends AttributeTransformer {
   }
 
   /**
+   * Returns an enumeration describing the available options <p>
+   *
+   * -N <classifier>
+   * Don't normalize the input data. <p>
+   *
+   * @return an enumeration of all the available options
+   **/
+  public Enumeration listOptions () {
+    Vector newVector = new Vector(1);
+    newVector.addElement(new Option("\tDon't normalize input data." 
+				    , "N", 0, "-N <classifier>"));
+    
+    return  newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options.
+   *
+   * Valid options are:<p>
+   * -N <classifier>
+   * Don't normalize the input data. <p>
+   */
+  public void setOptions (String[] options)
+    throws Exception
+  {
+    setNormalize(!Utils.getFlag('N', options));
+
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String normalizeTipText() {
+    return "Normalize input data.";
+  }
+
+  /**
+   * Set whether input data will be normalized.
+   * @param n true if input data is to be normalized
+   */
+  public void setNormalize(boolean n) {
+    m_normalize = n;
+  }
+
+  /**
+   * Gets whether or not input data is to be normalized
+   * @return true if input data is to be normalized
+   */
+  public boolean getNormalize() {
+    return m_normalize;
+  }
+
+    /**
+   * Gets the current settings of ClassifierSubsetEval
+   *
+   * @return an array of strings suitable for passing to setOptions()
+   */
+  public String[] getOptions () {
+
+    String[] options = new String[1];
+    int current = 0;
+
+    if (!getNormalize()) {
+      options[current++] = "-N";
+    }
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    
+    return  options;
+  }
+
+  /**
    * Initializes principal components and performs the analysis
    * @param data the instances to analyse/transform
    * @exception Exception if analysis fails
@@ -101,6 +181,8 @@ public class PrincipalComponents extends AttributeTransformer {
   private void buildAttributeConstructor (Instances data) throws Exception {
     m_eigenvalues = null;
     m_outputNumAtts = -1;
+    m_attributeFilter = null;
+    m_nominalToBinFilter = null;
 
     if (data.checkForStringAttributes()) {
       throw  new Exception("Can't handle string attributes!");
@@ -111,25 +193,45 @@ public class PrincipalComponents extends AttributeTransformer {
     // column to append to the transformed data (if necessary)
     m_trainCopy = new Instances(m_trainInstances);
     
-    m_replaceMissing = new ReplaceMissingValuesFilter();
-    m_replaceMissing.inputFormat(m_trainInstances);
-    m_trainInstances = Filter.useFilter(m_trainInstances, m_replaceMissing);
+    m_replaceMissingFilter = new ReplaceMissingValuesFilter();
+    m_replaceMissingFilter.inputFormat(m_trainInstances);
+    m_trainInstances = Filter.useFilter(m_trainInstances, m_replaceMissingFilter);
 
-    m_normalize = new NormalizationFilter();
-    m_normalize.inputFormat(m_trainInstances);
-    m_trainInstances = Filter.useFilter(m_trainInstances, m_normalize);
+    if (m_normalize) {
+      m_normalizeFilter = new NormalizationFilter();
+      m_normalizeFilter.inputFormat(m_trainInstances);
+      m_trainInstances = Filter.useFilter(m_trainInstances, m_normalizeFilter);
+    }
 
-
-    m_nominalToBin = new NominalToBinaryFilter();
-    m_nominalToBin.inputFormat(m_trainInstances);
-    m_trainInstances = Filter.useFilter(m_trainInstances, m_nominalToBin);
+    m_nominalToBinFilter = new NominalToBinaryFilter();
+    m_nominalToBinFilter.inputFormat(m_trainInstances);
+    m_trainInstances = Filter.useFilter(m_trainInstances, 
+					m_nominalToBinFilter);
+    
+    // delete any attributes with only one distinct value or are all missing
+    Vector deleteCols = new Vector();
+    for (int i=0;i<m_trainInstances.numAttributes();i++) {
+      if (m_trainInstances.numDistinctValues(i) <=1) {
+	deleteCols.addElement(new Integer(i));
+	//      System.err.println("att : "+(i+1)+ " num vals : "+m_trainInstances.numDistinctValues(i));
+      }
+    }
 
     if (m_trainInstances.classIndex() >=0) {
+      // get rid of the class column
       m_hasClass = true;
       m_classIndex = m_trainInstances.classIndex();
-      // get rid of the class column
+      deleteCols.addElement(new Integer(m_classIndex));
+    }
+
+    // remove columns from the data if necessary
+    if (deleteCols.size() > 0) {
       m_attributeFilter = new AttributeFilter();
-      m_attributeFilter.setAttributeIndices(""+(m_classIndex+1));
+      int [] todelete = new int [deleteCols.size()];
+      for (int i=0;i<deleteCols.size();i++) {
+	todelete[i] = ((Integer)(deleteCols.elementAt(i))).intValue();
+      }
+      m_attributeFilter.setAttributeIndicesArray(todelete);
       m_attributeFilter.setInvertSelection(false);
       m_attributeFilter.inputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_attributeFilter);
@@ -138,15 +240,25 @@ public class PrincipalComponents extends AttributeTransformer {
     m_numInstances = m_trainInstances.numInstances();
     m_numAttribs = m_trainInstances.numAttributes();
 
-    fillCovariance();
+    fillCorrelation();
 
     double [] d = new double[m_numAttribs+1]; 
     double [][] v = new double[m_numAttribs+1][m_numAttribs+1];
 
-    jacobi(m_covariance, m_numAttribs, d, v);
+    jacobi(m_correlation, m_numAttribs, d, v);
     m_eigenvectors = (double [][])v.clone();
     
     m_eigenvalues = (double [])d.clone();
+    /*    for (int i=0;i<m_eigenvalues.length;i++) {
+      System.err.println("eig val : "+i+" "+m_eigenvalues[i]);
+      } */
+
+    // any eigenvalues less than 0 are not worth anything --- change to 0
+    for (int i=0;i<m_eigenvalues.length;i++) {
+      if (m_eigenvalues[i] < 0) {
+	m_eigenvalues[i] = 0.0;
+      }
+    }
     m_sortedEigens = Utils.sort(m_eigenvalues);
   }
 
@@ -194,8 +306,8 @@ public class PrincipalComponents extends AttributeTransformer {
   /**
    * Fill the correlation matrix
    */
-  private void fillCovariance() {
-    m_covariance = new double[m_numAttribs+1][m_numAttribs+1];
+  private void fillCorrelation() {
+    m_correlation = new double[m_numAttribs+1][m_numAttribs+1];
     double [] att1 = new double [m_numInstances];
     double [] att2 = new double [m_numInstances];
     double corr;
@@ -203,15 +315,15 @@ public class PrincipalComponents extends AttributeTransformer {
     for (int i=1;i<=m_numAttribs;i++) {
       for (int j=1;j<=m_numAttribs;j++) {
 	if (i == j) {
-	  m_covariance[i][j] = 1.0;
+	  m_correlation[i][j] = 1.0;
 	} else {
 	  for (int k=0;k<m_numInstances;k++) {
 	    att1[k] = m_trainInstances.instance(k).value(i-1);
 	    att2[k] = m_trainInstances.instance(k).value(j-1);
 	  }
 	  corr = Utils.correlation(att1,att2,m_numInstances);
-	  m_covariance[i][j] = corr;
-	  m_covariance[i][j] = corr;
+	  m_correlation[i][j] = corr;
+	  m_correlation[i][j] = corr;
 	}
       }
     }
@@ -226,13 +338,13 @@ public class PrincipalComponents extends AttributeTransformer {
     double sum = Utils.sum(m_eigenvalues);
     double cumulative = 0.0;
     Instances output = null;
-    
+
     try {
       output = setOutputFormat();
     } catch (Exception ex) {
     }
 
-    result.append("Correlation matrix\n"+matrixToString(m_covariance)
+    result.append("Correlation matrix\n"+matrixToString(m_correlation)
 		  +"\n\n");
     result.append("eigenvalue\tproportion\tcumulative\n");
     for (int i=m_numAttribs;i>=1;i--) {
@@ -240,7 +352,7 @@ public class PrincipalComponents extends AttributeTransformer {
       result.append(Utils.doubleToString(m_eigenvalues[m_sortedEigens[i]],9,5)
 		    +"\t"+Utils.
 		    doubleToString((m_eigenvalues[m_sortedEigens[i]]/sum),
-					       9,5)
+				     9,5)
 		    +"\t"+Utils.doubleToString((cumulative/sum),9,5)
 		    +"\t"+output.attribute(m_numAttribs-i).name()+"\n");
     }
@@ -312,19 +424,24 @@ public class PrincipalComponents extends AttributeTransformer {
     Instance newInstance = new Instance(m_outputNumAtts);
     Instance tempInst = new Instance(instance);
 
-    m_replaceMissing.input(tempInst);
-    tempInst = m_replaceMissing.output();
+    m_replaceMissingFilter.input(tempInst);
+    tempInst = m_replaceMissingFilter.output();
     
-    m_normalize.input(tempInst);
-    tempInst = m_normalize.output();
+    if (m_normalize) {
+      m_normalizeFilter.input(tempInst);
+      tempInst = m_normalizeFilter.output();
+    }
 
-    m_nominalToBin.input(tempInst);
-    tempInst = m_nominalToBin.output();
+    m_nominalToBinFilter.input(tempInst);
+    tempInst = m_nominalToBinFilter.output();
 
-    if (m_hasClass) {
+    if (m_attributeFilter != null) {
       m_attributeFilter.input(tempInst);
       tempInst = m_attributeFilter.output();
-      newInstance.setValue(m_outputNumAtts-1,
+    }
+
+    if (m_hasClass) {
+       newInstance.setValue(m_outputNumAtts-1,
 			   instance.value(instance.classIndex()));
     }
     //    System.out.println("normalized etc: "+tempInst);
