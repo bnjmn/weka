@@ -16,7 +16,6 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package weka.core;
 
 import java.io.*;
@@ -34,13 +33,9 @@ import java.util.*;
  * or combinations thereof.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class Range implements Serializable {
-
-  // =================
-  // Protected members
-  // =================
 
   /** Record the string representations of the columns to delete */
   Vector m_RangeStrings = new Vector();
@@ -53,10 +48,6 @@ public class Range implements Serializable {
 
   /** Store the maximum value permitted in the range */
   int m_Upper;
-
-  // ===============
-  // Public methods.
-  // ===============
 
   /**
    * Sets the value of "last"
@@ -173,7 +164,7 @@ public class Range implements Serializable {
   }
 
   /**
-   * Constructs a representation of the current range
+   * Constructs a representation of the current range.
    * 
    * @return the string representation of the current range
    */
@@ -255,10 +246,9 @@ public class Range implements Serializable {
     return result;
   }
 
-  // =================
-  // Protected methods
-  // =================
-
+  /**
+   * Sets the flags.
+   */
   protected void setFlags() {
 
     m_SelectFlags = new boolean [m_Upper + 1];
@@ -331,7 +321,6 @@ public class Range implements Serializable {
     return rangeSingle(range);
   }
 
-
   /**
    * Determines if a string represents a valid index or simple range.
    * Examples: <code>first  last   2   first-last  first-4  4-last</code>
@@ -370,16 +359,11 @@ public class Range implements Serializable {
     }
   }
 
-  // ============
-  // Test method.
-  // ============
-
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain arguments to the filter: use -h for help
+   * @param argv one parameter: a test range specification
    */
-
   public static void main(String [] argv) {
 
     try {
