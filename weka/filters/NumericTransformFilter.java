@@ -32,7 +32,7 @@ import weka.core.*;
  * Name of the method used for the transformation.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class NumericTransformFilter extends Filter implements OptionHandler {
 
@@ -342,13 +342,7 @@ public class NumericTransformFilter extends Filter implements OptionHandler {
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
 
-    String rangeList = "";
-    for(int i = 0; i < attributes.length; i++)
-      if (i == 0)
-	rangeList = "" + (attributes[i] + 1);
-      else
-	rangeList += "," + (attributes[i] + 1);
-    setAttributeIndices(rangeList);
+    setAttributeIndices(Range.indicesToRangeList(attributes));
   }
   
 

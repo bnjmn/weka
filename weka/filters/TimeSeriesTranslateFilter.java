@@ -39,7 +39,7 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TimeSeriesTranslateFilter extends Filter
   implements OptionHandler {
@@ -370,15 +370,7 @@ public class TimeSeriesTranslateFilter extends Filter
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
 
-    String rangeList = "";
-    for(int i = 0; i < attributes.length; i++) {
-      if (i == 0) {
-	rangeList = "" + (attributes[i] + 1);
-      } else {
-	rangeList += "," + (attributes[i] + 1);
-      }
-    }
-    setAttributeIndices(rangeList);
+    setAttributeIndices(Range.indicesToRangeList(attributes));
   }
 
   /** Clears any instances from the history queue. */
