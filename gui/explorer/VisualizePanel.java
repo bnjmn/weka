@@ -41,6 +41,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -83,9 +84,329 @@ import java.awt.Graphics;
  * the size of the x is related to the magnitude of the error.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class VisualizePanel extends JPanel {
+
+  /** Inner class to handle displaying the legend for the colouring attrib */
+  protected class ClassPanel extends JPanel {
+    
+    /** True when the panel has been enabled (ie after the plot panel
+	has called either setNumeric or setNominal */
+    private boolean m_isEnabled = false;
+
+    /** True if the colouring attribute is numeric */
+    private boolean m_isNumeric = false;
+    
+    /** The height of the spectrum for numeric class */
+    private final int m_spectrumHeight = 5;
+
+    /**  The maximum value for the colouring attribute */
+    private double m_maxC;
+    
+    /** The minimum value for the colouring attribute */
+    private double m_minC;
+
+    /** The size of the ticks */
+    private final int m_tickSize = 5;
+
+    /** Font metrics */
+    private FontMetrics m_labelMetrics = null;
+
+    /** The font used in labeling */
+    private Font m_labelFont = null;
+
+    /** The amount of space to leave either side of the legend */ 
+    private int m_HorizontalPad=10;
+
+    /** The precision with which to display real values */
+    private int m_precisionC;
+
+    /** Field width for numeric values */
+    private int m_fieldWidthC;
+    
+    /** Instances being plotted */
+    private Instances m_Instances=null;
+
+    /** Index of the colouring attribute */
+    private int m_cIndex;
+
+    /** default colours for colouring discrete class */
+    protected Color [] m_DefaultColors = {Color.blue,
+					  Color.red,
+					  Color.green,
+					  Color.cyan,
+					  Color.magenta,
+					  Color.yellow,
+                                          Color.orange,
+                                          Color.gray,
+                                          Color.darkGray,
+                                          Color.black};
+
+    /**
+     * Set up fonts and font metrics
+     * @param gx the graphics context
+     */
+    private void setFonts(Graphics gx) {
+      if (m_labelMetrics == null) {
+	m_labelFont = new Font("Sanserif", Font.PLAIN, 12);
+	m_labelMetrics = gx.getFontMetrics(m_labelFont);
+	int hf = m_labelMetrics.getAscent();
+	if (getHeight() < (3*hf)) {
+	  m_labelFont = new Font("Sanserif",Font.PLAIN,10);
+	  m_labelMetrics = gx.getFontMetrics(m_labelFont);
+	}
+      }
+      gx.setFont(m_labelFont);
+    }
+
+    /**
+     * Enables the panel
+     * @param e true to enable the panel
+     */
+    protected void setOn(boolean e) {
+      m_isEnabled = e;
+    }
+
+    /**
+     * Sets the legend to be for a nominal variable
+     * @param plotInstances the instances currently being plotted
+     * @param cIndex the index of the colouring attribute
+     */
+    protected void setNominal(Instances plotInstances, int cIndex) {
+      m_isNumeric = false;
+      m_Instances = plotInstances;
+      m_cIndex = cIndex;
+      m_HorizontalPad = 10;
+      setOn(true);
+      repaint();
+    }
+
+    /**
+     * Sets the legend to be for a numeric variable
+     * @param mxC the maximum value of the colouring attribute
+     * @param mnC the minimum value of the colouring attribute
+     */
+    protected void setNumeric(double mxC, 
+			      double mnC) {
+      m_isNumeric = true;
+      m_maxC = mxC;
+      m_minC = mnC;
+
+      m_fieldWidthC = (int)((Math.log(m_maxC)/Math.log(10)))+1;
+      m_precisionC = 1;
+      if ((Math.abs(m_maxC-m_minC) < 1) && ((m_maxC-m_minC) != 0)) {
+	m_precisionC = (int)Math.abs(((Math.log(Math.abs(m_maxC-m_minC)) / 
+				     Math.log(10))))+1;
+      }
+      String maxStringC = Utils.doubleToString(m_maxC,
+					       m_fieldWidthC+1+m_precisionC
+					       ,m_precisionC);
+      if (m_labelMetrics != null) {
+	m_HorizontalPad = m_labelMetrics.stringWidth(maxStringC);
+      }
+
+      setOn(true);
+      repaint();
+    }
+
+    /**
+     * Renders the legend for a nominal colouring attribute
+     * @param gx the graphics context
+     */
+    protected void paintNominal(Graphics gx) {
+      setFonts(gx);
+      int numClasses = m_Instances.attribute(m_cIndex).numValues();
+      int maxLabelLen = 0;
+      int idx=0;
+      int legendHeight;
+      int w = getWidth();
+      int hf = m_labelMetrics.getAscent();
+
+      for (int i=0;i<numClasses;i++) {
+	if (m_Instances.attribute(m_cIndex).value(i).length() > 
+	    maxLabelLen) {
+	  maxLabelLen = m_Instances.
+	    attribute(m_cIndex).value(i).length();
+	  idx = i;
+	}
+      }
+      maxLabelLen = m_labelMetrics.stringWidth(m_Instances.
+					       attribute(m_cIndex).value(idx));
+
+
+      if (((w-(2*m_HorizontalPad))/(maxLabelLen+5)) >= numClasses) {
+	legendHeight = 1;
+      } else {
+	legendHeight = 2;
+      }
+	
+      int x = m_HorizontalPad;
+      int y = 1 + hf;
+
+      // do the first row
+      int ci, mp;
+      Color pc;
+      int numToDo = ((legendHeight==1) ? numClasses : (numClasses/2));
+      for (int i=0;i<numToDo;i++) {
+	ci = i % 10; mp = i / 10; mp *= 2;
+	pc = m_DefaultColors[ci];
+	for (int j=0;j<mp;j++) {
+	  pc = pc.darker();
+	}
+	gx.setColor(pc);
+	// can we fit the full label or will each need to be trimmed?
+	if ((numToDo * maxLabelLen) > (w-(m_HorizontalPad*2))) {
+	  String val = m_Instances.attribute(m_cIndex).value(i);
+	  int sw = m_labelMetrics.stringWidth(val);
+	  int rm=0;
+	  // truncate string if necessary
+	  if (sw > ((w-(m_HorizontalPad*2)) / (numToDo))) {
+	    int incr = (sw / val.length());
+	    rm = (sw -  ((w-(m_HorizontalPad*2)) / numToDo)) / incr;
+	    if (rm <= 0) {
+	      rm = 0;
+	    }
+	    val = val.substring(0,val.length()-rm);
+	    sw = m_labelMetrics.stringWidth(val);
+	  }
+	  gx.drawString(val,x,y);
+	  x += sw + 2;
+	} else {
+	  gx.drawString(m_Instances.attribute(m_cIndex).value(i),x,y);
+	  x += ((w-(m_HorizontalPad*2)) / numToDo);
+	}	  
+      }
+
+      x = m_HorizontalPad;
+      y = 1+ hf + 5 +hf;
+      for (int i=numToDo;i<numClasses;i++) {
+	ci = i % 10; mp = i / 10; mp *= 2;
+	pc = m_DefaultColors[ci];
+	for (int j=0;j<mp;j++) {
+	  pc = pc.darker();
+	}
+	gx.setColor(pc);
+	if (((numClasses-numToDo+1) * maxLabelLen) > 
+	    (w - (m_HorizontalPad*2))) {
+	  String val = m_Instances.attribute(m_cIndex).value(i);
+	  int sw = m_labelMetrics.stringWidth(val);
+	  int rm=0;
+	  // truncate string if necessary
+	  if (sw > ((w-(m_HorizontalPad*2)) / (numClasses-numToDo+1))) {
+	    int incr = (sw / val.length());
+	    rm = (sw -  ((w-(m_HorizontalPad*2)) / (numClasses-numToDo))) 
+	      / incr;
+	    if (rm <= 0) {
+	      rm = 0;
+	    }
+	    val = val.substring(0,val.length()-rm);
+	    sw = m_labelMetrics.stringWidth(val);
+	  }
+	  gx.drawString(val,x,y);
+	  //	  x += ((w-(m_HorizontalPad*2)) / (numClasses-numToDo))+3;
+	  x += sw +2;
+	} else {
+	  gx.drawString(m_Instances.attribute(m_cIndex).value(i),x,y);
+	  x += ((w - (m_HorizontalPad*2)) / (numClasses-numToDo));
+	}	  
+      }
+    }
+
+    /**
+     * Renders the legend for a numeric colouring attribute
+     * @param gx the graphics context
+     */
+    protected void paintNumeric(Graphics gx) {
+      setFonts(gx);
+      int w = getWidth();
+      double rs = 15;
+      double incr = 240.0 / (double)(w-(m_HorizontalPad*2));
+      int hf = m_labelMetrics.getAscent();
+      
+      for (int i=m_HorizontalPad;i<
+	     (w-m_HorizontalPad);i++) {
+	Color c = new Color((int)rs,0,(int)(255-rs));
+	gx.setColor(c);
+	gx.drawLine(i,0,
+		    i,0+m_spectrumHeight);
+	rs += incr;
+	}
+
+      	int fieldWidthC = (int)((Math.log(m_maxC)/Math.log(10)))+1;
+	
+	String maxStringC = Utils.doubleToString(m_maxC,
+						 fieldWidthC+1+m_precisionC,
+						 m_precisionC);
+	
+	int mswc = m_labelMetrics.stringWidth(maxStringC);
+	int tmsc = mswc;
+	if (w > (2 * tmsc)) {
+	  gx.setColor(Color.black);
+	  gx.drawLine(m_HorizontalPad,
+		      (m_spectrumHeight+5),
+		      w-m_HorizontalPad,
+		      (m_spectrumHeight+5));
+
+	  gx.drawLine(w-m_HorizontalPad,
+		      (m_spectrumHeight+5),
+		      w-m_HorizontalPad,
+		      (m_spectrumHeight+5+m_tickSize));
+
+	  gx.drawString(maxStringC, 
+			(w-m_HorizontalPad)-(mswc/2),
+			(m_spectrumHeight+5+m_tickSize+hf));
+
+	  gx.drawLine(m_HorizontalPad,
+		      (m_spectrumHeight+5),
+		      m_HorizontalPad,
+		      (m_spectrumHeight+5+m_tickSize));
+
+	  fieldWidthC = (int)((Math.log(m_minC)/Math.log(10)))+1;
+	  maxStringC = Utils.doubleToString(m_minC,
+					    fieldWidthC+1+m_precisionC,
+					    m_precisionC);
+	  mswc = m_labelMetrics.stringWidth(maxStringC);
+	  gx.drawString(maxStringC, 
+			m_HorizontalPad-(mswc/2),
+			(m_spectrumHeight+5+m_tickSize+hf));
+
+	  // draw the middle value if there is space
+	  if (w > (3 * tmsc)) {
+	    double mid = m_minC+((m_maxC-m_minC)/2.0);
+	    gx.drawLine(m_HorizontalPad+((w-(2*m_HorizontalPad))/2),
+			(m_spectrumHeight+5),
+			m_HorizontalPad+((w-(2*m_HorizontalPad))/2),
+			(m_spectrumHeight+5+m_tickSize));
+	    fieldWidthC = (int)((Math.log(mid)/Math.log(10)))+1;
+	    maxStringC = Utils.doubleToString(mid,
+					      fieldWidthC+1+m_precisionC,
+					      m_precisionC);
+	    mswc = m_labelMetrics.stringWidth(maxStringC);
+	    gx.drawString(maxStringC,
+			  m_HorizontalPad+((w-(2*m_HorizontalPad))/2)-(mswc/2),
+			  (m_spectrumHeight+5+m_tickSize+hf));
+	  }
+	}
+    }
+
+    /**
+     * Renders this component
+     * @param gx the graphics context
+     */
+    public void paintComponent(Graphics gx) {
+      super.paintComponent(gx);
+      if (m_isEnabled) {
+	if (m_isNumeric) {
+	  paintNumeric(gx);
+	} else {
+	  if (m_Instances != null) {
+	    paintNominal(gx);
+	  }
+	}
+      }
+    }
+  }
 
   /** Inner class to handle plotting */
   protected class PlotPanel extends JPanel {
@@ -122,9 +443,6 @@ public class VisualizePanel extends JPanel {
 
     /** Tick size */
     private final int m_tickSize = 5;
-
-    /** Height of the spectrum reference bar */
-    private final int m_spectrumHeight = 5;
 
     /**the offsets of the axes once label metrics are calculated */
     private int m_XaxisStart=0;
@@ -218,12 +536,13 @@ public class VisualizePanel extends JPanel {
     /**
      * Set the instances to plot
      * @param inst the instances
+     * @param cIndex the index of the colouring attribute
      */
-    public void setInstances(Instances inst) {
+    public void setInstances(Instances inst, int cIndex) {
       m_plotInstances=inst;
       m_xIndex=0;
       m_yIndex=0;
-      m_cIndex=0;
+      m_cIndex=cIndex;
       m_pointLookup = new double [m_plotInstances.numInstances()][5];
       determineBounds();
     }
@@ -254,6 +573,7 @@ public class VisualizePanel extends JPanel {
 	m_labelFont = new Font("Sanserif", Font.PLAIN, 12);
 	m_labelMetrics = gx.getFontMetrics(m_labelFont);
       }
+      gx.setFont(m_labelFont);
     }
 
     /**
@@ -649,7 +969,7 @@ public class VisualizePanel extends JPanel {
 	    mp *= 2;
 	    Color pc = m_DefaultColors[ci];
 	    for (int j=0;j<mp;j++) {
-	      pc = pc.brighter();
+	      pc = pc.darker();
 	    }
 	    
 	    gx.setColor(pc);	    
@@ -665,7 +985,7 @@ public class VisualizePanel extends JPanel {
 		mp *= 2;
 		pc = m_DefaultColors[ci];
 		for (int j=0;j<mp;j++) {
-		  pc = pc.brighter();
+		  pc = pc.darker();
 		}
 		
 		gx.setColor(pc);
@@ -708,6 +1028,7 @@ public class VisualizePanel extends JPanel {
     private void paintAxis(Graphics gx) {
       setFonts(gx);
 
+      Graphics classPgx = m_classPanel.getGraphics();
       int mxs = m_XaxisStart;
       int mxe = m_XaxisEnd;
       int mys = m_YaxisStart;
@@ -740,9 +1061,15 @@ public class VisualizePanel extends JPanel {
       String maxStringY = Utils.doubleToString(m_maxY,
 					       fieldWidthY+1+precisionY
 					       ,precisionY);
+      String minStringY = Utils.doubleToString(m_minY,
+					       fieldWidthY+1+precisionY
+					       ,precisionY);
 
       if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
-	mswy = m_labelMetrics.stringWidth(maxStringY);
+	mswy = (m_labelMetrics.stringWidth(maxStringY) > 
+		m_labelMetrics.stringWidth(minStringY))
+	  ? m_labelMetrics.stringWidth(maxStringY)
+	  : m_labelMetrics.stringWidth(minStringY);
       } else {
 	mswy = m_labelMetrics.stringWidth("MM");
       }
@@ -754,97 +1081,16 @@ public class VisualizePanel extends JPanel {
       
       m_YaxisEnd = h-m_axisPad-(2 * hf)-m_tickSize;
 
+      // draw the class legend
       if ((!m_colourUsingPreds) && 
 	  m_plotInstances.attribute(m_cIndex).isNumeric()) {
-	int nomSpacer = (m_plotInstances.attribute(m_xIndex).isNumeric())
-	  ? 1
-	  : 2;
-	m_YaxisEnd -= (m_spectrumHeight+(nomSpacer*hf)+m_tickSize+m_axisPad);
-	// draw spectrum
-	double rs = 15;
-	double incr = 240.0 / (double)(m_XaxisEnd-m_XaxisStart);
 
-	for (int i=m_XaxisStart;i<
-	       (m_XaxisStart+(m_XaxisEnd-m_XaxisStart));i++) {
-	  Color c = new Color((int)rs,0,(int)(255-rs));
-	  gx.setColor(c);
-	  gx.drawLine(i,(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+m_axisPad),
-		   i,(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+m_axisPad+m_spectrumHeight));
-	  rs += incr;
-	}
+	m_classPanel.setNumeric(m_maxC, m_minC);
 
-	int fieldWidthC = (int)((Math.log(m_maxC)/Math.log(10)))+1;
-	int precisionC = 1;
-	if ((Math.abs(m_maxC-m_minC) < 1) && ((m_maxC-m_minC) != 0)) {
-	  precisionC = (int)Math.abs(((Math.log(Math.abs(m_maxC-m_minC)) / 
-				       Math.log(10))))+1;
-	}
-	String maxStringC = Utils.doubleToString(m_maxC,
-						 fieldWidthC+1+precisionC,
-						 precisionC);
-	
-	int mswc = m_labelMetrics.stringWidth(maxStringC);
-	int tmsc = mswc;
-	if (w > (2 * tmsc)) {
-	  gx.setColor(Color.black);
-	  gx.drawLine(m_XaxisStart,
-		      (m_YaxisEnd+(nomSpacer*hf)+
-		       m_tickSize+m_axisPad+m_spectrumHeight+5),
-		      m_XaxisEnd,
-		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
-		       m_axisPad+m_spectrumHeight+5));
+      } else if ((!m_colourUsingPreds) && 
+	  m_plotInstances.attribute(m_cIndex).isNominal()) {
 
-	  gx.drawLine(m_XaxisEnd,
-		      (m_YaxisEnd+(hf*nomSpacer)+m_tickSize+
-		       m_axisPad+m_spectrumHeight+5),
-		      m_XaxisEnd,
-		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
-		       m_axisPad+m_spectrumHeight+5+m_tickSize));
-
-	  gx.drawString(maxStringC, 
-			m_XaxisEnd-(mswc/2),
-			(m_YaxisEnd+hf+m_tickSize+
-			m_axisPad+m_spectrumHeight+5+
-			 m_tickSize+(nomSpacer*hf)));
-
-	  gx.drawLine(m_XaxisStart,
-		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
-		       m_axisPad+m_spectrumHeight+5),
-		      m_XaxisStart,
-		      (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
-		       m_axisPad+m_spectrumHeight+5+m_tickSize));
-	  fieldWidthC = (int)((Math.log(m_minC)/Math.log(10)))+1;
-	  maxStringC = Utils.doubleToString(m_minC,
-					    fieldWidthC+1+precisionC,
-					    precisionC);
-	  mswc = m_labelMetrics.stringWidth(maxStringC);
-	  gx.drawString(maxStringC, 
-			m_XaxisStart-(mswc/2),
-			(m_YaxisEnd+hf+m_tickSize+
-			m_axisPad+m_spectrumHeight+5+
-			 m_tickSize+(nomSpacer*hf)));
-
-	  // draw the middle value if there is space
-	  if (w > (3 * tmsc)) {
-	    double mid = m_minC+((m_maxC-m_minC)/2.0);
-	    gx.drawLine(m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2),
-			(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
-			 m_axisPad+m_spectrumHeight+5),
-			m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2),
-			(m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
-			 m_axisPad+m_spectrumHeight+5+m_tickSize));
-	    fieldWidthC = (int)((Math.log(mid)/Math.log(10)))+1;
-	    maxStringC = Utils.doubleToString(mid,
-					      fieldWidthC+1+precisionC,
-					      precisionC);
-	    mswc = m_labelMetrics.stringWidth(maxStringC);
-	    gx.drawString(maxStringC,
-			  m_XaxisStart+((m_XaxisEnd-m_XaxisStart)/2)-(mswc/2),
-			  (m_YaxisEnd+(nomSpacer*hf)+m_tickSize+
-			   m_axisPad+m_spectrumHeight+5+
-			   m_tickSize+hf));
-	  }
-	}
+	m_classPanel.setNominal(m_plotInstances, m_cIndex);
       }
 
       // draw axis
@@ -931,6 +1177,7 @@ public class VisualizePanel extends JPanel {
 	
       }
 
+      // draw the y axis
       if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
 	if (h > (2 * hf)) {
 	  gx.drawString(maxStringY, 
@@ -1069,6 +1316,9 @@ public class VisualizePanel extends JPanel {
   /** The panel that displays the plot */
   protected PlotPanel m_plot = new PlotPanel();
 
+  /** Panel that surrounds the plot panel with a titled border */
+  protected JPanel m_plotSurround = new JPanel();
+
   /** An optional listener that we will inform when ComboBox selections
       change */
   protected ActionListener listener = null;
@@ -1076,6 +1326,9 @@ public class VisualizePanel extends JPanel {
   /** The name of the plot (not currently displayed, but can be used
       in the containing Frame or Panel) */
   protected String m_plotName = "";
+
+  /** The panel that displays the legend for the colouring attribute */
+  protected ClassPanel m_classPanel = new ClassPanel();
   
   /**
    * Constructor
@@ -1164,9 +1417,20 @@ public class VisualizePanel extends JPanel {
     constraints.insets = new Insets(10,0,0,0);
     combos.add(m_Jitter,constraints);
 
+    JPanel cp = new JPanel();
+    cp.setBorder(BorderFactory.createTitledBorder("Class colour")); 
+    cp.setLayout(new BorderLayout());
+
+    m_classPanel.setBorder(BorderFactory.createEmptyBorder(15,10,10,10));
+    cp.add(m_classPanel, BorderLayout.CENTER);
+
+    m_plotSurround.setBorder(BorderFactory.createTitledBorder("Plot"));
+    m_plotSurround.setLayout(new BorderLayout());
+    m_plotSurround.add(m_plot, BorderLayout.CENTER);
     setLayout(new BorderLayout());
     add(combos, BorderLayout.NORTH);
-    add(m_plot, BorderLayout.CENTER);
+    add(m_plotSurround, BorderLayout.CENTER);
+    add(cp, BorderLayout.SOUTH);
   }
 
   /**
@@ -1291,7 +1555,7 @@ public class VisualizePanel extends JPanel {
    */
   public void setInstances(Instances inst) {
     
-    m_plot.setInstances(inst);
+    m_plot.setInstances(inst, inst.numAttributes()-1);
     String [] XNames = new String [inst.numAttributes()];
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
@@ -1321,7 +1585,10 @@ public class VisualizePanel extends JPanel {
     m_YCombo.setEnabled(true);
     if (!m_plot.m_colourUsingPreds) {
       m_ColourCombo.setEnabled(true);
+      m_ColourCombo.setSelectedIndex(inst.numAttributes()-1);
     }
+    m_plotSurround.setBorder((BorderFactory.createTitledBorder("Plot: "
+			      +inst.relationName())));
   }
 
   /**
