@@ -27,9 +27,16 @@ import weka.gui.FileEditor;
 import java.io.File;
 import java.beans.*;
 import java.awt.BorderLayout;
+import java.awt.event.*;
 import javax.swing.JPanel;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JDialog;
 import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+import weka.gui.ExtensionFileFilter;
 import weka.core.converters.Loader;
+import weka.core.converters.FileSourcedLoader;
 
 /**
  * GUI Customizer for the loader bean
@@ -38,7 +45,7 @@ import weka.core.converters.Loader;
  * @version 1.0
  */
 public class LoaderCustomizer extends JPanel
-  implements Customizer {
+  implements Customizer, CustomizerCloseRequester {
 
   static {
 
@@ -78,9 +85,17 @@ public class LoaderCustomizer extends JPanel
     new PropertyChangeSupport(this);
 
   private weka.gui.beans.Loader m_dsLoader;
-  private FileEditor m_fileEditor = new FileEditor();
-  private GenericObjectEditor m_LoaderEditor = 
-    new GenericObjectEditor(true);
+
+  private PropertySheetPanel m_LoaderEditor = 
+    new PropertySheetPanel();
+
+  private JFileChooser m_fileChooser 
+    = new JFileChooser(new File(System.getProperty("user.dir")));
+  /*  private JDialog m_chooserDialog = 
+    new JDialog((JFrame)getTopLevelAncestor(),
+    true); */
+
+  private JFrame m_parentFrame;
 
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -92,16 +107,15 @@ public class LoaderCustomizer extends JPanel
 	}); */
 
     try {
-      m_LoaderEditor.setClassType(weka.core.converters.Loader.class);
-      m_LoaderEditor.setValue(new weka.core.converters.ArffLoader());
+      /*      m_LoaderEditor.setClassType(weka.core.converters.Loader.class);
+	      m_LoaderEditor.setValue(new weka.core.converters.ArffLoader()); */
       m_LoaderEditor.addPropertyChangeListener(
 	  new PropertyChangeListener() {
 	      public void propertyChange(PropertyChangeEvent e) {
 		repaint();
 		if (m_dsLoader != null) {
 		  System.err.println("Property change!!");
-		  m_dsLoader.setLoader((weka.core.converters.Loader)m_LoaderEditor.
-				       getValue());
+		  m_dsLoader.setLoader(m_dsLoader.getLoader());
 		}
 	      }
 	    });
@@ -112,7 +126,55 @@ public class LoaderCustomizer extends JPanel
 
     setLayout(new BorderLayout());
     //    add(m_fileEditor.getCustomEditor(), BorderLayout.CENTER);
-    add(m_LoaderEditor.getCustomEditor(), BorderLayout.CENTER);
+    //    add(m_LoaderEditor, BorderLayout.CENTER);
+    m_fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+    m_fileChooser.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
+	    try {
+	      ((FileSourcedLoader)m_dsLoader.getLoader()).
+		setFile(m_fileChooser.getSelectedFile());
+	      // tell the loader that a new file has been selected so
+	      // that it can attempt to load the header
+	      m_dsLoader.setLoader(m_dsLoader.getLoader());
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	    }
+	  }
+	  // closing
+	  if (m_parentFrame != null) {
+	    m_parentFrame.dispose();
+	  }
+	}
+      });   
+  }
+
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
+  }
+  
+  private void setUpOther() {
+    removeAll();
+    add(m_LoaderEditor, BorderLayout.CENTER);
+    validate();
+    repaint();
+  }
+
+  public void setUpFile() {
+    removeAll();
+    m_fileChooser.
+      setSelectedFile(((FileSourcedLoader)m_dsLoader.getLoader()).getFile());
+    ExtensionFileFilter ff = 
+      new ExtensionFileFilter(((FileSourcedLoader)m_dsLoader.getLoader()).
+			      getFileExtension(),
+			      ((FileSourcedLoader)m_dsLoader.getLoader()).
+			      getFileDescription());
+    m_fileChooser.addChoosableFileFilter(ff);
+    JPanel about = m_LoaderEditor.getAboutPanel();
+    if (about != null) {
+      add(about, BorderLayout.NORTH);
+    }
+    add(m_fileChooser, BorderLayout.CENTER);
   }
 
   /**
@@ -122,8 +184,13 @@ public class LoaderCustomizer extends JPanel
    */
   public void setObject(Object object) {
     m_dsLoader = (weka.gui.beans.Loader)object;
+    m_LoaderEditor.setTarget(m_dsLoader.getLoader());
     //    m_fileEditor.setValue(m_dsLoader.getDataSetFile());
-    m_LoaderEditor.setValue(m_dsLoader.getLoader());
+    if (m_dsLoader.getLoader() instanceof FileSourcedLoader) {
+      setUpFile();
+    } else {
+      setUpOther();
+    }
   }
 
   /**
