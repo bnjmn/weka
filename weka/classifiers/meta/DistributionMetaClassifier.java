@@ -16,165 +16,174 @@
 
 /*
  *    DistributionMetaClassifier.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
-import weka.classifiers.rules.ZeroR;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.*;
 import java.util.Enumeration;
-import java.util.Random;
 import java.util.Vector;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 
 /**
- * Class that wraps up a Classifier and presents it as a DistributionClassifier
- * for ease of programmatically handling Classifiers in general -- only the
- * one predict method (distributionForInstance) need be worried about. The
- * distributions produced by this classifier place a probability of 1 on the
- * class value predicted by the sub-classifier.<p>
+ * Class for wrapping a Classifier to make it return a distribution. Simply outputs
+ * a probabiltry of 1 for the predicted class and 0 for the others.
  *
- * Valid options are:<p>
- *
- * -W classname <br>
- * Specify the full class name of a sub-classifier (required).<p>
- *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.7 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.8 $
  */
 public class DistributionMetaClassifier extends DistributionClassifier 
   implements OptionHandler {
 
-  /** The classifier. */
-  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
-
-  /** Default constructor */
-  public DistributionMetaClassifier() { }
+  /** The classifier being wrapped */
+  private Classifier m_wrappedClassifier = new weka.classifiers.rules.ZeroR();
 
   /**
-   * Creates a new <code>DistributionMetaClassifier</code> instance,
-   * specifying the Classifier to wrap around.
-   *
-   * @param subClassifier a <code>Classifier</code>.
-   */
-  public DistributionMetaClassifier(Classifier subClassifier) {
+   * Default constructor.
+   * 
+   */  
+  public DistributionMetaClassifier() {
 
-    setClassifier(subClassifier);
   }
-
-
+   
   /**
-   * Builds the classifier.
-   *
-   * @param insts the training data.
-   * @exception Exception if a classifier can't be built
-   */
-  public void buildClassifier(Instances insts) throws Exception {
+   * Contructs a DistributionMetaClassifier wrapping a given Classifier.
+   * 
+   * @param toWrap the classifier to wrap around
+   */    
+  public DistributionMetaClassifier(Classifier toWrap) {
 
-    if (m_Classifier == null) {
-      throw new Exception("No base classifier has been set!");
+    setClassifier(toWrap);
+  }
+  
+  /**
+   * Builds a classifier for a set of instances.
+   *
+   * @param instances the instances to train the classifier with
+   * @exception Exception if the classifier hasn't been set or something goes wrong
+   */  
+  public void buildClassifier(Instances data) throws Exception {
+
+    if (m_wrappedClassifier == null) {
+      throw new Exception("No classifier has been set");
     }
-
-    m_Classifier.buildClassifier(insts);
+    m_wrappedClassifier.buildClassifier(data);
   }
-
+  
   /**
-   * Returns the distribution for an instance.
+   * Returns the class probability distribution for an instance. Will simply have a
+   * probability of 1 for the predicted class and 0 for the others.
    *
-   * @exception Exception if the distribution can't be computed successfully
-   */
-  public double[] distributionForInstance(Instance inst) throws Exception {
+   * @param instance the instance to be classified
+   * @return the probability distribution
+   */  
+  public double[] distributionForInstance(Instance instance) throws Exception {
     
-    double[] result = new double[inst.numClasses()];
-    double predictedClass = m_Classifier.classifyInstance(inst);
-    if (Instance.isMissingValue(predictedClass)) {
-      return result;
+    double predictedClass = m_wrappedClassifier.classifyInstance(instance);
+    double[] distribution = new double[instance.numClasses()];
+    if (!Instance.isMissingValue(predictedClass)) {
+      if (instance.classAttribute().type() == Attribute.NOMINAL) {
+	distribution[(int) predictedClass] = 1.0;
+      } else {
+	distribution[0] = predictedClass;
+      }
     }
-    if (inst.classAttribute().type() == Attribute.NOMINAL) {
-      result[(int)predictedClass] = 1.0;
-    } else {
-      result[0] = predictedClass;
-    }
-    return result;
+    return distribution;
   }
-
+  
   /**
-   * Prints the classifiers.
+   * Returns a description of the classifier.
+   *
+   * @return a string containing a description of the classifier
    */
   public String toString() {
 
-    return "DistributionMetaClassifier: " + m_Classifier.toString() + "\n";
+    return "DistributionMetaClassifier: " + m_wrappedClassifier.toString();
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Sets the classifier to wrap.
+   *
+   * @param toWrap the classifier
+   */
+  public void setClassifier(Classifier toWrap) {
+
+    m_wrappedClassifier = toWrap;
+  }
+
+  /**
+   * Gets the classifier being wrapped.
+   *
+   * @return the classifier
+   */
+  public Classifier getClassifier() {
+
+    return m_wrappedClassifier;
+  }
+
+  /**
+   * Returns an enumeration describing the available options..
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions()  {
+  public Enumeration listOptions() {
+    
+    Vector newVector = new Vector(1);
+    newVector.addElement(new Option(
+				    "\tClassifier to wrap. (required)\n",
+				    "W", 1,"-W <classifier name>"));
 
-    Vector vec = new Vector(1);
-    Object c;
-    
-    vec.addElement(new Option("\tSets the base classifier.",
-			      "W", 1, "-W <base classifier>"));
-    
-    if (m_Classifier != null) {
-      try {
-	vec.addElement(new Option("",
-				  "", 0, "\nOptions specific to classifier "
-				  + m_Classifier.getClass().getName() + ":"));
-	Enumeration enum = ((OptionHandler)m_Classifier).listOptions();
-	while (enum.hasMoreElements()) {
-	  vec.addElement(enum.nextElement());
-	}
-      } catch (Exception e) {
+    if ((m_wrappedClassifier != null) &&
+	(m_wrappedClassifier instanceof OptionHandler)) {
+      newVector.addElement(new Option(
+				      "",
+				      "", 0, "\nOptions specific to classifier "
+				      + m_wrappedClassifier.getClass().getName() + ":"));
+      Enumeration enum = ((OptionHandler)m_wrappedClassifier).listOptions();
+      while (enum.hasMoreElements()) {
+	newVector.addElement(enum.nextElement());
       }
     }
-    return vec.elements();
+    
+    return newVector.elements();
   }
 
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -W classname <br>
-   * Specify the full class name of a learner as the basis for 
-   * the multiclassclassifier (required).<p>
+   * -W classifier name <br>
+   * Classifier to wrap. (required) <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-  
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
+    
+    String wString = Utils.getOption('W', options);
+    if (wString.length() != 0) {
+      setClassifier(Classifier.forName(wString,
+				       Utils.partitionOptions(options)));
+
+    } else {
+      throw new Exception("A classifier must be specified with the -W option.");
     }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
   }
 
   /**
-   * Gets the current settings of the Classifier.
+   * Gets the current settings of the classifier.
    *
-   * @return an array of strings suitable for passing to setOptions
+   * @return an array of strings suitable for passing to setOptions()
    */
-  public String [] getOptions() {
-    
+  public String[] getOptions() {
+
     String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
+    if ((m_wrappedClassifier != null) &&
+	(m_wrappedClassifier instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler)m_wrappedClassifier).getOptions();
     }
     String [] options = new String [classifierOptions.length + 3];
     int current = 0;
@@ -195,38 +204,15 @@ public class DistributionMetaClassifier extends DistributionClassifier
   }
 
   /**
-   * Set the base classifier. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
-
-  /**
    * Main method for testing this class.
    *
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    DistributionClassifier scheme;
-
+    
     try {
-      scheme = new DistributionMetaClassifier();
-      System.out.println(Evaluation.evaluateModel(scheme, argv));
+      System.out.println(Evaluation.evaluateModel(new DistributionMetaClassifier(), 
+						  argv));
     } catch (Exception e) {
       System.err.println(e.getMessage());
     }
