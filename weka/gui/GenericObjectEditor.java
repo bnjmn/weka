@@ -93,7 +93,7 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class GenericObjectEditor implements PropertyEditor {
     
@@ -213,14 +213,8 @@ public class GenericObjectEditor implements PropertyEditor {
 		    });
 		
 		m_ObjectNames.goToRoot();
-		try{
-		    for(;m_ObjectNames.numChildren() == 1;
-			m_ObjectNames.goToChild(0));
-		    
-		    for(int i = 0; i < m_ObjectNames.numChildren(); i++){
-			m_ObjectNames.goToChild(i);			
-			label.add(build(true));	
-		    }
+		try{		
+		    build();	
 		}catch(Exception e){
 		}
 		
@@ -248,35 +242,67 @@ public class GenericObjectEditor implements PropertyEditor {
 	    }
 	    
 	    /** Private procedure to build the cascaded comboBox */
-	    private JMenuItem build(boolean useFullValue){
-		if(m_ObjectNames.isLeafReached()){	  
-		    JMenuItem mi;
-		    if(useFullValue)
-			mi = new JMenuItem(m_ObjectNames.fullValue());
-		    else
-			mi = new JMenuItem(m_ObjectNames.getValue());
-		    
-		    mi.addMouseListener(this);
-		    m_ObjectNames.goToParent();
-		    return mi;
-		}
-		else{
-		    JMenu menu;
-		    if(useFullValue)
-			menu = new JMenu(m_ObjectNames.fullValue());
-		    else
-			menu = new JMenu(m_ObjectNames.getValue());
-		    
-		    menu.addMenuListener(this);		
+	    private JMenuItem build(){		
+		JMenuItem menu;
+		int singleItem = 0;
+		boolean isFromRoot = m_ObjectNames.isRootReached();
+		String delim = m_ObjectNames.getSeperator();
+		
+		StringBuffer sb = 
+		    new StringBuffer(m_ObjectNames.getValue());
+		while(m_ObjectNames.numChildren() == 1){
+		    try{
+			m_ObjectNames.goToChild(0);
+		    }catch(Exception e){}
+		    sb.append(delim + m_ObjectNames.getValue());
+		    singleItem++;
+		}		    		    		
+		
+		if(isFromRoot){
 		    String[] kids = m_ObjectNames.childrenValues();
 		    for(int i=0; i < kids.length; i++){
 			String child = kids[i];
 			m_ObjectNames.goToChild(child);
-			menu.add(build(false));
+			if(m_ObjectNames.isLeafReached()){
+			    menu = new JMenuItem(m_ObjectNames.fullValue());
+			    menu.addMouseListener(this);
+			}
+			else{
+			    menu = new JMenu(m_ObjectNames.fullValue());
+			    ((JMenu)menu).addMenuListener(this);
+			    String[] grandkids = 
+				m_ObjectNames.childrenValues();
+			    for(int j=0; j < grandkids.length; j++){
+				m_ObjectNames.goToChild(grandkids[j]);
+				menu.add(build());
+			    }				
+			}
+
+			m_ObjectNames.goToParent();
+			label.add(menu);
 		    }
-		    m_ObjectNames.goToParent();
-		    return menu;
+		    menu = null;
 		}
+		else if(m_ObjectNames.isLeafReached()){
+		    menu = new JMenuItem(sb.toString());
+		    menu.addMouseListener(this);
+		} 
+		else{
+		    menu = new JMenu(sb.toString());
+		    ((JMenu)menu).addMenuListener(this);		
+		    
+		    String[] kids = m_ObjectNames.childrenValues();
+		    for(int i=0; i < kids.length; i++){
+			String child = kids[i];
+			m_ObjectNames.goToChild(child);
+			menu.add(build());
+		    }
+		}
+		
+		for(int i=0; i <= singleItem; i++)
+		    m_ObjectNames.goToParent(); // One more level up		    
+		
+		return menu;		
 	    }    
 	    
 	    /**
@@ -290,14 +316,8 @@ public class GenericObjectEditor implements PropertyEditor {
 		if(!m_ObjectNames.contains(className)){
 		    m_ObjectNames.add(className);
 		    m_ObjectNames.goToRoot();
-		    try{
-			for(;m_ObjectNames.numChildren() == 1;
-			    m_ObjectNames.goToChild(0));
-			
-			for(int i = 0; i < m_ObjectNames.numChildren(); i++){
-			    m_ObjectNames.goToChild(i);			
-			    label.add(build(true));	
-			}
+		    try{			
+			build();	
 		    }catch(Exception e){
 		    }
 		    
@@ -314,13 +334,12 @@ public class GenericObjectEditor implements PropertyEditor {
 	     */
 	    public void menuSelected(MenuEvent e){
 		JMenu child = (JMenu)e.getSource();
-		String value = child.getText();
+		String value = child.getText();		
 		
-		// Whether menu text contains context
-		if(value.startsWith(m_ObjectNames.fullValue()))
-		    value = value.substring(value.lastIndexOf(m_ObjectNames.getSeperator())+1);
+		if(!m_ObjectNames.goToChild(value))  // Idempotent if value wrong
+		    if(!m_ObjectNames.goDown(value)) // If values merged
+			m_ObjectNames.goTo(value);   // If merged from the root
 		
-		m_ObjectNames.goToChild(value);
 		setLabel(m_ObjectNames.fullValue());
 		//System.err.println("Select menu: " + m_ObjectNames.fullValue()+ "|" + value); 
 	    }
@@ -331,9 +350,17 @@ public class GenericObjectEditor implements PropertyEditor {
 	     * 
 	     * @param e the menuEvent concerned
 	     */
-	    public void menuDeselected(MenuEvent e){			
-		m_ObjectNames.goToParent();
+	    public void menuDeselected(MenuEvent e){
 		JMenu target = (JMenu)e.getSource();
+		StringTokenizer sptk = 
+		    new StringTokenizer(target.getText(), 
+					m_ObjectNames.getSeperator());
+		sptk.nextToken();
+		while(sptk.hasMoreTokens()){		    
+		    m_ObjectNames.goToParent();
+		    sptk.nextToken();
+		}
+		m_ObjectNames.goToParent();
 		
 		if(label.isMenuComponent(target)) // Top level reached 
 		    setLabel(m_Object.getClass().getName());	   
@@ -353,9 +380,9 @@ public class GenericObjectEditor implements PropertyEditor {
 	    }		
 	    
 	    /** 
-	     * Called when a leaf menu item is temporarily selected, to update the 
-	     * underlying HierachyPropertyParser, m_ObjectNames and record the
-	     * class in selection
+	     * Called when a leaf menu item is temporarily selected, to update
+	     * the underlying HierachyPropertyParser, m_ObjectNames and record
+	     * the class in selection
 	     * 
 	     * @param e the MouseEvent concerned
 	     */
@@ -363,13 +390,14 @@ public class GenericObjectEditor implements PropertyEditor {
 		JMenuItem target = (JMenuItem)me.getSource();		
 		String value = target.getText();
 		
-		// Whether menu text contains context
-		if(value.startsWith(m_ObjectNames.fullValue()))
-		    value = value.substring(value.lastIndexOf(m_ObjectNames.getSeperator())+1);
-		m_ObjectNames.goToChild(value);
+		if(!m_ObjectNames.goToChild(value)) // Idempotent if value wrong
+		    if(!m_ObjectNames.goDown(value)) // If values merged
+			m_ObjectNames.goTo(value);   // If merged from the root
+		
 		selected = m_ObjectNames.fullValue();
 		setLabel(selected);		
-		//System.err.println("Mouse in: " + m_ObjectNames.fullValue() + target.getText());
+		//System.err.println("Mouse in: " + m_ObjectNames.fullValue()
+		//		   + " | "+ value);
 	    }
 	    
 	    /** 
@@ -379,7 +407,19 @@ public class GenericObjectEditor implements PropertyEditor {
 	     * @param e the MouseEvent concerned
 	     */
 	    public void mouseExited(MouseEvent me){
+		JMenuItem target = (JMenuItem)me.getSource();
+		StringTokenizer sptk = 
+		    new StringTokenizer(target.getText(), 
+					m_ObjectNames.getSeperator());
+		
+		sptk.nextToken();
+		while(sptk.hasMoreTokens()){
+		    sptk.nextToken(); 
+		    m_ObjectNames.goToParent();
+		}		
+
 		m_ObjectNames.goToParent();
+		
 		selected = null;
 		setLabel(m_ObjectNames.fullValue());
 		//System.err.println("Mouse out: " + m_ObjectNames.fullValue());
@@ -419,16 +459,25 @@ public class GenericObjectEditor implements PropertyEditor {
 		    }
 		}
 		//System.err.println("Mouse released: " + m_ObjectNames.fullValue()+ "|" + selected +" |Backup: "+ m_Backup.getClass().getName()+" |Object: "+m_Object.getClass().getName());
-		m_ObjectNames.goToParent();
-		selected = null;
-	    }	    	   
+		JMenuItem target = (JMenuItem)me.getSource();
+		StringTokenizer sptk = 
+		    new StringTokenizer(target.getText(), 
+					m_ObjectNames.getSeperator());
+		sptk.nextToken();
+		while(sptk.hasMoreTokens()){
+		    sptk.nextToken();	
+		    m_ObjectNames.goToParent();
+		}
+		m_ObjectNames.goToParent();				
+		selected = null;	    	   
+	    }
 	}
 	
 	/** Creates the GUI editor component */
 	public GOEPanel() {
 	    //System.err.println("GOE(): " + m_Object);	    
 	    m_Backup = copyObject(m_Object);
-
+	    
 	    m_MenuBar = new JMenuBar();
 	    m_MenuBar.setLayout(new BorderLayout());	
 	    m_ObjectNames = new HierachyPropertyParser();
