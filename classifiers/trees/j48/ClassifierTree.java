@@ -31,7 +31,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -256,6 +256,15 @@ public class ClassifierTree implements Drawable, Serializable {
       }
     }
     return currLastID;
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+      return Drawable.TREE;
   }
 
   /**

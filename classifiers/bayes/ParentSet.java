@@ -22,7 +22,6 @@
  */
 package weka.classifiers.bayes;
 
-import java.io.Serializable;
 import weka.core.*;
 
 /**
@@ -30,9 +29,9 @@ import weka.core.*;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class ParentSet implements Serializable {
+public class ParentSet {
 
   /**
    * Holds indexes of parents
@@ -49,18 +48,42 @@ public class ParentSet implements Serializable {
   } 
 
   /**
+   * sets index parent of parent specified by index
+   * 
+   * @param iParent Index of parent
+   * @param nNode: index of the node that becomes parent
+   */
+  public void SetParent(int iParent, int nNode) {
+	m_nParents[iParent] = nNode;
+  } // SetParent
+
+
+  /**
    * Holds number of parents
    */
   private int m_nNrOfParents = 0;
 
   /**
    * returns number of parents
-   * @ return number of parents
+   * @return number of parents
    */
   public int GetNrOfParents() {
     return m_nNrOfParents;
   } 
 
+  /**
+   * test if node is contained in parent set
+   * @param iNode: node to test for
+   * @return number of parents
+   */
+	public boolean Contains(int iNode) {
+		for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
+			if (m_nParents[iParent] == iNode) {
+				return true;
+			}
+		}
+		return false;
+	}
   /**
    * Holds cardinality  of parents (= number of instantiations the parents can take)
    */
@@ -122,11 +145,19 @@ public class ParentSet implements Serializable {
    * @param _Instances used for updating the internals
    */
   public void AddParent(int nParent, Instances _Instances) {
+   if (m_nNrOfParents == 10) {
+	// reserve more memory
+	int [] nParents = new int[50];
+        for (int i = 0; i < m_nNrOfParents; i++) {
+            nParents[i] = m_nParents[i];
+        }
+        m_nParents = nParents;
+   }
     m_nParents[m_nNrOfParents] = nParent;
     m_nNrOfParents++;
     m_nCardinalityOfParents *= _Instances.attribute(nParent).numValues();
   }    // AddParent
- 
+
   /**
    * Delete last added parent from parent set and update internals (specifically the cardinality of the parent set)
    * 

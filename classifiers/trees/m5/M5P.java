@@ -31,7 +31,7 @@ import weka.core.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class M5P extends M5Base 
@@ -43,6 +43,15 @@ public class M5P extends M5Base
   public M5P() {
     super();
     setGenerateRules(false);
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+      return Drawable.TREE;
   }
 
   /**
@@ -161,3 +170,4 @@ public class M5P extends M5Base
     } 
   } 
 }
+

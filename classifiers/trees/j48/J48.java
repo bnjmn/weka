@@ -65,7 +65,7 @@ import weka.classifiers.*;
  *
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -152,6 +152,15 @@ public class J48 extends DistributionClassifier implements OptionHandler,
        throws Exception {
 
     return m_root.distributionForInstance(instance, m_useLaplace);
+  }
+
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   *  @return Drawable.TREE
+   */   
+  public int graphType() {
+      return Drawable.TREE;
   }
 
   /**

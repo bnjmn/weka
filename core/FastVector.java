@@ -31,7 +31,7 @@ import java.io.*;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ */
+ * @version $Revision: 1.8 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -258,6 +258,21 @@ public class FastVector implements Copyable, Serializable {
     return new FastVectorEnumeration(this, index);
   }
 
+    /**
+     * added by akibriya
+     */
+  public boolean contains(Object o) {
+      if(o==null)
+	  return false;
+
+      for(int i=0; i<m_Objects.length; i++) 
+	  if(o.equals(m_Objects[i]))
+	      return true;
+      
+      return false;
+  }
+
+
   /**
    * Returns the first element of the vector.
    *
@@ -430,3 +445,4 @@ public class FastVector implements Copyable, Serializable {
     m_Objects = newObjects;
   }
 }
+
