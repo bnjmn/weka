@@ -55,7 +55,7 @@ import javax.swing.BorderFactory;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -227,6 +227,17 @@ public class ResultHistoryPanel extends JPanel {
     }
     
     return v;
+  }
+
+  /**
+   * Gets the named buffer
+   * @return the buffer or null if there are no items in
+   * the list
+   */
+  public StringBuffer getNamedBuffer(String name) {
+    StringBuffer b = null;
+    b = (StringBuffer)(m_Results.get(name));
+    return b;
   }
 
   /**
