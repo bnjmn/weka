@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.55 $ 
+ * @version $Revision: 1.56 $ 
  */
 public class Instances implements Serializable {
  
@@ -72,11 +72,11 @@ public class Instances implements Serializable {
   static String ARFF_DATA = "@data";
 
   /** The dataset's name. */
-  protected /*@non_null@*/ String m_RelationName;         
+  protected /*@spec_public non_null@*/ String m_RelationName;         
 
   /** The attribute information. */
   protected /*@spec_public non_null@*/ FastVector m_Attributes;
-  /*@ public invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
+  /*  public invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
                     m_Attributes.elementAt(i) != null);
   */
 
@@ -788,6 +788,7 @@ public class Instances implements Serializable {
    *
    * @return the relation's name as a string
    */
+  //@ ensures \result == m_RelationName;
   public /*@pure@*/ String relationName() {
 
     return m_RelationName;
