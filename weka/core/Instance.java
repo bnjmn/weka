@@ -62,7 +62,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -318,6 +318,28 @@ public class Instance implements Copyable, Serializable {
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.equalHeaders(inst.m_Dataset);
+  }
+
+  /**
+   * Tests whether an instance has a missing value. Skips the class attribute if set.
+   * @return true if instance has a missing value.
+   * @exception UnassignedDatasetException if instance doesn't have access to any
+   * dataset
+   */
+  //@ requires m_Dataset != null;
+  public /*@pure@*/ boolean hasMissingValue() {
+    
+    if (m_Dataset == null) {
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
+    }
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i != classIndex()) {
+	if (isMissing(i)) {
+	  return true;
+	}
+      }
+    }
+    return false;
   }
 
   /**
