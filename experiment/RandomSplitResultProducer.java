@@ -37,7 +37,7 @@ import java.io.File;
  * SplitEvaluator to generate some results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class RandomSplitResultProducer 
@@ -254,6 +254,12 @@ public class RandomSplitResultProducer
 	     Utils.backQuoteChars(runInstances.relationName())
 	     +"."
 	     +m_SplitEvaluator.toString()).replace(' ','_');
+	  resultName = Utils.removeSubstring(resultName, 
+					     "weka.classifiers.");
+	  resultName = Utils.removeSubstring(resultName, 
+					     "weka.filters.");
+	  resultName = Utils.removeSubstring(resultName, 
+					     "weka.attributeSelection.");
 	  m_ZipDest.zipit(m_SplitEvaluator.getRawResultOutput(), resultName);
 	}
 	m_ResultListener.acceptResult(this, key, results);
