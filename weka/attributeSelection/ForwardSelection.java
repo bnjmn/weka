@@ -38,7 +38,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -475,7 +475,7 @@ public class ForwardSelection extends ASSearch
    * order they are added to the subset during a forward selection search.
    * Individual merit values reflect the merit associated with adding the
    * corresponding attribute to the subset; because of this, merit values
-   * will initially increase but then decrease as the best subset is
+   * may initially increase but then decrease as the best subset is
    * "passed by" on the way to the far side of the search space.
    *
    * @return an array of attribute indexes and associated merit values
