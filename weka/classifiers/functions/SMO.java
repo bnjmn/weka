@@ -113,7 +113,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.40 $ */
+ * @version $Revision: 1.41 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -562,7 +562,7 @@ public class SMO extends DistributionClassifier implements OptionHandler,
 				 int randomSeed) throws Exception {
       
       // Initialize the number of kernel evaluations
-      int m_kernelEvals = 0;
+      m_kernelEvals = 0;
       
       // Initialize thresholds
       m_bUp = -1; m_bLow = 1; m_b = 0;
