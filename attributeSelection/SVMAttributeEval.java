@@ -45,7 +45,7 @@ import weka.filters.AttributeFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SVMAttributeEval 
   extends AttributeEvaluator 
@@ -245,14 +245,15 @@ public class SVMAttributeEval
     
     // We need to repeat the following loop until we've computed
     // a weight for every attribute (excluding the class).
-    m_attScores = new double[data.numAttributes() - 1];
+    m_attScores = new double[data.numAttributes()];
     Instances trainCopy = new Instances(data);
     //    for (int i = 0; i < m_attScores.length; i++) {
     int i = 0;
-    do {
-      int numToElim = (m_attScores.length - i >= m_numToEliminate)
+    //    do {
+    while (trainCopy.numAttributes() > 1) {
+      int numToElim = (m_attScores.length - i-1 >= m_numToEliminate)
 	? m_numToEliminate
-	: m_attScores.length - i;
+	: m_attScores.length - i-1;
       
       // Build the linear SVM with default parameters
       SMO smo = new SMO();
@@ -299,7 +300,7 @@ public class SVMAttributeEval
 
       origIndices = temp;
       i += numToElim;
-    } while (i < m_attScores.length);
+    }
   }
 
   /**
