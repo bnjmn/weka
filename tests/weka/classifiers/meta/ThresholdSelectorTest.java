@@ -20,7 +20,7 @@ import weka.classifiers.evaluation.NominalPrediction;
  * java weka.classifiers.ThresholdSelectorTest
  *
  * @author <a href="mailto:len@webmind.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ThresholdSelectorTest extends AbstractClassifierTest {
 
@@ -106,28 +106,6 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
     }
     assertTrue("Upper limit shouldn't increase", maxp <= 1.0);
     assertTrue("Lower limit shouldn'd decrease", minp >= 0.25);
-  }
-
-
-  public void testRangeBounds() throws Exception {
-    
-    int cind = 0;
-    ((ThresholdSelector)m_Classifier).setDesignatedClass(new SelectedTag(ThresholdSelector.OPTIMIZE_0, ThresholdSelector.TAGS_OPTIMIZE));
-    ((ThresholdSelector)m_Classifier).setRangeCorrection(new SelectedTag(ThresholdSelector.RANGE_BOUNDS, ThresholdSelector.TAGS_RANGE));
-    FastVector result = null;
-    m_Instances.setClassIndex(1);
-    result = useClassifier();
-    assertTrue(result.size() != 0);
-    double minp = 0;
-    double maxp = 0;
-    for (int i = 0; i < result.size(); i++) {
-      NominalPrediction p = (NominalPrediction)result.elementAt(i);
-      double prob = p.distribution()[cind];
-      if ((i == 0) || (prob < minp)) minp = prob;
-      if ((i == 0) || (prob > maxp)) maxp = prob;
-    }
-    assertEquals("Upper limit should be close to 1: " + maxp, 1.0, maxp, 0.01);
-    assertEquals("Lower limit should be close to 0: " + minp, 0.0, minp, 0.01);
   }
   
   public void testDesignatedClass() throws Exception {
