@@ -29,17 +29,17 @@ import weka.core.Instances;
 /**
  * This filter should be extended by other unsupervised attribute
  * filters to allow processing of the class attribute if that's
- * required. It is essential that the extending filter does not change
- * the position (i.e. index) of the attribute that is originally the
- * class attribute !
+ * required. It the class is to be ignored it is essential that the
+ * extending filter does not change the position (i.e. index) of the
+ * attribute that is originally the class attribute !
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 
-*/
+ * @version $Revision: 1.2 $ 
+ */
 public abstract class PotentialClassIgnorer extends Filter {
 
-  /** True if the class is to be ignored */
-  private boolean m_IgnoreClass = true;
+  /** True if the class is to be unset */
+  protected boolean m_IgnoreClass = false;
 
   /** Storing the class index */
   protected int m_ClassIndex = -1;
@@ -87,7 +87,8 @@ public abstract class PotentialClassIgnorer extends Filter {
   }
 
   /**
-   * Set the IgnoreClass value.
+   * Set the IgnoreClass value. Set this to true if the
+   * class index is to be unset before the filter is applied.
    * @param newIgnoreClass The new IgnoreClass value.
    */
   public void setIgnoreClass(boolean newIgnoreClass) {
