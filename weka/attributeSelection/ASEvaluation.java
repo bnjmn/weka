@@ -6,14 +6,18 @@
 
 
 package weka.attributeSelection;
-import java.io.*;
-import weka.core.*;
+
+import java.io.Serializable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 
 /** 
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public abstract class ASEvaluation implements Serializable {
@@ -69,12 +73,15 @@ public abstract class ASEvaluation implements Serializable {
   }
 
   /**
-   * Creates copies of the current evaluator.
+   * Creates copies of the current evaluator. Note that this method
+   * now uses Serialization to perform a deep copy, so the evaluator
+   * object must be fully Serializable. Any currently built model will
+   * now be copied as well.
    *
    * @param model an example evaluator to copy
    * @param num the number of evaluator copies to create.
    * @return an array of evaluators.
-   * @exception Exception if an error occurs
+   * @exception Exception if an error occurs 
    */
   public static ASEvaluation [] makeCopies(ASEvaluation model,
 					 int num) throws Exception {
@@ -83,17 +90,9 @@ public abstract class ASEvaluation implements Serializable {
       throw new Exception("No model evaluator set");
     }
     ASEvaluation [] evaluators = new ASEvaluation [num];
-    String [] options = null;
-    if (model instanceof OptionHandler) {
-      options = ((OptionHandler)model).getOptions();
-    }
+    SerializedObject so = new SerializedObject(model);
     for(int i = 0; i < evaluators.length; i++) {
-      evaluators[i] = (ASEvaluation) model.getClass().newInstance();
-      if (options != null) {
-	String [] tempOptions = (String [])options.clone();
-	((OptionHandler)evaluators[i]).setOptions(tempOptions);
-	Utils.checkForRemainingOptions(tempOptions);
-      }
+      evaluators[i] = (ASEvaluation) so.getObject();
     }
     return evaluators;
   }
