@@ -81,7 +81,7 @@ import javax.swing.JCheckBox;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -486,11 +486,16 @@ public class ClassifierPanel extends JPanel {
       }
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
-    m_StartBut.setEnabled(m_RunThread == null);
-    m_StopBut.setEnabled(m_RunThread != null);
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
-    m_ClassCombo.setSelectedIndex(attribNames.length - 1);
-    m_ClassCombo.setEnabled(true);
+    if (attribNames.length > 0) {
+      m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+      m_ClassCombo.setEnabled(true);
+      m_StartBut.setEnabled(m_RunThread == null);
+      m_StopBut.setEnabled(m_RunThread != null);
+    } else {
+      m_StartBut.setEnabled(false);
+      m_StopBut.setEnabled(false);
+    }
   }
 
   /**
