@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.42 $ */
+ * @version $Revision: 1.43 $ */
 public class SMO extends DistributionClassifier implements OptionHandler, 
 					       WeightedInstancesHandler {
 
@@ -1930,10 +1930,10 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   }
   
   /**
-   * Gets the method of searching the tree for a new insertion. Will be one of
+   * Gets how the training data will be transformed. Will be one of
    * FILTER_NORMALIZE, FILTER_STANDARDIZE, FILTER_NONE.
    *
-   * @return the tree searching mode
+   * @return the filtering mode
    */
   public SelectedTag getFilterType() {
 
@@ -1941,7 +1941,7 @@ public class SMO extends DistributionClassifier implements OptionHandler,
   }
   
   /**
-   * Sets the method of searching the tree for a new insertion. Will be one of
+   * Sets how the training data will be transformed. Should be one of
    * FILTER_NORMALIZE, FILTER_STANDARDIZE, FILTER_NONE.
    *
    * @param newType the new filtering mode
