@@ -92,6 +92,7 @@ weka.classifiers.DistributionClassifier=\
  weka.classifiers.FilteredClassifier,\
  weka.classifiers.LogitBoost,\
  weka.classifiers.MultiClassClassifier,\
+ weka.classifiers.OrdinalClassClassifier,\
  weka.classifiers.ThresholdSelector,\
  weka.classifiers.UserClassifier,\
  weka.classifiers.AttributeSelectedClassifier,\
