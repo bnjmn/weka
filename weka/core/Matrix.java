@@ -21,6 +21,7 @@ package weka.core;
 import java.io.Writer;
 import java.io.Reader;
 import java.io.LineNumberReader;
+import java.io.Serializable;
 import java.util.StringTokenizer;
 
 /**
@@ -30,9 +31,9 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class Matrix {
+public class Matrix implements Serializable {
 
   /** The data in the matrix. */
   protected double [][] m_Elements;
