@@ -120,7 +120,7 @@ import javax.swing.JMenuItem;
  * history so that previous results are accessible.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1323,7 +1323,7 @@ public class ClassifierPanel extends JPanel {
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
     saveOutput.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  saveBuffer();
+	  saveBuffer(selectedName);
 	}
       });
     resultListMenu.add(saveOutput);
@@ -1474,9 +1474,10 @@ public class ClassifierPanel extends JPanel {
 
   /**
    * Save the currently selected classifier output to a file.
+   * @param name the name of the buffer to save
    */
-  protected void saveBuffer() {
-    StringBuffer sb = m_History.getSelectedBuffer();
+  protected void saveBuffer(String name) {
+    StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
 	m_Log.logMessage("Save succesful.");
