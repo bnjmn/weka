@@ -22,8 +22,7 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import weka.classifiers.*;
 import weka.core.*;
 import java.io.*;
 import java.util.*;
@@ -36,7 +35,7 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class Id3 extends Classifier {
 
@@ -62,9 +61,9 @@ public class Id3 extends Classifier {
   public String globalInfo() {
 
     return  "Class for constructing an unpruned decision tree based on the ID3 "
-      + "algorithm. Can only deal with nominal attributes. No missing values allowed. "
-      + "Note: empty leaves may result in unclassified instances. For more information "
-      + "see: \n\n"
+      + "algorithm. Can only deal with nominal attributes. No missing values "
+      + "allowed. Empty leaves may result in unclassified instances. For more "
+      + "information see: \n\n"
       + " R. Quinlan (1986). \"Induction of decision "
       + "trees\". Machine Learning. Vol.1, No.1, pp. 81-106";
   }
@@ -83,13 +82,15 @@ public class Id3 extends Classifier {
     Enumeration enumAtt = data.enumerateAttributes();
     while (enumAtt.hasMoreElements()) {
       if (!((Attribute) enumAtt.nextElement()).isNominal()) {
-        throw new UnsupportedAttributeTypeException("Id3: only nominal attributes, please.");
+        throw new UnsupportedAttributeTypeException("Id3: only nominal " +
+                                                    "attributes, please.");
       }
     }
     Enumeration enum = data.enumerateInstances();
     while (enum.hasMoreElements()) {
       if (((Instance) enum.nextElement()).hasMissingValue()) {
-	throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
+        throw new NoSupportForMissingValuesException("Id3: no missing values, "
+                                                     + "please.");
       }
     }
     data = new Instances(data);
@@ -129,8 +130,8 @@ public class Id3 extends Classifier {
       m_Distribution = new double[data.numClasses()];
       Enumeration instEnum = data.enumerateInstances();
       while (instEnum.hasMoreElements()) {
-	Instance inst = (Instance) instEnum.nextElement();
-	m_Distribution[(int) inst.classValue()]++;
+        Instance inst = (Instance) instEnum.nextElement();
+        m_Distribution[(int) inst.classValue()]++;
       }
       Utils.normalize(m_Distribution);
       m_ClassValue = Utils.maxIndex(m_Distribution);
@@ -139,8 +140,8 @@ public class Id3 extends Classifier {
       Instances[] splitData = splitData(data, m_Attribute);
       m_Successors = new Id3[m_Attribute.numValues()];
       for (int j = 0; j < m_Attribute.numValues(); j++) {
-	m_Successors[j] = new Id3();
-	m_Successors[j].buildClassifier(splitData[j]);
+        m_Successors[j] = new Id3();
+        m_Successors[j].buildClassifier(splitData[j]);
       }
     }
   }
@@ -155,13 +156,14 @@ public class Id3 extends Classifier {
     throws NoSupportForMissingValuesException {
 
     if (instance.hasMissingValue()) {
-      throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
+      throw new NoSupportForMissingValuesException("Id3: no missing values, "
+                                                   + "please.");
     }
     if (m_Attribute == null) {
       return m_ClassValue;
     } else {
       return m_Successors[(int) instance.value(m_Attribute)].
-	  classifyInstance(instance);
+        classifyInstance(instance);
     }
   }
 
@@ -175,13 +177,14 @@ public class Id3 extends Classifier {
     throws NoSupportForMissingValuesException {
 
     if (instance.hasMissingValue()) {
-      throw new NoSupportForMissingValuesException("Id3: no missing values, please.");
+      throw new NoSupportForMissingValuesException("Id3: no missing values, "
+                                                   + "please.");
     }
     if (m_Attribute == null) {
       return m_Distribution;
     } else { 
       return m_Successors[(int) instance.value(m_Attribute)].
-	  distributionForInstance(instance);
+        distributionForInstance(instance);
     }
   }
 
@@ -212,20 +215,20 @@ public class Id3 extends Classifier {
     Instances[] splitData = splitData(data, att);
     for (int j = 0; j < att.numValues(); j++) {
       if (splitData[j].numInstances() > 0) {
-	infoGain -= ((double) splitData[j].numInstances() /
-		     (double) data.numInstances()) *
-	  computeEntropy(splitData[j]);
+        infoGain -= ((double) splitData[j].numInstances() /
+                     (double) data.numInstances()) *
+          computeEntropy(splitData[j]);
       }
     }
     return infoGain;
   }
 
- /**
-  * Computes the entropy of a dataset.
-  * 
-  * @param data the data for which entropy is to be computed
-  * @return the entropy of the data's class distribution
-  */
+  /**
+   * Computes the entropy of a dataset.
+   * 
+   * @param data the data for which entropy is to be computed
+   * @return the entropy of the data's class distribution
+   */
   private double computeEntropy(Instances data) throws Exception {
 
     double [] classCounts = new double[data.numClasses()];
@@ -285,7 +288,7 @@ public class Id3 extends Classifier {
         text.append("\n");
         for (int i = 0; i < level; i++) {
           text.append("|  ");
-	}
+        }
         text.append(m_Attribute.name() + " = " + m_Attribute.value(j));
         text.append(m_Successors[j].toString(level + 1));
       }
