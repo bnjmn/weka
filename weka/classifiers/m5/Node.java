@@ -26,7 +26,7 @@ import weka.core.*;
 /**
  * Class for handing a node in the tree or the subtree under this node
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public final class Node implements Serializable {
@@ -262,7 +262,7 @@ public final class Node implements Serializable {
     else {  
       sMax = new SplitInfo(0,instances.numInstances()-1,-1);
       s = new SplitInfo(0,instances.numInstances()-1,-1);
-      for(j=0;j<instances.numAttributes()-1;j++){
+      for(j=0;j<instances.numAttributes();j++){
 	if(j != instances.classIndex()){
 	  instances.sort(instances.attribute(j));
 	  s.attrSplit(j,instances);
