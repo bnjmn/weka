@@ -37,7 +37,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RandomSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -169,7 +169,7 @@ public class RandomSearch extends ASSearch
    * If a start point is supplied, random search evaluates the
    * start point and then looks for subsets that are as good as or better 
    * than the start point with the same or lower cardinality.
-   * @exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);

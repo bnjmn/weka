@@ -34,7 +34,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ExhaustiveSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
@@ -143,7 +143,7 @@ public class ExhaustiveSearch extends ASSearch
    * the smallest possible subset with merit as good as or better than the
    * start set. Otherwise, the search space is explored FULLY, and the
    * best subset returned.
-   * @exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
