@@ -83,7 +83,7 @@ import weka.core.*;
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CheckClassifier implements OptionHandler {
 
@@ -577,8 +577,7 @@ public class CheckClassifier implements OptionHandler {
       evaluation1B = new Evaluation(train1);
       evaluation2 = new Evaluation(train2);
     } catch (Exception ex) {
-      System.err.println("Error setting up for tests: " + ex.getMessage());
-      System.exit(0);
+      throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
       stage = 0;
@@ -785,8 +784,7 @@ public class CheckClassifier implements OptionHandler {
       classifierB.buildClassifier(train);
       testWRTZeroR(classifierB, evaluationB, train, test);
     } catch (Exception ex) {
-      System.err.println("Error setting up for tests: " + ex.getMessage());
-      System.exit(0);
+      throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
       classifierI.buildClassifier(new Instances(train, 0));
@@ -891,8 +889,7 @@ public class CheckClassifier implements OptionHandler {
       classifierB.buildClassifier(train);
       testWRTZeroR(classifierB, evaluationB, train, test);
     } catch (Exception ex) {
-      System.err.println("Error setting up for tests: " + ex.getMessage());
-      System.exit(0);
+      throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
 
@@ -1008,8 +1005,7 @@ public class CheckClassifier implements OptionHandler {
       classifier = makeClassifier();
       evaluation = new Evaluation(train);
     } catch (Exception ex) {
-      System.err.println("Error setting up for tests: " + ex.getMessage());
-      System.exit(0);
+      throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
       Instances trainCopy = new Instances(train);
@@ -1085,8 +1081,7 @@ public class CheckClassifier implements OptionHandler {
       classifier = makeClassifier();
       evaluation = new Evaluation(train);
     } catch (Exception ex) {
-      System.err.println("Error setting up for tests: " + ex.getMessage());
-      System.exit(0);
+      throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
       classifier.buildClassifier(train);
@@ -1164,11 +1159,9 @@ public class CheckClassifier implements OptionHandler {
       zeroREval.evaluateModel(zeroR, test);
       return Utils.grOrEq(zeroREval.errorRate(), evaluation.errorRate());
     } catch (Exception ex) {
-      System.err.println("Problem determining ZeroR performance: "
-			 + ex.getMessage());
-      System.exit(0);
+      throw new Error("Problem determining ZeroR performance: "
+		      + ex.getMessage());
     }
-    return false;
   }
 
   /**

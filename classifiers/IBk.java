@@ -59,7 +59,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class IBk extends DistributionClassifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -508,8 +508,7 @@ public class IBk extends DistributionClassifier implements
       m_NumClasses = instances.numClasses();
       m_ClassType = instances.classAttribute().type();
     } catch (Exception ex) {
-      System.err.println("This should never be reached");
-      System.exit(0);
+      throw new Error("This should never be reached");
     }
 
     // Throw away training instances with missing class
@@ -927,8 +926,7 @@ public class IBk extends DistributionClassifier implements
 	    break;
 	  }
 	} catch (Exception ex) {
-	  System.err.println("Data has no class attribute!");
-	  System.exit(0);
+	  throw new Error("Data has no class attribute!");
 	}
 	total += weight;
 
@@ -1045,9 +1043,8 @@ public class IBk extends DistributionClassifier implements
       
       m_kNNValid = true;
     } catch (Exception ex) {
-      System.err.println("Couldn't optimize by cross-validation");
-      System.err.println(ex.getMessage());
-      System.exit(0);
+      throw new Error("Couldn't optimize by cross-validation: "
+		      +ex.getMessage());
     }
   }
 
