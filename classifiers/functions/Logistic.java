@@ -63,21 +63,21 @@ import java.util.Vector;
  * (default 200)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class Logistic extends DistributionClassifier 
   implements OptionHandler {
 
-  // The coefficients
+  /* The coefficients */
   private double[][] m_Coefficients = null;
 
-  // The index of the class
+  /* The index of the class */
   private int m_ClassIndex = -1;
 
-  // An attribute filter
+  /* An attribute filter */
   private AttributeFilter m_AttFilter = null;
 
-  // The header info
+  /* The header info */
   private Instances m_Header = null;
     
   /** The filter used to make attributes numeric. */
@@ -223,7 +223,7 @@ public class Logistic extends DistributionClassifier
     // Set class index
     m_ClassIndex = data.classIndex();
 
-    // Normalize data
+    // Standardize data
     double[][] values = 
       new double[data.numInstances()][data.numAttributes()];
     double[] means = new double[data.numAttributes()];
