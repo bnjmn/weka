@@ -52,7 +52,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public abstract class Filter implements Serializable {
 
@@ -314,9 +314,14 @@ public abstract class Filter implements Serializable {
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    if (m_OutputQueue.empty() && m_NewBatch) {
+    //util.Timer t = util.Timer.getTimer("Filter::output"); t.start();
+    // Clear out references to old strings occasionally
+    if (m_OutputQueue.empty() && m_NewBatch && 
+        (m_OutputStringAtts.length > 0) &&
+        (m_OutputFormat.numInstances() >= 10)) {
       m_OutputFormat = m_OutputFormat.stringFreeStructure();
     }
+    //t.stop();
     return result;
   }
   
