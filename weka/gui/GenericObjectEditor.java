@@ -16,12 +16,16 @@
 
 /*
  *    GenericObjectEditor.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 2001 Len Trigg, Xin Xu
  *
  */
 
-
 package weka.gui;
+
+import weka.gui.PropertySheetPanel;
+import weka.gui.SelectedTagEditor;
+import weka.gui.FileEditor;
+import weka.gui.PropertyDialog;
 
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -36,16 +40,17 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
 import java.awt.Window;
+import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -54,19 +59,26 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
+//import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
+//import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.event.MenuListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MouseInputAdapter;
 
 /** 
  * A PropertyEditor for objects that themselves have been defined as
@@ -80,520 +92,739 @@ import javax.swing.JScrollPane;
  * to be changed if we ever end up running in a Java OS ;-).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @author Xin Xu (xx5@cs.waikato.ac.nz)
+ * @version $Revision: 1.28 $
  */
 public class GenericObjectEditor implements PropertyEditor {
-
-  /** The classifier being configured */
-  private Object m_Object;
-
-  /** Holds a copy of the current classifier that can be reverted to
-      if the user decides to cancel */
-  private Object m_Backup;
-  
-  /** Handles property change notification */
-  private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
-
-  /** The Class of objects being edited */
-  private Class m_ClassType;
-
-  /** The GUI component for editing values, created when needed */
-  private GOEPanel m_EditorComponent;
-
-  /** True if the GUI component is needed */
-  private boolean m_Enabled = true;
-  
-  /** The name of the properties file */
-  protected static String PROPERTY_FILE = "weka/gui/GenericObjectEditor.props";
-
-  /** Contains the editor properties */
-  private static Properties EDITOR_PROPERTIES;
-
-  /** Loads the configuration property file */
-  static {
-
-    // Allow a properties file in the current directory to override
-    try {
-      EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-      java.util.Enumeration keys = 
-	(java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
-      if (!keys.hasMoreElements()) {
-	throw new Exception("Failed to read a property file for the "
-			    +"generic object editor");
-      }
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(null,
-          "Could not read a configuration file for the generic object\n"
-         +"editor. An example file is included with the Weka distribution.\n"
-	 +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-	 +"should be placed either in your user home (which is set\n"
-	 + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-	 + "or the directory that java was started from\n",
-	 "GenericObjectEditor",
-	 JOptionPane.ERROR_MESSAGE);
-    }
-  }
-
-  /**
-   * Handles the GUI side of editing values.
-   */
-  public class GOEPanel extends JPanel implements ItemListener {
     
-    /** The chooser component */
-    private JComboBox m_ObjectChooser;
+    /** The classifier being configured */
+    private Object m_Object;
     
-    /** The component that performs classifier customization */
-    private PropertySheetPanel m_ChildPropertySheet;
-
-    /** The model containing the list of names to select from */
-    private DefaultComboBoxModel m_ObjectNames;
-
-    /** Open object from disk */
-    private JButton m_OpenBut;
-
-    /** Save object to disk */
-    private JButton m_SaveBut;
-
-    /** ok button */
-    private JButton m_okBut;
+    /** Holds a copy of the current classifier that can be reverted to
+	if the user decides to cancel */
+    private Object m_Backup;
     
-    /** cancel button */
-    private JButton m_cancelBut;
-
-    /** The filechooser for opening and saving object files */
-    private JFileChooser m_FileChooser;
-
-    /** Creates the GUI editor component */
-    public GOEPanel() {
-      m_Backup = copyObject(m_Object);
-      //System.err.println("GOE()");
-      m_ObjectNames = new DefaultComboBoxModel(new String [0]);
-      m_ObjectChooser = new JComboBox(m_ObjectNames);
-      m_ObjectChooser.setEditable(false);
-
-      m_ChildPropertySheet = new PropertySheetPanel();
-      m_ChildPropertySheet.addPropertyChangeListener(
-      new PropertyChangeListener() {
-	public void propertyChange(PropertyChangeEvent evt) {
-	  m_Support.firePropertyChange("", null, null);
-	}
-      });
-
-      m_OpenBut = new JButton("Open...");
-      m_OpenBut.setToolTipText("Load a configured object");
-      m_OpenBut.setEnabled(true);
-      m_OpenBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  Object object = openObject();
-          if (object != null) {
-            // setValue takes care of: Making sure obj is of right type,
-            // and firing property change.
-            setValue(object);
-            // Need a second setValue to get property values filled in OK.
-            // Not sure why.
-            setValue(object);
-          }
-	}
-      });
-
-      m_SaveBut = new JButton("Save...");
-      m_SaveBut.setToolTipText("Save the current configured object");
-      m_SaveBut.setEnabled(true);
-      m_SaveBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveObject(m_Object);
-	}
-      });
-
-      m_okBut = new JButton("OK");
-      m_okBut.setEnabled(true);
-      m_okBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_Backup = copyObject(m_Object);
-	  if ((getTopLevelAncestor() != null)
-	      && (getTopLevelAncestor() instanceof Window)) {
-	    Window w = (Window) getTopLevelAncestor();
-	    w.dispose();
-	  }
-	}
-      });
-
-      m_cancelBut = new JButton("Cancel");
-      m_cancelBut.setEnabled(true);
-      m_cancelBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  if (m_Backup != null) {
-	    m_Object = copyObject(m_Backup);
-	    setObject(m_Object);
-	    updateClassType();
-	    updateChooser();
-	    updateChildPropertySheet();
-	  }
-	  if ((getTopLevelAncestor() != null)
-	      && (getTopLevelAncestor() instanceof Window)) {
-	    Window w = (Window) getTopLevelAncestor();
-	    w.dispose();
-	  }
-	}
-      });
-      
-      setLayout(new BorderLayout());
-      add(m_ObjectChooser, BorderLayout.NORTH);
-      add(m_ChildPropertySheet, BorderLayout.CENTER);
-      // Since we resize to the size of the property sheet, a scrollpane isn't
-      // typically needed
-      // add(new JScrollPane(m_ChildPropertySheet), BorderLayout.CENTER);
-
-      JPanel okcButs = new JPanel();
-      okcButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      okcButs.setLayout(new GridLayout(1, 4, 5, 5));
-      okcButs.add(m_OpenBut);
-      okcButs.add(m_SaveBut);
-      okcButs.add(m_okBut);
-      okcButs.add(m_cancelBut);
-      add(okcButs, BorderLayout.SOUTH);
-      
-      if (m_ClassType != null) {
-	updateClassType();
-	updateChooser();
-	updateChildPropertySheet();
-      }
-      m_ObjectChooser.addItemListener(this);
-    }
-
-    /**
-     * Opens an object from a file selected by the user.
-     * 
-     * @return the loaded object, or null if the operation was cancelled
-     */
-    protected Object openObject() {
-
-      if (m_FileChooser == null) {
-        createFileChooser();
-      }
-      int returnVal = m_FileChooser.showOpenDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File selected = m_FileChooser.getSelectedFile();
+    /** Handles property change notification */
+    private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
+    
+    /** The Class of objects being edited */
+    private Class m_ClassType;
+    
+    /** The GUI component for editing values, created when needed */
+    private GOEPanel m_EditorComponent;
+    
+    /** True if the GUI component is needed */
+    private boolean m_Enabled = true;
+    
+    /** The name of the properties file */
+    protected static String PROPERTY_FILE = "weka/gui/GenericObjectEditor.props";
+    
+    /** Contains the editor properties */
+    private static Properties EDITOR_PROPERTIES;
+    
+    /** Loads the configuration property file */
+    static {
+	
+	// Allow a properties file in the current directory to override
 	try {
-	  ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(new FileInputStream(selected)));
-          Object obj = oi.readObject();
-          oi.close();
-          if (!m_ClassType.isAssignableFrom(obj.getClass())) {
-            throw new Exception("Object not of type: " + m_ClassType.getName());
-          }
-          return obj;
+	    EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+	    java.util.Enumeration keys = 
+		(java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+	    if (!keys.hasMoreElements()) {
+		throw new Exception("Failed to read a property file for the "
+				    +"generic object editor");
+	    }
 	} catch (Exception ex) {
-	  JOptionPane.showMessageDialog(this,
-					"Couldn't read object: "
-					+ selected.getName() 
-					+ "\n" + ex.getMessage(),
-					"Open object file",
-					JOptionPane.ERROR_MESSAGE);
+	    JOptionPane.showMessageDialog(null,
+					  "Could not read a configuration file for the generic object\n"
+					  +"editor. An example file is included with the Weka distribution.\n"
+					  +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+					  +"should be placed either in your user home (which is set\n"
+					  + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+					  + "or the directory that java was started from\n",
+					  "GenericObjectEditor",
+					  JOptionPane.ERROR_MESSAGE);
 	}
-      }
-      return null;
     }
 
+    
     /**
-     * Opens an object from a file selected by the user.
-     * 
-     * @return the loaded object, or null if the operation was cancelled
+     * Handles the GUI side of editing values.
      */
-    protected void saveObject(Object object) {
+    public class GOEPanel extends JPanel{
+	
+	/** The chooser component */
+	private CascadedComboBox m_ObjectChooser;
+	
+	/** The component that performs classifier customization */
+	private PropertySheetPanel m_ChildPropertySheet;
+	
+	/** The model containing the list of names to select from */
+	private HierachyPropertyParser m_ObjectNames;
+	
+	/** Open object from disk */
+	private JButton m_OpenBut;
+	
+	/** Save object to disk */
+	private JButton m_SaveBut;
+	
+	/** ok button */
+	private JButton m_okBut;
+	
+	/** cancel button */
+	private JButton m_cancelBut;
+	
+	/** The filechooser for opening and saving object files */
+	private JFileChooser m_FileChooser;
 
-      if (m_FileChooser == null) {
-        createFileChooser();
-      }
-      int returnVal = m_FileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File sFile = m_FileChooser.getSelectedFile();
-	try {
-	  ObjectOutputStream oo = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(sFile)));
-          oo.writeObject(object);
-          oo.close();
-	} catch (Exception ex) {
-	  JOptionPane.showMessageDialog(this,
+	/** The Menubar to show the classes */
+	private JMenuBar m_MenuBar;	
+	
+	/** 
+	 * The inner class that implements a combo box that
+	 * can cascade according to the hierachy structure of
+	 * the property.  Note that MenuMouseDrag event is not
+	 * supported by this class and the listener to mouse drag
+	 * is disabled because of synchronization problems.
+	 */
+	private class CascadedComboBox extends MouseInputAdapter 
+	    implements MenuListener{
+	    
+	    /** The label showing the property selected */
+	    private JMenu label = null;
+	    
+	    /** The property in selection */
+	    private String selected = null;
+	    
+	    /** The class name to be loaded */
+	    private String loaded = null;
+
+	    public CascadedComboBox(){
+		label = new JMenu();
+		label.addMouseListener(new MouseInputAdapter(){	  
+		// Re-define mouse listener so that drag is not available
+			public void mousePressed(MouseEvent e){
+			    //System.err.println("???mouse pressed");
+			    if((JMenu)e.getSource() == label)
+				label.setPopupMenuVisible(false);
+			}
+			
+			public void mouseReleased(MouseEvent e){
+			    if((JMenu)e.getSource() == label){ 
+				//System.err.println("???mouse released");
+				label.setPopupMenuVisible(true);
+			    }
+			}			
+		    });
+
+		m_ObjectNames.goToRoot();
+		try{
+		    for(;m_ObjectNames.numChildren() == 1;
+			m_ObjectNames.goToChild(0));
+		
+		    for(int i = 0; i < m_ObjectNames.numChildren(); i++){
+			m_ObjectNames.goToChild(i);			
+			label.add(build(true));	
+		    }
+		}catch(Exception e){
+		}
+		
+		if(m_Object != null)
+		    label.setText(m_Object.getClass().getName());
+	    }
+	    
+	    /** 
+	     * Return the top level menu, which shows the class name
+	     *
+	     * @return the menu
+	     */
+	    public JMenu getLabel(){
+		return label;
+	    }
+	    
+	    /**
+	     * set the text of label menu
+	     *
+	     * @param text the text to be set
+	     */
+	    public void setLabel(String text){
+		label.setText(text);
+	    }
+	    
+	    /** Private procedure to build the cascaded comboBox */
+	    private JMenuItem build(boolean useFullValue){
+		if(m_ObjectNames.isLeafReached()){	  
+		    JMenuItem mi;
+		    if(useFullValue)
+			mi = new JMenuItem(m_ObjectNames.fullValue());
+		    else
+			mi = new JMenuItem(m_ObjectNames.getValue());
+		    
+		    mi.addMouseListener(this);
+		    m_ObjectNames.goToParent();
+		    return mi;
+		}
+		else{
+		    JMenu menu;
+		    if(useFullValue)
+			menu = new JMenu(m_ObjectNames.fullValue());
+		    else
+			menu = new JMenu(m_ObjectNames.getValue());
+		    
+		    menu.addMenuListener(this);		
+		    String[] kids = m_ObjectNames.childrenValues();
+		    for(int i=0; i < kids.length; i++){
+			String child = kids[i];
+			m_ObjectNames.goToChild(child);
+			menu.add(build(false));
+		    }
+		    m_ObjectNames.goToParent();
+		    //System.err.println("???Inside build: "+hpp.getValue());
+		    return menu;
+		}
+	    }    
+	    
+	    /**
+	     * Search the HierachyPropertyParser for the given class name,
+	     * if not found, add it into the appropriate position.  Does
+	     * nothing if already there
+	     *
+	     * @param className the given class name
+	     */
+	    public void add(String className){
+		if(!m_ObjectNames.contains(className)){
+		    m_ObjectNames.add(className);
+		    m_ObjectNames.goToRoot();
+		    try{
+			for(;m_ObjectNames.numChildren() == 1;
+			    m_ObjectNames.goToChild(0));
+			
+			for(int i = 0; i < m_ObjectNames.numChildren(); i++){
+			    m_ObjectNames.goToChild(i);			
+			    label.add(build(true));	
+			}
+		    }catch(Exception e){
+		    }
+
+		    if(m_Object != null)
+			label.setText(m_Object.getClass().getName());
+		}
+	    }
+	   
+	   /** 
+	     * Called when a menu is selected, to update the underlying
+	     * HierachyPropertyParser, m_ObjectNames.
+	     * 
+	     * @param e the menuEvent concerned
+	     */
+	    public void menuSelected(MenuEvent e){
+		JMenu child = (JMenu)e.getSource();
+		String value = child.getText();
+
+		// Whether menu text contains context
+		if(value.startsWith(m_ObjectNames.fullValue()))
+		    value = value.substring(value.lastIndexOf(m_ObjectNames.getSeperator())+1);
+		
+		m_ObjectNames.goToChild(value);
+		label.setText(m_ObjectNames.fullValue());
+		//System.err.println("???Select menu: " + m_ObjectNames.fullValue()+ "|" + value); 
+	    }
+	    
+	    /** 
+	     * Called when a menu is de-selected, to update the underlying
+	     * HierachyPropertyParser, m_ObjectNames.
+	     * 
+	     * @param e the menuEvent concerned
+	     */
+	    public void menuDeselected(MenuEvent e){			
+		m_ObjectNames.goToParent();
+		JMenu target = (JMenu)e.getSource();
+		
+		if(label.isMenuComponent(target)) // Top level reached 
+		    label.setText(m_Object.getClass().getName());	   
+		else
+		    label.setText(m_ObjectNames.fullValue());	
+		//System.err.println("???Deselect menu: " + m_ObjectNames.fullValue()+ "|" + loaded);
+	    }
+	    
+	    /** 
+	     * Called when a menu is cancelled, to update the underlying
+	     * HierachyPropertyParser, m_ObjectNames.
+	     * 
+	     * @param e the menuEvent concerned
+	     */
+	    public void menuCanceled(MenuEvent e){
+		menuDeselected(e);
+	    }		
+	    
+	    /** 
+	     * Called when a leaf menu item is temporarily selected, to update the 
+	     * underlying HierachyPropertyParser, m_ObjectNames and record the
+	     * class in selection
+	     * 
+	     * @param e the MouseEvent concerned
+	     */
+	    public void mouseEntered(MouseEvent me){
+		JMenuItem target = (JMenuItem)me.getSource();		
+		String value = target.getText();
+		
+		// Whether menu text contains context
+		if(value.startsWith(m_ObjectNames.fullValue()))
+		    value = value.substring(value.lastIndexOf(m_ObjectNames.getSeperator())+1);
+		m_ObjectNames.goToChild(value);
+		selected = m_ObjectNames.fullValue();
+		label.setText(selected);		
+		//System.err.println("???Mouse in: " + m_ObjectNames.fullValue() + "|" + loaded + "|" + target.getText());
+	    }
+	    
+	    /** 
+	     * Called when a leaf menu item is no longer selected, to update the 
+	     * underlying HierachyPropertyParser, m_ObjectNames.
+	     * 
+	     * @param e the MouseEvent concerned
+	     */
+	    public void mouseExited(MouseEvent me){
+		m_ObjectNames.goToParent();
+		selected = null;
+		label.setText(m_ObjectNames.fullValue());
+		//System.err.println("???Mouse out: " + m_ObjectNames.fullValue()+ "|" + loaded);
+	    }
+	    
+	    /** 
+	     * Called when a leaf menu item is confirmatively selected, to record the
+	     * class in selection and try to load it
+	     * 
+	     * @param e the MouseEvent concerned
+	     */
+	    public void mouseReleased(MouseEvent me){
+		String old = m_Object.getClass().getName();
+		try {
+		    if(selected != null)
+			loaded = selected;
+		    
+		    if ((m_Object != null) && old.equals(loaded)){
+			label.setText(old);
+			return;
+		    }
+		    
+		    // System.err.println("Different class type");
+		    label.setText(loaded);
+		    setObject(Class.forName(loaded).newInstance());
+		    m_ObjectNames.goToParent();
+		    selected = null;
+		    //System.err.println("???Mouse released: " + m_ObjectNames.fullValue()+ "|" + loaded);
+		    // System.err.println("done setting object from chooser");		    
+		} catch (Exception ex) {
+		    JOptionPane.showMessageDialog(null,
+						  "Could not create an example of\n"
+						  + loaded + "\n"
+						  + "from the current classpath",
+						  "GenericObjectEditor",
+						  JOptionPane.ERROR_MESSAGE);
+		    try{
+			label.setText(old);
+			setObject(Class.forName(old).newInstance());
+			m_ObjectNames.goToParent();
+			selected = null;
+			//System.err.println("???Mouse released: " + m_ObjectNames.fullValue()+ "|" + loaded);
+		    }catch(Exception e){
+			System.err.println(ex.getMessage());
+			ex.printStackTrace();
+		    }
+		}
+	    }	    	   
+	}
+	
+	/** Creates the GUI editor component */
+	public GOEPanel() {
+	    m_Backup = copyObject(m_Object);
+	    //System.err.println("GOE()");
+	    m_ChildPropertySheet = new PropertySheetPanel();
+	    m_ChildPropertySheet.addPropertyChangeListener
+		(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+			    m_Support.firePropertyChange("", null, null);
+			}
+		    });
+	    
+	    m_OpenBut = new JButton("Open...");
+	    m_OpenBut.setToolTipText("Load a configured object");
+	    m_OpenBut.setEnabled(true);
+	    m_OpenBut.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			Object object = openObject();
+			if (object != null) {
+			    // setValue takes care of: Making sure obj is of right type,
+			    // and firing property change.
+			    setValue(object);
+			    // Need a second setValue to get property values filled in OK.
+			    // Not sure why.
+			    setValue(object);
+			}
+		    }
+		});
+	    
+	    m_SaveBut = new JButton("Save...");
+	    m_SaveBut.setToolTipText("Save the current configured object");
+	    m_SaveBut.setEnabled(true);
+	    m_SaveBut.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			saveObject(m_Object);
+		    }
+		});
+	    
+	    m_okBut = new JButton("OK");
+	    m_okBut.setEnabled(true);
+	    m_okBut.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			m_Backup = copyObject(m_Object);
+			if ((getTopLevelAncestor() != null)
+			    && (getTopLevelAncestor() instanceof Window)) {
+			    Window w = (Window) getTopLevelAncestor();
+			    w.dispose();
+			}
+		    }
+		});
+	    
+	    m_cancelBut = new JButton("Cancel");
+	    m_cancelBut.setEnabled(true);
+	    m_cancelBut.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			if (m_Backup != null) {
+			    m_Object = copyObject(m_Backup);
+			    setObject(m_Object);
+			    updateClassType();
+			    updateChooser();
+			    updateChildPropertySheet();
+			}
+			if ((getTopLevelAncestor() != null)
+			    && (getTopLevelAncestor() instanceof Window)) {
+			    Window w = (Window) getTopLevelAncestor();
+			    w.dispose();
+			}
+		    }
+		});
+	    
+	    setLayout(new BorderLayout());
+	    
+	    m_MenuBar = new JMenuBar();
+	    m_MenuBar.setLayout(new BorderLayout());	
+	    if(m_ObjectNames != null){
+		if(m_ObjectChooser == null)
+		    m_ObjectChooser = new CascadedComboBox();		
+		m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER); 
+	    }
+	    
+	    add(m_MenuBar, BorderLayout.NORTH);
+	    add(m_ChildPropertySheet, BorderLayout.CENTER);
+	    // Since we resize to the size of the property sheet, a scrollpane isn't
+	    // typically needed
+	    // add(new JScrollPane(m_ChildPropertySheet), BorderLayout.CENTER);
+	    
+	    JPanel okcButs = new JPanel();
+	    okcButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+	    okcButs.setLayout(new GridLayout(1, 4, 5, 5));
+	    okcButs.add(m_OpenBut);
+	    okcButs.add(m_SaveBut);
+	    okcButs.add(m_okBut);
+	    okcButs.add(m_cancelBut);
+	    add(okcButs, BorderLayout.SOUTH);
+	    
+	    if (m_ClassType != null) {
+		updateClassType();
+		if(m_Object != null){
+		    updateChooser();
+		    updateChildPropertySheet();
+		}
+	    }
+	}
+	
+	/**
+	 * Opens an object from a file selected by the user.
+	 * 
+	 * @return the loaded object, or null if the operation was cancelled
+	 */
+	protected Object openObject() {
+	    
+	    if (m_FileChooser == null) {
+		createFileChooser();
+	    }
+	    int returnVal = m_FileChooser.showOpenDialog(this);
+	    if (returnVal == JFileChooser.APPROVE_OPTION) {
+		File selected = m_FileChooser.getSelectedFile();
+		try {
+		    ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(new FileInputStream(selected)));
+		    Object obj = oi.readObject();
+		    oi.close();
+		    if (!m_ClassType.isAssignableFrom(obj.getClass())) {
+			throw new Exception("Object not of type: " + m_ClassType.getName());
+		    }
+		    return obj;
+		} catch (Exception ex) {
+		    JOptionPane.showMessageDialog(this,
+						  "Couldn't read object: "
+						  + selected.getName() 
+						  + "\n" + ex.getMessage(),
+						  "Open object file",
+						  JOptionPane.ERROR_MESSAGE);
+		}
+	    }
+	    return null;
+	}
+	
+	/**
+	 * Opens an object from a file selected by the user.
+	 * 
+	 * @return the loaded object, or null if the operation was cancelled
+	 */
+	protected void saveObject(Object object) {
+	    
+	    if (m_FileChooser == null) {
+		createFileChooser();
+	    }
+	    int returnVal = m_FileChooser.showSaveDialog(this);
+	    if (returnVal == JFileChooser.APPROVE_OPTION) {
+		File sFile = m_FileChooser.getSelectedFile();
+		try {
+		    ObjectOutputStream oo = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(sFile)));
+		    oo.writeObject(object);
+		    oo.close();
+		} catch (Exception ex) {
+		    JOptionPane.showMessageDialog(this,
 					"Couldn't write to file: "
-					+ sFile.getName() 
-					+ "\n" + ex.getMessage(),
-					"Save object",
-					JOptionPane.ERROR_MESSAGE);
+						  + sFile.getName() 
+						  + "\n" + ex.getMessage(),
+						  "Save object",
+						  JOptionPane.ERROR_MESSAGE);
+		}
+	    }
 	}
-      }
-    }
-
-    protected void createFileChooser() {
-
-      m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
-      m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    }
-
-    /**
-     * Makes a copy of an object using serialization
-     * @param source the object to copy
-     * @return a copy of the source object
-     */
-    protected Object copyObject(Object source) {
-      Object result = null;
-      try {
-        SerializedObject so = new SerializedObject(source);
-	result = so.getObject();
-      } catch (Exception ex) {
-	System.err.println("GenericObjectEditor: Problem making backup object");
-	System.err.print(ex);
-      }
-      return result;
-    }
-
-    /** 
-     * This is used to hook an action listener to the ok button
-     * @param a The action listener.
-     */
-    public void addOkListener(ActionListener a) {
-      m_okBut.addActionListener(a);
-    }
-
-    /**
-     * This is used to hook an action listener to the cancel button
-     * @param a The action listener.
-     */
-    public void addCancelListener(ActionListener a) {
-      m_cancelBut.addActionListener(a);
-    }
+	
+	protected void createFileChooser() {
+	    
+	    m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
+	    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+	}
+	
+	/**
+	 * Makes a copy of an object using serialization
+	 * @param source the object to copy
+	 * @return a copy of the source object
+	 */
+	protected Object copyObject(Object source) {
+	    Object result = null;
+	    try {
+		SerializedObject so = new SerializedObject(source);
+		result = so.getObject();
+	    } catch (Exception ex) {
+		System.err.println("GenericObjectEditor: Problem making backup object");
+		System.err.print(ex);
+	    }
+	    return result;
+	}
+	
+	/** 
+	 * This is used to hook an action listener to the ok button
+	 * @param a The action listener.
+	 */
+	public void addOkListener(ActionListener a) {
+	    m_okBut.addActionListener(a);
+	}
+	
+	/**
+	 * This is used to hook an action listener to the cancel button
+	 * @param a The action listener.
+	 */
+	public void addCancelListener(ActionListener a) {
+	    m_cancelBut.addActionListener(a);
+	}
+	
+	/**
+	 * This is used to remove an action listener from the ok button
+	 * @param a The action listener
+	 */
+	public void removeOkListener(ActionListener a) {
+	    m_okBut.removeActionListener(a);
+	}
+	
+	/**
+	 * This is used to remove an action listener from the cancel button
+	 * @param a The action listener
+	 */
+	public void removeCancelListener(ActionListener a) {
+	    m_cancelBut.removeActionListener(a);
+	}
+	
+	
+	/** Called when the class of object being edited changes. */
+	protected void updateClassType() {	
     
-    /**
-     * This is used to remove an action listener from the ok button
-     * @param a The action listener
-     */
-    public void removeOkListener(ActionListener a) {
-      m_okBut.removeActionListener(a);
-    }
+	    //System.err.println("GOE::updateClassType()"); 
+	    m_ObjectNames = getClassesFromProperties();
+	    if(m_ObjectNames.depth() > 0){
+		m_ObjectChooser = new CascadedComboBox();
+		m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER);
+	    }
+	}
+		
+	/** Called to update the cascaded combo box of the values to
+	 * to be selected from */
+	protected void updateChooser(){
 
-    /**
-     * This is used to remove an action listener from the cancel button
-     * @param a The action listener
-     */
-    public void removeCancelListener(ActionListener a) {
-      m_cancelBut.removeActionListener(a);
+	    //System.err.println("GOE::updateChooser()");   	    
+	    String objectName = m_Object.getClass().getName();
+	    m_ObjectChooser.add(objectName);
+	    m_MenuBar.add(m_ObjectChooser.getLabel(), BorderLayout.CENTER); 
+	    m_ObjectChooser.setLabel(objectName);
+	}	
+	
+	/** Updates the child property sheet, and creates if needed */
+	public void updateChildPropertySheet() {
+	    
+	    //System.err.println("GOE::updateChildPropertySheet()");
+	    // Set the object as the target of the propertysheet
+	    m_ChildPropertySheet.setTarget(m_Object);
+	    
+	    // Adjust size of containing window if possible
+	    if ((getTopLevelAncestor() != null)
+		&& (getTopLevelAncestor() instanceof Window)) {
+		((Window) getTopLevelAncestor()).pack();
+	    }
+	}	
     }
-
-     
+        
+    
     /** Called when the class of object being edited changes. */
-    protected void updateClassType() {
-      
-      Vector classes = getClassesFromProperties();
-      m_ObjectChooser.setModel(new DefaultComboBoxModel(classes));
-      if (classes.size() > 0) {
-	add(m_ObjectChooser, BorderLayout.NORTH);
-      } else {
-	remove(m_ObjectChooser);
-      }
-    }
-
-    /** Called to update the list of values to be selected from */
-    protected void updateChooser() {
-
-      //System.err.println("GOE::updateChooser()");
-      String objectName = m_Object.getClass().getName();
-      boolean found = false;
-      for (int i = 0; i < m_ObjectNames.getSize(); i++) {
-	if (objectName.equals((String)m_ObjectNames.getElementAt(i))) {
-	  found = true;
-	  break;
+    protected HierachyPropertyParser getClassesFromProperties() {	    
+	HierachyPropertyParser hpp = null;
+	String className = m_ClassType.getName();
+	String typeOptions = EDITOR_PROPERTIES.getProperty(className);
+	if (typeOptions == null) {
+	    System.err.println("Warning: No configuration property found in\n"
+			       + PROPERTY_FILE + "\n"
+			       + "for " + className);
+	} else {		    
+	    try {
+		hpp = new HierachyPropertyParser(typeOptions, ", ");
+	    } catch (Exception ex) {
+		System.err.println("Invalid property: " + typeOptions);
+	    }	    
 	}
-      }
-      if (!found) {
-	m_ObjectNames.addElement(objectName);
-      }
-      m_ObjectChooser.setSelectedItem(objectName);
+	return hpp;
     }
-
-    /** Updates the child property sheet, and creates if needed */
-    public void updateChildPropertySheet() {
-
-      //System.err.println("GOE::updateChildPropertySheet()");
-      // Set the object as the target of the propertysheet
-      m_ChildPropertySheet.setTarget(m_Object);
-
-      // Adjust size of containing window if possible
-      if ((getTopLevelAncestor() != null)
-	  && (getTopLevelAncestor() instanceof Window)) {
-	((Window) getTopLevelAncestor()).pack();
-      }
-    }
-
+    
     /**
-     * When the chooser selection is changed, ensures that the Object
-     * is changed appropriately.
+     * Sets whether the editor is "enabled", meaning that the current
+     * values will be painted.
      *
-     * @param e a value of type 'ItemEvent'
+     * @param newVal a value of type 'boolean'
      */
-    public void itemStateChanged(ItemEvent e) {
-
-      //System.err.println("GOE::itemStateChanged()");
-      if ((e.getSource() == m_ObjectChooser)
-	  && (e.getStateChange() == ItemEvent.SELECTED)){
-	String className = (String)m_ObjectChooser
-			     .getSelectedItem();
-	try {
-	  //System.err.println("Setting object from chooser");
-	  if (m_Object.getClass().getName().compareTo(className) != 0) {
-	    //	    System.err.println("Different class type");
-	    setObject((Object)Class
-		      .forName(className)
-		      .newInstance());
-	  }
-	  //	  System.err.println("done setting object from chooser");
-	} catch (Exception ex) {
-	  m_ObjectChooser.hidePopup();
-	  m_ObjectChooser.setSelectedIndex(0);
-	  JOptionPane.showMessageDialog(this,
-					"Could not create an example of\n"
-					+ className + "\n"
-					+ "from the current classpath",
-					"GenericObjectEditor",
-					JOptionPane.ERROR_MESSAGE);
+    public void setEnabled(boolean newVal) {
+	
+	if (newVal != m_Enabled) {
+	    m_Enabled = newVal;
+	    /*
+	      if (m_EditorComponent != null) {
+	      m_EditorComponent.setEnabled(m_Enabled);
+	      }
+	    */
 	}
-      }
-    }
-  }
-
-  /** Called when the class of object being edited changes. */
-  protected Vector getClassesFromProperties() {
-    
-    Vector classes = new Vector();
-    String className = m_ClassType.getName();
-    String typeOptions = EDITOR_PROPERTIES.getProperty(className);
-    if (typeOptions == null) {
-      System.err.println("Warning: No configuration property found in\n"
-			 + PROPERTY_FILE + "\n"
-			 + "for " + className);
-    } else {
-      StringTokenizer st = new StringTokenizer(typeOptions, ", ");
-      while (st.hasMoreTokens()) {
-	String current = st.nextToken().trim();
-	if (false) {
-	  // Verify that class names are OK. Slow -- with Java2 we could
-	  // try Class.forName(current, false, getClass().getClassLoader());
-	  try {
-	    Class c = Class.forName(current);
-	    classes.addElement(current);
-	  } catch (Exception ex) {
-	    System.err.println("Couldn't find class with name" + current);
-	  }
-	} else {
-	  classes.addElement(current);
-	}
-      }
-    }
-    return classes;
-  }
-
-  /**
-   * Sets whether the editor is "enabled", meaning that the current
-   * values will be painted.
-   *
-   * @param newVal a value of type 'boolean'
-   */
-  public void setEnabled(boolean newVal) {
-
-    if (newVal != m_Enabled) {
-      m_Enabled = newVal;
-      /*
-      if (m_EditorComponent != null) {
-	m_EditorComponent.setEnabled(m_Enabled);
-      }
-      */
-    }
-  }
-  
-  /**
-   * Sets the class of values that can be edited.
-   *
-   * @param type a value of type 'Class'
-   */
-  public void setClassType(Class type) {
-
-    //System.err.println("setClassType("
-    //		       + (type == null? "<null>" : type.getName()) + ")");
-    m_ClassType = type;
-
-    if (m_EditorComponent != null) {
-      m_EditorComponent.updateClassType();
-    }
-  }
-
-  /**
-   * Sets the current object to be the default, taken as the first item in
-   * the chooser
-   */
-  public void setDefaultValue() {
-
-    if (m_ClassType == null) {
-      System.err.println("No ClassType set up for GenericObjectEditor!!");
-      return;
-    }
-    Vector v = getClassesFromProperties();
-    try {
-      if (v.size() > 0) {
-	setObject((Object)Class.forName((String)v.elementAt(0)).newInstance());
-      }
-    } catch (Exception ex) {
-    }
-  }
-  
-  /**
-   * Sets the current Object. If the Object is in the
-   * Object chooser, this becomes the selected item (and added
-   * to the chooser if necessary).
-   *
-   * @param o an object that must be a Object.
-   */
-  public void setValue(Object o) {
-
-    //System.err.println("setValue()");
-    if (m_ClassType == null) {
-      System.err.println("No ClassType set up for GenericObjectEditor!!");
-      return;
-    }
-    if (!m_ClassType.isAssignableFrom(o.getClass())) {
-      System.err.println("setValue object not of correct type!");
-      return;
     }
     
-    setObject((Object)o);
-      
-    if (m_EditorComponent != null) {
-      m_EditorComponent.updateChooser();
+    /**
+     * Sets the class of values that can be edited.
+     *
+     * @param type a value of type 'Class'
+     */
+    public void setClassType(Class type) {
+	
+	//System.err.println("setClassType("
+	//		   + (type == null? "<null>" : type.getName()) + ")");
+	m_ClassType = type;
+	
+	if (m_EditorComponent != null) {
+	    m_EditorComponent.updateClassType();
+	}
     }
-  }
-
-  /**
-   * Sets the current Object, but doesn't worry about updating
-   * the state of the Object chooser.
-   *
-   * @param c a value of type 'Object'
-   */
-  private void setObject(Object c) {
-
-    // This should really call equals() for comparison.
-    boolean trueChange = (c != getValue());
-    /*
-    System.err.println("Didn't even try to make a Object copy!! "
-		       + "(using original)");
-    */
-    m_Backup = m_Object;
-    m_Object = c;
-
-    if (m_EditorComponent != null) {
-      m_EditorComponent.updateChildPropertySheet();
-      if (trueChange) {
-	m_Support.firePropertyChange("", null, null);
-      }
+    
+    /**
+     * Sets the current object to be the default, taken as the first item in
+     * the chooser
+     */
+    public void setDefaultValue() {
+	
+	//System.err.println("GOE::setDefaultValue()");
+	if (m_ClassType == null) {
+	    System.err.println("No ClassType set up for GenericObjectEditor!!");
+	    return;
+	}	
+	
+	HierachyPropertyParser hpp = getClassesFromProperties();
+	try{
+	    if(hpp.depth() > 0){		
+		hpp.goToRoot();
+		while(!hpp.isLeafReached())
+		    hpp.goToChild(0);
+		
+		String defaultValue = hpp.fullValue();
+		setValue(Class.forName(defaultValue).newInstance());
+	    }
+	}catch(Exception ex){
+	    System.err.println("Problem loading the first class");
+	}
     }
-  }
-
-  
+    
+    /**
+     * Sets the current Object. If the Object is in the
+     * Object chooser, this becomes the selected item (and added
+     * to the chooser if necessary).
+     *
+     * @param o an object that must be a Object.
+     */
+    public void setValue(Object o) {
+	
+	//System.err.println("setValue()");
+	if (m_ClassType == null) {
+	    System.err.println("No ClassType set up for GenericObjectEditor!!");
+	    return;
+	}
+	if (!m_ClassType.isAssignableFrom(o.getClass())) {
+	    System.err.println("setValue object not of correct type!");
+	    return;
+	}
+	
+	setObject((Object)o);	
+	
+	if(m_EditorComponent != null)
+	    m_EditorComponent.updateChooser();
+    }
+    
+    /**
+     * Sets the current Object, but doesn't worry about updating
+     * the state of the object chooser.
+     *
+     * @param c a value of type 'Object'
+     */
+    private void setObject(Object c) {
+	
+	// This should really call equals() for comparison.
+	boolean trueChange = (c != getValue());
+	/*
+	  System.err.println("Didn't even try to make a Object copy!! "
+	  + "(using original)");
+	*/
+	m_Backup = m_Object;
+	m_Object = c;
+	
+	if (m_EditorComponent != null) {
+	    m_EditorComponent.updateChildPropertySheet();
+	    if (trueChange) {
+		m_Support.firePropertyChange("", null, null);
+	    }
+	}
+    }
+    
+    
   /**
    * Gets the current Object.
    *
@@ -756,13 +987,20 @@ public class GenericObjectEditor implements PropertyEditor {
 	.registerEditor(java.io.File.class,
 			FileEditor.class);
       GenericObjectEditor ce = new GenericObjectEditor();
-      ce.setClassType(weka.filters.Filter.class);
-      Object initial = new weka.filters.AddFilter();
-      if (args.length > 0) {
-	initial = (Object)Class.forName(args[0]).newInstance();
+      ce.setClassType(weka.classifiers.Classifier.class);
+      Object initial = new weka.classifiers.rules.ZeroR();
+      if (args.length > 0){
+	  ce.setClassType(Class.forName(args[0]));
+	  if(args.length > 1){
+	      initial = (Object)Class.forName(args[1]).newInstance();
+	      ce.setValue(initial);
+	  }
+	  else
+	      ce.setDefaultValue();
       }
-      ce.setValue(initial);
-
+      else	  
+	  ce.setValue(initial);
+      
       PropertyDialog pd = new PropertyDialog(ce, 100, 100);
       pd.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
