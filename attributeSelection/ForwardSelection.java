@@ -38,7 +38,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ForwardSelection extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -138,7 +138,7 @@ public class ForwardSelection extends ASSearch
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
@@ -433,7 +433,7 @@ public class ForwardSelection extends ASSearch
    * "passed by" on the way to the far side of the search space.
    *
    * @return an array of attribute indexes and associated merit values
-   * @exception if something goes wrong.
+   * @exception Exception if something goes wrong.
    */
   public double [][] rankedAttributes() throws Exception {
     

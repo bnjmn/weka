@@ -36,6 +36,7 @@ public interface StartSetHandler {
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
+   * @exception Exception if start set can't be set.
    */
   public abstract void setStartSet (String startSet) throws Exception;
 

@@ -36,7 +36,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -116,7 +116,7 @@ public class Ranker extends ASSearch
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
