@@ -110,7 +110,7 @@ import javax.swing.JList;
  * history so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -751,6 +751,10 @@ public class ClustererPanel extends JPanel {
 	    name += cname;
 	  }
 	  try {
+	    m_Log.logMessage("Started " + cname);
+	    if (m_Log instanceof TaskLogger) {
+	      ((TaskLogger)m_Log).taskStarted();
+	    }
 	    if (m_PercentBut.isSelected()) {
 	      testMode = 2;
 	      percent = Integer.parseInt(m_PercentText.getText());
@@ -788,10 +792,6 @@ public class ClustererPanel extends JPanel {
 	    }
 
 	    // Output some header information
-	    m_Log.logMessage("Started " + cname);
-	    if (m_Log instanceof TaskLogger) {
-	      ((TaskLogger)m_Log).taskStarted();
-	    }
 	    outBuff.append("=== Run information ===\n\n");
 	    outBuff.append("Scheme:       " + cname);
 	    if (clusterer instanceof OptionHandler) {
