@@ -85,7 +85,7 @@ import javax.swing.ButtonGroup;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class SetupPanel extends JPanel {
 
@@ -179,6 +179,9 @@ public class SetupPanel extends JPanel {
 		      GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier [].class,
+		      GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(Object [].class,
 		      GenericArrayEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.filters.Filter.class,
