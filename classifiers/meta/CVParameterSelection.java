@@ -64,10 +64,10 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
 */
 public class CVParameterSelection extends Classifier 
-  implements OptionHandler, Summarizable {
+  implements OptionHandler, Drawable, Summarizable {
 
   /*
    * A data structure to hold values associated with a single
@@ -746,6 +746,34 @@ public class CVParameterSelection extends Classifier
     return "Sets the classifier for boosting.";
   }
  
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   */   
+  public int graphType() {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graphType();
+    else 
+      return Drawable.NOT_DRAWABLE;
+  }
+
+  /**
+   * Returns graph describing the classifier (if possible).
+   *
+   * @return the graph of the classifier in dotty format
+   * @exception Exception if the classifier cannot be graphed
+   */
+  public String graph() throws Exception {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graph();
+    else throw new Exception("Classifier: " + 
+			     m_Classifier.getClass().getName() + " " +
+			     Utils.joinOptions(m_BestClassifierOptions)
+			     + " cannot be graphed");
+  }
+
   /**
    * Returns description of the cross-validated classifier.
    *

@@ -40,6 +40,7 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.Drawable;
 import weka.core.UnsupportedClassTypeException;
 
 /**
@@ -86,10 +87,10 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class ThresholdSelector extends Classifier 
-  implements OptionHandler {
+  implements OptionHandler, Drawable {
 
   /* Type of correction applied to threshold range */ 
   public static final int RANGE_NONE = 0;
@@ -787,7 +788,48 @@ public class ThresholdSelector extends Classifier
 
     return m_Classifier;
   }
+ 
+  /**
+   * Gets the classifier specification string, which contains the class name of
+   * the classifier and any options to the classifier
+   *
+   * @return the classifier string.
+   */
+  protected String getClassifierSpec() {
+    
+    Classifier c = getClassifier();
+    if (c instanceof OptionHandler) {
+      return c.getClass().getName() + " "
+	+ Utils.joinOptions(((OptionHandler)c).getOptions());
+    }
+    return c.getClass().getName();
+  }
 
+  /**
+   *  Returns the type of graph this classifier
+   *  represents.
+   */   
+  public int graphType() {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graphType();
+    else 
+      return Drawable.NOT_DRAWABLE;
+  }
+
+  /**
+   * Returns graph describing the classifier (if possible).
+   *
+   * @return the graph of the classifier in dotty format
+   * @exception Exception if the classifier cannot be graphed
+   */
+  public String graph() throws Exception {
+    
+    if (m_Classifier instanceof Drawable)
+      return ((Drawable)m_Classifier).graph();
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot be graphed");
+  }
  
   /**
    * Returns description of the cross-validated classifier.
