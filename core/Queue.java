@@ -12,7 +12,7 @@ import java.io.*;
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Queue extends Object implements Serializable {
 
@@ -110,12 +110,12 @@ public class Queue extends Object implements Serializable {
    * Pops an object from the front of the queue.
    *
    * @return the object at the front of the queue
-   * @exception Exception if the queue is empty
+   * @exception RuntimeException if the queue is empty
    */
-  public synchronized Object pop() throws Exception {
+  public synchronized Object pop() {
 
     if (m_Head == null) {
-      throw new Exception("Queue is empty");
+      throw new RuntimeException("Queue is empty");
     }
     Object retval = m_Head.contents();
     m_Size--;
@@ -130,12 +130,12 @@ public class Queue extends Object implements Serializable {
    * Gets object from the front of the queue.
    *
    * @return the object at the front of the queue
-   * @exception Exception if the queue is empty
+   * @exception RuntimeException if the queue is empty
    */
-  public synchronized Object peek() throws Exception {
+  public synchronized Object peek() {
     
     if (m_Head == null) {
-      throw new Exception("Queue is empty");
+      throw new RuntimeException("Queue is empty");
     }
     return m_Head.contents();
   }
