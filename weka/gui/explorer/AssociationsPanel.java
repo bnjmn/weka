@@ -84,7 +84,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -398,7 +398,7 @@ public class AssociationsPanel extends JPanel {
   }
 
   /**
-   * Save the currently selected classifier output to a file.
+   * Save the currently selected associator output to a file.
    */
   protected void saveBuffer() {
     StringBuffer sb = m_History.getSelectedBuffer();
