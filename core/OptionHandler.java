@@ -29,7 +29,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface OptionHandler {
 
@@ -38,7 +38,7 @@ public interface OptionHandler {
    *
    * @return an enumeration of all available options
    */
-  public Enumeration listOptions();
+  Enumeration listOptions();
 
   /**
    * Sets the OptionHandler's options using the given list. All options
@@ -48,14 +48,14 @@ public interface OptionHandler {
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  public void setOptions(String[] options) throws Exception;
+  void setOptions(String[] options) throws Exception;
 
   /**
    * Gets the current option settings for the OptionHandler.
    *
    * @return the list of current option settings as an array of strings
    */
-  public String[] getOptions();
+  String[] getOptions();
 }
 
 

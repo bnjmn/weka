@@ -28,7 +28,7 @@ package weka.experiment;
  * progress
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface RemoteExperimentListener {
 
@@ -36,6 +36,6 @@ public interface RemoteExperimentListener {
    * Called when progress has been made in a remote experiment
    * @param e the event encapsulating what happened
    */
-  public void remoteExperimentStatus(RemoteExperimentEvent e);
+  void remoteExperimentStatus(RemoteExperimentEvent e);
 
 }

@@ -27,7 +27,7 @@ package weka.core;
  * to toString() which is usually a fairly complete description) of itself.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface Summarizable {
 
@@ -36,7 +36,7 @@ public interface Summarizable {
    *
    * @return the object summarized as a string
    */
-  public String toSummaryString();
+  String toSummaryString();
 }
 
 

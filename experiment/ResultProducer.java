@@ -39,7 +39,7 @@ import java.io.Serializable;
 * </ul>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public interface ResultProducer extends Serializable {
@@ -49,21 +49,21 @@ public interface ResultProducer extends Serializable {
    *
    * @param instances a value of type 'Instances'.
    */
-  public void setInstances(Instances instances);
+  void setInstances(Instances instances);
 
   /**
    * Sets the object to send results of each run to.
    *
    * @param listener a value of type 'ResultListener'
    */
-  public void setResultListener(ResultListener listener);
+  void setResultListener(ResultListener listener);
 
   /**
    * Sets a list of method names for additional measures to look for
    * in SplitEvaluators.
    * @param additionalMeasures a list of method names
    */
-  public void setAdditionalMeasures(String [] additionalMeasures);
+  void setAdditionalMeasures(String [] additionalMeasures);
 
   /**
    * Prepare to generate results. The ResultProducer should call
@@ -71,7 +71,7 @@ public interface ResultProducer extends Serializable {
    *
    * @exception Exception if an error occurs during preprocessing.
    */
-  public void preProcess() throws Exception;
+  void preProcess() throws Exception;
   
   /**
    * Perform any postprocessing. When this method is called, it indicates
@@ -81,7 +81,7 @@ public interface ResultProducer extends Serializable {
    *
    * @exception Exception if an error occurs
    */
-  public void postProcess() throws Exception;
+  void postProcess() throws Exception;
   
   /**
    * Gets the results for a specified run number. Different run
@@ -93,7 +93,7 @@ public interface ResultProducer extends Serializable {
    * @param run the run number to generate results for.
    * @exception Exception if a problem occurs while getting the results
    */
-  public void doRun(int run) throws Exception;
+  void doRun(int run) throws Exception;
   
   /**
    * Gets the keys for a specified run number. Different run
@@ -103,7 +103,7 @@ public interface ResultProducer extends Serializable {
    * @param run the run number to get keys for.
    * @exception Exception if a problem occurs while getting the keys
    */
-  public void doRunKeys(int run) throws Exception;
+  void doRunKeys(int run) throws Exception;
 
   /**
    * Gets the names of each of the key columns produced for a single run.
@@ -114,7 +114,7 @@ public interface ResultProducer extends Serializable {
    * @exception Exception if the key names could not be determined (perhaps
    * because of a problem from a nested sub-resultproducer)
    */
-  public String [] getKeyNames() throws Exception;
+  String [] getKeyNames() throws Exception;
 
   /**
    * Gets the data types of each of the key columns produced for a single run.
@@ -124,7 +124,7 @@ public interface ResultProducer extends Serializable {
    * @exception Exception if the key types could not be determined (perhaps
    * because of a problem from a nested sub-resultproducer)
    */
-  public Object [] getKeyTypes() throws Exception;
+  Object [] getKeyTypes() throws Exception;
 
   /**
    * Gets the names of each of the result columns produced for a single run.
@@ -135,7 +135,7 @@ public interface ResultProducer extends Serializable {
    * @exception Exception if the result names could not be determined (perhaps
    * because of a problem from a nested sub-resultproducer)
    */
-  public String [] getResultNames() throws Exception;
+  String [] getResultNames() throws Exception;
 
   /**
    * Gets the data types of each of the result columns produced for a 
@@ -146,7 +146,7 @@ public interface ResultProducer extends Serializable {
    * @exception Exception if the result types could not be determined (perhaps
    * because of a problem from a nested sub-resultproducer)
    */
-  public Object [] getResultTypes() throws Exception;
+  Object [] getResultTypes() throws Exception;
 
   /**
    * Gets a description of the internal settings of the result
@@ -162,6 +162,6 @@ public interface ResultProducer extends Serializable {
    * @return the description of the ResultProducer state, or null
    * if no state is defined
    */
-  public String getCompatibilityState();
+  String getCompatibilityState();
 
 } // ResultProducer

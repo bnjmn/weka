@@ -29,7 +29,7 @@ import java.io.*;
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierDecList implements Serializable {
 
@@ -339,7 +339,7 @@ public class ClassifierDecList implements Serializable {
   protected int chooseLastIndex() {
 
     return 0;
-  };
+  }
 
   /**
    * Dummy method. Overwritten by sub classes.
@@ -347,13 +347,13 @@ public class ClassifierDecList implements Serializable {
   protected int chooseIndex() {
 
     return 0;
-  };
+  }
   
   /**
    * Dummy method. Overwritten by sub classes.
    */
   protected void pruneEnd() throws Exception {
-  };
+  }
 
   /**
    * Help method for printing tree structure.

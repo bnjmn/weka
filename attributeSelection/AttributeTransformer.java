@@ -29,7 +29,7 @@ import weka.core.*;
  * Abstract attribute transformer. Transforms the dataset.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface AttributeTransformer {
     // ===============
@@ -45,14 +45,14 @@ public interface AttributeTransformer {
    * @exception Exception if the header of the transformed data can't
    * be determined.
    */
-  public abstract Instances transformedHeader() throws Exception;
+  Instances transformedHeader() throws Exception;
 
   /**
    * Returns the transformed data
    * @return A set of instances representing the transformed data
    * @exception Exception if the attribute could not be evaluated
    */
-  public abstract Instances transformedData() throws Exception;
+  Instances transformedData() throws Exception;
 
   /**
    * Transforms an instance in the format of the original data to the
@@ -60,5 +60,5 @@ public interface AttributeTransformer {
    * @return a transformed instance
    * @exception Exception if the instance could not be transformed
    */
-  public abstract Instance convertInstance(Instance instance) throws Exception;
+  Instance convertInstance(Instance instance) throws Exception;
 }

@@ -28,7 +28,7 @@ package weka.gui;
  * status (transient) messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface Logger {
 
@@ -38,7 +38,7 @@ public interface Logger {
    *
    * @param message the log message
    */
-  public void logMessage(String message);
+  void logMessage(String message);
   
   /**
    * Sends the supplied message to the status line. These messages are
@@ -48,6 +48,6 @@ public interface Logger {
    *
    * @param message the status message.
    */
-  public void statusMessage(String message);
+  void statusMessage(String message);
   
 }

@@ -31,7 +31,7 @@ package weka.gui.treevisualizer;
  * from a tree displayer.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface TreeDisplayListener {
 
@@ -39,7 +39,7 @@ public interface TreeDisplayListener {
    * Gets called when the user selects something, in the tree display.
    * @param e Contains what the user selected with what it was selected for.
    */
-  public void userCommand(TreeDisplayEvent e);
+  void userCommand(TreeDisplayEvent e);
 }
 
 

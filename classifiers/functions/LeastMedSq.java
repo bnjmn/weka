@@ -35,7 +35,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -133,10 +133,10 @@ public class LeastMedSq extends Classifier implements OptionHandler {
 
     m_Data = data;
     m_TransformFilter = new NominalToBinaryFilter();
-    m_TransformFilter.inputFormat(m_Data);
+    m_TransformFilter.setInputFormat(m_Data);
     m_Data = Filter.useFilter(m_Data, m_TransformFilter);
     m_MissingFilter = new ReplaceMissingValuesFilter();
-    m_MissingFilter.inputFormat(m_Data);
+    m_MissingFilter.setInputFormat(m_Data);
     m_Data = Filter.useFilter(m_Data, m_MissingFilter);
     m_Data.deleteWithMissingClass();
   }
@@ -372,7 +372,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
 
     m_SplitFilter = new SplitDatasetFilter();
     m_SubSample = data;
-    m_SplitFilter.inputFormat(m_SubSample);
+    m_SplitFilter.setInputFormat(m_SubSample);
     m_SplitFilter.setInstancesIndices(selectIndices(m_SubSample));
     m_SubSample = Filter.useFilter(m_SubSample, m_SplitFilter);
   }

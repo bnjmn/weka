@@ -27,7 +27,7 @@ package weka.classifiers.evaluation;
  * actual class value.
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface Prediction {
 
@@ -35,7 +35,7 @@ public interface Prediction {
    * Constant representing a missing value. This should have the same value
    * as weka.core.Instance.MISSING_VALUE 
    */
-  public final static double MISSING_VALUE 
+  double MISSING_VALUE 
     = weka.core.Instance.missingValue();
 
   /** 
@@ -44,7 +44,7 @@ public interface Prediction {
    *
    * @return the weight assigned to this prediction.
    */
-  public double weight();
+  double weight();
 
   /** 
    * Gets the actual class value.
@@ -52,7 +52,7 @@ public interface Prediction {
    * @return the actual class value, or MISSING_VALUE if no
    * prediction was made.  
    */
-  public double actual();
+  double actual();
 
   /**
    * Gets the predicted class value.
@@ -60,6 +60,6 @@ public interface Prediction {
    * @return the predicted class value, or MISSING_VALUE if no
    * prediction was made.  
    */
-  public double predicted();
+  double predicted();
 
 }

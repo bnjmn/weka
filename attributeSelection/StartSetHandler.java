@@ -30,7 +30,7 @@ import weka.core.*;
  * given a starting set of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface StartSetHandler {
 
@@ -42,11 +42,11 @@ public interface StartSetHandler {
    * eg. 1,2,6,10-15.
    * @exception Exception if start set can't be set.
    */
-  public abstract void setStartSet (String startSet) throws Exception;
+  void setStartSet (String startSet) throws Exception;
 
   /**
    * Returns a list of attributes (and or attribute ranges) as a String
    * @return a list of attributes (and or attribute ranges)
    */
-  public abstract String getStartSet ();
+  String getStartSet ();
 }

@@ -31,7 +31,7 @@ import java.io.*;
  * neuralnode to perform all it's computations.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface NeuralMethod extends Serializable {
 
@@ -41,14 +41,14 @@ public interface NeuralMethod extends Serializable {
    * @param node The node to calculate the value for.
    * @return The value.
    */
-  public double outputValue(NeuralNode node);
+  double outputValue(NeuralNode node);
 
   /**
    * This function calculates what the error value should be.
    * @param node The node to calculate the error for.
    * @return The error.
    */
-  public double errorValue(NeuralNode node);
+  double errorValue(NeuralNode node);
 
   /**
    * This function will calculate what the change in weights should be
@@ -57,6 +57,6 @@ public interface NeuralMethod extends Serializable {
    * @param learn The learning rate to use.
    * @param momentum The momentum to use.
    */
-  public void updateWeights(NeuralNode node, double learn, double momentum);
+  void updateWeights(NeuralNode node, double learn, double momentum);
 
 }
