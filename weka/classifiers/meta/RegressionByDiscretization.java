@@ -56,7 +56,7 @@ import weka.filters.unsupervised.attribute.PotentialClassIgnorer;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler {
@@ -65,7 +65,7 @@ public class RegressionByDiscretization extends Classifier
   protected Classifier m_Classifier = new ZeroR();
   
   /** The discretization filter. */
-  protected PotentialClassIgnorer m_Discretizer = new Discretize();;
+  protected PotentialClassIgnorer m_Discretizer = new Discretize("last");
 
   /** The mean values for each Discretized class interval. */
   protected double [] m_ClassMeans;
