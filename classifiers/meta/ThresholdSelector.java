@@ -66,7 +66,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -421,11 +421,11 @@ public class ThresholdSelector extends DistributionClassifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
     if (instances.numClasses() > 2) {
       throw new Exception("Only works for two-class datasets!");
+    }
+    if (!instances.classAttribute().isNominal()) {
+      throw new Exception("Class attribute must be nominal!");
     }
     AttributeStats stats = instances.attributeStats(instances.classIndex());
     m_BestThreshold = 0.5;
@@ -733,6 +733,9 @@ public class ThresholdSelector extends DistributionClassifier
    */
   public void setNumXValFolds(int newNumFolds) {
     
+    if (newNumFolds < 2) {
+      throw new IllegalArgumentException("Number of folds must be greater than 1");
+    }
     m_NumXValFolds = newNumFolds;
   }
 
