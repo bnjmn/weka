@@ -42,8 +42,16 @@ import weka.classifiers.rules.ZeroR;
  * The index of the class for which IR statistics are to
  * be output. (default 1) <p>
  *
+ * -I attr index <br>
+ * The index of an attribute to output in the tresults. This 
+ * attribute should identify an instance in order to know 
+ * which instances are tested in a fold (default 1).
+ *
+ * -P 
+ * Add the prediction and target columns to the result file for each fold.
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -81,10 +89,16 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 11;
-
+  
   /** Class index for information retrieval statistics (default 0) */
   private int m_IRclass = 0;
+  
+  /** Flag for prediction and target columns output.*/
+  private boolean m_predTargetColumn = false;
 
+  /** Attribute index of instance identifier (default -1) */
+  private int m_attID = -1;
+  
   /**
    * No args constructor.
    */
@@ -110,7 +124,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
 	     "\tThe full class name of the classifier.\n"
@@ -122,6 +136,19 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 	     "\tare to be output. (default 1)",
 	     "C", 1, 
 	     "-C <index>"));
+    newVector.addElement(new Option(
+	     "\tThe index of an attribute to output in the\n" +
+	     "\tresults. This attribute should identify an\n" +
+             "\tinstance in order to know which instances are\n" +
+             "\tin the test set of a cross validation. if 0\n" +
+             "\tno output (default 0).",
+	     "I", 1, 
+	     "-I <index>"));
+    newVector.addElement(new Option(
+	     "\tAdd target and prediction columns to the result\n" +
+             "\tfor each fold.",
+	     "P", 0, 
+	     "-P"));
 
     if ((m_Classifier != null) &&
 	(m_Classifier instanceof OptionHandler)) {
@@ -146,6 +173,15 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * -C class index <br>
    * The index of the class for which IR statistics are to
    * be output. (default 1) <p>
+   *
+   * -I attr index <br>
+   * The index of an attribute to output in the tresults. This 
+   * attribute should identify an instance in order to know 
+   * which instances are tested in a fold. if zero, no output (default 0).
+   *
+   * -P 
+   * The flag that indicate if the prediction and targets have to be output
+   * in the result files for each fold.
    *
    * All option after -- will be passed to the classifier.
    *
@@ -175,6 +211,15 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     } else {
       m_IRclass = 0;
     }
+
+    String attID = Utils.getOption('I', options);
+    if (attID.length() != 0) {
+      m_attID = (new Integer(attID)).intValue() - 1;
+    } else {
+      m_attID = -1;
+    }
+    
+    m_predTargetColumn = Utils.getFlag('P', options);
   }
 
   /**
@@ -190,17 +235,22 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     }
     
-    String [] options = new String [classifierOptions.length + 5];
+    String [] options = new String [classifierOptions.length + 8];
     int current = 0;
 
     if (getClassifier() != null) {
       options[current++] = "-W";
       options[current++] = getClassifier().getClass().getName();
     }
+    options[current++] = "-I"; 
+    options[current++] = "" + (m_attID + 1);
+
+    if (getPredTargetColumn()) options[current++] = "-P";
+    
     options[current++] = "-C"; 
     options[current++] = "" + (m_IRclass + 1);
     options[current++] = "--";
-
+    
     System.arraycopy(classifierOptions, 0, options, current, 
 		     classifierOptions.length);
     current += classifierOptions.length;
@@ -343,6 +393,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       : 0;
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
+    if (getAttributeID() >= 0) overall_length += 1;
+    if (getPredTargetColumn()) overall_length += 2;
     Object [] resultTypes = new Object[overall_length];
     Double doub = new Double(0);
     int current = 0;
@@ -390,6 +442,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
+    // ID/Targets/Predictions
+    if (getAttributeID() >= 0) resultTypes[current++] = "";
+    if (getPredTargetColumn()){
+        resultTypes[current++] = "";
+        resultTypes[current++] = "";
+    }
+    
+    // Classifier defined extras
     resultTypes[current++] = "";
 
     // add any additional measures
@@ -415,6 +475,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       : 0;
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
+    if (getAttributeID() >= 0) overall_length += 1;
+    if (getPredTargetColumn()) overall_length += 2;
+
     String [] resultNames = new String[overall_length];
     int current = 0;
     resultNames[current++] = "Number_of_training_instances";
@@ -465,6 +528,13 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "Time_training";
     resultNames[current++] = "Time_testing";
 
+    // ID/Targets/Predictions
+    if (getAttributeID() >= 0) resultNames[current++] = "Instance_ID";
+    if (getPredTargetColumn()){
+        resultNames[current++] = "Targets";
+        resultNames[current++] = "Predictions";
+    }
+    
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -500,6 +570,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
       : 0;
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
+    if (getAttributeID() >= 0) overall_length += 1;
+    if (getPredTargetColumn()) overall_length += 2;
 
     Object [] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
@@ -507,7 +579,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     m_Classifier.buildClassifier(train);
     long trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
     long testTimeStart = System.currentTimeMillis();
-    eval.evaluateModel(m_Classifier, test);
+    double predictions[] = eval.evaluateModel(m_Classifier, test);
     long testTimeElapsed = System.currentTimeMillis() - testTimeStart;
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
@@ -557,6 +629,69 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
 
+    // IDs
+    if (getAttributeID() >= 0){
+        String idsString = "";
+        if (test.attribute(m_attID).isNumeric()){
+            if (test.numInstances() > 0)
+                idsString += test.instance(0).value(m_attID);
+            for(int i=1;i<test.numInstances();i++){
+                idsString += "|" + test.instance(i).value(m_attID);
+            }
+        } else {
+            if (test.numInstances() > 0)
+                idsString += test.instance(0).stringValue(m_attID);
+            for(int i=1;i<test.numInstances();i++){
+                idsString += "|" + test.instance(i).stringValue(m_attID);
+            }
+        }
+        result[current++] = idsString;
+    }
+    
+    if (getPredTargetColumn()){
+        if (test.classAttribute().isNumeric()){
+            // Targets
+            if (test.numInstances() > 0){
+                String targetsString = "";
+                targetsString += test.instance(0).value(test.classIndex());
+                for(int i=1;i<test.numInstances();i++){
+                    targetsString += "|" + test.instance(i).value(test.classIndex());
+                }
+                result[current++] = targetsString;
+            }
+    
+            // Predictions
+            if (predictions.length > 0){ 
+                String predictionsString = "";
+                predictionsString += predictions[0];
+                for(int i=1;i<predictions.length;i++){
+                    predictionsString += "|" + predictions[i];
+                }
+                result[current++] = predictionsString;
+            }            
+        } else {
+            // Targets
+            if (test.numInstances() > 0){
+                String targetsString = "";
+                targetsString += test.instance(0).stringValue(test.classIndex());
+                for(int i=1;i<test.numInstances();i++){
+                    targetsString += "|" + test.instance(i).stringValue(test.classIndex());
+                }
+                result[current++] = targetsString;
+            }
+    
+            // Predictions
+            if (predictions.length > 0){ 
+                String predictionsString = "";
+                predictionsString += test.classAttribute().value((int) predictions[0]);
+                for(int i=1;i<predictions.length;i++){
+                    predictionsString += "|" + test.classAttribute().value((int) predictions[i]);
+                }
+                result[current++] = predictionsString;
+            }
+        }
+    }
+    
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
@@ -620,7 +755,6 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * @return Value of ClassForIRStatistics.
    */
   public int getClassForIRStatistics() {
-    
     return m_IRclass;
   }
   
@@ -629,8 +763,38 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * @param v  Value to assign to ClassForIRStatistics.
    */
   public void setClassForIRStatistics(int v) {
-    
     m_IRclass = v;
+  }
+
+  /**
+   * Get the index of Attibute Identifying the instances
+   * @return index of outputed Attribute.
+   */
+  public int getAttributeID() {
+    return m_attID;
+  }
+  
+  /**
+   * Set the index of Attibute Identifying the instances
+   * @param v index the attribute to output
+   */
+  public void setAttributeID(int v) {
+    m_attID = v;
+  }
+    
+  /**
+   *@return true if the prediction and target columns must be outputed.
+   */
+  public boolean getPredTargetColumn(){
+      return m_predTargetColumn;
+  }
+
+  /**
+   * Set the flag for prediction and target output.
+   *@param v true if the 2 columns have to be outputed. false otherwise.
+   */
+  public void setPredTargetColumn(boolean v){
+      m_predTargetColumn = v;
   }
   
   /**
