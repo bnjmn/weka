@@ -71,7 +71,7 @@ import weka.associations.ItemSet;
  *   
  * 
  * @author Stefan Mutter
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeasureProducer {
@@ -213,7 +213,10 @@ public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeas
       }
       String assocName = assocSpec[0];
       assocSpec[0] = "";
-      setAssoc(Associator.forName(assocName,assocSpec));
+      Associator toUse = (Associator.forName(assocName,assocSpec));
+      if (!(toUse instanceof CARuleMiner))
+	  throw new Exception("Association Rule Miner has to be able to mine classification association rules");
+      setCarMiner((CARuleMiner)toUse);
      
       m_outputTree = Utils.getFlag('V', options);
       
@@ -272,24 +275,27 @@ public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeas
   }
   
     
-  /**
-   * Sets the class association rule miner
-   * @param toUse the class association rule miner
-   * @throws Exception exception if the miner is not a class association rule miner,
-   * e.g. does not implement the CARuleMiner interface.
+  /** Gets the tipText for this option.
+    * @return the tipText for this option.
+    */   
+  public String carMinerTipText(){
+   
+       return "The class association rule miner with its options.";
+   }
+  
+  /** Sets the class association rule miner
+   * @param assoc the class association rule miner
    */  
-   public void setAssoc(Associator toUse) throws Exception{
-    
-       if (!(toUse instanceof CARuleMiner))
-	  throw new Exception("Association Rule Miner has to be able to mine classification association rules");
-       m_assoc = (CARuleMiner)toUse;
+   public void setCarMiner(CARuleMiner assoc){
+   
+       m_assoc = assoc;
    }
     
    /**
     * Gets the class association rule miner
     * @return the class association rule miner
     */   
-   public CARuleMiner getAssoc(){
+   public CARuleMiner getCarMiner(){
        
        return m_assoc;
    }
@@ -303,39 +309,7 @@ public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeas
        return m_prune;
    }
    
-   /** Gets the tipText for the specified option.
-    * @return the tipText for the specified option.
-    */   
-   public String assocStringTipText(){
-    
-       return "Specify the full class name of a class association rule miner including its options.";
-   }
-   
-   /**
-    * Gets a string with the options for the class association rule miner
-    * @return a string with the options for the class association rule miner
-    */   
-   public String getAssocString(){
-    
-       return getAssocSpec();
-   }
-   
-   /**
-    * Sets the option for the class association rule miner
-    * @param input options
-    * @throws Exception throws exception if options not valid
-    */   
-   public void setAssocString(String input) throws Exception {
-    
-        String [] assocSpec = Utils.splitOptions(input);
-        if (assocSpec.length == 0) {
-            throw new Exception("Invalid Asociation Rule Miner specification string");
-        }
-        String assocName = assocSpec[0];
-        assocSpec[0] = "";
-        setAssoc(Associator.forName(assocName,assocSpec));
-   }
-   
+
    /** Gets the tipText for the specified option.
     * @return the tipText for the specified option.
     */   
@@ -460,7 +434,7 @@ public class JCBA extends CarClassifier implements OptionHandler, AdditionalMeas
       
       m_miningWatch = new Stopwatch();
       m_miningWatch.start();
-      m_assoc.setClass(m_instances.classIndex());
+      m_assoc.setClassIndex(m_instances.classIndex());
       allRules = m_assoc.mineCARs(m_instances);
       instancesNoClass = m_assoc.getInstancesNoClass();
       instancesOnlyClass = m_assoc.getInstancesOnlyClass();

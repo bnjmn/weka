@@ -91,7 +91,7 @@ import weka.associations.ItemSet;
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 public class CarApriori extends Apriori implements OptionHandler, CARuleMiner {
   
   /** Only the class attribute of all Instances.*/
@@ -490,7 +490,7 @@ public class CarApriori extends Apriori implements OptionHandler, CARuleMiner {
    * Sets the class index
    * @param index the class index
    */  
-  public void setClass(int index){
+  public void setClassIndex(int index){
       
       m_classIndex = index;
   }
@@ -499,7 +499,7 @@ public class CarApriori extends Apriori implements OptionHandler, CARuleMiner {
    * Gets the class index
    * @return the index of the class attribute
    */  
-  public int classIndex(){
+  public int getClassIndex(){
       
       return m_classIndex;
   }
@@ -510,7 +510,7 @@ public class CarApriori extends Apriori implements OptionHandler, CARuleMiner {
    * displaying in the explorer/experimenter gui
    */
   public String classIndexTipText() {
-    return "Index of the class attribute.";
+    return "Index of the class attribute.\n If set to -1, the last attribute will be taken as the class attribute.\nIf used in classification, the class attribute of the classifier overrides this option.";
   }
 
   /**
@@ -687,6 +687,7 @@ public class CarApriori extends Apriori implements OptionHandler, CARuleMiner {
       else
 	  m_numRules = v;
   }
+  
 
 
  
