@@ -63,7 +63,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -181,6 +181,24 @@ public class AttributeVisualizationPanel extends JPanel {
     this.repaint();
   }
     
+  /**
+   * Get the coloring index for the plot
+   *
+   * @return an <code>int</code> value
+   */
+  public int getColoringIndex() {
+    return m_colorAttrib.getSelectedIndex();
+  }
+
+  /**
+   * Set the coloring index for the plot
+   *
+   * @param ci an <code>int</code> value
+   */
+  public void setColoringIndex(int ci) {
+    m_colorAttrib.setSelectedIndex(ci);
+  }
+
   /**
    * Tells the panel which attribute to visualize.
    *
