@@ -39,7 +39,7 @@ import weka.classifiers.Classifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ThresholdCurve {
 
@@ -132,34 +132,52 @@ public class ThresholdCurve {
     Instances insts = makeHeader();
     int [] sorted = Utils.sort(probs);
     TwoClassStats tc = new TwoClassStats(totPos, totNeg, 0, 0);
+    double threshold = 0;
+    double cumulativePos = 0;
+    double cumulativeNeg = 0;
     for (int i = 0; i < sorted.length; i++) {
+
+      if ((i == 0) || (probs[sorted[i]] > threshold)) {
+	tc.setTruePositive(tc.getTruePositive() - cumulativePos);
+	tc.setFalseNegative(tc.getFalseNegative() + cumulativePos);
+	tc.setFalsePositive(tc.getFalsePositive() - cumulativeNeg);
+	tc.setTrueNegative(tc.getTrueNegative() + cumulativeNeg);
+	threshold = probs[sorted[i]];
+	insts.add(makeInstance(tc, threshold));
+	cumulativePos = 0;
+	cumulativeNeg = 0;
+	if (i == sorted.length - 1) {
+	  break;
+	}
+      }
+
       NominalPrediction pred = (NominalPrediction)predictions.elementAt(sorted[i]);
+
       if (pred.actual() == Prediction.MISSING_VALUE) {
-        System.err.println(getClass().getName()
-                           + " Skipping prediction with missing class value");
-        continue;
+	System.err.println(getClass().getName()
+			   + " Skipping prediction with missing class value");
+	continue;
       }
       if (pred.weight() < 0) {
-        System.err.println(getClass().getName() 
-                           + " Skipping prediction with negative weight");
-        continue;
+	System.err.println(getClass().getName() 
+			   + " Skipping prediction with negative weight");
+	continue;
       }
       if (pred.actual() == classIndex) {
-        tc.setTruePositive(tc.getTruePositive() - pred.weight());
-        tc.setFalseNegative(tc.getFalseNegative() + pred.weight());
+	cumulativePos += pred.weight();
       } else {
-        tc.setFalsePositive(tc.getFalsePositive() - pred.weight());
-        tc.setTrueNegative(tc.getTrueNegative() + pred.weight());
+	cumulativeNeg += pred.weight();
       }
+
       /*
       System.out.println(tc + " " + probs[sorted[i]] 
                          + " " + (pred.actual() == classIndex));
       */
-      if ((i != (sorted.length - 1)) &&
+      /*if ((i != (sorted.length - 1)) &&
           ((i == 0) ||  
           (probs[sorted[i]] != probs[sorted[i - 1]]))) {
         insts.add(makeInstance(tc, probs[sorted[i]]));
-      }
+	}*/
     }
     return insts;
   }
