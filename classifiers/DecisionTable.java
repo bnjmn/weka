@@ -38,7 +38,7 @@ import weka.classifiers.j48.*;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class DecisionTable 
   extends DistributionClassifier 
@@ -1132,12 +1132,12 @@ public class DecisionTable
     double [] normDist;
 
     m_disTransform.input(instance);
-    instance = m_disTransform.output();
     m_disTransform.batchFinished();
+    instance = m_disTransform.output();
 
     m_delTransform.input(instance);
-    instance = m_delTransform.output();
     m_delTransform.batchFinished();
+    instance = m_delTransform.output();
 
     thekey = new hashKey(instance, instance.numAttributes());
     

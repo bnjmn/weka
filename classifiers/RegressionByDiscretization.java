@@ -40,7 +40,7 @@ import weka.filters.*;
  * Any options after -- will be passed to the sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RegressionByDiscretization extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -145,8 +145,8 @@ public class RegressionByDiscretization extends Classifier
 
     if (m_Discretizer.input(instance)) {
 
-      Instance newInstance = m_Discretizer.output();
       m_Discretizer.batchFinished();
+      Instance newInstance = m_Discretizer.output();
       double [] probs = m_Classifier.distributionForInstance(newInstance);
       
       double prediction = 0, probSum = 0;

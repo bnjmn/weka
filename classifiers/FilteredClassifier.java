@@ -29,7 +29,7 @@ import weka.filters.Filter;
  * (required).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class FilteredClassifier extends DistributionClassifier
   implements OptionHandler {
@@ -270,8 +270,8 @@ public class FilteredClassifier extends DistributionClassifier
       throw new Exception("Filter didn't make the test instance"
 			  + " immediately available!");
     }
-    Instance newInstance = m_Filter.output();
     m_Filter.batchFinished();
+    Instance newInstance = m_Filter.output();
     /*
     System.err.println("FilteredClassifier:: " 
                        + m_Filter.getClass().getName()
