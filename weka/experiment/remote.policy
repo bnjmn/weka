@@ -23,12 +23,6 @@ grant {
   permission java.io.FilePermission
 	     "/path_to_dir_containing_remoteEngine.jar/-", "read";
 
-/* file permissions for the properties files */
-  permission java.io.FilePermission
-	     "/user_home/DatabaseUtils.props", "read";
-  permission java.io.FilePermission
-	     "/path_to_dir_containing_remoteEngine.jar/DatabaseUtils.props", "read";
-
 /* file permissions for downloading classes from client file url's */
 /*  permission java.io.FilePermission */
 /*	     "/joe user's path to weka classes/-", "read"; */
