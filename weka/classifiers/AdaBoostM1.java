@@ -57,7 +57,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class AdaBoostM1 extends DistributionClassifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -82,9 +82,6 @@ public class AdaBoostM1 extends DistributionClassifier
 
   /** Weight Threshold. The percentage of weight mass used in training */
   protected int m_WeightThreshold = 100;
-
-  /** The training data */
-  protected Instances m_Training;
 
   /** Debugging mode, gives extra output if true */
   protected boolean m_Debug;
@@ -456,7 +453,7 @@ public class AdaBoostM1 extends DistributionClassifier
   protected void buildClassifierUsingResampling(Instances data) 
     throws Exception {
 
-    Instances trainData, sample;
+    Instances trainData, sample, training;
     double epsilon, reweight, beta = 0, sumProbs;
     double oldSumOfWeights, newSumOfWeights;
     Evaluation evaluation;
@@ -471,10 +468,10 @@ public class AdaBoostM1 extends DistributionClassifier
     m_NumIterations = 0;
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
-    m_Training = new Instances(data, 0, numInstances);
-    sumProbs = m_Training.sumOfWeights();
-    for (int i = 0; i < m_Training.numInstances(); i++) {
-      m_Training.instance(i).setWeight(m_Training.instance(i).
+    training = new Instances(data, 0, numInstances);
+    sumProbs = training.sumOfWeights();
+    for (int i = 0; i < training.numInstances(); i++) {
+      training.instance(i).setWeight(training.instance(i).
 				      weight() / sumProbs);
     }
     
@@ -487,10 +484,10 @@ public class AdaBoostM1 extends DistributionClassifier
 
       // Select instances to train the classifier on
       if (m_WeightThreshold < 100) {
-	trainData = selectWeightQuantile(m_Training, 
+	trainData = selectWeightQuantile(training, 
 					 (double)m_WeightThreshold / 100);
       } else {
-	trainData = new Instances(m_Training);
+	trainData = new Instances(training);
       }
       
       // Resample
@@ -506,7 +503,7 @@ public class AdaBoostM1 extends DistributionClassifier
 	m_Classifiers[m_NumIterations].buildClassifier(sample);
 	evaluation = new Evaluation(data);
 	evaluation.evaluateModel(m_Classifiers[m_NumIterations], 
-				 m_Training);
+				 training);
 	epsilon = evaluation.errorRate();
 	resamplingIterations++;
       } while (Utils.eq(epsilon, 0) && 
@@ -529,8 +526,8 @@ public class AdaBoostM1 extends DistributionClassifier
       }
  
       // Update instance weights
-      oldSumOfWeights = m_Training.sumOfWeights();
-      Enumeration enum = m_Training.enumerateInstances();
+      oldSumOfWeights = training.sumOfWeights();
+      Enumeration enum = training.enumerateInstances();
       while (enum.hasMoreElements()) {
 	Instance instance = (Instance) enum.nextElement();
 	if (!Utils.eq(m_Classifiers[m_NumIterations].classifyInstance(instance), 
@@ -538,8 +535,8 @@ public class AdaBoostM1 extends DistributionClassifier
 	  instance.setWeight(instance.weight() * reweight);
       }
       // Renormalize weights
-      newSumOfWeights = m_Training.sumOfWeights();
-      enum = m_Training.enumerateInstances();
+      newSumOfWeights = training.sumOfWeights();
+      enum = training.enumerateInstances();
       while (enum.hasMoreElements()) {
 	Instance instance = (Instance) enum.nextElement();
 	instance.setWeight(instance.weight() * oldSumOfWeights 
@@ -559,7 +556,7 @@ public class AdaBoostM1 extends DistributionClassifier
   protected void buildClassifierWithWeights(Instances data) 
     throws Exception {
 
-    Instances trainData;
+    Instances trainData, training;
     double epsilon, reweight, beta = 0;
     double oldSumOfWeights, newSumOfWeights;
     Evaluation evaluation;
@@ -571,7 +568,7 @@ public class AdaBoostM1 extends DistributionClassifier
 
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
-    m_Training = new Instances(data, 0, numInstances);
+    training = new Instances(data, 0, numInstances);
     
     // Do boostrap iterations
     for (m_NumIterations = 0; m_NumIterations < m_Classifiers.length; 
@@ -581,10 +578,10 @@ public class AdaBoostM1 extends DistributionClassifier
       }
       // Select instances to train the classifier on
       if (m_WeightThreshold < 100) {
-	trainData = selectWeightQuantile(m_Training, 
+	trainData = selectWeightQuantile(training, 
 					 (double)m_WeightThreshold / 100);
       } else {
-	trainData = new Instances(m_Training, 0, numInstances);
+	trainData = new Instances(training, 0, numInstances);
       }
 
       // Build the classifier
@@ -592,7 +589,7 @@ public class AdaBoostM1 extends DistributionClassifier
 
       // Evaluate the classifier
       evaluation = new Evaluation(data);
-      evaluation.evaluateModel(m_Classifiers[m_NumIterations], m_Training);
+      evaluation.evaluateModel(m_Classifiers[m_NumIterations], training);
       epsilon = evaluation.errorRate();
 
       // Stop if error too small or error too big and ignore this model
@@ -611,8 +608,8 @@ public class AdaBoostM1 extends DistributionClassifier
       }
  
       // Update instance weights
-      oldSumOfWeights = m_Training.sumOfWeights();
-      Enumeration enum = m_Training.enumerateInstances();
+      oldSumOfWeights = training.sumOfWeights();
+      Enumeration enum = training.enumerateInstances();
       while (enum.hasMoreElements()) {
 	Instance instance = (Instance) enum.nextElement();
 	if (!Utils.eq(m_Classifiers[m_NumIterations]
@@ -621,8 +618,8 @@ public class AdaBoostM1 extends DistributionClassifier
 	  instance.setWeight(instance.weight() * reweight);
       }
       // Renormalize weights
-      newSumOfWeights = m_Training.sumOfWeights();
-      enum = m_Training.enumerateInstances();
+      newSumOfWeights = training.sumOfWeights();
+      enum = training.enumerateInstances();
       while (enum.hasMoreElements()) {
 	Instance instance = (Instance) enum.nextElement();
 	instance.setWeight(instance.weight() * oldSumOfWeights

@@ -31,7 +31,7 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class NaiveBayesSimple extends DistributionClassifier {
 
@@ -71,7 +71,7 @@ public class NaiveBayesSimple extends DistributionClassifier {
       throw new Exception("Naive Bayes: Class is numeric!");
     }
     
-    m_Instances = new Instances(instances, 0, 0);
+    m_Instances = new Instances(instances, 0);
     
     // Reserve space
     m_Counts = new double[instances.numClasses()]

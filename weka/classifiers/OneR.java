@@ -35,7 +35,7 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
 
@@ -44,8 +44,11 @@ public class OneR extends Classifier implements OptionHandler {
    */
   private class OneRRule {
 
-    /** A set of instances. */
-    private Instances m_instances;
+    /** The class attribute. */
+    private Attribute m_class;
+
+    /** The number of instances used for building the rule. */
+    private int m_numInst;
 
     /** Attribute to test */
     private Attribute m_attr; 
@@ -65,9 +68,10 @@ public class OneR extends Classifier implements OptionHandler {
     /**
      * Constructor for nominal attribute.
      */
-    public OneRRule(Instances data, Attribute attribute) {
+    public OneRRule(Instances data, Attribute attribute) throws Exception {
 
-      m_instances = data;
+      m_class = data.classAttribute();
+      m_numInst = data.numInstances();
       m_attr = attribute;
       m_correct = 0;
       m_classifications = new int[m_attr.numValues()];
@@ -76,9 +80,10 @@ public class OneR extends Classifier implements OptionHandler {
     /**
      * Constructor for numeric attribute.
      */
-    public OneRRule(Instances data, Attribute attribute, int nBreaks) {
+    public OneRRule(Instances data, Attribute attribute, int nBreaks) throws Exception {
 
-      m_instances = data;
+      m_class = data.classAttribute();
+      m_numInst = data.numInstances();
       m_attr = attribute;
       m_correct = 0;
       m_classifications = new int[nBreaks];
@@ -102,17 +107,12 @@ public class OneR extends Classifier implements OptionHandler {
 	  } else {
 	    text.append(">= " + m_breakpoints[v - 1]);
 	  }
-	  text.append("\t-> " + 
-		      m_instances.classAttribute().value(m_classifications[v]) 
-		      + "\n");
+	  text.append("\t-> " + m_class.value(m_classifications[v]) + "\n");
 	}
 	if (m_missingValueClass != -1) {
-	  text.append("\t?\t-> " + 
-		      m_instances.classAttribute().value(m_missingValueClass) 
-		      + "\n");
+	  text.append("\t?\t-> " + m_class.value(m_missingValueClass) + "\n");
 	}
-	text.append("(" + m_correct + "/" + m_instances.numInstances() +
-		    " instances correct)\n");
+	text.append("(" + m_correct + "/" + m_numInst + " instances correct)\n");
 	return text.toString();
       } catch (Exception e) {
 	return "Can't print OneR classifier!";
