@@ -15,12 +15,12 @@
  */
 
 /*
- * SearchAlgorithmTAN.java
+ * BayesNet.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
- 
- package weka.classifiers.bayes.net.search.score;
+
+package weka.classifiers.bayes.net.search.score;
 
 import java.util.Vector;
 import java.util.Enumeration;
@@ -29,92 +29,134 @@ import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 
 /** Search for TAN = Tree Augmented Naive Bayes network structure
- * 	N. Friedman, D. Geiger, M. Goldszmidt. 
- *	Bayesian Network Classifiers. 
- *	Machine Learning, 29: 131--163, 1997
- * 
+ *      N. Friedman, D. Geiger, M. Goldszmidt.
+ *      Bayesian Network Classifiers.
+ *      Machine Learning, 29: 131--163, 1997
+ *
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
+
 public class SearchAlgorithmTAN extends ScoreSearchAlgorithm {
 
 	/**
 	 * buildStructure determines the network structure/graph of the network
-	 * with Buntines greedy hill climbing algorithm, restricted by its initial
-	 * structure (which can be an empty graph, or a Naive Bayes graph.
+	 * using the maximimum weight spanning tree algorithm of Chow and Liu
+	 * 
 	 */
 	public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
-		super.buildStructure(bayesNet, instances);
+
 		m_bInitAsNaiveBayes = true;
 		m_nMaxNrOfParents = 2;
 		super.buildStructure(bayesNet, instances);
+		int      nNrOfAtts = instances.numAttributes();
+
+		// initialize as naive Bayes network
+		for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
+			if (iAttribute != instances.classIndex()) {
+				bayesNet.getParentSet(iAttribute).AddParent(instances.classIndex(), instances);
+			}
+		}
 
 		// determine base scores
 		double[] fBaseScores = new double[instances.numAttributes()];
-		int      nNrOfAtts = instances.numAttributes();
 
 		for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
 		  fBaseScores[iAttribute] = CalcNodeScore(iAttribute);
 		} 
 
+		//		// cache scores & whether adding an arc makes sense
+		double[][]  fScore = new double[nNrOfAtts][nNrOfAtts];
+
+		for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
+			for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
+				if (iAttributeHead != iAttributeTail) {
+					fScore[iAttributeHead][iAttributeTail] = CalcScoreWithExtraParent(iAttributeHead, iAttributeTail);
+				}
+			} 
+		}
+		
 		// TAN greedy search (not restricted by ordering like K2)
+		// 1. find strongest link
+		// 2. find remaining links by adding strongest link to already
+		//    connected nodes
+		// 3. assign direction to links
+		int nClassNode = instances.classIndex();
+		int [] link1 = new int [nNrOfAtts - 1];
+		int [] link2 = new int [nNrOfAtts - 1];
+		boolean [] linked = new boolean [nNrOfAtts];
+		// 1. find strongest link
+		int    nBestLinkNode1 = -1;
+		int    nBestLinkNode2 = -1;
+		double fBestDeltaScore = 0.0;
+		int iLinkNode1;
+		for (iLinkNode1 = 0; iLinkNode1 < nNrOfAtts; iLinkNode1++) {
+			if (iLinkNode1 != nClassNode) {
+			for (int iLinkNode2 = 0; iLinkNode2 < nNrOfAtts; iLinkNode2++) {
+				if ((iLinkNode1 != iLinkNode2) &&
+				    (iLinkNode2 != nClassNode) && (
+				    (nBestLinkNode1 == -1) || (fScore[iLinkNode1][iLinkNode2] - fBaseScores[iLinkNode1] > fBestDeltaScore)
+				)) {
+					fBestDeltaScore = fScore[iLinkNode1][iLinkNode2] - fBaseScores[iLinkNode1];
+					nBestLinkNode1 = iLinkNode2;
+					nBestLinkNode2 = iLinkNode1;
+			    } 
+			} 
+			}
+		}
+		link1[0] = nBestLinkNode1;
+		link2[0] = nBestLinkNode2;
+		linked[nBestLinkNode1] = true;
+		linked[nBestLinkNode2] = true;
+	
+		// 2. find remaining links by adding strongest link to already
+		//    connected nodes
+		for (int iLink = 1; iLink < nNrOfAtts - 2; iLink++) {
+			nBestLinkNode1 = -1;
+			for (iLinkNode1 = 0; iLinkNode1 < nNrOfAtts; iLinkNode1++) {
+				if (iLinkNode1 != nClassNode) {
+				for (int iLinkNode2 = 0; iLinkNode2 < nNrOfAtts; iLinkNode2++) {
+					if ((iLinkNode1 != iLinkNode2) &&
+					    (iLinkNode2 != nClassNode) && 
+					(linked[iLinkNode1] || linked[iLinkNode2]) &&
+					(!linked[iLinkNode1] || !linked[iLinkNode2]) &&
+					(
+					(nBestLinkNode1 == -1) || (fScore[iLinkNode1][iLinkNode2] - fBaseScores[iLinkNode1] > fBestDeltaScore)
+					)) {
+						fBestDeltaScore = fScore[iLinkNode1][iLinkNode2] - fBaseScores[iLinkNode1];
+						nBestLinkNode1 = iLinkNode2;
+						nBestLinkNode2 = iLinkNode1;
+					} 
+				} 
+				}
+			}
 
-		// cache scores & whether adding an arc makes sense
-		boolean[][] bAddArcMakesSense = new boolean[nNrOfAtts][nNrOfAtts];
-		double[][] fScore = new double[nNrOfAtts][nNrOfAtts];
-
-		for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; 
-		 iAttributeHead++) {
-		  if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() < m_nMaxNrOfParents) {
-
-		// only bother maintaining scores if adding parent makes sense
-		for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
-		  bAddArcMakesSense[iAttributeHead][iAttributeTail] = 
-			AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail);
-
-		  if (bAddArcMakesSense[iAttributeHead][iAttributeTail]) {
-			fScore[iAttributeHead][iAttributeTail] = 
-				CalcScoreWithExtraParent(iAttributeHead, iAttributeTail);
-		  } 
-		} 
-		  } 
-		} 
-
-		// go do the hill climbing
-	  for (int iArc = 0; iArc < nNrOfAtts - 1; iArc++) {
-		  int    nBestAttributeTail = -1;
-		  int    nBestAttributeHead = -1;
-		  double fBestDeltaScore = 0.0;
-
-		  // find best arc to add
-		  for (int iAttributeHead = 0; iAttributeHead < nNrOfAtts; iAttributeHead++) {
-		if (bayesNet.getParentSet(iAttributeHead).GetNrOfParents() < m_nMaxNrOfParents) {
-		  for (int iAttributeTail = 0; iAttributeTail < nNrOfAtts; iAttributeTail++) {
-			if (bAddArcMakesSense[iAttributeHead][iAttributeTail]) {
-			  if ((nBestAttributeTail == -1) || 
-			  (fScore[iAttributeHead][iAttributeTail] - fBaseScores[iAttributeHead] > fBestDeltaScore)) {
-			if (AddArcMakesSense(bayesNet, instances, iAttributeHead, iAttributeTail)) {
-			  fBestDeltaScore = fScore[iAttributeHead][iAttributeTail] 
-						- fBaseScores[iAttributeHead];
-			  nBestAttributeTail = iAttributeTail;
-			  nBestAttributeHead = iAttributeHead;
+			link1[iLink] = nBestLinkNode1;
+			link2[iLink] = nBestLinkNode2;
+			linked[nBestLinkNode1] = true;
+			linked[nBestLinkNode2] = true;
+		}
+		
+		
+		System.out.println();	
+	for (int i = 0; i < 3; i++) {
+		System.out.println(link1[i] + " " + link2[i]);
+	}
+		// 3. assign direction to links
+		boolean [] hasParent = new boolean [nNrOfAtts];
+		for (int iLink = 0; iLink < nNrOfAtts - 2; iLink++) {
+			if (!hasParent[link1[iLink]]) {
+				bayesNet.getParentSet(link1[iLink]).AddParent(link2[iLink], instances);
+				hasParent[link1[iLink]] = true;
 			} else {
-			  bAddArcMakesSense[iAttributeHead][iAttributeTail] = false;
-			} 
-			  } 
-			} 
-		  } 
-		} 
-		  } 
+				if (hasParent[link2[iLink]]) {
+					throw new Exception("Bug condition found: too many arrows");
+				}
+				bayesNet.getParentSet(link2[iLink]).AddParent(link1[iLink], instances);
+				hasParent[link2[iLink]] = true;
+			}
+		}
 
-		  if (nBestAttributeHead >= 0) {
-
-		// update network structure
-		bayesNet.getParentSet(nBestAttributeHead).AddParent(nBestAttributeTail, 
-							   instances);
-
-		  } 
-		} 
 	} // buildStructure
 
 
