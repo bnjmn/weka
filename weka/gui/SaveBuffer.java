@@ -100,7 +100,7 @@ public class SaveBuffer {
 					    null,
 					    options);
 	  JDialog dialog = jop.createDialog(m_parentComponent, "File query");
-	  dialog.show();
+	  dialog.setVisible(true);
 	  Object selectedValue = jop.getValue();
 	  if (selectedValue == null) {
 	  } else {

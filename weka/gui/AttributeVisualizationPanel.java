@@ -65,7 +65,7 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
@@ -789,7 +789,7 @@ public class AttributeVisualizationPanel extends JPanel {
       jf.getContentPane().setLayout( new BorderLayout() );
       jf.getContentPane().add(ap, BorderLayout.CENTER );
       jf.setDefaultCloseOperation( jf.EXIT_ON_CLOSE );
-      jf.show();
+      jf.setVisible(true);
     }
     else
       System.out.println("Usage: java AttributeVisualizationPanel [arff file] [index of attribute]");

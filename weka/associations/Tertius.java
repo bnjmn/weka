@@ -115,7 +115,7 @@ import java.awt.event.ActionEvent;
  * Set output of current values. (default: 0) <p>
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class Tertius extends Associator implements OptionHandler, Runnable {
@@ -1625,7 +1625,7 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
       valuesFrame.add(stop, BorderLayout.SOUTH);
       valuesFrame.add(valuesLabel, BorderLayout.NORTH);
       valuesFrame.pack();
-      valuesFrame.show();
+      valuesFrame.setVisible(true);
     } else if (m_printValues == OUT) {
       System.out.println("Best and worst current values:");
     }

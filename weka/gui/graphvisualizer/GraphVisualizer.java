@@ -1268,7 +1268,7 @@ public class GraphVisualizer extends JPanel implements GraphConstants, LayoutCom
 		   
 		   jd.getContentPane().setLayout( new BorderLayout() );
 		   jd.getContentPane().add(js, BorderLayout.CENTER);
-		   jd.show();
+		   jd.setVisible(true);
 		   
 		   return;
 	       }
@@ -1357,6 +1357,6 @@ public class GraphVisualizer extends JPanel implements GraphConstants, LayoutCom
 	jf.setDefaultCloseOperation( jf.EXIT_ON_CLOSE );
 	jf.setSize(800,600);
 	//jf.pack();
-	jf.show();
+	jf.setVisible(true);
     }
 }
