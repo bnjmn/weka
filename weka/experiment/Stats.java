@@ -24,7 +24,7 @@ import weka.core.Utils;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Stats {
   
@@ -56,10 +56,21 @@ public class Stats {
    */
   public void add(double value) {
 
-    sum += value;
-    sumSq += value * value;
-    count ++;
-    if (count == 1) {
+    add(value, 1);
+  }
+
+  /**
+   * Adds a value that has been seen n times to the observed values
+   *
+   * @param value the observed value
+   * @param n the number of times to add value
+   */
+  public void add(double value, double n) {
+
+    sum += value * n;
+    sumSq += value * value * n;
+    count += n;
+    if (count == n) {
       min = max = value;
     } else if (value < min) {
       min = value;

@@ -41,7 +41,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class InstanceQuery extends DatabaseUtils {
 
@@ -157,6 +157,10 @@ public class InstanceQuery extends DatabaseUtils {
     FastVector instances = new FastVector();
     int rowCount = 0;
     while(rs.next()) {
+      if (rowCount % 100 == 0) {
+	System.err.print("read " + rowCount + " instances \r");
+	System.err.flush();
+      }
       Instance newInst = new Instance(numAttributes);
       for(int i = 1; i <= numAttributes; i++) {
 	switch (md.getColumnType(i)) {
