@@ -81,7 +81,12 @@ public class PrincipalComponents extends AttributeTransformer {
    */
   public String globalInfo() {
     return "Performs a principal components analysis and transformation of "
-      +"the data.";
+      +"the data. Use in conjunction with a Ranker search. Dimensionality "
+      +"reduction can be accomplished by setting an appropriate threshold "
+      +"in Ranker. One heuristic is to choose enough eigenvectors ("
+      +"transformed attributes) to account for around 95% of the variance "
+      +"in the original data. This can be done by setting a threshold of "
+      +"0.04 for the Ranker search.";
   }
 
   /**
@@ -355,7 +360,9 @@ public class PrincipalComponents extends AttributeTransformer {
 				       5,3)
 			+m_trainInstances.attribute(j-1).name());
 	 if (j != m_numAttribs) {
-	   attName.append("+");
+	   if (m_eigenvectors[j+1][m_sortedEigens[i]] >= 0) {
+	     attName.append("+");
+	   }
 	 }
        }
        attributes.addElement(new Attribute(attName.toString()));
