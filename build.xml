@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.20 $
+   $Revision: 1.21 $
   ===========================================================================
 -->
 
@@ -282,10 +282,10 @@
   <target name = "init_build_from_cvs_checkout"
    depends="init_compile, init_dist">
      <cvspass cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password=""/>
-     <cvs command="checkout -r ${tag}" 
+     <cvs command="checkout -P -r ${tag}" 
       cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="weka" dest="."/>
-     <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="tests" dest="."/>
-      <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="wekadocs" dest="."/>
+     <cvs command="checkout -P -r ${tag}" cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="tests" dest="."/>
+      <cvs command="checkout -P -r ${tag}" cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="wekadocs" dest="."/>
   </target>
 
   <!-- Initialization for build from cvs export. User must supply revision tag to export by specifying -Dtag=tag_name_of_release when starting ant -->
