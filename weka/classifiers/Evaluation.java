@@ -62,7 +62,7 @@ import weka.estimators.*;
  * Outputs statistics only, not the classifier. <p>
  * 
  * -i <br>
- * Outputs information-retrieval statistics for two-class problems. <p>
+ * Outputs information-retrieval statistics per class. <p>
  *
  * -k <br>
  * Outputs information-theoretic statistics. <p>
@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.25 $
+ * @version  $Revision: 1.26 $
   */
 public class Evaluation implements Summarizable {
 
@@ -379,7 +379,7 @@ public class Evaluation implements Summarizable {
    * Outputs statistics only, not the classifier. <p>
    * 
    * -i <br>
-   * Outputs information-retrieval statistics for two-class problems. <p>
+   * Outputs detailed information-retrieval statistics per class. <p>
    *
    * -k <br>
    * Outputs information-theoretic statistics. <p>
@@ -476,7 +476,7 @@ public class Evaluation implements Summarizable {
    * Outputs statistics only, not the classifier. <p>
    * 
    * -i <br>
-   * Outputs information-retrieval statistics for two-class problems. <p>
+   * Outputs detailed information-retrieval statistics per class. <p>
    *
    * -k <br>
    * Outputs information-theoretic statistics. <p>
@@ -510,7 +510,7 @@ public class Evaluation implements Summarizable {
     boolean IRstatistics = false, noOutput = false,
       printClassifications = false, trainStatistics = true,
       printMargins = false, printComplexityStatistics = false,
-      printGraph = false, ROCStatistics = false, printSource = false;
+      printGraph = false, classStatistics = false, printSource = false;
     Evaluation trainingEvaluation, testingEvaluation;
     StringBuffer text = new StringBuffer();
     BufferedReader trainReader = null, testReader = null;
@@ -644,14 +644,13 @@ public class Evaluation implements Summarizable {
 	  }
 	}
       }
-      IRstatistics = Utils.getFlag('i', options);
+      classStatistics = Utils.getFlag('i', options);
       noOutput = Utils.getFlag('o', options);
       trainStatistics = !Utils.getFlag('v', options);
       printComplexityStatistics = Utils.getFlag('k', options);
       printClassifications = Utils.getFlag('p', options);
       printMargins = Utils.getFlag('r', options);
       printGraph = Utils.getFlag('g', options);
-      ROCStatistics = Utils.getFlag('y', options);
       sourceClass = Utils.getOption('z', options);
       printSource = (sourceClass.length() != 0);
       
@@ -759,6 +758,11 @@ public class Evaluation implements Summarizable {
       text.append("\n" + classifier.toString() + "\n");
     }
 
+    if (!printMargins && (costMatrix != null)) {
+      text.append("\n=== Evaluation Cost Matrix ===\n\n")
+        .append(costMatrix.toString());
+    }
+
     // Compute error estimate from training data
     if ((trainStatistics) &&
 	(trainFileName.length() != 0)) {
@@ -796,18 +800,13 @@ public class Evaluation implements Summarizable {
 	return trainingEvaluation.toCumulativeMarginDistributionString();
       } else {
 	text.append(trainingEvaluation.
-		    toSummaryString("\n=== Error on training" + 
+		    toSummaryString("\n\n=== Error on training" + 
 				    " data ===\n", printComplexityStatistics));
 	if (template.classAttribute().isNominal()) {
-	  if (ROCStatistics) {
+	  if (classStatistics) {
 	    text.append("\n\n" + trainingEvaluation.toClassDetailsString());
 	  }
 	  text.append("\n\n" + trainingEvaluation.toMatrixString());
-	  if (IRstatistics) {
-	    text.append("\n\n" + trainingEvaluation.
-			toInformationRetrievalStatisticsString() + 
-			"\n");
-	  }
 	}
       }
     }
@@ -836,25 +835,21 @@ public class Evaluation implements Summarizable {
       testingEvaluation.
       crossValidateModel(classifier, train, folds);
       if (template.classAttribute().isNumeric()) {
-	text.append("\n\n" + testingEvaluation.
+	text.append("\n\n\n" + testingEvaluation.
 		    toSummaryString("=== Cross-validation ===\n",
 				    printComplexityStatistics));
       } else {
-	text.append("\n\n" + testingEvaluation.
+	text.append("\n\n\n" + testingEvaluation.
 		    toSummaryString("=== Stratified " + 
 				    "cross-validation ===\n",
 				    printComplexityStatistics));
       }
     }
     if (template.classAttribute().isNominal()) {
-      if (ROCStatistics) {
+      if (classStatistics) {
 	text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
       text.append("\n\n" + testingEvaluation.toMatrixString());
-      if (IRstatistics) {
-	text.append("\n\n" + testingEvaluation.
-		    toInformationRetrievalStatisticsString() + "\n");
-      }
     }
     return text.toString();
   }
@@ -1368,60 +1363,6 @@ public class Evaluation implements Summarizable {
     return result;
   }
 
-  /**
-   * Calls toInformationRetrievalStatisticsString() with a 
-   * default title.
-   *
-   * @exception Exception if the dataset is not a two-class dataset.
-   */
-  public String toInformationRetrievalStatisticsString() 
-       throws Exception {
-
-    if (m_NumClasses != 2) {
-      throw 
-      new Exception("Can only compute IR statistics for " + 
-		      "2-class problems!");
-    }
-    return toInformationRetrievalStatisticsString("=== IR " + 
-						  "statistics ===\n");
-  }
-
-  /**
-   * Outputs information retrieval statistics (precision, recall,
-   * f-measure) for two-class problems.
-   *
-   * @param title the title for the statistics
-   * @return the summary as a String
-   * @exception Exception if the dataset is not a two-class dataset.
-   */
-  public String toInformationRetrievalStatisticsString(String title) 
-       throws Exception{
-
-    double precision, recall, f_measure;
-    StringBuffer text = new StringBuffer();
-    int maj, min;
-    
-    if (m_NumClasses != 2) {
-      throw new Exception("Can only compute IR statistics " + 
-			  "for 2-class problems!");
-    }
-    if (Utils.gr(m_ConfusionMatrix[1][1] + m_ConfusionMatrix[1][0],
-		 m_ConfusionMatrix[0][0] + m_ConfusionMatrix[0][1])) {
-      maj = 1; min = 0;
-    } else {
-      maj = 0; min = 1;
-    }
-    precision = m_ConfusionMatrix[min][min] / 
-      (m_ConfusionMatrix[min][min] + m_ConfusionMatrix[maj][min]);
-    recall = m_ConfusionMatrix[min][min] /
-      (m_ConfusionMatrix[min][min] + m_ConfusionMatrix[min][maj]);
-    f_measure = 2 * precision * recall / (precision + recall);
-    text.append("Precision " + Utils.doubleToString(precision,7,2) + "\n");
-    text.append("Recall    " + Utils.doubleToString(recall,7,2) + "\n");
-    text.append("F-measure " + Utils.doubleToString(f_measure,7,2));
-    
-    return text.toString();
-  }
 
   /**
    * Calls toSummaryString() with no title and no complexity stats
@@ -1571,12 +1512,10 @@ public class Evaluation implements Summarizable {
   public String toMatrixString(String title) throws Exception {
 
     StringBuffer text = new StringBuffer();
-    double maxval;
     char [] IDChars = {'a','b','c','d','e','f','g','h','i','j',
 		       'k','l','m','n','o','p','q','r','s','t',
 		       'u','v','w','x','y','z'};
     int IDWidth;
-    int i, j;
     boolean fractional = false;
 
     if (!m_ClassIsNominal) {
@@ -1585,9 +1524,13 @@ public class Evaluation implements Summarizable {
 
     // Find the maximum value in the matrix
     // and check for fractional display requirement 
-    for(maxval = 0, i = 0; i < m_NumClasses; i++) {
-      for(j = 0; j < m_NumClasses; j++) {
+    double maxval = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      for(int j = 0; j < m_NumClasses; j++) {
 	double current = m_ConfusionMatrix[i][j];
+        if (current < 0) {
+          current *= -10;
+        }
 	if (current > maxval) {
 	  maxval = current;
 	}
@@ -1603,52 +1546,42 @@ public class Evaluation implements Summarizable {
 				 + (fractional ? 3 : 0)),
 			     (int)(Math.log(m_NumClasses) / 
 				   Math.log(IDChars.length)));
-    text.append(title + "\n");
-    for(i = 0; i < m_NumClasses; i++) {
+    text.append(title).append("\n");
+    for(int i = 0; i < m_NumClasses; i++) {
       if (fractional) {
-	text.append(" " + num2ShortID(i,IDChars,IDWidth - 3) + "   ");
+	text.append(" ").append(num2ShortID(i,IDChars,IDWidth - 3))
+          .append("   ");
       } else {
-	text.append(" " + num2ShortID(i,IDChars,IDWidth));
+	text.append(" ").append(num2ShortID(i,IDChars,IDWidth));
       }
     }
     text.append("   <-- classified as\n");
-    for(i = 0; i< m_NumClasses; i++) { 
-      for(j = 0; j < m_NumClasses; j++) {
-	text.append(" " + 
+    for(int i = 0; i< m_NumClasses; i++) { 
+      for(int j = 0; j < m_NumClasses; j++) {
+	text.append(" ").append(
 		    Utils.doubleToString(m_ConfusionMatrix[i][j],
 					 IDWidth,
 					 (fractional ? 2 : 0)));
       }
-      text.append(" | " + num2ShortID(i,IDChars,IDWidth) + " = " 
-		  + m_ClassNames[i]);
-      if (i != m_NumClasses - 1) {
-	text.append("\n");
-      }
+      text.append(" | ").append(num2ShortID(i,IDChars,IDWidth))
+        .append(" = ").append(m_ClassNames[i]).append("\n");
     }
     return text.toString();
   }
 
   public String toClassDetailsString() throws Exception {
 
-    return toClassDetailsString("=== Accuracy By Class ===\n");
+    return toClassDetailsString("=== Detailed Accuracy By Class ===\n");
   }
 
   /**
-   * For the following confusion matrix<br>
-   *  <pre>
-   * A B C
-   * 5 1 0  A
-   * 2 7 1  B
-   * 1 1 9  C
-   * </pre>
-   * Will print out a breakdown of the accuracy for each class, eg:<br>
-   * <pre>
-   *   TP    FP  Class
-   * 0.85  0.14   A
-   * 0.70  0.11   B
-   * 0.82  0.06   C
-   * </pre>
-   * Should be useful for ROC curves.
+   * Generates a breakdown of the accuracy for each class,
+   * incorporating various information-retrieval statistics, such as
+   * true/false positive rate, precision/recall/F-Measure.  Should be
+   * useful for ROC curves, recall/precision curves.  
+   * 
+   * @param title the title to prepend the stats string with 
+   * @return the statistics presented as a string
    */
   public String toClassDetailsString(String title) throws Exception {
 
@@ -1656,10 +1589,20 @@ public class Evaluation implements Summarizable {
       throw new Exception("Evaluation: No confusion matrix possible!");
     }
     StringBuffer text = new StringBuffer(title 
-					 + "\nTruePos  FalsePos  Class\n");
+					 + "\nTP Rate   FP Rate"
+                                         + "   Precision   Recall"
+                                         + "  F-Measure   Class\n");
     for(int i = 0; i < m_NumClasses; i++) {
-      text.append(Utils.doubleToString(truePositives(i), 7, 3)).append("   ");
-      text.append(Utils.doubleToString(falsePositives(i), 7, 3)).append("  ");
+      text.append(Utils.doubleToString(truePositiveRate(i), 7, 3))
+        .append("   ");
+      text.append(Utils.doubleToString(falsePositiveRate(i), 7, 3))
+        .append("    ");
+      text.append(Utils.doubleToString(precision(i), 7, 3))
+        .append("   ");
+      text.append(Utils.doubleToString(recall(i), 7, 3))
+        .append("   ");
+      text.append(Utils.doubleToString(fMeasure(i), 7, 3))
+        .append("    ");
       text.append(m_ClassNames[i]).append('\n');
     }
     return text.toString();
@@ -1677,7 +1620,7 @@ public class Evaluation implements Summarizable {
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
-  public double truePositives(int classIndex) {
+  public double truePositiveRate(int classIndex) {
 
     double correct = 0, total = 0;
     for (int j = 0; j < m_NumClasses; j++) {
@@ -1704,7 +1647,7 @@ public class Evaluation implements Summarizable {
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
-  public double falsePositives(int classIndex) {
+  public double falsePositiveRate(int classIndex) {
 
     double incorrect = 0, total = 0;
     for (int i = 0; i < m_NumClasses; i++) {
@@ -1721,6 +1664,73 @@ public class Evaluation implements Summarizable {
       return 0;
     }
     return incorrect / total;
+  }
+
+  /**
+   * Calculate the recall with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * correctly classified positives
+   * ------------------------------
+   *       total positives
+   * </pre><p>
+   * (Which is also the same as the truePositiveRate.)
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the recall
+   */
+  public double recall(int classIndex) {
+
+    return truePositiveRate(classIndex);
+  }
+
+  /**
+   * Calculate the precision with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * correctly classified positives
+   * ------------------------------
+   *  total predicted as positive
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the precision
+   */
+  public double precision(int classIndex) {
+
+    double correct = 0, total = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      if (i == classIndex) {
+	correct += m_ConfusionMatrix[i][classIndex];
+      }
+      total += m_ConfusionMatrix[i][classIndex];
+    }
+    if (total == 0) {
+      return 0;
+    }
+    return correct / total;
+  }
+
+  /**
+   * Calculate the F-Measure with respect to a particular class. 
+   * This is defined as<p>
+   * <pre>
+   * 2 * recall * precision
+   * ----------------------
+   *   recall + precision
+   * </pre>
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the F-Measure
+   */
+  public double fMeasure(int classIndex) {
+
+    double precision = precision(classIndex);
+    double recall = recall(classIndex);
+    if ((precision + recall) == 0) {
+      return 0;
+    }
+    return 2 * precision * recall / (precision + recall);
   }
 
   /**
@@ -1911,8 +1921,8 @@ public class Evaluation implements Summarizable {
     optionsText.append("-t <name of training file>\n");
     optionsText.append("\tSets training file.\n");
     optionsText.append("-T <name of test file>\n");
-    optionsText.append("\tSets test file. If missing, a cross-validation\n");
-    optionsText.append("\twill be performed on the training data.\n");
+    optionsText.append("\tSets test file. If missing, a cross-validation");
+    optionsText.append(" will be performed on the training data.\n");
     optionsText.append("-c <class index>\n");
     optionsText.append("\tSets index of class attribute (default: last).\n");
     optionsText.append("-x <number of folds>\n");
@@ -1930,17 +1940,14 @@ public class Evaluation implements Summarizable {
     optionsText.append("-o\n");
     optionsText.append("\tOutputs statistics only, not the classifier.\n");
     optionsText.append("-i\n");
-    optionsText.append("\tOutputs information retrieval statistics for\n");
-    optionsText.append("\ttwo-class problems.\n");
+    optionsText.append("\tOutputs detailed information-retrieval");
+    optionsText.append(" statistics for each class.\n");
     optionsText.append("-k\n");
     optionsText.append("\tOutputs information-theoretic statistics.\n");
     optionsText.append("-p\n");
     optionsText.append("\tOnly outputs predictions for test instances.\n");
     optionsText.append("-r\n");
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
-    optionsText.append("-y\n");
-    optionsText.append("\tOutputs detailed class breakdown.\n");
-    optionsText.append("\tyy? y not?\n");
     if (classifier instanceof Sourcable) {
       optionsText.append("-z <class name>\n");
       optionsText.append("\tOnly outputs the source representation"
