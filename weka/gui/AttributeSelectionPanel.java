@@ -42,7 +42,7 @@ import javax.swing.BorderFactory;
  * classification).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -308,6 +308,7 @@ public class AttributeSelectionPanel extends JPanel {
       tcm.getColumn(2).setMinWidth(100);
     } else {
       m_Model.setInstances(newInstances);
+      m_Table.clearSelection();
     }
     m_IncludeAll.setEnabled(true);
     m_RemoveAll.setEnabled(true);
