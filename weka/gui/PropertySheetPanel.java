@@ -71,7 +71,7 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -226,7 +226,7 @@ public class PropertySheetPanel extends JPanel
 	    JPanel jp = new JPanel();
 	    jp.setBorder(BorderFactory.createCompoundBorder(
 			 BorderFactory.createTitledBorder("About"),
-			 BorderFactory.createEmptyBorder(0, 5, 5, 5)
+			 BorderFactory.createEmptyBorder(5, 5, 5, 5)
 		 ));
 	    jp.setLayout(new BorderLayout());
 	    jp.add(jt, BorderLayout.CENTER);
@@ -300,11 +300,13 @@ public class PropertySheetPanel extends JPanel
 	  // If it's a user-defined property we give a warning.
 	  String getterClass = m_Properties[i].getReadMethod()
 	    .getDeclaringClass().getName();
+	  /*
 	  if (getterClass.indexOf("java.") != 0) {
 	    System.err.println("Warning: Can't find public property editor"
 			       + " for property \"" + name + "\" (class \""
 			       + type.getName() + "\").  Skipping.");
 	  }
+	  */
 	  continue;
 	}
 	if (editor instanceof GenericObjectEditor) {
@@ -316,10 +318,12 @@ public class PropertySheetPanel extends JPanel
 	  // If it's a user-defined property we give a warning.
 	  String getterClass = m_Properties[i].getReadMethod()
 	    .getDeclaringClass().getName();
+	  /*
 	  if (getterClass.indexOf("java.") != 0) {
 	    System.err.println("Warning: Property \"" + name 
 			       + "\" has null initial value.  Skipping.");
 	  }
+	  */
 	  continue;
 	}
 
