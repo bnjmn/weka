@@ -26,6 +26,7 @@ import weka.core.Utils;
 import weka.core.Range;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.AttributeTransformer;
 import weka.attributeSelection.AttributeSelection;
 import weka.filters.Filter;
 import weka.gui.Logger;
@@ -80,7 +81,11 @@ import javax.swing.JFrame;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.Point;
+import java.awt.Dimension;
 
 /** 
  * This panel allows the user to select and configure an attribute
@@ -93,7 +98,7 @@ import java.awt.Point;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -150,6 +155,10 @@ public class AttributeSelectionPanel extends JPanel {
   /** Click to save the output associated with the currently selected result */
   protected JButton m_SaveOutBut = new JButton("Save Output");
 
+  /** Stop the class combo from taking up to much space */
+  private Dimension COMBO_SIZE = new Dimension(150, m_SaveOutBut
+					       .getPreferredSize().height);
+
   /**
    * Alters the enabled/disabled status of elements associated with each
    * radio button
@@ -165,6 +174,12 @@ public class AttributeSelectionPanel extends JPanel {
 
   /** Click to stop a running classifier */
   protected JButton m_StopBut = new JButton("Stop");
+
+  /** Click to visualize data transformed by attribute transformers */
+  protected JButton m_VisualizeBut = new JButton("Visualize");
+
+  /** The current visualization object */
+  protected VisualizePanel m_CurrentVis = null;
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -218,6 +233,7 @@ public class AttributeSelectionPanel extends JPanel {
     m_AttributeEvaluatorEditor.
       addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
+	updateRadioLinks();
 	repaint();
       }
     });
@@ -240,6 +256,12 @@ public class AttributeSelectionPanel extends JPanel {
     m_StopBut.setToolTipText("Stops a attribute selection task");
     m_SaveOutBut.setToolTipText("Save the selected attribute selection output "
 				+"to a file");
+    m_VisualizeBut.setToolTipText("Visualize transformed data");
+    
+    m_ClassCombo.setPreferredSize(COMBO_SIZE);
+    m_ClassCombo.setMaximumSize(COMBO_SIZE);
+    m_ClassCombo.setMinimumSize(COMBO_SIZE);
+    
     m_ClassCombo.setEnabled(false);
     m_TrainBut.setSelected(true);
     updateRadioLinks();
@@ -250,6 +272,7 @@ public class AttributeSelectionPanel extends JPanel {
     m_TrainBut.addActionListener(m_RadioListener);
     m_CVBut.addActionListener(m_RadioListener);
 
+    m_VisualizeBut.setEnabled(false);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_SaveOutBut.setEnabled(false);
@@ -268,6 +291,25 @@ public class AttributeSelectionPanel extends JPanel {
 	  saveBuffer();
 	}
       });
+    m_VisualizeBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  visualize();
+	}
+      });
+
+    m_History.getSelectionModel()
+      .addListSelectionListener(new ListSelectionListener() {
+	  public void valueChanged(ListSelectionEvent e) {
+	    if (!e.getValueIsAdjusting()) {
+	      ListSelectionModel lm = (ListSelectionModel) e.getSource();
+	      if (m_History.getSelectedObject() != null) {
+		m_VisualizeBut.setEnabled(true);
+	      } else {
+		m_VisualizeBut.setEnabled(false);
+	      }
+	    }
+	  }
+	});
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -356,7 +398,8 @@ public class AttributeSelectionPanel extends JPanel {
 
     JPanel vPl = new JPanel();
     vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    vPl.setLayout(new GridLayout(1,1,5,5));
+    vPl.setLayout(new GridLayout(1,2,5,5));
+    vPl.add(m_VisualizeBut);
     vPl.add(m_SaveOutBut);
     buttons.add(vPl);
     
@@ -384,18 +427,18 @@ public class AttributeSelectionPanel extends JPanel {
     mondo.setLayout(gbL);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 0;     gbC.gridx = 0;
+    gbC.gridy = 0;     gbC.gridx = 0; gbC.weightx = 0;
     gbL.setConstraints(p2, gbC);
     mondo.add(p2);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 1;     gbC.gridx = 0;
+    gbC.gridy = 1;     gbC.gridx = 0; gbC.weightx = 0;
     gbL.setConstraints(buttons, gbC);
     mondo.add(buttons);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
-    gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
+    gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0; gbC.weighty = 100;
     gbL.setConstraints(m_History, gbC);
     mondo.add(m_History);
     gbC = new GridBagConstraints();
@@ -416,10 +459,22 @@ public class AttributeSelectionPanel extends JPanel {
    * Updates the enabled status of the input fields and labels.
    */
   protected void updateRadioLinks() {
+    m_CVBut.setEnabled(true);
     m_CVText.setEnabled(m_CVBut.isSelected());
     m_CVLab.setEnabled(m_CVBut.isSelected());
     m_SeedText.setEnabled(m_CVBut.isSelected());
     m_SeedLab.setEnabled(m_CVBut.isSelected());
+    
+    if (m_AttributeEvaluatorEditor.getValue() 
+	instanceof AttributeTransformer) {
+      m_CVBut.setSelected(false);
+      m_CVBut.setEnabled(false);
+      m_CVText.setEnabled(false);
+      m_CVLab.setEnabled(false);
+      m_SeedText.setEnabled(false);
+      m_SeedLab.setEnabled(false);
+      m_TrainBut.setSelected(true);
+    }
   }
   
   /**
@@ -456,7 +511,11 @@ public class AttributeSelectionPanel extends JPanel {
       default:
 	type = "(???) ";
       }
-      attribNames[i] = type + m_Instances.attribute(i).name();
+      String attnm = m_Instances.attribute(i).name();
+      /* if (attnm.length() > 25) {
+	attnm = attnm.substring(0,25)+"...";
+	} */
+      attribNames[i] = type + attnm;
     }
     m_StartBut.setEnabled(m_RunThread == null);
     m_StopBut.setEnabled(m_RunThread != null);
@@ -613,6 +672,19 @@ public class AttributeSelectionPanel extends JPanel {
 	    m_Log.logMessage(ex.getMessage());
 	    m_Log.statusMessage("See error log");
 	  } finally {
+	    if (evaluator instanceof AttributeTransformer) {
+	      m_CurrentVis = new VisualizePanel();
+	      try {
+		Instances transformed = 
+		  ((AttributeTransformer)evaluator).getTransformedData();
+		m_CurrentVis.setInstances(transformed);
+		m_CurrentVis.setColourIndex(transformed.classIndex());
+		m_CurrentVis.setName(name+" ("+inst.relationName()+")");
+		m_History.addObject(name, m_CurrentVis);
+		m_VisualizeBut.setEnabled(true);
+	      } catch (Exception ex) {
+	      }
+	    }
 	    if (isInterrupted()) {
 	      m_Log.logMessage("Interrupted " + ename+" "+sname);
 	      m_Log.statusMessage("See error log");
@@ -655,6 +727,28 @@ public class AttributeSelectionPanel extends JPanel {
       if (m_SaveOut.save(sb)) {
 	m_Log.logMessage("Save succesful.");
       }
+    }
+  }
+
+  protected void visualize() {
+    final VisualizePanel sp;
+    sp = (VisualizePanel)m_History.getSelectedObject();
+
+    if (sp != null) {
+      String plotName = sp.getName();
+      final javax.swing.JFrame jf = 
+	new javax.swing.JFrame("Weka Attribute Selection Visualize: "
+			       +plotName);
+      jf.setSize(500,400);
+      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().add(sp, BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    jf.dispose();
+	  }
+	});
+
+      jf.setVisible(true);
     }
   }
 
