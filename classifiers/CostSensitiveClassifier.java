@@ -46,7 +46,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CostSensitiveClassifier extends Classifier
   implements OptionHandler {
@@ -293,6 +293,7 @@ public class CostSensitiveClassifier extends Classifier
     } else {
       m_OnDemandDirectory = new File(newDir.getParent());
     }
+    m_MatrixSource = MATRIX_ON_DEMAND;
   }
 
   /**
@@ -372,6 +373,7 @@ public class CostSensitiveClassifier extends Classifier
   public void setCostMatrix(CostMatrix newCostMatrix) {
     
     m_CostMatrix = newCostMatrix;
+    m_MatrixSource = MATRIX_SUPPLIED;
   }
   
   /**
