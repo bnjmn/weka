@@ -17,7 +17,7 @@ package weka.core;
  * @author wolfgang.hoschek@cern.ch
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Statistics {
 
@@ -761,7 +761,7 @@ public class Statistics {
    * @param bb the beta parameter of the beta distribution.
    * @param xx the integration end point.
    */
-  static double incompleteBeta( double aa, double bb, double xx ) throws ArithmeticException {
+  public static double incompleteBeta( double aa, double bb, double xx ) throws ArithmeticException {
 
     double a, b, t, x, xc, w, y;
     boolean flag;
