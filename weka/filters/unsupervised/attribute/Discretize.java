@@ -48,7 +48,7 @@ import weka.core.*;
  *
  * -R col1,col2-col4,... <br>
  * Specifies list of columns to Discretize. First
- * and last are valid indexes. (default: none) <p>
+ * and last are valid indexes. (default: first-last) <p>
  *
  * -V <br>
  * Invert matching sense.<p>
@@ -58,7 +58,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Discretize extends Filter 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
@@ -115,7 +115,7 @@ public class Discretize extends Filter
     newVector.addElement(new Option(
               "\tSpecifies list of columns to Discretize. First"
 	      + " and last are valid indexes.\n"
-	      + "\t(default none)",
+	      + "\t(default: first-last)",
               "R", 1, "-R <col1,col2-col4,...>"));
 
     newVector.addElement(new Option(
