@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.23 $
+ * @version  $Revision: 1.24 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1472,7 +1472,7 @@ public class Evaluation implements Summarizable {
 		      Utils.doubleToString(pctIncorrect(),
 					   12, 4) + " %\n");
 	  if (m_CostMatrix != null) {
-	    text.append("Total  Cost                        ");
+	    text.append("Total Cost                         ");
 	    text.append(Utils.doubleToString(totalCost(), 12, 4) + "\n");
 	    text.append("Average Cost                       ");
 	    text.append(Utils.doubleToString(avgCost(), 12, 4) + "\n");
