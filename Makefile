@@ -1,5 +1,5 @@
 #
-# $Revision: 1.30 $
+# $Revision: 1.31 $
 #
 
 # Java Compiler to use
@@ -69,6 +69,7 @@ doc :
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
 	weka.classifiers.kstar \
+	weka.classifiers.neural \
 	weka.classifiers.evaluation \
 	weka.filters \
 	weka.estimators \
@@ -99,6 +100,7 @@ install : all
 	weka/classifiers/j48/*.class \
 	weka/classifiers/m5/*.class \
 	weka/classifiers/kstar/*.class \
+	weka/classifiers/neural/*.class \
 	weka/classifiers/evaluation/*.class \
 	weka/filters/*.class \
 	weka/estimators/*class \
@@ -126,6 +128,7 @@ install : all
 	weka/classifiers/j48/*.java \
 	weka/classifiers/m5/*.java \
 	weka/classifiers/kstar/*.java \
+	weka/classifiers/neural/*.java \
 	weka/classifiers/evaluation/*.java \
 	weka/filters/*.java \
 	weka/estimators/*java \
@@ -171,6 +174,7 @@ install : all
 	weka.classifiers.j48 \
 	weka.classifiers.m5 \
 	weka.classifiers.kstar \
+	weka.classifiers.neural \
 	weka.classifiers.evaluation \
 	weka.filters \
 	weka.estimators \
