@@ -36,12 +36,9 @@ import weka.core.*;
  * If binary attributes are to be coded as nominal ones.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class NominalToBinaryFilter extends Filter implements OptionHandler {
-
-  /** The average class values for all nominal values in the training data. */
-  private double[][] m_AvgClassValues = null;
 
   /** The sorted indices of the attribute values. */
   private int[][] m_Indices = null;
@@ -68,7 +65,6 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     }
     m_NewBatch = true;
     setOutputFormat();
-    m_AvgClassValues = null;
     m_Indices = null;
     if (m_InputFormat.classAttribute().isNominal()) {
       return true;
@@ -96,7 +92,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
       resetQueue();
       m_NewBatch = false;
     }
-    if ((m_AvgClassValues != null) || 
+    if ((m_Indices != null) || 
 	(m_InputFormat.classAttribute().isNominal())) {
       convertInstance(instance);
       return true;
@@ -120,7 +116,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     if (m_InputFormat == null) {
       throw new Exception("No input instance format defined");
     }
-    if ((m_AvgClassValues == null) && 
+    if ((m_Indices == null) && 
 	(m_InputFormat.classAttribute().isNumeric())) {
       computeAverageClassValues();
       setOutputFormat();
@@ -217,36 +213,36 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
     
     double totalCounts, sum;
     Instance instance;
-    double[] counts;
+    double [] counts;
 
-    m_AvgClassValues = new double[m_InputFormat.numAttributes()][0];
+    double [][] avgClassValues = new double[m_InputFormat.numAttributes()][0];
     m_Indices = new int[m_InputFormat.numAttributes()][0];
     for (int j = 0; j < m_InputFormat.numAttributes(); j++) {
       Attribute att = m_InputFormat.attribute(j);
       if (att.isNominal()) {
-	m_AvgClassValues[j] = new double [att.numValues()];
+	avgClassValues[j] = new double [att.numValues()];
 	counts = new double [att.numValues()];
 	for (int i = 0; i < m_InputFormat.numInstances(); i++) {
 	  instance = m_InputFormat.instance(i);
 	  if (!instance.classIsMissing() && 
 	      (!instance.isMissing(j))) {
 	    counts[(int)instance.value(j)] += instance.weight();
-	    m_AvgClassValues[j][(int)instance.value(j)] += 
+	    avgClassValues[j][(int)instance.value(j)] += 
 	      instance.weight() * instance.classValue();
 	  }
 	}
-	sum = Utils.sum(m_AvgClassValues[j]);
+	sum = Utils.sum(avgClassValues[j]);
 	totalCounts = Utils.sum(counts);
 	if (Utils.gr(totalCounts, 0)) {
 	  for (int k = 0; k < att.numValues(); k++) {
 	    if (Utils.gr(counts[k], 0)) {
-	      m_AvgClassValues[j][k] /= (double)counts[k];
+	      avgClassValues[j][k] /= (double)counts[k];
 	    } else {
-	      m_AvgClassValues[j][k] = sum / (double)totalCounts;
+	      avgClassValues[j][k] = sum / (double)totalCounts;
 	    }
 	  }
 	}
-	m_Indices[j] = Utils.sort(m_AvgClassValues[j]);
+	m_Indices[j] = Utils.sort(avgClassValues[j]);
       }
     }
   }
@@ -342,7 +338,7 @@ public class NominalToBinaryFilter extends Filter implements OptionHandler {
    */
   private void setOutputFormatNumeric() throws Exception {
 
-    if (m_AvgClassValues == null) {
+    if (m_Indices == null) {
       setOutputFormat(null);
       return;
     }
