@@ -39,7 +39,7 @@ import weka.filters.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -73,9 +73,14 @@ public class LinearRegression extends Classifier implements OptionHandler,
   private int m_AttributeSelection;
 
   /* Attribute selection methods */
-  private static final int M5METHOD = 0;
-  private static final int NONE     = 1;
-  private static final int GREEDY   = 2;
+  private static final int SELECTION_M5 = 0;
+  private static final int SELECTION_NONE = 1;
+  private static final int SELECTION_GREEDY = 2;
+  public static final Tag [] TAGS_SELECTION = {
+    new Tag(SELECTION_NONE, "No attribute selection"),
+    new Tag(SELECTION_M5, "M5 method"),
+    new Tag(SELECTION_GREEDY, "Greedy method")
+  };
 
   /**
    * Builds a regression model for the given data.
@@ -211,9 +216,12 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
     String selectionString = Utils.getOption('S', options);
     if (selectionString.length() != 0) {
-      setAttributeSelectionMethod(Integer.parseInt(selectionString));
+      setAttributeSelectionMethod(new SelectedTag(Integer
+						  .parseInt(selectionString),
+						  TAGS_SELECTION));
     } else {
-      setAttributeSelectionMethod(M5METHOD);
+      setAttributeSelectionMethod(new SelectedTag(SELECTION_M5,
+						  TAGS_SELECTION));
     }
 
     setDebug(Utils.getFlag('D', options));
@@ -230,7 +238,8 @@ public class LinearRegression extends Classifier implements OptionHandler,
     int current = 0;
 
     options[current++] = "-S";
-    options[current++] = "" + getAttributeSelectionMethod();
+    options[current++] = "" + getAttributeSelectionMethod()
+      .getSelectedTag().getID();
     if (getDebug()) {
       options[current++] = "-D";
     }
@@ -245,22 +254,28 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * Sets the method used to select attributes for use in the
    * linear regression. 
    *
-   * @param method the method to use. Must be one of NONE, M5METHOD, GREEDY
+   * @param method the attribute selection method to use.
    */
-  public void setAttributeSelectionMethod(int method) {
+  public void setAttributeSelectionMethod(SelectedTag method) {
     
-    m_AttributeSelection = method;
+    if (method.getTags() == TAGS_SELECTION) {
+      m_AttributeSelection = method.getSelectedTag().getID();
+    }
   }
 
   /**
    * Gets the method used to select attributes for use in the
    * linear regression. 
    *
-   * @return the method to use. Must be one of NONE, M5METHOD, GREEDY
+   * @return the method to use.
    */
-  public int getAttributeSelectionMethod() {
+  public SelectedTag getAttributeSelectionMethod() {
     
-    return m_AttributeSelection;
+    try {
+      return new SelectedTag(m_AttributeSelection, TAGS_SELECTION);
+    } catch (Exception ex) {
+      return null;
+    }
   }
 
   /**
@@ -371,7 +386,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
     int currentNumAttributes = numAttributes;
     switch (m_AttributeSelection) {
 
-    case GREEDY:
+    case SELECTION_GREEDY:
 
       // Greedy attribute removal
       do {
@@ -412,7 +427,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
       } while (improved);
       break;
 
-    case M5METHOD:
+    case SELECTION_M5:
 
       // Step through the attributes removing the one with the smallest 
       // standardised coefficient until no improvement in Akaike
@@ -464,7 +479,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
       } while (improved);
       break;
 
-    case NONE:
+    case SELECTION_NONE:
       break;
     }
     m_SelectedAttributes = selectedAttributes;
