@@ -65,13 +65,13 @@ import weka.core.FastVector;
  * (if that 10% figure is > width).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 
 public class AttributeVisualizationPanel extends JPanel {
 
   Instances m_data;
-  AttributeStats as;
+  AttributeStats as; 
   int attribIndex, maxValue;
   int histBarCounts[]; 
   int histBarClassCounts[][];
@@ -320,16 +320,95 @@ public class AttributeVisualizationPanel extends JPanel {
 
 
   private class HistCalc extends Thread {
+
+   /****Code for M.P.Wand's method of histogram bin width selection.
+    *   There is some problem with it. It always comes up -ve value 
+    *   which is raised to the power 1/3 and gives an NAN.
+    private static final int M=400;
+    private double psi(int r, double g) {
+      double val;
+      
+      double sum=0.0;
+      for(int i=0; i<M; i++) {
+	  double valCjKj=0.0;
+	  for(int j=0; j<M; j++) {
+	      valCjKj += c(j) * k(r, j-i, g);
+	  }
+	  sum += valCjKj*c(i);
+      }
+
+      val = Math.pow(m_data.numInstances(), -2) * sum;
+      //System.out.println("psi returns: "+val);
+      return val;
+    }
+    private double g21() {
+      double val;
+      
+      val = Math.pow(2 / ( Math.sqrt(2D*Math.PI)*psi(4, g22())*m_data.numInstances() ), 1/5D) * Math.sqrt(2) * as.numericStats.stdDev;
+      //System.out.println("g21 returns: "+val);
+      return val;
+    }    
+    private double g22() {
+      double val;
+
+      val = Math.pow( 2D/(5*m_data.numInstances()), 1/7D) * Math.sqrt(2) * as.numericStats.stdDev;
+      //System.out.println("g22 returns: "+val);
+      return val;
+    }
+    private double c(int j) {
+      double val=0.0;
+      double sigma = (as.numericStats.max - as.numericStats.min)/(M-1);
+      
+      //System.out.println("In c before doing the sum we have");
+      //System.out.println("max: " +as.numericStats.max+" min: "+as.numericStats.min+
+      //		 " sigma: "+sigma);
+      for(int i=0; i<m_data.numInstances(); i++) {
+	  if(!m_data.instance(i).isMissing(attribIndex))
+	      val += Math.max( 0, 
+			       ( 1 - Math.abs( Math.pow(sigma, -1)*(m_data.instance(i).value(attribIndex) - j) ) ) 
+			     );
+      }
+      //System.out.println("c returns: "+val);
+      return val;
+    }
+    private double k(int r, int j, double g) {
+      double val;
+      double sigma = (as.numericStats.max - as.numericStats.min)/(M-1);
+      //System.out.println("Before calling L we have");
+      //System.out.println("Max: "+as.numericStats.max+" Min: "+as.numericStats.min+"\n"+
+      //			 "r: "+r+" j: "+j+" g: "+g);
+      val = Math.pow( g, -r-1) * L(sigma*j/g);
+      //System.out.println("k returns: "+val);
+      return val;	
+    }
+    private double L(double x) {
+      double val;
+      
+      val = Math.pow( 2*Math.PI, -1/2D ) * Math.exp( -(x*x)/2D );
+      //System.out.println("L returns: "+val);
+      return val;
+    }
+    *******End of Wand's method
+    */
+
     public void run() {
       synchronized (m_locker) {
 	if((classIndex >= 0) && (m_data.attribute(classIndex).isNominal())) {
+	     
+	  int intervals; double intervalWidth=0.0;
 
-	  int intervals = as.totalCount>10 ? 
-	                  (int)(as.totalCount*0.1):(int)as.totalCount;  //At the time of this coding the
-	                                                //possibility of datasets with zero instances 
-	                                                //was being dealt with in the 
-	                                                //PreProcessPanel of weka Explorer.
-	                                       
+	  //This uses the M.P.Wand's method to calculate the histogram's interval width.
+	  //See "Data-Based Choice of Histogram Bin Width".
+	  //intervalWidth = Math.pow( 6D/( -psi(2, g21()) * m_data.numInstances() ), 1/3D );
+
+	  //This uses the Scott's method to calculate the histogram's interval width.
+	  //See "On optimal and data-based histograms". Biometrika, 66, 605-610 or 
+	  //see the same paper mentioned above.
+	  intervalWidth =  3.49 * as.numericStats.stdDev * Math.pow(m_data.numInstances(), -1/3D);
+
+	  intervals = (int)Math.round((as.numericStats.max - as.numericStats.min)/intervalWidth);
+	    
+                                 
 	  if(intervals > AttributeVisualizationPanel.this.getWidth()) {
 	      intervals = AttributeVisualizationPanel.this.getWidth()-4;
 	      if(intervals<1)
@@ -339,7 +418,7 @@ public class AttributeVisualizationPanel extends JPanel {
 	  double barRange   = (as.numericStats.max - as.numericStats.min)/(double)histClassCounts.length;
 	  double currentBar = as.numericStats.min; // + barRange;
 	  maxValue = 0;
-	  
+  
 	  if(m_colorList.size()==0)
 	    m_colorList.addElement(Color.black);
 	  for(int i=m_colorList.size(); i<m_data.attribute(classIndex).numValues()+1; i++) {
