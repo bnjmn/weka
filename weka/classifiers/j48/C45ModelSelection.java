@@ -13,7 +13,7 @@ import weka.core.*;
  * Class for selecting a C4.5-type split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $y
+ * @version $Revision: 1.5 $y
  */
 public class C45ModelSelection extends ModelSelection {
 
@@ -31,7 +31,7 @@ public class C45ModelSelection extends ModelSelection {
    * @param allData FULL training dataset (necessary for
    * selection of split points).
    */
-  public C45ModelSelection(int minNoObj, Instances allData){
+  public C45ModelSelection(int minNoObj, Instances allData) {
     m_minNoObj = minNoObj;
     m_allData = allData;
   }
@@ -148,7 +148,7 @@ public class C45ModelSelection extends ModelSelection {
       // attribute to the distribution for the model, so that
       // the complete distribution is stored with the model. 
       bestModel.distribution().
-	addInstWithUnknown(data,bestModel.attIndex());
+	  addInstWithUnknown(data,bestModel.attIndex());
       
       // Set the split point analogue to C45 if attribute numeric.
       if (m_allData != null)

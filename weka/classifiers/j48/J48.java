@@ -44,12 +44,19 @@ import weka.classifiers.*;
  * -L <br>
  * Do not clean up after the tree has been built.
  *
+ * -A <br>
+ * If set, Laplace smoothing is used for predicted probabilites. <p>
+ *
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class J48 extends DistributionClassifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
   AdditionalMeasureProducer {
+
+  // To maintain the same version number after adding m_ClassAttribute
+  static final long serialVersionUID = -217733168393644444L;
 
   /** The decision tree */
   private ClassifierTree m_root;
@@ -62,6 +69,10 @@ public class J48 extends DistributionClassifier implements OptionHandler,
 
   /** Minimum number of instances */
   private int m_minNumObj = 2;
+
+  /** Determines whether probabilities are smoothed using
+      Laplace correction when predictions are generated */
+  private boolean m_useLaplace = false;
 
   /** Use reduced error pruning? */
   private boolean m_reducedErrorPruning = false;
@@ -124,7 +135,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
   public final double [] distributionForInstance(Instance instance) 
        throws Exception {
 
-    return m_root.distributionForInstance(instance);
+    return m_root.distributionForInstance(instance, m_useLaplace);
   }
 
   /**
@@ -196,11 +207,17 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    * -S <br>
    * Don't perform subtree raising. <p>
    *
+   * -L <br>
+   * Do not clean up after the tree has been built.
+   *
+   * -A <br>
+   * If set, Laplace smoothing is used for predicted probabilites. <p>
+   *
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(8);
+    Vector newVector = new Vector(9);
 
     newVector.
 	addElement(new Option("\tUse unpruned tree.",
@@ -229,7 +246,10 @@ public class J48 extends DistributionClassifier implements OptionHandler,
 			      "S", 0, "-S"));
     newVector.
         addElement(new Option("\tDo not clean up after the tree has been built.",
-			      "L", 1, "-L"));
+			      "L", 0, "-L"));
+   newVector.
+        addElement(new Option("\tLaplace smoothing for predicted probabilities.",
+			      "A", 0, "-A"));
 
     return newVector.elements();
   }
@@ -250,6 +270,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
       m_minNumObj = 2;
     }
     m_binarySplits = Utils.getFlag('B', options);
+    m_useLaplace = Utils.getFlag('A', options);
 
     // Pruning options
     m_unpruned = Utils.getFlag('U', options);
@@ -302,7 +323,7 @@ public class J48 extends DistributionClassifier implements OptionHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [9];
+    String [] options = new String [10];
     int current = 0;
 
     if (m_noCleanup) {
@@ -325,13 +346,36 @@ public class J48 extends DistributionClassifier implements OptionHandler,
       options[current++] = "-B";
     }
     options[current++] = "-M"; options[current++] = "" + m_minNumObj;
+    if (m_useLaplace) {
+      options[current++] = "-A";
+    }
 
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
   }
-
+  
+  /**
+   * Get the value of useLaplace.
+   *
+   * @return Value of useLaplace.
+   */
+  public boolean getUseLaplace() {
+    
+    return m_useLaplace;
+  }
+  
+  /**
+   * Set the value of useLaplace.
+   *
+   * @param newuseLaplace Value to assign to useLaplace.
+   */
+  public void setUseLaplace(boolean newuseLaplace) {
+    
+    m_useLaplace = newuseLaplace;
+  }
+  
   /**
    * Returns a description of the classifier.
    */

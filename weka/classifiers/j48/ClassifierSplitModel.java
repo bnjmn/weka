@@ -16,7 +16,7 @@ import weka.core.*;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class ClassifierSplitModel implements Cloneable, Serializable {
 
@@ -80,15 +80,47 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
    *
    * @exception Exception if something goes wrong
    */
-  public double classProb(int classIndex,Instance instance) 
+  public double classProb(int classIndex, Instance instance, int theSubset) 
        throws Exception {
-    
-    int theSubset = whichSubset(instance);
 
-    if (theSubset > -1)
+    if (theSubset > -1) {
       return m_distribution.prob(classIndex,theSubset);
-    else
-      return m_distribution.prob(classIndex);
+    } else {
+      double [] weights = weights(instance);
+      if (weights == null) {
+	return m_distribution.prob(classIndex);
+      } else {
+	double prob = 0;
+	for (int i = 0; i < weights.length; i++) {
+	  prob += weights[i] * m_distribution.prob(classIndex, i);
+	}
+	return prob;
+      }
+    }
+  }
+
+  /**
+   * Gets class probability for instance.
+   *
+   * @exception Exception if something goes wrong
+   */
+  public double classProbLaplace(int classIndex, Instance instance,
+				 int theSubset) throws Exception {
+
+    if (theSubset > -1) {
+      return m_distribution.laplaceProb(classIndex, theSubset);
+    } else {
+      double [] weights = weights(instance);
+      if (weights == null) {
+	return m_distribution.laplaceProb(classIndex);
+      } else {
+	double prob = 0;
+	for (int i = 0; i < weights.length; i++) {
+	  prob += weights[i] * m_distribution.laplaceProb(classIndex, i);
+	}
+	return prob;
+      }
+    }
   }
 
   /**
@@ -176,9 +208,9 @@ public abstract class ClassifierSplitModel implements Cloneable, Serializable {
   /**
    * Sets distribution associated with model.
    */
-  public final void setDistribution(Distribution distribution) {
+  public void resetDistribution(Instances data) throws Exception {
 
-    m_distribution = distribution;
+    m_distribution = new Distribution(data, this);
   }
 
   /**

@@ -13,7 +13,7 @@ import java.io.*;
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClassifierDecList implements Serializable {
 
@@ -393,17 +393,20 @@ public class ClassifierDecList implements Serializable {
     double [] weights;
     int treeIndex;
 
-    if (m_isLeaf){
-      return weight*localModel().classProb(classIndex,instance);
-    }else{
+    if (m_isLeaf) {
+      return weight * localModel().classProb(classIndex, instance, -1);
+    } else {
       treeIndex = localModel().whichSubset(instance);
-      if (treeIndex == -1){
+      if (treeIndex == -1) {
 	weights = localModel().weights(instance);
-	return son(indeX).getProbs(classIndex,instance,weights[indeX]*weight);
+	return son(indeX).getProbs(classIndex, instance, 
+				   weights[indeX] * weight);
       }else{
-	if (treeIndex == indeX)
-	  return son(indeX).getProbs(classIndex,instance,weight);
-	return 0;
+	if (treeIndex == indeX) {
+	  return son(indeX).getProbs(classIndex, instance, weight);
+	} else {
+	  return 0;
+	}
       }
     }
   }
