@@ -56,7 +56,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class Explorer extends JPanel {
 
@@ -114,6 +114,7 @@ public class Explorer extends JPanel {
     m_ClustererPanel.setLog(m_LogPanel);
     m_ClustererPanel.setPreprocess(m_PreprocessPanel);
     m_AttributeSelectionPanel.setLog(m_LogPanel);
+    m_VisualizePanel.setLog(m_LogPanel);
     m_TabbedPane.addTab("Preprocess", null, m_PreprocessPanel,
 			"Open/Edit/Save instances");
     m_TabbedPane.addTab("Classify", null, m_ClassifierPanel,
