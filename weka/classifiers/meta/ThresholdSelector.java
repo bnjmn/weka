@@ -66,7 +66,7 @@ import weka.core.Attribute;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class ThresholdSelector extends DistributionClassifier 
   implements OptionHandler {
@@ -195,9 +195,6 @@ public class ThresholdSelector extends DistributionClassifier
     Instances curve = (new ThresholdCurve()).getCurve(predictions, m_DesignatedClass);
 
     //System.err.println(curve);
-    
-    m_BestThreshold = 0.5;
-    m_BestValue = MIN_VALUE;
     double low = 1.0;
     double high = 0.0;
     if (curve.numInstances() > 0) {
@@ -377,9 +374,6 @@ public class ThresholdSelector extends DistributionClassifier
     setDistributionClassifier((DistributionClassifier)Classifier.
 		  forName(classifierName,
 			  Utils.partitionOptions(options)));
-    if (!(m_Classifier instanceof OptionHandler)) {
-      throw new Exception("Base classifier must accept options");
-    }
   }
 
   /**
@@ -430,72 +424,73 @@ public class ThresholdSelector extends DistributionClassifier
     if (instances.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
-    if (instances.numClasses() != 2) {
+    if (instances.numClasses() > 2) {
       throw new Exception("Only works for two-class datasets!");
     }
     AttributeStats stats = instances.attributeStats(instances.classIndex());
-    if (stats.missingCount > 0) {
-      instances = new Instances(instances);
-      instances.deleteWithMissingClass();
-    }
-
-    // Determine which class value to look for
-    switch (m_ClassMode) {
-    case OPTIMIZE_0:
-      m_DesignatedClass = 0;
-      break;
-    case OPTIMIZE_1:
-      m_DesignatedClass = 1;
-      break;
-    case OPTIMIZE_POS_NAME:
-      Attribute cAtt = instances.classAttribute();
-      boolean found = false;
-      for (int i = 0; i < cAtt.numValues() && !found; i++) {
-        String name = cAtt.value(i).toLowerCase();
-        if (name.startsWith("yes") || name.equals("1") || 
-            name.startsWith("pos")) {
-          found = true;
-          m_DesignatedClass = i;
-        }
-      }
-      if (found) {
-        break;
-      }
-      // No named class found, so fall through to default of least frequent
-    case OPTIMIZE_LFREQ:
-      m_DesignatedClass = (stats.nominalCounts[0] > stats.nominalCounts[1]) ? 1 : 0;
-      break;
-    case OPTIMIZE_MFREQ:
-      m_DesignatedClass = (stats.nominalCounts[0] > stats.nominalCounts[1]) ? 0 : 1;
-      break;
-    default:
-      throw new Exception("Unrecognized class value selection mode");
-    }
-
-    /*
-    System.err.println("ThresholdSelector: Using mode=" 
-                       + TAGS_OPTIMIZE[m_ClassMode].getReadable());
-    System.err.println("ThresholdSelector: Optimizing using class "
-                       + m_DesignatedClass + "/" 
-                       + instances.classAttribute().value(m_DesignatedClass));
-    */
-
+    m_BestThreshold = 0.5;
+    m_BestValue = MIN_VALUE;
+    m_HighThreshold = 1;
+    m_LowThreshold = 0;
     // If data contains only one instance of positive data
     // optimize on training data
     if (stats.distinctCount != 2) {
       System.err.println("Couldn't find examples of both classes. No adjustment.");
-      m_BestThreshold = 0.5;
-      m_BestValue = MIN_VALUE;
       m_Classifier.buildClassifier(instances);
-    } else if (stats.nominalCounts[m_DesignatedClass] == 1) {
-      System.err.println("Only 1 positive found: optimizing on training data");
-      findThreshold(getPredictions(instances, EVAL_TRAINING_SET, 0));
     } else {
-      int numFolds = Math.min(m_NumXValFolds, stats.nominalCounts[m_DesignatedClass]);
-      //System.err.println("Number of folds for threshold selector: " + numFolds);
-      findThreshold(getPredictions(instances, m_EvalMode, numFolds));
-      if (m_EvalMode != EVAL_TRAINING_SET) {
-	m_Classifier.buildClassifier(instances);
+      
+      // Determine which class value to look for
+      switch (m_ClassMode) {
+      case OPTIMIZE_0:
+        m_DesignatedClass = 0;
+        break;
+      case OPTIMIZE_1:
+        m_DesignatedClass = 1;
+        break;
+      case OPTIMIZE_POS_NAME:
+        Attribute cAtt = instances.classAttribute();
+        boolean found = false;
+        for (int i = 0; i < cAtt.numValues() && !found; i++) {
+          String name = cAtt.value(i).toLowerCase();
+          if (name.startsWith("yes") || name.equals("1") || 
+              name.startsWith("pos")) {
+            found = true;
+            m_DesignatedClass = i;
+          }
+        }
+        if (found) {
+          break;
+        }
+        // No named class found, so fall through to default of least frequent
+      case OPTIMIZE_LFREQ:
+        m_DesignatedClass = (stats.nominalCounts[0] > stats.nominalCounts[1]) ? 1 : 0;
+        break;
+      case OPTIMIZE_MFREQ:
+        m_DesignatedClass = (stats.nominalCounts[0] > stats.nominalCounts[1]) ? 0 : 1;
+        break;
+      default:
+        throw new Exception("Unrecognized class value selection mode");
+      }
+      
+      /*
+        System.err.println("ThresholdSelector: Using mode=" 
+        + TAGS_OPTIMIZE[m_ClassMode].getReadable());
+        System.err.println("ThresholdSelector: Optimizing using class "
+        + m_DesignatedClass + "/" 
+        + instances.classAttribute().value(m_DesignatedClass));
+      */
+      
+      
+      if (stats.nominalCounts[m_DesignatedClass] == 1) {
+        System.err.println("Only 1 positive found: optimizing on training data");
+        findThreshold(getPredictions(instances, EVAL_TRAINING_SET, 0));
+      } else {
+        int numFolds = Math.min(m_NumXValFolds, stats.nominalCounts[m_DesignatedClass]);
+        //System.err.println("Number of folds for threshold selector: " + numFolds);
+        findThreshold(getPredictions(instances, m_EvalMode, numFolds));
+        if (m_EvalMode != EVAL_TRAINING_SET) {
+          m_Classifier.buildClassifier(instances);
+        }
       }
     }
   }
@@ -544,7 +539,9 @@ public class ThresholdSelector extends DistributionClassifier
 
     // Alter the distribution
     pred[m_DesignatedClass] = prob;
-    pred[(m_DesignatedClass + 1) % 2] = 1.0 - prob;
+    if (pred.length == 2) { // Handle case when there's only one class
+      pred[(m_DesignatedClass + 1) % 2] = 1.0 - prob;
+    }
     return pred;
   }
 
