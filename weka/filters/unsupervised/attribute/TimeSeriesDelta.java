@@ -57,9 +57,23 @@ import weka.core.*;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TimeSeriesDelta extends TimeSeriesTranslate {
+
+  /**
+   * Returns a string describing this classifier
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "An instance filter that assumes instances form time-series data and "
+      + "replaces attribute values in the current instance with the difference "
+      + "between the current value and the equivalent attribute attribute value "
+      + "of some previous (or future) instance. For instances where the time-shifted "
+      + "value is unknown either the instance may be dropped, or missing values "
+      + "used.";
+  }
 
   /**
    * Sets the format of the input instances.
