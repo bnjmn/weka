@@ -54,7 +54,10 @@ public class TrainTestSplitMaker
   private Thread m_splitThread = null;
 
   public TrainTestSplitMaker() {
-    super();
+         m_visual.loadIcons(BeanVisual.ICON_PATH
+		       +"TrainTestSplitMaker.gif",
+		       BeanVisual.ICON_PATH
+		       +"TrainTestSplittMaker_animated.gif");
     m_visual.setText("TrainTestSplitMaker");
   }
 
