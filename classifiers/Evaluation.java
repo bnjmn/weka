@@ -99,7 +99,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.35 $
+ * @version  $Revision: 1.36 $
   */
 public class Evaluation implements Summarizable {
 
@@ -1113,6 +1113,35 @@ public class Evaluation implements Summarizable {
   }
 
   /**
+   * Returns value of kappa statistic if class is nominal.
+   *
+   * @return the value of the kappa statistic
+   */
+  public final double kappa() {
+    
+
+    double[] sumRows = new double[m_ConfusionMatrix.length];
+    double[] sumColumns = new double[m_ConfusionMatrix.length];
+    double sumOfWeights = 0;
+    for (int i = 0; i < m_ConfusionMatrix.length; i++) {
+      for (int j = 0; j < m_ConfusionMatrix.length; j++) {
+	sumRows[i] += m_ConfusionMatrix[i][j];
+	sumColumns[j] += m_ConfusionMatrix[i][j];
+	sumOfWeights += m_ConfusionMatrix[i][j];
+      }
+    }
+    double correct = 0, chanceAgreement = 0;
+    for (int i = 0; i < m_ConfusionMatrix.length; i++) {
+      chanceAgreement += (sumRows[i] * sumColumns[i]);
+      correct += m_ConfusionMatrix[i][i];
+    }
+    chanceAgreement /= (sumOfWeights * sumOfWeights);
+    correct /= sumOfWeights;
+
+    return (correct - chanceAgreement) / (1 - chanceAgreement);
+  }
+
+  /**
    * Returns the correlation coefficient if the class is numeric.
    *
    * @return the correlation coefficient
@@ -1425,6 +1454,9 @@ public class Evaluation implements Summarizable {
 	  text.append(Utils.doubleToString(incorrect(), 12, 4) + "     " +
 		      Utils.doubleToString(pctIncorrect(),
 					   12, 4) + " %\n");
+	  text.append("Kappa statistic                    ");
+	  text.append(Utils.doubleToString(kappa(), 12, 4) + "\n");
+	  
 	  if (m_CostMatrix != null) {
 	    text.append("Total Cost                         ");
 	    text.append(Utils.doubleToString(totalCost(), 12, 4) + "\n");
