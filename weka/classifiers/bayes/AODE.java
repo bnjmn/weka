@@ -26,7 +26,8 @@ package weka.classifiers.bayes;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
 
 /**
  * AODE achieves highly accurate classification by averaging over all
@@ -35,8 +36,8 @@ import weka.classifiers.*;
  * naive Bayes. The resulting algorithm is computationally efficient while
  * delivering highly accurate classification on many learning tasks.<br>
  * For more information, see<p>
- * G. Webb, J. Boughton & Z. Wang (2003). <i>Not So Naive Bayes.</i>
- * Submitted for publication<br>
+ * G. Webb, J. Boughton & Z. Wang (2004). <i>Not So Naive Bayes.</i>
+ * To be published in Machine Learning.<br>
  * G. Webb, J. Boughton & Z. Wang (2002). <i>Averaged One-Dependence
  * Estimators: Preliminary Results.</i> AI2002 Data Mining Workshop, Canberra.
  *
@@ -49,14 +50,16 @@ import weka.classifiers.*;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
+ *  this version resolves errors in the handling of missing attribute values.
  */
-public class AODE extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler {
+public class AODE extends Classifier
+                  implements OptionHandler, WeightedInstancesHandler {
     
   /**
    * 3D array (m_NumClasses * m_TotalAttValues * m_TotalAttValues)
-   * of attribute counts
+   * of attribute counts, i.e. the number of times an attribute value occurs
+   * in conjunction with another attribute value and a class value.  
    */
   private double [][][] m_CondiCounts;
     
@@ -64,10 +67,10 @@ public class AODE extends Classifier
   private double [] m_ClassCounts;
     
   /** The sums of attribute-class counts  
-   *    -- if there are no missing values for att, then m_SumForCounts[classVal][att] will 
-   *       be the same as m_ClassCounts[classVal] 
+   *    -- if there are no missing values for att, then m_SumForCounts[classVal][att] 
+   *       will be the same as m_ClassCounts[classVal] 
    */
-  private int [][] m_SumForCounts;
+  private double [][] m_SumForCounts;
 
   /** The number of classes */
   private int m_NumClasses;
@@ -85,33 +88,35 @@ public class AODE extends Classifier
   private Instances m_Instances;
     
   /**
-   * The total number of values for all attributes (not including
-   * class).  Eg. for three atts each with two possible values,
-   * m_TotalAttValues would be 6.
+   * The total number of values (including an extra for each attribute's 
+   * missing value, which are included in m_CondiCounts) for all attributes 
+   * (not including class).  Eg. for three atts each with two possible values,
+   * m_TotalAttValues would be 9 (6 values + 3 missing).
    * This variable is used when allocating space for m_CondiCounts matrix.
    */
   private int m_TotalAttValues;
     
-  /** The starting index (in the m_CondiCounts matrix) of each attribute */
+  /** The starting index (in the m_CondiCounts matrix) of the values for each attribute */
   private int [] m_StartAttIndex;
     
   /** The number of values for each attribute */
   private int [] m_NumAttValues;
     
   /** The frequency of each attribute value for the dataset */
-  private int [] m_Frequencies;
+  private double [] m_Frequencies;
 
   /** The number of valid class values observed in dataset 
    *  -- with no missing classes, this number is the same as m_NumInstances.
    */
   private double m_SumInstances;
-    
+
   /** An att's frequency must be this value or more to be a superParent */
   private int m_Limit;
 
   /** If true, outputs debugging info */
   private boolean m_Debug = false;
 
+ 
   /**
    * Returns a string describing this classifier
    * @return a description of the classifier suitable for
@@ -124,12 +129,12 @@ public class AODE extends Classifier
       +"naive Bayes. The resulting algorithm is computationally efficient while "
       +"delivering highly accurate classification on many learning tasks.\n\n"
       +"For more information, see\n\n"
-      +"G. Webb, J. Boughton & Z. Wang (2003). Not So Naive Bayes. "
-      +"Submitted for publication "
+      +"G. Webb, J. Boughton & Z. Wang (2004). Not So Naive Bayes. "
+      +"To be published in Machine Learning. "
       +"G. Webb, J. Boughton & Z. Wang (2002). <i>Averaged One-Dependence "
       +"Estimators: Preliminary Results. AI2002 Data Mining Workshop, Canberra.";
   }
-    
+ 
   /**
    * Generates the classifier.
    *
@@ -172,25 +177,24 @@ public class AODE extends Classifier
     m_NumAttValues = new int[m_NumAttributes];
  
     m_TotalAttValues = 0;
-        
     for(int i = 0; i < m_NumAttributes; i++) {
        if(i != m_ClassIndex) {
           m_StartAttIndex[i] = m_TotalAttValues;
           m_NumAttValues[i] = m_Instances.attribute(i).numValues();
-          m_TotalAttValues += m_NumAttValues[i];
+          m_TotalAttValues += m_NumAttValues[i] + 1;  // + 1 so room for missing value count
        } else {
-          // m_StartAttIndex[i] = -1;  // class isn't included 
+          // m_StartAttIndex[i] = -1;  // class isn't included
 	  m_NumAttValues[i] = m_NumClasses;
        }
     }
-        
+
     // allocate space for counts and frequencies
     m_CondiCounts = new double[m_NumClasses][m_TotalAttValues][m_TotalAttValues];
     m_ClassCounts = new double[m_NumClasses];
-    m_SumForCounts = new int[m_NumClasses][m_NumAttributes];
-    m_Frequencies = new int[m_TotalAttValues];
+    m_SumForCounts = new double[m_NumClasses][m_NumAttributes];
+    m_Frequencies = new double[m_TotalAttValues];
 
-    // Calculate the counts
+    // calculate the counts
     for(int k = 0; k < m_NumInstances; k++) {
        addToCounts((Instance)m_Instances.instance(k));
     }
@@ -208,43 +212,54 @@ public class AODE extends Classifier
    *
    */
   private void addToCounts(Instance instance) {
-        
-    double [] pointer;
-    
-    int classVal = (int)instance.classValue();
-    double weight = instance.weight();
+ 
+    double [] countsPointer;
+ 
+    if(instance.classIsMissing())
+       return;   // ignore instances with missing class
 
+    int classVal = (int)instance.classValue();
+    int weight = (int)instance.weight();
+ 
     m_ClassCounts[classVal] += weight;
-    m_SumInstances += weight;;
-        
-    // store instance's att vals in an int array, b/c accessing it in the loop(s) is more efficient
+    m_SumInstances += weight;
+   
+    // store instance's att val indexes in an array, b/c accessing it 
+    // in loop(s) is more efficient
     int [] attIndex = new int[m_NumAttributes];
     for(int i = 0; i < m_NumAttributes; i++) {
-       if(instance.isMissing(i) || i == m_ClassIndex)
-          attIndex[i] = -1;
-       else
-          attIndex[i] = m_StartAttIndex[i] + (int)instance.value(i);
+       if(i == m_ClassIndex)
+          attIndex[i] = -1;  // we don't use the class attribute in counts
+       else {
+          if(instance.isMissing(i))
+             attIndex[i] = m_StartAttIndex[i] + m_NumAttValues[i];
+          else
+             attIndex[i] = m_StartAttIndex[i] + (int)instance.value(i);
+       }
     }
 
     for(int Att1 = 0; Att1 < m_NumAttributes; Att1++) {
        if(attIndex[Att1] == -1)
-          continue;   // avoid pointless looping
+          continue;   // avoid pointless looping as Att1 is currently the class attribute
 
        m_Frequencies[attIndex[Att1]] += weight;
-       m_SumForCounts[classVal][Att1] += weight;
+       
+       // if this is a missing value, we don't want to increase sumforcounts
+       if(!instance.isMissing(Att1))
+          m_SumForCounts[classVal][Att1] += weight;
 
        // save time by referencing this now, rather than do it repeatedly in the loop
-       pointer = m_CondiCounts[classVal][attIndex[Att1]];
-    
+       countsPointer = m_CondiCounts[classVal][attIndex[Att1]];
+
        for(int Att2 = 0; Att2 < m_NumAttributes; Att2++) {
-          if((attIndex[Att2] != -1)) {
-             pointer[attIndex[Att2]] += weight;
+          if(attIndex[Att2] != -1) {
+             countsPointer[attIndex[Att2]] += weight;
           }
        }
     }
   }
-    
-    
+ 
+ 
   /**
    * Calculates the class membership probabilities for the given test
    * instance.
@@ -253,75 +268,83 @@ public class AODE extends Classifier
    * @return predicted class probability distribution
    * @exception Exception if there is a problem generating the prediction
    */
-  public double [] distributionForInstance(Instance instance)
-                                                        throws Exception {
+  public double [] distributionForInstance(Instance instance) throws Exception {
+ 
     double [] probs = new double[m_NumClasses];
     int pIndex, parentCount; 
-    double probSum = 0;
-    
-    double [][] pointer1;
-    double [] pointer2;
-    
-    // store instance's att values in an int array, so accessing them is more efficient in loop(s)
+ 
+    // pointers for efficiency
+    double [][] countsForClass;
+    double [] countsForClassParent;
+
+    // store instance's att values in an int array, so accessing them 
+    // is more efficient in loop(s).
     int [] attIndex = new int[m_NumAttributes];
     for(int att = 0; att < m_NumAttributes; att++) {
        if(instance.isMissing(att) || att == m_ClassIndex)
-          attIndex[att] = -1;
+          attIndex[att] = -1;   // can't use class or missing values in calculations
        else
-          attIndex[att] = m_StartAttIndex[att] + (int)instance.value(att);
+	  attIndex[att] = m_StartAttIndex[att] + (int)instance.value(att);
     }
-    
+
     // calculate probabilities for each possible class value
     for(int classVal = 0; classVal < m_NumClasses; classVal++) {
-            
+ 
        probs[classVal] = 0;
        double x = 0;
-       
-       pointer1 = m_CondiCounts[classVal];
-       
        parentCount = 0;
+ 
+       countsForClass = m_CondiCounts[classVal];
 
        // each attribute has a turn of being the parent
        for(int parent = 0; parent < m_NumAttributes; parent++) {
           if(attIndex[parent] == -1)
-             continue;
+             continue;  // skip class attribute or missing value
 
           // determine correct index for the parent in m_CondiCounts matrix
           pIndex = attIndex[parent];
 
-          pointer2 = pointer1[pIndex];
-
           // check that the att value has a frequency of m_Limit or greater
-	  if(m_Frequencies[pIndex] < m_Limit)
-	     continue;
-	     
+	  if(m_Frequencies[pIndex] < m_Limit) 
+             continue;
+
+          countsForClassParent = countsForClass[pIndex];
+
           // block the parent from being its own child
-	  attIndex[parent] = -1;
-	  
+          attIndex[parent] = -1;
+
           parentCount++;
 
-          double classparentfreq = pointer2[pIndex];
+          double classparentfreq = countsForClassParent[pIndex];
+
+          // find the number of missing values for parent's attribute
+          double missing4ParentAtt = 
+                 m_Frequencies[m_StartAttIndex[parent] + m_NumAttValues[parent]];
 
           // calculate the prior probability -- P(parent & classVal)
           x = (classparentfreq + 1.0)
-	     / (m_SumInstances + m_NumClasses * m_NumAttValues[parent]);
+             / ((m_SumInstances - missing4ParentAtt) + m_NumClasses
+	        * m_NumAttValues[parent]);
 
-	  // take into account the value of each attribute
+          // take into account the value of each attribute
           for(int att = 0; att < m_NumAttributes; att++) {
              if(attIndex[att] == -1)
                 continue;
  
-             x *= (pointer2[attIndex[att]] + 1.0)
-                 / (classparentfreq + m_NumAttValues[att]);
+             double missingForParentandChildAtt = 
+                      countsForClassParent[m_StartAttIndex[att] + m_NumAttValues[att]];
+
+             x *= (countsForClassParent[attIndex[att]] + 1.0)
+                 / (classparentfreq - missingForParentandChildAtt + m_NumAttValues[att]);
           }
 
-	  // add this probability to the overall probability
+          // add this probability to the overall probability
           probs[classVal] += x;
-       
+ 
           // unblock the parent
-	  attIndex[parent] = pIndex;
+          attIndex[parent] = pIndex;
        }
-        
+ 
        // check that at least one att was a parent
        if(parentCount < 1) {
 
@@ -329,7 +352,7 @@ public class AODE extends Classifier
 	  probs[classVal] = NBconditionalProb(instance, classVal);
 
        } else {
-       
+ 
           // divide by number of parent atts to get the mean
           probs[classVal] /= (double)(parentCount);
        }
@@ -435,40 +458,12 @@ public class AODE extends Classifier
        options[current++] = "-D";
     }
         
-    options[current++] = "-F"; options[current++] = ""+m_Limit;
+    options[current++] = "-F " + m_Limit;
+
     while (current < options.length) {
        options[current++] = "";
     }
     return options;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String frequencyLimitForParentAttributesTipText() {
-    return "Minimum frequency count for parent attributes.";
-  }
-
-  /**
-   * Set the frequency limit for parent attributes
-   *
-   * @param fl an <code>int</code> value
-   */
-  public void setFrequencyLimitForParentAttributes(int fl) {
-    if (fl > 0) {
-      m_Limit = fl;
-    }
-  }
-
-  /**
-   * Return the frequency limit for parent attributes
-   *
-   * @return an <code>int</code> value
-   */
-  public int getFrequencyLimitForParentAttributes() {
-    return m_Limit;
   }
     
   /**
