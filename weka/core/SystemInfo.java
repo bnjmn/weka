@@ -32,7 +32,7 @@ import java.util.Vector;
  * version, JVM settings etc. Useful for Bug-Reports.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class SystemInfo {
   /** for storing the information */
