@@ -46,7 +46,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class Stacking extends Classifier implements OptionHandler {
 
@@ -54,7 +54,9 @@ public class Stacking extends Classifier implements OptionHandler {
   protected Classifier m_MetaClassifier = new weka.classifiers.ZeroR();
 
   /** The base classifiers. */
-  protected Classifier [] m_BaseClassifiers = new Classifier [0];
+  protected Classifier [] m_BaseClassifiers = {
+     new weka.classifiers.ZeroR()
+  };
  
   /** Format for meta data */
   protected Instances m_MetaFormat = null;

@@ -45,7 +45,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class MultiScheme extends Classifier implements OptionHandler {
 
@@ -53,7 +53,9 @@ public class MultiScheme extends Classifier implements OptionHandler {
   protected Classifier m_Classifier;
  
   /** The list of classifiers */
-  protected Classifier [] m_Classifiers = new Classifier [0];
+  protected Classifier [] m_Classifiers = {
+     new weka.classifiers.ZeroR()
+  };
 
   /** The index into the vector for the selected scheme */
   protected int m_ClassifierIndex;
