@@ -78,6 +78,9 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JFrame;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JViewport;
@@ -88,7 +91,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -116,9 +119,6 @@ public class AssociationsPanel extends JPanel {
 
   /** Click to stop a running associator */
   protected JButton m_StopBut = new JButton("Stop");
-  
-  /** Click to save the output associated with the currently selected result */
-  protected JButton m_SaveOutBut = new JButton("Save Output");
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -159,7 +159,26 @@ public class AssociationsPanel extends JPanel {
 	}
       }
     });
-    m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
+    m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
+    m_History.setHandleRightClicks(false);
+    // see if we can popup a menu for the selected result
+    m_History.getList().addMouseListener(new MouseAdapter() {
+	public void mouseClicked(MouseEvent e) {
+	  if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	      == InputEvent.BUTTON1_MASK) {
+	    
+	  } else {
+	    int index = m_History.getList().locationToIndex(e.getPoint());
+	    if (index != -1) {
+	      String name = m_History.getNameAtIndex(index);
+	      historyRightClickPopup(name, e.getX(), e.getY());
+	    } else {
+	      historyRightClickPopup(null, e.getX(), e.getY());
+	    }
+	  }
+	}
+      });
+
     m_AssociatorEditor.setClassType(Associator.class);
     m_AssociatorEditor.setValue(new weka.associations.Apriori());
     m_AssociatorEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -170,10 +189,8 @@ public class AssociationsPanel extends JPanel {
 
     m_StartBut.setToolTipText("Starts the associator");
     m_StopBut.setToolTipText("Stops the associator");
-    m_SaveOutBut.setToolTipText("Save the selected associator output to a file");
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
-    m_SaveOutBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	startAssociator();
@@ -184,11 +201,6 @@ public class AssociationsPanel extends JPanel {
 	stopAssociator();
       }
     });
-    m_SaveOutBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveBuffer();
-	}
-      });
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -200,7 +212,7 @@ public class AssociationsPanel extends JPanel {
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(2,2));
+    buttons.setLayout(new GridLayout(1,2));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
@@ -208,12 +220,6 @@ public class AssociationsPanel extends JPanel {
     ssButs.add(m_StopBut);
     buttons.add(ssButs);
 
-    JPanel vPl = new JPanel();
-    vPl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    vPl.setLayout(new GridLayout(1,1,5,5));
-    vPl.add(m_SaveOutBut);
-    buttons.add(vPl);
-    
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Associator output"));
     p3.setLayout(new BorderLayout());
@@ -372,7 +378,6 @@ public class AssociationsPanel extends JPanel {
 	      m_Log.logMessage("Interrupted " + cname);
 	      m_Log.statusMessage("See error log");
 	    }
-	    m_SaveOutBut.setEnabled(true);
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
 	    m_StopBut.setEnabled(false);
@@ -403,16 +408,67 @@ public class AssociationsPanel extends JPanel {
 
   /**
    * Save the currently selected associator output to a file.
+   * @param name the name of the buffer to save
    */
-  protected void saveBuffer() {
-    StringBuffer sb = m_History.getSelectedBuffer();
+  protected void saveBuffer(String name) {
+    StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
-	m_Log.logMessage("Save succesful.");
+	m_Log.logMessage("Save successful.");
       }
     }
   }
     
+  /**
+   * Handles constructing a popup menu with visualization options.
+   * @param name the name of the result history list entry clicked on by
+   * the user
+   * @param x the x coordinate for popping up the menu
+   * @param y the y coordinate for popping up the menu
+   */
+  protected void historyRightClickPopup(String name, int x, int y) {
+    final String selectedName = name;
+    JPopupMenu resultListMenu = new JPopupMenu();
+    
+    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    if (selectedName != null) {
+      visMainBuffer.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    m_History.setSingle(selectedName);
+	  }
+	});
+    } else {
+      visMainBuffer.setEnabled(false);
+    }
+    resultListMenu.add(visMainBuffer);
+    
+    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    if (selectedName != null) {
+      visSepBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.openFrame(selectedName);
+	}
+      });
+    } else {
+      visSepBuffer.setEnabled(false);
+    }
+    resultListMenu.add(visSepBuffer);
+    
+    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    if (selectedName != null) {
+      saveOutput.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    saveBuffer(selectedName);
+	  }
+	});
+    } else {
+      saveOutput.setEnabled(false);
+    }
+    resultListMenu.add(saveOutput);
+
+    resultListMenu.show(m_History.getList(), x, y);
+  }
+
   /**
    * Tests out the Associator panel from the command line.
    *
