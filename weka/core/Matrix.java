@@ -31,7 +31,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Matrix implements Serializable {
 
@@ -156,6 +156,18 @@ public class Matrix implements Serializable {
   }
 
   /**
+   * Add a value to an element.
+   *
+   * @param rowIndex the row's index.
+   * @param columnIndex the column's index.
+   * @param value the value to add.
+   */
+  public final void addElement(int rowIndex, int columnIndex, double value) {
+
+    m_Elements[rowIndex][columnIndex] += value;
+  }
+
+  /**
    * Returns the number of rows in the matrix.
    *
    * @return the number of rows
@@ -218,7 +230,7 @@ public class Matrix implements Serializable {
    *
    * @return the converted string
    */
-  public final String toString() {
+  public String toString() {
 
     // Determine the width required for the maximum element,
     // and check for fractional display requirement.
