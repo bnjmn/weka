@@ -16,7 +16,7 @@
 
 /*
  *    Obfuscate.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -33,8 +33,8 @@ import weka.core.*;
  * and all nominal (and string) attribute values. For exchanging sensitive
  * datasets. Currently doesn't like string attributes.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.2 $
  */
 public class Obfuscate extends Filter implements UnsupervisedFilter,
 						 StreamableFilter {

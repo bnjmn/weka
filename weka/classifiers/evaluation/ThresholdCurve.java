@@ -16,7 +16,7 @@
 
 /*
  *    ThresholdCurve.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -38,8 +38,8 @@ import weka.classifiers.DistributionClassifier;
  * resulting dataset can be used to visualize precision/recall tradeoff, or 
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.14 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.15 $
  */
 public class ThresholdCurve {
 

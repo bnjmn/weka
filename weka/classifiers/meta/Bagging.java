@@ -61,8 +61,8 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.17 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.18 $
  */
 public class Bagging extends DistributionClassifier 
   implements OptionHandler {

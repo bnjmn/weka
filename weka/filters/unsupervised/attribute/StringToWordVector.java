@@ -16,7 +16,7 @@
 
 /*
  *    StringToWordVector.java
- *    Copyright (C) 2000 Webmind Inc.
+ *    Copyright (C) 2002 University of Waikato
  *
  *    Updated 12/Dec/2001 by Gordon Paynter (gordon.paynter@ucr.edu)
  *                        Added parameters for delimiter set,
@@ -52,9 +52,9 @@ import weka.core.Utils;
  * words (attributes) is determined by the first batch filtered (typically
  * training data).
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version 1.8-gwp-$Revision: 1.1 $ 
+ * @author Len Trigg (len@reeltwo.com)
+ * @author Stuart Inglis (stuart@reeltwo.com)
+ * @version 1.8-gwp-$Revision: 1.2 $ 
  **/
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {

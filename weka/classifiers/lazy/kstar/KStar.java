@@ -47,7 +47,7 @@ import weka.classifiers.*;
  * <i>Proceedings of the 12th International Conference on Machine
  * learning</i>, pp. 108-114.<p>
  *
- * @author Len Trigg (len@intelligenesis.net)
+ * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $
  */

@@ -16,7 +16,7 @@
 
 /*
  *    HyperPipes.java
- *    Copyright (C) 1999 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -44,8 +44,8 @@ import java.io.*;
  * works quite well when you have smegloads of attributes.
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.10 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.11 $
  */ 
 public class HyperPipes extends DistributionClassifier {
 

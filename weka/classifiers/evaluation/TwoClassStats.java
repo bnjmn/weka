@@ -16,7 +16,7 @@
 
 /*
  *    TwoClassStats.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -25,8 +25,8 @@ package weka.classifiers.evaluation;
 /**
  * Encapsulates performance functions for two-class problems.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.5 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.6 $
  */
 public class TwoClassStats {
 

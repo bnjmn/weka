@@ -16,7 +16,7 @@
 
 /*
  *    SparseToNonSparse.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -34,8 +34,8 @@ import weka.core.Utils;
  * A filter that converts all incoming sparse instances into 
  * non-sparse format.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.1 $ 
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.2 $ 
  */
 public class SparseToNonSparse extends Filter implements UnsupervisedFilter,
 							 StreamableFilter {

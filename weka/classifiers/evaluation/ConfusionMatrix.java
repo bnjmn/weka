@@ -16,7 +16,7 @@
 
 /*
  *    NominalPrediction.java
- *    Copyright (C) 2000 Intelligenesis Corp.
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -31,8 +31,8 @@ import weka.classifiers.CostMatrix;
  * Cells of this matrix correspond to counts of the number (or weight)
  * of predictions for each actual value / predicted value combination.
  *
- * @author Len Trigg (len@intelligenesis.net)
- * @version $Revision: 1.4 $
+ * @author Len Trigg (len@reeltwo.com)
+ * @version $Revision: 1.5 $
  */
 public class ConfusionMatrix extends Matrix {
 
