@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -179,7 +179,7 @@ public class SimpleKMeans extends Clusterer
       converged = true;
       for (i = 0; i < instances.numInstances(); i++) {
 	Instance toCluster = instances.instance(i);
-	int newC = clusterProcessedInstance(toCluster);
+	int newC = clusterProcessedInstance(toCluster, true);
 	if (newC != clusterAssignments[i]) {
 	  converged = false;
 	}
@@ -238,9 +238,10 @@ public class SimpleKMeans extends Clusterer
    * clusters an instance that has been through the filters
    *
    * @param instance the instance to assign a cluster to
+   * @param updateErrors if true, update the within clusters sum of errors
    * @return a cluster number
    */
-  private int clusterProcessedInstance(Instance instance) {
+  private int clusterProcessedInstance(Instance instance, boolean updateErrors) {
     double minDist = Integer.MAX_VALUE;
     int bestCluster = 0;
     for (int i = 0; i < m_NumClusters; i++) {
@@ -250,7 +251,9 @@ public class SimpleKMeans extends Clusterer
 	bestCluster = i;
       }
     }
-    m_squaredErrors[bestCluster] += minDist;
+    if (updateErrors) {
+      m_squaredErrors[bestCluster] += minDist;
+    }
     return bestCluster;
   }
 
@@ -268,7 +271,7 @@ public class SimpleKMeans extends Clusterer
     m_ReplaceMissingFilter.batchFinished();
     Instance inst = m_ReplaceMissingFilter.output();
 
-    return clusterProcessedInstance(inst);
+    return clusterProcessedInstance(inst, false);
   }
 
   /**
