@@ -2,7 +2,7 @@ JAVAC = javac
 
 SOURCES = DecisionTable.java OneR.java Prism.java ZeroR.java \
 	Ridor.java ConjunctiveRule.java JRip.java RuleStats.java \
-	M5Rules.java
+	M5Rules.java Nnge.java
 
 
 

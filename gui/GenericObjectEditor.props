@@ -79,6 +79,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees.UserClassifier,\
  weka.classifiers.rules.ConjunctiveRule,\
  weka.classifiers.rules.DecisionTable,\
+ weka.classifiers.rules.Nnge,\
  weka.classifiers.rules.OneR,\
  weka.classifiers.rules.part.PART,\
  weka.classifiers.rules.M5Rules,\
