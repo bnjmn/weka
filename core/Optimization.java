@@ -136,7 +136,7 @@ import java.io.*;
  * <p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public abstract class Optimization{
     
@@ -262,7 +262,7 @@ public abstract class Optimization{
     public double[] lnsrch(double[] xold, double[] gradient, 
 			   double[] direct, double stpmax,
 			   boolean[] isFixed, double[][] nwsBounds,
-			   FastVector wsBdsIndx)
+			   DynamicIntArray wsBdsIndx)
 	throws Exception {
 	
 	int i, j, k,len=xold.length, 
@@ -362,7 +362,7 @@ public abstract class Optimization{
 			isFixed[i]=true; // Fix this variable
 			alpha = 0.0;
 			nwsBounds[0][i]=Double.NaN; //Add cons. to working set
-			wsBdsIndx.addElement(new Integer(i));
+			wsBdsIndx.addElement(i);
 		    }
 		    else if(alpha > alpi){ // Fix one variable in one iteration
 			alpha = alpi;
@@ -380,7 +380,7 @@ public abstract class Optimization{
 			isFixed[i]=true; // Fix this variable
 			alpha = 0.0;
 			nwsBounds[1][i]=Double.NaN; //Add cons. to working set
-			wsBdsIndx.addElement(new Integer(i));
+			wsBdsIndx.addElement(i);
 		    }
 		    else if(alpha > alpi){
 			alpha = alpi;
@@ -487,7 +487,7 @@ public abstract class Optimization{
 					       +fixedOne+" to bound "+ x[fixedOne]+
 					       " from value "+ xold[fixedOne]);
 			isFixed[fixedOne]=true; // Fix the variable
-			wsBdsIndx.addElement(new Integer(fixedOne));
+			wsBdsIndx.addElement(fixedOne);
 		    }		
 		    return x;
 		}
@@ -535,7 +535,7 @@ public abstract class Optimization{
 						       +fixedOne+" to bound "+ x[fixedOne]+
 						       " from value "+ xold[fixedOne]);
 				isFixed[fixedOne]=true; // Fix the variable
-				wsBdsIndx.addElement(new Integer(fixedOne));
+				wsBdsIndx.addElement(fixedOne);
 			    }		 				    
 			    return x;
 			}
@@ -577,7 +577,7 @@ public abstract class Optimization{
 					       +fixedOne+" to bound "+ x[fixedOne]+
 					       " from value "+ xold[fixedOne]);
 			isFixed[fixedOne]=true; // Fix the variable
-			wsBdsIndx.addElement(new Integer(fixedOne));
+			wsBdsIndx.addElement(fixedOne);
 		    }		 		    
 		}
 		else{   // Convergence on delta(x)
@@ -719,7 +719,7 @@ public abstract class Optimization{
 				   +fixedOne+" to bound "+ x[fixedOne]+
 				   " from value "+ xold[fixedOne]);
 	    isFixed[fixedOne]=true; // Fix the variable
-	    wsBdsIndx.addElement(new Integer(fixedOne));
+	    wsBdsIndx.addElement(fixedOne);
 	}
 	
 	return x;
@@ -744,9 +744,9 @@ public abstract class Optimization{
 	boolean[] isFixed = new boolean[l];
 	double[][] nwsBounds = new double[2][l];
 	// Record indice of fixed variables, simply for efficiency
-	FastVector wsBdsIndx = new FastVector(); 
+	DynamicIntArray wsBdsIndx = new DynamicIntArray(constraints.length); 
 	// Vectors used to record the variable indices to be freed 	
-	FastVector toFree=null, oldToFree=null;	
+	DynamicIntArray toFree=null, oldToFree=null;	
 
 	// Initial value of obj. function, gradient and inverse of the Hessian
 	m_f = objectiveFunction(initX);
@@ -792,7 +792,7 @@ public abstract class Optimization{
 	    
 	    if(m_IsZeroStep){ // Zero step, simply delete rows/cols of D and L
 		for(int f=0; f<wsBdsIndx.size(); f++){
-		    int idx=((Integer)wsBdsIndx.elementAt(f)).intValue();
+		    int idx=wsBdsIndx.elementAt(f);
 		    L.setRow(idx, new double[l]);
 		    L.setColumn(idx, new double[l]);
 		    D[idx] = 0.0;
@@ -860,11 +860,11 @@ public abstract class Optimization{
 			System.err.println("Test any release possible ...");
 		    	
 		    if(toFree != null)
-			oldToFree = (FastVector)toFree.copy();
-		    toFree = new FastVector();
+			oldToFree = (DynamicIntArray)toFree.copy();
+		    toFree = new DynamicIntArray(wsBdsIndx.size());
 		    
 		    for(int m=size-1; m>=0; m--){
-			int index=((Integer)wsBdsIndx.elementAt(m)).intValue();
+			int index=wsBdsIndx.elementAt(m);
 			double[] hessian = evaluateHessian(x, index);			
 			double deltaL=0.0;
 			if(hessian != null){
@@ -896,7 +896,7 @@ public abstract class Optimization{
 							      Math.abs(L2));  
 			if((L1*L2>0.0) && isConverge){ //Same sign and converge: valid
 			    if(L2 < 0.0){// Negative Lagrangian: feasible
-				toFree.addElement(new Integer(index));
+				toFree.addElement(index);
 				wsBdsIndx.removeElementAt(m);
 				finish=false; // Not optimal, cannot finish
 			    }
@@ -905,7 +905,7 @@ public abstract class Optimization{
 			// Although hardly happen, better check it
 			// If the first-order Lagrangian multiplier estimate is wrong,
 			// avoid zigzagging
-			if((hessian==null) && equal(toFree, oldToFree)) 
+			if((hessian==null) && (toFree != null) && toFree.equal(oldToFree)) 
 			    finish = true;           
 		    }
 		    
@@ -920,7 +920,7 @@ public abstract class Optimization{
 		    
 		    // Free some variables
 		    for(int mmm=0; mmm<toFree.size(); mmm++){
-			int freeIndx=((Integer)toFree.elementAt(mmm)).intValue();
+			int freeIndx=toFree.elementAt(mmm);
 			isFixed[freeIndx] = false; // Free this variable
 			if(x[freeIndx] <= constraints[0][freeIndx]){// Lower bound
 			    nwsBounds[0][freeIndx] = constraints[0][freeIndx];
@@ -992,7 +992,7 @@ public abstract class Optimization{
 		    throw new Exception("direct is NaN!");
 	    }
 	    
-	    System.gc();
+	    //System.gc();
 	}
 	
 	if(m_Debug)
@@ -1167,6 +1167,81 @@ public abstract class Optimization{
 	    }
 	}	
     }
+
+  /**
+   * Implements a simple dynamic array for ints.
+   */
+  private class DynamicIntArray {
+
+    /** The int array. */
+    private int[] m_Objects;
+
+    /** The current size; */
+    private int m_Size = 0;
+
+    /** The capacity increment */
+    private int m_CapacityIncrement = 1;
+  
+    /** The capacity multiplier. */
+    private int m_CapacityMultiplier = 2;
+
+    /**
+     * Constructs a vector with the given capacity.
+     *
+     * @param capacity the vector's initial capacity
+     */
+    public DynamicIntArray(int capacity) {
+      
+      m_Objects = new int[capacity];
+    }
+
+    /**
+     * Adds an element to this vector. Increases its
+     * capacity if its not large enough.
+     *
+     * @param element the element to add
+     */
+    public final void addElement(int element) {
+      
+      if (m_Size == m_Objects.length) {
+	int[] newObjects;
+	newObjects = new int[m_CapacityMultiplier *
+			     (m_Objects.length +
+			      m_CapacityIncrement)];
+	System.arraycopy(m_Objects, 0, newObjects, 0, m_Size);
+	m_Objects = newObjects;
+      }
+      m_Objects[m_Size] = element;
+      m_Size++;
+    }
+
+    /**
+     * Produces a copy of this vector.
+     *
+     * @return the new vector
+     */
+    public final Object copy() {
+      
+      
+      DynamicIntArray copy = new DynamicIntArray(m_Objects.length);
+      
+      copy.m_Size = m_Size;
+      copy.m_CapacityIncrement = m_CapacityIncrement;
+      copy.m_CapacityMultiplier = m_CapacityMultiplier;
+      System.arraycopy(m_Objects, 0, copy.m_Objects, 0, m_Size);
+      return copy;
+    }
+
+    /**
+     * Returns the element at the given position.
+     *
+     * @param index the element's index
+     * @return the element with the given index
+     */
+    public final int elementAt(int index) {
+      
+      return m_Objects[index];
+    }
     
     /**
      * Check whether the two integer vectors equal to each other
@@ -1177,23 +1252,51 @@ public abstract class Optimization{
      * @param b another integer vector
      * @return whether they are equal
      */ 
-    private boolean equal(FastVector a, FastVector b){
-	if((a==null) || (b==null) || (a.size()!=b.size()))
-	    return false;
-	
-	int size=a.size();
-	// Store into int arrays
-	int[] ia=new int[size], ib=new int[size];
-	for(int i=0;i<size;i++){
-	    ia[i] = ((Integer)a.elementAt(i)).intValue();
-	    ib[i] = ((Integer)b.elementAt(i)).intValue();
-	}
-	// Only values matter, order does not matter
-	int[] sorta=Utils.sort(ia), sortb=Utils.sort(ib);
-	for(int j=0; j<size;j++)
-	    if(ia[sorta[j]] != ib[sortb[j]])
-		return false;
-	
-	return true;
+    private boolean equal(DynamicIntArray b){
+      if((b==null) || (size()!=b.size()))
+	  return false;
+      
+      int size=size();
+      
+      // Only values matter, order does not matter
+      int[] sorta=Utils.sort(m_Objects), sortb=Utils.sort(b.m_Objects);
+      for(int j=0; j<size;j++)
+	if(m_Objects[sorta[j]] != b.m_Objects[sortb[j]])
+	  return false;
+      
+      return true;
     }
+
+    /**
+     * Deletes an element from this vector.
+     *
+     * @param index the index of the element to be deleted
+     */
+    public final void removeElementAt(int index) {
+      
+      System.arraycopy(m_Objects, index + 1, m_Objects, index, 
+		       m_Size - index - 1);
+      m_Size--;
+    }
+
+    /**
+     * Removes all components from this vector and sets its 
+     * size to zero. 
+     */
+    public final void removeAllElements() {
+      
+      m_Objects = new int[m_Objects.length];
+      m_Size = 0;
+    }
+
+    /**
+     * Returns the vector's current size.
+     *
+     * @return the vector's current size
+     */
+    public final int size() {
+      
+      return m_Size;
+    }
+  }
 }
