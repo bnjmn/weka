@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -66,9 +66,21 @@ public class SimpleKMeans extends Clusterer
   private Instances m_ClusterCentroids;
 
   /**
-   * Holds the standard deviations of attributes in each cluster
+   * Holds the standard deviations of the numeric attributes in each cluster
    */
   private Instances m_ClusterStdDevs;
+
+  
+  /**
+   * For each cluster, holds the frequency counts for the values of each 
+   * nominal attribute
+   */
+  private int [][][] m_ClusterNominalCounts;
+
+  /**
+   * The number of instances in each cluster
+   */
+  private int [] m_ClusterSizes;
 
   /**
    * random seed
@@ -89,6 +101,8 @@ public class SimpleKMeans extends Clusterer
    * Keep track of the number of iterations completed before convergence
    */
   private int m_Iterations = 0;
+
+  private double [] m_squaredErrors;
 
   /**
    * Returns a string describing this clusterer
@@ -173,6 +187,8 @@ public class SimpleKMeans extends Clusterer
     boolean converged = false;
     int emptyClusterCount;
     Instances [] tempI = new Instances[m_NumClusters];
+    m_squaredErrors = new double [m_NumClusters];
+    m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
     while (!converged) {
       emptyClusterCount = 0;
       m_Iterations++;
@@ -203,6 +219,8 @@ public class SimpleKMeans extends Clusterer
 	} else {
 	  for (int j = 0; j < instances.numAttributes(); j++) {
 	    vals[j] = tempI[i].meanOrMode(j);
+	    m_ClusterNominalCounts[i][j] = 
+	      tempI[i].attributeStats(j).nominalCounts;
 	  }
 	  m_ClusterCentroids.add(new Instance(1.0, vals));
 	}
@@ -212,8 +230,13 @@ public class SimpleKMeans extends Clusterer
 	m_NumClusters -= emptyClusterCount;
 	tempI = new Instances[m_NumClusters];
       }
+      if (!converged) {
+	m_squaredErrors = new double [m_NumClusters];
+	m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
+      }
     }
     m_ClusterStdDevs = new Instances(instances, m_NumClusters);
+    m_ClusterSizes = new int [m_NumClusters];
     for (i = 0; i < m_NumClusters; i++) {
       double [] vals2 = new double[instances.numAttributes()];
       for (int j = 0; j < instances.numAttributes(); j++) {
@@ -221,9 +244,10 @@ public class SimpleKMeans extends Clusterer
 	  vals2[j] = Math.sqrt(tempI[i].variance(j));
 	} else {
 	  vals2[j] = Instance.missingValue();
-	}
+	}	
       }
       m_ClusterStdDevs.add(new Instance(1.0, vals2));
+      m_ClusterSizes[i] = tempI[i].numInstances();
     }
   }
 
@@ -243,6 +267,7 @@ public class SimpleKMeans extends Clusterer
 	bestCluster = i;
       }
     }
+    m_squaredErrors[bestCluster] += minDist;
     return bestCluster;
   }
 
@@ -567,8 +592,9 @@ public class SimpleKMeans extends Clusterer
     }
     temp.append("\nkMeans\n======\n");
     temp.append("\nNumber of iterations: " + m_Iterations+"\n");
+    temp.append("Within cluster sum of squared errors: " + Utils.sum(m_squaredErrors));
 
-    temp.append("\nCluster centroids:\n");
+    temp.append("\n\nCluster centroids:\n");
     for (int i = 0; i < m_NumClusters; i++) {
       temp.append("\nCluster "+i+"\n\t");
       temp.append("Mean/Mode: ");
@@ -593,6 +619,26 @@ public class SimpleKMeans extends Clusterer
     }
     temp.append("\n\n");
     return temp.toString();
+  }
+
+  public Instances getClusterCentroids() {
+    return m_ClusterCentroids;
+  }
+
+  public Instances getClusterStandardDevs() {
+    return m_ClusterStdDevs;
+  }
+
+  public int [][][] getClusterNominalCounts() {
+    return m_ClusterNominalCounts;
+  }
+
+  public double getSquaredError() {
+    return Utils.sum(m_squaredErrors);
+  }
+
+  public int [] getClusterSizes() {
+    return m_ClusterSizes;
   }
 
   /**
