@@ -47,7 +47,7 @@ import java.util.*;
  * (default 0, don't randomize)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
 public class SplitDatasetFilter extends Filter implements OptionHandler {
 
@@ -157,15 +157,15 @@ public class SplitDatasetFilter extends Filter implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [11];
+    String [] options = new String [7];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = "" + getSeed();
+    if (getInvertSelection()) {
+      options[current++] = "-V";
+    }
     if (!getInstancesIndices().equals("")) {
       options[current++] = "-R"; options[current++] = getInstancesIndices();
-      if (getInvertSelection()) {
-	options[current++] = "-V";
-      }
     } else {
       options[current++] = "-N"; options[current++] = "" + getNumFolds();
       options[current++] = "-F"; options[current++] = "" + getFold();
