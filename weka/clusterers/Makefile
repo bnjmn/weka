@@ -1,7 +1,7 @@
 JAVAC = javac
 
 SOURCES = ClusterEvaluation.java Clusterer.java Cobweb.java \
-	  DistributionClusterer.java EM.java
+	  DistributionClusterer.java EM.java SimpleKMeans.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
