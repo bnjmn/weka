@@ -18,11 +18,13 @@
  *    StringToWordVectorFilter.java
  *    Copyright (C) 2000 Webmind Inc.
  *
+ *    Updated 12/Dec/2001 by Gordon Paynter (gordon.paynter@ucr.edu)
+ *                        Added parameters for delimiter set,
+ *                        number of words to add, and input range.
  */
 
 
 package weka.filters;
-
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -35,8 +37,12 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+
 
 /** 
  * Converts String attributes into a set of attributes representing word
@@ -46,12 +52,15 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@intelligenesis.net)
  * @author Stuart Inglis (stuart@intelligenesis.net)
- * @version $Revision: 1.8 $ 
+ * @version 1.8-gwp-$Revision: 1.9 $ 
  **/
-public class StringToWordVectorFilter extends Filter {
+public class StringToWordVectorFilter extends Filter implements OptionHandler {
 
   /** Delimiters used in tokenization */
-  private static final String DELIMS = " \n\t.,:'\"()?!";
+  private String delimiters = " \n\t.,:'\"()?!";
+
+  /** Range of columns to convert to word vectors */
+  protected Range m_SelectedRange = null;
 
   /** Contains a mapping of valid words to attribute indexes */
   private TreeMap m_Dictionary = new TreeMap();
@@ -65,7 +74,99 @@ public class StringToWordVectorFilter extends Filter {
    */
   private int m_WordsToKeep = 1000;
 
-  
+  /**
+   * Returns an enumeration describing the available options
+   *
+   * @return an enumeration of all the available options
+   */
+  public Enumeration listOptions() {
+
+    Vector newVector = new Vector(3);
+
+    newVector.addElement(new Option(
+				    "\tString containing the set of delimiter characters\n"
+				    + "\t(default: \" \\n\\t.,:'\\\"()?!\")",
+				    "D", 1, "-D <delimiter set>"));
+    newVector.addElement(new Option(
+				    "\tSpecify list of string attributes to convert to words (as weka Range).\n"
+				    + "\t(default: select all string attributes)",
+				    "R", 1, "-R <index1,index2-index4,...>"));
+    newVector.addElement(new Option(
+				    "\tSpecify approximate number of word fields to create.\n"
+				    + "\tSurplus words will be discarded..\n"
+				    + "\t(default: 1000)",
+				    "w", 1, "-w <number of words to keep>"));
+
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options controlling the behaviour of this object.
+   * Valid options are:<p>
+   *
+   * -D <delimiter charcters>
+   * Specify set of delimiter characters
+   * (default: " \n\t.,:'\\\"()?!\"<p>
+   *
+   * -R index1,index2-index4,...<br>
+   * Specify list of string attributes to convert to words.
+   * (default: all string attributes)<p>
+   *
+   * -w <number of words to keep><br>
+   * Specify number of word fields to create.
+   * Other, less useful words will be discarded.
+   * (default: 1000)<p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+
+    String value = Utils.getOption('D', options);
+    if (value.length() != 0) {
+      setDelimiters(value);
+    }
+
+    value = Utils.getOption('R', options);
+    if (value.length() != 0) {
+      setSelectedRange(value);
+    }
+
+    value = Utils.getOption('w', options);
+    if (value.length() != 0) {
+      setWordsToKeep(Integer.valueOf(value).intValue());
+    }
+
+  }
+
+  /**
+   * Gets the current settings of the filter.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String [] getOptions() {
+
+    String [] options = new String [10];
+    int current = 0;
+
+    options[current++] = "-D"; 
+    options[current++] = getDelimiters();
+
+    if (getSelectedRange() != null) {
+      options[current++] = "-R"; 
+      m_SelectedRange.setUpper(getInputFormat().numAttributes() - 1);
+      options[current++] = getSelectedRange().getRanges();
+    }
+
+    options[current++] = "-w"; 
+    options[current++] = String.valueOf(getWordsToKeep());
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
+  }
+
   /**
    * Default constructor. Targets 1000 words in the output.
    */
@@ -103,7 +204,7 @@ public class StringToWordVectorFilter extends Filter {
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
-       throws Exception {
+    throws Exception {
 
     super.setInputFormat(instanceInfo);
     m_FirstBatchDone = false;
@@ -168,6 +269,42 @@ public class StringToWordVectorFilter extends Filter {
   }
 
   /**
+   * Get the value of delimiters.
+   *
+   * @return Value of delimiters.
+   */
+  public String getDelimiters() {
+    return delimiters;
+  }
+    
+  /**
+   * Set the value of delimiters.
+   *
+   * @param newdelimiters Value to assign to delimiters.
+   */
+  public void setDelimiters(String newDelimiters) {
+    delimiters = newDelimiters;
+  }
+
+  /**
+   * Get the value of m_SelectedRange.
+   *
+   * @return Value of m_SelectedRange.
+   */
+  public Range getSelectedRange() {
+    return m_SelectedRange;
+  }
+    
+  /**
+   * Set the value of m_SelectedRange.
+   *
+   * @param newSelectedRange Value to assign to m_SelectedRange.
+   */
+  public void setSelectedRange(String newSelectedRange) {
+    m_SelectedRange = new Range(newSelectedRange);
+  }
+
+  /**
    * Gets the number of words (per class if there is a class attribute
    * assigned) to attempt to keep.
    *
@@ -211,8 +348,37 @@ public class StringToWordVectorFilter extends Filter {
     }
   }
 
-
+  private void determineSelectedRange() {
+    
+    Instances inputFormat = getInputFormat();
+    
+    // Calculate the default set of fields to convert
+    if (m_SelectedRange == null) {
+      StringBuffer fields = new StringBuffer();
+      for (int j = 0; j < inputFormat.numAttributes(); j++) { 
+	if (inputFormat.attribute(j).type() == Attribute.STRING)
+	  fields.append((j + 1) + ",");
+      }
+      m_SelectedRange = new Range(fields.toString());
+    }
+    
+    m_SelectedRange.setUpper(inputFormat.numAttributes() - 1);
+    
+    // Prevent the user from converting non-string fields
+    StringBuffer fields = new StringBuffer();
+    for (int j = 0; j < inputFormat.numAttributes(); j++) { 
+      if (m_SelectedRange.isInRange(j) 
+	  && inputFormat.attribute(j).type() == Attribute.STRING)
+	fields.append((j + 1) + ",");
+    }
+    m_SelectedRange.setRanges(fields.toString());
+    
+    // System.err.println("Selected Range: " + getSelectedRange().getRanges()); 
+  }
+  
   private void determineDictionary() {
+    
+    // System.err.println("Creating dictionary"); 
     
     int classInd = getInputFormat().classIndex();
     int values = 1;
@@ -224,22 +390,24 @@ public class StringToWordVectorFilter extends Filter {
       dictionaryArr[i] = new TreeMap();
     }
 
-    //System.err.print("Creating dictionary\n"); System.err.flush();
+    // Make sure we know which fields to convert
+    determineSelectedRange();
 
-    // Tokenize all training text into an orderedMap.
+    // Tokenize all training text into an orderedMap of "words".
     for (int i = 0; i < getInputFormat().numInstances(); i++) {
       /*
-      if (i % 10 == 0) {
+	if (i % 10 == 0) {
         System.err.print( i + " " + getInputFormat().numInstances() + "\r"); 
         System.err.flush();
-      }
+	}
       */
       Instance instance = getInputFormat().instance(i);
       for (int j = 0; j < instance.numAttributes(); j++) { 
-        if ((getInputFormat().attribute(j).type() == Attribute.STRING) 
-            && (instance.isMissing(j) == false)) {
+        if (m_SelectedRange.isInRange(j) && (instance.isMissing(j) == false)) {
+	  //getInputFormat().attribute(j).type() == Attribute.STRING 
+            
           StringTokenizer st = new StringTokenizer(instance.stringValue(j),
-                                                   DELIMS);
+                                                   delimiters);
           while (st.hasMoreTokens()) {
             String word = st.nextToken().intern();
             int vInd = 0;
@@ -286,24 +454,38 @@ public class StringToWordVectorFilter extends Filter {
     }
 
     /*
-    for (int z=0;z<values;z++) {
+      for (int z=0;z<values;z++) {
       System.err.println(dictionaryArr[z].size()+" "+totalsize);
-    }
+      }
     */
 
     // Convert the dictionary into an attribute index
     // and create one attribute per word
-    FastVector attributes = new FastVector(totalsize);
+    FastVector attributes = new FastVector(totalsize +
+					   getInputFormat().numAttributes());
+
+    // Add the non-converted attributes 
+    int classIndex = -1;
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      if (!m_SelectedRange.isInRange(i)) { 
+        if (getInputFormat().classIndex() == i) {
+          classIndex = attributes.size();
+        }
+	attributes.addElement(getInputFormat().attribute(i).copy());
+      }     
+    }
+
+    // Add the word vector attributes
     TreeMap newDictionary = new TreeMap();
 
-    int index = 0;
+    int index = attributes.size();
     for(int z = 0; z < values; z++) {
       /*
-      System.err.print("\nCreating word index...");
-      if (values > 1) {
+	System.err.print("\nCreating word index...");
+	if (values > 1) {
         System.err.print(" for class id=" + z); 
-      }
-      System.err.flush();
+	}
+	System.err.flush();
       */
       Iterator it = dictionaryArr[z].keySet().iterator();
       while (it.hasNext()) {
@@ -313,10 +495,10 @@ public class StringToWordVectorFilter extends Filter {
           //          System.err.println(word+" "+newDictionary.get(word));
           if(newDictionary.get(word) == null) {
             /*
-            if (values > 1) {
+	      if (values > 1) {
               System.err.print(getInputFormat().classAttribute().value(z) + " ");
-            }
-            System.err.println(word);
+	      }
+	      System.err.println(word);
             */
             newDictionary.put(word, new Integer(index++));
             attributes.addElement(new Attribute(word));
@@ -328,19 +510,10 @@ public class StringToWordVectorFilter extends Filter {
     attributes.trimToSize();
     m_Dictionary = newDictionary;
 
-    int classIndex = -1;
-    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if (getInputFormat().attribute(i).type() != Attribute.STRING) {
-        if (getInputFormat().classIndex() == i) {
-          classIndex = attributes.size();
-        }
-        attributes.addElement(getInputFormat().attribute(i).copy());
-      }     
-    }
-    /*
-    System.err.println("done. " + index + " words in total.");
-    */
+    //System.err.println("done: " + index + " words in total.");
+
     
+    // Set the filter's output format
     Instances outputFormat = new Instances(getInputFormat().relationName(), 
                                            attributes, 0);
     outputFormat.setClassIndex(classIndex);
@@ -352,11 +525,48 @@ public class StringToWordVectorFilter extends Filter {
 
     // Convert the instance into a sorted set of indexes
     TreeMap contained = new TreeMap();
+
+    // Copy all non-converted attributes from input to output
+    int firstCopy = 0;
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      if (!m_SelectedRange.isInRange(i)) { 
+      
+	if (getInputFormat().attribute(i).type() != Attribute.STRING) {
+	  // Add simple nominal and numeric attributes directly
+	  if (instance.value(i) != 0.0) {
+	    contained.put(new Integer(firstCopy), 
+			  new Double(instance.value(i)));
+	  } 
+	} else {
+	  if (instance.isMissing(i)) {
+	    contained.put(new Integer(firstCopy),
+			  new Double(Instance.missingValue()));
+	  } else {
+
+	    // If this is a string attribute, we have to first add
+	    // this value to the range of possible values, then add
+	    // its new internal index.
+	    if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
+	      // Note that the first string value in a
+	      // SparseInstance doesn't get printed.
+	      outputFormatPeek().attribute(firstCopy)
+		.addStringValue("Hack to defeat SparseInstance bug");
+	    }
+	    int newIndex = outputFormatPeek().attribute(firstCopy)
+	      .addStringValue(instance.stringValue(i));
+	    contained.put(new Integer(firstCopy), 
+			  new Double(newIndex));
+	  }
+	}
+	firstCopy++;
+      }     
+    }
     for (int j = 0; j < instance.numAttributes(); j++) { 
-      if ((getInputFormat().attribute(j).type() == Attribute.STRING) 
-          && (instance.isMissing(j) == false)) {
+      //if ((getInputFormat().attribute(j).type() == Attribute.STRING) 
+      if (m_SelectedRange.isInRange(j)
+	  && (instance.isMissing(j) == false)) {          
         StringTokenizer st = new StringTokenizer(instance.stringValue(j),
-                                                 DELIMS);
+                                                 delimiters);
         while (st.hasMoreTokens()) {
           String word = st.nextToken();
           Integer index = (Integer) m_Dictionary.get(word);
@@ -365,17 +575,6 @@ public class StringToWordVectorFilter extends Filter {
           }
         }
       }
-    }
-
-    int firstCopy = m_Dictionary.size();
-    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if (getInputFormat().attribute(i).type() != Attribute.STRING) {
-        if (instance.value(i) != 0.0) {
-          contained.put(new Integer(firstCopy), 
-                        new Double(instance.value(i)));
-        }
-        firstCopy++;
-      }     
     }
     
     // Convert the set to structures needed to create a sparse instance.
@@ -388,6 +587,7 @@ public class StringToWordVectorFilter extends Filter {
       values[i] = value.doubleValue();
       indices[i] = index.intValue();
     }
+
     Instance inst = new SparseInstance(instance.weight(), values, indices, 
                                        outputFormatPeek().numAttributes());
     inst.setDataset(outputFormatPeek());
@@ -410,7 +610,7 @@ public class StringToWordVectorFilter extends Filter {
 	Filter.filterFile(new StringToWordVectorFilter(), argv);
       }
     } catch (Exception ex) {
-      	ex.printStackTrace();
+      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }
