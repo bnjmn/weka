@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * Class representing a set of literals, being either the body or the head
  * of a rule.
  *
- * @author <a href="mailto:adeltour@netcourrier.com">Amélie Deltour</a>
+ * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
  */
 
 public abstract class LiteralSet implements Serializable, Cloneable {

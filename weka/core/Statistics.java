@@ -4,8 +4,8 @@ package weka.core;
  * Class implementing some distributions, tests, etc. The code is mostly adapted from the CERN
  * Jet Java libraries:
  * 
- * Copyright © 2001 University of Waikato
- * Copyright © 1999 CERN - European Organization for Nuclear Research.
+ * Copyright 2001 University of Waikato
+ * Copyright 1999 CERN - European Organization for Nuclear Research.
  * Permission to use, copy, modify, distribute and sell this software and its documentation for
  * any purpose is hereby granted without fee, provided that the above copyright notice appear
  * in all copies and that both that copyright notice and this permission notice appear in
@@ -17,7 +17,7 @@ package weka.core;
  * @author wolfgang.hoschek@cern.ch
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Statistics {
 

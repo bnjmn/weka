@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.34 $
+ * @version  $Revision: 1.35 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -624,7 +624,7 @@ public class AttributeSelection implements Serializable {
 	 if (retType.equals(ASEvaluation.class)) {
 	   Class args [] = { };
 	   ASEvaluation tempEval = (ASEvaluation)(meth.invoke(m_searchMethod,
-							     args));
+							      (Object[])args));
 	   if (tempEval instanceof AttributeTransformer) {
 	     // grab the transformed data header
 	     m_trainInstances = 
