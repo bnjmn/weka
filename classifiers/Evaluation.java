@@ -109,7 +109,7 @@ import weka.estimators.*;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.21 $
+ * @version  $Revision: 1.22 $
   */
 public class Evaluation implements Summarizable {
 
@@ -152,17 +152,8 @@ public class Evaluation implements Summarizable {
   /** The cost matrix (if given). */
   private CostMatrix m_CostMatrix;
 
-  /** The weight of all correctly classified instances weighted by a cost. */
-  private double m_CorrectWithCost;
-  
-  /** The weight of all incorrectly classified instances weighted by a cost. */
-  private double m_IncorrectWithCost;
-  
-  /** The weight of all unclassified instances weighted by a cost. */
-  private double m_UnclassifiedWithCost;
-
-  /** The weight of all instances with a class weighted by a cost. */
-  private double m_WithClassWithCost;
+  /** The total cost of predictions (includes instance weights) */
+  private double m_TotalCost;
 
   /** Sum of errors. */
   private double m_SumErr;
@@ -230,9 +221,6 @@ public class Evaluation implements Summarizable {
   /** Total entropy of scheme predictions */
   private double m_SumSchemeEntropy;
   
-  /** Random instance for dataset shuffling and resampling */
-  private Random m_Random = null;
-
   /**
    * Initializes all the counters for the evaluation.
    *
@@ -242,7 +230,7 @@ public class Evaluation implements Summarizable {
    */
   public Evaluation(Instances data) throws Exception {
     
-    this(data, null, null);
+    this(data, null);
   }
 
   /**
@@ -251,13 +239,10 @@ public class Evaluation implements Summarizable {
    *
    * @param data set of instances, to get some header information
    * @param costMatrix the cost matrix---if null, default costs will be used
-   * @param random a random number generator for cost matrix-based
-   * resampling---if set to null, no resampling is performed
    * @exception Exception if cost matrix is not compatible with 
    * data, the class is not defined or the class is numeric
    */
-  public Evaluation(Instances data, CostMatrix costMatrix,
-		    Random random) 
+  public Evaluation(Instances data, CostMatrix costMatrix) 
        throws Exception {
     
     m_NumClasses = data.numClasses();
@@ -284,7 +269,6 @@ public class Evaluation implements Summarizable {
     m_ClassPriors = new double [m_NumClasses];
     setPriors(data);
     m_MarginCounts = new double [k_MarginResolution + 1];
-    m_Random = random;
   }
 
   /**
@@ -327,9 +311,6 @@ public class Evaluation implements Summarizable {
     // Do the folds
     for (int i = 0; i < numFolds; i++) {
       Instances train = data.trainCV(numFolds, i);
-      if (m_CostMatrix != null) {
-	train = m_CostMatrix.applyCostMatrix(train, m_Random);
-      }
       setPriors(train);
       classifier.buildClassifier(train);
       Instances test = data.testCV(numFolds, i);
@@ -630,7 +611,13 @@ public class Evaluation implements Summarizable {
       }
       costFileName = Utils.getOption('m', options);
       if (costFileName.length() != 0) {
-
+        System.out.println(
+           "NOTE: The behaviour of the -m option has changed between WEKA 3.0"
+           +" and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
+           +" only. For cost-sensitive *prediction*, use one of the"
+           +" cost-sensitive metaschemes such as"
+           +" weka.classifiers.CostSensitiveClassifier or"
+           +" weka.classifiers.MetaCost");
 	try {
 	  costReader = new FileReader(costFileName);
 	} catch (Exception e) {
@@ -642,7 +629,7 @@ public class Evaluation implements Summarizable {
 	} catch (Exception ex) {
 	  try {
 	    // Now try as the poxy old format :-)
-	    System.err.println("Attempting to read old format");
+	    //System.err.println("Attempting to read old format cost file");
 	    try {
 	      costReader.close(); // Close the old one
 	      costReader = new FileReader(costFileName);
@@ -650,12 +637,12 @@ public class Evaluation implements Summarizable {
 	      throw new Exception("Can't open file " + e.getMessage() + '.');
 	    }
 	    costMatrix = new CostMatrix(template.numClasses());
-	    System.err.println("Created default cost matrix");
+	    //System.err.println("Created default cost matrix");
 	    costMatrix.readOldFormat(costReader);
-	    System.err.println("Read old format");
+	    //System.err.println("Read old format");
 	  } catch (Exception e2) {
 	    // re-throw the original exception
-	    System.err.println("Re-throwing original exception");
+	    //System.err.println("Re-throwing original exception");
 	    throw ex;
 	  }
 	}
@@ -698,20 +685,8 @@ public class Evaluation implements Summarizable {
     }
 
     // Setup up evaluation objects
-    if (costMatrix == null) {
-      trainingEvaluation = new Evaluation(new Instances(template, 0));
-      testingEvaluation = new Evaluation(new Instances(template, 0));
-    } else {
-      if (classifier instanceof WeightedInstancesHandler) {
-	random = null;
-      } else {
-	random = new Random(seed);
-      }
-      trainingEvaluation = new Evaluation(new Instances(template, 0),
-					  costMatrix, random);
-      testingEvaluation = new Evaluation(new Instances(template, 0), 
-					 costMatrix, random);
-    }
+    trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
+    testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
     
     if (objectInputFileName.length() != 0) {
       
@@ -757,12 +732,7 @@ public class Evaluation implements Summarizable {
     } else if (objectInputFileName.length() == 0) {
       
       // Build classifier in one go
-      if (costMatrix != null) {
-	tempTrain = costMatrix.applyCostMatrix(trainWithoutStrings, 
-					       trainingEvaluation.m_Random);
-      } else {
-	tempTrain = new Instances(train);
-      }
+      tempTrain = new Instances(train);
       trainingEvaluation.setPriors(tempTrain);
       testingEvaluation.setPriors(tempTrain);
       classifier.buildClassifier(tempTrain);
@@ -1078,17 +1048,6 @@ public class Evaluation implements Summarizable {
   }
 
   /**
-   * Gets the number of instances incorrectly classified (that is, for
-   * which an incorrect prediction was made), including misclassification costs.
-   *
-   * @return the number of incorrectly classified instances 
-   */
-  public final double incorrectWithCost() {
-
-    return m_IncorrectWithCost;
-  }
-
-  /**
    * Gets the percentage of instances incorrectly classified (that is, for
    * which an incorrect prediction was made).
    *
@@ -1101,17 +1060,16 @@ public class Evaluation implements Summarizable {
   }
 
   /**
-   * Gets the percentage of instances incorrectly classified (that is, for
-   * which an incorrect prediction was made), including misclassification costs.
+   * Gets the total cost, that is, the cost of each prediction times the
+   * weight of the instance, summed over all instances.
    *
-   * @return the percent of incorrectly classified instances 
-   * (between 0 and 100)
+   * @return the total cost
    */
-  public final double pctIncorrectWithCost() {
+  public final double totalCost() {
 
-    return 100 * m_IncorrectWithCost / m_WithClassWithCost;
+    return m_TotalCost;
   }
-
+  
   /**
    * Gets the average cost, that is, total cost of misclassifications
    * (incorrect plus unclassified) over the total number of instances.
@@ -1120,7 +1078,7 @@ public class Evaluation implements Summarizable {
    */
   public final double avgCost() {
 
-    return (m_IncorrectWithCost + m_UnclassifiedWithCost) / m_WithClass;
+    return m_TotalCost / m_WithClass;
   }
 
   /**
@@ -1136,17 +1094,6 @@ public class Evaluation implements Summarizable {
   }
 
   /**
-   * Gets the number of instances correctly classified (that is, for
-   * which a correct prediction was made), including misclassification costs.
-   *
-   * @return the number of correctly classified instances
-   */
-  public final double correctWithCost() {
-    
-    return m_CorrectWithCost;
-  }
-
-  /**
    * Gets the percentage of instances correctly classified (that is, for
    * which a correct prediction was made).
    *
@@ -1158,17 +1105,6 @@ public class Evaluation implements Summarizable {
   }
   
   /**
-   * Gets the percentage of instances correctly classified (that is, for
-   * which a correct prediction was made), including misclassification costs.
-   *
-   * @return the percent of correctly classified instances (between 0 and 100)
-   */
-  public final double pctCorrectWithCost() {
-
-    return 100.0 * m_CorrectWithCost / m_WithClassWithCost;
-  }
-
-  /**
    * Gets the number of instances not classified (that is, for
    * which no prediction was made by the classifier). (Actually the sum
    * of the weights of these instances)
@@ -1178,18 +1114,6 @@ public class Evaluation implements Summarizable {
   public final double unclassified() {
     
     return m_Unclassified;
-  }
-
-  /**
-   * Gets the number of instances not classified (that is, for
-   * which no prediction was made by the classifier), including the 
-   * misclassification costs.
-   *
-   * @return the number of unclassified instances
-   */
-  public final double unclassifiedWithCost() {
-    
-    return m_UnclassifiedWithCost;
   }
 
   /**
@@ -1204,23 +1128,12 @@ public class Evaluation implements Summarizable {
   }
 
   /**
-   * Gets the percentage of instances not classified (that is, for
-   * which no prediction was made by the classifier), including
-   * misclassification costs.
-   *
-   * @return the percent of unclassified instances (between 0 and 100)
-   */
-  public final double pctUnclassifiedWithCost() {
-    
-    return 100 * m_UnclassifiedWithCost / m_WithClassWithCost;
-  }
-
-  /**
    * Returns the estimated error rate or the root mean squared error
    * (if the class is numeric). If a cost matrix was given this
-   * error rate involves weights from the cost matrix.
+   * error rate gives the average cost.
    *
-   * @return the estimated error rate (between 0 and 1)
+   * @return the estimated error rate (between 0 and 1, or between 0 and 
+   * maximum cost)
    */
   public final double errorRate() {
 
@@ -1230,7 +1143,7 @@ public class Evaluation implements Summarizable {
     if (m_CostMatrix == null) {
       return m_Incorrect / m_WithClass;
     } else {
-      return m_IncorrectWithCost / m_WithClassWithCost;
+      return avgCost();
     }
   }
 
@@ -1602,26 +1515,10 @@ public class Evaluation implements Summarizable {
 		      Utils.doubleToString(pctIncorrect(),
 					   12, 4) + " %\n");
 	  if (m_CostMatrix != null) {
-	    text.append("Correctly Classified With Cost     ");
-	    text.append(Utils.doubleToString(correctWithCost(), 12 ,4) + 
-			"     " +
-			Utils.doubleToString(pctCorrectWithCost(), 12, 4) 
-			+ " %\n");
-	    text.append("Incorrectly Classified With Cost   ");
-	    text.append(Utils.doubleToString(incorrectWithCost(), 12, 4) +
-			"     " +
-			Utils.doubleToString(pctIncorrectWithCost(), 12, 4) 
-			+ " %\n");
+	    text.append("Total  Cost                        ");
+	    text.append(Utils.doubleToString(totalCost(), 12, 4) + "\n");
 	    text.append("Average Cost                       ");
 	    text.append(Utils.doubleToString(avgCost(), 12, 4) + "\n");
-	    if (Utils.gr(m_UnclassifiedWithCost, 0)) {
-	      text.append("UnClassified With Cost             ");
-	      text.append(Utils.doubleToString(unclassifiedWithCost(), 12, 4) +
-			  "     " +
-			  Utils.doubleToString(pctUnclassifiedWithCost(), 
-                                               12, 4) 
-			  + " %\n");
-	    }
 	  }
 	  if (printComplexityStatistics) {
 	    text.append("K&B Relative Info Score            ");
@@ -1677,10 +1574,6 @@ public class Evaluation implements Summarizable {
       }
       text.append("Total Number of Instances          ");
       text.append(Utils.doubleToString(m_WithClass, 12, 4) + "\n");
-      if (m_CostMatrix != null) {
-	text.append("Total Number With Cost             ");
-	text.append(Utils.doubleToString(m_WithClassWithCost, 12, 4) + "\n");
-      }    
       if (m_MissingClass > 0) {
 	text.append("Ignored Class Unknown Instances            ");
 	text.append(Utils.doubleToString(m_MissingClass, 12, 4) + "\n");
@@ -2207,24 +2100,22 @@ public class Evaluation implements Summarizable {
 	}
       }
 
+      m_WithClass += instance.weight();
+
       // Determine misclassification cost
       if (m_CostMatrix != null) {
-	// If no prediction was made, this is taken as being maximally wrong.
-	// If the prediction was correct, assume this is maximally right.
-	if ((predictedClass < 0) || (predictedClass == actualClass)) {
-	  costFactor = m_CostMatrix.getMaxCost(actualClass); 
-	} else {
-	  costFactor = m_CostMatrix.getElement(actualClass, predictedClass);
-	}
+        if (predictedClass < 0) {
+          m_TotalCost += instance.weight()
+            * m_CostMatrix.getMaxCost(actualClass);
+        } else {
+          m_TotalCost += instance.weight() 
+            * m_CostMatrix.getElement(actualClass, predictedClass);
+        }
       }
-
-      m_WithClass += instance.weight();
-      m_WithClassWithCost += costFactor * instance.weight();
 
       // Update counts when no class was predicted
       if (predictedClass < 0) {
 	m_Unclassified += instance.weight();
-	m_UnclassifiedWithCost += costFactor * instance.weight();
 	return;
       }
 
@@ -2251,14 +2142,11 @@ public class Evaluation implements Summarizable {
 			  instance.weight());
 
       // Update other stats
-      m_ConfusionMatrix[actualClass][predictedClass] += 
-	instance.weight() * costFactor;
+      m_ConfusionMatrix[actualClass][predictedClass] += instance.weight();
       if (predictedClass != actualClass) {
 	m_Incorrect += instance.weight();
-	m_IncorrectWithCost += costFactor * instance.weight();
       } else {
 	m_Correct += instance.weight();
-	m_CorrectWithCost += costFactor * instance.weight();
       }
     } else {
       m_MissingClass += instance.weight();
