@@ -36,7 +36,7 @@ import javax.swing.JFileChooser;
  * A PropertyEditor for File objects that lets the user select a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class FileEditor extends PropertyEditorSupport {
 
@@ -74,8 +74,15 @@ public class FileEditor extends PropertyEditorSupport {
   public java.awt.Component getCustomEditor() {
 
     if (m_FileChooser == null) {
-      m_FileChooser 
-        = new JFileChooser(new File(System.getProperty("user.dir")));
+      File currentFile = (File) getValue();
+      if (currentFile != null) {
+	m_FileChooser 
+	  = new JFileChooser();
+	m_FileChooser.setSelectedFile(currentFile);
+      } else {
+	m_FileChooser 
+	  = new JFileChooser(new File(System.getProperty("user.dir")));
+      }
       m_FileChooser.setApproveButtonText("Select");
       m_FileChooser.setApproveButtonMnemonic('S');
       m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
