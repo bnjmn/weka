@@ -1,5 +1,5 @@
 #
-# $Revision: 1.25 $
+# $Revision: 1.26 $
 #
 
 # Java Compiler to use
@@ -78,6 +78,7 @@ doc :
 	weka.gui \
 	weka.gui.experiment \
 	weka.gui.explorer \
+	weka.gui.visualize \
 	weka.gui.treevisualizer \
 	weka.gui.streams ; \
 	touch doc/index.html; for page in `ls doc/*.html`; \
@@ -110,6 +111,7 @@ install : all
 	weka/gui/*.gif \
 	weka/gui/experiment/*.class \
 	weka/gui/explorer/*.class \
+	weka/gui/visualize/*.class \
 	weka/gui/treevisualizer/*.class \
 	weka/gui/streams/*.class \
 	; \
@@ -133,6 +135,7 @@ install : all
 	weka/gui/*.gif \
 	weka/gui/experiment/*.java \
 	weka/gui/explorer/*.java \
+	weka/gui/visualize/*.java \
 	weka/gui/treevisualizer/*.java \
 	weka/gui/streams/*.java \
 	;\
@@ -154,6 +157,7 @@ install : all
 	weka.gui \
 	weka.gui.experiment \
 	weka.gui.explorer \
+	weka.gui.visualize \
 	weka.gui.treevisualizer \
 	weka.gui.streams; \
 	for page in `ls $(WEKAHOME)/doc/*.html`; \
