@@ -116,6 +116,11 @@ public class AttributeSelectionFilter
   public void setOptions(String[] options) throws Exception
   {
     String optionString;
+    String [] SearchOptions = null;
+    String [] evalOptions = null;
+    boolean noEvaluator = false;
+    boolean noSearch = false;
+    int breakLoc;
     resetOptions();
 
     if (Utils.getFlag('X',options))
@@ -134,67 +139,91 @@ public class AttributeSelectionFilter
     optionString = Utils.getOption('E',options);
     if (optionString.length()==0)
       {
-	throw new Exception("No attribute/subset evaluator given.");
+	noEvaluator = true;
+	//	throw new Exception("No attribute/subset evaluator given.");
       }
-
-    optionString = optionString.trim();
-    // split a quoted evaluator name from its options (if any)
-    int breakLoc = optionString.indexOf(' ');
-    String evalClassName = optionString;
-    String evalOptionsString = "";
-    String [] evalOptions = null;
-    if (breakLoc != -1) {
-      evalClassName = optionString.substring(0, breakLoc);
-      evalOptionsString = optionString.substring(breakLoc).trim();
-      evalOptions = Utils.splitOptions(evalOptionsString);
-    }
-
-    ASEvaluator = (ASEvaluation)Class.forName(evalClassName).newInstance();
-
-    // save the options to be passed on
-    if (options != null) 
+    else
       {
-	optionsCopy = new String[options.length+evalOptions.length];
-	System.arraycopy(options, 0, optionsCopy, 0, options.length);
+	optionString = optionString.trim();
+	// split a quoted evaluator name from its options (if any)
+	breakLoc = optionString.indexOf(' ');
+	String evalClassName = optionString;
+	String evalOptionsString = "";
+	if (breakLoc != -1) {
+	  evalClassName = optionString.substring(0, breakLoc);
+	  evalOptionsString = optionString.substring(breakLoc).trim();
+	  evalOptions = Utils.splitOptions(evalOptionsString);
+	}
 
-	// append any evaluator options to the array
-	if (evalOptions != null)
-	  System.arraycopy(evalOptions, 0, 
-			   optionsCopy, options.length, evalOptions.length); 
+	ASEvaluator = (ASEvaluation)Class.forName(evalClassName).newInstance();
+
+	// save the options to be passed on
+	if (options != null) 
+	  {
+	    if (evalOptions != null)
+	      optionsCopy = new String[options.length+evalOptions.length];
+	    else
+	      optionsCopy = new String[options.length];
+	    System.arraycopy(options, 0, optionsCopy, 0, options.length);
+	    
+	    // append any evaluator options to the array
+	    if (evalOptions != null)
+	      System.arraycopy(evalOptions, 0, 
+			       optionsCopy, options.length, 
+			       evalOptions.length); 
+	  }
       }
 
     // set up a dummy search object (if necessary) so help can be printed
     optionString = Utils.getOption('S',options);
-    // split a quoted evaluator name from its options (if any)
-    optionString = optionString.trim();
-    breakLoc = optionString.indexOf(' ');
-    String SearchClassName = optionString;
-    String SearchOptionsString = "";
-    String [] SearchOptions = null;
-    if (breakLoc != -1) 
+     if (optionString.length()==0)
       {
-	SearchClassName = optionString.substring(0, breakLoc);
-	SearchOptionsString = optionString.substring(breakLoc).trim();
-	SearchOptions = Utils.splitOptions(SearchOptionsString);
+	noSearch = true;
       }
+     else
+       {
+	 System.out.println("Here2\n");
+	 // split a quoted evaluator name from its options (if any)
+	 optionString = optionString.trim();
+	 breakLoc = optionString.indexOf(' ');
+	 String SearchClassName = optionString;
+	 String SearchOptionsString = "";
+	 if (breakLoc != -1) 
+	   {
+	     SearchClassName = optionString.substring(0, breakLoc);
+	     SearchOptionsString = optionString.substring(breakLoc).trim();
+	     SearchOptions = Utils.splitOptions(SearchOptionsString);
+	   }
 
-    ASSearch = (ASSearch)Class.forName(SearchClassName).newInstance();
+	 ASSearch = (ASSearch)Class.forName(SearchClassName).newInstance();
+       }
 
-    // Try setting options for ASEvaluator
-    if (ASEvaluator instanceof OptionHandler)
-      {
-	((OptionHandler)ASEvaluator).setOptions(evalOptions);
-      }
-    Utils.checkForRemainingOptions(evalOptions);
+     if (!noEvaluator)
+       {
+	 // Try setting options for ASEvaluator
+	 if (ASEvaluator instanceof OptionHandler)
+	   {
+	     ((OptionHandler)ASEvaluator).setOptions(evalOptions);
+	   }
+	 Utils.checkForRemainingOptions(evalOptions);
+       }
     
-    // Try setting options for search method
-    if (ASSearch instanceof OptionHandler)
-      {
-	if (SearchOptions != null)
-	  ((OptionHandler)ASSearch).setOptions(SearchOptions);
-      }
-    Utils.checkForRemainingOptions(SearchOptions);
+     if (!noSearch)
+       {
+	 // Try setting options for search method
+	 if (ASSearch instanceof OptionHandler)
+	   {
+	     if (SearchOptions != null)
+	       ((OptionHandler)ASSearch).setOptions(SearchOptions);
+	   }
+	 Utils.checkForRemainingOptions(SearchOptions);
+       }
 
+     if (noEvaluator)
+       throw new Exception("No attribute/subset evaluator given.");
+
+     if (noSearch)
+       throw new Exception("No search method specified.");
 
     for (int i=0;i<options.length;i++)
       options[i] = "";
