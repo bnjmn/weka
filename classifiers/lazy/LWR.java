@@ -24,7 +24,12 @@ import weka.core.*;
 
 /**
  * Locally-weighted regression. Uses an instance-based algorithm to assign
- * instance weights which are then used by a linear regression model. <p>
+ * instance weights which are then used by a linear regression model. See <p>
+ *
+ * Atkeson, C., A. Moore, and S. Schaal (1996) <i>Locally weighted
+ * learning</i>
+ * <a href="ftp://ftp.cc.gatech.edu/pub/people/cga/air1.ps.gz">download 
+ * postscript</a>. <p>
  *
  * Valid options are:<p>
  *
@@ -40,7 +45,7 @@ import weka.core.*;
  * (default 0 = Linear) <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LWR extends Classifier 
   implements OptionHandler, UpdateableClassifier, 
@@ -56,16 +61,16 @@ public class LWR extends Classifier
   protected double [] m_Max;
     
   /** True if debugging output should be printed */
-  protected boolean b_Debug;
+  protected boolean m_Debug;
 
   /** The number of neighbours used to select the kernel bandwidth */
   protected int m_kNN = 5;
 
   /** The weighting kernel method currently selected */
-  protected int m_WeightKernel;
+  protected int m_WeightKernel = LINEAR;
 
   /** True if m_kNN should be set to all instances */
-  protected boolean b_UseAllK = true;
+  protected boolean m_UseAllK = true;
 
   /* The available kernel weighting methods */
   protected static final int LINEAR  = 0;
@@ -144,7 +149,7 @@ public class LWR extends Classifier
       options[current++] = "-D";
     }
     options[current++] = "-W"; options[current++] = "" + getWeightingKernel();
-    if (!b_UseAllK) {
+    if (!m_UseAllK) {
       options[current++] = "-K"; options[current++] = "" + getKNN();
     }
     while (current < options.length) {
@@ -160,7 +165,7 @@ public class LWR extends Classifier
    */
   public void setDebug(boolean debug) {
 
-    b_Debug = debug;
+    m_Debug = debug;
   }
   /**
    * SGts whether debugging output should be produced
@@ -169,7 +174,7 @@ public class LWR extends Classifier
    */
   public boolean getDebug() {
 
-    return b_Debug;
+    return m_Debug;
   }
 
   /**
@@ -177,15 +182,16 @@ public class LWR extends Classifier
    * The bandwidth is taken as the distance to the kth neighbour.
    *
    * @param knn the number of neighbours included inside the kernel
-   * bandwidth
+   * bandwidth, or 0 to specify using all neighbors.
    */
   public void setKNN(int knn) {
 
     m_kNN = knn;
     if (knn <= 0) {
-      b_UseAllK = true;
+      m_kNN = 0;
+      m_UseAllK = true;
     } else {
-      b_UseAllK = false;
+      m_UseAllK = false;
     }
   }
 
@@ -202,20 +208,26 @@ public class LWR extends Classifier
   }
 
   /**
-   * Sets the kernel weighting method to use.
+   * Sets the kernel weighting method to use. Must be one of LINEAR,
+   * INVERSE, or GAUSS, other values are ignored.
    *
    * @param kernel the new kernel method to use. Must be one of LINEAR,
    * INVERSE, or GAUSS
    */
   public void setWeightingKernel(int kernel) {
 
+    if ((kernel != LINEAR)
+	&& (kernel != INVERSE)
+	&& (kernel != GAUSS)) {
+      return;
+    }
     m_WeightKernel = kernel;
   }
 
   /**
    * Gets the kernel weighting method to use.
    *
-   * @return the new kernel method to use. Must be one of LINEAR,
+   * @return the new kernel method to use. Will be one of LINEAR,
    * INVERSE, or GAUSS
    */
   public int getWeightingKernel() {
@@ -307,6 +319,10 @@ public class LWR extends Classifier
    */
   public double classifyInstance(Instance instance) throws Exception {
 
+    if (m_Train.numInstances() == 0) {
+      throw new Exception("No training instances!");
+    }
+
     updateMinMax(instance);
 
     // Get the distances to each training instance
@@ -316,7 +332,7 @@ public class LWR extends Classifier
     }
     int [] sortKey = Utils.sort(distance);
 
-    if (b_Debug) {
+    if (m_Debug) {
       System.out.println("Instance Distances");
       for (int i = 0; i < distance.length; i++) {
 	System.out.println("" + distance[sortKey[i]]);
@@ -325,7 +341,7 @@ public class LWR extends Classifier
 
     // Determine the bandwidth
     int k = sortKey.length - 1;
-    if (!b_UseAllK && (m_kNN < k)) {
+    if (!m_UseAllK && (m_kNN < k)) {
       k = m_kNN;
     }
     double bandwidth = distance[sortKey[k]];
@@ -361,7 +377,7 @@ public class LWR extends Classifier
       }
     }
 
-    if (b_Debug) {
+    if (m_Debug) {
       System.out.println("Instance Weights");
       for (int i = 0; i < distance.length; i++) {
 	System.out.println("" + distance[i]);
@@ -379,7 +395,7 @@ public class LWR extends Classifier
       newInst.setWeight(newInst.weight() * weight);
       weightedTrain.add(newInst);
     }
-    if (b_Debug) {
+    if (m_Debug) {
       System.out.println("Kept " + weightedTrain.numInstances() + " out of "
 			 + m_Train.numInstances() + " instances");
     }
@@ -388,7 +404,7 @@ public class LWR extends Classifier
     LinearRegression weightedRegression = new LinearRegression();
     weightedRegression.buildClassifier(weightedTrain);
 
-    if (b_Debug) {
+    if (m_Debug) {
       System.out.println("Classifying test instance: " + instance);
       System.out.println("Built regression model:\n" 
 			 + weightedRegression.toString());
@@ -418,7 +434,7 @@ public class LWR extends Classifier
       result += "Using gaussian weighting kernels\n";
       break;
     }
-    result += "Using " + (b_UseAllK ? "all" : "" + m_kNN) + " neighbours";
+    result += "Using " + (m_UseAllK ? "all" : "" + m_kNN) + " neighbours";
     return result;
   }
 
@@ -432,44 +448,49 @@ public class LWR extends Classifier
   private double distance(Instance first, Instance second) {  
 
     double diff, distance = 0;
-
+    int numAttribsUsed = 0;
     for(int i = 0; i < m_Train.numAttributes(); i++) { 
       if (i == m_Train.classIndex()) {
 	continue;
       }
-      if (m_Train.attribute(i).isNominal()) {
-
+      switch (m_Train.attribute(i).type()) {
+      case Attribute.NOMINAL:
 	// If attribute is nominal
+	numAttribsUsed++;
 	if (first.isMissing(i) || second.isMissing(i) ||
 	    ((int)first.value(i) != (int)second.value(i))) {
 	  diff = 1;
 	} else {
 	  diff = 0;
 	}
-      } else {
-
+	break;
+      case Attribute.NUMERIC:
 	// If attribute is numeric
+	numAttribsUsed++;	
 	if (first.isMissing(i) || second.isMissing(i)) {
 	  if (first.isMissing(i) && second.isMissing(i)) {
 	    diff = 1;
 	  } else {
 	    if (second.isMissing(i)) {
-	      diff = norm(first.value(i), i);
+	      diff = norm(first.value(i),i);
 	    } else {
-	      diff = norm(second.value(i), i);
+	      diff = norm(second.value(i),i);
 	    }
 	    if (diff < 0.5) {
-	      diff = 1.0 - diff;
+	      diff = 1.0-diff;
 	    }
 	  }
 	} else {
-	  diff = norm(first.value(i), i) - norm(second.value(i), i);
+	  diff = norm(first.value(i),i) - norm(second.value(i),i);
 	}
+	break;
+      default:
+	diff = 0;
+	break;
       }
       distance += diff * diff;
     }
-
-    return Math.sqrt(distance);
+    return Math.sqrt(distance / numAttribsUsed);
   }
 
   /**
