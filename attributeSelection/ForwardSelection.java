@@ -26,7 +26,7 @@ import  weka.core.*;
  * Class for performing a forward selection hill climbing search. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ForwardSelection extends RankedOutputSearch {
 
@@ -96,7 +96,7 @@ public class ForwardSelection extends RankedOutputSearch {
     }
     if (!m_doRank) {
       FString.append("\tMerit of best subset found: "
-		     +Utils.doubleToString(m_bestMerit,8,3)+"\n");
+		     +Utils.doubleToString(Math.abs(m_bestMerit),8,3)+"\n");
     }
     return FString.toString();
   }

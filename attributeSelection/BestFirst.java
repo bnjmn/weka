@@ -35,7 +35,7 @@ import  weka.core.*;
  * (default = 5). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class BestFirst
   extends ASSearch
@@ -399,7 +399,7 @@ public class BestFirst
     BfString.append("\tTotal number of subsets evaluated: " 
 		    + m_totalEvals + "\n");
     BfString.append("\tMerit of best subset found: "
-		    +Utils.doubleToString(m_bestMerit,8,3)+"\n");
+		    +Utils.doubleToString(Math.abs(m_bestMerit),8,3)+"\n");
     return  BfString.toString();
   }
 
