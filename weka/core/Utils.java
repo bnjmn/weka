@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public final class Utils {
 
@@ -273,17 +273,17 @@ public final class Utils {
       while (((precisionValue < 0) && (dotPosition < 1)) ||
 	     (dotPosition < 0)) {
 	if (precisionValue < 0) {
-	  stringBuffer.insert(1, 0);
+	  stringBuffer.insert(1, '0');
 	} else {
-	  stringBuffer.insert(0, 0);
+	  stringBuffer.insert(0, '0');
 	}
 	dotPosition++;
       }
       stringBuffer.insert(dotPosition, '.');
       if ((precisionValue < 0) && (stringBuffer.charAt(1) == '.')) {
-	stringBuffer.insert(1, 0);
+	stringBuffer.insert(1, '0');
       } else if (stringBuffer.charAt(0) == '.') {
-	stringBuffer.insert(0, 0);
+	stringBuffer.insert(0, '0');
       }
       int currentPos = stringBuffer.length() - 1;
       while ((currentPos > dotPosition) &&
