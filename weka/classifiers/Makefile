@@ -2,7 +2,9 @@ JAVAC = javac
 
 SOURCES = BVDecompose.java CheckClassifier.java Classifier.java \
 	CostMatrix.java DistributionClassifier.java Evaluation.java \
-	IterativeClassifier.java Sourcable.java UpdateableClassifier.java
+	IterativeClassifier.java Sourcable.java UpdateableClassifier.java \
+	SequentialClassifier.java DistributionSequentialClassifier.java \
+	SequentialEvaluation.java
 
 
 CLASSFILES = $(SOURCES:.java=.class)
