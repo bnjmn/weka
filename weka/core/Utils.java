@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public final class Utils {
 
@@ -411,8 +411,22 @@ public final class Utils {
    * @return true if the flag was found
    * @exception Exception if an illegal option was found
    */
-
   public static boolean getFlag(char flag, String [] options) 
+    throws Exception {
+       return getFlag("" + flag, options);
+  }
+  
+  /**
+   * Checks if the given array contains the flag "-String". Stops
+   * searching at the first marker "--". If the flag is found,
+   * it is replaced with the empty string.
+   *
+   * @param flag the String indicating the flag.
+   * @param strings the array of strings containing all the options.
+   * @return true if the flag was found
+   * @exception Exception if an illegal option was found
+   */
+  public static boolean getFlag(String flag, String [] options) 
     throws Exception {
 
     if (options == null) {
@@ -423,10 +437,7 @@ public final class Utils {
 	try {
 	  Double dummy = Double.valueOf(options[i]);
 	} catch (NumberFormatException e) {
-	  if (options[i].length() > 2) {
-	    throw new Exception("Illegal option: " + options[i]);
-	  }
-	  if (options[i].charAt(1) == flag) {
+	  if (options[i].equals("-" + flag)) {
 	    options[i] = "";
 	    return true;
 	  }
@@ -451,6 +462,21 @@ public final class Utils {
    */
   public static /*@non_null@*/ String getOption(char flag, String [] options) 
     throws Exception {
+     return getOption("" + flag, options);
+  }
+
+  /**
+   * Gets an option indicated by a flag "-String" from the given array
+   * of strings. Stops searching at the first marker "--". Replaces 
+   * flag and option with empty strings.
+   *
+   * @param flag the String indicating the option.
+   * @param options the array of strings containing all the options.
+   * @return the indicated option or an empty string
+   * @exception Exception if the option indicated by the flag can't be found
+   */
+  public static /*@non_null@*/ String getOption(String flag, String [] options) 
+    throws Exception {
 
     String newString;
 
@@ -463,10 +489,7 @@ public final class Utils {
 	try {
 	  Double dummy = Double.valueOf(options[i]);
 	} catch (NumberFormatException e) {
-	  if (options[i].length() != 2) {
-	    throw new Exception("Illegal option: " + options[i]);
-	  }
-	  if (options[i].charAt(1) == flag) {
+	  if (options[i].equals("-" + flag)) {
 	    if (i + 1 == options.length) {
 	      throw new Exception("No value given for -" + flag + " option.");
 	    }
