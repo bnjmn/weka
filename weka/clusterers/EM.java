@@ -25,60 +25,93 @@ import weka.core.*;
 import weka.estimators.*;
 
 /**
- * Simple EM class
+ * Simple EM class. <p>
+ *
+ * Valid options are:<p>
+ *
+ * -V <br>
+ * Verbose. <p>
+ *
+ * -N <number of clusters> <br
+ * Specify the number of clusters to generate. If omitted,
+ * EM will use cross validation to select the number of clusters
+ * automatically. <p>
+ *
+ * -I <max iterations> <br>
+ * Terminate after this many iterations if EM has not converged. <p>
+ *
+ * -S <seed> <br>
+ * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 2 Feb 1999 (Mark)
+ * @version $Revision: 1.3 $
  */
 public class EM extends DistributionClusterer implements OptionHandler
 {
 
   /** hold the discrete estimators for each cluster */
-  private Estimator model [][];
+  private Estimator m_model [][];
 
   /** hold the normal estimators for each cluster */
-  private double modelNormal [][][];
+  private double m_modelNormal [][][];
 
   /** hold the weights of each instance for each cluster */
-  private double weights [][];
+  private double m_weights [][];
 
   /** hold default standard deviations for numeric attributes */
-  private double defSds [];
+  private double m_defSds [];
 
   /** the prior probabilities for clusters */
-  private double priors [];
+  private double m_priors [];
 
   /** the loglikelihood of the data */
-  private double loglikely;
+  private double m_loglikely;
 
   /** training instances */
-  private Instances theInstances = null;
+  private Instances m_theInstances = null;
 
   /** number of clusters */
-  private int num_clusters;
+  private int m_num_clusters;
 
   /** number of attributes */
-  private int num_attribs;
+  private int m_num_attribs;
 
   /** number of training instances */
-  private int num_instances;
+  private int m_num_instances;
 
   /** maximum iterations to perform */
-  private int max_iterations;
+  private int m_max_iterations;
   
   /** random numbers and seed */
-  private Random rr;
+  private Random m_rr;
 
-  private int rseed;
+  private int m_rseed;
 
   /** Constant for normal distribution. */
-  private static double normConst = Math.sqrt(2 * Math.PI);
+  private static double m_normConst = Math.sqrt(2 * Math.PI);
 
-  private boolean verbose;
-
+  /** Verbose? */
+  private boolean m_verbose;
 
   /**
-   * Returns an enumeration describing the available options
+   * Returns an enumeration describing the available options. <p>
+   *
+   * Valid options are:<p>
+   *
+   * -V <br>
+   * Verbose. <p>
+   *
+   * -N <number of clusters> <br
+   * Specify the number of clusters to generate. If omitted,
+   * EM will use cross validation to select the number of clusters
+   * automatically. <p>
+   *
+   * -I <max iterations> <br>
+   * Terminate after this many iterations if EM has not converged. <p>
+   *
+   * -S <seed> <br>
+   * Specify random number seed. <p>
+   *
    * @return an enumeration of all the available options
    *
    **/
@@ -87,10 +120,16 @@ public class EM extends DistributionClusterer implements OptionHandler
 
     Vector newVector = new Vector(5);
 
-    newVector.addElement(new Option("\tnumber of clusters. If omitted or\n\t-1 specified, then cross validation is used to\n\tselect the number of clusters.", "N", 1,"-N <num>"));
+    newVector.addElement(new Option("\tnumber of clusters. If omitted or"
+				    +"\n\t-1 specified, then cross "
+				    +"validation is used to\n\tselect the "
+				    +"number of clusters.", 
+				    "N", 1,"-N <num>"));
 
-    newVector.addElement(new Option("\tmax iterations.", "I", 1,"-I <num>"));
-    newVector.addElement(new Option("\trandom number seed.", "S", 1,"-S <num>"));
+    newVector.addElement(new Option("\tmax iterations.\n(default 100)", 
+				    "I", 1,"-I <num>"));
+    newVector.addElement(new Option("\trandom number seed.\n(default 1)", 
+				    "S", 1,"-S <num>"));
     newVector.addElement(new Option("\tverbose..", "V", 0,"-V"));
 
     return newVector.elements();
@@ -106,26 +145,28 @@ public class EM extends DistributionClusterer implements OptionHandler
   {
     resetOptions();
 
-    verbose = Utils.getFlag('V',options);
+    m_verbose = Utils.getFlag('V',options);
 
     String optionString = Utils.getOption('I',options);
     if (optionString.length() != 0)
     {
-      max_iterations = Integer.parseInt(optionString);
+      m_max_iterations = Integer.parseInt(optionString);
     }
 
     optionString = Utils.getOption('N',options);
     if (optionString.length() != 0)
     {
-      num_clusters = Integer.parseInt(optionString);
-      if (num_clusters <= 0 )
-	num_clusters = -1;
+      m_num_clusters = Integer.parseInt(optionString);
+      if (m_num_clusters <= 0 )
+	{
+	  m_num_clusters = -1;
+	}
     }
 
     optionString = Utils.getOption('S',options);
     if (optionString.length() != 0)
     {
-      rseed = Integer.parseInt(optionString);
+      m_rseed = Integer.parseInt(optionString);
     }
   }
 
@@ -138,15 +179,17 @@ public class EM extends DistributionClusterer implements OptionHandler
 
     String [] options = new String [7];
     int current = 0;
-    if (verbose) {
-      options[current++] = "-V";
-    }
-    options[current++] = "-I"; options[current++] = "" + max_iterations;
-    options[current++] = "-N"; options[current++] = "" + num_clusters;
-    options[current++] = "-S"; options[current++] = "" + rseed;
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    if (m_verbose) 
+      {
+	options[current++] = "-V";
+      }
+    options[current++] = "-I"; options[current++] = "" + m_max_iterations;
+    options[current++] = "-N"; options[current++] = "" + m_num_clusters;
+    options[current++] = "-S"; options[current++] = "" + m_rseed;
+    while (current < options.length) 
+      {
+	options[current++] = "";
+      }
     return options;
   }
 
@@ -162,87 +205,104 @@ public class EM extends DistributionClusterer implements OptionHandler
     Instances copyI = new Instances(inst);
     inst = copyI;
 
-    defSds = new double [num_attribs];
-    for (i=0;i<num_attribs;i++)
-      defSds[i] = 0.01;
-    
-    for (i=0;i<num_attribs;i++)
-      if (inst.attribute(i).isNumeric())
-      {
-	inst.sort(i);
-	
-	if ((inst.numInstances() > 0)
-            && !inst.instance(0).isMissing(i)) 
-	{
-          double lastVal = inst.instance(0).value(i);
-          double currentVal, deltaSum = 0;
-          int distinct = 0;
-          for (int j = 1; j < inst.numInstances(); j++) 
-	  {
-            Instance currentInst = inst.instance(j);
-            if (currentInst.isMissing(i)) 
-	    {
-              break;
-            }
-            currentVal = currentInst.value(i);
-            if (currentVal != lastVal) 
-	    {
-              deltaSum += currentVal - lastVal;
-              lastVal = currentVal;
-              distinct++;
-            }
-          }
+    m_defSds = new double [m_num_attribs];
 
-	   if (distinct > 0) 
-	   {
-	     defSds[i] = deltaSum / distinct;
-	   }
-	}
+    for (i=0;i<m_num_attribs;i++)
+      {
+	m_defSds[i] = 0.01;
+      }
+    
+    for (i=0;i<m_num_attribs;i++)
+      {
+	if (inst.attribute(i).isNumeric())
+	  {
+	    inst.sort(i);
+	
+	    if ((inst.numInstances() > 0)
+		&& !inst.instance(0).isMissing(i)) 
+	      {
+		double lastVal = inst.instance(0).value(i);
+		double currentVal, deltaSum = 0;
+		int distinct = 0;
+		for (int j = 1; j < inst.numInstances(); j++) 
+		  {
+		    Instance currentInst = inst.instance(j);
+		    if (currentInst.isMissing(i)) 
+		      {
+			break;
+		      }
+		    currentVal = currentInst.value(i);
+		    if (currentVal != lastVal) 
+		      {
+			deltaSum += currentVal - lastVal;
+			lastVal = currentVal;
+			distinct++;
+		      }
+		  }
+
+		if (distinct > 0) 
+		  {
+		    m_defSds[i] = deltaSum / distinct;
+		  }
+	      }
+	  }
       }
   }
 
-
   /**
    * Initialised estimators and storage.
+   *
+   * @param inst the instances
+   * @param num_cl the number of clusters
    **/
   private void EM_Init(Instances inst, int num_cl) throws Exception
   {
-    weights = new double [inst.numInstances()][num_cl];
+    m_weights = new double [inst.numInstances()][num_cl];
     int z;
 
-    model = new Estimator [num_cl][num_attribs];
+    m_model = new Estimator [num_cl][m_num_attribs];
 
-    modelNormal = new double [num_cl][num_attribs][3];
+    m_modelNormal = new double [num_cl][m_num_attribs][3];
 
-    priors = new double [num_cl];
+    m_priors = new double [num_cl];
 
     for (int i=0;i<inst.numInstances();i++)
     {
       for (int j=0;j<num_cl;j++)
-	weights[i][j] = rr.nextDouble();
+	{
+	  m_weights[i][j] = m_rr.nextDouble();
+	}
 
-      Utils.normalize(weights[i]);
+      Utils.normalize(m_weights[i]);
     }
 
     // initial priors
     estimate_priors(inst, num_cl);
   }
 
-
   /**
    * calculate prior probabilites for the clusters
+   *
+   * @param inst the instances
+   * @param num_cl the number of clusters
    * @exception Exception if priors can't be calculated
    **/
   private void estimate_priors(Instances inst, int num_cl) throws Exception
   {
-    for (int i=0;i<num_clusters;i++)
-      priors[i] = 0.0;
+    for (int i=0;i<m_num_clusters;i++)
+      {
+	m_priors[i] = 0.0;
+      }
 
     for (int i=0;i<inst.numInstances();i++)
-      for (int j=0;j<num_cl;j++)
-	priors[j] += weights[i][j];
-
-    Utils.normalize(priors);
+      {
+	for (int j=0;j<num_cl;j++)
+	  {
+	    m_priors[j] += m_weights[i][j];
+	  }
+      }
+    
+    Utils.normalize(m_priors);
   }
 
   /**
@@ -255,24 +315,33 @@ public class EM extends DistributionClusterer implements OptionHandler
     
     double diff = x - mean;
     
-    return (1 / (normConst * stdDev)) 
+    return (1 / (m_normConst * stdDev)) 
       * Math.exp(-(diff * diff / (2 * stdDev * stdDev)));
   }
   
   /**
    * New probability estimators for an iteration
+   *
+   * @param num_cl the numbe of clusters
    */
   private void new_estimators(int num_cl)
   {
     for (int i=0;i<num_cl;i++)
-      for (int j=0;j<num_attribs;j++)
       {
-	if (theInstances.attribute(j).isNominal())
-	  model[i][j] = new DiscreteEstimator(theInstances.attribute(j).numValues(), true);
-	else
-	{
-	  modelNormal[i][j][0] = modelNormal[i][j][1] = modelNormal[i][j][2] = 0.0;
-	}
+	for (int j=0;j<m_num_attribs;j++)
+	  {
+	    if (m_theInstances.attribute(j).isNominal())
+	      {
+		m_model[i][j] = 
+		  new DiscreteEstimator(m_theInstances.
+					attribute(j).numValues(), true);
+	      }
+	    else
+	      {
+		m_modelNormal[i][j][0] = 
+		  m_modelNormal[i][j][1] = m_modelNormal[i][j][2] = 0.0;
+	      }
+	  }
       }
   }
 
@@ -288,66 +357,83 @@ public class EM extends DistributionClusterer implements OptionHandler
     new_estimators(num_cl);
 
     for (i=0;i<num_cl;i++)
-      for (j=0;j<num_attribs;j++)
-	for (l=0;l<inst.numInstances();l++)
-	{
-	  if (!inst.instance(l).isMissing(j))
+      {
+	for (j=0;j<m_num_attribs;j++)
 	  {
-	    if (inst.attribute(j).isNominal())
-	      model[i][j].addValue(inst.instance(l).value(j),
-				   weights[l][i]);
-	    else
-	    {
+	    for (l=0;l<inst.numInstances();l++)
+	      {
+		if (!inst.instance(l).isMissing(j))
+		  {
+		    if (inst.attribute(j).isNominal())
+		      {
+			m_model[i][j].addValue(inst.instance(l).value(j),
+					     m_weights[l][i]);
+		      }
+		    else
+		      {
+			
+			m_modelNormal[i][j][0] += (inst.instance(l).value(j) * 
+						   m_weights[l][i]);
 	    
-	      modelNormal[i][j][0] += (inst.instance(l).value(j) * 
-				       weights[l][i]);
-	    
-	      modelNormal[i][j][2] += weights[l][i];
+			m_modelNormal[i][j][2] += m_weights[l][i];
 
-	      modelNormal[i][j][1] += (inst.instance(l).value(j) * 
-				       inst.instance(l).value(j) * 
-				       weights[l][i]);
+			m_modelNormal[i][j][1] += (inst.instance(l).value(j) * 
+						   inst.instance(l).value(j) * 
+						   m_weights[l][i]);
 	   
-	    }
+		      }
+		  }
+	      }
 	  }
-	}
+      }
 
     // calcualte mean and std deviation for numeric attributes
-    for (j=0;j<num_attribs;j++)
-      if (!inst.attribute(j).isNominal())
-	for (i=0;i<num_cl;i++)
-	{
-
-	  if (Utils.smOrEq(modelNormal[i][j][2],1))
+    for (j=0;j<m_num_attribs;j++)
+      {
+	if (!inst.attribute(j).isNominal())
 	  {
-	    modelNormal[i][j][1] = /* defSds[j] / (2 * 3);*/ 1e-6;
+	    for (i=0;i<num_cl;i++)
+	      {
+
+		if (Utils.smOrEq(m_modelNormal[i][j][2],1))
+		  {
+		    m_modelNormal[i][j][1] = /* m_defSds[j] / (2 * 3);*/ 1e-6;
+		  }
+		else
+		  {
+		    // variance
+		    m_modelNormal[i][j][1] = 
+		      (m_modelNormal[i][j][1] - 
+		       (m_modelNormal[i][j][0] * m_modelNormal[i][j][0] / 
+			m_modelNormal[i][j][2])) / 
+		      (m_modelNormal[i][j][2] - 1);
+		  }
+
+		// std dev
+		if (m_modelNormal[i][j][1] <= 0.0)
+		  {
+		    m_modelNormal[i][j][1] = /* m_defSds[j] / (2 * 3);*/ 1e-6;
+		  }
+
+		m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]);
+
+		// mean
+		if (m_modelNormal[i][j][2] > 0.0)
+		  {
+		    m_modelNormal[i][j][0] /= m_modelNormal[i][j][2]; 
+		  }
+	      }
 	  }
-	  else
-	    // variance
-	    modelNormal[i][j][1] = (modelNormal[i][j][1] - 
-				  (modelNormal[i][j][0] * modelNormal[i][j][0] / 
-				   modelNormal[i][j][2])) / (modelNormal[i][j][2] - 1);
-
-	  // std dev
-	  if (modelNormal[i][j][1] <= 0.0)
-	  {
-	    modelNormal[i][j][1] = /* defSds[j] / (2 * 3);*/ 1e-6;
-	  }
-
-	  modelNormal[i][j][1] = Math.sqrt(modelNormal[i][j][1]);
-
-	  // mean
-	  if (modelNormal[i][j][2] > 0.0)
-	    modelNormal[i][j][0] /= modelNormal[i][j][2]; 
-	}
-
+      }
   }
 
   /**
    * The E step of the EM algorithm. Estimate cluster membership 
    * probabilities.
+   *
    * @param inst the training instances
    * @param num_cl the number of clusters
+   * @return the average log likelihood
    */
   private double E(Instances inst, int num_cl) throws Exception
   {
@@ -357,37 +443,48 @@ public class EM extends DistributionClusterer implements OptionHandler
     double loglk = 0.0;
 
     for (l=0;l<inst.numInstances();l++)
-    {
-      for (i=0;i<num_cl;i++)
       {
-	prob = 1.0;
-	for (j=0;j<num_attribs;j++)
-	{
-	  if (!inst.instance(l).isMissing(j))
+	for (i=0;i<num_cl;i++)
 	  {
-	    if (inst.attribute(j).isNominal())
-	      prob *= 
-	      model[i][j].getProbability(inst.instance(l).value(j));
-	    else // numeric attribute
-	      prob *= 
-	      normalDens(inst.instance(l).value(j), 
-				 modelNormal[i][j][0], modelNormal[i][j][1]);
+	    prob = 1.0;
+	    for (j=0;j<m_num_attribs;j++)
+	      {
+		if (!inst.instance(l).isMissing(j))
+		  {
+		    if (inst.attribute(j).isNominal())
+		      {
+			prob *= 
+			  m_model[i][j].
+			  getProbability(inst.instance(l).value(j));
+		      }
+		    else 
+		      {
+			// numeric attribute
+			prob *= 
+			  normalDens(inst.instance(l).value(j), 
+				     m_modelNormal[i][j][0], 
+				     m_modelNormal[i][j][1]);
+		      }
+		  }
+	      }
+	    m_weights[l][i] = (prob * m_priors[i]);
 	  }
-	}
-	weights[l][i] = (prob * priors[i]);
-      }
 
-      double temp1=0;
+	double temp1=0;
 
-       for (i=0;i<num_cl;i++)
-	 temp1 += weights[l][i];
+	for (i=0;i<num_cl;i++)
+	  {
+	    temp1 += m_weights[l][i];
+	  }
 
-       if (temp1 > 0)
+	if (temp1 > 0)
+	  {
 	    loglk += Math.log(temp1);
+	  }
 
-      // normalise the weights for this instance
-      Utils.normalize(weights[l]);
-    }
+	// normalise the weights for this instance
+	Utils.normalize(m_weights[l]);
+      }
 
     // reestimate priors
     estimate_priors(inst, num_cl);
@@ -404,44 +501,52 @@ public class EM extends DistributionClusterer implements OptionHandler
     resetOptions();
   }
 
-  protected void resetOptions() {
-    
-    max_iterations = 100;
-    rseed = 100;
-    num_clusters = -1;
-    verbose = false;
+  /**
+   * Reset to default options
+   */
+  protected void resetOptions() 
+  {
+    m_max_iterations = 100;
+    m_rseed = 100;
+    m_num_clusters = -1;
+    m_verbose = false;
   }
 
   /**
    * Outputs the generated clusters into a string.
    */
-  public String toString() {
-
+  public String toString() 
+  {
     StringBuffer text = new StringBuffer();
-
+    
     text.append("\nEM\n==\n");
-    text.append("\nNumber of clusters: "+num_clusters+"\n");
-    for (int j = 0; j < num_clusters; j++) {
-      text.append("\nCluster: "+j+" Prior probability: "+
-		  Utils.doubleToString(priors[j], 6, 4)+"\n\n");
-      for (int i = 0; i < num_attribs; i++) {
-	text.append("Attribute: "+theInstances.attribute(i).name()+"\n");
-	if (theInstances.attribute(i).isNominal()) {
-	  if (model[j][i] != null) {
-	    text.append(model[j][i].toString());
+    text.append("\nNumber of clusters: "+m_num_clusters+"\n");
+    for (int j = 0; j < m_num_clusters; j++) 
+      {
+	text.append("\nCluster: "+j+" Prior probability: "+
+		    Utils.doubleToString(m_priors[j], 6, 4)+"\n\n");
+	for (int i = 0; i < m_num_attribs; i++) 
+	  {
+	    text.append("Attribute: "+m_theInstances.attribute(i).name()+"\n");
+	    if (m_theInstances.attribute(i).isNominal()) 
+	      {
+		if (m_model[j][i] != null) 
+		  {
+		    text.append(m_model[j][i].toString());
+		  }
+	      } 
+	    else 
+	      {
+		text.append("Normal Distribution. Mean = "+
+			    Utils.doubleToString(m_modelNormal[j][i][0],8,4)+
+			    " StdDev = "+
+			    Utils.doubleToString(m_modelNormal[j][i][1],8,4)+
+			    "\n");
+	      }
 	  }
-	} else {
-	  text.append("Normal Distribution. Mean = "+
-		      Utils.doubleToString(modelNormal[j][i][0],8,4)+
-		      " StdDev = "+
-		      Utils.doubleToString(modelNormal[j][i][1],8,4)+
-		      "\n");
-	}
       }
-    }
     return text.toString();
   }
-
 
   /**
    * verbose output for debugging
@@ -452,32 +557,33 @@ public class EM extends DistributionClusterer implements OptionHandler
     int i,j,l,m;
 
     System.out.println("======================================");
-    for (j=0;j<num_clusters;j++)
-      for (i=0;i<num_attribs;i++)
+    for (j=0;j<m_num_clusters;j++)
+      for (i=0;i<m_num_attribs;i++)
       {
 	System.out.println("Clust: "+j+" att: "+i+"\n");
-	if (theInstances.attribute(i).isNominal())
+	if (m_theInstances.attribute(i).isNominal())
 	{
-	  if (model[j][i] != null)
-	    System.out.println(model[j][i].toString());
+	  if (m_model[j][i] != null)
+	    System.out.println(m_model[j][i].toString());
 	}
 	else 
 	{
 	  System.out.println("Normal Distribution. Mean = "+
-			     Utils.doubleToString(modelNormal[j][i][0],8,4)+
+			     Utils.doubleToString(m_modelNormal[j][i][0],8,4)+
 			     " StandardDev = "+
-			     Utils.doubleToString(modelNormal[j][i][1],8,4)+
+			     Utils.doubleToString(m_modelNormal[j][i][1],8,4)+
 			     " WeightSum = "+
-			     Utils.doubleToString(modelNormal[j][i][2],8,4));
+			     Utils.doubleToString(m_modelNormal[j][i][2],8,4));
 	}
       }
 
     for (l=0;l<inst.numInstances();l++)
     {
-      m = Utils.maxIndex(weights[l]);
-      System.out.print("Inst "+Utils.doubleToString((double)l,5,0)+" Class "+m+"\t");
-      for (j=0;j<num_clusters;j++)
-	System.out.print(Utils.doubleToString(weights[l][j],7,5)+"  ");
+      m = Utils.maxIndex(m_weights[l]);
+      System.out.print("Inst "+Utils.doubleToString((double)l,5,0)
+		       +" Class "+m+"\t");
+      for (j=0;j<m_num_clusters;j++)
+	System.out.print(Utils.doubleToString(m_weights[l][j],7,5)+"  ");
       System.out.println();
     }
   }
@@ -485,6 +591,8 @@ public class EM extends DistributionClusterer implements OptionHandler
   /**
    * estimate the number of clusters by cross validation on the training
    * data.
+   *
+   * @return the number of clusters selected
    */
   private int CVClusters() throws Exception
   {
@@ -499,8 +607,8 @@ public class EM extends DistributionClusterer implements OptionHandler
     while (CVdecreased)
     {
       CVdecreased = false;
-      cvr = new Random(rseed);
-      trainCopy = new Instances(theInstances);
+      cvr = new Random(m_rseed);
+      trainCopy = new Instances(m_theInstances);
       trainCopy.randomize(cvr);
       // theInstances.stratify(10);
       templl = 0.0;
@@ -513,16 +621,23 @@ public class EM extends DistributionClusterer implements OptionHandler
 
 	iterate(cvTrain, num_cl, false);
 	tll = E(cvTest, num_cl);
-	if (verbose)
-	  System.out.println("# clust: "+num_cl+" Fold: "+i+" Loglikely: "+tll);
+	if (m_verbose)
+	  {
+	    System.out.println("# clust: "+num_cl+" Fold: "
+			       +i+" Loglikely: "+tll);
+	  }
 	templl += tll;
       }
       templl /= 10.0;
-      if (verbose)
-	System.out.println("=================================================\n# clust: "
-			   +num_cl+" Mean Loglikely: "
-			   +templl
-			   +"\n=================================================");
+      if (m_verbose)
+	{
+	  System.out.println("==================================="
+			     +"==============\n# clust: "
+			     +num_cl+" Mean Loglikely: "
+			     +templl
+			     +"\n================================"
+			     +"=================");
+	}
       
       if (templl > CVLogLikely)
       {
@@ -532,12 +647,12 @@ public class EM extends DistributionClusterer implements OptionHandler
       }
     }
 
-    if (verbose)
-      System.out.println("Number of clusters: "+(num_cl-1));
-
+    if (m_verbose)
+      {
+	System.out.println("Number of clusters: "+(num_cl-1));
+      }
     return num_cl-1;
   }
-
 
   /**
    * Returns the number of clusters.
@@ -548,10 +663,11 @@ public class EM extends DistributionClusterer implements OptionHandler
    */
   public int numberOfClusters() throws Exception
   {
-    if (num_clusters == -1)
-      throw new Exception("Haven't generated any clusters!");
-
-    return num_clusters;
+    if (m_num_clusters == -1)
+      {
+	throw new Exception("Haven't generated any clusters!");
+      }
+    return m_num_clusters;
   }
 
   /**
@@ -565,18 +681,18 @@ public class EM extends DistributionClusterer implements OptionHandler
    */
   public void buildClusterer(Instances data) throws Exception
   {
+    if (data.checkForStringAttributes()) 
+      {
+	throw new Exception("Can't handle string attributes!");
+      }
 
-    if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
-
-    theInstances = data;
+    m_theInstances = data;
     doEM();
   }
 
-
   /**
    * Predicts the cluster memberships for a given instance.
+   *
    * @param data set of test instances
    * @param instance the instance to be assigned a cluster.
    * @return an array containing the estimated membership 
@@ -590,60 +706,67 @@ public class EM extends DistributionClusterer implements OptionHandler
     int i,j;
     double prob;
 
-    double [] wghts = new double [num_clusters];
+    double [] wghts = new double [m_num_clusters];
     
-    for (i=0;i<num_clusters;i++)
+    for (i=0;i<m_num_clusters;i++)
     {
       prob = 1.0;
-      for (j=0;j<num_attribs;j++)
+      for (j=0;j<m_num_attribs;j++)
       {
 	if (!inst.isMissing(j))
 	{
 	  if (inst.attribute(j).isNominal())
-	    prob *= 
-	    model[i][j].getProbability(inst.value(j));
-	  else // numeric attribute
-	    prob *= 
-	    normalDens(inst.value(j), 
-		       modelNormal[i][j][0], modelNormal[i][j][1]);
+	    {
+	      prob *= 
+		m_model[i][j].getProbability(inst.value(j));
+	    }
+	  else
+	    {// numeric attribute
+	      prob *= 
+		normalDens(inst.value(j), 
+			   m_modelNormal[i][j][0], m_modelNormal[i][j][1]);
+	    }
 	}
       }
-      wghts[i] = (prob * priors[i]);
+      wghts[i] = (prob * m_priors[i]);
     }
-
     return wghts;
   }
-
 
   /**
    * Perform the EM algorithm
    */
   private void doEM() throws Exception
   {
-    if (verbose)
-      System.out.println("Seed: "+rseed);
+    if (m_verbose)
+      {
+	System.out.println("Seed: "+m_rseed);
+      }
 
-    rr = new Random(rseed);
+    m_rr = new Random(m_rseed);
 
-    num_instances = theInstances.numInstances();
-    num_attribs = theInstances.numAttributes();
+    m_num_instances = m_theInstances.numInstances();
+    m_num_attribs = m_theInstances.numAttributes();
 
-    if (verbose)
-      System.out.println("Number of instances: "+num_instances+"\nNumber of atts: "+num_attribs+"\n");
+    if (m_verbose)
+      {
+	System.out.println("Number of instances: "
+			   +m_num_instances+"\nNumber of atts: "
+			   +m_num_attribs+"\n");
+      }
 
     // setDefaultStdDevs(theInstances);
     
     // cross validate to determine number of clusters?
-    if (num_clusters == -1)
+    if (m_num_clusters == -1)
     {
-      num_clusters = CVClusters();
+      m_num_clusters = CVClusters();
     }
 
     // fit full training set
-    EM_Init(theInstances,num_clusters);
-    loglikely = iterate(theInstances, num_clusters, verbose);
+    EM_Init(m_theInstances,m_num_clusters);
+    m_loglikely = iterate(m_theInstances, m_num_clusters, m_verbose);
   }
-
 
   /**
    * iterates the M and E steps until the log likelihood of the data
@@ -663,16 +786,20 @@ public class EM extends DistributionClusterer implements OptionHandler
     double llk = 0.0;
 
     if (report)
-      EM_Report(inst);
+      {
+	EM_Report(inst);
+      }
 
-    for (i=0;i<max_iterations;i++)
+    for (i=0;i<m_max_iterations;i++)
     {
       M(inst,num_cl);
       llkold = llk;
       llk = E(inst,num_cl);
       
       if (report)
-	System.out.println("Loglikely: "+llk);
+	{
+	  System.out.println("Loglikely: "+llk);
+	}
 
       if (i > 0)
       {
@@ -684,8 +811,9 @@ public class EM extends DistributionClusterer implements OptionHandler
     }
 
     if (report)
-      EM_Report(inst);
-
+      {
+	EM_Report(inst);
+      }
     return llk;
   }
 
@@ -696,21 +824,20 @@ public class EM extends DistributionClusterer implements OptionHandler
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain the following arguments:
+   * @param argv should contain the following arguments: <p>
    * -t training file [-T test file] [-N number of clusters] [-S random seed]
    */
 
   public static void main(String [] argv)
   {
-
-    try {
-      System.out.println(ClusterEvaluation.evaluateClusterer(new EM(), argv));
-    }
+    try 
+      {
+	System.out.println(ClusterEvaluation.
+			   evaluateClusterer(new EM(), argv));
+      }
     catch (Exception e)
     {
       System.out.println(e.getMessage());
     }
   }
 }
-
-

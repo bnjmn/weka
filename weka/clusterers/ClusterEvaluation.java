@@ -24,14 +24,31 @@ import java.io.*;
 import weka.core.*;
 
 /**
- * Class for evaluating clustering models.
+ * Class for evaluating clustering models.<p>
+ *
+ * Valid options are: <p>
+ *
+ * -t <name of the training file> <br>
+ * Specify the training file. <p>
+ *
+ * -T <name of the test file> <br>
+ * Specify the test file to apply clusterer to. <p>
+ *
+ * -d <name of file to save clustering model to> <br>
+ * Specify output file. <p>
+ *
+ * -l <name of file to load clustering model from> <br>
+ * Specifiy input file. <p>
+ *
+ * -p <br>
+ * Output predictions. Predicitons are for the training file if only the
+ * training file is specified, otherwise they are for the test file. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  1.0 - March 1999 - Initial version (Mark)
+ * @version  $Revision: 1.2 $
  */
-public class ClusterEvaluation {
-
-
+public class ClusterEvaluation 
+{
   /**
    * Evaluates a clusterer with the options given in an array of
    * strings. It takes the string indicated by "-t" as training file, the
@@ -71,6 +88,11 @@ public class ClusterEvaluation {
     
     try
     {
+      if (Utils.getFlag('h',options))
+	{
+	  throw new Exception("Help requested.");
+	}
+
       // Get basic options (options the same for all clusterers
       printClusterAssignments = Utils.getFlag('p', options);
 
@@ -150,7 +172,9 @@ public class ClusterEvaluation {
     }
     
     if (objectInputFileName.length() != 0)
-      Utils.checkForRemainingOptions(options);
+      {
+	Utils.checkForRemainingOptions(options);
+      }
 
     // Set options for clusterer
     if (clusterer instanceof OptionHandler) 
@@ -166,8 +190,10 @@ public class ClusterEvaluation {
 	objectInputStream.close();
       }
     else
-      // Build the clusterer if no object file provided
-      clusterer.buildClusterer(train);
+      {
+	// Build the clusterer if no object file provided
+	clusterer.buildClusterer(train);
+      }
 
     /* Output cluster predictions only (for the test data if specified,
        otherwise for the training data */
@@ -181,8 +207,10 @@ public class ClusterEvaluation {
     text.append("\n\n=== Clustering stats for training data ===\n\n"+
 		printClusterStats(clusterer, trainFileName));
     if (testFileName.length() != 0)
-      text.append("\n\n=== Clustering stats for testing data ===\n\n"+
+      {
+	text.append("\n\n=== Clustering stats for testing data ===\n\n"+
 		printClusterStats(clusterer, testFileName));
+      }
 
     if ((clusterer instanceof DistributionClusterer) &&
 	(doXval == true) &&
@@ -236,9 +264,9 @@ public class ClusterEvaluation {
     StringBuffer CvString = new StringBuffer();
 
     if (options != null) 
-    {
-      savedOptions = new String[options.length];
-    }
+      {
+	savedOptions = new String[options.length];
+      }
 
     data = new Instances(data);
 
@@ -258,8 +286,10 @@ public class ClusterEvaluation {
       }
 
       if (!(clusterer instanceof DistributionClusterer))
-	throw new Exception(clustererString+" must be a distrinbution "+
-			    "clusterer.");
+	{
+	  throw new Exception(clustererString+" must be a distrinbution "+
+			      "clusterer.");
+	}
 
       // Save options
       if (options != null) 
@@ -296,7 +326,9 @@ public class ClusterEvaluation {
 
 	double temp = Utils.sum(tempDist);
 	if (temp > 0)
-	  foldAv += Math.log(temp);
+	  {
+	    foldAv += Math.log(temp);
+	  }
       }
       CvAv += (foldAv / test.numInstances());
     }
@@ -358,7 +390,9 @@ public class ClusterEvaluation {
 	      temp = Utils.sum(dist);
 
 	      if (temp > 0)
-		loglk += Math.log(temp);
+		{
+		  loglk += Math.log(temp);
+		}
 	    }
 	  }
 	  catch (Exception e) 
@@ -385,10 +419,11 @@ public class ClusterEvaluation {
 	}
 	
 	if (clusterer instanceof DistributionClusterer)
-	  text.append("\nLog likelihood: "+Utils.doubleToString(loglk,1,5)
+	  {
+	    text.append("\nLog likelihood: "+Utils.doubleToString(loglk,1,5)
 		      +"\n");
+	  }
       }
-
       return text.toString();
     }
 
@@ -452,12 +487,9 @@ public class ClusterEvaluation {
 	    throw new Exception('\n' + "Unable to cluster instance\n"+
 				e.getMessage());
 	  }
-
 	  text.append(i+" "+cnum+"\n");
-
 	}
       }
-
       return text.toString();
     }
 
@@ -482,11 +514,13 @@ public class ClusterEvaluation {
     optionsText.append("-d <name of output file>\n");
     optionsText.append("\tSets model output file.\n");
     optionsText.append("-p\n");
-    optionsText.append("\tOutput predictions. Predictions are for training file"
+    optionsText.append("\tOutput predictions. Predictions are for "
+		       +"training file"
 		       +"\n\tif only training file is specified,"
 		       +"\n\totherwise predictions are for the test file.\n");
     optionsText.append("-x <number of folds>\n");
-    optionsText.append("\tOnly Distribution Clusterers can be cross validated.\n");
+    optionsText.append("\tOnly Distribution Clusterers can be cross "
+		       +"validated.\n");
     optionsText.append("-s <random number seed>\n");
 
     // Get scheme-specific options
@@ -505,8 +539,32 @@ public class ClusterEvaluation {
 	optionsText.append(option.description() + "\n");
       }
     }
-
     return optionsText.toString();
   }
 
+  /**
+   * Main method for testing this class.
+   *
+   * @param args the options
+   */
+  public static void main(String [] args)
+  {
+    try
+      {
+	if (args.length == 0)
+	  {
+	    throw new Exception("The first argument must be the name of a "
+				+"clusterer");
+	  }
+	String ClustererString = args[0];
+	args[0]="";
+	System.out.println(evaluateClusterer((Clusterer)Class.
+					    forName(ClustererString).
+					     newInstance(), args));
+      }
+    catch (Exception e)
+      {
+	System.out.println(e.getMessage());
+      }
+  }
 }

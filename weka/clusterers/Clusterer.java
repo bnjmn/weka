@@ -26,7 +26,7 @@ import weka.core.*;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version 1.0 March 1999 (Mark)
+ * @version $Revision: 1.2 $
  */
 public abstract class Clusterer implements Cloneable, Serializable {
 
