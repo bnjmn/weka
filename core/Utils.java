@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public final class Utils {
 
@@ -177,8 +177,8 @@ public final class Utils {
       }
       
       return stringBuffer.toString().trim();
-    } 
-    return new String("NaN");
+    }
+    return new String("" + value);
   }
 
   /**
@@ -197,7 +197,8 @@ public final class Utils {
     char[] result;
     int dotPosition;
 
-    if (afterDecimalPoint >= width) {
+    if ((afterDecimalPoint >= width) 
+        || (tempString.indexOf('E') != -1)) { // Protects sci notation
       return tempString;
     }
 
