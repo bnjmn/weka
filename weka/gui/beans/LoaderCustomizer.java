@@ -77,7 +77,7 @@ public class LoaderCustomizer extends JPanel
   private weka.gui.beans.Loader m_dsLoader;
   private FileEditor m_fileEditor = new FileEditor();
   private GenericObjectEditor m_LoaderEditor = 
-    new GenericObjectEditor();
+    new GenericObjectEditor(true);
 
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {

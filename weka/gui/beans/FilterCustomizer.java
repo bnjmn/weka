@@ -35,7 +35,7 @@ import weka.filters.Filter;
  * GUI customizer for the filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FilterCustomizer extends JPanel
   implements Customizer {
@@ -69,7 +69,7 @@ public class FilterCustomizer extends JPanel
 
   private weka.gui.beans.Filter m_filter;
   private GenericObjectEditor m_filterEditor = 
-    new GenericObjectEditor();
+    new GenericObjectEditor(true);
  
   public FilterCustomizer() {
     try {
