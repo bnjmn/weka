@@ -52,7 +52,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
@@ -376,7 +376,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 	}
       }
     }
-    attributes.addElement(m_BaseFormat.classAttribute());
+    attributes.addElement(m_BaseFormat.classAttribute().copy());
     metaFormat = new Instances("Meta format", attributes, 0);
     metaFormat.setClassIndex(metaFormat.numAttributes() - 1);
     return metaFormat;
