@@ -9,7 +9,7 @@ SOURCES = Classifier.java DistributionClassifier.java \
 	Bagging.java LogitBoost.java AdaBoostM1.java Stacking.java \
 	MultiClassClassifier.java MultiScheme.java CVParameterSelection.java \
 	BVDecompose.java RegressionByDiscretization.java \
-	CostSensitiveClassifier.java \
+	CostSensitiveClassifier.java MetaCost.java \
 	ClassificationViaRegression.java FilteredClassifier.java \
 	Sourcable.java 
 
