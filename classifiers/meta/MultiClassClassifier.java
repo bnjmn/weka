@@ -22,9 +22,9 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
 import weka.classifiers.DistributionClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -39,8 +39,11 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.FastVector;
+import weka.core.Range;
 import weka.filters.Filter;
 import weka.filters.MakeIndicatorFilter;
+import weka.filters.InstanceFilter;
 
 /**
  * Class for handling multi-class datasets with 2-class distribution
@@ -48,9 +51,9 @@ import weka.filters.MakeIndicatorFilter;
  *
  * Valid options are:<p>
  *
- * -E num <br>
- * Sets the error-correction mode. Valid values are 0 (no correction),
- * 1 (random codes), and 2 (exhaustive code). (default 0) <p>
+ * -M num <br>
+ * Sets the method to use. Valid values are 0 (1-against-all),
+ * 1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0) <p>
  *
  * -R num <br>
  * Sets the multiplier when using random codes. (default 2.0)<p>
@@ -61,16 +64,17 @@ import weka.filters.MakeIndicatorFilter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@webmind.com)
- * @version $Revision: 1.25 $
+ * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @version $Revision: 1.26 $
  */
 public class MultiClassClassifier extends DistributionClassifier 
   implements OptionHandler {
 
-  /** The classifiers. (One for each class.) */
+  /** The classifiers. */
   private Classifier [] m_Classifiers;
 
   /** The filters used to transform the class. */
-  private MakeIndicatorFilter[] m_ClassFilters;
+  private Filter[] m_ClassFilters;
 
   /** The class name of the base classifier. */
   private DistributionClassifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -81,23 +85,28 @@ public class MultiClassClassifier extends DistributionClassifier
   /** Internal copy of the class attribute for output purposes */
   private Attribute m_ClassAttribute;
   
+  /** A transformed dataset header used by the  1-against-1 method */
+  private Instances m_TwoClassDataset;
+
   /** 
    * The multiplier when generating random codes. Will generate
    * numClasses * m_RandomWidthFactor codes
    */
   private double m_RandomWidthFactor = 2.0;
-  
-  /** The error-correcting output code method to use */
-  private int m_ErrorMode = ERROR_NONE;
+
+  /** The multiclass method to use */
+  private int m_Method = METHOD_1_AGAINST_ALL;
 
   /** The error correction modes */
-  public final static int ERROR_NONE       = 0;
-  public final static int ERROR_RANDOM     = 1;
-  public final static int ERROR_EXHAUSTIVE = 2;
-  public static final Tag [] TAGS_ERROR = {
-    new Tag(ERROR_NONE       , "No correction"),
-    new Tag(ERROR_RANDOM     , "Random correction code"),
-    new Tag(ERROR_EXHAUSTIVE , "Exhaustive correction code")
+  public final static int METHOD_1_AGAINST_ALL    = 0;
+  public final static int METHOD_ERROR_RANDOM     = 1;
+  public final static int METHOD_ERROR_EXHAUSTIVE = 2;
+  public final static int METHOD_1_AGAINST_1      = 3;
+  public static final Tag [] TAGS_METHOD = {
+    new Tag(METHOD_1_AGAINST_ALL, "1-against-all"),
+    new Tag(METHOD_ERROR_RANDOM, "Random correction code"),
+    new Tag(METHOD_ERROR_EXHAUSTIVE, "Exhaustive correction code"),
+    new Tag(METHOD_1_AGAINST_1, "1-against-1")
   };
 
   /** Interface for the code constructors */
@@ -259,17 +268,63 @@ public class MultiClassClassifier extends DistributionClassifier
       m_Classifiers = Classifier.makeCopies(m_Classifier, 1);
       m_Classifiers[0].buildClassifier(insts);
 
-    } else {
+    } else if (m_Method == METHOD_1_AGAINST_1) {
+ 
+      // generate fastvector of pairs
+      FastVector pairs = new FastVector();
+      for (int i=0; i<insts.numClasses(); i++) {
+	for (int j=0; j<insts.numClasses(); j++) {
+	  if (j<=i) continue;
+	  int[] pair = new int[2];
+	  pair[0] = i; pair[1] = j;
+	  pairs.addElement(pair);
+	}
+      }
+
+      numClassifiers = pairs.size();
+      m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
+      m_ClassFilters = new Filter[numClassifiers];
+
+      // generate the classifiers
+      for (int i=0; i<numClassifiers; i++) {
+	InstanceFilter classFilter = new InstanceFilter();
+	classFilter.setAttributeIndex(insts.classIndex());
+	classFilter.setModifyHeader(true);
+	classFilter.setInvertSelection(false);
+	classFilter.setNominalIndicesArr((int[])pairs.elementAt(i));
+	int[] pair = (int[])pairs.elementAt(i);
+	Instances tempInstances = new Instances(insts, 0);
+	tempInstances.setClassIndex(-1);
+	classFilter.setInputFormat(tempInstances);
+	newInsts = Filter.useFilter(insts, classFilter);
+	newInsts.setClassIndex(insts.classIndex());
+	m_Classifiers[i].buildClassifier(newInsts);
+	m_ClassFilters[i] = classFilter;
+      }
+
+      // construct a two-class header version of the dataset
+      m_TwoClassDataset = new Instances(insts, 0);
+      int classIndex = m_TwoClassDataset.classIndex();
+      m_TwoClassDataset.setClassIndex(-1);
+      m_TwoClassDataset.deleteAttributeAt(classIndex);
+      FastVector classLabels = new FastVector();
+      classLabels.addElement("class0");
+      classLabels.addElement("class1");
+      m_TwoClassDataset.insertAttributeAt(new Attribute("class", classLabels),
+					  classIndex);
+      m_TwoClassDataset.setClassIndex(classIndex);
+
+    } else { // use error correcting code style methods
       Code code = null;
-      switch (m_ErrorMode) {
-      case ERROR_EXHAUSTIVE:
+      switch (m_Method) {
+      case METHOD_ERROR_EXHAUSTIVE:
         code = new ExhaustiveCode(numClassifiers);
         break;
-      case ERROR_RANDOM:
+      case METHOD_ERROR_RANDOM:
         code = new RandomCode(numClassifiers, 
                               (int)(numClassifiers * m_RandomWidthFactor));
         break;
-      case ERROR_NONE:
+      case METHOD_1_AGAINST_ALL:
         code = new StandardCode(numClassifiers);
         break;
       default:
@@ -280,15 +335,16 @@ public class MultiClassClassifier extends DistributionClassifier
       m_ClassFilters = new MakeIndicatorFilter[numClassifiers];
       AttributeStats classStats = insts.attributeStats(insts.classIndex());
       for (int i = 0; i < m_Classifiers.length; i++) {
-        if ((m_ErrorMode == ERROR_NONE) && 
+        if ((m_Method == METHOD_1_AGAINST_ALL) && 
             (classStats.nominalCounts[i] == 0)) {
           m_Classifiers[i] = null;
         } else {
           m_ClassFilters[i] = new MakeIndicatorFilter();
-          m_ClassFilters[i].setAttributeIndex(insts.classIndex());
-          m_ClassFilters[i].setValueIndices(code.getIndices(i));
-          m_ClassFilters[i].setNumeric(false);
-          m_ClassFilters[i].setInputFormat(insts);
+	  MakeIndicatorFilter classFilter = (MakeIndicatorFilter) m_ClassFilters[i];
+          classFilter.setAttributeIndex(insts.classIndex());
+          classFilter.setValueIndices(code.getIndices(i));
+          classFilter.setNumeric(false);
+          classFilter.setInputFormat(insts);
           newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
           m_Classifiers[i].buildClassifier(newInsts);
         }
@@ -310,21 +366,41 @@ public class MultiClassClassifier extends DistributionClassifier
     }
     
     double[] probs = new double[inst.numClasses()];
-    for(int i = 0; i < m_ClassFilters.length; i++) {
-      if (m_Classifiers[i] != null) {
-        m_ClassFilters[i].input(inst);
-        m_ClassFilters[i].batchFinished();
-        double [] current = ((DistributionClassifier)m_Classifiers[i])
-          .distributionForInstance(m_ClassFilters[i].output());
-        for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
-          if (m_ClassFilters[i].getValueRange().isInRange(j)) {
-            probs[j] += current[1];
-          } else {
-            probs[j] += current[0];
-          }
-        }
+
+    if (m_Method == METHOD_1_AGAINST_1) {    
+      for(int i = 0; i < m_ClassFilters.length; i++) {
+	if (m_Classifiers[i] != null) {
+	  Instance tempInst = new Instance(inst); 
+	  tempInst.setDataset(m_TwoClassDataset);
+	  double [] current = ((DistributionClassifier)m_Classifiers[i])
+	    .distributionForInstance(tempInst);  
+	  Range range = new Range(((InstanceFilter)m_ClassFilters[i])
+				  .getNominalIndices());
+	  range.setUpper(m_ClassAttribute.numValues());
+	  int[] pair = range.getSelection();
+	  if (current[0] > current[1]) probs[pair[0]] += 1.0;
+	  else if (current[1] > current[0]) probs[pair[1]] += 1.0;
+	}
+      }
+    } else {
+      // error correcting style methods
+      for(int i = 0; i < m_ClassFilters.length; i++) {
+	if (m_Classifiers[i] != null) {
+	  m_ClassFilters[i].input(inst);
+	  m_ClassFilters[i].batchFinished();
+	  double [] current = ((DistributionClassifier)m_Classifiers[i])
+	    .distributionForInstance(m_ClassFilters[i].output());
+	  for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
+	    if (((MakeIndicatorFilter)m_ClassFilters[i]).getValueRange().isInRange(j)) {
+	      probs[j] += current[1];
+	    } else {
+	      probs[j] += current[0];
+	    }
+	  }
+	}
       }
     }
+    
     if (Utils.gr(Utils.sum(probs), 0)) {
       Utils.normalize(probs);
       return probs;
@@ -347,11 +423,19 @@ public class MultiClassClassifier extends DistributionClassifier
       text.append("Classifier ").append(i + 1);
       if (m_Classifiers[i] != null) {
         if ((m_ClassFilters != null) && (m_ClassFilters[i] != null)) {
-          text.append(", using indicator values: ");
-          text.append(m_ClassFilters[i].getValueRange());
+	  if (m_ClassFilters[i] instanceof InstanceFilter) {
+	    Range range = new Range(((InstanceFilter)m_ClassFilters[i])
+				    .getNominalIndices());
+	    range.setUpper(m_ClassAttribute.numValues());
+	    int[] pair = range.getSelection();
+	    text.append(", " + (pair[0]+1) + " vs " + (pair[1]+1));
+	  } else if (m_ClassFilters[i] instanceof MakeIndicatorFilter) {
+	    text.append(", using indicator values: ");
+	    text.append(((MakeIndicatorFilter)m_ClassFilters[i]).getValueRange());
+	  }
         }
         text.append('\n');
-        text.append(m_Classifiers[i].toString() + "\n");
+        text.append(m_Classifiers[i].toString() + "\n\n");
       } else {
         text.append(" Skipped (no training examples)\n");
       }
@@ -361,9 +445,9 @@ public class MultiClassClassifier extends DistributionClassifier
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options
    *
-   * @return an enumeration of all the available options.
+   * @return an enumeration of all the available options
    */
   public Enumeration listOptions()  {
 
@@ -371,9 +455,9 @@ public class MultiClassClassifier extends DistributionClassifier
     Object c;
     
     vec.addElement(new Option(
-       "\tSets the error-correction mode. Valid values are 0 (no correction),\n"
-       +"\t1 (random codes), and 2 (exhaustive code). (default 0)\n",
-       "E", 1, "-E <num>"));
+       "\tSets the method to use. Valid values are 0 (1-against-all),\n"
+       +"\t1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)\n",
+       "M", 1, "-M <num>"));
     vec.addElement(new Option(
        "\tSets the multiplier when using random codes. (default 2.0)",
        "R", 1, "-R <num>"));
@@ -399,9 +483,9 @@ public class MultiClassClassifier extends DistributionClassifier
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -E num <br>
-   * Sets the error-correction mode. Valid values are 0 (no correction),
-   * 1 (random codes), and 2 (exhaustive code). (default 0) <p>
+   * -M num <br>
+   * Sets the method to use. Valid values are 0 (1-against-all),
+   * 1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0) <p>
    *
    * -R num <br>
    * Sets the multiplier when using random codes. (default 2.0)<p>
@@ -415,13 +499,12 @@ public class MultiClassClassifier extends DistributionClassifier
    */
   public void setOptions(String[] options) throws Exception {
   
-    String errorString = Utils.getOption('E', options);
+    String errorString = Utils.getOption('M', options);
     if (errorString.length() != 0) {
-      setErrorCorrectionMode(new SelectedTag(Integer.parseInt(errorString), 
-                                             TAGS_ERROR));
+      setMethod(new SelectedTag(Integer.parseInt(errorString), 
+                                             TAGS_METHOD));
     } else {
-      setErrorCorrectionMode(new SelectedTag(ERROR_NONE,
-                                             TAGS_ERROR));
+      setMethod(new SelectedTag(METHOD_1_AGAINST_ALL, TAGS_METHOD));
     }
 
     String rfactorString = Utils.getOption('R', options);
@@ -456,8 +539,8 @@ public class MultiClassClassifier extends DistributionClassifier
     String [] options = new String [classifierOptions.length + 7];
     int current = 0;
 
-    options[current++] = "-E";
-    options[current++] = "" + m_ErrorMode;
+    options[current++] = "-M";
+    options[current++] = "" + m_Method;
     
     options[current++] = "-R";
     options[current++] = "" + m_RandomWidthFactor;
@@ -525,39 +608,32 @@ public class MultiClassClassifier extends DistributionClassifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String errorCorrectionModeTipText() {
-    return "Sets whether error correction will be used. The default method "
-      + "is no error correction: one classifier will be built per class value. "
-      + "Increased accuracy can be obtained by using error correcting output "
-      + "codes. \"Random\" generates random output codes (the number of "
-      + "which is determined by the number of classes and the width "
-      + "multiplier). \"Exhaustive\" generates one classifier for each "
-      + "(non-redundant) combination of class values - beware that this "
-      + "increases exponentially in the number of class values. We have yet "
-      + "to implement BCH codes (feel free to do so)."; 
+  public String methodTipText() {
+    return "Sets the method to use for transforming the multi-class problem into "
+      + "several 2-class ones."; 
   }
 
   /**
-   * Gets the error correction mode used. Will be one of
-   * ERROR_NONE, ERROR_RANDOM, or ERROR_EXHAUSTIVE.
+   * Gets the method used. Will be one of METHOD_1_AGAINST_ALL,
+   * METHOD_ERROR_RANDOM, METHOD_ERROR_EXHAUSTIVE, or METHOD_1_AGAINST_1.
    *
-   * @return the current error correction mode.
+   * @return the current method.
    */
-  public SelectedTag getErrorCorrectionMode() {
+  public SelectedTag getMethod() {
       
-    return new SelectedTag(m_ErrorMode, TAGS_ERROR);
+    return new SelectedTag(m_Method, TAGS_METHOD);
   }
 
   /**
-   * Sets the error correction mode used. Will be one of
-   * ERROR_NONE, ERROR_RANDOM, or ERROR_EXHAUSTIVE.
+   * Sets the method used. Will be one of METHOD_1_AGAINST_ALL,
+   * METHOD_ERROR_RANDOM, METHOD_ERROR_EXHAUSTIVE, or METHOD_1_AGAINST_1.
    *
-   * @param newMethod the new error correction mode.
+   * @param newMethod the new method.
    */
-  public void setErrorCorrectionMode(SelectedTag newMethod) {
+  public void setMethod(SelectedTag newMethod) {
     
-    if (newMethod.getTags() == TAGS_ERROR) {
-      m_ErrorMode = newMethod.getSelectedTag().getID();
+    if (newMethod.getTags() == TAGS_METHOD) {
+      m_Method = newMethod.getSelectedTag().getID();
     }
   }
 
@@ -605,6 +681,8 @@ public class MultiClassClassifier extends DistributionClassifier
       System.out.println(Evaluation.evaluateModel(scheme, argv));
     } catch (Exception e) {
       System.err.println(e.getMessage());
+      e.printStackTrace();
     }
   }
 }
+
