@@ -1,27 +1,7 @@
 JAVAC = javac
 
-SOURCES = Filter.java NullFilter.java AllFilter.java AddFilter.java \
-	DiscretizeFilter.java InstanceFilter.java AttributeFilter.java \
-	MergeTwoValuesFilter.java SwapAttributeValuesFilter.java \
-	MakeIndicatorFilter.java ReplaceMissingValuesFilter.java \
-	NumericTransformFilter.java FirstOrderFilter.java \
-	NominalToBinaryFilter.java SplitDatasetFilter.java \
-	CopyAttributesFilter.java AbstractTimeSeriesFilter.java \
-	TimeSeriesDeltaFilter.java \
-	TimeSeriesTranslateFilter.java RandomizeFilter.java \
-	AttributeSelectionFilter.java NormalizationFilter.java \
-	ResampleFilter.java AttributeTypeFilter.java \
-	StringToNominalFilter.java ObfuscateFilter.java \
-	NonSparseToSparseFilter.java SparseToNonSparseFilter.java \
-	UselessAttributeFilter.java SpreadSubsampleFilter.java \
-	StringToWordVectorFilter.java \
-	AttributeExpressionFilter.java AddNoiseFilter.java \
-	ClassOrderFilter.java MisclassificationFilter.java
-
-# Filters To Do:
-# TimeSeriesSmoothFilter.java    -- replace attribute values with values
-#                                   smoothed over historic instances 
-#                                   (average / decay)
+SOURCES = Filter.java NullFilter.java AllFilter.java \
+	StreamableFilter.java SupervisedFilter.java UnsupervisedFilter.java
 
 CLASSFILES = $(SOURCES:.java=.class)
 
@@ -33,18 +13,20 @@ CLASSFILES = $(SOURCES:.java=.class)
 #----------------------------------------------------------------------------#
 
 all :	$(CLASSFILES)
+	(cd supervised; make all JAVAC=$(JAVAC))
+	(cd unsupervised; make all JAVAC=$(JAVAC))
 
 debug : clean
 	$(JAVAC) -g $(SOURCES)
+	(cd supervised; make debug JAVAC=$(JAVAC))
+	(cd unsupervised; make debug JAVAC=$(JAVAC))
 
 optimized : clean
 	$(JAVAC) -O $(SOURCES)
-
-binaries : all
-	(cd ..; \
-	jar -cvfm archive/$(PACKAGE)-bin.`date +%d%b%Y`.jar \
-	$(PACKAGE)/*.class)
+	(cd supervised; make optimized JAVAC=$(JAVAC))
+	(cd unsupervised; make optimized JAVAC=$(JAVAC))
 
 clean : 
 	$(RM) *.class *~
-
+	(cd supervised; make clean JAVAC=$(JAVAC))
+	(cd unsupervised; make clean JAVAC=$(JAVAC))
