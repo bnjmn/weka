@@ -43,16 +43,19 @@ import weka.filters.*;
  * Technical Report CD-99-14. Control Division, Dept of Mechanical and
  * Production Engineering, National University of Singapore. <p>
  *
+ * Note: for improved speed normalization should be turned off when
+ * operating on SparseInstances.<p>
+ *
  * Valid options are:<p>
  *
  * -C num <br>
- * The complexity constant C. (default 1000)<p>
+ * The complexity constant C. (default 1)<p>
  *
  * -E num <br>
  * The exponent for the polynomial kernel. (default 1)<p>
  *
- * -R <br>
- * Normalize the training instances. <p>
+ * -N <br>
+ * Don't normalize the training instances. <p>
  *
  * -L <br>
  * Rescale kernel. <p>
@@ -73,7 +76,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@intelligenesis.net) (sparse vector code)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class SMO extends DistributionClassifier implements OptionHandler {
 
@@ -200,7 +203,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   private double m_exponent = 1.0;
 
   /** The complexity parameter. */
-  private double m_C = 1000.0;
+  private double m_C = 1.0;
 
   /** Epsilon for rounding. */
   private double m_eps = 1.0e-12;
@@ -259,7 +262,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
   private int m_cacheSize = 1000003;
 
   /** True if we don't want to normalize */
-  private boolean m_dontNormalize = true;
+  private boolean m_dontNormalize = false;
 
   /** Rescale? */
   private boolean m_rescale = false;
@@ -512,13 +515,13 @@ public class SMO extends DistributionClassifier implements OptionHandler {
 
     Vector newVector = new Vector(8);
 
-    newVector.addElement(new Option("\tThe complexity constant C. (default 1000)",
+    newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
 				    "C", 1, "-C <double>"));
     newVector.addElement(new Option("\tThe exponent for the "
 				    + "polynomial kernel. (default 1)",
 				    "E", 1, "-E <double>"));
-    newVector.addElement(new Option("\tNormalize the data.",
-				    "R", 0, "-R"));
+    newVector.addElement(new Option("\tDon't normalize the data.",
+				    "N", 0, "-N"));
     newVector.addElement(new Option("\tRescale the kernel.",
 				    "L", 0, "-L"));
     newVector.addElement(new Option("\tUse lower-order terms.",
@@ -541,13 +544,13 @@ public class SMO extends DistributionClassifier implements OptionHandler {
    * Parses a given list of options. Valid options are:<p>
    *
    * -C num <br>
-   * The complexity constant C. (default 1000)<p>
+   * The complexity constant C. (default 1)<p>
    *
    * -E num <br>
    * The exponent for the polynomial kernel. (default 1) <p>
    *
-   * -R <br>
-   * Normalize the training instances. <p>
+   * -N <br>
+   * Don't normalize the training instances. <p>
    *
    * -L <br>
    * Rescale kernel. <p>
@@ -573,7 +576,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     if (complexityString.length() != 0) {
       m_C = (new Double(complexityString)).doubleValue();
     } else {
-      m_C = 1000.0;
+      m_C = 1.0;
     }
     String exponentsString = Utils.getOption('E', options);
     if (exponentsString.length() != 0) {
@@ -599,7 +602,7 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     } else {
       m_eps = 1.0e-12;
     }
-    m_dontNormalize = !Utils.getFlag('R', options);
+    m_dontNormalize = Utils.getFlag('N', options);
     m_rescale = Utils.getFlag('L', options);
     if ((m_exponent == 1.0) && (m_rescale)) {
       throw new Exception("Can't use rescaling with linear machine.");
@@ -625,8 +628,8 @@ public class SMO extends DistributionClassifier implements OptionHandler {
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
     options[current++] = "-T"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
-    if (!m_dontNormalize) {
-      options[current++] = "-R";
+    if (m_dontNormalize) {
+      options[current++] = "-N";
     }
     if (m_rescale) {
       options[current++] = "-L";
