@@ -39,10 +39,11 @@ import java.util.Vector;
  * Full class name of clusterer to use, followed by scheme options. (required)<p>
  *
  * -I range string <br>
- * The range of attributes the clusterer should ignore.<p>
+ * The range of attributes the clusterer should ignore. Note: if a class index
+ * is set then the class is automatically ignored during clustering.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AddCluster extends Filter implements UnsupervisedFilter, OptionHandler {
 
@@ -51,6 +52,9 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
 
   /** Range of attributes to ignore */
   protected Range m_IgnoreAttributesRange = null;
+
+  /** Filter for removing attributes */
+  protected Filter m_removeAttributes = new Remove();
 
   /**
    * Sets the format of the input instances.
@@ -64,6 +68,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
     super.setInputFormat(instanceInfo);
+    m_removeAttributes = null;
 
     return false;
   }
@@ -84,19 +89,30 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
     Instances toFilterIgnoringAttributes = toFilter;
 
     // filter out attributes if necessary
-    if (m_IgnoreAttributesRange != null) {
+    if (m_IgnoreAttributesRange != null || toFilter.classIndex() >=0) {
       toFilterIgnoringAttributes = new Instances(toFilter);
-      Filter removeAttributes = new Remove();
-      ((Remove)removeAttributes).setAttributeIndices(m_IgnoreAttributesRange.getRanges());
-      ((Remove)removeAttributes).setInvertSelection(false);
-      removeAttributes.setInputFormat(toFilter);
-      for (int i = 0; i < toFilter.numInstances(); i++) {
-	removeAttributes.input(toFilter.instance(i));
+      m_removeAttributes = new Remove();
+      String rangeString = "";
+      if (m_IgnoreAttributesRange != null) {
+	rangeString += m_IgnoreAttributesRange.getRanges();
       }
-      removeAttributes.batchFinished();
-      toFilterIgnoringAttributes = removeAttributes.getOutputFormat();
+      if (toFilter.classIndex() >= 0) {
+	if (rangeString.length() > 0) {
+	  rangeString += (","+(toFilter.classIndex()+1));	  
+	} else {
+	  rangeString = ""+(toFilter.classIndex()+1);
+	}
+      }
+      ((Remove)m_removeAttributes).setAttributeIndices(rangeString);
+      ((Remove)m_removeAttributes).setInvertSelection(false);
+      m_removeAttributes.setInputFormat(toFilter);
+      for (int i = 0; i < toFilter.numInstances(); i++) {
+	m_removeAttributes.input(toFilter.instance(i));
+      }
+      m_removeAttributes.batchFinished();
+      toFilterIgnoringAttributes = m_removeAttributes.getOutputFormat();
       Instance tempInst;
-      while ((tempInst = removeAttributes.output()) != null) {
+      while ((tempInst = m_removeAttributes.output()) != null) {
 	toFilterIgnoringAttributes.add(tempInst);
       }
     }
@@ -115,36 +131,82 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
 
     setOutputFormat(filtered);
 
-    Instance original, processed;
-
     // build new dataset
     for (int i=0; i<toFilter.numInstances(); i++) {
-      
-      original = toFilter.instance(i);
-
-      // copy values
-      double[] instanceVals = new double[filtered.numAttributes()];
-      for(int j = 0; j < toFilter.numAttributes(); j++) {
-	instanceVals[j] = original.value(j);
-      }
-      // add cluster to end
-      instanceVals[toFilter.numAttributes()]
-	= m_Clusterer.clusterInstance(toFilterIgnoringAttributes.instance(i));
-      
-      // create new instance
-      if (original instanceof SparseInstance) {
-	processed = new SparseInstance(original.weight(), instanceVals);
-      } else {
-	processed = new Instance(original.weight(), instanceVals);
-      }
-      copyStringValues(original, false, original.dataset(), getOutputStringIndex(),
-		       getOutputFormat(), getOutputStringIndex());
-      processed.setDataset(filtered);
-      
-      push(processed);
+      convertInstance(toFilter.instance(i));
     }
+    flushInput();
+    m_NewBatch = true;
 
     return (numPendingOutput() != 0);
+  }
+
+  /**
+   * Input an instance for filtering. Ordinarily the instance is processed
+   * and made available for output immediately. Some filters require all
+   * instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @exception IllegalStateException if no input format has been defined.
+   */
+  public boolean input(Instance instance) throws Exception {
+
+    if (getInputFormat() == null) {
+      throw new IllegalStateException("No input instance format defined");
+    }
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    
+    if (outputFormatPeek() != null) {
+      convertInstance(instance);
+      return true;
+    }
+
+    bufferInput(instance);
+    return false;
+  }
+
+  /**
+   * Convert a single instance over. The converted instance is added to 
+   * the end of the output queue.
+   *
+   * @param instance the instance to convert
+   */
+  protected void convertInstance(Instance instance) throws Exception {
+    Instance original, processed;
+    original = instance;
+
+    // copy values
+    double[] instanceVals = new double[instance.numAttributes()+1];
+    for(int j = 0; j < instance.numAttributes(); j++) {
+      instanceVals[j] = original.value(j);
+    }
+    Instance filteredI = null;
+    if (m_removeAttributes != null) {
+      m_removeAttributes.input(instance);
+      filteredI = m_removeAttributes.output();
+    } else {
+      filteredI = instance;
+    }
+
+    // add cluster to end
+    instanceVals[instance.numAttributes()]
+      = m_Clusterer.clusterInstance(filteredI);
+
+    // create new instance
+    if (original instanceof SparseInstance) {
+      processed = new SparseInstance(original.weight(), instanceVals);
+    } else {
+      processed = new Instance(original.weight(), instanceVals);
+    }
+    copyStringValues(original, false, original.dataset(), getOutputStringIndex(),
+		     getOutputFormat(), getOutputStringIndex());
+      
+    push(processed);
   }
 
   /**
@@ -177,7 +239,8 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
    * Full class name of clusterer to use, followed by scheme options. (required)<p>
    *   
    * -I range string <br>
-   * The range of attributes the clusterer should ignore.<p>
+   * The range of attributes the clusterer should ignore. Note: if a class index
+   * is set then the class is automatically ignored during clustering<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
