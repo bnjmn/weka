@@ -36,7 +36,7 @@ import java.util.StringTokenizer;
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class Matrix implements Cloneable, Serializable {
 
@@ -433,10 +433,11 @@ public class Matrix implements Cloneable, Serializable {
     Matrix weightedThis = new Matrix(numRows(), numColumns());
     Matrix weightedDep = new Matrix(numRows(), 1);
     for (int i = 0; i < w.length; i++) {
+      double sqrt_weight = Math.sqrt(w[i]);
       for (int j = 0; j < numColumns(); j++) {
-	weightedThis.setElement(i, j, getElement(i, j) * w[i]);
+	weightedThis.setElement(i, j, getElement(i, j) * sqrt_weight);
       }
-      weightedDep.setElement(i, 0, y.getElement(i, 0) * w[i]);
+      weightedDep.setElement(i, 0, y.getElement(i, 0) * sqrt_weight);
     }
     return weightedThis.regression(weightedDep);
   }
@@ -565,15 +566,15 @@ public class Matrix implements Cloneable, Serializable {
 	int help = piv[col]; piv[col] = piv[newrow]; piv[newrow] = help;
 	double hh  = factor[col]; factor[col] = factor[newrow]; factor[newrow] = help;
       }
-      double b_jj = m_Elements[col][col];
 
-      if (b_jj == 0.0) {
+      if (m_Elements[col][col] == 0.0) {
 	throw new Exception("Matrix is singular");
       }
 
       for (int row = col + 1; row < nr; row ++) {
 	// divide all 
-	m_Elements[row][col] = m_Elements[row][col] / b_jj;
+	m_Elements[row][col] = m_Elements[row][col] / 
+	  m_Elements[col][col];
       }
    }
 
