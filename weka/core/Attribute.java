@@ -62,7 +62,7 @@ import java.util.*;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -114,7 +114,7 @@ public class Attribute implements Copyable, Serializable {
 
     m_Name = attributeName;
     m_Index = -1;
-    if (m_Values == null) {
+    if (attributeValues == null) {
       m_Values = new FastVector();
       m_Type = STRING;
     } else {
