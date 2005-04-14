@@ -81,7 +81,7 @@ import java.lang.reflect.InvocationTargetException;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.35 $
+ * @version  $Revision: 1.36 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -608,6 +608,7 @@ public class AttributeSelection implements Serializable {
     // Do the search
     attributeSet = m_searchMethod.search(m_ASEvaluator, 
 					 m_trainInstances);
+
     // try and determine if the search method uses an attribute transformer---
     // this is a bit of a hack to make things work properly with RankSearch
     // using PrincipalComponents as its attribute ranker
@@ -693,16 +694,18 @@ public class AttributeSelection implements Serializable {
        
       // set up the selected attributes array - usable by a filter or
       // whatever
-      if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	  && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) || 
-	  m_trainInstances.classIndex() >= 0) 
-	{
-	  // one more for the class
-	  m_selectedAttributeSet = new int[m_numToSelect + 1];
-	  m_selectedAttributeSet[m_numToSelect] = 
-	    m_trainInstances.classIndex();
-	}
-      else {
+      if (m_trainInstances.classIndex() >= 0) {
+        if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)        
+             && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) ||
+            m_ASEvaluator instanceof AttributeTransformer) {
+          // one more for the class
+          m_selectedAttributeSet = new int[m_numToSelect + 1];
+          m_selectedAttributeSet[m_numToSelect] = 
+              m_trainInstances.classIndex();
+        } else {
+          m_selectedAttributeSet = new int[m_numToSelect];
+        }
+      } else {
 	m_selectedAttributeSet = new int[m_numToSelect];
       }
 
