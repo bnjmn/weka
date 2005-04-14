@@ -71,7 +71,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30.2.1 $
+ * @version $Revision: 1.30.2.2 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -86,6 +86,8 @@ public class EM
 
   /** default minimum standard deviation */
   private double m_minStdDev = 1e-6;
+
+  private double [] m_minStdDevPerAtt;
 
   /** hold the weights of each instance for each cluster */
   private double m_weights[][];
@@ -240,6 +242,10 @@ public class EM
    */
   public void setMinStdDev(double m) {
     m_minStdDev = m;
+  }
+
+  public void setMinStdDevPerAtt(double [] m) {
+    m_minStdDevPerAtt = m;
   }
 
   /**
@@ -452,6 +458,9 @@ public class EM
 	    m_model[i][j].addValue(k, nominalCounts[i][j][k]);
 	  }
 	} else {
+	  double minStdD = (m_minStdDevPerAtt != null)
+	    ? m_minStdDevPerAtt[j]
+	    : m_minStdDev;
 	  double mean = (center.isMissing(j))
 	    ? inst.meanOrMode(j)
 	    : center.value(j);
@@ -459,12 +468,19 @@ public class EM
 	  double stdv = (stdD.instance(i).isMissing(j))
 	    ? ((m_maxValues[j] - m_minValues[j]) / (2 * m_num_clusters))
 	    : stdD.instance(i).value(j);
-	  if (stdv < m_minStdDev) {
+	  if (stdv < minStdD) {
 	    stdv = inst.attributeStats(j).numericStats.stdDev;
-	    if (stdv < m_minStdDev) {
-	      stdv = m_minStdDev;
+            if (Double.isInfinite(stdv)) {
+              stdv = minStdD;
+            }
+	    if (stdv < minStdD) {
+	      stdv = minStdD;
 	    }
 	  }
+	  if (stdv <= 0) {
+	    stdv = m_minStdDev;
+	  }
+
 	  m_modelNormal[i][j][1] = stdv;
 	  m_modelNormal[i][j][2] = 1.0;
 	}
@@ -597,14 +613,24 @@ public class EM
 	    }
 	    
 	    // std dev      
-	    m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]); 
+	    double minStdD = (m_minStdDevPerAtt != null)
+	    ? m_minStdDevPerAtt[j]
+	    : m_minStdDev;
 
-	    if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
+	    m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]);              
+
+	    if ((m_modelNormal[i][j][1] <= minStdD)) {
 	      m_modelNormal[i][j][1] = inst.attributeStats(j).numericStats.stdDev;
-	      if ((m_modelNormal[i][j][1] <= m_minStdDev)) {
-		m_modelNormal[i][j][1] = m_minStdDev;
+	      if ((m_modelNormal[i][j][1] <= minStdD)) {
+		m_modelNormal[i][j][1] = minStdD;
 	      }
 	    }
+	    if ((m_modelNormal[i][j][1] <= 0)) {
+	      m_modelNormal[i][j][1] = m_minStdDev;
+	    }
+            if (Double.isInfinite(m_modelNormal[i][j][1])) {
+              m_modelNormal[i][j][1] = m_minStdDev;
+            }
 	    
 	    // mean
 	    m_modelNormal[i][j][0] /= m_modelNormal[i][j][2];
@@ -781,6 +807,7 @@ public class EM
     double templl, tll;
     boolean CVincreased = true;
     m_num_clusters = 1;
+    int num_clusters = m_num_clusters;
     int i;
     Random cvr;
     Instances trainCopy;
@@ -788,53 +815,93 @@ public class EM
       ? m_theInstances.numInstances() 
       : 10;
 
-    while (CVincreased) {
+    boolean ok = true;
+    int seed = m_rseed;
+    int restartCount = 0;
+    CLUSTER_SEARCH: while (CVincreased) {
+      // theInstances.stratify(10);
+        
       CVincreased = false;
       cvr = new Random(m_rseed);
       trainCopy = new Instances(m_theInstances);
       trainCopy.randomize(cvr);
-      // theInstances.stratify(10);
       templl = 0.0;
-
       for (i = 0; i < numFolds; i++) {
 	Instances cvTrain = trainCopy.trainCV(numFolds, i, cvr);
+	if (num_clusters > cvTrain.numInstances()) {
+	  break CLUSTER_SEARCH;
+	}
 	Instances cvTest = trainCopy.testCV(numFolds, i);
-	m_rr = new Random(m_rseed);
+	m_rr = new Random(seed);
+        for (int z=0; z<10; z++) m_rr.nextDouble();
+	m_num_clusters = num_clusters;
 	EM_Init(cvTrain);
-	iterate(cvTrain, false);
-	tll = E(cvTest, false);
+	try {
+	  iterate(cvTrain, false);
+	} catch (Exception ex) {
+	  // catch any problems - i.e. empty clusters occuring
+	  ex.printStackTrace();
+          //          System.err.println("Restarting after CV training failure ("+num_clusters+" clusters");
+          seed++;
+          restartCount++;
+          ok = false;
+          if (restartCount > 5) {
+            break CLUSTER_SEARCH;
+          }
+	  break;
+	}
+        try {
+          tll = E(cvTest, false);
+        } catch (Exception ex) {
+          // catch any problems - i.e. empty clusters occuring
+          //          ex.printStackTrace();
+          ex.printStackTrace();
+          //          System.err.println("Restarting after CV testing failure ("+num_clusters+" clusters");
+          //          throw new Exception(ex); 
+          seed++;
+          restartCount++;
+          ok = false;
+          if (restartCount > 5) {
+            break CLUSTER_SEARCH;
+          }
+          break;
+        }
 
 	if (m_verbose) {
-	  System.out.println("# clust: " + m_num_clusters + " Fold: " + i 
+	  System.out.println("# clust: " + num_clusters + " Fold: " + i 
 			     + " Loglikely: " + tll);
 	}
 	templl += tll;
       }
 
-      templl /= (double)numFolds;
-
-      if (m_verbose) {
-	System.out.println("===================================" 
-			   + "==============\n# clust: " 
-			   + m_num_clusters 
-			   + " Mean Loglikely: " 
-			   + templl 
-			   + "\n================================" 
-			   + "=================");
-      }
-
-      if (templl > CVLogLikely) {
-	CVLogLikely = templl;
-	CVincreased = true;
-	m_num_clusters++;
+      if (ok) {
+        restartCount = 0;
+        seed = m_rseed;
+        templl /= (double)numFolds;
+        
+        if (m_verbose) {
+          System.out.println("===================================" 
+                             + "==============\n# clust: " 
+                             + num_clusters 
+                             + " Mean Loglikely: " 
+                             + templl 
+                             + "\n================================" 
+                             + "=================");
+        }
+        
+        if (templl > CVLogLikely) {
+          CVLogLikely = templl;
+          CVincreased = true;
+          num_clusters++;
+        }
       }
     }
 
     if (m_verbose) {
-      System.out.println("Number of clusters: " + (m_num_clusters - 1));
+      System.out.println("Number of clusters: " + (num_clusters - 1));
     }
 
-    m_num_clusters--;
+    m_num_clusters = num_clusters - 1;
   }
 
 
@@ -899,7 +966,7 @@ public class EM
     data = weka.filters.Filter.useFilter(data, m_replaceMissing);
     
     m_theInstances = data;
-    
+
     // calculate min and max values for attributes
     m_minValues = new double [m_theInstances.numAttributes()];
     m_maxValues = new double [m_theInstances.numAttributes()];
@@ -1035,22 +1102,45 @@ public class EM
       EM_Report(inst);
     }
 
-    for (i = 0; i < m_max_iterations; i++) {
-      llkold = llk;
-      llk = E(inst, true);
-
-      if (report) {
-	System.out.println("Loglikely: " + llk);
+    boolean ok = false;
+    int seed = m_rseed;
+    int restartCount = 0;
+    while (!ok) {
+      try {
+        for (i = 0; i < m_max_iterations; i++) {
+          llkold = llk;
+          llk = E(inst, true);
+          
+          if (report) {
+            System.out.println("Loglikely: " + llk);
+          }
+          
+          if (i > 0) {
+            if ((llk - llkold) < 1e-6) {
+              break;
+            }
+          }
+          M(inst);
+        }
+        ok = true;
+      } catch (Exception ex) {
+        //        System.err.println("Restarting after training failure");
+        ex.printStackTrace();
+        seed++;
+        restartCount++;
+        m_rr = new Random(seed);
+        for (int z = 0; z < 10; z++) {
+          m_rr.nextDouble(); m_rr.nextInt();
+        }
+        if (restartCount > 5) {
+          //          System.err.println("Reducing the number of clusters");
+          m_num_clusters--;
+          restartCount = 0;
+        }
+        EM_Init(m_theInstances);
       }
-
-      if (i > 0) {
-	if ((llk - llkold) < 1e-6) {
-	  break;
-	}
-      }
-      M(inst);
     }
-
+      
     if (report) {
       EM_Report(inst);
     }
