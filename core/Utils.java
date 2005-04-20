@@ -37,7 +37,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.45 $
+ * @version $Revision: 1.46 $
  */
 public final class Utils {
 
@@ -963,6 +963,42 @@ public final class Utils {
   }
 
   /**
+   * Returns the kth-smallest value in the array.
+   *
+   * @param array the array of integers
+   * @param k the value of k
+   * @return the kth-smallest value
+   */
+  public static double kthSmallestValue(int[] array, int k) {
+
+    int [] index = new int[array.length];
+    
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+    }
+
+    return array[index[select(array, index, 0, array.length - 1, k)]];
+  }
+
+  /**
+   * Returns the kth-smallest value in the array
+   *
+   * @param array the array of double
+   * @param k the value of k
+   * @return the kth-smallest value
+   */
+  public static double kthSmallestValue(double[] array, int k) {
+
+    int [] index = new int[array.length];
+    
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+    }
+
+    return array[index[select(array, index, 0, array.length - 1, k)]];
+  }
+
+  /**
    * Returns the logarithm of a for base 2.
    *
    * @param a a double
@@ -1402,129 +1438,179 @@ public final class Utils {
   }
 
   /**
-   * Implements quicksort for an array of indices.
+   * Partitions the instances around a pivot. Used by quicksort and
+   * kthSmallestValue.
    *
-   * @param array the array of integers to be sorted
-   * @param index the index which should contain the positions in the
-   * sorted array
-   * @param lo0 the first index of the subset to be sorted
-   * @param hi0 the last index of the subset to be sorted
+   * @param array the array of doubles to be sorted
+   * @param index the index into the array of doubles
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
+   *
+   * @return the index of the middle element
    */
-  //@ requires 0 <= lo0 && lo0 <= hi0 && hi0 < index.length;
-  //@ requires (\forall int i; 0 <= i && i < index.length; 0 <= index[i] && index[i] < array.length);
-  //@ requires array != index;
-  //  assignable index;
-  private static void quickSort(/*@non_null@*/ int [] array, 
-				/*@non_null@*/ int [] index,
-				int lo0, int hi0) {
-
-    int lo = lo0;
-    int hi = hi0;
-    int mid;
-    int help;
+  private static int partition(double[] array, int[] index, int l, int r) {
     
-    if (hi0 > lo0) {
-      
-      // Arbitrarily establishing partition element as the midpoint of
-      // the array.
-      mid = array[index[(lo0 + hi0) / 2]];
+    double pivot = array[index[(l + r) / 2]];
+    int help;
 
-      // loop through the array until indices cross
-      while (lo <= hi) {
-	
-	// find the first element that is greater than or equal to  
-	// the partition element starting from the left Index.
-	while ((array[index[lo]] < mid) && (lo < hi0)) {
-	  ++lo;
-	}
-	
-	// find an element that is smaller than or equal to 
-	// the partition element starting from the right Index.
-	while ((array[index[hi]] > mid) && (hi > lo0)) {
-	  --hi;
-	}
-	
-	// if the indexes have not crossed, swap
-	if (lo <= hi) {
-	  help = index[lo];
-	  index[lo] = index[hi];
-	  index[hi] = help;
-	  ++lo;
-	  --hi;
-	}
+    while (l < r) {
+      while ((array[index[l]] < pivot) && (l < r)) {
+        l++;
       }
-      
-      // If the right index has not reached the left side of array
-      // must now sort the left partition.
-      if (lo0 < hi) {
-	quickSort(array, index, lo0, hi);
+      while ((array[index[r]] > pivot) && (l < r)) {
+        r--;
       }
-      
-      // If the left index has not reached the right side of array
-      // must now sort the right partition.
-      if (lo < hi0) {
-	quickSort(array, index, lo, hi0);
+      if (l < r) {
+        help = index[l];
+        index[l] = index[r];
+        index[r] = help;
+        l++;
+        r--;
       }
     }
+    if ((l == r) && (array[index[r]] > pivot)) {
+      r--;
+    } 
+
+    return r;
   }
 
   /**
-   * Implements unsafe quicksort for an array of indices.
+   * Partitions the instances around a pivot. Used by quicksort and
+   * kthSmallestValue.
+   *
+   * @param array the array of integers to be sorted
+   * @param index the index into the array of integers
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
+   *
+   * @return the index of the middle element
+   */
+  private static int partition(int[] array, int[] index, int l, int r) {
+    
+    double pivot = array[index[(l + r) / 2]];
+    int help;
+
+    while (l < r) {
+      while ((array[index[l]] < pivot) && (l < r)) {
+        l++;
+      }
+      while ((array[index[r]] > pivot) && (l < r)) {
+        r--;
+      }
+      if (l < r) {
+        help = index[l];
+        index[l] = index[r];
+        index[r] = help;
+        l++;
+        r--;
+      }
+    }
+    if ((l == r) && (array[index[r]] > pivot)) {
+      r--;
+    } 
+
+    return r;
+  }
+  
+  /**
+   * Implements quicksort according to Manber's "Introduction to
+   * Algorithms".
    *
    * @param array the array of doubles to be sorted
-   * @param index the index which should contain the positions in the
-   * sorted array
-   * @param lo0 the first index of the subset to be sorted
-   * @param hi0 the last index of the subset to be sorted
+   * @param index the index into the array of doubles
+   * @param left the first index of the subset to be sorted
+   * @param right the last index of the subset to be sorted
    */
-  private static void quickSort(double [] array, int [] index, int lo0, int hi0) {
+  //@ requires 0 <= first && first <= right && right < array.length;
+  //@ requires (\forall int i; 0 <= i && i < index.length; 0 <= index[i] && index[i] < array.length);
+  //@ requires array != index;
+  //  assignable index;
+  private static void quickSort(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
+                                int left, int right) {
 
-    int lo = lo0;
-    int hi = hi0;
-    double mid;
-    int help;
+    if (left < right) {
+      int middle = partition(array, index, left, right);
+      quickSort(array, index, left, middle);
+      quickSort(array, index, middle + 1, right);
+    }
+  }
+  
+  /**
+   * Implements quicksort according to Manber's "Introduction to
+   * Algorithms".
+   *
+   * @param array the array of integers to be sorted
+   * @param index the index into the array of integers
+   * @param left the first index of the subset to be sorted
+   * @param right the last index of the subset to be sorted
+   */
+  //@ requires 0 <= first && first <= right && right < array.length;
+  //@ requires (\forall int i; 0 <= i && i < index.length; 0 <= index[i] && index[i] < array.length);
+  //@ requires array != index;
+  //  assignable index;
+  private static void quickSort(/*@non_null@*/ int[] array, /*@non_null@*/  int[] index, 
+                                int left, int right) {
+
+    if (left < right) {
+      int middle = partition(array, index, left, right);
+      quickSort(array, index, left, middle);
+      quickSort(array, index, middle + 1, right);
+    }
+  }
+  
+  /**
+   * Implements computation of the kth-smallest element according
+   * to Manber's "Introduction to Algorithms".
+   *
+   * @param array the array of double
+   * @param index the index into the array of doubles
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
+   * @param k the value of k
+   *
+   * @return the index of the kth-smallest element
+   */
+  //@ requires 0 <= first && first <= right && right < array.length;
+  private static int select(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
+                            int left, int right, int k) {
     
-    if (hi0 > lo0) {
-      
-      // Arbitrarily establishing partition element as the midpoint of
-      // the array.
-      mid = array[index[(lo0 + hi0) / 2]];
-
-      // loop through the array until indices cross
-      while (lo <= hi) {
-	
-	// find the first element that is greater than or equal to  
-	// the partition element starting from the left Index.
-	while ((array[index[lo]] < mid) && (lo < hi0)) {
-	  ++lo;
-	}
-	
-	// find an element that is smaller than or equal to 
-	// the partition element starting from the right Index.
-	while ((array[index[hi]] > mid) && (hi > lo0)) {
-	  --hi;
-	}
-	
-	// if the indexes have not crossed, swap
-	if (lo <= hi) {
-	  help = index[lo];
-	  index[lo] = index[hi];
-	  index[hi] = help;
-	  ++lo;
-	  --hi;
-	}
+    if (left == right) {
+      return left;
+    } else {
+      int middle = partition(array, index, left, right);
+      if ((middle - left + 1) >= k) {
+        return select(array, index, left, middle, k);
+      } else {
+        return select(array, index, middle + 1, right, k - (middle - left + 1));
       }
-      
-      // If the right index has not reached the left side of array
-      // must now sort the left partition.
-      if (lo0 < hi) {
-	quickSort(array, index, lo0, hi);
-      }
-      
-      // If the left index has not reached the right side of array
-      // must now sort the right partition.
-      if (lo < hi0) {
-	quickSort(array, index, lo, hi0);
+    }
+  }
+  
+  /**
+   * Implements computation of the kth-smallest element according
+   * to Manber's "Introduction to Algorithms".
+   *
+   * @param array the array of integers
+   * @param index the index into the array of integers
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
+   * @param k the value of k
+   *
+   * @return the index of the kth-smallest element
+   */
+  //@ requires 0 <= first && first <= right && right < array.length;
+  private static int select(/*@non_null@*/ int[] array, /*@non_null@*/ int[] index, 
+                            int left, int right, int k) {
+    
+    if (left == right) {
+      return left;
+    } else {
+      int middle = partition(array, index, left, right);
+      if ((middle - left + 1) >= k) {
+        return select(array, index, left, middle, k);
+      } else {
+        return select(array, index, middle + 1, right, k - (middle - left + 1));
       }
     }
   }
@@ -1536,8 +1622,9 @@ public final class Utils {
    */
   public static void main(String[] ops) {
 
-    double[] doubles = {4.5, 6.7, Double.NaN, 3.4, 4.8, 1.2, 3.4};
-    int[] ints = {12, 6, 2, 18, 16, 6, 7, 5};
+    double[] doublesWithNaN = {4.5, 6.7, Double.NaN, 3.4, 4.8, 1.2, 3.4};
+    double[] doubles = {4.5, 6.7, 6.7, 3.4, 4.8, 1.2, 3.4, 6.7, 6.7, 3.4};
+    int[] ints = {12, 6, 2, 18, 16, 6, 7, 5, 18, 18, 17};
 
     try {
 
@@ -1560,6 +1647,11 @@ public final class Utils {
       Utils.checkForRemainingOptions(ops);
       
       // Statistics
+      System.out.println("Original array with NaN (doubles): ");
+      for (int i = 0; i < doublesWithNaN.length; i++) {
+	System.out.print(doublesWithNaN[i] + " ");
+      }
+      System.out.println();
       System.out.println("Original array (doubles): ");
       for (int i = 0; i < doubles.length; i++) {
 	System.out.print(doubles[i] + " ");
@@ -1580,12 +1672,40 @@ public final class Utils {
       System.out.println("Max index (ints): " + Utils.maxIndex(ints));
       System.out.println("Min index (doubles): " + Utils.minIndex(doubles));
       System.out.println("Min index (ints): " + Utils.minIndex(ints));
-      
+      System.out.println("Median (doubles): " + 
+                         Utils.kthSmallestValue(doubles, doubles.length / 2));
+      System.out.println("Median (ints): " + 
+                         Utils.kthSmallestValue(ints, ints.length / 2));
+
       // Sorting and normalizing
+      System.out.println("Sorted array with NaN (doubles): ");
+      int[] sorted = Utils.sort(doublesWithNaN);
+      for (int i = 0; i < doublesWithNaN.length; i++) {
+	System.out.print(doublesWithNaN[sorted[i]] + " ");
+      }
+      System.out.println();
       System.out.println("Sorted array (doubles): ");
-      int[] sorted = Utils.sort(doubles);
+      sorted = Utils.sort(doubles);
       for (int i = 0; i < doubles.length; i++) {
 	System.out.print(doubles[sorted[i]] + " ");
+      }
+      System.out.println();
+      System.out.println("Sorted array (ints): ");
+      sorted = Utils.sort(ints);
+      for (int i = 0; i < ints.length; i++) {
+	System.out.print(ints[sorted[i]] + " ");
+      }
+      System.out.println();
+      System.out.println("Indices from stable sort (doubles): ");
+      sorted = Utils.stableSort(doubles);
+      for (int i = 0; i < doubles.length; i++) {
+	System.out.print(sorted[i] + " ");
+      }
+      System.out.println();
+      System.out.println("Indices from sort (ints): ");
+      sorted = Utils.sort(ints);
+      for (int i = 0; i < ints.length; i++) {
+	System.out.print(sorted[i] + " ");
       }
       System.out.println();
       System.out.println("Normalized array (doubles): ");
