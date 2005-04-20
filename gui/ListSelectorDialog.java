@@ -45,7 +45,7 @@ import javax.swing.JList;
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ListSelectorDialog extends JDialog {
   
@@ -77,12 +77,14 @@ public class ListSelectorDialog extends JDialog {
     
     super(parentFrame, "Select items", true);
     m_List = userList;
+    m_CancelBut.setMnemonic('C');
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = CANCEL_OPTION;
 	setVisible(false);
       }
     });
+    m_SelectBut.setMnemonic('S');
     m_SelectBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = APPROVE_OPTION;
@@ -99,6 +101,9 @@ public class ListSelectorDialog extends JDialog {
     b1.add(m_CancelBut);
     c.add(b1, BorderLayout.SOUTH);
     c.add(new JScrollPane(m_List), BorderLayout.CENTER);
+
+    getRootPane().setDefaultButton(m_SelectBut);
+    
     pack();
   }
 
