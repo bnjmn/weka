@@ -39,7 +39,7 @@ import java.util.Enumeration;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -213,5 +213,20 @@ public class PairedCorrectedTTester extends PairedTTester {
       e.printStackTrace();
       System.err.println(e.getMessage());
     }
+  }
+
+  /**
+   * returns the name of the tester
+   */
+  public String getDisplayName() {
+    return "Paired T-Tester (corrected)";
+  }
+
+  /**
+   * returns a string that is displayed as tooltip on the "perform test"
+   * button in the experimenter
+   */
+  public String getToolTipText() {
+    return "Performs test using corrected resampled t-test statistic (Nadeau and Bengio)";
   }
 }
