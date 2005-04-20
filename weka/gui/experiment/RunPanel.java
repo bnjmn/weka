@@ -64,7 +64,7 @@ import java.io.File;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class RunPanel extends JPanel implements ActionListener {
 
@@ -244,6 +244,8 @@ public class RunPanel extends JPanel implements ActionListener {
     m_StopBut.addActionListener(this);
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
+    m_StartBut.setMnemonic('S');
+    m_StopBut.setMnemonic('t');
     m_Log.statusMessage(NOT_RUNNING);
 
     // Set the GUI layout

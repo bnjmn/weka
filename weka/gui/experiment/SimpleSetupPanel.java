@@ -98,7 +98,7 @@ import javax.swing.event.DocumentEvent;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -271,6 +271,7 @@ public class SimpleSetupPanel extends JPanel {
     } catch (Exception e) {}
 
     // create action listeners
+    m_NewBut.setMnemonic('N');
     m_NewBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  Experiment newExp = new Experiment();
@@ -284,11 +285,13 @@ public class SimpleSetupPanel extends JPanel {
 	}
       });
     m_SaveBut.setEnabled(false);
+    m_SaveBut.setMnemonic('S');
     m_SaveBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  saveExperiment();
 	}
       });
+    m_OpenBut.setMnemonic('O');
     m_OpenBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  openExperiment();
