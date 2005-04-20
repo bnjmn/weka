@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.59 $ 
+ * @version $Revision: 1.60 $ 
  */
 public class Instances implements Serializable {
  
@@ -609,6 +609,59 @@ public class Instances implements Serializable {
   public /*@non_null pure@*/ Instance instance(int index) {
 
     return (Instance)m_Instances.elementAt(index);
+  }
+
+  /**
+   * Returns the kth-smallest attribute value of a numeric attribute.
+   * Note that calling this method will change the order of the data!
+   *
+   * @param att the Attribute object
+   * @param k the value of k
+   * @return the kth-smallest value
+   */
+  public double kthSmallestValue(Attribute att, int k) {
+
+    return kthSmallestValue(att.index(), k);
+  }
+
+  /**
+   * Returns the kth-smallest attribute value of a numeric attribute.
+   * Note that calling this method will change the order of the data!
+   * The number of non-missing values in the data must be as least
+   * as last as k for this to work.
+   *
+   * @param attIndex the attribute's index
+   * @param k the value of k
+   * @return the kth-smallest value
+   */
+  public double kthSmallestValue(int attIndex, int k) {
+    
+    if (!attribute(attIndex).isNumeric()) {
+      throw new IllegalArgumentException("Instances: attribute must be numeric to compute kth-smallest value.");
+    }
+
+    int i,j;
+
+    // move all instances with missing values to end
+    j = numInstances() - 1;
+    i = 0;
+    while (i <= j) {
+      if (instance(j).isMissing(attIndex)) {
+	j--;
+      } else {
+	if (instance(i).isMissing(attIndex)) {
+	  swap(i,j);
+	  j--;
+	}
+	i++;
+      }
+    }
+
+    if ((k < 0) || (k > j)) {
+      throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
+    }
+
+    return instance(select(attIndex, 0, j, k)).value(attIndex);
   }
 
   /**
@@ -1905,61 +1958,57 @@ public class Instances implements Serializable {
   }
   
   /**
-   * Implements quicksort.
+   * Partitions the instances around a pivot. Used by quicksort and
+   * kthSmallestValue.
    *
    * @param attIndex the attribute's index
-   * @param lo0 the first index of the subset to be sorted
-   * @param hi0 the last index of the subset to be sorted
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
+   *
+   * @return the index of the middle element
    */
   //@ requires 0 <= attIndex && attIndex < numAttributes();
-  //@ requires 0 <= lo0 && lo0 <= hi0 && hi0 < numInstances();
-  protected void quickSort(int attIndex, int lo0, int hi0) {
+  //@ requires 0 <= left && left <= right && right < numInstances();
+  protected int partition(int attIndex, int l, int r) {
     
-    int lo = lo0, hi = hi0;
-    double mid;
-    
-    if (hi0 > lo0) {
-      
-      // Arbitrarily establishing partition element as the 
-      // midpoint of the array.
-      mid = instance((lo0 + hi0) / 2).value(attIndex);
+    double pivot = instance((l + r) / 2).value(attIndex);
 
-      // loop through the array until indices cross
-      while(lo <= hi) {
-	
-	// find the first element that is greater than or equal to 
-	// the partition element starting from the left Index.
-	while ((instance(lo).value(attIndex) < 
-		mid) && (lo < hi0)) {
-	  ++lo;
-	}
-	
-	// find an element that is smaller than or equal to
-	// the partition element starting from the right Index.
-	while ((instance(hi).value(attIndex)  > 
-		mid) && (hi > lo0)) {
-	  --hi;
-	}
-	
-	// if the indexes have not crossed, swap
-	if(lo <= hi) {
-	  swap(lo,hi);
-	  ++lo;
-	  --hi;
-	}
+    while (l < r) {
+      while ((instance(l).value(attIndex) < pivot) && (l < r)) {
+        l++;
       }
-      
-      // If the right index has not reached the left side of array
-      // must now sort the left partition.
-      if(lo0 < hi) {
-	quickSort(attIndex,lo0,hi);
+      while ((instance(r).value(attIndex) > pivot) && (l < r)) {
+        r--;
       }
-      
-      // If the left index has not reached the right side of array
-      // must now sort the right partition.
-      if(lo < hi0) {
-	quickSort(attIndex,lo,hi0);
+      if (l < r) {
+        swap(l, r);
+        l++;
+        r--;
       }
+    }
+    if ((l == r) && (instance(r).value(attIndex) > pivot)) {
+      r--;
+    } 
+
+    return r;
+  }
+  
+  /**
+   * Implements quicksort according to Manber's "Introduction to
+   * Algorithms".
+   *
+   * @param attIndex the attribute's index
+   * @param left the first index of the subset to be sorted
+   * @param right the last index of the subset to be sorted
+   */
+  //@ requires 0 <= attIndex && attIndex < numAttributes();
+  //@ requires 0 <= first && first <= right && right < numInstances();
+  protected void quickSort(int attIndex, int left, int right) {
+
+    if (left < right) {
+      int middle = partition(attIndex, left, right);
+      quickSort(attIndex, left, middle);
+      quickSort(attIndex, middle + 1, right);
     }
   }
 
@@ -1973,6 +2022,33 @@ public class Instances implements Serializable {
     
     while (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {};
     tokenizer.pushBack();
+  }
+  
+  /**
+   * Implements computation of the kth-smallest element according
+   * to Manber's "Introduction to Algorithms".
+   *
+   * @param attIndex the attribute's index
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
+   * @param k the value of k
+   *
+   * @return the index of the kth-smallest element
+   */
+  //@ requires 0 <= attIndex && attIndex < numAttributes();
+  //@ requires 0 <= first && first <= right && right < numInstances();
+  protected int select(int attIndex, int left, int right, int k) {
+    
+    if (left == right) {
+      return left;
+    } else {
+      int middle = partition(attIndex, left, right);
+      if ((middle - left + 1) >= k) {
+        return select(attIndex, left, middle, k);
+      } else {
+        return select(attIndex, middle + 1, right, k - (middle - left + 1));
+      }
+    }
   }
 
   /**
