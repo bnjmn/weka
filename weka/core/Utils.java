@@ -23,6 +23,7 @@
 package weka.core;
 
 import java.lang.Math;
+import java.lang.reflect.Array;
 import java.util.StringTokenizer;
 import java.util.Properties;
 import java.io.File;
@@ -36,7 +37,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public final class Utils {
 
@@ -362,6 +363,73 @@ public final class Utils {
     }
 
     return new String(result);
+  }
+
+  /**
+   * Returns the dimensions of the given array. Even though the
+   * parameter is of type "Object" one can hand over primitve arrays, e.g.
+   * int[3] or double[2][4].
+   *
+   * @param array       the array to determine the dimensions for
+   * @return            the dimensions of the array
+   */
+  public static int getArrayDimensions(Object array) {
+    int       result;
+
+    result = 0;
+
+    if (array == null)
+      return result;
+    
+    if (array.getClass().isArray()) {
+      result  = 1;
+      if (Array.getLength(array) > 0)
+        result += getArrayDimensions(Array.get(array, 0));
+      else
+        result += 1;  // we can't go further...
+    }
+    
+    return result;
+  }
+
+  /**
+   * Returns the given Array in a string representation. Even though the
+   * parameter is of type "Object" one can hand over primitve arrays, e.g.
+   * int[3] or double[2][4].
+   * 
+   * @param array       the array to return in a string representation
+   * @return            the array as string
+   */
+  public static String arrayToString(Object array) {
+    String        result;
+    int           dimensions;
+    int           i;       
+
+    result     = "";
+    dimensions = getArrayDimensions(array);
+    
+    if (dimensions == 0) {
+      result = "null";
+    }
+    else if (dimensions == 1) {
+      for (i = 0; i < Array.getLength(array); i++) {
+        if (i > 0)
+          result += ",";
+        if (Array.get(array, i) == null)
+          result += "null";
+        else
+          result += Array.get(array, i).toString();
+      }
+    }
+    else {
+      for (i = 0; i < Array.getLength(array); i++) {
+        if (i > 0)
+          result += ",";
+        result += "[" + arrayToString(Array.get(array, i)) + "]";
+      }
+    }
+    
+    return result;
   }
 
   /**
