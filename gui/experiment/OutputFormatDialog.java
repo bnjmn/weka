@@ -29,6 +29,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -38,11 +39,15 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import weka.core.RTSI;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+
 /** 
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class OutputFormatDialog extends JDialog {
   /** Signifies an OK property selection */
@@ -54,11 +59,42 @@ public class OutputFormatDialog extends JDialog {
   /** the result of the user's action, either OK or CANCEL */
   protected int m_Result = CANCEL_OPTION;
   
-  /** the different types for outputting the comparison tables */
-  protected final static String[] m_OutputFormats = {"Plain Text", "LaTeX", "CSV"};
+  /** the different classes for outputting the comparison tables */
+  protected static Vector m_OutputFormatClasses = null;
   
+  /** the different names of matrices for outputting the comparison tables */
+  protected static Vector m_OutputFormatNames = null;
+  
+  /** determine all classes inheriting from the ResultMatrix (in the same
+   * package!)
+   * @see ResultMatrix
+   * @see RTSI */
+  static {
+    Vector classes = RTSI.find(
+                      ResultMatrix.class.getPackage().getName(), 
+                      ResultMatrix.class.getName());
+
+    // set names and classes
+    m_OutputFormatClasses = new Vector();
+    m_OutputFormatNames   = new Vector();
+    for (int i = 0; i < classes.size(); i++) {
+      try {
+        Class cls = Class.forName(classes.get(i).toString());
+        ResultMatrix matrix = (ResultMatrix) cls.newInstance();
+        m_OutputFormatClasses.add(cls);
+        m_OutputFormatNames.add(matrix.getDisplayName());
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  /** the output format specific matrix */
+  protected Class m_ResultMatrix = ResultMatrixPlainText.class;
+
   /** lets the user choose the format for the output */
-  protected JComboBox m_OutputFormatComboBox = new JComboBox(m_OutputFormats);
+  protected JComboBox m_OutputFormatComboBox = new JComboBox(m_OutputFormatNames);
 
   /** the spinner to choose the precision for the mean from */
   protected JSpinner m_MeanPrecSpinner = new JSpinner();
@@ -71,12 +107,6 @@ public class OutputFormatDialog extends JDialog {
 
   /** Click to cancel the dialog */
   protected JButton m_CancelButton = new JButton("Cancel");
-  
-  /** Produce tables in latex format */
-  protected boolean m_latexOutput = false;
-  
-  /** Produce tables in csv format */
-  protected boolean m_csvOutput = false;
   
   /** the number of digits after the period (= precision) for printing the mean */
   protected int m_MeanPrec = 2;
@@ -100,6 +130,7 @@ public class OutputFormatDialog extends JDialog {
   protected void createDialog() {
     JPanel              panel;
     SpinnerNumberModel  model;
+    JLabel              label;
     
     getContentPane().setLayout(new BorderLayout());
     
@@ -113,24 +144,40 @@ public class OutputFormatDialog extends JDialog {
     model = (SpinnerNumberModel) m_StdDevPrecSpinner.getModel();
     model.setMaximum(new Integer(20));
     model.setMinimum(new Integer(0));
-    panel.add(new JLabel("Mean Precision"));
+    label = new JLabel("Mean Precision");
+    label.setDisplayedMnemonic('M');
+    label.setLabelFor(m_MeanPrecSpinner);
+    panel.add(label);
     panel.add(m_MeanPrecSpinner);
-    panel.add(new JLabel("StdDev. Precision"));
+    label = new JLabel("StdDev. Precision");
+    label.setDisplayedMnemonic('S');
+    label.setLabelFor(m_StdDevPrecSpinner);
+    panel.add(label);
     panel.add(m_StdDevPrecSpinner);
     
     // Format
-    panel.add(new JLabel("Output Format"));
+    label = new JLabel("Output Format");
+    label.setDisplayedMnemonic('F');
+    label.setLabelFor(m_OutputFormatComboBox);
+    panel.add(label);
     panel.add(m_OutputFormatComboBox);
+    m_OutputFormatComboBox.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  getData();
+	}
+      });
     
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     getContentPane().add(panel, BorderLayout.SOUTH);
+    m_CancelButton.setMnemonic('C');
     m_CancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         m_Result = CANCEL_OPTION;
         setVisible(false);
       }
     });
+    m_OkButton.setMnemonic('O');
     m_OkButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         getData();
@@ -140,6 +187,9 @@ public class OutputFormatDialog extends JDialog {
     });
     panel.add(m_OkButton);
     panel.add(m_CancelButton);
+
+    // default button
+    getRootPane().setDefaultButton(m_OkButton);
 
     pack();
   }
@@ -153,13 +203,12 @@ public class OutputFormatDialog extends JDialog {
     m_StdDevPrecSpinner.setValue(new Integer(m_StdDevPrec));
     
     // format
-    if (getProduceLatex())
-      m_OutputFormatComboBox.setSelectedIndex(1);
-    else
-    if (getProduceCSV())
-      m_OutputFormatComboBox.setSelectedIndex(2);
-    else
-      m_OutputFormatComboBox.setSelectedIndex(0);
+    for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
+      if (m_OutputFormatClasses.get(i).equals(m_ResultMatrix)) {
+        m_OutputFormatComboBox.setSelectedItem(m_OutputFormatNames.get(i));
+        break;
+      }
+    }
   }    
   
   /**
@@ -171,8 +220,8 @@ public class OutputFormatDialog extends JDialog {
     m_StdDevPrec = Integer.parseInt(m_StdDevPrecSpinner.getValue().toString());
     
     // format
-    setProduceLatex(m_OutputFormatComboBox.getSelectedIndex() == 1);
-    setProduceCSV(m_OutputFormatComboBox.getSelectedIndex() == 2);
+    m_ResultMatrix = (Class) m_OutputFormatClasses.get(
+                        m_OutputFormatComboBox.getSelectedIndex());
   }
   
   /**
@@ -208,39 +257,32 @@ public class OutputFormatDialog extends JDialog {
   }
 
   /**
-   * Set whether latex is output
-   * @param l true if tables are to be produced in Latex format
+   * Sets the matrix to use as initial selected output format
+   * @param matrix the matrix to use as initial selected output format
    */
-  public void setProduceLatex(boolean l) {
-    m_latexOutput = l;
-    if (m_latexOutput)
-      setProduceCSV(false);
+  public void setResultMatrix(Class matrix) {
+    m_ResultMatrix = matrix;
   }
 
   /**
-   * Get whether latex is output
-   * @return true if Latex is to be output
+   * Gets the currently selected output format result matrix.
+   * @return the currently selected matrix to use as output
    */
-  public boolean getProduceLatex() {
-    return m_latexOutput;
+  public Class getResultMatrix() {
+    return m_ResultMatrix;
   }
-  
+
   /**
-   * Set whether csv is output
-   * @param c true if tables are to be produced in csv format
+   * sets the class of the chosen result matrix
    */
-  public void setProduceCSV(boolean c) {
-    m_csvOutput = c;
-    if (m_csvOutput)
-      setProduceLatex(false);
-  }
-  
-  /**
-   * Get whether csv is output
-   * @return true if csv is to be output
-   */
-  public boolean getProduceCSV() {
-    return m_csvOutput;
+  protected void setFormat() {
+    for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
+      if (m_OutputFormatNames.get(i).toString().equals(
+            m_OutputFormatComboBox.getItemAt(i).toString())) {
+        m_OutputFormatComboBox.setSelectedIndex(i);
+        break;
+      }
+    }
   }
   
   /**
