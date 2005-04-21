@@ -32,7 +32,7 @@ import java.util.*;
  * The best network found is returned.  
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.2 $
+ * Version: $Revision: 1.3 $
  */
 public class RepeatedHillClimber extends HillClimber {
 
@@ -182,7 +182,7 @@ public class RepeatedHillClimber extends HillClimber {
 		Vector newVector = new Vector(4);
 
 		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
-		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
+		newVector.addElement(new Option("\tRandom number seed\n", "A", 1, "-A <seed>"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -205,7 +205,7 @@ public class RepeatedHillClimber extends HillClimber {
 			setRuns(Integer.parseInt(sRuns));
 		}
 		
-		String sSeed = Utils.getOption('R', options);
+		String sSeed = Utils.getOption('A', options);
 		if (sSeed.length() != 0) {
 			setSeed(Integer.parseInt(sSeed));
 		}
@@ -226,7 +226,7 @@ public class RepeatedHillClimber extends HillClimber {
 		options[current++] = "-U";
 		options[current++] = "" + getRuns();
 
-		options[current++] = "-R";
+		options[current++] = "-A";
 		options[current++] = "" + getSeed();
 
 		// insert options from parent class
