@@ -271,9 +271,9 @@ public class LAGDHillClimber extends HillClimber {
 		newVector.addElement(new Option("\tLook Ahead Depth\n)", "L", 2, "-L <nr of look ahead steps>"));
 		newVector.addElement(new Option("\tNr of Good Operations\n)", "G", 5, "-G <nr of good operations>"));
 
-		Enumeration enum = super.listOptions();
-		while (enum.hasMoreElements()) {
-			newVector.addElement(enum.nextElement());
+		Enumeration enm = super.listOptions();
+		while (enm.hasMoreElements()) {
+			newVector.addElement(enm.nextElement());
 		}
 		return newVector.elements();
 	} // listOptions
