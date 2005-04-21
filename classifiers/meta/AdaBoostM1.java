@@ -63,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -244,6 +244,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     int current = 0;
     if (getUseResampling()) {
       options[current++] = "-Q";
+      options[current++] = "";
     } else {
       options[current++] = "-P"; 
       options[current++] = "" + getWeightThreshold();
