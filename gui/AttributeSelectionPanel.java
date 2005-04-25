@@ -30,8 +30,10 @@ import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.regex.Pattern;
 import javax.swing.JPanel;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -43,10 +45,18 @@ import javax.swing.BorderFactory;
  * Creates a panel that displays the attributes contained in a set of
  * instances, letting the user toggle whether each attribute is selected
  * or not (eg: so that unselected attributes can be removed before
- * classification).
+ * classification). <br>
+ * Besides the All, None and Invert button one can also choose attributes which
+ * names match a regular expression (Pattern button). E.g. for removing all
+ * attributes that contain an ID and therefore unwanted information, one can
+ * match all names that contain "id" in the name:<br> 
+ * <pre>   (.*_id_.*|.*_id$|^id$)</pre> 
+ * This does not match e.g. "humidity", which could be an attribute we would
+ * like to keep.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.7 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -235,6 +245,18 @@ public class AttributeSelectionPanel extends JPanel {
       }
       fireTableRowsUpdated(0, m_Selected.length);
     }
+
+    /**
+     * applies the perl regular expression pattern to select the attribute
+     * names (expects a valid reg expression!)
+     * @param pattern     a perl reg. expression
+     */
+    public void pattern(String pattern) {
+      for (int i = 0; i < m_Selected.length; i++)
+        m_Selected[i] = Pattern.matches(
+                          pattern, m_Instances.attribute(i).name());
+      fireTableRowsUpdated(0, m_Selected.length);
+    }
   }
 
   /** Press to select all attributes */  
@@ -246,11 +268,17 @@ public class AttributeSelectionPanel extends JPanel {
   /** Press to invert the current selection */
   protected JButton m_Invert = new JButton("Invert");
 
+  /** Press to enter a perl regular expression for selection */
+  protected JButton m_Pattern = new JButton("Pattern");
+
   /** The table displaying attribute names and selection status */
   protected JTable m_Table = new JTable();
 
   /** The table model containingn attribute names and selection status */
   protected AttributeTableModel m_Model;
+
+  /** The current regular expression. */
+  protected String m_PatternRegEx = "";
   
   /**
    * Creates the attribute selection panel with no initial instances.
@@ -278,6 +306,31 @@ public class AttributeSelectionPanel extends JPanel {
 	m_Model.invert();
       }
     });
+    m_Pattern.setToolTipText("Selects all attributes that match a reg. expression");
+    m_Pattern.setEnabled(false);
+    m_Pattern.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        String pattern = JOptionPane.showInputDialog(
+                            m_Pattern.getParent(),
+                            "Enter a Perl regular expression",
+                            m_PatternRegEx);
+        if (pattern != null) {
+          try {
+            Pattern.compile(pattern);
+            m_PatternRegEx = pattern;
+	    m_Model.pattern(pattern);
+          }
+          catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+              m_Pattern.getParent(),
+              "'" + pattern + "' is not a valid Perl regular expression!\n" 
+              + "Error: " + ex, 
+              "Error in Pattern...", 
+              JOptionPane.ERROR_MESSAGE);
+          }
+        }
+      }
+    });
     m_Table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     m_Table.setColumnSelectionAllowed(false); 
     m_Table.setPreferredScrollableViewportSize(new Dimension(250, 150));
@@ -285,10 +338,11 @@ public class AttributeSelectionPanel extends JPanel {
     // Set up the layout
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-    p1.setLayout(new GridLayout(1, 3, 5, 5));
+    p1.setLayout(new GridLayout(1, 4, 5, 5));
     p1.add(m_IncludeAll);
     p1.add(m_RemoveAll);
     p1.add(m_Invert);
+    p1.add(m_Pattern);
 
     setLayout(new BorderLayout());
     add(p1, BorderLayout.NORTH);
@@ -316,6 +370,7 @@ public class AttributeSelectionPanel extends JPanel {
     m_IncludeAll.setEnabled(true);
     m_RemoveAll.setEnabled(true);
     m_Invert.setEnabled(true);
+    m_Pattern.setEnabled(true);
     m_Table.sizeColumnsToFit(2);
     m_Table.revalidate();
     m_Table.repaint();
