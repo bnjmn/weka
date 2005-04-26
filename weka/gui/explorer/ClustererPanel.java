@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -215,9 +215,6 @@ public class ClustererPanel extends JPanel {
 
   /** The user-supplied test set (if any) */
   protected Instances m_TestInstances;
-
-  /** The user supplied test set after preprocess filters have been applied */
-  protected Instances m_TestInstancesCopy;
 
   /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
@@ -585,7 +582,7 @@ public class ClustererPanel extends JPanel {
     if (m_SetTestFrame == null) {
       final SetInstancesPanel sp = new SetInstancesPanel();
       m_Summary = sp.getSummary();
-      if (m_TestInstancesCopy != null) {
+      if (m_TestInstances != null) {
 	sp.setInstances(m_TestInstances);
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
@@ -691,7 +688,7 @@ public class ClustererPanel extends JPanel {
 	  Instances userTest = null;
 	  PlotData2D predData = null;
 	  if (m_TestInstances != null) {
-	    userTest = new Instances(m_TestInstancesCopy);
+	    userTest = new Instances(m_TestInstances);
 	  }
 	  
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
@@ -1426,7 +1423,7 @@ public class ClustererPanel extends JPanel {
 
     PlotData2D predData = null;
     if (m_TestInstances != null) {
-      userTest = new Instances(m_TestInstancesCopy);
+      userTest = new Instances(m_TestInstances);
     }
     
     boolean saveVis = m_StorePredictionsBut.isSelected();
