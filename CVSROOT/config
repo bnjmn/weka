@@ -9,3 +9,6 @@ SystemAuth=no
 # level of the new working directory when using the `cvs checkout'
 # command.
 #TopLevelAdmin=no
+
+# Change LockDir to /usr/local/global-cvs/tmp
+LockDir=/usr/local/global-cvs/tmp
