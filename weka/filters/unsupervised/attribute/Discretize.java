@@ -65,7 +65,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class Discretize extends PotentialClassIgnorer 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
@@ -780,7 +780,7 @@ public class Discretize extends PotentialClassIgnorer
    */
   protected void findNumBins(int index) {
 
-    double min = Double.MAX_VALUE, max = -Double.MIN_VALUE, binWidth = 0, 
+    double min = Double.MAX_VALUE, max = -Double.MAX_VALUE, binWidth = 0, 
       entropy, bestEntropy = Double.MAX_VALUE, currentVal;
     double[] distribution;
     int bestNumBins  = 1;
