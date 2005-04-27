@@ -99,7 +99,7 @@ import weka.gui.visualize.PrintablePanel;
  * over nodes.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version 1.0 - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.3.2.2 $
  */
 public class GraphVisualizer extends JPanel implements GraphConstants,
 LayoutCompleteEventListener  {
@@ -617,10 +617,10 @@ LayoutCompleteEventListener  {
       if(maxY<n.y)
         maxY=n.y;
     }
-    System.out.println("Scale: "+scale+" paddedWidth: "+paddedNodeWidth+
-    " nodeHeight: "+nodeHeight+"\nmaxX: "+maxX+" maxY: "+
-    maxY+" final: "+(int)((maxX+paddedNodeWidth+2)*scale)+
-    ","+(int)((maxY+nodeHeight+2)*scale) );
+    //System.out.println("Scale: "+scale+" paddedWidth: "+paddedNodeWidth+
+    //                   " nodeHeight: "+nodeHeight+"\nmaxX: "+maxX+" maxY: "+
+    //                   maxY+" final: "+(int)((maxX+paddedNodeWidth+2)*scale)+
+    //                   ","+(int)((maxY+nodeHeight+2)*scale) );
     m_gp.setPreferredSize(new Dimension((int)((maxX+paddedNodeWidth+2)*scale),
     (int)((maxY+nodeHeight+2)*scale)));
     //System.out.println("Size set to "+this.getPreferredSize());
@@ -1201,9 +1201,9 @@ LayoutCompleteEventListener  {
               GraphNode n2 = (GraphNode)m_nodes.elementAt(n.prnts[j]);
               noOfPrntsOutcomes *= n2.outcomes.length;
             }
-            if(noOfPrntsOutcomes>1023) {
-              System.err.println("Too many outcomes of parents can't "+
-                                 "display probabilities");
+            if(noOfPrntsOutcomes>511) {
+              System.err.println("Too many outcomes of parents ("+noOfPrntsOutcomes+
+                                 ") can't display probabilities");
               return;
             }
           }
