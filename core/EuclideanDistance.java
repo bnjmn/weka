@@ -39,7 +39,7 @@ import java.io.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class EuclideanDistance implements DistanceFunction, Cloneable, 
 					  Serializable {
@@ -450,9 +450,10 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
     
     int numAtt = m_Data.numAttributes();
     double [][] ranges = new double [numAtt][3];
-    
+
     if (m_Data.numInstances() <= 0) {
       initializeRangesEmpty(numAtt, ranges);
+      m_Ranges = ranges;
       return ranges;
     }
     else
@@ -508,8 +509,8 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
     
     for (int j = 0; j < numAtt; j++) {
       ranges[j][R_MIN] = Double.MAX_VALUE;
-      ranges[j][R_MAX] = Double.MIN_VALUE;
-      ranges[j][R_WIDTH] = Double.MIN_VALUE;
+      ranges[j][R_MAX] = -Double.MAX_VALUE;
+      ranges[j][R_WIDTH] = Double.MAX_VALUE;
     }
   }
   
@@ -539,7 +540,7 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
       }
       else { // if value was missing
         ranges[j][R_MIN] = Double.MAX_VALUE;
-        ranges[j][R_MAX] = Double.MIN_VALUE;
+        ranges[j][R_MAX] = -Double.MAX_VALUE;
         ranges[j][R_WIDTH] = Double.MAX_VALUE;
       }
     }
@@ -581,7 +582,7 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
    * @param ranges low, high and width values for all attributes
    */  //being used in other classes (KDTree)
   public double [][] updateRanges(Instance instance, double [][] ranges) {
-    
+       
     // updateRangesFirst must have been called on ranges
     for (int j = 0; j < ranges.length; j++) {
       double value = instance.value(j);
