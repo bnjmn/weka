@@ -44,7 +44,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -658,77 +658,98 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
   public String graph() throws Exception {
 	  return toXMLBIF03();
   }
-
-
-    /**
-     * Returns a description of the classifier in XML BIF 0.3 format.
-     * See http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/
-     * for details on XML BIF.
-     * @return an XML BIF 0.3 description of the classifier as a string.
-     */
-    public String toXMLBIF03() {
-        if (m_Instances == null) {
-            return ("<!--No model built yet-->");
+       
+  /**
+   * Returns a description of the classifier in XML BIF 0.3 format.
+   * See http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/
+   * for details on XML BIF.
+   * @return an XML BIF 0.3 description of the classifier as a string.
+   */
+  public String toXMLBIF03() {
+    if (m_Instances == null) {
+      return("<!--No model built yet-->");
+    }
+    
+    StringBuffer text = new StringBuffer();
+    
+    text.append("<?xml version=\"1.0\"?>\n");
+    text.append("<!-- DTD for the XMLBIF 0.3 format -->\n");
+    text.append("<!DOCTYPE BIF [\n");
+    text.append("	<!ELEMENT BIF ( NETWORK )*>\n");
+    text.append("	      <!ATTLIST BIF VERSION CDATA #REQUIRED>\n");
+    text.append("	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>\n");
+    text.append("	<!ELEMENT NAME (#PCDATA)>\n");
+    text.append("	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >\n");
+    text.append("	      <!ATTLIST VARIABLE TYPE (nature|decision|utility) \"nature\">\n");
+    text.append("	<!ELEMENT OUTCOME (#PCDATA)>\n");
+    text.append("	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >\n");
+    text.append("	<!ELEMENT FOR (#PCDATA)>\n");
+    text.append("	<!ELEMENT GIVEN (#PCDATA)>\n");
+    text.append("	<!ELEMENT TABLE (#PCDATA)>\n");
+    text.append("	<!ELEMENT PROPERTY (#PCDATA)>\n");
+    text.append("]>\n");
+    text.append("\n");
+    text.append("\n");
+    text.append("<BIF VERSION=\"0.3\">\n");
+    text.append("<NETWORK>\n");
+    text.append("<NAME>" + XMLNormalize(m_Instances.relationName()) + "</NAME>\n");
+    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+      text.append("<VARIABLE TYPE=\"nature\">\n");
+      text.append("<NAME>" + XMLNormalize(m_Instances.attribute(iAttribute).name()) + "</NAME>\n");
+      for (int iValue = 0; iValue < m_Instances.attribute(iAttribute).numValues(); iValue++) {
+        text.append("<OUTCOME>" + XMLNormalize(m_Instances.attribute(iAttribute).value(iValue)) + "</OUTCOME>\n");
+      }
+      text.append("</VARIABLE>\n");
+    }
+    
+    for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
+      text.append("<DEFINITION>\n");
+      text.append("<FOR>" + XMLNormalize(m_Instances.attribute(iAttribute).name()) + "</FOR>\n");
+      for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
+        text.append("<GIVEN>"
+        + XMLNormalize(m_Instances.attribute(m_ParentSets[iAttribute].getParent(iParent)).name()) +
+        "</GIVEN>\n");
+      }
+      text.append("<TABLE>\n");
+      for (int iParent = 0; iParent < m_ParentSets[iAttribute].getCardinalityOfParents(); iParent++) {
+        for (int iValue = 0; iValue < m_Instances.attribute(iAttribute).numValues(); iValue++) {
+          text.append(m_Distributions[iAttribute][iParent].getProbability(iValue));
+          text.append(' ');
         }
-
-        StringBuffer text = new StringBuffer();
-
-        text.append("<?xml version='1.0'?>\n");
-        text.append("<!-- DTD for the XMLBIF 0.3 format -->\n");
-        text.append("<!DOCTYPE BIF [\n");
-        text.append("	<!ELEMENT BIF ( NETWORK )*>\n");
-        text.append("	      <!ATTLIST BIF VERSION CDATA #REQUIRED>\n");
-        text.append("	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>\n");
-        text.append("	<!ELEMENT NAME (#PCDATA)>\n");
-        text.append("	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >\n");
-        text.append("	      <!ATTLIST VARIABLE TYPE (nature|decision|utility) \"nature\">\n");
-        text.append("	<!ELEMENT OUTCOME (#PCDATA)>\n");
-        text.append("	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >\n");
-        text.append("	<!ELEMENT FOR (#PCDATA)>\n");
-        text.append("	<!ELEMENT GIVEN (#PCDATA)>\n");
-        text.append("	<!ELEMENT TABLE (#PCDATA)>\n");
-        text.append("	<!ELEMENT PROPERTY (#PCDATA)>\n");
-        text.append("]>\n");
-        text.append("\n");
-        text.append("\n");
-        text.append("<BIF VERSION=\"0.3\">\n");
-        text.append("<NETWORK>\n");
-        text.append("<NAME>" + m_Instances.relationName() + "</NAME>\n");
-        for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-            text.append("<VARIABLE TYPE='nature'>\n");
-            text.append("<NAME>" + m_Instances.attribute(iAttribute).name() + "</NAME>\n");
-            for (int iValue = 0; iValue < m_Instances.attribute(iAttribute).numValues(); iValue++) {
-                text.append("<OUTCOME>" + m_Instances.attribute(iAttribute).value(iValue) + "</OUTCOME>\n");
-            }
-            text.append("</VARIABLE>\n");
-        }
-
-        for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
-            text.append("<DEFINITION>\n");
-            text.append("<FOR>" + m_Instances.attribute(iAttribute).name() + "</FOR>\n");
-            for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
-                text.append(
-                    "<GIVEN>"
-                        + m_Instances.attribute(m_ParentSets[iAttribute].getParent(iParent)).name()
-                        + "</GIVEN>\n");
-            }
-            text.append("<TABLE>\n");
-            for (int iParent = 0; iParent < m_ParentSets[iAttribute].getCardinalityOfParents(); iParent++) {
-                for (int iValue = 0; iValue < m_Instances.attribute(iAttribute).numValues(); iValue++) {
-                    text.append(m_Distributions[iAttribute][iParent].getProbability(iValue));
-                    text.append(' ');
-                }
-                text.append('\n');
-            }
-            text.append("</TABLE>\n");
-            text.append("</DEFINITION>\n");
-        }
-        text.append("</NETWORK>\n");
-        text.append("</BIF>\n");
-        return text.toString();
-    } // toXMLBIF03
-
-
+        text.append('\n');
+      }
+      text.append("</TABLE>\n");
+      text.append("</DEFINITION>\n");
+    }
+    text.append("</NETWORK>\n");
+    text.append("</BIF>\n");
+    return text.toString();
+  } // toXMLBIF03
+  
+  
+  /** XMLNormalize converts the five standard XML entities in a string
+   * g.e. the string V&D's is returned as V&amp;D&apos;s
+   * @param sStr string to normalize
+   * @return normalized string
+   */
+  String XMLNormalize(String sStr) {
+    StringBuffer sStr2 = new StringBuffer();
+    for (int iStr = 0; iStr < sStr.length(); iStr++) {
+      char c = sStr.charAt(iStr);
+      switch (c) {
+        case '&': sStr2.append("&amp;"); break;
+        case '\'': sStr2.append("&apos;"); break;
+        case '\"': sStr2.append("&quot;"); break;
+        case '<': sStr2.append("&lt;"); break;
+        case '>': sStr2.append("&gt;"); break;
+        default:
+          sStr2.append(c);
+      }
+    }
+    return sStr2.toString();
+  } // XMLNormalize
+  
+  
     /**
      * @return a string to describe the UseADTreeoption.
      */
