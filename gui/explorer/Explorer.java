@@ -25,6 +25,7 @@ package weka.gui.explorer;
 
 import weka.core.Utils;
 import weka.gui.LogPanel;
+import weka.gui.LookAndFeel;
 import weka.gui.WekaTaskMonitor;
 import weka.gui.visualize.MatrixPanel;
 import weka.gui.visualize.PlotData2D;
@@ -41,7 +42,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import javax.swing.UIManager;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
@@ -60,7 +60,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class Explorer extends JPanel {
 
@@ -168,9 +168,8 @@ public class Explorer extends JPanel {
    */
   public static void main(String [] args) {
 
-    try { // use system look & feel
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch (Exception e) {}
+    LookAndFeel.setLookAndFeel();
+    
     try {
       m_initialJVMSize = Runtime.getRuntime().totalMemory();
       m_explorer = new Explorer();
