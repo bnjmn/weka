@@ -21,6 +21,8 @@
  */
 package weka.core;
 
+import weka.gui.LookAndFeel;
+
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -32,7 +34,7 @@ import java.util.Vector;
  * version, JVM settings etc. Useful for Bug-Reports.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision: 1.1.2.4 $
  */
 public class SystemInfo {
   /** for storing the information */
@@ -50,9 +52,12 @@ public class SystemInfo {
    * reads all the properties and stores them in the hashtable
    */
   private void readProperties() {
-    Properties        props;
-    Enumeration       enm;
-    Object            name;
+    Properties          props;
+    Enumeration         enm;
+    Object              name;
+    String[]            laf;
+    String              tmpStr;
+    int                 i;
     
     m_Info.clear();
 
@@ -66,6 +71,17 @@ public class SystemInfo {
 
     // additional WEKA info
     m_Info.put("weka.version", Version.VERSION);
+
+    // look and feel info
+    laf    = LookAndFeel.getInstalledLookAndFeels();
+    tmpStr = "";
+    for (i = 0; i < laf.length; i++) {
+      if (i > 0)
+        tmpStr += ",";
+      tmpStr += laf[i];
+    }
+    m_Info.put("ui.installedLookAndFeels", tmpStr);
+    m_Info.put("ui.currentLookAndFeel", LookAndFeel.getSystemLookAndFeel());
   }
 
   /**
