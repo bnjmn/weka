@@ -24,6 +24,7 @@
 package weka.gui.experiment;
 
 import weka.experiment.Experiment;
+import weka.gui.LookAndFeel;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -32,7 +33,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.UIManager;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
@@ -44,7 +44,7 @@ import javax.swing.JOptionPane;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Experimenter extends JPanel {
 
@@ -115,9 +115,8 @@ public class Experimenter extends JPanel {
    */
   public static void main(String [] args) {
     
-    try { // use system look & feel
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch (Exception e) {}
+    LookAndFeel.setLookAndFeel();
+    
     try {
       m_initialJVMSize = Runtime.getRuntime().totalMemory();
 
