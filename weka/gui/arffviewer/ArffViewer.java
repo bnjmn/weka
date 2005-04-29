@@ -25,6 +25,7 @@ package weka.gui.arffviewer;
 import weka.gui.ComponentHelper;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.JTableHelper;
+import weka.gui.LookAndFeel;
 import weka.core.Instances;
 import weka.core.converters.AbstractSaver;
 import weka.core.converters.ArffSaver;
@@ -62,7 +63,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffViewer 
@@ -519,7 +520,19 @@ implements  ActionListener, ChangeListener, WindowListener
     
     return result;
   }
-  
+
+  /**
+   * loads the specified file
+   */
+  private void loadFile(String filename) {
+    ArffPanel         panel;
+
+    panel    = new ArffPanel(filename);
+    panel.addChangeListener(this);
+    tabbedPane.addTab(panel.getTitle(), panel);
+    tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+  }
+   
   /**
    * loads the specified file into the table
    */
@@ -527,7 +540,6 @@ implements  ActionListener, ChangeListener, WindowListener
     int               retVal;
     int               i;
     String            filename;
-    ArffPanel         panel;
     
     retVal = fileChooser.showOpenDialog(this);
     if (retVal != FileChooser.APPROVE_OPTION)
@@ -537,10 +549,7 @@ implements  ActionListener, ChangeListener, WindowListener
     
     for (i = 0; i< fileChooser.getSelectedFiles().length; i++) {
       filename = fileChooser.getSelectedFiles()[i].getAbsolutePath();
-      panel    = new ArffPanel(filename);
-      panel.addChangeListener(this);
-      tabbedPane.addTab(panel.getTitle(), panel);
-      tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+      loadFile(filename);
     }
     
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -970,6 +979,21 @@ implements  ActionListener, ChangeListener, WindowListener
    * shows the frame
    */
   public static void main(String[] args) throws Exception {
-    new ArffViewer().show();
+    ArffViewer      viewer;
+    int             i;
+
+    LookAndFeel.setLookAndFeel();
+    
+    viewer = new ArffViewer();
+    viewer.show();
+
+    if (args.length > 0) {
+      for (i = 0; i < args.length; i++) {
+        System.out.println("Loading " + (i+1) + "/" + args.length +  ": '" + args[i] + "'...");
+        viewer.loadFile(args[i]);
+      }
+      viewer.tabbedPane.setSelectedIndex(0);
+      System.out.println("Finished!");
+    }
   }
 }
