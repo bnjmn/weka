@@ -23,6 +23,8 @@
 
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
+import weka.gui.LookAndFeel;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -125,18 +127,8 @@ public class OPTICS_Visualizer {
     public OPTICS_Visualizer(SERObject serObject, String title) {
         this.serObject = serObject;
 
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
-
+        LookAndFeel.setLookAndFeel();
+    
         frame = new JFrame(title);
 
         frame.addWindowListener(new WindowAdapter() {
