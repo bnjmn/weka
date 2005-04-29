@@ -25,6 +25,7 @@ package weka.gui.beans;
 import weka.core.Utils;
 import weka.gui.ListSelectorDialog;
 import weka.gui.LogPanel;
+import weka.gui.LookAndFeel;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.visualize.PrintablePanel;
 
@@ -108,7 +109,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.23.2.2 $
+ * @version  $Revision: 1.23.2.3 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -247,7 +248,7 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.23.2.2 $
+   * @version $Revision: 1.23.2.3 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1431,9 +1432,8 @@ public class KnowledgeFlow extends JPanel implements PropertyChangeListener {
    */
   public static void main(String [] args) {
 
-    try { // use system look & feel
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch (Exception e) {}
+    LookAndFeel.setLookAndFeel();
+    
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
