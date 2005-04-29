@@ -25,6 +25,7 @@ package weka.gui.arffviewer;
 import weka.gui.ComponentHelper;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.JTableHelper;
+import weka.gui.LookAndFeel;
 import weka.core.Instances;
 import weka.core.converters.AbstractSaver;
 import weka.core.converters.ArffSaver;
@@ -62,7 +63,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
 public class ArffViewer 
@@ -1037,6 +1038,8 @@ implements  ActionListener, ChangeListener, WindowListener
   public static void main(String[] args) throws Exception {
     ArffViewer      viewer;
     int             i;
+
+    LookAndFeel.setLookAndFeel();
     
     viewer = new ArffViewer();
     viewer.show();
