@@ -64,9 +64,9 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
-public class Plot2D extends PrintablePanel {
+public class Plot2D extends JPanel {
 
   /* constants for shape types */
   public static final int MAX_SHAPES = 5;
