@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ResultMatrixPlainText extends ResultMatrix {
@@ -232,17 +232,22 @@ public class ResultMatrixPlainText extends ResultMatrix {
     body.append(line.replaceAll(".", "-") + "\n");
 
     // output wins/losses/ties
-    line = padString(cells[cells.length - 1][0], startMeans[1]-2, true) + " |";
-    i    = 0;
-    for (n = 1; n < cells[cells.length - 1].length; n++) {
-      if (isSignificance(n)) {
-        line = padString(
-                line, startSigs[i] + 1 - cells[cells.length - 1][n].length());
-        line += " " + cells[cells.length - 1][n];
-        i++;
+    if (getColCount() > 1) {
+      line = padString(cells[cells.length - 1][0], startMeans[1]-2, true) + " |";
+      i    = 0;
+      for (n = 1; n < cells[cells.length - 1].length; n++) {
+        if (isSignificance(n)) {
+          line = padString(
+                  line, startSigs[i] + 1 - cells[cells.length - 1][n].length());
+          line += " " + cells[cells.length - 1][n];
+          i++;
+        }
       }
+      line = padString(line, maxLength);
     }
-    line = padString(line, maxLength);
+    else {
+      line = padString(cells[cells.length - 1][0], line.length() - 2) + " |";
+    }
     foot.append(line + "\n");
     
     // assemble output
