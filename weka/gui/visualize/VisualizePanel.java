@@ -100,12 +100,12 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.1 $
+ * @version $Revision: 1.21.2.2 $
  */
 public class VisualizePanel extends PrintablePanel {
 
   /** Inner class to handle plotting */
-  protected class PlotPanel extends JPanel implements Plot2DCompanion {
+  protected class PlotPanel extends PrintablePanel implements Plot2DCompanion {
 
     /** The actual generic plotting panel */
     protected Plot2D m_plot2D = new Plot2D();
