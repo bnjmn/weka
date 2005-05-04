@@ -78,7 +78,7 @@ import weka.core.Option;
  * Produce comparison tables with only the significances <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class PairedTTester implements OptionHandler, Tester {
 
@@ -984,7 +984,12 @@ public class PairedTTester implements OptionHandler, Tester {
 
     // generate output
     StringBuffer result = new StringBuffer(1000);
-    result.append(m_ResultMatrix.toStringMatrix());
+    try {
+      result.append(m_ResultMatrix.toStringMatrix());
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
     
     // append a key so that we can tell the difference between long
     // scheme+option names
