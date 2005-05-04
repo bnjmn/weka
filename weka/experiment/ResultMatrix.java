@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -879,7 +879,7 @@ public abstract class ResultMatrix implements Serializable {
     }
       
     // too long?
-    if (result.length() > length)
+    if ( (length > 0) && (result.length() > length) )
       result = result.substring(0, length);
 
     return result;
