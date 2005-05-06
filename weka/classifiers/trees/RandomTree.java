@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -205,7 +205,8 @@ public class RandomTree extends Classifier
     Vector newVector = new Vector(6);
 
     newVector.
-      addElement(new Option("\tNumber of attributes to randomly investigate.",
+      addElement(new Option("\tNumber of attributes to randomly investigate\n"
+                            +"\t(<1 = int(log(#attributes)+1)).",
 			    "K", 1, "-K <number of attributes>"));
 
     newVector.
@@ -282,6 +283,7 @@ public class RandomTree extends Classifier
 
     // Make sure K value is in range
     if (m_KValue > data.numAttributes()-1) m_KValue = data.numAttributes()-1;
+    if (m_KValue < 1) m_KValue = (int) Utils.log2(data.numAttributes())+1;
 
     // Check for non-nominal classes
     if (!data.classAttribute().isNominal()) {
