@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -158,6 +158,12 @@ public abstract class ResultMatrix implements Serializable {
 
   /** the difference between wins and losses */
   protected int[] m_RankingDiff = null;
+
+  /** the ordering of the rows */
+  protected int[] m_RowOrder = null;
+
+  /** the ordering of the columns */
+  protected int[] m_ColOrder = null;
   
   /**
    * initializes the matrix as 1x1 matrix
@@ -270,7 +276,8 @@ public abstract class ResultMatrix implements Serializable {
   }
 
   /**
-   * removes the stored data but retains the dimensions of the matrix
+   * removes the stored data and the ordering, but retains the dimensions of
+   * the matrix
    */
   public void clear() {
     m_MeanPrec          = 2;
@@ -306,6 +313,8 @@ public abstract class ResultMatrix implements Serializable {
     m_Mean         = new double[rows][cols];
     m_Significance = new int[rows][cols];
     m_StdDev       = new double[rows][cols];
+    m_ColOrder     = null;
+    m_RowOrder     = null;
 
     // NaN means that there exists no value! -> toArray()
     for (i = 0; i < m_Mean.length; i++) {
@@ -805,6 +814,106 @@ public abstract class ResultMatrix implements Serializable {
   }
 
   /**
+   * sets the ordering of the rows, null means default
+   * @param order       the new order of the rows
+   */
+  public void setRowOrder(int[] order) {
+    int         i;
+    
+    // default order?
+    if (order == null) {
+      m_RowOrder = null;
+    }
+    else {
+      if (order.length == getRowCount()) {
+        m_RowOrder = new int[order.length];
+        for (i = 0; i < order.length; i++)
+          m_RowOrder[i] = order[i];
+      }
+      else {
+        System.err.println("setRowOrder: length does not match (" 
+            + order.length + " <> " + getRowCount() + ") - ignored!");
+      }
+    }
+  }
+
+  /**
+   * returns the current order of the rows, null means the default order
+   * @return        the current order of the rows
+   */
+  public int[] getRowOrder() {
+    return m_RowOrder;
+  }
+
+  /**
+   * returns the displayed index of the given row, depending on the order of
+   * rows, returns -1 if index out of bounds
+   * @param index         the row to get the displayed index for
+   * @return              the real index of the row
+   */
+  public int getDisplayRow(int index) {
+    if ( (index >= 0) && (index < getRowCount()) ) {
+      if (getRowOrder() == null)
+        return index;
+      else
+        return getRowOrder()[index];
+    }
+    else {
+      return -1;
+    }
+  }
+
+  /**
+   * sets the ordering of the columns, null means default
+   * @param order       the new order of the columns
+   */
+  public void setColOrder(int[] order) {
+    int         i;
+    
+    // default order?
+    if (order == null) {
+      m_ColOrder = null;
+    }
+    else {
+      if (order.length == getColCount()) {
+        m_ColOrder = new int[order.length];
+        for (i = 0; i < order.length; i++)
+          m_ColOrder[i] = order[i];
+      }
+      else {
+        System.err.println("setColOrder: length does not match (" 
+            + order.length + " <> " + getColCount() + ") - ignored!");
+      }
+    }
+  }
+
+  /**
+   * returns the current order of the columns, null means the default order
+   * @return        the current order of the columns
+   */
+  public int[] getColOrder() {
+    return m_ColOrder;
+  }
+
+  /**
+   * returns the displayed index of the given col, depending on the order of
+   * columns, returns -1 if index out of bounds
+   * @param index         the column to get the displayed index for
+   * @return              the real index of the column
+   */
+  public int getDisplayCol(int index) {
+    if ( (index >= 0) && (index < getColCount()) ) {
+      if (getColOrder() == null)
+        return index;
+      else
+        return getColOrder()[index];
+    }
+    else {
+      return -1;
+    }
+  }
+
+  /**
    * returns the given number as string rounded to the given number of
    * decimals. additional necessary 0's are added
    * @param d       the number to format
@@ -938,6 +1047,8 @@ public abstract class ResultMatrix implements Serializable {
   protected String[][] toArray() {
     int               i;
     int               n;
+    int               ii;
+    int               nn;
     int               x;
     int               y;
     String[][]        result;
@@ -958,10 +1069,10 @@ public abstract class ResultMatrix implements Serializable {
     result = new String[rows + 2][cols + 1];
 
     // col names
-    x = 0;
-    result[0][x] = trimString("Dataset", getRowNameWidth());
-    x++;
-    for (i = 0; i < getColCount(); i++) {
+    result[0][0] = trimString("Dataset", getRowNameWidth());
+    x = 1;
+    for (ii = 0; ii < getColCount(); ii++) {
+      i = getDisplayCol(ii);
       if (getColHidden(i))
         continue;
       
@@ -979,7 +1090,8 @@ public abstract class ResultMatrix implements Serializable {
 
     // row names
     y = 1;
-    for (i = 0; i < getRowCount(); i++) {
+    for (ii = 0; ii < getRowCount(); ii++) {
+      i = getDisplayRow(ii);
       if (!getRowHidden(i)) {
         result[y][0] = trimString(getRowName(i), getRowNameWidth());
         y++;
@@ -988,12 +1100,14 @@ public abstract class ResultMatrix implements Serializable {
 
     // fill in mean/std dev
     y = 1;
-    for (i = 0; i < getRowCount(); i++) {
+    for (ii = 0; ii < getRowCount(); ii++) {
+      i = getDisplayRow(ii);
       if (getRowHidden(i))
         continue;
 
       x = 1;
-      for (n = 0; n < getColCount(); n++) {
+      for (nn = 0; nn < getColCount(); nn++) {
+        n = getDisplayCol(nn);
         if (getColHidden(n))
           continue;
 
@@ -1044,9 +1158,14 @@ public abstract class ResultMatrix implements Serializable {
     // wins/ties/losses
     y = result.length - 1;
     x = 0;
-    result[y][0] = LEFT_PARENTHESES + WIN_STRING + "/" + TIE_STRING + "/" + LOSS_STRING + RIGHT_PARENTHESES;
+    result[y][0] =   LEFT_PARENTHESES 
+                   + WIN_STRING + "/" 
+                   + TIE_STRING + "/" 
+                   + LOSS_STRING 
+                   + RIGHT_PARENTHESES;
     x++;
-    for (i = 0; i < getColCount(); i++) {
+    for (ii = 0; ii < getColCount(); ii++) {
+      i = getDisplayCol(ii);
       if (getColHidden(i))
         continue;
 

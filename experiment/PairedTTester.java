@@ -78,7 +78,7 @@ import weka.core.Option;
  * Produce comparison tables with only the significances <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class PairedTTester implements OptionHandler, Tester {
 
@@ -99,6 +99,9 @@ public class PairedTTester implements OptionHandler, Tester {
 
   /** The sorting of the datasets (according to the sort column) */
   protected int[] m_SortOrder = null;
+
+  /** The sorting of the columns (test base is always first) */
+  protected int[] m_ColOrder = null;
 
   /** The significance level for comparisons */
   protected double m_SignificanceLevel = 0.05;
@@ -819,7 +822,8 @@ public class PairedTTester implements OptionHandler, Tester {
   }
 
   /**
-   * clears the content and fills the column and row names
+   * clears the content and fills the column and row names according to the
+   * given sorting
    */
   protected void initResultMatrix() {
     m_ResultMatrix.clear();
@@ -936,19 +940,41 @@ public class PairedTTester implements OptionHandler, Tester {
       }
     }
 
-    // sort according to sort column
+    // sort rows according to sort column
     m_SortOrder = Utils.sort(sortValues);
+
+    // determine column order
+    m_ColOrder = new int[getNumResultsets()];
+    m_ColOrder[0] = baseResultset;
+    int index = 1;
+    for (int i = 0; i < getNumResultsets(); i++) {
+      if (i == baseResultset)
+        continue;
+      m_ColOrder[index] = i;
+      index++;
+    }
 
     // setup matrix
     initResultMatrix();    
+    m_ResultMatrix.setRowOrder(m_SortOrder);
+    m_ResultMatrix.setColOrder(m_ColOrder);
     m_ResultMatrix.setMeanWidth(maxWidthMean);
     m_ResultMatrix.setStdDevWidth(maxWidthStdDev);
     m_ResultMatrix.setSignificanceWidth(1);
+
+    // make sure that test base is displayed, even though it might not be
+    // selected
+    for (int i = 0; i < m_ResultMatrix.getColCount(); i++) {
+      if (    (i == baseResultset)
+           && (m_ResultMatrix.getColHidden(i)) ) {
+        m_ResultMatrix.setColHidden(i, false);
+        System.err.println("Note: test base was hidden - set visible!");
+      }
+    }
     
     // the data
-    for (int ii = 0; ii < getNumDatasets(); ii++) {
-      int i = m_SortOrder[ii];
-      m_ResultMatrix.setRowName(ii, 
+    for (int i = 0; i < getNumDatasets(); i++) {
+      m_ResultMatrix.setRowName(i, 
           templateString(m_DatasetSpecifiers.specifier(i)));
 
       for (int j = 0; j < getNumResultsets(); j++) {
@@ -959,21 +985,21 @@ public class PairedTTester implements OptionHandler, Tester {
                 baseResultset, j, comparisonColumn);
 
           // count
-          m_ResultMatrix.setCount(ii, pairedStats.count);
+          m_ResultMatrix.setCount(i, pairedStats.count);
 
           // mean
-          m_ResultMatrix.setMean(j, ii, pairedStats.yStats.mean);
+          m_ResultMatrix.setMean(j, i, pairedStats.yStats.mean);
           
           // std dev
-          m_ResultMatrix.setStdDev(j, ii, pairedStats.yStats.stdDev);
+          m_ResultMatrix.setStdDev(j, i, pairedStats.yStats.stdDev);
 
           // significance
           if (pairedStats.differencesSignificance < 0)
-            m_ResultMatrix.setSignificance(j, ii, ResultMatrix.SIGNIFICANCE_WIN);
+            m_ResultMatrix.setSignificance(j, i, ResultMatrix.SIGNIFICANCE_WIN);
           else if (pairedStats.differencesSignificance > 0)
-            m_ResultMatrix.setSignificance(j, ii, ResultMatrix.SIGNIFICANCE_LOSS);
+            m_ResultMatrix.setSignificance(j, i, ResultMatrix.SIGNIFICANCE_LOSS);
           else
-            m_ResultMatrix.setSignificance(j, ii, ResultMatrix.SIGNIFICANCE_TIE);
+            m_ResultMatrix.setSignificance(j, i, ResultMatrix.SIGNIFICANCE_TIE);
         }
         catch (Exception e) {
           //e.printStackTrace();
