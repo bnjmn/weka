@@ -92,7 +92,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -925,6 +925,7 @@ public class ResultsPanel extends JPanel {
     int datasetCol = -1;
     String selectedList = "";
     String selectedListDataset = "";
+    boolean comparisonFieldSet = false; 
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
       if (name.toLowerCase().startsWith("key_", 0)) {
@@ -953,10 +954,12 @@ public class ResultsPanel extends JPanel {
 	selectedList += "," + (i + 1);
       } else if (name.toLowerCase().indexOf("percent_correct") != -1) {
 	m_CompareCombo.setSelectedIndex(i);
+	comparisonFieldSet = true;
 	//	break;
       } else if ((name.toLowerCase().indexOf("root_relative_squared_error") != -1) &&
-		 (m_CompareCombo.getSelectedIndex() < 0)) {
+          (!comparisonFieldSet)) {
 	m_CompareCombo.setSelectedIndex(i);
+	comparisonFieldSet = true;
       }
     }
     m_TesterClasses.setEnabled(true);
