@@ -62,7 +62,7 @@ import javax.swing.JCheckBox;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -196,7 +196,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
    * @return a File with a path that is relative to the user's directory
    * @exception Exception if the path cannot be constructed
    */
-  protected File convertToRelativePath(File absolute) throws Exception {
+  protected File createRelativePath(File absolute) throws Exception {
     String userPath = m_UserDir.getAbsolutePath() + File.separator;
     String targetPath = (new File(absolute.getParent())).getPath() 
       + File.separator;
@@ -258,6 +258,41 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     }
     //    System.err.println("new path : "+relativePath.toString());
     return new File(relativePath.toString());
+  }
+
+  /**
+   * Converts a File's absolute path to a path relative to the user
+   * (ie start) directory. Includes an additional workaround for Cygwin, which
+   * doesn't like upper case drive letters.
+   * @param absolute the File to convert to relative path
+   * @return a File with a path that is relative to the user's directory
+   * @exception Exception if the path cannot be constructed
+   */
+  protected File convertToRelativePath(File absolute) throws Exception {
+    File        result;
+    String      fileStr;
+    
+    result = null;
+    
+    // if we're running windows, it could be Cygwin
+    if (File.separator.equals("\\")) {
+      // Cygwin doesn't like upper case drives -> try lower case drive
+      try {
+        fileStr = absolute.getPath();
+        fileStr =   fileStr.substring(0, 1).toLowerCase() 
+                  + fileStr.substring(1);
+        result = createRelativePath(new File(fileStr));
+      }
+      catch (Exception e) {
+        // no luck with Cygwin workaround, convert it like it is
+        result = createRelativePath(absolute);
+      }
+    }
+    else {
+      result = createRelativePath(absolute);
+    }
+
+    return result;
   }
   
   /**
