@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ResultMatrixLatex extends ResultMatrix {
@@ -147,18 +147,18 @@ public class ResultMatrixLatex extends ResultMatrix {
     }
     result.append("}\n\\\\\n\\hline\n");
     if (!getShowStdDev())
-      result.append("Dataset & " + getColName(0));
+      result.append("Dataset & " + cells[0][1]);
     else
-      result.append("Dataset & \\multicolumn{3}{c}{" + getColName(0) + "}");
+      result.append("Dataset & \\multicolumn{3}{c}{" + cells[0][1] + "}");
 
     // now do the column names (numbers)
-    for (j = 1; j < getColCount(); j++) {
-      if (getColHidden(j))
+    for (j = 2; j < cells[0].length; j++) {
+      if (!isMean(j))
         continue;
       if (!getShowStdDev())
-        result.append("& " + getColName(j) + " & ");
+        result.append("& " + cells[0][j] + " & ");
       else
-        result.append("& \\multicolumn{4}{c}{" + getColName(j) + "} ");
+        result.append("& \\multicolumn{4}{c}{" + cells[0][j] + "} ");
     }
     result.append("\\\\\n\\hline\n");
 
