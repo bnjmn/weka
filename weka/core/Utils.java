@@ -24,7 +24,6 @@ package weka.core;
 
 import java.lang.Math;
 import java.lang.reflect.Array;
-import java.util.StringTokenizer;
 import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public final class Utils {
 
