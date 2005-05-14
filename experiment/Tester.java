@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Interface for different kinds of Testers in the Experimenter.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface Tester extends Serializable {
   /**
@@ -54,43 +54,19 @@ public interface Tester extends Serializable {
    * @param tester      the Tester to get the settings from
    */
   public void assign(Tester tester);
-  
-  /**
-   * Sets the precision of the mean output
-   * @param precision the number of digits used in printing the mean
-   */
-  public void setMeanPrec(int precision);
-
-  /**
-   * Gets the precision used for printing the mean
-   * @return the number of digits used in printing the mean
-   */
-  public int getMeanPrec();
-
-  /**
-   * Sets the precision of the std. deviation output
-   * @param precision the number of digits used in printing the std. deviation
-   */
-  public void setStdDevPrec(int precision);
-
-  /**
-   * Gets the precision used for printing the std. deviation
-   * @return the number of digits used in printing the std. deviation
-   */
-  public int getStdDevPrec();
 
   /**
    * Sets the matrix to use to produce the output.
-   * @param matrix the class to use to produce the output
+   * @param matrix the instance to use to produce the output
    * @see ResultMatrix
    */
-  public void setResultMatrix(Class matrix);
+  public void setResultMatrix(ResultMatrix matrix);
 
   /**
-   * Gets the class that produces the output.
-   * @return the class to produce the output
+   * Gets the instance that produces the output.
+   * @return the instance to produce the output
    */
-  public Class getResultMatrix();
+  public ResultMatrix getResultMatrix();
 
   /**
    * Set whether standard deviations are displayed or not.
@@ -117,13 +93,6 @@ public interface Tester extends Serializable {
    * @return the number of resultsets in the data
    */
   public int getNumResultsets();
-
-  /**
-   * Gets the number of displayed resultsets in the data.
-   *
-   * @return the number of displayed resultsets in the data
-   */
-  public int getNumDisplayedResultsets();
 
   /**
    * Gets a string descriptive of the specified resultset.
