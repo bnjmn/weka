@@ -92,7 +92,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -211,7 +211,7 @@ public class ResultsPanel extends JPanel {
   protected JButton m_TestsButton = new JButton("Select");
 
   /** Lets the user select which schemes are compared to base */
-  protected JButton m_DisplayedButton = new JButton("Select");
+  protected JButton m_DisplayedButton = new JButton("Columns");
 
   /** Holds the list of schemes to base the test against */
   protected JList m_TestsList = new JList(m_TestsModel);
@@ -282,14 +282,8 @@ public class ResultsPanel extends JPanel {
 					       .getPreferredSize().height);
 
   /** the initial result matrix */
-  protected Class m_ResultMatrix = ResultMatrixPlainText.class;
+  protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
   
-  /** the number of digits after the period (= precision) for printing the mean */
-  protected int m_MeanPrec = 2;
-  
-  /** the number of digits after the period (= precision) for printing the std. deviation */
-  protected int m_StdDevPrec = 2;
-
   /**
    * Creates the results panel with no initial experiment.
    */
@@ -1073,8 +1067,6 @@ public class ResultsPanel extends JPanel {
     m_History.addResult(name, outBuff);
     m_History.setSingle(name);
     m_TTester.setDisplayedResultsets(m_DisplayedList.getSelectedIndices());
-    m_TTester.setMeanPrec(m_MeanPrec);
-    m_TTester.setStdDevPrec(m_StdDevPrec);
     m_TTester.setResultMatrix(m_ResultMatrix);
     try {
       if (tType < m_TTester.getNumResultsets()) {
@@ -1169,14 +1161,22 @@ public class ResultsPanel extends JPanel {
   public void setOutputFormatFromDialog() {
     OutputFormatDialog dialog = new OutputFormatDialog(null);
     
-    dialog.setResultMatrix(m_ResultMatrix);
-    dialog.setMeanPrec(m_MeanPrec);
-    dialog.setStdDevPrec(m_StdDevPrec);
+    dialog.setResultMatrix(m_ResultMatrix.getClass());
+    dialog.setMeanPrec(m_ResultMatrix.getMeanPrec());
+    dialog.setStdDevPrec(m_ResultMatrix.getStdDevPrec());
+    dialog.setRemoveFilterName(m_ResultMatrix.getRemoveFilterName());
     
     if (dialog.showDialog() == OutputFormatDialog.APPROVE_OPTION) {
-      m_ResultMatrix = dialog.getResultMatrix();
-      m_MeanPrec     = dialog.getMeanPrec();
-      m_StdDevPrec   = dialog.getStdDevPrec();
+      try {
+        m_ResultMatrix = (ResultMatrix) dialog.getResultMatrix().newInstance();
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        m_ResultMatrix = new ResultMatrixPlainText();
+      }
+      m_ResultMatrix.setMeanPrec(dialog.getMeanPrec());
+      m_ResultMatrix.setStdDevPrec(dialog.getStdDevPrec());
+      m_ResultMatrix.setRemoveFilterName(dialog.getRemoveFilterName());
     }
   }
 

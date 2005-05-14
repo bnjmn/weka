@@ -32,6 +32,7 @@ import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -47,7 +48,7 @@ import weka.experiment.ResultMatrixPlainText;
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class OutputFormatDialog extends JDialog {
   /** Signifies an OK property selection */
@@ -101,6 +102,9 @@ public class OutputFormatDialog extends JDialog {
 
   /** the spinner to choose the precision for the std. deviation from */
   protected JSpinner m_StdDevPrecSpinner = new JSpinner();
+
+  /** the checkbox for the removing of filter classnames */
+  protected JCheckBox m_RemoveFilterNameCheckBox = new JCheckBox("");
   
   /** Click to activate the current set parameters */
   protected JButton m_OkButton = new JButton("OK");
@@ -113,6 +117,9 @@ public class OutputFormatDialog extends JDialog {
   
   /** the number of digits after the period (= precision) for printing the std. deviation */
   protected int m_StdDevPrec = 2;
+
+  /** whether to remove the filter names from the names */
+  protected boolean m_RemoveFilterName = false;
 
   /**
    * initializes the dialog with the given parent frame
@@ -134,7 +141,7 @@ public class OutputFormatDialog extends JDialog {
     
     getContentPane().setLayout(new BorderLayout());
     
-    panel = new JPanel(new GridLayout(3, 2));
+    panel = new JPanel(new GridLayout(4, 2));
     getContentPane().add(panel, BorderLayout.CENTER);
     
     // Precision
@@ -166,6 +173,13 @@ public class OutputFormatDialog extends JDialog {
 	  getData();
 	}
       });
+
+    // Remove filter classname
+    label = new JLabel("Remove filter classnames");
+    label.setDisplayedMnemonic('R');
+    label.setLabelFor(m_RemoveFilterNameCheckBox);
+    panel.add(label);
+    panel.add(m_RemoveFilterNameCheckBox);
     
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -201,8 +215,11 @@ public class OutputFormatDialog extends JDialog {
     // Precision
     m_MeanPrecSpinner.setValue(new Integer(m_MeanPrec));
     m_StdDevPrecSpinner.setValue(new Integer(m_StdDevPrec));
+
+    // filter names
+    m_RemoveFilterNameCheckBox.setSelected(m_RemoveFilterName);
     
-    // format
+    // format (must be last, since getData() will be called!)
     for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
       if (m_OutputFormatClasses.get(i).equals(m_ResultMatrix)) {
         m_OutputFormatComboBox.setSelectedItem(m_OutputFormatNames.get(i));
@@ -218,6 +235,9 @@ public class OutputFormatDialog extends JDialog {
     // Precision
     m_MeanPrec   = Integer.parseInt(m_MeanPrecSpinner.getValue().toString());
     m_StdDevPrec = Integer.parseInt(m_StdDevPrecSpinner.getValue().toString());
+
+    // filter names
+    m_RemoveFilterName = m_RemoveFilterNameCheckBox.isSelected();
     
     // format
     m_ResultMatrix = (Class) m_OutputFormatClasses.get(
@@ -270,6 +290,20 @@ public class OutputFormatDialog extends JDialog {
    */
   public Class getResultMatrix() {
     return m_ResultMatrix;
+  }
+
+  /**
+   * sets whether to remove the filter classname from the dataset name
+   */
+  public void setRemoveFilterName(boolean remove) {
+    m_RemoveFilterName = remove;
+  }
+
+  /**
+   * returns whether the filter classname is removed from the dataset name
+   */
+  public boolean getRemoveFilterName() {
+    return m_RemoveFilterName;
   }
 
   /**
