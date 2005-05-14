@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -123,6 +123,9 @@ public abstract class ResultMatrix implements Serializable {
   /** whether a "(x)" is printed before each row name with "x" as the index */
   protected boolean m_EnumerateRowNames;
 
+  /** the size of the names of the columns */
+  protected int m_ColNameWidth;
+
   /** the size of the names of the rows */
   protected int m_RowNameWidth;
 
@@ -164,6 +167,9 @@ public abstract class ResultMatrix implements Serializable {
 
   /** the ordering of the columns */
   protected int[] m_ColOrder = null;
+
+  /** whether to remove the filter name from the dataaset name */
+  protected boolean m_RemoveFilterName = false;
   
   /**
    * initializes the matrix as 1x1 matrix
@@ -288,6 +294,7 @@ public abstract class ResultMatrix implements Serializable {
     m_EnumerateColNames = true;
     m_EnumerateRowNames = false;
     m_RowNameWidth      = 0;
+    m_ColNameWidth      = 0;
     m_MeanWidth         = 0;
     m_StdDevWidth       = 0;
     m_SignificanceWidth = 0;
@@ -360,6 +367,21 @@ public abstract class ResultMatrix implements Serializable {
    */
   public int getStdDevPrec() {
     return m_StdDevPrec;
+  }
+
+  /**
+   * sets the width for the column names (0 = optimal)
+   */
+  public void setColNameWidth(int width) {
+    if (width >= 0)
+      m_ColNameWidth = width;
+  }
+
+  /**
+   * returns the current width for the column names
+   */
+  public int getColNameWidth() {
+    return m_ColNameWidth;
   }
 
   /**
@@ -449,6 +471,20 @@ public abstract class ResultMatrix implements Serializable {
    */
   public boolean getShowStdDev() {
     return m_ShowStdDev;
+  }
+
+  /**
+   * sets whether to remove the filter classname from the dataset name
+   */
+  public void setRemoveFilterName(boolean remove) {
+    m_RemoveFilterName = remove;
+  }
+
+  /**
+   * returns whether the filter classname is removed from the dataset name
+   */
+  public boolean getRemoveFilterName() {
+    return m_RemoveFilterName;
   }
 
   /**
@@ -1038,6 +1074,18 @@ public abstract class ResultMatrix implements Serializable {
   }
 
   /**
+   * removes the filter classname from the given string if it should be 
+   * removed, otherwise leaves the string alone
+   * @see     #getRemoveFilterName()
+   */
+  protected String removeFilterName(String s) {
+    if (getRemoveFilterName())
+      return s.replaceAll("-weka\\.filters\\..*", "");
+    else
+      return s;
+  }
+
+  /**
    * returns a 2-dimensional array with the prepared data. includes the column
    * and row names. hidden cols/rows are already excluded. <br>
    * first row: column names<br>
@@ -1076,7 +1124,8 @@ public abstract class ResultMatrix implements Serializable {
       if (getColHidden(i))
         continue;
       
-      result[0][x] = getColName(i);
+      result[0][x] = trimString(
+          removeFilterName(getColName(i)), getColNameWidth());
       x++;
       // std dev
       if (getShowStdDev()) {
@@ -1093,7 +1142,8 @@ public abstract class ResultMatrix implements Serializable {
     for (ii = 0; ii < getRowCount(); ii++) {
       i = getDisplayRow(ii);
       if (!getRowHidden(i)) {
-        result[y][0] = trimString(getRowName(i), getRowNameWidth());
+        result[y][0] = trimString(
+            removeFilterName(getRowName(i)), getRowNameWidth());
         y++;
       }
     }
