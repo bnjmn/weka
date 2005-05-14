@@ -78,7 +78,7 @@ import weka.core.Option;
  * Produce comparison tables with only the significances <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class PairedTTester implements OptionHandler, Tester {
 
@@ -140,12 +140,6 @@ public class PairedTTester implements OptionHandler, Tester {
   /** Indicates whether standard deviations should be displayed */
   protected boolean m_ShowStdDevs = false;
   
-  /** the number of digits after the period (= precision) for printing the mean */
-  protected int m_MeanPrec = 2;
-  
-  /** the number of digits after the period (= precision) for printing the std. deviation */
-  protected int m_StdDevPrec = 2;
-
   /** the instance of the class to produce the output. */
   protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
   
@@ -389,58 +383,20 @@ public class PairedTTester implements OptionHandler, Tester {
   }
 
   /**
-   * Sets the precision of the mean output
-   * @param precision the number of digits used in printing the mean
-   */
-  public void setMeanPrec(int precision) {
-    m_MeanPrec = precision;
-  }
-
-  /**
-   * Gets the precision used for printing the mean
-   * @return the number of digits used in printing the mean
-   */
-  public int getMeanPrec() {
-    return m_MeanPrec;
-  }
-
-  /**
-   * Sets the precision of the std. deviation output
-   * @param precision the number of digits used in printing the std. deviation
-   */
-  public void setStdDevPrec(int precision) {
-    m_StdDevPrec = precision;
-  }
-
-  /**
-   * Gets the precision used for printing the std. deviation
-   * @return the number of digits used in printing the std. deviation
-   */
-  public int getStdDevPrec() {
-    return m_StdDevPrec;
-  }
-
-  /**
    * Sets the matrix to use to produce the output.
-   * @param matrix the class to use to produce the output
+   * @param matrix the instance to use to produce the output
    * @see ResultMatrix
    */
-  public void setResultMatrix(Class matrix) {
-    try {
-      m_ResultMatrix = (ResultMatrix) matrix.newInstance();
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      m_ResultMatrix = new ResultMatrixPlainText();
-    }
+  public void setResultMatrix(ResultMatrix matrix) {
+    m_ResultMatrix = matrix;
   }
 
   /**
-   * Gets the class that produces the output.
-   * @return the class to produce the output
+   * Gets the instance that produces the output.
+   * @return the instance to produce the output
    */
-  public Class getResultMatrix() {
-    return m_ResultMatrix.getClass();
+  public ResultMatrix getResultMatrix() {
+    return m_ResultMatrix;
   }
 
   /**
@@ -574,30 +530,6 @@ public class PairedTTester implements OptionHandler, Tester {
       }
     }
     return m_Resultsets.size();
-  }
-
-  /**
-   * Gets the number of displayed resultsets in the data.
-   *
-   * @return the number of displayed resultsets in the data
-   */
-  public int getNumDisplayedResultsets() {
-
-    if (!m_ResultsetsValid) {
-      try {
-        prepareData();
-      } catch (Exception ex) {
-        ex.printStackTrace();
-        return 0;
-      }
-    }
-    
-    int result = 0;
-    for (int i = 0; i < getNumResultsets(); i++) {
-      if (displayResultset(i))
-        result++;
-    }
-    return result;
   }
 
   /**
@@ -826,10 +758,7 @@ public class PairedTTester implements OptionHandler, Tester {
    * given sorting
    */
   protected void initResultMatrix() {
-    m_ResultMatrix.clear();
     m_ResultMatrix.setSize(getNumResultsets(), getNumDatasets());
-    m_ResultMatrix.setMeanPrec(m_MeanPrec);
-    m_ResultMatrix.setStdDevPrec(m_StdDevPrec);
     m_ResultMatrix.setShowStdDev(m_ShowStdDevs);
 
     for (int i = 0; i < getNumDatasets(); i++)
@@ -1067,6 +996,9 @@ public class PairedTTester implements OptionHandler, Tester {
     newVector.addElement(new Option(
          "\tProduce table comparisons with only the significance values",
          "significance", 0, "-significance"));
+    newVector.addElement(new Option(
+         "\tProduce table comparisons output suitable for GNUPlot",
+         "gnuplot", 0, "-gnuplot"));
 
     return newVector.elements();
   }
@@ -1117,13 +1049,15 @@ public class PairedTTester implements OptionHandler, Tester {
 
     setShowStdDevs(Utils.getFlag('V', options));
     if (Utils.getFlag('L', options));
-      setResultMatrix(ResultMatrixLatex.class);
+      setResultMatrix(new ResultMatrixLatex());
     if (Utils.getFlag("csv", options));
-      setResultMatrix(ResultMatrixCSV.class);
+      setResultMatrix(new ResultMatrixCSV());
     if (Utils.getFlag("html", options));
-      setResultMatrix(ResultMatrixHTML.class);
+      setResultMatrix(new ResultMatrixHTML());
     if (Utils.getFlag("significance", options));
-      setResultMatrix(ResultMatrixSignificance.class);
+      setResultMatrix(new ResultMatrixSignificance());
+    if (Utils.getFlag("significance", options));
+      setResultMatrix(new ResultMatrixSignificance());
 
     String datasetList = Utils.getOption('D', options);
     Range datasetRange = new Range();
@@ -1395,8 +1329,6 @@ public class PairedTTester implements OptionHandler, Tester {
    */
   public void assign(Tester tester) {
     setInstances(tester.getInstances());
-    setMeanPrec(tester.getMeanPrec());
-    setStdDevPrec(tester.getStdDevPrec());
     setResultMatrix(tester.getResultMatrix());
     setShowStdDevs(tester.getShowStdDevs());
     setResultsetKeyColumns(tester.getResultsetKeyColumns());
