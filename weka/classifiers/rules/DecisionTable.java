@@ -57,7 +57,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $ 
+ * @version $Revision: 1.29.2.1 $ 
  */
 public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
@@ -267,8 +267,9 @@ public class DecisionTable extends Classifier
      *
      * @param t an instance from which to generate a key
      * @param numAtts the number of attributes
+     * @param ignoreClass if true treat the class as a normal attribute
      */
-    public hashKey(Instance t, int numAtts) throws Exception {
+    public hashKey(Instance t, int numAtts, boolean ignoreClass) throws Exception {
 
       int i;
       int cindex = t.classIndex();
@@ -277,7 +278,7 @@ public class DecisionTable extends Classifier
       attributes = new double [numAtts];
       missing = new boolean [numAtts];
       for (i=0;i<numAtts;i++) {
-	if (i == cindex) {
+	if (i == cindex && !ignoreClass) {
 	  missing[i] = true;
 	} else {
 	  if ((missing[i] = t.isMissing(i)) == false) {
@@ -426,7 +427,7 @@ public class DecisionTable extends Classifier
     if (instA != null) {
       thekey = new hashKey(instA);
     } else {
-      thekey = new hashKey(inst, inst.numAttributes());
+      thekey = new hashKey(inst, inst.numAttributes(), false);
     }
       
     // see if this one is already in the table
@@ -1209,7 +1210,7 @@ public class DecisionTable extends Classifier
     m_delTransform.batchFinished();
     instance = m_delTransform.output();
 
-    thekey = new hashKey(instance, instance.numAttributes());
+    thekey = new hashKey(instance, instance.numAttributes(), false);
     
     // if this one is not in the table
     if ((tempDist = (double [])m_entries.get(thekey)) == null) {
