@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -153,7 +153,7 @@ public class SimpleKMeans extends Clusterer
     for (int j = instances.numInstances() - 1; j >= 0; j--) {
       instIndex = RandomO.nextInt(j+1);
       hk = new DecisionTable.hashKey(instances.instance(instIndex), 
-				     instances.numAttributes());
+				     instances.numAttributes(), true);
       if (!initC.containsKey(hk)) {
 	m_ClusterCentroids.add(instances.instance(instIndex));
 	initC.put(hk, null);
@@ -298,12 +298,12 @@ public class SimpleKMeans extends Clusterer
       } else {
 	secondI = second.index(p2);
       }
-      if (firstI == m_ClusterCentroids.classIndex()) {
+      /*      if (firstI == m_ClusterCentroids.classIndex()) {
 	p1++; continue;
       } 
       if (secondI == m_ClusterCentroids.classIndex()) {
 	p2++; continue;
-      } 
+        } */
       double diff;
       if (firstI == secondI) {
 	diff = difference(firstI, 
