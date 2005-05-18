@@ -58,7 +58,7 @@ import  weka.filters.Filter;
  * (default = 1) <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -446,6 +446,7 @@ public class WrapperSubsetEval
 
       // check on the standard deviation
       if (!repeat(repError, i + 1)) {
+        i++;
         break;
       }
     }
