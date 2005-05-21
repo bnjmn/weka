@@ -32,7 +32,7 @@ import weka.core.Version;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ResultMatrixGnuPlot extends ResultMatrix {
@@ -146,14 +146,6 @@ public class ResultMatrixGnuPlot extends ResultMatrix {
     result.append("set terminal x11\n");
     result.append("set output\n");
     result.append("\n");
-    result.append("# generate ps:\n");
-    result.append("#set terminal postscript\n");
-    result.append("#set output \"plot.ps\"\n");
-    result.append("\n");
-    result.append("# generate png:\n");
-    result.append("#set terminal png size 800,600\n");
-    result.append("#set output \"plot.png\"\n");
-    result.append("\n");
     result.append("# to display all data rows:\n");
     result.append("set xrange [0:" + ((cells.length - 2) + 1) + "]\n");
     result.append("\n");
@@ -201,6 +193,16 @@ public class ResultMatrixGnuPlot extends ResultMatrix {
       
       result.append(line + "\n");
     }
+    result.append("\n");
+    result.append("# generate ps:\n");
+    result.append("#set terminal postscript\n");
+    result.append("#set output \"plot.ps\"\n");
+    result.append("#replot\n");
+    result.append("\n");
+    result.append("# generate png:\n");
+    result.append("#set terminal png size 800,600\n");
+    result.append("#set output \"plot.png\"\n");
+    result.append("#replot\n");
     result.append("\n");
     result.append("# wait for user to hit <Return>\n");
     result.append("pause -1\n");
