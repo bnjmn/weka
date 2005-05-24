@@ -71,7 +71,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -962,8 +962,11 @@ public class EM
     }
     
     m_replaceMissing = new ReplaceMissingValues();
-    m_replaceMissing.setInputFormat(data);
-    data = weka.filters.Filter.useFilter(data, m_replaceMissing);
+    Instances instances = new Instances(data);
+    instances.setClassIndex(-1);
+    m_replaceMissing.setInputFormat(instances);
+    data = weka.filters.Filter.useFilter(instances, m_replaceMissing);
+    instances = null;
     
     m_theInstances = data;
 
