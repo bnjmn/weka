@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.3 $
+ * @version $Revision: 1.19.2.4 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -129,8 +129,10 @@ public class SimpleKMeans extends Clusterer
     }
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
-    m_ReplaceMissingFilter.setInputFormat(data);
-    Instances instances = Filter.useFilter(data, m_ReplaceMissingFilter);
+    Instances instances = new Instances(data);
+    instances.setClassIndex(-1);
+    m_ReplaceMissingFilter.setInputFormat(instances);
+    instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
 
     m_Min = new double [instances.numAttributes()];
     m_Max = new double [instances.numAttributes()];
