@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
@@ -83,7 +83,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
     /**  Upper bound for the CV search */
     private double m_Upper;      
 
-    /**  Increment during the search */
+    /**  Number of steps during the search */
     private double m_Steps;      
 
     /**  The parameter value with the best performance */
@@ -512,9 +512,9 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    *
    * @param cvParam the string representation of a scheme parameter. The
    * format is: <br>
-   * param_char lower_bound upper_bound increment <br>
-   * eg to search a parameter -P from 1 to 10 by increments of 2: <br>
-   * P 1 10 2 <br>
+   * param_char lower_bound upper_bound number_of_steps <br>
+   * eg to search a parameter -P from 1 to 10 by increments of 1: <br>
+   * P 1 10 11 <br>
    * @exception Exception if the parameter specifier is of the wrong format
    */
   public void addCVParameter(String cvParam) throws Exception {
@@ -544,9 +544,9 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
     return "Sets the scheme parameters which are to be set "+
 	   "by cross-validation.\n"+
 	   "The format for each string should be:\n"+
-	   "param_char lower_bound upper_bound increment\n"+
-	   "eg to search a parameter -P from 1 to 10 by increments of 2:\n"+
-	   "    \"P 1 10 2\" ";
+	   "param_char lower_bound upper_bound number_of_steps\n"+
+	   "eg to search a parameter -P from 1 to 10 by increments of 1:\n"+
+	   "    \"P 1 10 11\" ";
   }
 
   /**
