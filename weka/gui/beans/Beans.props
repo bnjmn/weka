@@ -33,6 +33,14 @@ weka.filters.Filter=weka.gui.beans.Filter
 weka.clusterers.Clusterer=weka.gui.beans.Clusterer
 # weka.attributeSelection.ASEvaluation=weka.gui.beans.AttributeSelector
 
+# toolbar ordering information for wrapper types
+weka.core.converters.Loader.order=0
+weka.core.converters.Saver.order=1
+weka.filters.Filter.order=3
+weka.classifiers.Classifier.order=4
+weka.clusterers.Clusterer.order=5
+# weka.attributeSelection.ASEvaluation.order=6
+
 # toolbar naming aliases for weka algorithm classes
 weka.core.converters.Loader.alias=DataSources
 weka.core.converters.Saver.alias=DataSinks
