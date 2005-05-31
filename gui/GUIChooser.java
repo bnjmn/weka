@@ -27,6 +27,7 @@ import weka.core.Version;
 import weka.gui.explorer.Explorer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.beans.KnowledgeFlow;
+import weka.gui.beans.KnowledgeFlowApp;
 
 import java.awt.Panel;
 import java.awt.Button;
@@ -55,7 +56,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class GUIChooser extends JFrame {
 
@@ -202,28 +203,35 @@ public class GUIChooser extends JFrame {
       }
     });
 
+    KnowledgeFlowApp.addStartupListener(new weka.gui.beans.StartUpListener() {
+        public void startUpComplete() {
+          if (m_KnowledgeFlowFrame == null) {
+            KnowledgeFlowApp kna = KnowledgeFlowApp.getSingleton();
+            m_KnowledgeFlowBut.setEnabled(false);
+            m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
+            m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
+            m_KnowledgeFlowFrame.getContentPane()
+              .add(kna, BorderLayout.CENTER);
+            m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent w) {
+                  m_KnowledgeFlowFrame.dispose();
+                  m_KnowledgeFlowFrame = null;
+                  weka.gui.beans.BeanConnection.reset();
+                  weka.gui.beans.BeanInstance.reset(null);
+                  m_KnowledgeFlowBut.setEnabled(true);
+                  checkExit();
+                }
+              });
+            m_KnowledgeFlowFrame.pack();
+            m_KnowledgeFlowFrame.setSize(800, 600);
+            m_KnowledgeFlowFrame.setVisible(true);
+          }
+        }
+      });
+
     m_KnowledgeFlowBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	if (m_KnowledgeFlowFrame == null) {
-	  m_KnowledgeFlowBut.setEnabled(false);
-	  m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
-	  m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
-	  m_KnowledgeFlowFrame.getContentPane()
-	    .add(new KnowledgeFlow(), BorderLayout.CENTER);
-	  m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
-	    public void windowClosing(WindowEvent w) {
-	      m_KnowledgeFlowFrame.dispose();
-	      m_KnowledgeFlowFrame = null;
-              weka.gui.beans.BeanConnection.reset();
-              weka.gui.beans.BeanInstance.reset(null);
-	      m_KnowledgeFlowBut.setEnabled(true);
-	      checkExit();
-	    }
-	  });
-	  m_KnowledgeFlowFrame.pack();
-	  m_KnowledgeFlowFrame.setSize(800, 600);
-	  m_KnowledgeFlowFrame.setVisible(true);
-	}
+        KnowledgeFlow.startApp();
       }
     });
 
