@@ -54,9 +54,9 @@ import weka.gui.Logger;
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
 <<<<<<< Classifier.java
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
 =======
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
 >>>>>>> 1.14
  * @since 1.0
  * @see JPanel
@@ -200,7 +200,7 @@ public class Classifier extends JPanel
       }
     }
     // get global info
-    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Classifier);
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Classifier);
   }
 
   /**
