@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  */
 public class Saver extends AbstractDataSink implements WekaWrapper {
@@ -193,7 +193,7 @@ public class Saver extends AbstractDataSink implements WekaWrapper {
 
     
     // get global info
-    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Saver);
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Saver);
     if(m_Saver instanceof DatabaseConverter)
         m_isDBSaver = true;
     else

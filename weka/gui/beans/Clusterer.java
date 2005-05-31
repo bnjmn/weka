@@ -56,7 +56,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -166,7 +166,7 @@ public class Clusterer extends JPanel implements BeanCommon, Visible, WekaWrappe
     m_visual.setText(clustererName);
 
     // get global info
-    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Clusterer);
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Clusterer);
   }
 
 
