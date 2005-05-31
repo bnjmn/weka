@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -169,7 +169,7 @@ public class Filter extends JPanel
     }
     
     // get global info
-    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Filter);
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Filter);
   }
 
   public weka.filters.Filter getFilter() {

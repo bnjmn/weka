@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -269,7 +269,7 @@ public class Loader extends AbstractDataSource
     }
     
     // get global info
-    m_globalInfo = KnowledgeFlow.getGlobalInfo(m_Loader);
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Loader);
   }
 
   /**
