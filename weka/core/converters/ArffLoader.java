@@ -38,7 +38,7 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
@@ -92,11 +92,14 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
   /**
    * Resets the Loader ready to read a new data set
    */
-  public void reset() {
+  public void reset() throws Exception {
 
     m_structure = null;
     //    m_sourceReader = null;
     setRetrieval(NONE);
+    if (m_File != null) {
+      setFile(new File(m_File));
+    }
   }
 
   /**
@@ -107,8 +110,9 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    * @exception IOException if an error occurs
    */
   public void setSource(File file) throws IOException {
-
-    reset();
+    
+    m_structure = null;
+    setRetrieval(NONE);
 
     if (file == null) {
       throw new IOException("Source file object is null!");
@@ -119,6 +123,7 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
     } catch (FileNotFoundException ex) {
       throw new IOException("File not found");
     }
+    m_File = file.getAbsolutePath();
   }
   
 
@@ -150,7 +155,7 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    * @exception IOException always thrown.
    */
   public void setSource(InputStream in) throws IOException {
-
+    m_File = null;
     m_sourceReader = new BufferedReader(new InputStreamReader(in));
   }
 
@@ -250,6 +255,13 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    
     Instance current = m_structure.instance(0);
     m_structure.delete(0);
+    if (current == null) {
+      try {
+        reset();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    }
     return current;
   }
 

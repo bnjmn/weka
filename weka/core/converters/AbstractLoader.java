@@ -31,7 +31,7 @@ import java.io.*;
  * methods. All other methods must be overridden.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public abstract class AbstractLoader implements Loader {
   
@@ -72,6 +72,15 @@ public abstract class AbstractLoader implements Loader {
   public void setSource(File file) throws IOException {
 
     throw new IOException("Setting File as source not supported");
+  }
+
+  /**
+   * Default implementation sets retrieval mode to NONE
+   *
+   * @exception never.
+   */
+  public void reset() throws Exception {
+    m_retrieval = NONE;
   }
   
   /**

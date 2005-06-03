@@ -41,7 +41,7 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
 public class C45Loader extends AbstractLoader 
@@ -113,9 +113,12 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
   /**
    * Resets the Loader ready to read a new data set
    */
-  public void reset() {
+  public void reset() throws Exception {
     m_structure = null;
     setRetrieval(NONE);
+    if (m_File != null) {
+      setFile(new File(m_File));
+    }
   }
 
   /**
@@ -164,7 +167,9 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    * @exception IOException if an error occurs
    */
   public void setSource(File file) throws IOException {
-    reset();
+    
+    m_structure = null;
+    setRetrieval(NONE);
 
     if (file == null) {
       throw new IOException("Source file object is null!");
@@ -203,6 +208,7 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
     } catch (FileNotFoundException ex) {
       throw new IOException("File not found : "+(path+fname));
     }
+    m_File = file.getAbsolutePath();
   }
 
   /**
@@ -256,7 +262,11 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       result.add(current);
       current = getInstance(st);
     }
-    reset();
+    try {
+      reset();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
     return result;
   }
 
@@ -297,7 +307,11 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       nextI.setDataset(m_structure);
     }
     else{
+      try {
         reset();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
     }
     return nextI;
   }

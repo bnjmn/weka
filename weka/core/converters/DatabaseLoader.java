@@ -65,7 +65,7 @@ import java.util.Enumeration;
  * Sets incremental loading
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  * @see Loader
  */
 public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
@@ -83,7 +83,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   private DatabaseConnection m_DataBaseConnection;
   
   /** The user defined query to load instances. (form: SELECT *|<column-list> FROM <table> [WHERE <condition>]) */
-  private String m_query;
+  private String m_query = "Select * from Results0";;
   
   /** Flag indicating that pseudo incremental mode is used (all instances load at once into main memeory and then incrementally from main memory instead of the database) */
   private boolean m_pseudoIncremental;
@@ -181,7 +181,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
         m_DataBaseConnection.disconnectFromDatabase();
     m_DataBaseConnection = new DatabaseConnection();
     m_orderBy = new FastVector();
-    m_query = "Select * from Results0";
+    //    m_query = "Select * from Results0";
     m_inc = false;
     
   }
