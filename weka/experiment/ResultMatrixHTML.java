@@ -15,8 +15,8 @@
  */
 
 /*
- *    ResultMatrixHTML.java
- *    Copyright (C) 2005 FracPete
+ * ResultMatrixHTML.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ResultMatrixHTML extends ResultMatrix {
@@ -164,7 +164,7 @@ public class ResultMatrixHTML extends ResultMatrix {
 
       result +=   "   <tr>"
                 + "<td><b>(" + (i+1) + ")</b></td>"
-                + "<td>" + m_ColNames[i] + "</td>" 
+                + "<td>" + removeFilterName(m_ColNames[i]) + "</td>" 
                 + "</tr>\n";
     }
 
@@ -219,7 +219,7 @@ public class ResultMatrixHTML extends ResultMatrix {
         result += "<td>" + content.replaceAll(" ", "&nbsp;") + "</td>";
       }
 
-      result += "<td><b>" + getSummaryTitle(i) + "</b> = " + m_ColNames[i] + "</td></tr>\n";
+      result += "<td><b>" + getSummaryTitle(i) + "</b> = " + removeFilterName(m_ColNames[i]) + "</td></tr>\n";
     }
 
     result += "</table>\n";
@@ -265,7 +265,7 @@ public class ResultMatrixHTML extends ResultMatrix {
         + "<td align=\"right\">" + m_RankingDiff[curr] + "</td>"
         + "<td align=\"right\">" + m_RankingWins[curr] + "</td>"
         + "<td align=\"right\">" + m_RankingLosses[curr] + "</td>"
-        + "<td>" + m_ColNames[curr] + "</td>"
+        + "<td>" + removeFilterName(m_ColNames[curr]) + "</td>"
         + "<tr>\n";
     }
 

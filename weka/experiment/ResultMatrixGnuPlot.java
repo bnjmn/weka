@@ -15,8 +15,8 @@
  */
 
 /*
- *    ResultMatrixCSV.java
- *    Copyright (C) 2005 FracPete
+ * ResultMatrixCSV.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import weka.core.Version;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ResultMatrixGnuPlot extends ResultMatrix {
