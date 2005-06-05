@@ -74,6 +74,7 @@ import weka.gui.TaskLogger;
 import weka.gui.PropertyPanel;
 import weka.gui.AttributeVisualizationPanel;
 import weka.gui.ViewerDialog;
+import weka.gui.sql.SqlViewerDialog;
 import weka.core.UnassignedClassException;
 
 /** 
@@ -84,7 +85,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.52 $
+ * @version $Revision: 1.53 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -100,10 +101,6 @@ public class PreprocessPanel extends JPanel {
 
   /** Click to load base instances from a Database */
   protected JButton m_OpenDBBut = new JButton("Open DB...");
-
-  /** Lets the user enter a DB query */
-  protected GenericObjectEditor m_DatabaseQueryEditor = 
-    new GenericObjectEditor();
 
   /** Click to revert back to the last saved point */
   protected JButton m_UndoBut = new JButton("Undo");
@@ -219,17 +216,6 @@ public class PreprocessPanel extends JPanel {
   public PreprocessPanel() {
 
     // Create/Configure/Connect components
-    try {
-    m_DatabaseQueryEditor.setClassType(weka.experiment.InstanceQuery.class);
-    m_DatabaseQueryEditor.setValue(new weka.experiment.InstanceQuery());
-    ((GenericObjectEditor.GOEPanel)m_DatabaseQueryEditor.getCustomEditor())
-      .addOkListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    setInstancesFromDBQ();
-	  }
-	});
-    } catch (Exception ex) {
-    }
     m_FilterEditor.setClassType(weka.filters.Filter.class);
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
@@ -256,7 +242,11 @@ public class PreprocessPanel extends JPanel {
     });
     m_OpenDBBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	PropertyDialog pd = new PropertyDialog(m_DatabaseQueryEditor,100,100);
+        SqlViewerDialog dialog = new SqlViewerDialog(null);
+        dialog.setVisible(true);
+        if (dialog.getReturnValue() == JOptionPane.OK_OPTION)
+          setInstancesFromDBQ(dialog.getURL(), dialog.getUser(),
+                              dialog.getPassword(), dialog.getQuery());
       }
     });
     m_OpenFileBut.addActionListener(new ActionListener() {
@@ -684,15 +674,24 @@ public class PreprocessPanel extends JPanel {
   }
 
   /**
-   * Queries the user for a URL to a database to load instances from, 
-   * then loads the instances in a background process. This is done in the IO
-   * thread, and an error message is popped up if the IO thread is busy.
+   * Loads instances from an SQL query the user provided with the
+   * SqlViewerDialog, then loads the instances in a background process. This is
+   * done in the IO thread, and an error message is popped up if the IO thread
+   * is busy.
+   * @param url           the database URL
+   * @param user          the user to connect as
+   * @param pw            the password of the user
+   * @param query         the query for retrieving instances from
    */
-  public void setInstancesFromDBQ() {
+  public void setInstancesFromDBQ(String url, String user, 
+                                  String pw, String query) {
     if (m_IOThread == null) {
       try {
-	InstanceQuery InstQ = 
-	  (InstanceQuery)m_DatabaseQueryEditor.getValue();
+	InstanceQuery InstQ = new InstanceQuery();
+        InstQ.setDatabaseURL(url);
+        InstQ.setUsername(user);
+        InstQ.setPassword(pw);
+        InstQ.setQuery(query);
 	
         // we have to disconnect, otherwise we can't change the DB!
         if (InstQ.isConnected())
