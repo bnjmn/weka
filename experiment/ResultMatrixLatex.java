@@ -15,8 +15,8 @@
  */
 
 /*
- *    ResultMatrixLatex.java
- *    Copyright (C) 2005 FracPete
+ * ResultMatrixLatex.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ResultMatrixLatex extends ResultMatrix {
@@ -232,7 +232,7 @@ public class ResultMatrixLatex extends ResultMatrix {
         continue;
 
       result +=   LEFT_PARENTHESES + (i+1) + RIGHT_PARENTHESES 
-                + " & " + m_ColNames[i].replace('_', '-')
+                + " & " + removeFilterName(m_ColNames[i]).replace('_', '-')
                                        .replaceAll("\\\\", "\\\\textbackslash") 
                 + " \\\\\n";
     }

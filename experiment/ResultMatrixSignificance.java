@@ -15,8 +15,8 @@
  */
 
 /*
- *    ResultMatrixSignificance.java
- *    Copyright (C) 2005 FracPete
+ * ResultMatrixSignificance.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ResultMatrixSignificance extends ResultMatrix {

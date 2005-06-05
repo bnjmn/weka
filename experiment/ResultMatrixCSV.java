@@ -15,8 +15,8 @@
  */
 
 /*
- *    ResultMatrixCSV.java
- *    Copyright (C) 2005 FracPete
+ * ResultMatrixCSV.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ResultMatrixCSV extends ResultMatrix {
@@ -123,7 +123,7 @@ public class ResultMatrixCSV extends ResultMatrix {
         continue;
 
       result +=   LEFT_PARENTHESES + (i+1) + RIGHT_PARENTHESES
-                + "," + Utils.quote(m_ColNames[i]) + "\n";
+                + "," + Utils.quote(removeFilterName(m_ColNames[i])) + "\n";
     }
 
     return result;
@@ -176,7 +176,7 @@ public class ResultMatrixCSV extends ResultMatrix {
                     + " (" + m_Wins[i][j] + ")";
       }
 
-      result += line + "," + getSummaryTitle(i) + " = " + m_ColNames[i] + '\n';
+      result += line + "," + getSummaryTitle(i) + " = " + removeFilterName(m_ColNames[i]) + '\n';
     }
 
     return result;
@@ -213,7 +213,7 @@ public class ResultMatrixCSV extends ResultMatrix {
       result += m_RankingDiff[curr] + ","
         + m_RankingWins[curr] + ","
         + m_RankingLosses[curr] + ","
-        + m_ColNames[curr] + "\n";
+        + removeFilterName(m_ColNames[curr]) + "\n";
     }
 
     return result;

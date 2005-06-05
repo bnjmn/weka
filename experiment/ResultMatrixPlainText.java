@@ -15,8 +15,8 @@
  */
 
 /*
- *    ResultMatrixPlainText.java
- *    Copyright (C) 2005 FracPete
+ * ResultMatrixPlainText.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ResultMatrixPlainText extends ResultMatrix {
@@ -272,7 +272,7 @@ public class ResultMatrixPlainText extends ResultMatrix {
         continue;
 
       result +=   LEFT_PARENTHESES + (i+1) + RIGHT_PARENTHESES 
-                + " " + m_ColNames[i] + "\n";
+                + " " + removeFilterName(m_ColNames[i]) + "\n";
     }
 
     return result;
@@ -360,7 +360,7 @@ public class ResultMatrixPlainText extends ResultMatrix {
       result += Utils.padLeft("" + m_RankingDiff[curr], width) + ' '
         + Utils.padLeft("" + m_RankingWins[curr], width) + ' '
         + Utils.padLeft("" + m_RankingLosses[curr], width) + ' '
-        + m_ColNames[curr] + '\n';
+        + removeFilterName(m_ColNames[curr]) + '\n';
     }
 
     return result;
