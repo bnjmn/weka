@@ -15,8 +15,8 @@
  */
 
 /*
- *    Tester.java
- *    Copyright (C) 2005 FracPete
+ * Tester.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Interface for different kinds of Testers in the Experimenter.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface Tester extends Serializable {
   /**

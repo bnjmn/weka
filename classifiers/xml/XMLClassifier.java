@@ -16,7 +16,7 @@
 
 /*
  * XMLClassifier.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.xml;
@@ -31,7 +31,7 @@ import weka.experiment.PropertyNode;
  * fro XML.<br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class XMLClassifier extends XMLBasicSerialization {
 

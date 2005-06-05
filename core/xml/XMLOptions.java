@@ -16,7 +16,7 @@
 
 /*
  * XMLOptions.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import org.w3c.dom.NodeList;
  * line string.<p>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class XMLOptions {
    /** tag for a single option */

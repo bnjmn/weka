@@ -16,7 +16,7 @@
 
 /*
  * PropertyHandler.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
@@ -30,11 +30,12 @@ import java.util.Hashtable;
  * that are allowed for a certain class.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class PropertyHandler {
    /** 
-    * contains display names of properties to ignore in the serialization process
+    * contains display names of properties to ignore in the serialization
+    * process
     * 
     * @see #ignored()
     * @see #addIgnored(String)

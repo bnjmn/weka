@@ -15,8 +15,8 @@
  */
 
 /*
- *    Version.java
- *    Copyright (C) 2005 FracPete
+ * Version.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ package weka.core;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class Version implements Comparable {
   /** the major version */
