@@ -16,7 +16,7 @@
 
 /*
  * MethodHandler.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
@@ -30,7 +30,7 @@ import java.util.Hashtable;
  * (or classes) and Methods that are associated with them. 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MethodHandler {
    /** 

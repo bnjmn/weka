@@ -16,7 +16,7 @@
 
 /*
  * InstanceComparator.java
- * Copyright (C) 2005 FracPete
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import java.util.Comparator;
  *
  * @see     Instance
  * @author  FracPete (fracpete at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     java.util.Arrays
  * @see     java.util.Collections
  */

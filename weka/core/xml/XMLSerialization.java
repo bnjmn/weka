@@ -16,7 +16,7 @@
 
 /*
  * XMLSerialization.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -89,7 +89,7 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class XMLSerialization {
    /** the tag for an object */
