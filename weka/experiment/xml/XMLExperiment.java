@@ -16,7 +16,7 @@
 
 /*
  * XMLExperiment.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.experiment.xml;
@@ -53,7 +53,7 @@ import weka.experiment.PropertyNode;
  * @see Experiment#m_ClassFirst
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class XMLExperiment extends XMLBasicSerialization {
    /** the name of the classFirst property */
