@@ -15,8 +15,8 @@
  */
 
 /*
- *    ResultMatrix.java
- *    Copyright (C) 2005 FracPete
+ * ResultMatrix.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -226,6 +226,7 @@ public abstract class ResultMatrix implements Serializable {
     m_StdDevWidth       = matrix.m_StdDevWidth;
     m_SignificanceWidth = matrix.m_SignificanceWidth;
     m_CountWidth        = matrix.m_CountWidth;
+    m_RemoveFilterName  = matrix.m_RemoveFilterName;
     
     // header
     m_HeaderKeys   = (Vector) matrix.m_HeaderKeys.clone();
@@ -1080,7 +1081,9 @@ public abstract class ResultMatrix implements Serializable {
    */
   protected String removeFilterName(String s) {
     if (getRemoveFilterName())
-      return s.replaceAll("-weka\\.filters\\..*", "");
+      return s.replaceAll("-weka\\.filters\\..*", "")
+              .replaceAll("-unsupervised\\..*",   "")
+              .replaceAll("-supervised\\..*",     "");
     else
       return s;
   }
