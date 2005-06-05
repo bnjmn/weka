@@ -38,7 +38,7 @@ import javax.swing.event.TableModelEvent;
 *
 *
 * @author     FracPete (fracpete at waikato dot ac dot nz)
-* @version    $Revision: 1.1 $
+* @version    $Revision: 1.2 $
 */
 
 public class ResultSetTableModel implements TableModel {
@@ -104,7 +104,7 @@ public class ResultSetTableModel implements TableModel {
    * returns the number of columns in the model
    */
   public int getColumnCount() {
-    return m_Helper.getColumnCount();
+    return m_Helper.getColumnCount() + 1;
   }
 
   /**

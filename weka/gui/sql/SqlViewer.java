@@ -54,7 +54,7 @@ import javax.swing.JPanel;
  *
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
 
 public class SqlViewer 
@@ -217,8 +217,13 @@ public class SqlViewer
       try {
         if (evt.hasResult()) {
           helper = new ResultSetHelper(evt.getResultSet());
-          m_InfoPanel.append(helper.getRowCount() + " rows selected.", 
-              "information_small.gif");
+          if (evt.getMaxRows() > 0)
+            m_InfoPanel.append(helper.getRowCount() + " rows selected (" 
+                + evt.getMaxRows() + " displayed).", 
+                "information_small.gif");
+          else
+            m_InfoPanel.append(helper.getRowCount() + " rows selected.", 
+                "information_small.gif");
         }
 
         // save max rows
