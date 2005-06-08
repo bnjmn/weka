@@ -22,7 +22,6 @@
 
 package  weka.attributeSelection;
 
-import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 
@@ -38,7 +37,7 @@ import  weka.core.*;
  * search is used to produce a ranked list of attributes.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RankSearch extends ASSearch implements OptionHandler {
 
@@ -68,6 +67,12 @@ public class RankSearch extends ASSearch implements OptionHandler {
 
   /** will hold the attribute ranking */
   private int [] m_Ranking;
+
+  /** add this many attributes in each iteration from the ranking */
+  protected int m_add = 1;
+
+  /** start from this point in the ranking */
+  protected int m_startPoint = 0;
 
   /**
    * Returns a string describing this search method
@@ -116,6 +121,62 @@ public class RankSearch extends ASSearch implements OptionHandler {
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String stepSizeTipText() {
+    return "Add this many attributes from the ranking in each iteration.";
+  }
+
+  /**
+   * Set the number of attributes to add from the rankining
+   * in each iteration
+   * @param ss the number of attribes to add.
+   */
+  public void setStepSize(int ss) {
+    if (ss > 0) {
+      m_add = ss;
+    }
+  }
+
+  /**
+   * Get the number of attributes to add from the rankining
+   * in each iteration
+   * @return the number of attributes to add.
+   */
+  public int getStepSize() {
+    return m_add;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String startPointTipText() {
+    return "Start evaluating from this point in the ranking.";
+  }
+
+  /**
+   * Set the point at which to start evaluating the ranking
+   * @param sp the position in the ranking to start at
+   */
+  public void setStartPoint(int sp) {
+    if (sp >= 0) {
+      m_startPoint = sp;
+    }
+  }
+
+  /**
+   * Get the point at which to start evaluating the ranking
+   * @return the position in the ranking to start at
+   */
+  public int getStartPoint() {
+    return m_startPoint;
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    * @return an enumeration of all the available options.
    **/
@@ -128,6 +189,13 @@ public class RankSearch extends ASSearch implements OptionHandler {
 			       + "\n\teg. -A weka.attributeSelection."
 			       +"GainRatioAttributeEval ... " 
 			       + "-- -M", "A", 1, "-A <attribute evaluator>"));
+    newVector.addElement(new Option("\tnumber of attributes to be added from the"
+                                    +"\n\tranking in each iteration (default = 1).", 
+                                    "S", 1,"-S <step size>"));
+
+    newVector.addElement(new Option("\tpoint in the ranking to start evaluating from. "
+                                    +"\n\t(default = 0, ie. the head of the ranking).", 
+                                    "R", 1,"-R <start point>"));
 
     if ((m_ASEval != null) && 
 	(m_ASEval instanceof OptionHandler)) {
@@ -161,6 +229,17 @@ public class RankSearch extends ASSearch implements OptionHandler {
     throws Exception {
     String optionString;
     resetOptions();
+
+    optionString = Utils.getOption('S', options);
+    if (optionString.length() != 0) {
+      setStepSize(Integer.parseInt(optionString));
+    }
+
+    optionString = Utils.getOption('R', options);
+    if (optionString.length() != 0) {
+      setStartPoint(Integer.parseInt(optionString));
+    }
+
     optionString = Utils.getOption('A', options);
 
     if (optionString.length() == 0) {
@@ -185,8 +264,12 @@ public class RankSearch extends ASSearch implements OptionHandler {
       evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
     }
 
-    String[] options = new String[4 + evaluatorOptions.length];
+    String[] options = new String[8 + evaluatorOptions.length];
     int current = 0;
+
+    options[current++] = "S"; options[current++] = ""+getStepSize();
+
+    options[current++] = "R"; options[current++] = ""+getStartPoint();
 
     if (getAttributeEvaluator() != null) {
       options[current++] = "-A";
@@ -280,7 +363,7 @@ public class RankSearch extends ASSearch implements OptionHandler {
     }
 
     // now evaluate the attribute ranking
-    for (int i=0;i<m_Ranking.length;i++) {
+    for (int i=m_startPoint;i<m_Ranking.length;i+=m_add) {
       temp_group = new BitSet(m_numAttribs);
       for (int j=0;j<=i;j++) {
 	temp_group.set(m_Ranking[j]);

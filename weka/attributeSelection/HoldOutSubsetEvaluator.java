@@ -22,7 +22,6 @@
 
 package weka.attributeSelection;
 
-import java.io.*;
 import java.util.*;
 import weka.core.*;
 
@@ -32,7 +31,7 @@ import weka.core.*;
  * train the subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class HoldOutSubsetEvaluator extends SubsetEvaluator {
 

@@ -21,8 +21,6 @@
  */
 
 package weka.attributeSelection;
-import java.io.*;
-import weka.core.*;
 
 
 /** 
@@ -30,7 +28,7 @@ import weka.core.*;
  * as the error of a learning scheme
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface ErrorBasedMeritEvaluator {
 

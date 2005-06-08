@@ -24,7 +24,6 @@
 package weka.attributeSelection;
 
 import java.io.Serializable;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.Utils;
@@ -33,7 +32,7 @@ import weka.core.Utils;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public abstract class ASEvaluation implements Serializable {

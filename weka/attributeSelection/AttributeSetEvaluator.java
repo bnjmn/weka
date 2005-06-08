@@ -55,14 +55,12 @@
 
 package weka.attributeSelection;
 
-import java.io.*;
-import weka.core.*;
 
 /**
  * Abstract attribute set evaluator.
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AttributeSetEvaluator extends ASEvaluation {
     // ===============

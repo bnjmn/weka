@@ -56,10 +56,8 @@
 
 package  weka.attributeSelection;
 
-import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
-import  weka.attributeSelection.*;
 
 /**
  * Class for ranking the attributes evaluated by an AttributeSetEvaluator
@@ -74,7 +72,7 @@ import  weka.attributeSelection.*;
  * discard attributes. <p>
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FCBFSearch extends ASSearch
   implements RankedOutputSearch, StartSetHandler, OptionHandler {

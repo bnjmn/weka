@@ -22,10 +22,8 @@
 
 package  weka.attributeSelection;
 
-import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
-import  weka.classifiers.*;
 import  weka.filters.supervised.attribute.Discretize;
 import  weka.filters.Filter;
 
@@ -46,7 +44,7 @@ import  weka.filters.Filter;
  * Include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
