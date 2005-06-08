@@ -26,7 +26,9 @@ import weka.core.Utils;
 import weka.gui.ListSelectorDialog;
 import weka.gui.LogPanel;
 import weka.gui.LookAndFeel;
+import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
+import weka.gui.HierarchyPropertyParser;
 import weka.gui.visualize.PrintablePanel;
 
 import java.io.OutputStream;
@@ -47,6 +49,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.Date;
+import java.util.Hashtable;
 import java.text.SimpleDateFormat;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -110,7 +113,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.1 $
+ * @version  $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -200,13 +203,28 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	  // All the weka algorithms of this class of algorithm
 	  String wekaAlgs = GEOProps.getProperty(geoKey);
 
+          Hashtable roots = GenericObjectEditor.sortClassesByRoot(wekaAlgs);
+          Hashtable hpps = new Hashtable();
+          Enumeration enm = roots.keys();
+          while (enm.hasMoreElements()) {
+            String root = (String) enm.nextElement();
+            String classes = (String) roots.get(root);
+            weka.gui.HierarchyPropertyParser hpp = 
+              new weka.gui.HierarchyPropertyParser();
+            hpp.build(classes, ", ");
+            //            System.err.println(hpp.showTree());
+            hpps.put(root, hpp);
+          }
+
 	  //------ test the HierarchyPropertyParser
-	  weka.gui.HierarchyPropertyParser hpp = 
+          /*  weka.gui.HierarchyPropertyParser hpp = 
 	    new weka.gui.HierarchyPropertyParser();
 	  hpp.build(wekaAlgs, ", ");
-	  // 	  System.err.println(hpp.showTree());
+
+	  System.err.println(hpp.showTree()); */
 	  // ----- end test the HierarchyPropertyParser
-	  newV.addElement(hpp); // add the hierarchical property parser
+          //	  newV.addElement(hpp); // add the hierarchical property parser
+	  newV.addElement(hpps); // add the hierarchical property parser
 
 	  StringTokenizer st = new StringTokenizer(wekaAlgs, ", ");
 	  while (st.hasMoreTokens()) {
@@ -274,7 +292,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -656,13 +674,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       // the root package for weka algorithms
       String rootPackage = "";
       weka.gui.HierarchyPropertyParser hpp = null;
+      Hashtable hpps = null;
 
       // Is this a wrapper toolbar?
       if (tempBeanCompName.compareTo("null") != 0) {
 	tempBean = null;
 	toolBarType = WEKAWRAPPER_TOOLBAR;
 	rootPackage = (String)tempBarSpecs.elementAt(2);
-	hpp = (weka.gui.HierarchyPropertyParser)tempBarSpecs.elementAt(3);
+        //	hpp = (weka.gui.HierarchyPropertyParser)tempBarSpecs.elementAt(3);
+        hpps = (Hashtable)tempBarSpecs.elementAt(3);
 	try {
 	  Beans.instantiate(null, tempBeanCompName);
 	} catch (Exception ex) {
@@ -679,44 +699,52 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       //      tempToolBar.setLayout(new FlowLayout());
       int z = 2;
       if (toolBarType == WEKAWRAPPER_TOOLBAR) {
-	if (!hpp.goTo(rootPackage)) {
-	  System.err.println("**** Failed to locate root package in tree ");
-	  System.exit(1);
-	}
-	String [] primaryPackages = hpp.childrenValues();
-	for (int kk = 0; kk < primaryPackages.length; kk++) {
-	  hpp.goToChild(primaryPackages[kk]);
-	  // check to see if this is a leaf - if so then there are no
-	  // sub packages
-	  if (hpp.isLeafReached()) {
-	    if (singletonHolderPanel == null) {
-	      singletonHolderPanel = Box.createHorizontalBox();
-	      singletonHolderPanel.setBorder(javax.swing.BorderFactory.
-					     createTitledBorder(tempBarName));
-	    }
-	    String algName = hpp.fullValue();
-	    tempBean = instantiateToolBarBean(true,
-					       tempBeanCompName, algName);
-	    if (tempBean != null) {
-	      // tempToolBar.add(tempBean);
-	      singletonHolderPanel.add(tempBean);
-	    }
-	    hpp.goToParent();
-	  } else {
-	    // make a titledborder JPanel to hold all the schemes in this
-	    // package
-	    //	    JPanel holderPanel = new JPanel();
-	    Box holderPanel = Box.createHorizontalBox();
-	    holderPanel.setBorder(javax.swing.BorderFactory.
-				  createTitledBorder(primaryPackages[kk]));
-	    processPackage(holderPanel, tempBeanCompName, hpp);
-	    tempToolBar.add(holderPanel);
-	  }
-	}
-	if (singletonHolderPanel != null) {
-	  tempToolBar.add(singletonHolderPanel);
-	  singletonHolderPanel = null;
-	}
+        Enumeration enm = hpps.keys();
+        while (enm.hasMoreElements()) {
+          String root = (String) enm.nextElement();
+          String userPrefix = "";
+          hpp = (HierarchyPropertyParser) hpps.get(root);
+
+          if (!hpp.goTo(rootPackage)) {
+            System.err.println("**** Processing user package... ");
+            //            System.exit(1);
+            userPrefix = root+".";
+          }
+          String [] primaryPackages = hpp.childrenValues();
+          for (int kk = 0; kk < primaryPackages.length; kk++) {
+            hpp.goToChild(primaryPackages[kk]);
+            // check to see if this is a leaf - if so then there are no
+            // sub packages
+            if (hpp.isLeafReached()) {
+              if (singletonHolderPanel == null) {
+                singletonHolderPanel = Box.createHorizontalBox();
+                singletonHolderPanel.setBorder(javax.swing.BorderFactory.
+                                               createTitledBorder(tempBarName));
+              }
+              String algName = hpp.fullValue();
+              tempBean = instantiateToolBarBean(true,
+                                                tempBeanCompName, algName);
+              if (tempBean != null) {
+                // tempToolBar.add(tempBean);
+                singletonHolderPanel.add(tempBean);
+              }
+              hpp.goToParent();
+            } else {
+              // make a titledborder JPanel to hold all the schemes in this
+              // package
+              //	    JPanel holderPanel = new JPanel();
+              Box holderPanel = Box.createHorizontalBox();
+              holderPanel.setBorder(javax.swing.BorderFactory.
+                                    createTitledBorder(userPrefix+primaryPackages[kk]));
+              processPackage(holderPanel, tempBeanCompName, hpp);
+              tempToolBar.add(holderPanel);
+            }
+          }
+          if (singletonHolderPanel != null) {
+            tempToolBar.add(singletonHolderPanel);
+            singletonHolderPanel = null;
+          }
+        }
       } else {
 	Box holderPanel = Box.createHorizontalBox();
 	 holderPanel.setBorder(javax.swing.BorderFactory.
