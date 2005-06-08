@@ -119,7 +119,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -610,7 +610,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * returns the name of the root element of the given class name, 
    * <code>null</code> if it doesn't contain the separator
    */
-  protected String getRootFromClass(String clsname, String separator) {
+  protected static String getRootFromClass(String clsname, String separator) {
     if (clsname.indexOf(separator) > -1)
       return clsname.substring(0, clsname.indexOf(separator));
     else
@@ -628,7 +628,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return for each distinct root element in the classnames, one entry in
    * the hashtable (with the root element as key)
    */
-  protected Hashtable sortClassesByRoot(String classes) {
+  public static Hashtable sortClassesByRoot(String classes) {
     Hashtable                 roots;
     Hashtable                 result;
     Enumeration               enm;
