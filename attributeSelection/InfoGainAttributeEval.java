@@ -22,7 +22,6 @@
 
 package  weka.attributeSelection;
 
-import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.filters.supervised.attribute.Discretize;
@@ -42,7 +41,7 @@ import  weka.filters.Filter;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator

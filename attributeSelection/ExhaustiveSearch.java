@@ -22,7 +22,6 @@
 
 package  weka.attributeSelection;
 
-import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 
@@ -38,7 +37,7 @@ import  weka.core.*;
  * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ExhaustiveSearch extends ASSearch 
   implements StartSetHandler, OptionHandler {
