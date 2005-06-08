@@ -48,7 +48,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -69,6 +69,7 @@ public class ClassifierPerformanceEvaluator
   
   private Vector m_textListeners = new Vector();
   private Vector m_thresholdListeners = new Vector();
+  private Vector m_visualizableErrorListeners = new Vector();
 
   public ClassifierPerformanceEvaluator() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -163,6 +164,23 @@ public class ClassifierPerformanceEvaluator
 				  resultT,
 				  textTitle);
 		  notifyTextListeners(te);
+
+                  // set up visualizable errors
+                  if (m_visualizableErrorListeners.size() > 0) {
+                    PlotData2D errorD = new PlotData2D(m_predInstances);
+                    errorD.setShapeSize(m_plotSize);
+                    errorD.setShapeType(m_plotShape);
+                    errorD.setPlotName(textTitle+" ("
+                                       +ce.getTestSet().getDataSet().relationName()
+                                       +")");
+                    errorD.addInstanceNumberAttribute();
+                    VisualizableErrorEvent vel = 
+                      new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this,
+                                                 errorD);
+                    notifyVisualizableErrorListeners(vel);
+                  }
+                  
+
 		  if (ce.getTestSet().getDataSet().classAttribute().isNominal()) {
 		    ThresholdCurve tc = new ThresholdCurve();
 		    Instances result = tc.getCurve(m_preds, 0);
@@ -327,6 +345,24 @@ public class ClassifierPerformanceEvaluator
   }
 
   /**
+   * Add a visualizable error listener
+   *
+   * @param vel a <code>VisualizableErrorListener</code> value
+   */
+  public synchronized void addVisualizableErrorListener(VisualizableErrorListener vel) {
+    m_visualizableErrorListeners.add(vel);
+  }
+
+  /**
+   * Remove a visualizable error listener
+   *
+   * @param vel a <code>VisualizableErrorListener</code> value
+   */
+  public synchronized void removeVisualizableErrorListener(VisualizableErrorListener vel) {
+    m_visualizableErrorListeners.remove(vel);
+  }
+
+  /**
    * Notify all text listeners of a TextEvent
    *
    * @param te a <code>TextEvent</code> value
@@ -360,6 +396,25 @@ public class ClassifierPerformanceEvaluator
 	//	System.err.println("Notifying text listeners "
 	//			   +"(ClassifierPerformanceEvaluator)");
 	((ThresholdDataListener)l.elementAt(i)).acceptDataSet(re);
+      }
+    }
+  }
+
+  /**
+   * Notify all VisualizableErrorListeners of a VisualizableErrorEvent
+   *
+   * @param te a <code>VisualizableErrorEvent</code> value
+   */
+  private void notifyVisualizableErrorListeners(VisualizableErrorEvent re) {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_visualizableErrorListeners.clone();
+    }
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+	//	System.err.println("Notifying text listeners "
+	//			   +"(ClassifierPerformanceEvaluator)");
+	((VisualizableErrorListener)l.elementAt(i)).acceptDataSet(re);
       }
     }
   }

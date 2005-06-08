@@ -42,13 +42,14 @@ import java.beans.beancontext.*;
 
 /**
  * Bean that can be used for displaying threshold curves (e.g. ROC
- * curves).
+ * curves) and scheme error plots
  *
  * @author Mark Hall
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ModelPerformanceChart extends JPanel
-  implements ThresholdDataListener, Visible, UserRequestAcceptor,
+  implements ThresholdDataListener, VisualizableErrorListener, 
+             Visible, UserRequestAcceptor,
 	     Serializable, BeanContextChild {
   
   protected BeanVisual m_visual;
@@ -113,6 +114,11 @@ public class ModelPerformanceChart extends JPanel
     add(m_visPanel, BorderLayout.CENTER);
   }
 
+  /**
+   * Display a threshold curve.
+   *
+   * @param e a ThresholdDataEvent
+   */
   public synchronized void acceptDataSet(ThresholdDataEvent e) {
     if (m_visPanel == null) {
       m_visPanel = new VisualizePanel();
@@ -139,6 +145,28 @@ public class ModelPerformanceChart extends JPanel
       System.err.println("Problem setting up visualization (ModelPerformanceChart)");
       ex.printStackTrace();
     }
+  }
+
+  /**
+   * Display a scheme error plot.
+   *
+   * @param e a VisualizableErrorEvent
+   */
+  public synchronized void acceptDataSet(VisualizableErrorEvent e) {
+    if (m_visPanel == null) {
+      m_visPanel = new VisualizePanel();
+    }
+    if (m_masterPlot == null) {
+      m_masterPlot = e.getDataSet();
+    }
+    try {
+      m_visPanel.setMasterPlot(m_masterPlot);
+    } catch (Exception ex) {
+      System.err.println("Problem setting up visualization (ModelPerformanceChart)");
+      ex.printStackTrace();
+    }
+    m_visPanel.validate();
+    m_visPanel.repaint();
   }
 
   /**
