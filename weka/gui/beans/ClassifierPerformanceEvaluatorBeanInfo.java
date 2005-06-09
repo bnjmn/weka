@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the classifier performance evaluator
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class ClassifierPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
   
@@ -40,11 +40,11 @@ public class ClassifierPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
 			       TextListener.class, 
 			       "acceptText"),
 	new EventSetDescriptor(ClassifierPerformanceEvaluator.class, 
-			       "ThresholdData", 
+			       "thresholdData", 
 			       ThresholdDataListener.class, 
 			       "acceptDataSet"),
       	new EventSetDescriptor(ClassifierPerformanceEvaluator.class, 
-			       "VisualizableError", 
+			       "visualizableError", 
 			       VisualizableErrorListener.class, 
 			       "acceptDataSet")};
       return esds;
