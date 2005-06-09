@@ -67,7 +67,7 @@ import weka.gui.visualize.PrintablePanel;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 
 public class AttributeVisualizationPanel extends PrintablePanel {
@@ -887,7 +887,7 @@ public class AttributeVisualizationPanel extends PrintablePanel {
         }
       }
     }
-    return "Click left mouse button while holding <ctrl> and <alt> to display a save dialog.";
+    return "Click left mouse button while holding <alt> and <shift> to display a save dialog.";
   }
   
   
