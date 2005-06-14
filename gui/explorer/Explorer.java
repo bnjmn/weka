@@ -23,6 +23,7 @@
 
 package weka.gui.explorer;
 
+import weka.core.Memory;
 import weka.core.Utils;
 import weka.gui.LogPanel;
 import weka.gui.LookAndFeel;
@@ -60,7 +61,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class Explorer extends JPanel {
 
@@ -154,13 +155,10 @@ public class Explorer extends JPanel {
       monitoring thread to free up some memory if we running out of memory
    */
   private static Explorer m_explorer;
-  /** 
-   * The size in bytes of the java virtual machine at the start. This 
-   * represents the critical amount of memory that is necessary for the  
-   * program to run. If our free memory falls below (or is very close) to this 
-   * critical amount then the virtual machine throws an OutOfMemoryError.
-   */
-  private static long m_initialJVMSize;
+
+  /** for monitoring the Memory consumption */
+  private static Memory m_Memory = new Memory(true);
+
   /**
    * Tests out the explorer environment.
    *
@@ -171,7 +169,9 @@ public class Explorer extends JPanel {
     LookAndFeel.setLookAndFeel();
     
     try {
-      m_initialJVMSize = Runtime.getRuntime().totalMemory();
+      // uncomment to disable the memory management:
+      //m_Memory.setEnabled(false);
+
       m_explorer = new Explorer();
       final JFrame jf = new JFrame("Weka Explorer");
       jf.getContentPane().setLayout(new BorderLayout());
@@ -202,49 +202,20 @@ public class Explorer extends JPanel {
               this.sleep(4000);
 
               System.gc();
-              if((Runtime.getRuntime().maxMemory() - 
-                  Runtime.getRuntime().totalMemory())  <  
-                                    m_initialJVMSize+200000) {
 
+              if (m_Memory.isOutOfMemory()) {
+                // clean up
                 jf.dispose();
                 m_explorer = null;
                 System.gc();
 
-                Thread [] thGroup = new Thread[Thread.activeCount()];
-                Thread.enumerate(thGroup);
-                //System.out.println("No of threads in the ThreadGroup:"+
-                //                   thGroup.length);
-                for(int i=0; i<thGroup.length; i++) {
-                  Thread t = thGroup[i];
-                  if(t!=null) {
-                    //System.out.println("Thread "+(i+1)+": "+t.getName());
-                    if(t!=Thread.currentThread()) {
-                      if(t.getName().startsWith("Thread")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                      else if(t.getName().startsWith("AWT-EventQueue")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                    }
-                  }
-                  //else
-                  //  System.out.println("Thread "+(i+1)+" is null.");
-                }
-                thGroup=null;
-                //System.gc();
+                // stop threads
+                m_Memory.stopThreads();
 
-                JOptionPane.showMessageDialog(null,
-                                              "Not enough memory. Please load "+
-                                              "a smaller dataset or use "+
-                                              "larger heap size.", 
-                                              "OutOfMemory",
-                                              JOptionPane.WARNING_MESSAGE);
-                System.err.println("displayed message");
-                System.err.println("Not enough memory. Please load a smaller "+
-                                   "dataset or use larger heap size.");
-                System.err.println("exiting");
+                // display error
+                System.err.println("\ndisplayed message:");
+                m_Memory.showOutOfMemory();
+                System.err.println("\nexiting");
                 System.exit(-1);
               }
 
