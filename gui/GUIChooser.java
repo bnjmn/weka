@@ -23,11 +23,13 @@
 
 package weka.gui;
 
+import weka.core.Memory;
 import weka.core.Version;
 import weka.gui.explorer.Explorer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.beans.KnowledgeFlow;
 import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.arffviewer.ArffViewer;
 
 import java.awt.Panel;
 import java.awt.Button;
@@ -41,6 +43,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -56,7 +59,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class GUIChooser extends JFrame {
 
@@ -72,6 +75,15 @@ public class GUIChooser extends JFrame {
   /** Click to open the KnowledgeFlow */
   protected Button m_KnowledgeFlowBut = new Button("KnowledgeFlow");
 
+  /** Click to open the ArffViewer */
+  protected Button m_ArffViewerBut = new Button("ArffViewer");
+
+  /** keeps track of the opened ArffViewer instancs */
+  protected Vector m_ArffViewers = new Vector();
+
+  /** Click to open the LogWindow */
+  protected Button m_LogWindowBut = new Button("Log");
+
   /** The SimpleCLI */
   protected SimpleCLI m_SimpleCLI;
 
@@ -83,6 +95,9 @@ public class GUIChooser extends JFrame {
 
   /** The frame containing the knowledge flow interface */
   protected JFrame m_KnowledgeFlowFrame;
+
+  /** The frame of the LogWindow */
+  protected static LogWindow m_LogWindow = new LogWindow();
 
   /** The weka image */
   Image m_weka = Toolkit.getDefaultToolkit().
@@ -102,11 +117,13 @@ public class GUIChooser extends JFrame {
     this.getContentPane().setLayout(new BorderLayout());
     JPanel wbuts = new JPanel();
     wbuts.setBorder(BorderFactory.createTitledBorder("GUI"));
-    wbuts.setLayout(new GridLayout(2, 2));
+    wbuts.setLayout(new GridLayout(3, 2));
     wbuts.add(m_SimpleBut);
     wbuts.add(m_ExplorerBut);
     wbuts.add(m_ExperimenterBut);
     wbuts.add(m_KnowledgeFlowBut);
+    wbuts.add(m_ArffViewerBut);
+    wbuts.add(m_LogWindowBut);
     this.getContentPane().add(wbuts, BorderLayout.SOUTH);
     
     JPanel wekaPan = new JPanel();
@@ -235,6 +252,20 @@ public class GUIChooser extends JFrame {
       }
     });
 
+    m_ArffViewerBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        ArffViewer av = new ArffViewer();
+        av.setVisible(true);
+        m_ArffViewers.add(av);
+      }
+    });
+
+    m_LogWindowBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_LogWindow.setVisible(true);
+      }
+    });
+
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent w) {
 	dispose();
@@ -262,13 +293,10 @@ public class GUIChooser extends JFrame {
       monitoring thread to free up some memory if we running out of memory
    */
   private static GUIChooser m_chooser;
-  /** 
-   * The size in bytes of the java virtual machine at the start. This 
-   * represents the critical amount of memory that is necessary for the  
-   * program to run. If our free memory falls below (or is very close) to this 
-   * critical amount then the virtual machine throws an OutOfMemoryError.
-   */
-  private static long m_initialJVMSize;  
+
+  /** for monitoring the Memory consumption */
+  private static Memory m_Memory = new Memory(true);
+
   /**
    * Tests out the GUIChooser environment.
    *
@@ -279,7 +307,10 @@ public class GUIChooser extends JFrame {
     LookAndFeel.setLookAndFeel();
     
     try {
-      m_initialJVMSize = Runtime.getRuntime().totalMemory();
+
+      // uncomment to disable the memory management:
+      //m_Memory.setEnabled(false);
+
       m_chooser = new GUIChooser();
       m_chooser.setVisible(true);
 
@@ -291,10 +322,9 @@ public class GUIChooser extends JFrame {
               this.sleep(4000);
               
               System.gc();
-              if((Runtime.getRuntime().maxMemory() - 
-                  Runtime.getRuntime().totalMemory())  < 
-                                      m_initialJVMSize+200000) {
-
+              
+              if (m_Memory.isOutOfMemory()) {
+                // clean up
                 m_chooser.dispose();
                 if(m_chooser.m_ExperimenterFrame!=null) {
                   m_chooser.m_ExperimenterFrame.dispose();
@@ -312,47 +342,35 @@ public class GUIChooser extends JFrame {
                   m_chooser.m_SimpleCLI.dispose();
                   m_chooser.m_SimpleCLI = null;
                 }
+                if (m_chooser.m_ArffViewers.size() > 0) {
+                  for (int i = 0; i < m_chooser.m_ArffViewers.size(); i++) {
+                    ArffViewer av = (ArffViewer) 
+                                        m_chooser.m_ArffViewers.get(i);
+                    av.dispose();
+                  }
+                  m_chooser.m_ArffViewers.clear();
+                }
                 m_chooser = null;
                 System.gc();
 
-                Thread [] thGroup = new Thread[Thread.activeCount()];
-                Thread.enumerate(thGroup);
-                //System.out.println("No of threads in the ThreadGroup:"+
-                //                   thGroup.length);
-                for(int i=0; i<thGroup.length; i++) {
-                  Thread t = thGroup[i];
-                  if(t!=null) {
-                    //System.out.println("Thread "+(i+1)+": "+t.getName());
-                    if(t!=Thread.currentThread()) {
-                      if(t.getName().startsWith("Thread")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                      else if(t.getName().startsWith("AWT-EventQueue")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                    }
-                  }
-                  //else
-                  //  System.out.println("Thread "+(i+1)+" is null.");
-                }
-                thGroup=null;
-                //System.gc();
+                // stop threads
+                m_Memory.stopThreads();
 
-                JOptionPane.showMessageDialog(null,
-                                              "Not enough memory. Please load "+
-                                              "a smaller dataset or use "+
-                                              "larger heap size.", 
-                                              "OutOfMemory",
-                                              JOptionPane.WARNING_MESSAGE);
-                System.err.println("displayed message");
-                System.err.println("Not enough memory. Please load a smaller "+
-                                   "dataset or use larger heap size.");
-                System.err.println("exiting");
-                System.exit(-1);
+                // display error
+                m_chooser.m_LogWindow.setVisible(true);
+                m_chooser.m_LogWindow.toFront();
+                System.err.println("\ndisplayed message:");
+                m_Memory.showOutOfMemory();
+                System.err.println("\nrestarting...");
+
+                // restart GUI
+                m_chooser = new GUIChooser();
+                m_chooser.setVisible(true);
               }
-            } catch(InterruptedException ex) { ex.printStackTrace(); }
+            } 
+            catch(InterruptedException ex) { 
+              ex.printStackTrace(); 
+            }
           }
         }
       };
