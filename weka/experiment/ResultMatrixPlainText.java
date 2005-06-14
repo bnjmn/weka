@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class ResultMatrixPlainText extends ResultMatrix {
@@ -184,8 +184,12 @@ public class ResultMatrixPlainText extends ResultMatrix {
 
           // print cell
           if (getShowStdDev()) {
-            if ( (isMean(n - 1)) && (!cells[i][n].trim().equals("")) )
-              line += "(" + cells[i][n] + ")";
+            if (isMean(n - 1)) {
+              if (!cells[i][n].trim().equals(""))              
+                line += "(" + cells[i][n] + ")";
+              else
+                line += " " + cells[i][n] + " ";
+            }
             else
               line += " " + cells[i][n];
           }
