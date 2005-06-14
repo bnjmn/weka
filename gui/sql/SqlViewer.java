@@ -23,6 +23,7 @@
 
 package weka.gui.sql;
 
+import weka.core.Memory;
 import weka.core.Utils;
 import weka.gui.LookAndFeel;
 import weka.gui.sql.event.ConnectionEvent;
@@ -54,7 +55,7 @@ import javax.swing.JPanel;
  *
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision: 1.3 $
  */
 
 public class SqlViewer 
@@ -547,6 +548,12 @@ public class SqlViewer
     m_ConnectionPanel.removeHistoryChangedListener(l);
     m_QueryPanel.removeHistoryChangedListener(l);
   }
+
+  /** for monitoring the Memory consumption */
+  private static Memory m_Memory = new Memory(true);
+  
+  /** the sql viewer */
+  private static SqlViewer m_Viewer;
   
   /**
    * starts the SQL-Viewer interface.
@@ -554,18 +561,62 @@ public class SqlViewer
   public static void main(String[] args) {
     LookAndFeel.setLookAndFeel();
     
-    final JFrame jf = new JFrame("Weka SQL-Viewer");
-    SqlViewer viewer = new SqlViewer(jf);
-    jf.getContentPane().setLayout(new BorderLayout());
-    jf.getContentPane().add(viewer, BorderLayout.CENTER);
-    jf.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-        jf.dispose();
-        System.exit(0);
-      }
-    });
-    jf.pack();
-    jf.setSize(800, 600);
-    jf.setVisible(true);
+    try {
+      // uncomment to disable the memory management:
+      //m_Memory.setEnabled(false);
+
+      final JFrame jf = new JFrame("Weka SQL-Viewer");
+      m_Viewer = new SqlViewer(jf);
+      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().add(m_Viewer, BorderLayout.CENTER);
+      jf.addWindowListener(new WindowAdapter() {
+        public void windowClosing(WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
+      });
+      jf.pack();
+      jf.setSize(800, 600);
+      jf.setVisible(true);
+
+      Thread memMonitor = new Thread() {
+        public void run() {
+          while (true) {
+            try {
+              this.sleep(4000);
+
+              System.gc();
+
+              if (m_Memory.isOutOfMemory()) {
+                // clean up
+                jf.dispose();
+                m_Viewer = null;
+                System.gc();
+
+                // stop threads
+                m_Memory.stopThreads();
+
+                // display error
+                System.err.println("\ndisplayed message:");
+                m_Memory.showOutOfMemory();
+                System.err.println("\nexiting");
+                System.exit(-1);
+              }
+
+            } 
+            catch (InterruptedException ex) { 
+              ex.printStackTrace(); 
+            }
+          }
+        }
+      };
+
+      memMonitor.setPriority(Thread.MAX_PRIORITY);
+      memMonitor.start();
+    } 
+    catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println(ex.getMessage());
+    }
   }
 }
