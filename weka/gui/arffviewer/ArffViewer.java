@@ -27,6 +27,7 @@ import weka.gui.ExtensionFileFilter;
 import weka.gui.JTableHelper;
 import weka.gui.LookAndFeel;
 import weka.core.Instances;
+import weka.core.Memory;
 import weka.core.converters.AbstractSaver;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVSaver;
@@ -63,7 +64,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 
 public class ArffViewer 
@@ -82,6 +83,9 @@ implements  ActionListener, ChangeListener, WindowListener
   private final static int    WIDTH             = 800;
   /** default height */
   private final static int    HEIGHT            = 600;
+  
+  /** for monitoring the Memory consumption */
+  private static Memory m_Memory = new Memory(true);
   
   private JTabbedPane           tabbedPane;
   private JMenuBar              menuBar;
@@ -115,6 +119,7 @@ implements  ActionListener, ChangeListener, WindowListener
   private int                   height;
   private int                   top;
   private int                   left;
+  private boolean               exitOnClose;
   
   /**
    * initializes the object
@@ -308,6 +313,20 @@ implements  ActionListener, ChangeListener, WindowListener
    */
   public boolean getConfirmExit() {
     return confirmExit;
+  }
+  
+  /**
+   * whether to do a System.exit(0) on close
+   */
+  public void setExitOnClose(boolean value) {
+    exitOnClose = value;
+  }
+
+  /**
+   * returns TRUE if a System.exit(0) is done on a close
+   */
+  public boolean getExitOnClose() {
+    return exitOnClose;
   }
   
   /**
@@ -942,6 +961,9 @@ implements  ActionListener, ChangeListener, WindowListener
     else {
       dispose();
     }
+
+    if (getExitOnClose())
+      System.exit(0);
   }
   
   /**
@@ -975,25 +997,88 @@ implements  ActionListener, ChangeListener, WindowListener
     return this.getClass().getName();
   }
   
+  /** the viewer if started from command line */
+  private static ArffViewer m_Viewer;
+
+  /** whether the files were already loaded */
+  private static boolean m_FilesLoaded;
+
+  /** the command line arguments */
+  private static String[] m_Args;
+  
   /**
-   * shows the frame
+   * shows the frame and it tries to load all the arff files that were
+   * provided as arguments.
    */
   public static void main(String[] args) throws Exception {
-    ArffViewer      viewer;
-    int             i;
-
     LookAndFeel.setLookAndFeel();
     
-    viewer = new ArffViewer();
-    viewer.show();
+    try {
+      // uncomment to disable the memory management:
+      //m_Memory.setEnabled(false);
 
-    if (args.length > 0) {
-      for (i = 0; i < args.length; i++) {
-        System.out.println("Loading " + (i+1) + "/" + args.length +  ": '" + args[i] + "'...");
-        viewer.loadFile(args[i]);
-      }
-      viewer.tabbedPane.setSelectedIndex(0);
-      System.out.println("Finished!");
+      m_Viewer      = new ArffViewer();
+      m_Viewer.setExitOnClose(true);
+      m_Viewer.setVisible(true);
+      m_FilesLoaded = false;
+      m_Args        = args;
+
+      Thread memMonitor = new Thread() {
+        public void run() {
+          while(true) {
+            try {
+              if ( (m_Args.length > 0) && (!m_FilesLoaded) ) {
+                for (int i = 0; i < m_Args.length; i++) {
+                  System.out.println("Loading " + (i+1) + "/" 
+                      + m_Args.length +  ": '" + m_Args[i] + "'...");
+                  m_Viewer.loadFile(m_Args[i]);
+                }
+                m_Viewer.tabbedPane.setSelectedIndex(0);
+                System.out.println("Finished!");
+                m_FilesLoaded = true;
+              }
+
+              //System.out.println("before sleeping");
+              this.sleep(4000);
+              
+              System.gc();
+              
+              if (m_Memory.isOutOfMemory()) {
+                // clean up
+                m_Viewer.dispose();
+                m_Viewer = null;
+                System.gc();
+
+                // stop threads
+                m_Memory.stopThreads();
+
+                // display error
+                System.err.println("\ndisplayed message:");
+                m_Memory.showOutOfMemory();
+                System.err.println("\nrestarting...");
+
+                // restart GUI
+                System.gc();
+                m_Viewer = new ArffViewer();
+                m_Viewer.setExitOnClose(true);
+                m_Viewer.setVisible(true);
+                // Note: no re-loading of datasets, otherwise we could end up
+                //       in an endless loop!
+              }
+            }
+            catch(InterruptedException ex) { 
+              ex.printStackTrace(); 
+            }
+          }
+        }
+      };
+
+      memMonitor.setPriority(Thread.NORM_PRIORITY);
+      memMonitor.start();    
+    } 
+    catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println(ex.getMessage());
     }
   }
 }
