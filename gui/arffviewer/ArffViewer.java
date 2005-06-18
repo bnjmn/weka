@@ -64,7 +64,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 
 public class ArffViewer 
@@ -1114,6 +1114,7 @@ implements  ActionListener, ChangeListener, WindowListener
                 System.err.println("\nrestarting...");
 
                 // restart GUI
+                System.gc();
                 m_Viewer = new ArffViewer();
                 m_Viewer.setExitOnClose(true);
                 m_Viewer.setVisible(true);
