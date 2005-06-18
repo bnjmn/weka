@@ -23,6 +23,7 @@
 
 package weka.gui.experiment;
 
+import weka.core.Memory;
 import weka.experiment.Experiment;
 import weka.gui.LookAndFeel;
 
@@ -33,7 +34,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.UIManager;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
@@ -45,7 +45,7 @@ import javax.swing.JOptionPane;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  */
 public class Experimenter extends JPanel {
 
@@ -102,13 +102,10 @@ public class Experimenter extends JPanel {
       monitoring thread to free up some memory if we running out of memory
    */
   private static Experimenter m_experimenter;
-  /** 
-   * The size in bytes of the java virtual machine at the start. This 
-   * represents the critical amount of memory that is necessary for the  
-   * program to run. If our free memory falls below (or is very close) to this 
-   * critical amount then the virtual machine throws an OutOfMemoryError.
-   */
-  private static long m_initialJVMSize;  
+
+  /** for monitoring the Memory consumption */
+  private static Memory m_Memory = new Memory(true);
+
   /**
    * Tests out the experiment environment.
    *
@@ -119,7 +116,8 @@ public class Experimenter extends JPanel {
     LookAndFeel.setLookAndFeel();
     
     try {
-      m_initialJVMSize = Runtime.getRuntime().totalMemory();
+      // uncomment to disable the memory management:
+      //m_Memory.setEnabled(false);
 
       boolean classFirst = false;
       if (args.length > 0) {
@@ -146,49 +144,20 @@ public class Experimenter extends JPanel {
               this.sleep(4000);
               
               System.gc();
-              if((Runtime.getRuntime().maxMemory() - 
-                  Runtime.getRuntime().totalMemory())  < 
-                                      m_initialJVMSize+200000) {
 
+              if (m_Memory.isOutOfMemory()) {
+                // clean up
                 jf.dispose();
                 m_experimenter = null;
                 System.gc();
 
-                Thread [] thGroup = new Thread[Thread.activeCount()];
-                Thread.enumerate(thGroup);
-                //System.out.println("No of threads in the ThreadGroup:"+
-                //                   thGroup.length);
-                for(int i=0; i<thGroup.length; i++) {
-                  Thread t = thGroup[i];
-                  if(t!=null) {
-                    //System.out.println("Thread "+(i+1)+": "+t.getName());
-                    if(t!=Thread.currentThread()) {
-                      if(t.getName().startsWith("Thread")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                      else if(t.getName().startsWith("AWT-EventQueue")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                    }
-                  }
-                  //else
-                  //  System.out.println("Thread "+(i+1)+" is null.");
-                }
-                thGroup=null;
-                //System.gc();
+                // stop threads
+                m_Memory.stopThreads();
 
-                JOptionPane.showMessageDialog(null,
-                                              "Not enough memory. Please load "+
-                                              "a smaller dataset or use "+
-                                              "larger heap size.", 
-                                              "OutOfMemory",
-                                              JOptionPane.WARNING_MESSAGE);
-                System.err.println("displayed message");
-                System.err.println("Not enough memory. Please load a smaller "+
-                                   "dataset or use larger heap size.");
-                System.err.println("exiting");
+                // display error
+                System.err.println("\ndisplayed message:");
+                m_Memory.showOutOfMemory();
+                System.err.println("\nexiting");
                 System.exit(-1);
               }
 

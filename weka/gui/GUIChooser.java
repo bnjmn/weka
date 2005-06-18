@@ -23,6 +23,7 @@
 
 package weka.gui;
 
+import weka.core.Memory;
 import weka.core.Version;
 import weka.gui.explorer.Explorer;
 import weka.gui.experiment.Experimenter;
@@ -56,7 +57,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.6 $
+ * @version $Revision: 1.14.2.7 $
  */
 public class GUIChooser extends JFrame {
 
@@ -262,13 +263,10 @@ public class GUIChooser extends JFrame {
       monitoring thread to free up some memory if we running out of memory
    */
   private static GUIChooser m_chooser;
-  /** 
-   * The size in bytes of the java virtual machine at the start. This 
-   * represents the critical amount of memory that is necessary for the  
-   * program to run. If our free memory falls below (or is very close) to this 
-   * critical amount then the virtual machine throws an OutOfMemoryError.
-   */
-  private static long m_initialJVMSize;  
+
+  /** for monitoring the Memory consumption */
+  private static Memory m_Memory = new Memory(true);
+
   /**
    * Tests out the GUIChooser environment.
    *
@@ -279,7 +277,10 @@ public class GUIChooser extends JFrame {
     LookAndFeel.setLookAndFeel();
     
     try {
-      m_initialJVMSize = Runtime.getRuntime().totalMemory();
+
+      // uncomment to disable the memory management:
+      //m_Memory.setEnabled(false);
+
       m_chooser = new GUIChooser();
       m_chooser.setVisible(true);
 
@@ -291,10 +292,9 @@ public class GUIChooser extends JFrame {
               this.sleep(4000);
               
               System.gc();
-              if((Runtime.getRuntime().maxMemory() - 
-                  Runtime.getRuntime().totalMemory())  < 
-                                      m_initialJVMSize+200000) {
 
+              if (m_Memory.isOutOfMemory()) {
+                // clean up
                 m_chooser.dispose();
                 if(m_chooser.m_ExperimenterFrame!=null) {
                   m_chooser.m_ExperimenterFrame.dispose();
@@ -315,44 +315,23 @@ public class GUIChooser extends JFrame {
                 m_chooser = null;
                 System.gc();
 
-                Thread [] thGroup = new Thread[Thread.activeCount()];
-                Thread.enumerate(thGroup);
-                //System.out.println("No of threads in the ThreadGroup:"+
-                //                   thGroup.length);
-                for(int i=0; i<thGroup.length; i++) {
-                  Thread t = thGroup[i];
-                  if(t!=null) {
-                    //System.out.println("Thread "+(i+1)+": "+t.getName());
-                    if(t!=Thread.currentThread()) {
-                      if(t.getName().startsWith("Thread")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                      else if(t.getName().startsWith("AWT-EventQueue")) {
-                        //System.out.println("Stopping: "+t.toString());
-                        t.stop();
-                      }
-                    }
-                  }
-                  //else
-                  //  System.out.println("Thread "+(i+1)+" is null.");
-                }
-                thGroup=null;
-                //System.gc();
+                // stop threads
+                m_Memory.stopThreads();
 
-                JOptionPane.showMessageDialog(null,
-                                              "Not enough memory. Please load "+
-                                              "a smaller dataset or use "+
-                                              "larger heap size.", 
-                                              "OutOfMemory",
-                                              JOptionPane.WARNING_MESSAGE);
-                System.err.println("displayed message");
-                System.err.println("Not enough memory. Please load a smaller "+
-                                   "dataset or use larger heap size.");
-                System.err.println("exiting");
-                System.exit(-1);
+                // display error
+                System.err.println("\ndisplayed message:");
+                m_Memory.showOutOfMemory();
+                System.err.println("\nrestarting...");
+
+                // restart GUI
+                System.gc();
+                m_chooser = new GUIChooser();
+                m_chooser.setVisible(true);
               }
-            } catch(InterruptedException ex) { ex.printStackTrace(); }
+            }
+            catch(InterruptedException ex) { 
+              ex.printStackTrace(); 
+            }
           }
         }
       };
