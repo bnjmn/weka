@@ -59,7 +59,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class GUIChooser extends JFrame {
 
@@ -364,6 +364,7 @@ public class GUIChooser extends JFrame {
                 System.err.println("\nrestarting...");
 
                 // restart GUI
+                System.gc();
                 m_chooser = new GUIChooser();
                 m_chooser.setVisible(true);
               }
