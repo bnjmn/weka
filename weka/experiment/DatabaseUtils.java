@@ -53,7 +53,7 @@ import java.sql.PreparedStatement;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.1 $
+ * @version $Revision: 1.18.2.2 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -156,7 +156,8 @@ public class DatabaseUtils implements Serializable {
   /**
    * translates the column data type string to an integer value that indicates
    * which data type / get()-Method to use in order to retrieve values from the
-   * database (see DatabaseUtils.Properties, InstanceQuery())
+   * database (see DatabaseUtils.Properties, InstanceQuery()). Blanks in the type 
+   * are replaced with underscores "_", since Java property names can't contain blanks.
    * @param type the column type as retrieved with java.sql.MetaData.getColumnTypeName(int)
    * @return an integer value that indicates
    * which data type / get()-Method to use in order to retrieve values from the
@@ -164,6 +165,10 @@ public class DatabaseUtils implements Serializable {
   int translateDBColumnType(String type) {
 
     try {
+      // Oracle, e.g., has datatypes like "DOUBLE PRECISION"
+      // BUT property names can't have blanks in the name, hence replace blanks
+      // with underscores "_":
+      type = type.replaceAll(" ", "_");
       return Integer.parseInt(PROPERTIES.getProperty(type));
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException("Unknown data type: " + type + ". Add entry " +
