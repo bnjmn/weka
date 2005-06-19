@@ -48,7 +48,7 @@ import java.util.Vector;
 * </pre>
 *
 * @author   FracPete (fracpete at waikato dot ac dot nz)
-* @version  $Revision: 1.1 $
+* @version  $Revision: 1.2 $
 */
 
 public class Tee extends PrintStream {
@@ -314,7 +314,7 @@ public class Tee extends PrintStream {
     if (x instanceof Throwable) {
       t     = (Throwable) x;
       trace = t.getStackTrace();
-      line  = t.getMessage() + "\n";
+      line  = t.toString() + "\n";
       for (i = 0; i < trace.length; i++)
         line += "\t" + trace[i].toString() + "\n";
       x = line;
