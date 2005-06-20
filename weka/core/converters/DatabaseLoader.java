@@ -35,6 +35,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Enumeration;
+import java.util.Vector;
 
 
 /**
@@ -65,7 +66,7 @@ import java.util.Enumeration;
  * Sets incremental loading
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  * @see Loader
  */
 public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
@@ -1172,27 +1173,24 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
    */  
   public String[] getOptions() {
       
-    String[] options = new String[10];
-    int current = 0;
-    options[current] = "-Q"; options[current++] = getQuery();
-    StringBuffer text = new StringBuffer();
-    int i;
-    for(i = 0;i < m_orderBy.size()-1;i++){
-        text.append((String)m_orderBy.elementAt(i));
-        text.append(", ");
-    }
-    if(i == m_orderBy.size()-1){
-        text.append((String)m_orderBy.elementAt(i));
-        options[current] = "-P"; options[current++] = text.toString();
-    }
-    if (m_inc) {
-      options[current++] = "-I";
-    }
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    Vector options = new Vector();
     
-    return  options;
+    options.add("-Q"); 
+    options.add(getQuery());
+    
+    StringBuffer text = new StringBuffer();
+    for (int i = 0; i < m_orderBy.size(); i++) {
+      if (i > 0)
+        text.append(", ");
+      text.append((String) m_orderBy.elementAt(i));
+    }
+    options.add("-P"); 
+    options.add(text.toString());
+    
+    if (m_inc)
+      options.add("-I");
+    
+    return (String[]) options.toArray(new String[options.size()]);
   }
   
   /** Lists the available options

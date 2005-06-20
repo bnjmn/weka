@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.Enumeration;
+import java.util.Vector;
 import java.sql.*;
 
 
@@ -53,7 +54,7 @@ import java.sql.*;
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class DatabaseSaver extends AbstractSaver implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
     
@@ -542,18 +543,22 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
    * @return the current setting
    */  
   public String[] getOptions() {
-      
-    String[] options = new String[5];
-    int current = 0;
-    options[current] = "-T"; options[current++] = m_tableName;
-    if(m_id)
-        options[current] = "-P";
-    options[current] = "-i"; options[current++] = m_inputFile;
-    while (current < options.length) {
-      options[current++] = "";
+    Vector options = new Vector();
+
+    if ( (m_tableName != null) && (m_tableName.length() != 0) ) {
+      options.add("-T"); 
+      options.add(m_tableName);
     }
     
-    return  options;
+    if (m_id)
+        options.add("-P");
+
+    if ( (m_inputFile != null) && (m_inputFile.length() != 0) ) {
+      options.add("-i"); 
+      options.add(m_inputFile);
+    }
+    
+    return (String[]) options.toArray(new String[options.size()]);
   }
   
   /** Lists the available options
