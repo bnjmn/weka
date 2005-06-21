@@ -47,7 +47,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.15.2.1 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -72,14 +72,25 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    *
    */
    public Enumeration listOptions () {
-     Vector newVector = new Vector(2);
+     Vector result = new Vector();
 
-     newVector.addElement(new Option("\tSQL query to execute.",
-				     "Q",1,"-Q <query>"));
-     newVector.addElement(new Option("\tReturn sparse rather than normal "
-				    +"instances." 
-				    , "S", 0, "-S"));
-     return  newVector.elements();
+     result.addElement(
+         new Option("\tSQL query to execute.",
+                    "Q",1,"-Q <query>"));
+     
+     result.addElement(
+         new Option("\tReturn sparse rather than normal instances.", 
+                    "S", 0, "-S"));
+     
+     result.addElement(
+         new Option("\tThe username to use for connecting.", 
+                    "U", 1, "-U <username>"));
+     
+     result.addElement(
+         new Option("\tThe password to use for connecting.", 
+                    "P", 1, "-P <password>"));
+     
+     return result.elements();
    }
 
   /**
@@ -87,22 +98,39 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    *
    * Valid options are:<p>
    * 
+   * -Q query<br>
+   * The query to execute.<p>
+   * 
    * -S <br>
    * Return a set of sparse instances rather than normal instances.<p>
+   * 
+   * -U username <br>
+   * The username to connect with.<p>
+   * 
+   * -P password <br>
+   * The password to connect with.<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions (String[] options)
     throws Exception {
+    
+    String      tmpStr;
+    
     setSparseData(Utils.getFlag('S',options));
 
-    String optionString;
-    
-    optionString = Utils.getOption('Q',options);
-    if (optionString.length() != 0) {
-      setQuery(optionString);
-    } 
+    tmpStr = Utils.getOption('Q',options);
+    if (tmpStr.length() != 0)
+      setQuery(tmpStr);
+
+    tmpStr = Utils.getOption('U',options);
+    if (tmpStr.length() != 0)
+      setUsername(tmpStr);
+
+    tmpStr = Utils.getOption('P',options);
+    if (tmpStr.length() != 0)
+      setPassword(tmpStr);
   }
 
   /**
@@ -162,20 +190,25 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    */
   public String[] getOptions () {
 
-    String[] options = new String[3];
-    int current = 0;
+    Vector options = new Vector();
 
-    options[current] = "-Q"; options[current++] = getQuery();
+    options.add("-Q"); 
+    options.add(getQuery());
  
-    if (getSparseData()) {
-      options[current++] = "-S";
+    if (getSparseData())
+      options.add("-S");
+
+    if (!getUsername().equals("")) {
+      options.add("-U");
+      options.add(getUsername());
     }
 
-    while (current < options.length) {
-      options[current++] = "";
+    if (!getPassword().equals("")) {
+      options.add("-P");
+      options.add(getPassword());
     }
-    
-    return  options;
+
+    return (String[]) options.toArray(new String[options.size()]);
   }
 
   /**
@@ -193,7 +226,8 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    * Makes a database query to convert a table into a set of instances
    *
    * @param query the query to convert to instances
-   * @return the instances contained in the result of the query
+   * @return the instances contained in the result of the query, NULL if the
+   *         SQL query doesn't return a ResultSet, e.g., DELETE/INSERT/UPDATE
    * @exception Exception if an error occurs
    */
   public Instances retrieveInstances(String query) throws Exception {
@@ -201,7 +235,14 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     System.err.println("Executing query: " + query);
     connectToDatabase();
     if (execute(query) == false) {
-      throw new Exception("Query didn't produce results");
+      if (m_PreparedStatement.getUpdateCount() == -1) {
+        throw new Exception("Query didn't produce results");
+      }
+      else {
+        System.err.println(m_PreparedStatement.getUpdateCount() 
+            + " rows affected.");
+        return null;
+      }
     }
     ResultSet rs = getResultSet();
     System.err.println("Getting metadata...");
@@ -453,6 +494,9 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
      
       Instances aha = iq.retrieveInstances();
       iq.disconnectFromDatabase();
+      // query returned no result -> exit
+      if (aha == null)
+        return;
       // The dataset may be large, so to make things easier we'll
       // output an instance at a time (rather than having to convert
       // the entire dataset to one large string)
