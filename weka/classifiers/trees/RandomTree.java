@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -205,7 +205,8 @@ public class RandomTree extends Classifier
     Vector newVector = new Vector(6);
 
     newVector.
-      addElement(new Option("\tNumber of attributes to randomly investigate.",
+      addElement(new Option("\tNumber of attributes to randomly investigate\n"
+                            +"\t(<1 = int(log(#attributes)+1)).",
 			    "K", 1, "-K <number of attributes>"));
 
     newVector.
@@ -282,6 +283,7 @@ public class RandomTree extends Classifier
 
     // Make sure K value is in range
     if (m_KValue > data.numAttributes()-1) m_KValue = data.numAttributes()-1;
+    if (m_KValue < 1) m_KValue = (int) Utils.log2(data.numAttributes())+1;
 
     // Check for non-nominal classes
     if (!data.classAttribute().isNominal()) {
@@ -300,6 +302,10 @@ public class RandomTree extends Classifier
     if (data.numAttributes() == 1) {
       throw new IllegalArgumentException("RandomTree: Attribute missing. Need at least " +
 					 "one attribute other than class attribute!");
+    }
+
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
 
     Instances train = data;
@@ -566,7 +572,7 @@ public class RandomTree extends Classifier
 
     // Make leaf if there are no training instances
     if (((data.classIndex() > 0) && (sortedIndices[0].length == 0)) ||
-	(sortedIndices[1].length == 0)) {
+	((data.classIndex() == 0) && sortedIndices[1].length == 0)) {
       m_Distribution = new double[1][data.numClasses()];
       m_ClassProbs = null;
       return;
