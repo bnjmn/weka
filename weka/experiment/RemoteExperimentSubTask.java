@@ -29,7 +29,7 @@ import java.io.File;
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RemoteExperimentSubTask implements Task {
 
@@ -70,7 +70,7 @@ public class RemoteExperimentSubTask implements Task {
     String goodResult = "(sub)experiment completed successfully";
     String subTaskType;
     if (m_experiment.getRunLower() != m_experiment.getRunUpper()) {
-      subTaskType = "(datataset "
+      subTaskType = "(dataset "
 	+ ((File)m_experiment.getDatasets().elementAt(0)).getName();
     } else {
       subTaskType = "(exp run # "+
