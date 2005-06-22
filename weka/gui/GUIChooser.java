@@ -57,7 +57,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.7 $
+ * @version $Revision: 1.14.2.8 $
  */
 public class GUIChooser extends JFrame {
 
@@ -321,12 +321,8 @@ public class GUIChooser extends JFrame {
                 // display error
                 System.err.println("\ndisplayed message:");
                 m_Memory.showOutOfMemory();
-                System.err.println("\nrestarting...");
-
-                // restart GUI
-                System.gc();
-                m_chooser = new GUIChooser();
-                m_chooser.setVisible(true);
+                System.err.println("\nexiting...");
+                System.exit(-1);
               }
             }
             catch(InterruptedException ex) { 
