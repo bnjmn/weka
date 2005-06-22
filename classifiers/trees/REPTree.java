@@ -56,7 +56,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -1553,6 +1553,10 @@ public class REPTree extends Classifier
     if (data.numAttributes() == 1) {
       throw new IllegalArgumentException("REPTree: Attribute missing. Need at least " +
 					 "one attribute other than class attribute!");
+    }
+
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
 
     // Randomize and stratify
