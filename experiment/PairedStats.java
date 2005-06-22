@@ -30,7 +30,7 @@ import weka.core.Statistics;
  * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PairedStats {
   
@@ -65,6 +65,9 @@ public class PairedStats {
   
   /** The significance level for comparisons */
   public double sigLevel;
+
+  /** The degrees of freedom (if set programmatically) */
+  protected int m_degreesOfFreedom = 0;
     
   /**
    * Creates a new PairedStats object with the supplied significance level.
@@ -77,6 +80,25 @@ public class PairedStats {
     yStats = new Stats();
     differencesStats = new Stats();
     sigLevel = sig;
+  }
+
+  /**
+   * Sets the degrees of freedom (if calibration is required).
+   */
+  public void setDegreesOfFreedom(int d) {
+   
+    if (d <= 0) {
+      throw new IllegalArgumentException("PairedStats: degrees of freedom must be >= 1");
+    }
+    m_degreesOfFreedom = d;
+  }
+
+  /**
+   * Gets the degrees of freedom.
+   */
+  public int getDegreesOfFreedom() {
+
+    return m_degreesOfFreedom;
   }
 
   /**
@@ -173,11 +195,18 @@ public class PairedStats {
       double tval = differencesStats.mean
 	* Math.sqrt(count)
 	/ differencesStats.stdDev;
-      
-      if (count > 1) {
-	differencesProbability = Statistics.FProbability(tval * tval, 1,
-							 (int) count - 1);
-      } else differencesProbability = 1;
+
+      if (m_degreesOfFreedom >= 1){
+        differencesProbability = Statistics.FProbability(tval * tval, 1,
+                                                         m_degreesOfFreedom);
+      } else {
+        if (count > 1) {
+          differencesProbability = Statistics.FProbability(tval * tval, 1,
+                                                           (int) count - 1);
+        } else {
+          differencesProbability = 1;
+        }
+      }
     } else {
       if (differencesStats.sumSq == 0) {
 	differencesProbability = 1.0;
