@@ -89,7 +89,7 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.5 $ 
+ * @version $Revision: 1.1.2.6 $ 
  */
 public class XMLSerialization {
    /** the tag for an object */
@@ -528,7 +528,14 @@ public class XMLSerialization {
             // if no get/set methods -> we assume it has String-Constructor
             if (memberlist.size() == 0) {
                if (!o.toString().equals(""))
-                  node.appendChild(node.getOwnerDocument().createTextNode(o.toString()));
+                  node.appendChild(node.getOwnerDocument().createTextNode(
+                      // these five entities are recognized by every XML processor
+                      // see http://www.xml.com/pub/a/2001/03/14/trxml10.html
+                      o.toString().replaceAll("&", "&amp;")
+                                  .replaceAll("\"", "&quot;")
+                                  .replaceAll("'", "&apos;")
+                                  .replaceAll("<", "&lt;")
+                                  .replaceAll(">", "&gt;")));
             }
             else {
                enm = memberlist.keys();
