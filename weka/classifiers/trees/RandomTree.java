@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -304,6 +304,10 @@ public class RandomTree extends Classifier
 					 "one attribute other than class attribute!");
     }
 
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+
     Instances train = data;
 
     // Create array of sorted indices and weights
@@ -568,7 +572,7 @@ public class RandomTree extends Classifier
 
     // Make leaf if there are no training instances
     if (((data.classIndex() > 0) && (sortedIndices[0].length == 0)) ||
-	(sortedIndices[1].length == 0)) {
+	((data.classIndex() == 0) && sortedIndices[1].length == 0)) {
       m_Distribution = new double[1][data.numClasses()];
       m_ClassProbs = null;
       return;
