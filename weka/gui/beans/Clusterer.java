@@ -56,7 +56,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -70,8 +70,8 @@ public class Clusterer extends JPanel implements BeanCommon, Visible, WekaWrappe
 
   protected BeanVisual m_visual = 
     new BeanVisual("Clusterer",
-		   BeanVisual.ICON_PATH+"DefaultClusterer.gif",
-		   BeanVisual.ICON_PATH+"DefaultClusterer_animated.gif");
+		   BeanVisual.ICON_PATH+"EM.gif",
+		   BeanVisual.ICON_PATH+"EM_animated.gif");
 
   private static int IDLE = 0;
   private static int BUILDING_MODEL = 1;
@@ -544,6 +544,18 @@ public class Clusterer extends JPanel implements BeanCommon, Visible, WekaWrappe
       return false;
     }
     return true;
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection according to the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
   }
 
   /**
