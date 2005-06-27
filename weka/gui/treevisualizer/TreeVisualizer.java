@@ -60,7 +60,7 @@ import weka.gui.visualize.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class TreeVisualizer extends PrintablePanel implements MouseMotionListener,
 			       MouseListener,ActionListener,ItemListener {
@@ -1069,6 +1069,10 @@ public class TreeVisualizer extends PrintablePanel implements MouseMotionListene
       }
       
     }
+    // pop up save dialog explicitly (is somehow overridden...)
+    else if ( (e.getButton() == MouseEvent.BUTTON1) && e.isAltDown() && e.isShiftDown() && !e.isControlDown() ) {
+      saveComponent();
+    }
     else if (m_mouseState == 0 && m_scaling == 0) {
       //either middle or right mouse button pushed
       //determine menu to use
@@ -2068,6 +2072,7 @@ public class TreeVisualizer extends PrintablePanel implements MouseMotionListene
 	//f.add(a);
         Container contentPane = f.getContentPane();
 	contentPane.add(a);
+   f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	f.setSize(800,600);
 	f.setVisible(true);
 	//f.
