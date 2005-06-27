@@ -106,7 +106,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * @author Gabi Schmidberger <gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware <mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -1951,10 +1951,14 @@ throws Exception{
       options[current++] = "" + getDistanceFSpec();
     }
     
-    options[current++] = "-N";
-    options[current++] = "" + getInputCenterFile();
-    options[current++] = "-O";
-    options[current++] = "" + getOutputCenterFile();
+    if (getInputCenterFile() != null) {
+      options[current++] = "-N";
+      options[current++] = "" + getInputCenterFile();
+    }
+    if (getOutputCenterFile() != null) {
+      options[current++] = "-O";
+      options[current++] = "" + getOutputCenterFile();
+    }
     options[current++] = "-S";
     options[current++] = "" + getSeed();
     int dL = getDebugLevel();
