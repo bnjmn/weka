@@ -38,7 +38,7 @@ import java.io.Serializable;
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.3 $
+ * @version  $Revision: 1.4 $
  * @since 1.0
  */
 public class BeanInstance implements Serializable {
@@ -221,6 +221,27 @@ public class BeanInstance implements Serializable {
   }
 
   /**
+   * Looks for all beans (if any) located within
+   * the supplied bounding box
+   *
+   * @param boundingBox the bounding rectangle
+   * @return a Vector of BeanInstances
+   */
+  public static Vector findInstances(Rectangle boundingBox) {
+    int centerX, centerY;
+    Vector result = new Vector();
+    for (int i = 0; i < COMPONENTS.size(); i++) {
+      BeanInstance t = (BeanInstance)COMPONENTS.elementAt(i);
+      centerX = t.getX() + (t.getWidth()/2);
+      centerY = t.getY() + (t.getHeight()/2);
+      if (boundingBox.contains(centerX, centerY)) {
+        result.addElement(t);
+      }
+    }
+    return result;
+  }
+
+  /**
    * Creates a new <code>BeanInstance</code> instance.
    *
    * @param container a <code>JComponent</code> to add the bean to
@@ -278,7 +299,22 @@ public class BeanInstance implements Serializable {
     }
   }
 
-  private void addBean(JComponent container) {
+  /**
+   * Adds this bean to the global list of beans and
+   * to the supplied container. The constructor
+   * calls this method, so a client should not need
+   * to unless they have called removeBean and then
+   * wish to have it added again.
+   *
+   * @param container the Component on which this
+   * BeanInstance will be displayed
+   */
+  public void addBean(JComponent container) {
+
+    // do nothing if we are already in the list
+    if (COMPONENTS.contains(this)) {
+      return;
+    }
 
     // Ignore invisible components
     if (!Beans.isInstanceOf(m_bean, JComponent.class)) {
@@ -351,6 +387,20 @@ public class BeanInstance implements Serializable {
     return ((JComponent)m_bean).getHeight();
   }
  
+  /**
+   * Set the x and y coordinates of this bean
+   *
+   * @param newX the x coordinate
+   * @param newY the y coordinate
+   */
+  public void setXY(int newX, int newY) {
+    setX(newX);
+    setY(newY);
+    if (getBean() instanceof MetaBean) {
+      ((MetaBean)getBean()).shiftInputsAndOutputs(this, false);
+    }
+  }
+
   /**
    * Sets the x coordinate of this bean
    *
