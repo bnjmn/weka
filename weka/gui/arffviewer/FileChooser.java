@@ -23,6 +23,8 @@
 package weka.gui.arffviewer;
 
 import java.awt.Component;
+import java.io.File;
+
 import javax.swing.JFileChooser;
 
 /**
@@ -34,11 +36,37 @@ import javax.swing.JFileChooser;
  * NullPointerException! ;-)
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
-public class FileChooser extends JFileChooser
-{
+public class FileChooser 
+  extends JFileChooser {
+  
+  /**
+   * default constructor, pointing to the user's default directory
+   */
+  public FileChooser() {
+    super();
+  }
+  
+  /**
+   * sets the default directory to the given one
+   * 
+   * @param currentDirectoryPath    the directory to start in
+   */
+  public FileChooser(String currentDirectoryPath) {
+    super(currentDirectoryPath);
+  }
+  
+  /**
+   * sets the default directory to the given one
+   * 
+   * @param currentDirectory    the directory to start in
+   */
+  public FileChooser(File currentDirectory) {
+    super(currentDirectory);
+  }
+  
   /**
    * Pops up a "Save File" file chooser dialog
    */
