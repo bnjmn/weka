@@ -60,7 +60,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffPanel 
@@ -581,6 +581,10 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     
     model = (ArffTableSorter) tableArff.getModel();
     
+    // really an attribute column?
+    if (model.getAttributeAt(currentCol) == null)
+      return;
+    
     // really?
     if (ComponentHelper.showMessageBox(
         getParent(), 
@@ -640,15 +644,20 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   /**
    * renames the current attribute
    */
-  private void renameAttribute() {
+  public void renameAttribute() {
     ArffTableSorter   model;
     String            newName;
     
     // no column selected?
     if (currentCol == -1)
       return;
-    
+
     model   = (ArffTableSorter) tableArff.getModel();
+
+    // really an attribute column?
+    if (model.getAttributeAt(currentCol) == null)
+      return;
+    
     newName = ComponentHelper.showInputBox(getParent(), "Rename attribute...", "Enter new Attribute name", model.getAttributeAt(currentCol).name());
     if (newName == null)
       return;
