@@ -53,7 +53,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffTableModel implements TableModel, Undoable {
@@ -347,6 +347,8 @@ public class ArffTableModel implements TableModel, Undoable {
     if ( (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0)
         result = Integer.class;
+      else if (getType(columnIndex) == Attribute.NUMERIC)
+        result = Double.class;
       else
         result = String.class;   // otherwise no input of "?"!!!
     }
@@ -471,7 +473,7 @@ public class ArffTableModel implements TableModel, Undoable {
       }
       else {
         if (isMissingAt(rowIndex, columnIndex)) {
-          result = "?";
+          result = null;
         }
         else {
           switch (getType(columnIndex)) {
@@ -481,20 +483,24 @@ public class ArffTableModel implements TableModel, Undoable {
               result = data.instance(rowIndex).stringValue(columnIndex - 1);
               break;
             case Attribute.NUMERIC:
-              result = new Double(data.instance(rowIndex).value(columnIndex - 1)).toString();
+              result = new Double(data.instance(rowIndex).value(columnIndex - 1));
               break;
           }
         }
       }
     }
     
-    // does it contain "\n" or "\r"? -> replace with ", "
-    tmp = result.toString();
-    if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
-      tmp    = tmp.replaceAll("\\r\\n", ", ");
-      tmp    = tmp.replaceAll("\\r", ", ").replaceAll("\\n", ", ");
-      tmp    = tmp.replaceAll(", $", "");
-      result = tmp;
+    if (getType(columnIndex) != Attribute.NUMERIC) {
+      if (result != null) {
+        // does it contain "\n" or "\r"? -> replace with ", "
+        tmp = result.toString();
+        if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
+          tmp    = tmp.replaceAll("\\r\\n", ", ");
+          tmp    = tmp.replaceAll("\\r", ", ").replaceAll("\\n", ", ");
+          tmp    = tmp.replaceAll(", $", "");
+          result = tmp;
+        }
+      }
     }
     
     return result;
@@ -537,7 +543,7 @@ public class ArffTableModel implements TableModel, Undoable {
     att      = inst.attribute(index);
     
     // missing?
-    if ( (aValue == null) || (aValue.toString().equals("?")) ) {
+    if (aValue == null) {
       inst.setValue(index, Instance.missingValue());
     }
     else {
@@ -576,7 +582,7 @@ public class ArffTableModel implements TableModel, Undoable {
     }
     
     // notify only if the value has changed!
-    if (!oldValue.toString().equals(aValue.toString()) && notify)
+    if (notify && (!("" + oldValue).equals("" + aValue)) )
       notifyListener(new TableModelEvent(this, rowIndex, columnIndex));
   }
   

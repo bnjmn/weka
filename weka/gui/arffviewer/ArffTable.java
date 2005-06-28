@@ -43,7 +43,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.1 $ 
+ * @version $Revision: 1.2.2.2 $ 
  */
 
 public class ArffTable extends JTable {
@@ -120,7 +120,7 @@ public class ArffTable extends JTable {
       if (i > 0) {
         if (arffModel.getType(i) == Attribute.NOMINAL) {
           combo = new JComboBox();
-          combo.addItem("?");
+          combo.addItem(null);
           enm  = arffModel.getInstances().attribute(i - 1).enumerateValues();
           while (enm.hasMoreElements())
             combo.addItem(enm.nextElement());
