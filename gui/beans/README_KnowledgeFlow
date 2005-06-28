@@ -2,6 +2,23 @@
 KnowledgeFlow GUI Quick Primer
 ===============================================================
 
+What's new in the KnowledgeFlow:
+
+Components can now be grouped together under a "meta" component. Start
+by placing some components on the layout and connecting them
+together. Then select a subset of components with the mouse by holding
+down the left button and dragging the resulting rectangle. You will
+then be asked whether you wish to group the selected components and
+for a name to give the group. The selected components will then be
+replaced by a single icon on the layout. All grouped beans can still
+be configured and connections made by right-clicking on the icon to
+display a pop-up menu. At the moment meta components can't form part
+of another group (this functionality will be added in a later
+release). Eventually, functionality will be added to allow the user
+to store custom groups in a user toolbar for reuse.
+
+Introduction:
+
 The KnowledgeFlow provides an alternative to the Explorer as a
 graphical front end to Weka's core algorithms. The KnowledgeFlow is a
 work in progress so some of the functionality from the Explorer is not
@@ -12,9 +29,8 @@ The KnowledgeFlow presents a "data-flow" inspired interface to
 Weka. The user can select Weka components from a tool bar, place them
 on a layout canvas and connect them together in order to form a
 "knowledge flow" for processing and analyzing data. At present, all of
-Weka's classifiers and filters are available in the KnowledgeFlow
-along with some extra tools. Components for clustering will be
-available in a later release.
+Weka's classifiers, filters, clusterers, loaders and savers are
+available in the KnowledgeFlow along with some extra tools.
 
 The KnowledgeFlow can handle data either incrementally or in batches
 (the Explorer handles batch data only). Of course learning from data
@@ -39,6 +55,21 @@ Features of the KnowledgeFlow:
 
 Components available in the KnowledgeFlow:
 
+DataSources:
+  All of Weka's loaders are available
+
+DataSinks:
+  All of Weka's savers are available
+
+Filters:
+  All of Weka's filters are available
+
+Classifiers:
+  All of Weka's classifiers are available
+
+Clusterers:
+  All of Weka's clusterers are available
+
 Evaluation:
   TrainingSetMaker - make a data set into a training set
   TestSetMaker - make a data set into a test set
@@ -48,16 +79,18 @@ Evaluation:
     a training set and a test set
   ClassAssigner - assign a column to be the class for any data set, training
     set or test set
-  ClassValuePicker - choose a class value to be considered as the "positve"
+  ClassValuePicker - choose a class value to be considered as the "positive"
     class. This is useful when generating data for ROC style curves (see
-    below).
+    below)
   ClassifierPerformanceEvaluator - evaluate the performance of batch
     trained/tested classifiers
   IncrementalClassifierEvaluator - evaluate the performance of incrementally
     trained classifiers
+  ClustererPerformanceEvaluator - evaluate the performance of batch
+    trained/tested clusterers
   PredictionAppender - append classifier predictions to a test set. For
     discrete class problems, can either append predicted class labels or
-    probability distributions.
+    probability distributions
 
 Visualization:
   DataVisualizer - component that can pop up a panel for visualizing data in
@@ -77,14 +110,7 @@ Visualization:
     plot of data (used for viewing the online performance of incremental
     classifiers)
 
-Filters:
-  All of Weka's filters are available
 
-Classifiers:
-  All of Weka's classifiers are available
-
-DataSources:
-  All of Weka's loaders are available
 ---------------
 
 Launching the KnowledgeFlow:
@@ -94,9 +120,9 @@ environments. Select the button labeled "KnowledgeFlow" to start the
 KnowledgeFlow. Alternatively, you can launch the KnowledgeFlow from a
 terminal window by typing "java weka.gui.beans.KnowledgeFlow".
 
-At the top of the KnowledgeFlow window is are four tabs: Evaluation,
-Visualization, Filters, Classifiers, DataSources. The names are pretty 
-much self explanatory.
+At the top of the KnowledgeFlow window is are seven tabs: DataSources,
+DataSinks, Filters, Classifiers, Clusterers, Evaluation and
+Visualization. The names are pretty much self explanatory.
 
 EXAMPLE:
 -----------------
