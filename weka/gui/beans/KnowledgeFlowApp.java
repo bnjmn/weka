@@ -114,7 +114,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.4 $
+ * @version  $Revision: 1.5 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -293,7 +293,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -364,6 +364,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   private JButton m_loadB;
   private JButton m_stopB;
   private JButton m_helpB;
+  private JButton m_newB;
 
   /**
    * Reference to bean being manipulated
@@ -626,9 +627,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 						  +"Stop24.gif")));
     m_helpB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
 						  +"Help24.gif")));
+    m_newB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+						  +"New24.gif")));
     m_stopB.setToolTipText("Stop all execution");
     m_loadB.setToolTipText("Load layout");
     m_helpB.setToolTipText("Display help");
+    m_newB.setToolTipText("Clear the layout");
     Image tempI = loadImage(BeanVisual.ICON_PATH+"Pointer.gif");
     m_pointerB = new JToggleButton(new ImageIcon(tempI));
     m_pointerB.addActionListener(new ActionListener() {
@@ -644,7 +648,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     fixedTools.add(m_pointerB);
     fixedTools.add(m_saveB);
     fixedTools.add(m_loadB);
-    fixedTools.add(m_stopB);
+
     Dimension dP = m_saveB.getPreferredSize();
     Dimension dM = m_saveB.getMaximumSize();
     fixedTools.setFloatable(false);
@@ -656,6 +660,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     fixedTools2.setOrientation(JToolBar.VERTICAL);
     fixedTools2.setFloatable(false);
     fixedTools2.add(m_helpB);
+    fixedTools2.add(m_newB);
+    fixedTools2.add(m_stopB);
     m_helpB.setPreferredSize(dP);
     m_helpB.setMaximumSize(dP);
     toolBarPanel.add(fixedTools2, BorderLayout.EAST);
@@ -688,6 +694,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	public void actionPerformed(ActionEvent ae) {
 	  popupHelp();
 	}
+      });
+
+    m_newB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          clearLayout();
+        }
       });
 
     final int STANDARD_TOOLBAR = 0;
@@ -1067,6 +1079,13 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     } catch (Exception ex) {
       tempB.setEnabled(true);
     }
+  }
+
+  private void clearLayout() {
+    BeanInstance.reset(m_beanLayout);
+    BeanConnection.reset();
+    m_beanLayout.revalidate();
+    m_beanLayout.repaint();
   }
   
   /**
