@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.22 $
+   $Revision: 1.23 $
   ===========================================================================
 -->
 
@@ -250,19 +250,19 @@
    description="Make a release in ${release}. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
     <!-- copy the docs to dist/docs -->
 
-    <copy todir="${path_modifier}weka-${release}/doc" >
+    <copy todir="${path_modifier}weka-${release}/weka-${release}/doc" >
        <fileset dir="${path_modifier}${doc}"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}">
+    <copy todir="${path_modifier}weka-${release}/weka-${release}">
        <fileset dir="${path_modifier}${dist}"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}/changelogs">
+    <copy todir="${path_modifier}weka-${release}/weka-${release}/changelogs">
        <fileset dir="${path_modifier}wekadocs/changelogs"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}/data">
+    <copy todir="${path_modifier}weka-${release}/weka-${release}/data">
        <fileset dir="${path_modifier}wekadocs/data"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}">
+    <copy todir="${path_modifier}weka-${release}/weka-${release}">
        <fileset dir="${path_modifier}wekadocs">
          <include name="README*"/>
 	 <include name="*.pdf"/>
