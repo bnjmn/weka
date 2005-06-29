@@ -51,13 +51,15 @@ public class NormalizedPolyKernel extends PolyKernel {
   public double eval(int id1, int id2, Instance inst1) 
     throws Exception {
 	
-    double div = Math.sqrt(super.eval(id1, id1, inst1) * 
-			   super.eval(id2, id2, m_data.instance(id2)));
-    if(div != 0){
+
+    double div = Math.sqrt(super.eval(id1, id1, inst1) * ((m_keys != null)
+                           ? super.eval(id2, id2, m_data.instance(id2))
+                           : super.eval(-1, -1, m_data.instance(id2))));
+
+    if(div != 0){      
       return super.eval(id1, id2, inst1) / div;
     } else {
       return 0;
     }
-  }
-    
+  }    
 }
