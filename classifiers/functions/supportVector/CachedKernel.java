@@ -28,7 +28,7 @@ public abstract class CachedKernel extends Kernel {
 
   /** Kernel cache */
   private double[] m_storage;
-  private long[] m_keys;
+  protected long[] m_keys;
 
   /** The kernel matrix if full cache is used (i.e. size is set to 0) */
   private double[][] m_kernelMatrix;
