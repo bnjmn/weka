@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.23 $
+   $Revision: 1.24 $
   ===========================================================================
 -->
 
@@ -76,6 +76,7 @@
           <include name="weka/**/*.props"/>
 	  <include name="weka/**/*.gif"/>
 	  <include name="weka/**/*.jpeg"/>
+	  <include name="weka/**/*.txt"/>
 	  <include name="weka/gui/beans/README*"/>
        </fileset>
     </copy>
@@ -202,7 +203,7 @@
     <!-- jar up the source -->
     <jar jarfile="${path_modifier}${dist}/weka-src.jar" 
     basedir="${path_modifier}."
-    includes="weka/**/*.java,weka/**/*.props,weka/**/*.gif"/>
+    includes="weka/**/*.java,weka/**/*.props,weka/**/*.gif,weka/**/*.txt"/>
   </target>
 
   <!-- make a jar file containing just the stuff needed for running a remote experiment server -->
@@ -243,10 +244,15 @@
      <include name="CHANGELOG-${release}.html"/>
    </replace>
   </target>
-    
+
+  <!-- Writes $release version number to weka/core/version.txt -->    
+  <target name="set_version">
+    <echo message="${release}" file="${path_modifier}weka/core/version.txt"/>
+    <echo message="${release}" file="${path_modifier}${build}/classes/weka/core/version.txt"/>
+  </target>
 
   <!-- Make a release -->
-  <target name="release" depends="run_tests, exejar, remotejar, srcjar, docs, changelog"
+  <target name="release" depends="run_tests, set_version, exejar, remotejar, srcjar, docs, changelog"
    description="Make a release in ${release}. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
     <!-- copy the docs to dist/docs -->
 
