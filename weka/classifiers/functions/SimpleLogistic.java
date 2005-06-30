@@ -52,7 +52,7 @@ import java.util.*;
  * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class SimpleLogistic extends Classifier 
@@ -212,7 +212,7 @@ public class SimpleLogistic extends Classifier
 	setUseCrossValidation(!Utils.getFlag('S', options));
 	setErrorOnProbabilities(Utils.getFlag('P', options));
 	
-	optionString = Utils.getOption('L', options);
+	optionString = Utils.getOption('M', options);
 	if (optionString.length() != 0) {
 	    setMaxBoostingIterations((new Integer(optionString)).intValue());
 	}
