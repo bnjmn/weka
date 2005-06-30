@@ -30,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JComponent;
 import java.awt.BorderLayout;
 import java.awt.Point;
+import java.awt.Dimension;
 import java.io.Serializable;
 import java.beans.EventSetDescriptor;
 import java.beans.BeanInfo;
@@ -221,15 +222,23 @@ implements BeanCommon, Visible, EventConstraints,
     for (int i = 0; i < m_inputs.size(); i++) {
       BeanInstance temp = (BeanInstance)m_inputs.elementAt(i);
       Point p = (Point)m_originalCoordsInputs.elementAt(i);
-      temp.setX((int)p.getX());
-      temp.setY((int)p.getY());
+      JComponent c = (JComponent)temp.getBean();
+      Dimension d = c.getPreferredSize();
+      int dx = (int)(d.getWidth() / 2);
+      int dy = (int)(d.getHeight() / 2);
+      temp.setX((int)p.getX()+dx);
+      temp.setY((int)p.getY()+dy);
     }
 
     for (int i = 0; i < m_outputs.size(); i++) {
       BeanInstance temp = (BeanInstance)m_outputs.elementAt(i);
       Point p = (Point)m_originalCoordsOutputs.elementAt(i);
-      temp.setX((int)p.getX());
-      temp.setY((int)p.getY());
+      JComponent c = (JComponent)temp.getBean();
+      Dimension d = c.getPreferredSize();
+      int dx = (int)(d.getWidth() / 2);
+      int dy = (int)(d.getHeight() / 2);
+      temp.setX((int)p.getX()+dx);
+      temp.setY((int)p.getY()+dy);
     }
   }
 
