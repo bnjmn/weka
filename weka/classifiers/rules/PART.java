@@ -66,7 +66,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class PART extends Classifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
@@ -298,8 +298,12 @@ public class PART extends Classifier implements OptionHandler,
       options[current++] = "-B";
     }
     options[current++] = "-M"; options[current++] = "" + m_minNumObj;
-    options[current++] = "-C"; options[current++] = "" + m_CF;
-    options[current++] = "-N"; options[current++] = "" + m_numFolds;
+    if (!m_reducedErrorPruning) {
+      options[current++] = "-C"; options[current++] = "" + m_CF;
+    }
+    if (m_reducedErrorPruning) {
+      options[current++] = "-N"; options[current++] = "" + m_numFolds;
+    }
     options[current++] = "-Q"; options[current++] = "" + m_Seed;
 
     while (current < options.length) {
