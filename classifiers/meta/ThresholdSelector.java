@@ -87,7 +87,7 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.31 $ 
  */
 public class ThresholdSelector extends Classifier 
   implements OptionHandler, Drawable {
@@ -366,7 +366,7 @@ public class ThresholdSelector extends Classifier
 
     String rangeString = Utils.getOption('R', options);
     if (rangeString.length() != 0) {
-      setRangeCorrection(new SelectedTag(Integer.parseInt(rangeString) - 1, 
+      setRangeCorrection(new SelectedTag(Integer.parseInt(rangeString), 
                                          TAGS_RANGE));
     } else {
       setRangeCorrection(new SelectedTag(RANGE_NONE, TAGS_RANGE));
