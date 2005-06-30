@@ -32,7 +32,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MathExpression extends PotentialClassIgnorer implements UnsupervisedFilter, OptionHandler {
   /** Stores which columns to select as a funky range */
@@ -300,7 +300,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
              +"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse",
 	     "E",1,"-E <expression>"));
     newVector.addElement(new Option(
-              "\tSpecify list of columns to delete. First and last are valid\n"
+              "\tSpecify list of columns to modify. First and last are valid\n"
 	      +"\tindexes. (default none)",
               "R", 1, "-R <index1,index2-index4,...>"));    
     newVector.addElement(new Option(
