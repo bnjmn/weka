@@ -51,7 +51,7 @@ import weka.classifiers.UpdateableClassifier;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  *  this version resolves errors in the handling of missing attribute values.
  */
 public class AODE extends Classifier
@@ -469,7 +469,8 @@ public class AODE extends Classifier
        options[current++] = "-D";
     }
         
-    options[current++] = "-F " + m_Limit;
+    options[current++] = "-F ";
+    options[current++] = "" + m_Limit;
 
     while (current < options.length) {
        options[current++] = "";
