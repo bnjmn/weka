@@ -114,7 +114,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.6 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -293,7 +293,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1118,7 +1118,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
             Vector group = ((MetaBean)bc).getBeansInSubFlow();
             Vector associatedConnections = 
               ((MetaBean)bc).getAssociatedConnections();
-            ((MetaBean)bc).restoreInputAndOutputCoords();
+            ((MetaBean)bc).restoreBeans();
             for (int i = 0; i < group.size(); i++) {
               BeanInstance tbi = (BeanInstance)group.elementAt(i);
               addComponent(tbi, false);
@@ -1595,7 +1595,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
           BeanConnection temp = (BeanConnection)associatedConnections.elementAt(i);
           temp.setHidden(true);
         }
-        group.shiftInputsAndOutputs(bi, true);
+        group.shiftBeans(bi, true);
         
         addComponent(bi, true);
       }

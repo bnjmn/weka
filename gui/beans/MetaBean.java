@@ -172,11 +172,11 @@ implements BeanCommon, Visible, EventConstraints,
     return getBeanInfos(m_outputs, 2);
   }
 
-  // stores the original position of the input and
-  // output beans when this group is created. Used
+  // stores the original position of the beans 
+  // when this group is created. Used
   // to restore their locations if the group is ungrouped.
-  private Vector m_originalCoordsInputs;
-  private Vector m_originalCoordsOutputs;
+  private Vector m_originalCoords;
+
   /**
    * Move coords of all inputs and outputs of this meta bean
    * to the coords of the supplied BeanInstance. Typically
@@ -190,49 +190,28 @@ implements BeanCommon, Visible, EventConstraints,
    * be used.
    * @param save true if coordinates are to be saved.
    */
-  public void shiftInputsAndOutputs(BeanInstance toShiftTo, 
-                                    boolean save) {
+  public void shiftBeans(BeanInstance toShiftTo, 
+                         boolean save) {
     if (save) {
-      m_originalCoordsInputs = new Vector();
-      m_originalCoordsOutputs = new Vector();
+      m_originalCoords = new Vector();
     }
     int targetX = toShiftTo.getX();
     int targetY = toShiftTo.getY();
 
-    for (int i = 0; i < m_inputs.size(); i++) {
-      BeanInstance temp = (BeanInstance)m_inputs.elementAt(i);
+    for (int i = 0; i < m_subFlow.size(); i++) {
+      BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (save) {
         Point p = new Point(temp.getX(), temp.getY());
-        m_originalCoordsInputs.add(p);
-      }
-      temp.setX(targetX); temp.setY(targetY);
-    }
-
-    for (int i = 0; i < m_outputs.size(); i++) {
-      BeanInstance temp = (BeanInstance)m_outputs.elementAt(i);
-      if (save) {
-        Point p = new Point(temp.getX(), temp.getY());
-        m_originalCoordsOutputs.add(p);
+        m_originalCoords.add(p);
       }
       temp.setX(targetX); temp.setY(targetY);
     }
   }
 
-  public void restoreInputAndOutputCoords() {
-    for (int i = 0; i < m_inputs.size(); i++) {
-      BeanInstance temp = (BeanInstance)m_inputs.elementAt(i);
-      Point p = (Point)m_originalCoordsInputs.elementAt(i);
-      JComponent c = (JComponent)temp.getBean();
-      Dimension d = c.getPreferredSize();
-      int dx = (int)(d.getWidth() / 2);
-      int dy = (int)(d.getHeight() / 2);
-      temp.setX((int)p.getX()+dx);
-      temp.setY((int)p.getY()+dy);
-    }
-
-    for (int i = 0; i < m_outputs.size(); i++) {
-      BeanInstance temp = (BeanInstance)m_outputs.elementAt(i);
-      Point p = (Point)m_originalCoordsOutputs.elementAt(i);
+  public void restoreBeans() {
+    for (int i = 0; i < m_subFlow.size(); i++) {
+      BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
+      Point p = (Point)m_originalCoords.elementAt(i);
       JComponent c = (JComponent)temp.getBean();
       Dimension d = c.getPreferredSize();
       int dx = (int)(d.getWidth() / 2);

@@ -38,7 +38,7 @@ import java.io.Serializable;
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.4 $
+ * @version  $Revision: 1.5 $
  * @since 1.0
  */
 public class BeanInstance implements Serializable {
@@ -397,7 +397,7 @@ public class BeanInstance implements Serializable {
     setX(newX);
     setY(newY);
     if (getBean() instanceof MetaBean) {
-      ((MetaBean)getBean()).shiftInputsAndOutputs(this, false);
+      ((MetaBean)getBean()).shiftBeans(this, false);
     }
   }
 
