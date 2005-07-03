@@ -15,12 +15,14 @@
  */
 
 /*
- *    Version.java
- *    Copyright (C) 2005 FracPete
+ * Version.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
+
+import java.io.*;
 
 /**
  * This class contains the version number of the current WEKA release and some
@@ -31,21 +33,88 @@ package weka.core;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class Version implements Comparable {
+  
   /** the major version */
-  public final static int MAJOR = 3; 
+  public static int MAJOR = 3; 
   
   /** the minor version */
-  public final static int MINOR = 4; 
+  public static int MINOR = 4; 
   
   /** the revision */
-  public final static int REVISION = 4;
-  
+  public static int REVISION = 3;
+
+  static {
+    try {
+      InputStream inR = 
+        ClassLoader.getSystemResourceAsStream("weka/core/version.txt");
+      LineNumberReader lnr = new LineNumberReader(new InputStreamReader(inR));
+      
+      String line = lnr.readLine();
+      int [] maj = new int[1];
+      int [] min = new int[1];
+      int [] rev = new int[1];
+      parseVersion(line, maj, min, rev);
+      MAJOR = maj[0];
+      MINOR = min[0];
+      REVISION = rev[0];
+      lnr.close();
+    } catch (Exception ex) {
+      System.err.println("weka.core.Version: Unable to load version information!");
+    }
+  }
+
   /** the complete version */
-  public final static String VERSION = MAJOR + "." + MINOR + "." + REVISION;
-  
+  public static String VERSION = MAJOR + "." + MINOR + "." + REVISION;
+
+
+  private static void parseVersion(String version, int [] maj, int [] min,
+                                   int [] rev) {
+    int major = 0;
+    int minor = 0;
+    int revision = 0;
+
+    try {
+      String tmpStr = version;
+      tmpStr = tmpStr.replace('-', '.');
+      if (tmpStr.indexOf(".") > -1) {
+        major  = Integer.parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
+        tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
+        if (tmpStr.indexOf(".") > -1) {
+          minor  = Integer.parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
+          tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
+          if (!tmpStr.equals(""))
+            revision = Integer.parseInt(tmpStr);
+          else
+            revision = 0;
+        }
+        else {
+          if (!tmpStr.equals(""))
+            minor = Integer.parseInt(tmpStr);
+          else
+            minor = 0;
+        }
+      }
+      else {
+        if (!tmpStr.equals(""))
+          major = Integer.parseInt(tmpStr);
+        else
+          major = 0;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      major    = -1;
+      minor    = -1;
+      revision = -1;
+    } finally {
+      maj[0] = major;
+      min[0] = minor;
+      rev[0] = revision;
+    }
+  }
+
   /**
    * checks the version of this class against the given version-string
    * @param o     the version-string to compare with
@@ -57,47 +126,18 @@ public class Version implements Comparable {
     int       major;
     int       minor;
     int       revision;
+    int       [] maj = new int [1];
+    int       [] min = new int [1];
+    int       [] rev = new int [1];
     String    tmpStr;
-    
-    major    = 0;
-    minor    = 0;
-    revision = 0;
+   
     
     // do we have a string?
     if (o instanceof String) {
-      try {
-        tmpStr = o.toString();
-        if (tmpStr.indexOf(".") > -1) {
-           major  = Integer.parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
-           tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
-           if (tmpStr.indexOf(".") > -1) {
-             minor  = Integer.parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
-             tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
-             if (!tmpStr.equals(""))
-               revision = Integer.parseInt(tmpStr);
-             else
-               revision = 0;
-           }
-           else {
-             if (!tmpStr.equals(""))
-               minor = Integer.parseInt(tmpStr);
-             else
-               minor = 0;
-           }
-        }
-        else {
-          if (!tmpStr.equals(""))
-            major = Integer.parseInt(tmpStr);
-          else
-            major = 0;
-        }
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        major    = -1;
-        minor    = -1;
-        revision = -1;
-      }
+      parseVersion((String)o, maj, min, rev);
+      major = maj[0];
+      minor = min[0];
+      revision = rev[0];
     }
     else {
       System.out.println(this.getClass().getName() + ": no version-string for comparTo povided!");
