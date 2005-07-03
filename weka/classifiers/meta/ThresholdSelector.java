@@ -28,6 +28,7 @@ import weka.classifiers.rules.ZeroR;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
@@ -87,9 +88,9 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30.2.1 $ 
+ * @version $Revision: 1.30.2.2 $ 
  */
-public class ThresholdSelector extends Classifier 
+public class ThresholdSelector extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler, Drawable {
 
   /* Type of correction applied to threshold range */ 
@@ -124,9 +125,6 @@ public class ThresholdSelector extends Classifier
     new Tag(OPTIMIZE_POS_NAME, "Class value named: \"yes\", \"pos(itive)\",\"1\"")
   };
 
-  /** The generated base classifier */
-  protected Classifier m_Classifier = new weka.classifiers.functions.Logistic();
-
   /** The upper threshold used as the basis of correction */
   protected double m_HighThreshold = 1;
 
@@ -141,9 +139,6 @@ public class ThresholdSelector extends Classifier
   
   /** The number of folds used in cross-validation */
   protected int m_NumXValFolds = 3;
-
-  /** Random number seed */
-  protected int m_Seed = 1;
 
   /** Designated class value, determined during building */
   protected int m_DesignatedClass = 0;
@@ -160,6 +155,22 @@ public class ThresholdSelector extends Classifier
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
   protected static final double MIN_VALUE = 0.05;
+    
+  /**
+   * Constructor.
+   */
+  public ThresholdSelector() {
+    
+    m_Classifier = new weka.classifiers.functions.Logistic();
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.functions.Logistic";
+  }
 
   /**
    * Collects the classifier predictions using the specified evaluation method.
@@ -257,7 +268,7 @@ public class ThresholdSelector extends Classifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
               "\tThe class for which threshold is determined. Valid values are:\n" +
@@ -266,10 +277,6 @@ public class ThresholdSelector extends Classifier
               "\tfrequent), and 5 (for the first class named any of \"yes\",\"pos(itive)\"\n" +
               "\t\"1\", or method 3 if no matches). (default 5).",
 	      "C", 1, "-C <integer>"));
-    newVector.addElement(new Option(
-	      "\tFull name of classifier to perform parameter selection on.\n"
-	      + "\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W <classifier class name>"));
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation. If just a\n" +
 	      "\thold-out set is used, this determines the size of the hold-out set\n" +
@@ -283,9 +290,6 @@ public class ThresholdSelector extends Classifier
               "\t(default 0).",
 	      "R", 1, "-R <integer>"));
     newVector.addElement(new Option(
-	      "\tSets the random number seed (default 1).",
-	      "S", 1, "-S <random number seed>"));
-    newVector.addElement(new Option(
 	      "\tSets the evaluation mode. Use 0 for\n" +
 	      "\tevaluation using cross-validation,\n" +
 	      "\t1 for evaluation using hold-out set,\n" +
@@ -293,17 +297,10 @@ public class ThresholdSelector extends Classifier
 	      "\ttraining data (default 1).",
 	      "E", 1, "-E <integer>"));
 
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option("",
-	        "", 0,
-		"\nOptions specific to sub-classifier "
-	        + m_Classifier.getClass().getName()
-		+ ":\n(use -- to signal start of sub-classifier options)"));
-      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-      while (enu.hasMoreElements()) {
-	newVector.addElement(enu.nextElement());
-      }
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }
@@ -379,21 +376,7 @@ public class ThresholdSelector extends Classifier
       setNumXValFolds(3);
     }
 
-    String randomString = Utils.getOption('S', options);
-    if (randomString.length() != 0) {
-      setSeed(Integer.parseInt(randomString));
-    } else {
-      setSeed(1);
-    }
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
+    super.setOptions(options);
   }
 
   /**
@@ -403,30 +386,20 @@ public class ThresholdSelector extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 8];
 
     int current = 0;
-    String [] options = new String [classifierOptions.length + 13];
 
     options[current++] = "-C"; options[current++] = "" + (m_DesignatedClass + 1);
     options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
     options[current++] = "-E"; options[current++] = "" + m_EvalMode;
     options[current++] = "-R"; options[current++] = "" + m_RangeMode;
-    options[current++] = "--";
 
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
+    current += superOptions.length;
     while (current < options.length) {
       options[current++] = "";
     }
@@ -695,36 +668,6 @@ public class ThresholdSelector extends Classifier
 
     return new SelectedTag(m_RangeMode, TAGS_RANGE);
   }
-  
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-
-    return "Sets the seed used for randomization. This is used when "
-      + "randomizing the data during optimization.";
-  }
-
-  /**
-   * Sets the seed for random number generation.
-   *
-   * @param seed the random number seed
-   */
-  public void setSeed(int seed) {
-    
-    m_Seed = seed;
-  }
-
-  /**
-   * Gets the random number seed.
-   * 
-   * @return the random number seed
-   */
-  public int getSeed() {
-
-    return m_Seed;
-  }
 
   /**
    * @return tip text for this property suitable for
@@ -758,52 +701,6 @@ public class ThresholdSelector extends Classifier
       throw new IllegalArgumentException("Number of folds must be greater than 1");
     }
     m_NumXValFolds = newNumFolds;
-  }
-
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-
-    return "Sets the base Classifier to which the optimization "
-      + "will be made.";
-  }
-
-  /**
-   * Set the Classifier for which threshold is set. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the Classifier used as the classifier.
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
- 
-  /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @return the classifier string.
-   */
-  protected String getClassifierSpec() {
-    
-    Classifier c = getClassifier();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
   }
 
   /**
