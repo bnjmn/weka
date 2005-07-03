@@ -25,6 +25,7 @@ package weka.classifiers.meta;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
@@ -62,15 +63,15 @@ import weka.filters.Filter;
  * Specify the full class name of a classifier as the basis for 
  * the multi-class classifier (required).<p>
  *
- * -Q seed <br>
+ * -S seed <br>
  * Random number seed (default 1).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.37.2.1 $
+ * @version $Revision: 1.37.2.2 $
  */
-public class MultiClassClassifier extends Classifier 
+public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler {
 
   /** The classifiers. */
@@ -78,9 +79,6 @@ public class MultiClassClassifier extends Classifier
 
   /** The filters used to transform the class. */
   private Filter[] m_ClassFilters;
-
-  /** The class name of the base classifier. */
-  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
@@ -90,9 +88,6 @@ public class MultiClassClassifier extends Classifier
   
   /** A transformed dataset header used by the  1-against-1 method */
   private Instances m_TwoClassDataset;
-
-  /** Random number seed */
-  protected int m_Seed = 1;
 
   /** 
    * The multiplier when generating random codes. Will generate
@@ -114,6 +109,22 @@ public class MultiClassClassifier extends Classifier
     new Tag(METHOD_ERROR_EXHAUSTIVE, "Exhaustive correction code"),
     new Tag(METHOD_1_AGAINST_1, "1-against-1")
   };
+    
+  /**
+   * Constructor.
+   */
+  public MultiClassClassifier() {
+    
+    m_Classifier = new weka.classifiers.functions.Logistic();
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.functions.Logistic";
+  }
 
   /** Interface for the code constructors */
   private abstract class Code implements Serializable {
@@ -176,7 +187,7 @@ public class MultiClassClassifier extends Classifier
     Random r = null;
     public RandomCode(int numClasses, int numCodes, Instances data) {
       r = data.getRandomNumberGenerator(m_Seed);
-      numCodes = Math.max(numClasses, numCodes);
+      numCodes = Math.max(2, numCodes); // Need at least two classes
       m_Codebits = new boolean[numCodes][numClasses];
       int i = 0;
       do {
@@ -509,24 +520,10 @@ public class MultiClassClassifier extends Classifier
     vec.addElement(new Option(
        "\tSets the multiplier when using random codes. (default 2.0)",
        "R", 1, "-R <num>"));
-    vec.addElement(new Option(
-       "\tSets the base classifier.",
-       "W", 1, "-W <base classifier>"));
-    vec.addElement(new Option(
-       "\tSets the random number seed for random codes.",
-       "Q", 1, "-Q <random number seed>"));
 
-    if (m_Classifier != null) {
-      try {
-	vec.addElement(new Option("",
-				  "", 0, "\nOptions specific to classifier "
-				  + m_Classifier.getClass().getName() + ":"));
-	Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-	while (enu.hasMoreElements()) {
-	  vec.addElement(enu.nextElement());
-	}
-      } catch (Exception e) {
-      }
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      vec.addElement(enu.nextElement());
     }
     return vec.elements();
   }
@@ -545,7 +542,7 @@ public class MultiClassClassifier extends Classifier
    * Specify the full class name of a learner as the basis for 
    * the multiclassclassifier (required).<p>
    *
-   * -Q seed <br>
+   * -S seed <br>
    * Random number seed (default 1).<p>
    *
    * @param options the list of options as an array of strings
@@ -567,20 +564,8 @@ public class MultiClassClassifier extends Classifier
     } else {
       setRandomWidthFactor(2.0);
     }
-    String randomString = Utils.getOption('Q', options);
-    if (randomString.length() != 0) {
-      setSeed(Integer.parseInt(randomString));
-    } else {
-      setSeed(1);
-    }
 
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
+    super.setOptions(options);
   }
 
   /**
@@ -589,14 +574,12 @@ public class MultiClassClassifier extends Classifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
-    String [] options = new String [classifierOptions.length + 9];
+
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 4];
+
     int current = 0;
+
 
     options[current++] = "-M";
     options[current++] = "" + m_Method;
@@ -604,17 +587,10 @@ public class MultiClassClassifier extends Classifier
     options[current++] = "-R";
     options[current++] = "" + m_RandomWidthFactor;
 
-    options[current++] = "-Q"; options[current++] = "" + getSeed();
-    
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
+    current += superOptions.length;
     while (current < options.length) {
       options[current++] = "";
     }
@@ -696,56 +672,6 @@ public class MultiClassClassifier extends Classifier
     if (newMethod.getTags() == TAGS_METHOD) {
       m_Method = newMethod.getSelectedTag().getID();
     }
-  }
-
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "Sets the Classifier used as the basis for "
-      + "the multi-class classifier.";
-  }
-
-  /**
-   * Set the base classifier. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
-
-  /**
-   * Sets the seed for random number generation.
-   *
-   * @param seed the random number seed
-   */
-  public void setSeed(int seed) {
-    
-    m_Seed = seed;;
-  }
-
-  /**
-   * Gets the random number seed.
-   * 
-   * @return the random number seed
-   */
-  public int getSeed() {
-
-    return m_Seed;
   }
 
   /**
