@@ -95,7 +95,7 @@ import weka.core.*;
  * Sets the size of the kernel cache. Should be a prime number. 
  * (default 250007, use 0 for full cache) <p>
  *
- * -T num <br>
+ * -L num <br>
  * Sets the tolerance parameter. (default 1.0e-3)<p>
  *
  * -P num <br>
@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.54 $ */
+ * @version $Revision: 1.55 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -1494,7 +1494,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
 				    "A", 1, "-A <int>"));
     newVector.addElement(new Option("\tThe tolerance parameter. " +
 				    "(default 1.0e-3)",
-				    "T", 1, "-T <double>"));
+				    "L", 1, "-L <double>"));
     newVector.addElement(new Option("\tThe epsilon for round-off error. " +
 				    "(default 1.0e-12)",
 				    "P", 1, "-P <double>"));
@@ -1538,7 +1538,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
    * -A num <br> Sets the size of the kernel cache. Should be a prime
    * number. (default 250007, use 0 for full cache) <p>
    *
-   * -T num <br>
+   * -L num <br>
    * Sets the tolerance parameter. (default 1.0e-3)<p>
    *
    * -P num <br> 
@@ -1583,7 +1583,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
     } else {
       m_cacheSize = 250007;
     }
-    String toleranceString = Utils.getOption('T', options);
+    String toleranceString = Utils.getOption('L', options);
     if (toleranceString.length() != 0) {
       m_tol = (new Double(toleranceString)).doubleValue();
     } else {
@@ -1645,7 +1645,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
     options[current++] = "-E"; options[current++] = "" + m_exponent;
     options[current++] = "-G"; options[current++] = "" + m_gamma;
     options[current++] = "-A"; options[current++] = "" + m_cacheSize;
-    options[current++] = "-T"; options[current++] = "" + m_tol;
+    options[current++] = "-L"; options[current++] = "" + m_tol;
     options[current++] = "-P"; options[current++] = "" + m_eps;
     options[current++] = "-N"; options[current++] = "" + m_filterType;
     if (m_featureSpaceNormalization) {
