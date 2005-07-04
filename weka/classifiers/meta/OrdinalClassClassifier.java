@@ -24,6 +24,7 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
+import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import java.io.Serializable;
 import weka.core.*;
@@ -51,7 +52,7 @@ import java.util.Vector;
  * @version $Revision 1.0 $
  * @see OptionHandler
  */
-public class OrdinalClassClassifier extends Classifier 
+public class OrdinalClassClassifier extends SingleClassifierEnhancer 
 implements OptionHandler {
 
   /** The classifiers. (One for each class.) */
@@ -60,14 +61,26 @@ implements OptionHandler {
   /** The filters used to transform the class. */
   private MakeIndicator[] m_ClassFilters;
 
-  /** The class name of the base classifier. */
-  private Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
-
   /** Internal copy of the class attribute for output purposes */
   private Attribute m_ClassAttribute;
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.J48";
+  }
+
+  /**
+   * Default constructor.
+   */
+  public OrdinalClassClassifier() {
+    m_Classifier = new weka.classifiers.trees.J48();
+  }
 
   /**
    * Returns a string describing this attribute evaluator
@@ -180,24 +193,11 @@ implements OptionHandler {
    */
   public Enumeration listOptions()  {
 
-    Vector vec = new Vector(1);
-    Object c;
-    
-    vec.addElement(new Option(
-       "\tSets the base classifier.",
-       "W", 1, "-W <base classifier>"));
-    
-    if (m_Classifier != null) {
-      try {
-	vec.addElement(new Option("",
-				  "", 0, "\nOptions specific to classifier "
-				  + m_Classifier.getClass().getName() + ":"));
-	Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-	while (enu.hasMoreElements()) {
-	  vec.addElement(enu.nextElement());
-	}
-      } catch (Exception e) {
-      }
+    Vector vec = new Vector();
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      vec.addElement(enu.nextElement());
     }
     return vec.elements();
   }
@@ -214,14 +214,7 @@ implements OptionHandler {
    */
   public void setOptions(String[] options) throws Exception {
   
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-                                                 Utils.partitionOptions(options)));
+    super.setOptions(options);
   }
 
   /**
@@ -231,58 +224,9 @@ implements OptionHandler {
    */
   public String [] getOptions() {
     
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
-    String [] options = new String [classifierOptions.length + 3];
-    int current = 0;
-
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
-
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return super.getOptions();
   }
   
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "Sets the Classifier used as the basis for "
-      + "the multi-class classifier.";
-  }
-
-  /**
-   * Set the base classifier. 
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
   /**
    * Prints the classifiers.
    */
