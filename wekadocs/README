@@ -4,14 +4,14 @@
                               README                                   
                               ======                                   
                                                                        
-                             WEKA 3.4.4
-                            7 March 2005
+                             WEKA 3.4.5
+                            4 July 2005
                                                                        
                  Java Programs for Machine Learning 
 
            Copyright (C) 1998-2005  University of Waikato
 
-                web: http://www.cs.waikato.ac.nz/~ml            
+              web: http://www.cs.waikato.ac.nz/~ml/weka            
                                                                        
 =====================================================================
 
@@ -33,7 +33,7 @@ Contents:
 
 5. The Experiment package
 
-6. Tutorial
+6. Explorer guide
 
 7. Source code
 
@@ -320,16 +320,13 @@ However, all this is much easier if you use the Experimenter GUI.
 
 ----------------------------------------------------------------------
 
-6. Tutorial:
+6. Explorer guide:
 ------------
 
-A tutorial on how to use WEKA is in $WEKAHOME/Tutorial.pdf. However,
-not everything in WEKA is covered in the Tutorial, and the package
-structure has changed quite a bit. For a complete list you have to
-look at the online documentation $WEKAHOME/doc/packages.html.  In
-particular, Tutorial.pdf is a draft from the "Data Mining" book (see
-our web page), and so only describes features in the stable 3.0
-release.
+A guide on how to use the WEKA Explorer is in
+$WEKAHOME/ExplorerGuide.pdf.  For an explanation on how to use the
+other user interfaces in WEKA you might want to take a look at the
+book "Data Mining" by Witten and Frank (2005) (see our web page).
 
 ----------------------------------------------------------------------
 
@@ -358,9 +355,7 @@ visualization tool, etc., using the WEKA classes, and you think it
 should be included in WEKA, send us the code, and we can potentially
 put it in the next WEKA distribution.
 
-If you find any bugs, send a fix to mlcontrib@cs.waikato.ac.nz.
-If that's too hard, just send a bug report to the wekalist mailing 
-list.
+If you find any bugs, send a bug report to the wekalist mailing list.
 
 -----------------------------------------------------------------------
 
