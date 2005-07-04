@@ -25,6 +25,7 @@ package weka.classifiers.meta;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
+import weka.classifiers.SingleClassifierEnhancer;
 import java.util.Enumeration;
 import java.util.Vector;
 import weka.core.Instance;
@@ -44,19 +45,16 @@ import weka.core.Drawable;
  *
  * -W classifierstring <br>
  * Classifierstring should contain the full class name of a classifier
- * followed by options to the classifier. <p>
+ * (options are specified after a --). <p>
  *
  * -F filterstring <br>
  * Filterstring should contain the full class name of a filter
  * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
-public class FilteredClassifier extends Classifier implements Drawable {
-
-  /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
+public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
 
   /** The filter */
   protected Filter m_Filter = new weka.filters.supervised.attribute.AttributeSelection();
@@ -77,29 +75,22 @@ public class FilteredClassifier extends Classifier implements Drawable {
       + "by the filter without changing its structure.";
 
   }
-  
-  /**
-   * Default constructor specifying ZeroR as the classifier and
-   * AllFilter as the filter. Both of these are just placeholders
-   * for more useful selections.
-   */
-  public FilteredClassifier() {
 
-    this(new weka.classifiers.rules.ZeroR(), 
-	 new weka.filters.supervised.attribute.AttributeSelection());
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.J48";
   }
 
   /**
-   * Constructor that specifies the subclassifier and filter to use.
-   *
-   * @param classifier the Classifier to receive filtered instances.
-   * @param filter the Filter that will process instances before
-   * passing to the Classifier.
+   * Default constructor.
    */
-  public FilteredClassifier(Classifier classifier, Filter filter) {
+  public FilteredClassifier() {
 
-    m_Classifier = classifier;
-    m_Filter = filter;
+    m_Classifier = new weka.classifiers.trees.J48();
+    m_Filter = new weka.filters.supervised.attribute.Discretize();
   }
 
   /**
@@ -136,17 +127,17 @@ public class FilteredClassifier extends Classifier implements Drawable {
   public Enumeration listOptions() {
 
     Vector newVector = new Vector(2);
-
-    newVector.addElement(new Option(
-	      "\tFull class name of classifier to use, followed\n"
-	      + "\tby scheme options.\n"
-	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
-	      "W", 1, "-W <classifier specification>"));
     newVector.addElement(new Option(
 	      "\tFull class name of filter to use, followed\n"
 	      + "\tby filter options.\n"
 	      + "\teg: \"weka.filters.AttributeFilter -V -R 1,2\"",
 	      "F", 1, "-F <filter specification>"));
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
+
     return newVector.elements();
   }
 
@@ -155,7 +146,7 @@ public class FilteredClassifier extends Classifier implements Drawable {
    *
    * -W classifierstring <br>
    * Classifierstring should contain the full class name of a classifier
-   * followed by options to the classifier.<p>
+   * (options are specified after a --). <p>
    *
    * -F filterstring <br>
    * Filterstring should contain the full class name of a filter
@@ -165,19 +156,6 @@ public class FilteredClassifier extends Classifier implements Drawable {
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    String classifierString = Utils.getOption('W', options);
-    if (classifierString.length() > 0) {
-      String [] classifierSpec = Utils.splitOptions(classifierString);
-      if (classifierSpec.length == 0) {
-	throw new IllegalArgumentException("Invalid classifier specification string");
-      }
-      String classifierName = classifierSpec[0];
-      classifierSpec[0] = "";
-      setClassifier(Classifier.forName(classifierName, classifierSpec));
-    } else {
-      setClassifier(new weka.classifiers.rules.ZeroR());
-    }
 
     // Same for filter
     String filterString = Utils.getOption('F', options);
@@ -190,8 +168,10 @@ public class FilteredClassifier extends Classifier implements Drawable {
       filterSpec[0] = "";
       setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
     } else {
-      setFilter(new weka.filters.supervised.attribute.AttributeSelection());
+      setFilter(new weka.filters.supervised.attribute.Discretize());
     }
+
+    super.setOptions(options);
   }
 
   /**
@@ -201,62 +181,16 @@ public class FilteredClassifier extends Classifier implements Drawable {
    */
   public String [] getOptions() {
 
-    String [] options = new String [4];
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
     int current = 0;
 
-    options[current++] = "-W";
-    options[current++] = "" + getClassifierSpec();
-
-    // Same for filter
     options[current++] = "-F";
     options[current++] = "" + getFilterSpec();
 
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
     return options;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "The classifier to be used.";
-  }
-
-  /**
-   * Sets the classifier
-   *
-   * @param classifier the classifier with all options set.
-   */
-  public void setClassifier(Classifier classifier) {
-
-    m_Classifier = classifier;
-  }
-
-  /**
-   * Gets the classifier used.
-   *
-   * @return the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-  
-  /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @return the classifier string.
-   */
-  protected String getClassifierSpec() {
-    
-    Classifier c = getClassifier();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
   }
   
   /**
