@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 
@@ -99,10 +99,19 @@ public abstract class SingleClassifierEnhancer extends Classifier {
     String classifierName = Utils.getOption('W', options);
 
     if (classifierName.length() > 0) { 
+      
+      // This is just to set the classifier in case the option 
+      // parsing fails.
+      setClassifier(Classifier.forName(classifierName, null));
       setClassifier(Classifier.forName(classifierName,
 				       Utils.partitionOptions(options)));
     } else {
-      setClassifier((Classifier)Class.forName(defaultClassifierString()).newInstance());
+      
+      // This is just to set the classifier in case the option 
+      // parsing fails.
+      setClassifier(Classifier.forName(defaultClassifierString(), null));
+      setClassifier(Classifier.forName(defaultClassifierString(),
+				       Utils.partitionOptions(options)));
     }
   }
 
