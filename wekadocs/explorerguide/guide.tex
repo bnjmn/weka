@@ -2,7 +2,7 @@
 
 \usepackage{epsfig}
 
-\title{\epsfig{file=coa-hor.eps,width=6cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-4-3}
+\title{\epsfig{file=coa-hor.eps,width=6cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-0}
 \author{Richard Kirkby\\Eibe Frank}
 
 \setcounter{secnumdepth}{1}
@@ -17,7 +17,7 @@
 \center
 \vspace{8cm}
 
-\copyright 2002, 2004 University of Waikato
+\copyright 2002-2005 University of Waikato
 
 \end{titlepage}
 
@@ -51,7 +51,7 @@ help in tracking down the cause.
 This User Manual focuses on using the Explorer but does not explain
 the individual data preprocessing tools and learning algorithms in
 Weka. For more information on the various filters and learning methods
-in Weka, see the book {\em Data Mining} (Witten and Frank, 2000).
+in Weka, see the book {\em Data Mining} (Witten and Frank, 2005).
 
 \section{The WEKA Explorer}
 
@@ -276,11 +276,12 @@ Once you have selected and configured a filter, you can apply it to
 the data by pressing the \textbf{Apply} button at the right end of the
 \textbf{Filter} panel in the Preprocess panel. The Preprocess panel
 will then show the transformed data. The change can be undone by
-pressing the \textbf{Undo} button. Finally, the \textbf{Save...}
-button at the top right of the Preprocess panel saves the current
-version of the relation in the same formats available for loading
-data, allowing it to be kept for future use.
-\\
+pressing the \textbf{Undo} button. You can also use the
+\textbf{Edit...} button to modify your data manually in a dataset
+editor.  Finally, the \textbf{Save...}  button at the top right of the
+Preprocess panel saves the current version of the relation in the same
+formats available for loading data, allowing it to be kept for future
+use.  \\
 
 \noindent \textbf{Note:} Some of the filters behave differently
 depending on whether a class attribute has been set or not (using the
@@ -667,7 +668,7 @@ instances to a new ARFF file.
 
 Drummond, C. and Holte, R. (2000) Explicitly representing expected cost: An alternative to ROC representation. \textit{Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.}
 \\\\
-Witten, I.H. and Frank, E. (2000) \textit{Data Mining: Practical machine
-learning tools and techniques with Java implementations.}  Morgan Kaufmann, San
+Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
+learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
 Francisco.
 \end{document}
