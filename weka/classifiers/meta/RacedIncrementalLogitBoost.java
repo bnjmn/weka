@@ -37,10 +37,10 @@ import java.io.Serializable;
  * Set the minimum chunk size (default 500). <p>
  *
  * -M num <br>
- * Set the maximum chunk size (default 8000). <p>
+ * Set the maximum chunk size (default 2000). <p>
  *
  * -V num <br>
- * Set the validation set size (default 5000). <p>
+ * Set the validation set size (default 1000). <p>
  *
  * -D <br>
  * Turn on debugging output.<p>
@@ -62,10 +62,10 @@ import java.io.Serializable;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
-public class RacedIncrementalLogitBoost extends Classifier
-  implements OptionHandler, UpdateableClassifier {
+public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnhancer
+  implements UpdateableClassifier {
 
   /** The pruning types */
   public static final int PRUNETYPE_NONE = 0;
@@ -75,9 +75,6 @@ public class RacedIncrementalLogitBoost extends Classifier
     new Tag(PRUNETYPE_LOGLIKELIHOOD, "Log likelihood pruning")
   };
 
-  /** The model base classifier to use */
-  protected Classifier m_Classifier = new weka.classifiers.trees.DecisionStump();
-
   /** The committees */   
   protected FastVector m_committees;
 
@@ -86,9 +83,6 @@ public class RacedIncrementalLogitBoost extends Classifier
 
   /** Whether to use resampling */
   protected boolean m_UseResampling = false;
-
-  /** Seed for boosting with resampling. */
-  protected int m_Seed = 1;
 
   /** The number of classes */
   protected int m_NumClasses;
@@ -106,10 +100,10 @@ public class RacedIncrementalLogitBoost extends Classifier
   protected int m_minChunkSize = 500;
 
   /** The maimum chunk size used for training */
-  protected int m_maxChunkSize = 8000;
+  protected int m_maxChunkSize = 2000;
 
   /** The size of the validation set */
-  protected int m_validationChunkSize = 5000;
+  protected int m_validationChunkSize = 1000;
 
   /** The number of instances consumed */  
   protected int m_numInstancesConsumed;
@@ -132,11 +126,25 @@ public class RacedIncrementalLogitBoost extends Classifier
   /** The maximum number of instances required for processing */   
   protected int m_maxBatchSizeRequired;
 
-  /** Whether to output debug messages */     
-  protected boolean m_Debug = false;
-
   /** The random number generator used */
   protected Random m_RandomInstance = null;
+
+    
+  /**
+   * Constructor.
+   */
+  public RacedIncrementalLogitBoost() {
+    
+    m_Classifier = new weka.classifiers.trees.DecisionStump();
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.DecisionStump";
+  }
 
 
   /* Class representing a committee of LogitBoosted models */
@@ -687,28 +695,19 @@ public class RacedIncrementalLogitBoost extends Classifier
     Vector newVector = new Vector(9);
 
     newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
-
-    newVector.addElement(new Option(
 	      "\tMinimum size of chunks.\n"
 	      +"\t(default 500)",
 	      "C", 1, "-C <num>"));
 
     newVector.addElement(new Option(
 	      "\tMaximum size of chunks.\n"
-	      +"\t(default 20000)",
+	      +"\t(default 2000)",
 	      "M", 1, "-M <num>"));
 
     newVector.addElement(new Option(
 	      "\tSize of validation set.\n"
-	      +"\t(default 5000)",
+	      +"\t(default 1000)",
 	      "V", 1, "-V <num>"));
-
-    newVector.addElement(new Option(
-	      "\tFull name of 'weak' learner to boost.\n"
-	      +"\teg: weka.classifiers.DecisionStump",
-	      "W", 1, "-W <learner class name>"));
 
     newVector.addElement(new Option(
 	      "\tCommittee pruning to perform.\n"
@@ -718,20 +717,11 @@ public class RacedIncrementalLogitBoost extends Classifier
     newVector.addElement(new Option(
 	      "\tUse resampling for boosting.",
 	      "Q", 0, "-Q"));
-    newVector.addElement(new Option(
-	      "\tSeed for resampling. (Default 1)",
-	      "S", 1, "-S <num>"));
 
-    if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
-      newVector.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to weak learner "
-	  + m_Classifier.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-      while (enu.hasMoreElements()) {
-	newVector.addElement(enu.nextElement());
-      }
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }
@@ -756,14 +746,14 @@ public class RacedIncrementalLogitBoost extends Classifier
     if (maxChunkSize.length() != 0) {
       setMaxChunkSize(Integer.parseInt(maxChunkSize));
     } else {
-      setMaxChunkSize(20000);
+      setMaxChunkSize(2000);
     }
 
     String validationChunkSize = Utils.getOption('V', options);
     if (validationChunkSize.length() != 0) {
       setValidationChunkSize(Integer.parseInt(validationChunkSize));
     } else {
-      setValidationChunkSize(5000);
+      setValidationChunkSize(1000);
     }
 
     String pruneType = Utils.getOption('P', options);
@@ -775,23 +765,7 @@ public class RacedIncrementalLogitBoost extends Classifier
 
     setUseResampling(Utils.getFlag('Q', options));
 
-    String seedString = Utils.getOption('S', options);
-    if (seedString.length() != 0) {
-      setSeed(Integer.parseInt(seedString));
-    } else {
-      setSeed(1);
-    }
-
-    setDebug(Utils.getFlag('D', options));
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
+    super.setOptions(options);
   }
 
   /**
@@ -801,24 +775,13 @@ public class RacedIncrementalLogitBoost extends Classifier
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 9];
 
-    String [] options = new String [classifierOptions.length + 15];
     int current = 0;
-    
-    if (getDebug()) {
-      options[current++] = "-D";
-    }
-    
+
     if (getUseResampling()) {
       options[current++] = "-Q";
-    }
-    if (getSeed() != 1) {
-      options[current++] = "-S"; options[current++] = "" + getSeed();
     }
     options[current++] = "-C"; options[current++] = "" + getMinChunkSize();
 
@@ -828,15 +791,10 @@ public class RacedIncrementalLogitBoost extends Classifier
 
     options[current++] = "-P"; options[current++] = "" + m_PruningType;
 
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
+    current += superOptions.length;
     while (current < options.length) {
       options[current++] = "";
     }
@@ -850,36 +808,6 @@ public class RacedIncrementalLogitBoost extends Classifier
   public String globalInfo() {
 
     return "Classifier for incremental learning of large datasets by way of racing logit-boosted committees.";
-  }
-
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-
-    return "Sets the base classifier to boost. If not capable of handling weighted instances then resampling will be used.";
-  }
-
-  /**
-   * Set the classifier for boosting. The learner should be able to
-   * handle numeric class attributes.
-   *
-   * @param newClassifier the Classifier to use.
-   */
-  public void setClassifier(Classifier newClassifier) {
-
-    m_Classifier = newClassifier;
-  }
-
-  /**
-   * Get the classifier used as the classifier
-   *
-   * @return the classifier used as the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
   }
 
   /**
@@ -1004,35 +932,6 @@ public class RacedIncrementalLogitBoost extends Classifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String debugTipText() {
-
-    return "Whether debugging output should be sent to the terminal.";
-  }
-
-  /**
-   * Set debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-
-    m_Debug = debug;
-  }
-
-  /**
-   * Get whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-
-    return m_Debug;
-  }
-
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
   public String useResamplingTipText() {
 
     return "Force the use of resampling data rather than using the weight-handling capabilities of the base classifier. Resampling is always used if the base classifier cannot handle weighted instances.";
@@ -1056,35 +955,6 @@ public class RacedIncrementalLogitBoost extends Classifier
   public boolean getUseResampling() {
     
     return m_UseResampling;
-  }
-
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-
-    return "Random seed used for resampling the data.";
-  }
-  
-  /**
-   * Set seed for resampling.
-   *
-   * @param seed the seed for resampling
-   */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Get seed for resampling.
-   *
-   * @return the seed for resampling
-   */
-  public int getSeed() {
-
-    return m_Seed;
   }
 
   /**
