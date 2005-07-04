@@ -25,7 +25,8 @@ package weka.classifiers.meta;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.rules.ZeroR;
+import weka.classifiers.trees.J48;
+import weka.classifiers.SingleClassifierEnhancer;
 import java.io.*;
 import java.util.*;
 
@@ -54,13 +55,10 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
-public class AttributeSelectedClassifier extends Classifier 
+public class AttributeSelectedClassifier extends SingleClassifierEnhancer
   implements OptionHandler, Drawable, AdditionalMeasureProducer {
-
-  /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;
@@ -86,7 +84,23 @@ public class AttributeSelectedClassifier extends Classifier
 
   /** The time taken to select attributes AND build the classifier */
   protected double m_totalTime;
- 
+
+  
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.J48";
+  }
+  
+  /**
+   * Default constructor.
+   */
+  public AttributeSelectedClassifier() {
+    m_Classifier = new weka.classifiers.trees.J48();
+  }
+
   /**
    * Returns a string describing this search method
    * @return a description of the search method suitable for
@@ -104,12 +118,6 @@ public class AttributeSelectedClassifier extends Classifier
    */
   public Enumeration listOptions() {
      Vector newVector = new Vector(3);
-
-    newVector.addElement(new Option(
-	      "\tFull class name of classifier to use, followed\n"
-	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
-	      "W", 1, "-W <classifier specification>"));
     
     newVector.addElement(new Option(
 	      "\tFull class name of attribute evaluator, followed\n"
@@ -122,6 +130,11 @@ public class AttributeSelectedClassifier extends Classifier
 	      + "\tby its options. (required)\n"
 	      + "\teg: \"weka.attributeSelection.BestFirst -D 1\"",
 	      "S", 1, "-S <search method specification>"));
+    
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -148,21 +161,8 @@ public class AttributeSelectedClassifier extends Classifier
    */
   public void setOptions(String[] options) throws Exception {
 
-    String classifierString = Utils.getOption('W', options);
-    if (classifierString.length() == 0) {
-      throw new Exception("A classifier must be specified"
-			  + " with the -W option.");
-    }
-    String [] classifierSpec = Utils.splitOptions(classifierString);
-    if (classifierSpec.length == 0) {
-      throw new Exception("Invalid classifier specification string");
-    }
-    String classifierName = classifierSpec[0];
-    classifierSpec[0] = "";
-    setClassifier(Classifier.forName(classifierName, classifierSpec));
-
     // same for attribute evaluator
-     String evaluatorString = Utils.getOption('E', options);
+    String evaluatorString = Utils.getOption('E', options);
     if (evaluatorString.length() == 0) {
       throw new Exception("An attribute evaluator must be specified"
 			  + " with the -E option.");
@@ -188,6 +188,8 @@ public class AttributeSelectedClassifier extends Classifier
     String searchName = searchSpec[0];
     searchSpec[0] = "";
     setSearch(ASSearch.forName(searchName, searchSpec));
+
+    super.setOptions(options);
   }
 
   /**
@@ -197,11 +199,10 @@ public class AttributeSelectedClassifier extends Classifier
    */
   public String [] getOptions() {
 
-    String [] options = new String [6];
-    int current = 0;
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 4];
 
-    options[current++] = "-W";
-    options[current++] = "" + getClassifierSpec();
+    int current = 0;
 
     // same attribute evaluator
     options[current++] = "-E";
@@ -211,55 +212,10 @@ public class AttributeSelectedClassifier extends Classifier
     options[current++] = "-S";
     options[current++] = "" + getSearchSpec();
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "Set the classifier to use";
-  }
-
-  /**
-   * Sets the classifier
-   *
-   * @param classifier the classifier with all options set.
-   */
-  public void setClassifier(Classifier classifier) {
-
-    m_Classifier = classifier;
-  }
-
-  /**
-   * Gets the classifier used.
-   *
-   * @return the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-
-  /**
-   * Gets the classifier specification string, which contains the class name of
-   * the classifier and any options to the classifier
-   *
-   * @return the classifier string.
-   */
-  protected String getClassifierSpec() {
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
     
-    Classifier c = getClassifier();
-    if (c instanceof OptionHandler) {
-      return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
-    }
-    return c.getClass().getName();
+    return options;
   }
 
   /**

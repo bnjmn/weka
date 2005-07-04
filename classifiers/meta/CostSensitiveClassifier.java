@@ -25,6 +25,7 @@ package weka.classifiers.meta;
 import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import java.io.BufferedReader;
 import java.io.File;
@@ -76,9 +77,9 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
-public class CostSensitiveClassifier extends Classifier
+public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhancer
   implements OptionHandler, Drawable {
 
   /* Specify possible sources of the cost matrix */
@@ -104,18 +105,27 @@ public class CostSensitiveClassifier extends Classifier
   /** The cost matrix */
   protected CostMatrix m_CostMatrix = new CostMatrix(1);
 
-  /** The classifier */
-  protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
-
-  /** Seed for reweighting using resampling. */
-  protected int m_Seed = 1;
-
   /** 
    * True if the costs should be used by selecting the minimum expected
    * cost (false means weight training data by the costs)
    */
   protected boolean m_MinimizeExpectedCost;
   
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.rules.ZeroR";
+  }
+
+  /**
+   * Default constructor.
+   */
+  public CostSensitiveClassifier() {
+    m_Classifier = new weka.classifiers.rules.ZeroR();
+  }
+
   /**
    * Returns an enumeration describing the available options.
    *
@@ -130,10 +140,6 @@ public class CostSensitiveClassifier extends Classifier
 	      +"\treweight training instances according to costs per class",
 	      "M", 0, "-M"));
     newVector.addElement(new Option(
-	      "\tFull class name of classifier to use. (required)\n"
-	      + "\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W <class name>"));
-    newVector.addElement(new Option(
 	      "\tFile name of a cost matrix to use. If this is not supplied,\n"
               +"\ta cost matrix will be loaded on demand. The name of the\n"
               +"\ton-demand file is the relation name of the training data\n"
@@ -144,9 +150,12 @@ public class CostSensitiveClassifier extends Classifier
               "\tName of a directory to search for cost files when loading\n"
               +"\tcosts on demand (default current directory).",
               "N", 1, "-N <directory>"));
-    newVector.addElement(new Option(
-	      "\tSeed used when reweighting via resampling. (Default 1)",
-	      "S", 1, "-S <num>"));
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
+
     return newVector.elements();
   }
 
@@ -182,21 +191,6 @@ public class CostSensitiveClassifier extends Classifier
 
     setMinimizeExpectedCost(Utils.getFlag('M', options));
 
-    String seedString = Utils.getOption('S', options);
-    if (seedString.length() != 0) {
-      setSeed(Integer.parseInt(seedString));
-    } else {
-      setSeed(1);
-    }
-
-    String classifierName = Utils.getOption('W', options);
-    if (classifierName.length() == 0) {
-      throw new Exception("A classifier must be specified with"
-			  + " the -W option.");
-    }
-    setClassifier(Classifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
-
     String costFile = Utils.getOption('C', options);
     if (costFile.length() != 0) {
       try {
@@ -219,6 +213,7 @@ public class CostSensitiveClassifier extends Classifier
     if (demandDir.length() != 0) {
       setOnDemandDirectory(new File(demandDir));
     }
+    super.setOptions(options);
   }
 
 
@@ -228,14 +223,9 @@ public class CostSensitiveClassifier extends Classifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 7];
 
-    String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
-
-    String [] options = new String [classifierOptions.length + 9];
     int current = 0;
 
     if (m_MatrixSource == MATRIX_SUPPLIED) {
@@ -247,23 +237,14 @@ public class CostSensitiveClassifier extends Classifier
       options[current++] = "-N";
       options[current++] = "" + getOnDemandDirectory();
     }
-    options[current++] = "-S"; options[current++] = "" + getSeed();
+
     if (getMinimizeExpectedCost()) {
       options[current++] = "-M";
     }
-    if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
-    }
-    options[current++] = "--";
 
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
     return options;
   }
 
@@ -391,36 +372,6 @@ public class CostSensitiveClassifier extends Classifier
   }
   
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classifierTipText() {
-    return "Sets the Classifier used as the basis for "
-      + "the cost-sensitive classification.";
-  }
-
-  /**
-   * Sets the distribution classifier
-   *
-   * @param classifier the classifier with all options set.
-   */
-  public void setClassifier(Classifier classifier) {
-
-    m_Classifier = classifier;
-  }
-
-  /**
-   * Gets the classifier used.
-   *
-   * @return the classifier
-   */
-  public Classifier getClassifier() {
-
-    return m_Classifier;
-  }
-  
-
-  /**
    * Gets the classifier specification string, which contains the class name of
    * the classifier and any options to the classifier
    *
@@ -466,35 +417,6 @@ public class CostSensitiveClassifier extends Classifier
     m_MatrixSource = MATRIX_SUPPLIED;
   }
   
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-    return "Sets the random number seed when reweighting instances. Ignored "
-      + "when using minimum expected cost criteria.";
-  }
-  
-  /**
-   * Set seed for resampling.
-   *
-   * @param seed the seed for resampling
-   */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Get seed for resampling.
-   *
-   * @return the seed for resampling
-   */
-  public int getSeed() {
-
-    return m_Seed;
-  }
-
 
   /**
    * Builds the model of the base learner.
