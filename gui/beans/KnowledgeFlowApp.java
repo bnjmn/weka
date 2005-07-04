@@ -114,7 +114,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.6 $
+ * @version  $Revision: 1.7 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -293,7 +293,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -645,7 +645,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       });
 
     m_toolBarGroup.add(m_pointerB);
-    fixedTools.add(m_pointerB);
+    fixedTools.add(m_newB);
     fixedTools.add(m_saveB);
     fixedTools.add(m_loadB);
 
@@ -659,8 +659,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     JToolBar fixedTools2 = new JToolBar();
     fixedTools2.setOrientation(JToolBar.VERTICAL);
     fixedTools2.setFloatable(false);
+    fixedTools2.add(m_pointerB);
     fixedTools2.add(m_helpB);
-    fixedTools2.add(m_newB);
     fixedTools2.add(m_stopB);
     m_helpB.setPreferredSize(dP);
     m_helpB.setMaximumSize(dP);
