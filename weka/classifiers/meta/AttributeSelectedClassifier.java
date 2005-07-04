@@ -40,9 +40,10 @@ import weka.attributeSelection.*;
  * Valid options from the command line are:<p>
  *
  * -W classifierstring <br>
- * Classifierstring should contain the full class name of a classifier
- * followed by options to the classifier.
- * (required).<p>
+ * Classifierstring should contain the full class name of a classifier.
+ * Any options for the classifier should appear at the end of the command line
+ * following a "--".
+ *.<p>
  *
  * -E evaluatorstring <br>
  * Evaluatorstring should contain the full class name of an attribute
@@ -55,7 +56,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16.2.1 $
+ * @version $Revision: 1.16.2.2 $
  */
 public class AttributeSelectedClassifier extends SingleClassifierEnhancer
   implements OptionHandler, Drawable, AdditionalMeasureProducer {
@@ -142,9 +143,9 @@ public class AttributeSelectedClassifier extends SingleClassifierEnhancer
    * Parses a given list of options. Valid options are:<p>
    *
    * -W classifierstring <br>
-   * Classifierstring should contain the full class name of a classifier
-   * followed by options to the classifier.
-   * (required).<p>
+   * Classifierstring should contain the full class name of a classifier.
+   * Any options for the classifier should appear at the end of the command line
+   * following a "--".<p>
    *
    * -E evaluatorstring <br>
    * Evaluatorstring should contain the full class name of an attribute
