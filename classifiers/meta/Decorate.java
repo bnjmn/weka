@@ -53,11 +53,11 @@ import weka.experiment.*;
  * Specify the full class name of a weak classifier as the basis for 
  * Decorate (default weka.classifiers.trees.J48()).<p>
  *
- * -I num <br>
- * Specify the desired size of the committee (default 15). <p>
+ * -E num <br>
+ * Specify the desired size of the committee (default 10). <p>
  *
- * -M iterations <br>
- * Set the maximum number of Decorate iterations (default 50). <p>
+ * -I iterations <br>
+ * Set the maximum number of Decorate iterations (default 10). <p>
  *
  * -S seed <br>
  * Seed for random number generator. (default 0).<p>
@@ -68,26 +68,14 @@ import weka.experiment.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.3 $ */
-public class Decorate extends Classifier implements OptionHandler{
-
-    /** Set to true to get debugging output. */
-    protected boolean m_Debug = false;
-
-    /** The model base classifier to use. */
-    protected Classifier m_Classifier = new weka.classifiers.trees.J48();
+ * @version $Revision: 1.4 $ */
+public class Decorate extends RandomizableIteratedSingleClassifierEnhancer {
       
     /** Vector of classifiers that make up the committee/ensemble. */
     protected Vector m_Committee = null;
     
     /** The desired ensemble size. */
-    protected int m_DesiredSize = 15;
-
-    /** The maximum number of Decorate iterations to run. */
-    protected int m_NumIterations = 50;
-    
-    /** The seed for random number generation. */
-    protected int m_Seed = 0;
+    protected int m_DesiredSize = 10;
     
     /** Amount of artificial/random instances to use - specified as a
         fraction of the training data size. */
@@ -100,6 +88,22 @@ public class Decorate extends Classifier implements OptionHandler{
     protected Vector m_AttributeStats = null;
 
     
+  /**
+   * Constructor.
+   */
+  public Decorate() {
+    
+    m_Classifier = new weka.classifiers.trees.J48();
+  }
+
+  /**
+   * String describing default classifier.
+   */
+  protected String defaultClassifierString() {
+    
+    return "weka.classifiers.trees.J48";
+  }
+    
     /**
      * Returns an enumeration describing the available options
      *
@@ -107,45 +111,22 @@ public class Decorate extends Classifier implements OptionHandler{
      */
     public Enumeration listOptions() {
 	Vector newVector = new Vector(8);
-	newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
+
 	newVector.addElement(new Option(
               "\tDesired size of ensemble.\n" 
-              + "\t(default 15)",
-              "I", 1, "-I"));
+              + "\t(default 10)",
+              "E", 1, "-E"));
 	newVector.addElement(new Option(
-	      "\tMaximum number of Decorate iterations.\n"
-	      + "\t(default 50)",
-	      "M", 1, "-M"));
-	newVector.addElement(new Option(
-	      "\tFull name of base classifier.\n"
-	      + "\t(default weka.classifiers.trees.J48)",
-	      "W", 1, "-W"));
-	newVector.addElement(new Option(
-              "\tSeed for random number generator.\n"
-	      +"\tIf set to -1, use a random seed.\n"
-              + "\t(default 0)",
-              "S", 1, "-S"));
-	newVector.addElement(new Option(
-				    "\tFactor that determines number of artificial examples to generate.\n"
-				    +"\tSpecified proportional to training set size.\n" 
-				    + "\t(default 1.0)",
-				    "R", 1, "-R"));
-    
-	if ((m_Classifier != null) &&
-	    (m_Classifier instanceof OptionHandler)) {
-	    newVector.addElement(new Option(
-					    "",
-					    "", 0, "\nOptions specific to classifier "
-					    + m_Classifier.getClass().getName() + ":"));
-	    Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-	    while (enu.hasMoreElements()) {
-		newVector.addElement(enu.nextElement());
-	    }
-	}
-	
-	return newVector.elements();
+ 	    "\tFactor that determines number of artificial examples to generate.\n"
+           +"\tSpecified proportional to training set size.\n" 
+          + "\t(default 1.0)",
+	    "R", 1, "-R"));
+
+        Enumeration enu = super.listOptions();
+        while (enu.hasMoreElements()) {
+          newVector.addElement(enu.nextElement());
+        }
+        return newVector.elements();
     }
 
     
@@ -159,11 +140,11 @@ public class Decorate extends Classifier implements OptionHandler{
      * Specify the full class name of a weak classifier as the basis for 
      * Decorate (required).<p>
      *
-     * -I num <br>
-     * Specify the desired size of the committee (default 15). <p>
+     * -E num <br>
+     * Specify the desired size of the committee (default 10). <p>
      *
-     * -M iterations <br>
-     * Set the maximum number of Decorate iterations (default 50). <p>
+     * -I iterations <br>
+     * Set the maximum number of Decorate iterations (default 10). <p>
      *
      * -S seed <br>
      * Seed for random number generator. (default 0).<p>
@@ -177,27 +158,12 @@ public class Decorate extends Classifier implements OptionHandler{
      * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
-	setDebug(Utils.getFlag('D', options));
 
-	String desiredSize = Utils.getOption('I', options);
+	String desiredSize = Utils.getOption('E', options);
 	if (desiredSize.length() != 0) {
 	    setDesiredSize(Integer.parseInt(desiredSize));
 	} else {
-	    setDesiredSize(15);
-	}
-
-	String maxIterations = Utils.getOption('M', options);
-	if (maxIterations.length() != 0) {
-	    setNumIterations(Integer.parseInt(maxIterations));
-	} else {
-	    setNumIterations(50);
-	}
-	
-	String seed = Utils.getOption('S', options);
-	if (seed.length() != 0) {
-	    setSeed(Integer.parseInt(seed));
-	} else {
-	    setSeed(0);
+	    setDesiredSize(10);
 	}
 	
 	String artSize = Utils.getOption('R', options);
@@ -206,12 +172,8 @@ public class Decorate extends Classifier implements OptionHandler{
 	} else {
 	    setArtificialSize(1.0);
 	}
-	
-	String classifierName = Utils.getOption('W', options);
-	if (classifierName.length() != 0) {
-	  setClassifier(Classifier.forName(classifierName,
-					   Utils.partitionOptions(options)));
-	}
+
+        super.setOptions(options);
     }
     
     /**
@@ -220,33 +182,22 @@ public class Decorate extends Classifier implements OptionHandler{
      * @return an array of strings suitable for passing to setOptions
      */
     public String [] getOptions() {
-	String [] classifierOptions = new String [0];
-	if ((m_Classifier != null) && 
-	    (m_Classifier instanceof OptionHandler)) {
-	    classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-	}
-	String [] options = new String [classifierOptions.length + 12];
-	int current = 0;
-	if (getDebug()) {
-	    options[current++] = "-D";
-	}
-	options[current++] = "-S"; options[current++] = "" + getSeed();
-	options[current++] = "-I"; options[current++] = "" + getDesiredSize();
-	options[current++] = "-M"; options[current++] = "" + getNumIterations();
-	options[current++] = "-R"; options[current++] = "" + getArtificialSize();
-	
-	if (getClassifier() != null) {
-	    options[current++] = "-W";
-	    options[current++] = getClassifier().getClass().getName();
-	}
-	options[current++] = "--";
-	System.arraycopy(classifierOptions, 0, options, current, 
-			 classifierOptions.length);
-	current += classifierOptions.length;
-	while (current < options.length) {
-	    options[current++] = "";
-	}
-	return options;
+
+      String [] superOptions = super.getOptions();
+      String [] options = new String [superOptions.length + 4];
+      
+      int current = 0;
+      options[current++] = "-E"; options[current++] = "" + getDesiredSize();
+      options[current++] = "-R"; options[current++] = "" + getArtificialSize();
+      
+      System.arraycopy(superOptions, 0, options, current, 
+                       superOptions.length);
+      
+      current += superOptions.length;
+      while (current < options.length) {
+        options[current++] = "";
+      }
+      return options;
     }
 
   /**
@@ -285,25 +236,6 @@ public class Decorate extends Classifier implements OptionHandler{
   }
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-    return "seed for random number generator used for creating artificial data."
-	+" Set to -1 to use a random seed.";
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-b   */
-  public String classifierTipText() {
-    return "the desired base learner for the ensemble.";
-  }
-
-  /**
    * Returns a string describing classifier
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
@@ -319,43 +251,6 @@ b   */
 	  +"using artificial training examples (IJCAI 2003).\n"
 	  +"P. Melville & R. J. Mooney. Creating diversity in ensembles using artificial data (submitted).";
   }
-
-    
-    /**
-     * Set debugging mode
-     *
-     * @param debug true if debug output should be printed
-     */
-    public void setDebug(boolean debug) {
-	m_Debug = debug;
-    }
-    
-    /**
-     * Get whether debugging is turned on
-     *
-     * @return true if debugging output is on
-     */
-    public boolean getDebug() {
-	return m_Debug;
-    }
-    
-    /**
-     * Set the base classifier for Decorate.
-     *
-     * @param newClassifier the Classifier to use.
-     */
-    public void setClassifier(Classifier newClassifier) {
-	m_Classifier = newClassifier;
-    }
-
-    /**
-     * Get the classifier used as the base classifier
-     *
-     * @return the classifier used as the classifier
-     */
-    public Classifier getClassifier() {
-	return m_Classifier;
-    }
 
     /**
      * Factor that determines number of artificial examples to generate.
@@ -391,42 +286,6 @@ b   */
      */
     public void setDesiredSize(int newDesiredSize) {
 	m_DesiredSize = newDesiredSize;
-    }
-    
-    /**
-     * Sets the max number of Decorate iterations to run.
-     *
-     * @param numIterations  max number of Decorate iterations to run
-     */
-    public void setNumIterations(int numIterations) {
-	m_NumIterations = numIterations;
-    }
-
-    /**
-     * Gets the max number of Decorate iterations to run.
-     *
-     * @return the  max number of Decorate iterations to run
-     */
-    public int getNumIterations() {
-        return m_NumIterations;
-    }
-    
-    /**
-     * Set the seed for random number generator.
-     *
-     * @param seed the random number seed 
-     */
-    public void setSeed(int seed) {
-	m_Seed = seed;
-    }
-    
-    /**
-     * Gets the seed for the random number generator.
-     *
-     * @return the seed for the random number generator
-     */
-    public int getSeed() {
-        return m_Seed;
     }
 
     /**
