@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -1015,8 +1015,11 @@ public class Classifier extends JPanel
     }
 
     if (eventName.compareTo("batchClassifier") == 0) {
-      if (!m_listenees.containsKey("testSet") || 
-	  !m_listenees.containsKey("trainingSet")) {
+      if (!m_listenees.containsKey("testSet")) {
+        return false;
+      }
+      if (!m_listenees.containsKey("trainingSet") && 
+          m_trainingSet == null) {
 	return false;
       }
       Object source = m_listenees.get("testSet");
@@ -1025,12 +1028,12 @@ public class Classifier extends JPanel
 	  return false;
 	}
       }
-      source = m_listenees.get("trainingSet");
+      /*      source = m_listenees.get("trainingSet");
       if (source instanceof EventConstraints) {
 	if (!((EventConstraints)source).eventGeneratable("trainingSet")) {
 	  return false;
 	}
-      }
+        } */
     }
 
     if (eventName.compareTo("text") == 0) {
