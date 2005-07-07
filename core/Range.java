@@ -39,7 +39,7 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class Range implements Serializable {
 
@@ -116,16 +116,18 @@ public class Range implements Serializable {
 
   public /*@non_null pure@*/String getRanges() {
 
-    String result = null;
-    Enumeration enu = m_RangeStrings.elements();
-    while (enu.hasMoreElements()) {
-      if (result == null) {
-	result = (String)enu.nextElement();
+    StringBuffer result = new StringBuffer(m_RangeStrings.size()*4);
+    boolean first = true;
+    char sep = ',';
+    for (int i = 0; i < m_RangeStrings.size(); i++) {
+      if (first) {
+        result.append((String)m_RangeStrings.elementAt(i));
+        first = false;
       } else {
-	result += ',' + (String)enu.nextElement();
+        result.append(sep + (String)m_RangeStrings.elementAt(i));
       }
     }
-    return (result == null) ? "" : result;
+    return result.toString();
   }
 
   /**
