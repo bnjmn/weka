@@ -31,6 +31,7 @@ weka.core.converters.Saver=weka.gui.beans.Saver
 weka.classifiers.Classifier=weka.gui.beans.Classifier
 weka.filters.Filter=weka.gui.beans.Filter
 weka.clusterers.Clusterer=weka.gui.beans.Clusterer
+weka.associations.Associator=weka.gui.beans.Associator
 # weka.attributeSelection.ASEvaluation=weka.gui.beans.AttributeSelector
 
 # toolbar ordering information for wrapper types
@@ -39,6 +40,7 @@ weka.core.converters.Saver.order=1
 weka.filters.Filter.order=3
 weka.classifiers.Classifier.order=4
 weka.clusterers.Clusterer.order=5
+weka.associations.Associator.order=6
 # weka.attributeSelection.ASEvaluation.order=6
 
 # toolbar naming aliases for weka algorithm classes
@@ -47,3 +49,4 @@ weka.core.converters.Saver.alias=DataSinks
 weka.classifiers.Classifier.alias=Classifiers
 weka.clusterers.Clusterer.alias=Clusterers
 weka.filters.Filter.alias=Filters
+weka.associations.Associator.alias=Associations
