@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.60 $ 
+ * @version $Revision: 1.61 $ 
  */
 public class Instances implements Serializable {
  
@@ -228,6 +228,7 @@ public class Instances implements Serializable {
   /**
    * Create a copy of the structure, but "cleanse" string types (i.e.
    * doesn't contain references to the strings seen in the past).
+   * Also cleanses all relational attributes.
    *
    * @return a copy of the instance structure.
    */
@@ -238,6 +239,8 @@ public class Instances implements Serializable {
       Attribute att = (Attribute)atts.elementAt(i);
       if (att.type() == Attribute.STRING) {
         atts.setElementAt(new Attribute(att.name(), (FastVector)null), i);
+      } else if (att.type() == Attribute.RELATIONAL) {
+        atts.setElementAt(new Attribute(att.name(), att.relation()), i);
       }
     }
     Instances result = new Instances(relationName(), atts, 0);
@@ -1204,6 +1207,22 @@ public class Instances implements Serializable {
       text.append(attribute(i)).append("\n");
     }
     text.append("\n").append(ARFF_DATA).append("\n");
+
+    text.append(stringWithoutHeader());
+    return text.toString();
+  }
+
+  /**
+   * Returns the instances in the dataset as a string in ARFF format. Strings
+   * are quoted if they contain whitespace characters, or if they
+   * are a question mark.
+   *
+   * @return the dataset in ARFF format as a string
+   */
+  protected String stringWithoutHeader() {
+    
+    StringBuffer text = new StringBuffer();
+
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i));
       if (i < numInstances() - 1) {
@@ -1446,6 +1465,14 @@ public class Instances implements Serializable {
 	percent = Math.round(100.0 * as.realCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
+      case Attribute.RELATIONAL:
+	result.append(Utils.padLeft("Rel", 4)).append(' ');
+	percent = Math.round(100.0 * as.intCount / as.totalCount);
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	result.append(Utils.padLeft("" + 0, 3)).append("% ");
+	percent = Math.round(100.0 * as.realCount / as.totalCount);
+	result.append(Utils.padLeft("" + percent, 3)).append("% ");
+	break;
       default:
 	result.append(Utils.padLeft("???", 4)).append(' ');
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
@@ -1528,7 +1555,7 @@ public class Instances implements Serializable {
       if (tokenizer.ttype == '}') {
 	break;
       }
-       
+ 
       // Is index valid?
       try{
 	m_IndicesBuffer[numValues] = Integer.valueOf(tokenizer.sval).intValue();
@@ -1586,6 +1613,20 @@ public class Instances implements Serializable {
           } catch (ParseException e) {
             errms(tokenizer,"unparseable date: " + tokenizer.sval);
           }
+          break;
+        case Attribute.RELATIONAL:
+          StringReader reader = new StringReader(tokenizer.sval);
+          StreamTokenizer innerTokenizer = new StreamTokenizer(reader);
+          initTokenizer(innerTokenizer);
+          Instances data = new Instances(attribute(m_IndicesBuffer[numValues]).relation(), 100);
+
+          // Allocate buffers in case sparse instances have to be read
+          data.m_ValueBuffer = new double[data.numAttributes()];
+          data.m_IndicesBuffer = new int[data.numAttributes()];
+
+          while (data.getInstance(innerTokenizer, true)) {};
+          data.compactify();
+          m_ValueBuffer[numValues] = attribute(m_IndicesBuffer[numValues]).addRelation(data);
           break;
         default:
           errms(tokenizer,"unknown attribute type in column " + m_IndicesBuffer[numValues]);
@@ -1670,6 +1711,20 @@ public class Instances implements Serializable {
             errms(tokenizer,"unparseable date: " + tokenizer.sval);
           }
           break;
+        case Attribute.RELATIONAL:
+          StringReader reader = new StringReader(tokenizer.sval);
+          StreamTokenizer innerTokenizer = new StreamTokenizer(reader);
+          initTokenizer(innerTokenizer);
+          Instances data = new Instances(attribute(i).relation(), 100);
+
+          // Allocate buffers in case sparse instances have to be read
+          data.m_ValueBuffer = new double[data.numAttributes()];
+          data.m_IndicesBuffer = new int[data.numAttributes()];
+
+          while (data.getInstance(innerTokenizer, true)) {};
+          data.compactify();
+          instance[i] = attribute(i).addRelation(data);
+          break;
         default:
           errms(tokenizer,"unknown attribute type in column " + i);
 	}
@@ -1694,10 +1749,6 @@ public class Instances implements Serializable {
   protected void readHeader(StreamTokenizer tokenizer) 
      throws IOException {
     
-    String attributeName;
-    FastVector attributeValues;
-    int i;
-
     // Get name of relation.
     getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
@@ -1721,74 +1772,7 @@ public class Instances implements Serializable {
     }
 
     while (Attribute.ARFF_ATTRIBUTE.equalsIgnoreCase(tokenizer.sval)) {
-
-      // Get attribute name.
-      getNextToken(tokenizer);
-      attributeName = tokenizer.sval;
-      getNextToken(tokenizer);
-
-      // Check if attribute is nominal.
-      if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
-
-	// Attribute is real, integer, or string.
-	if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_REAL) ||
-	    tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER) ||
-	    tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
-	  m_Attributes.addElement(new Attribute(attributeName, numAttributes()));
-	  readTillEOL(tokenizer);
-	} else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
-	  m_Attributes.
-	    addElement(new Attribute(attributeName, (FastVector)null,
-				     numAttributes()));
-	  readTillEOL(tokenizer);
-	} else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
-          String format = null;
-          if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
-            if ((tokenizer.ttype != StreamTokenizer.TT_WORD) &&
-                (tokenizer.ttype != '\'') &&
-                (tokenizer.ttype != '\"')) {
-              errms(tokenizer,"not a valid date format");
-            }
-            format = tokenizer.sval;
-            readTillEOL(tokenizer);
-          } else {
-            tokenizer.pushBack();
-          }
-	  m_Attributes.addElement(new Attribute(attributeName, format,
-                                                numAttributes()));
-
-	} else {
-	  errms(tokenizer,"no valid attribute type or invalid "+
-		"enumeration");
-	}
-      } else {
-
-	// Attribute is nominal.
-	attributeValues = new FastVector();
-	tokenizer.pushBack();
-	
-	// Get values for nominal attribute.
-	if (tokenizer.nextToken() != '{') {
-	  errms(tokenizer,"{ expected at beginning of enumeration");
-	}
-	while (tokenizer.nextToken() != '}') {
-	  if (tokenizer.ttype == StreamTokenizer.TT_EOL) {
-	    errms(tokenizer,"} expected at end of enumeration");
-	  } else {
-	    attributeValues.addElement(tokenizer.sval);
-	  }
-	}
-	if (attributeValues.size() == 0) {
-	  errms(tokenizer,"no nominal values found");
-	}
-	m_Attributes.
-	  addElement(new Attribute(attributeName, attributeValues,
-				   numAttributes()));
-      }
-      getLastToken(tokenizer,false);
-      getFirstToken(tokenizer);
-      if (tokenizer.ttype == StreamTokenizer.TT_EOF)
-	errms(tokenizer,"premature end of file");
+      parseAttribute(tokenizer);
     }
 
     // Check if data part follows. We can't easily check for EOL.
@@ -1804,6 +1788,122 @@ public class Instances implements Serializable {
     // Allocate buffers in case sparse instances have to be read
     m_ValueBuffer = new double[numAttributes()];
     m_IndicesBuffer = new int[numAttributes()];
+  }
+
+  /**
+   * Parses the attribute declaration.
+   *
+   * @param tokenizer the stream tokenizer
+   * @exception IOException if the information is not read 
+   * successfully
+   */
+  protected void parseAttribute(StreamTokenizer tokenizer) 
+    throws IOException {
+
+    String attributeName;
+    FastVector attributeValues;
+
+    // Get attribute name.
+    getNextToken(tokenizer);
+    attributeName = tokenizer.sval;
+    getNextToken(tokenizer);
+    
+    // Check if attribute is nominal.
+    if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
+      
+      // Attribute is real, integer, or string.
+      if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_REAL) ||
+          tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER) ||
+          tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
+        m_Attributes.addElement(new Attribute(attributeName, numAttributes()));
+        readTillEOL(tokenizer);
+      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
+        m_Attributes.
+          addElement(new Attribute(attributeName, (FastVector)null,
+                                   numAttributes()));
+        readTillEOL(tokenizer);
+      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
+        String format = null;
+        if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
+          if ((tokenizer.ttype != StreamTokenizer.TT_WORD) &&
+              (tokenizer.ttype != '\'') &&
+              (tokenizer.ttype != '\"')) {
+            errms(tokenizer,"not a valid date format");
+          }
+          format = tokenizer.sval;
+          readTillEOL(tokenizer);
+        } else {
+          tokenizer.pushBack();
+        }
+        m_Attributes.addElement(new Attribute(attributeName, format,
+                                              numAttributes()));
+        
+      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_RELATIONAL)) {
+        readTillEOL(tokenizer);
+        
+        // Read attributes for subrelation
+        // First, save current set of attributes
+        FastVector atts = m_Attributes;
+        m_Attributes = new FastVector();
+        
+        // Now, read attributes until we hit end of declaration of relational value
+        getFirstToken(tokenizer);
+        if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
+          errms(tokenizer,"premature end of file");
+        }
+        do {
+          if (Attribute.ARFF_ATTRIBUTE.equalsIgnoreCase(tokenizer.sval)) {
+            parseAttribute(tokenizer);
+          } else if (Attribute.ARFF_END_SUBRELATION.equalsIgnoreCase(tokenizer.sval)) {
+            getNextToken(tokenizer);
+            if (!attributeName.equalsIgnoreCase(tokenizer.sval)) {
+              errms(tokenizer, "declaration of subrelation " + attributeName + 
+                    " must be terminated by " + "@end " + attributeName);
+            }
+            break;
+          } else {
+            errms(tokenizer, "declaration of subrelation " + attributeName + 
+                  " must be terminated by " + "@end " + attributeName);
+          }
+        } while (true);
+        
+        // Make relation and restore original set of attributes
+        Instances relation = new Instances(attributeName, m_Attributes, 0);
+        m_Attributes = atts;
+        m_Attributes.addElement(new Attribute(attributeName, relation,
+                                              numAttributes()));
+      } else {
+        errms(tokenizer,"no valid attribute type or invalid "+
+              "enumeration");
+      }
+    } else {
+      
+      // Attribute is nominal.
+      attributeValues = new FastVector();
+      tokenizer.pushBack();
+      
+      // Get values for nominal attribute.
+      if (tokenizer.nextToken() != '{') {
+        errms(tokenizer,"{ expected at beginning of enumeration");
+      }
+      while (tokenizer.nextToken() != '}') {
+        if (tokenizer.ttype == StreamTokenizer.TT_EOL) {
+          errms(tokenizer,"} expected at end of enumeration");
+        } else {
+          attributeValues.addElement(tokenizer.sval);
+        }
+      }
+      if (attributeValues.size() == 0) {
+        errms(tokenizer,"no nominal values found");
+      }
+      m_Attributes.
+        addElement(new Attribute(attributeName, attributeValues,
+                                 numAttributes()));
+    }
+    getLastToken(tokenizer,false);
+    getFirstToken(tokenizer);
+    if (tokenizer.ttype == StreamTokenizer.TT_EOF)
+      errms(tokenizer,"premature end of file");
   }
 
   /**
