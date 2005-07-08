@@ -62,7 +62,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class Instance implements Copyable, Serializable {
   
@@ -753,13 +753,53 @@ public class Instance implements Copyable, Serializable {
   }
 
   /** 
-   * Returns the string value of a nominal, string, or date attribute
-   * for the instance.
+   * Returns the relational value of a relational attribute.
+   *
+   * @param attIndex the attribute's index
+   * @return the corresponding relation as an Instances object
+   * @exception IllegalArgumentException if the attribute is not a
+   * relation-valued attribute
+   * @exception UnassignedDatasetException if the instance doesn't belong
+   * to a dataset.
+   */
+  //@ requires m_Dataset != null;
+  public final /*@pure@*/ Instances relationalValue(int attIndex) {
+
+    if (m_Dataset == null) {
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
+    } 
+    return relationalValue(m_Dataset.attribute(attIndex));
+  }
+
+
+  /** 
+   * Returns the relational value of a relational attribute.
+   *
+   * @param attIndex the attribute's index
+   * @return the corresponding relation as an Instances object
+   * @exception IllegalArgumentException if the attribute is not a
+   * relation-valued attribute
+   * @exception UnassignedDatasetException if the instance doesn't belong
+   * to a dataset.
+   */
+  public final /*@pure@*/ Instances relationalValue(Attribute att) {
+
+    int attIndex = att.index();
+    if (att.isRelationValued()) {
+      return att.relation((int) value(attIndex));
+    } else {
+      throw new IllegalArgumentException("Attribute isn't relation-valued!");
+    }
+  }
+
+  /** 
+   * Returns the value of a nominal, string, date, or relational attribute
+   * for the instance as a string.
    *
    * @param attIndex the attribute's index
    * @return the value as a string
    * @exception IllegalArgumentException if the attribute is not a nominal,
-   * string, or date attribute.
+   * string, date, or relation-valued attribute.
    * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
@@ -772,14 +812,15 @@ public class Instance implements Copyable, Serializable {
     return stringValue(m_Dataset.attribute(attIndex));
   }
 
+
   /** 
-   * Returns the string value of a nominal, string, or date attribute
-   * for the instance.
+   * Returns the value of a nominal, string, date, or relational attribute
+   * for the instance as a string.
    *
-   * @param att the attribute
+   * @param attIndex the attribute's index
    * @return the value as a string
    * @exception IllegalArgumentException if the attribute is not a nominal,
-   * string, or date attribute.
+   * string, date, or relation-valued attribute.
    * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
@@ -792,6 +833,8 @@ public class Instance implements Copyable, Serializable {
       return att.value((int) value(attIndex));
     case Attribute.DATE:
       return att.formatDate(value(attIndex));
+    case Attribute.RELATIONAL:
+      return att.relation((int) value(attIndex)).stringWithoutHeader();
     default:
       throw new IllegalArgumentException("Attribute isn't nominal, string or date!");
     }
@@ -854,6 +897,7 @@ public class Instance implements Copyable, Serializable {
        case Attribute.NOMINAL:
        case Attribute.STRING:
        case Attribute.DATE:
+       case Attribute.RELATIONAL:
          text.append(Utils.quote(stringValue(attIndex)));
          break;
        case Attribute.NUMERIC:

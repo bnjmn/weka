@@ -489,6 +489,18 @@ public class SparseInstance extends Instance {
               System.err.println("Att:" + m_Indices[i] + " Val:" + valueSparse(i));
 	      throw new Error("This should never happen!");
 	    }
+	  } else if (m_Dataset.attribute(m_Indices[i]).isRelationValued()) {
+	    try {
+	      text.append(m_Indices[i] + " " +
+			  Utils.quote(m_Dataset.attribute(m_Indices[i]).
+				      relation((int)valueSparse(i)).
+                                      stringWithoutHeader()));
+            } catch (Exception e) {
+              e.printStackTrace();
+              System.err.println(new Instances(m_Dataset, 0));
+              System.err.println("Att:" + m_Indices[i] + " Val:" + valueSparse(i));
+	      throw new Error("This should never happen!");
+	    }
 	  } else {
 	    text.append(m_Indices[i] + " " +
 			Utils.doubleToString(m_AttValues[i],6));
