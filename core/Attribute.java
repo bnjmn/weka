@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -614,9 +614,9 @@ public class Attribute implements Copyable, Serializable {
       break;
     case RELATIONAL:
       text.append(ARFF_ATTRIBUTE_RELATIONAL).append("\n");
-      Enumeration enum = m_Header.enumerateAttributes();
-      while (enum.hasMoreElements()) {
-        text.append(enum.nextElement()).append("\n");
+      Enumeration enm = m_Header.enumerateAttributes();
+      while (enm.hasMoreElements()) {
+        text.append(enm.nextElement()).append("\n");
       }
       text.append(ARFF_END_SUBRELATION).append(" ").append(m_Name);
       break;
