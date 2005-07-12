@@ -8,21 +8,30 @@
 
 /*
  * Matrix.java
- * Copyright (C) 1999 The Mathworks and NIST
+ * Copyright (C) 1999 The Mathworks and NIST and 2005 University of Waikato,
+ *               Hamilton, New Zealand
  *
  */
 
 package weka.core.matrix;
 
-import java.text.NumberFormat;
+import weka.core.Utils;
+
+import java.io.BufferedReader;
+import java.io.LineNumberReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 import java.text.FieldPosition;
-import java.io.Serializable;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.StreamTokenizer;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.StringTokenizer;
 
 /**
 * Jama = Java Matrix class.
@@ -64,11 +73,12 @@ import java.io.StreamTokenizer;
 * </PRE></DD>
 * </DL>
  * <p/>
- * Adapted from the <a href="http://math.nist.gov/javanumerics/jama/" target="_blank">JAMA</a> package.
+ * Adapted from the <a href="http://math.nist.gov/javanumerics/jama/" target="_blank">JAMA</a> package. Additional methods are tagged with the 
+ * <code>@author</code> tag.
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
 */
 
 public class Matrix 
@@ -163,6 +173,70 @@ public class Matrix
         A[i][j] = vals[i+j*m];
       }
     }
+  }
+
+  /**
+   * Reads a matrix from a reader. The first line in the file should
+   * contain the number of rows and columns. Subsequent lines
+   * contain elements of the matrix.
+   *
+   * @param     r the reader containing the matrix
+   * @throws    Exception if an error occurs
+   * @see       #write(Writer)
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public Matrix(Reader r) throws Exception {
+    LineNumberReader lnr = new LineNumberReader(r);
+    String line;
+    int currentRow = -1;
+
+    while ((line = lnr.readLine()) != null) {
+
+      // Comments
+      if (line.startsWith("%"))  
+        continue;
+      
+      StringTokenizer st = new StringTokenizer(line);
+      // Ignore blank lines
+      if (!st.hasMoreTokens())  
+        continue;
+
+      if (currentRow < 0) {
+        int rows = Integer.parseInt(st.nextToken());
+        if (!st.hasMoreTokens())
+          throw new Exception("Line " + lnr.getLineNumber() 
+              + ": expected number of columns");
+
+        int cols = Integer.parseInt(st.nextToken());
+        A = new double[rows][cols];
+        m = rows;
+        n = cols;
+        currentRow++;
+        continue;
+
+      } 
+      else {
+        if (currentRow == getRowDimension())
+          throw new Exception("Line " + lnr.getLineNumber() 
+              + ": too many rows provided");
+
+        for (int i = 0; i < getColumnDimension(); i++) {
+          if (!st.hasMoreTokens())
+            throw new Exception("Line " + lnr.getLineNumber() 
+                + ": too few matrix elements provided");
+
+          set(currentRow, i, Double.valueOf(st.nextToken()).doubleValue());
+        }
+        currentRow++;
+      }
+    }
+
+    if (currentRow == -1)
+      throw new Exception("Line " + lnr.getLineNumber() 
+          + ": expected number of rows");
+    else if (currentRow != getRowDimension())
+      throw new Exception("Line " + lnr.getLineNumber() 
+          + ": too few rows provided");
   }
 
   /** 
@@ -472,6 +546,7 @@ public class Matrix
    * Returns true if the matrix is symmetric.
    *
    * @return boolean true if matrix is symmetric.
+   * @author FracPete, taken from old weka.core.Matrix class
    */
   public boolean isSymmetric() {
     int nr = A.length, nc = A[0].length;
@@ -491,6 +566,7 @@ public class Matrix
    * returns whether the matrix is a square matrix or not.
    *
    * @return true if the matrix is a square matrix
+   * @author FracPete
    */
   public boolean isSquare() {
     return (getRowDimension() == getColumnDimension());
@@ -871,6 +947,148 @@ public class Matrix
     return solve(identity(m,m));
   }
 
+  /**
+   * returns the square root of the matrix, i.e., X from the equation
+   * X*X = A.<br/>
+   * Steps in the Calculation (see <a href="http://www.mathworks.com/access/helpdesk/help/techdoc/ref/sqrtm.html" target="blank"><code>sqrtm</code></a> in Matlab):<br/>
+   * <ol>
+   *   <li>perform eigenvalue decomposition<br/>[V,D]=eig(A)</li>
+   *   <li>take the square root of all elements in D (only the ones with 
+   *       positive sign are considered for further computation)<br/>
+   *       S=sqrt(D)</li>
+   *   <li>calculate the root<br/>
+   *       X=V*S/V, which can be also written as X=(V'\(V*S)')'</li>
+   * </ol>
+   * <p/>
+   * <b>Note:</b> since this method uses other high-level methods, it generates
+   * several instances of matrices. This can be problematic with large
+   * matrices.
+   * <p/>
+   * Examples:
+   * <ol>
+   *   <li>
+   *   <pre>
+   *  X =
+   *   5   -4    1    0    0
+   *  -4    6   -4    1    0
+   *   1   -4    6   -4    1
+   *   0    1   -4    6   -4
+   *   0    0    1   -4    5
+   * 
+   *  sqrt(X) =
+   *   2   -1   -0   -0   -0 
+   *  -1    2   -1    0   -0 
+   *   0   -1    2   -1    0 
+   *  -0    0   -1    2   -1 
+   *  -0   -0   -0   -1    2 
+   *  
+   *  Matrix m = new Matrix(new double[][]{{5,-4,1,0,0},{-4,6,-4,1,0},{1,-4,6,-4,1},{0,1,-4,6,-4},{0,0,1,-4,5}});
+   *   </pre>
+   *   </li>
+   *   <li>
+   *   <pre>
+   *  X =
+   *   7   10
+   *  15   22
+   *  
+   *  sqrt(X) =
+   *  1.5667    1.7408
+   *  2.6112    4.1779
+   * 
+   *  Matrix m = new Matrix(new double[][]{{7, 10},{15, 22}});
+   *   </pre>
+   *   </li>
+   * </ol>
+   *
+   * @return    sqrt(A)
+   * @author    FracPete
+   */
+  public Matrix sqrt() {
+    EigenvalueDecomposition   evd;
+    Matrix                    s;
+    Matrix                    v;
+    Matrix                    d;
+    Matrix                    result;
+    Matrix                    a;
+    Matrix                    b;
+    int                       i;
+    int                       n;
+
+    result = null;
+    
+    // eigenvalue decomp.
+    // [V, D] = eig(A) with A = this
+    evd = this.eig();
+    v   = evd.getV();
+    d   = evd.getD();
+
+    // S = sqrt of cells of D
+    s = new Matrix(d.getRowDimension(), d.getColumnDimension());
+    for (i = 0; i < s.getRowDimension(); i++)
+      for (n = 0; n < s.getColumnDimension(); n++)
+        s.set(i, n, StrictMath.sqrt(d.get(i, n)));
+
+    // to calculate:
+    //      result = V*S/V
+    //
+    //    with   X = B/A
+    //    and  B/A = (A'\B')'
+    //    and V=A and V*S=B
+    // we get 
+    //      result = (V'\(V*S)')'
+    //      
+    //         A*X = B
+    //           X = A\B
+    // which is 
+    //           X = A.solve(B)
+    //           
+    // with A=V' and B=(V*S)' 
+    // we get
+    //           X = V'.solve((V*S)')
+    // or
+    //      result = X'
+    //
+    // which is in full length
+    //      result = (V'.solve((V*S)'))'
+    a      = v.inverse();
+    b      = v.times(s).inverse();
+    v      = null;
+    d      = null;
+    evd    = null;
+    s      = null;
+    result = a.solve(b).inverse();
+
+    return result;
+  }
+
+  /**
+   * Performs a (ridged) linear regression.
+   *
+   * @param     y the dependent variable vector
+   * @param     ridge the ridge parameter
+   * @return    the coefficients 
+   * @throws    IllegalArgumentException if not successful
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public LinearRegression regression(Matrix y, double ridge) {
+    return new LinearRegression(this, y, ridge);
+  }
+
+  /**
+   * Performs a weighted (ridged) linear regression. 
+   *
+   * @param     y the dependent variable vector
+   * @param     w the array of data point weights
+   * @param     ridge the ridge parameter
+   * @return    the coefficients 
+   * @throws    IllegalArgumentException if the wrong number of weights were
+   *            provided.
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public final LinearRegression regression(Matrix y, double[] w, double ridge) {
+    return new LinearRegression(this, y, w, ridge);
+  }
+
   /** 
    * Matrix determinant
    * @return     determinant
@@ -1019,7 +1237,14 @@ public class Matrix
    * US Locale).  Elements are separated by
    * whitespace, all the elements for each row appear on a single line,
    * the last row is followed by a blank line.
+   * <p/>
+   * Note: This format differs from the one that can be read via the
+   * Matrix(Reader) constructor! For that format, the write(Writer) method
+   * is used (from the original weka.core.Matrix class).
+   *
    * @param input the input stream.
+   * @see Matrix(Reader)
+   * @see #write(Writer)
    */
   public static Matrix read(BufferedReader input) throws java.io.IOException {
     StreamTokenizer tokenizer= new StreamTokenizer(input);
@@ -1075,6 +1300,156 @@ public class Matrix
   private void checkMatrixDimensions(Matrix B) {
     if (B.m != m || B.n != n) {
       throw new IllegalArgumentException("Matrix dimensions must agree.");
+    }
+  }
+
+  /**
+   * Writes out a matrix. The format can be read via the Matrix(Reader)
+   * constructor.
+   *
+   * @param     w the output Writer
+   * @throws    Exception if an error occurs
+   * @see       Matrix(Reader)
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public void write(Writer w) throws Exception {
+    w.write("% Rows\tColumns\n");
+    w.write("" + getRowDimension() + "\t" + getColumnDimension() + "\n");
+    w.write("% Matrix elements\n");
+    for(int i = 0; i < getRowDimension(); i++) {
+      for(int j = 0; j < getColumnDimension(); j++)
+        w.write("" + get(i, j) + "\t");
+      w.write("\n");
+    }
+    w.flush();
+  }
+
+  /** 
+   * Converts a matrix to a string
+   *
+   * @return    the converted string
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public String toString() {
+    // Determine the width required for the maximum element,
+    // and check for fractional display requirement.
+    double maxval = 0;
+    boolean fractional = false;
+    for (int i = 0; i < getRowDimension(); i++) {
+      for (int j = 0; j < getColumnDimension(); j++) {
+        double current = get(i, j);
+        if (current < 0)
+          current *= -10;
+        if (current > maxval)
+          maxval = current;
+        double fract = current - Math.rint(current);
+        if (!fractional
+            && ((Math.log(fract) / Math.log(10)) >= -2)) {
+          fractional = true;
+        }
+      }
+    }
+    int width = (int)(Math.log(maxval) / Math.log(10) 
+        + (fractional ? 4 : 1));
+
+    StringBuffer text = new StringBuffer();   
+    for (int i = 0; i < getRowDimension(); i++) {
+      for (int j = 0; j < getColumnDimension(); j++)
+        text.append(" ").append(Utils.doubleToString(get(i, j),
+              width, (fractional ? 2 : 0)));
+      text.append("\n");
+    }
+
+    return text.toString();
+  } 
+  
+  /**
+   * Main method for testing this class.
+   */
+  public static void main(String[] args) {
+    Matrix        I;
+    Matrix        A;
+    Matrix        B;
+
+    try {
+      // Identity
+      System.out.println("\nIdentity\n");
+      I = Matrix.identity(3, 5);
+      System.out.println("I(3,5)\n" + I);
+      
+      // basic operations - square
+      System.out.println("\nbasic operations - square\n");
+      A = Matrix.random(3, 3);
+      B = Matrix.random(3, 3);
+      System.out.println("A\n" + A);
+      System.out.println("B\n" + B);
+      System.out.println("A'\n" + A.inverse());
+      System.out.println("A^T\n" + A.transpose());
+      System.out.println("A+B\n" + A.plus(B));
+      System.out.println("A*B\n" + A.times(B));
+      System.out.println("X from A*X=B\n" + A.solve(B));
+
+      // basic operations - non square
+      System.out.println("\nbasic operations - non square\n");
+      A = Matrix.random(2, 3);
+      B = Matrix.random(3, 4);
+      System.out.println("A\n" + A);
+      System.out.println("B\n" + B);
+      System.out.println("A*B\n" + A.times(B));
+
+      // sqrt
+      System.out.println("\nsqrt (1)\n");
+      A = new Matrix(new double[][]{{5,-4,1,0,0},{-4,6,-4,1,0},{1,-4,6,-4,1},{0,1,-4,6,-4},{0,0,1,-4,5}});
+      System.out.println("A\n" + A);
+      System.out.println("sqrt(A)\n" + A.sqrt());
+
+      // sqrt
+      System.out.println("\nsqrt (2)\n");
+      A = new Matrix(new double[][]{{7, 10},{15, 22}});
+      System.out.println("A\n" + A);
+      System.out.println("sqrt(A)\n" + A.sqrt());
+      System.out.println("det(A)\n" + A.det() + "\n");
+
+      // eigenvalue decomp.
+      System.out.println("\nEigenvalue Decomposition\n");
+      EigenvalueDecomposition evd = A.eig();
+      System.out.println("[V,D] = eig(A)");
+      System.out.println("- V\n" + evd.getV());
+      System.out.println("- D\n" + evd.getD());
+
+      // LU decomp.
+      System.out.println("\nLU Decomposition\n");
+      LUDecomposition lud = A.lu();
+      System.out.println("[L,U,P] = lu(A)");
+      System.out.println("- L\n" + lud.getL());
+      System.out.println("- U\n" + lud.getU());
+      System.out.println("- P\n" + Utils.arrayToString(lud.getPivot()) + "\n");
+
+      // regression
+      System.out.println("\nRegression\n");
+      B = new Matrix(new double[][]{{3},{2}});
+      double ridge = 0.5;
+      double[] weights = new double[]{0.3, 0.7};
+      LinearRegression lr = A.regression(B, ridge);
+      System.out.println("A\n" + A);
+      System.out.println("B\n" + B);
+      System.out.println("ridge = " + ridge + "\n");
+      System.out.println("weights = " + Utils.arrayToString(weights) + "\n");
+      System.out.println("A.regression(B, ridge)\n" 
+          + A.regression(B, ridge) + "\n");
+      System.out.println("A.regression(B, weights, ridge)\n" 
+          + A.regression(B, weights, ridge) + "\n");
+
+      // writer/reader
+      System.out.println("\nWriter/Reader\n");
+      StringWriter writer = new StringWriter();
+      A.write(writer);
+      System.out.println("A.write(Writer)\n" + writer);
+      A = new Matrix(new StringReader(writer.toString()));
+      System.out.println("A = new Matrix.read(Reader)\n" + A);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }
