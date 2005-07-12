@@ -45,7 +45,7 @@ import  weka.filters.Filter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -419,15 +419,6 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
 
     Matrix corr = new Matrix(m_correlation);
     corr.eigenvalueDecomposition(v, d);
-    //if (debug) {
-    //  Matrix V = new Matrix(v);
-    //  boolean b = corr.testEigen(V, d, true);
-    //  if (!b)
-    //	System.out.println("Problem with eigenvektors!!!");
-    //  else
-    //	System.out.println("***** everything's fine !!!");
-    //  }
-    
     m_eigenvectors = (double [][])v.clone();
     m_eigenvalues = (double [])d.clone();
 
