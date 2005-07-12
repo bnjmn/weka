@@ -52,7 +52,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @deprecated Use instead <code>weka.core.matrix.Matrix</code> - only for
  * backwards compatibility. 
  */
@@ -91,54 +91,7 @@ public class Matrix
    * @throws Exception if an error occurs
    */
   public Matrix(Reader r) throws Exception {
-    LineNumberReader lnr = new LineNumberReader(r);
-    String line;
-    int currentRow = -1;
-
-    while ((line = lnr.readLine()) != null) {
-
-      if (line.startsWith("%")) { // Comments
-        continue;
-      }
-      StringTokenizer st = new StringTokenizer(line);
-      if (!st.hasMoreTokens()) {  // Ignore blank lines
-        continue;
-      }
-
-      if (currentRow < 0) {
-        int rows = Integer.parseInt(st.nextToken());
-        if (!st.hasMoreTokens()) {
-          throw new Exception("Line " + lnr.getLineNumber() 
-              + ": expected number of columns");
-        }
-        int cols = Integer.parseInt(st.nextToken());
-        m_Matrix = new weka.core.matrix.Matrix(rows, cols);
-        currentRow++;
-        continue;
-
-      } else {
-        if (currentRow == numRows()) {
-          throw new Exception("Line " + lnr.getLineNumber() 
-              + ": too many rows provided");
-        }
-        for (int i = 0; i < numColumns(); i++) {
-          if (!st.hasMoreTokens()) {
-            throw new Exception("Line " + lnr.getLineNumber() 
-                + ": too few matrix elements provided");
-          }
-          m_Matrix.set(
-              currentRow, i, Double.valueOf(st.nextToken()).doubleValue());
-        }
-        currentRow++;
-      }
-    }
-    if (currentRow == -1) {
-      throw new Exception("Line " + lnr.getLineNumber() 
-          + ": expected number of rows");
-    } else if (currentRow != numRows()) {
-      throw new Exception("Line " + lnr.getLineNumber() 
-          + ": too few rows provided");
-    }
+    m_Matrix = new weka.core.matrix.Matrix(r);
   }
 
   /**
@@ -164,16 +117,7 @@ public class Matrix
    * @throws Exception if an error occurs
    */
   public void write(Writer w) throws Exception {
-    w.write("% Rows\tColumns\n");
-    w.write("" + numRows() + "\t" + numColumns() + "\n");
-    w.write("% Matrix elements\n");
-    for(int i = 0; i < numRows(); i++) {
-      for(int j = 0; j < numColumns(); j++) {
-        w.write("" + m_Matrix.get(i, j) + "\t");
-      }
-      w.write("\n");
-    }
-    w.flush();
+    m_Matrix.write(w);
   }
 
   /**
@@ -282,9 +226,8 @@ public class Matrix
    * @param newColumn an array of doubles
    */
   public final void setColumn(int index, double[] newColumn) {
-    for (int i = 0; i < numRows(); i++) {
+    for (int i = 0; i < numRows(); i++)
       m_Matrix.set(i, index, newColumn[i]);
-    }
   }
 
   /** 
@@ -293,39 +236,7 @@ public class Matrix
    * @return the converted string
    */
   public String toString() {
-    // Determine the width required for the maximum element,
-    // and check for fractional display requirement.
-    double maxval = 0;
-    boolean fractional = false;
-    for(int i = 0; i < numRows(); i++) {
-      for(int j = 0; j < numColumns(); j++) {
-        double current = getElement(i, j);
-        if (current < 0) {
-          current *= -10;
-        }
-        if (current > maxval) {
-          maxval = current;
-        }
-        double fract = current - Math.rint(current);
-        if (!fractional
-            && ((Math.log(fract) / Math.log(10)) >= -2)) {
-          fractional = true;
-        }
-      }
-    }
-    int width = (int)(Math.log(maxval) / Math.log(10) 
-        + (fractional ? 4 : 1));
-
-    StringBuffer text = new StringBuffer();   
-    for(int i = 0; i < numRows(); i++) {
-      for(int j = 0; j < numColumns(); j++) {
-        text.append(" ").append(Utils.doubleToString(getElement(i, j),
-              width, (fractional ? 2 : 0)));
-      }
-      text.append("\n");
-    }
-
-    return text.toString();
+    return m_Matrix.toString();
   } 
     
   /**
@@ -392,8 +303,7 @@ public class Matrix
    * @throws IllegalArgumentException if not successful
    */
   public final double[] regression(Matrix y, double ridge) {
-    return new weka.core.matrix.LinearRegression(
-        getMatrix(), y.getMatrix(), ridge).getCoefficients();
+    return getMatrix().regression(y.getMatrix(), ridge).getCoefficients();
   }
 
   /**
@@ -407,8 +317,7 @@ public class Matrix
    * provided.
    */
   public final double[] regression(Matrix y, double [] w, double ridge) {
-    return new weka.core.matrix.LinearRegression(
-        getMatrix(), y.getMatrix(), w, ridge).getCoefficients();
+    return getMatrix().regression(y.getMatrix(), w, ridge).getCoefficients();
   }
 
   /**
@@ -549,70 +458,6 @@ public class Matrix
    */
   protected static double hypot(double a, double b) {
     return weka.core.matrix.Maths.hypot(a, b);
-  }
-
-  /**
-   * Test eigenvectors and eigenvalues.
-   * function is used for debugging
-   *
-   * @param V matrix with eigenvectors of A
-   * @param d array with eigenvalues of A
-   * @throws if new matrix cannot be made
-   */
-  public boolean testEigen(Matrix V, double [] d, boolean verbose)
-    throws Exception {
-
-    boolean equal = true;
-    if (verbose) {
-      System.out.println("--- test Eigenvectors and Eigenvalues of Matrix A --------");
-      System.out.println("Matrix A \n" + this);
-      System.out.println("Matrix V, the columns are the Eigenvectors\n" + V);
-      System.out.println("the Eigenvalues are");
-      for (int k = 0; k < d.length; k++) {
-        System.out.println( Utils.doubleToString(d[k], 2));
-      }
-      System.out.println("\n---");
-    }
-    double[][] f = new double[V.numRows()][1];
-    Matrix F = new Matrix(f);
-    for (int i = 0; i < V.numRows(); i++) {
-      double [] col =  V.getColumn(i);
-      double norm = 0.0;
-      for (int j = 0; j < col.length; j++) {
-        norm += Math.pow(col[j], 2.0);
-      }
-      norm = Math.pow(norm, 0.5);
-
-      F.setColumn(0, V.getColumn(i));
-      if (verbose)
-        System.out.println("Eigenvektor " + i + " =\n" + F + "\nNorm " + norm);
-      Matrix R = this.multiply(F);
-      if (verbose) {
-        System.out.println("this x Eigenvektor " + i + " =\n");
-        for (int k = 0; k < V.numRows(); k++) {
-          System.out.print(Utils.doubleToString(R.getElement(k, 0), 2) + "  ");
-        }
-        System.out.println(" ");
-        System.out.println(" ");
-        System.out.println("Eigenvektor "+ i + " x Eigenvalue " +
-            Utils.doubleToString(d[i], 2) +" =");
-      }
-      for (int k = 0; k < V.numRows() && equal; k++) {
-        double dd = F.getElement(k, 0) * d[i];
-        double diff = dd - R.getElement(k, 0);
-        equal = Math.abs(diff) < Utils.SMALL;
-        if (Math.abs(diff) > Utils.SMALL)
-          System.out.println("OOOOOOps");
-        if (verbose) {
-          System.out.print( Utils.doubleToString(dd, 2) + "  ");
-        }
-      }
-      if (verbose) {
-        System.out.println(" ");
-        System.out.println("---");
-      }
-    }
-    return equal;
   }
   
   /**
