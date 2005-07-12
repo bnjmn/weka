@@ -14,11 +14,13 @@
 
 package weka.core.matrix;
 
+import weka.core.Utils;
+
 /**
  * Class for performing (ridged) linear regression.
  *
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
  
 public class LinearRegression {
@@ -120,5 +122,12 @@ public class LinearRegression {
    */
   public final double[] getCoefficients() {
     return m_Coefficients;
+  }
+
+  /**
+   * returns the coefficients in a string representation
+   */
+  public String toString() {
+    return Utils.arrayToString(getCoefficients());
   }
 }
