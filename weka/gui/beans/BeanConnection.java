@@ -48,7 +48,7 @@ import javax.swing.SwingConstants;
  * maintains a list of all connections
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class BeanConnection implements Serializable {
 
@@ -658,7 +658,7 @@ public class BeanConnection implements Serializable {
    *
    * @return a <code>BeanInstance</code> value
    */
-  protected BeanInstance getSource() {
+  public BeanInstance getSource() {
     return m_source;
   }
 
@@ -667,8 +667,17 @@ public class BeanConnection implements Serializable {
    *
    * @return a <code>BeanInstance</code> value
    */
-  protected BeanInstance getTarget() {
+  public BeanInstance getTarget() {
     return m_target;
+  }
+  
+  /**
+   * Returns the name of the event for this conncetion
+   * 
+   * @return the name of the event for this connection
+   */
+  public String getEventName() {
+    return m_eventName;
   }
 
   /**
