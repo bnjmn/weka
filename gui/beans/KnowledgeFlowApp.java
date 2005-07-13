@@ -24,12 +24,15 @@ package weka.gui.beans;
 
 import weka.core.Memory;
 import weka.core.Utils;
+import weka.core.xml.KOML;
+import weka.gui.ExtensionFileFilter;
 import weka.gui.ListSelectorDialog;
 import weka.gui.LogPanel;
 import weka.gui.LookAndFeel;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
+import weka.gui.beans.xml.XMLBeans;
 import weka.gui.visualize.PrintablePanel;
 
 import java.io.OutputStream;
@@ -75,6 +78,7 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
+import javax.swing.filechooser.FileFilter;
 
 
 import java.awt.BorderLayout;
@@ -114,7 +118,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.8 $
+ * @version  $Revision: 1.9 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -293,7 +297,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.9 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -391,6 +395,27 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
   protected BeanContextSupport m_bcSupport = new BeanContextSupport();
 
+  /** the extension for the serialized setups (Java serialization) */
+  public final static String FILE_EXTENSION = ".kf";
+
+  /** the extension for the serialized setups (Java serialization) */
+  public final static String FILE_EXTENSION_XML = ".kfml";
+  
+  /** A filter to ensure only experiment files get shown in the chooser */
+  protected FileFilter m_KfFilter = 
+    new ExtensionFileFilter(FILE_EXTENSION, 
+                            "KnowledgeFlow configuration files (*" + FILE_EXTENSION + ")");
+
+  /** A filter to ensure only experiment (in KOML format) files get shown in the chooser */
+  protected FileFilter m_KOMLFilter = 
+    new ExtensionFileFilter(KOML.FILE_EXTENSION, 
+                            "KnowledgeFlow configuration files (*" + KOML.FILE_EXTENSION + ")");
+
+  /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
+  protected FileFilter m_XMLFilter = 
+    new ExtensionFileFilter(FILE_EXTENSION_XML, 
+                            "KnowledgeFlow layout files (*" + FILE_EXTENSION_XML + ")");
+
   /**
    * Creates a new <code>KnowledgeFlowApp</code> instance.
    */
@@ -401,6 +426,14 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     temp.getGraphics().setFont(new Font("Monospaced", Font.PLAIN, 10));
     m_fontM = temp.getGraphics().getFontMetrics();
     temp.hide();
+
+    // FileChooser
+    m_FileChooser.addChoosableFileFilter(m_KfFilter);
+    if (KOML.isPresent())
+       m_FileChooser.addChoosableFileFilter(m_KOMLFilter);
+    m_FileChooser.addChoosableFileFilter(m_XMLFilter);
+    m_FileChooser.setFileFilter(m_KfFilter);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     m_bcSupport.setDesignTime(true);
     m_beanLayout.setLayout(null);
@@ -1628,13 +1661,51 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     m_saveB.setEnabled(false);
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+      // determine filename
+      File oFile = m_FileChooser.getSelectedFile();
+
+      // add extension if necessary
+      if (m_FileChooser.getFileFilter() == m_KfFilter) {
+        if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION))
+          oFile = new File(oFile.getParent(), oFile.getName() + FILE_EXTENSION);
+      }
+      else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
+        if (!oFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
+          oFile = new File(oFile.getParent(), oFile.getName() + KOML.FILE_EXTENSION);
+      }
+      else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
+        if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML))
+          oFile = new File(oFile.getParent(), oFile.getName() + FILE_EXTENSION_XML);
+      }
+    
       try {
-	File oFile = m_FileChooser.getSelectedFile();
-	InputStream is = new FileInputStream(oFile);
-	ObjectInputStream ois = new ObjectInputStream(is);
-	Vector beans = (Vector) ois.readObject();
-	Vector connections = (Vector) ois.readObject();
-	ois.close();
+        Vector beans       = new Vector();
+        Vector connections = new Vector();
+
+        // KOML?
+        if ( (KOML.isPresent()) && (oFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+          Vector v     = (Vector) KOML.read(oFile.getAbsolutePath());
+          beans        = (Vector) v.get(0);
+          connections  = (Vector) v.get(1);
+        }
+        // XML?
+        else if (oFile.getAbsolutePath().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
+          XMLBeans xml = new XMLBeans(m_beanLayout); 
+          Vector v     = (Vector) xml.read(oFile);
+          beans        = (Vector) v.get(0);
+          connections  = (Vector) v.get(1);
+          //connections  = new Vector();
+        }
+        // binary
+        else {
+          InputStream is = new FileInputStream(oFile);
+          ObjectInputStream ois = new ObjectInputStream(is);
+          beans = (Vector) ois.readObject();
+          connections = (Vector) ois.readObject();
+          ois.close();
+        }
+
 	java.awt.Color bckC = getBackground();
 	m_bcSupport = new BeanContextSupport();
 	m_bcSupport.setDesignTime(true);
@@ -1706,15 +1777,50 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	  ((JComponent)(tempB.getBean())).setBackground(java.awt.Color.white);
 	}
       }
+
+      // determine filename
+      File sFile = m_FileChooser.getSelectedFile();
+
+      // add extension if necessary
+      if (m_FileChooser.getFileFilter() == m_KfFilter) {
+        if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION))
+          sFile = new File(sFile.getParent(), sFile.getName() + FILE_EXTENSION);
+      }
+      else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
+        if (!sFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
+          sFile = new File(sFile.getParent(), sFile.getName() + KOML.FILE_EXTENSION);
+      }
+      else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
+        if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML))
+          sFile = new File(sFile.getParent(), sFile.getName() + FILE_EXTENSION_XML);
+      }
+    
       // now serialize components vector and connections vector
       try {
-	File sFile = m_FileChooser.getSelectedFile();
-	OutputStream os = new FileOutputStream(sFile);
-	ObjectOutputStream oos = new ObjectOutputStream(os);
-	oos.writeObject(beans);
-	oos.writeObject(BeanConnection.getConnections());
-	oos.flush();
-	oos.close();
+        // KOML?
+        if ( (KOML.isPresent()) && (sFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+          Vector v = new Vector();
+          v.add(beans);
+          v.add(BeanConnection.getConnections());
+          KOML.write(sFile.getAbsolutePath(), v);
+        }
+        // XML?
+        else if (sFile.getAbsolutePath().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
+          Vector v = new Vector();
+          v.add(beans);
+          v.add(BeanConnection.getConnections());
+          XMLBeans xml = new XMLBeans(m_beanLayout); 
+          xml.write(sFile, v);
+        }
+        // binary
+        else {
+          OutputStream os = new FileOutputStream(sFile);
+          ObjectOutputStream oos = new ObjectOutputStream(os);
+          oos.writeObject(beans);
+          oos.writeObject(BeanConnection.getConnections());
+          oos.flush();
+          oos.close();
+        }
       } catch (Exception ex) {
 	ex.printStackTrace();
       } finally {
