@@ -66,7 +66,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class Experiment implements Serializable, OptionHandler {
   
@@ -930,10 +930,14 @@ public class Experiment implements Serializable, OptionHandler {
 	} catch (Exception ex) {
 	  ex.printStackTrace();
 	  String result = "Usage:\n\n"
-	    + "-l <exp file>\n"
-	    + "\tLoad experiment from file (default use cli options)\n"
-	    + "-s <exp file>\n"
-	    + "\tSave experiment to file after setting other options\n"
+	    + "-l <exp|xml file>\n"
+	    + "\tLoad experiment from file (default use cli options).\n"
+      + "\tThe type is determined, based on the extension (" 
+        + FILE_EXTENSION + " or .xml)\n"
+	    + "-s <exp|xml file>\n"
+	    + "\tSave experiment to file after setting other options.\n"
+      + "\tThe type is determined, based on the extension (" 
+        + FILE_EXTENSION + " or .xml)\n"
 	    + "\t(default don't save)\n"
 	    + "-r\n"
 	    + "\tRun experiment (default don't run)\n"
