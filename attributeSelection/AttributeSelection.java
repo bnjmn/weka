@@ -79,7 +79,7 @@ import java.lang.reflect.Method;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.37 $
+ * @version  $Revision: 1.38 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -661,6 +661,7 @@ public class AttributeSelection implements Serializable {
       for (int i = 0; i < m_numToSelect; i++) {
 	double precision = (Math.abs(m_attributeRanking[i][1]) - 
 			    (int)(Math.abs(m_attributeRanking[i][1])));
+        double intPart = (int)(Math.abs(m_attributeRanking[i][1]));
 
 	if (precision > 0) {
 	  precision = Math.abs((Math.log(Math.abs(precision)) / 
@@ -669,7 +670,12 @@ public class AttributeSelection implements Serializable {
 	if (precision > f_p) {
 	  f_p = (int)precision;
 	}
-	if ((Math.abs((Math.log(Math.abs(m_attributeRanking[i][1])) 
+
+        if (intPart == 0) {
+          if (w_p < 2) {
+            w_p = 2;
+          }
+        } else if ((Math.abs((Math.log(Math.abs(m_attributeRanking[i][1])) 
 		       / Math.log(10)))+1) > w_p) {
 	  if (m_attributeRanking[i][1] > 0) {
 	    w_p = (int)Math.abs((Math.log(Math.abs(m_attributeRanking[i][1]))
@@ -677,7 +683,7 @@ public class AttributeSelection implements Serializable {
 	  }
 	}
       }
-      
+
       for (int i = 0; i < m_numToSelect; i++) {
 	m_selectionResults.
 	  append(Utils.doubleToString(m_attributeRanking[i][1],
