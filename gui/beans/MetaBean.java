@@ -176,6 +176,24 @@ implements BeanCommon, Visible, EventConstraints,
   // when this group is created. Used
   // to restore their locations if the group is ungrouped.
   private Vector m_originalCoords;
+  /**
+   * returns the vector containing the original coordinates (instances of class
+   * Point) for the inputs
+   * @return the containing the coord Points of the original inputs
+   */
+  public Vector getOriginalCoords() {
+    return m_originalCoords;
+  }
+  
+  /**
+   * sets the vector containing the original coordinates (instances of class
+   * Point) for the inputs
+   * @param value the vector containing the points of the coords of the original inputs
+   */
+  public void setOriginalCoords(Vector value) {
+    m_originalCoords = value;
+  }
+  
 
   /**
    * Move coords of all inputs and outputs of this meta bean
