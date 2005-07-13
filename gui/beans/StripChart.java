@@ -55,7 +55,7 @@ import weka.core.Instance;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class StripChart 
   extends JPanel 
@@ -237,7 +237,8 @@ public class StripChart
    */
   public void setXLabelFreq(int freq) {
     m_xValFreq = freq;
-    setRefreshWidth();
+    if (getGraphics() != null)
+      setRefreshWidth();
   }
 
   /**
@@ -265,7 +266,8 @@ public class StripChart
    */
   public void setRefreshFreq(int freq) {
     m_refreshFrequency = freq;
-    setRefreshWidth();
+    if (getGraphics() != null)
+      setRefreshWidth();
   }
 
   /**
