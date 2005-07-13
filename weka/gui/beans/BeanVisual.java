@@ -41,7 +41,7 @@ import java.io.IOException;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -297,6 +297,24 @@ public class BeanVisual extends JPanel implements Serializable {
    */
   public ImageIcon getAnimatedIcon() {
     return m_animatedIcon;
+  }
+
+  /**
+   * returns the path for the icon
+   * 
+   * @return the path for the icon
+   */
+  public String getIconPath() {
+    return m_iconPath;
+  }
+
+  /**
+   * returns the path for the animated icon
+   * 
+   * @return the path for the animated icon
+   */
+  public String getAnimatedIconPath() {
+    return m_animatedIconPath;
   }
 
   /**
