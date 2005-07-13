@@ -19,6 +19,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions,\
  weka.classifiers.lazy,\
  weka.classifiers.meta,\
+ weka.classifiers.misc,\
  weka.classifiers.trees,\
  weka.classifiers.rules
 
