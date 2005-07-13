@@ -22,16 +22,13 @@
 package weka.classifiers.xml;
 
 import weka.core.xml.XMLBasicSerialization;
-import weka.core.xml.XMLSerializationMethodHandler;
-import weka.experiment.Experiment;
-import weka.experiment.PropertyNode;
 
 /**
  * This class serializes and deserializes a Classifier instance to and
  * fro XML.<br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class XMLClassifier extends XMLBasicSerialization {
 
