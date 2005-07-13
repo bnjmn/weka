@@ -56,7 +56,7 @@ import org.w3c.dom.Element;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class XMLBasicSerialization extends XMLSerialization {
 
@@ -85,105 +85,16 @@ public class XMLBasicSerialization extends XMLSerialization {
    public void clear() throws Exception {
       super.clear();
       
-      // DefaultListModel
-      m_CustomMethods.read().add(
-            DefaultListModel.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readDefaultListModel"));
-      m_CustomMethods.write().add(
-            DefaultListModel.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeDefaultListModel"));
-
-      // HashMap
-      m_CustomMethods.read().add(
-            HashMap.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readMap"));
-      m_CustomMethods.write().add(
-            HashMap.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeMap"));
-
-      // HashSet
-      m_CustomMethods.read().add(
-            HashSet.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readCollection"));
-      m_CustomMethods.write().add(
-            HashSet.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeCollection"));
-
-      // Hashtable
-      m_CustomMethods.read().add(
-            Hashtable.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readMap"));
-      m_CustomMethods.write().add(
-            Hashtable.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeMap"));
-
-      // LinkedList
-      m_CustomMethods.read().add(
-            LinkedList.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readCollection"));
-      m_CustomMethods.write().add(
-            LinkedList.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeCollection"));
-
-      // Properties
-      m_CustomMethods.read().add(
-            Properties.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readMap"));
-      m_CustomMethods.write().add(
-            Properties.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeMap"));
-
-      // Stack
-      m_CustomMethods.read().add(
-            Stack.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readCollection"));
-      m_CustomMethods.write().add(
-            Stack.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeCollection"));
-
-      // TreeMap
-      m_CustomMethods.read().add(
-            TreeMap.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readMap"));
-      m_CustomMethods.write().add(
-            TreeMap.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeMap"));
-
-      // TreeSet
-      m_CustomMethods.read().add(
-            TreeSet.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readCollection"));
-      m_CustomMethods.write().add(
-            TreeSet.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeCollection"));
-
-      // Vector
-      m_CustomMethods.read().add(
-            Vector.class, 
-            XMLSerializationMethodHandler.findReadMethod(
-               this, "readCollection"));
-      m_CustomMethods.write().add(
-            Vector.class, 
-            XMLSerializationMethodHandler.findWriteMethod(
-               this, "writeCollection"));
+      m_CustomMethods.register(this, DefaultListModel.class, "DefaultListModel");
+      m_CustomMethods.register(this, HashMap.class, "Map");
+      m_CustomMethods.register(this, HashSet.class, "Collection");
+      m_CustomMethods.register(this, Hashtable.class, "Map");
+      m_CustomMethods.register(this, LinkedList.class, "Collection");
+      m_CustomMethods.register(this, Properties.class, "Map");
+      m_CustomMethods.register(this, Stack.class, "Collection");
+      m_CustomMethods.register(this, TreeMap.class, "Map");
+      m_CustomMethods.register(this, TreeSet.class, "Collection");
+      m_CustomMethods.register(this, Vector.class, "Collection");
    }
    
    /**
@@ -193,21 +104,28 @@ public class XMLBasicSerialization extends XMLSerialization {
     * member of
     * @param o the Object to describe in XML
     * @param name the name of the object
+    * @return the node that was created
     * @throws Exception if the DOM creation fails
     * @see javax.swing.DefaultListModel
     */
-   public void writeDefaultListModel(Element parent, Object o, String name) 
+   public Element writeDefaultListModel(Element parent, Object o, String name) 
       throws Exception {
 
       Element              node;
       int                  i;
       DefaultListModel     model;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), name);
+      
       model = (DefaultListModel) o;
       node = addElement(parent, name, o.getClass().getName(), false, false);
 
       for (i = 0; i < model.getSize(); i++)
          invokeWriteToXML(node, model.get(i), Integer.toString(i));
+      
+      return node;
    }
 
    /**
@@ -224,11 +142,27 @@ public class XMLBasicSerialization extends XMLSerialization {
       Vector               children;
       Element              child;
       int                  i;
+      int                  index;
+      int                  currIndex;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), node.getAttribute(ATT_NAME));
+      
       children = XMLDocument.getChildTags(node); 
       model    = new DefaultListModel();
-      model.setSize(children.size());
+      
+      // determine highest index for size
+      index    = children.size() - 1;
+      for (i = 0; i < children.size(); i++) {
+        child     = (Element) children.get(i);
+        currIndex = Integer.parseInt(child.getAttribute(ATT_NAME));
+        if (currIndex > index)
+          index = currIndex;
+      }
+      model.setSize(index + 1);
 
+      // set values
       for (i = 0; i < children.size(); i++) {
          child = (Element) children.get(i);
          model.set(
@@ -246,16 +180,21 @@ public class XMLBasicSerialization extends XMLSerialization {
     * member of
     * @param o the Object to describe in XML
     * @param name the name of the object
+    * @return the node that was created
     * @throws Exception if the DOM creation fails
     * @see javax.swing.DefaultListModel
     */
-   public void writeCollection(Element parent, Object o, String name) 
+   public Element writeCollection(Element parent, Object o, String name) 
       throws Exception {
 
       Element         node;
       Iterator        iter;
       int             i;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), name);
+      
       iter = ((Collection) o).iterator();
       node = addElement(parent, name, o.getClass().getName(), false, false);
 
@@ -264,6 +203,8 @@ public class XMLBasicSerialization extends XMLSerialization {
          invokeWriteToXML(node, iter.next(), Integer.toString(i));
          i++;
       }
+      
+      return node;
    }
 
    /**
@@ -281,10 +222,26 @@ public class XMLBasicSerialization extends XMLSerialization {
       Vector               children;
       Element              child;
       int                  i;
+      int                  index;
+      int                  currIndex;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), node.getAttribute(ATT_NAME));
+      
       children = XMLDocument.getChildTags(node); 
       v        = new Vector();
-      v.setSize(children.size());
+
+      // determine highest index for size
+      index    = children.size() - 1;
+      for (i = 0; i < children.size(); i++) {
+        child     = (Element) children.get(i);
+        currIndex = Integer.parseInt(child.getAttribute(ATT_NAME));
+        if (currIndex > index)
+          index = currIndex;
+      }
+      v.setSize(index + 1);
+
 
       // put the children in the vector to sort them according their index
       for (i = 0; i < children.size(); i++) {
@@ -309,10 +266,11 @@ public class XMLBasicSerialization extends XMLSerialization {
     * member of
     * @param o the Object to describe in XML
     * @param name the name of the object
+    * @return the node that was created
     * @throws Exception if the DOM creation fails
     * @see javax.swing.DefaultListModel
     */
-   public void writeMap(Element parent, Object o, String name) 
+   public Element writeMap(Element parent, Object o, String name) 
       throws Exception {
 
       Map            map;
@@ -321,6 +279,10 @@ public class XMLBasicSerialization extends XMLSerialization {
       Element        child;
       Iterator       iter;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), name);
+      
       map  = (Map) o;
       iter = map.keySet().iterator();
       node = addElement(parent, name, o.getClass().getName(), false, false);
@@ -332,6 +294,8 @@ public class XMLBasicSerialization extends XMLSerialization {
          invokeWriteToXML(child, key,          VAL_KEY);
          invokeWriteToXML(child, map.get(key), VAL_VALUE);
       }
+      
+      return node;
    }
 
    /**
@@ -355,6 +319,10 @@ public class XMLBasicSerialization extends XMLSerialization {
       int                  n;
       String               name;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), node.getAttribute(ATT_NAME));
+      
       map      = (Map) Class.forName(
                      node.getAttribute(ATT_CLASS)).newInstance();
       children = XMLDocument.getChildTags(node); 
@@ -381,11 +349,5 @@ public class XMLBasicSerialization extends XMLSerialization {
       }
       
       return map;
-   }
-   
-   /**
-    * for testing only 
-    */
-   public static void main(String[] args) throws Exception {
    }
 }
