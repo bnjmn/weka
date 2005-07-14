@@ -16,7 +16,7 @@
 
 /*
  * XMLExperiment.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.experiment.xml;
@@ -33,7 +33,6 @@ import java.util.Vector;
 import org.w3c.dom.Element;
 
 import weka.core.xml.XMLBasicSerialization;
-import weka.core.xml.XMLSerializationMethodHandler;
 import weka.core.xml.XMLDocument;
 import weka.experiment.Experiment;
 import weka.experiment.PropertyNode;
@@ -53,7 +52,7 @@ import weka.experiment.PropertyNode;
  * @see Experiment#m_ClassFirst
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class XMLExperiment extends XMLBasicSerialization {
    /** the name of the classFirst property */
@@ -97,9 +96,7 @@ public class XMLExperiment extends XMLBasicSerialization {
       m_Properties.addAllowed(weka.experiment.ResultProducer.class, "options");
       
       // read/write methods
-      // PropertyNode
-      m_CustomMethods.read().add(PropertyNode.class, XMLSerializationMethodHandler.findReadMethod(this, "readPropertyNode"));
-      m_CustomMethods.write().add(PropertyNode.class, XMLSerializationMethodHandler.findWriteMethod(this, "writePropertyNode"));
+      m_CustomMethods.register(this, PropertyNode.class, "PropertyNode");
    }
    
    /**
@@ -117,7 +114,7 @@ public class XMLExperiment extends XMLBasicSerialization {
       
       // classfirst
       node = addElement(m_Document.getDocument().getDocumentElement(), NAME_CLASSFIRST, Boolean.class.getName(), false, false);
-      node.appendChild(node.getOwnerDocument().createTextNode(new Boolean(false).toString()));   // TODO: get-Method for classFirst
+      node.appendChild(node.getOwnerDocument().createTextNode(new Boolean(false).toString()));   // TODO: get-Method for classFirst in Experiment???
    }
    
    /**
@@ -155,15 +152,20 @@ public class XMLExperiment extends XMLBasicSerialization {
     * @param parent the parent of this object, e.g. the class this object is a member of
     * @param o the Object to describe in XML
     * @param name the name of the object
+    * @return the node that was created
     * @throws Exception if the DOM creation fails
     */
-   public void writePropertyNode(Element parent, Object o, String name) throws Exception {
+   public Element writePropertyNode(Element parent, Object o, String name) throws Exception {
       Element              node;
       PropertyNode         pnode;
       Vector               children;
       int                  i;
       Element              child;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), name);
+      
       pnode = (PropertyNode) o;
       node  = (Element) parent.appendChild(m_Document.getDocument().createElement(TAG_OBJECT));
       node.setAttribute(ATT_NAME, name);
@@ -191,6 +193,8 @@ public class XMLExperiment extends XMLBasicSerialization {
             child.setAttribute(ATT_PRIMITIVE, VAL_YES);
          }
       }
+      
+      return node;
    }
 
    /**
@@ -212,6 +216,10 @@ public class XMLExperiment extends XMLBasicSerialization {
       int                  i;
       Class                cls;
 
+      // for debugging only
+      if (DEBUG)
+         trace(new Throwable(), node.getAttribute(ATT_NAME));
+      
       result      = null;
 
       children    = XMLDocument.getChildTags(node);
