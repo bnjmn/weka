@@ -16,12 +16,15 @@
 
 /*
  * XMLSerializationMethodHandler.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *
  */
 
 package weka.core.xml;
 
 import java.lang.reflect.Method;
+
+import javax.swing.plaf.ColorUIResource;
 
 import org.w3c.dom.Element;
 
@@ -38,7 +41,7 @@ import org.w3c.dom.Element;
  * @see XMLSerialization
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class XMLSerializationMethodHandler {
    /** for storing read methods */
@@ -232,6 +235,19 @@ public class XMLSerializationMethodHandler {
     */
    public MethodHandler write() {
       return m_WriteMethods;
+   }
+   
+   /**
+    * adds read and write methods for the given class, i.e., read&;lt;name&gt;
+    * and write&lt;name&gt; ("name" is prefixed by read and write)
+    * 
+    * @param handler  the handler class that contains the read and write method
+    * @param cls      the class to register the read and write method for
+    * @param name     the suffix of the read and write method
+    */
+   public void register(Object handler, Class cls, String name) {
+     read().add(cls, XMLSerializationMethodHandler.findReadMethod(handler, "read" + name));
+     write().add(cls, XMLSerializationMethodHandler.findWriteMethod(handler, "write" + name));
    }
    
    /**
