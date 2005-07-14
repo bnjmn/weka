@@ -16,22 +16,19 @@
 
 /*
  * XMLClassifier.java
- * Copyright (C) 2004 FracPete
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.xml;
 
 import weka.core.xml.XMLBasicSerialization;
-import weka.core.xml.XMLSerializationMethodHandler;
-import weka.experiment.Experiment;
-import weka.experiment.PropertyNode;
 
 /**
  * This class serializes and deserializes a Classifier instance to and
  * fro XML.<br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3.2.1 $ 
+ * @version $Revision: 1.3.2.2 $ 
  */
 public class XMLClassifier extends XMLBasicSerialization {
 
