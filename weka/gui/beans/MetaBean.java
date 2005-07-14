@@ -40,6 +40,14 @@ import java.beans.PropertyChangeListener;
 
 import weka.gui.Logger;
 
+/**
+ * A meta bean that encapsulates several other regular beans, useful for 
+ * grouping large KnowledgeFlows.
+ *
+ *
+ * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
+ * @version $Revision: 1.5 $
+ */
 public class MetaBean extends JPanel 
 implements BeanCommon, Visible, EventConstraints,
            Serializable, UserRequestAcceptor {
@@ -176,6 +184,7 @@ implements BeanCommon, Visible, EventConstraints,
   // when this group is created. Used
   // to restore their locations if the group is ungrouped.
   private Vector m_originalCoords;
+
   /**
    * returns the vector containing the original coordinates (instances of class
    * Point) for the inputs
@@ -193,7 +202,6 @@ implements BeanCommon, Visible, EventConstraints,
   public void setOriginalCoords(Vector value) {
     m_originalCoords = value;
   }
-  
 
   /**
    * Move coords of all inputs and outputs of this meta bean
