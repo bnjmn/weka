@@ -33,12 +33,13 @@ import java.awt.BorderLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.awt.*;
+import java.beans.EventSetDescriptor;
 
 /**
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
@@ -345,6 +346,18 @@ public class ClassAssigner extends JPanel
        return false;
      } 
     return true;
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection according to the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
   }
 
   /**

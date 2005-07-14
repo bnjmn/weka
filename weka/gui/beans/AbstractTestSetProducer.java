@@ -38,7 +38,7 @@ import java.beans.EventSetDescriptor;
  * visual representation.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  * @since 1.0
  * @see TestSetProducer
  */
@@ -129,6 +129,18 @@ public abstract class AbstractTestSetProducer extends JPanel
    */
   public boolean connectionAllowed(String eventName) {
     return (m_listenee == null);
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection according to the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
   }
 
   /**

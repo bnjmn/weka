@@ -41,7 +41,7 @@ import java.io.IOException;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -91,7 +91,7 @@ public class BeanVisual extends JPanel implements Serializable {
   private PropertyChangeSupport m_pcs = new PropertyChangeSupport(this);
   
   private boolean m_displayConnectors = false;
-  
+  private Color m_connectorColor = Color.blue;
 
   /**
    * Constructor
@@ -307,7 +307,20 @@ public class BeanVisual extends JPanel implements Serializable {
   public void setDisplayConnectors(boolean dc) {
     //    m_visualHolder.setDisplayConnectors(dc);
     m_displayConnectors = dc;
+    m_connectorColor = Color.blue;
     repaint();
+  }
+
+  /**
+   * Turn on/off the connector points
+   *
+   * @param dc a <code>boolean</code> value
+   * @param c the Color to use
+   */
+  public void setDisplayConnectors(boolean dc,
+                                   Color c) {
+    setDisplayConnectors(dc);
+    m_connectorColor = c;
   }
 
   /**
@@ -331,7 +344,7 @@ public class BeanVisual extends JPanel implements Serializable {
   public void paintComponent(Graphics gx) {
     super.paintComponent(gx);
     if (m_displayConnectors) {
-      gx.setColor(Color.blue);
+      gx.setColor(m_connectorColor);
       
       int midx = (int)(this.getWidth() / 2.0);
       int midy = (int)(this.getHeight() / 2.0);

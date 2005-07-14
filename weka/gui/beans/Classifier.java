@@ -46,14 +46,14 @@ import java.beans.EventSetDescriptor;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.classifiers.*;
-import weka.classifiers.trees.J48;
+import weka.classifiers.rules.ZeroR;
 import weka.gui.Logger;
 
 /**
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.2 $
+ * @version $Revision: 1.16.2.3 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -73,8 +73,8 @@ public class Classifier extends JPanel
 
   protected BeanVisual m_visual = 
     new BeanVisual("Classifier",
-		   BeanVisual.ICON_PATH+"J48.gif",
-		   BeanVisual.ICON_PATH+"J48_animated.gif");
+		   BeanVisual.ICON_PATH+"DefaultClassifier.gif",
+		   BeanVisual.ICON_PATH+"DefaultClassifier_animated.gif");
 
   private static int IDLE = 0;
   private static int BUILDING_MODEL = 1;
@@ -121,7 +121,7 @@ public class Classifier extends JPanel
    */
   private Instances m_trainingSet;
   private transient Instances m_testingSet;
-  private weka.classifiers.Classifier m_Classifier = new J48();
+  private weka.classifiers.Classifier m_Classifier = new ZeroR();
   private IncrementalClassifierEvent m_ie = 
     new IncrementalClassifierEvent(this);
 
@@ -1015,8 +1015,11 @@ public class Classifier extends JPanel
     }
 
     if (eventName.compareTo("batchClassifier") == 0) {
-      if (!m_listenees.containsKey("testSet") || 
-	  !m_listenees.containsKey("trainingSet")) {
+      if (!m_listenees.containsKey("testSet")) {
+        return false;
+      }
+      if (!m_listenees.containsKey("trainingSet") && 
+          m_trainingSet == null) {
 	return false;
       }
       Object source = m_listenees.get("testSet");
@@ -1025,12 +1028,12 @@ public class Classifier extends JPanel
 	  return false;
 	}
       }
-      source = m_listenees.get("trainingSet");
+      /*      source = m_listenees.get("trainingSet");
       if (source instanceof EventConstraints) {
 	if (!((EventConstraints)source).eventGeneratable("trainingSet")) {
 	  return false;
 	}
-      }
+        } */
     }
 
     if (eventName.compareTo("text") == 0) {

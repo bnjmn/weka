@@ -44,6 +44,7 @@ import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.io.Serializable;
+import java.beans.EventSetDescriptor;
 
 import weka.core.Queue;
 import weka.core.Instances;
@@ -54,7 +55,7 @@ import weka.core.Instance;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class StripChart 
   extends JPanel 
@@ -694,6 +695,18 @@ public class StripChart
       return true;
     }
     return false;
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection according to the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
   }
 
   /**

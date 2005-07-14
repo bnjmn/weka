@@ -35,6 +35,7 @@ import java.awt.BorderLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.awt.*;
+import java.beans.EventSetDescriptor;
 
 public class ClassValuePicker extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
@@ -232,6 +233,18 @@ public class ClassValuePicker extends JPanel
     }
 
     return true;
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection according to the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
   }
 
   /**

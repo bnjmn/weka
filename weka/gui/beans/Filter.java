@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.1 $
+ * @version $Revision: 1.11.2.2 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -656,6 +656,18 @@ public class Filter extends JPanel
       return false;
     }
     return true;
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection according to the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
   }
 
   /**

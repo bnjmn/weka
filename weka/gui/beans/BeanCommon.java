@@ -22,6 +22,8 @@
 
 package weka.gui.beans;
 
+import java.beans.EventSetDescriptor;
+
 /**
  * Interface specifying routines that all weka beans should implement
  * in order to allow the bean environment to exercise some control over the
@@ -34,7 +36,7 @@ package weka.gui.beans;
  * perhaps a limited number of sources.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  * @since 1.0
  */
 public interface BeanCommon {
@@ -50,6 +52,16 @@ public interface BeanCommon {
    * @param logger a <code>weka.gui.Logger</code> value
    */
   void setLog(weka.gui.Logger logger);
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  boolean connectionAllowed(EventSetDescriptor esd);
 
   /**
    * Returns true if, at this time, 

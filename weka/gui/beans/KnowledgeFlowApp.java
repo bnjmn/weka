@@ -114,7 +114,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.1.2.4 $
+ * @version  $Revision: 1.1.2.5 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -293,7 +293,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.1.2.4 $
+   * @version $Revision: 1.1.2.5 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -305,6 +305,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       //      BeanInstance.paintConnections(gx);
       if (m_mode == CONNECTING) {
 	gx.drawLine(m_startX, m_startY, m_oldX, m_oldY);
+      } else if (m_mode == SELECTING) {
+        gx.drawRect((m_startX < m_oldX) ? m_startX : m_oldX, 
+                    (m_startY < m_oldY) ? m_startY : m_oldY, 
+                    Math.abs(m_oldX-m_startX), Math.abs(m_oldY-m_startY));
       }
     }
 
@@ -330,6 +334,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   protected static final int MOVING = 1;
   protected static final int CONNECTING = 2;
   protected static final int ADDING = 3;
+  protected static final int SELECTING = 4;
 
   // which operation is in progress
   private int m_mode = NONE;
@@ -359,6 +364,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   private JButton m_loadB;
   private JButton m_stopB;
   private JButton m_helpB;
+  private JButton m_newB;
 
   /**
    * Reference to bean being manipulated
@@ -371,7 +377,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   private EventSetDescriptor m_sourceEventSetDescriptor;
 
   /**
-   * Used to record screen coordinates during move and connect
+   * Used to record screen coordinates during move, select and connect
    * operations
    */
   private int m_oldX, m_oldY;
@@ -417,6 +423,19 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 		m_oldY = me.getY();
 		m_mode = MOVING;
 	      }
+              if (m_mode != MOVING) {
+                m_mode = SELECTING;
+                m_oldX = me.getX();
+                m_oldY = me.getY();
+                m_startX = m_oldX;
+                m_startY = m_oldY;
+                Graphics2D gx = (Graphics2D)m_beanLayout.getGraphics();
+                gx.setXORMode(java.awt.Color.white);
+                //                gx.drawRect(m_oldX, m_oldY, m_oldX, m_oldY);
+                //                gx.drawLine(m_startX, m_startY, m_startX, m_startY);
+                gx.dispose();
+                m_mode = SELECTING;
+              }
 	    }
 	  }
 	}
@@ -428,6 +447,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	    m_beanLayout.repaint();
 	    m_mode = NONE;
 	  }
+          if (m_mode == SELECTING) {
+            revalidate();
+            m_beanLayout.repaint();
+            m_mode = NONE;
+            checkSubFlow(m_startX, m_startY, me.getX(), me.getY());
+          }
 	}
 
 	public void mouseClicked(MouseEvent me) {
@@ -478,15 +503,22 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 		// Give the target bean a chance to veto the proposed
 		// connection
 		if (((BeanCommon)bi.getBean()).
-		    connectionAllowed(m_sourceEventSetDescriptor.getName())) {
+		    connectionAllowed(m_sourceEventSetDescriptor)) {
 		  doConnection = true;
 		}
 	      }
 	      if (doConnection) {
 		// attempt to connect source and target beans
-		BeanConnection bc = 
-		  new BeanConnection(m_editElement, bi, 
-				     m_sourceEventSetDescriptor);
+
+                if (bi.getBean() instanceof MetaBean) {
+                  BeanConnection.doMetaConnection(m_editElement, bi,
+                                                  m_sourceEventSetDescriptor,
+                                                  m_beanLayout);
+                } else {
+                  BeanConnection bc = 
+                    new BeanConnection(m_editElement, bi, 
+                                       m_sourceEventSetDescriptor);
+                }
 	      }
 	      m_beanLayout.repaint();
 	    }
@@ -506,13 +538,20 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	    int width = ic.getIconWidth() / 2;
 	    int height = ic.getIconHeight() / 2;
 
-	    m_editElement.setX(m_oldX-width);
-	    m_editElement.setY(m_oldY-height);
+            /*	    m_editElement.setX(m_oldX-width);
+                    m_editElement.setY(m_oldY-height); */
+
+            m_editElement.setXY(m_oldX-width,
+                                m_oldY-height);
 	    m_beanLayout.repaint();
 	    
 	    // note the new points
 	    m_oldX = me.getX(); m_oldY = me.getY();
 	  }
+          if (m_mode == SELECTING) {
+            m_beanLayout.repaint();
+            m_oldX = me.getX(); m_oldY = me.getY();
+          }
 	}
 
 	 public void mouseMoved(MouseEvent e) {
@@ -588,9 +627,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 						  +"Stop24.gif")));
     m_helpB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
 						  +"Help24.gif")));
+    m_newB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+						  +"New24.gif")));
     m_stopB.setToolTipText("Stop all execution");
     m_loadB.setToolTipText("Load layout");
     m_helpB.setToolTipText("Display help");
+    m_newB.setToolTipText("Clear the layout");
     Image tempI = loadImage(BeanVisual.ICON_PATH+"Pointer.gif");
     m_pointerB = new JToggleButton(new ImageIcon(tempI));
     m_pointerB.addActionListener(new ActionListener() {
@@ -603,10 +645,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       });
 
     m_toolBarGroup.add(m_pointerB);
-    fixedTools.add(m_pointerB);
+    fixedTools.add(m_newB);
     fixedTools.add(m_saveB);
     fixedTools.add(m_loadB);
-    fixedTools.add(m_stopB);
+
     Dimension dP = m_saveB.getPreferredSize();
     Dimension dM = m_saveB.getMaximumSize();
     fixedTools.setFloatable(false);
@@ -617,7 +659,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     JToolBar fixedTools2 = new JToolBar();
     fixedTools2.setOrientation(JToolBar.VERTICAL);
     fixedTools2.setFloatable(false);
+    fixedTools2.add(m_pointerB);
     fixedTools2.add(m_helpB);
+    fixedTools2.add(m_stopB);
     m_helpB.setPreferredSize(dP);
     m_helpB.setMaximumSize(dP);
     toolBarPanel.add(fixedTools2, BorderLayout.EAST);
@@ -650,6 +694,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	public void actionPerformed(ActionEvent ae) {
 	  popupHelp();
 	}
+      });
+
+    m_newB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          clearLayout();
+        }
       });
 
     final int STANDARD_TOOLBAR = 0;
@@ -1030,6 +1080,13 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       tempB.setEnabled(true);
     }
   }
+
+  private void clearLayout() {
+    BeanInstance.reset(m_beanLayout);
+    BeanConnection.reset();
+    m_beanLayout.revalidate();
+    m_beanLayout.repaint();
+  }
   
   /**
    * Popup a context sensitive menu for the bean component
@@ -1052,6 +1109,32 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 				      SwingConstants.CENTER), 
 			   menuItemCount);
     menuItemCount++;
+    if (bc instanceof MetaBean) {
+      JMenuItem ungroupItem = new JMenuItem("Ungroup");
+      ungroupItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            // ungroup
+            bi.removeBean(m_beanLayout);
+            Vector group = ((MetaBean)bc).getBeansInSubFlow();
+            Vector associatedConnections = 
+              ((MetaBean)bc).getAssociatedConnections();
+            ((MetaBean)bc).restoreBeans();
+            for (int i = 0; i < group.size(); i++) {
+              BeanInstance tbi = (BeanInstance)group.elementAt(i);
+              addComponent(tbi, false);
+              tbi.addBean(m_beanLayout);
+            }
+            for (int i = 0; i < associatedConnections.size(); i++) {
+              BeanConnection tbc = 
+                (BeanConnection)associatedConnections.elementAt(i);
+              tbc.setHidden(false);
+            }
+            m_beanLayout.repaint();
+          }
+        });
+      beanContextMenu.add(ungroupItem);
+      menuItemCount++;
+    }
     JMenuItem deleteItem = new JMenuItem("Delete");
     deleteItem.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -1064,56 +1147,139 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     menuItemCount++;
     // first determine if there is a customizer for this bean
     try {
-      BeanInfo compInfo = Introspector.getBeanInfo(bc.getClass());
+      //BeanInfo [] compInfo = null;
+      //JComponent [] associatedBeans = null;
+      Vector compInfo = new Vector(1);
+      Vector associatedBeans = null;
+      Vector associatedBeansWithCustomizers = new Vector();
+      Vector outputBeans = null;
+      Vector compInfoOutputs = null;
+      if (bc instanceof MetaBean) {
+        compInfo = ((MetaBean)bc).getBeanInfoSubFlow();        
+        associatedBeans = ((MetaBean)bc).getBeansInSubFlow();
+        // make a list of only those sub flow beans that have customizers
+        for (int i = 0; i < associatedBeans.size(); i++) {
+          Object bn = ((BeanInstance)associatedBeans.elementAt(i)).getBean();
+          BeanInfo tbi = Introspector.getBeanInfo(bn.getClass());
+          if (tbi.getBeanDescriptor().getCustomizerClass() != null) {
+            associatedBeansWithCustomizers.add(associatedBeans.elementAt(i));
+          }
+        }
+        outputBeans = ((MetaBean)bc).getBeansInOutputs();
+        compInfoOutputs = ((MetaBean)bc).getBeanInfoOutputs();
+      } else {
+        compInfo.add(Introspector.getBeanInfo(bc.getClass()));
+        compInfoOutputs = compInfo;
+      }
+      final Vector tempAssociatedBeans = associatedBeans;
       if (compInfo == null) {
 	System.err.println("Error");
       } else {
 	//	System.err.println("Got bean info");
-	final Class custClass = 
-	  compInfo.getBeanDescriptor().getCustomizerClass();
-	if (custClass != null) {
-	  //	  System.err.println("Got customizer class");
-	  //	  popupCustomizer(custClass, bc);
-	  JMenuItem custItem = new JMenuItem("Configure...");
-	  custItem.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent e) {
-		popupCustomizer(custClass, bc);
-	      }
-	    });
-	  beanContextMenu.add(custItem);
-	  menuItemCount++;
-	} else {
-	  System.err.println("No customizer class");
+        for (int zz = 0; zz < compInfo.size(); zz++) {
+          final int tt = zz;
+          final Class custClass = 
+            ((BeanInfo)compInfo.elementAt(zz)).getBeanDescriptor().
+            getCustomizerClass();
+          if (custClass != null) {
+            //	  System.err.println("Got customizer class");
+            //	  popupCustomizer(custClass, bc);
+            JMenuItem custItem = null;
+            if (!(bc instanceof MetaBean)) {
+              custItem = new JMenuItem("Configure...");
+            } else {
+              String custName = custClass.getName();
+              BeanInstance tbi = 
+                (BeanInstance)associatedBeansWithCustomizers.elementAt(zz);
+              if (tbi.getBean() instanceof WekaWrapper) {
+                custName = ((WekaWrapper)tbi.getBean()).
+                  getWrappedAlgorithm().getClass().getName();
+              } else {
+                custName = custName.substring(0, custName.indexOf("Customizer"));
+              }
+              custName = custName.
+                substring(custName.lastIndexOf('.')+1 , custName.length());
+              custItem = new JMenuItem("Configure: "+ custName);
+            }
+            custItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                  if (bc instanceof MetaBean) {
+                    popupCustomizer(custClass, 
+                                    (JComponent)((BeanInstance)tempAssociatedBeans.
+                                                 elementAt(tt)).getBean());
+                  } else {
+                    popupCustomizer(custClass, bc);
+                  }
+                }
+              });
+            beanContextMenu.add(custItem);
+            menuItemCount++;
+         
+          } else {
+            System.err.println("No customizer class");
+          }
+        }
+        Vector esdV = new Vector();
+        for (int i = 0; i < compInfoOutputs.size(); i++) {
+          EventSetDescriptor [] temp = 
+            ((BeanInfo)compInfoOutputs.elementAt(i)).getEventSetDescriptors();
+          if (temp != null && temp.length > 0) {
+            esdV.add(temp);
+          }
+        }
+        //        EventSetDescriptor [] esds = compInfo.getEventSetDescriptors();
+        //        if (esds != null && esds.length > 0) {
+        if (esdV.size() > 0) {
+          beanContextMenu.insert(new JLabel("Connections", 
+                                            SwingConstants.CENTER), 
+                                 menuItemCount);
+          menuItemCount++;
 	}
-	EventSetDescriptor [] esds = compInfo.getEventSetDescriptors();
-	if (esds != null && esds.length > 0) {
-	  beanContextMenu.insert(new JLabel("Connections", 
-					    SwingConstants.CENTER), 
-				 menuItemCount);
-	  menuItemCount++;
-	}
-	for (int i = 0; i < esds.length; i++) {
-	  //	  System.err.println(esds[i].getName());
-	  // add each event name to the menu
-	  JMenuItem evntItem = new JMenuItem(esds[i].getName());
-	  final EventSetDescriptor esd = esds[i];
-	  // Check EventConstraints (if any) here
-	  boolean ok = true;
-	  if (bc instanceof EventConstraints) {
-	    ok = ((EventConstraints) bc).eventGeneratable(esd.getName());
-	  }
-	  if (ok) {
-	    evntItem.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-		  connectComponents(esd, bi, xx, yy);
-		}
-	      });
-	  } else {
-	    evntItem.setEnabled(false);
-	  }
-	  beanContextMenu.add(evntItem);
-	  menuItemCount++;
-	}
+        final Vector finalOutputs = outputBeans;
+        for (int j = 0; j < esdV.size(); j++) {
+          final int fj = j;
+          String sourceBeanName="";
+          if (bc instanceof MetaBean) {
+            Object sourceBean = ((BeanInstance)outputBeans.elementAt(j)).getBean();
+            if (sourceBean instanceof WekaWrapper) {
+              sourceBeanName = ((WekaWrapper)sourceBean).
+                getWrappedAlgorithm().getClass().getName();
+            } else {
+              sourceBeanName = sourceBean.getClass().getName();
+            }
+            sourceBeanName = sourceBeanName.
+              substring(sourceBeanName.lastIndexOf('.')+1, sourceBeanName.length());
+            sourceBeanName += ": ";
+          }
+          EventSetDescriptor [] esds = 
+            (EventSetDescriptor [])esdV.elementAt(j);
+          for (int i = 0; i < esds.length; i++) {
+            //	  System.err.println(esds[i].getName());
+            // add each event name to the menu
+            JMenuItem evntItem = new JMenuItem(sourceBeanName
+                                               +esds[i].getName());
+            final EventSetDescriptor esd = esds[i];
+            // Check EventConstraints (if any) here
+            boolean ok = true;
+            if (bc instanceof EventConstraints) {
+              ok = ((EventConstraints) bc).eventGeneratable(esd.getName());
+            }
+            if (ok) {
+              evntItem.addActionListener(new ActionListener() {
+                  public void actionPerformed(ActionEvent e) {
+                    connectComponents(esd, (bc instanceof MetaBean)
+                                      ? ((BeanInstance)finalOutputs.elementAt(fj))
+                                      : bi, 
+                                      xx, yy);
+                  }
+                });
+            } else {
+              evntItem.setEnabled(false);
+            }
+            beanContextMenu.add(evntItem);
+            menuItemCount++;
+          }
+        }
       }
     } catch (IntrospectionException ie) {
       ie.printStackTrace();
@@ -1251,14 +1417,24 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       JComponent bean = 
 	(JComponent)((BeanInstance)beanInstances.elementAt(i)).getBean();
       boolean connectable = false;
-      if (listenerClass.isInstance(bean) && bean != source) {
+      boolean canContinue = false;
+      if (bean != source) {
+        if (bean instanceof MetaBean) {
+          if (((MetaBean)bean).canAcceptConnection(listenerClass)) {
+            canContinue = true;
+          }
+        } else if (listenerClass.isInstance(bean) && bean != source) {
+          canContinue = true;
+        }
+      }
+      if (canContinue) {
 	if (!(bean instanceof BeanCommon)) {
 	  connectable = true; // assume this bean is happy to receive a connection
 	} else {
 	  // give this bean a chance to veto any proposed connection via
 	  // the listener interface
 	  if (((BeanCommon)bean).
-	      connectionAllowed(esd.getName())) {
+	      connectionAllowed(esd)) {
 	    connectable = true;
 	  }
 	}
@@ -1295,24 +1471,143 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     }
   }
 
+  private void addComponent(BeanInstance comp, boolean repaint) {
+    if (comp.getBean() instanceof Visible) {
+      ((Visible)comp.getBean()).getVisual().addPropertyChangeListener(this);
+    }
+    if (comp.getBean() instanceof BeanCommon) {
+      ((BeanCommon)comp.getBean()).setLog(m_logPanel);
+    }
+    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    if (repaint) {
+      m_beanLayout.repaint();
+    }
+    m_pointerB.setSelected(true);
+    m_mode = NONE;
+  }
+
   private void addComponent(int x, int y) {
     if (m_toolBarBean instanceof BeanContextChild) {
       m_bcSupport.add(m_toolBarBean);
     }
     BeanInstance bi = new BeanInstance(m_beanLayout, m_toolBarBean, x, y);
     //    addBean((JComponent)bi.getBean());
-
-    if (m_toolBarBean instanceof Visible) {
-      ((Visible)m_toolBarBean).getVisual().addPropertyChangeListener(this);
-    }
-    if (m_toolBarBean instanceof BeanCommon) {
-      ((BeanCommon)m_toolBarBean).setLog(m_logPanel);
-    }
     m_toolBarBean = null;
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-    m_beanLayout.repaint();
-    m_pointerB.setSelected(true);
-    m_mode = NONE;
+    addComponent(bi, true);
+  }
+
+  /**
+   * Handles the checking of a selected set of components
+   * for suitability for grouping. If suitable the user
+   * is prompted for a name and then a MetaBean is used
+   * group the components.
+   */
+  private void checkSubFlow(int startX, int startY,
+                            int endX, int endY) {
+
+    java.awt.Rectangle r = 
+      new java.awt.Rectangle((startX < endX) ? startX : endX,
+                             (startY < endY) ? startY: endY,
+                             Math.abs(startX - endX),
+                             Math.abs(startY - endY));
+    Vector selected = BeanInstance.findInstances(r);
+
+    // check if sub flow is valid
+    Vector inputs = BeanConnection.inputs(selected);
+    Vector outputs = BeanConnection.outputs(selected);
+    
+    // screen the inputs and outputs
+    if (inputs.size() == 0 || outputs.size() == 0) {
+      return;
+    }
+
+    // dissallow MetaBeans in the selected set (for the
+    // time being).
+    for (int i = 0; i < selected.size(); i++) {
+      BeanInstance temp = (BeanInstance)selected.elementAt(i);
+      if (temp.getBean() instanceof MetaBean) {
+        return;
+      }
+    }
+
+    // show connector dots for selected beans
+    for (int i = 0; i < selected.size(); i++) {
+      BeanInstance temp = (BeanInstance)selected.elementAt(i);
+      if (temp.getBean() instanceof Visible) {
+        ((Visible)temp.getBean()).getVisual().setDisplayConnectors(true);
+      }
+    }
+
+    // show connector dots for input beans
+    for (int i = 0; i < inputs.size(); i++) {
+      BeanInstance temp = (BeanInstance)inputs.elementAt(i);
+      if (temp.getBean() instanceof Visible) {
+        ((Visible)temp.getBean()).getVisual().
+          setDisplayConnectors(true, java.awt.Color.red);
+      }
+    }
+
+    // show connector dots for output beans
+    for (int i = 0; i < outputs.size(); i++) {
+      BeanInstance temp = (BeanInstance)outputs.elementAt(i);
+      if (temp.getBean() instanceof Visible) {
+        ((Visible)temp.getBean()).getVisual().
+          setDisplayConnectors(true, java.awt.Color.green);
+      }
+    }
+
+    // Confirmation pop-up
+    int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
+                                               "Group this sub-flow?",
+                                               "Group Components",
+                                               JOptionPane.YES_NO_OPTION);
+    if (result == JOptionPane.YES_OPTION) {
+      Vector associatedConnections = 
+        BeanConnection.associatedConnections(selected);
+
+      String name = JOptionPane.showInputDialog(KnowledgeFlowApp.this,
+                                                "Enter a name for this group",
+                                                "MyGroup");
+      if (name != null) {       
+        MetaBean group = new MetaBean();
+        group.setSubFlow(selected);
+        group.setAssociatedConnections(associatedConnections);
+        group.setInputs(inputs);
+        group.setOutputs(outputs);
+        if (name.length() > 0) {
+          group.getVisual().setText(name);
+        }
+        
+        if (group instanceof BeanContextChild) {
+          m_bcSupport.add(group);
+        }
+        BeanInstance bi = new BeanInstance(m_beanLayout, group, 
+                                           (int)r.getX()+(int)(r.getWidth()/2),
+                                           (int)r.getY()+(int)(r.getHeight()/2));
+        for (int i = 0; i < selected.size(); i++) {
+          BeanInstance temp = (BeanInstance)selected.elementAt(i);
+          temp.removeBean(m_beanLayout);
+          if (temp.getBean() instanceof Visible) {
+            ((Visible)temp.getBean()).getVisual().removePropertyChangeListener(this);
+          }
+        }
+        for (int i = 0; i < associatedConnections.size(); i++) {
+          BeanConnection temp = (BeanConnection)associatedConnections.elementAt(i);
+          temp.setHidden(true);
+        }
+        group.shiftBeans(bi, true);
+        
+        addComponent(bi, true);
+      }
+    }
+
+    // hide connector dots
+    for (int i = 0; i < selected.size(); i++) {
+      BeanInstance temp = (BeanInstance)selected.elementAt(i);
+      if (temp.getBean() instanceof Visible) {
+        ((Visible)temp.getBean()).getVisual().setDisplayConnectors(false);
+      }
+    }    
   }
 
   /**
@@ -1395,6 +1690,11 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	if (tempB.getBean() instanceof Visible) {
 	  ((Visible)(tempB.getBean())).getVisual().
 	    removePropertyChangeListener(this);
+          
+          if (tempB.getBean() instanceof MetaBean) {
+            ((MetaBean)tempB.getBean()).
+              removePropertyChangeListenersSubFlow(this);
+          }
 
 	  // A workaround to account for JPanel's with their default
 	  // background colour not being serializable in Apple's JRE.
@@ -1425,6 +1725,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	    ((Visible)(tempB.getBean())).getVisual().
 	      addPropertyChangeListener(this);
 
+            if (tempB.getBean() instanceof MetaBean) {
+              ((MetaBean)tempB.getBean()).
+                addPropertyChangeListenersSubFlow(this);
+            }
 	    // Restore the default background colour
 	    ((Visible)(tempB.getBean())).getVisual().
 	      setBackground(bckC);
@@ -1541,7 +1845,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
         }
       });
 
-      jf.setSize(800,600);
+      jf.setSize(900,600);
       jf.setVisible(true);     
 
       
@@ -1562,7 +1866,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
                 // stop threads
                 m_Memory.stopThreads();
-
+               
                 // display error
                 System.err.println("\ndisplayed message:");
                 m_Memory.showOutOfMemory();
