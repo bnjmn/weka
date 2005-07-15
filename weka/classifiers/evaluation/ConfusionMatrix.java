@@ -32,7 +32,7 @@ import weka.classifiers.CostMatrix;
  * of predictions for each actual value / predicted value combination.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class ConfusionMatrix extends Matrix {
 
@@ -80,9 +80,8 @@ public class ConfusionMatrix extends Matrix {
    * Creates and returns a clone of this object.
    *
    * @return a clone of this instance.
-   * @exception CloneNotSupportedException if an error occurs
    */
-  public Object clone() throws CloneNotSupportedException {
+  public Object clone() {
 
     ConfusionMatrix m = (ConfusionMatrix)super.clone();
     m.m_ClassNames = (String [])m_ClassNames.clone();
