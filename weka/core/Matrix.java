@@ -19,18 +19,6 @@
  *    Matrix.java
  *    Copyright (C) 1999 Yong Wang, Eibe Frank, Len Trigg, Gabi Schmidberger
  *
- *    The code contains some functions from the CERN Jet Java libraries
- *    for these the following copyright applies:
- *
- *    Copyright (C) 1999 CERN - European Organization for Nuclear Research.
- *    Permission to use, copy, modify, distribute and sell this software and
- *    its documentation for any purpose is hereby granted without fee, provided
- *    that the above copyright notice appear in all copies and that both that
- *    copyright notice and this permission notice appear in supporting documentation. 
- *    CERN and the University of Waikato make no representations about the
- *    suitability of this software for any purpose.
- *    It is provided "as is" without expressed or implied warranty.
- *
  */
 
 package weka.core;
@@ -52,7 +40,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @deprecated Use instead <code>weka.core.matrix.Matrix</code> - only for
  * backwards compatibility. 
  */
@@ -420,11 +408,13 @@ public class Matrix
   /**
    * Performs Eigenvalue Decomposition using Householder QR Factorization
    *
+   * Matrix must be symmetrical.
    * Eigenvectors are return in parameter V, as columns of the 2D array.
    * (Real parts of) Eigenvalues are returned in parameter d.
    *
    * @param V double array in which the eigenvectors are returned 
    * @param d array in which the eigenvalues are returned
+   * @throws Exception if matrix is not symmetric
    */
   public void eigenvalueDecomposition(double[][] V, double[] d) 
     throws Exception {
