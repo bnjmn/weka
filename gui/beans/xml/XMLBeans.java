@@ -56,7 +56,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -478,7 +478,7 @@ public class XMLBeans
       sourcePos = Integer.parseInt(tok.nextToken());
       targetPos = Integer.parseInt(tok.nextToken());
       event     = tok.nextToken();
-      hidden    = Boolean.parseBoolean(tok.nextToken());
+      hidden    = Boolean.getBoolean(tok.nextToken());
 
       // regular connection? -> new instance
       if (!(key instanceof MetaBean)) {
