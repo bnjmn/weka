@@ -56,10 +56,11 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16.2.2 $
+ * @version $Revision: 1.16.2.3 $
  */
 public class AttributeSelectedClassifier extends SingleClassifierEnhancer
-  implements OptionHandler, Drawable, AdditionalMeasureProducer {
+  implements OptionHandler, Drawable, AdditionalMeasureProducer,
+             WeightedInstancesHandler {
 
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;
@@ -340,17 +341,39 @@ public class AttributeSelectedClassifier extends SingleClassifierEnhancer
       m_numClasses = 1;
     }
 
+    Instances resampledData = null;
+    if (!(m_Evaluator instanceof WeightedInstancesHandler) || 
+        !(m_Classifier instanceof WeightedInstancesHandler)) {
+      Random r = new Random(1);
+      for (int i = 0; i < 10; i++) {
+        r.nextDouble();
+      }
+      resampledData = newData.resampleWithWeights(r);
+    }
+
     m_AttributeSelection = new AttributeSelection();
     m_AttributeSelection.setEvaluator(m_Evaluator);
     m_AttributeSelection.setSearch(m_Search);
     long start = System.currentTimeMillis();
-    m_AttributeSelection.SelectAttributes(newData);
+    m_AttributeSelection.
+      SelectAttributes((m_Evaluator instanceof WeightedInstancesHandler) 
+                       ? newData
+                       : resampledData);
     long end = System.currentTimeMillis();
-    newData = m_AttributeSelection.reduceDimensionality(newData);
-    m_Classifier.buildClassifier(newData);
+    if (m_Classifier instanceof WeightedInstancesHandler) {
+      newData = m_AttributeSelection.reduceDimensionality(newData);
+      m_Classifier.buildClassifier(newData);
+    } else {
+      resampledData = m_AttributeSelection.reduceDimensionality(resampledData);
+      m_Classifier.buildClassifier(resampledData);
+    }
+
     long end2 = System.currentTimeMillis();
     m_numAttributesSelected = m_AttributeSelection.numberAttributesSelected();
-    m_ReducedHeader = new Instances(newData, 0);
+    m_ReducedHeader = 
+      new Instances((m_Classifier instanceof WeightedInstancesHandler) ?
+                    newData
+                    : resampledData, 0);
     m_selectionTime = (double)(end - start);
     m_totalTime = (double)(end2 - start);
   }
