@@ -33,6 +33,8 @@ import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeTransformer;
 import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.Ranker;
+import weka.attributeSelection.AttributeEvaluator;
 import weka.filters.Filter;
 import weka.gui.Logger;
 import weka.gui.TaskLogger;
@@ -108,7 +110,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -246,6 +248,45 @@ public class AttributeSelectionPanel extends JPanel {
     m_AttributeEvaluatorEditor.
       addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
+        if (m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator) {
+          if (!(m_AttributeSearchEditor.getValue() instanceof Ranker)) {
+            Object backup = m_AttributeEvaluatorEditor.getBackup();
+            int result = 
+              JOptionPane.showConfirmDialog(null, "You must use use the Ranker search method "
+                                            +"in order to use\n"
+                                            +m_AttributeEvaluatorEditor.getValue().getClass().getName()
+                                            +".\nShould I select the Ranker search method for you?",
+                                            "Alert!", JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+              m_AttributeSearchEditor.setValue(new Ranker());
+            } else {
+              // restore to what was there previously (if possible)
+              if (backup != null) {
+                m_AttributeEvaluatorEditor.setValue(backup);
+              }             
+            }
+          }
+        } else {
+          if (m_AttributeSearchEditor.getValue() instanceof Ranker) {
+            Object backup = m_AttributeEvaluatorEditor.getBackup();
+            int result = 
+              JOptionPane.showConfirmDialog(null, "You must use use a search method that explores \n"
+                                            +"the space of attribute subsets (such as GreedyStepwise) in "
+                                            +"order to use\n"
+                                            +m_AttributeEvaluatorEditor.getValue().getClass().getName()
+                                            +".\nShould I select the GreedyStepwise search method for "
+                                            +"you?\n(you can always switch to a different method afterwards)",
+                                            "Alert!", JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+              m_AttributeSearchEditor.setValue(new weka.attributeSelection.GreedyStepwise());
+            } else {
+              // restore to what was there previously (if possible)
+              if (backup != null) {
+                m_AttributeEvaluatorEditor.setValue(backup);
+              } 
+            }
+          }
+        }
 	updateRadioLinks();
 	repaint();
       }
@@ -256,6 +297,46 @@ public class AttributeSelectionPanel extends JPanel {
     m_AttributeSearchEditor.
       addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
+          if (m_AttributeSearchEditor.getValue() instanceof Ranker) {
+            if (!(m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator)) {
+              Object backup = m_AttributeSearchEditor.getBackup();
+              int result = 
+                JOptionPane.showConfirmDialog(null, "You must use use an evaluator that evaluates\n"
+                                              +"single attributes (such as InfoGain) in order to use\n"
+                                              +"the Ranker. Should I select the InfoGain evaluator "
+                                              +"for you?\n"
+                                              +"(You can always switch to a different method afterwards)" ,
+                                              "Alert!", JOptionPane.YES_NO_OPTION);
+              if (result == JOptionPane.YES_OPTION) {
+                m_AttributeEvaluatorEditor.setValue(new weka.attributeSelection.InfoGainAttributeEval());
+              } else {
+                // restore to what was there previously (if possible)
+                if (backup != null) {
+                  m_AttributeSearchEditor.setValue(backup);
+                }             
+              }
+            }
+          } else {
+            if (m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator) {
+              Object backup = m_AttributeSearchEditor.getBackup();
+              int result = 
+                JOptionPane.showConfirmDialog(null, "You must use use an evaluator that evaluates\n"
+                                              +"subsets of attributes (such as CFS) in order to use\n"
+                                              +m_AttributeEvaluatorEditor.getValue().getClass().getName()
+                                              +".\nShould I select the CFS subset evaluator for you?"
+                                              +"\n(you can always switch to a different method afterwards)",
+                                              "Alert!", JOptionPane.YES_NO_OPTION);
+
+              if (result == JOptionPane.YES_OPTION) {
+                m_AttributeEvaluatorEditor.setValue(new weka.attributeSelection.CfsSubsetEval());
+              } else {
+                // restore to what was there previously (if possible)
+                if (backup != null) {
+                  m_AttributeSearchEditor.setValue(backup);
+                }              
+              }
+            }
+          }
 	  repaint();
 	}
       });
