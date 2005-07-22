@@ -119,7 +119,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.38.2.4 $
+ * @version $Revision: 1.38.2.5 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -616,7 +616,17 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     else
       return null;
   }
-  
+
+  /**
+   * Returns the backup object (may be null if there is no
+   * backup).
+   *
+   * @return the backup object
+   */
+  public Object getBackup() {
+    return m_Backup;
+  }
+
   /**
    * parses the given string of classes separated by ", " and returns the
    * a hashtable with as many entries as there are different root elements in 
