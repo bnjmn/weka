@@ -119,7 +119,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -604,6 +604,16 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public GenericObjectEditor(boolean canChangeClassInDialog) {
 
     m_canChangeClassInDialog = canChangeClassInDialog;
+  }
+
+  /**
+   * Returns the backup object (may be null if there is no
+   * backup.
+   *
+   * @return the backup object
+   */
+  public Object getBackup() {
+    return m_Backup;
   }
   
   /**
