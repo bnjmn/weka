@@ -100,7 +100,7 @@ import weka.core.*;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.6.2.1 $ 
 `*/
 public class MultiBoostAB extends AdaBoostM1 {
 
@@ -298,8 +298,13 @@ public class MultiBoostAB extends AdaBoostM1 {
     } else {
       text.append("MultiBoostAB: Base classifiers and their weights: \n\n");
       for (int i = 0; i < m_NumIterations ; i++) {
-	text.append(m_Classifiers[i].toString() + "\n\n");
-	text.append("Weight: " + Utils.roundDouble(m_Betas[i], 2) + "\n\n");
+        if ( (m_Classifiers != null) && (m_Classifiers[i] != null) ) {
+	  text.append(m_Classifiers[i].toString() + "\n\n");
+	  text.append("Weight: " + Utils.roundDouble(m_Betas[i], 2) + "\n\n");
+        }
+        else {
+          text.append("not yet initialized!\n\n");
+        }
       }
       text.append("Number of performed Iterations: " + m_NumIterations + "\n");
     }
