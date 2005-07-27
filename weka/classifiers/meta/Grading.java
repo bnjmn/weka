@@ -57,12 +57,12 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.4.2.1 $ 
  */
 public class Grading extends Stacking {
 
   /** The meta classifiers, one for each base classifier. */
-  protected Classifier [] m_MetaClassifiers = null;
+  protected Classifier [] m_MetaClassifiers = new Classifier[0];
 
   /** InstPerClass */
   protected double [] m_InstPerClass = null;
