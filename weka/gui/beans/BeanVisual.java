@@ -41,7 +41,7 @@ import java.io.IOException;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4.2.2 $
+ * @version $Revision: 1.4.2.3 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -386,7 +386,16 @@ public class BeanVisual extends JPanel implements Serializable {
     throws IOException, ClassNotFoundException {
     try {
       ois.defaultReadObject();
+      remove(m_visualLabel);
+      m_visualLabel = new JLabel(m_icon);
       loadIcons(m_iconPath, m_animatedIconPath);
+      add(m_visualLabel, BorderLayout.CENTER);
+      Dimension d = m_visualLabel.getPreferredSize();
+      Dimension d2 = new Dimension((int)d.getWidth() + 10, 
+				   (int)d.getHeight() + 10);
+      setMinimumSize(d2);
+      setPreferredSize(d2);
+      setMaximumSize(d2);   
     } catch (Exception ex) {
       ex.printStackTrace();
     }

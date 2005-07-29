@@ -24,6 +24,7 @@ package weka.gui.beans;
 
 import weka.core.Memory;
 import weka.core.Utils;
+import weka.core.SerializedObject;
 import weka.core.xml.KOML;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.ListSelectorDialog;
@@ -44,6 +45,7 @@ import java.io.ObjectInputStream;
 import java.io.LineNumberReader;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -118,7 +120,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.1.2.6 $
+ * @version  $Revision: 1.1.2.7 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -297,7 +299,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.1.2.6 $
+   * @version $Revision: 1.1.2.7 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -363,6 +365,14 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    */
   private JTabbedPane m_toolBars = new JTabbedPane();
 
+  /**
+   * Stuff relating to user created meta beans
+   */
+  private JToolBar m_userToolBar = null;
+  private Box m_userBoxPanel = null;
+  private Vector m_userComponents = new Vector();
+  private boolean m_firstUserComponentOpp = true;
+
   private JToggleButton m_pointerB;
   private JButton m_saveB;
   private JButton m_loadB;
@@ -404,17 +414,22 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   /** A filter to ensure only experiment files get shown in the chooser */
   protected FileFilter m_KfFilter = 
     new ExtensionFileFilter(FILE_EXTENSION, 
-                            "KnowledgeFlow configuration files (*" + FILE_EXTENSION + ")");
+                            "KnowledgeFlow configuration files (*" 
+                            + FILE_EXTENSION + ")");
 
-  /** A filter to ensure only experiment (in KOML format) files get shown in the chooser */
+  /** A filter to ensure only experiment (in KOML format) files 
+      get shown in the chooser */
   protected FileFilter m_KOMLFilter = 
     new ExtensionFileFilter(KOML.FILE_EXTENSION, 
-                            "KnowledgeFlow configuration files (*" + KOML.FILE_EXTENSION + ")");
+                            "KnowledgeFlow configuration files (*" 
+                            + KOML.FILE_EXTENSION + ")");
 
-  /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
+  /** A filter to ensure only experiment (in XML format) files get 
+      shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(FILE_EXTENSION_XML, 
-                            "KnowledgeFlow layout files (*" + FILE_EXTENSION_XML + ")");
+                            "KnowledgeFlow layout files (*" 
+                            + FILE_EXTENSION_XML + ")");
 
   /**
    * Creates a new <code>KnowledgeFlowApp</code> instance.
@@ -429,15 +444,16 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
     // FileChooser
     m_FileChooser.addChoosableFileFilter(m_KfFilter);
-    if (KOML.isPresent())
-       m_FileChooser.addChoosableFileFilter(m_KOMLFilter);
+    if (KOML.isPresent()) {
+      m_FileChooser.addChoosableFileFilter(m_KOMLFilter);
+    }
     m_FileChooser.addChoosableFileFilter(m_XMLFilter);
     m_FileChooser.setFileFilter(m_KfFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     m_bcSupport.setDesignTime(true);
     m_beanLayout.setLayout(null);
-
+    
     // handle mouse events
     m_beanLayout.addMouseListener(new MouseAdapter() {
 
@@ -627,6 +643,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
      add(m_logPanel, BorderLayout.SOUTH);
      
      setUpToolBars();
+     loadUserComponents();
   }
   
   private Image loadImage(String path) {
@@ -849,16 +866,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	tempToolBar.add(holderPanel);
       }
       
+      JScrollPane tempJScrollPane = 
+        createScrollPaneForToolBar(tempToolBar);
       // ok, now create tabbed pane to hold this toolbar
-      JScrollPane tempJScrollPane = new JScrollPane(tempToolBar, 
-					JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-					JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
-      Dimension d = tempToolBar.getPreferredSize();
-      tempJScrollPane.setMinimumSize(new Dimension((int)d.getWidth(),
-						   (int)(d.getHeight()+15)));
-      tempJScrollPane.setPreferredSize(new Dimension((int)d.getWidth(),
-						    (int)(d.getHeight()+15)));
       m_toolBars.addTab(tempBarName, null, 
 			tempJScrollPane,
 			tempBarName);
@@ -868,6 +879,20 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
     //    add(m_toolBars, BorderLayout.NORTH);
     add(toolBarPanel, BorderLayout.NORTH);
+  }
+
+  private JScrollPane createScrollPaneForToolBar(JToolBar tb) {
+    JScrollPane tempJScrollPane = 
+      new JScrollPane(tb, 
+                      JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                      JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    
+    Dimension d = tb.getPreferredSize();
+    tempJScrollPane.setMinimumSize(new Dimension((int)d.getWidth(),
+                                                 (int)(d.getHeight()+15)));
+    tempJScrollPane.setPreferredSize(new Dimension((int)d.getWidth(),
+                                                   (int)(d.getHeight()+15)));
+    return tempJScrollPane;
   }
 
   private void processPackage(JComponent holderPanel,
@@ -950,14 +975,57 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       ((Visible)tempBean).getVisual().scale(3);
     }
 
+    return makeHolderPanelForToolBarBean(tempBeanCompName, tempBean, 
+                                         wekawrapper, algName, false);
+  }
+
+  /**
+   * Instantiates (by making a serialized copy) the supplied
+   * template meta bean for display in the user tool bar
+   * 
+   * @param bean the prototype MetaBean to display in the toolbar
+   */
+  private JPanel instantiateToolBarMetaBean(MetaBean bean) {
+    // copy the bean via serialization
+    ((Visible)bean).getVisual().removePropertyChangeListener(this);
+    bean.removePropertyChangeListenersSubFlow(this);
+    Object copy = null;
+    try {
+      SerializedObject so = new SerializedObject(bean);
+      copy = (MetaBean)so.getObject();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      return null;
+    }
+    ((Visible)bean).getVisual().addPropertyChangeListener(this);
+    bean.addPropertyChangeListenersSubFlow(this);
+
+    String displayName ="";
+    //
+    if (copy instanceof Visible) {
+      ((Visible)copy).getVisual().scale(3);
+      displayName = ((Visible)copy).getVisual().getText();
+    }
+    return makeHolderPanelForToolBarBean(displayName,
+                                         copy,
+                                         false,
+                                         null,
+                                         true);
+  }
+
+  private JPanel makeHolderPanelForToolBarBean(final String tempName,
+                                               Object tempBean,
+                                               boolean wekawrapper,
+                                               String algName,
+                                               final boolean metabean) {
     // ---------------------------------------
     JToggleButton tempButton;
-    JPanel tempP = new JPanel();
+    final JPanel tempP = new JPanel();
     JLabel tempL = new JLabel();
     tempL.setFont(new Font("Monospaced", Font.PLAIN, 10));
     String labelName = (wekawrapper == true) 
       ? algName 
-      : tempBeanCompName;
+      : tempName;
     labelName = labelName.substring(labelName.lastIndexOf('.')+1, 
 				    labelName.length());
     tempL.setText(" "+labelName+" ");
@@ -985,24 +1053,53 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     m_toolBarGroup.add(tempButton);
     
     // add an action listener for the button here
-    final String tempName = tempBeanCompName;
     final Object tempBN = tempBean;
+    final JToggleButton fButton = tempButton;
     //	  final JToggleButton tempButton2 = tempButton;
     tempButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
+          boolean changeCursor = true;
 	  try {
 	    m_toolBarBean = null;
-	    m_toolBarBean = Beans.instantiate(null, tempName);
-	    if (m_toolBarBean instanceof WekaWrapper) {
+            if (metabean) {
+              if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
+                changeCursor = false;
+                m_toolBarGroup.remove(fButton);
+                m_userBoxPanel.remove(tempP);
+                m_userBoxPanel.revalidate();
+                m_userComponents.remove(tempBN);
+                if (m_firstUserComponentOpp) {
+                  installWindowListenerForSavingUserBeans();
+                  m_firstUserComponentOpp = false;
+                }
+                if (m_userComponents.size() == 0) {
+                  m_toolBars.removeTabAt(m_toolBars.getTabCount() - 1);
+                  m_userToolBar = null;
+                }
+              } else {
+                SerializedObject so = new SerializedObject(tempBN);
+                MetaBean copy = (MetaBean)so.getObject();
+                ((Visible)copy).getVisual().
+                  addPropertyChangeListener(KnowledgeFlowApp.this);
+                copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
+                m_toolBarBean = copy;
+              }
+            } else {
+              m_toolBarBean = Beans.instantiate(null, tempName);
+            }
+            if (m_toolBarBean instanceof WekaWrapper) {
 	      Object wrappedAlg = 
 		((WekaWrapper)tempBN).getWrappedAlgorithm();
 	      
-	      ((WekaWrapper)m_toolBarBean).setWrappedAlgorithm(wrappedAlg.getClass().newInstance());
+	      ((WekaWrapper)m_toolBarBean).
+                setWrappedAlgorithm(wrappedAlg.getClass().newInstance());
 	      //		    tempButton2.setSelected(false);
 	    }
-	    setCursor(Cursor.
-		      getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-	    m_mode = ADDING;
+            if (changeCursor) {
+              setCursor(Cursor.
+                        getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+              m_mode = ADDING;
+            }
 	  } catch (Exception ex) {
 	    System.err.
 	      println("Problem adding bean to data flow layout");
@@ -1010,15 +1107,19 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 	}
       });
     
-
-    // set tool tip text from global info if supplied
-    String summary = getGlobalInfo(tempBean);
-    if (summary != null) {
-      int ci = summary.indexOf('.');
-      if (ci != -1) {
-	summary = summary.substring(0, ci + 1);
+    if (tempBean instanceof MetaBean) {
+      tempButton.setToolTipText("Hold down shift and click to remove");
+      m_userComponents.add(tempBean);
+    } else {
+      // set tool tip text from global info if supplied
+      String summary = getGlobalInfo(tempBean);
+      if (summary != null) {
+        int ci = summary.indexOf('.');
+        if (ci != -1) {
+          summary = summary.substring(0, ci + 1);
+        }
+        tempButton.setToolTipText(summary);
       }
-      tempButton.setToolTipText(summary);
     }
 
     //return tempBean;
@@ -1074,6 +1175,21 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     return jp;
   }
 
+  private void setUpUserToolBar() {
+    m_userBoxPanel = Box.createHorizontalBox();
+    m_userBoxPanel.setBorder(javax.swing.BorderFactory.
+                             createTitledBorder("User"));
+    m_userToolBar = new JToolBar();
+    m_userToolBar.add(m_userBoxPanel);
+    JScrollPane tempJScrollPane = 
+      createScrollPaneForToolBar(m_userToolBar);
+    // ok, now create tabbed pane to hold this toolbar
+    
+    m_toolBars.addTab("User", null, 
+                      tempJScrollPane,
+                      "User created components");
+  }
+
   /**
    * Pop up a help window
    */
@@ -1082,7 +1198,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     try {
       tempB.setEnabled(false);
       InputStream inR = 
-	ClassLoader.getSystemResourceAsStream("weka/gui/beans/README_KnowledgeFlow");
+	ClassLoader.
+        getSystemResourceAsStream("weka/gui/beans/README_KnowledgeFlow");
       StringBuffer helpHolder = new StringBuffer();
       LineNumberReader lnr = new LineNumberReader(new InputStreamReader(inR));
       
@@ -1166,6 +1283,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
           }
         });
       beanContextMenu.add(ungroupItem);
+      menuItemCount++;
+      // Add to user tab
+      JMenuItem addToUserTabItem = new JMenuItem("Add to user tab");
+      addToUserTabItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            addToUserToolBar((MetaBean)bi.getBean(), true);
+          }
+        });
+      beanContextMenu.add(addToUserTabItem);
       menuItemCount++;
     }
     JMenuItem deleteItem = new JMenuItem("Delete");
@@ -1390,6 +1516,32 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   }
 
   /**
+   * Handles adding a custom MetaBean to the user toolbar
+   *
+   * @param bean the MetaBean
+   * @param installListener install a listener for window close
+   * events so as to save the user components
+   */
+  private void addToUserToolBar(MetaBean bean, 
+                                boolean installListener) {
+    if (m_userToolBar == null) {
+      // need to create the user tab and toolbar
+      setUpUserToolBar();
+    }
+    // now add to user tool bar
+    JPanel tempUser = instantiateToolBarMetaBean(bean);
+    m_userBoxPanel.add(tempUser);
+    if (installListener && m_firstUserComponentOpp) {
+      try {
+        installWindowListenerForSavingUserBeans();
+        m_firstUserComponentOpp = false;
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+
+  /**
    * Popup a menu giving choices for connections to delete (if any)
    *
    * @param closestConnections a vector containing 0 or more BeanConnections
@@ -1520,6 +1672,14 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   }
 
   private void addComponent(int x, int y) {
+    if (m_toolBarBean instanceof MetaBean) {
+      // need to add the MetaBean's internal connections
+      // to BeanConnection's vector
+      Vector associatedConnections = 
+        ((MetaBean)m_toolBarBean).getAssociatedConnections();
+      BeanConnection.getConnections().addAll(associatedConnections);
+    }
+
     if (m_toolBarBean instanceof BeanContextChild) {
       m_bcSupport.add(m_toolBarBean);
     }
@@ -1667,16 +1827,20 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
-        if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION))
-          oFile = new File(oFile.getParent(), oFile.getName() + FILE_EXTENSION);
-      }
-      else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
-        if (!oFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
-          oFile = new File(oFile.getParent(), oFile.getName() + KOML.FILE_EXTENSION);
-      }
-      else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
-        if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML))
-          oFile = new File(oFile.getParent(), oFile.getName() + FILE_EXTENSION_XML);
+        if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION)) {
+          oFile = new File(oFile.getParent(), 
+                           oFile.getName() + FILE_EXTENSION);
+        }
+      } else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
+        if (!oFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION)) {
+          oFile = new File(oFile.getParent(), 
+                           oFile.getName() + KOML.FILE_EXTENSION);
+        }
+      } else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
+        if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
+          oFile = new File(oFile.getParent(), 
+                           oFile.getName() + FILE_EXTENSION_XML);
+        }
       }
     
       try {
@@ -1684,21 +1848,20 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
         Vector connections = new Vector();
 
         // KOML?
-        if ( (KOML.isPresent()) && (oFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+        if ( (KOML.isPresent()) && 
+             (oFile.getAbsolutePath().toLowerCase().
+              endsWith(KOML.FILE_EXTENSION)) ) {
           Vector v     = (Vector) KOML.read(oFile.getAbsolutePath());
           beans        = (Vector) v.get(0);
           connections  = (Vector) v.get(1);
-        }
-        // XML?
-        else if (oFile.getAbsolutePath().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
+        } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase().
+                              endsWith(FILE_EXTENSION_XML)) {
           XMLBeans xml = new XMLBeans(m_beanLayout); 
           Vector v     = (Vector) xml.read(oFile);
           beans        = (Vector) v.get(0);
           connections  = (Vector) v.get(1);
           //connections  = new Vector();
-        }
-        // binary
-        else {
+        } /* binary */ else {
           InputStream is = new FileInputStream(oFile);
           ObjectInputStream ois = new ObjectInputStream(is);
           beans = (Vector) ois.readObject();
@@ -1783,37 +1946,40 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
-        if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION))
-          sFile = new File(sFile.getParent(), sFile.getName() + FILE_EXTENSION);
-      }
-      else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
-        if (!sFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION))
-          sFile = new File(sFile.getParent(), sFile.getName() + KOML.FILE_EXTENSION);
-      }
-      else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
-        if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML))
-          sFile = new File(sFile.getParent(), sFile.getName() + FILE_EXTENSION_XML);
+        if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION)) {
+          sFile = new File(sFile.getParent(), 
+                           sFile.getName() + FILE_EXTENSION);
+        }
+      } else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
+        if (!sFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION)) {
+          sFile = new File(sFile.getParent(), 
+                           sFile.getName() + KOML.FILE_EXTENSION);
+        }
+      } else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
+        if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
+          sFile = new File(sFile.getParent(), 
+                           sFile.getName() + FILE_EXTENSION_XML);
+        }
       }
     
       // now serialize components vector and connections vector
       try {
         // KOML?
-        if ( (KOML.isPresent()) && (sFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+        if ((KOML.isPresent()) && 
+            (sFile.getAbsolutePath().toLowerCase().
+             endsWith(KOML.FILE_EXTENSION)) ) {
           Vector v = new Vector();
           v.add(beans);
           v.add(BeanConnection.getConnections());
           KOML.write(sFile.getAbsolutePath(), v);
-        }
-        // XML?
-        else if (sFile.getAbsolutePath().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
+        } /* XML? */ else if (sFile.getAbsolutePath().
+                              toLowerCase().endsWith(FILE_EXTENSION_XML)) {
           Vector v = new Vector();
           v.add(beans);
           v.add(BeanConnection.getConnections());
           XMLBeans xml = new XMLBeans(m_beanLayout); 
           xml.write(sFile, v);
-        }
-        // binary
-        else {
+        } /* binary */ else {
           OutputStream os = new FileOutputStream(sFile);
           ObjectOutputStream oos = new ObjectOutputStream(os);
           oos.writeObject(beans);
@@ -1847,6 +2013,66 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     m_loadB.setEnabled(true);
   }
 
+  private void loadUserComponents() {
+    Vector tempV = null;
+    File sFile = 
+      new File(System.getProperty("user.home")
+               +File.separator + ".knowledgeFlow"
+               +File.separator + "userComponents");
+    if (sFile.exists()) {
+      try {
+        InputStream is = new FileInputStream(sFile);
+        ObjectInputStream ois = new ObjectInputStream(is);
+        tempV = (Vector)ois.readObject();
+        ois.close();
+      } catch (Exception ex) {
+        System.err.println("Problem reading user components.");
+        ex.printStackTrace();
+        return;
+      }
+      if (tempV.size() > 0) {
+        // create the user tab and add the components
+        for (int i = 0; i < tempV.size(); i++) {
+          MetaBean tempB = (MetaBean)tempV.elementAt(i);
+          addToUserToolBar(tempB, false);
+        }
+      }
+    }
+  }
+
+  private void installWindowListenerForSavingUserBeans() {
+    ((JFrame)getTopLevelAncestor()).
+      addWindowListener(new java.awt.event.WindowAdapter() {
+          public void windowClosing(java.awt.event.WindowEvent e) {
+            System.err.println("Saving user components....");
+            File sFile = 
+              new File(System.getProperty("user.home")
+                       +File.separator+".knowledgeFlow");
+            if (!sFile.exists()) {
+              if (!sFile.mkdir()) {
+                System.err.println("Unable to create .knowledgeFlow "
+                                   +"directory in your HOME.");
+              }
+            }
+            try {
+              File sFile2 = new File(sFile.getAbsolutePath()
+                                     +File.separator
+                                     +"userComponents");
+                
+              OutputStream os = new FileOutputStream(sFile2);
+              ObjectOutputStream oos = new ObjectOutputStream(os);
+              oos.writeObject(m_userComponents);
+              oos.flush();
+              oos.close();
+            } catch (Exception ex) {
+              System.err.println("Unable to save user components");
+              ex.printStackTrace();
+            } 
+
+          }
+        });
+  }
+  
   /**
    * Utility method for grabbing the global info help (if it exists) from
    * an arbitrary object
@@ -1941,15 +2167,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       //final KnowledgeFlowApp tm = new KnowledgeFlowApp();
       m_knowledgeFlow = new KnowledgeFlowApp();
 
-
-
       jf.getContentPane().add(m_knowledgeFlow, java.awt.BorderLayout.CENTER);
-      jf.addWindowListener(new java.awt.event.WindowAdapter() {
-        public void windowClosing(java.awt.event.WindowEvent e) {
-          jf.dispose();
-          System.exit(0);
-        }
-      });
+      jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       jf.setSize(900,600);
       jf.setVisible(true);     
