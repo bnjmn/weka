@@ -59,7 +59,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class GUIChooser extends JFrame {
 
@@ -240,7 +240,7 @@ public class GUIChooser extends JFrame {
                 }
               });
             m_KnowledgeFlowFrame.pack();
-            m_KnowledgeFlowFrame.setSize(800, 600);
+            m_KnowledgeFlowFrame.setSize(900, 600);
             m_KnowledgeFlowFrame.setVisible(true);
           }
         }
