@@ -78,7 +78,7 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
 */
 
 public class Matrix 
@@ -1362,6 +1362,78 @@ public class Matrix
 
     return text.toString();
   } 
+
+  /**
+   * converts the Matrix into a single line Matlab string: matrix is enclosed 
+   * by parentheses, rows are separated by semicolon and single cells by
+   * blanks, e.g., [1 2; 3 4].
+   * @return      the matrix in Matlab single line format
+   */
+  public String toMatlab() {
+    StringBuffer      result;
+    int               i;
+    int               n;
+
+    result = new StringBuffer();
+
+    result.append("[");
+
+    for (i = 0; i < getRowDimension(); i++) {
+      if (i > 0)
+        result.append("; ");
+      
+      for (n = 0; n < getColumnDimension(); n++) {
+        if (n > 0)
+          result.append(" ");
+        result.append(Double.toString(get(i, n)));
+      }
+    }
+    
+    result.append("]");
+
+    return result.toString();
+  }
+
+  /**
+   * creates a matrix from the given Matlab string.
+   * @param matlab  the matrix in matlab format
+   * @return        the matrix represented by the given string
+   * @see           #toMatlab()
+   */
+  public static Matrix parseMatlab(String matlab) throws Exception {
+    StringTokenizer   tokRow;
+    StringTokenizer   tokCol;
+    int               rows;
+    int               cols;
+    Matrix            result;
+    String            cells;
+    
+    // get content
+    cells = matlab.substring(
+              matlab.indexOf("[") + 1, matlab.indexOf("]")).trim();
+    
+    // determine dimenions
+    tokRow = new StringTokenizer(cells, ";");
+    rows   = tokRow.countTokens();
+    tokCol = new StringTokenizer(tokRow.nextToken(), " ");
+    cols   = tokCol.countTokens();
+    
+    // fill matrix
+    result = new Matrix(rows, cols);
+    tokRow = new StringTokenizer(cells, ";");
+    rows   = 0;
+    while (tokRow.hasMoreTokens()) {
+      tokCol = new StringTokenizer(tokRow.nextToken(), " ");
+      cols   = 0;
+      while (tokCol.hasMoreTokens()) {
+        result.set(rows, cols, Double.parseDouble(tokCol.nextToken()));
+        cols++;
+      }
+      rows++;
+    }
+    
+    return result;
+  }
   
   /**
    * Main method for testing this class.
@@ -1447,6 +1519,17 @@ public class Matrix
       System.out.println("A.write(Writer)\n" + writer);
       A = new Matrix(new StringReader(writer.toString()));
       System.out.println("A = new Matrix.read(Reader)\n" + A);
+
+      // Matlab
+      System.out.println("\nMatlab-Format\n");
+      String matlab = "[ 1   2;3 4 ]";
+      System.out.println("Matlab: " + matlab);
+      System.out.println("from Matlab:\n" + Matrix.parseMatlab(matlab));
+      System.out.println("to Matlab:\n" + Matrix.parseMatlab(matlab).toMatlab());
+      matlab = "[1 2 3 4;3 4 5 6;7 8 9 10]";
+      System.out.println("Matlab: " + matlab);
+      System.out.println("from Matlab:\n" + Matrix.parseMatlab(matlab));
+      System.out.println("to Matlab:\n" + Matrix.parseMatlab(matlab).toMatlab() + "\n");
     }
     catch (Exception e) {
       e.printStackTrace();

@@ -40,7 +40,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @deprecated Use instead <code>weka.core.matrix.Matrix</code> - only for
  * backwards compatibility. 
  */
@@ -448,6 +448,26 @@ public class Matrix
    */
   protected static double hypot(double a, double b) {
     return weka.core.matrix.Maths.hypot(a, b);
+  }
+
+  /**
+   * converts the Matrix into a single line Matlab string: matrix is enclosed 
+   * by parentheses, rows are separated by semicolon and single cells by
+   * blanks, e.g., [1 2; 3 4].
+   * @return      the matrix in Matlab single line format
+   */
+  public String toMatlab() {
+    return getMatrix().toMatlab();
+  }
+
+  /**
+   * creates a matrix from the given Matlab string.
+   * @param matlab  the matrix in matlab format
+   * @return        the matrix represented by the given string
+   * @see           #toMatlab()
+   */
+  public static Matrix parseMatlab(String matlab) throws Exception {
+    return new Matrix(weka.core.matrix.Matrix.parseMatlab(matlab).getArray());
   }
   
   /**
