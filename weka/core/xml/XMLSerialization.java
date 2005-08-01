@@ -22,6 +22,8 @@
 
 package weka.core.xml;
 
+import weka.core.Utils;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -90,12 +92,17 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */
    protected static boolean DEBUG = false;
   
+   /** the node that is currently processed, in case of writing the parent node
+    * (something might go wrong writing the new child) and in case of reading 
+    * the actual node that is tried to process */
+   protected Element m_CurrentNode = null;
+   
    /** the tag for an object */
    public final static String TAG_OBJECT = "object";
    
@@ -149,7 +156,7 @@ public class XMLSerialization {
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_NAME + "      CDATA #REQUIRED>\n"
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_CLASS + "     CDATA #REQUIRED>\n"
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_PRIMITIVE + " CDATA \"" + ATT_PRIMITIVE_DEFAULT + "\">\n"
-      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_ARRAY + "     CDATA \"" + ATT_ARRAY_DEFAULT + "\">\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_ARRAY + "     CDATA \"" + ATT_ARRAY_DEFAULT + "\">   <!-- the dimensions of the array; no=0, yes=1 -->\n"
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_NULL + "      CDATA \"" + ATT_NULL_DEFAULT + "\">\n"
       + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_VERSION + "   CDATA \"" + Version.VERSION + "\">\n"
       + "]\n"
@@ -211,6 +218,8 @@ public class XMLSerialization {
       m_ClassnameOverride.put(java.io.File.class, java.io.File.class.getName());
       
       setVersion(Version.VERSION); 
+      
+      m_CurrentNode = null;
    }
    
    /**
@@ -331,19 +340,38 @@ public class XMLSerialization {
    }
    
    /**
-    * turns the given string into a boolean
+    * turns the given string into a boolean, if a positive number is given, 
+    * then zero is considered FALSE, every other number TRUE; the empty string 
+    * is also considered being FALSE
     * 
     * @param s the string to turn into a boolean
     * @return the string as boolean
     */
    protected boolean stringToBoolean(String s) {
-      if (s.equals(VAL_YES))
+      if (s.equals(""))
+         return false;
+      else if (s.equals(VAL_YES))
          return true;
-      else
-      if (s.equalsIgnoreCase("true"))
+      else if (s.equalsIgnoreCase("true"))
          return true;
+      else if (s.replaceAll("[0-9]*", "").equals(""))
+         return (Integer.parseInt(s) != 0);
       else
          return false;
+   }
+   
+   /**
+    * appends a new node to the parent with the given parameters (a non-array)
+    * 
+    * @param parent the parent of this node. if it is <code>null</code> the 
+    *        document root element is used
+    * @param name the name of the node
+    * @param classname the classname for this node
+    * @param primitive whether it is a primitve data type or not (i.e. an object)
+    * @return the generated node 
+    */
+   protected Element addElement(Element parent, String name, String classname, boolean primitive) {
+     return addElement(parent, name, classname, primitive, 0);
    }
    
    /**
@@ -354,10 +382,10 @@ public class XMLSerialization {
     * @param name the name of the node
     * @param classname the classname for this node
     * @param primitive whether it is a primitve data type or not (i.e. an object)
-    * @param array whether it is an array
+    * @param array the dimensions of the array (0 if not an array)
     * @return the generated node 
     */
-   protected Element addElement(Element parent, String name, String classname, boolean primitive, boolean array) {
+   protected Element addElement(Element parent, String name, String classname, boolean primitive, int array) {
      return addElement(parent, name, classname, primitive, array, false);
    }
    
@@ -369,11 +397,11 @@ public class XMLSerialization {
     * @param name the name of the node
     * @param classname the classname for this node
     * @param primitive whether it is a primitve data type or not (i.e. an object)
-    * @param array whether it is an array
+    * @param array the dimensions of the array (0 if not an array)
     * @param isnull whether it is null
     * @return the generated node 
     */
-   protected Element addElement(Element parent, String name, String classname, boolean primitive, boolean array, boolean isnull) {
+   protected Element addElement(Element parent, String name, String classname, boolean primitive, int array, boolean isnull) {
       Element           result;
 
       if (parent == null)
@@ -389,8 +417,17 @@ public class XMLSerialization {
       // add following attributes only if necessary, i.e., different from default:
       if (!booleanToString(primitive).equals(ATT_PRIMITIVE_DEFAULT))
         result.setAttribute(ATT_PRIMITIVE, booleanToString(primitive));
-      if (!booleanToString(array).equals(ATT_ARRAY_DEFAULT))
-        result.setAttribute(ATT_ARRAY, booleanToString(array));
+
+      // multi-dimensional array?
+      if (array > 1) {
+        result.setAttribute(ATT_ARRAY, Integer.toString(array));
+      }
+      // backwards compatible: 0 -> no array ("no"), 1 -> 1-dim. array ("yes")
+      else {
+        if (!booleanToString(array == 1).equals(ATT_ARRAY_DEFAULT))
+          result.setAttribute(ATT_ARRAY, booleanToString(array == 1));
+      }
+      
       if (!booleanToString(isnull).equals(ATT_NULL_DEFAULT))
         result.setAttribute(ATT_NULL, booleanToString(isnull));
       
@@ -498,7 +535,9 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Boolean.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+     
+     node = addElement(parent, name, Boolean.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Boolean(o).toString()));
      
      return node;
@@ -519,7 +558,9 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Byte.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+     
+     node = addElement(parent, name, Byte.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Byte(o).toString()));
      
      return node;
@@ -540,7 +581,9 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Character.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+     
+     node = addElement(parent, name, Character.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Character(o).toString()));
      
      return node;
@@ -561,7 +604,9 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Double.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+     
+     node = addElement(parent, name, Double.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Double(o).toString()));
      
      return node;
@@ -582,7 +627,9 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Float.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+     
+     node = addElement(parent, name, Float.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Float(o).toString()));
      
      return node;
@@ -603,7 +650,9 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Integer.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+     
+     node = addElement(parent, name, Integer.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Integer(o).toString()));
      
      return node;
@@ -624,7 +673,9 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Long.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+
+     node = addElement(parent, name, Long.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Long(o).toString()));
      
      return node;
@@ -645,10 +696,25 @@ public class XMLSerialization {
      if (DEBUG)
         trace(new Throwable(), name);
      
-     node = addElement(parent, name, Short.TYPE.getName(), true, false);
+     m_CurrentNode = parent;
+     
+     node = addElement(parent, name, Short.TYPE.getName(), true);
      node.appendChild(node.getOwnerDocument().createTextNode(new Short(o).toString()));
      
      return node;
+   }
+   
+   /**
+    * checks whether the innermost class is a primitive class (handles 
+    * multi-dimensional arrays)
+    * @param o        the array class to inspect
+    * @return         whether the array consists of primitive elements
+    */
+   protected boolean isPrimitiveArray(Class c) {
+     if (c.getComponentType().isArray())
+       return isPrimitiveArray(c.getComponentType());
+    else
+       return c.getComponentType().isPrimitive();
    }
    
    /**
@@ -680,7 +746,7 @@ public class XMLSerialization {
       Method               method;
       PropertyDescriptor   desc;
       boolean              primitive;
-      boolean              array;
+      int                  array;
       int                  i;
       Object               obj;
 
@@ -692,7 +758,7 @@ public class XMLSerialization {
 
       // special handling of null-objects
       if (o == null) {
-        node = addElement(parent, name, "" + null, false, false, true);
+        node = addElement(parent, name, "" + null, false, 0, true);
         return node;
       }
       
@@ -700,10 +766,12 @@ public class XMLSerialization {
       obj = null;
       
       // get information about object
-      array = o.getClass().isArray();
-      if (array) {
-         classname = o.getClass().getComponentType().getName();
-         primitive = o.getClass().getComponentType().isPrimitive(); 
+      array = 0;
+      if (o.getClass().isArray())
+        array = Utils.getArrayDimensions(o);
+      if (array > 0) {
+        classname = Utils.getArrayClass(o.getClass()).getName();
+        primitive = isPrimitiveArray(o.getClass()); 
       }
       else {
          // try to get property descriptor to determine real class
@@ -732,10 +800,12 @@ public class XMLSerialization {
       // fix class/primitive if parent is array of primitives, thanks to 
       // reflection the elements of the array are objects and not primitives!
       if (    (parent != null) 
-           && (stringToBoolean(parent.getAttribute(ATT_ARRAY)))
+           && (!parent.getAttribute(ATT_ARRAY).equals(""))
+           && (!parent.getAttribute(ATT_ARRAY).equals(VAL_NO))
            && (stringToBoolean(parent.getAttribute(ATT_PRIMITIVE))) ) {
          primitive = true;
          classname = parent.getAttribute(ATT_CLASS);
+         obj       = null;
       }
 
       // perhaps we need to override the classname
@@ -748,7 +818,7 @@ public class XMLSerialization {
       node = addElement(parent, name, classname, primitive, array);
       
       // array? -> save as child with 'name="<index>"'
-      if (array) {
+      if (array > 0) {
          for (i = 0; i < Array.getLength(o); i++) {
             invokeWriteToXML(node, Array.get(o, i), Integer.toString(i));
          }
@@ -824,6 +894,8 @@ public class XMLSerialization {
       node       = null;
       method     = null;
       useDefault = false;
+
+      m_CurrentNode = parent;
       
       // default, if null
       if (o == null)
@@ -866,7 +938,14 @@ public class XMLSerialization {
       catch (Exception e) {
          if (DEBUG)
             e.printStackTrace();
+         
+         if (m_CurrentNode != null) {
+           System.out.println("Happened near: " + getPath(m_CurrentNode));
+           // print it only once!
+           m_CurrentNode = null;
+         }
          System.out.println("PROBLEM (write): " + name);
+
          throw (Exception) e.fillInStackTrace();
       }
       
@@ -1038,6 +1117,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Boolean) getPrimitive(node)).booleanValue();
    }
@@ -1054,6 +1135,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Byte) getPrimitive(node)).byteValue();
    }
@@ -1070,6 +1153,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Character) getPrimitive(node)).charValue();
    }
@@ -1086,6 +1171,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Double) getPrimitive(node)).doubleValue();
    }
@@ -1102,6 +1189,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Float) getPrimitive(node)).floatValue();
    }
@@ -1118,6 +1207,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Integer) getPrimitive(node)).intValue();
    }
@@ -1134,6 +1225,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Long) getPrimitive(node)).longValue();
    }
@@ -1150,6 +1243,8 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+     m_CurrentNode = node;
      
      return ((Short) getPrimitive(node)).shortValue();
    }
@@ -1224,6 +1319,56 @@ public class XMLSerialization {
    }
    
    /**
+    * returns an array with the dimensions of the array stored in XML
+    * @param node the node to determine the dimensions for
+    * @return the dimensions of the array
+    */
+   protected int[] getArrayDimensions(Element node) {
+     Vector         children;
+     Vector         tmpVector;      
+     int[]          tmp;
+     int[]          result;
+     int            i;
+     
+     // have we reached the innermost dimension?
+     if (stringToBoolean(node.getAttribute(ATT_ARRAY)))
+       children = XMLDocument.getChildTags(node);
+     else
+       children = null;
+     
+     if (children != null) {
+       tmpVector = new Vector();
+
+       if (children.size() > 0) {
+         // are children also arrays?
+         tmp = getArrayDimensions((Element) children.get(0));
+         
+         // further dimensions
+         if (tmp != null) {
+           for (i = tmp.length - 1; i >= 0; i--)
+             tmpVector.add(new Integer(tmp[i]));
+         }
+  
+         // add current dimension
+         tmpVector.add(0, new Integer(children.size()));
+       }
+       else {
+         tmpVector.add(new Integer(0));
+       }
+       
+       // generate result
+       result = new int[tmpVector.size()];
+       for (i = 0; i < result.length; i++)
+         result[i] = ((Integer) tmpVector.get(tmpVector.size() - i - 1)).intValue();
+     }
+     else {
+       result = null;
+     }
+     
+     return result;
+   }
+   
+   /**
     * builds the object from the given DOM node. 
     * (only public due to reflection) 
     * 
@@ -1258,6 +1403,8 @@ public class XMLSerialization {
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+      m_CurrentNode = node;
       
       result    = null;
       
@@ -1276,7 +1423,7 @@ public class XMLSerialization {
       
       // array
       if (array) {
-         result = Array.newInstance(cls, children.size());
+         result = Array.newInstance(cls, getArrayDimensions(node));
          for (i = 0; i < children.size(); i++) {
             child = (Element) children.get(i);
             Array.set(result, Integer.parseInt(child.getAttribute(ATT_NAME)), invokeReadFromXML(child));
@@ -1344,6 +1491,7 @@ public class XMLSerialization {
 
       useDefault = false;
       method     = null;
+      m_CurrentNode = node;
       
       try {
          // special handling of null values
@@ -1382,7 +1530,14 @@ public class XMLSerialization {
       catch (Exception e) {
          if (DEBUG)
             e.printStackTrace();
+         
+         if (m_CurrentNode != null) {
+           System.out.println("Happened near: " + getPath(m_CurrentNode));
+           // print it only once!
+           m_CurrentNode = null;
+         }
          System.out.println("PROBLEM (read): " + node.getAttribute("name"));
+
          throw (Exception) e.fillInStackTrace();
       }
    }
