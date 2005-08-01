@@ -30,6 +30,8 @@ import weka.classifiers.rules.ZeroR;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -74,10 +76,13 @@ import weka.filters.Filter;
  * -S seed <br>
  * Random number seed used when reweighting by resampling (default 1).<p>
  *
+ * -matlab matrix<br>
+ * The cost matrix, specified in Matlab single line format.<p>
+ *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhancer
   implements OptionHandler, Drawable {
@@ -150,6 +155,9 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
               "\tName of a directory to search for cost files when loading\n"
               +"\tcosts on demand (default current directory).",
               "N", 1, "-N <directory>"));
+    newVector.addElement(new Option(
+              "\tThe cost matrix in Matlab single line format.",
+              "matlab", 1, "-matlab <matrix>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -182,6 +190,9 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
    * -S seed <br>
    * Random number seed used when reweighting by resampling (default 1).<p>
    *
+   * -matlab matrix<br>
+   * The cost matrix, specified in Matlab single line format.<p>
+   *
    * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
@@ -213,6 +224,16 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
     if (demandDir.length() != 0) {
       setOnDemandDirectory(new File(demandDir));
     }
+
+    String matlab = Utils.getOption("matlab", options);
+    if (matlab.length() != 0) {
+      StringWriter writer = new StringWriter();
+      CostMatrix.parseMatlab(matlab).write(writer);
+      setCostMatrix(new CostMatrix(new StringReader(writer.toString())));
+      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED,
+                                          TAGS_MATRIX_SOURCE));
+    }
+    
     super.setOptions(options);
   }
 
@@ -232,6 +253,10 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
       if (m_CostFile != null) {
         options[current++] = "-C";
         options[current++] = "" + m_CostFile;
+      }
+      else {
+        options[current++] = "-matlab";
+        options[current++] = getCostMatrix().toMatlab();
       }
     } else {
       options[current++] = "-N";
