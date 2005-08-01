@@ -16,7 +16,7 @@
 
 /*
  * XMLBeans.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.beans.xml;
@@ -56,7 +56,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -246,8 +246,7 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
-    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
-    
+    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");    
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
@@ -478,7 +477,7 @@ public class XMLBeans
       sourcePos = Integer.parseInt(tok.nextToken());
       targetPos = Integer.parseInt(tok.nextToken());
       event     = tok.nextToken();
-      hidden    = Boolean.getBoolean(tok.nextToken());
+      hidden    = stringToBoolean(tok.nextToken());
 
       // regular connection? -> new instance
       if (!(key instanceof MetaBean)) {
@@ -608,8 +607,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     color = (Color) o;
-    node  = addElement(parent, name, color.getClass().getName(), false, false);
+    node  = addElement(parent, name, color.getClass().getName(), false);
 
     writeIntToXML(node, color.getRed(), VAL_RED);
     writeIntToXML(node, color.getGreen(), VAL_GREEN);
@@ -639,6 +640,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -686,8 +689,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     dim = (Dimension) o;
-    node = addElement(parent, name, dim.getClass().getName(), false, false);
+    node = addElement(parent, name, dim.getClass().getName(), false);
 
     writeDoubleToXML(node, dim.getWidth(), VAL_WIDTH);
     writeDoubleToXML(node, dim.getHeight(), VAL_HEIGHT);
@@ -715,6 +720,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -760,8 +767,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     font = (Font) o;
-    node = addElement(parent, name, font.getClass().getName(), false, false);
+    node = addElement(parent, name, font.getClass().getName(), false);
 
     invokeWriteToXML(node, font.getName(), VAL_NAME);
     writeIntToXML(node, font.getStyle(), VAL_STYLE);
@@ -791,6 +800,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -838,8 +849,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     p    = (Point) o;
-    node = addElement(parent, name, p.getClass().getName(), false, false);
+    node = addElement(parent, name, p.getClass().getName(), false);
 
     writeDoubleToXML(node, p.getX(), VAL_X);
     writeDoubleToXML(node, p.getY(), VAL_Y);
@@ -867,6 +880,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -912,8 +927,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     resource = (ColorUIResource) o;
-    node     = addElement(parent, name, resource.getClass().getName(), false, false);
+    node     = addElement(parent, name, resource.getClass().getName(), false);
     invokeWriteToXML(node, new Color(resource.getRGB()), VAL_COLOR);
     
     return node;
@@ -938,6 +955,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -979,8 +998,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     resource = (FontUIResource) o;
-    node     = addElement(parent, name, resource.getClass().getName(), false, false);
+    node     = addElement(parent, name, resource.getClass().getName(), false);
     invokeWriteToXML(node, new Font(resource.getName(), resource.getStyle(), resource.getSize()), VAL_COLOR);
     
     return node;
@@ -1005,6 +1026,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -1046,8 +1069,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     beaninst = (BeanInstance) o;
-    node     = addElement(parent, name, beaninst.getClass().getName(), false, false);
+    node     = addElement(parent, name, beaninst.getClass().getName(), false);
 
     writeIntToXML(node, m_BeanInstances.indexOf(beaninst), VAL_ID);
     writeIntToXML(node, beaninst.getX() + beaninst.getWidth()  / 2, VAL_X);   // x is thought to be in the center?
@@ -1082,6 +1107,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -1170,8 +1197,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     beanconn = (BeanConnection) o;
-    node     = addElement(parent, name, beanconn.getClass().getName(), false, false);
+    node     = addElement(parent, name, beanconn.getClass().getName(), false);
 
     // get position
     sourcePos = m_BeanInstances.indexOf(beanconn.getSource());
@@ -1213,6 +1242,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -1275,8 +1306,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     loader = (weka.gui.beans.Loader) o;
-    node   = addElement(parent, name, loader.getClass().getName(), false, false);
+    node   = addElement(parent, name, loader.getClass().getName(), false);
 
     invokeWriteToXML(node, loader.getLoader(), VAL_LOADER);
     invokeWriteToXML(node, loader.getBeanContext(), VAL_BEANCONTEXT);
@@ -1304,9 +1337,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     saver = (weka.gui.beans.Saver) o;
-    node   = addElement(parent, name, saver.getClass().getName(), false, false);
-
+    node   = addElement(parent, name, saver.getClass().getName(), false);
 
     invokeWriteToXML(node, saver.getSaver(), VAL_SAVER);
     
@@ -1333,8 +1367,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     loader = (weka.core.converters.Loader) o;
-    node   = addElement(parent, name, loader.getClass().getName(), false, false);
+    node   = addElement(parent, name, loader.getClass().getName(), false);
 
     // file
     if (loader instanceof weka.core.converters.ArffLoader)
@@ -1379,6 +1415,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -1429,8 +1467,10 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     saver = (weka.core.converters.Saver) o;
-    node   = addElement(parent, name, saver.getClass().getName(), false, false);
+    node   = addElement(parent, name, saver.getClass().getName(), false);
 
     // file
     if (saver instanceof weka.core.converters.ArffSaver)
@@ -1475,6 +1515,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -1525,6 +1567,8 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     visual = (BeanVisual) o;
     node   = writeToXML(parent, o, name);
 
@@ -1556,6 +1600,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     result = null;
 
@@ -1671,6 +1717,8 @@ public class XMLBeans
     if (DEBUG)
        trace(new Throwable(), name);
     
+    m_CurrentNode = parent;
+    
     meta = (MetaBean) o;
     node = writeToXML(parent, o, name);
 
@@ -1726,6 +1774,8 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+    m_CurrentNode = node;
     
     children = XMLDocument.getChildTags(node);
     result   = new MetaBean();
