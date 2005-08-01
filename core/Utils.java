@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.48 $
  */
 public final class Utils {
 
@@ -365,6 +365,34 @@ public final class Utils {
   }
 
   /**
+   * Returns the basic class of an array class (handles multi-dimensional
+   * arrays).
+   * @param o        the array to inspect
+   * @return         the class of the innermost elements
+   */
+  public static Class getArrayClass(Class c) {
+     if (c.getComponentType().isArray())
+        return getArrayClass(c.getComponentType());
+     else
+        return c.getComponentType();
+  }
+
+  /**
+   * Returns the dimensions of the given array. Even though the
+   * parameter is of type "Object" one can hand over primitve arrays, e.g.
+   * int[3] or double[2][4].
+   *
+   * @param array       the array to determine the dimensions for
+   * @return            the dimensions of the array
+   */
+  public static int getArrayDimensions(Class array) {
+    if (array.getComponentType().isArray())
+      return 1 + getArrayDimensions(array.getComponentType());
+    else
+      return 1;
+  }
+
+  /**
    * Returns the dimensions of the given array. Even though the
    * parameter is of type "Object" one can hand over primitve arrays, e.g.
    * int[3] or double[2][4].
@@ -373,22 +401,7 @@ public final class Utils {
    * @return            the dimensions of the array
    */
   public static int getArrayDimensions(Object array) {
-    int       result;
-
-    result = 0;
-
-    if (array == null)
-      return result;
-    
-    if (array.getClass().isArray()) {
-      result  = 1;
-      if (Array.getLength(array) > 0)
-        result += getArrayDimensions(Array.get(array, 0));
-      else
-        result += 1;  // we can't go further...
-    }
-    
-    return result;
+    return getArrayDimensions(array.getClass());
   }
 
   /**
@@ -1738,6 +1751,12 @@ public final class Utils {
       System.out.println("5.5 rounded: " + Utils.round(5.5));
       System.out.println("5.55555 rounded to 2 decimal places: " + 
 			 Utils.roundDouble(5.55555, 2));
+      
+      // Arrays
+      System.out.println("Array-Dimensions of 'new int[][]': " + Utils.getArrayDimensions(new int[][]{}));
+      System.out.println("Array-Dimensions of 'new int[][]{{1,2,3},{4,5,6}}': " + Utils.getArrayDimensions(new int[][]{{1,2,3},{4,5,6}}));
+      String[][][] s = new String[3][4][];
+      System.out.println("Array-Dimensions of 'new String[3][4][]': " + Utils.getArrayDimensions(s));
     } catch (Exception e) {
       e.printStackTrace();
     }
