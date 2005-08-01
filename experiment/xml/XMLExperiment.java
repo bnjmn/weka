@@ -52,7 +52,7 @@ import weka.experiment.PropertyNode;
  * @see Experiment#m_ClassFirst
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class XMLExperiment extends XMLBasicSerialization {
    /** the name of the classFirst property */
@@ -113,7 +113,7 @@ public class XMLExperiment extends XMLBasicSerialization {
       exp = (Experiment) o;
       
       // classfirst
-      node = addElement(m_Document.getDocument().getDocumentElement(), NAME_CLASSFIRST, Boolean.class.getName(), false, false);
+      node = addElement(m_Document.getDocument().getDocumentElement(), NAME_CLASSFIRST, Boolean.class.getName(), false);
       node.appendChild(node.getOwnerDocument().createTextNode(new Boolean(false).toString()));   // TODO: get-Method for classFirst in Experiment???
    }
    
@@ -165,6 +165,8 @@ public class XMLExperiment extends XMLBasicSerialization {
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), name);
+      
+      m_CurrentNode = parent;
       
       pnode = (PropertyNode) o;
       node  = (Element) parent.appendChild(m_Document.getDocument().createElement(TAG_OBJECT));
@@ -219,6 +221,8 @@ public class XMLExperiment extends XMLBasicSerialization {
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
+
+      m_CurrentNode = node;
       
       result      = null;
 
