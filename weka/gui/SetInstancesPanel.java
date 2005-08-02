@@ -31,6 +31,7 @@ import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -52,7 +53,7 @@ import javax.swing.BorderFactory;
  * lets the user open a set of instances from either a file or URL.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class SetInstancesPanel extends JPanel {
   
@@ -61,6 +62,9 @@ public class SetInstancesPanel extends JPanel {
 
   /** Click to open instances from a URL */
   protected JButton m_OpenURLBut = new JButton("Open URL...");
+
+  /** Click to close the dialog */
+  protected JButton m_CloseBut = new JButton("Close");
 
   /** The instance summary component */
   protected InstancesSummaryPanel m_Summary = new InstancesSummaryPanel();
@@ -88,6 +92,12 @@ public class SetInstancesPanel extends JPanel {
   /** The current set of instances loaded */
   protected Instances m_Instances;
   
+  /** the parent frame. if one is provided, the close-button is displayed */
+  protected JFrame m_ParentFrame = null;
+
+  /** the panel the Close-Button is located in */
+  protected JPanel m_CloseButPanel = null;
+  
   /**
    * Create the panel.
    */
@@ -95,6 +105,7 @@ public class SetInstancesPanel extends JPanel {
 
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
+    m_CloseBut.setToolTipText("Closes the dialog");
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -107,6 +118,11 @@ public class SetInstancesPanel extends JPanel {
 	setInstancesFromFileQ();
       }
     });
+    m_CloseBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        closeFrame();
+      }
+    });
     m_Summary.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
     JPanel buttons = new JPanel();
@@ -114,9 +130,46 @@ public class SetInstancesPanel extends JPanel {
     buttons.add(m_OpenFileBut);
     buttons.add(m_OpenURLBut);
     
+    m_CloseButPanel = new JPanel();
+    m_CloseButPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    m_CloseButPanel.add(m_CloseBut);
+    m_CloseButPanel.setVisible(false);
+    
+    JPanel buttonsAll = new JPanel();
+    buttonsAll.setLayout(new BorderLayout());
+    buttonsAll.add(buttons, BorderLayout.CENTER);
+    buttonsAll.add(m_CloseButPanel, BorderLayout.SOUTH);
+    
     setLayout(new BorderLayout());
     add(m_Summary, BorderLayout.CENTER);
-    add(buttons, BorderLayout.SOUTH);
+    add(buttonsAll, BorderLayout.SOUTH);
+  }
+
+  /**
+   * Sets the frame, this panel resides in. Used for displaying the close 
+   * button, i.e., the close-button is visible if the given frame is not null.
+   * @param parent        the parent frame
+   */
+  public void setParentFrame(JFrame parent) {
+    m_ParentFrame = parent;
+    m_CloseButPanel.setVisible(m_ParentFrame != null);
+  }
+  
+  /**
+   * Returns the current frame the panel knows of, that it resides in. Can be
+   * null.
+   * @return the current parent frame
+   */
+  public JFrame getParentFrame() {
+    return m_ParentFrame;
+  }
+
+  /**
+   * closes the frame, i.e., the visibility is set to false
+   */
+  public void closeFrame() {
+    if (m_ParentFrame != null)
+      m_ParentFrame.setVisible(false);
   }
 
   /**
