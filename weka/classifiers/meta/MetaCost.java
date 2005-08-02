@@ -74,10 +74,13 @@ import weka.filters.Filter;
  * -P num <br>
  * Size of each bag, as a percentage of the training size (default 100). <p>
  *
+ * -cost-matrix matrix<br>
+ * The cost matrix, specified in Matlab single line format.<p>
+ *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.15.2.1 $ 
  */
 public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
@@ -159,6 +162,9 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
               +"\tcosts on demand (default current directory).",
               "N", 1, "-N <directory>"));
     newVector.addElement(new Option(
+              "\tThe cost matrix in Matlab single line format.",
+              "cost-matrix", 1, "-cost-matrix <matrix>"));
+    newVector.addElement(new Option(
               "\tSize of each bag, as a percentage of the\n" 
               + "\ttraining set size. (default 100)",
               "P", 1, "-P"));
@@ -194,6 +200,9 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
    *
    * -P num <br>
    * Size of each bag, as a percentage of the training size (default 100). <p>
+   *
+   * -cost-matrix matrix<br>
+   * The cost matrix, specified in Matlab single line format.<p>
    *
    * Options after -- are passed to the designated classifier.<p>
    *
@@ -233,6 +242,15 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
       setOnDemandDirectory(new File(demandDir));
     }
 
+    String cost_matrix = Utils.getOption("cost-matrix", options);
+    if (cost_matrix.length() != 0) {
+      StringWriter writer = new StringWriter();
+      CostMatrix.parseMatlab(cost_matrix).write(writer);
+      setCostMatrix(new CostMatrix(new StringReader(writer.toString())));
+      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED,
+                                          TAGS_MATRIX_SOURCE));
+    }
+    
     super.setOptions(options);
   }
 
@@ -247,17 +265,17 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
     String [] superOptions = super.getOptions();
     String [] options;
 
-    if ((m_MatrixSource == MATRIX_SUPPLIED) && (m_CostFile == null)) {
-      options = new String [superOptions.length + 4];
-    } else {
-      options = new String [superOptions.length + 6];
-    }
+    options = new String [superOptions.length + 6];
     int current = 0;
 
     if (m_MatrixSource == MATRIX_SUPPLIED) {
       if (m_CostFile != null) {
         options[current++] = "-C";
         options[current++] = "" + m_CostFile;
+      }
+      else {
+        options[current++] = "-cost-matrix";
+        options[current++] = getCostMatrix().toMatlab();
       }
     } else {
       options[current++] = "-N";
@@ -529,6 +547,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
 			 .evaluateModel(new MetaCost(),
 					argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
