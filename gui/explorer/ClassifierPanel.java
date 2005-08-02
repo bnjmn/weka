@@ -137,7 +137,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.81 $
+ * @version $Revision: 1.82 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -767,6 +767,7 @@ public class ClassifierPanel extends JPanel {
       // Add propertychangelistener to update m_TestInstances whenever
       // it changes in the settestframe
       m_SetTestFrame = new JFrame("Test Instances");
+      sp.setParentFrame(m_SetTestFrame);   // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
       m_SetTestFrame.pack();
