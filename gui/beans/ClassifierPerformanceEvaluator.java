@@ -48,7 +48,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -155,10 +155,14 @@ public class ClassifierPerformanceEvaluator
 		  String resultT = "=== Evaluation result ===\n\n"
 		    + "Scheme: " + textTitle + "\n"
 		    + "Relation: " + ce.getTestSet().getDataSet().relationName()
-		    + "\n\n" + m_eval.toSummaryString()
-                    + "\n" + m_eval.toClassDetailsString()
-                    + "\n" + m_eval.toMatrixString();
-
+		    + "\n\n" + m_eval.toSummaryString();
+                  
+                  if (ce.getTestSet().getDataSet().
+                      classAttribute().isNominal()) {
+                    resultT += "\n" + m_eval.toClassDetailsString()
+                      + "\n" + m_eval.toMatrixString();
+                  }
+                  
 		  TextEvent te = 
 		    new TextEvent(ClassifierPerformanceEvaluator.this, 
 				  resultT,
