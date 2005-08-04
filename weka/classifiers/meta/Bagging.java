@@ -67,7 +67,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -367,9 +367,6 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
 
     super.buildClassifier(data);
 
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
     if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {
       throw new IllegalArgumentException("Bag size needs to be 100% if " +
 					 "out-of-bag error is to be calculated!");
