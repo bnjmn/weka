@@ -120,7 +120,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.10 $
+ * @version  $Revision: 1.11 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -299,7 +299,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.10 $
+   * @version $Revision: 1.11 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1304,26 +1304,18 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
       });
     beanContextMenu.add(deleteItem);
     menuItemCount++;
-    // first determine if there is a customizer for this bean
+
     try {
       //BeanInfo [] compInfo = null;
       //JComponent [] associatedBeans = null;
       Vector compInfo = new Vector(1);
       Vector associatedBeans = null;
-      Vector associatedBeansWithCustomizers = new Vector();
       Vector outputBeans = null;
       Vector compInfoOutputs = null;
       if (bc instanceof MetaBean) {
         compInfo = ((MetaBean)bc).getBeanInfoSubFlow();        
         associatedBeans = ((MetaBean)bc).getBeansInSubFlow();
-        // make a list of only those sub flow beans that have customizers
-        for (int i = 0; i < associatedBeans.size(); i++) {
-          Object bn = ((BeanInstance)associatedBeans.elementAt(i)).getBean();
-          BeanInfo tbi = Introspector.getBeanInfo(bn.getClass());
-          if (tbi.getBeanDescriptor().getCustomizerClass() != null) {
-            associatedBeansWithCustomizers.add(associatedBeans.elementAt(i));
-          }
-        }
+
         outputBeans = ((MetaBean)bc).getBeansInOutputs();
         compInfoOutputs = ((MetaBean)bc).getBeanInfoOutputs();
       } else {
@@ -1340,6 +1332,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
           final Class custClass = 
             ((BeanInfo)compInfo.elementAt(zz)).getBeanDescriptor().
             getCustomizerClass();
+
           if (custClass != null) {
             //	  System.err.println("Got customizer class");
             //	  popupCustomizer(custClass, bc);
@@ -1349,7 +1342,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
             } else {
               String custName = custClass.getName();
               BeanInstance tbi = 
-                (BeanInstance)associatedBeansWithCustomizers.elementAt(zz);
+                (BeanInstance)associatedBeans.elementAt(zz);
               if (tbi.getBean() instanceof WekaWrapper) {
                 custName = ((WekaWrapper)tbi.getBean()).
                   getWrappedAlgorithm().getClass().getName();
