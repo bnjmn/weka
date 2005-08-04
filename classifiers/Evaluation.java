@@ -60,10 +60,12 @@ import java.util.zip.GZIPOutputStream;
  * The name of a file containing a cost matrix. <p>
  *
  * -l filename <br>
- * Loads classifier from the given file. <p>
+ * Loads classifier from the given file. In case the filename ends with ".xml" 
+ * the options are loaded from XML. <p>
  *
  * -d filename <br>
- * Saves classifier built from the training data into the given file. <p>
+ * Saves classifier built from the training data into the given file. In case 
+ * the filename ends with ".xml" the options are saved XML, not the model. <p>
  *
  * -v <br>
  * Outputs no statistics for the training data. <p>
@@ -124,7 +126,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.57 $
+ * @version  $Revision: 1.58 $
  */
 public class Evaluation implements Summarizable {
 
@@ -389,10 +391,12 @@ public class Evaluation implements Summarizable {
    * The name of a file containing a cost matrix. <p>
    *
    * -l filename <br>
-   * Loads classifier from the given file. <p>
+   * Loads classifier from the given file. In case the filename ends with
+   * ".xml" the options are loaded from XML. <p>
    *
    * -d filename <br>
-   * Saves classifier built from the training data into the given file. <p>
+   * Saves classifier built from the training data into the given file. In case 
+   * the filename ends with ".xml" the options are saved XML, not the model. <p>
    *
    * -v <br>
    * Outputs no statistics for the training data. <p>
@@ -490,11 +494,13 @@ public class Evaluation implements Summarizable {
    * -m file with cost matrix <br>
    * The name of a file containing a cost matrix. <p>
    *
-   * -l name of model input file <br>
-   * Loads classifier from the given file. <p>
+   * -l filename <br>
+   * Loads classifier from the given file. In case the filename ends with
+   * ".xml" the options are loaded from XML. <p>
    *
-   * -d name of model output file <br>
-   * Saves classifier built from the training data into the given file. <p>
+   * -d filename <br>
+   * Saves classifier built from the training data into the given file. In case 
+   * the filename ends with ".xml" the options are saved XML, not the model. <p>
    *
    * -v <br>
    * Outputs no statistics for the training data. <p>
@@ -525,7 +531,8 @@ public class Evaluation implements Summarizable {
    * @param classifier machine learning classifier
    * @param options the array of string containing the options
    * @exception Exception if model could not be evaluated successfully
-   * @return a string describing the results */
+   * @return a string describing the results 
+   */
   public static String evaluateModel(Classifier classifier,
 				     String [] options) throws Exception {
 			      
@@ -569,6 +576,7 @@ public class Evaluation implements Summarizable {
          optionsTmp = new String[options.length + cl.getOptions().length];
          System.arraycopy(cl.getOptions(), 0, optionsTmp, 0, cl.getOptions().length);
          System.arraycopy(options, 0, optionsTmp, cl.getOptions().length, options.length);
+         options = optionsTmp;
       }
 
       // Get basic options (options the same for all schemes)
@@ -788,7 +796,7 @@ public class Evaluation implements Summarizable {
       else {
          BufferedOutputStream xmlOutputStream = new BufferedOutputStream(os);
          if (objectOutputFileName.endsWith(".xml")) {
-            XMLSerialization xmlSerial = new XMLSerialization();
+            XMLSerialization xmlSerial = new XMLClassifier();
             xmlSerial.write(xmlOutputStream, classifier);
          }
          else
@@ -2302,9 +2310,11 @@ public class Evaluation implements Summarizable {
     optionsText.append("-m <name of file with cost matrix>\n");
     optionsText.append("\tSets file with cost matrix.\n");
     optionsText.append("-l <name of input file>\n");
-    optionsText.append("\tSets model input file.\n");
+    optionsText.append("\tSets model input file. In case the filename ends with '.xml',\n");
+    optionsText.append("\tthe options are loaded from the XML file.\n");
     optionsText.append("-d <name of output file>\n");
-    optionsText.append("\tSets model output file.\n");
+    optionsText.append("\tSets model output file. In case the filename ends with '.xml',\n");
+    optionsText.append("\tonly the options are saved to the XML file, not the model.");
     optionsText.append("-v\n");
     optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
