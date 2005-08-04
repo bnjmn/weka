@@ -63,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24.2.1 $ 
+ * @version $Revision: 1.24.2.2 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -325,16 +325,10 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     super.buildClassifier(data);
 
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
     data = new Instances(data);
     data.deleteWithMissingClass();
     if (data.numInstances() == 0) {
       throw new Exception("No train instances without class missing!");
-    }
-    if (data.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("AdaBoostM1 can't handle a numeric class!");
     }
     m_NumClasses = data.numClasses();
     if ((!m_UseResampling) && 
