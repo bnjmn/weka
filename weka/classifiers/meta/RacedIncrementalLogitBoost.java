@@ -62,7 +62,7 @@ import java.io.Serializable;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnhancer
   implements UpdateableClassifier {
@@ -517,7 +517,7 @@ public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnha
     int classIndex = data.classIndex();
 
     if (data.classAttribute().isNumeric()) {
-      throw new Exception("LogitBoost can't handle a numeric class!");
+      throw new Exception("RacedIncrementalLogitBoost can't handle a numeric class!");
     }
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
