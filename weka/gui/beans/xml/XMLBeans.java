@@ -56,7 +56,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -1411,6 +1411,7 @@ public class XMLBeans
     int         i;
     String      name;
     String      file;
+    File        fl;
 
     // for debugging only
     if (DEBUG)
@@ -1441,8 +1442,14 @@ public class XMLBeans
     if (file.equals(""))
       file = null;
 
-    if (file != null)
-      ((weka.core.converters.AbstractLoader) result).setSource(new File(file));
+    // set file only, if it exists
+    if (file != null) {
+      fl = new File(file);
+      if (fl.exists())
+        ((weka.core.converters.AbstractLoader) result).setSource(fl);
+      else
+        System.out.println("WARNING: The file '" + file + "' does not exist!");
+    }
     
     return result;
   }
