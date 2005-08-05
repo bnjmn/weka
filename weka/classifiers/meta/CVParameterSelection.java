@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27.2.2 $ 
+ * @version $Revision: 1.27.2.3 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
@@ -444,9 +444,6 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
     Instances trainData = new Instances(instances);
     trainData.deleteWithMissingClass();
     if (trainData.numInstances() == 0) {

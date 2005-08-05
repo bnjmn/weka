@@ -57,7 +57,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler {
@@ -99,10 +99,6 @@ public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhance
    * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
 
     if (!(m_Classifier instanceof Randomizable)) {
       throw new IllegalArgumentException("Base learner must implement Randomizable!");
