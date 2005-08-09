@@ -45,8 +45,8 @@ import weka.gui.Logger;
  * grouping large KnowledgeFlows.
  *
  *
- * @author Mark Hall (mhall at cs dot waikato dot ac dot nz
- * @version $Revision: 1.4.2.3 $)
+ * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
+ * @version $Revision: 1.4.2.4 $
  */
 public class MetaBean extends JPanel 
 implements BeanCommon, Visible, EventConstraints,
@@ -83,12 +83,24 @@ implements BeanCommon, Visible, EventConstraints,
     m_subFlow = sub;
   }
 
+  public Vector getSubFlow() {
+    return m_subFlow;
+  }
+
   public void setInputs(Vector inputs) {
     m_inputs = inputs;
   }
 
+  public Vector getInputs() {
+    return m_inputs;
+  }
+
   public void setOutputs(Vector outputs) {
     m_outputs = outputs;
+  }
+
+  public Vector getOutputs() {
+    return m_outputs;
   }
 
   private Vector getBeans(Vector beans, int type) {
@@ -202,7 +214,7 @@ implements BeanCommon, Visible, EventConstraints,
   public void setOriginalCoords(Vector value) {
     m_originalCoords = value;
   }
-  
+
   /**
    * Move coords of all inputs and outputs of this meta bean
    * to the coords of the supplied BeanInstance. Typically
