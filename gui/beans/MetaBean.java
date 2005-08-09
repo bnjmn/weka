@@ -46,7 +46,7 @@ import weka.gui.Logger;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MetaBean extends JPanel 
 implements BeanCommon, Visible, EventConstraints,
@@ -83,12 +83,24 @@ implements BeanCommon, Visible, EventConstraints,
     m_subFlow = sub;
   }
 
+  public Vector getSubFlow() {
+    return m_subFlow;
+  }
+
   public void setInputs(Vector inputs) {
     m_inputs = inputs;
   }
 
+  public Vector getInputs() {
+    return m_inputs;
+  }
+
   public void setOutputs(Vector outputs) {
     m_outputs = outputs;
+  }
+
+  public Vector getOutputs() {
+    return m_outputs;
   }
 
   private Vector getBeans(Vector beans, int type) {

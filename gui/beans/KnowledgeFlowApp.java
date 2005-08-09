@@ -120,7 +120,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.11 $
+ * @version  $Revision: 1.12 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -299,7 +299,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1508,6 +1508,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     }
   }
 
+                                
   /**
    * Handles adding a custom MetaBean to the user toolbar
    *
@@ -1517,10 +1518,47 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    */
   private void addToUserToolBar(MetaBean bean, 
                                 boolean installListener) {
+
     if (m_userToolBar == null) {
       // need to create the user tab and toolbar
       setUpUserToolBar();
     }
+
+    // Disconnect any beans connected to the inputs or outputs
+    // of this MetaBean (prevents serialization of the entire
+    // KnowledgeFlow!!)
+    Vector tempRemovedConnections = new Vector();
+    Vector allConnections = BeanConnection.getConnections();
+    Vector inputs = bean.getInputs();
+    Vector outputs = bean.getOutputs();
+    for (int i = 0; i < inputs.size(); i++) {
+      BeanInstance temp = (BeanInstance)inputs.elementAt(i);
+      // is this input a target for some event?
+      for (int j = 0; j < allConnections.size(); j++) {
+        BeanConnection tempC = (BeanConnection)allConnections.elementAt(j);
+        if (tempC.getTarget() == temp) {
+          tempRemovedConnections.add(tempC);
+        }
+      }
+    }
+    for (int i = 0; i < outputs.size(); i++) {
+      BeanInstance temp = (BeanInstance)outputs.elementAt(i);
+      // is this output a source for some target?
+      for (int j = 0; j < allConnections.size(); j++) {
+        BeanConnection tempC = (BeanConnection)allConnections.elementAt(j);
+        if (tempC.getSource() == temp) {
+          tempRemovedConnections.add(tempC);
+        }
+      }
+    }
+    
+    
+    for (int i = 0; i < tempRemovedConnections.size(); i++) {
+      BeanConnection temp = 
+        (BeanConnection)tempRemovedConnections.elementAt(i);
+      temp.remove();
+    }
+    
     // now add to user tool bar
     JPanel tempUser = instantiateToolBarMetaBean(bean);
     m_userBoxPanel.add(tempUser);
@@ -1532,6 +1570,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
         ex.printStackTrace();
       }
     }
+
+    // Now reinstate any deleted connections to the original MetaBean
+    for (int i = 0; i < tempRemovedConnections.size(); i++) {
+      BeanConnection temp = 
+        (BeanConnection)tempRemovedConnections.elementAt(i);
+      BeanConnection newC = 
+        new BeanConnection(temp.getSource(), temp.getTarget(),
+                           temp.getSourceEventSetDescriptor());
+    }    
   }
 
   /**
