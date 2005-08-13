@@ -126,7 +126,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.58 $
+ * @version  $Revision: 1.59 $
  */
 public class Evaluation implements Summarizable {
 
@@ -2314,7 +2314,7 @@ public class Evaluation implements Summarizable {
     optionsText.append("\tthe options are loaded from the XML file.\n");
     optionsText.append("-d <name of output file>\n");
     optionsText.append("\tSets model output file. In case the filename ends with '.xml',\n");
-    optionsText.append("\tonly the options are saved to the XML file, not the model.");
+    optionsText.append("\tonly the options are saved to the XML file, not the model.\n");
     optionsText.append("-v\n");
     optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
