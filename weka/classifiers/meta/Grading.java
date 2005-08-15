@@ -57,7 +57,7 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4.2.1 $ 
+ * @version $Revision: 1.4.2.2 $ 
  */
 public class Grading extends Stacking {
 
@@ -236,8 +236,10 @@ public class Grading extends Stacking {
     FastVector attributes = new FastVector();
     Instances metaFormat;
     
-    for (int i = 0; i<instances.numAttributes()-1; i++) {
-      attributes.addElement(instances.attribute(i));
+    for (int i = 0; i<instances.numAttributes(); i++) {
+	if ( i != instances.classIndex() ) {
+	    attributes.addElement(instances.attribute(i));
+	}
     }
 
     FastVector nomElements = new FastVector(2);
@@ -264,8 +266,13 @@ public class Grading extends Stacking {
     int i;
     int maxIdx;
     double maxVal;
-    for (i = 0;i<instance.numAttributes()-1;i++) {
-      values[i] = instance.value(i);
+
+    int idx = 0;
+    for (i = 0; i < instance.numAttributes(); i++) {
+	if (i != instance.classIndex()) {
+	    values[idx] = instance.value(i);
+	    idx++;
+	}
     }
 
     Classifier classifier = getClassifier(k);
@@ -286,7 +293,7 @@ public class Grading extends Stacking {
       predConf= (instance.classValue()==maxIdx) ? 1:0;
     }
     
-    values[i]=predConf;
+    values[idx]=predConf;
     metaInstance = new Instance(1, values);
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
