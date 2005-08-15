@@ -57,7 +57,7 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class Grading extends Stacking {
 
@@ -310,7 +310,6 @@ public class Grading extends Stacking {
     try {
       System.out.println(Evaluation.evaluateModel(new Grading(), argv));
     } catch (Exception e) {
-	e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
