@@ -100,7 +100,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.2 $
+ * @version $Revision: 1.21.2.3 $
  */
 public class VisualizePanel extends PrintablePanel {
 
@@ -204,7 +204,8 @@ public class VisualizePanel extends PrintablePanel {
 		Graphics g = m_plot2D.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
-		if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
+		if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK &&
+                    !e.isAltDown()) {
 		  m_shapePoints.addElement(new 
 		    Double(m_plot2D.convertToAttribX(e.getX())));
 		  
