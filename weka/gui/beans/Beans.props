@@ -47,3 +47,11 @@ weka.core.converters.Saver.alias=DataSinks
 weka.classifiers.Classifier.alias=Classifiers
 weka.clusterers.Clusterer.alias=Clusterers
 weka.filters.Filter.alias=Filters
+
+# GUI behaviour
+ScrollBarIncrementLayout=20
+ScrollBarIncrementComponents=50
+FlowWidth=1024
+FlowHeight=768
+PreferredExtension=.kf
+UserComponentsInXML=false
