@@ -120,7 +120,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.1.2.9 $
+ * @version  $Revision: 1.1.2.10 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -299,7 +299,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.1.2.9 $
+   * @version $Revision: 1.1.2.10 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -345,6 +345,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   // which operation is in progress
   private int m_mode = NONE;
 
+  /** the extension for the user components, when serialized to XML */
+  protected final static String USERCOMPONENTS_XML_EXTENSION = ".xml";
+  
   /**
    * Button group to manage all toolbar buttons
    */
@@ -411,26 +414,45 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
   /** the extension for the serialized setups (Java serialization) */
   public final static String FILE_EXTENSION_XML = ".kfml";
   
-  /** A filter to ensure only experiment files get shown in the chooser */
+  /** A filter to ensure only KnowledgeFlow files in binary format get shown in
+      the chooser */
   protected FileFilter m_KfFilter = 
     new ExtensionFileFilter(FILE_EXTENSION, 
                             "KnowledgeFlow configuration files (*" 
                             + FILE_EXTENSION + ")");
 
-  /** A filter to ensure only experiment (in KOML format) files 
+  /** A filter to ensure only KnowledgeFlow files in KOML format 
       get shown in the chooser */
   protected FileFilter m_KOMLFilter = 
     new ExtensionFileFilter(KOML.FILE_EXTENSION, 
                             "KnowledgeFlow configuration files (*" 
                             + KOML.FILE_EXTENSION + ")");
 
-  /** A filter to ensure only experiment (in XML format) files get 
+  /** A filter to ensure only KnowledgeFlow layout files in XML format get 
       shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(FILE_EXTENSION_XML, 
                             "KnowledgeFlow layout files (*" 
                             + FILE_EXTENSION_XML + ")");
 
+  /** the scrollbar increment of the layout scrollpane */
+  protected int m_ScrollBarIncrementLayout = 20;
+
+  /** the scrollbar increment of the components scrollpane */
+  protected int m_ScrollBarIncrementComponents = 50;
+
+  /** the flow layout width */
+  protected int m_FlowWidth = 1024;
+
+  /** the flow layout height */
+  protected int m_FlowHeight = 768;
+
+  /** the preferred file extension */
+  protected String m_PreferredExtension = FILE_EXTENSION;
+  
+  /** whether to store the user components in XML or in binary format */
+  protected boolean m_UserComponentsInXML = false;
+  
   /**
    * Creates a new <code>KnowledgeFlowApp</code> instance.
    */
@@ -442,13 +464,42 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     m_fontM = temp.getGraphics().getFontMetrics();
     temp.hide();
 
+    // some GUI defaults
+    try {
+      m_ScrollBarIncrementLayout = Integer.parseInt(
+          BEAN_PROPERTIES.getProperty(
+            "ScrollBarIncrementLayout", "" + m_ScrollBarIncrementLayout));
+      m_ScrollBarIncrementComponents = Integer.parseInt(
+          BEAN_PROPERTIES.getProperty(
+            "ScrollBarIncrementComponents", "" + m_ScrollBarIncrementComponents));
+      m_FlowWidth = Integer.parseInt(
+          BEAN_PROPERTIES.getProperty(
+            "FlowWidth", "" + m_FlowWidth));
+      m_FlowHeight = Integer.parseInt(
+          BEAN_PROPERTIES.getProperty(
+            "FlowHeight", "" + m_FlowHeight));
+      m_PreferredExtension = BEAN_PROPERTIES.getProperty(
+          "PreferredExtension", m_PreferredExtension);
+      m_UserComponentsInXML = Boolean.valueOf(
+          BEAN_PROPERTIES.getProperty(
+            "UserComponentsInXML", "" + m_UserComponentsInXML)).booleanValue();
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
     // FileChooser
     m_FileChooser.addChoosableFileFilter(m_KfFilter);
     if (KOML.isPresent()) {
       m_FileChooser.addChoosableFileFilter(m_KOMLFilter);
     }
     m_FileChooser.addChoosableFileFilter(m_XMLFilter);
-    m_FileChooser.setFileFilter(m_KfFilter);
+    if (m_PreferredExtension.equals(FILE_EXTENSION_XML))
+      m_FileChooser.setFileFilter(m_XMLFilter);
+    else if (KOML.isPresent() && m_PreferredExtension.equals(KOML.FILE_EXTENSION))
+      m_FileChooser.setFileFilter(m_KOMLFilter);
+    else
+      m_FileChooser.setFileFilter(m_KfFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     m_bcSupport.setDesignTime(true);
@@ -630,11 +681,13 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
                    ));
      final JScrollPane js = new JScrollPane(m_beanLayout);
      p1.add(js, BorderLayout.CENTER);
+     js.getVerticalScrollBar().setUnitIncrement(m_ScrollBarIncrementLayout);
+     js.getHorizontalScrollBar().setUnitIncrement(m_ScrollBarIncrementLayout);
 
      setLayout(new BorderLayout());
      
      add(p1, BorderLayout.CENTER);
-     m_beanLayout.setSize(1024, 768);
+     m_beanLayout.setSize(m_FlowWidth, m_FlowHeight);
      Dimension d = m_beanLayout.getPreferredSize();
      m_beanLayout.setMinimumSize(d);
      m_beanLayout.setMaximumSize(d);
@@ -892,6 +945,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
                                                  (int)(d.getHeight()+15)));
     tempJScrollPane.setPreferredSize(new Dimension((int)d.getWidth(),
                                                    (int)(d.getHeight()+15)));
+    tempJScrollPane.getHorizontalScrollBar().setUnitIncrement(
+        m_ScrollBarIncrementComponents);
+
     return tempJScrollPane;
   }
 
@@ -1703,6 +1759,22 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     if (comp.getBean() instanceof BeanCommon) {
       ((BeanCommon)comp.getBean()).setLog(m_logPanel);
     }
+    if (comp.getBean() instanceof MetaBean) {
+      // re-align sub-beans
+      Vector list;
+      
+      list = ((MetaBean) comp.getBean()).getInputs();
+      for (int i = 0; i < list.size(); i++) {
+        ((BeanInstance) list.get(i)).setX(comp.getX());
+        ((BeanInstance) list.get(i)).setY(comp.getY());
+      }
+
+      list = ((MetaBean) comp.getBean()).getOutputs();
+      for (int i = 0; i < list.size(); i++) {
+        ((BeanInstance) list.get(i)).setX(comp.getX());
+        ((BeanInstance) list.get(i)).setY(comp.getY());
+      }
+    }
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     if (repaint) {
       m_beanLayout.repaint();
@@ -1892,15 +1964,14 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
              (oFile.getAbsolutePath().toLowerCase().
               endsWith(KOML.FILE_EXTENSION)) ) {
           Vector v     = (Vector) KOML.read(oFile.getAbsolutePath());
-          beans        = (Vector) v.get(0);
-          connections  = (Vector) v.get(1);
+          beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+          connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
         } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase().
                               endsWith(FILE_EXTENSION_XML)) {
-          XMLBeans xml = new XMLBeans(m_beanLayout); 
+          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport); 
           Vector v     = (Vector) xml.read(oFile);
-          beans        = (Vector) v.get(0);
-          connections  = (Vector) v.get(1);
-          //connections  = new Vector();
+          beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+          connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
         } /* binary */ else {
           InputStream is = new FileInputStream(oFile);
           ObjectInputStream ois = new ObjectInputStream(is);
@@ -2009,15 +2080,17 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
             (sFile.getAbsolutePath().toLowerCase().
              endsWith(KOML.FILE_EXTENSION)) ) {
           Vector v = new Vector();
-          v.add(beans);
-          v.add(BeanConnection.getConnections());
+          v.setSize(2);
+          v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
+          v.set(XMLBeans.INDEX_BEANCONNECTIONS, BeanConnection.getConnections());
           KOML.write(sFile.getAbsolutePath(), v);
         } /* XML? */ else if (sFile.getAbsolutePath().
                               toLowerCase().endsWith(FILE_EXTENSION_XML)) {
           Vector v = new Vector();
-          v.add(beans);
-          v.add(BeanConnection.getConnections());
-          XMLBeans xml = new XMLBeans(m_beanLayout); 
+          v.setSize(2);
+          v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
+          v.set(XMLBeans.INDEX_BEANCONNECTIONS, BeanConnection.getConnections());
+          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport); 
           xml.write(sFile, v);
         } /* binary */ else {
           OutputStream os = new FileOutputStream(sFile);
@@ -2055,16 +2128,26 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
   private void loadUserComponents() {
     Vector tempV = null;
+    String ext = "";
+    if (m_UserComponentsInXML)
+      ext = USERCOMPONENTS_XML_EXTENSION;
     File sFile = 
       new File(System.getProperty("user.home")
                +File.separator + ".knowledgeFlow"
-               +File.separator + "userComponents");
+               +File.separator + "userComponents"
+               +ext);
     if (sFile.exists()) {
       try {
-        InputStream is = new FileInputStream(sFile);
-        ObjectInputStream ois = new ObjectInputStream(is);
-        tempV = (Vector)ois.readObject();
-        ois.close();
+        if (m_UserComponentsInXML) {
+          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS);
+          tempV = (Vector) xml.read(sFile);
+        }
+        else {
+          InputStream is = new FileInputStream(sFile);
+          ObjectInputStream ois = new ObjectInputStream(is);
+          tempV = (Vector)ois.readObject();
+          ois.close();
+        }
       } catch (Exception ex) {
         System.err.println("Problem reading user components.");
         ex.printStackTrace();
@@ -2095,15 +2178,25 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
               }
             }
             try {
+              String ext = "";
+              if (m_UserComponentsInXML)
+                ext = USERCOMPONENTS_XML_EXTENSION;
               File sFile2 = new File(sFile.getAbsolutePath()
                                      +File.separator
-                                     +"userComponents");
+                                     +"userComponents"
+                                     +ext);
                 
-              OutputStream os = new FileOutputStream(sFile2);
-              ObjectOutputStream oos = new ObjectOutputStream(os);
-              oos.writeObject(m_userComponents);
-              oos.flush();
-              oos.close();
+              if (m_UserComponentsInXML) {
+                XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS);
+                xml.write(sFile2, m_userComponents);
+              }
+              else {
+                OutputStream os = new FileOutputStream(sFile2);
+                ObjectOutputStream oos = new ObjectOutputStream(os);
+                oos.writeObject(m_userComponents);
+                oos.flush();
+                oos.close();
+              }
             } catch (Exception ex) {
               System.err.println("Unable to save user components");
               ex.printStackTrace();
