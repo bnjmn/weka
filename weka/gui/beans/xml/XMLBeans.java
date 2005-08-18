@@ -33,6 +33,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.beans.beancontext.BeanContextSupport;
 import java.beans.BeanInfo;
 import java.beans.EventSetDescriptor;
 import java.beans.Introspector;
@@ -56,7 +57,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -87,6 +88,9 @@ public class XMLBeans
   
   /** the value of the file property */
   public final static String VAL_FILE = "file";
+  
+  /** the value of the options property */
+  public final static String VAL_OPTIONS = "options";
   
   /** the value of the saver property */
   public final static String VAL_SAVER = "saver";
@@ -121,6 +125,9 @@ public class XMLBeans
   /** the value of the style property */
   public final static String VAL_STYLE = "style";
  
+  /** the value of the location property */
+  public final static String VAL_LOCATION = "location";
+ 
   /** the value of the size property */
   public final static String VAL_SIZE = "size";
  
@@ -140,7 +147,13 @@ public class XMLBeans
   public final static String VAL_ASSOCIATEDCONNECTIONS = "associatedConnections";
   
   /** the value of the input property */
+  public final static String VAL_INPUTS = "inputs";
+  
+  /** the value of the input id property */
   public final static String VAL_INPUTSID = "inputs_id";
+  
+  /** the value of the outputs id property */
+  public final static String VAL_OUTPUTS = "outputs";
   
   /** the value of the outputs property */
   public final static String VAL_OUTPUTSID = "outputs_id";
@@ -151,6 +164,14 @@ public class XMLBeans
   /** the value of the originalCoords property */
   public final static String VAL_ORIGINALCOORDS = "originalCoords";
 
+  /** the index in the Vector, where the BeanInstances are stored 
+   * (Instances and Connections are stored in a Vector and then serialized) */
+  public final static int INDEX_BEANINSTANCES = 0;
+
+  /** the index in the Vector, where the BeanConnections are stored
+  * (Instances and Connections are stored in a Vector and then serialized) */
+  public final static int INDEX_BEANCONNECTIONS = 1;
+  
   /** the component that manages the layout of the beans */
   protected JComponent m_BeanLayout;
   
@@ -176,16 +197,72 @@ public class XMLBeans
    * @see #REGULAR_CONNECTION */
   protected Hashtable m_BeanConnectionRelation;
   
+  /** the data that is about to be read/written contains a complete layout 
+   * @see #m_DataType */
+  public final static int DATATYPE_LAYOUT = 0;
+  
+  /** the data that is about to be read/written contains user-components, i.e., 
+   * Metabeans 
+   * @see #m_DataType */
+  public final static int DATATYPE_USERCOMPONENTS = 1;
+  
+  /** the type of data that is be read/written
+   * @see #DATATYPE_LAYOUT
+   * @see #DATATYPE_USERCOMPONENTS */
+  protected int m_DataType = DATATYPE_LAYOUT;
+  
+  /** the beancontext to use for loading from XML and the beancontext is
+   * null in the bean */
+  protected BeanContextSupport m_BeanContextSupport = null;
+  
   /**
-   * initializes the serialization
+   * initializes the serialization for layouts
    * 
    * @param layout      the component that manages the layout
+   * @param context     the bean context support to use
    * @throws Exception  if initialization fails
    */
-  public XMLBeans(JComponent layout) throws Exception {
+  public XMLBeans(JComponent layout, BeanContextSupport context) throws Exception {
+    this(layout, context, DATATYPE_LAYOUT);
+  }
+  
+  /**
+   * initializes the serialization for different types of data
+   * 
+   * @param layout      the component that manages the layout
+   * @param context     the bean context support to use
+   * @param datatype    the type of data to read/write
+   * @throws Exception  if initialization fails
+   */
+  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype) throws Exception {
     super();
     
     m_BeanLayout = layout;
+    m_BeanContextSupport = context;
+    setDataType(datatype);
+  }
+  
+  /**
+   * sets what kind of data is to be read/written
+   * @param value       the type of data
+   * @see #m_DataType
+   */
+  public void setDataType(int value) {
+    if (value == DATATYPE_LAYOUT)
+      m_DataType = value;
+    else if (value == DATATYPE_USERCOMPONENTS)
+      m_DataType = value;
+    else
+      System.out.println("DataType '" + value + "' is unknown!");
+  }
+  
+  /**
+   * returns the type of data that is to be read/written
+   * @return the type of data
+   * @see #m_DataType
+   */
+  public int getDataType() {
+    return m_DataType;
   }
 
   /**
@@ -240,7 +317,10 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "bean");
     m_Properties.addAllowed(weka.gui.beans.Saver.class, "saver");
     m_Properties.addAllowed(weka.gui.beans.Loader.class, "loader");
-    m_Properties.addAllowed(weka.gui.beans.Loader.class, "beanContext");
+    if (getDataType() == DATATYPE_LAYOUT)
+      m_Properties.addAllowed(weka.gui.beans.Loader.class, "beanContext");
+    else
+      m_Properties.addIgnored(weka.gui.beans.Loader.class, "beanContext");   // TODO: more classes???
     m_Properties.addAllowed(weka.gui.beans.Filter.class, "filter");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
@@ -268,7 +348,6 @@ public class XMLBeans
     m_CustomMethods.register(this, weka.gui.beans.BeanInstance.class, "BeanInstance");
     m_CustomMethods.register(this, weka.gui.beans.BeanConnection.class, "BeanConnection");
     m_CustomMethods.register(this, weka.gui.beans.BeanVisual.class, "BeanVisual");
-    m_CustomMethods.register(this, weka.gui.beans.Loader.class, "BeanLoader");
     m_CustomMethods.register(this, weka.gui.beans.Saver.class, "BeanSaver");
     m_CustomMethods.register(this, weka.gui.beans.MetaBean.class, "MetaBean");
     
@@ -290,21 +369,30 @@ public class XMLBeans
   }
   
   /**
-   * traverses over all beans and stores them in a vector (recurses into 
-   * MetaBeans, since the sub-beans are not visible)
+   * traverses over all BeanInstances (or MetaBeans) and stores them in a vector 
+   * (recurses into MetaBeans, since the sub-BeanInstances are not visible)
+   * @param beaninsts       the BeanInstances/MetaBeans to traverse
    */
-  protected void addBeanInstances(Vector beans) {
+  protected void addBeanInstances(Vector list) {
     int             i;
-    BeanInstance    bean;
+    BeanInstance    beaninst;
     
-    for (i = 0; i < beans.size(); i++) {
-      bean = (BeanInstance) beans.get(i);
-      
-      m_BeanInstancesID.add(new Integer(m_BeanInstances.size()));
-      m_BeanInstances.add(bean);
-      
-      if (bean.getBean() instanceof MetaBean)
-        addBeanInstances(((MetaBean) bean.getBean()).getBeansInSubFlow());
+    for (i = 0; i < list.size(); i++) {
+      if (list.get(i) instanceof BeanInstance) {
+        beaninst = (BeanInstance) list.get(i);
+        
+        m_BeanInstancesID.add(new Integer(m_BeanInstances.size()));
+        m_BeanInstances.add(beaninst);
+        
+        if (beaninst.getBean() instanceof MetaBean)
+          addBeanInstances(((MetaBean) beaninst.getBean()).getBeansInSubFlow());
+      }
+      else if (list.get(i) instanceof MetaBean) {
+        addBeanInstances(((MetaBean) list.get(i)).getBeansInSubFlow());
+      }
+      else {
+        System.out.println("addBeanInstances does not support Vectors of class '" + list.get(i) + "'!");
+      }
     }
   }
   
@@ -324,9 +412,52 @@ public class XMLBeans
     // gather all BeanInstances, also the ones in MetaBeans
     m_BeanInstances   = new Vector();
     m_BeanInstancesID = new Vector();
-    addBeanInstances(BeanInstance.getBeanInstances());
+    
+    switch (getDataType()) {
+      case DATATYPE_LAYOUT:
+        addBeanInstances(BeanInstance.getBeanInstances());
+        break;
+
+      case DATATYPE_USERCOMPONENTS:
+        addBeanInstances((Vector) o);
+        break;
+        
+      default:
+        System.out.println("writePreProcess: data type '" + getDataType() + "' is not recognized!");
+        break;
+    }
     
     return o;
+  }
+  
+  /**
+   * enables derived classes to add other properties to the DOM tree, e.g.
+   * ones that do not apply to the get/set convention of beans. only implemented
+   * with empty method body.
+   * 
+   * @param o the object that is serialized into XML
+   * @throws Exception if post-processing fails
+   */
+  protected void writePostProcess(Object o) throws Exception {
+    Element         root;
+    NodeList        list;
+    Element         conns;
+    Element         child;
+    int             i;
+
+    // since not all BeanConnections get saved to XML (e.g., MetaBeans in the 
+    // UserToolBar) if one saves a layout, the numbering in the Vector of the 
+    // BeanConnections is not correct. The "name" attribute of the nodes has
+    // to be modified
+    if (getDataType() == DATATYPE_LAYOUT) {
+      root  = m_Document.getDocument().getDocumentElement();
+      conns = (Element) root.getChildNodes().item(INDEX_BEANCONNECTIONS);
+      list  = conns.getChildNodes();
+      for (i = 0; i < list.getLength(); i++) {
+        child = (Element) list.item(i);
+        child.setAttribute(ATT_NAME, "" + i);
+      }
+    }
   }
   
   /**
@@ -428,6 +559,10 @@ public class XMLBeans
 
     result = null;
     
+    // was there a connection?
+    if ( (sourcePos == -1) || (targetPos == -1) )
+      return result;
+    
     instSource = (BeanInstance) m_BeanInstances.get(sourcePos);
     instTarget = (BeanInstance) m_BeanInstances.get(targetPos);
     
@@ -464,6 +599,7 @@ public class XMLBeans
     Vector                  conns;
     BeanConnection          conn;
     StringTokenizer         tok;
+    Vector                  beanconns;
 
     conns = (Vector) m_BeanConnectionRelation.get(key);
     
@@ -480,13 +616,16 @@ public class XMLBeans
       hidden    = stringToBoolean(tok.nextToken());
 
       // regular connection? -> new instance
-      if (!(key instanceof MetaBean)) {
+      // or MetaBean from user toolbar
+      if ( (!(key instanceof MetaBean)) || (getDataType() == DATATYPE_USERCOMPONENTS)) {
         conn = createBeanConnection(sourcePos, targetPos, event, hidden);
       }
       // MetaBean? -> find BeanConnection 
       else {
-        for (i = 0; i < BeanConnection.getConnections().size(); i++) {
-          conn = (BeanConnection) BeanConnection.getConnections().get(i);
+        beanconns = BeanConnection.getConnections();
+        
+        for (i = 0; i < beanconns.size(); i++) {
+          conn = (BeanConnection) beanconns.get(i);
           if (    (conn.getSource() == (BeanInstance) m_BeanInstances.get(sourcePos))
                && (conn.getTarget() == (BeanInstance) m_BeanInstances.get(targetPos))
                && (conn.getEventName().equals(event)) ) {
@@ -500,7 +639,31 @@ public class XMLBeans
       if (key instanceof MetaBean)
         setBeanConnection(conn, ((MetaBean) key).getAssociatedConnections());
       else
-        setBeanConnection(conn, (Vector) deserialized.get(1));
+        setBeanConnection(conn, (Vector) deserialized.get(INDEX_BEANCONNECTIONS));
+    }
+  }
+  
+  /**
+   * removes the given meta beans from the layout, since they're only listed
+   * in the user toolbar
+   * 
+   * @param metabeans         the list of MetaBeans in the user toolbar
+   */
+  protected void removeUserToolBarBeans(Vector metabeans) {
+    int           i;
+    int           n;
+    MetaBean      meta;
+    Vector        subflow;
+    BeanInstance  beaninst;
+    
+    for (i = 0; i < metabeans.size(); i++) {
+      meta    = (MetaBean) metabeans.get(i);
+      subflow = meta.getSubFlow();
+      
+      for (n = 0; n < subflow.size(); n++) {
+        beaninst = (BeanInstance) subflow.get(n);
+        beaninst.removeBean(m_BeanLayout);
+      }
     }
   }
   
@@ -534,6 +697,10 @@ public class XMLBeans
       rebuildBeanConnections(deserialized, key);
     }
 
+    // remove MetaBean and subflow from BeanInstance (not part of the flow!)
+    if (getDataType() == DATATYPE_USERCOMPONENTS)
+      removeUserToolBarBeans(deserialized);
+    
     return deserialized;
   }
 
@@ -643,8 +810,7 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     red      = 0;
     green    = 0;
@@ -652,8 +818,8 @@ public class XMLBeans
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_RED))
         red = readIntFromXML(child);
       else if (name.equals(VAL_GREEN))
@@ -723,16 +889,15 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     width    = 0;
     height   = 0;
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_WIDTH))
         width = readDoubleFromXML(child);
       else if (name.equals(VAL_HEIGHT))
@@ -803,8 +968,7 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     fontname = "";
     style    = 0;
@@ -812,8 +976,8 @@ public class XMLBeans
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_NAME))
         name = (String) invokeReadFromXML(child);
       else if (name.equals(VAL_STYLE))
@@ -883,16 +1047,15 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     x        = 0;
     y        = 0;
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_X))
         x = readDoubleFromXML(child);
       else if (name.equals(VAL_Y))
@@ -958,15 +1121,14 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     color    = null;
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_COLOR))
         color = (Color) invokeReadFromXML(child);
       else
@@ -1029,15 +1191,14 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     font     = null;
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_FONT))
         font = (Font) invokeReadFromXML(child);
       else
@@ -1110,8 +1271,7 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     id       = -1;
     x        = 0;
@@ -1120,8 +1280,8 @@ public class XMLBeans
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_ID))
         id = readIntFromXML(child);
       else if (name.equals(VAL_X))
@@ -1138,16 +1298,10 @@ public class XMLBeans
     result   = new BeanInstance(m_BeanLayout, bean, x, y);
     beaninst = (BeanInstance) result;
     
-    // fix coordinates
-    coords = new Point();
-    coords.setLocation(beaninst.getX(), beaninst.getY());
-    coords = fixCoordinates(beaninst, coords);
-    beaninst.setX((int) coords.getX());
-    beaninst.setY((int) coords.getY());
-
     // set parent of BeanVisual
     if (beaninst.getBean() instanceof weka.gui.beans.Visible) {
       visual = ((Visible) beaninst.getBean()).getVisual();
+      visual.setSize(visual.getPreferredSize());
       if (visual.getParent() == null) {
         ((JPanel) beaninst.getBean()).add(visual);
       }
@@ -1200,20 +1354,31 @@ public class XMLBeans
     m_CurrentNode = parent;
     
     beanconn = (BeanConnection) o;
-    node     = addElement(parent, name, beanconn.getClass().getName(), false);
+    node     = null;
 
     // get position
     sourcePos = m_BeanInstances.indexOf(beanconn.getSource());
     targetPos = m_BeanInstances.indexOf(beanconn.getTarget());
     
-    // get id
-    source = ((Integer) m_BeanInstancesID.get(sourcePos)).intValue();
-    target = ((Integer) m_BeanInstancesID.get(targetPos)).intValue();
+    // get id (if Connection is from a Bean in the UserToolBar, it's not listed! -> ignore it)
+    if ( (sourcePos > -1) && (targetPos > -1) ) {
+      source = ((Integer) m_BeanInstancesID.get(sourcePos)).intValue();
+      target = ((Integer) m_BeanInstancesID.get(targetPos)).intValue();
+    }
+    else {
+       source = -1;
+       target = -1;
+    }
     
-    writeIntToXML(node, source, VAL_SOURCEID);
-    writeIntToXML(node, target, VAL_TARGETID);
-    invokeWriteToXML(node, beanconn.getEventName(), VAL_EVENTNAME);
-    writeBooleanToXML(node, beanconn.isHidden(), VAL_HIDDEN);
+    // connection exists in the layout?
+    if ( (source > -1) && (target > -1) ) {
+      node = addElement(parent, name, beanconn.getClass().getName(), false);
+  
+      writeIntToXML(node, source, VAL_SOURCEID);
+      writeIntToXML(node, target, VAL_TARGETID);
+      invokeWriteToXML(node, beanconn.getEventName(), VAL_EVENTNAME);
+      writeBooleanToXML(node, beanconn.isHidden(), VAL_HIDDEN);
+    }
     
     return node;
   }
@@ -1245,8 +1410,7 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = null;
     children = XMLDocument.getChildTags(node);
     source   = 0;
     target   = 0;
@@ -1255,8 +1419,8 @@ public class XMLBeans
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
+      name  = child.getAttribute(ATT_NAME);
 
-      name = child.getAttribute(ATT_NAME);
       if (name.equals(VAL_SOURCEID))
         source = readIntFromXML(child);
       else if (name.equals(VAL_TARGETID))
@@ -1362,6 +1526,7 @@ public class XMLBeans
     Element                       node;
     weka.core.converters.Loader   loader;
     File                          file;
+    boolean                       known;
 
     // for debugging only
     if (DEBUG)
@@ -1371,6 +1536,8 @@ public class XMLBeans
     
     loader = (weka.core.converters.Loader) o;
     node   = addElement(parent, name, loader.getClass().getName(), false);
+    known  = true;
+    file   = null;
 
     // file
     if (loader instanceof weka.core.converters.ArffLoader)
@@ -1382,10 +1549,10 @@ public class XMLBeans
     else if (loader instanceof weka.core.converters.SerializedInstancesLoader)
       file = ((weka.core.converters.SerializedInstancesLoader) loader).retrieveFile();
     else
-      file = null;
+      known = false;
 
-    if (file == null)
-      System.out.println("WARNING: unknown loader class '" + loader.getClass().getName() + "' - cannot save!");
+    if (!known)
+      System.out.println("WARNING: unknown loader class '" + loader.getClass().getName() + "' - cannot retrieve file!");
     
     // only save it, if it's a real file!
     if ( (file == null) || (file.isDirectory()) )
@@ -1419,26 +1586,20 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
     children = XMLDocument.getChildTags(node);
     file     = "";
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
-
-      name = child.getAttribute(ATT_NAME);
+      name  = child.getAttribute(ATT_NAME);
 
       if (name.equals(VAL_FILE))
         file = (String) invokeReadFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
-
+        readFromXML(result, name, child);
     }
 
-    result = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
-    
     if (file.equals(""))
       file = null;
 
@@ -1469,6 +1630,7 @@ public class XMLBeans
     Element                     node;
     weka.core.converters.Saver  saver;
     File                        file;
+    boolean                     known;
 
     // for debugging only
     if (DEBUG)
@@ -1478,6 +1640,8 @@ public class XMLBeans
     
     saver = (weka.core.converters.Saver) o;
     node   = addElement(parent, name, saver.getClass().getName(), false);
+    known = true;
+    file  = null;
 
     // file
     if (saver instanceof weka.core.converters.ArffSaver)
@@ -1489,10 +1653,10 @@ public class XMLBeans
     else if (saver instanceof weka.core.converters.SerializedInstancesSaver)
       file = ((weka.core.converters.SerializedInstancesSaver) saver).retrieveFile();
     else
-      file = null;
+      known = false;
     
-    if (file == null)
-      System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot write!");
+    if (!known)
+      System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot retrieve file!");
     
     // only save it, if it's a real file!
     if ( (file == null) || (file.isDirectory()) )
@@ -1525,25 +1689,20 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
     children = XMLDocument.getChildTags(node);
     file     = "";
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
-
-      name = child.getAttribute(ATT_NAME);
+      name  = child.getAttribute(ATT_NAME);
 
       if (name.equals(VAL_FILE))
         file = (String) invokeReadFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        readFromXML(result, name, child);
     }
 
-    result = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
-    
     if (file.equals(""))
       file = null;
     
@@ -1610,8 +1769,7 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    result = null;
-
+    result       = null;
     children     = XMLDocument.getChildTags(node);
     text         = "";
     iconPath     = "";
@@ -1620,8 +1778,7 @@ public class XMLBeans
     // find text
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
-
-      name = child.getAttribute(ATT_NAME);
+      name  = child.getAttribute(ATT_NAME);
 
       if (name.equals(VAL_TEXT))
         text = (String) invokeReadFromXML(child);
@@ -1665,47 +1822,6 @@ public class XMLBeans
   }
   
   /**
-   * fixes the coordinates for the given bean, since the coordinates are
-   * centered and not left top corner
-   * @param bean        the bean to fix the coordinates for
-   * @param coords      the coordinates to fix
-   * @return            a new Point with the fixed coordinates
-   */
-  protected Point fixCoordinates(BeanInstance bean, Point coords) {
-    Point       result;
-    double      x;
-    double      y;
-    
-    x = coords.getX() + bean.getWidth()  / 2;
-    y = coords.getY() + bean.getHeight() / 2;
-    
-    result = new Point();
-    result.setLocation(x, y);
-    
-    return result;
-  }
-  
-  /**
-   * fixes the coordinates for the given beans, since the coordinates are
-   * centered and not left top corner
-   * @param beans       a vector containing the BeanInstances to fix the 
-   *                    coordinates for
-   * @param coords      a vector of Points with the original coordinates
-   * @return            a vector containing new Points as coordinates
-   */
-  protected Vector fixCoordinates(Vector beans, Vector coords) {
-    Vector        result;
-    int           i;
-    
-    result = new Vector();
-
-    for (i = 0; i < beans.size(); i++)
-      result.add(fixCoordinates((BeanInstance) beans.get(i), (Point) coords.get(i)));
-    
-    return result;
-  }
-  
-  /**
    * adds the given MetaBean to a DOM structure.
    * 
    * @param parent the parent of this object, e.g. the class this object is a member of
@@ -1731,7 +1847,6 @@ public class XMLBeans
 
     invokeWriteToXML(node, getIDsForBeanInstances(meta.getBeansInInputs()), VAL_INPUTSID);
     invokeWriteToXML(node, getIDsForBeanInstances(meta.getBeansInOutputs()), VAL_OUTPUTSID);
-    invokeWriteToXML(node, meta.getBeansInSubFlow(), VAL_SUBFLOW);
     
     return node;
   }
@@ -1784,8 +1899,8 @@ public class XMLBeans
 
     m_CurrentNode = node;
     
-    children = XMLDocument.getChildTags(node);
     result   = new MetaBean();
+    children = XMLDocument.getChildTags(node);
     inputs   = new Vector();
     outputs  = new Vector();
     coords   = new Vector();
@@ -1795,8 +1910,7 @@ public class XMLBeans
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
-
-      name = child.getAttribute(ATT_NAME);
+      name  = child.getAttribute(ATT_NAME);
 
       if (name.equals(VAL_ASSOCIATEDCONNECTIONS))
         ((MetaBean) result).setAssociatedConnections((Vector) invokeReadFromXML(child));
@@ -1808,9 +1922,12 @@ public class XMLBeans
         ((MetaBean) result).setSubFlow((Vector) invokeReadFromXML(child));
       else if (name.equals(VAL_ORIGINALCOORDS))
         coords = (Vector) invokeReadFromXML(child);
+      else if (name.equals(VAL_INPUTS))
+        System.out.println("INFO: '" + name + "' will be restored later.");
+      else if (name.equals(VAL_OUTPUTS))
+        System.out.println("INFO: '" + name + "' will be restored later.");
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        readFromXML(result, name, child);
     }
 
     bean = (MetaBean) result;
@@ -1818,9 +1935,7 @@ public class XMLBeans
     // set inputs and outputs, after the beans have been instantiated
     bean.setInputs(getBeanInstancesForIDs(inputs));
     bean.setOutputs(getBeanInstancesForIDs(outputs));
-    
-    // fix coordinates
-    bean.setOriginalCoords(fixCoordinates(bean.getBeansInSubFlow(), coords));
+    bean.setOriginalCoords(coords);
     
     return result;
   }
