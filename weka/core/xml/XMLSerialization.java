@@ -92,7 +92,7 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */
@@ -862,7 +862,7 @@ public class XMLSerialization {
                   
                   desc   = (PropertyDescriptor) memberlist.get(memberName);
                   method = desc.getReadMethod();
-                  member = method.invoke(o, null);
+                  member = method.invoke(o, (Object[]) null);
                   invokeWriteToXML(node, member, memberName);
                }
             }
