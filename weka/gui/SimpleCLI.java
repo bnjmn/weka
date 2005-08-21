@@ -56,7 +56,7 @@ import java.util.Vector;
  * through previous commmands. This gui uses only AWT (i.e. no Swing).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class SimpleCLI extends Frame implements ActionListener {
   
@@ -263,7 +263,14 @@ public class SimpleCLI extends Frame implements ActionListener {
 	}
 	Class theClass = Class.forName(className);
 
-	m_RunThread = new ClassRunner(theClass, commandArgs);
+	// some classes expect a fixed order of the args, i.e., they don't
+	// use Utils.getOption(...) => create new array without first two
+	// empty strings (former "java" and "<classname>")
+	Vector argv = new Vector();
+	for (int i = 2; i < commandArgs.length; i++)
+	  argv.add(commandArgs[i]);
+  
+	m_RunThread = new ClassRunner(theClass, (String[]) argv.toArray(new String[argv.size()]));
 	m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
 	m_RunThread.start();	
       } catch (Exception ex) {
