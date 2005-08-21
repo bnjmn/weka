@@ -27,6 +27,8 @@ import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -45,7 +47,7 @@ import javax.swing.JList;
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ListSelectorDialog extends JDialog {
   
@@ -105,6 +107,14 @@ public class ListSelectorDialog extends JDialog {
     getRootPane().setDefaultButton(m_SelectBut);
     
     pack();
+
+    // make sure, it's not bigger than the screen
+    Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+    int width  = getWidth() > screen.getWidth() 
+                    ? (int) screen.getWidth() : getWidth();
+    int height = getHeight() > screen.getHeight() 
+                    ? (int) screen.getHeight() : getHeight();
+    setSize(width, height);
   }
 
   /**
