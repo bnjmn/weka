@@ -27,7 +27,7 @@ import weka.classifiers.*;
 
 /**
  * Class for contructing Hidden Naive Bayes classification model
- * with high classification accuracy and AUC.
+ * with high classification accuracy and AUC.<p/>
  *
  * For more information on HNB, see<p/>
  *
@@ -37,7 +37,7 @@ import weka.classifiers.*;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 /**
@@ -100,7 +100,14 @@ public class HNB
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    //judge dataset
+    // judge dataset
+    // class
+    if (instances.classIndex() == -1)
+      throw new UnassignedClassException("No class attribute set!");
+    if (!instances.classAttribute().isNominal())
+      throw new UnsupportedClassTypeException("Handles only nominal classes!");
+    
+    // attributes
     Enumeration enumInsts,enumAtts;
     enumAtts = instances.enumerateAttributes();
     while (enumAtts.hasMoreElements()) {
@@ -111,7 +118,7 @@ public class HNB
       enumInsts = instances.enumerateInstances();
       while (enumInsts.hasMoreElements()) {
         if (((Instance) enumInsts.nextElement()).isMissing(attribute)) {
-          throw new NoSupportForMissingValuesException("Handles no missing values only.");
+          throw new NoSupportForMissingValuesException("Can't handle missing values.");
         }
       }
     }
