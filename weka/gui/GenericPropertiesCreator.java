@@ -76,7 +76,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.RTSI
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -108,22 +108,32 @@ public class GenericPropertiesCreator {
   /** the output properties file with the filled in classes */
   protected Properties outputProperties;
   
+  /** whether an explicit input file was given - if false, the Utils class
+   * is used to locate the props-file */
+  protected boolean explicitPropsFile;
+  
   /**
-   * initializes the creator  
+   * initializes the creator, locates the props file with the Utils class.
    * 
    * @throws Exception if loading of CREATOR_FILE fails
    * @see #CREATOR_FILE
+   * @see Utils#readProperties(String)
+   * @see #loadInputProperties()
    */
   public GenericPropertiesCreator() throws Exception {
     this(CREATOR_FILE);
+    explicitPropsFile = false;
   }
 
   /**
-   * initializes the creator  
+   * initializes the creator, the given file overrides the props-file search
+   * of the Utils class
    * 
    * @param filename the file containing the packages to create a props file from
    * @throws Exception if loading of the file fails
    * @see #CREATOR_FILE
+   * @see Utils#readProperties(String)
+   * @see #loadInputProperties()
    */
   public GenericPropertiesCreator(String filename) throws Exception {
     super();
@@ -131,8 +141,29 @@ public class GenericPropertiesCreator {
     outputFilename   = PROPERTY_FILE;
     inputProperties  = null;
     outputProperties = null;
+    explicitPropsFile = true;
   }
 
+  /**
+   * if FALSE, the locating of a props-file of the Utils-class is used, 
+   * otherwise it's tried to load the specified file
+   * @see Utils#readProperties(String)
+   * @see #loadInputProperties()
+   */
+  public void setExplicitPropsFile(boolean value) {
+    explicitPropsFile = value;
+  }
+  
+  /**
+   * returns TRUE, if a file is loaded and not the Utils class used for 
+   * locating the props file.
+   * @see Utils#readProperties(String)
+   * @see #loadInputProperties()
+   */
+  public boolean getExplicitPropsFile() {
+    return explicitPropsFile;
+  }
+  
   /**
    * returns the name of the output file
    * 
@@ -161,12 +192,15 @@ public class GenericPropertiesCreator {
   }
   
   /**
-   * sets the file to get the information about the packages from
+   * sets the file to get the information about the packages from. 
+   * automatically sets explicitPropsFile to TRUE.
    * 
    * @param filename the filename for the input 
+   * @see #setExplicitPropsFile(boolean)
    */
   public void setInputFilename(String filename) {
     inputFilename = filename;
+    setExplicitPropsFile(true);
   }
   
   /**
@@ -197,7 +231,7 @@ public class GenericPropertiesCreator {
     inputProperties = new Properties();
     try {
       File f = new File(getInputFilename());
-      if (f.exists())
+      if (getExplicitPropsFile() && f.exists())
         inputProperties.load(new FileInputStream(getInputFilename()));
       else
         inputProperties = Utils.readProperties(getInputFilename());
