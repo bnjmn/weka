@@ -285,7 +285,7 @@ ResultPoducer
 weka.experiment.DatabaseResultProducer: acts as a cache for results,
 storing them in a database.
 
-The RandomSplitResultProducer and CrossValidatioResultProducer make
+The RandomSplitResultProducer and CrossValidationResultProducer make
 use of a SplitEvaluator to obtain actual results for a particular
 split, provided are ClassifierSplitEvaluator (for nominal
 classification) and RegressionSplitEvaluator (for numeric
