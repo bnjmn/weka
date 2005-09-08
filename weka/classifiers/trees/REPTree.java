@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.*;
+import weka.classifiers.rules.ZeroR;
 import weka.core.*;
 import java.util.*;
 import java.io.*;
@@ -56,11 +57,14 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.1 $ 
+ * @version $Revision: 1.19.2.2 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
 	     AdditionalMeasureProducer, Sourcable {
+
+  /** ZeroR model that is used if no attributes are present. */
+  protected ZeroR m_zeroR;
 
   /**
    * Returns a string describing classifier
@@ -118,7 +122,7 @@ public class REPTree extends Classifier
      */
     protected double[] distributionForInstance(Instance instance) 
       throws Exception {
-    
+
       double[] returnedDist = null;
       
       if (m_Attribute > -1) {
@@ -1550,13 +1554,15 @@ public class REPTree extends Classifier
 					 "instances have missing class!");
     }
 
-    if (data.numAttributes() == 1) {
-      throw new IllegalArgumentException("REPTree: Attribute missing. Need at least " +
-					 "one attribute other than class attribute!");
-    }
-
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+
+    m_zeroR = null;
+    if (data.numAttributes() == 1) {
+      m_zeroR = new ZeroR();
+      m_zeroR.buildClassifier(data);
+      return;
     }
 
     // Randomize and stratify
@@ -1659,8 +1665,12 @@ public class REPTree extends Classifier
    */
   public double[] distributionForInstance(Instance instance) 
     throws Exception {
-  
-    return m_Tree.distributionForInstance(instance);
+      
+      if (m_zeroR != null) {
+	return m_zeroR.distributionForInstance(instance);
+      } else {
+	return m_Tree.distributionForInstance(instance);
+      }
   }
 
 
@@ -1693,6 +1703,9 @@ public class REPTree extends Classifier
   public String toSource(String className) 
     throws Exception {
      
+    if (m_Tree == null) {
+      throw new Exception("REPTree: No model built yet.");
+    } 
     StringBuffer [] source = m_Tree.toSource(className, m_Tree);
     return
     "class " + className + " {\n\n"
@@ -1720,6 +1733,9 @@ public class REPTree extends Classifier
    */
   public String graph() throws Exception {
 
+    if (m_Tree == null) {
+      throw new Exception("REPTree: No model built yet.");
+    } 
     StringBuffer resultBuff = new StringBuffer();
     m_Tree.toGraph(resultBuff, 0, null);
     String result = "digraph Tree {\n" + "edge [style=bold]\n" + resultBuff.toString()
@@ -1732,6 +1748,9 @@ public class REPTree extends Classifier
    */
   public String toString() {
 
+    if (m_zeroR != null) {
+      return "No attributes other than class. Using ZeroR.\n\n" + m_zeroR.toString();
+    }
     if ((m_Tree == null)) {
       return "REPTree: No model built yet.";
     } 
