@@ -35,7 +35,7 @@ import weka.estimators.*;
  * Bayes networks and random instances based on a Bayes network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class BayesNetGenerator extends BayesNet {
 	int m_nSeed = 1;
@@ -313,7 +313,7 @@ public class BayesNetGenerator extends BayesNet {
 		newVector.addElement(new Option("\tGenerate network (instead of instances)\n", "B", 0, "-B"));
 		newVector.addElement(new Option("\tNr of nodes\n", "N", 1, "-N <integer>"));
 		newVector.addElement(new Option("\tNr of arcs\n", "A", 1, "-A <integer>"));
-		newVector.addElement(new Option("\tNr of instances\n", "I", 1, "-I <integer>"));
+		newVector.addElement(new Option("\tNr of instances\n", "M", 1, "-M <integer>"));
 		newVector.addElement(new Option("\tCardinality of the variables\n", "C", 1, "-C <integer>"));
 		newVector.addElement(new Option("\tSeed for random number generator\n", "S", 1, "-S <integer>"));
 
@@ -378,7 +378,7 @@ public class BayesNetGenerator extends BayesNet {
 	public String[] getOptions() {
 		String[] options = new String[13];
 		int current = 0;
-		if (!m_bGenerateNet) {
+		if (m_bGenerateNet) {
 		  options[current++] = "-B";
 		} 
 
@@ -397,8 +397,10 @@ public class BayesNetGenerator extends BayesNet {
 		options[current++] = "-S";
 		options[current++] = "" + m_nSeed;
 
-		options[current++] = "-F";
-		options[current++] = "" + m_sBIFFile;
+                if (m_sBIFFile.length() != 0) {
+                  options[current++] = "-F";
+                  options[current++] = "" + m_sBIFFile;
+                }
 
 		// Fill up rest with empty strings, not nulls!
 		while (current < options.length) {
