@@ -24,7 +24,21 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * M5P. Implements routines for generating M5 model trees.
+ * M5P. Implements routines for generating M5 model trees.<p/>
+ *
+ * The original algorithm M5 was invented by Quinlan: <br/>
+ * 
+ * Quinlan J. R. (1992). Learning with continuous classes. Proceedings of
+ * the Australian Joint Conference on Artificial Intelligence. 343--348.
+ * World Scientific, Singapore. <p/>
+ * 
+ * Yong Wang made improvements and created M5': <br/>
+ * 
+ * Wang, Y and Witten, I. H. (1997). Induction of model trees for
+ * predicting continuous classes. Proceedings of the poster papers of the
+ * European Conference on Machine Learning. University of Economics,
+ * Faculty of Informatics and Statistics, Prague. <p/>
+ *
  *
  * Valid options are:<p>
  * 
@@ -32,7 +46,7 @@ import weka.core.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class M5P extends M5Base 
