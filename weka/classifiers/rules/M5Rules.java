@@ -27,7 +27,7 @@ import weka.classifiers.trees.m5.*;
  * Generates a decision list for regression problems using 
  * separate-and-conquer. In each iteration it builds an 
  * model tree using M5 and makes the "best" 
- * leaf into a rule. Reference:\n\n"
+ * leaf into a rule. Reference: <p/>
  * M. Hall, G. Holmes, E. Frank (1999).  "Generating Rule Sets 
  * from Model Trees". Proceedings of the Twelfth Australian Joint 
  * Conference on Artificial Intelligence, Sydney, Australia. 
@@ -41,14 +41,14 @@ import weka.classifiers.trees.m5.*;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * -M <num> <br>
+ * -M num <br>
  * Minimum number of objects per leaf. <p>
  *
  * -N  <br>
  * Turns pruning off. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class M5Rules extends M5Base {
     
