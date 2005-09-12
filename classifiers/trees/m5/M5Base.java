@@ -30,6 +30,19 @@ import weka.filters.Filter;
  * M5Base. Implements base routines
  * for generating M5 Model trees and rules. <p>
  * 
+ * The original algorithm M5 was invented by Quinlan: <br/>
+ * 
+ * Quinlan J. R. (1992). Learning with continuous classes. Proceedings of
+ * the Australian Joint Conference on Artificial Intelligence. 343--348.
+ * World Scientific, Singapore. <p/>
+ * 
+ * Yong Wang made improvements and created M5': <br/>
+ * 
+ * Wang, Y and Witten, I. H. (1997). Induction of model trees for
+ * predicting continuous classes. Proceedings of the poster papers of the
+ * European Conference on Machine Learning. University of Economics,
+ * Faculty of Informatics and Statistics, Prague. <p/>
+ *
  * Valid options are:<p>
  * 
  * -U <br>
@@ -38,7 +51,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -117,6 +130,23 @@ public abstract class M5Base extends Classifier
     m_unsmoothedPredictions = false;
     m_useUnpruned = false;
     m_minNumInstances = 4;
+  }
+
+  /**
+   * returns information about the classifier
+   */
+  public String globalInfo() {
+    return 
+        "The original algorithm M5 was invented by Quinlan:\n"
+      + "Quinlan J. R. (1992). Learning with continuous classes. Proceedings of "
+      + "the Australian Joint Conference on Artificial Intelligence. 343--348. "
+      + "World Scientific, Singapore.\n"
+      + "\n"
+      + "Yong Wang made improvements and created M5':\n"
+      + "Wang, Y and Witten, I. H. (1997). Induction of model trees for "
+      + "predicting continuous classes. Proceedings of the poster papers of "
+      + "the European Conference on Machine Learning. University of Economics, "
+      + "Faculty of Informatics and Statistics, Prague.";
   }
 
   /**
