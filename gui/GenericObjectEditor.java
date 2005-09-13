@@ -119,7 +119,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -242,6 +242,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       m_scroller = new JScrollPane(treeView);
       
       m_scroller.setPreferredSize(new Dimension(300, 400));
+      m_scroller.getVerticalScrollBar().setUnitIncrement(20);
 
       add(m_scroller);
     }
