@@ -15,8 +15,8 @@
  */
 
 /*
- *    GenericPropertiesCreator.java
- *    Copyright (C) 2005 FracPete
+ * GenericPropertiesCreator.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.gui;
@@ -76,7 +76,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.RTSI
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -326,7 +326,25 @@ public class GenericPropertiesCreator {
   }
   
   /**
-   * for executing the  
+   * for generating props file:
+   * <ul>
+   *   <li>
+   *     no parameter: 
+   *     see default constructor
+   *   </li>
+   *   <li>
+   *     1 parameter (i.e., filename): 
+   *     see default constructor + setOutputFilename(String)
+   *   </li>
+   *   <li>
+   *     2 parameters (i.e, filenames): 
+   *     see constructor with String argument + setOutputFilename(String)
+   *   </li>
+   * </ul>
+   *
+   * @see #GenericPropertiesCreator()
+   * @see #GenericPropertiesCreator(String)
+   * @see #setOutputFilename(String)
    */
   public static void main(String[] args) throws Exception {
     GenericPropertiesCreator   c = null;
