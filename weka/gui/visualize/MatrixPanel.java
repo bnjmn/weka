@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 
@@ -765,74 +765,76 @@ public class MatrixPanel extends JPanel{
       cellRange = cellSize; cellSize = cellRange + 2*intpad;
 
       jPlColHeader = new JPanel() {
-	      java.awt.Rectangle r;     
-	      public void paint(Graphics g) {
-		  r = g.getClipBounds();
-		  g.clearRect(r.x, r.y, r.width, r.height);
-		  g.setFont( f );
-		  fm = g.getFontMetrics();
-		  int xpos = 0, ypos = 0, attribWidth=0;
-		  
-		  g.setColor(fontColor);
-		  xpos = extpad;
-		  ypos=extpad+fm.getHeight();
-
-		  for(int i=0; i<m_selectedAttribs.length; i++) {
-		      if( xpos+cellSize < r.x)
-			  { xpos += cellSize+extpad; continue; }
-		      else if(xpos > r.x+r.width)
-			  { break; }
-		      else {
-			  attribWidth = fm.stringWidth(m_data.attribute(m_selectedAttribs[i]).name());
-			  g.drawString(m_data.attribute(m_selectedAttribs[i]).name(), 
-				       (attribWidth<cellSize) ? (xpos + (cellSize/2 - attribWidth/2)):xpos, 
-				       ypos);
-		      }
-		      xpos += cellSize+extpad;
-		  }
-		  fm = null; r=null;
-	      }
-	      
-	      public Dimension getPreferredSize() {
-		  fm = this.getFontMetrics(this.getFont());
-		  return new Dimension( m_selectedAttribs.length*(cellSize+extpad),
-						       2*extpad + fm.getHeight() );
-	      }
-	  };
+        java.awt.Rectangle r;
+        public void paint(Graphics g) {
+          r = g.getClipBounds();
+          g.setColor(this.getBackground());
+          g.fillRect(r.x, r.y, r.width, r.height);
+          g.setFont( f );
+          fm = g.getFontMetrics();
+          int xpos = 0, ypos = 0, attribWidth=0;
+          
+          g.setColor(fontColor);
+          xpos = extpad;
+          ypos=extpad+fm.getHeight();
+          
+          for(int i=0; i<m_selectedAttribs.length; i++) {
+            if( xpos+cellSize < r.x)
+            { xpos += cellSize+extpad; continue; }
+            else if(xpos > r.x+r.width)
+            { break; }
+            else {
+              attribWidth = fm.stringWidth(m_data.attribute(m_selectedAttribs[i]).name());
+              g.drawString(m_data.attribute(m_selectedAttribs[i]).name(),
+              (attribWidth<cellSize) ? (xpos + (cellSize/2 - attribWidth/2)):xpos,
+              ypos);
+            }
+            xpos += cellSize+extpad;
+          }
+          fm = null; r=null;
+        }
+        
+        public Dimension getPreferredSize() {
+          fm = this.getFontMetrics(this.getFont());
+          return new Dimension( m_selectedAttribs.length*(cellSize+extpad),
+          2*extpad + fm.getHeight() );
+        }
+      };
 
       jPlRowHeader = new JPanel() {
-	      java.awt.Rectangle r; 	      
-	      public void paint(Graphics g) {
-		  r = g.getClipBounds();
-		  g.clearRect(r.x, r.y, r.width, r.height);
-		  g.setFont( f );
-		  fm = g.getFontMetrics();
-		  int xpos = 0, ypos = 0, attribWidth=0;
-		  
-		  g.setColor(fontColor);
-		  xpos = extpad;
-		  ypos=extpad; 
-		  
-		  for(int j=m_selectedAttribs.length-1; j>=0; j--) {
-		      if( ypos+cellSize < r.y )
-			  { ypos += cellSize+extpad;  continue; }
-		      else if( ypos > r.y+r.height )
-			  break;
-		      else {
-			  g.drawString(m_data.attribute(m_selectedAttribs[j]).name(), xpos+extpad, ypos+cellSize/2);
-		      }
-		      xpos = extpad;
-		      ypos += cellSize+extpad;
-		  }		 
-		  r=null; 
-	      }
-	      
-	      public Dimension getPreferredSize() {
-		  return new Dimension( 100+extpad,
-					m_selectedAttribs.length*(cellSize+extpad)
-					);
-	      }
-	  };      
+        java.awt.Rectangle r;
+        public void paint(Graphics g) {
+          r = g.getClipBounds();
+          g.setColor(this.getBackground());
+          g.fillRect(r.x, r.y, r.width, r.height);
+          g.setFont( f );
+          fm = g.getFontMetrics();
+          int xpos = 0, ypos = 0, attribWidth=0;
+          
+          g.setColor(fontColor);
+          xpos = extpad;
+          ypos=extpad;
+          
+          for(int j=m_selectedAttribs.length-1; j>=0; j--) {
+            if( ypos+cellSize < r.y )
+            { ypos += cellSize+extpad;  continue; }
+            else if( ypos > r.y+r.height )
+              break;
+            else {
+              g.drawString(m_data.attribute(m_selectedAttribs[j]).name(), xpos+extpad, ypos+cellSize/2);
+            }
+            xpos = extpad;
+            ypos += cellSize+extpad;
+          }
+          r=null;
+        }
+        
+        public Dimension getPreferredSize() {
+          return new Dimension( 100+extpad,
+          m_selectedAttribs.length*(cellSize+extpad)
+          );
+        }
+      };
       jPlColHeader.setFont(f);
       jPlRowHeader.setFont(f);
       this.setFont(f);
@@ -963,82 +965,82 @@ public class MatrixPanel extends JPanel{
       g.setColor(Color.white);
       g.fillRect(xpos, ypos, cellSize, cellSize);
       for(int i=0; i<m_points.length; i++) {
-
-	if( !(m_missing[i][yattrib] || m_missing[i][xattrib]) ) {      
-
-	  if(m_type[0]==0)
-	    if(m_missing[i][m_missing[0].length-1])
-	      g.setColor(m_defaultColors[m_defaultColors.length-1]);
-	    else
-	      g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])) );
-	  else 
-	    g.setColor((Color)m_colorList.elementAt(m_pointColors[i]));
-
-	  if(m_points[i][xattrib]+jitterVals[i][0]<0 || m_points[i][xattrib]+jitterVals[i][0]>cellRange)
-	    if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
-	      //both x and y out of range don't add jitter
-	      x=intpad+m_points[i][xattrib];
-	      y=intpad+(cellRange - m_points[i][yattrib]);
-	    }
-	    else {
-	      //only x out of range
-	      x=intpad+m_points[i][xattrib];
-	      y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
-	    }
-	  else if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
-	    //only y out of range
-	    x=intpad+m_points[i][xattrib]+jitterVals[i][0];
-	    y=intpad+(cellRange - m_points[i][yattrib]);
-	  }
-	  else {
-	    //none out of range
-	    x=intpad+m_points[i][xattrib]+jitterVals[i][0];
-	    y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
-	  }
-	  if(datapointSize==1)
-	      g.drawLine(x+xpos, y+ypos, x+xpos, y+ypos);
-	  else 
-	      g.drawOval(x+xpos-datapointSize/2, y+ypos-datapointSize/2, datapointSize, datapointSize);
-	}
+        
+        if( !(m_missing[i][yattrib] || m_missing[i][xattrib]) ) {
+          
+          if(m_type[0]==0)
+            if(m_missing[i][m_missing[0].length-1])
+              g.setColor(m_defaultColors[m_defaultColors.length-1]);
+            else
+              g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])) );
+          else
+            g.setColor((Color)m_colorList.elementAt(m_pointColors[i]));
+          
+          if(m_points[i][xattrib]+jitterVals[i][0]<0 || m_points[i][xattrib]+jitterVals[i][0]>cellRange)
+            if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
+              //both x and y out of range don't add jitter
+              x=intpad+m_points[i][xattrib];
+              y=intpad+(cellRange - m_points[i][yattrib]);
+            }
+            else {
+              //only x out of range
+              x=intpad+m_points[i][xattrib];
+              y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
+            }
+          else if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
+            //only y out of range
+            x=intpad+m_points[i][xattrib]+jitterVals[i][0];
+            y=intpad+(cellRange - m_points[i][yattrib]);
+          }
+          else {
+            //none out of range
+            x=intpad+m_points[i][xattrib]+jitterVals[i][0];
+            y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
+          }
+          if(datapointSize==1)
+            g.drawLine(x+xpos, y+ypos, x+xpos, y+ypos);
+          else
+            g.drawOval(x+xpos-datapointSize/2, y+ypos-datapointSize/2, datapointSize, datapointSize);
+        }
       }
       g.setColor( fontColor );
     }
-
+    
 
     /**
        Paints the matrix of plots in the current visible region
     */
     public void paintME(Graphics g) {
       r = g.getClipBounds();
-
+      
       g.setColor( this.getBackground() );
       g.fillRect(r.x, r.y, r.width, r.height);
       g.setColor( fontColor );
-
+      
       int xpos = 0, ypos = 0, attribWidth=0;
-	  
+      
       xpos = extpad;
       ypos=extpad;
-	
-	  
+      
+      
       for(int j=m_selectedAttribs.length-1; j>=0; j--) {
-	if( ypos+cellSize < r.y )
-	  { ypos += cellSize+extpad;  continue; }
-	else if( ypos > r.y+r.height )
-	  break;
-	else {
-	    for(int i=0; i<m_selectedAttribs.length; i++) {
-		if( xpos+cellSize < r.x) {
-		    xpos += cellSize+extpad; continue; }
-		else if(xpos > r.x+r.width)
-		    break;
-		else
-		    paintGraph(g, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
-		xpos += cellSize+extpad;
-	    }
-	}
-	xpos = extpad;
-	ypos += cellSize+extpad;
+        if( ypos+cellSize < r.y )
+        { ypos += cellSize+extpad;  continue; }
+        else if( ypos > r.y+r.height )
+          break;
+        else {
+          for(int i=0; i<m_selectedAttribs.length; i++) {
+            if( xpos+cellSize < r.x) {
+              xpos += cellSize+extpad; continue; }
+            else if(xpos > r.x+r.width)
+              break;
+            else
+              paintGraph(g, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
+            xpos += cellSize+extpad;
+          }
+        }
+        xpos = extpad;
+        ypos += cellSize+extpad;
       }
     }
       
