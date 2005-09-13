@@ -1,7 +1,4 @@
 /*
- *    Generator.java
- *    Copyright (C) 2000 Gabi Schmidberger
- *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -17,229 +14,186 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+/*
+ * ClusterGenerator.java
+ * Copyright (C) 2000 Gabi Schmidberger
+ *
+ */
+
 package weka.datagenerators;
 
-import java.lang.Exception;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.Enumeration;
-import weka.core.Instance;
-import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
+import weka.core.Range;
 import weka.core.Utils;
-import weka.core.Attribute;
-import weka.core.FastVector;
+import weka.datagenerators.DataGenerator;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Abstract class for cluster data generators.
+ * Abstract class for cluster data generators. <p/>
  *
- * ------------------------------------------------------------------- <p>
+ * Valid options are: <p/>
  *
- * General options are: <p>
+ * -r string <br/>
+ * Name of the relation of the generated dataset. <p/>
  *
- * -r string <br>
- * Name of the relation of the generated dataset. <br>
- * (default = name built using name of used generator and options) <p>
+ * -a num <br/>
+ * Number of attributes. <p/>
  *
- * -a num <br>
- * Number of attributes. (default = 2) <p>
+ * -k num <br/>
+ * Number of clusters. <p/>
  *
- * -k num <br>
- * Number of clusters. (default = 4) <p>
+ * -c <br/>
+ * Class Flag. If set, cluster is listed in extra class attribute.<p/>
  *
- * -c <br>
- * Class Flag. If set, cluster is listed in extra class attribute.<p>
- *
- * -o filename<br>
+ * -o filename<br/>
  * writes the generated dataset to the given file using ARFF-Format.
- * (default = stdout).
- * 
- * ------------------------------------------------------------------- <p>
+ * (default = stdout). <p/>
  *
  * Example usage as the main of a datagenerator called RandomGenerator:
- * <code> <pre>
- * public static void main(String [] args) {
+ * <pre>
+ * public static void main(String[] args) {
  *   try {
- *     DataGenerator.makeData(new RandomGenerator(), argv);
- *   } catch (Exception e) {
+ *     DataGenerator.makeData(new RandomGenerator(), args);
+ *   } 
+ *   catch (Exception e) {
+ *     e.printStackTrace();
  *     System.err.println(e.getMessage());
  *   }
  * }
- * </pre> </code> 
- * <p>
- *
- * ------------------------------------------------------------------ <p>
- *
+ * </pre>
+ * <p/>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.3 $
  */
-public abstract class ClusterGenerator implements Serializable {
+public abstract class ClusterGenerator 
+  extends DataGenerator {
 
-  /** @serial Debugging mode */
-  private boolean m_Debug = false;
+  /** Number of attribute the dataset should have */
+  protected int m_NumAttributes;
 
-  /** @serial The format for the generated dataset */
-  private Instances m_Format = null;
+  /** class flag  */
+  protected boolean m_ClassFlag = false;
 
-  /** @serial Relation name the dataset should have */
-  private String m_RelationName = "";
+  /** Stores which columns are boolean (default numeric) */
+  protected Range m_booleanCols;
 
-  /** @serial Number of attribute the dataset should have */
-  protected int m_NumAttributes = 2;
-
-  /** @serial Number of Clusters the dataset should have */
-  protected int m_NumClusters = 4;
-
-  /** @serial class flag  */
-  private boolean m_ClassFlag = false;
-
-  /** @serial Number of instances that should be produced into the dataset 
-    * this number is by default m_NumExamples,
-    * but can be reset by the generator 
-    */
-   private int m_NumExamplesAct = 0;
-
-  /** @serial PrintWriter */
-  private PrintWriter m_Output = null;
+  /** Stores which columns are nominal (default numeric)  */
+  protected Range m_nominalCols;
 
   /**
-   * Initializes the format for the dataset produced. 
-   * Must be called before the generateExample or generateExamples
-   * methods are used.
+   * initializes the generator 
+   */
+  public ClusterGenerator() {
+    super();
+
+    setNumAttributes(defaultNumAttributes());
+  }
+  
+  /**
+   * Returns an enumeration describing the available options.
    *
-   * @return the format for the dataset 
-   * @exception Exception if the generating of the format failed
+   * @return an enumeration of all the available options.
    */
+  public Enumeration listOptions() {
+    Vector result = enumToVector(super.listOptions());
 
-  abstract Instances defineDataFormat() throws Exception; 
+    result.addElement(new Option(
+          "\tThe number of attributes (default " 
+          + defaultNumAttributes() + ").",
+          "a", 1, "-a <num>"));
 
-  /**
-   * Generates one example of the dataset. 
-   *
-   * @return the generated example
-   * @exception Exception if the format of the dataset is not yet defined
-   * @exception Exception if the generator only works with generateExamples
-   * which means in non single mode
-   */
-
-  abstract Instance generateExample() throws Exception;
-
-  /**
-   * Generates all examples of the dataset. 
-   *
-   * @return the generated dataset
-   * @exception Exception if the format of the dataset is not yet defined
-   * @exception Exception if the generator only works with generateExample,
-   * which means in single mode
-   */
-
-  abstract Instances generateExamples() throws Exception;
-
-  /**
-   * Generates a comment string that documentates the data generator.
-   * By default this string is added at the beginning of the produced output
-   * as ARFF file type, next after the options.
-   * 
-   * @return string contains info about the generated rules
-   * @exception Exception if the generating of the documentation fails
-   */
-  abstract String generateStart () throws Exception;
-
-  /**
-   * Generates a comment string that documentates the data generator.
-   * By default this string is added at the end of the produced output
-   * as ARFF file type.
-   * 
-   * @return string contains info about the generated rules
-   * @exception Exception if the generating of the documentation fails
-   */
-  abstract String generateFinished () throws Exception;
-
-
-  /**
-   * Return if single mode is set for the given data generator
-   * mode depends on option setting and or generator type.
-   * 
-   * @return single mode flag
-   * @exception Exception if mode is not set yet
-   */
-  abstract boolean getSingleModeFlag () throws Exception;
-
-
-  /**
-   * Sets the class flag, if class flag is set, 
-   * the cluster is listed as class atrribute in an extra attribute.
-   * @param classFlag the new class flag
-   */
-  public void setClassFlag(boolean classFlag) { m_ClassFlag = classFlag; }
-
-  /**
-   * Gets the class flag.
-   * @return the class flag 
-   */
-  public boolean getClassFlag() {
-    boolean b = m_ClassFlag;
-    return m_ClassFlag; }
-
-  /**
-   * Sets the debug flag.
-   * @param debug the new debug flag
-   */
-  public void setDebug(boolean debug) { 
-    m_Debug = debug;
+    result.addElement(new Option(
+        "\tClass Flag, if set, the cluster is listed in extra attribute.",
+        "c", 0, "-c"));
+    
+    result.addElement(new Option(
+        "\tThe indices for boolean attributes.",
+        "b", 1, "-b <range>"));
+    
+    result.addElement(new Option(
+        "\tThe indices for nominal attributes.",
+        "m", 1, "-m <range>"));
+    
+    return result.elements();
   }
 
   /**
-   * Gets the debug flag.
-   * @return the debug flag 
+   * Sets the options.
+   *
+   * @param options the options 
+   * @exception Exception if invalid option
    */
-  public boolean getDebug() { return m_Debug; }
+  public void setOptions(String[] options) throws Exception { 
+    String        tmpStr;
+   
+    super.setOptions(options);
 
-  /**
-   * Sets the relation name the dataset should have.
-   * @param relationName the new relation name
-   */
-  public void setRelationName(String relationName) {
-    if (relationName.length() == 0) {
-      // build relationname 
-      StringBuffer name = new StringBuffer(this.getClass().getName());
-      String [] options = getGenericOptions();
-      for (int i = 0; i < options.length; i++) {
-	name = name.append(options[i].trim());
-      }
-
-      if (this instanceof OptionHandler) {
-        options = ((OptionHandler)this).getOptions();
-        for (int i = 0; i < options.length; i++) {
-	  name = name.append(options[i].trim());
-        }
-      }
-      m_RelationName = name.toString();
-    } 
+    tmpStr = Utils.getOption('a', options);
+    if (tmpStr.length() != 0)
+      setNumAttributes(Integer.parseInt(tmpStr));
     else
-      m_RelationName = relationName;
+      setNumAttributes(defaultNumAttributes());
+
+    setClassFlag(Utils.getFlag('c', options));
+
+    tmpStr = Utils.getOption('b', options);
+    setBooleanIndices(tmpStr);
+    m_booleanCols.setUpper(getNumAttributes());
+
+    tmpStr = Utils.getOption('m', options);
+    setNominalIndices(tmpStr);
+    m_nominalCols.setUpper(getNumAttributes());
+
+    // check indices
+    tmpStr = checkIndices();
+    if (tmpStr.length() > 0)
+      throw new IllegalArgumentException(tmpStr);
+  }
+  
+  /**
+   * Gets the current settings of the classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector        result;
+    String[]      options;
+    int           i;
+    
+    result  = new Vector();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+    
+    result.add("-a");
+    result.add("" + getNumAttributes());
+
+    if (getClassFlag())
+      result.add("-c");
+    
+    if (!getBooleanCols().toString().equalsIgnoreCase("empty")) {
+      result.add("-b");
+      result.add("" + getBooleanCols());
+    }
+    
+    if (!getNominalCols().toString().equalsIgnoreCase("empty")) {
+      result.add("-m");
+      result.add("" + getNominalCols());
+    }
+    
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
-   * Gets the relation name the dataset should have.
-   * @return the relation name the dataset should have
+   * returns the default number of attributes
    */
-  public String getRelationName() { return m_RelationName; }
-
-  /**
-   * Sets the number of clusters the dataset should have.
-   * @param numClusters the new number of clusters
-   */
-  public void setNumClusters(int numClusters) { m_NumClusters = numClusters; }
-
-  /**
-   * Gets the number of clusters the dataset should have.
-   * @return the number of clusters the dataset should have
-   */
-  public int getNumClusters() { return m_NumClusters; }
+  protected int defaultNumAttributes() {
+    return 10;
+  }
 
   /**
    * Sets the number of attributes the dataset should have.
@@ -247,285 +201,147 @@ public abstract class ClusterGenerator implements Serializable {
    */
   public void setNumAttributes(int numAttributes) {
     m_NumAttributes = numAttributes;
+    getBooleanCols().setUpper(getNumAttributes());
+    getNominalCols().setUpper(getNumAttributes());
   }
 
   /**
    * Gets the number of attributes that should be produced.
    * @return the number of attributes that should be produced
    */
-  public int getNumAttributes() { return m_NumAttributes; }
-
-  /**
-   * Sets the number of examples the dataset should have.
-   * @param numExamplesAct the new number of examples
-   */
-  public void setNumExamplesAct(int numExamplesAct) { 
-    m_NumExamplesAct = numExamplesAct;
+  public int getNumAttributes() { 
+    return m_NumAttributes; 
   }
-
-  /**
-   * Gets the number of examples the dataset should have.
-   * @return the number of examples the dataset should have
-   */
-  public int getNumExamplesAct() { return m_NumExamplesAct; }
-
-  /**
-   * Sets the print writer.
-   * @param newOutput the new print writer
-   */
-  public void setOutput(PrintWriter newOutput) {
-    m_Output = newOutput;
-  }
-
-  /**
-   * Gets the print writer.
-   * @return print writer object
-   */
-  public PrintWriter getOutput() { return m_Output; }
-
-  /**
-   * Sets the format of the dataset that is to be generated. 
-   * @param the new dataset format of the dataset 
-   */
-  protected void setFormat(Instances newFormat) {
-
-    m_Format = new Instances(newFormat, 0);
-  }
-
-  /**
-   * Gets the format of the dataset that is to be generated. 
-   * @return the dataset format of the dataset
-   */
-  protected Instances getFormat() {
-
-    Instances format = new Instances(m_Format, 0);
-    return format;
-  }
-
-  /**
-   * Returns a string representing the dataset in the instance queue.
-   * @return the string representing the output data format
-   */
-  protected String toStringFormat() {
   
-   if (m_Format == null)
-     return "";
-   return m_Format.toString();
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String numAttributesTipText() {
+    return "The number of attributes the generated data will contain.";
   }
 
   /**
-   * Calls the data generator.
-   *
-   * @param dataGenerator one of the data generators 
-   * @param options options of the data generator
-   * @exception Exception if there was an error in the option list
+   * Sets the class flag, if class flag is set, 
+   * the cluster is listed as class atrribute in an extra attribute.
+   * @param classFlag the new class flag
    */
-  public static void makeData(ClusterGenerator generator, String [] options) 
-    throws Exception {
+  public void setClassFlag(boolean classFlag) { 
+    m_ClassFlag = classFlag; 
+  }
 
-    PrintWriter output = null;
-
-    // read options /////////////////////////////////////////////////
-    try {
-      setOptions(generator, options);
-    } catch (Exception ex) {
-      String specificOptions = "";
-      if (generator instanceof OptionHandler) {
-        specificOptions = generator.listSpecificOptions(generator);
-        }
-      String genericOptions = listGenericOptions(generator);
-      throw new Exception('\n' + ex.getMessage()
-			  + specificOptions + genericOptions);
-    }
-    
-    // define dataset format  ///////////////////////////////////////    
-    // computes actual number of examples to be produced
-    generator.setFormat(generator.defineDataFormat());
-
-    // get print writer /////////////////////////////////////////////
-    output = generator.getOutput();
-
-    // output of options ////////////////////////////////////////////
-    output.println("% ");
-    output.print("% " + generator.getClass().getName() + " ");
-    String [] outOptions = generator.getGenericOptions();
-    for (int i = 0; i < outOptions.length; i++) {
-      output.print(outOptions[i] + " ");
-    }
-    outOptions = ((OptionHandler) generator).getOptions();
-    for (int i = 0; i < outOptions.length; i++) {
-      output.print(outOptions[i] + " ");
-    }
-    output.println("\n%");
-
-    // comment at beginning of ARFF File ////////////////////////////    
-    String commentAtStart = generator.generateStart();
+  /**
+   * Gets the class flag.
+   * @return the class flag 
+   */
+  public boolean getClassFlag() {
+    return m_ClassFlag; 
+  }
   
-    if (commentAtStart.length() > 0) {
-      output.println(commentAtStart);
-    }
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String classFlagTipText() {
+    return "If set to TRUE, lists the cluster as an extra attribute.";
+  }
 
-    // ask data generator which mode ////////////////////////////////
-    boolean singleMode = generator.getSingleModeFlag();
+  /**
+   * Sets which attributes are boolean 
+   * @param rangeList a string representing the list of attributes. Since
+   * the string will typically come from a user, attributes are indexed from
+   * 1. <br/>
+   * eg: first-3,5,6-last
+   * @exception IllegalArgumentException if an invalid range list is supplied 
+   */
+  public void setBooleanIndices(String rangeList) {
+    m_booleanCols.setRanges(rangeList);
+  }
 
-    // start data producer   //////////////////////////////////////// 
-    if (singleMode) {
-      // output of  dataset header //////////////////////////////////
-      output.println(generator.toStringFormat());
-      for (int i = 0; i < generator.getNumExamplesAct(); i++)  {
-        // over all examples to be produced
-        Instance inst = generator.generateExample();
-        output.println(inst);
-        }
-    } else { // generator produces all instances at once
-      Instances dataset = generator.generateExamples();
-      // output of  dataset ////////////////////////////////////////////
-      output.println(dataset);      
-    }
-    // comment at end of ARFF File /////////////////////////////////////    
-    String commentAtEnd = generator.generateFinished();
+  /**
+   * Sets which attributes are boolean.
+   * @param value the range to use
+   */
+  public void setBooleanCols(Range value) {
+    m_booleanCols.setRanges(value.getRanges());
+  }
+
+  /**
+   * returns the range of boolean attributes.
+   */
+  public Range getBooleanCols() {
+    if (m_booleanCols == null)
+      m_booleanCols = new Range();
+
+    return m_booleanCols;
+  }
   
-    if (commentAtEnd.length() > 0) {
-      output.println(commentAtEnd);
-    }
-    
-    if (output != null) {
-      output.close();
-    }
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String booleanColsTipText() {
+    return "The range of attributes that are generated as boolean ones.";
   }
 
   /**
-   * Makes a string with the options of the specific data generator.
-   *
-   * @param generator the datagenerator that is used
-   * @return string with the options of the data generator used
+   * Sets which attributes are nominal
+   * @param rangeList a string representing the list of attributes. Since
+   * the string will typically come from a user, attributes are indexed from
+   * 1. <br/>
+   * eg: first-3,5,6-last
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
-  private String listSpecificOptions(ClusterGenerator generator) { 
-
-    String optionString = "";
-    if (generator instanceof OptionHandler) {
-      optionString += "\nData Generator options:\n\n";
-      Enumeration enu = ((OptionHandler)generator).listOptions();
-      while (enu.hasMoreElements()) {
-        Option option = (Option) enu.nextElement();
-	optionString += option.synopsis() + '\n'
-	    + option.description() + "\n";
-	}
-    }
-    return optionString;
+  public void setNominalIndices(String rangeList) {
+    m_nominalCols.setRanges(rangeList);
   }
 
   /**
-   * Sets the generic options and specific options.
-   *
-   * @param generator the data generator used 
-   * @param options the generic options and the specific options
-   * @exception Exception if help request or any invalid option
+   * Sets which attributes are nominal.
+   * @param value the range to use
    */
-  private static void setOptions(ClusterGenerator generator,
-                                 String[] options) throws Exception { 
+  public void setNominalCols(Range value) {
+    m_nominalCols.setRanges(value.getRanges());
+  }
 
-    boolean helpRequest = false;
-    String outfileName = new String(""); 
-    PrintWriter output;
+  /**
+   * returns the range of nominal attributes.
+   */
+  public Range getNominalCols() {
+    if (m_nominalCols == null)
+      m_nominalCols = new Range();
 
-    // get help 
-    helpRequest = Utils.getFlag('h', options);
+    return m_nominalCols;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String nominalColsTipText() {
+    return "The range of attributes to generate as nominal ones.";
+  }
 
-    if (Utils.getFlag('d', options)) { generator.setDebug(true); }
-
-    // get relationname
-    String relationName = Utils.getOption('r', options); 
-    // set relation name at end of method after all options are set
-
-    // get outputfilename
-    outfileName = Utils.getOption('o', options); 
-
-    // get num of clusters
-    String num = Utils.getOption('k', options);
-    if (num.length() != 0)
-      generator.setNumClusters(Integer.parseInt(num));
-
-    // get class flag
-    if (Utils.getFlag('c', options))
-      generator.setClassFlag(true);
-
-    // get num of attributes
-    String numAttributes = Utils.getOption('a', options);
-    if (numAttributes.length() != 0)
-      generator.setNumAttributes(Integer.parseInt(numAttributes));
-      
-    if (generator instanceof OptionHandler) {
-      ((OptionHandler)generator).setOptions(options);
+  /**
+   * check if attribute types are not contradicting
+   */
+  protected String checkIndices() {
+    for (int i = 1; i < getNumAttributes() + 1; i++) {
+      m_booleanCols.isInRange(i);
+      if (m_booleanCols.isInRange(i) && m_nominalCols.isInRange(i)) {
+	return   "Error in attribute type: Attribute " 
+               + i + " is set boolean and nominal.";
       }
-
-    // all options are set, now set relation name
-    generator.setRelationName(relationName);
-
-    // End read options
-    Utils.checkForRemainingOptions(options);
-
-    if (helpRequest) {
-      throw new Exception("Help requested.\n");
-    }
-
-    if (outfileName.length() != 0) {
-      output = new PrintWriter(new FileOutputStream(outfileName));
-    } else { 
-      output = new PrintWriter(System.out);
-    }
-    generator.setOutput(output);
-  }
-
-  /**
-   * Method for listing generic options.
-   *
-   * @param generator the data generator
-   * @return string with the generic data generator options
-   */
-  private static String listGenericOptions (ClusterGenerator generator) {
-
-    String genericOptions = "\nGeneral options:\n\n"
-	+ "-h\n"
-	+ "\tGet help on available options.\n"
-	+ "-r <relation name>\n"
-	+ "\tThe name of the relation for the produced dataset.\n"
-	+ "-a <number of attributes>\n"
-	+ "\tThe number of attributes for the produced dataset.\n"
-	+ "-k <number of clusters>\n"
-	+ "\tThe number of clusters the dataset is produced in.\n"
-	+ "-c \n"
-	+ "\tThe class flag, if set, the cluster is listed in the class " 
-        + "attribute.\n"
-	+ "-o <file>\n"
-	+ "\tThe name of the file output instances will be written to.\n"
-	+ "\tIf not supplied the instances will be written to stdout.\n";
-    return genericOptions;
-  }
-
-  /**
-   * Gets the current generic settings of the datagenerator.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
-  private String [] getGenericOptions() {
-    
-    String [] options = new String [10];
-    int i = 0;
-    String name = getRelationName();
-    if (name.length() > 0) {
-      options[i++] = "-r";
-      options[i++] = "" + getRelationName();
-    }
-    options[i++] = "-a"; options[i++] = "" + getNumAttributes();
-    options[i++] = "-k"; options[i++] = "" + getNumClusters();
-    if (getClassFlag()) {
-      options[i++] = "-c"; options[i++] = "";
-    }
-    while (i < options.length) {
-      options[i++] = "";
-    }
-    return options;
+    } 
+    return "";
   }
 }
 
