@@ -81,3 +81,15 @@ weka.classifiers.bayes.net.search.SearchAlgorithm=\
 
 weka.classifiers.bayes.net.estimate.BayesNetEstimator =\
  weka.classifiers.bayes.net.estimate
+
+# Lists the DataGenerator Algorithms-Packages
+weka.datagenerators.DataGenerator=\
+ weka.datagenerators.classifiers.classification,\
+ weka.datagenerators.classifiers.regression,\
+ weka.datagenerators.clusterers
+
+# Lists the packages where to find ClusterDefinition
+weka.datagenerators.ClusterDefinition=\
+ weka.datagenerators,\
+ weka.datagenerators.clusterers
+
