@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 
 
@@ -768,7 +768,8 @@ public class MatrixPanel extends JPanel{
 	      java.awt.Rectangle r;     
 	      public void paint(Graphics g) {
 		  r = g.getClipBounds();
-		  g.clearRect(r.x, r.y, r.width, r.height);
+		  g.setColor(this.getBackground());
+		  g.fillRect(r.x, r.y, r.width, r.height);
 		  g.setFont( f );
 		  fm = g.getFontMetrics();
 		  int xpos = 0, ypos = 0, attribWidth=0;
@@ -804,7 +805,8 @@ public class MatrixPanel extends JPanel{
 	      java.awt.Rectangle r; 	      
 	      public void paint(Graphics g) {
 		  r = g.getClipBounds();
-		  g.clearRect(r.x, r.y, r.width, r.height);
+		  g.setColor(this.getBackground());
+		  g.fillRect(r.x, r.y, r.width, r.height);
 		  g.setFont( f );
 		  fm = g.getFontMetrics();
 		  int xpos = 0, ypos = 0, attribWidth=0;
