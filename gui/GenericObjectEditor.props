@@ -273,3 +273,20 @@ weka.classifiers.bayes.net.search.SearchAlgorithm =\
 weka.classifiers.bayes.net.estimate.BayesNetEstimator =\
  weka.classifiers.bayes.net.estimate.SimpleEstimator, \
  weka.classifiers.bayes.net.estimate.BMAEstimator
+
+# Lists the data generator algorithms
+weka.datagenerators.DataGenerator=\
+  weka.datagenerators.classifiers.classification.Agrawal,\
+  weka.datagenerators.classifiers.classification.BayesNet,\
+  weka.datagenerators.classifiers.classification.LED24,\
+  weka.datagenerators.classifiers.classification.RandomRBF,\
+  weka.datagenerators.classifiers.classification.RDG1,\
+  weka.datagenerators.classifiers.regression.Expression,\
+  weka.datagenerators.classifiers.regression.MexicanHat,\
+  weka.datagenerators.clusterers.BIRCHCluster,\
+  weka.datagenerators.clusterers.SubspaceCluster
+
+# Lists the Cluster definitions
+weka.datagenerators.ClusterDefinition=\
+  weka.datagenerators.clusterers.SubspaceClusterDefinition
+   
