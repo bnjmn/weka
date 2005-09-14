@@ -115,7 +115,8 @@ import java.util.Vector;
  *
  * -O <br/>
  * Flag for input order is ordered. If flag is not set then input
- * order is randomized.<p/>
+ * order is randomized. RANDOMIZED is currently not implemented, therefore
+ * is the input order always ordered. <p/>
  *
  * -P num<br/>
  * Noise rate in percent. Can be between 0% and 30%.<br/>
@@ -123,7 +124,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class BIRCHCluster 
   extends ClusterGenerator {
@@ -502,7 +503,7 @@ public class BIRCHCluster
     if (Utils.getFlag('O', options))
       setInputOrder(new SelectedTag(ORDERED, TAGS_INPUTORDER));
     else
-      setInputOrder(new SelectedTag(RANDOMIZED, TAGS_INPUTORDER));
+      setInputOrder(defaultInputOrder());
 
     tmpStr = Utils.getOption('P', options);
     if (tmpStr.length() != 0)
@@ -915,7 +916,7 @@ public class BIRCHCluster
    * returns the default input order
    */
   protected SelectedTag defaultInputOrder() {
-    return new SelectedTag(ORDERED, TAGS_INPUTORDER);  // only one that is currently implemented
+    return new SelectedTag(ORDERED, TAGS_INPUTORDER);  // TODO: the only one that is currently implemented, normally RANDOMIZED
   }
 
   /**
