@@ -37,27 +37,27 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13.2.1 $ 
+ * @version $Revision: 1.13.2.2 $ 
 */
 public class NaiveBayesSimple extends Classifier {
 
   /** All the counts for nominal attributes. */
-  private double [][][] m_Counts;
+  protected double [][][] m_Counts;
   
   /** The means for numeric attributes. */
-  private double [][] m_Means;
+  protected double [][] m_Means;
 
   /** The standard deviations for numeric attributes. */
-  private double [][] m_Devs;
+  protected double [][] m_Devs;
 
   /** The prior probabilities of the classes. */
-  private double [] m_Priors;
+  protected double [] m_Priors;
 
   /** The instances used for training. */
-  private Instances m_Instances;
+  protected Instances m_Instances;
 
   /** Constant for normal distribution. */
-  private static double NORM_CONST = Math.sqrt(2 * Math.PI);
+  protected static double NORM_CONST = Math.sqrt(2 * Math.PI);
 
   /**
    * Returns a string describing this classifier
@@ -316,7 +316,7 @@ public class NaiveBayesSimple extends Classifier {
   /**
    * Density function of normal distribution.
    */
-  private double normalDens(double x, double mean, double stdDev) {
+  protected double normalDens(double x, double mean, double stdDev) {
     
     double diff = x - mean;
     
