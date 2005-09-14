@@ -10,7 +10,8 @@ import junit.framework.TestSuite;
  * java weka.AllTests
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.3 $
  */
 public class AllTests extends TestSuite {
 
@@ -29,6 +30,8 @@ public class AllTests extends TestSuite {
     suite.addTest(weka.classifiers.AllTests.suite());
 //      suite.addTest(weka.clusterers.AllTests.suite());
 
+    // data generators
+    suite.addTest(weka.datagenerators.AllTests.suite());
 
     // High level applications
 //      suite.addTest(weka.experiment.AllTests.suite());
