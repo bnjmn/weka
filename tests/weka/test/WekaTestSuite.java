@@ -39,13 +39,23 @@ import junit.framework.TestSuite;
  * automatic generation of a series of tests.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     GenericPropertiesCreator
  * @see     RTSI
  */
 public class WekaTestSuite
   extends TestSuite {
 
+  /**
+   * checks whether the classname is a valid one, i.e., from a public class
+   *
+   * @param classname   the classname to check
+   * @return            whether the classname is a valid one
+   */
+  protected static boolean isValidClassname(String classname) {
+    return (classname.indexOf("$") == -1);
+  }
+  
   /**
    * determines all the classes derived from the given superclass in the
    * specified packages
@@ -58,12 +68,17 @@ public class WekaTestSuite
     Vector        result;
     Vector        names;
     int           i;
+    int           n;
 
     result = new Vector();
 
     for (i = 0; i < packages.size(); i++) {
       names = RTSI.find((String) packages.get(i), superclass);
-      result.addAll(names);
+      for (n = 0; n < names.size(); n++) {
+        // skip non-public classes
+        if (isValidClassname((String) names.get(n)))
+          result.add(names.get(n));
+      }
     }
     
     return result;
@@ -82,6 +97,7 @@ public class WekaTestSuite
     String                    classes;
     Vector                    result;
     StringTokenizer           tok;
+    String                    classname;
     
     result = new Vector();
 
@@ -92,8 +108,12 @@ public class WekaTestSuite
       classes = gpc.getOutputProperties().getProperty(property);
       tok     = new StringTokenizer(classes, ",");
       
-      while (tok.hasMoreTokens())
-        result.add(tok.nextToken());
+      while (tok.hasMoreTokens()) {
+        classname = tok.nextToken();
+        // skip non-public classes
+        if (isValidClassname(classname))
+          result.add(classname);
+      }
     }
     catch (Exception e) {
       e.printStackTrace();
