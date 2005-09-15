@@ -63,7 +63,7 @@ import weka.core.*;
  * Zijian Zheng & G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LBR extends Classifier {
 
@@ -639,7 +639,7 @@ public class LBR extends Classifier {
     for (attIndex = 0; attIndex < m_numAtts; attIndex++) {
       Attribute attribute = (Attribute) instances.attribute(attIndex);
       if (attribute.isNumeric()) {
-        throw new Exception("Can't handle numeric attributes!  Descritize the dataset prior to using Lazy Bayesian Rules or use the Filtered Classifier");
+        throw new Exception("Can't handle numeric attributes!  Discretize the dataset prior to using Lazy Bayesian Rules or use the Filtered Classifier");
       }
     }
     if (instances.classAttribute().isNumeric()) {
