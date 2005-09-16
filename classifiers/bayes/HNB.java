@@ -37,11 +37,11 @@ import weka.classifiers.*;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 /**
- * Implement an Hidden Naive Bayes classifier.
+ * Implement the Hidden Naive Bayes classifier.
  */
 public class HNB 
   extends Classifier {
@@ -144,7 +144,7 @@ public class HNB
         m_TotalAttValues += m_NumAttValues[i];
       }
       else {
-        m_StartAttIndex[i] = -1; // class needn't be included
+        m_StartAttIndex[i] = -1;
         m_NumAttValues[i] = m_NumClasses;
       }
     }
@@ -175,9 +175,9 @@ public class HNB
     }
 
     //compute conditional mutual information of each pair attributes
-    m_conditionalMutualInformation=new double[instances.numAttributes()-1][instances.numAttributes()-1];
-    for(int son=0;son<instances.numAttributes()-1;son++){
-      for(int parent=0;parent<instances.numAttributes()-1;parent++){
+    m_conditionalMutualInformation=new double[m_NumAttributes-1][m_NumAttributes-1];
+    for(int son=0;son<m_NumAttributes-1;son++){
+      for(int parent=0;parent<m_NumAttributes-1;parent++){
         if(son==parent)continue;
         m_conditionalMutualInformation[son][parent]=conditionalMutualInfo(son,parent);
       }
@@ -201,7 +201,7 @@ public class HNB
     double[] PriorsClass = new double[m_NumClasses];
     double[][] PriorsClassSon=new double[m_NumClasses][m_NumAttValues[son]];
     double[][] PriorsClassParent=new double[m_NumClasses][m_NumAttValues[parent]];
-    double[][][] PosterioriClassParentSon=new double[m_NumClasses][m_NumAttValues[parent]][m_NumAttValues[son]];
+    double[][][] PriorsClassParentSon=new double[m_NumClasses][m_NumAttValues[parent]][m_NumAttValues[son]];
 
     for(int i=0;i<m_NumClasses;i++){
       PriorsClass[i]=m_ClassCounts[i]/m_NumInstances;
@@ -222,12 +222,7 @@ public class HNB
     for(int i=0;i<m_NumClasses;i++){
       for(int j=0;j<m_NumAttValues[parent];j++){
         for(int k=0;k<m_NumAttValues[son];k++){
-          if(m_CondiCounts[i][pIndex+j][pIndex+j]<1e-6){
-            PosterioriClassParentSon[i][j][k]=0;
-          }
-          else{
-            PosterioriClassParentSon[i][j][k]=m_CondiCounts[i][pIndex+j][sIndex+k]/m_CondiCounts[i][pIndex+j][pIndex+j];
-          }
+          PriorsClassParentSon[i][j][k]=m_CondiCounts[i][pIndex+j][sIndex+k]/m_NumInstances;
         }
       }
     }
@@ -235,7 +230,7 @@ public class HNB
     for(int i=0;i<m_NumClasses;i++){
       for(int j=0;j<m_NumAttValues[parent];j++){
         for(int k=0;k<m_NumAttValues[son];k++){
-          CondiMutualInfo+=PosterioriClassParentSon[i][j][k]*PriorsClassParent[i][j]*log2(PosterioriClassParentSon[i][j][k]*PriorsClass[i],PriorsClassSon[i][k]);
+          CondiMutualInfo+=PriorsClassParentSon[i][j][k]*log2(PriorsClassParentSon[i][j][k]*PriorsClass[i],PriorsClassParent[i][j]*PriorsClassSon[i][k]);
         }
       }
     }
@@ -284,27 +279,27 @@ public class HNB
 
     // calculate probabilities for each possible class value
     for(int classVal = 0; classVal < m_NumClasses; classVal++) {
-      probs[classVal]=(m_ClassCounts[classVal]+1.0)/(m_NumInstances+m_NumClasses);// calculate the prior probability
+      probs[classVal]=(m_ClassCounts[classVal]+1.0/m_NumClasses)/(m_NumInstances+1.0);
       for(int son = 0; son < m_NumAttributes; son++) {
         if(attIndex[son]==-1) continue;
         sIndex=attIndex[son];
-        attIndex[son]=-1;// block the parent from being its own child
+        attIndex[son]=-1;
         prob=0;
         CondiMutualInfoSum=0;
         for(int parent=0; parent<m_NumAttributes; parent++) {
           if(attIndex[parent]==-1) continue;
           CondiMutualInfoSum+=m_conditionalMutualInformation[son][parent];
-          prob+=m_conditionalMutualInformation[son][parent]*(m_CondiCounts[classVal][attIndex[parent]][sIndex]+1.0)/(m_CondiCounts[classVal][attIndex[parent]][attIndex[parent]] + m_NumAttValues[son]);
+          prob+=m_conditionalMutualInformation[son][parent]*(m_CondiCounts[classVal][attIndex[parent]][sIndex]+1.0/m_NumAttValues[son])/(m_CondiCounts[classVal][attIndex[parent]][attIndex[parent]] + 1.0);
         }
         if(CondiMutualInfoSum>0){
           prob=prob/CondiMutualInfoSum;
           probs[classVal] *= prob;
         }
         else{
-          prob=(m_CondiCounts[classVal][sIndex][sIndex]+1.0)/(m_ClassCounts[classVal]+m_NumAttValues[son]);
+          prob=(m_CondiCounts[classVal][sIndex][sIndex]+1.0/m_NumAttValues[son])/(m_ClassCounts[classVal]+1.0);
           probs[classVal]*= prob;
         }
-        attIndex[son] = sIndex; //unblock the parent
+        attIndex[son] = sIndex;
       }
     }
     Utils.normalize(probs);
