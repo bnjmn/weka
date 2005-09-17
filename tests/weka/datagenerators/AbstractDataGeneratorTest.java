@@ -20,19 +20,25 @@
 
 package weka.datagenerators;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import junit.framework.TestCase;
 
 /**
  * Abstract Test class for DataGenerators.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractDataGeneratorTest 
   extends TestCase {
 
   /** The datagenerator to be tested */
   protected DataGenerator m_Generator;
+
+  /** for storing the result */
+  protected StringWriter m_Output;
 
   /**
    * Constructs the <code>AbstractDataGeneratorTest</code>. 
@@ -52,11 +58,14 @@ public abstract class AbstractDataGeneratorTest
    */
   protected void setUp() throws Exception {
     m_Generator = getGenerator();
+    m_Output    = new StringWriter();
+    m_Generator.setOutput(new PrintWriter(m_Output));
   }
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
     m_Generator = null;
+    m_Output    = null;
   }
 
   /**
