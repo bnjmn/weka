@@ -20,12 +20,23 @@ import weka.classifiers.*;
  * java weka.classifiers.nn.PaceRegressionTest
  *
  * @author <a href="mailto:mfw4@cs.waikato.ac.nz">Malcolm Ware</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PaceRegressionTest extends AbstractClassifierTest {
 
 
   public PaceRegressionTest(String name) { super(name);  }
+
+  /**
+   * Called by JUnit before each test method. This implementation creates
+   * the default classifier to test and loads a test set of Instances.
+   *
+   * @exception Exception if an error occurs reading the example instances.
+   */
+  protected void setUp() throws Exception {
+    super.setUp();
+    m_Tester.setNumInstances(40);
+  }
 
   /** Creates a default ThresholdSelector */
   public Classifier getClassifier() {
