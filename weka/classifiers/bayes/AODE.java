@@ -51,7 +51,7 @@ import weka.classifiers.UpdateableClassifier;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.8.2.2 $
+ * @version $Revision: 1.8.2.3 $
  *  this version resolves errors in the handling of missing attribute values.
  */
 public class AODE extends Classifier
@@ -149,11 +149,11 @@ public class AODE extends Classifier
     m_SumInstances = 0;
     
     m_NumClasses = instances.numClasses();
-    if(m_NumClasses < 2) {
-       throw new Exception ("Dataset has no class attribute");
-    }
     if(instances.classAttribute().isNumeric()) {
        throw new Exception("AODE: Class is numeric!");
+    }
+    if(m_NumClasses < 2) {
+       throw new Exception ("Dataset has no class attribute");
     }
     if(instances.checkForStringAttributes()) {
        throw new Exception("AODE: String attributes are not allowed.");
