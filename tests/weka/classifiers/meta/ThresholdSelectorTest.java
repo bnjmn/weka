@@ -1,55 +1,60 @@
 /*
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/*
  * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.classifiers.meta;
 
 import weka.classifiers.*;
-import java.util.Random;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import weka.classifiers.evaluation.EvaluationUtils;
+import weka.classifiers.evaluation.NominalPrediction;
+import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.NoSupportForMissingValuesException;
 import weka.core.SelectedTag;
-import weka.classifiers.evaluation.NominalPrediction;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.filters.unsupervised.attribute.RemoveType;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.Filter;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.util.Random;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * Tests ThresholdSelector. Run from the command line with:<p>
- * java weka.classifiers.ThresholdSelectorTest
+ * java weka.classifiers.meta.ThresholdSelectorTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.6.2.1 $
  */
-public class ThresholdSelectorTest extends AbstractClassifierTest {
+public class ThresholdSelectorTest 
+  extends AbstractClassifierTest {
 
-  private class DummyClassifier extends Classifier {
-    
-    double [] m_Preds;
-    int m_Pos;
-    Random m_Rand = new Random(42);
-    public DummyClassifier(double [] preds) {
-      m_Preds = preds;
-    }
-    public void buildClassifier(Instances train) { }
-    public double [] distributionForInstance(Instance test) throws Exception {
-
-      double [] result = new double[test.numClasses()];
-      int pred = 0;
-      result[pred] = m_Preds[m_Pos];
-      double residual = (1.0 - result[pred]) / (result.length - 1);
-      for (int i = 0; i < result.length; i++) {
-        if (i != pred) {
-          result[i] = residual;
-        }
-      }
-      m_Pos = (m_Pos + 1) % m_Preds.length;
-      return result;
-    }
-  }
-
-  private static double [] DIST1 = new double [] {
+  private static double[] DIST1 = new double [] {
     0.25,
     0.375,
     0.5,
@@ -59,19 +64,51 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
     1.0
   };
 
-  public ThresholdSelectorTest(String name) { super(name);  }
+  /** A set of instances to test with */
+  protected transient Instances m_Instances;
+
+  /** Used to generate various types of predictions */
+  protected transient EvaluationUtils m_Evaluation;
+
+  public ThresholdSelectorTest(String name) { 
+    super(name);  
+  }
+
+  /**
+   * Called by JUnit before each test method. This implementation creates
+   * the default classifier to test and loads a test set of Instances.
+   *
+   * @exception Exception if an error occurs reading the example instances.
+   */
+  protected void setUp() throws Exception {
+    super.setUp();
+
+    m_Evaluation = new EvaluationUtils();
+    m_Instances = new Instances(
+                    new BufferedReader(
+                      new InputStreamReader(
+                        ClassLoader.getSystemResourceAsStream(
+                          "weka/classifiers/data/ClassifierTest.arff"))));
+  }
 
   /** Creates a default ThresholdSelector */
   public Classifier getClassifier() {
     return getClassifier(DIST1);
   }
 
+  /** Called by JUnit after each test method */
+  protected void tearDown() {
+    super.tearDown();
+
+    m_Evaluation = null;
+  }
+
   /**
    * Creates a ThresholdSelector that returns predictions from a 
    * given distribution
    */
-  public Classifier getClassifier(double []dist) {
-    return getClassifier(new DummyClassifier(dist));
+  public Classifier getClassifier(double[] dist) {
+    return getClassifier(new ThresholdSelectorDummyClassifier(dist));
   }
 
   /**
@@ -85,6 +122,90 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
     ThresholdSelector t = new ThresholdSelector();
     t.setClassifier(classifier);
     return t;
+  }
+
+  /**
+   * Builds a model using the current classifier using the first
+   * half of the current data for training, and generates a bunch of
+   * predictions using the remaining half of the data for testing.
+   *
+   * @return a <code>FastVector</code> containing the predictions.
+   */
+  protected FastVector useClassifier() throws Exception {
+
+    Classifier dc = null;
+    int tot = m_Instances.numInstances();
+    int mid = tot / 2;
+    Instances train = null;
+    Instances test = null;
+    try {
+      train = new Instances(m_Instances, 0, mid);
+      test = new Instances(m_Instances, mid, tot - mid);
+      dc = m_Classifier;
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Problem setting up to use classifier: " + ex);
+    }
+    int counter = 0;
+    do {
+      try {
+	return m_Evaluation.getTrainTestPredictions(dc, train, test);
+      } catch (UnsupportedAttributeTypeException ex) {
+	SelectedTag tag = null;
+	boolean invert = false;
+	String msg = ex.getMessage();
+	if ((msg.indexOf("string") != -1) && 
+	    (msg.indexOf("attributes") != -1)) {
+	  System.err.println("\nDeleting string attributes.");
+	  tag = new SelectedTag(Attribute.STRING,
+				RemoveType.TAGS_ATTRIBUTETYPE);
+	} else if ((msg.indexOf("only") != -1) && 
+		   (msg.indexOf("nominal") != -1)) {
+	  System.err.println("\nDeleting non-nominal attributes.");
+	  tag = new SelectedTag(Attribute.NOMINAL,
+				RemoveType.TAGS_ATTRIBUTETYPE);
+	  invert = true;
+	} else if ((msg.indexOf("only") != -1) && 
+		   (msg.indexOf("numeric") != -1)) {
+	  System.err.println("\nDeleting non-numeric attributes.");
+	  tag = new SelectedTag(Attribute.NUMERIC,
+				RemoveType.TAGS_ATTRIBUTETYPE);
+	  invert = true;
+	}  else {
+	  throw ex;
+	}
+	RemoveType attFilter = new RemoveType();
+	attFilter.setAttributeType(tag);
+	attFilter.setInvertSelection(invert);
+	attFilter.setInputFormat(train);
+	train = Filter.useFilter(train, attFilter);
+	attFilter.batchFinished();
+	test = Filter.useFilter(test, attFilter);
+	counter++;
+	if (counter > 2) {
+	  throw ex;
+	}
+      } catch (NoSupportForMissingValuesException ex2) {
+	System.err.println("\nReplacing missing values.");
+	ReplaceMissingValues rmFilter = new ReplaceMissingValues();
+	rmFilter.setInputFormat(train);
+	train = Filter.useFilter(train, rmFilter);
+	rmFilter.batchFinished();
+	test = Filter.useFilter(test, rmFilter);
+      } catch (IllegalArgumentException ex3) {
+	String msg = ex3.getMessage();
+	if (msg.indexOf("Not enough instances") != -1) {
+	  System.err.println("\nInflating training data.");
+	  Instances trainNew = new Instances(train);
+	  for (int i = 0; i < train.numInstances(); i++) {
+	    trainNew.add(train.instance(i));
+	  }
+	  train = trainNew;
+	} else {
+	  throw ex3;
+	}
+      }
+    } while (true);
   }
 
   public void testRangeNone() throws Exception {
@@ -155,5 +276,4 @@ public class ThresholdSelectorTest extends AbstractClassifierTest {
   public static void main(String[] args){
     junit.textui.TestRunner.run(suite());
   }
-
 }
