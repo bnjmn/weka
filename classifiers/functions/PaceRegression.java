@@ -79,7 +79,7 @@ import weka.core.*;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 public class PaceRegression extends Classifier implements OptionHandler,
 					       WeightedInstancesHandler {
 
@@ -159,14 +159,9 @@ public class PaceRegression extends Classifier implements OptionHandler,
   public void buildClassifier(Instances data) throws Exception {
 
     //  Checks on data model and instances
-    try {
     if (!data.classAttribute().isNumeric()) {
       throw new UnsupportedClassTypeException("Class attribute has to be numeric"+
 					      " for pace regression!");
-    }
-    } catch (UnassignedClassException e) {
-      System.err.println(data);
-      System.err.println(data.classIndex());
     }
     if (data.numInstances() == 0) {
       throw new Exception("No instances in training file!");
