@@ -76,7 +76,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.RTSI
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -240,6 +240,16 @@ public class GenericPropertiesCreator {
       e.printStackTrace();
     }
   }
+
+  /**
+   * checks whether the classname is a valid one, i.e., from a public class
+   *
+   * @param classname   the classname to check
+   * @return            whether the classname is a valid one
+   */
+  protected boolean isValidClassname(String classname) {
+    return (classname.indexOf("$") == -1);
+  }
   
   /**
    * fills in all the classes (based on the packages in the input properties 
@@ -267,6 +277,9 @@ public class GenericPropertiesCreator {
         pkg     = tok.nextToken().trim();
         classes = RTSI.find(pkg, Class.forName(key));
         for (i = 0; i < classes.size(); i++) {
+          // skip non-public classes
+          if (!isValidClassname(classes.get(i).toString()))
+            continue;
           if (!value.equals(""))
             value += ",";
           value += classes.get(i).toString();
