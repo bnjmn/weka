@@ -4,52 +4,315 @@
 
 package weka.classifiers;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.util.Random;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.classifiers.evaluation.EvaluationUtils;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SelectedTag;
-import weka.test.Regression;
-import weka.core.UnsupportedClassTypeException;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.NoSupportForMissingValuesException;
-import weka.filters.unsupervised.attribute.RemoveType;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
 
 /**
- * Abstract Test class for Classifiers.
+ * Abstract Test class for Classifiers. Internally it uses the class
+ * <code>CheckClassifier</code> to determine success or failure of the
+ * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.8 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.9 $
+ *
+ * @see CheckClassifier
+ * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
  */
-public abstract class AbstractClassifierTest extends TestCase {
+public abstract class AbstractClassifierTest 
+  extends TestCase {
 
-  /** Set to true to print out extra info during testing */
-  protected static boolean VERBOSE = false;
+  /**
+   * Class that performs the actual testing. Only publishes the necessary 
+   * protected methods of the <code>CheckClassifier</code> class.
+   */
+  protected class TestClassifier
+    extends CheckClassifier {
 
-  /** The filter to be tested */
+    /**
+     * Checks whether the scheme can take command line options.
+     *
+     * @return index 0 is true if the classifier can take options
+     */
+    public boolean[] canTakeOptions() {
+      return super.canTakeOptions();
+    }
+
+    /**
+     * Checks whether the scheme can build models incrementally.
+     *
+     * @return index 0 is true if the classifier can train incrementally
+     */
+    public boolean[] updateableClassifier() {
+      return super.updateableClassifier();
+    }
+
+    /**
+     * Checks whether the scheme says it can handle instance weights.
+     *
+     * @return true if the classifier handles instance weights
+     */
+    public boolean[] weightedInstancesHandler() {
+      return super.weightedInstancesHandler();
+    }
+
+    /**
+     * Checks basic prediction of the scheme, for simple non-troublesome
+     * datasets.
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @return index 0 is true if the test was passed, index 1 is true if test 
+     *         was acceptable
+     */
+    public boolean[] canPredict(boolean nominalPredictor,
+                                boolean numericPredictor, 
+                                boolean stringPredictor, 
+                                boolean numericClass) {
+      return super.canPredict(
+          nominalPredictor, numericPredictor, stringPredictor, numericClass);
+    }
+
+    /**
+     * Checks whether nominal schemes can handle more than two classes.
+     * If a scheme is only designed for two-class problems it should
+     * throw an appropriate exception for multi-class problems.
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numClasses the number of classes to test
+     * @return index 0 is true if the test was passed, index 1 is true if test 
+     *         was acceptable
+     */
+    public boolean[] canHandleNClasses(boolean nominalPredictor,
+                                       boolean numericPredictor, 
+                                       boolean stringPredictor, 
+                                       int numClasses) {
+      return super.canHandleNClasses(
+          nominalPredictor, numericPredictor, stringPredictor, numClasses);
+    }
+
+    /**
+     * Checks whether the scheme can handle zero training instances.
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @return index 0 is true if the test was passed, index 1 is true if test 
+     *         was acceptable
+     */
+    public boolean[] canHandleZeroTraining(boolean nominalPredictor,
+                                           boolean numericPredictor, 
+                                           boolean stringPredictor, 
+                                           boolean numericClass) {
+      return super.canHandleZeroTraining(
+          nominalPredictor, numericPredictor, stringPredictor, numericClass);
+    }
+
+    /**
+     * Checks whether the scheme correctly initialises models when 
+     * buildClassifier is called. This test calls buildClassifier with
+     * one training dataset and records performance on a test set. 
+     * buildClassifier is then called on a training set with different
+     * structure, and then again with the original training set. The
+     * performance on the test set is compared with the original results
+     * and any performance difference noted as incorrect build initialisation.
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @return index 0 is true if the test was passed, index 1 is true if the
+     *         scheme performs worse than ZeroR, but without error (index 0 is
+     *         false)
+     */
+    public boolean[] correctBuildInitialisation(boolean nominalPredictor,
+                                                boolean numericPredictor, 
+                                                boolean stringPredictor, 
+                                                boolean numericClass) {
+      return super.correctBuildInitialisation(
+          nominalPredictor, numericPredictor, stringPredictor, numericClass);
+    }
+
+    /**
+     * Checks basic missing value handling of the scheme. If the missing
+     * values cause an exception to be thrown by the scheme, this will be
+     * recorded.
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @param predictorMissing true if the missing values may be in 
+     * the predictors
+     * @param classMissing true if the missing values may be in the class
+     * @param level the percentage of missing values
+     * @return index 0 is true if the test was passed, index 1 is true if test 
+     *         was acceptable
+     */
+    public boolean[] canHandleMissing(boolean nominalPredictor,
+                                      boolean numericPredictor, 
+                                      boolean stringPredictor, 
+                                      boolean numericClass,
+                                      boolean predictorMissing,
+                                      boolean classMissing,
+                                      int missingLevel) {
+      return super.canHandleMissing(
+          nominalPredictor, numericPredictor, stringPredictor, 
+          numericClass, predictorMissing,
+          classMissing, missingLevel);
+    }
+
+    /**
+     * Checks whether an updateable scheme produces the same model when
+     * trained incrementally as when batch trained. The model itself
+     * cannot be compared, so we compare the evaluation on test data
+     * for both models. It is possible to get a false positive on this
+     * test (likelihood depends on the classifier).
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @return index 0 is true if the test was passed
+     */
+    public boolean[] updatingEquality(boolean nominalPredictor,
+                                      boolean numericPredictor, 
+                                      boolean stringPredictor, 
+                                      boolean numericClass) {
+      return super.updatingEquality(
+          nominalPredictor, numericPredictor, stringPredictor, numericClass);
+    }
+
+    /**
+     * Checks whether the classifier erroneously uses the class
+     * value of test instances (if provided). Runs the classifier with
+     * test instance class values set to missing and compares with results
+     * when test instance class values are left intact.
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @return index 0 is true if the test was passed
+     */
+    public boolean[] doesntUseTestClassVal(boolean nominalPredictor,
+                                           boolean numericPredictor, 
+                                           boolean stringPredictor, 
+                                           boolean numericClass) {
+      return super.doesntUseTestClassVal(
+          nominalPredictor, numericPredictor, stringPredictor, numericClass);
+    }
+
+    /**
+     * Checks whether the classifier can handle instance weights.
+     * This test compares the classifier performance on two datasets
+     * that are identical except for the training weights. If the 
+     * results change, then the classifier must be using the weights. It
+     * may be possible to get a false positive from this test if the 
+     * weight changes aren't significant enough to induce a change
+     * in classifier performance (but the weights are chosen to minimize
+     * the likelihood of this).
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @return index 0 true if the test was passed
+     */
+    public boolean[] instanceWeights(boolean nominalPredictor,
+                                     boolean numericPredictor, 
+                                     boolean stringPredictor, 
+                                     boolean numericClass) {
+      return super.instanceWeights(
+          nominalPredictor, numericPredictor, stringPredictor, numericClass);
+    }
+
+    /**
+     * Checks whether the scheme alters the training dataset during
+     * training. If the scheme needs to modify the training
+     * data it should take a copy of the training data. Currently checks
+     * for changes to header structure, number of instances, order of
+     * instances, instance weights.
+     *
+     * @param nominalPredictor if true use nominal predictor attributes
+     * @param numericPredictor if true use numeric predictor attributes
+     * @param stringPredictor if true use string predictor attributes
+     * @param numericClass if true use a numeric class attribute otherwise a
+     * nominal class attribute
+     * @param predictorMissing true if we know the classifier can handle
+     * (at least) moderate missing predictor values
+     * @param classMissing true if we know the classifier can handle
+     * (at least) moderate missing class values
+     * @return index 0 is true if the test was passed
+     */
+    public boolean[] datasetIntegrity(boolean nominalPredictor,
+                                      boolean numericPredictor, 
+                                      boolean stringPredictor, 
+                                      boolean numericClass,
+                                      boolean predictorMissing,
+                                      boolean classMissing) {
+      return super.datasetIntegrity(
+          nominalPredictor, numericPredictor, stringPredictor, 
+          numericClass, predictorMissing,
+          classMissing);
+    }
+  }
+
+  /** The classifier to be tested */
   protected Classifier m_Classifier;
 
-  /** A set of instances to test with */
-  protected Instances m_Instances;
+  /** For testing the classifier */
+  protected TestClassifier m_Tester;
+  
+  /** whether classifier is updateable */
+  protected boolean m_updateableClassifier;
 
-  /** Used to generate various types of predictions */
-  protected EvaluationUtils m_Evaluation;
+  /** whether classifier handles weighted instances */
+  protected boolean m_weightedInstancesHandler;
 
+  /** the number of classes to test with testNClasses() 
+   * @see #testNClasses() */
+  protected int m_NClasses;
+
+  /** used as index for boolean arrays with capabilities */
+  protected final static int NOMINAL = 0;
+
+  /** used as index for boolean arrays with capabilities */
+  protected final static int NUMERIC = 1;
+
+  /** whether to run CheckClassifier in DEBUG mode */
+  protected boolean DEBUG = false;
+  
+  /** wether classifier can predict nominal  */
+  protected boolean[] m_canPredictNominal;
+  protected boolean[] m_canPredictNumeric;
+  protected boolean[] m_canPredictString;
+  
+  /** whether classifier handles missing values */
+  protected boolean[] m_handleMissingPredictors;
+
+  /** whether classifier handles class with only missing values */
+  protected boolean[] m_handleMissingClass;
+  
   /**
    * Constructs the <code>AbstractClassifierTest</code>. Called by subclasses.
    *
    * @param name the name of the test class
    */
-  public AbstractClassifierTest(String name) { super(name); }
+  public AbstractClassifierTest(String name) { 
+    super(name); 
+  }
 
   /**
    * Called by JUnit before each test method. This implementation creates
@@ -59,440 +322,422 @@ public abstract class AbstractClassifierTest extends TestCase {
    */
   protected void setUp() throws Exception {
     m_Classifier = getClassifier();
-    m_Evaluation = new EvaluationUtils();
-    m_Instances = new Instances(new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("weka/classifiers/data/ClassifierTest.arff"))));
+    m_Tester     = new TestClassifier();
+    m_Tester.setSilent(true);
+    m_Tester.setClassifier(m_Classifier);
+    m_Tester.setNumInstances(20);
+    m_Tester.setDebug(DEBUG);
+
+    m_updateableClassifier     = m_Tester.updateableClassifier()[0];
+    m_weightedInstancesHandler = m_Tester.weightedInstancesHandler()[0];
+    m_canPredictNominal        = new boolean[2];
+    m_canPredictNumeric        = new boolean[2];
+    m_canPredictString         = new boolean[2];
+    m_handleMissingPredictors  = new boolean[2];
+    m_handleMissingClass       = new boolean[2];
+    m_NClasses                 = 4;
+
+    // initialize attributes
+    checkAttributes(true, false, false, false);
+    checkAttributes(false, true, false, false);
+    checkAttributes(false, false, true, false);
   }
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
     m_Classifier = null;
-    m_Evaluation = null;
-    m_Instances = null;
+    m_Tester     = null;
+
+    m_updateableClassifier     = false;
+    m_weightedInstancesHandler = false;
+    m_canPredictNominal        = new boolean[2];
+    m_canPredictNumeric        = new boolean[2];
+    m_canPredictString         = new boolean[2];
+    m_handleMissingPredictors  = new boolean[2];
+    m_handleMissingClass       = new boolean[2];
+    m_NClasses                 = 4;
   }
 
   /**
-   * Used to create an instance of a specific classifier. The classifier
-   * should be configured to operate on a dataset that contains
-   * attributes in this order:<p>
-   *
-   * String, Nominal, Numeric, String, Nominal, Numeric<p>
-   *
-   * Where the first three attributes do not contain any missing values,
-   * but the last three attributes do. If the classifier is for some reason
-   * incapable of accepting a dataset of this type, override setUp() to 
-   * either manipulate the default dataset to be compatible, or load another
-   * test dataset. <p>
-   *
-   * The configured classifier should preferrably do something
-   * meaningful, since the results of classification are used as the default
-   * regression output.
+   * Used to create an instance of a specific classifier.
    *
    * @return a suitably configured <code>Classifier</code> value
    */
   public abstract Classifier getClassifier();
 
   /**
-   * Builds a model using the current classifier using the first
-   * half of the current data for training, and generates a bunch of
-   * predictions using the remaining half of the data for testing.
+   * checks whether at least one attribute type can be handled with the
+   * given class type
    *
-   * @return a <code>FastVector</code> containing the predictions.
+   * @param type      the class type to check for, NOMINAL or NUMERIC
    */
-  protected FastVector useClassifier() throws Exception {
-
-    Classifier dc = null;
-    int tot = m_Instances.numInstances();
-    int mid = tot / 2;
-    Instances train = null;
-    Instances test = null;
-    try {
-      train = new Instances(m_Instances, 0, mid);
-      test = new Instances(m_Instances, mid, tot - mid);
-      dc = m_Classifier;
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      fail("Problem setting up to use classifier: " + ex);
-    }
-    int counter = 0;
-    do {
-      try {
-	return m_Evaluation.getTrainTestPredictions(dc, train, test);
-      } catch (UnsupportedAttributeTypeException ex) {
-	SelectedTag tag = null;
-	boolean invert = false;
-	String msg = ex.getMessage();
-	if ((msg.indexOf("string") != -1) && 
-	    (msg.indexOf("attributes") != -1)) {
-	  System.err.println("\nDeleting string attributes.");
-	  tag = new SelectedTag(Attribute.STRING,
-				RemoveType.TAGS_ATTRIBUTETYPE);
-	} else if ((msg.indexOf("only") != -1) && 
-		   (msg.indexOf("nominal") != -1)) {
-	  System.err.println("\nDeleting non-nominal attributes.");
-	  tag = new SelectedTag(Attribute.NOMINAL,
-				RemoveType.TAGS_ATTRIBUTETYPE);
-	  invert = true;
-	} else if ((msg.indexOf("only") != -1) && 
-		   (msg.indexOf("numeric") != -1)) {
-	  System.err.println("\nDeleting non-numeric attributes.");
-	  tag = new SelectedTag(Attribute.NUMERIC,
-				RemoveType.TAGS_ATTRIBUTETYPE);
-	  invert = true;
-	}  else {
-	  throw ex;
-	}
-	RemoveType attFilter = new RemoveType();
-	attFilter.setAttributeType(tag);
-	attFilter.setInvertSelection(invert);
-	attFilter.setInputFormat(train);
-	train = Filter.useFilter(train, attFilter);
-	attFilter.batchFinished();
-	test = Filter.useFilter(test, attFilter);
-	counter++;
-	if (counter > 2) {
-	  throw ex;
-	}
-      } catch (NoSupportForMissingValuesException ex2) {
-	System.err.println("\nReplacing missing values.");
-	ReplaceMissingValues rmFilter = new ReplaceMissingValues();
-	rmFilter.setInputFormat(train);
-	train = Filter.useFilter(train, rmFilter);
-	rmFilter.batchFinished();
-	test = Filter.useFilter(test, rmFilter);
-      } catch (IllegalArgumentException ex3) {
-	String msg = ex3.getMessage();
-	if (msg.indexOf("Not enough instances") != -1) {
-	  System.err.println("\nInflating training data.");
-	  Instances trainNew = new Instances(train);
-	  for (int i = 0; i < train.numInstances(); i++) {
-	    trainNew.add(train.instance(i));
-	  }
-	  train = trainNew;
-	} else {
-	  throw ex3;
-	}
-      }
-    } while (true);
-  }
-
-  /**
-   * Add missing values to a dataset.
-   *
-   * @param data the instances to add missing values to
-   * @param level the level of missing values to add (if positive, this
-   * is the probability that a value will be set to missing, if negative
-   * all but one value will be set to missing (not yet implemented))
-   * @param predictorMissing if true, predictor attributes will be modified
-   * @param classMissing if true, the class attribute will be modified
-   */
-  protected void addMissing(Instances data, int level,
-			    boolean predictorMissing, boolean classMissing) {
-
-    int classIndex = data.classIndex();
-    Random random = new Random(1);
-    for (int i = 0; i < data.numInstances(); i++) {
-      Instance current = data.instance(i);
-      for (int j = 0; j < data.numAttributes(); j++) {
-	if (((j == classIndex) && classMissing) ||
-	    ((j != classIndex) && predictorMissing)) {
-	  if (Math.abs(random.nextInt()) % 100 < level)
-	    current.setMissing(j);
-	}
-      }
-    }
-  }
-
-  /**
-   * Make a simple set of instances, which can later be modified
-   * for use in specific tests.
-   *
-   * @param seed the random number seed
-   * @param numInstances the number of instances to generate
-   * @param numNominal the number of nominal attributes
-   * @param numNumeric the number of numeric attributes
-   * @param numClasses the number of classes (if nominal class)
-   * @param numericClass true if the class attribute should be numeric
-   * @return the test dataset
-   * @exception Exception if the dataset couldn't be generated
-   */
-  protected Instances makeTestDataset(int seed, int numInstances, 
-				      int numNominal, int numNumeric, 
-				      int numClasses, boolean numericClass) 
-    throws Exception {
-
-    int numAttributes = numNominal + numNumeric + 1;
-    Random random = new Random(seed);
-    FastVector attributes = new FastVector(numAttributes);
-
-    // Add Nominal attributes
-    for (int i = 0; i < numNominal; i++) {
-      FastVector nomStrings = new FastVector(i + 1);
-      for(int j = 0; j <= i; j++) {
-	nomStrings.addElement("a" + (i + 1) + "l" + (j + 1));
-      }
-      attributes.addElement(new Attribute("Nominal" + (i + 1), nomStrings));
-    }
-
-    // Add Numeric attributes
-    for (int i = 0; i < numNumeric; i++) {
-      attributes.addElement(new Attribute("Numeric" + (i + 1)));
-    }
-
-    // TODO: Add some String attributes...
-
-    // Add class attribute
-    if (numericClass) {
-      attributes.addElement(new Attribute("Class"));
-    } else {
-      FastVector nomStrings = new FastVector();
-      for(int j = 0; j <numClasses; j++) {
-	nomStrings.addElement("cl" + (j + 1));
-      }
-      attributes.addElement(new Attribute("Class",nomStrings));
-    }    
-
-    Instances data = new Instances("CheckSet", attributes, numInstances);
-    data.setClassIndex(data.numAttributes() - 1);
-
-    // Generate the instances
-    for (int i = 0; i < numInstances; i++) {
-      Instance current = new Instance(numAttributes);
-      current.setDataset(data);
-      if (numericClass) {
-	current.setClassValue(random.nextFloat() * 0.25
-			      + Math.abs(random.nextInt())
-			      % Math.max(2, numNominal));
-      } else {
-	current.setClassValue(Math.abs(random.nextInt()) % data.numClasses());
-      }
-      double classVal = current.classValue();
-      double newVal = 0;
-      for (int j = 0; j < numAttributes - 1; j++) {
-	switch (data.attribute(j).type()) {
-	case Attribute.NUMERIC:
-	  newVal = classVal * 4 + random.nextFloat() * 1 - 0.5;
-	  current.setValue(j, newVal);
-	  break;
-	case Attribute.NOMINAL:
-	  if (random.nextFloat() < 0.2) {
-	    newVal = Math.abs(random.nextInt())
-	      % data.attribute(j).numValues();
-	  } else {
-	    newVal = ((int)classVal) % data.attribute(j).numValues();
-	  }
-	  current.setValue(j, newVal);
-	  break;
-	case Attribute.STRING:
-	  System.err.println("Huh? this bit isn't implemented yet");
-	  break;
-	}
-      }
-      data.add(current);
-    }
-    return data;
-  }
-
-  /**
-   * Returns a short summary string for the dataset characteristics
-   *
-   * @param nominalPredictor true if nominal predictor attributes are present
-   * @param stringPredictor true if string predictor attributes are present
-   * @param numericPredictor true if numeric predictor attributes are present
-   * @param numericClass true if the class attribute is numeric
-   */
-  protected String attributeSummary(boolean nominalPredictor, 
-                                    boolean stringPredictor, 
-                                    boolean numericPredictor, 
-                                    boolean numericClass) {
-    
-    StringBuffer sb = new StringBuffer();
-    if (numericClass) {
-      sb.append(" (numeric class,");
-    } else {
-      sb.append(" (nominal class,");
-    }
-    if (numericPredictor) {
-      sb.append(" numeric");
-      if (nominalPredictor || stringPredictor) {
-	sb.append(" &");
-      }
-    }
-    if (nominalPredictor) {
-      sb.append(" nominal");
-      if (stringPredictor) {
-	sb.append(" &");
-      }
-    }
-    if (stringPredictor) {
-      sb.append(" string");
-    }
-    sb.append(" predictors)");
-    return sb.toString();
-  }
-
-  /**
-   * Returns a string containing all the predictions.
-   *
-   * @param predictions a <code>FastVector</code> containing the predictions
-   * @return a <code>String</code> representing the vector of predictions.
-   */
-  protected String predictionsToString(FastVector predictions) {
-
-    StringBuffer sb = new StringBuffer();
-    sb.append(predictions.size()).append(" predictions\n");
-    for (int i = 0; i < predictions.size(); i++) {
-      sb.append(predictions.elementAt(i)).append('\n');
-    }
-    return sb.toString();
-  }
-
-  // TODO:
-  // Test building with various combinations of attributes:
-  // testClassMultiNominalPredictorsNone()
-  // testClassMultiNominalPredictorsNominal()
-  // testClassMultiNominalPredictorsNominalNumeric()
-  // testClassMultiNominalPredictorsNominalNumericString()
-  // testClassMultiNominalPredictorsNominalNumeric()
-  // testClassBinaryPredictorsNone()
-  // testClassBinaryPredictorsNominal()
-  // testClassBinaryPredictorsNominalNumeric()
-  // testClassBinaryPredictorsNominalNumericString()
-  // testClassBinaryPredictorsNominalNumeric()
-  // testClassNumericPredictorsNone()
-  // testClassNumericPredictorsNominal()
-  // testClassNumericPredictorsNominalNumeric()
-  // testClassNumericPredictorsNominalNumericString()
-  // testClassNumericPredictorsNominalNumeric()
-
-  // With default classifier:
-  // testBuildZeroTrainingInstances()
-  // testBuildOneTrainingInstance()
-  // testBuildMissingPredictorValues()
-  // testBuildAllMissingPredictorValues()
-  // testBuildMissingClassValues()
-  // testBuildAllMissingClassValues()
-  // testBuildInitialization() (i.e. no result changes when build called repeatedly)
-  // testBuildNoTamper() Classifier doesn't alter training instances
-  // Test prediction with:
-  // testPredictionNoPeeking() Ignores test instance class values
-  // testPredictionNoTamper() Doesn't alter test instances
-  // 
-
-  /** 
-   * Tests whether the classifier doesn't barf when you call toString
-   * before a model has been built. 
-   */
-  public void testToString_NoModel() {
-    
-    m_Classifier.toString();
+  protected boolean canPredict(int type) {
+    return    m_canPredictNominal[type]
+           || m_canPredictNumeric[type]
+           || m_canPredictString[type];
   }
 
   /** 
-   * Tests whether the classifier doesn't barf when you call toString
-   * after a model has been built. 
+   * returns a string for the class type
    */
-  public void testToString() throws Exception {
-    
-    try { // Try a regression model
-      m_Instances.setClassIndex(2);
-      useClassifier();
-      m_Classifier.toString();
-    } catch (UnsupportedClassTypeException ex) {
-    }
-    try { // Try a classification model
-      m_Instances.setClassIndex(1);
-      useClassifier();
-      System.err.println(m_Classifier.toString());
-    } catch (UnsupportedClassTypeException ex) {
-    }
+  protected String getClassTypeString(int type) {
+    if (type == NOMINAL)
+      return "Nominal";
+    else if (type == NUMERIC)
+      return "Numeric";
+    else
+      throw new IllegalArgumentException("Class type '" + type + "' unknown!");
   }
 
   /**
-   * Runs a regression test -- this checks that the output of the tested
-   * object matches that in a reference version. When this test is
-   * run without any pre-existing reference output, the reference version
-   * is created.
-   */
-  public void testRegression() throws Exception {
-
-    Regression reg = new Regression(this.getClass());
-    FastVector resultNum = null;
-    try {
-      m_Instances.setClassIndex(2);
-      resultNum = useClassifier();
-    } catch (UnsupportedClassTypeException ex) {
-    }
-    FastVector resultNom = null;
-    try {
-      m_Instances.setClassIndex(1);
-      resultNom = useClassifier();
-    } catch (UnsupportedClassTypeException ex) {
-    }
-    if ((resultNum == null) && (resultNom == null)) {
-      fail("Problem during regression testing: no successful predictions for "
-           + "either numeric or nominal class");
-    }
-    if (resultNum != null) {
-      reg.println(predictionsToString(resultNum));
-    }
-    if (resultNom != null) {
-      reg.println(predictionsToString(resultNom));
-    }
-    try {
-      String diff = reg.diff();
-      if (diff == null) {
-        System.err.println("Warning: No reference available, creating."); 
-      } else if (!diff.equals("")) {
-        fail("Regression test failed. Difference:\n" + diff);
-      }
-    } catch (java.io.IOException ex) {
-      fail("Problem during regression testing.\n" + ex);
-    }
-  }
-
-  /**
-   * Performs some timing tests on the current classifier. This timing
-   * is only carried out if VERBOSE is true. The only way this test
-   * should actually fail is if there is a problem building the model
-   * or generating predictions.
+   * tests whether the classifier can handle certain attributes and if not,
+   * if the exception is OK
    *
-   * @exception Exception if an error occurs.  
+   * @param nom         to check for nominal attributes
+   * @param num         to check for numeric attributes
+   * @param str         to check for string attributes
+   * @param allowFail   whether a junit fail can be executed
+   * @see CheckClassifier#canPredict(boolean,boolean,boolean,boolean)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
    */
-  public void testThroughput() throws Exception {
+  protected void checkAttributes(boolean nom, boolean num, boolean str, 
+                                 boolean allowFail) {
+    boolean[]     result;
+    String        att;
+    int           i;
 
-    if (VERBOSE) {
-      Instances icopy = new Instances(m_Instances);
-      // Make a bigger dataset
-      Instances result = null;
-      for (int i = 0; i < 20000; i++) {
-        icopy.add(m_Instances.instance(i%m_Instances.numInstances()));
+    // determine text for type of attributes
+    att = "";
+    if (nom)
+      att = "nominal";
+    else if (num)
+      att = "numeric";
+    else if (str)
+      att = "string";
+    
+    for (i = NOMINAL; i <= NUMERIC; i++) {
+      result = m_Tester.canPredict(nom, num, str, (i == NUMERIC));
+      if (nom)
+        m_canPredictNominal[i] = result[0];
+      else if (num)
+        m_canPredictNumeric[i] = result[0];
+      else if (str)
+        m_canPredictString[i] = result[0];
+
+      if (!result[0] && !result[1] && allowFail)
+        fail("Error handling " + att + " attributes (" + getClassTypeString(i) 
+            + " class)!");
+    }
+  }
+
+  /**
+   * tests whether the classifier can handle different types of attributes and
+   * if not, if the exception is OK
+   *
+   * @see #checkAttributes(boolean,boolean,boolean)
+   */
+  public void testAttributes() {
+    // nominal
+    checkAttributes(true, false, false, true);
+    // numeric
+    checkAttributes(false, true, false, true);
+    // string
+    checkAttributes(false, false, true, true);
+  }
+
+  /**
+   * tests whether the classifier handles instance weights correctly
+   *
+   * @see CheckClassifier#instanceWeights(boolean,boolean,boolean,boolean)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testInstanceWeights() {
+    boolean[]     result;
+    int           i;
+    
+    if (m_weightedInstancesHandler) {
+      for (i = NOMINAL; i <= NUMERIC; i++) {
+        // does the classifier support this type of class at all?
+        if (!canPredict(i))
+          continue;
+        
+        result = m_Tester.instanceWeights(
+            m_canPredictNominal[i], 
+            m_canPredictNumeric[i], 
+            m_canPredictString[i], 
+            (i == NUMERIC));
+
+        if (!result[0])
+          fail("Error handling instance weights (" + getClassTypeString(i) 
+              + " class)!");
       }
-      long starttime, endtime;
-      double secs, rate;
+    }
+  }
 
-      // Time model building
-      starttime = System.currentTimeMillis();
-      // Build the model
-      m_Classifier.buildClassifier(icopy);
-      endtime = System.currentTimeMillis();
-      secs = (double)(endtime - starttime) / 1000;
-      System.err.println("\n" + m_Classifier.getClass().getName() 
-                         + " built model from " + icopy.numInstances() 
-                         + " in " + secs + " sec"); 
+  /**
+   * tests whether classifier handles N classes
+   *
+   * @see CheckClassifier#canHandleNClasses(boolean,boolean,boolean,int)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   * @see #m_NClasses
+   */
+  public void testNClasses() {
+    boolean[]     result;
+
+    if (!canPredict(NOMINAL))
+      return;
+
+    result = m_Tester.canHandleNClasses(
+        m_canPredictNominal[NOMINAL],
+        m_canPredictNumeric[NOMINAL],
+        m_canPredictString[NOMINAL],
+        m_NClasses);
+
+    if (!result[0] && !result[1])
+      fail("Error handling " + m_NClasses + " classes!");
+  }
+
+  /**
+   * tests whether the classifier can handle zero training instances
+   *
+   * @see CheckClassifier#canHandleZeroTraining(boolean,boolean,boolean,boolean)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testZeroTraining() {
+    boolean[]     result;
+    int           i;
+    
+    for (i = NOMINAL; i <= NUMERIC; i++) {
+      // does the classifier support this type of class at all?
+      if (!canPredict(i))
+        continue;
       
-      // Time testing
-      starttime = System.currentTimeMillis();
-      // Generate the predictions
-      for (int i = 0; i < icopy.numInstances(); i++) {
-        m_Classifier.classifyInstance(icopy.instance(i));
+      result = m_Tester.canHandleZeroTraining(
+          m_canPredictNominal[i], 
+          m_canPredictNumeric[i], 
+          m_canPredictString[i], 
+          (i == NUMERIC));
+
+      if (!result[0] && !result[1])
+        fail("Error handling zero training instances (" + getClassTypeString(i) 
+            + " class)!");
+    }
+  }
+
+  /**
+   * checks whether the classifier can handle the given percentage of
+   * missing predictors
+   *
+   * @param type        the class type
+   * @param percent     the percentage of missing predictors
+   * @return            true if the classifier can handle it
+   */
+  protected boolean checkMissingPredictors(int type, int percent) {
+    boolean[]     result;
+    
+    result = m_Tester.canHandleMissing(
+        m_canPredictNominal[type], 
+        m_canPredictNumeric[type], 
+        m_canPredictString[type], 
+        (type == NUMERIC),
+        true,
+        false,
+        percent);
+
+    if (!result[0] && !result[1])
+      fail("Error handling " + percent + "% missing predictors (" 
+          + getClassTypeString(type) + " class)!");
+    
+    return result[0];
+  }
+
+  /**
+   * tests whether the classifier can handle missing predictors (20% and 100%)
+   *
+   * @see CheckClassifier#canHandleMissing(boolean,boolean,boolean,boolean,boolean,boolean,int)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testMissingPredictors() {
+    int           i;
+    
+    for (i = NOMINAL; i <= NUMERIC; i++) {
+      // does the classifier support this type of class at all?
+      if (!canPredict(i))
+        continue;
+      
+      // 20% missing
+      m_handleMissingPredictors[i] = checkMissingPredictors(i, 20);
+
+      // 100% missing
+      if (m_handleMissingPredictors[i])
+        checkMissingPredictors(i, 100);
+    }
+  }
+
+  /**
+   * checks whether the classifier can handle the given percentage of
+   * missing class labels
+   *
+   * @param type        the class type
+   * @param percent     the percentage of missing class labels
+   * @return            true if the classifier can handle it
+   */
+  protected boolean checkMissingClass(int type, int percent) {
+    boolean[]     result;
+    
+    result = m_Tester.canHandleMissing(
+        m_canPredictNominal[type], 
+        m_canPredictNumeric[type], 
+        m_canPredictString[type], 
+        (type == NUMERIC),
+        false,
+        true,
+        percent);
+
+    if (!result[0] && !result[1])
+      fail("Error handling " + percent + "% missing class labels (" 
+          + getClassTypeString(type) + " class)!");
+    
+    return result[0];
+  }
+
+  /**
+   * tests whether the classifier can handle missing class values (20% and
+   * 100%)
+   *
+   * @see CheckClassifier#canHandleMissing(boolean,boolean,boolean,boolean,boolean,boolean,int)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testMissingClass() {
+    int           i;
+    
+    for (i = NOMINAL; i <= NUMERIC; i++) {
+      // does the classifier support this type of class at all?
+      if (!canPredict(i))
+        continue;
+      
+      // 20% missing
+      m_handleMissingClass[i] = checkMissingClass(i, 20);
+
+      // 100% missing
+      if (m_handleMissingClass[i])
+        checkMissingClass(i, 100);
+    }
+  }
+
+  /**
+   * tests whether the classifier correctly initializes in the
+   * buildClassifier method
+   *
+   * @see CheckClassifier#correctBuildInitialisation(boolean,boolean,boolean,boolean)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testBuildInitialization() {
+    boolean[]     result;
+    int           i;
+    
+    for (i = NOMINAL; i <= NUMERIC; i++) {
+      // does the classifier support this type of class at all?
+      if (!canPredict(i))
+        continue;
+      
+      result = m_Tester.correctBuildInitialisation(
+          m_canPredictNominal[i], 
+          m_canPredictNumeric[i], 
+          m_canPredictString[i], 
+          (i == NUMERIC));
+
+      if (!result[0] && !result[1])
+        fail("Incorrect build initialization (" + getClassTypeString(i) 
+            + " class)!");
+    }
+  }
+
+  /**
+   * tests whether the classifier alters the training set during training.
+   *
+   * @see CheckClassifier#datasetIntegrity(boolean,boolean,boolean,boolean,boolean,boolean)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testDatasetIntegrity() {
+    boolean[]     result;
+    int           i;
+    
+    for (i = NOMINAL; i <= NUMERIC; i++) {
+      // does the classifier support this type of class at all?
+      if (!canPredict(i))
+        continue;
+      
+      result = m_Tester.datasetIntegrity(
+          m_canPredictNominal[i], 
+          m_canPredictNumeric[i], 
+          m_canPredictString[i], 
+          (i == NUMERIC),
+          m_handleMissingPredictors[i],
+          m_handleMissingClass[i]);
+
+      if (!result[0] && !result[1])
+        fail("Training set is altered during training (" 
+            + getClassTypeString(i) + " class)!");
+    }
+  }
+
+  /**
+   * tests whether the classifier erroneously uses the class value of test
+   * instances (if provided)
+   *
+   * @see CheckClassifier#doesntUseTestClassVal(boolean,boolean,boolean,boolean)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testUseOfTestClassValue() {
+    boolean[]     result;
+    int           i;
+    
+    for (i = NOMINAL; i <= NUMERIC; i++) {
+      // does the classifier support this type of class at all?
+      if (!canPredict(i))
+        continue;
+      
+      result = m_Tester.datasetIntegrity(
+          m_canPredictNominal[i], 
+          m_canPredictNumeric[i], 
+          m_canPredictString[i], 
+          (i == NUMERIC),
+          m_handleMissingPredictors[i],
+          m_handleMissingClass[i]);
+
+      if (!result[0])
+        fail("Uses test class values (" + getClassTypeString(i) + " class)!");
+    }
+  }
+
+  /**
+   * tests whether the classifier produces the same model when trained
+   * incrementally as when batch trained.
+   *
+   * @see CheckClassifier#updatingEquality(boolean,boolean,boolean,boolean)
+   * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)
+   */
+  public void testUpdatingEquality() {
+    boolean[]     result;
+    int           i;
+    
+    if (m_updateableClassifier) {
+      for (i = NOMINAL; i <= NUMERIC; i++) {
+        // does the classifier support this type of class at all?
+        if (!canPredict(i))
+          continue;
+        
+        result = m_Tester.updatingEquality(
+            m_canPredictNominal[i], 
+            m_canPredictNumeric[i], 
+            m_canPredictString[i], 
+            (i == NUMERIC));
+
+        if (!result[0])
+          fail("Incremental training does not produce same result as "
+              + "batch training (" + getClassTypeString(i) + " class)!");
       }
-      endtime = System.currentTimeMillis();
-      secs = (double)(endtime - starttime) / 1000;
-      rate = (double)icopy.numInstances() / secs;
-      System.err.println("\n" + m_Classifier.getClass().getName() 
-                         + " made " + icopy.numInstances() 
-                         + " predictions in " + secs + " sec (" 
-                         + rate + " inst/sec)"); 
     }
   }
 }
