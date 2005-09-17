@@ -29,7 +29,7 @@ import java.util.*;
 import weka.core.*;
 
 /**
- * Class for boosting a classifier using Freund & Schapire's Adaboost 
+ * Class for boosting a classifier using Freund &amp; Schapire's Adaboost 
  * M1 method. For more information, see<p>
  *
  * Yoav Freund and Robert E. Schapire
@@ -63,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24.2.2 $ 
+ * @version $Revision: 1.24.2.3 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -327,6 +327,9 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     data = new Instances(data);
     data.deleteWithMissingClass();
+    if (data.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("AdaBoostM1: can't handle a numeric class!");
+    }
     if (data.numInstances() == 0) {
       throw new Exception("No train instances without class missing!");
     }
@@ -626,6 +629,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     try {
       System.out.println(Evaluation.evaluateModel(new AdaBoostM1(), argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
