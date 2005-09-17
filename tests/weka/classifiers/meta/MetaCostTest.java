@@ -19,11 +19,26 @@ import java.io.InputStreamReader;
  * java weka.classifiers.meta.MetaCostTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class MetaCostTest extends AbstractClassifierTest {
 
-  public MetaCostTest(String name) { super(name);  }
+  public MetaCostTest(String name) { 
+    super(name);  
+  }
+
+  /**
+   * Called by JUnit before each test method. This implementation creates
+   * the default classifier to test and loads a test set of Instances.
+   *
+   * @exception Exception if an error occurs reading the example instances.
+   */
+  protected void setUp() throws Exception {
+    super.setUp();
+
+    // can handle only as much classes as there are in the CostMatrix!
+    m_NClasses = ((MetaCost) getClassifier()).getCostMatrix().numRows();
+  }
 
   /** Creates a default MetaCost */
   public Classifier getClassifier() {
