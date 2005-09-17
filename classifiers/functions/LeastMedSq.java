@@ -14,7 +14,7 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/**
+/*
  *    LeastMedSq.java
  *
  *    Copyright (C) 2001 Tony Voyle
@@ -41,7 +41,7 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
   
@@ -107,6 +107,9 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * @exception Exception if an error occurs
    */
   public void buildClassifier(Instances data)throws Exception{
+
+    data = new Instances(data);
+    data.deleteWithMissingClass();
 
     if (!data.classAttribute().isNumeric())
       throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
