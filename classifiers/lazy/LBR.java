@@ -60,10 +60,10 @@ import weka.core.*;
  * performed for a single training set.
  *
  * For more information, see<p>
- * Zijian Zheng & G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
+ * Zijian Zheng &amp; G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LBR extends Classifier {
 
@@ -634,17 +634,22 @@ public class LBR extends Classifier {
     forCnt = 0;
     whileCnt = 0;
     
-    m_numAtts = instances.numAttributes();
+    if (instances.classAttribute().isNumeric()) {
+      throw new Exception("LBR: Class is numeric!");
+    }
+    
     // LBR requires nominal attibutes
+    if (instances.checkForStringAttributes())
+      throw new Exception("Can't handle string attributes!");
+
+    m_numAtts = instances.numAttributes();
     for (attIndex = 0; attIndex < m_numAtts; attIndex++) {
       Attribute attribute = (Attribute) instances.attribute(attIndex);
       if (attribute.isNumeric()) {
         throw new Exception("Can't handle numeric attributes!  Discretize the dataset prior to using Lazy Bayesian Rules or use the Filtered Classifier");
       }
     }
-    if (instances.classAttribute().isNumeric()) {
-      throw new Exception("LBR: Class is numeric!");
-    }
+
     m_numClasses = instances.numClasses();
     if (m_numClasses < 0) {
       throw new Exception ("Dataset has no class attribute");
