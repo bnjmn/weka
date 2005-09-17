@@ -59,7 +59,7 @@ import weka.filters.supervised.attribute.NominalToBinary;
  *
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 
 
@@ -122,8 +122,8 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
     Instances filteredData = new Instances(data);
     filteredData.deleteWithMissingClass();
 
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances without missing class values in training file!");
+    if (filteredData.numInstances() == 0) {
+      throw new Exception("No instances in training file!");
     }
 
     //replace missing values
