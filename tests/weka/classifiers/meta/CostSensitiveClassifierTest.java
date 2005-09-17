@@ -19,11 +19,26 @@ import java.io.InputStreamReader;
  * java weka.classifiers.meta.CostSensitiveClassifierTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CostSensitiveClassifierTest extends AbstractClassifierTest {
 
-  public CostSensitiveClassifierTest(String name) { super(name);  }
+  public CostSensitiveClassifierTest(String name) { 
+    super(name);  
+  }
+
+  /**
+   * Called by JUnit before each test method. This implementation creates
+   * the default classifier to test and loads a test set of Instances.
+   *
+   * @exception Exception if an error occurs reading the example instances.
+   */
+  protected void setUp() throws Exception {
+    super.setUp();
+
+    // can handle only as much classes as there are in the CostMatrix!
+    m_NClasses = ((CostSensitiveClassifier) getClassifier()).getCostMatrix().numRows();
+  }
 
   /** Creates a default CostSensitiveClassifier */
   public Classifier getClassifier() {
