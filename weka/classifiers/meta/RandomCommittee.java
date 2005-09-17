@@ -57,7 +57,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision: 1.5.2.2 $
  */
 public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler {
@@ -99,6 +99,11 @@ public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhance
    * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
+
+    if (data.numInstances() == 0) {
+      throw new IllegalArgumentException("RandomTree: zero training instances or all " +
+					 "instances have missing class!");
+    }
 
     if (!(m_Classifier instanceof Randomizable)) {
       throw new IllegalArgumentException("Base learner must implement Randomizable!");
@@ -178,6 +183,7 @@ public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhance
       System.out.println(Evaluation.
 			 evaluateModel(new RandomCommittee(), argv));
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
