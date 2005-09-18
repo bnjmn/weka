@@ -35,7 +35,7 @@ import weka.estimators.*;
  * Bayes networks and random instances based on a Bayes network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class BayesNetGenerator extends BayesNet {
 	int m_nSeed = 1;
@@ -410,14 +410,28 @@ public class BayesNetGenerator extends BayesNet {
 		return options;
 	} // getOptions
 
+    /**
+     * prints all the options to stdout
+     */
+    protected static void printOptions(OptionHandler o) {
+      Enumeration enm = o.listOptions();
+      
+      System.out.println("Options for " + o.getClass().getName() + ":\n");
+      
+      while (enm.hasMoreElements()) {
+        Option option = (Option) enm.nextElement();
+        System.out.println(option.synopsis());
+        System.out.println(option.description());
+      }
+    }
 
     static public void main(String [] Argv) {
 		BayesNetGenerator b = new BayesNetGenerator();
-		if (Argv.length == 0) {
-			System.err.println(b.listOptions().toString());
-			return;
-		}
     	try {
+		if ( (Argv.length == 0) || (Utils.getFlag('h', Argv)) ) {
+                        printOptions(b);
+                        return;
+		}
 	    	b.setOptions(Argv);
 	    	
 	    	b.generateRandomNetwork();
@@ -427,7 +441,7 @@ public class BayesNetGenerator extends BayesNet {
 	    	System.out.println(b.toString());
     	} catch (Exception e) {
     		e.printStackTrace();
-    		System.err.println(b.listOptions().toString());
+    		printOptions(b);
     	}
     } // main
     
