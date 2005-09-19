@@ -29,7 +29,7 @@ import weka.core.*;
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class C45Split extends ClassifierSplitModel{
 
@@ -283,6 +283,12 @@ public class C45Split extends ClassifierSplitModel{
     m_splitPoint = 
       (trainInstances.instance(splitIndex+1).value(m_attIndex)+
        trainInstances.instance(splitIndex).value(m_attIndex))/2;
+
+    // In case we have a numerical precision problem we need to choose the
+    // smaller value
+    if (m_splitPoint == trainInstances.instance(splitIndex + 1).value(m_attIndex)) {
+      m_splitPoint = trainInstances.instance(splitIndex).value(m_attIndex);
+    }
 
     // Restore distributioN for best split.
     m_distribution = new Distribution(2,trainInstances.numClasses());
