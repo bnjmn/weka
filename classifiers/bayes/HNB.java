@@ -37,44 +37,44 @@ import weka.classifiers.*;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 /**
  * Implement the Hidden Naive Bayes classifier.
  */
-public class HNB 
-  extends Classifier {
+
+public class HNB  extends Classifier {
 
   /** The number of each class value occurs in the dataset */
-  private double[] m_ClassCounts;
+  private double [] m_ClassCounts;
 
-  /** 3D array of attribute with two conditions counts (class and another attribute) */
-  private double[][][] m_CondiCounts;
+  /** The number of class and two attributes values occurs in the dataset */
+  private double [][][] m_ClassAttAttCounts;
 
-  /** The starting index in the m_CondiCounts array of each attribute */
-  private int[] m_StartAttIndex;
+  /** The number of values for each attribute in the dataset */
+  private int [] m_NumAttValues;
 
-  /** The number of values for each attribute */
-  private int[] m_NumAttValues;
-
-  /** The total number of values for all attributes (not including class) */
+  /** The number of values for all attributes in the dataset */
   private int m_TotalAttValues;
 
-  /** The number of classes */
+  /** The number of classes in the dataset */
   private int m_NumClasses;
 
-  /** The number of attributes in dataset (including class) */
+  /** The number of attributes including class in the dataset */
   private int m_NumAttributes;
 
   /** The number of instances in the dataset */
   private int m_NumInstances;
 
-  /** The index of the class attribute */
+  /** The index of the class attribute in the dataset */
   private int m_ClassIndex;
 
+  /** The starting index of each attribute in the dataset */
+  private int[] m_StartAttIndex;
+
   /** The 2D array of conditional mutual information of each pair attributes */
-  private double[][] m_conditionalMutualInformation;
+  private double[][] m_condiMutualInfo;
 
   /**
    * Returns a string describing this classifier.
@@ -83,7 +83,8 @@ public class HNB
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return  
+
+    return
       "Contructs Hidden Naive Bayes classification model with high "
       + "classification accuracy and AUC.\n"
       + "For more information refer to:\n"
@@ -106,7 +107,6 @@ public class HNB
       throw new UnassignedClassException("No class attribute set!");
     if (!instances.classAttribute().isNominal())
       throw new UnsupportedClassTypeException("Handles only nominal classes!");
-    
     // attributes
     Enumeration enumInsts,enumAtts;
     enumAtts = instances.enumerateAttributes();
@@ -135,8 +135,7 @@ public class HNB
     m_NumAttValues = new int[m_NumAttributes];
 
     // set the starting index of each attribute and the number of values for
-    // each attribute and the total number of values for all attributes (not
-    // including class).
+    // each attribute and the total number of values for all attributes (not including class).
     for(int i = 0; i < m_NumAttributes; i++) {
       if(i != m_ClassIndex) {
         m_StartAttIndex[i] = m_TotalAttValues;
@@ -151,7 +150,7 @@ public class HNB
 
     // allocate space for counts and frequencies
     m_ClassCounts = new double[m_NumClasses];
-    m_CondiCounts = new double[m_NumClasses][m_TotalAttValues][m_TotalAttValues];
+    m_ClassAttAttCounts = new double[m_NumClasses][m_TotalAttValues][m_TotalAttValues];
 
     // Calculate the counts
     for(int k = 0; k < m_NumInstances; k++) {
@@ -168,36 +167,34 @@ public class HNB
         if(attIndex[Att1] == -1) continue;
         for(int Att2 = 0; Att2 < m_NumAttributes; Att2++) {
           if((attIndex[Att2] != -1)) {
-            m_CondiCounts[classVal][attIndex[Att1]][attIndex[Att2]] ++;
+            m_ClassAttAttCounts[classVal][attIndex[Att1]][attIndex[Att2]] ++;
           }
         }
       }
     }
 
-    //compute conditional mutual information of each pair attributes
-    m_conditionalMutualInformation=new double[m_NumAttributes-1][m_NumAttributes-1];
-    for(int son=0;son<m_NumAttributes-1;son++){
-      for(int parent=0;parent<m_NumAttributes-1;parent++){
-        if(son==parent)continue;
-        m_conditionalMutualInformation[son][parent]=conditionalMutualInfo(son,parent);
+    //compute conditional mutual information of each pair attributes (not including class)
+    m_condiMutualInfo=new double[m_NumAttributes][m_NumAttributes];
+    for(int son=0;son<m_NumAttributes;son++){
+      if(son == m_ClassIndex) continue;
+      for(int parent=0;parent<m_NumAttributes;parent++){
+        if(parent == m_ClassIndex || son==parent) continue;
+        m_condiMutualInfo[son][parent]=conditionalMutualInfo(son,parent);
       }
     }
-
   }
 
   /**
    * Computes conditional mutual information between a pair of attributes.
    *
    * @param son and parent are a pair of attributes
-   * @return the conditional mutual information between son and parent given
-   * class
+   * @return the conditional mutual information between son and parent given class
    */
   private double conditionalMutualInfo(int son, int parent)throws Exception{
 
     double CondiMutualInfo=0;
     int sIndex=m_StartAttIndex[son];
     int pIndex=m_StartAttIndex[parent];
-
     double[] PriorsClass = new double[m_NumClasses];
     double[][] PriorsClassSon=new double[m_NumClasses][m_NumAttValues[son]];
     double[][] PriorsClassParent=new double[m_NumClasses][m_NumAttValues[parent]];
@@ -209,20 +206,20 @@ public class HNB
 
     for(int i=0;i<m_NumClasses;i++){
       for(int j=0;j<m_NumAttValues[son];j++){
-        PriorsClassSon[i][j]=m_CondiCounts[i][sIndex+j][sIndex+j]/m_NumInstances;
+        PriorsClassSon[i][j]=m_ClassAttAttCounts[i][sIndex+j][sIndex+j]/m_NumInstances;
       }
     }
 
     for(int i=0;i<m_NumClasses;i++){
       for(int j=0;j<m_NumAttValues[parent];j++){
-        PriorsClassParent[i][j]=m_CondiCounts[i][pIndex+j][pIndex+j]/m_NumInstances;
+        PriorsClassParent[i][j]=m_ClassAttAttCounts[i][pIndex+j][pIndex+j]/m_NumInstances;
       }
     }
 
     for(int i=0;i<m_NumClasses;i++){
       for(int j=0;j<m_NumAttValues[parent];j++){
         for(int k=0;k<m_NumAttValues[son];k++){
-          PriorsClassParentSon[i][j][k]=m_CondiCounts[i][pIndex+j][sIndex+k]/m_NumInstances;
+          PriorsClassParentSon[i][j][k]=m_ClassAttAttCounts[i][pIndex+j][sIndex+k]/m_NumInstances;
         }
       }
     }
@@ -235,7 +232,6 @@ public class HNB
       }
     }
     return CondiMutualInfo;
-
   }
 
   /**
@@ -250,7 +246,6 @@ public class HNB
       return 0.0;
     else
       return Math.log(x/y)/Math.log(2);
-
   }
 
   /**
@@ -266,7 +261,7 @@ public class HNB
     double[] probs = new double[m_NumClasses];
     int sIndex;
     double prob;
-    double CondiMutualInfoSum;
+    double condiMutualInfoSum;
 
     // store instance's att values in an int array
     int[] attIndex = new int[m_NumAttributes];
@@ -285,18 +280,18 @@ public class HNB
         sIndex=attIndex[son];
         attIndex[son]=-1;
         prob=0;
-        CondiMutualInfoSum=0;
+        condiMutualInfoSum=0;
         for(int parent=0; parent<m_NumAttributes; parent++) {
           if(attIndex[parent]==-1) continue;
-          CondiMutualInfoSum+=m_conditionalMutualInformation[son][parent];
-          prob+=m_conditionalMutualInformation[son][parent]*(m_CondiCounts[classVal][attIndex[parent]][sIndex]+1.0/m_NumAttValues[son])/(m_CondiCounts[classVal][attIndex[parent]][attIndex[parent]] + 1.0);
+          condiMutualInfoSum+=m_condiMutualInfo[son][parent];
+          prob+=m_condiMutualInfo[son][parent]*(m_ClassAttAttCounts[classVal][attIndex[parent]][sIndex]+1.0/m_NumAttValues[son])/(m_ClassAttAttCounts[classVal][attIndex[parent]][attIndex[parent]] + 1.0);
         }
-        if(CondiMutualInfoSum>0){
-          prob=prob/CondiMutualInfoSum;
+        if(condiMutualInfoSum>0){
+          prob=prob/condiMutualInfoSum;
           probs[classVal] *= prob;
         }
         else{
-          prob=(m_CondiCounts[classVal][sIndex][sIndex]+1.0/m_NumAttValues[son])/(m_ClassCounts[classVal]+1.0);
+          prob=(m_ClassAttAttCounts[classVal][sIndex][sIndex]+1.0/m_NumAttValues[son])/(m_ClassCounts[classVal]+1.0);
           probs[classVal]*= prob;
         }
         attIndex[son] = sIndex;
@@ -310,6 +305,7 @@ public class HNB
    * returns a string representation of the classifier
    */
   public String toString() {
+
     return "HNB (Hidden Naive Bayes)";
   }
 
@@ -319,6 +315,7 @@ public class HNB
    * @param args the options
    */
   public static void main(String[] args) {
+
     try {
       System.out.println(Evaluation.evaluateModel(new HNB(), args));
     }
@@ -327,5 +324,5 @@ public class HNB
       System.err.println(e.getMessage());
     }
   }
-
 }
+
