@@ -40,34 +40,38 @@ import weka.core.*;
  *
  * <p> Valid filter-specific options are: <p>
  *
- * -N <num> <br>
+ * -N num <br>
  * The number of dimensions (attributes) the data should
- * be reduced to (exclusive of the class attribute, if it is set). <p>
+ * be reduced to (default 10; exclusive of the class attribute, if it is set).
+ * <p>
  *
- * -P <percent> <br>
+ * -P percent <br>
  * The percentage of dimensions (attributes) the data should
  * be reduced to  (exclusive of the class attribute, if it is set). This 
  * -N option is ignored if this option is present or is greater 
  * than zero.<p>
  *
- * -D <distribution num> <br>
+ * -D distribution num <br>
  * The distribution to use for calculating the random
  * matrix.<br>
+ * <ul>
  * <li> 1 - Sparse distribution of: (default) <br>
  *      sqrt(3)*{+1 with prob(1/6), 0 with prob(2/3), -1 with prob(1/6)}</li>
  * <li> 2 - Sparse distribution of: <br>
  *      {+1 with prob(1/2), -1 with prob(1/2)}</li>
  * <li> 3 - Gaussian distribution </li>
+ * </ul>
  *
  * -M <br>
- * Replace missing values using the ReplaceMissingValues filter
+ * Replace missing values using the ReplaceMissingValues filter <p>
  *
- * -R <num> <br>
+ * -R num <br>
  * Specify the random seed for the random number generator for
- * calculating the random matrix.
+ * calculating the random matrix (default 42). <p>
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version 1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.3.2.1 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
+ *          Kibriya)]
  */
 public class RandomProjection extends Filter implements UnsupervisedFilter, OptionHandler {
 
@@ -84,7 +88,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
  
   /** The types of distributions that can be used for 
       calculating the random matrix */
-  private static final int SPARSE1=1, SPARSE2=2, GAUSSIAN=3;
+  public static final int SPARSE1=1, SPARSE2=2, GAUSSIAN=3;
 
   public static final Tag [] TAGS_DSTRS_TYPE = {
     new Tag(SPARSE1, "Sparse 1"),
@@ -132,7 +136,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 
     newVector.addElement(new Option(
 	      "\tThe number of dimensions (attributes) the data should be reduced to\n"
-             +"\t(exclusive of the class attribute, if it is set).",
+             +"\t(default 10; exclusive of the class attribute, if it is set).",
 	      "N", 1, "-N <number>"));
 
     newVector.addElement(new Option(
@@ -160,7 +164,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 
     newVector.addElement(new Option(
 	      "\tThe random seed for the random number generator used for\n"
-	     +"\tcalculating the random matrix.",
+	     +"\tcalculating the random matrix (default 42).",
 	      "R", 0, "-R <num>"));
  
     return newVector.elements();
@@ -169,31 +173,34 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
   /**
    * Parses the options for this object. Valid options are: <p>
    *
-   * -N <num> <br>
+   * -N num <br>
    * The number of dimensions (attributes) the data should
    * be reduced to (exclusive of the class attribute). <p>
    *
-   * -P <percent> <br>
+   * -P percent <br>
    * The percentage of dimensions (attributes) the data should
    * be reduced to  (exclusive of the class attribute). This 
    * -N option is ignored if this option is present or is greater 
    * than zero.<p>
    *
-   * -D <distribution num> <br>
+   * -D distribution num <br>
    * The distribution to use for calculating the random
    * matrix.<br>
+   * <ul>
    * <li> 1 - Sparse distribution of: (default) <br>
    *      sqrt(3)*{+1 with prob(1/6), 0 with prob(2/3), -1 with prob(1/6)}</li>
    * <li> 2 - Sparse distribution of: <br>
    *      {+1 with prob(1/2), -1 with prob(1/2)}</li>
    * <li> 3 - Gaussian distribution </li>
+   * </ul>
    *
    * -M <br>
-   * Replace missing values using the ReplaceMissingValues filter
+   * Replace missing values using the ReplaceMissingValues filter <p>
    *
-   * -R <num> <br>
+   * -R num <br>
    * Specify the random seed for the random number generator for
-   * calculating the random matrix.   *
+   * calculating the random matrix. <p>
+   * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
