@@ -28,11 +28,26 @@ import java.util.*;
 import weka.core.*;
 
 /** 
- * Modify numeric attributes according to a given expression
+ * Modify numeric attributes according to a given expression. <p/>
  *
+ * Valid options are: <p/>
+ * 
+ * -E expression <br/>
+ *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX) <br/>
+ *  Supported operators are +, -, *, /, pow, log,
+ *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
+ *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse <p/>
+ *
+ * -R range <br/>
+ *  Specify list of columns to ignore. First and last are valid
+ *  indexes. (default none) <p/>
+ *
+ * -V <br/>
+ *  Invert matching sense (i.e. only modify specified columns) <p/>
+ *  
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MathExpression extends PotentialClassIgnorer implements UnsupervisedFilter, OptionHandler {
   /** Stores which columns to select as a funky range */
@@ -130,7 +145,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
     }
     if (m_attStats == null) {
       Instances input = getInputFormat();
-      
+
       m_expTree = Parser.parse(getExpression());
       m_attStats = new AttributeStats [input.numAttributes()];
       
@@ -238,11 +253,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
   }
 
     /**
-   * Parses a list of options for this object. Valid options are:<p>
-   *
-   * -E expression <br>
-   * Specify the expression to apply. Eg. a^2*mean(a) + log(a) <p>
-   *
+   * Parses a list of options for this object. 
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -278,7 +289,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
       options[current++] = "-V";
     }
     if (!getIgnoreRange().equals("")) {
-      options[current++] = "-I"; options[current++] = getIgnoreRange();
+      options[current++] = "-R"; options[current++] = getIgnoreRange();
     }
     while(current < options.length) {
       options[current++] = "";
@@ -300,7 +311,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
              +"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse",
 	     "E",1,"-E <expression>"));
     newVector.addElement(new Option(
-              "\tSpecify list of columns to modify. First and last are valid\n"
+              "\tSpecify list of columns to ignore. First and last are valid\n"
 	      +"\tindexes. (default none)",
               "R", 1, "-R <index1,index2-index4,...>"));    
     newVector.addElement(new Option(
@@ -406,7 +417,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
    *
    * @param rangeList a string representing the list of attributes.  Since
    * the string will typically come from a user, attributes are indexed from
-   * 1. <br>
+   * 1. <br/>
    * eg: first-3,5,6-last
    */
   public void setIgnoreRange(String rangeList) {
@@ -416,25 +427,25 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
   
   
   
-  /** Class to built the tree of the grammar:</br>
-   * Exp  -> Term '+' Exp   </br>
-   *         | Term '-' Exp </br>
-   *         | Term         </br>
-   * Term -> Atom '*' Term  </br>
-   *         | Atom '/' Term </br>
-   *         | Atom </br>
-   * Atom -> <number> </br>
-   *         | '('Exp')' </br>
-   *         | function '(' Params ')' </br>
-   *         | '-' Atom | VARIABLE </br>
-   *         | Disjunction </br>
-   * Params -> E </br>
-   *           | E,Params </br>
-   * Disjunction -> Conjunction </br>
-   *                | Conjunction '|' Disjunction </br>
-   * Conjonction -> NumTest </br>
-   *                | NumTest '&' Conjonction </br>
-   * NumTest -> Exp '<' Exp | Exp '>' Exp | Exp '=' Exp | '[' Disjunction ']' | '!' '[' Disjunction ']'</br>
+  /** Class to built the tree of the grammar:<br/>
+   * Exp  -&gt; Term '+' Exp   <br/>
+   *         | Term '-' Exp <br/>
+   *         | Term         <br/>
+   * Term -&gt; Atom '*' Term  <br/>
+   *         | Atom '/' Term <br/>
+   *         | Atom <br/>
+   * Atom -&gt; &lt;number&gt; <br/>
+   *         | '('Exp')' <br/>
+   *         | function '(' Params ')' <br/>
+   *         | '-' Atom | VARIABLE <br/>
+   *         | Disjunction <br/>
+   * Params -&gt; E <br/>
+   *           | E,Params <br/>
+   * Disjunction -&gt; Conjunction <br/>
+   *                | Conjunction '|' Disjunction <br/>
+   * Conjonction -&gt; NumTest <br/>
+   *                | NumTest '&amp;' Conjonction <br/>
+   * NumTest -&gt; Exp '&lt;' Exp | Exp '&gt;' Exp | Exp '=' Exp | '[' Disjunction ']' | '!' '[' Disjunction ']'<br/>
    */
   static public class Parser {
       
