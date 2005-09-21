@@ -35,30 +35,31 @@ import java.util.Vector;
  * Valid filter-specific options are: <p>
  *
  * -W classifier string <br>
- * Full class name of classifier to use, followed by scheme options. (required)<p>
+ * Full class name of classifier to use, followed by scheme options.
+ * (required)<p>
  * 
  * -C class index <br>
- * Attribute on which misclassifications are based. If < 0 will use any current set
- * class or default to the last attribute.
+ * Attribute on which misclassifications are based. If &lt; 0 will use any
+ * current set class or default to the last attribute. <p>
  *
  * -F number of folds <br>
  * The number of folds to use for cross-validation cleansing.
- * (<2 = no cross-validation - default)<p> 
+ * (&lt;2 = no cross-validation - default)<p> 
  *
  * -T threshold <br>
  * Threshold for the max error when predicting numeric class.
- * (Value should be >= 0, default = 0.1)<p>
+ * (Value should be &gt;= 0, default = 0.1)<p>
  *
  * -I max iterations <br>
  * The maximum number of cleansing iterations to perform.
- * (<1 = until fully cleansed - default)<p>
+ * (&lt;1 = until fully cleansed - default)<p>
  *
  * -V <br>
  * Invert the match so that correctly classified instances are discarded.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class RemoveMisclassified extends Filter implements UnsupervisedFilter, OptionHandler {
 
@@ -68,10 +69,10 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
   /** The attribute to treat as the class for purposes of cleansing. */
   protected int m_classIndex = -1;
 
-  /** The number of cross validation folds to perform (<2 = no cross validation)  */
+  /** The number of cross validation folds to perform (&lt;2 = no cross validation)  */
   protected int m_numOfCrossValidationFolds = 0;
   
-  /** The maximum number of cleansing iterations to perform (<1 = until fully cleansed)  */
+  /** The maximum number of cleansing iterations to perform (&lt;1 = until fully cleansed)  */
   protected int m_numOfCleansingIterations = 0;
 
   /** The threshold for deciding when a numeric value is correctly classified */
@@ -344,23 +345,24 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
    * Parses the options for this object. Valid options are: <p>
    *
    * -W classifier string <br>
-   * Full class name of classifier to use, followed by scheme options. (required)<p>
+   * Full class name of classifier to use, followed by scheme options.
+   * (required)<p>
    * 
    * -C class index <br>
-   * Attribute on which misclassifications are based. If < 0 will use any current
-   * set class or default to the last attribute.
+   * Attribute on which misclassifications are based. If &lt; 0 will use any
+   * current set class or default to the last attribute.
    *
    * -F number of folds <br>
    * The number of folds to use for cross-validation cleansing.
-   * (<2 = no cross-validation - default)<p> 
+   * (&lt;2 = no cross-validation - default)<p> 
    *
    * -T threshold <br>
    * Threshold for the max error when predicting numeric class.
-   * (Value should be >= 0, default = 0.1)<p>
+   * (Value should be &gt;= 0, default = 0.1)<p>
    *
    * -I max iterations <br>
    * The maximum number of cleansing iterations to perform.
-   * (<1 = until fully cleansed - default)<p>
+   * (&lt;1 = until fully cleansed - default)<p>
    *
    * -V <br>
    * Invert the match so that correctly classified instances are discarded.<p>
@@ -518,7 +520,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
 
   /**
    * Sets the attribute on which misclassifications are based.
-   * If < 0 will use any current set class or default to the last attribute.
+   * If &lt; 0 will use any current set class or default to the last attribute.
    *
    * @param classIndex the class index.
    */
@@ -550,7 +552,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
 
   /**
    * Sets the number of cross-validation folds to use
-   * - < 2 means no cross-validation.
+   * - &lt; 2 means no cross-validation.
    *
    * @param numOfFolds the number of folds.
    */
@@ -582,7 +584,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
 
   /**
    * Sets the threshold for the max error when predicting a numeric class.
-   * The value should be >= 0.
+   * The value should be &gt;= 0.
    *
    * @param threshold the numeric theshold.
    */
@@ -614,7 +616,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter, O
 
   /**
    * Sets the maximum number of cleansing iterations to perform
-   * - < 1 means go until fully cleansed
+   * - &lt; 1 means go until fully cleansed
    *
    * @param iterations the maximum number of iterations.
    */
