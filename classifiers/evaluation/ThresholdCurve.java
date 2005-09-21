@@ -39,7 +39,7 @@ import weka.classifiers.Classifier;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ThresholdCurve {
 
@@ -237,8 +237,7 @@ public class ThresholdCurve {
   }
 
   /**
-   * Calculates the area under the ROC curve.  This is normalised so
-   * that 0.5 is random, 1.0 is perfect and 0.0 is bizarre.
+   * Calculates the area under the ROC curve as the Wilcoxon-Mann-Whitney statistic.
    *
    * @param tcurve a previously extracted threshold curve Instances.
    * @return the ROC area, or Double.NaN if you don't pass in 
@@ -255,37 +254,24 @@ public class ThresholdCurve {
     final int fpInd = tcurve.attribute(FALSE_POS_NAME).index();
     final double [] tpVals = tcurve.attributeToDoubleArray(tpInd);
     final double [] fpVals = tcurve.attributeToDoubleArray(fpInd);
-    final double tp0 = tpVals[0];
-    final double fp0 = fpVals[0];
-    double area = 0.0;
-    //starts at high values and goes down
-    double xlast = 1.0;
-    double ylast = 1.0;
-    for (int i = 1; i < n; i++) {
-      final double x = fpVals[i] / fp0;
-      final double y = tpVals[i] / tp0;
-      final double areaDelta = (y + ylast) * (xlast - x) / 2.0;
-      /*
-      System.err.println("[" + i + "]"
-                         + " x=" + x
-                         + " y'=" + y
-                         + " xl=" + xlast
-                         + " yl=" + ylast
-                         + " a'=" + areaDelta);
-      */
 
-      area += areaDelta;
-      xlast = x;
-      ylast = y;
+    double area = 0.0, cumNeg = 0.0;
+    final double totalPos = tpVals[0];
+    final double totalNeg = fpVals[0];
+    for (int i = 0; i < n; i++) {
+	double cip, cin;
+	if (i < n - 1) {
+	    cip = tpVals[i] - tpVals[i + 1];
+	    cin = fpVals[i] - fpVals[i + 1];
+	} else {
+	    cip = tpVals[n - 1];
+	    cin = fpVals[n - 1];
+	}
+	area += cip * (cumNeg + (0.5 * cin));
+	cumNeg += cin;
     }
+    area /= (totalNeg * totalPos);
 
-    //make sure ends at 0,0
-    if (xlast > 0.0) {
-      final double areaDelta = ylast * xlast / 2.0;
-      //System.err.println(" a'=" + areaDelta);
-      area += areaDelta;
-    }
-    //System.err.println(" area'=" + area);
     return area;
   }
 
