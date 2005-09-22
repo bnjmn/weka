@@ -48,10 +48,14 @@ import java.io.StreamTokenizer;
 </PRE></DD>
 </DL>
 
-@author The MathWorks, Inc. and the National Institute of Standards and Technology.
-@version 5 August 1998
+* @author The MathWorks, Inc. and the National Institute of Standards and
+* Technology.
+* @version $Revision: 1.2 $ (5 August 1998)
 */
 
+/**
+ * @author Yong Wang
+ */
 public class Matrix implements Cloneable, java.io.Serializable {
 
 /* ------------------------

@@ -28,6 +28,11 @@ import weka.core.Instance;
 import weka.core.Instances;
 import java.util.Enumeration;
 
+/**
+ * @author Peter A. Flach
+ * @author Nicolas Lachiche
+ * @version $Revision: 1.3 $
+ */
 public class IndividualInstance extends Instance {
 
   private Instances m_parts;

@@ -38,6 +38,7 @@ import java.text.DecimalFormat;
  * Class representing a rule with a body and a head.
  *
  * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
+ * @version $Revision: 1.5 $
  */
 
 public class Rule implements Serializable, Cloneable {

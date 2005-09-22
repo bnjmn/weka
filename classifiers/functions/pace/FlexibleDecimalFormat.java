@@ -25,6 +25,10 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.FieldPosition;
 
+/**
+ * @author Yong Wang
+ * @version $Revision: 1.3 $
+ */
 public class FlexibleDecimalFormat extends DecimalFormat {
 
   private DecimalFormat nf = null;

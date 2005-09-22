@@ -49,6 +49,11 @@ import java.util.Vector;
  *  A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise <br>
  *  Proc. 2nd Int. Conf. on Knowledge Discovery and Data Mining (KDD'96), Portland, OR, 1996, pp. 226-231.<br>
  * </p>
+ *
+ * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
+ * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
+ * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
+ * @version $Revision: 1.2 $
  */
 public class DBScan extends Clusterer implements OptionHandler {
 

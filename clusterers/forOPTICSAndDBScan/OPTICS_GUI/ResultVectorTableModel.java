@@ -37,6 +37,10 @@ import javax.swing.table.AbstractTableModel;
  * Time: 9:23:31 PM <br/>
  * $ Revision 1.4 $ <br/>
  * </p>
+ *
+ * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
+ * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
+ * @version $Revision: 1.2 $
  */
 public class ResultVectorTableModel extends AbstractTableModel {
 

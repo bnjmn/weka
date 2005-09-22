@@ -41,6 +41,7 @@ import weka.core.*;
  * Specify the norm of the instances after normalization (default 1.0).<p>
  *
  * @author Julien Prados
+ * @version $Revision: 1.3 $
  */
 public class Normalize extends Filter implements UnsupervisedFilter, OptionHandler {
 

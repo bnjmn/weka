@@ -34,6 +34,10 @@ import java.io.File;
  * Time: 6:54:56 PM <br/>
  * $ Revision 1.4 $ <br/>
  * </p>
+ *
+ * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
+ * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
+ * @version $Revision: 1.2 $
  */
 public class SERFileFilter extends FileFilter {
 

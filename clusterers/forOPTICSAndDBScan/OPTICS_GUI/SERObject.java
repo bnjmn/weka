@@ -35,6 +35,10 @@ import java.io.Serializable;
  * Time: 9:43:00 PM <br/>
  * $ Revision 1.4 $ <br/>
  * </p>
+ *
+ * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
+ * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
+ * @version $Revision: 1.2 $
  */
 public class SERObject implements Serializable {
     private FastVector resultVector;

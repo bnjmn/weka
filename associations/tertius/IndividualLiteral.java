@@ -25,6 +25,11 @@
 
 package weka.associations.tertius;
 
+/**
+ * @author Peter A. Flach
+ * @author Nicolas Lachiche
+ * @version $Revision: 1.3 $
+ */
 public class IndividualLiteral extends AttributeValueLiteral {
 
   private int m_type;

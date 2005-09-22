@@ -29,12 +29,16 @@ import weka.classifiers.*;
 
 /**
  * Class for generating a Naive Bayes tree (decision tree with
- * Naive Bayes classifiers at the leaves).
+ * Naive Bayes classifiers at the leaves). <p>
  *
  * For more information, see<p>
  *
  * Ron Kohavi (1996). Scaling up the accuracy of naive-Bayes classifiers:
- * a decision tree hybrid. <i>Proceedings of the Second International Conference on Knowledge Discovery and Data Mining</i>.</p>
+ * a decision tree hybrid. <i>Proceedings of the Second International
+ * Conference on Knowledge Discovery and Data Mining</i>.</p>
+ *
+ * @author Mark Hall
+ * @version $Revision: 1.4 $
  */
 public class NBTree extends Classifier 
   implements WeightedInstancesHandler, Drawable, Summarizable,
