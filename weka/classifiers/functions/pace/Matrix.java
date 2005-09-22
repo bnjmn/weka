@@ -1,3 +1,11 @@
+/*
+ * This software is a cooperative product of The MathWorks and the National
+ * Institute of Standards and Technology (NIST) which has been released to the
+ * public domain. Neither The MathWorks nor NIST assumes any responsibility
+ * whatsoever for its use by other parties, and makes no guarantees, expressed
+ * or implied, about its quality, reliability, or any other characteristic.
+ */
+
 package weka.classifiers.functions.pace;
 
 import java.text.NumberFormat;
@@ -49,7 +57,7 @@ import java.io.StreamTokenizer;
 </DL>
 
 * @author The MathWorks, Inc. and the National Institute of Standards and Technology.
-* @version $Revision: 1.1.2.1 $ (5 August 1998)
+* @version $Revision: 1.1.2.2 $ (5 August 1998)
 */
 
 public class Matrix implements Cloneable, java.io.Serializable {
