@@ -27,6 +27,11 @@ package weka.associations.tertius;
 import weka.core.Instance;
 import weka.associations.Tertius;
 
+/**
+ * @author Peter A. Flach
+ * @author Nicolas Lachiche
+ * @version $Revision: 1.3.2.1 $
+ */
 public class AttributeValueLiteral extends Literal {
 
   private String m_value;

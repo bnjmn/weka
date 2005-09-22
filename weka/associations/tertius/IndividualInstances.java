@@ -32,6 +32,11 @@ import weka.core.Utils;
 import java.util.Enumeration;
 import java.io.IOException;
 
+/**
+ * @author Peter A. Flach
+ * @author Nicolas Lachiche
+ * @version $Revision: 1.3.2.1 $
+ */
 public class IndividualInstances extends Instances {
     
   public IndividualInstances(Instances individuals, Instances parts) 

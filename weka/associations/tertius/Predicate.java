@@ -27,6 +27,11 @@ package weka.associations.tertius;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * @author Peter A. Flach
+ * @author Nicolas Lachiche
+ * @version $Revision: 1.2.2.1 $
+ */
 public class Predicate implements Serializable {
 
   private ArrayList m_literals;

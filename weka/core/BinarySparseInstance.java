@@ -35,6 +35,8 @@ import java.io.*;
  * rearrange your nominal attribute value orderings if
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
+ *
+ * @version $Revision: 1.7.2.1 $
  */
 public class BinarySparseInstance extends SparseInstance {
 

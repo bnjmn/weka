@@ -57,7 +57,7 @@ import weka.core.*;
  *
  * @author Brent Martin (bim20@cosc.canterbury.ac.nz)
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $$ 
+ * @version $Revision: 1.2.2.1 $
  */
 public class NNge extends Classifier implements UpdateableClassifier, OptionHandler {
 

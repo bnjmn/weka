@@ -31,7 +31,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version 1.0
+ * @version $Revision: 1.1.2.1 $
  */
 public class Stopwords {
   

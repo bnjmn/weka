@@ -26,6 +26,10 @@ import java.util.*;
 
 import java.lang.reflect.*;
 
+/**
+ * @author Yong Wang
+ * @version $Revision: 1.2.2.1 $
+ */
 public class  DoubleVector implements Cloneable {
 
   double[] V; // array for internal storage of elements.

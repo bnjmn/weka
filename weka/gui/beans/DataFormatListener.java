@@ -5,7 +5,7 @@ package weka.gui.beans;
  * in data format changes can implement.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.1.2.1 $
  */
 public interface DataFormatListener {
   

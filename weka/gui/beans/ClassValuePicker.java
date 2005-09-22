@@ -37,6 +37,10 @@ import javax.swing.SwingConstants;
 import java.awt.*;
 import java.beans.EventSetDescriptor;
 
+/**
+ * @author Mark Hall
+ * @version $Revision: 1.3.2.2 $
+ */
 public class ClassValuePicker extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
 	     EventConstraints, Serializable {

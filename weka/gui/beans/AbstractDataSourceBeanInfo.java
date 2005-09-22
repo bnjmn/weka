@@ -29,7 +29,7 @@ import java.beans.*;
  * AbstractDataSource might want to extend this class
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.1.2.1 $
  * @since 1.0
  * @see SimpleBeanInfo
  */

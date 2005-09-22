@@ -29,6 +29,7 @@ package weka.core;
  * associating names with the alternative behaviours.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a> 
+ * @version $Revision: 1.6.2.1 $
  */
 public class SelectedTag {
   

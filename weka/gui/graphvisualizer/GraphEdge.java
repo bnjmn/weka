@@ -26,7 +26,7 @@ package weka.gui.graphvisualizer;
  * This class represents an edge in the graph
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version 1.0 - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.2.2.1 $ - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class GraphEdge extends Object {
   

@@ -26,6 +26,9 @@ import weka.core.Statistics;
 
 /**
  * Class for some utility mathematical or statistical functions.
+ *
+ * @author Yong Wang
+ * @version $Revision: 1.2.2.1 $
  */
 public class Maths {
     

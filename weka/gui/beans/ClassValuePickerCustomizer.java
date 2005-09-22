@@ -34,6 +34,10 @@ import javax.swing.JLabel;
 import weka.core.Instances;
 import weka.core.Attribute;
 
+/**
+ * @author Mark Hall
+ * @version $Revision: 1.3.2.1 $
+ */
 public class ClassValuePickerCustomizer extends JPanel
   implements Customizer, CustomizerClosingListener, DataFormatListener {
 

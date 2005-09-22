@@ -24,6 +24,10 @@ package weka.classifiers.functions.pace;
 import java.lang.*;
 import java.util.*;
 
+/**
+ * @author Yong Wang
+ * @version $Revision: 1.1.2.1 $
+ */
 public class  IntVector implements Cloneable {
 
   int[]  V; // Array for internal storage of elements.

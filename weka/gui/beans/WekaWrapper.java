@@ -28,7 +28,7 @@ package weka.gui.beans;
  * by a bean for handling classes of Weka algorithms. 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.2.2.1 $
  * @since 1.0
  */
 public interface WekaWrapper {

@@ -33,7 +33,7 @@ import java.util.Hashtable;
  * These two measures allow to introduce a sort order for rules.
  *
  * @author Stefan Mutter
- * @version 1.0 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class RuleItem implements Comparable, Serializable{
       

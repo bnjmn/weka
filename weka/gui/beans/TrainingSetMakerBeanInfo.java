@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the training set maker bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.1.2.1 $
  */
 public class TrainingSetMakerBeanInfo 
   extends AbstractTrainingSetProducerBeanInfo { }

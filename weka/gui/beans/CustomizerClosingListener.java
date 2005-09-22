@@ -21,6 +21,10 @@
  */
 package weka.gui.beans;
 
+/**
+ * @author Mark Hall
+ * @version $Revision: 1.2.2.1 $
+ */
 public interface CustomizerClosingListener {
 
   /**
